@@ -54,6 +54,13 @@ references:
     publisher: "Springer"
     doi: "10.1007/978-3-030-84300-7"
     note: "Topics in Applied Physics, vol. 143. El tratamiento en formato libro de los absorbentes y difusores de metamaterial resonantes; el acompañante moderno de Cox & D'Antonio para toda esta familia."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field"
+    designation: "ISO 17497-2:2012"
+    url: "https://www.iso.org/standard/55293.html"
+    note: "El coeficiente de difusión direccional al que se reduce el campo lejano del panel, y su normalización frente a una referencia plana de igual huella (fórmula (7)); la medición con goniómetro que valora un panel construido está en la guía de difusores."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -581,7 +588,10 @@ coeficiente de difusión direccional ISO 17497-2
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-El modelo es de reacción local (los pozos no se acoplan internamente) y
+Ninguna norma rige el modelo en sí: es el método publicado por Jiménez et al.
+(2017), implementado a partir de los artículos citados, y la ISO 17497-2 solo
+valora lo que predice. El modelo es de reacción local (los pozos no se
+acoplan internamente) y
 comparte los límites declarados del campo lejano de Fraunhofer: pierde
 precisión a baja frecuencia, en ángulos rasantes y donde importa la difracción
 de borde, así que valora diseños en lugar de sustituir una medición ISO

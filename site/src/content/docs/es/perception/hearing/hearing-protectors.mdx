@@ -380,8 +380,11 @@ print(por_snr.reported_level)             # 82
 print(hearing.snr_protected_level(snr, l_p_a=104.0, c_minus_a=-1.0).reported_level)  # 82
 ```
 
-El apartado 8.3 admite además el nivel sin ponderar en lugar del ponderado C, y
-el apartado 7.3 dice lo mismo para HML. Con ruido de mucho contenido en muy
+El apartado 8.2 redondea el SNR al entero más próximo, como el apartado 7.2
+hace con los valores HML, y ese índice redondeado es el que lleva
+`snr.reported` y el que consume la aplicación. El apartado 8.3 admite además el
+nivel sin ponderar en lugar del ponderado C, y el apartado 7.3 dice lo mismo
+para HML. Con ruido de mucho contenido en muy
 baja frecuencia queda alto, así que es un recurso y no un equivalente.
 
 Como el ruido de referencia es fijo, el índice no dice nada de la forma del

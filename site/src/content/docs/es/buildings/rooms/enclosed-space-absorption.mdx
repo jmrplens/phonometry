@@ -534,8 +534,8 @@ CUMPLE; un tiempo de reverberación objetivo indicado mediante el campo
 el tiempo de reverberación de una sala es un intervalo objetivo y no una
 magnitud en la que simplemente cuanto más alto o más bajo, mejor. Usa el mismo
 contenedor `ReportMetadata` y el mismo motor de renderizado que las demás
-fichas; pasar `metadata=None` produce una ficha de caracterización básica. El
-renderizado necesita reportlab y, para la figura que incrusta la ficha,
+fichas; pasar `metadata=None` produce una ficha de caracterización básica. La
+generación necesita reportlab y, para la figura que incrusta la ficha,
 matplotlib (`pip install "phonometry[report,plot]"`); solo se admite
 `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
 `language="es"` para una ficha en español (cadenas fijas traducidas y separador
@@ -624,7 +624,7 @@ EN 12354-6 da una estimación de campo difuso, y un objetivo pasado por
 - [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
   el miembro de la familia que consume la $A$ que aquí se calcula, a través de
   $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$.
-- [Informe de conformidad](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
+- [Informe de conformidad](/phonometry/es/reference/conformance/):
   los tres casos del Anexo E frente a los que se comprueban estas
   implementaciones.
 - [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):

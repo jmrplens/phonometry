@@ -137,6 +137,31 @@ Every one of them is also in the
 [published catalogue of solids](/phonometry/reference/catalogues/solids/),
 filterable, with the book and the page each row was read on.
 
+The nine are Hopkins **Table A2**, building materials; Cremer 3e **Table 4.3**,
+thirteen metals, lead and copper each in two variants; Mechel **Table 3**,
+construction materials, plastics and metals; Bies 5e **Table C.1**, metals,
+building materials, woods, plastics and honeycomb panels; Norton & Karczub
+**Appendix 4 A**, solids with the bar and the bulk speed in separate columns,
+and their **Table 6.1**, structural loss factors; Vigran **Table 3.1**,
+building materials; Long's **Table 12.1**; and Arau's **Table 4.1**. Every row
+names its table, so counting them gives what each one brought:
+
+```python
+from collections import Counter
+
+for table, rows in Counter(row.table for row in solids.PUBLISHED_SOLIDS.values()).items():
+    print(table, rows)
+# hopkins-2007-table-a2 25
+# cremer-2005-table-4-3 15
+# mechel-2008-table-3 38
+# bies-2017-table-c1 105
+# long-2014-table-12-1 18
+# arau-1999-table-4-1 18
+# norton-karczub-2003-appendix-4a 21
+# norton-karczub-2003-table-6-1 11
+# vigran-2008-table-3-1 9
+```
+
 ```python
 from phonometry import solids
 
@@ -223,7 +248,25 @@ prints as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed
 of sound and no conversion, which makes it the cheapest cross-check there is
 between books that share no other column: for steel, both print 12,3 m Hz.
 Cremer prints no such column, so his rows carry a derived one and join that
-comparison only through the heading assumption Hopkins states.
+comparison only through the heading assumption Hopkins states. Arau prints the
+critical frequency of a one centimetre plate instead of the product, which is
+a change of unit and not an assumption, so his rows carry `h f_c` too. On that
+column he and Hopkins agree within four per cent for aluminium, brick and
+glass, and are nineteen per cent apart on steel:
+
+```python
+for hopkins_key, arau_key in [("aluminium", "aluminio"), ("brick", "ladrillo_macizo"),
+                              ("glass", "vidrio_monolitico"), ("steel", "acero")]:
+    hopkins = solids.PUBLISHED_SOLIDS[f"hopkins-2007-table-a2/{hopkins_key}"]
+    arau = solids.PUBLISHED_SOLIDS[f"arau-1999-table-4-1/{arau_key}"]
+    h_fc, a_fc = (hopkins.thickness_critical_frequency_product_m_hz,
+                  arau.thickness_critical_frequency_product_m_hz)
+    print(hopkins_key, h_fc, a_fc, f"{abs(a_fc - h_fc) / h_fc:.0%}")
+# aluminium 12.7 12.6 1%
+# brick 24.0 23.8 1%
+# glass 12.5 12.0 4%
+# steel 12.3 10.0 19%
+```
 
 ### The most expensive way to misread a table
 

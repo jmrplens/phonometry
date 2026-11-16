@@ -54,6 +54,13 @@ references:
     implemented: false
     url: "https://www.iso.org/standard/62406.html"
     note: "Los símbolos y referencias que los documentos de guía adoptan para sus criterios (Lp,0-pk y LE,p re 1 µPa y 1 µPa²·s)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Underwater acoustics — Measurement of radiated underwater sound from percussive pile driving"
+    designation: "ISO 18406:2017"
+    url: "https://www.iso.org/standard/62407.html"
+    note: "La exposición sonora por golpe (Fórmulas 3–4) que strike_sel_spectrum reparte en bandas y la acumulación de +10 log10 N sobre los golpes (Fórmula 9) que aplica weighted_exposure; las métricas de banda ancha están en la página de Acústica submarina."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -639,7 +646,8 @@ su parámetro $F_1$. Los criterios de perturbación conductual (los umbrales de
 escalón y de dosis-respuesta usados en las estimaciones de hostigamiento)
 quedan fuera de alcance: solo se implementan los criterios de efecto auditivo.
 La biblioteca no elige por el usuario ni el grupo auditivo ni el periodo de
-acumulación, y no modela el movimiento del animal respecto a la fuente, de
+acumulación: ambas son decisiones de la evaluación, que se toman por especie y
+por actividad. No modela el movimiento del animal respecto a la fuente, de
 modo que el SEL acumulado que informa es el caso peor de receptor estático.
 Tampoco comprueba que el espectro aportado abarque la banda de paso del grupo:
 un registro que se queda corto respecto de $f_2$ se pondera tal cual y

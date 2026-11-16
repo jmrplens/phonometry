@@ -11,7 +11,7 @@ A rigid-walled (or absorbing) rectangular room, a *shoebox*, reflects a
 point source in its six walls. Each reflection is equivalent to the free-field
 sound of a mirror image of the source, so the room impulse response (RIR) is
 the sum of the direct sound and one delayed, attenuated pulse per image
-(Kuttruff, *Room Acoustics* 6th ed., 4.1, Equations (4.4)-(4.5); Vorlander,
+(Kuttruff, *Room Acoustics* 6th ed., 4.1-4.2, Equations (4.4)-(4.5); Vorlander,
 *Auralization* 2nd ed., 11.4, the Allen-Berkley/Borish construction). This is
 the deterministic complement of the statistical reverberation-time formulae of
 [`phonometry.room.reverberation_prediction`](/phonometry/reference/api/rooms/reverberation-prediction/): where those give a single

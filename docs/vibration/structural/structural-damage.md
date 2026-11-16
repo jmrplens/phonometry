@@ -276,5 +276,8 @@ values), the vertical value for floors (5.2), the doubling of row 1 for
 massive engineering structures (5.1), the 50 % reduction of the pipeline table
 for long-term vibration (6.3), the bending stress of Formula (1) in 6.2 and
 the storey estimate of 6.4. Prediction (DIN 4150-1), human perception in
-buildings (DIN 4150-2) and the instrument requirements of DIN 45669 are not
-implemented.
+buildings (DIN 4150-2) and the instrument requirements of DIN 45669-1 are not
+part of this page: they are on
+[Predicting vibration before measuring](../immission/vibration-prediction.md),
+[Vibration and people in buildings](../immission/people-in-buildings.md) and
+[Measuring vibration immission](../immission/vibration-meter.md).

@@ -981,6 +981,9 @@ and hole functions return an `ApertureTransmissionResult`
 `radiation_index`, `.plot()`). The predictions carry the modelling caveats of
 their sources (Sharp's method above $1.5\times$ the first panel resonance;
 Gomperts' inviscid slit valid for $w < 0.3\lambda$; Leppington "method no. 1").
+Nothing in the code refuses an argument outside the first two bounds, so they
+are the reader's to enforce: a slit of a given width leaves Gomperts' model as
+the frequency rises and $0.3\lambda$ shrinks towards $w$.
 
 ## What this guide covers
 

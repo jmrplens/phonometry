@@ -81,10 +81,11 @@ de audición y el modelo de daño levantado sobre ella.
 
 ## [Salas y edificación](/phonometry/es/reference/theory/rooms-buildings/)
 
-Cinco grupos: las curvas de criterio de ANSI S12.2, la respuesta al impulso y los
-parámetros que se leen de ella, el aislamiento acústico y la absorción tal como
-se miden, esas mismas magnitudes tal como se predicen, y la incertidumbre que
-cualifica a unas y a otras.
+Seis grupos: las curvas de criterio de ANSI S12.2, la respuesta al impulso y los
+parámetros que se leen de ella, el campo acústico de una sala tal como lo
+predicen los modelos de fuentes imagen y de campo estacionario, el aislamiento
+acústico y la absorción tal como se miden, esas mismas magnitudes tal como se
+predicen, y la incertidumbre que cualifica a unas y a otras.
 
 - [Criterios de ruido de salas (ANSI S12.2)](/phonometry/es/reference/theory/rooms-buildings/#criterios-de-ruido-de-salas-ansi-s122)
 - [Respuesta al impulso y parámetros de acústica de salas (ISO 18233, ISO 3382-1/-2/-3)](/phonometry/es/reference/theory/rooms-buildings/#respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3)
@@ -93,6 +94,9 @@ cualifica a unas y a otras.
   - [Ventanas de regresión y validez (ISO 3382-2, apartado 6, Anexo B/C)](/phonometry/es/reference/theory/rooms-buildings/#ventanas-de-regresion-y-validez-iso-3382-2-apartado-6-anexo-bc)
   - [Claridad, definición y tiempo central (ISO 3382-1, Anexo A)](/phonometry/es/reference/theory/rooms-buildings/#claridad-definicion-y-tiempo-central-iso-3382-1-anexo-a)
   - [Decaimiento espacial en oficinas diáfanas (ISO 3382-3, apartado 6)](/phonometry/es/reference/theory/rooms-buildings/#decaimiento-espacial-en-oficinas-diafanas-iso-3382-3-apartado-6)
+- [Campo acústico de la sala, predicho (Kuttruff, Vorländer, Bies)](/phonometry/es/reference/theory/rooms-buildings/#campo-acustico-de-la-sala-predicho-kuttruff-vorlander-bies)
+  - [Respuesta al impulso de una sala por fuentes imagen (Kuttruff 4.1, Vorländer 11)](/phonometry/es/reference/theory/rooms-buildings/#respuesta-al-impulso-de-una-sala-por-fuentes-imagen-kuttruff-41-vorlander-11)
+  - [Campo estacionario de sala (Bies 6.4, Kuttruff 5.6)](/phonometry/es/reference/theory/rooms-buildings/#campo-estacionario-de-sala-bies-64-kuttruff-56)
 - [Aislamiento acústico y absorción, medidos (ISO 16283, ISO 10140, ISO 717, ISO 354)](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-medidos-iso-16283-iso-10140-iso-717-iso-354)
   - [Aislamiento en campo e índice ponderado (ISO 16283-1, ISO 717-1)](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-en-campo-e-indice-ponderado-iso-16283-1-iso-717-1)
   - [Aislamiento a impactos (ISO 16283-2, ISO 717-2)](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-a-impactos-iso-16283-2-iso-717-2)

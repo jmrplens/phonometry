@@ -437,6 +437,15 @@ print(round(float(burst.short_term_loudness.max()), 1),
 # El resultado lleva ambas trazas sobre un eje temporal de 1 ms:
 burst.plot(language="es")
 plt.show()
+
+# O dibuja a mano la traza rápida de corto plazo y la lenta de largo plazo:
+fig, ax = plt.subplots()
+ax.plot(burst.times, burst.short_term_loudness, label="Sonoridad de corto plazo S'(t)")
+ax.plot(burst.times, burst.long_term_loudness, label="Sonoridad de largo plazo S''(t)")
+ax.set_xlabel("Tiempo [s]")
+ax.set_ylabel("Sonoridad [sonios]")
+ax.legend()
+plt.show()
 ```
 
 </details>

@@ -216,8 +216,9 @@ $L_\mathrm{dn}$ (3.6.5) keeps only the +10 dB night penalty.
 ISO 1996-1:2016, *Acoustics — Description, measurement and assessment of
 environmental noise — Part 1: Basic quantities and assessment procedures*:
 Lden (3.6.4), Ldn (3.6.5) and the composite whole-day rating level of
-clause 6.5 (Formulae 5-6, Table A.1 adjustments). ISO 1996-2:2017,
+clause 6.5 (Formulae 5-6, Table A.1 adjustments). ISO 1996-2:2007,
 *Acoustics — Description, measurement and assessment of environmental
 noise — Part 2: Determination of sound pressure levels*: the Annex C tonal
-adjustment, the Clause 10.4 residual-noise correction and the Clause 4 /
-Annex F measurement uncertainty budget.
+adjustment, which the 2017 edition no longer carries and leaves to
+ISO/PAS 20065. ISO 1996-2:2017, same title: the Clause 10.4 residual-noise
+correction and the Clause 4 / Annex F measurement uncertainty budget.

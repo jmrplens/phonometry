@@ -332,7 +332,7 @@ thresholds of Table C.2 are lower still. NOTE 5 of Annex C records the same
 result for this exposure and quotes $R$ = 0.97 against the 0.96 computed here.
 Its printed $S_\mathrm{d}$ is the 1.40 MPa computed here too, so the slip is the
 last digit of the printed $R$, as the
-[errata register](/phonometry/reference/errata/) records; the band, and
+[errata registry](/phonometry/reference/errata/) records; the band, and
 therefore the verdict, is the same. The $\alpha$ and $\beta$ coefficients of Formula (C.5) and the Table C.2
 thresholds for female subjects rest on a smaller data set, as the standard
 footnotes both tables.
@@ -484,8 +484,9 @@ result.report(
 )   # R = 1.22, Pi = 37 % -> moderate probability of an adverse health effect
 ```
 
-The example fiche is regenerated with `make reports` and kept rendered in the
-repository; click the preview to open the PDF.
+Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
+(`pip install "phonometry[report,plot]"`). The example fiche is regenerated with `make reports` and kept rendered in the repository; click the
+preview to open the PDF.
 
 <ReportPreview
 	name="iso2631_5_multiple_shock_example"

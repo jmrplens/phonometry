@@ -218,6 +218,12 @@ the result is $D = -4.78$ dB and $\mathrm{EPNL} = 92.62$ EPNdB, just below
 $\mathrm{PNLTM}$ because the window is barely longer than the reference
 duration.
 
+The two 10 dB-down points are the records whose PNLT is nearest to
+$\mathrm{PNLTM} - 10$, the first counted from the start and the last from the
+end, so a dip below that threshold inside a history with more than one lobe does
+not cut the window short: §4.5 asks for the longest duration such a history
+allows.
+
 That chain has an order to it, and the order is the part a finished time
 history cannot show. The tone correction is measured on each spectrum as it
 arrives, one record at a time, by fitting a background under the spectrum and
@@ -273,6 +279,12 @@ method enter. The reference-condition integrated-method example of ETM Vol. I
 Table 4-4 (a different, real certification time history, with increments
 between 0.395 s and 0.431 s) is reproduced as
 $\mathrm{EPNL} = 92.6\ \text{EPNdB}$.
+
+When the PNLT history is already in hand, `epnl_from_pnlt` runs the duration
+and window machinery on its own: it takes the PNLT series and its `dt` (and,
+optionally, the per-record tone corrections, which switch on the bandsharing
+adjustment) and returns an `EPNLIntegration` record that names `epnl`, `pnltm`,
+`bandsharing_adjustment`, `band_limits` and `duration_correction`.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -408,7 +420,8 @@ incidence angle in degrees from the microphone's principal axis; and the value
 is the measured **free-field sensitivity-level difference in decibels relative
 to 0°, normal incidence**, for sinusoidal waves in a free field. At 4 kHz the
 limits are 0.5 / 1.0 / 2.0 / 2.5 / 2.5 dB at 30 / 60 / 90 / 120 / 150°, so the
-example below passes with margin. That check matters because the aeroplane
+example below passes with margin. An angle between two tabulated ones is held
+to the limit of the greater (§4.4.2). That check matters because the aeroplane
 sweeps through a wide range of incidence angles while the microphone stays
 fixed, and the whole station is built around sound arriving within a few degrees
 of grazing. `frequency_response` values are deviations in decibels from the
@@ -425,7 +438,9 @@ Read `report.passes` as a verdict on data you supplied: a failed check
 invalidates the certification data, it is not a correction to apply. Band-filter
 conformance is a separate matter: Annex 16 §3.7.3 requires IEC 61260 class 1,
 with class 2 admissible only if the certificating authority allows it, and the
-library's own filter verification is the place that is checked.
+library's own filter verification, `verify_filter_class` of
+[Filter class verification](/phonometry/signals/filters/filter-compliance/), is the
+place that is checked.
 
 ```python
 from phonometry import aircraft
@@ -508,6 +523,12 @@ att = aircraft.band_attenuation_arp5534(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 att.plot()   # band vs pure-tone mid-band (needs matplotlib)
 ```
+
+The result is an `AircraftBandAttenuation` holding the band attenuation
+$\delta_\mathrm{B}$ as `band_attenuation`, the pure-tone mid-band value
+$\delta_\mathrm{t} = \alpha\,s$ as `midband_attenuation` and the pure-tone
+coefficient $\alpha$ itself, in dB/m, as `coefficient_db_per_m`, one value per
+band each.
 
 The regression was fitted for roughly 6-32 °C and 20-95 % relative humidity
 (the 14 CFR Part 36 test window) and for path lengths up to 7620 m

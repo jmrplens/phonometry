@@ -697,17 +697,34 @@ unrounded.)
 uncertainty ($u_{1\mathrm{b}}$, task-based only), the **instrument** ($u_2$, Table C.5)
 and the **microphone position** ($u_3$, Clause C.6). The last two are small
 and roughly fixed ($u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
-a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default), so
-in practice the **sampling term almost always dominates**: it scales with the
-scatter of the measured levels, which in a real workplace easily reaches
-several decibels and, entered in quadrature, swamps the sub-decibel
-instrument and position terms. The practical consequence: a quadrature
-budget is set by its largest term, so tightening the instrument grade buys
-little once sampling scatter is large; the productive
+a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default),
+which makes them a floor no survey design gets under. The **sampling term**
+scales with the scatter of the measured levels and dominates only once that
+scatter is large: with a personal exposimeter, a task's sampling term
+overtakes the instrument term once the sample standard deviation exceeds
+$1.5\sqrt{I}$ (about 3.7 dB at six samples). In the Annex D day it does not,
+and the duration of the short, loud task costs more than its sampling term and
+almost as much as its instrument term. The practical consequence: a quadrature budget is set by its largest term, so
+tightening the instrument grade buys little once sampling scatter is large;
+the productive
 move is *more samples* (the standard error falls as $1/\sqrt{I}$ or $1/\sqrt{N}$),
 which is exactly what the Clause 9.3 / 10.4 advisories nudge you toward.
 Because peak $L_{p,\mathrm{Cpeak}}$ carries no Annex C sampling model (Table C.5,
 Note 1), it is reported without an uncertainty, not with a zero one.
+
+The four terms of each task of the Annex D day, as $(c\,u)^2$ in dB²:
+
+```python
+res_d = hearing.task_based_exposure(tasks, warn=False)
+for t in res_d.tasks:
+    print(f"task {t.label:<16} sampling {(t.c1a * t.u1a) ** 2:5.3f}  "
+          f"duration {(t.c1b * t.u1b) ** 2:5.3f}  "
+          f"instrument {(t.c1a * t.u2) ** 2:5.3f}  "
+          f"position {(t.c1a * t.u3) ** 2:5.3f}")
+    # task planning/breaks  sampling 0.000  duration 0.000  instrument 0.000  position 0.000
+    # task welding          sampling 0.049  duration 0.059  instrument 0.175  position 0.078
+    # task cutting/grinding sampling 0.757  duration 1.070  instrument 1.148  position 0.510
+```
 
 When a task's samples span **3 dB or more** (Clause 9.3), or the job contribution
 $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered

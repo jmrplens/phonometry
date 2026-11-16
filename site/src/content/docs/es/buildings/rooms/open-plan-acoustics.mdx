@@ -447,8 +447,8 @@ rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
 `temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
 `measurement_standard`, `test_date`, `laboratory`, `operator`, `report_id` y
 `notes`. Al pasar `metadata=None` se obtiene una ficha de caracterización
-simple. La ficha incrusta la gráfica de decaimiento espacial, por lo que el
-renderizado necesita tanto reportlab como matplotlib (`pip install
+simple. La ficha incrusta la gráfica de decaimiento espacial, por lo que la
+generación necesita tanto reportlab como matplotlib (`pip install
 "phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La ficha se
 renderiza en inglés por defecto; pasa `language="es"` para una ficha en español
 (cadenas fijas traducidas y separador decimal de coma).
@@ -500,12 +500,14 @@ campo directo de la persona sentada enfrente,
 
 $$
 L_p(\text{señal}) = L_W + 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right],
+\quad \text{(ec. (17.50))}
 $$
 
 y el ruido es el campo reverberante que levantan $N$ hablantes simultáneos,
 
 $$
 L_p(\text{ruido}) = L_W + 10\log_{10} N + 10\log_{10}\!\left[\frac{4}{N A_\text{mesa}}\right],
+\quad \text{(ec. (17.51))}
 $$
 
 con $L_W$ el nivel de potencia acústica de un hablante (unos 70 dB en
@@ -532,6 +534,7 @@ la pena recordar:
 
 $$
 L_\mathrm{SN} = 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right] + 10\log_{10}\!\left[\frac{A_\text{mesa}}{4}\right].
+\quad \text{(ec. (17.52))}
 $$
 
 No sobrevive ni $L_W$ ni $N$. Una sala más llena no es intrínsecamente peor,
@@ -687,7 +690,9 @@ una página con `.report()`. Las condiciones de medición de los apartados 5.1 y
 para leer los resultados. El modelo de ruido autogenerado por los ocupantes
 del capítulo 17 de *Architectural Acoustics* 2.ª ed. de Long (ecs. (17.50) a
 (17.54)) mediante `room.crowd_noise` y sus piezas, con la ventana de diseño de
-las ecs. (17.53)-(17.54) y su condición de cierre.
+las ecs. (17.53)-(17.54) y su condición de cierre. El
+[informe de conformidad](/phonometry/es/reference/conformance/) contrasta
+$D_\mathrm{2,S}$ con la definición que da la propia norma.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

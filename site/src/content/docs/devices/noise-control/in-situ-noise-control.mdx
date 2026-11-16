@@ -232,7 +232,7 @@ ratio of the two absolute temperatures the wrong way up: the correction turns a
 squared pressure into a sound power, so the hotter side takes the larger one,
 and the print gives the reciprocal. `temperature_field_correction` returns the
 equations as printed, so that its number is the one the standard gives, and
-[the errata register](/phonometry/reference/errata/) records the evidence and
+[the errata registry](/phonometry/reference/errata/) records the evidence and
 the reading the characteristic impedance asks for. Then measure the flow, the
 total pressure loss across the silencer and the flow velocities in the duct.
 The two conditions of 9.2 are lines for the report, not for the measurement:
@@ -354,7 +354,7 @@ tie each campaign to one kind of position; the NOTE that closes the clause asks
 for positions where the two corrections are essentially the same, which only
 makes sense if each campaign takes its own. `measured_insertion_loss_indirect` takes a
 receiver type for each campaign, and
-[the errata register](/phonometry/reference/errata/) gives the reading.
+[the errata registry](/phonometry/reference/errata/) gives the reading.
 
 The reference microphone stands at least 1,5 m above the top edge of the
 barrier, measured from its highest point where the top is not a straight edge,
@@ -388,7 +388,7 @@ adds an upwind class over short distances alone. That upwind row is printed
 "+ 1 to − 5", an interval whose ends run the wrong way and whose lower end is
 where the downwind class begins; `wind_class` reads it as −5 m/s to −1 m/s, the
 mirror of the downwind row, and
-[the errata register](/phonometry/reference/errata/) gives the evidence.
+[the errata registry](/phonometry/reference/errata/) gives the evidence.
 
 ```python
 print(environment.wind_class(2.5))                        # downwind
@@ -495,7 +495,10 @@ with its two receiver corrections; the background table of 6.4; the wind classes
 of Table 1 and the cloud cover classes of Table 2; the short-distance test of
 6.3.1; the reference microphone height of 7.2.2, raised where the elevation rule
 of its NOTE asks for more; the hemi-free-field clearance of 8.1.2; and the equivalent-site
-geometry of 6.1.
+geometry of 6.1. One defect in the print of ISO 11820 and two in that of
+ISO 10847 are recorded in the [errata registry](/phonometry/reference/errata/),
+along with a note that the two stepped background tables are a difference and
+not an erratum.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -530,5 +533,13 @@ the three documents, so nothing here reproduces one.
   ISO 10847 measures.
 - [Sound power in situ by comparison](/phonometry/devices/emission/sound-power-in-situ/):
   the other way of determining a quantity in a room that was never built for it.
+- [Errata in published sources](/phonometry/reference/errata/): a temperature
+  ratio of ISO 11820 Equations (20) and (22) printed the wrong way up, an upwind
+  wind class printed with a positive lower bound, and one prime asked to mean two
+  different things.
+- API reference:
+  [`noise_control.silencer_in_situ`](/phonometry/reference/api/noise_control/silencer-in-situ/),
+  [`noise_control.screen_in_situ`](/phonometry/reference/api/noise_control/screen-in-situ/)
+  and [`environment.propagation.barrier_in_situ`](/phonometry/reference/api/environment/barrier-in-situ/).
 
 </SeeAlso>

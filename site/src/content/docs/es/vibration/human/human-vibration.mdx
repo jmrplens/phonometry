@@ -978,8 +978,10 @@ res.report(
 )   # A(8) = 3,61 m/s² -> zona de acción (EAV superado, ELV no), veredicto CUMPLE
 ```
 
-La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
-el repositorio; pulsa la vista previa para abrir el PDF.
+La generación necesita reportlab y, para la figura que incrusta la ficha,
+matplotlib (`pip install "phonometry[report,plot]"`). La ficha de ejemplo se
+regenera con `make reports` y se mantiene renderizada en el repositorio; pulsa
+la vista previa para abrir el PDF.
 
 <ReportPreview
 	name="human_vibration_example"

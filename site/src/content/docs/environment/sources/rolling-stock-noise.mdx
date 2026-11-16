@@ -360,6 +360,22 @@ of averaging a few metres of random roughness. `check_reference_track` holds
 each line analysed by Method B to its 15 m: the two rails above, at 16 m each,
 meet it.
 
+The tone is the check to run first. A cosine of 3 µm amplitude at 1 cm has an
+rms of $3/\sqrt{2}$ µm and so a level of $10\lg(9/2)$ dB re 1 µm in the 1 cm
+band. With the spike removal of 7.2 and the curvature processing of 7.3 switched
+off, so that both methods receive the record as it was written, they read it
+alike to the third decimal:
+
+```python
+x = np.arange(0.0, 20.0, 1.0e-3)
+tone = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
+raw = {"spike_removal": False, "curvature_processing": False}
+tone_b = environment.filtered_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+tone_a = environment.acoustic_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+print(round(tone_b.level_at(0.01), 3), round(tone_a.level_at(0.01), 3))
+# 6.532 6.532   10 lg(9/2) dB re 1 um by both methods
+```
+
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg"
   alt="One-third octave band roughness level in dB re 1 µm against wavelength from 50 cm to 0.25 cm of one 20 m record analysed by both methods: Method A, on 1 m Fourier segments, starts at 25 cm, and Method B, through order 4 one-third octave filters with 2 m discarded at either end, starts at 50 cm; from 25 cm down the two curves lie within a few tenths of a decibel of each other, about 3 dB under the Figure 2 limit drawn dashed from 40 cm to 0.315 cm"
@@ -685,6 +701,7 @@ standards do not cover.
 - [CNOSSOS-EU railway source emission](/phonometry/environment/sources/cnossos-rail-emission/): the prediction side of the same noise, where rail and wheel roughness spectra and transfer functions become a sound power per metre.
 - [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/): what the same trains put into the ground and the buildings beside the track.
 - [Road-surface noise: the statistical pass-by method](/phonometry/environment/sources/road-surface-pass-by/): the road's counterpart, where the surface is measured through the traffic on it.
+- [Errata in published sources](/phonometry/reference/errata/): the three ISO 3095 entries of Tables G.1 and G.2, and the two EN 15610 entries on the listing of Annex B, its spike-removal loop and its filters run forward and back.
 - API reference: [`environment.sources.rolling_stock_noise`](/phonometry/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](/phonometry/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](/phonometry/reference/api/environment/track-decay/).
 
 </SeeAlso>

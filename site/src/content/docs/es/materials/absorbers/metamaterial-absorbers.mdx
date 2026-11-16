@@ -512,11 +512,38 @@ Por debajo de su propia resonancia la derivación es una compliancia: ablanda
 la ranura sin añadir masa móvil, y eso es exactamente lo que baja la velocidad
 de fase. `materials.rectangular_duct_properties(f, side_m=1.0e-3)` da
 la misma pareja efectiva para un conducto cuadrado cuando la geometría de
-guiado es un conducto y no una ranura, y las tres toman un estado
-`AirProperties` (velocidad del sonido, densidad, viscosidad, número de Prandtl,
-relación de calores específicos, presión atmosférica), así que un diseño para
-un conducto de escape caliente o para una cabina en altura cambia un argumento
-en lugar del modelo.
+guiado es un conducto y no una ranura, y las tres toman el aire como un
+`Fluid` (`fluid=`, por defecto `materials.ABSORBER_AIR`: velocidad del sonido,
+densidad, viscosidad, número de Prandtl, relación de calores específicos,
+presión estática), así que un diseño para un conducto de escape caliente o
+para una cabina en altura cambia un argumento en lugar del modelo.
+
+Los dos modelos viscotérmicos están sujetos a los límites que deben alcanzar
+exactamente. Cuando las capas límite se desvanecen en un canal ancho, la
+densidad efectiva y el módulo de compresibilidad tienden a los del aire
+libre, $\rho_0$ y $\kappa_0$; cuando $\omega \to 0$, $j\omega\rho$ tiende a la
+resistividad al flujo de Poiseuille del canal, $12\eta/h^2$ para una ranura de
+altura $h$ y $28{,}454\,\eta/w^2$ para un conducto cuadrado de lado $w$. Los
+tests y el informe de conformidad comprueban ambos:
+
+```python
+f_dc = np.array([1.0e-2])                     # 0,01 Hz: flujo estacionario
+eta = materials.ABSORBER_AIR.viscosity
+slit = materials.slit_effective_properties(f_dc, slit_height_m=1.2e-3)
+duct = materials.rectangular_duct_properties(f_dc, side_m=3.0e-3)
+sigma_slit = (1j * 2 * np.pi * f_dc * slit.effective_density)[0].real
+sigma_duct = (1j * 2 * np.pi * f_dc * duct.effective_density)[0].real
+print(round(sigma_slit, 1), round(12 * eta / 1.2e-3**2, 1))       # 153.3 153.3
+print(round(sigma_duct, 2), round(28.454 * eta / 3.0e-3**2, 2))   # 58.17 58.17
+```
+
+Esos límites son los que zanjan la serie del conducto cuadrado tal como la
+imprimen Jiménez et al. (2017) en sus Ecs. (7) y (8): su constante inicial de
+4 da dieciséis veces $\rho_0$, y solo 64 alcanza ambos. Esa constante, y un
+término de radiación de la ranura impreso en el convenio temporal opuesto, que
+subiría la resonancia que una masa añadida debe bajar, son las dos entradas
+del [registro de erratas](/phonometry/es/reference/errata/) sobre estos
+artículos; la biblioteca implementa 64 y el signo de masa añadida.
 
 ## 4. Los absorbentes resonantes clásicos bajo la misma óptica
 
@@ -654,7 +681,7 @@ expuestos en el resultado), y el cálculo de diseño por acoplamiento crítico
 hasta que el cero de reflexión queda sobre el eje de frecuencia real. También
 están expuestos los dos bloques constructivos viscotérmicos con los que se
 ensambla la cadena (`slit_effective_properties`, `rectangular_duct_properties`
-y `helmholtz_resonator_impedance`, todos con un estado `AirProperties`), y
+y `helmholtz_resonator_impedance`, todos con el aire como un `Fluid`), y
 `slit_helmholtz_absorber` acepta una *lista* de resonadores, que es la cadena
 graduada de la sección 4.
 </ScopeClaim>

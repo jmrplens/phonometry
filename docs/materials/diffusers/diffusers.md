@@ -27,10 +27,12 @@ tens of centimetres deep, have their own guide:
 
 The scattering coefficient $s$ is the fraction of reflected energy that does
 **not** leave the surface in the specular direction. ISO 17497-1 measures it in a
-reverberation room from four reverberation-time situations: with the test sample
-mounted on a turntable and held **stationary**, and with the turntable
-**rotating** (which averages the phase-coherent specular reflection away), each
-with and without a reflecting base plate.
+reverberation room from four reverberation-time situations. The turntable and
+its reflecting base plate stay in the room for all four; what changes is
+whether the test sample is on the plate and whether the turntable is held
+**stationary** or **rotating** (Table 2). Averaging the impulse responses in
+phase over the rotation keeps the specular reflection and cancels the
+scattered part, which then shows as extra absorption.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" width="92%"></picture>
 

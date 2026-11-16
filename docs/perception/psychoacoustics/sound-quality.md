@@ -241,7 +241,7 @@ print(res.roughness > psychoacoustics.PROMINENT_ROUGHNESS_ASPER)   # True: promi
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="Two panels. Top: the ECMA-418-2 time-dependent tonality T(t) over two seconds for a 1 kHz tone in noise, holding near 1.19 tu_HMS, against pure noise flat at 0.02 tu_HMS. Bottom: the roughness of a 1 kHz carrier at 100 percent amplitude modulation against modulation frequency from 10 to 210 Hz, rising to a marked peak of 1.0 asper at 70 Hz and falling away on either side" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -251,30 +251,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import psychoacoustics
 
-fs = 48000
+fs, p0 = 48000, 2e-5
+
+# Top panel: tonality T(t) of a 1 kHz tone in noise against the noise alone,
+# each component at 50 dB SPL over 2 s.
 t = np.arange(int(2.0 * fs)) / fs
-amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
+rng = np.random.default_rng(2026)
+noise = rng.standard_normal(t.size)
+noise *= p0 * 10 ** (50 / 20) / np.sqrt(np.mean(noise**2))
+tone = p0 * 10 ** (50 / 20) * np.sqrt(2) * np.sin(2 * np.pi * 1000 * t)
+tin = psychoacoustics.tonality_ecma(tone + noise, fs)
+pn = psychoacoustics.tonality_ecma(noise, fs)
 
-# A pure tone (tonal, smooth) vs a 70 Hz amplitude-modulated tone (rough),
-# both normalized to an overall level of 60 dB SPL:
-tone = amp * np.sin(2 * np.pi * 1000 * t)
-rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
-rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
+# Bottom panel: roughness of a 1 kHz carrier at 100 % AM, swept over the
+# modulation frequency (1 s per point at 60 dB SPL).
+tm = np.arange(fs) / fs
+fmods = np.array([20.0, 30, 40, 50, 60, 70, 80, 100, 120, 150, 180, 200])
+r = []
+for fm in fmods:
+    am = (1 + np.sin(2 * np.pi * fm * tm)) * np.sin(2 * np.pi * 1000 * tm)
+    am *= p0 * 10 ** (60 / 20) / np.sqrt(np.mean(am**2))
+    r.append(psychoacoustics.roughness_ecma(am, fs).roughness)
 
-scores = {
-    "Pure tone": (psychoacoustics.tonality_ecma(tone, fs).tonality, psychoacoustics.roughness_ecma(tone, fs).roughness),
-    "70 Hz AM tone": (psychoacoustics.tonality_ecma(rough, fs).tonality, psychoacoustics.roughness_ecma(rough, fs).roughness),
-}
-labels = list(scores)
-tonal = [scores[k][0] for k in labels]
-rough_v = [scores[k][1] for k in labels]
-xpos = np.arange(len(labels))
-fig, ax = plt.subplots()
-ax.bar(xpos - 0.2, tonal, 0.4, label=r"Tonality [$\mathrm{tu}_\mathrm{HMS}$]")
-ax.bar(xpos + 0.2, rough_v, 0.4, label="Roughness [asper]")
-ax.set_xticks(xpos)
-ax.set_xticklabels(labels)
-ax.legend()
+fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10, 8.5))
+ax0.plot(tin.times, tin.tonality_vs_time,
+         label=rf"Tone in noise ($T$ = {tin.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")   # 1.19
+ax0.plot(pn.times, pn.tonality_vs_time,
+         label=rf"Pure noise ($T$ = {pn.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")       # 0.02
+ax0.set(xlabel="Time [s]", ylabel=r"Tonality $T$ [$\mathrm{tu}_\mathrm{HMS}$]")
+ax0.legend()
+ax1.plot(fmods, r, "o-", label="1 kHz carrier, 100 % AM")          # peak 1.0 asper
+ax1.set(xlabel=r"Modulation frequency $f_\mathrm{mod}$ [Hz]", ylabel="Roughness $R$ [asper]")
+ax1.legend()
 plt.show()
 ```
 

@@ -101,8 +101,10 @@ tone through that chain, down to the $K_\mathrm{t}$ the mean audibility earns.
 The **decisive** audibility of one narrow-band spectrum is the largest tone
 audibility in it (clause 5.3.8). Over $J$ staggered spectra the **mean
 audibility** is their energy mean (Formula 20); a spectrum in which no tone is
-found contributes $\Delta L_j = -10\ \text{dB}$ (Formula 21). `assess_tones` applies the whole
-chain to a spectrum's tones and reports the decisive tone.
+found contributes $\Delta L_j = -10\ \text{dB}$ (Formula 21). `assess_tones` is
+the *per-tone* entry point: it applies Formulae (2)-(5) and (12)-(14) to each
+tone it is given and reports the largest, which is the decisive audibility only
+when no two audible tones share a critical band.
 
 **How the decisive band is selected.** The method does not scan a fixed set of
 bands: each detected *tone* defines its own critical band (§1), the audibility
@@ -173,12 +175,13 @@ amount of level justifies a penalty for it.
 
 Clause 5.4 attaches a 90 % bilateral extended uncertainty $U$ to every
 audibility, and clause 6 makes it mandatory whenever fewer than 12 spectra
-have been averaged. `assess_tones` computes it per tone
-(`res.extended_uncertainties`), `audibility_uncertainty` evaluates it straight
-from the spectrum lines, and `mean_audibility_uncertainty` propagates it to
-the energy-averaged audibility of a spectrum set. The Annex E example
-reproduces the printed Table E.2 column (for the 137.3 Hz tone,
-$U = 2.80\ \text{dB}$ against the printed 2,79).
+have been averaged. `analyze_spectrum` computes it per tone
+(`res.extended_uncertainties`) from the spectrum lines it holds;
+`assess_tones`, which receives levels and no lines, only carries the values
+passed to it as `extended_uncertainties=`. `audibility_uncertainty` evaluates it
+straight from the spectrum lines, and `mean_audibility_uncertainty` propagates
+it to the energy-averaged audibility of a spectrum set (Annex E Table E.2:
+$U = 2.80\ \text{dB}$ for the 137.3 Hz tone against the printed 2,79).
 
 **How to read $U$.** A 90 % *bilateral* interval leaves 5 % in each tail, so
 $\Delta L - U$ is a one-sided 95 % statement: when the whole interval

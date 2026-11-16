@@ -68,13 +68,22 @@ varias guías.
   Citado por [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
   [Caracterización de altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/) y
   [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+- Beranek, L. L., & Mellow, T. J. (2019). *Acoustics: Sound fields,
+  transducers and vibration* (2.ª ed.). Academic Press.
+  ISBN 978-0-12-815227-0. La edición en la que el informe de conformidad lee
+  la impedancia de radiación y la directividad del pistón en pantalla
+  (Ecs. 13.117, 13.118, 4.151, 13.102), y aquella cuya Tabla 7.1 da las
+  amplitudes de Delany-Bazley que trata
+  [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/).
 - Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5.ª ed.). CRC Press.
+  control* (5.ª ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152). Las
   relaciones de recinto en régimen estacionario (apartado 6.4, Ecs. 6.43-6.44)
-  que hay detrás de `steady_state_spl` y `room_constant`, y la pérdida por
+  que hay detrás de `steady_state_spl` y `room_constant`, la pérdida por
   inserción de cerramientos del apartado 7.4.2 (Ecs. 7.103, 7.111), que es el
-  modelo de cerramiento por defecto de la biblioteca. Citado por
+  modelo de cerramiento por defecto de la biblioteca, y el apéndice D, que
+  reúne los juegos de coeficientes de materiales porosos de la tabla D.1 y
+  las recursiones de construcciones en capas (Ecs. D.91-D.99). Citado por
   [Entre recintos: partición, receptor y criterio](/phonometry/es/devices/noise-control/room-to-room/),
   [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/),
   [Control de ruido industrial: HVAC y cerramientos](/phonometry/es/devices/noise-control/noise-control/),
@@ -91,9 +100,11 @@ varias guías.
   Los modelos de potencia acústica del apartado 4.6 (Tabla 4.5,
   Ecs. 4.53-4.56), el balance de potencia entre recintos del apartado 4.9
   (Ecs. 4.92-4.101), la ecuación de diseño de cerramientos del apartado 4.10
-  (Ecs. 4.102-4.115) y los problemas resueltos 4.16, 4.18 y 4.21 con sus
-  respuestas impresas por bandas de octava, alrededor de los cuales está
-  construida esta guía. Citado por
+  (Ecs. 4.102-4.115), el método de la meseta para la pérdida de transmisión
+  de paneles del apartado 3.9 (Tabla 3.1), los modos acústicos de orden
+  superior de un conducto circular rígido del apartado 7.2 (Tabla 7.1) y los
+  problemas resueltos 4.16, 4.18 y 4.21 con sus respuestas impresas por
+  bandas de octava. Citado por
   [Entre recintos: partición, receptor y criterio](/phonometry/es/devices/noise-control/room-to-room/),
   [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/),
   [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/)
@@ -102,8 +113,8 @@ varias guías.
 - Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control
   engineering: Principles and applications* (2.ª ed.). Wiley.
   [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568). El
-  tratamiento complementario de los conductos y los cerramientos de esta
-  página. Citado por
+  tratamiento complementario de los conductos, los silenciadores y los
+  cerramientos. Citado por
   [Control de ruido industrial: HVAC y cerramientos](/phonometry/es/devices/noise-control/noise-control/)
   y [Silenciadores](/phonometry/es/devices/noise-control/silencers/).
 
@@ -135,6 +146,14 @@ síncrono, Golay por los pares complementarios.
   digitales, el paso natural tras las guías de bancos de filtros.
   Citado por [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/) y la
   [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/).
+- Bristow-Johnson, R. *Audio EQ Cookbook*. Republicado como nota del grupo de
+  trabajo del W3C (ed. R. Toy), 8 de junio de 2021.
+  [w3.org/TR/audio-eq-cookbook](https://www.w3.org/TR/audio-eq-cookbook/).
+  Las recetas de coeficientes biquad (pico, shelving, paso bajo y paso alto,
+  paso banda, banda eliminada, paso todo) y su parametrización por Q / ancho
+  de banda / pendiente de shelving, implementadas al pie de la letra por
+  `ParametricEQ`.
+  Citado por [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/).
 - Bendat, J. S., & Piersol, A. G. (2010). *Random data: Analysis and
   measurement procedures* (4.ª ed.). Wiley. ISBN 978-0-470-24877-5.
   [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
@@ -142,9 +161,13 @@ síncrono, Golay por los pares complementarios.
   estadística, y de las funciones de coherencia de sistemas de entradas
   múltiples del capítulo 7 (coherencia múltiple y parcial, espectros
   condicionados) con las fórmulas de error de la sección 9.3 que implementa
-  `miso_coherence`.
-  Citado por [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/)
-  y [Coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/).
+  `miso_coherence`. También las fórmulas de correlación y de retardo, el
+  capítulo de la envolvente de Hilbert y la relación de Hilbert entre
+  log-magnitud y fase de las utilidades de fase mínima.
+  Citado por [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/),
+  [Coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/),
+  [Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/)
+  y [Distorsión con barridos y utilidades de fase](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
 - Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
   *Proceedings of the IEEE*, 70(9), 1055-1096.
   [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
@@ -215,6 +238,17 @@ síncrono, Golay por los pares complementarios.
   de círculo de referencia de 25 dB.
   Citado por [Caracterización de altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/) y
   [Caracterización de micrófonos](/phonometry/es/devices/electroacoustics/microphones/).
+- International Electrotechnical Commission. (1985). *Sound system
+  equipment — Part 1: General* (IEC 60268-1:1985).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1204).
+  La señal de programa simulado del capítulo 7, y el apéndice A: la red y el
+  medidor de cuasipico de la tabla AI, la figura A1 y las tablas AII y AIII,
+  y las ráfagas tonales del apartado A2, que comienzan en el paso por cero
+  del tono con un número entero de periodos completos, se repiten en trenes a
+  una tasa de repetición dada y duran lo que fija la tabla AII.
+  Citado por [Señales de prueba y herramientas de muestreo](/phonometry/es/signals/spectra/test-signals/),
+  [Medidor de cuasipico](/phonometry/es/devices/broadcast/quasi-peak/) y
+  [Auriculares](/phonometry/es/devices/electroacoustics/headphones/).
 - Harris, F. J. (1978). On the use of windows for harmonic analysis with the
   discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51-83.
   [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837). Las
@@ -237,8 +271,9 @@ síncrono, Golay por los pares complementarios.
   estimation of time delay. *IEEE Transactions on Acoustics, Speech, and
   Signal Processing*, 24(4), 320-327.
   [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
-  El marco GCC, las ponderaciones de su Tabla I y las condiciones de cada una,
-  y el procesador de máxima verosimilitud (Hannan-Thomson). Citado por
+  El marco GCC, las ponderaciones de su Tabla I (Roth, SCOT, PHAT) y las
+  condiciones de cada una, y el procesador de máxima verosimilitud
+  (Hannan-Thomson). Citado por
   [Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/).
 - McFadden, P. D. (1987). A revised model for the extraction of periodic
   waveforms by time domain averaging. *Mechanical Systems and Signal
@@ -410,9 +445,11 @@ las guías y no un tratamiento general de la audición.
   Citado por [Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/).
 - International Organization for Standardization. (2016). *Acoustics —
   Objective method for assessing the audibility of tones in noise —
-  Engineering method* (ISO/PAS 20065:2016).
+  Engineering method* (ISO/PAS 20065:2016; anulada, sustituida por
+  [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html)).
   [Catálogo iso.org](https://www.iso.org/standard/66941.html).
-  El método de ingeniería para la audibilidad objetiva de tonos.
+  El método de ingeniería para la audibilidad objetiva de tonos; la
+  implementación sigue la edición PAS de 2016.
   Citado por [Audibilidad objetiva de tonos](/phonometry/es/perception/psychoacoustics/tone-audibility/).
 - International Organization for Standardization. (2017). *Acoustics —
   Statistical distribution of hearing thresholds related to age and gender*
@@ -521,8 +558,10 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   estadística del decaimiento, la frecuencia de Schroeder, la absorción y
   los parámetros perceptivos de sala.
   Citado por [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/),
-  [Predicción del tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/) y
-  [Absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/).
+  [Predicción del tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/),
+  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/),
+  [Absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/) y
+  [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/).
 - Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
   Press.
   [Escaneo libre en Internet Archive](https://archive.org/details/collectedpaperso00sabi).
@@ -649,8 +688,10 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   cadenas de medición, la transmisión por flancos y el marco de predicción
   EN 12354.
   Citado por [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/),
-  [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/) y
-  [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/).
+  [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
+  [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/),
+  [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/) y
+  [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/).
 - Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
   [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
@@ -666,7 +707,10 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   [Catálogo iso.org](https://www.iso.org/standard/77435.html).
   La valoración por curva de referencia y los términos de adaptación
   espectral C y Ctr.
-  Citado por [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/).
+  Citado por [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/),
+  [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/),
+  [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/) y
+  [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/).
 - International Organization for Standardization. (2014). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 1: Airborne sound insulation* (ISO 16283-1:2014).
@@ -679,7 +723,8 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   [Catálogo iso.org](https://www.iso.org/standard/16620.html).
   El método de resonancia para la rigidez dinámica por unidad de superficie,
   idéntico a EN 29052-1.
-  Citado por [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/).
+  Citado por [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/)
+  y [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/).
 - Hopkins, C., Wilson, R., & Craik, R. J. M. (1999). Dynamic stiffness as an
   acoustic specification parameter for wall ties used in masonry cavity walls.
   *Applied Acoustics 58, 51-68*.
@@ -690,16 +735,18 @@ se reparte la absorción, que es justo donde discrepan los cinco.
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2.ª ed.). Springer.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
-  El modelo de fuentes imagen del apartado 1 (capítulo 11), con las
-  expresiones del factor de reflexión y del retardo. Citado por
-  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/).
+  El modelo de fuentes imagen (capítulo 11), con las expresiones del factor de
+  reflexión y del retardo. Citado por
+  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/)
+  y [Teoría: salas y edificación](/phonometry/es/reference/theory/rooms-buildings/).
 - Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
   simulating small-room acoustics. *The Journal of the Acoustical Society of
   America*, 65(4), 943-950.
   [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599). La descomposición
   por número de reflexiones de la retícula de fuentes imagen de una sala
-  rectangular que se usa en el apartado 1. Citado por
-  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/).
+  rectangular. Citado por
+  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/)
+  y [Teoría: salas y edificación](/phonometry/es/reference/theory/rooms-buildings/).
 
 ## Materiales y superficies
 
@@ -728,6 +775,7 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   autores del método del coeficiente de difusión de ISO 17497-2.
   Citado por
   [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/),
+  [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/),
   [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/),
   [Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/) y
   [Metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/).
@@ -840,8 +888,8 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   absorbers for use in buildings — Rating of sound absorption*
   (ISO 11654:1997).
   [Catálogo iso.org](https://www.iso.org/standard/19583.html).
-  La valoración ponderada de absorción acústica, sus indicadores de forma y
-  la clase de absorción.
+  La valoración ponderada de absorción acústica $\alpha_\mathrm{w}$, sus
+  indicadores de forma y la clase de absorción.
   Citado por
   [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/).
 - International Organization for Standardization. (2020). *Acoustics —
@@ -864,7 +912,8 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [Catálogo iso.org](https://www.iso.org/standard/55293.html).
   El método del coeficiente de difusión con goniómetro.
-  Citado por [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/).
+  Citado por [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/)
+  y [Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/).
 - International Organization for Standardization. (2002). *Acoustics —
   Measurement of sound absorption properties of road surfaces in situ —
   Part 1: Extended surface method* (ISO 13472-1:2002, la edición
@@ -896,8 +945,9 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   porosidad con fondo rígido, que conecta los modelos de material poroso del
   apartado de caracterización con la absorción perfecta a una sola frecuencia.
   Citado por
-  [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
+  [Teoría: materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
 - Mechel, F. P. (Ed.) (2008). *Formulas of acoustics* (2.ª ed.). Springer.
+  ISBN 978-3-540-76832-6.
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
   Apartados D.3-D.6 (reflexión en una capa, esquema multicapa, integrales de
   campo difuso) y G.11 (relaciones porosas empíricas). Citado por
@@ -924,6 +974,15 @@ FRF. Las obras de vibración en humanos son de otra clase: sustentan las
 ponderaciones y las medidas de dosis, no la física de transmisión que tienen
 por encima.
 
+- Vér, I. L., & Beranek, L. L. (Eds.). (2006). *Noise and vibration control
+  engineering: Principles and applications* (2.ª ed.). John Wiley & Sons.
+  ISBN 978-0-471-44942-3.
+  [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568).
+  El manual del que esta biblioteca lee sus materiales de amortiguamiento
+  comerciales: la Tabla 14.1 del capítulo 14, «Structural Damping», de
+  Eric E. Ungar y Jeffrey A. Zapfe, que es la única tabla del corpus que da
+  un factor de pérdidas con la temperatura y la frecuencia a las que alcanza
+  su máximo.
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
   sound: Structural vibrations and sound radiation at audio frequencies*
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
@@ -1035,7 +1094,10 @@ y la fuente del material de refracción; la revisión de Embleton es el camino m
 corto hacia el efecto suelo. Los artículos de barreras son los dos extremos de
 un mismo asunto: Kurze y Anderson como el ajuste en forma cerrada que usa la
 ingeniería, y Hadden y Pierce como la solución exacta de la cuña que aquel
-aproxima.
+aproxima. Las tres últimas entradas miden lo que refleja una pantalla y no lo
+que atenúa: la EN 1793-5 es el método in situ, y los dos artículos de Garai
+y Guidorzi son la construcción de la ventana que fija su límite de baja
+frecuencia y la revisión que adoptó su edición de 2016.
 
 - Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
   Academic Publishers. ISBN 978-1-4020-0390-5.
@@ -1043,14 +1105,17 @@ aproxima.
   La teoría ondulatoria del sonido en exteriores (ecuación parabólica, fast
   field program, refracción, turbulencia) que sustenta las aproximaciones de
   ingeniería de la ISO 9613-2.
-  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/).
+  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/)
+  y [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/).
 - Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
   (2.ª ed.). CRC Press.
   [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
   Los modelos de impedancia del suelo, el coeficiente de reflexión de onda
-  esférica que explica el mínimo del suelo y los efectos meteorológicos sobre las
-  barreras.
-  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/).
+  esférica que explica el mínimo del suelo, los efectos meteorológicos sobre las
+  barreras y el modelo FDTD presión-velocidad de referencia del capítulo 4.
+  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/),
+  [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/) y
+  [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/).
 - Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
   157-173.
   [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
@@ -1072,7 +1137,8 @@ aproxima.
   the absorption of sound by the atmosphere* (ISO 9613-1:1993).
   [Catálogo iso.org](https://www.iso.org/standard/17426.html).
   El coeficiente de atenuación atmosférica de tono puro.
-  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/).
+  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/) y
+  [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
 - International Organization for Standardization. (1996). *Acoustics —
   Attenuation of sound during propagation outdoors — Part 2: General method
   of calculation* (ISO 9613-2:1996; revisada en 2024, el método de 1996 es el
@@ -1106,7 +1172,12 @@ aproxima.
   Objective method for the measurement of prominence of impulsive sounds and
   for adjustment of LAeq* (ISO/PAS 1996-3:2022).
   [Catálogo iso.org](https://www.iso.org/standard/77035.html).
-  El sucesor ISO construido sobre la prominencia de la NT ACOU 112.
+  El sucesor ISO construido sobre la prominencia de la NT ACOU 112: el método
+  objetivo de análisis de arranques que implementa
+  `impulsive_sound_adjustment`, desde el historial de nivel $L_{p\mathrm{AF}}$
+  (apartado 4), la detección de arranques y la tasa de crecimiento por
+  mínimos cuadrados (apartados 3.3-3.5) hasta la prominencia (apartado 5,
+  fórmula 2) y el ajuste $K_\mathrm{I}$ (apartado 6, fórmula 3).
   Citado por [Prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/).
 - International Electrotechnical Commission. (2018). *Wind turbines —
   Part 11: Acoustic noise measurement techniques*
@@ -1144,6 +1215,31 @@ aproxima.
   de difracción en cuña cuyo límite de cuña plana (pantalla delgada) usa la
   pérdida por inserción de la barrera. Citado por
   [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/).
+- European Committee for Standardization. (2016). *Road traffic noise
+  reducing devices — Test method for determining the acoustic performance —
+  Part 5: Intrinsic characteristics — In situ values of sound reflection
+  under direct sound field conditions* (EN 1793-5:2016).
+  El índice de reflexión acústica in situ de una pantalla de carretera: la
+  sustracción de señales y la ventana de Adrienne que comparte con la
+  ISO 13472-1, la rejilla de nueve micrófonos, el número único $DL_{RI}$ y el
+  ejemplo del anexo B.
+  Citado por [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/).
+- Garai, M., & Guidorzi, P. (2000). European methodology for testing the
+  airborne sound insulation characteristics of noise barriers in situ:
+  experimental verification and comparison with laboratory data. *The Journal
+  of the Acoustical Society of America*, 108(3), 1054-1067.
+  [doi:10.1121/1.1286811](https://doi.org/10.1121/1.1286811).
+  Sección III.D: la ventana que termina donde llega la primera componente no
+  deseada, y la primera muesca de su espectro como límite de baja frecuencia.
+  Citado por [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/).
+- Guidorzi, P., & Garai, M. (2013). Advancements in sound reflection and
+  airborne sound insulation measurement on noise barriers. *Open Journal of
+  Acoustics*, 3(2A), 25-38.
+  [doi:10.4236/oja.2013.32A004](https://doi.org/10.4236/oja.2013.32A004).
+  La revisión de QUIESST que adoptó la edición de 2016 de la EN 1793-5: la
+  rejilla de nueve micrófonos, la alineación por debajo de la muestra y la
+  corrección de directividad.
+  Citado por [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/).
 
 ## Ruido de aeronaves
 
@@ -1159,7 +1255,8 @@ vuelo.
   [Tienda ICAO](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
   La norma de certificación acústica de aeronaves cuyo Apéndice 2 define el
   procedimiento EPNL.
-  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/).
+  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/) y
+  [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
 - International Civil Aviation Organization. (2018). *Environmental technical
   manual — Volume I: Procedures for the noise certification of aircraft*
   (Doc 9501, 3.ª ed.).
@@ -1252,8 +1349,12 @@ vuelo.
 - Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
   absorbent materials. *Applied Acoustics*, 3(2), 105-116.
   [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
-  El modelo de impedancia del suelo de un parámetro (resistividad de flujo).
-  Citado por [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
+  El modelo empírico original de un parámetro para absorbentes fibrosos: las
+  relaciones en función de la frecuencia dividida por la resistividad al
+  flujo, con su rango de validez declarado. El mismo modelo es el modelo de
+  impedancia del suelo de un parámetro (resistividad de flujo). Citado por
+  [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/)
+  y [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
 
 ## Acústica submarina
 
@@ -1285,8 +1386,11 @@ absorción de alcance decreciente y no tres alternativas.
   Academic Press. ISBN 978-0-12-487570-8.
   [Página del editor](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
   La acústica oceánica desde primeros principios; el coeficiente de reflexión
-  de Rayleigh fluido-fluido del modelo de fondo marino.
-  Citado por [Propagación submarina del sonido](/phonometry/es/underwater/underwater-propagation/).
+  de Rayleigh fluido-fluido del modelo de fondo marino, y el tiempo de
+  propagación en forma cerrada a lo largo del rayo en arco de círculo de un
+  gradiente lineal de velocidad del sonido (Ecuación 3.3.20).
+  Citado por [Propagación submarina del sonido](/phonometry/es/underwater/underwater-propagation/) y
+  [Métodos numéricos de propagación submarina](/phonometry/es/underwater/underwater-solvers/).
 - Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
   *Computational ocean acoustics* (2.ª ed.). Springer.
   [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).
@@ -1528,6 +1632,22 @@ implementación.
   la pérdida por transmisión a partir de la matriz compuesta (Ec. (3.27)), y
   el tratamiento de referencia de los silenciadores disipativos y combinados.
   Citado por [Silenciadores](/phonometry/es/devices/noise-control/silencers/).
+- Farina, A. (2000). Simultaneous measurement of impulse response and
+  distortion with a swept-sine technique. *108th AES Convention*, París,
+  preprint 5093.
+  [Ficha en la AES E-Library](https://www.aes.org/e-lib/browse.cfm?elib=10211).
+  La deconvolución del barrido exponencial y el empaquetado L·ln(n) de las
+  respuestas al impulso armónicas por delante de la lineal.
+  Citado por [Distorsión con barridos y utilidades de fase](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+- Müller, S., & Massarani, P. (2001). Transfer-function measurement with
+  sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
+  [Ficha en la AES E-Library](https://aes.org/publications/elibrary-page/?id=10189).
+  La monografía de medición con barridos detrás de las notas de práctica:
+  filtros inversos, fundidos y rechazo de la distorsión, y la síntesis de un
+  barrido a partir de un espectro de magnitud y un retardo de grupo
+  (Secs. 4.2-4.3).
+  Citado por [Distorsión con barridos y utilidades de fase](/phonometry/es/devices/electroacoustics/swept-sine-distortion/)
+  y [Medición de sistemas: Golay, barridos, inversión](/phonometry/es/signals/spectra/system-measurement/).
 - Novak, A., Lotton, P., & Simon, L. (2015). Synchronized swept-sine: Theory,
   application and implementation. *Journal of the Audio Engineering Society*,
   63(10), 786-798.

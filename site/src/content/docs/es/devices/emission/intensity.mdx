@@ -194,6 +194,24 @@ fig, (axl, axr) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 plane.plot(ax=axl, language="es")
 standing.plot(ax=axr, language="es")
 plt.show()
+
+# El panel derecho a mano, con los campos por banda que lleva el resultado:
+# Lp y LI como curvas, el índice presión-intensidad como barras en un eje gemelo.
+fig, ax = plt.subplots()
+ax.semilogx(standing.frequencies, standing.pressure_level, "o-", label="Nivel de presión Lp")
+ax.semilogx(standing.frequencies, standing.intensity_level, "s--", label="Nivel de intensidad LI")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel [dB]")
+twin = ax.twinx()
+twin.bar(standing.frequencies, standing.pressure_intensity_index,
+         width=standing.frequencies * 0.2, color="#2ca02c", alpha=0.25,
+         label="δpI = Lp − LI")
+twin.set_ylabel("Índice presión-intensidad δpI [dB]")
+lines, labels = ax.get_legend_handles_labels()
+tlines, tlabels = twin.get_legend_handles_labels()
+ax.legend(lines + tlines, labels + tlabels)
+ax.set_title(f"Lp frente a LI  (δpI total = {standing.total_pressure_intensity_index:.1f} dB)")
+plt.show()
 ```
 
 </details>

@@ -418,7 +418,13 @@ fractil poblacional del apartado 4.4, todo implementado por
 `age_threshold(age, sex, fractile)`. El umbral de referencia de la audición en
 campo libre y campo difuso de la Tabla 1 de ISO 389-7:2005 en las once
 frecuencias audiométricas, devuelto por `reference_threshold(field)`, junto
-con las condiciones de escucha del apartado 1 que lo definen.
+con las condiciones de escucha del apartado 1 que lo definen. Los niveles de
+referencia equivalentes de presión acústica liminar de ISO 389-1:1998, el cero
+audiométrico del apartado 3: el Beyer DT 48 y el Telephonics TDH 39 en un
+acoplador CEI 60303 (Tabla 1) y cualquier otro auricular supraaural en un oído
+artificial CEI 60318 (Tabla 2), devueltos por
+`earphone_reference_level(earphone, frequencies)` y sumados a un audiograma por
+`hearing_level_to_coupler_spl`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

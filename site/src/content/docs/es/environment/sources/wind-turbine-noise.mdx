@@ -8,7 +8,7 @@ references:
     title: "Wind turbines — Part 11: Acoustic noise measurement techniques"
     designation: "IEC 61400-11:2012+AMD1:2018 CSV"
     url: "https://webstore.iec.ch/en/publication/63367"
-    note: "La edición implementada: la geometría de medida, la clasificación en intervalos de velocidad de viento y la cadena de audibilidad tonal (potencia acústica aparente Fórmula 26, banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31, tonalidad/audibilidad Fórmulas 32-34). El flujo completo de medición queda fuera del alcance aquí."
+    note: "La edición implementada: la geometría de medida y la cadena de audibilidad tonal (potencia acústica aparente Fórmula 26, banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31, tonalidad/audibilidad Fórmulas 32-34). El flujo completo de medición, con su clasificación en intervalos de velocidad de viento, su regresión a velocidades de viento normalizadas y sus balances de incertidumbre, queda fuera del alcance aquí."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2005
@@ -37,7 +37,9 @@ La IEC 61400-11 mide la emisión acústica de un aerogenerador. Esta página cub
 sus dos magnitudes en forma cerrada: el **nivel de potencia acústica aparente**
 referido a una fuente puntual equivalente en el centro del rotor, y la
 **audibilidad tonal** que decide si un tono discreto (paso de pala, multiplicadora,
-generador) es audible por encima del ruido de enmascaramiento.
+generador) es audible por encima del ruido de enmascaramiento. Las dos se
+comprueban frente a las fórmulas de la norma, y la audibilidad también frente a
+un tono sintético cuya audibilidad se calcula a mano.
 
 ## Nivel de potencia acústica aparente
 
@@ -46,7 +48,7 @@ horizontal $R_0 = H + D/2$ (altura de buje $H$, diámetro de rotor $D$), la
 distancia oblicua al centro del rotor es $R_1 = \sqrt{H^2 + R_0^2}$ y el nivel
 de potencia acústica aparente es
 $L_{W\mathrm{A},i} = L_{p,i} - 6 + 10\log_{10}(4\pi R_1^2/S_0)$ por banda
-($S_0 = 1\ \text{m}^2$), sumado energéticamente sobre las bandas. Los −6 dB
+($S_0 = 1\ \text{m}^2$), sumado energéticamente sobre las bandas (Fórmula 27). Los −6 dB
 dan cuenta de la duplicación de presión en la placa del suelo.
 
 <ThemeImage loading="eager" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia acústica aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" width="94%" />
@@ -341,7 +343,9 @@ las dos impresiones llevan el criterio con signos opuestos.
 
 ### Informe de evaluación (`.report()`)
 
-`WindTurbineTonalityResult.report(path)` genera una ficha PDF de una página con
+La audibilidad tonal es la parte de la evaluación de un aerogenerador que acaba
+en un documento entregado a la administración, y el resultado escribe ese
+documento: `WindTurbineTonalityResult.report(path)` genera una ficha PDF de una página con
 la disposición de la evaluación de tonalidad de un laboratorio de ruido
 ambiental, según la **IEC 61400-11:2012+A1:2018** (apartados 9.5.2 a 9.5.8):
 una línea con la base normativa, un bloque opcional de metadatos (fuente o
@@ -358,7 +362,7 @@ se construye $\Delta L_\mathrm{a}$, y un pie con el descargo fijo.
 Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de sonoridad ISO 532-1](/phonometry/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
 un `requirement` indicado se interpreta como la audibilidad tonal $\Delta L_\mathrm{a}$
-máxima admisible en dB (un tono menos audible cumple). El renderizado necesita
+máxima admisible en dB (un tono menos audible cumple). La generación necesita
 reportlab y, para la figura que incrusta la ficha, matplotlib (`pip install
 "phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La ficha se
 genera en inglés por defecto; pasa `language="es"` para una ficha en español

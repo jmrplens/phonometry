@@ -370,7 +370,7 @@ sources (the rubber ball) are not covered by any of these models.
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
   ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550176](https://doi.org/10.4324/9780080550176).
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
   Section 3.6.3 for the tapping-machine contact model and the force spectrum,
   Section 4.3.8 for the covering cut-off frequency and the two-line estimate,
   and Sections 4.3.9 and 4.3.10 for the floating-floor improvement laws.
@@ -403,8 +403,9 @@ column of the Annex G worked example anchors Formula (C.1) band for band.
 
 ISO 12354-1:2017, Annex D: the additional-layer resonance (Formulae D.1 and
 D.2), the Table D.1 ratings read at the rounded one-third-octave band of the
-resonance, and the corrections of Formulae (D.3) to (D.8). Two defects of the
-printed annex are recorded in `docs/ERRATA.md`. What each formula rests on is
+resonance, and the corrections of Formulae (D.3) to (D.8). One defect of the
+printed annex, Table D.1 listing 1600 Hz in two rows, is recorded in
+`docs/ERRATA.md`. What each formula rests on is
 set out in "What is anchored on a published number, and what is not" above.
 
 ## See also

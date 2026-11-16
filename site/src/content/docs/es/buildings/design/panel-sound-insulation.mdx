@@ -1011,7 +1011,10 @@ funciones de rendija y orificio devuelven un `ApertureTransmissionResult`
 `radiation_index`, `.plot()`). Las predicciones arrastran las salvedades de sus
 fuentes (el método de Sharp por encima de $1{,}5\times$ la primera resonancia del
 panel; la rendija sin viscosidad de Gomperts válida para $w < 0{,}3\lambda$;
-«método n.º 1» de Leppington).
+«método n.º 1» de Leppington). Nada en el código rechaza un argumento fuera de
+los dos primeros límites, así que hacerlos cumplir le toca al lector: una
+rendija de anchura dada sale del modelo de Gomperts a medida que sube la
+frecuencia y $0{,}3\lambda$ se acerca a $w$.
 
 ## Qué cubre esta guía
 

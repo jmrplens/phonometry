@@ -291,10 +291,28 @@ accumulates more of it than the single closed form allows.
 > overlap and absolute-threshold screening become 50 % overlap, a Hann window
 > and relative floors here), so perfectly steady signals do not read exactly
 > zero: a steady 1 kHz tone comes out near 0.09 vacil and steady broadband
-> noise about 0.15-0.19 vacil, partly the physical level fluctuation of the
+> noise about 0.15 vacil, partly the physical level fluctuation of the
 > noise itself. For **AM broadband noise** the signal model overshoots
 > the absolute level (it spreads the modulated energy across bands); quote the
 > closed form `fluctuation_strength_am_noise` (§3.1) for that stimulus.
+
+The two steady readings of the note, computed:
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(2 * fs) / fs
+tone = np.sin(2 * np.pi * 1000 * t)  # 1 kHz, unmodulated, set to 70 dB SPL
+tone *= 2e-5 * 10 ** (70 / 20) / np.sqrt(np.mean(tone**2))
+noise = np.random.default_rng(0).standard_normal(t.size)  # broadband, 60 dB SPL
+noise *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(noise**2))
+steady_tone = psychoacoustics.fluctuation_strength(tone, float(fs))
+steady_noise = psychoacoustics.fluctuation_strength(noise, float(fs))
+print(round(steady_tone.fluctuation_strength, 2))   # 0.09 vacil
+print(round(steady_noise.fluctuation_strength, 2))  # 0.15 vacil
+```
 
 ## See also
 

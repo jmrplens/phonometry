@@ -347,7 +347,40 @@ print(building.low_frequency_procedure_applies(25.4))   # False, rounds to 25
 In a whole measurement the two halves travel together in a
 `LowFrequencyProcedure`, which `airborne_insulation()` applies to the band
 vector for you, and `impact_insulation()` and `facade_insulation()` take the
-same object under a `low_frequency=` keyword.
+same object under a `low_frequency=` keyword. The receiving room's Clause 10.4
+octave reverberation time travels in the same object and stands in for its
+50 Hz, 63 Hz and 80 Hz values, as `res.t2` shows:
+
+```python
+# `np` and `building` are the imports of the blocks above.
+
+# The optional low range measured alongside the core bands, in an 18 m3
+# receiving room. The four corners hold 50, 63 and 80 Hz only: no other band
+# is measured there.
+freqs = np.array([50.0, 63.0, 80.0, 100.0, 125.0, 160.0])
+l1 = np.array([88.4, 90.1, 87.6, 85.2, 84.7, 84.1])   # source room, dB
+l2 = np.array([50.3, 52.8, 49.1, 45.6, 43.2, 41.8])   # receiving room, dB
+t2 = np.array([0.62, 0.58, 0.54, 0.49, 0.47, 0.45])   # receiving room, s
+corners = np.array([[56.4, 58.1, 54.7],
+                    [55.2, 60.3, 53.9],
+                    [54.8, 57.6, 56.2],
+                    [53.1, 56.9, 55.4]])
+
+lf = building.LowFrequencyProcedure(
+    volume=18.0,
+    corner_levels=corners,
+    reverberation_63_octave=0.72,      # Clause 10.4, receiving room
+)
+res = building.airborne_insulation(l1, l2, t2, frequencies=freqs,
+                                   receiver_low_frequency=lf)
+
+chain = res.receiver_low_frequency
+print(np.round(chain.l_corner, 1))   # [56.4 60.3 56.2]  highest corner per band
+print(np.round(chain.l_default, 1))  # [50.3 52.8 49.1]  default procedure
+print(np.round(chain.l_lf, 1))       # [53.4 56.9 52.9]  Formula (13)
+print(res.t2)                        # [0.72 0.72 0.72 0.49 0.47 0.45]
+print(np.round(res.dnt, 1))          # [36.6 34.8 36.3 39.5 41.2 41.8]
+```
 
 They warn when you forget, everywhere the procedure is allowed: airborne,
 impact, and the loudspeaker façade methods. A road-traffic façade stays silent

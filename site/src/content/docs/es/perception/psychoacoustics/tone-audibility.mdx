@@ -308,12 +308,14 @@ penalización por él.
 
 El apartado 5.4 asocia a cada audibilidad una incertidumbre expandida $U$
 (bilateral al 90 %), y el apartado 6 la hace obligatoria cuando se han
-promediado menos de 12 espectros. `assess_tones` la calcula por tono
-(`res.extended_uncertainties`), `audibility_uncertainty` la evalúa
-directamente desde las líneas del espectro y `mean_audibility_uncertainty`
-la propaga a la audibilidad media energética de un conjunto de espectros
-(Anexo E: $U = 2{,}80\ \text{dB}$ para el tono de 137,3 Hz frente al 2,79
-impreso).
+promediado menos de 12 espectros. `analyze_spectrum` la calcula por tono
+(`res.extended_uncertainties`) a partir de las líneas del espectro que
+tiene; `assess_tones`, que recibe niveles y no líneas, solo conserva los
+valores que se le pasan como `extended_uncertainties=`. `audibility_uncertainty`
+la evalúa directamente desde las líneas del espectro y
+`mean_audibility_uncertainty` la propaga a la audibilidad media energética de
+un conjunto de espectros (Tabla E.2 del Anexo E: $U = 2{,}80\ \text{dB}$ para
+el tono de 137,3 Hz frente al 2,79 impreso).
 
 **Cómo leer $U$.** Un intervalo *bilateral* al 90 % deja un 5 % en cada cola,
 así que $\Delta L - U$ es un enunciado unilateral al 95 %: cuando todo el
@@ -538,8 +540,8 @@ Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de sonoridad ISO
 532-1](/phonometry/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
 un `requirement` indicado se interpreta como la audibilidad decisiva
-$\Delta L_\mathrm{ta}$ máxima admisible en dB (un tono más silencioso cumple). El
-renderizado necesita reportlab y, para la figura que incrusta la ficha,
+$\Delta L_\mathrm{ta}$ máxima admisible en dB (un tono más silencioso cumple). La
+generación necesita reportlab y, para la figura que incrusta la ficha,
 matplotlib (`pip install "phonometry[report,plot]"`); solo se admite
 `engine="reportlab"`. La ficha se genera en inglés por defecto; pasa
 `language="es"` para una ficha en español (cadenas fijas traducidas y separador

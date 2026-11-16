@@ -174,12 +174,12 @@ segment's power and distance, and is corrected term by term:
 
 | Function | Symbol | Doc 29 | What it accounts for |
 |---|---|---|---|
-| `impedance_adjustment` | $\Delta_{\text{imp}}$ | §4.2.1 | the air at the aerodrome against the 409.81 N·s/m³ reference impedance of the tables |
-| `duration_correction` | $\Delta_V$ | §4.5.1 | the segment speed against the NPD reference speed (exposure levels only) |
-| `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3 | where the engines are mounted, through the depression angle |
-| `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4 | ground effect and refraction for a receiver off to the side |
-| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6 | the share of the infinite-path energy a finite segment contributes (exposure levels only) |
-| `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7 | the rearward jet lobe behind a take-off ground-roll segment |
+| `impedance_adjustment` | $\Delta_{\text{imp}}$ | §4.2.1, Eqs. 4-6 and 4-7 | the air at the aerodrome against the 409.81 N·s/m³ reference impedance of the tables |
+| `duration_correction` | $\Delta_V$ | §4.5.1, Eq. 4-14 | the segment speed against the NPD reference speed (exposure levels only) |
+| `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3, Eqs. 4-15 and 4-16 | where the engines are mounted, through the depression angle |
+| `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4, Eqs. 4-18 and 4-19 | ground effect and refraction for a receiver off to the side |
+| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6, Eq. 4-20 | the share of the infinite-path energy a finite segment contributes (exposure levels only) |
+| `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7, Eqs. 4-22 to 4-25 | the rearward jet lobe behind a take-off ground-roll segment |
 
 $\beta$ is the elevation angle of the propagation path above the ground line at
 the receiver and $\ell$ the perpendicular distance from the receiver to the
@@ -207,6 +207,10 @@ is Eq. 4-8b (Eq. 4-9b behind a ground roll), and the event level is the energy
 sum over the segments, $L_E = 10\lg\sum 10^{L_{E,\text{seg}}/10}$ (Eq. 4-11). A
 maximum level takes the largest segment value instead (Eq. 4-10) and drops the
 two terms that exist only for exposure, $\Delta_V$ and $\Delta_\mathrm{F}$.
+Behind a take-off ground roll, for a receiver whose foot of the perpendicular
+falls before the start of a segment the `ground_roll` mask flags ($q < 0$), the
+noise fraction takes its reduced form with $q = 0$ (Eq. 4-21a) and
+$\Delta_{\text{SOR}}$ is added; everywhere else $\Delta_{\text{SOR}}$ is zero.
 
 Their magnitudes are worth carrying, because they decide which term matters for
 a given receiver.

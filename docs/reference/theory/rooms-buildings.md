@@ -97,7 +97,7 @@ $$
 
 with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $\mathrm{e}^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
 
-The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is exact only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
+The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
 
 ### Steady-state room field (Bies 6.4, Kuttruff 5.6)
 
@@ -107,7 +107,23 @@ $$
 L_p = L_W + 10 \log_{10}\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right) \left[ + 10 \log_{10}\frac{\rho c}{400} \right] \quad \text{(Bies Eq. 6.43)},
 $$
 
-the optional last term (about $+0.14$ dB at 20 °C) correcting a characteristic impedance away from 400 Pa·s/m. The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](../../buildings/rooms/room-image-sources.md).
+the optional last term correcting a characteristic impedance $\rho c$ away from 400 Pa·s/m. In air at 20 °C, 101.325 kPa and 50 % relative humidity it adds 0.13 dB:
+
+```python
+from phonometry import fluids, room
+
+air = fluids.air(
+    temperature_c=20.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0
+)
+rho_c = air.characteristic_impedance  # Pa·s/m
+plain = room.steady_state_spl(90.0, 2.0, room_constant=50.0)
+corrected = room.steady_state_spl(
+    90.0, 2.0, room_constant=50.0, characteristic_impedance=rho_c
+)
+print(round(rho_c, 1), round(corrected - plain, 2))  # 412.5 0.13
+```
+
+The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](../../buildings/rooms/room-image-sources.md).
 
 ### Field insulation and weighted rating (ISO 16283-1, ISO 717-1)
 
@@ -346,8 +362,9 @@ usage.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
   The statistical decay theory behind backward integration and the Sabine
   relations used throughout this page, the image-source construction
-  (Section 4.1), the Eyring reverberation and reverberation distance
-  (Sections 5.5–5.6) and the Schroeder frequency (Section 3.6).
+  (Section 4.1) and the impulse response it sums (Section 4.2), the Eyring
+  reverberation (Section 5.4), the reverberation distance (Section 5.6) and
+  the Schroeder frequency (Section 3.6).
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).

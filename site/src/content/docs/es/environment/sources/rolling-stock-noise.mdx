@@ -368,6 +368,23 @@ metros de rugosidad aleatoria. `check_reference_track` exige sus 15 m a cada
 línea analizada con el método B: los dos carriles de arriba, con 16 m cada
 uno, los cumplen.
 
+El tono es la comprobación que conviene hacer primero. Un coseno de 3 µm de
+amplitud a 1 cm tiene un valor eficaz de $3/\sqrt{2}$ µm y, por tanto, un nivel
+de $10\lg(9/2)$ dB re 1 µm en la banda de 1 cm. Con la eliminación de picos de
+7.2 y el procesado por curvatura de 7.3 desactivados, para que los dos métodos
+reciban el registro tal como se escribió, lo leen igual hasta la tercera cifra
+decimal:
+
+```python
+x = np.arange(0.0, 20.0, 1.0e-3)
+tone = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um a 1 cm de longitud de onda
+raw = {"spike_removal": False, "curvature_processing": False}
+tone_b = environment.filtered_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+tone_a = environment.acoustic_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+print(round(tone_b.level_at(0.01), 3), round(tone_a.level_at(0.01), 3))
+# 6.532 6.532   10 lg(9/2) dB re 1 um por los dos métodos
+```
+
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg"
   alt="Nivel de rugosidad por bandas de tercio de octava en dB re 1 µm frente a la longitud de onda, de 50 cm a 0,25 cm, de un registro de 20 m analizado por los dos métodos: el método A, con segmentos de Fourier de 1 m, empieza en 25 cm, y el método B, con filtros de tercio de octava de orden 4 y 2 m descartados en cada extremo, empieza en 50 cm; de 25 cm hacia abajo las dos curvas quedan a unas décimas de decibelio una de otra, unos 3 dB por debajo del límite de la figura 2, dibujado a trazos de 40 cm a 0,315 cm"
@@ -703,6 +720,7 @@ carril no cubren.
 - [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/): el lado de la predicción del mismo ruido, donde los espectros de rugosidad del carril y de la rueda y las funciones de transferencia se convierten en una potencia sonora por metro.
 - [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/): lo que los mismos trenes transmiten al terreno y a los edificios junto a la vía.
 - [Ruido y pavimento: el método estadístico de paso](/phonometry/es/environment/sources/road-surface-pass-by/): el equivalente en carretera, donde el pavimento se mide a través del tráfico que circula por él.
+- [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/): las tres entradas de la ISO 3095 sobre las Tablas G.1 y G.2, y las dos de la EN 15610 sobre el listado del anexo B, su bucle de eliminación de picos y sus filtros pasados hacia delante y hacia atrás.
 - Referencia de la API: [`environment.sources.rolling_stock_noise`](/phonometry/es/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](/phonometry/es/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](/phonometry/es/reference/api/environment/track-decay/).
 
 </SeeAlso>

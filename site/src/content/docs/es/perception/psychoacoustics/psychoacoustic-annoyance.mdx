@@ -434,6 +434,25 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
 
+Una señal estacionaria no marca cero, por el entramado que describe el alcance
+de más abajo:
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(2 * fs) / fs
+tono = np.sin(2 * np.pi * 1000 * t)  # 1 kHz, sin modular, llevado a 70 dB SPL
+tono *= 2e-5 * 10 ** (70 / 20) / np.sqrt(np.mean(tono**2))
+ruido = np.random.default_rng(0).standard_normal(t.size)  # banda ancha, 60 dB SPL
+ruido *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(ruido**2))
+tono_estacionario = psychoacoustics.fluctuation_strength(tono, float(fs))
+ruido_estacionario = psychoacoustics.fluctuation_strength(ruido, float(fs))
+print(round(tono_estacionario.fluctuation_strength, 2))   # 0,09 vacil
+print(round(ruido_estacionario.fluctuation_strength, 2))  # 0,15 vacil
+```
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -452,10 +471,13 @@ magnitudes a partir de una señal ($N_5$ Zwicker de la ISO 532-1, $S$ de la DIN
 <ScopeClaim status="not-covered" label="No cubierto">
 La exactitud del modelo de Osses 2016 para tonos FM no se persigue
 explícitamente. Aquí solo se validan estímulos AM. El front-end también se
-aparta del planteamiento exacto del artículo (tramas de 2 s, solape del 90 %, umbral
-absoluto de audición). Como resultado, un tono estacionario de 1 kHz marca
-unos 0,09 vacil en vez de 0, y el ruido de banda ancha estacionario marca unos
-0,15-0,19 vacil. Para el ruido de banda ancha AM, cita
+aparta del planteamiento exacto del artículo: sus tramas de 2 s con un solape
+del 90 % y su criba frente al umbral absoluto de audición pasan a ser aquí un
+solape del 50 %, una ventana de Hann y umbrales relativos. Como resultado, un
+tono estacionario de 1 kHz marca unos 0,09 vacil en vez de 0, y el ruido de
+banda ancha estacionario marca unos 0,15 vacil, en parte por la
+fluctuación física de nivel del propio ruido. Para el ruido de banda ancha AM,
+cita
 `fluctuation_strength_am_noise` (§3.1) en vez de `fluctuation_strength`, que
 sobreestima ese estímulo. La intensidad de fluctuación normativa del modelo de
 Sottek del apartado 9 de ECMA-418-2 no está implementada en esta página: está

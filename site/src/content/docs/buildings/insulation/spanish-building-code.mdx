@@ -293,7 +293,9 @@ different quantities and nothing guarantees the agreement in general.
 `check_db_hr_requirement()` rounds the achieved value the way DB-HR asks before
 comparing it (to an integer for the dB quantities, to one decimal for the
 reverberation time) and returns the margin; `assess_db_hr()` does the same over
-a list of value-requirement pairs.
+a list of value-requirement pairs. The `DBHRAssessment` it returns draws the
+achieved values against their limits with `.plot()`, one per checked
+requirement.
 
 ## Windows and composite façades
 

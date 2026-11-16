@@ -341,11 +341,11 @@ dominates" is a rule of thumb, not an identity. With the default personal
 exposimeter the task sampling term overtakes the instrument term only once the
 sample standard deviation exceeds $1.5\sqrt{I}$ (about 3.7 dB at six samples),
 and in this Annex D day it does not: cutting and grinding scatters by 3.0 dB
-over six samples, so $u_{1\mathrm{a}} = 1.2$ dB against $u_2 = 1.5$ dB. The largest
-single segment here is in fact the **duration** of that short, loud task,
-because $c_{1\mathrm{b}} = 4.34\,c_{1\mathrm{a}}/\bar{T}_m$ grows as the task shortens, so a
-$\pm 0.5$ h uncertainty on a 1.5 h task costs more than either the sampling or
-the instrument term.
+over six samples, so $u_{1\mathrm{a}} = 1.2$ dB against $u_2 = 1.5$ dB. The
+**duration** of that short, loud task weighs more than its sampling, because
+$c_{1\mathrm{b}} = 4.34\,c_{1\mathrm{a}}/\bar{T}_m$ grows as the task shortens: a
+$\pm 0.5$ h uncertainty on a 1.5 h task costs more than the sampling term and
+almost as much as the instrument term, the largest segment of the day.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -358,10 +358,13 @@ import numpy as np
 # the snippets above; here it is rebuilt with the duration term included.
 res_d = hearing.task_based_exposure(tasks, warn=False)
 for t in res_d.tasks:
-    print(f"{t.label:<16} sampling {(t.c1a * t.u1a) ** 2:5.3f}  "
+    print(f"task {t.label:<16} sampling {(t.c1a * t.u1a) ** 2:5.3f}  "
           f"duration {(t.c1b * t.u1b) ** 2:5.3f}  "
           f"instrument {(t.c1a * t.u2) ** 2:5.3f}  "
           f"position {(t.c1a * t.u3) ** 2:5.3f}")
+    # task planning/breaks  sampling 0.000  duration 0.000  instrument 0.000  position 0.000
+    # task welding          sampling 0.049  duration 0.059  instrument 0.175  position 0.078
+    # task cutting/grinding sampling 0.757  duration 1.070  instrument 1.148  position 0.510
 
 counts = np.arange(3, 31)
 u2, u3, scatter = 1.5, 1.0, 3.0
@@ -445,7 +448,8 @@ measured $L_\mathrm{EX,8h}$ does not include. `verbose=True` adds the per-task
 Annex C uncertainty columns ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), and `language="es"`
 renders the Spanish fiche (the vocabulary of the Spanish transposition,
 RD 286/2006: *nivel de exposición diario equivalente*, *valor límite de
-exposición*, with comma decimals).
+exposición*, with comma decimals). Rendering needs reportlab and, for the contribution chart the fiche of a
+task-based result embeds, matplotlib (`pip install "phonometry[report,plot]"`).
 
 ```python
 from phonometry import ReportMetadata, hearing

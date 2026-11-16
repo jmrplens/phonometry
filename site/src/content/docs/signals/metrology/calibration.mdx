@@ -552,7 +552,7 @@ as they are.
 
 | Requirement | Clause | What is measured | Acceptance limit | Maximum uncertainty | Class 1 at 1 kHz |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `level` | 5.3.2 | generated minus specified level, the mean of at least three couplings, and the level at each end of the supply range (5.3.4) | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
+| `level` | 5.3.2 | generated minus specified level, the mean of at least three couplings (A.5.5.3), and the level at each end of the supply range (5.3.4) | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
 | `fluctuation` | 5.3.3 | the larger of the maximum and minimum F-weighted level against their mean, over 60 s | Table 2 | Table A.1 | 0.07 dB; 0.03 dB |
 | `frequency` | 5.4.2 | generated minus specified frequency | Table 4 | Table A.2 | ±0.7 %; 0.2 % |
 | `distortion` | 5.6 | total distortion + noise, 22.4 Hz to 22.4 kHz | Table 7 | Table A.3 | 2.5 %; 0.5 % |
@@ -762,15 +762,15 @@ rules, and every conformance verdict in the library. None of these functions
 refuses uncalibrated samples (they cannot tell), so the frame is a decision the
 analyst has to record beside the result.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbfs_versus_spl.svg" alt="Left: the same third-octave band spectrum computed with a calibration factor and with dbfs=True, superimposed once the constant offset is added. Right: the first cycles of a band-filtered tone burst overshooting the drive amplitude by 1.32 decibels, which is what mode='peak' reads" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbfs_versus_spl.svg" alt="Left: the same third-octave band spectrum computed with a calibration factor and with dbfs=True, superimposed once the constant offset is added. Right: the first cycles of a band-filtered tone burst overshooting the drive amplitude by 0.82 decibels, which is what mode='peak' reads" width="92%" />
 
 *Left: one record, two frames. The dBFS spectrum is the dB SPL spectrum shifted
 by a constant, here 106.04 dB, which is exactly the calibrator level minus the
 dBFS level of the calibrator take: the dBFS frame changes the origin and
 nothing else, which is why every shape-based quantity above survives it. Right:
 the onset of a 1 kHz tone burst after the octave filter, drive amplitude 0.5.
-The band signal overshoots to 0.582 before settling, so `mode='peak'` reads
-1.32 dB above the steady tone.*
+The band signal overshoots to 0.549 before settling, so `mode='peak'` reads
+0.82 dB above the steady tone.*
 
 ## RMS versus peak levels
 
@@ -800,10 +800,23 @@ spl_peak, freq = filtered.levels, filtered.frequencies
 :::note
 `mode='peak'` measures the absolute maximum of the **filtered** band signal,
 which includes the filter's onset transient (overshoot). Signals that start
-abruptly may read about 1 dB high (1.32 dB for the tone burst drawn in the
+abruptly may read about 1 dB high (0.82 dB for the tone burst drawn in the
 right-hand panel above). This is inherent to IIR band filters (an analog sound
 level meter behaves the same way), not a processing artifact.
 :::
+
+The burst of that panel is forty cycles of 1 kHz at drive amplitude 0.5, and
+`mode='peak'` reads its overshoot directly:
+
+```python
+from phonometry import signals
+
+burst = signals.tone_burst(fs, 1000.0, 40, amplitude=0.5, post_silence=0.03)
+peak = filters.octave_filter(burst.signal, fs, fraction=1, mode='peak')
+level = peak.levels[peak.frequencies.index(1000.0)]   # the 1 kHz octave band
+print(f"{2e-5 * 10 ** (level / 20):.3f}, {level - 20 * np.log10(0.5 / 2e-5):.2f} dB")
+# 0.549, 0.82 dB
+```
 
 ## Integer audio input
 

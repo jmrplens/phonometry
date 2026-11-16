@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/io/videos.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/videos/
 
 # Writing animations and FDTD runs to video
 
@@ -12,8 +14,8 @@ GIF on the CPU. `simulation.write_fdtd_animation` and
 `simulation.write_elastic_fdtd_animation` write an acoustic or elastic FDTD
 run straight to a video as it is computed, here or on a node, without storing
 its snapshots (sections 4 and 5).
-[Where heavy work runs](../simulation/where-it-runs.md) maps the devices, the
-nodes and the encoders in one place.
+[Where heavy work runs](../simulation/where-it-runs.md) maps the
+devices, the nodes and the encoders in one place.
 
 ffmpeg is a program, not a Python package, so it is installed apart from
 phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
@@ -454,24 +456,24 @@ promise for every GPU.
 
 ## What this guide covers
 
-**Covered.** Writing any matplotlib animation to WebM (AV1, VP9), MP4 (AV1,
-HEVC, H.264) or GIF through ffmpeg on this machine, with the options of one
-record checked before anything runs; the encoder of a WebM or an MP4 chosen
-by a real trial encode, GPU encoders first and the CPU last, SVT-AV1 before
-VP9, x265 or x264, and a GIF written on the CPU; three quality presets and
-raw ffmpeg options; and an acoustic or elastic FDTD run written straight to a
-video, here or computed, drawn and encoded on a node, with the colour scale
-given or found on the device, and the node's bytes checked before the video
-takes the path's place.
+- **Covered.** Writing any matplotlib animation to WebM (AV1, VP9), MP4 (AV1, HEVC, H.264)
+  or GIF through ffmpeg on this machine, with the options of one record
+  checked before anything runs; the encoder of a WebM or an MP4 chosen by a
+  real trial encode, GPU encoders first and the CPU last, SVT-AV1 before VP9,
+  x265 or x264, and a GIF written on the CPU; three quality presets and raw
+  ffmpeg options; and an acoustic or elastic FDTD run written straight to a
+  video, here or computed, drawn and encoded on a node, with the colour scale
+  given or found on the device, and the node's bytes checked before the video
+  takes the path's place.
 
-**Not covered.** Audio tracks, and encoding on another machine an animation
-drawn on this one. Quick Sync, VAAPI and VideoToolbox are tried and used but
-not tested in CI; NVENC is not tested in CI either, and was checked on the
-maintainer's GPU node. A simulation video's frames are the snapshot plot
-under matplotlib's default style, not a style or a figure of yours. The
-quality presets are starting points, not calibrated settings: phonometry
-uses the ffmpeg it finds, and the same CRF reads differently from one
-SVT-AV1 major release to the next.
+- **Not covered.** Audio tracks, and encoding on another machine an animation drawn on this
+  one. Quick Sync, VAAPI and VideoToolbox are tried and used but not tested in
+  CI; NVENC is not tested in CI either, and was checked on the maintainer's GPU
+  node. A simulation video's frames are the snapshot plot under matplotlib's
+  default style, not a style or a figure of yours. The quality presets are
+  starting points, not calibrated settings: phonometry uses the ffmpeg it
+  finds, and the same CRF reads differently from one SVT-AV1 major release to
+  the next.
 
 ## See also
 
@@ -521,11 +523,7 @@ elastic run, in the unit of the field drawn, and the run steps once.
 
 ## References
 
-- FFmpeg project. *FFmpeg codecs documentation*.
-  [ffmpeg.org/ffmpeg-codecs.html](https://ffmpeg.org/ffmpeg-codecs.html).
-  The encoders write_video chooses among and the constant-quality options
-  each one takes.
-- Alliance for Open Media. *SVT-AV1*.
-  [gitlab.com/AOMediaCodec/SVT-AV1](https://gitlab.com/AOMediaCodec/SVT-AV1).
-  The AV1 encoder write_video tries first on the CPU, before VP9 in a WebM
-  and x265 or x264 in an MP4.
+- **Alliance for Open Media. (n.d.).** [*SVT-AV1*](https://gitlab.com/AOMediaCodec/SVT-AV1).
+  The AV1 encoder write_video tries first on the CPU, before VP9 in a WebM and x265 or x264 in an MP4.
+- **FFmpeg project. (n.d.).** [*FFmpeg codecs documentation*](https://ffmpeg.org/ffmpeg-codecs.html).
+  The encoders write_video chooses among and the constant-quality options each one takes.

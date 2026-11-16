@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/devices/
 
 # Sources and devices
 
@@ -117,43 +119,43 @@ it.
 
 ## What this section does not cover
 
-**Not every facility is qualified here.** The free-field qualification of
-an anechoic or hemi-anechoic room is performed, by ISO 26101 against the
-amended ISO 3745 Annex A, in [Free Field and Reference Sources](emission/free-field-qualification.md),
-and the two rooms of ISO 3743 are qualified in
-[Sound Power in Small Test Rooms](emission/sound-power-test-rooms.md): the hard-walled room of
-Part 1 by its volume, surfaces and acoustic adequacy
-(`check_hard_walled_room`), the special reverberation room of Part 2 by its
-reverberation time, surfaces and suitability
-(`check_special_room_reverberation`, `check_special_room_surfaces`,
-`check_special_room_suitability`). ISO 3741's reverberation-room
-qualification and IEC 61043's residual-intensity test of a probe are assumed
-to have been done: the library warns on the coarse advisory criteria a
-standard states explicitly and grades a residual index you supply, but it
-does not certify an ISO 3741 reverberation room or an instrument. The same
-boundary runs through the electroacoustics pages, which
-**reduce and report curves the laboratory supplies** rather than telling you
-how to acquire them, and through ISO/TS 7849, whose clauses 5 to 7 on
-instrumentation, installation and measurement positions are laboratory
-practice this library assumes.
+- **Not covered.** **Not every facility is qualified here.** The free-field qualification of
+  an anechoic or hemi-anechoic room is performed, by ISO 26101 against the
+  amended ISO 3745 Annex A, in [Free Field and Reference Sources](emission/free-field-qualification.md),
+  and the two rooms of ISO 3743 are qualified in
+  [Sound Power in Small Test Rooms](emission/sound-power-test-rooms.md): the hard-walled room of
+  Part 1 by its volume, surfaces and acoustic adequacy
+  (`check_hard_walled_room`), the special reverberation room of Part 2 by its
+  reverberation time, surfaces and suitability
+  (`check_special_room_reverberation`, `check_special_room_surfaces`,
+  `check_special_room_suitability`). ISO 3741's reverberation-room
+  qualification and IEC 61043's residual-intensity test of a probe are assumed
+  to have been done: the library warns on the coarse advisory criteria a
+  standard states explicitly and grades a residual index you supply, but it
+  does not certify an ISO 3741 reverberation room or an instrument. The same
+  boundary runs through the electroacoustics pages, which
+  **reduce and report curves the laboratory supplies** rather than telling you
+  how to acquire them, and through ISO/TS 7849, whose clauses 5 to 7 on
+  instrumentation, installation and measurement positions are laboratory
+  practice this library assumes.
 
-Two specific absences are worth knowing before you plan a job. Dissipative
-duct-lining silencers are **not modelled from liner properties** anywhere:
-the reactive
-elements are computed exactly within the no-flow plane-wave model, and the
-lined-elbow figure is a table lookup (Bies Table 8.11) and the plenum
-attenuation Wells' closed form driven by a declared mean absorption. Neither is a liner model.
-And no page here predicts a panel's transmission loss:
-`enclosure_insertion_loss` combines a value you supply with the interior
-correction, and the prediction itself is [Insulation
-design](../buildings/design/index.md).
+- **Not covered.** Two specific absences are worth knowing before you plan a job. Dissipative
+  duct-lining silencers are **not modelled from liner properties** anywhere:
+  the reactive
+  elements are computed exactly within the no-flow plane-wave model, and the
+  lined-elbow figure is a table lookup (Bies Table 8.11) and the plenum
+  attenuation Wells' closed form driven by a declared mean absorption. Neither is a liner model.
+  And no page here predicts a panel's transmission loss:
+  `enclosure_insertion_loss` combines a value you supply with the interior
+  correction, and the prediction itself is [Insulation
+  design](../buildings/design/index.md).
 
-Editions are pinned rather than current in two places: the distortion metrics
-follow AES17-2015 and not the 2020 revision, and the microphone
-rated-characteristics report follows IEC 60268-4:2014 and not the 2018 one.
-Object-based audio (BS.1770-5 Annex 4) is out of scope, and the library
-implements no spatial renderer, so an object-based programme has to be
-rendered to a loudspeaker layout before it can be measured.
+- **Not covered.** Editions are pinned rather than current in two places: the distortion metrics
+  follow AES17-2015 and not the 2020 revision, and the microphone
+  rated-characteristics report follows IEC 60268-4:2014 and not the 2018 one.
+  Object-based audio (BS.1770-5 Annex 4) is out of scope, and the library
+  implements no spatial renderer, so an object-based programme has to be
+  rendered to a loudspeaker layout before it can be measured.
 
 ## Before and after these pages
 
@@ -168,6 +170,6 @@ under Signal analysis. The electroacoustics and noise-control pages carry their
 derivations inline.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

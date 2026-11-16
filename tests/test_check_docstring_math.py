@@ -31,6 +31,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_docstring_math as cdm
+from github_edition import EDITION_MARK
 
 
 def _module(source: str, tmp_path: pathlib.Path) -> pathlib.Path:
@@ -231,3 +232,17 @@ def test_an_empty_page_has_no_bare_script(tmp_path: pathlib.Path) -> None:
     page = tmp_path / "page.md"
     page.write_text("", encoding="utf-8")
     assert cdm._page_bare_scripts(page) == []
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here."""
+    edition = tmp_path / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\n$x$\n", encoding="utf-8"
+    )
+    by_hand = tmp_path / "notes.md"
+    by_hand.write_text("$x$\n", encoding="utf-8")
+    monkeypatch.setattr(cdm, "_PAGE_ROOTS", (tmp_path,))
+    assert list(cdm._pages()) == [by_hand]

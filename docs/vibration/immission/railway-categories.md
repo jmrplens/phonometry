@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/railway-categories.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/
 
 # Railway vibration by category of train (E DIN 4150-2)
 
@@ -48,19 +50,37 @@ print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="A section through a railway and the building beside it, a strip of train passages, and the formulae. Top left, a tram runs on the surface and a metro in a tunnel below it, with arrows through the ground to the building. In the upper storey, the room to be protected, a transducer stands at the middle of the floor span with arrows for the vertical z and the horizontals x and y, marked 1. A second transducer sits on the foundation in the basement, marked 3, and a dashed arrow marked 2 rises from it to the floor of the room. Three boxes at the right explain the numbers: the floor point takes z, x and y where the vibration is expected to be strongest, for z mostly the middle of the span; the transfer to the room is a linear factor or a frequency-dependent transfer function, preferably measured, with its uncertainty only as an upper bound; the substitute point, at the foundation for monitoring over weeks or months, is held to DIN 45669-2. A line beneath says that from a substitute point only KB Fmax below A o and KB FTr below A r can be shown. In the middle, a time axis from 0 to 380 seconds carries four passages, a metro running north and one running south with small humps and a tram running east and one running west with large ones, each inside one dashed interval however long it lasts. Under them, per category: 14 passages giving 0.037 and 0.055, 14 giving 0.047 and 0.070, 9 giving 0.406 and 0.609, and 10 giving 0.568 and 0.851, the largest, which is the KB Fmax of the railway. A box at the foot carries Formulae 5, 7, 8 and 6, with notes on the 1920 and 960 intervals of the day and the night, the zero for a category at or below 0.1, and the meter to DIN 45669-1, for which a 4 Hz lower limit is usually enough at a railway" width="100%"></picture>
 
-**How the measurement goes.** Use a vibration meter to DIN 45669-1, where a
-lower limit of 4 Hz is usually enough beside a railway, and couple the
-transducers as DIN 45669-2 asks on the floor of the room to be protected,
-where the vibration is expected to be strongest: for `z` mostly the middle of
-the floor span, with `x` and `y` horizontal and at right angles. Carry the
-whole measurement out with particular regard to DIN 45672-1 and DIN 45672-2.
-Record every passage whole and keep one clock maximum from it, sorted into
-categories of normally at least one per track or direction and kind of
-train, and mark anything atypical. For monitoring over weeks or months a
-substitute point at the foundation may stand in, through a transfer
-determined preferably by measurement, but only to show $KB_\mathrm{Fmax} < A_\mathrm{o}$ and
-$KB_\mathrm{FTr} < A_\mathrm{r}$. Expect up to about 15 % uncertainty, and report the points,
-directions, coupling and meter.
+In Example 8 the vertical, measured at the middle of the floor span, is the
+direction that decides, and the 2,5 h recorded are taken as representative.
+Clause 5 of the draft says where that point goes and what the meter has to
+be, and it adds what the 1999 edition did not have: a point at the
+foundation that may stand in for the room during a monitoring.
+
+### How the measurement goes
+
+Use a vibration meter to DIN 45669-1; beside a railway a lower frequency
+limit of 4 Hz is usually enough. Set up and couple the transducers as
+DIN 45669-2 asks, on the floor of the room to be protected, where the
+vibration is expected to be strongest: for the vertical, mostly the middle
+of the floor span. At a railway, carry the whole measurement out with
+particular regard to DIN 45672-1 and DIN 45672-2. Take `z` and the two
+horizontals `x` and `y` at right angles, mostly parallel to the outer walls;
+the horizontals may also be taken at or near a wall. Record every passage
+whole and keep one clock maximum from it, sorted into categories from the
+operating programme or timetable, normally at least one per track or
+direction and kind of train. Measure long enough to catch the typical
+exposure, and mark anything atypical.
+
+For monitoring over weeks or months, a substitute point, at the foundation
+for instance, may stand in for the room if it meets DIN 45669-2 and its
+transfer to the room, a linear factor or a frequency-dependent function, is
+determined, preferably by measurement, with its uncertainty taken only as an
+upper bound; from there only $KB_\mathrm{Fmax} < A_\mathrm{o}$ and $KB_\mathrm{FTr} < A_\mathrm{r}$ can be
+shown, never reliably an exceedance. Expect up to about 15 % uncertainty on
+any $KB_\mathrm{F}$ quantity, work $KB_\mathrm{Fmax}$ and $KB_\mathrm{FTr}$ to at least three decimals
+and round them to two as DIN 1333 does, and report the site plan with points
+and directions, the coupling, the meter and its settings, and the operating
+conditions.
 
 ## 2. A weighting factor for the kind of train
 
@@ -270,25 +290,25 @@ print(vibration.guide_values("residential", time_of_day="night", source="induced
 
 ## What this guide covers
 
-**The railway of 6.5.3**: the r.m.s. of a category of train over its
-passages (Formula (5)), 1,5 times it and the largest of those (Formulae (7)
-and (8)), the assessment vibration severity with the factors of Table 2
-(Formula (6)), the night-time upper value of a new line (6.5.3.5) and the
-25 % rule of an altered one (6.5.3.6).
+- **Covered.** **The railway of 6.5.3**: the r.m.s. of a category of train over its
+  passages (Formula (5)), 1,5 times it and the largest of those (Formulae (7)
+  and (8)), the assessment vibration severity with the factors of Table 2
+  (Formula (6)), the night-time upper value of a new line (6.5.3.5) and the
+  25 % rule of an altered one (6.5.3.6).
 
-**The rest of the draft** behind `edition="2023"`: the one cell of Table 1,
-the procedure without the 15 % shortcut, a railway compared with $A_\mathrm{o}$, the
-existing road of 6.5.2 and the induced seismic event of 6.5.1.3, and Table 3
-as printed.
+- **Covered.** **The rest of the draft** behind `edition="2023"`: the one cell of Table 1,
+  the procedure without the 15 % shortcut, a railway compared with $A_\mathrm{o}$, the
+  existing road of 6.5.2 and the induced seismic event of 6.5.1.3, and Table 3
+  as printed.
 
-**No decision the draft leaves open.** An existing line that is not being
-altered (6.5.3.4) has no numeric rule and none is invented; the concession
-of 6.5.3.7 to a new building, an $A_\mathrm{o}$ of 0,6 for a category with rare
-passages, is a judgement and stays one.
+- **Not covered.** **No decision the draft leaves open.** An existing line that is not being
+  altered (6.5.3.4) has no numeric rule and none is invented; the concession
+  of 6.5.3.7 to a new building, an $A_\mathrm{o}$ of 0,6 for a category with rare
+  passages, is a judgement and stays one.
 
-**No measurement and no monitoring.** Clause 5, the substitute measuring
-points and transfer functions of a long-term monitoring included, and
-Clause 8, the report, are text.
+- **Not covered.** **No measurement and no monitoring.** Clause 5, the substitute measuring
+  points and transfer functions of a long-term monitoring included, and
+  Clause 8, the report, are text.
 
 ## See also
 
@@ -305,17 +325,10 @@ Clause 8, the report, are text.
 - API reference:
   [`vibration.immission.train_categories`](https://docs.jmrp.io/phonometry/reference/api/vibration/train-categories/)
   and [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
+
 ## References
 
-- Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —
-  Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08). A
-  draft, intended to replace DIN 4150-2:1999-06. Table 1 with its one changed
-  cell, Formulae (5) to (8) and Table 2 of 6.5.3, the night-time upper value
-  of 6.5.3.5, the 25 % rule of 6.5.3.6, the existing-road tolerance of 6.5.2,
-  the induced seismic event of 6.5.1.3, and Table 3 as printed. Annex B,
-  Examples 8 and 9, is the oracle of the conformance rows; Examples 1, 2
-  and 4 to 7 are those of the 1999 edition, and Example 3 is reworked
-  without the 15 % argument.
-- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen —
-  Teil 2: Einwirkungen auf Menschen in Gebäuden* (DIN 4150-2:1999-06). The
-  edition in force, which the library reads by default.
+- **Deutsches Institut für Normung. (1999).** *Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden* (DIN 4150-2:1999-06).
+  The edition in force, which the library reads by default; the draft's changes are read with edition='2023'.
+- **Deutsches Institut für Normung. (2023).** *Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08).
+  A draft, intended to replace DIN 4150-2:1999-06. Table 1 with its one changed cell, Formulae (5) to (8) and Table 2 of 6.5.3, the night-time upper value of 6.5.3.5, the 25 % rule of 6.5.3.6, the existing-road tolerance of 6.5.2, the induced seismic event of 6.5.1.3, and Table 3 as printed. Annex B, Examples 8 and 9, is the oracle of the conformance rows; Examples 1, 2 and 4 to 7 are those of the 1999 edition, and Example 3 is reworked without the 15 % argument.

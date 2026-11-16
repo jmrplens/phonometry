@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/where-it-runs.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/where-it-runs/
 
 # Where heavy work runs: CPU or GPU, here or on a node
 
@@ -137,14 +139,14 @@ the containers, the codecs, the encoders and the quality presets.
 
 ## What this guide covers
 
-**Covered.** The map of where phonometry's heavy work runs: the devices a
-simulation steps on, a node named in the hosts file, and the CPU and GPU
-encoders of a video, here or on a node, with the page that explains each.
+- **Covered.** The map of where phonometry's heavy work runs: the devices a simulation
+  steps on, a node named in the hosts file, and the CPU and GPU encoders of a
+  video, here or on a node, with the page that explains each.
 
-**Not covered.** Running code of your own on a node: only the library's
-functions travel, with their arguments as data. Encoding on a node an
-animation drawn here. JAX and the other array libraries. NVENC, Quick Sync,
-VAAPI and VideoToolbox are tried and used, and not tested in CI.
+- **Not covered.** Running code of your own on a node: only the library's functions travel,
+  with their arguments as data. Encoding on a node an animation drawn here.
+  JAX and the other array libraries. NVENC, Quick Sync, VAAPI and VideoToolbox
+  are tried and used, and not tested in CI.
 
 ## See also
 

@@ -310,9 +310,9 @@ octavefilter = octave_filter  # kept for old callers
 **Exceptions.** The module `__getattr__` that lazily imports the package's own domains (`src/phonometry/__init__.py`, PEP 562) is not an alias. It is defined under `if not TYPE_CHECKING:`, so a type checker reads the names the package publishes and refuses a misspelt one instead of typing it `object`; `tests/test_package_architecture.py` holds every module `__getattr__` of the package to that. After 4.0.0, a name no release shipped is still removed outright, and a shipped one follows [A16](#a16).
 
 <a id="a14"></a>
-### A14. Record every shipped name you rename or remove in the migration guide's three copies
+### A14. Record every shipped name you rename or remove in both pages of the migration guide
 
-**Why.** A caller upgrading from 3.3.0 or 4.0.0rc1 reads the migration guide, not the diff, and the guide maps the shipped name straight to the final one, never through an intermediate name. Its three copies are `docs/start/upgrading.md` and the English and Spanish site pages.
+**Why.** A caller upgrading from 3.3.0 or 4.0.0rc1 reads the migration guide, not the diff, and the guide maps the shipped name straight to the final one, never through an intermediate name. It is written twice, as the English and the Spanish site page (`site/src/content/docs/start/upgrading.mdx` and its `es/` twin); `make llms` writes its GitHub copy, `docs/start/upgrading.md`, from the English page.
 
 **Do**
 
@@ -335,7 +335,7 @@ CHANGELOG only: "partial_exposure is now daily_exposure"
 <a id="a15"></a>
 ### A15. Move every caller of a renamed name in the same commit
 
-**Why.** A rename that leaves a caller behind breaks a test, a figure script, a guide example or an errata citation. Every caller means src, tests (fixtures and `match=` strings included), the conformance domains, the figure, diagram and report scripts, the guides in their three places (the `docs/` mirror and both site twins each carry their own copy of an example), the errata registers where they cite a code name, and the README.
+**Why.** A rename that leaves a caller behind breaks a test, a figure script, a guide example or an errata citation. Every caller means src, tests (fixtures and `match=` strings included), the conformance domains, the figure, diagram and report scripts, the guides in both languages (each site twin carries its own copy of an example; the GitHub edition under `docs/` is written from the English page by `make llms`), the errata registers where they cite a code name, and the README.
 
 **Do**
 
@@ -346,7 +346,7 @@ git grep -nw old_name -- src tests scripts docs site README.md
 **Don't**
 
 ```text
-rename in src, and leave docs/ and the Spanish site page for later
+rename in src, and leave the Spanish site page for later
 ```
 
 **Enforced by:** `scripts/check_doc_snippets.py`, review

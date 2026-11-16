@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/rooms/sound-strength.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/
 
 # Sound strength G (ISO 3382-1)
 
@@ -41,6 +43,9 @@ The reference quantities cancel in the ratio. They are there so that each
 half is a level in its own right, which is what makes the three routes of
 section 2 possible: you can obtain $L_{pE,10}$ without ever measuring
 $p_{10}(t)$, and subtract it from a level you did measure.
+
+All of this is Annex A, and Annex A is informative: it fixes the definition
+everyone quotes, and nothing about $G$ is normative in ISO 3382-1.
 
 ```python
 import numpy as np
@@ -176,6 +181,18 @@ print(round(room.sound_strength_from_power(80.0, 100.0), 4))   # 11.0
 
 A.2.1 asks for $L_W$ to be measured to ISO 3741, which lives in
 [Sound Power](../../devices/emission/sound-power.md).
+
+The printed A.2.1 carries two defects, both in
+the [errata registry](../../ERRATA.md). The same symbol
+$L_{pE}$ names the hall's exposure level under (A.2) and the
+reverberation-room level under (A.5), so substituting one into the other as
+printed makes the hall vanish from $G$; the library keeps the two apart, the
+hall's level coming from the `ir` that `sound_strength` measures and the
+laboratory's as the `reverberation_room_level` of
+`reverberation_room_reference_level`. And the note under (A.4) asks for a
+measurement "at every 12,5°", a step that does not go into a full turn a whole
+number of times, so `directivity_energy_average` takes at least 29 bearings
+spread over the full turn and refuses fewer.
 
 ## 3. Why the routes cannot agree exactly
 
@@ -328,25 +345,40 @@ acquiring the response itself, with the source and microphone positions
 ISO 3382-1 asks for, is in
 [Measuring the Room Impulse Response](room-impulse-response.md).
 
+## What this guide covers
+
+- **Covered.** The sound strength of ISO 3382-1:2009, A.2.1: the energy ratio of
+  Equation (A.1) measured from a pair of impulse responses, the sound pressure
+  exposure level of Equations (A.2) and (A.3), the inverse-square correction of
+  Equations (A.4) and (A.8) with the printed 3 m minimum, the reverberation-room
+  route of Equation (A.5), the sound-power route of Equation (A.9), and the
+  energy mean over bearings the note under (A.4) asks for.
+
+- **Not covered yet.** The rest of Annex A and its neighbours: the stage support of Annex C, the
+  measurement uncertainty of Clause 7, and the source directivity qualification
+  of Table 1. The lateral energy measures of A.2.4 and A.2.5 and the interaural
+  cross correlation of Annex B have a guide of their own,
+  [Spatial impression](spatial-impression.md).
+
 ## See also
 
-- [Room Acoustic Parameters](room-acoustics.md): the decay times and energy
-  ratios read from the same impulse response.
-- [Measuring the Room Impulse Response](room-impulse-response.md): the
-  ISO 18233 acquisition of the responses this page compares.
+- [Room Acoustic Parameters](room-acoustics.md): the
+  decay times and energy ratios read from the same impulse response.
+- [Measuring the Room Impulse Response](room-impulse-response.md):
+  the ISO 18233 acquisition of the responses this page compares.
 - [Sound Power](../../devices/emission/sound-power.md): the $L_W$ that
   Equation (A.9) subtracts, measured to ISO 3741.
-- [Absorption and Reverberation Time](enclosed-space-absorption.md): the
-  absorption area Equation (A.5) converts a diffuse-field reading through.
+- [Absorption and Reverberation Time](enclosed-space-absorption.md):
+  the absorption area Equation (A.5) converts a diffuse-field reading through.
 - API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
-## Standards
+## References
 
-ISO 3382-1:2009, Annex A (informative), A.2.1: the sound strength G of
-Equation (A.1), the sound pressure exposure levels of Equations (A.2) and
-(A.3), and the three routes to the free-field reference at 10 m of
-Equations (A.4) to (A.9). Annex A is informative: it fixes the definition
-everyone quotes, and nothing about G is normative in ISO 3382-1. Validated
-against closed forms and the standard's own printed offsets in the
-[conformance report](../../CONFORMANCE.md); the two defects the annex carries
-are in the [errata register](../../ERRATA.md).
+- **Barron, M. (2009).** *Auditorium acoustics and architectural design* (2nd ed.). Spon Press.
+  Where the sound strength came from as a design quantity, and how it behaves with distance in a real hall.
+- **Barron, M., & Lee, L.-J. (1988).** Energy relations in concert auditoriums. I. *The Journal of the Acoustical Society of America*, *84*(2), 618-628. https://doi.org/10.1121/1.396840
+  The measured departure from classical theory that explains why G keeps falling past the critical distance in a real hall.
+- **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  Annex A.2.1 and Equations (A.1) to (A.9): the definition of the sound strength and every printed route to its free-field reference.
+- **Lundeby, A., Vigran, T. E., Bietz, H., & Vorländer, M. (1995).** Uncertainties of measurements in room acoustics. *Acta Acustica united with Acustica*, *81*(4), 344-355.
+  The measurement uncertainties behind the integration-limit and calibration cautions of this page.

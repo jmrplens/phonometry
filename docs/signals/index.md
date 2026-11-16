@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/signals/
 
 # Signal analysis
 
@@ -188,34 +190,34 @@ What the numbers mean and how much to trust them.
 Four things a reader reasonably expects here are absent, and each guide says
 so in its own "Not covered" block.
 
-**No instrument is verified.** `verify_filter_class` and
-`verify_weighting_class` check a designed digital response against the
-tolerance tables of IEC 61260-1 and IEC 61672-1; the IEC 61672-2
-pattern-evaluation tests a physical meter needs for type approval, the IEC
-61672-3 periodic tests it receives in service, the IEC 61260-2 and IEC 61260-3
-tests of a physical band filter and the IEC 60942 tests of the calibrator
-itself, are not run (a laboratory's calibrator results are graded by
-`metrology.verify_sound_calibrator`, its meter periodic test results by
-`metrology.verify_sound_level_meter_periodic` and its filter periodic test
-results by `filters.verify_filter_periodic`, none of which performs a
-physical test;
-the IEC 61260-2 tests that need no specimen are computed on the design), so a class
-verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
-verification](metrology/compliance-verification.md) draws
-that boundary part by part.
+- **Not covered.** **No instrument is verified.** `verify_filter_class` and
+  `verify_weighting_class` check a designed digital response against the
+  tolerance tables of IEC 61260-1 and IEC 61672-1; the IEC 61672-2
+  pattern-evaluation tests a physical meter needs for type approval, the IEC
+  61672-3 periodic tests it receives in service, the IEC 61260-2 and IEC 61260-3
+  tests of a physical band filter and the IEC 60942 tests of the calibrator
+  itself, are not run (a laboratory's calibrator results are graded by
+  `metrology.verify_sound_calibrator`, its meter periodic test results by
+  `metrology.verify_sound_level_meter_periodic` and its filter periodic test
+  results by `filters.verify_filter_periodic`, none of which performs a
+  physical test;
+  the IEC 61260-2 tests that need no specimen are computed on the design), so a class
+  verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
+  verification](metrology/compliance-verification.md) draws
+  that boundary part by part.
 
-**No file is opened.** Nothing in the library decodes WAV, FLAC or any other
-container: every function takes an array you have already read, which is why
-`fs` is always an argument.
+- **Not covered.** **No file is opened.** Nothing in the library decodes WAV, FLAC or any other
+  container: every function takes an array you have already read, which is why
+  `fs` is always an argument.
 
-**No array processing.** Correlation and time delay model one common path
-between exactly two sensors and report the single largest peak; there is no
-multi-sensor TDOA solver, no beamformer and no source localisation.
+- **Not covered.** **No array processing.** Correlation and time delay model one common path
+  between exactly two sensors and report the single largest peak; there is no
+  multi-sensor TDOA solver, no beamformer and no source localisation.
 
-**No perceptual features.** The cepstrum here is the plain linear-frequency
-one, with no mel warping or MFCC variant, and loudness as a sensation belongs
-to [Psychoacoustics](../perception/psychoacoustics/index.md), not to the
-energy metrics of this section.
+- **Not covered.** **No perceptual features.** The cepstrum here is the plain linear-frequency
+  one, with no mel warping or MFCC variant, and loudness as a sensation belongs
+  to [Psychoacoustics](../perception/psychoacoustics/index.md), not to the
+  energy metrics of this section.
 
 ## Before and after these pages
 
@@ -227,6 +229,6 @@ Started](../start/getting-started.md) installs the library and
 calibrates a first analysis.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

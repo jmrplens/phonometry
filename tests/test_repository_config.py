@@ -42,7 +42,7 @@ _SCRIPTS = str(_ROOT / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import mirror_overviews
+import github_edition
 
 _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
@@ -102,56 +102,96 @@ def _path_instructions() -> list[dict[str, str]]:
     return list(rules)
 
 
-def _generated_overview_mirrors() -> set[str]:
-    """The mirror indexes ``scripts/mirror_overviews.py`` actually writes."""
+#: How every file of the GitHub edition opens: a comment naming the site page
+#: ``site/scripts/agent-md.mjs --docs`` wrote it from
+#: (``site/src/lib/agent-md/edition.mjs``, ``EDITION_MARK``).
+def _edition_pages() -> set[str]:
+    """The files of the GitHub edition under ``docs/``, by the comment they open with."""
     return {
-        mirror_overviews._mirror_path(
-            page.parent.relative_to(mirror_overviews.SITE).as_posix()
-        )
-        .relative_to(_ROOT)
-        .as_posix()
-        for page in mirror_overviews._overviews()
+        path.relative_to(_ROOT).as_posix()
+        for path in _ROOT.glob("docs/**/*.md")
+        if github_edition.is_edition_file(path)
     }
 
 
-def test_the_generated_index_rule_covers_only_generated_indexes() -> None:
-    """The rule that says "will be overwritten" must match nothing else.
+def test_the_python_checks_know_the_edition_by_the_comment_it_is_written_with() -> None:
+    """``scripts/github_edition.py`` reads the opening ``edition.mjs`` writes.
 
-    ``mirror_overviews.py`` skips ``reference/``, so ``docs/reference/api``
-    and ``docs/reference/theory`` keep hand-written indexes. The API one is
-    the sharper case: ``scripts/check_api_reference.py`` fails until a new
-    public name is added to it by hand, so telling the bot the file is build
-    output points it at the opposite of what CI demands.
+    A Python check tells a file of the edition from a hand-written one by its
+    first characters; a reworded opening on the JavaScript side would make
+    every file of the edition read as written by hand again, silently.
     """
-    generated = _generated_overview_mirrors()
-    assert generated, "the overview generator claims to write nothing"
+    source = (_ROOT / "site" / "src" / "lib" / "agent-md" / "edition.mjs").read_text(
+        encoding="utf-8"
+    )
+    mark = re.search(r"^export const EDITION_MARK = '([^']*)';$", source, re.MULTILINE)
+    assert mark, "edition.mjs no longer states EDITION_MARK as one quoted string"
+    assert "`${EDITION_MARK}site/src/content/docs/`" in source
+    assert github_edition.EDITION_MARK == f"{mark.group(1)}site/src/content/docs/"
+
+
+def test_only_a_markdown_file_is_opened_to_tell_the_edition(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The gates ask of every file they walk; only a ``.md`` file is the edition's.
+
+    A module, a site page or a data file that happened to open with the same
+    characters is not a file of the edition, and is not opened to find out.
+    """
+    opening = f"{github_edition.EDITION_MARK}page.mdx: edit that page. -->\n"
+    for name in ("page.md", "page.mdx", "module.py"):
+        (tmp_path / name).write_text(opening, encoding="utf-8")
+    assert github_edition.is_edition_file(tmp_path / "page.md")
+    assert not github_edition.is_edition_file(tmp_path / "page.mdx")
+    assert not github_edition.is_edition_file(tmp_path / "module.py")
+    assert not github_edition.is_edition_file(tmp_path / "absent.json")
+
+
+@pytest.mark.whole_tree
+def test_the_generated_page_rules_cover_only_the_edition() -> None:
+    """The rules that say "will be overwritten" must match the edition and nothing else.
+
+    The edition is every page of docs/ that stands for a page of the site, and
+    beside it sit files written by hand that CI requires a hand edit of. The
+    sharpest is ``docs/reference/api/index.md``, the curated API table:
+    ``scripts/check_api_reference.py`` fails until a new public name is added
+    to it by hand, so telling the bot the file is build output points it at
+    the opposite of what CI demands. ``docs/README.md``, the errata registers
+    and ``docs/contributing/`` are the others.
+    """
+    generated = _edition_pages()
+    assert len(generated) > 200, (
+        "the edition holds fewer pages than the site has guides"
+    )
 
     on_disk = sorted(
         p.relative_to(_ROOT).as_posix() for p in _ROOT.glob("docs/**/*.md")
     )
     rules = [
-        r for r in _path_instructions() if "mirror_overviews.py" in r["instructions"]
+        r for r in _path_instructions() if "will be overwritten" in r["instructions"]
     ]
-    generated_rules = [r for r in rules if "will be overwritten" in r["instructions"]]
-    assert len(generated_rules) == 1, (
-        "expected exactly one rule declaring the overview mirrors generated"
-    )
+    assert rules, "no rule declares the edition's pages generated"
 
-    matcher = _glob_to_regex(generated_rules[0]["path"])
-    matched = {path for path in on_disk if matcher.fullmatch(path)}
+    matched = {
+        path
+        for rule in rules
+        for path in on_disk
+        if _glob_to_regex(rule["path"]).fullmatch(path)
+    }
     assert matched == generated, (
-        "the .coderabbit.yaml glob and the generator disagree; "
+        "the .coderabbit.yaml globs and the edition disagree; "
         f"claimed but hand-written: {sorted(matched - generated)}; "
         f"generated but unclaimed: {sorted(generated - matched)}"
     )
 
 
+@pytest.mark.whole_tree
 def test_the_readme_is_not_advertised_as_generated() -> None:
-    """``docs/README.md`` is authored, and two gates require editing it.
+    """``docs/README.md`` is authored, and ``make llms`` requires editing it.
 
-    ``mirror_overviews.py`` and ``generate_llms.py`` both read it to assert it
-    links every mirror page; neither writes it. Listing it among the generated
-    files is the same false claim this configuration exists to correct.
+    The edition's generator reads it to assert it links every page of the
+    edition; it never writes it. Listing it among the generated files is the
+    same false claim this configuration exists to correct.
     """
     claims = [
         rule["instructions"]
@@ -164,14 +204,14 @@ def test_the_readme_is_not_advertised_as_generated() -> None:
     )
     for text in claims:
         paragraph = text[text.index("generated files under") :]
-        sentence = paragraph[: paragraph.index(".") + 1]
+        sentence = paragraph[: paragraph.index(". ") + 1]
         assert "README" not in sentence, (
             f"the README is listed as generated output: {sentence!r}"
         )
 
-    assert not any(
-        path.endswith("README.md") for path in _generated_overview_mirrors()
-    ), "the overview generator writes a README after all; the claim was right"
+    assert "docs/README.md" not in _edition_pages(), (
+        "the edition's generator writes the README after all; the claim was right"
+    )
 
 
 def _trigger_paths(workflow: pathlib.Path, event: str) -> set[str]:
@@ -1255,8 +1295,8 @@ def test_the_docs_workflow_triggers_on_every_script_it_runs() -> None:
     """A script the site build runs has to be able to trigger that build.
 
     The docs workflow runs Python scripts of the repository before and after
-    the build (the mirror checks, the llms generator, the static check of the
-    llms files), and ``pnpm build`` runs the llms generator again. A script
+    the build (the llms generator, the static check of the llms files, the
+    conformance claims), and ``pnpm build`` runs the llms generator again. A script
     outside the workflow's paths can be broken by a pull request that never
     runs the workflow, and the site build then fails on the next pull request
     that touches site/, which changed nothing at fault. The modules those
@@ -2111,8 +2151,6 @@ _MYPY_STATED_IN = (
 #: that outlived its page fails.
 _TYPE_CHECKS_OF_A_USERS_CODE = dict.fromkeys(
     (
-        "docs/start/environments/index.md",
-        "docs/start/environments/type-checking.md",
         "site/src/content/docs/start/environments/index.md",
         "site/src/content/docs/start/environments/type-checking.md",
         "site/src/content/docs/es/start/environments/index.md",
@@ -2277,7 +2315,10 @@ def _stated_files() -> dict[str, str]:
     """The text of every tracked file that may tell anyone to run the type check.
 
     Workflows and actions, Makefiles, shell scripts and hooks, and pages. The
-    CHANGELOG is left out: it records the commands of past releases.
+    CHANGELOG is left out: it records the commands of past releases. So is the
+    GitHub edition under ``docs/``: ``make llms`` writes each of its files from
+    a site page read here, and an entry keyed by its path would be a second
+    entry for one page.
     """
     names = _tracked(
         ".github/*.yml",
@@ -2293,7 +2334,7 @@ def _stated_files() -> dict[str, str]:
     return {
         name: (_ROOT / name).read_text(encoding="utf-8")
         for name in names
-        if name != "CHANGELOG.md"
+        if name != "CHANGELOG.md" and not github_edition.is_edition_file(_ROOT / name)
     }
 
 

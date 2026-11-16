@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/
 
 # Vibration immission
 
@@ -93,27 +95,27 @@ behind an edition switch.
 
 ## What this section does not cover
 
-**Almost no measurement procedure.** DIN 45669-2 fixes the measurement
-positions, the coupling of a transducer to a floor or to the ground, the
-measurement duration and the disturbances that have to be kept out. Its
-numbers are on the meter page: the limits a transducer may be set down loose
-within, the mass it may add and the meter's own share of the error. The rest
-is text and is not here.
+- **Not covered.** **Almost no measurement procedure.** DIN 45669-2 fixes the measurement
+  positions, the coupling of a transducer to a floor or to the ground, the
+  measurement duration and the disturbances that have to be kept out. Its
+  numbers are on the meter page: the limits a transducer may be set down loose
+  within, the mass it may add and the meter's own share of the error. The rest
+  is text and is not here.
 
-**No decision on the cases DIN 4150-2 leaves open.** An existing railway line,
-a construction site beyond 78 working days, a hospital next to one and
-whatever 6.2 sends to an individual assessment are judged case by case in the
-standard, and they are not judged here. The guide
-values, the procedure and the assessment vibration severity are on the people
-page; where they do not reach, neither does the library.
+- **Not covered.** **No decision on the cases DIN 4150-2 leaves open.** An existing railway line,
+  a construction site beyond 78 working days, a hospital next to one and
+  whatever 6.2 sends to an individual assessment are judged case by case in the
+  standard, and they are not judged here. The guide
+  values, the procedure and the assessment vibration severity are on the people
+  page; where they do not reach, neither does the library.
 
-**No railway measuring procedure.** DIN 45672-1 fixes the measurement points
-on the way from the track to the building, the directions, the trains to
-record and the report to write. Only its Clause 4.5, the ground constants, is
-arithmetic, and only that is here.
+- **Not covered.** **No railway measuring procedure.** DIN 45672-1 fixes the measurement points
+  on the way from the track to the building, the directions, the trains to
+  record and the report to write. Only its Clause 4.5, the ground constants, is
+  arithmetic, and only that is here.
 
-**No work plan for a prediction.** Clause 6 of the draft of DIN 45672-3, the
-phases from the site visit to the choice of a measure, and the measured
-cases of Annex A of DIN 4150-1, which the standard says are not a basis for
-a prediction, are described and not computed; the constants of a blast or
-an impact are the user's.
+- **Not covered.** **No work plan for a prediction.** Clause 6 of the draft of DIN 45672-3, the
+  phases from the site visit to the choice of a measure, and the measured
+  cases of Annex A of DIN 4150-1, which the standard says are not a basis for
+  a prediction, are described and not computed; the constants of a blast or
+  an impact are the user's.

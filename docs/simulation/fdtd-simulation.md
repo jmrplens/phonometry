@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/fdtd-simulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/
 
 # 2D FDTD wave simulation
 
@@ -42,9 +44,7 @@ in this layout is 6.6 cm between a column and a wall, so
 $\Delta x = \min(\text{smallest aperture}/4,\ \lambda/8)$ allows up to 1.6 cm,
 and the clip runs at 2.5 mm because a banner needs the definition.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall.gif" alt="Animation: an 800 Hz plane wavefront sweeping a 4 metre rigid-walled hall filled with a staggered colonnade of rigid columns, every column shedding a scattered wavelet until the interference of the wavelets fills the hall with structured energy that then drains through the absorbing ends" width="640" height="160" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall.webm)
+**Video:** [A wavefront through a hall of columns (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_pillar_hall.webm): An 800 Hz plane wavefront sweeps a 4 m rigid-walled hall filled with a staggered colonnade of rigid columns 10 to 17 cm across, simulated at 2.5 mm; every column diffracts the front and sheds a scattered wavelet, and the wavelets interfere until the whole hall is filled with structured energy that then drains through the absorbing ends.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" width="86%"></picture>
 
@@ -912,9 +912,7 @@ wavelength). The exact continuous answer travels behind each trace in
 grey, so the numerical packet's lag is a gap on screen rather than a number
 in a table.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion.gif" alt="Animation: a 500 Hz tone burst travelling down three FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey; by the end the coarse packet has fallen two wavelengths behind and grown a ripple tail while the finest one still sits on the exact wave" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion.webm)
+**Video:** [Numerical dispersion measured on three grids (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_dispersion.webm): A 500 Hz tone burst travels down three otherwise identical plane FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey. By the end of the run the coarse packet has fallen two wavelengths behind and grown a long ripple tail, the ten-cell packet lags by half a wavelength, and the twenty-cell packet still sits on the exact wave. Each panel prints its running lag in metres and, once the packet has crossed the 6.6 metre finish line, the crossing time and the measured speed deficit against the closed form. A side panel carries the phase-speed and group-speed error laws with the three grids marked.
 
 *Read three things off it. First, the lag grows: it is 0.14 m at 2.4 ms and
 1.35 m by the end, because a speed error accumulates with distance. Second,
@@ -1049,45 +1047,46 @@ res = simulation.write_fdtd_animation(
 
 ## What this guide covers
 
-**Covered.** The staggered pressure-velocity FDTD scheme of Attenborough &
-Van Renterghem, chapter 4: the governing equations (Eqs. 4.3-4.4), the leapfrog update (Eqs.
-4.11-4.12), the Courant stability condition (Eqs. 4.13-4.14), the rigid
-boundary (Eq. 4.32) and the frequency-independent real-impedance boundary
-(Eqs. 4.33-4.35), exposed through `fdtd_simulation`/`FDTD2D` with the point
-sources `GaussianPulse`, `CWSource` and `SignalSource`, the one-way
-plane-wave launchers `PlaneWaveSource` and `add_plane_wave`, pressure probes
-and a rasterised `obstacle_mask`, with `damping` as the only volumetric loss.
-Section 3 derives the four sizing rules the resolution rule does not cover:
-the source bandwidth, the run duration, the sponge thickness in cells, and the
-transient and DFT window of a steady-state measurement. Section 2 lists
-the six checks that say whether a run is usable. Validated against closed-form
-oracles: the rigid-room normal modes (Kuttruff ch. 3), free-field arrival times
-and cylindrical 2D decay, the rigid-wall image echo, the impedance reflection
-coefficient and the dispersion relation of section 6, with the measured
-convergence order matching the scheme's second-order design. The
-near-to-far-field chain of section 4: closed-contour phasor capture
-(`add_contour_probe`) and the 2D Kirchhoff-Helmholtz integral
-(`far_field_from_contour`, Williams ch. 8), validated against the exact
-monopole and dipole line-source fields, the extinction property, and the
-meshed QRD and metadiffuser panels against the library's own Fraunhofer and
-TMM far-field models.
+- **Covered.** The staggered pressure-velocity FDTD scheme of Attenborough & Van Renterghem,
+  chapter 4: the governing equations (Eqs. 4.3-4.4), the leapfrog update (Eqs.
+  4.11-4.12), the Courant stability condition (Eqs. 4.13-4.14), the rigid
+  boundary (Eq. 4.32) and the frequency-independent real-impedance boundary
+  (Eqs. 4.33-4.35), exposed through `fdtd_simulation`/`FDTD2D` with the point
+  sources `GaussianPulse`, `CWSource` and `SignalSource`, the one-way
+  plane-wave launchers `PlaneWaveSource` and `add_plane_wave`, pressure probes
+  and a rasterised `obstacle_mask`, with `damping` as the only volumetric loss.
+  Section 3 derives the four sizing rules the resolution rule does not cover:
+  the source bandwidth, the run duration, the sponge thickness in cells, and the
+  transient and DFT window of a steady-state measurement. Section 2 lists
+  the six checks that say whether a run is usable. Validated against closed-form
+  oracles: the rigid-room normal modes (Kuttruff ch. 3), free-field arrival times
+  and cylindrical 2D decay, the rigid-wall image echo, the impedance reflection
+  coefficient and the dispersion relation of section 6, with the measured
+  convergence order matching the scheme's second-order design. The
+  near-to-far-field chain of section 4: closed-contour phasor capture
+  (`add_contour_probe`) and the 2D Kirchhoff-Helmholtz integral
+  (`far_field_from_contour`, Williams ch. 8), validated against the exact
+  monopole and dipole line-source fields, the extinction property, and the
+  meshed QRD and metadiffuser panels against the library's own Fraunhofer and
+  TMM far-field models.
 
-**Not covered.** Interior geometry is rigid by construction: only the four
-domain sides accept an impedance or a sponge, so an interior surface can be softened only by
-making the absorber a lossy `damping` region of cells left out of
-`obstacle_mask` (a masked surface closes its faces, and no wave reaches a
-lossy region behind it), and that region is a frequency-independent
-equivalent fluid rather than a porous model. The solver
-is two-dimensional only: it models a line source in cross-section (cylindrical
-$1/\sqrt{r}$ spreading), not the spherical $1/r$ spreading of a 3D point
-source, so absolute levels and decay rates are not those of a 3D room. The
-open boundary is the quadratic-ramp absorbing layer described as "the simple
-precursor" of a true perfectly matched layer, not a PML itself. The governing
-equations assume a non-moving medium, so wind or flow advection is not
-modelled, and the only impedance boundary is the frequency-independent real
-one of Eqs. 4.33-4.35. Elastic media are not covered here: the P-SV companion
-solver, its free surfaces and its fluid-solid physics have their own guide,
-[Elastic waves and fluid-solid coupling](elastic-waves.md).
+- **Not covered.** Interior geometry is rigid by construction: only the four domain sides accept
+  an impedance or a sponge, so an interior surface can be softened only by
+  making the absorber a lossy `damping` region of cells left out of
+  `obstacle_mask` (a masked surface closes its faces, and no wave reaches a
+  lossy region behind it), and that region is a frequency-independent
+  equivalent fluid rather than a porous model. The solver
+  is two-dimensional only: it models a line source in cross-section (cylindrical
+  $1/\sqrt{r}$ spreading), not the spherical $1/r$ spreading of a 3D point
+  source, so absolute levels and decay rates are not those of a 3D room. The
+  open boundary is the quadratic-ramp absorbing layer described as "the simple
+  precursor" of a true perfectly matched layer, not a PML itself. The governing
+  equations assume a non-moving medium, so wind or flow advection is not
+  modelled, and the only impedance boundary is the frequency-independent real
+  one of Eqs. 4.33-4.35. Elastic media are not covered here: the P-SV companion
+  solver, its free surfaces and its fluid-solid physics have their own guide,
+  [Elastic waves and fluid-solid
+  coupling](elastic-waves.md).
 
 ## See also
 
@@ -1164,42 +1163,11 @@ against a closed form or a 3D solver.
 
 ## References
 
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Chapter 4: the pressure-velocity FDTD reference model implemented here,
-  from the governing equations (4.3-4.4) and the staggered leapfrog update
-  (4.11-4.12) through the Courant condition (4.13-4.14), the phase-error
-  analysis (4.15) and the rigid and finite-impedance boundary conditions
-  (4.32-4.35).
-- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
-  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  Section 3.5 places time-domain wave-based methods among the numerical
-  approaches to the wave equation in enclosures, and chapter 3 gives the
-  rigid-room normal modes used as the analytic oracle.
-- Williams, E. G. (1999). *Fourier acoustics: Sound radiation and
-  nearfield acoustical holography*. Academic Press.
-  [doi:10.1016/B978-0-12-753960-7.X5000-1](https://doi.org/10.1016/B978-0-12-753960-7.X5000-1).
-  Chapter 8: the Helmholtz integral equation behind
-  `far_field_from_contour`, with the outgoing free-space Green function
-  and the far-field limit of section 4.
-- Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).
-  Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*,
-  7, 5389. [doi:10.1038/s41598-017-05710-5](https://doi.org/10.1038/s41598-017-05710-5).
-  The meshed Table-1 panel and the near-to-far-field polar comparison of
-  section 4 reproduce, with this solver, the TMM-vs-full-wave cross-check the
-  paper reports.
-
-## Standards and sources
-
-The module implements a textbook numerical method rather than a measurement
-standard: the discretisation, stability bound and boundary conditions follow
-Attenborough & Van Renterghem (2021) chapter 4 as the citable reference
-formulation. Validation is anchored to closed forms (rigid-box
-eigenfrequencies, cylindrical spreading, image sources, the
-normal-incidence reflection coefficient and the scheme's dispersion
-relation); the box mode and the free-field arrival run in the
-[conformance report](../CONFORMANCE.md), with the ripple and level of the
-near-to-far-field monopole of section 4. The elastic P-SV companion solver
-and its own oracles are covered in
-[Elastic waves and fluid-solid coupling](elastic-waves.md).
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+  Chapter 4: the pressure-velocity FDTD reference model implemented here, from the governing equations (4.3-4.4) and the staggered leapfrog update (4.11-4.12) through the Courant condition (4.13-4.14), the phase-error analysis (4.15) and the rigid and finite-impedance boundary conditions (4.32-4.35). The module implements this textbook numerical method rather than a measurement standard, with this chapter as the citable reference formulation.
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+  The meshed Table-1 panel and the near-to-far-field polar comparison of section 4 reproduce, with this solver, the TMM-vs-full-wave cross-check the paper reports.
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+  Section 3.5 places time-domain wave-based methods among the numerical approaches to the wave equation in enclosures, and chapter 3 gives the rigid-room normal modes used as the analytic oracle.
+- **Williams, E. G. (1999).** *Fourier acoustics: Sound radiation and nearfield acoustical holography*. Academic Press. https://doi.org/10.1016/B978-0-12-753960-7.X5000-1
+  Chapter 8: the Helmholtz integral equation behind far_field_from_contour, with the outgoing free-space Green function and the far-field limit of the near-to-far-field transformation of section 4.

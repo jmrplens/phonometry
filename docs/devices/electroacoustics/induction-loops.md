@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/induction-loops.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/induction-loops/
 
 # Audio-Frequency Induction Loops (IEC 60118-4)
 
@@ -634,38 +636,38 @@ plt.show()
 
 ## What this guide covers
 
-**Covered.** IEC 60118-4:2014 with its Amendment 1:2017: the 400 mA/m reference and its
-levels (3.1, 4.3), the flux density and the telecoil's cosine law (E.6, E.2),
-the true-RMS meter flat or A-weighted (6.1.3), the band-limited pink noise with
-its crest factor (6.4) and the combi signal (6.6, Table 2), the background
-noise classes of 7.2, the verdict on a system over its useful magnetic field
-volume (8.2.7, 8.3.7, 8.4.3, 10.4.7), the measurement points and the verdict of
-a refuge, call point or counter as the amendment writes clause 9, at the points
-of Figures 2 and 3 or of a useful volume that covers their heights (9.4, 9.5),
-and the overload test of 10.3 with Table 4, judged on the compliance voltage
-at the Table 4 frequency (10.3.3). The loop's field by Biot-Savart at any
-point, which reproduces the centre formula of E.1 and the curves of Figure
-E.2 b), and the current and loop size of IEC 62489-1 5.4.10 and 5.4.11, which
-reproduce the currents of Figure H.1. The loop as a load (IEC 62489-1 Annex
-B): the resistance with the IEC 60028 resistivity and the inductance by
-Grover's Formula (58), which reproduce Table B.1 as shown. The amplifier's
-maximum output current, compliance voltage, noise, frequency response, AGC
-range and quadrature phase error (5.4.7, 5.4.8, 5.4.9, 5.4.12, 5.4.13,
-5.4.14), and the neck loop's characteristics (clause 9) with the two types of
-the draft Amendment 2, cited as a draft.
+- **Covered.** IEC 60118-4:2014 with its Amendment 1:2017: the 400 mA/m reference and its
+  levels (3.1, 4.3), the flux density and the telecoil's cosine law (E.6, E.2),
+  the true-RMS meter flat or A-weighted (6.1.3), the band-limited pink noise with
+  its crest factor (6.4) and the combi signal (6.6, Table 2), the background
+  noise classes of 7.2, the verdict on a system over its useful magnetic field
+  volume (8.2.7, 8.3.7, 8.4.3, 10.4.7), the measurement points and the verdict of
+  a refuge, call point or counter as the amendment writes clause 9, at the points
+  of Figures 2 and 3 or of a useful volume that covers their heights (9.4, 9.5),
+  and the overload test of 10.3 with Table 4, judged on the compliance voltage
+  at the Table 4 frequency (10.3.3). The loop's field by Biot-Savart at any
+  point, which reproduces the centre formula of E.1 and the curves of Figure
+  E.2 b), and the current and loop size of IEC 62489-1 5.4.10 and 5.4.11, which
+  reproduce the currents of Figure H.1. The loop as a load (IEC 62489-1 Annex
+  B): the resistance with the IEC 60028 resistivity and the inductance by
+  Grover's Formula (58), which reproduce Table B.1 as shown. The amplifier's
+  maximum output current, compliance voltage, noise, frequency response, AGC
+  range and quadrature phase error (5.4.7, 5.4.8, 5.4.9, 5.4.12, 5.4.13,
+  5.4.14), and the neck loop's characteristics (clause 9) with the two types of
+  the draft Amendment 2, cited as a draft.
 
-**Not covered.** The effect of metal in the building (Annex F) has no model in the standard and
-none here: it is the frequency response the installer measures. The peak
-programme meter of 6.1.4, the speech signals of 6.3 (ISTS, ITU-T P.50) and the
-subjective commissioning of 10.1 are not computations. The loop listener and
-assistive listening device of IEC 62489-1 Annex F, and the monitoring devices,
-are specified by single values to be met; the draft's Table D.1 rests on a
-source model it does not give. The inductances of Table B.1's neck loop and
-large loop are not reproduced by any formula tried. The field patterns of
-Figures E.3 to E.5 and A.1 are of the kind `rectangular_loop_field` computes
-and are not checked point by point. The 10 s for which 5.4.7 asks the maximum
-current to be held is a condition on the measurement. The electromagnetic
-exposure of IEC 62489-2 is outside this library.
+- **Not covered.** The effect of metal in the building (Annex F) has no model in the standard and
+  none here: it is the frequency response the installer measures. The peak
+  programme meter of 6.1.4, the speech signals of 6.3 (ISTS, ITU-T P.50) and the
+  subjective commissioning of 10.1 are not computations. The loop listener and
+  assistive listening device of IEC 62489-1 Annex F, and the monitoring devices,
+  are specified by single values to be met; the draft's Table D.1 rests on a
+  source model it does not give. The inductances of Table B.1's neck loop and
+  large loop are not reproduced by any formula tried. The field patterns of
+  Figures E.3 to E.5 and A.1 are of the kind `rectangular_loop_field` computes
+  and are not checked point by point. The 10 s for which 5.4.7 asks the maximum
+  current to be held is a condition on the measurement. The electromagnetic
+  exposure of IEC 62489-2 is outside this library.
 
 ## See also
 
@@ -685,28 +687,15 @@ exposure of IEC 62489-2 is outside this library.
 
 ## References
 
-- Grover, F. W. (1946). *Inductance calculations: Working formulas and
-  tables*. D. Van Nostrand. Formula (58), the inductance of a rectangle of
-  round wire (pp. 60-61; read in the 1973 Instrument Society of America
-  edition), which without its internal term reproduces four of the six
-  inductances of Table B.1 of IEC 62489-1.
-
-## Standards
-
-IEC 60118-4:2014, *Electroacoustics – Hearing aids – Part 4: Induction-loop
-systems for hearing aid purposes – System performance requirements*, read in
-BS EN 60118-4:2015: the reference magnetic field strength (3.1), the meters and
-test signals (6.1, 6.4, 6.6, Table 2), the magnetic background noise (7.2), the
-maximum field (8.2.7), the frequency response and the useful magnetic field
-volume (8.3.7, 8.4.3), Annex E (E.1, Figure E.2, E.2, E.3, E.6) and Figure
-H.1. IEC 60118-4:2014/AMD1:2017, read in UNE-EN IEC 60118-4:2016/A1:2018:
-clauses 9 and 10 as replaced, with Figures 2 and 3, 9.4, 9.5, 10.2, 10.3 with
-Table 4 and 10.4.7. IEC 62489-1:2010+AMD1:2014,
-*Audio-frequency induction-loop systems for assisted hearing – Part 1: Methods
-of measuring and specifying the performance of system components*, read in
-BS EN 62489-1:2010+A1:2015: the amplifier (5.4.7 to 5.4.14), the loop as a load
-(Annex B, Table B.1) and the neck loop (clause 9, Annex E). E DIN EN
-62489-1/A2:2017-10 (prEN 62489-1:2010/prA2:2017), a draft cited as one: the two
-neck-loop types of its Annex D. IEC 60028:1925, *International standard of
-resistance for copper*: the resistivity of standard annealed copper and its
-temperature coefficient (clause I).
+- **Grover, F. W. (1946).** *Inductance calculations: Working formulas and tables*. D. Van Nostrand.
+  Formula (58), the inductance of a rectangle of round wire (pp. 60-61; read in the 1973 Instrument Society of America edition), which without its internal term reproduces four of the six inductances of Table B.1 of IEC 62489-1.
+- **International Electrotechnical Commission. (1925).** *International standard of resistance for copper* (IEC 60028:1925).
+  The resistivity of standard annealed copper, 1/58 ohm square millimetre per metre at 20 °C, and its temperature coefficient of 0.00393 per degree (clause I), which reproduce the resistances of Table B.1.
+- **International Electrotechnical Commission. (2014).** *Audio-frequency induction-loop systems for assisted hearing – Part 1: Methods of measuring and specifying the performance of system components* (IEC 62489-1:2010+AMD1:2014).
+  Read in the consolidated BS EN 62489-1:2010+A1:2015. The amplifier's maximum output current (5.4.7), compliance voltage (5.4.8), noise (5.4.9), field strength and loop dimensions (5.4.10, 5.4.11), frequency response (5.4.12), automatic gain control (5.4.13) and quadrature phase error (5.4.14), the loop's resistance, inductance and impedance (Annex B, Table B.1) and the neck loop (clause 9, Annex E).
+- **International Electrotechnical Commission. (2014).** *Electroacoustics – Hearing aids – Part 4: Induction-loop systems for hearing aid purposes – System performance requirements* (IEC 60118-4:2014).
+  Read in BS EN 60118-4:2015, which is IEC 60118-4:2014 unchanged. The reference magnetic field strength (3.1), the meters and test signals (6.1, 6.4, 6.6, Table 2), the magnetic background noise (7.2), the maximum field (8.2.7), the frequency response and the useful magnetic field volume (8.3.7, 8.4.3), Annex E: the centre field of a square loop (E.1), the field patterns of Figure E.2, the telecoil's directional response (E.2), the loop impedance (E.3) and the magnetic units (E.6), and the loop currents of Figure H.1.
+- **International Electrotechnical Commission. (2017).** *Audio-frequency induction-loop systems for assisted hearing – Part 1: Methods of measuring and specifying the performance of system components – Amendment 2 (draft)* (E DIN EN 62489-1/A2:2017-10).
+  The draft prEN 62489-1:2010/prA2:2017 in its German edition, a draft for comment and cited as one. Its Annex D specifies two neck-loop types: type 1, for audio sources powered by two primary 1.5 V cells and higher voltage supplies, 32 ohm plus or minus 5 %, and type 2, with a transformer or an amplifier, at least 32 ohm, both reaching 400 mA/m on the jig with at most 1.06 V.
+- **International Electrotechnical Commission. (2017).** *Electroacoustics – Hearing aids – Part 4: Induction-loop systems for hearing aid purposes – System performance requirements – Amendment 1* (IEC 60118-4:2014/AMD1:2017).
+  Read in its Spanish edition, UNE-EN IEC 60118-4:2016/A1:2018. It replaces clauses 9 and 10: the measurement points of a refuge and a counter (Figures 2 and 3), the useful volume that may replace them (9.4) and their limits (9.5), the commissioning window (10.2), the overload test at the frequency of Table 4 (10.3) and the noise with the system switched on (10.4.7).

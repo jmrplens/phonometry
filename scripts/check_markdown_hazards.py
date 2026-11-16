@@ -88,9 +88,10 @@ closing run is a paragraph that holds inline maths, which swallows nothing.
    errata page: the list item above became a second h1 of the page, its open
    ``$`` was cut off by the heading, and every later ``$`` of the item paired
    with the wrong partner, so its prose rendered as maths and its formulas as
-   raw TeX. GitHub's rendering of the mirror showed the same heading. A real
-   heading is written with ``#`` here, and a thematic break stands after a
-   blank line, so a line like this right under text is always the defect.
+   raw TeX. GitHub's rendering of the errata register showed the same
+   heading. A real heading is written with ``#`` here, and a thematic break
+   stands after a blank line, so a line like this right under text is always
+   the defect.
    Inside a display block it is neither: ``=`` alone on a line of a formula
    written one term per line is maths, and so is the line under it.
 
@@ -128,6 +129,7 @@ import pathlib
 import re
 import sys
 
+from github_edition import is_edition_file
 from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines, quotation_marks
 from markdown_spans import (
     block_starts,
@@ -140,7 +142,9 @@ from markdown_spans import (
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: Trees of hand-written markdown. The API reference is generated from the
-#: docstrings and the plans folder is local scratch, so neither is checked.
+#: docstrings, the GitHub edition of the guides under ``docs/`` is written by
+#: ``make llms`` from the site pages read here (:func:`pages`) and the plans
+#: folder is local scratch, so none of them is checked.
 _ROOTS = (
     _ROOT / "site" / "src" / "content" / "docs",
     _ROOT / "docs",
@@ -492,15 +496,23 @@ def _check(path: pathlib.Path) -> list[str]:
     )
 
 
+def pages() -> list[pathlib.Path]:
+    """Every page of hand-written markdown, in a stable order."""
+    return [
+        path
+        for root in _ROOTS
+        for path in sorted(root.rglob("*.md*"))
+        if not any(part in path.as_posix() for part in _SKIP)
+        and not is_edition_file(path)
+    ]
+
+
 def main() -> int:
     problems: list[str] = []
     checked = 0
-    for root in _ROOTS:
-        for path in sorted(root.rglob("*.md*")):
-            if any(part in path.as_posix() for part in _SKIP):
-                continue
-            checked += 1
-            problems.extend(_check(path))
+    for path in pages():
+        checked += 1
+        problems.extend(_check(path))
 
     if problems:
         print(

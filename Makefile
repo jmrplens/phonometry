@@ -199,7 +199,7 @@ subscripts:
 # beside pi, and an italic e is a variable. KaTeX and mathtext set a bare letter
 # italic, so the exponential is upright only where the source writes
 # \mathrm{e}, and the corpus had both, a few lines apart on one page. This
-# reads every formula of the docstrings, the three editions of the guides and
+# reads every formula of the docstrings, the guides in both languages and
 # the errata register, and the label source of every figure and plate, and
 # fails on an exponent hung on an italic e. Static and dependency-free.
 euler-number:
@@ -750,25 +750,17 @@ posters: assets
 brand:
 	$(PYTHON) scripts/generate_brand.py
 
-# Write docs/reference/bibliography.md, the GitHub copy of the bibliography,
-# from the references every page of the site declares, as the site build writes
-# the page (site/scripts/mirror-bibliography.mjs). It needs the site's
-# dependencies (`pnpm install` in site/). Run it after changing a page's
-# references; the docs workflow fails while the copy is stale.
-bibliography-mirror:
-	cd site && $(PNPM) run mirror:bibliography
-
-# llms.txt, from the site's own pages: agent-md.mjs dumps the English routes
-# and the Markdown copy of every page the llms files carry, without the two
-# dated header lines llms.txt does not state, and generate_llms.py writes the
-# index from that dump. The shards and llms-full.txt carry those dates, so the
-# site build writes them (site/package.json `prebuild`) and they are not
-# committed. The two mirror scripts still write the docs/ overviews and
-# glossary from the site.
+# llms.txt and the GitHub edition under docs/, from the site's own pages, in
+# one run of agent-md.mjs: it dumps the English routes and the Markdown copy of
+# every page the llms files carry, without the two dated header lines llms.txt
+# does not state, and writes every page of the edition (docs/<route>.md) from
+# its source; generate_llms.py then writes the index from the dump. The shards
+# and llms-full.txt carry those dates, so the site build writes them
+# (site/package.json `prebuild`) and they are not committed. The run fails
+# before it writes when docs/README.md, which is kept by hand, does not link
+# every page of the edition.
 llms: site-deps
-	$(PYTHON) scripts/mirror_overviews.py
-	$(PYTHON) scripts/mirror_glossary.py
-	cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated
+	cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated --docs ../docs
 	$(PYTHON) scripts/generate_llms.py --pages build/agent-md
 
 # Regenerate README_PYPI.md (the PyPI long description) from README.md:
@@ -778,8 +770,8 @@ llms: site-deps
 pypi-readme:
 	$(PYTHON) scripts/generate_pypi_readme.py
 
-# Run every Python snippet the guides print, in both languages and the docs/
-# mirror, hold each output comment to what its print wrote, hold the two
+# Run every Python snippet the guides print, in both languages and in the files
+# of docs/ written by hand, hold each output comment to what its print wrote, hold the two
 # languages to the same API and reject a block that shadows a name it imported
 # (see the doc-snippets job in python-app.yml). `make snippets-static` skips
 # the execution and output passes, which are the slow half.
@@ -912,8 +904,8 @@ reports:
 # same artefact, so the count on the banner is always the tree's own; it is
 # deliberately not under `graphs`, which empties .github/images of SVGs before
 # every figure run. The claims step rewrites the counts in the prose that has no
-# build step to interpolate them through (.zenodo.json, the plain-markdown
-# mirror under docs/, the site frontmatter); the Astro page bodies import them
+# build step to interpolate them through (.zenodo.json, the files of docs/
+# written by hand, the site frontmatter); the Astro page bodies import them
 # from site/src/data/conformance-stats.mjs and need nothing. The last two steps
 # are the read-only validations CI also runs: the artefact against itself, and
 # its vocabularies against the site that has to accept and word them. CI fails
@@ -1016,7 +1008,7 @@ check: lint security test
 .PHONY: install site-deps lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
-	bibliography-mirror llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names catalogue-links fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \

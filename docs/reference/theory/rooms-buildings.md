@@ -1,20 +1,70 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/rooms-buildings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/
 
 # Theory: Rooms and Buildings
 
-This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](index.md); surface scattering and acoustic material characterisation live on [Materials and Surfaces](materials-surfaces.md).
+This page collects the theory behind rooms and buildings: impulse-response measurement and the room-acoustic parameters, the image-source and steady-state models of the sound field in a room, background-noise criteria, airborne and impact insulation with their single-number ratings and uncertainty, and flanking and absorption prediction. It is part of the [theory reference](index.md); surface scattering and acoustic material characterisation live on [Materials and Surfaces](materials-surfaces.md).
+
+Each section keeps its own standard's notation, and five letters carry more than
+one meaning across them:
+
+| Symbol | Meaning | Where |
+| :--- | :--- | :--- |
+| $A$ | Equivalent absorption area, m² ($A_0 = 10$ m² reference, $A_\mathrm{T}$ specimen, $A_\mathrm{obj}$, $A_\mathrm{air}$) | throughout |
+| $m$ | Power attenuation coefficient of air, 1/m | image sources, ISO 354 and EN 12354-6 |
+| $m$ | Number of repeated measurements | ISO 12999-1 uncertainty only |
+| $m'$ / $m''$ | Mass per unit area, kg/m² (EN 12354 writes $m'$, the panel-prediction literature $m''$) | flanking and panel prediction |
+| $C$ | Clarity, dB (subscripted 50 or 80) | ISO 3382-1 parameters |
+| $C$ | Decay curvature, % | ISO 3382-2 validity |
+| $C$, $C_\mathrm{tr}$ | Spectrum adaptation terms, dB | ISO 717 ratings |
+| $R$ | Room constant, m² | steady-state room field |
+| $R_q$ | Pressure reflection factor of wall $q$ | image sources |
+| $R$, $R'$ | Sound reduction index, dB ($R_\mathrm{w}$ weighted, $R'$ apparent) | insulation sections |
+| $T$ | Reverberation time, s ($T_\mathrm{S}$ is the centre time) | throughout |
 
 ## Room noise criteria (ANSI S12.2)
 
-ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of octave-band curves (16 Hz – 8 kHz). The **NC rating** follows the two-step procedure of clause 5.2.2 on the Table 1 curves (NC-15 to NC-70): the speech interference level $\mathrm{SIL} = \tfrac14(L_{500}+L_{1000}+L_{2000}+L_{4000})$ (clause 3.2) selects the NC-(SIL) curve, and if no band exceeds it the spectrum is designated NC-(SIL); otherwise the tangency method (clause 5.2.3) applies: each measured band is interpolated against the tabulated curve values, the rating is the highest per-band index and the band that sets it is the governing band; the interpolation makes the rating continuous (an NC-42.5 is reported as such, not snapped to a curve). Spectra above NC-70 or below NC-15 fall outside the family and are flagged (>NC-70 with the band of maximum exceedance, or <NC-15) instead of receiving a fabricated number. The **RC Mark II** contour (Annex D) is a pure −5 dB/octave line keyed to its 1000 Hz value with a low-frequency floor of $\max(\mathrm{RC} + 25,\ 55)$ dB at 16/31.5 Hz; the rating is the arithmetic mean of the 500/1000/2000 Hz levels rounded to an integer (clause D.4), and the spectral-quality tag compares the spectrum with the reference contour (clause D.3): rumble "R" when any band at or below 500 Hz exceeds it by more than 5 dB, hiss "H" when any band at or above 1 kHz exceeds it by more than 3 dB (both together "RH"), else neutral "N", reported as e.g. RC-35(N). The generated RC contours reproduce Table D.1 digit for digit, and feeding any Table 1 NC curve back returns its own tangency rating. NCB, RNC (Annex A) and the QAI (clause D.5) are deliberately out of scope.
+ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of octave-band curves (16 Hz – 8 kHz). The **NC rating** starts from the speech interference level $\mathrm{SIL} = \tfrac14(L_{500}+L_{1000}+L_{2000}+L_{4000})$ (clause 3.2), which preselects the NC-(SIL) curve: if no band exceeds it, the spectrum is designated NC-(SIL) and the procedure ends there (clause 5.2.2). The two families otherwise differ in almost every respect:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" width="96%"></picture>
+| | NC | RC Mark II |
+| :--- | :--- | :--- |
+| Curve family | Table 1 curves NC-15 to NC-70, 16 Hz – 8 kHz | A pure −5 dB/octave line keyed to its 1 kHz value, floored at $\max(\mathrm{RC}+25,\ 55)$ dB at 16 and 31.5 Hz (Annex D) |
+| How the rating is picked | Tangency (clause 5.2.3): each band interpolated against the tabulated curves, the highest per-band index wins | Arithmetic mean of the 500/1000/2000 Hz levels, rounded to an integer (D.4) |
+| What is reported | A continuous value plus the band that set it (e.g. NC-42.5 at 250 Hz, not snapped to a curve) | An integer with a spectral-quality tag, e.g. RC-35(N) |
+| Quality tag | none | Rumble "R" when any band ≤ 500 Hz exceeds the contour by more than 5 dB, hiss "H" when any band ≥ 1 kHz exceeds it by more than 3 dB, "RH" for both, else "N" (D.3) |
+| Outside the family | Flagged: &gt;NC-70 with the band of maximum exceedance, or &lt;NC-15, rather than a fabricated number | — |
 
-*The same spectrum rated both ways: NC tangency at the governing band (left) and the RC Mark II reference with the rumble excess (right).*
+The generated RC contours reproduce Table D.1 digit for digit, and feeding any Table 1 NC curve back returns its own tangency rating. NCB, RNC (Annex A) and the QAI (clause D.5) are deliberately out of scope.
+
+**Reading a rating.** Neither number is a verdict on its own; the criterion comes
+from the use of the room, and Annex C (informative) is where the standard puts
+it. Its Table C.2 recommends, for example, NC 25-30 for a classroom or a small
+auditorium, 30-35 for a small private office, 40-45 for an open-plan area and
+40-50 for public circulation. A rating in the low forties is unremarkable in
+an open office and a clear failure in a lecture room. The RC tag is a diagnosis
+rather than a grade: the reference contour is a straight −5 dB/octave line
+because that is the slope occupants describe as bland, so **R** means the
+spectrum carries more low-frequency energy than that slope allows and points at
+fan and duct-borne noise or a structure-borne path, while **H** points at the
+terminal device: diffuser velocity, turbulence at the outlet. Different tags,
+different remedies. And a rating computed from a spectrum whose lowest bands were
+never actually measured is not comparable with one where they were, because those
+bands set both the tag and, often, the tangency point.
 
 See the [Room Noise guide](../../buildings/rooms/room-noise.md) for usage.
 
-## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" width="96%"></picture>
+
+*One ventilation-dominated spectrum, read by both procedures. The NC rating is
+set at 250 Hz (not at any of the four SIL bands) so the governing band is
+already telling the diagnostic story, and NC-42.5 would pass in an open-plan
+area and fail in a lecture room. The RC panel says the same thing in one letter:
+the bands below 500 Hz push through the +5 dB rumble tolerance, so the room is
+RC-35(R) and the remedy is on the low-frequency side, in the fan and the duct
+run, not at the diffuser.*
+
+## Impulse response and room-acoustic parameters (ISO 18233, ISO 3382-1/-2/-3)
 
 ### Deterministic-excitation impulse response (ISO 18233)
 
@@ -25,6 +75,32 @@ $$
 $$
 
 A constant time-per-octave makes the ESS spectrum pink (−3 dB/octave). Deconvolution is done by **linear** (non-circular, zero-padded) spectral division $H = Y\ \overline{X} / (|X|^2 + \varepsilon)$, the Tikhonov term $\varepsilon$ (a fraction of $\max |X|^2$) preventing noise blow-up at the band edges. Since a low-to-high sweep places harmonic-distortion products at negative arrival times, they fall in the wrapped tail and are removed by keeping the causal part (Farina). The MLS method (Annex A) instead exploits that the circular autocorrelation of a maximum-length sequence of length $2^N-1$ is a periodic delta, so $h = \operatorname{xcorr}_{\text{circ}}(\text{recorded}, \text{mls}) / 2^N$; synchronous averaging of $n$ periods adds $10 \log_{10} n$ dB.
+
+**How long the record has to be, and what breaks first.** The two rules that
+decide whether a deconvolved impulse response is usable are in clause 6.2, and
+they differ by excitation type. A *repetitive* signal such as an MLS must have a
+repetition period no shorter than the reverberation time of the room,
+$T_\mathrm{REP} \ge T$ (Formula 10), or the modes are not excited to steady state and
+the response wraps onto itself. A *non-repetitive* sweep may be of any suitable
+length, but it must be **followed by silence**, and the decay must be recorded
+over at least half the reverberation time (6.2.2.3); for a low-to-high sweep the
+silence needed is set by the reverberation time at the *high* frequencies, which
+is where padding has to be kept clear of the wrapped harmonic arrivals. A record
+that stops with the sweep folds the tail back onto the head and biases every
+$T$ and every clarity value derived from it, silently and always in the same
+direction.
+
+The assumption that breaks first is time invariance, and clause 6.1 is explicit
+about it: moving the source or a microphone during the measurement is not
+acceptable, and neither air movement nor a change in the speed of sound through
+temperature is. The path length changes by a fraction of a wavelength between
+the start and the end of the excitation, and the deconvolution charges the
+mismatch to the noise floor. This is also what separates the two methods in
+practice: MLS rests on the exactness of the circular autocorrelation and
+degrades under both time variance and loudspeaker distortion, which it smears
+over the whole response, whereas the sweep pushes distortion products to
+negative times where they can be cut away. The sweep is therefore the default,
+and MLS is kept for cases where the excitation must be noise-like.
 
 ### Schroeder backward integration (ISO 3382-1, 5.3.3)
 
@@ -43,6 +119,23 @@ i.e. a reversed cumulative sum in discrete time. Backward integration cancels th
 ### Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C)
 
 Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3: the noise must sit at least 25 dB below the IR peak for EDT (evaluation span + 15 dB), tightened to 46 dB for T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value stays within the 5 % JND. The **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
+
+The regression is only half of what makes $T$ a property of the room rather than
+of one point in it; the other half is spatial sampling, and ISO 3382-2 grades the
+result by it (clause 4.3, Table 1). The **survey** method needs at least one
+source position and two source-microphone combinations, one decay each, in
+octave bands only, for a nominal accuracy better than 10 %. The **engineering**
+method needs at least two source positions and **six** independent combinations
+with two decays each, and is the grade the sound-insulation standards call for
+(better than 5 % in octaves, 10 % in thirds). The **precision** method needs two
+source positions and **twelve** combinations with three decays each (2.5 % and
+5 %). Independence is the operative word: microphone positions should be about
+half a wavelength apart, in practice a minimum of some 2 m, at least about a
+quarter wavelength (roughly 1 m) from any reflecting surface including the
+floor, never symmetric, and no closer to a source than
+$d_{\min} = 2\sqrt{V/(c\,T)}$, so that direct sound does not dominate the early
+decay. Positions packed closer than that are not the independent positions
+Table 1 counts, and a $T$ averaged over them carries no grade at all.
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 
@@ -83,11 +176,15 @@ and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
 not exist rather than being large.*
 
+<a id="room-sound-field-predicted-kuttruff-vorlander-bies"></a>
+
+## Room sound field, predicted (Kuttruff, Vorländer, Bies)
+
 <a id="image-source-room-impulse-response-kuttruff-41-vorlander-11"></a>
 
 ### Image-source room impulse response (Kuttruff 4.1, Vorländer 11)
 
-A rectangular room reflects a point source in its walls; each reflection equals the free-field sound of a **mirror image** of the source. Mirroring a coordinate in a wall ($S_n = S - 2 d\,\mathbf{n}$, Vorländer Eq. 11.36) turns the source into a regular lattice of images, and the room impulse response is the sum of the direct sound and one delayed, attenuated impulse per image (Kuttruff Eqs. 4.4–4.5),
+A rectangular room reflects a point source in its walls; each reflection equals the free-field sound of a **mirror image** of the source. Mirroring the source position $S$ in a wall at distance $d$ with unit normal $\mathbf{n}$ ($S_n = S - 2 d\,\mathbf{n}$, Vorländer Eq. 11.36) turns the source into a regular lattice of images, and the room impulse response is the sum of the direct sound and one delayed, attenuated impulse per image (Kuttruff Eqs. 4.4–4.5),
 
 $$
 g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
@@ -95,13 +192,13 @@ A_n = \frac{1}{4\pi r_n}\ \mathrm{e}^{-m r_n / 2} \prod_{\text{walls}} R_q^{\,k_
 t_n = \frac{r_n}{c},
 $$
 
-with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $\mathrm{e}^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
+with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $\mathrm{e}^{-m r_n/2}$ ($m$ the power attenuation coefficient of the table above, so the intensity falls as $\mathrm{e}^{-m r}$ and the pressure as $\mathrm{e}^{-m r/2}$). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
 
-The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
+The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), with $S$ here the total boundary area, because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
 
 ### Steady-state room field (Bies 6.4, Kuttruff 5.6)
 
-A source of constant power sets up a steady level made of a direct field falling with distance and a diffuse **reverberant** field that is (approximately) uniform. With the **room constant** $R = S\bar\alpha/(1-\bar\alpha)$ (Bies Eq. 6.44) and the directivity factor $Q$,
+A source of constant power sets up a steady level made of a direct field falling with distance and a diffuse **reverberant** field that is (approximately) uniform. With the **room constant** $R = S\bar\alpha/(1-\bar\alpha)$ (Bies Eq. 6.44), $S$ the total boundary area and $\bar\alpha$ its mean absorption coefficient, and the directivity factor $Q$,
 
 $$
 L_p = L_W + 10 \log_{10}\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right) \left[ + 10 \log_{10}\frac{\rho c}{400} \right] \quad \text{(Bies Eq. 6.43)},
@@ -123,19 +220,54 @@ corrected = room.steady_state_spl(
 print(round(rho_c, 1), round(corrected - plain, 2))  # 412.5 0.13
 ```
 
-The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](../../buildings/rooms/room-image-sources.md).
+The **critical distance** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check.
+
+See the [Image Sources and the Steady-State Room Field guide](../../buildings/rooms/room-image-sources.md) for usage.
+
+## Sound insulation and absorption, measured (ISO 16283, ISO 10140, ISO 717, ISO 354)
 
 ### Field insulation and weighted rating (ISO 16283-1, ISO 717-1)
 
 Per one-third-octave band the level difference $D = L_1 - L_2$ (energy-averaged over microphone positions, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) is normalised two ways: the standardized level difference $D_{\mathrm{n}T} = D + 10 \log_{10}(T/T_0)$ with $T_0 = 0.5$ s (so $D_{\mathrm{n}T} = D$ when $T = T_0$), and the apparent sound reduction index $R' = D + 10 \log_{10}(S/A)$ with the Sabine absorption area $A = 0.16\ V / T$, hence $R' = D + 10 \log_{10}[S T / (0.16\ V)]$.
 
+In a room below 25 m³ that default average is **not** the level ISO 16283-1 asks
+for in the three lowest bands. Clause 8 adds a corner measurement: the levels
+taken in the room corners are energy-averaged (Formula 12) and combined with the
+default average as
+$L_\mathrm{LF} = 10 \log_{10}\left[(10^{0.1 L_\mathrm{corner}} + 2 \cdot 10^{0.1 L})/3\right]$
+(Formula 13), and that $L_\mathrm{LF}$ replaces the default level **in the 50, 63 and
+80 Hz bands only**, because the default positions do not sample the modal field
+there. The library consumes levels and does not perform this combination, so it
+has to be applied before calling. It matters because the extended spectrum
+adaptation terms $C_{50-3150}$ and $C_{\mathrm{tr},50-3150}$ are dominated by exactly
+those three bands: a small-room rating computed without the corner procedure is
+not comparable with one that used it.
+
 The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference curve** in 1 dB steps toward the measured curve until the sum of *unfavourable* deviations $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the rating $R_\mathrm{w}$ is the shifted reference at 500 Hz. The **spectrum adaptation terms** are $C = X_{\mathrm{A}1} - X_\mathrm{w}$ and $C_\mathrm{tr} = X_{\mathrm{A}2} - X_\mathrm{w}$ with $X_{\mathrm{A}j} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (Table 4 spectra No. 1 pink noise, No. 2 urban traffic), each rounded to an integer. The ISO 717-1 Annex C worked example ($R_\mathrm{w} = 30$, $C = -2$, $C_\mathrm{tr} = -3$, unfavourable sum 31.8 dB) is reproduced exactly.
+
+**Reading $C$ and $C_\mathrm{tr}$.** The weighted rating condenses a whole curve against
+one fixed reference curve, so it answers for the reference source and no other.
+The adaptation terms put the source dependence back by re-rating the same
+measured curve against two standard spectra: No. 1 for sources whose spectrum is
+flat-ish and mid-and-high dominated (speech, television, everyday activity)
+and No. 2 for sources dominated by low frequencies, such as urban road traffic,
+distant aircraft and bass-heavy music. Both terms are almost always negative, and
+the value is the number of decibels to *add* to $R_\mathrm{w}$ to get the level difference
+that source will actually experience, which is why regulations state
+requirements as $R_\mathrm{w} + C$ or $R_\mathrm{w} + C_\mathrm{tr}$ and not as $R_\mathrm{w}$ alone. That makes
+$C_\mathrm{tr}$ a diagnostic: near $-2$ is ordinary for a homogeneous heavy wall, while
+values approaching $-8$ or worse mark a construction whose insulation collapses
+in the lowest bands (typically a lightweight double leaf near its
+mass-spring-mass resonance, or a window). Two partitions with the same $R_\mathrm{w}$
+can differ by many decibels under traffic. The terms are computed over the same
+band range as the rating they accompany, so an adaptation term quoted over
+100–3150 Hz and one extended to 50 Hz are not comparable quantities.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
 
 *A measured R spectrum against the shifted ISO 717-1 reference: the rating is the shifted reference read at 500 Hz.*
 
-### Impact insulation and absorption (ISO 16283-2, ISO 717-2, ISO 354)
+### Impact insulation (ISO 16283-2, ISO 717-2)
 
 Impact insulation swaps the airborne source for a standardized **tapping
 machine** and rates the receiving-room level, so the sign conventions flip. The
@@ -163,6 +295,8 @@ is the same procedure: the reference curve shifted in 1 dB steps until the
 unfavourable sum is as large as it can be without passing 32.0 dB, and the
 rating read off the shifted reference at 500 Hz.*
 
+### Absorption in a reverberation room (ISO 354)
+
 Sound absorption (ISO 354) measures the equivalent absorption area from
 Sabine's relation applied to a reverberation room empty and with the specimen:
 $A = 55.3\ V/(c\ T) - 4 V m$ (the $4 V m$ term is the air absorption, $m$ the
@@ -173,16 +307,60 @@ ISO 9613-1 attenuation coefficient by $m = \alpha / (10 \log_{10} e)$. Because
 diffraction and edge scattering intercept more than the flat sample area,
 $\alpha_\mathrm{s}$ is left unclamped and may exceed 1.0 (Clause 3.7 NOTE 2).
 
+**The two reverberation times are not free inputs.** They are the output of a
+tightly specified arrangement, and $\alpha_\mathrm{s}$ means nothing without it. The room
+holds at least 150 m³ (200 m³ strongly recommended for a new one), its longest
+dimension stays below $1.9\,V^{1/3}$, and it carries enough fixed or rotating
+diffusion for the decays to be exponential (clause 6.1). The plane specimen
+covers 10 to 12 m² (the upper limit scaled by $(V/200)^{2/3}$ above 200 m³) and is
+rectangular with a width-to-length ratio between 0.7 and 1, sits at least 0.75 m
+from any room boundary and preferably has its edges non-parallel to the nearest
+room edge (6.2.1). Its **mounting is part of the result** (Annex B): rigid
+backing, air gap or framed edges change the answer, which is why a catalogue
+$\alpha_\mathrm{s}$ without its mounting code is not usable and why the same product
+gives different curves in different laboratories. Each $T$ is the average of at
+least 12 spatially independent decays, from at least 3 microphone and 2 source
+positions, with microphones at least 1.5 m apart, 2 m from any source and 1 m
+from any room surface and from the specimen (7.1.4, 7.1.3). Both measurements
+are made between 30 % and 90 % relative humidity and above 15 °C, at nearly the
+same climate (6.3.2).
+
+That last condition is not housekeeping. The result is the *difference* of two
+large and nearly equal absorption areas, so everything that changes between the
+empty and the loaded measurement lands in it: a shift in temperature or humidity
+moves both $c$ and the air term $4Vm$, which is why the two decays belong in the
+same session with the climate recorded. And an $\alpha_\mathrm{s}$ above 1 is not an
+error but the signature of edge diffraction intercepting more energy than the
+flat projected area (largest for small specimens and at low frequency). The
+value belongs to a specimen of *that* size, aspect ratio and mounting and cannot
+be transplanted to a surface of another shape without judgement.
+
 ### Laboratory vs field normalization (ISO 10140, ISO 16283)
 
-The field indices carry a prime because they include flanking transmission
-around the partition; the laboratory indices do not, because a qualified
-facility suppresses it. The algebra is otherwise identical, differing only in
-which quantity is normalised. The airborne pair is the direct laboratory sound
-reduction index $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) versus the
-apparent field index $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1), the
-same closed form evaluated with the facility's known $A$ or the room's measured
-$A = 0.16\ V/T$. The impact pair is the normalized laboratory level
+The field indices carry a prime because the receiving-room level they start from
+includes flanking transmission around the partition; the laboratory indices do
+not, because a qualified facility suppresses it. The formulas are therefore the
+*same*, and the prime is a statement about the specimen rather than about the
+arithmetic: the direct laboratory sound reduction index
+$R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) and the apparent field index
+$R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1) are one closed form,
+evaluated with the facility's known $A$ in the laboratory and with the receiving
+room's measured $A = 0.16\ V/T$ in the field. What differs in *what is
+normalised* is not laboratory against field but airborne against impact: the
+airborne indices scale by the area-to-absorption ratio $S/A$, the impact levels
+by $A/A_0$.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab.svg" alt="Plan view of an ISO 10140 laboratory transmission suite: structurally decoupled source and receiving reverberation rooms of about 59 and 51 cubic metres, the test element mounted in the 10 square metre test opening between them, a corner loudspeaker in the source room and a continuously moving microphone with a sweep radius of at least 1 m in each room" width="92%"></picture>
+
+What "a qualified facility suppresses it" means physically is drawn above: an
+ISO 10140-5 suite is two *structurally decoupled* reverberation rooms of roughly
+50 to 60 m³ sharing a test opening of about 10 m², built so that transmission
+around the specimen sits far below transmission through it. The facility
+measures its own flanking limit, and a specimen may be reported only up to that
+limit, which is why a laboratory $R$ carries no prime, and why the same
+construction built into a building reads several decibels lower. The practical
+consequence is a diagnosis: when a field $R'$ refuses to rise after the element
+is improved, the measurement has hit a flanking path, not the element. The impact pair is the normalized laboratory level
 $L_\mathrm{n} = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) versus the field $L'_\mathrm{n}$
 (ISO 16283-2), both referenced to $A_0 = 10$ m². Before either is formed the
 receiving-room level is corrected for background noise by the energy
@@ -197,7 +375,7 @@ for the 45° loudspeaker method ($R'_{45°}$) and $-3$ dB for the all-angle
 road-traffic method ($R'_\mathrm{tr,s}$); all three carry the ISO 717-1 airborne
 single number.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_lab.svg" alt="Plan view of an ISO 10140 laboratory transmission suite: structurally decoupled source and receiving reverberation rooms of about 59 and 51 cubic metres, the test element mounted in the 10 square metre test opening between them, a corner loudspeaker in the source room and a continuously moving microphone with a sweep radius of at least 1 m in each room" width="92%"></picture>
+## Sound insulation and absorption, predicted (EN 12354-1/-2/-6, Bies, Cremer, Hopkins)
 
 ### Flanking transmission prediction (EN 12354-1/2)
 
@@ -245,8 +423,24 @@ subtraction $L'_\mathrm{n,w} = L_\mathrm{n,w,eq} - \Delta L_\mathrm{w} + K$, wit
 equivalent level $L_\mathrm{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
 covering improvement $\Delta L_\mathrm{w}$ (ISO 717-2) and the flanking correction $K$
 from Table 1. The EN 12354-1 Annex H.3 ($R'_\mathrm{w} = 52$ dB) and EN 12354-2 Annex E.3
-($L'_\mathrm{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
-model is stated to have about a 2 dB standard deviation (Clause 5).
+($L'_\mathrm{n,w} = 45$ dB) worked examples are reproduced exactly.
+
+**Where the simplified model applies.** It assumes homogeneous elements whose
+transmission is governed by their mass per unit area, joined rigidly, so that the
+junction attenuation can depend on the mass ratio alone; the Annex E regressions
+are empirical fits to exactly that family. They return no meaningful answer for
+framed lightweight constructions, for elastically decoupled junctions, or for
+elements with a strong internal loss mechanism. Those need the detailed
+band-by-band model or measured $K_{ij}$ values. The $K_{ij,\min}$ floor exists
+to stop the regressions producing implausibly high junction attenuations for
+small elements, so a path that lands on the floor is a signal that the mass-ratio
+fit is at the edge of its range rather than a result to report as-is. Because the
+paths sum energetically, the apparent rating is pinned by whichever path is
+strongest: improving the separating element alone stops paying the moment one
+flanking path dominates, and identifying *that* path is the model's chief
+practical value, well before the last decibel of the total. The 2 dB standard
+deviation the standard quotes (Clause 5) is the spread of the simplified model
+against measurement **inside that intended population**, not a general error bar.
 
 ### Absorption in enclosed spaces (EN 12354-6)
 
@@ -288,7 +482,62 @@ and not proportionally.*
 
 See the [Enclosed-Space Absorption guide](../../buildings/rooms/enclosed-space-absorption.md) for usage.
 
-### Measurement uncertainty (ISO 12999-1)
+### Predicted panel sound insulation (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
+
+Where EN 12354 takes the element $R$ as a measurement, the sound reduction index
+of a panel can also be **predicted** from its physical properties. A limp panel
+follows the mass law $TL_0 = 10\log_{10}[1 + (\pi f m''/\rho_0 c_0)^2]$ (Bies Eq. 7.40),
+which rises 6 dB per octave and 6 dB per doubling of the surface mass $m''$ (the
+$m'$ of the EN 12354 subsections above); the
+field-incidence value subtracts 5.5 dB (one-third octave). That 5.5 dB is not
+derived: it is the result of averaging the normal-incidence mass law over
+incidence angles up to the limiting angle observed in practice rather than over
+the full hemisphere, so it is a fixed empirical offset and not a function of
+anything. Stiffness adds a
+**coincidence dip** at $f_\mathrm{c} = (c_0^2/2\pi)\sqrt{m''/B'}$ (Eq. 7.3), where the free
+bending wavelength matches the acoustic trace wavelength. Sharp's method holds
+the mass law to $f_\mathrm{c}/2$, drops linearly in $\log f$ to the dip
+$TL = 20\log_{10}(f_\mathrm{c} m'') + 10\log_{10}\eta - 44$ and rises again above $f_\mathrm{c}$ with the loss
+factor $\eta$ (Eq. 7.44); the $-44$ there is an empirical fit to measured
+coincidence dips, and the loss factor appears explicitly because the depth of the
+dip is controlled by damping rather than by mass. A **double wall** is a
+mass-spring-mass system with the
+cavity as the spring: below $f_0 = 60\sqrt{(m_1+m_2)/(m_1 m_2 d)}$ (Eq. 7.62) it
+follows the mass law of the combined mass, and above it the two leaves' mass laws
+add plus the cavity term $20\log_{10}(2kd)$, saturating at +6 dB beyond
+$f_\mathrm{l} = c_0/(2\pi d)$ (Eq. 7.64); a porous fill lowers $f_0$. The 60 in $f_0$ is
+the numeric constant left once the stiffness of an air layer of thickness $d$ is
+substituted into the mass-spring-mass resonance, so it is fixed to air at
+ordinary conditions and changes for a gas-filled or evacuated cavity; and $f_\mathrm{l}$
+marks where half a wavelength fits across the cavity, above which the cavity
+stops behaving as a pure spring and standing waves in it limit what the
+construction can achieve. Small air paths cap
+any construction: the transmission coefficient of a straight slit (Gomperts,
+Hopkins Eq. 4.99, with resonances at $d + 2e = z\lambda/2$) or a circular hole
+(Wilson & Soroka, Eq. 4.102) combines with the wall in the area-weighted energy
+sum $R = -10\log_{10}[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Eq. 4.92), so a bare opening
+of relative area $S_\mathrm{a}/S$ limits the composite to $10\log_{10}(S/S_\mathrm{a})$. The resonant
+transmission path and the double-wall radiation draw on the plate radiation
+efficiency and point mobilities of the
+[vibration theory](vibration.md).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%"></picture>
+
+*The four behaviours of the paragraph above, one per panel. Top left, the mass
+law rising 6 dB per octave with Sharp's coincidence dip cut into it at $f_\mathrm{c}$.
+Top right, the double wall: no better than the combined mass below $f_0$, then
+the cavity term climbing until it saturates. Bottom left, the radiation
+efficiency that decides how much of the plate's vibration becomes sound. Bottom
+right, the ceiling a leak imposes: a 1 % open area holds the composite at
+$10\log_{10}(S/S_\mathrm{a}) = 20$ dB however good the wall is, which is the panel worth
+showing a client.*
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="To-scale cross-section of a 2 mm slit through a 100 mm wall: the hatched wall drawn in section with the narrow horizontal air gap at mid-height, an incident-sound arrow pointing at the gap from the left, the 100 mm wall depth and 2 mm slit width dimensioned, and circular transmitted wavefronts sketched spreading from the slit exit on the right" width="80%"></picture>
+
+See the [Predicting Panel Sound Insulation](../../buildings/design/panel-sound-insulation.md)
+guide for usage.
+
+## Measurement uncertainty (ISO 12999-1)
 
 ISO 12999-1 supplies the uncertainty of the quantities above from
 inter-laboratory (ISO 5725) reproducibility and repeatability rather than a
@@ -314,157 +563,65 @@ energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 See the [Room Acoustics](../../buildings/rooms/room-acoustics.md) and
 [Field Insulation Measurement (ISO 16283)](../../buildings/insulation/insulation-field.md) guides for usage.
 
-### Predicted panel sound insulation (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
-
-Where EN 12354 takes the element $R$ as a measurement, the sound reduction index
-of a panel can also be **predicted** from its physical properties. A limp panel
-follows the mass law $TL_0 = 10\log_{10}[1 + (\pi f m''/\rho_0 c_0)^2]$ (Bies Eq. 7.40),
-which rises 6 dB per octave and 6 dB per doubling of the surface mass $m''$; the
-field-incidence value subtracts 5.5 dB (one-third octave). Stiffness adds a
-**coincidence dip** at $f_\mathrm{c} = (c_0^2/2\pi)\sqrt{m''/B'}$ (Eq. 7.3), where the free
-bending wavelength matches the acoustic trace wavelength. Sharp's method holds
-the mass law to $f_\mathrm{c}/2$, drops linearly in $\log f$ to the dip
-$TL = 20\log_{10}(f_\mathrm{c} m'') + 10\log_{10}\eta - 44$ and rises again above $f_\mathrm{c}$ with the loss
-factor $\eta$ (Eq. 7.44). A **double wall** is a mass-spring-mass system with the
-cavity as the spring: below $f_0 = 60\sqrt{(m_1+m_2)/(m_1 m_2 d)}$ (Eq. 7.62) it
-follows the mass law of the combined mass, and above it the two leaves' mass laws
-add plus the cavity term $20\log_{10}(2kd)$, saturating at +6 dB beyond
-$f_\mathrm{l} = c_0/(2\pi d)$ (Eq. 7.64); a porous fill lowers $f_0$. Small air paths cap
-any construction: the transmission coefficient of a straight slit (Gomperts,
-Hopkins Eq. 4.99, with resonances at $d + 2e = z\lambda/2$) or a circular hole
-(Wilson & Soroka, Eq. 4.102) combines with the wall in the area-weighted energy
-sum $R = -10\log_{10}[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Eq. 4.92), so a bare opening
-of relative area $S_\mathrm{a}/S$ limits the composite to $10\log_{10}(S/S_\mathrm{a})$. The resonant
-transmission path and the double-wall radiation draw on the plate radiation
-efficiency and point mobilities of the
-[vibration theory](vibration.md). The prediction is clean-room from Bies,
-Hansen & Howard (2017), Hopkins (2007) and Cremer, Heckl & Petersson (2005).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%"></picture>
-
-*The four behaviours of the paragraph above, one per panel. Top left, the mass
-law rising 6 dB per octave with Sharp's coincidence dip cut into it at $f_\mathrm{c}$.
-Top right, the double wall: no better than the combined mass below $f_0$, then
-the cavity term climbing until it saturates. Bottom left, the radiation
-efficiency that decides how much of the plate's vibration becomes sound. Bottom
-right, the ceiling a leak imposes: a 1 % open area holds the composite at
-$10\log_{10}(S/S_\mathrm{a}) = 20$ dB however good the wall is, which is the panel worth
-showing a client.*
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="To-scale cross-section of a 2 mm slit through a 100 mm wall: the hatched wall drawn in section with the narrow horizontal air gap at mid-height, an incident-sound arrow pointing at the gap from the left, the 100 mm wall depth and 2 mm slit width dimensioned, and circular transmitted wavefronts sketched spreading from the slit exit on the right" width="80%"></picture>
-
-See the [Predicting Panel Sound Insulation](../../buildings/design/panel-sound-insulation.md) guide for
-usage.
-
 ## References
 
-- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
-  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  The statistical decay theory behind backward integration and the Sabine
-  relations used throughout this page, the image-source construction
-  (Section 4.1) and the impulse response it sums (Section 4.2), the Eyring
-  reverberation (Section 5.4), the reverberation distance (Section 5.6) and
-  the Schroeder frequency (Section 3.6).
-- Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
-  simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
-  [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
-  The image-source / mirror-source model of the impulse-response section
-  (Chapter 11).
-- Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
-  simulating small-room acoustics. *The Journal of the Acoustical Society of
-  America*, 65(4), 943-950.
-  [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599).
+- **Acoustical Society of America. (2019).** [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
+  The normative NC tangency method and the Annex D RC Mark II rating with its spectral tag.
+- **Allen, J. B., & Berkley, D. A. (1979).** Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. https://doi.org/10.1121/1.382599
   The reflection-count decomposition of the rectangular-room image lattice.
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  The steady-state room field and the room constant (Section 6.4).
-- Schroeder, M. R. (1965). New method of measuring reverberation time.
-  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
-  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
-  The backward-integration method of the decay-curve section.
-- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
-  Measuring room impulse responses: Impact of the decay range on derived
-  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
-  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
-  The INR decay-range analysis behind the tightened T20/T30 validity
-  thresholds.
-- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
-  Control*, 3(1), 19-27.
-  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
-  The original NC curves rated by the tangency method of the room-noise
-  section.
-- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
-  noise of heating, ventilating, and air-conditioning (HVAC) systems in
-  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
-  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
-  The RC Mark II contour and spectral-quality tag codified by ANSI/ASA
-  S12.2 Annex D.
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  The measurement chains, flanking transmission and EN 12354 prediction
-  framework of the insulation sections.
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Sound transmission in buildings, from single and double constructions to
-  floating floors.
-- Acoustical Society of America. (2019). *Criteria for evaluating room
-  noise* (ANSI/ASA S12.2-2019).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  The normative NC tangency method and the Annex D RC Mark II rating with
-  its spectral tag.
-- International Organization for Standardization. (2006). *Acoustics —
-  Application of new measurement methods in building and room acoustics*
-  (ISO 18233:2006).
-  [iso.org catalogue](https://www.iso.org/standard/40408.html).
-  The swept-sine and MLS deconvolution of the deterministic-excitation
-  section.
-- International Organization for Standardization. (2009). *Acoustics —
-  Measurement of room acoustic parameters — Part 1: Performance spaces*
-  (ISO 3382-1:2009).
-  [iso.org catalogue](https://www.iso.org/standard/40979.html).
-  Backward integration, the parameter definitions and the Annex A clarity
-  family.
-- International Organization for Standardization. (2008). *Acoustics —
-  Measurement of room acoustic parameters — Part 2: Reverberation time in
-  ordinary rooms* (ISO 3382-2:2008).
-  [iso.org catalogue](https://www.iso.org/standard/36201.html).
-  The regression windows, dynamic-range rules and curvature check of the
-  validity section.
-- International Organization for Standardization. (2012). *Acoustics —
-  Measurement of room acoustic parameters — Part 3: Open plan offices*
-  (ISO 3382-3:2012; since revised as
-  [ISO 3382-3:2022](https://www.iso.org/standard/77437.html)).
-  [iso.org catalogue](https://www.iso.org/standard/46520.html).
-  The open-plan spatial decay and the distraction and privacy distances.
-- International Organization for Standardization. (2014). *Acoustics — Field
-  measurement of sound insulation in buildings and of building elements —
-  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
-  [iso.org catalogue](https://www.iso.org/standard/55997.html).
-  The field level differences and normalizations of the insulation
-  sections.
-- International Organization for Standardization. (2020). *Acoustics —
-  Rating of sound insulation in buildings and of building elements — Part 1:
-  Airborne sound insulation* (ISO 717-1:2020).
-  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+- **Beranek, L. L. (1957).** Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. https://doi.org/10.1121/1.2369239
+  The original NC curves rated by the tangency method of the room-noise section.
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  ISBN 978-1-138-30690-5. The steady-state room field and the room constant (Section 6.4, Eqs. 6.43 and 6.44), and the mass law, coincidence, double-wall and composite-partition equations (7.3, 7.40, 7.44, 7.62, 7.64) of the panel-prediction subsection.
+- **Blazier, W. E. (1997).** RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. https://doi.org/10.3397/1.2828446
+  The RC Mark II contour and spectral-quality tag codified by ANSI/ASA S12.2 Annex D.
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+  ISBN 978-3-540-22696-3. The structure-borne transmission and radiation theory the panel-prediction subsection draws on, shared with the vibration theory page.
+- **European Committee for Standardization. (2000).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-between-rooms) (EN 12354-1:2000).
+  The simplified single-number flanking model (Formulae 26-31), the Annex E junction regressions and the Annex H.3 worked example of the flanking subsection.
+- **European Committee for Standardization. (2000).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-impact-sound-insulation-between-rooms) (EN 12354-2:2000).
+  The impact counterpart of the same subsection: Formula 21, the Annex B bare-floor equivalent level and the Annex E.3 worked example.
+- **European Committee for Standardization. (2003).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 6: Sound absorption in enclosed spaces*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces) (EN 12354-6:2003).
+  The Clause 4 absorption model and Annex E worked cases of the enclosed-space section. The linked catalogue record is the BSI Knowledge page for BS EN 12354-6:2003.
+- **Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).** Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. https://doi.org/10.3813/aaa.918574
+  The INR decay-range analysis behind the tightened T20/T30 validity thresholds.
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  ISBN 978-0-7506-6526-1. The measurement chains, flanking transmission and EN 12354 prediction framework of the insulation sections.
+- **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
+  The reverberation-room absorption measurement and its air-absorption term.
+- **International Organization for Standardization. (2006).** [*Acoustics — Application of new measurement methods in building and room acoustics*](https://www.iso.org/standard/40408.html) (ISO 18233:2006).
+  The swept-sine and MLS deconvolution of the deterministic-excitation section.
+- **International Organization for Standardization. (2008).** [*Acoustics — Measurement of room acoustic parameters — Part 2: Reverberation time in ordinary rooms*](https://www.iso.org/standard/36201.html) (ISO 3382-2:2008).
+  The regression windows, dynamic-range rules and curvature check of the validity section.
+- **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  Backward integration, the parameter definitions and the Annex A clarity family.
+- **International Organization for Standardization. (2012).** [*Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices*](https://www.iso.org/standard/46520.html) (ISO 3382-3:2012).
+  The open-plan spatial decay and the distraction and privacy distances. Since revised as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html); the 2012 edition is the implemented one.
+- **International Organization for Standardization. (2014).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/55997.html) (ISO 16283-1:2014).
+  The field level differences and normalizations of the insulation sections.
+- **International Organization for Standardization. (2016).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 3: Façade sound insulation*](https://www.iso.org/standard/59748.html) (ISO 16283-3:2016).
+  The façade extension of the laboratory-versus-field subsection: the 2 m reference position and the angle-of-incidence corrections.
+- **International Organization for Standardization. (2020).** [*Acoustics — Determination and application of measurement uncertainties in building acoustics — Part 1: Sound insulation*](https://www.iso.org/standard/73930.html) (ISO 12999-1:2020).
+  The measurement situations, tabulated uncertainties and coverage factors of the uncertainty section.
+- **International Organization for Standardization. (2020).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/77436.html) (ISO 16283-2:2020).
+  The field impact-level measurement behind L'nT and L'n in the impact-insulation subsection.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
   The reference-curve shift and the spectrum adaptation terms C and Ctr.
-- International Organization for Standardization. (2003). *Acoustics —
-  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
-  [iso.org catalogue](https://www.iso.org/standard/34545.html).
-  The reverberation-room absorption measurement and its air-absorption
-  term.
-- European Committee for Standardization. (2003). *Building acoustics —
-  Estimation of acoustic performance of buildings from the performance of
-  elements — Part 6: Sound absorption in enclosed spaces*
-  (EN 12354-6:2003).
-  [BSI Knowledge record (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
-  The Clause 4 absorption model and Annex E worked cases of the
-  enclosed-space section.
-- International Organization for Standardization. (2020). *Acoustics —
-  Determination and application of measurement uncertainties in building
-  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
-  [iso.org catalogue](https://www.iso.org/standard/73930.html).
-  The measurement situations, tabulated uncertainties and coverage factors
-  of the uncertainty section.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
+  The impact single-number rating and the CI adaptation term, with the Annex C worked examples the impact-insulation subsection reproduces.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/79487.html) (ISO 10140-2:2021).
+  The laboratory sound reduction index R of the laboratory-versus-field subsection.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/79483.html) (ISO 10140-3:2021).
+  The laboratory normalized impact level Ln of the same subsection.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 4: Measurement procedures and requirements*](https://www.iso.org/standard/73911.html) (ISO 10140-4:2021).
+  Clause 4.3, the background-noise correction and its 6/15 dB margins and 1.3 dB cap, quoted in the laboratory-versus-field subsection.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment*](https://www.iso.org/standard/79482.html) (ISO 10140-5:2021).
+  The qualified transmission suite drawn in the laboratory-versus-field subsection, and the flanking limit that lets a laboratory index drop its prime.
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+  The statistical decay theory behind backward integration and the Sabine relations used throughout this page, the image-source construction (Section 4.1) and the impulse response it sums (Section 4.2), the Eyring reverberation (Section 5.4), the reverberation distance (Section 5.6) and the Schroeder frequency (Section 3.6).
+- **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. https://doi.org/10.1121/1.1909343
+  The backward-integration method of the decay-curve section.
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+  ISBN 978-0-415-42853-8. Sound transmission in buildings, from single and double constructions to floating floors.
+- **Vorländer, M. (2020).** *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. https://doi.org/10.1007/978-3-030-51202-6
+  The mirror-source model of the image-source subsection (Chapter 11), with its mirroring and reflection-factor expressions (Eqs. 11.36 and 11.39).

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/
 
 # Sound insulation
 
@@ -126,49 +128,49 @@ related EN 12354-5, lives in
 
 ## What this section does not cover
 
-**The library starts after the microphone.** The field, laboratory, survey and
-intensity routines that form an insulation index accept per-position spectra
-and energy-average them for you; the heavy-impact standardization, the
-flanking indices, the ISO 717 ratings and the background-noise helpers take
-their per-band input already formed. Either way, nothing verifies how the
-measurement was made: not the number and placement of the source and
-microphone positions behind those spectra, not the corner positions the
-ISO 16283 low-frequency procedure is fed from, and not the test-facility and
-mounting requirements of ISO 10140-1. Those are the operator's
-responsibility and the report's, and
-they are what makes the numbers here mean something. The one method that
-checks its own positions is the ISO 16032 engineering
-method for service-equipment noise, with the position ladder of its 7.4.1, the
-distances of 7.3 and the corner height and 0.2 m from obstacles of 7.2 in a
-rectangular room; it also checks the measurement itself: the calibration
-deviation, the background time against the operator's tolerance and a
-background that varies, disturbed periods and the calculation against the
-instrument.
-Background noise is the one correction genuinely left to the caller of the
-insulation routines: their
-field levels must arrive already corrected, their 6 dB signal-to-background
-floor checked by the operator. Two helpers apply their own rule instead: the
-ISO 10140-4 laboratory one, warning when its floor is broken and capping the
-correction, and the Clause 9 field correction of ISO 16032 for service
-equipment, which holds its correction at 2.2 dB below a 4 dB margin and marks
-the result an upper limit. Two consequences worth naming: the background
-corrections are *different* rules, so neither helper is to be applied to
-the field data of an insulation index; and the intensity route takes both
-the pressure and the intensity level as inputs, with the scanning probe and
-its phase-mismatch calibration outside the library.
+- **Not covered.** **The library starts after the microphone.** The field, laboratory, survey and
+  intensity routines that form an insulation index accept per-position spectra
+  and energy-average them for you; the heavy-impact standardization, the
+  flanking indices, the ISO 717 ratings and the background-noise helpers take
+  their per-band input already formed. Either way, nothing verifies how the
+  measurement was made: not the number and placement of the source and
+  microphone positions behind those spectra, not the corner positions the
+  ISO 16283 low-frequency procedure is fed from, and not the test-facility and
+  mounting requirements of ISO 10140-1. Those are the operator's
+  responsibility and the report's, and
+  they are what makes the numbers here mean something. The one method that
+  checks its own positions is the ISO 16032 engineering
+  method for service-equipment noise, with the position ladder of its 7.4.1, the
+  distances of 7.3 and the corner height and 0.2 m from obstacles of 7.2 in a
+  rectangular room; it also checks the measurement itself: the calibration
+  deviation, the background time against the operator's tolerance and a
+  background that varies, disturbed periods and the calculation against the
+  instrument.
+  Background noise is the one correction genuinely left to the caller of the
+  insulation routines: their
+  field levels must arrive already corrected, their 6 dB signal-to-background
+  floor checked by the operator. Two helpers apply their own rule instead: the
+  ISO 10140-4 laboratory one, warning when its floor is broken and capping the
+  correction, and the Clause 9 field correction of ISO 16032 for service
+  equipment, which holds its correction at 2.2 dB below a 4 dB margin and marks
+  the result an upper limit. Two consequences worth naming: the background
+  corrections are *different* rules, so neither helper is to be applied to
+  the field data of an insulation index; and the intensity route takes both
+  the pressure and the intensity level as inputs, with the scanning probe and
+  its phase-mismatch calibration outside the library.
 
-**Coverage inside the standards is partial in two places.** Of ISO 10848 only
-the Part 1 formulae are implemented generically, plus the Part 4 modal-overlap
-validity check, not the facility-specific setups of Parts 2, 3 and 4. Of the
-Spanish code, only the verification indices are implemented: the simplified
-option's solution tables of clause 3, the execution conditions of clause 5 and
-the maintenance conditions of clause 6 are out of scope, and the general
-option's calculation route is [Predicting Sound
-Insulation](../design/insulation-prediction.md).
+- **Not covered.** **Coverage inside the standards is partial in two places.** Of ISO 10848 only
+  the Part 1 formulae are implemented generically, plus the Part 4 modal-overlap
+  validity check, not the facility-specific setups of Parts 2, 3 and 4. Of the
+  Spanish code, only the verification indices are implemented: the simplified
+  option's solution tables of clause 3, the execution conditions of clause 5 and
+  the maintenance conditions of clause 6 are out of scope, and the general
+  option's calculation route is [Predicting Sound
+  Insulation](../design/insulation-prediction.md).
 
-**And there is no heavy-impact prediction at all.** A floor construction can
-be carried to a tapping-machine level by the models in [Insulation
-design](../design/index.md); nothing does the same for the rubber
-ball, because the complexity of the input force and the use of a time-weighted
-maximum leave no simple counterpart. The heavy-impact page rates a
-measurement, and only a measurement.
+- **Not covered.** **And there is no heavy-impact prediction at all.** A floor construction can
+  be carried to a tapping-machine level by the models in [Insulation
+  design](../design/index.md); nothing does the same for the rubber
+  ball, because the complexity of the input force and the use of a time-weighted
+  maximum leave no simple counterpart. The heavy-impact page rates a
+  measurement, and only a measurement.

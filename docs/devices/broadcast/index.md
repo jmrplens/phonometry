@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/broadcast/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/broadcast/
 
 # Broadcast
 
@@ -74,11 +76,11 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-BS.1770-5 **Annex 4, object-based audio, is out of scope**, and the library
-implements no spatial renderer, so an object-based programme has to be
-rendered to a loudspeaker layout before any of this applies. **EBU Tech 3343**
-is cited as production practice around these numbers, not as an algorithm:
-nothing here runs it. And loudness normalisation itself (the gain change, and
-any limiting that follows it) is a production step this library does not
-perform: it measures the programme and tells you the offset, and applying it
-is your encoder's job.
+- **Not covered.** BS.1770-5 **Annex 4, object-based audio, is out of scope**, and the library
+  implements no spatial renderer, so an object-based programme has to be
+  rendered to a loudspeaker layout before any of this applies. **EBU Tech 3343**
+  is cited as production practice around these numbers, not as an algorithm:
+  nothing here runs it. And loudness normalisation itself (the gain change, and
+  any limiting that follows it) is a production step this library does not
+  perform: it measures the programme and tells you the offset, and applying it
+  is your encoder's job.

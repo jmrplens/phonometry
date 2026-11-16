@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/signal-analysis.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/
 
 # Theory: Signal Analysis
 
@@ -12,13 +14,26 @@ $$
 G = 10^{0.3}
 $$
 
+$G = 10^{0.3} \approx 1.9953$ is the octave ratio IEC 61260-1 and ANSI S1.11
+adopt in preference to an exact factor of 2, because a base-10 ratio keeps the
+band grid commensurate with the decade grid tabulated data uses and puts 1 kHz
+exactly on it. The band index $x$ is an integer, anchored so that $x = 30$ lands
+on the 1 kHz reference, and the mid-band frequency depends on whether the
+fraction $b$ is odd or even:
+
 **Mid-band:**
 
 $$
-f_\mathrm{m} = 1000 \cdot G^{x/b}
+f_\mathrm{m} = 1000 \cdot G^{(x-30)/b} \quad (b \text{ odd}), \qquad
+f_\mathrm{m} = 1000 \cdot G^{(2x-59)/(2b)} \quad (b \text{ even})
 $$
 
-(for odd $b$)
+The distinction is not cosmetic. For odd $b$ the reference sits at a band
+*centre*, so a one-third-octave bank has a band centred exactly on 1000.00 Hz;
+for even $b$ it sits on a band *edge*, so a sixth-octave bank has bands at
+944.1 Hz and 1059.3 Hz and none at 1 kHz at all. A formula written only for odd
+$b$ cannot produce the band set the library returns for `fraction=2`,
+`fraction=6` or `fraction=12`.
 
 **Band edges:**
 
@@ -26,19 +41,27 @@ $$
 f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
+**Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact midband
+frequency; what an instrument prints (and what `nominal_frequencies` returns as
+its `labels`, or `octave_filter(..., nominal=True)`) is the ISO 266 preferred
+number nearest to it. The one-third-octave band whose exact centre is 1258.9 Hz
+is labelled 1250 Hz, and the sixth-octave band centred on 1059.3 Hz is labelled
+1.06k. Compare band levels between tools by index or by exact centre, never by
+matching label strings: different tools round the labels differently.
+
 ## Frequency Resolution vs FFT Bin Spacing
 
 `octave_filter` is a **time-domain fractional-octave filter bank**, not an FFT or
 Welch spectrum estimator. Therefore, its result does not have a frequency
 resolution in the `fs / nfft` sense.
 
-For `fraction=3`, the output contains one scalar level per third-octave band.
+For `fraction=3`, the output contains one scalar level per one-third-octave band.
 The relevant frequency granularity is the standardized band definition: center
 frequency, lower edge, and upper edge. Because fractional-octave bands are
 logarithmically spaced, their absolute bandwidth in Hz grows with frequency
 while their relative bandwidth remains approximately constant.
 
-For example, with `fraction=3` and `limits=[12, 20000]`, the exact third-octave
+For example, with `fraction=3` and `limits=[12, 20000]`, the exact one-third-octave
 band around 1 kHz is approximately:
 
 | Nominal band | Lower edge | Center | Upper edge | Bandwidth |
@@ -70,7 +93,7 @@ fs = 100_000
 pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
 x = pressure_signal_pa
 
-# Standardized third-octave levels from phonometry.
+# Standardized one-third-octave levels from phonometry.
 filtered = filters.octave_filter(
     x,
     fs=fs,
@@ -94,11 +117,11 @@ freq_bins, psd = signal.welch(
     scaling="density",
 )
 
-# Example: list the Welch bins inside the third-octave band closest to 1 kHz.
+# Example: list the Welch bins inside the one-third-octave band closest to 1 kHz.
 band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
 in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
 
-print("Selected third-octave band:", bands.labels[band_index])
+print("Selected one-third-octave band:", bands.labels[band_index])
 print("Welch bin spacing:", freq_bins[1] - freq_bins[0], "Hz")
 for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)
@@ -109,7 +132,7 @@ for f, pxx in zip(freq_bins[in_band], psd[in_band]):
 *The two objects on one axis, for a six-tone signal at 20, 100, 500, 2000,
 4000 and 15 000 Hz. The grey trace is a Welch PSD ($f_\mathrm{s}$ = 48 kHz,
 `nperseg = 8192`, so a fixed 5.86 Hz bin everywhere); the markers are the
-standardized third-octave levels of the same signal. The bin width never
+standardized one-third-octave levels of the same signal. The bin width never
 changes and the band width does: 4.60 Hz at the 20 Hz band, narrower than one
 bin, against 230.77 Hz at 1 kHz and 3657 Hz at 16 kHz. That is why the top
 bands each swallow hundreds of bins while the bottom ones sit inside a single
@@ -127,8 +150,11 @@ filtered by each band. Applying Welch/FFT to one selected filtered waveform can
 be useful as a diagnostic view of the content inside that filtered band, but it
 does not recover FFT bins from the scalar band levels.
 
-## Magnitude Responses |H(jw)|
+## Magnitude Responses
 
+The magnitude response of a filter is $|H(j\omega)|$, the modulus of its
+transfer function evaluated on the imaginary axis: what the filter does to the
+amplitude of a steady sinusoid at each frequency, before any band is filtered.
 The library implements standard classical filter prototypes:
 
 **1. Butterworth:** Maximally flat passband.
@@ -163,6 +189,44 @@ $$
 
 (Where $\theta_n$ is the reverse Bessel polynomial)
 
+The five are not interchangeable for a reported band level, and the table says
+which is which:
+
+| Prototype | Passband | Stopband | Where its edge frequency is defined | IEC 61260-1 class reachable | Where it belongs |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Butterworth | Monotone, maximally flat | Monotone | −3 dB | **Class 1** with the defaults | The bank default, and any reported level |
+| Chebyshev II | Flat | Equiripple | −3 dB (mapped from the stopband edge) | Class 1 once `attenuation` ≥ 70 dB | A steeper skirt at the same order |
+| Chebyshev I | Equiripple (`ripple` dB) | Monotone | Passband ripple edge | None | Exploratory filtering |
+| Elliptic | Equiripple | Equiripple | Passband ripple edge | None | Exploratory filtering |
+| Bessel | Maximally flat group delay | Slow roll-off | −3 dB | None | Preserving a burst or decay envelope |
+
+The bank default is Butterworth, order 6, and it is the only architecture that
+clears the IEC 61260-1:2014 class 1 mask with the default parameters; Chebyshev II
+joins it once the stopband attenuation is raised to 70 dB or more. Chebyshev I,
+elliptic and Bessel fail the mask on passband ripple or roll-off whatever the
+parameters, so they belong to exploratory filtering and not to a band level that
+will be reported. The physical reason is worth carrying: a flat passband means an
+in-band tone is measured with no ripple error wherever it sits, and a monotone
+stopband makes leakage from a loud neighbouring band predictable. An equiripple
+design reaches the same mask at a lower order but biases a narrowband source by
+up to the ripple value depending on where in the band it falls, and smears
+impulsive signals through group-delay distortion near the edges. Bessel does the
+opposite: it preserves the shape of a decay or a burst envelope, which matters
+when the band signal feeds a reverberation-time fit, but will not meet class 1
+at any reasonable order. Raising the order tightens the mask fit and lengthens
+the filter transient, which the settling rule below quantifies.
+`verify_filter_class` checks a designed bank against the masks; see
+[Filter Class Verification](../../signals/filters/filter-compliance.md).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="88%"></picture>
+
+*The same 1 kHz octave band designed five ways. Look at three things: the
+flatness of the passband top (Butterworth and Chebyshev II flat, Chebyshev I and
+elliptic rippling by the design ripple), the steepness of the skirt just outside
+the edges, and the shape of the deep stopband. The zoom at the crossover is where
+the band-edge rule below becomes visible: the two equiripple designs are not at
+−3 dB there, because that is not where their edge is defined.*
+
 ### Band-edge placement
 
 Every architecture is designed on the band edges themselves, at whichever
@@ -179,47 +243,68 @@ and have no −3 dB point there. Two cases need special handling:
 - **Bessel**: designed with `norm="mag"`, which defines the −3 dB point exactly
   at `Wn` (the `phase` norm would shift the edges to roughly −10 dB).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="88%"></picture>
-
-*The same 1 kHz octave band designed five ways. Look at three things: the
-flatness of the passband top (Butterworth and Chebyshev II flat, Chebyshev I and
-elliptic rippling by the design ripple), the steepness of the skirt just outside
-the edges, and the shape of the deep stopband. The zoom at the crossover is where
-the band-edge rule below becomes visible: the two equiripple designs are not at
-−3 dB there, because that is not where their edge is defined.*
-
 ## Filter Bank Design & Numerical Stability
 
-To ensure **100% stability** across the entire audible spectrum (even at low
-frequencies like 16 Hz with high sample rates), phonometry employs two
-critical strategies:
+A single high-order band-pass at 16 Hz and 192 kHz puts its poles within about
+$10^{-4}$ of the unit circle, where float64 coefficients no longer resolve them
+and the difference equation degenerates. Two measures keep every band of the bank
+away from that regime:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Data flow inside one band of the filter bank: a band with room to decimate, meaning half the sample rate is at least 32 times its upper edge, so that it can be decimated by two or more and still keep its processing Nyquist frequency sixteen times that edge, takes the resample_poly branch down to fs over M so its poles stay clear of the unit circle, every band is then a cascade of second-order sections designed on the IEC 61260-1 band edges rather than one high-order transfer function, both branches end in the band level in dB, and sigbands=True additionally returns the band signal brought back to the input rate" width="92%"></picture>
 
-1. **Second-Order Sections (SOS):** All filters are implemented as a series of
-   cascaded biquads. This avoids the catastrophic numerical precision loss
-   associated with high-order transfer functions (coefficients a, b).
-2. **Multi-rate Decimation:** Whenever half the sample rate is at least 32
-   times the band's upper edge, the signal is automatically downsampled
-   (decimated) by
+1. **Second-Order Sections (SOS):** each band is a cascade of biquads rather than
+   one high-order transfer function, so a coefficient rounding error perturbs one
+   pole pair instead of all of them at once.
+2. **Multi-rate Decimation:** whenever half the sample rate is at least 32
+   times the band's upper edge, the signal is downsampled (decimated) by
    $M = \lfloor (f_\mathrm{s}/2) / (16\,f_\text{upper}) \rfloor$ before filtering
-   (the 18 lowest of the 33 one-third-octave bands at 48 kHz). This keeps the
-   digital pole locations far from the unit circle boundary, preventing
-   oscillation and noise, and it stops at sixteen times the upper edge because
-   closer to its Nyquist frequency the bilinear transform bends the band: at
-   1.25 times the edge the octave bank summed its adjacent outputs to
-   +0.94 dB, past the +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and at 16
-   the bend moves that sum by at most 0.005 dB. The band level is computed on
-   the decimated signal; only `sigbands=True` brings the band signal back to
-   the input rate, with `resample_poly(M, 1)`. Both directions run through the
-   same linear-phase Kaiser-windowed filter, sized for a 120 dB stopband so
-   that the images the decimation folds onto a band stay more than 125 dB
-   below it. A Chebyshev II band of low order
-   and deep stopband, whose stopband edge would sit above sixteen times its
-   upper edge, reserves more so its stopband edge stays below the decimated
-   Nyquist.
+   (the 18 lowest of the 33 one-third-octave bands at 48 kHz), so each low band
+   is filtered near its own natural rate and its poles sit well inside the unit
+   circle. It stops at sixteen times the upper edge because closer to its
+   Nyquist frequency the bilinear transform bends the band: at 1.25 times the
+   edge the octave bank summed its adjacent outputs to +0.94 dB, past the
+   +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and at 16 the bend moves that
+   sum by at most 0.005 dB. The band level is computed on the decimated signal;
+   only `sigbands=True` brings the band signal back to the input rate, with
+   `resample_poly(M, 1)`. Both directions run through the same linear-phase
+   Kaiser-windowed filter, sized for a 120 dB stopband so that the images the
+   decimation folds onto a band stay more than 125 dB below it. A Chebyshev II
+   band of low order and deep stopband, whose stopband edge would sit above
+   sixteen times its upper edge, reserves more so its stopband edge stays below
+   the decimated Nyquist.
+3. **Settling, and two effects that bias a band level.** A band filter needs
+   roughly $5/f_\text{low}$ seconds to settle, so a 1 s record already truncates
+   the 16 Hz band's response and reads several tenths of a decibel low while the
+   same record is ample above 500 Hz; the analysed record must exceed both
+   $5/f_\text{low}$ and, for a decay measurement, the reverberation time of the
+   band. `mode='peak'` reads the filter's own onset overshoot (up to about 1 dB
+   for an abruptly starting tone), so a peak band level of a gated signal should
+   discard the first $5/f_\text{low}$ seconds. And `zero_phase=True` runs the
+   cascade forwards and backwards: group delay disappears, which is what
+   ISO 3382-2 clause 7.3 wants for a decay, but the effective passband narrows
+   and the measured **broadband** band level falls by roughly 0.2 to 0.3 dB per
+   band (a pure in-band tone is unaffected, sitting where both passes are ≈ 0 dB),
+   so a level reported for conformity should come from the single forward pass.
+
+See the [Filter Banks guide](../../signals/filters/filter-banks.md) for usage,
+the [Filter Gallery](../../signals/filters/filter-gallery.md) for the five
+architectures side by side, and
+[Filter Class Verification](../../signals/filters/filter-compliance.md) for
+checking a designed bank against the IEC 61260-1 masks.
 
 ## Weighting Curves (IEC 61672-1)
+
+A frequency weighting is a fixed approximation to the ear's frequency response
+*at one loudness*, obtained by inverting an equal-loudness contour. **A** follows
+the inverse of the 40 phon contour, **C** the inverse of a contour near 100 phon
+(hence nearly flat through the mid band, with only the band-limiting roll-offs
+left), and **Z** is a defined flat response between stated band limits, not the
+absence of a filter. That origin is also the domain of validity: because A is
+anchored at 40 phon it progressively under-reads the low-frequency content of
+loud sources, which is exactly why loudness models, C-weighted peaks and the G
+curve below exist. See
+[Equal-loudness contours](perception.md#equal-loudness-contours-iso-2262023)
+for the contours themselves.
 
 The A-weighting transfer function:
 
@@ -227,16 +312,21 @@ $$
 R_\mathrm{A}(f) = \frac{12194^2 \cdot f^4}{(f^2 + 20.6^2)\sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)}(f^2 + 12194^2)}
 $$
 
+The four corner frequencies are the pole pairs at 20.6 Hz and 12194 Hz that band-
+limit the response and the single poles at 107.7 Hz and 737.9 Hz that build the
+low-frequency slope; the $+2.00$ dB term is the normalisation that forces the
+response to exactly 0 dB at 1 kHz.
+
 $$
 A(f) = 20 \log_{10}(R_\mathrm{A}(f)) + 2.00
 $$
 
 The digital filter is obtained from the analog poles/zeros via the bilinear
-transform. That transform compresses frequencies near Nyquist, so the default
-`high_accuracy` mode does not apply it to the printed prototype: it fits a
-prototype of the same structure whose response *at the warped frequencies* is
-the printed one's response at the true frequencies, and transforms that. See
-[Frequency Weighting](../../signals/levels/weighting.md).
+transform. Because the bilinear transform compresses frequencies near Nyquist,
+the default `high_accuracy` mode does not apply that transform to the printed
+prototype: it fits a prototype of the same structure whose response *at the
+warped frequencies* is the printed one's response at the true frequencies, and
+transforms that; see [Frequency Weighting](../../signals/levels/weighting.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="A, C and Z frequency weighting curves of IEC 61672-1 with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 
@@ -254,7 +344,25 @@ $$
 \alpha = 1 - \mathrm{e}^{-1 / (f_\mathrm{s} \cdot \tau)}
 $$
 
-Where $\tau$ is the time constant (e.g., 125 ms for Fast).
+This is the digital image of the analogue RC detector of the classical sound
+level meter: the squared pressure charges a capacitor through a resistor, so the
+displayed mean square is a one-pole low pass on $p^2$ with time constant $\tau$,
+and $\alpha = 1 - \mathrm{e}^{-1/(f_\mathrm{s} \tau)}$ is its impulse-invariant discretisation,
+exact at any $f_\mathrm{s}$, unlike the $1/(f_\mathrm{s} \tau)$ approximation often seen. The two
+standard constants are $\tau = 125$ ms (**Fast**) and $\tau = 1$ s (**Slow**).
+A step input reaches within 1 dB of its final value after about $1.6\tau$ and is
+0.03 dB short at $5\tau$, which is why levels read from the first few time
+constants of a record are biased low.
+
+**Impulse is not this filter.** It cannot be: a single $\alpha$ cannot hold a
+peak, and the figure below shows Impulse holding one. IEC 61672-1 defines the I
+weighting as a fast 35 ms detector followed by a 1.5 s decay, implemented here as
+an *asymmetric* detector: it charges with $\tau = 35$ ms whenever the input
+exceeds the current state and discharges with $\tau = 1.5$ s otherwise, so a
+transient is captured quickly and then held for over a second. That makes I
+neither an r.m.s. nor an energy average, which is why it is reserved for the
+specific regulations that name it and must never be energy-summed across
+intervals.
 
 The default initial condition is $y[-1] = 0$. Use `initial_state='first'` to
 start from the first input energy, or pass a scalar/array with the previous
@@ -280,7 +388,7 @@ $$
 k = \left| \frac{\prod_i (j\omega_{10} - p_i)}{\prod_i (j\omega_{10} - z_i)} \right|, \qquad \omega_{10} = 2\pi \cdot 10 \ \text{rad/s}
 $$
 
-The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz. Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies (a small dB increase above threshold produces a large loudness jump), so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
+The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.svg" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
 
@@ -288,6 +396,8 @@ The four zeros against eight poles shape the characteristic response: a rise of 
 Table 2 nominal values: 0 dB at the 10 Hz anchor, the +12 dB/octave climb
 through the infrasound decade below it, and the two 24 dB/octave roll-offs
 that fence the curve off below 1 Hz and above 20 Hz.*
+
+Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies (a small dB increase above threshold produces a large loudness jump), so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
 
 Since G acts on 0.25 Hz – 315 Hz, far below the Nyquist frequency at audio rates, the frequency warping of the plain bilinear transform (applied without prewarping) is negligible there: about 0.014 % at 315 Hz for $f_\mathrm{s} = 48$ kHz, under 0.01 dB on the response. The default design still fits the prototype at the sample rate as it does for A and C, which costs nothing here and matters at the low rates infrasound is often recorded at, where 315 Hz approaches Nyquist.
 
@@ -321,7 +431,7 @@ $$
 L_\mathrm{EX,8h} = 10 \log_{10}\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
-It is identical to $L_\mathrm{EP,d}$ of Directive 86/188/EEC and $L_\mathrm{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_\mathrm{EX,8h}$ of exactly 90 dB**.
+It is identical to $L_\mathrm{EP,d}$ of Directive 86/188/EEC and $L_\mathrm{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_\mathrm{EX,8h}$ of exactly 90 dB**. ISO 9612 prescribes how to sample a working day to obtain it and how to bound the result; see [Occupational noise exposure](environment-transport.md#occupational-noise-exposure-iso-9612).
 
 **$L_\mathrm{Cpeak}$** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_\mathrm{Cpeak} = 20\log_{10}(\max|p_\mathrm{C}(t)|/p_0)$, the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
 
@@ -335,7 +445,7 @@ $$
 \rho_0 \frac{\partial u}{\partial t} = -\frac{\partial p}{\partial r}
 $$
 
-A p-p probe approximates the pressure gradient by the **finite difference** of two microphones a spacer distance $\Delta r$ apart (IEC 61043:1994, definition 3.2):
+A p-p probe approximates the pressure gradient by the **finite difference** of two microphones a spacer distance $\Delta r$ apart (IEC 61043:1993, definition 3.2):
 
 $$
 p = \frac{p_1 + p_2}{2}, \qquad u = -\frac{1}{\rho_0 \Delta r} \int (p_2 - p_1)\ dt, \qquad I = \overline{p\ u}
@@ -355,13 +465,34 @@ $$
 
 IEC 61043 clause 7.3 specifies the probe intensity response with exactly this argument and Table 3 tabulates it (e.g. −10.5 dB at 6.3 kHz for a 25 mm spacer). Below $f = 0.1 c / \Delta r$ (i.e. $k \Delta r$ under 0.63) the bias stays within about 0.3 dB; `bias_correction` provides the reciprocal factor per band and `max_valid_frequency` the bound.
 
+**The usable band is bounded below as well, and the library exposes no bound for
+it.** Halving the spacer doubles the top of the band and simultaneously *halves*
+the true pressure difference between the two microphones, because that difference
+shrinks as $k \Delta r$. Any residual inter-channel phase mismatch is therefore
+amplified in the same proportion, and at low frequency it eventually swamps the
+true intensity, which is why a probe ships with a set of spacers rather than
+one. As orders of magnitude, a 50 mm spacer covers roughly the 50 Hz to 1.25 kHz
+thirds and a 12 mm spacer roughly 200 Hz to 5 kHz, so a full-range survey is two
+passes stitched at the overlap. The consequence for validity is that a band fails
+not because it lies above `max_valid_frequency` alone, but whenever the field
+reactivity climbs to within the bias-error factor of the instrument's residual
+index, which happens first at the *low*-frequency end.
+
+That residual index is measured, not looked up. A residual intensity testing
+device presents the same sound pressure to both microphones at once, both ports
+opening onto one small cavity, so whatever intensity the probe then indicates is
+pure phase-mismatch residual and $\delta_{pI0} = L_p - L_I$ in that state, per
+band. It is part of the checks made before a survey, with the microphones in the
+same ports and orientation they will be used in, and any phase compensation
+applied there stays applied for the measurement.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="88%"></picture>
 
 The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive the field is: in a free plane progressive wave it equals $10 \log_{10}(\rho_0 c / 400) = 0.14$ dB, while large values flag reactive or noisy fields in which the inter-channel phase error dominates. ISO 9614-1:1993 Annex A generalizes it over a measurement surface as the indicator F2 (with F3 for negative partial power and F4 for field non-uniformity), and the instrument's **dynamic capability** $L_\mathrm{d} = \delta_{pI0} - K$ (pressure-residual intensity index minus the bias error factor: 10 dB for grades 1/2, 7 dB for grade 3) must exceed F2 for the measurement to be valid (criterion 1).
 
 See the [Sound Intensity guide](../../devices/emission/intensity.md) for usage.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="One-third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
 
 *The p-p estimator in the two limiting fields: the gap between $L_p$ and $L_I$ is the pressure-intensity index that flags reactive fields.*
 
@@ -416,58 +547,21 @@ See the [GUM Uncertainty guide](../../signals/metrology/gum-uncertainty.md) for 
 
 ## References
 
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Open Library record](https://openlibrary.org/isbn/9780131988422).
-  The digital-filter theory behind the SOS cascades, the bilinear transform
-  and the multirate decimation of the filter-bank design section.
-- Smith, J. O. *Introduction to digital filters with audio applications*
-  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
-  Stanford University.
-  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
-  Free companion treatment of the classical filter prototypes and their
-  magnitude responses.
-- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  The physics of the p-p estimator: active intensity, the finite-difference
-  bias and the phase-mismatch error budget.
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The base-10 mid-band and band-edge definitions of the octave-band section
-  and the class masks the banks are verified against.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The A/C/Z weighting curves, the exponential time integration and the SEL
-  and LCpeak definitions of the event-metric section.
-- International Electrotechnical Commission. (1993). *Electroacoustics —
-  Instruments for the measurement of sound intensity — Measurements with
-  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
-  as EN 61043:1994).
-  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
-  The p-p instrument standard: the cross-spectral estimator and the
-  pressure-residual intensity index behind the dynamic capability.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17427.html).
-  The surface indicators F2–F4 that generalize the pressure-intensity index
-  over a measurement surface.
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Guide to the expression of uncertainty in measurement* (JCGM
-  100:2008, the GUM). BIPM.
-  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
-  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
-  The law of propagation of uncertainty and the Welch–Satterthwaite expanded
-  uncertainty of the GUM section.
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Supplement 1 to the "Guide to the expression of uncertainty in
-  measurement" — Propagation of distributions using a Monte Carlo method*
-  (JCGM 101:2008). BIPM.
-  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
-  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
-  The Monte Carlo propagation of distributions and its coverage-interval
-  construction.
+- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. https://doi.org/10.4324/9780203475386
+  ISBN 978-0-419-19810-9. The physics of the p-p estimator: active intensity, the finite-difference bias and the phase-mismatch error budget.
+- **International Electrotechnical Commission. (1993).** [*Electroacoustics — Instruments for the measurement of sound intensity — Measurements with pairs of pressure sensing microphones*](https://webstore.iec.ch/en/publication/4353) (IEC 61043:1993).
+  The p-p instrument standard, adopted in Europe as EN 61043:1994: the cross-spectral estimator and the pressure-residual intensity index behind the dynamic capability.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The A/C/Z weighting curves, the exponential time integration and the SEL and LCpeak definitions of the event-metric section.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The base-10 mid-band and band-edge definitions of the octave-band section and the class masks the banks are verified against.
+- **International Organization for Standardization. (1993).** [*Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points*](https://www.iso.org/standard/17427.html) (ISO 9614-1:1993).
+  The surface indicators F2–F4 that generalize the pressure-intensity index over a measurement surface.
+- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Guide to the expression of uncertainty in measurement*](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) (JCGM 100:2008, the GUM). BIPM. https://doi.org/10.59161/JCGM100-2008E
+  The law of propagation of uncertainty and the Welch–Satterthwaite expanded uncertainty of the GUM section. The linked PDF is the free download.
+- **Joint Committee for Guides in Metrology. (2008).** [*Evaluation of measurement data — Supplement 1 to the "Guide to the expression of uncertainty in measurement" — Propagation of distributions using a Monte Carlo method*](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf) (JCGM 101:2008). BIPM. https://doi.org/10.59161/JCGM101-2008
+  The Monte Carlo propagation of distributions and its coverage-interval construction. The linked PDF is the free download.
+- **Oppenheim, A. V., & Schafer, R. W. (2010).** [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
+  ISBN 978-0-13-198842-2. The digital-filter theory behind the SOS cascades, the bilinear transform and the multirate decimation of the filter-bank design section.
+- **Smith, J. O. (n.d.).** [*Introduction to digital filters with audio applications*](https://ccrma.stanford.edu/~jos/filters/). Center for Computer Research in Music and Acoustics (CCRMA), Stanford University.
+  A free online-book companion treatment of the classical filter prototypes and their magnitude responses.

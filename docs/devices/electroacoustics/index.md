@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/
 
 # Electroacoustics
 
@@ -103,18 +105,18 @@ are the place to start.
 
 ## What this section does not cover
 
-The type-test pages **reduce and report** what a laboratory measured; they do
-not acquire it. The free-field response, the polar cuts, the noise spectrum
-and the distortion-against-level sweep come in as data, and no procedure here
-tells you how to run the anechoic room or the substitution measurement that
-produced them. Two implemented editions are pinned rather than current: the
-distortion metrics follow AES17-2015 and not the 2020 revision, and the
-microphone report follows IEC 60268-4:2014 and not the 2018 one. Thiele-Small
-parameter extraction from an impedance curve is not implemented, and the
-electrical and mechanical power-handling ratings of IEC 60268-5 clauses 17 and
-18 are stated by the manufacturer rather than computed. The feedback criterion
-is level bookkeeping, not an acoustic model: it consumes two direct-field levels
-you supply, does not compute them from a coverage pattern, and predicts
-neither the ring frequency nor the effect of an equaliser or frequency
-shifter. And IEC 60268-16, the speech transmission index, is not part of this
-section at all: it is in [Speech](../../perception/speech/index.md).
+- **Not covered.** The type-test pages **reduce and report** what a laboratory measured; they do
+  not acquire it. The free-field response, the polar cuts, the noise spectrum
+  and the distortion-against-level sweep come in as data, and no procedure here
+  tells you how to run the anechoic room or the substitution measurement that
+  produced them. Two implemented editions are pinned rather than current: the
+  distortion metrics follow AES17-2015 and not the 2020 revision, and the
+  microphone report follows IEC 60268-4:2014 and not the 2018 one. Thiele-Small
+  parameter extraction from an impedance curve is not implemented, and the
+  electrical and mechanical power-handling ratings of IEC 60268-5 clauses 17 and
+  18 are stated by the manufacturer rather than computed. The feedback criterion
+  is level bookkeeping, not an acoustic model: it consumes two direct-field levels
+  you supply, does not compute them from a coverage pattern, and predicts
+  neither the ring frequency nor the effect of an equaliser or frequency
+  shifter. And IEC 60268-16, the speech transmission index, is not part of this
+  section at all: it is in [Speech](../../perception/speech/index.md).

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/human/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/
 
 # Human vibration
 
@@ -59,33 +61,33 @@ analysis](../../signals/index.md) section.
 
 ## What this section does not cover
 
-**A meter is graded on the clauses that can be computed.** The tolerance
-tables of ISO 8041-1 are implemented, and so is every other criterion of it
-that is arithmetic: the band-limiting stage on its own, the characteristic
-phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
-indications the standard prints, which
-is what [meter
-verification](meter-verification.md) is about. The
-design and type-testing clauses of that standard, from indication and
-linearity to the environmental tests, are laboratory measurements on hardware
-and stay outside: a pass on any of these is a necessary condition for
-conformity, not a certificate of it.
+- **the clauses that are arithmetic.** **A meter is graded on the clauses that can be computed.** The tolerance
+  tables of ISO 8041-1 are implemented, and so is every other criterion of it
+  that is arithmetic: the band-limiting stage on its own, the characteristic
+  phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
+  indications the standard prints, which
+  is what [meter
+  verification](meter-verification.md) is about. The
+  design and type-testing clauses of that standard, from indication and
+  linearity to the environmental tests, are laboratory measurements on hardware
+  and stay outside: a pass on any of these is a necessary condition for
+  conformity, not a certificate of it.
 
-**Building vibration stops at the weighting.** Of ISO 2631-2 the library
-implements the direction-independent `Wm` curve and nothing else, and that is
-closer to the standard than it looks: the 2003 edition deliberately deleted
-its predecessor's guidance values, so there are no acceptable magnitudes for
-building vibration to compare against. A reader looking for a limit will not
-find one here, and will not find one in the standard either.
+- **Not covered.** **Building vibration stops at the weighting.** Of ISO 2631-2 the library
+  implements the direction-independent `Wm` curve and nothing else, and that is
+  closer to the standard than it looks: the 2003 edition deliberately deleted
+  its predecessor's guidance values, so there are no acceptable magnitudes for
+  building vibration to compare against. A reader looking for a limit will not
+  find one here, and will not find one in the standard either.
 
-**Of ISO 2631-5, the clause 5 model only.** The Annex A finite-element model
-for less severe seated exposures is distributed separately by ISO and is not
-implemented, which is what makes the 1 g delineation above a routing decision
-rather than a preference.
+- **Not covered.** **Of ISO 2631-5, the clause 5 model only.** The Annex A finite-element model
+  for less severe seated exposures is distributed separately by ISO and is not
+  implemented, which is what makes the 1 g delineation above a routing decision
+  rather than a preference.
 
-And the verdict stops at the directive itself. An A(8) is assessed against
-the action and limit values of Directive 2002/44/EC (each marked exceeded or
-not, the exposure zone named, and a PASS/FAIL verdict issued against the
-limit value) but the library applies no national transposition of the
-directive, and the conclusion of a workplace risk assessment is not a number
-this section produces.
+- **Not covered.** And the verdict stops at the directive itself. An A(8) is assessed against
+  the action and limit values of Directive 2002/44/EC (each marked exceeded or
+  not, the exposure zone named, and a PASS/FAIL verdict issued against the
+  limit value) but the library applies no national transposition of the
+  directive, and the conclusion of a workplace risk assessment is not a number
+  this section produces.

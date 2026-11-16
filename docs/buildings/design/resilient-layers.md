@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/design/resilient-layers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/
 
 # Predicting Resilient-Layer Performance
 
@@ -14,6 +16,15 @@ side lives in
 [Floor-Covering Impact Improvement (ISO 16251-1)](impact-improvement.md)
 and
 [Dynamic stiffness of resilient materials](../../materials/resilient/dynamic-stiffness.md).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_resilient_buildups_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_resilient_buildups.svg" alt="Three resilient constructions in section with their mass-spring analogues: a floating screed on a continuous layer turned up at the wall, a walking surface on discrete mounts, and a wall lining bonded with adhesive dabs beside the same lining on studs over a filled cavity" width="92%"></picture>
+
+Every formula below is chosen by a construction detail, so it is worth having the
+three build-ups in view: a continuous resilient layer under a screed, discrete
+mounts under a walking surface, and a lining fixed to a wall either by bonding or
+on studs over a cavity. Which of them you have built decides which law applies,
+and as the last section of this page shows, whether the prediction means
+anything at all.
 
 ## The excitation: the tapping machine as a mass-spring-dashpot
 
@@ -73,6 +84,47 @@ res.power_input_level        # 10 lg(Win/1 pW), rising 3 dB per doubling
 res.plot()                   # the force spectrum with both asymptotes
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tapping_force_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tapping_force_spectrum.svg" alt="Tapping-machine force spectrum on a 140 mm concrete slab and on a 22 mm chipboard walking surface, each with its upper and lower momentum asymptotes, its cut-off frequency and the hammer limiting frequency marked, and the 6 dB gap between the two asymptotes annotated" width="88%"></picture>
+
+*The same machine, two floors. On concrete the hammer rebounds
+(**under-critical**) and the spectrum hugs the upper asymptote
+$|F_n|_\text{upper} = 2mv_0/T_\mathrm{i}$ to within 1 dB right across the building
+acoustics range, its cut-off sitting at 6 948 Hz and its hammer limiting
+frequency at 120 kHz, both far outside anything that is rated. On 22 mmchipboard the surface gives way, the hammer does not rebound
+(**over-critical**), and both frequencies collapse into the middle of the range:
+$f_\mathrm{co}$ = 589 Hz and $f_\mathrm{limit}$ = 555 Hz, so the spectrum bends
+towards the lower asymptote $mv_0/T_\mathrm{i}$ where a rated band actually sits.
+The two asymptotes are 6.0 dB apart in mean square, and that gap is the whole
+reason a tapping-machine level measured on a timber floor cannot be compared with
+one measured on concrete: the machine is injecting a different force.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+# The names come from the import block above.
+
+freqs = np.logspace(np.log10(50.0), np.log10(20000.0), 400)
+fig, ax = plt.subplots()
+for label, rho_s, c_s, nu_s, h_s in (("140 mm concrete", 2200.0, 3800.0, 0.2, 0.14),
+                                     ("22 mm chipboard", 650.0, 2400.0, 0.3, 0.022)):
+    e_s = rho_s * c_s**2 * (1 - nu_s**2)
+    z_s = vibration.infinite_plate_impedance(vibration.plate_bending_stiffness(e_s, h_s, nu_s),
+                                             rho_s * h_s)
+    k_s = building.plate_contact_stiffness(e_s, poisson_ratio=nu_s)
+    r = building.tapping_force_spectrum(freqs, k_s, z_s)
+    ax.loglog(freqs, r.peak_force, label=f"{label} (fco = {r.cut_off_frequency:.0f} Hz)")
+    ax.axhline(r.upper_limit, ls="--", lw=0.8)
+    ax.axhline(r.lower_limit, ls=":", lw=0.8)
+ax.set(xlabel="Frequency [Hz]", ylabel="Line force $|F_n|$ [N]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## Soft floor coverings: the cut-off frequency is the design
 
 A soft covering on a heavyweight floor changes nothing but the force input:
@@ -102,6 +154,15 @@ against a design estimate of 27.9 dB, while the band value is 33.3 dB.
 carries the nulls where they belong.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soft_covering_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soft_covering_prediction.svg" alt="Predicted improvement of impact sound insulation of two soft floor coverings on a 140 mm concrete slab: a stiff PVC covering whose cut-off frequency of 2318 Hz leaves it useless across the building acoustics range, and a resiliently backed covering whose 100 Hz cut-off gives 70 dB by 5 kHz, each against its two-line 12 dB per octave estimate" width="80%"></picture>
+
+*Two 5 mm coverings on the same slab, differing only in modulus, and the whole
+distance between them is $f_\mathrm{co}$. The stiff PVC puts it at 2318 Hz, above
+most of the rating range, so it is still worth 3.4 dB at 3150 Hz and buys
+nothing where footfall lives; the resiliently backed one at 100 Hz is already
+worth 17.0 dB at 250 Hz and reaches 69.6 dB at 5 kHz. Above $f_\mathrm{co}$ both
+climb at 12 dB per octave, and the dotted two-line construction tracks the band
+values within about 3 dB except around the transform's nulls, where the 315 Hz
+band runs 7.8 dB high.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -171,11 +232,28 @@ applies is a question about damping, not about the layer:
 
 | Model | Law | When |
 | --- | --- | --- |
-| `"cremer"` | $\Delta L = 40 \log_{10} (f/f_0)$ | Cremer's infinite-plate result; asphalt screeds and dry floating floors, whose internal losses are high enough to behave as infinite plates (ISO 12354-2 Formula C.3) |
+| `"cremer"` | $\Delta L = 40 \log_{10} (f/f_0)$ | Cremer's infinite-plate result; asphalt screeds and dry floating floors, whose internal losses are high enough to behave as infinite plates (ISO 12354-2 Formula C.3). The derivation is reported to hold over $f_0 < f < 4f_0$, so the branch far above resonance is an extrapolation |
 | `"en12354"` | $\Delta L = 30 \log_{10} (f/f_0)$ | sand-cement and calcium-sulfate screeds, whose low loss factor makes them finite plates with a reverberant bending field (Formula C.1) |
 | `"cremer_hammer"` | $40 \log_{10} (f/f_0) + 10 \log_{10}[1 + (f/f_\mathrm{limit})^2]$ | a lightweight walking surface, where the hammer impedance is no longer negligible; tends to 18 dB per octave |
 
+All three laws are written for $f > f_0$, and the library clamps them to zero
+at and below the resonance. That clamp is a convention, not a physical result:
+in the band containing $f_0$ the mass-spring system amplifies, and measured
+floors fall between about $-5$ dB and $0$ dB there (the "worse than bare at
+$f_0$" of the introduction), which no model on this page reproduces. As long as
+$f_0$ sits below the rated range the difference is harmless, but a stiff layer
+or a light screed that puts $f_0$ near 100 Hz produces a $\Delta L_\mathrm{w}$ that is
+optimistic in precisely the band that decides the rating. Check where $f_0$
+lands before trusting the number.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floating_floor_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floating_floor_prediction.svg" alt="Improvement of impact sound insulation of a 35 mm floating screed of 73.5 kg per square metre on an 8 meganewton per cubic metre resilient layer: nothing below the 52.8 Hz mass-spring resonance, then the 30 lg law of EN 12354-2 reaching 59 dB at 5 kHz against the steeper 40 lg law of Cremer and the 18 dB per octave branch that includes the tapping-machine hammer impedance" width="80%"></picture>
+
+*Identical $s'$ and $m'$, identical 52.8 Hz resonance, nothing below it, and
+three answers that part company immediately above: at 1 kHz 38.3, 51.1 and
+57.8 dB, at 5 kHz 59.3, 79.1 and 98.7 dB. Choosing the branch is choosing the
+answer, and the choice is a statement about the screed's internal damping and
+the walking surface's impedance, not about the resilient layer, which is the
+same in all three.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -273,7 +351,10 @@ Table D.1 then reads the weighted improvement off $f_0$, rounded to the
 one-third-octave band it falls in. Below 200 Hz the lining helps, by
 $74.4 - 20\log_{10} f_0 - R_\mathrm{w}/2$ dB, and the better the bare wall the less there is
 to gain. From 200 Hz upwards it costs: 1 dB at 200 Hz falling to 10 dB from
-630 Hz to 1600 Hz, recovering to 5 dB above. Getting the resonance well below
+630 Hz to 1600 Hz, recovering to 5 dB above. The printed table puts 1600 Hz in
+both of its last two rows; `weighted_lining_improvement` charges the 10 dB
+there, as the 2000 edition printed it, and the
+[errata registry](../../ERRATA.md) records the overlap. Getting the resonance well below
 the range of interest is therefore the entire design brief.
 
 ```python
@@ -299,6 +380,60 @@ res.plot()   # the Annex D ratings against fo, with this system marked
 # A laboratory rating transfers to the field through Formula (D.8).
 round(building.lining_improvement_in_situ(10.0, 100.0, 60.0), 1)  # 4.4 dB on a Rw 60 wall
 ```
+
+## What the formulae assume about the build
+
+Every model on this page assumes the resilient layer is the *only* mechanical
+connection between the two masses. None of them can see a rigid bridge, so all of
+them are upper bounds on a correctly built construction, and in the field the
+gap between a prediction and a measurement is far more often a bridge than a
+wrong $s'$.
+
+**Start with the right $s'$.** ISO 12354-2 Annex C qualifies it three times, in
+Formulae (C.2), (C.4)/(C.5) and (C.6), with the same phrase: the dynamic
+stiffness per unit area in accordance with EN 29052-1 **measured without any
+pre-load**. A stiffness quoted under service load is a different number, and
+since $f_0 \propto \sqrt{s'}$ a factor of two in the declared stiffness moves the
+resonance by $\sqrt{2}$ and shifts the whole improvement spectrum by
+$30\lg\sqrt{2} = 4{,}5$ dB on the 30 lg law, 6,0 dB on the 40 lg one. The
+[dynamic-stiffness guide](../../materials/resilient/dynamic-stiffness.md)
+shows what the load plate does and why it is what it is.
+
+**The series law has a condition printed under it.** Formula (C.6),
+$s'_\mathrm{tot} = (\sum 1/s'_i)^{-1}$, is followed verbatim by: this holds only if
+every resilient layer covers the whole area of the floor without any separations
+or cuttings, for example by heating or water-supply pipes or electrical devices.
+Services crossing a layer therefore invalidate it; the layer is laid *over* them,
+not around them.
+
+**Then the bridges.** These are the ways the assumption fails on site, roughly in
+order of how often:
+
+- screed in contact with the wall, because the edge strip was cut short, folded
+  down before the pour, or trimmed flush and then grouted over by the skirting;
+- screed touching a service penetration (a pipe, a conduit, a floor box) that
+  was not sleeved;
+- debris and mortar droppings left on the resilient layer before the pour, each
+  one a point bridge;
+- skirtings, door thresholds or floor finishes fixed *through* the floating slab
+  into the structure below;
+- a wall lining bonded with too many or too large adhesive dabs, which moves the
+  construction from the intended soft case to the D.1 bonded case;
+- for discrete mounts, any contact at all besides the mounts.
+
+The scale is brutal and the signature is recognisable. A handful of point bridges
+can cost 10 dB or more; a continuous edge contact can remove the improvement
+almost entirely. And because a bridge short-circuits the spring rather than
+detuning it, a bridged floating floor loses across the *whole* range above $f_0$
+rather than in one band, which is how it is told apart from a wrong $s'$ or a
+misplaced resonance in a
+[field measurement](../insulation/insulation-field.md).
+
+For linings the same point has a number on it, and it is on this page already:
+the Annex D formula is chosen by the fixing, so a board specified on studs over a
+filled cavity but built with adhesive dabs moves $f_0$ from 70,8 Hz to 542 Hz and
+turns a +13,8 dB gain into a $-9{,}0$ dB loss. Nearly twenty-three decibels, from
+a site decision that never reached a drawing.
 
 ## What is anchored on a published number, and what is not
 
@@ -340,73 +475,31 @@ example.
 
 ## What this guide covers
 
-**Covered.** Hopkins 3.6.3's tapping-machine force pulse (Eqs. 3.85, 3.90 to
-3.92, 3.95 to 3.106) through `tapping_force_spectrum`, `force_pulse`,
-`plate_contact_stiffness`, `covering_contact_stiffness`,
-`tapping_cut_off_frequency`, `hammer_limiting_frequency` and
-`short_pulse_mean_square_force`; the soft-covering improvement of Hopkins
-4.4.3.1 (Eq. 4.114 and the two-line estimate) through `covering_improvement`;
-ISO 12354-2:2017 Annex C (Formulae C.1 to C.6) with Hopkins 4.4.4 and Vigran
-8.4 through `floating_floor_resonance_frequency`,
-`floating_floor_improvement_spectrum`, `weighted_floating_floor_improvement`,
-`combined_dynamic_stiffness`, `double_floating_floor_resonances` and
-`resilient_mount_improvement`; and ISO 12354-1:2017 Annex D (Formulae D.1 to
-D.8 and Table D.1) through `lining_resonance_frequency`,
-`weighted_lining_improvement`, `lining_improvement` and
-`lining_improvement_in_situ`.
+- **Covered.** Hopkins 3.6.3's tapping-machine force pulse (Eqs. 3.85, 3.90 to 3.92, 3.95 to
+  3.106) through `tapping_force_spectrum`, `force_pulse`,
+  `plate_contact_stiffness`, `covering_contact_stiffness`,
+  `tapping_cut_off_frequency`, `hammer_limiting_frequency` and
+  `short_pulse_mean_square_force`; the soft-covering improvement of Hopkins
+  4.4.3.1 (Eq. 4.114 and the two-line estimate) through `covering_improvement`;
+  ISO 12354-2:2017 Annex C (Formulae C.1 to C.6) with Hopkins 4.4.4 and Vigran
+  8.4 through `floating_floor_resonance_frequency`,
+  `floating_floor_improvement_spectrum`, `weighted_floating_floor_improvement`,
+  `combined_dynamic_stiffness`, `double_floating_floor_resonances` and
+  `resilient_mount_improvement`; and ISO 12354-1:2017 Annex D (Formulae D.1 to
+  D.8 and Table D.1) through `lining_resonance_frequency`,
+  `weighted_lining_improvement`, `lining_improvement` and
+  `lining_improvement_in_situ`.
 
-**Not covered.** The force model assumes a frequency-independent
-driving-point impedance, so a joisted or battened lightweight floor, whose
-impedance changes with where the hammer lands, is outside it; Hopkins points
-to numerical methods there. Soft coverings are treated as linear springs, and
-their measured non-linearity under the tapping machine is not modelled. There
-is no per-band prediction of a lining's $\Delta R(f)$: Annex D is a
-single-number method, and where ISO 12354 needs a lining spectrum it either
-measures it (ISO 10140-1 Annex G) or, for a floating floor, takes
-$\Delta R(f) = \Delta L(f)$, which its own Annex L calls rough. Heavy impact
-sources (the rubber ball) are not covered by any of these models.
-
-## References
-
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  Section 3.6.3 for the tapping-machine contact model and the force spectrum,
-  Section 4.3.8 for the covering cut-off frequency and the two-line estimate,
-  and Sections 4.3.9 and 4.3.10 for the floating-floor improvement laws.
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Section 8.4 for the resilient-mount improvement and the hammer-on-covering
-  resonances used here as spot checks.
-- International Organization for Standardization. (2017). *Building acoustics
-  — Estimation of acoustic performance of buildings from the performance of
-  elements — Part 1: Airborne sound insulation between rooms*
-  (ISO 12354-1:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70242.html).
-  Annex D, the additional-layer ratings this page reads off the resonance
-  frequency.
-- International Organization for Standardization. (2017). *Building acoustics
-  — Estimation of acoustic performance of buildings from the performance of
-  elements — Part 2: Impact sound insulation between rooms*
-  (ISO 12354-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70243.html).
-  Annex C, the floating-floor improvement and its weighted rating, and the
-  Annex G worked example whose per-band column anchors Formula (C.1).
-
-## Standards
-
-ISO 12354-2:2017, Annex C: the floating-floor resonance (Formula C.2), the
-improvement spectrum of Formula (C.1) and the weighted ratings of Formulae
-(C.4) and (C.5), with the combination rule of Formula (C.6). The per-band
-column of the Annex G worked example anchors Formula (C.1) band for band.
-
-ISO 12354-1:2017, Annex D: the additional-layer resonance (Formulae D.1 and
-D.2), the Table D.1 ratings read at the rounded one-third-octave band of the
-resonance, and the corrections of Formulae (D.3) to (D.8). One defect of the
-printed annex, Table D.1 listing 1600 Hz in two rows, is recorded in
-`docs/ERRATA.md`. What each formula rests on is
-set out in "What is anchored on a published number, and what is not" above.
+- **Not covered.** The force model assumes a frequency-independent driving-point impedance, so a
+  joisted or battened lightweight floor, whose impedance changes with where the
+  hammer lands, is outside it; Hopkins points to numerical methods there. Soft
+  coverings are treated as linear springs, and their measured non-linearity
+  under the tapping machine is not modelled. There is no per-band prediction of
+  a lining's $\Delta R(f)$: Annex D is a single-number method, and where ISO
+  12354 needs a lining spectrum it either measures it (ISO 10140-1 Annex G) or,
+  for a floating floor, takes $\Delta R(f) = \Delta L(f)$, which its own Annex L
+  calls rough. Heavy impact sources (the rubber ball) are not covered by any of
+  these models.
 
 ## See also
 
@@ -422,3 +515,17 @@ set out in "What is anchored on a published number, and what is not" above.
   the mass-spring-mass resonance of a double leaf, the airborne counterpart of
   the lining resonance.
 - API reference: [`building.prediction.resilient_layers`](https://docs.jmrp.io/phonometry/reference/api/building/resilient-layers/).
+- Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mass-spring picture behind an improvement index, and why a resilient layer is a mobility mismatch.
+
+## References
+
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  Section 3.6.3 (the tapping-machine force pulse and its cut-off frequency), 4.3.8 (surface finishes and linings), 4.4.3.1 (soft floor coverings) and 4.4.4 (floating floors), the source of the models on this page. ISBN 978-0-7506-6526-1.
+- **International Organization for Standardization. (1989).** [*Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings*](https://www.iso.org/standard/16620.html) (EN 29052-1:1992 (ISO 9052-1:1989)).
+  The measurement of the dynamic stiffness per unit area s' that every formula on this page starts from.
+- **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://www.iso.org/standard/70242.html) (ISO 12354-1:2017).
+  Annex D, the resonance frequency of an additional layer (Formulae D.1/D.2) and the weighted sound reduction index improvement it implies (Table D.1, Formulae D.3 to D.8).
+- **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://www.iso.org/standard/70243.html) (ISO 12354-2:2017).
+  Annex C, the floating-floor improvement laws (Formulae C.1 to C.3), the weighted improvement fits (C.4/C.5) and the series combination of resilient layers (C.6); Annex G Table G.4, the printed per-band improvement reproduced here.
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+  Section 8.4, the independent statement of the same floating-floor and floor-covering models (Eqs. 8.40, 8.45 to 8.48, 8.51) used here as a cross-source check. ISBN 978-0-415-42853-8.

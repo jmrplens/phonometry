@@ -4,10 +4,11 @@
 Two files hold the numbers. ``backend_tolerance.json`` is the bound the
 tolerance test holds each backend to, and ``gpu-parity.lock`` is the CuPy
 proof: the GPU, the NVIDIA driver, CuPy, the CUDA versions and the energy
-difference. The guide "Where a simulation runs" quotes them in English, in
-Spanish (with a decimal comma) and in its ``docs/`` mirror; the module
-docstrings of the two engines quote the energy bound, and the changelog entry
-of the feature quotes the bounds and the versions.
+difference. The guide "Where a simulation runs" quotes them in English and in
+Spanish (with a decimal comma), and ``make llms`` writes its GitHub edition
+from the English page; the module docstrings of the two engines quote the
+energy bound, and the changelog entry of the feature quotes the bounds and
+the versions.
 
 A new measurement that changes a record and leaves a page behind fails here,
 and so does a page edited to a number no record holds: each page has to
@@ -207,14 +208,6 @@ _PAGES = (
         _SPANISH_VERSIONS + _PROVENANCE_EXAMPLE,
         _SPANISH_MATRIX,
         "es",
-    ),
-    _Page(
-        "docs/simulation/compute.md",
-        ".",
-        "not published yet",
-        _ENGLISH_VERSIONS + _PROVENANCE_EXAMPLE,
-        _ENGLISH_MATRIX,
-        "en",
     ),
 )
 _PAGE_IDS = [page.path for page in _PAGES]

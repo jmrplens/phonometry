@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/absorbers/porous-absorbers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/
 
 # Porous and Multilayer Absorbers
 
@@ -10,10 +12,14 @@ and microperforated panels, membranes) predicts the absorption coefficient
 of the whole construction before anything is built. This page covers the
 three porous models (Delany–Bazley, Miki, Johnson–Champoux–Allard), the
 multilayer solver, the resonant sheet layers of Maa and the random-incidence
-(Paris) integral. The measurement counterparts live in the
+(Paris) integral. All three of those models assume the skeleton never moves;
+the page also covers what to do when it does: the limp-frame inertia
+correction below the decoupling frequency, and the full Biot poroelastic
+layer, whose frame-borne wave produces a quarter-wavelength resonance no
+equivalent fluid can reproduce. The measurement counterparts live in the
 [impedance tube](impedance-tube.md) and
-[reverberation room](absorption-measurement.md) guides; rating the predicted
-spectrum lives in the latter's
+[reverberation room](absorption-measurement.md) guides;
+rating the predicted spectrum lives in the latter's
 [ISO 11654 section](absorption-measurement.md#3-weighted-rating-and-absorption-class-iso-11654);
 and the resonant metamaterial relatives of these constructions, slow-sound
 slit panels that reach perfect absorption at critical coupling, have their
@@ -46,7 +52,11 @@ input impedance at low frequency (Mechel Sect. G.12).
 **Miki** (1990) refitted the same Delany–Bazley data under a passivity
 (positive-real) constraint, so the model stays physically well behaved below
 the fit range; it is the usual choice when a one-parameter model must be
-evaluated broadband.
+evaluated broadband. Miki states his own validity window in the paper's
+variable $Y = f/\sigma$, $0.01 < Y < 1.0$: the Delany–Bazley window divided
+by $\rho_0$, so the two differ by a factor of about 1.2 rather than by a slip
+of the pen. The library warns on $X$ for `delany_bazley` and on $Y$ for
+`miki`, each against its own published range.
 
 **Johnson–Champoux–Allard (JCA)** is the five-parameter semi-phenomenological
 model (Cox & D'Antonio 3e Eqs. 6.19–6.25): flow resistivity $\sigma$,
@@ -78,43 +88,6 @@ refused than handed a `None`.
 These are parameter sets from worked examples and not a material database: a
 real specimen is characterised to ISO 9053 and ISO 10534-2, and every model
 here keeps its parameters as explicit arguments.
-
-Where a specimen is incomplete rather than absent, four published relations
-close the gap. `porosity_from_bulk_density` is Hopkins Eq. (1.160),
-$\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$;
-`airflow_resistivity_from_bulk_density` is his Eq. (1.165),
-$r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$, taking a
-`FiberResistivityFit` that carries the bulk-density range it was fitted over and
-warning outside it, with the rock wool of his Fig. 1.49 published both lateral
-and longitudinal because mineral wool is anisotropic;
-`viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
-$\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$; and
-`fiber_characteristic_lengths` their Eqs. (5.29) and (5.30) for a bundle of
-cylinders, which gives both lengths from the fibre radius and the two densities.
-
-Each says what it is worth. Hopkins' two equations check each other: the ends of
-the bulk-density range his resistivity fit was made over, put through his
-porosity relation at the fibre density he states, give back the porosity range he
-prints beside them, 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³. A unit shape
-factor in Eq. (5.25) lands within a factor of two on eighteen of the twenty-three
-specimens Allard & Atalla print with all four columns, and nowhere near a carpet.
-And the two routes to $\Lambda$ are different models, not two readings of one:
-on the same rock wool the cylinder bundle is the lower estimate throughout, by
-1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
-
-```python
-from phonometry import materials
-
-sigma = materials.airflow_resistivity_from_bulk_density(
-    60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
-)
-phi = materials.porosity_from_bulk_density(
-    60.0, fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3
-)
-print(round(sigma), round(phi, 3))                       # 23226 0.977
-print(round(materials.viscous_characteristic_length(
-    sigma, porosity=phi, tortuosity=1.0) * 1e6, 1))      # 80.5
-```
 
 ```python
 import numpy as np
@@ -178,6 +151,204 @@ data (for example the $Z_\mathrm{c}$, $k$ recovered by the
 [ASTM E2611 transfer-matrix reduction](impedance-tube.md)) plugs into the layer
 solver exactly like a modelled one.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_model_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_model_comparison.svg" alt="Left panel: the normalised characteristic impedance of a 20 kPa s per square metre material under Delany-Bazley, Miki and Johnson-Champoux-Allard from 20 hertz to 20 kilohertz on log-log axes, with the 0.01 to 1 fit window in the absorber variable shaded; the three curves overlie inside the window and separate below it. Right panel: the real part of the input impedance of a 50 mm hard-backed layer under the same three models, where the Delany-Bazley curve goes negative below 74.6 hertz while Miki and JCA stay positive" width="90%"></picture>
+
+*The three models, and what "outside the fit range" costs. Inside the
+$0.01 < X < 1$ window the curves are practically the same material, which is
+why the one-parameter fits are still used. Below it they part company, and the
+right panel shows the consequence in the quantity a designer actually uses: for
+this 50 mm hard-backed layer Delany–Bazley returns a **negative** resistance
+below 74.6 Hz, a passive layer that generates energy. Miki's passivity
+constraint keeps it positive, and JCA is physical everywhere by construction.
+The warning `PorousAbsorberWarning` fires here; the extrapolated values are
+still returned, so it is the caller's job to notice.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+f_cmp = np.geomspace(20.0, 20000.0, 400)
+for name, medium in (
+    ("Delany-Bazley", materials.delany_bazley(f_cmp, 20000.0)),
+    ("Miki", materials.miki(f_cmp, 20000.0)),
+):
+    zs = materials.layered_absorber(
+        f_cmp, [materials.PorousLayer(thickness_m=0.05, medium=medium)]
+    ).normalized_impedance
+    below = f_cmp[zs.real < 0.0]
+    print(name, "Re(Zs) < 0 below", f"{below.max():.1f} Hz" if below.size else "never")
+# Delany-Bazley Re(Zs) < 0 below 74.6 Hz
+# Miki Re(Zs) < 0 never
+```
+
+</details>
+
+### 1.1 Where the five JCA numbers come from
+
+Delany–Bazley and Miki need one measured number. JCA needs five, and a reader
+with a real sample has to get the other four from somewhere.
+
+**Flow resistivity $\sigma$** is the only one with a standard behind it:
+ISO 9053-1 or -2, in the [airflow-resistance guide](airflow-resistance.md).
+It is also the one to re-measure first when a model and a measurement
+disagree.
+
+**Porosity $\phi$** is the *open* (connected) porosity: the ratio of the air
+volume to the total volume, counting only air that is not locked inside the
+frame, so a closed bubble in a foam belongs to the frame and not to $\phi$
+(Allard & Atalla 2e Sect. 2.5.1). It is measured by gas-displacement methods
+(Zwikker & Kosten 1949; Champoux et al. 1991), and for most fibrous materials
+and open-cell foams it "lies very close to 1", which is why 0.95–0.99 is a
+defensible starting guess and why $\phi$ is rarely the parameter that matters.
+
+**Tortuosity $\alpha_\infty$** is an intrinsic property of the micro-geometry:
+it is what the effective density tends to, times $\rho_0$, once the viscous
+skin depth vanishes. It can be evaluated from electrical-conductivity
+measurements on a frame saturated with a conducting fluid (Sect. 4.9), or
+together with the two characteristic lengths from ultrasonic transmission
+(Sect. 5.3.5). It is 1 for straight pores normal to the surface and grows with
+any dispersion of the microscopic velocity.
+
+**The characteristic lengths $\Lambda$, $\Lambda'$** are the hardest to get
+directly: the reference method is ultrasonic transmission in two gases (helium
+and air), and the book's own worked foam ($\phi = 0.98$) comes out at
+$\Lambda = 202$ µm, $\Lambda' = 367$ µm and $\alpha_\infty = 1.05$ from exactly
+that measurement (Leclaire et al. 1996, reproduced as Fig. 5.5). Note the
+ratio: $\Lambda'/\Lambda \approx 1.8$ there, not 1 and not 3. It is a property
+of the pore geometry, so treat it as something to *find*, not to assume. Where
+no ultrasonic bench is available, the practical route is an inverse fit
+against a measured normal-incidence surface impedance, the quantity the
+[impedance tube](impedance-tube.md) returns, and
+where even that is out of reach, the closed-form fallback
+$\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ with
+$\alpha_\infty = 1$ collapses JCA back onto Delany–Bazley over its fit range.
+That fallback is `viscous_characteristic_length`, and the next section says what
+it and three relations like it are worth.
+
+The inverse fit is a few lines, and it is worth running against a synthetic
+"measurement" first so that the recovery can be checked:
+
+```python
+from scipy.optimize import least_squares
+
+f_fit = np.geomspace(200.0, 1600.0, 40)      # a 100 mm tube's usable band
+
+def surface_impedance(sigma, viscous):
+    """Normalised Zs of a 50 mm hard-backed JCA layer."""
+    medium = materials.johnson_champoux_allard(
+        f_fit, sigma, porosity=0.98, tortuosity=1.05,
+        viscous_length_m=viscous, thermal_length_m=2.5 * viscous,
+    )
+    layer = materials.layered_absorber(f_fit, [materials.PorousLayer(thickness_m=0.05, medium=medium)])
+    return layer.normalized_impedance
+
+# Stand in for the tube result: a specimen whose true parameters we know.
+measured = surface_impedance(22000.0, 9.0e-5)
+
+def residual(p):                              # sigma in kPa s/m2, Lambda in um
+    z = surface_impedance(p[0] * 1e3, p[1] * 1e-6)
+    return np.concatenate([(z - measured).real, (z - measured).imag])
+
+fit = least_squares(residual, x0=[10.0, 50.0],
+                    bounds=([1.0, 10.0], [200.0, 500.0]))
+print(round(fit.x[0] * 1e3), round(fit.x[1], 1))   # 22000 90.0 -- both recovered
+```
+
+Two warnings go with it. Fitting all five parameters at once is
+under-determined against one impedance spectrum: hold $\phi$ at its measured
+or near-unity value, hold $\alpha_\infty$ unless there is a reason to move it,
+and let the fit find $\sigma$ and the lengths. And when a fitted $\sigma$ comes
+out far from the flow rig's answer, believe the rig: a fit that has absorbed a
+mounting error into the material parameters will predict every other
+construction wrong.
+
+### 1.2 Filling in what a table did not print
+
+Published specimens are incomplete in a regular way. A building-materials table
+gives a bulk density and no porosity. A manufacturer's sheet gives a bulk
+density and no flow resistivity. Almost nothing gives a characteristic length,
+because measuring one needs an ultrasonic bench. Four published relations close
+those gaps, and each of them is an estimate that says how good an estimate it
+is.
+
+**Porosity from the two densities.** `porosity_from_bulk_density` is Hopkins
+Eq. (1.160), $\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$, which holds
+when the fibres are solid and the binder has negligible mass.
+
+**Resistivity from the bulk density.** `airflow_resistivity_from_bulk_density`
+is his Eq. (1.165), $r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$ with
+the fibre diameter in micrometres. The constants belong to a material, not to
+mineral wool in general, so they travel in a `FiberResistivityFit` that carries
+the fibre diameter they were fitted at and the bulk-density range they were
+fitted over, and a density outside that range is announced rather than
+extrapolated in silence. Two are published from Hopkins' page, for the same rock
+wool measured both ways round: mineral wool is anisotropic, its fibres lie
+mostly in the plane of the sheet, and a flow through the sheet crosses more of
+them than a flow along it.
+
+```python
+# The rock wool of Hopkins Fig. 1.49, at a density every supplier stocks.
+sigma = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
+)
+phi = materials.porosity_from_bulk_density(
+    60.0, fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3
+)
+print(round(sigma), round(phi, 3))
+# 23226 0.977
+
+# In the plane of the sheet the same wool resists about half as much.
+lateral = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LATERAL_FIT
+)
+print(round(lateral), round(sigma / lateral, 2))
+# 12382 1.88
+```
+
+The two equations are printed on facing pages and they check each other. Put the
+ends of the bulk-density range the resistivity fit was made over through the
+porosity relation, at the fibre density Hopkins states, and the porosity range
+he prints beside them comes back: 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³.
+
+**The viscous length from the three measured parameters.**
+`viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
+$\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$ with a shape factor $c$
+close to 1. How close is the question, and the book answers it against itself:
+across the twenty-three specimens it prints with all four columns at once, a
+unit shape factor lands within a factor of two on eighteen, with the middle of
+the set near 1,2. The five it misses are the two carpets, the woven screen and
+two rows whose lengths the book took from a different model. So the relation is
+worth a factor of two on a bulk fibrous or open-cell absorber, and nothing at
+all on a floor covering.
+
+**Both lengths from the fibre geometry.** `fiber_characteristic_lengths` is
+their Eqs. (5.29) and (5.30) for a bundle of cylinders, $\Lambda = 1/(2\pi L R)$
+and $\Lambda' = 2\Lambda$, with the fibre length per unit volume $L$ eliminated
+through its own definition, leaving
+$\Lambda = R\rho_\mathrm{fibre}/(2\rho_\mathrm{bulk})$.
+
+These last two are different models and not two opinions on one. Give them the
+same rock wool and they drift apart with density: the cylinder bundle is the
+lower estimate throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+
+```python
+# Both routes, on the 60 kg/m3 wool above.
+from_parameters = materials.viscous_characteristic_length(
+    sigma, porosity=phi, tortuosity=1.0
+)
+from_geometry = materials.fiber_characteristic_lengths(
+    2.375e-6,  # half of Hopkins' 4,75 um fibre diameter
+    bulk_density_kg_m3=60.0,
+    fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3,
+)
+print(round(from_parameters * 1e6, 1), round(from_geometry.viscous_length_m * 1e6, 1))
+# 80.5 51.5
+```
+
+Which to believe is a question about the material, and neither answers it.
+Estimating a characteristic length is what to do when the alternative is
+guessing one; it is not what to do when a tube is available.
+
 ### Limp frames: when the skeleton moves (Allard & Atalla 11.3.4)
 
 Every model above assumes the frame stands still. That is only true above the
@@ -205,12 +376,9 @@ $$
 
 where $\tilde\rho_{\text{eq}}$ is the rigid-frame effective density of any of
 the three models above and $\rho_\mathrm{t}$ is the apparent total density of the
-material. What anchors the correction is the printed equation itself,
-transcribed term by term against the page; the book tabulates no computed limp
-density anywhere. Two limits it states in prose are exact as well and are
-checked, but they corroborate rather than pin the form: neither constrains the
-$\rho_0$ terms, and a sign-flipped variant of the same equation satisfies both.
-The limits are:
+material. What that form is anchored on, and how weakly, is set out in the
+validation note at the end of this subsection. It has two limits worth knowing
+as physics:
 
 - **heavy frame**: as $\rho_1$ grows the correction vanishes and the
   rigid-frame result comes back;
@@ -357,6 +525,42 @@ fluid displacement over the frame displacement that say which medium each wave
 travels in. The wave whose $|\mu|$ is large is the **airborne** wave, the one an
 equivalent fluid already models; the other is the **frame-borne** wave, which
 has no equivalent-fluid counterpart at all.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/biot_waves_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/biot_waves.svg" alt="Upper panel: the real and imaginary parts of the two compressional Biot wavenumbers and the real part of the shear wavenumber against frequency from 50 to 1500 hertz for a glass wool layer, with the 495 hertz root swap marked by a dotted vertical line. Lower panel: the magnitudes of the two velocity ratios on a logarithmic axis, the airborne one flat above 42 and the frame-borne one on the unity line" width="88%"></picture>
+
+*The three waves the Biot theory predicts where an equivalent fluid predicts
+one, for the Allard & Atalla Table 6.1 glass wool. The lower panel is what
+names them: $|\mu_\mathrm{a}|$ never falls below 42, so in the airborne wave the pore
+fluid moves and the frame barely does: that is the wave the equivalent-fluid
+models already describe. $|\mu_\mathrm{b}|$ sits on 1, so in the frame-borne wave fluid
+and frame move together, and no equivalent fluid has such a branch at all. The
+dotted line at 495 Hz is where the solver's two compressional roots exchange
+places; the labelling follows $|\mu|$, not the eigenvalue order, so the curves
+stay continuous across it.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# The BiotWavesResult of the published glass wool. Its .plot() draws the
+# upper panel; the lower one is two of its fields.
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
+frame = glass_wool.frame_constants()
+shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio
+f_biot = np.linspace(50.0, 1500.0, 1451)
+biot = materials.biot_waves(
+    glass_wool.medium(f_biot),
+    porosity=glass_wool.porosity,
+    tortuosity=glass_wool.tortuosity,
+    frame_density=glass_wool.frame_density_kg_m3,
+    shear_modulus=shear,
+    poisson_ratio=poisson,
+)
+print(round(float(abs(biot.airborne_velocity_ratio).min()), 1))    # 42.4
+print(round(float(abs(biot.frame_borne_velocity_ratio[0])), 3))    # 1.002
+```
+
+</details>
 
 `biot_waves` takes the *rigid-frame* equivalent fluid of the pores, normally a
 `johnson_champoux_allard` result. That is deliberate: the frame inertia is the
@@ -527,8 +731,8 @@ $R(\theta)$ and $\alpha(\theta) = 1 - |R|^2$. A single hard-backed porous
 layer reduces to the textbook closed form
 $Z_\mathrm{s} = -j Z_\mathrm{c} \cot(k d)$ (Mechel Sect. D.3, Eq. 1).
 
-Before the matrices, the physical picture: a hard-backed porous layer is an
-equivalent fluid wrapped in five measurable numbers. The 50 mm layer below,
+Behind the matrices there is one physical picture: a hard-backed porous layer
+is an equivalent fluid wrapped in five measurable numbers. The 50 mm layer below,
 evaluated with the five-parameter JCA model those numbers belong to, absorbs
 91 % of a normal-incidence 1 kHz wave; the code that follows runs the same
 layer through the one-parameter Miki fit instead, which lands slightly
@@ -548,6 +752,40 @@ print(round(res.absorption[i], 3))               # 0.937 at 1 kHz
 
 res.plot()   # alpha(f) with |R| overlaid
 ```
+
+**Spacing the layer off the wall.** The commonest move in absorber design is
+not more material, it is a cavity, and the reason is in the boundary
+condition. A porous layer dissipates through the particle velocity in its
+pores, and a rigid backing forces that velocity to zero at the wall: so a
+layer thin against the wavelength sits in the dead zone and does almost
+nothing at low frequency. Move it back by $d$ and it sits near the velocity
+maximum at the frequency where the cavity is a quarter wavelength, $c_0/4d$,
+which is 858 Hz for a 100 mm gap (the layer's own presence pulls the useful
+gain lower still). The arithmetic is worth seeing:
+
+```python
+# The same 50 mm blanket, hard against the wall and spaced off it.
+bands_gap = np.array([125.0, 250.0, 500.0, 1000.0])
+med_gap = materials.miki(bands_gap, 20000.0)
+flat = materials.layered_absorber(bands_gap, [materials.PorousLayer(thickness_m=0.05, medium=med_gap)])
+spaced = materials.layered_absorber(
+    bands_gap, [materials.PorousLayer(thickness_m=0.05, medium=med_gap), materials.AirLayer(thickness_m=0.10)]
+)
+thick = materials.layered_absorber(bands_gap, [materials.PorousLayer(thickness_m=0.15, medium=med_gap)])
+print(np.round(flat.absorption, 2))     # [0.09 0.26 0.62 0.94]  50 mm on the wall
+print(np.round(spaced.absorption, 2))   # [0.44 0.78 0.9  0.77]  50 mm + 100 mm gap
+print(np.round(thick.absorption, 2))    # [0.52 0.7  0.8  0.89]  150 mm on the wall
+```
+
+At 250 Hz the 50 mm layer on a 100 mm cavity beats 150 mm of solid blanket
+(0.78 against 0.70) for a third of the material and the same 150 mm of total
+depth. Two limits come with the trick: the gain disappears above the first
+cavity half-wave, where the layer lands back in a velocity node (visible as
+the spaced curve falling below the flat one at 1 kHz), and on a large surface
+the cavity must be partitioned or the field propagates laterally inside it at
+oblique incidence. This is the prediction counterpart of ISO 354's
+[Type E-*xxx* and G-*xxx* mountings](absorption-measurement.md#12-the-specimen-and-its-mounting-clause-62-and-annex-b),
+whose suffix is exactly this $d$.
 
 The solver evaluates the physical quantities through a numerically robust
 admittance recursion (immune to the $\mathrm{e}^{|\mathrm{Im}(k_x)| d}$ overflow of
@@ -639,10 +877,51 @@ Helmholtz resonator: $m = (\rho_0/\varepsilon)\,[t + 2\delta a +
 end-correction factor $\delta$ per orifice end and the visco-thermal
 resistance $r = (\rho_0/\varepsilon)\sqrt{8\nu\omega}\,(1 + t/2a)$
 (Cox & D'Antonio Eqs. 7.6/7.12). The default end correction is the
-Fok-function interaction fit $\delta = 0.85\,(1 - 1.47\sqrt{\varepsilon} +
-0.47\varepsilon^{3/2})$ (Table 7.1), valid for any open area. For a
+Fok-function interaction fit
+$\delta = 0.85\,(1 - 1.47\sqrt{\varepsilon} + 0.47\varepsilon^{3/2})$
+(Table 7.1), valid for any open area. For a
 shallow cavity the resonance is
-$f_0 = (c_0/2\pi)\sqrt{\varepsilon/(t'\,d)}$ (Eq. 7.4).
+$f_0 = (c_0/2\pi)\sqrt{\varepsilon/(t'\,d)}$ (Eq. 7.4). In those two
+expressions $t$ is the plate thickness, $a$ the hole **radius**, $\varepsilon$
+the open area (hole area over panel area), $\nu$ the kinematic viscosity of
+air, $t' = t + 2\delta a$ the end-corrected plate thickness and $d$ the cavity
+depth behind the panel.
+
+**Why a perforated panel needs porous material behind it.** The resonance
+formula places the peak; the *resistance* decides its height and its width,
+and that is where an ordinary perforated panel is weak. Its holes are
+millimetres across, so the viscous loss in each plug is a small fraction of
+$\rho_0 c_0$: over an empty cavity the construction is a high-Q resonator that
+absorbs over a narrow band and does almost nothing elsewhere. The standard fix
+is to put the missing resistance in the cavity (a porous layer or a resistive
+fleece), which lowers and broadens the peak towards the matched condition. That
+is exactly why the "Perforated + porous" design in the figure above carries a
+`PorousLayer` behind the plate, and why the MPP below can do without one: its
+sub-millimetre holes supply the resistance themselves. Two design consequences
+follow: place the porous layer where the particle velocity is high, which
+means against the perforated plate rather than flat on the rigid backing, and
+aim for a total flow resistance of the order of $\rho_0 c_0$. The same
+statement read as an impedance match is the critical-coupling condition of the
+[metamaterial guide](metamaterial-absorbers.md).
+
+### The sheet layer classes: parameters
+
+The three sheet layers take positional arguments, and the hole dimension is a
+**radius**, not a diameter: half the drilled hole. Getting that wrong
+computes the resonance and the peak absorption for a hole twice the real size.
+
+| Class | Parameter | Units | Notes |
+| :--- | :--- | :--- | :--- |
+| `PerforatedPlateLayer` | `thickness_m` | m | Plate thickness $t$ |
+| | `hole_radius` | m | Hole **radius** $a$, half the drilled diameter |
+| | `open_area` | — | Perforation ratio $\varepsilon$ = hole area / panel area |
+| | `end_correction` | — | $\delta$ per orifice end; `None` uses the Fok interaction fit |
+| `MicroperforatedPlateLayer` | `thickness_m` | m | Plate thickness $t$ |
+| | `hole_radius` | m | Hole **radius** $a$ |
+| | `open_area` | — | Perforation ratio $\varepsilon$ |
+| | `end_correction` | — | Default `0.85`, Maa's piston reactance |
+| `MembraneLayer` | `surface_density` | kg/m² | Mass per unit area $m$ |
+| | `resistance` | Pa·s/m | Added flow resistance; default `0.0` |
 
 **Microperforated panel (MPP).** With submillimetre holes the viscous
 boundary layer fills the orifice and the panel absorbs *without any porous
@@ -667,7 +946,8 @@ $f_2/f_1 = \pi/\mathrm{arccot}(1+r) - 1$ (Maa Eqs. 9–21, Table I).
 import numpy as np
 from phonometry import materials
 
-# Maa (1998) Fig. 5: d = t = 0.2 mm, holes every 2.5 mm, cavity 6 cm.
+# Maa (1998) Fig. 5: hole diameter 0.2 mm (so hole_radius = 0.1 mm),
+# plate 0.2 mm thick, holes every 2.5 mm, cavity 6 cm.
 eps = (np.pi / 4.0) * (0.2 / 2.5) ** 2
 f = np.linspace(100.0, 4000.0, 2000)
 res = materials.layered_absorber(
@@ -696,7 +976,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Maa (1998) Fig. 5: d = t = 0.2 mm, holes every 2.5 mm, cavity 6 cm.
+# Maa (1998) Fig. 5: hole diameter 0.2 mm (so hole_radius = 0.1 mm),
+# plate 0.2 mm thick, holes every 2.5 mm, cavity 6 cm.
 eps = (np.pi / 4.0) * (0.2 / 2.5) ** 2
 f = np.linspace(100.0, 4000.0, 1200)
 res = materials.layered_absorber(
@@ -727,6 +1008,96 @@ are exposed as `helmholtz_resonance_frequency` and
 `membrane_resonance_frequency`; the full frequency response comes from the
 same layer stack.
 
+### The sheet impedance itself
+
+The layer classes above hand their transfer impedance to the multilayer
+solver, and the solver gives back $\alpha(f)$, which is how a resonant sheet
+is *evaluated*, not how it is *designed*. Every design relation in this
+section is written in $r$ and $\omega m$, so the same impedances are exposed
+on their own: `perforated_plate_impedance`, `microperforated_plate_impedance`
+and `membrane_impedance`, all returning $z$ in Pa·s/m before normalisation,
+plus `perforation_end_correction` for the Fok factor. With them the design
+argument closes on itself: the reactance crosses the cavity's
+$-\cot(\omega D/c_0)$ at the resonance, and the resistance *there* fixes both
+the peak height $4r/(1+r)^2$ and the bandwidth:
+
+```python
+# Maa's own Fig. 5 geometry, read as an impedance at its 677.5 Hz peak.
+rho_c = 1.205 * 343.0
+f_peak = np.array([677.5])
+z_mpp = materials.microperforated_plate_impedance(
+    f_peak, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=eps
+)
+r_mpp = float(z_mpp.real[0]) / rho_c
+print(round(r_mpp, 3), round(float(z_mpp.imag[0]) / rho_c, 3))   # 1.531 1.077
+print(round(4 * r_mpp / (1 + r_mpp) ** 2, 3))    # 0.956 = the peak alpha above
+
+# The same panel with millimetre holes instead: an order of magnitude less
+# resistance, hence the narrow peak that needs porous backing.
+z_perf = materials.perforated_plate_impedance(
+    f_peak, thickness_m=0.006, hole_radius=0.0025, open_area=0.05
+)
+print(round(float(z_perf.real[0]) / rho_c, 4))   # 0.0925, 16x lower
+
+# A membrane is pure reactance unless a fixing resistance is supplied.
+print(np.round(materials.membrane_impedance(f_peak, surface_density=2.0), 1))
+# [0.+8513.7j]
+
+# The Fok interaction: crowded holes shorten the effective plug.
+print(round(materials.perforation_end_correction(0.05), 3))   # 0.575 vs 0.85
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sheet_transfer_impedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sheet_transfer_impedance.svg" alt="Normalised resistance and reactance of Maa's microperforated panel against frequency from 100 hertz to 4 kilohertz, with the negative cotangent reactance of its 60 mm cavity drawn as a second curve. The two reactances cross near 677 hertz, where the resistance is 1.53, and a companion axis shows the absorption peaking at 0.96 at exactly that frequency" width="84%"></picture>
+
+*The whole design rule of this section in one picture. The panel reactance
+$x(f)$ and the cavity reactance $-\cot(\omega D/c_0)$ cross at 677 Hz: that
+crossing is the resonance, and it is placed by the geometry. What happens
+*at* the crossing is set by the resistance there, $r = 1.53$, which gives
+$4r/(1+r)^2 = 0.96$: the peak the stack computes, recovered from two numbers.
+A panel with millimetre holes has $r$ sixteen times smaller, so its crossing
+would be just as sharp and far less absorbent, which is the whole argument for
+either sub-millimetre holes or porous backing.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+f_sheet = np.geomspace(100.0, 4000.0, 400)
+z_sheet = materials.microperforated_plate_impedance(
+    f_sheet, thickness_m=0.2e-3, hole_radius=0.1e-3, open_area=eps
+) / rho_c
+cavity = -1.0 / np.tan(2.0 * np.pi * f_sheet * 0.06 / 343.0)
+print(round(float(z_sheet.real[0]), 2), round(float(cavity[0]), 2))
+```
+
+</details>
+
+### Building what the stack predicts
+
+The transfer-matrix stack assumes an infinite, laterally uniform, locally
+reacting construction. Five things have to be true on site for that assumption
+to survive.
+
+1. **Partition or fill the cavity behind a resonant facing.** The
+   one-dimensional model and the local-reaction assumption both need cells
+   small against the wavelength at the design frequency. An unpartitioned
+   cavity behind a perforated facing lets the field propagate laterally, which
+   turns a locally reacting design into a bulk-reacting one and typically
+   broadens and lowers the peak.
+2. **Seal the perimeter to the substrate**, or the cavity is vented and the
+   resonance it was tuned for does not exist.
+3. **Check the open area against the sheet you actually bought.** The model's
+   $\varepsilon$ is the geometric ratio $(\pi/4)(d_\text{hole}/b)^2$ for holes
+   of diameter $d_\text{hole}$ on a pitch $b$. Burrs, paint and partly blocked
+   sub-millimetre holes move the MPP resistance directly, and the resistance
+   is what the peak height depends on.
+4. **Mount a membrane limp and unstressed.** Clamping and stiffening add a
+   restoring force the $z = j\omega m$ model does not have, and push $f_0$
+   above the $60/\sqrt{m d}$ estimate.
+5. **Do not assume the backing.** The drawn stack ends on a rigid wall; a
+   construction on a resilient substrate needs that backing impedance passed
+   explicitly through `termination=` rather than left at `"rigid"`.
+
 ## 4. Oblique and random incidence
 
 `layered_absorber(..., angle_rad=theta)` evaluates the full bulk-reacting stack
@@ -741,7 +1112,19 @@ $$
 $$
 
 evaluated by Gauss–Legendre quadrature in `diffuse_field_absorption`
-(``angle_limit_rad`` defaults to 90°; truncations at 75–87° are in use). For a
+(``angle_limit_rad`` defaults to 90°; truncations at 75–87° are in use). That
+truncation is not decoration and deserves a decision rule. The integrand
+weights oblique angles most heavily, and it is precisely near grazing
+incidence that the infinite-plane theory stops describing a real test: a
+finite mounted specimen does not behave like an unbounded layer at 85°, and a
+diffuse field over a 10–12 m² sample simply does not deliver the grazing
+energy the full integral assumes, so the untruncated result tends to sit below
+measured values. What practitioners do follows: truncate around 78° when the
+intention is to compare with a reverberation-room measurement, and keep 90°
+when the intention is the theoretical random-incidence coefficient of an
+infinite surface. A truncated $\alpha_\mathrm{dif}$ is a fitted engineering quantity
+rather than a physical one, so the limit must be quoted with the number: the
+snippet below prints the size of the decision. For a
 *locally reacting* surface with known normalised impedance the integral has
 the closed form of Mechel Eq. 10, exposed as `statistical_absorption`; its
 maximum over all passive impedances is the published **0.951** (at
@@ -761,6 +1144,11 @@ print(np.round(diffuse.absorption, 2))   # [0.37 0.68 0.9  0.95]
 diffuse.plot()   # alpha_dif(f); overlay normal.absorption to compare
 
 print(round(float(materials.statistical_absorption(1.567 + 0j)), 3))  # 0.951
+
+# What the truncation is worth, on the same layer.
+truncated = materials.diffuse_field_absorption(f, layers, angle_limit_rad=np.radians(78.0))
+print(np.round(truncated.absorption - diffuse.absorption, 3))
+# [-0.001  0.01   0.019  0.018]  a few hundredths, and it goes the right way
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_absorption.svg" alt="Random-incidence absorption of a 50 mm porous layer by the Paris integral compared with its normal-incidence coefficient: the diffuse-field curve sits clearly above the normal-incidence one below 700 Hz and the two converge towards 0.95 at high frequency" width="80%"></picture>
@@ -794,35 +1182,73 @@ plt.show()
 
 </details>
 
+**Do not compare this with a datasheet $\alpha_\mathrm{s}$.** The Paris integral is
+evaluated on an *infinite, laterally uniform* layer. An ISO 354 measurement is
+made on a mounted 10–12 m² specimen whose edges diffract energy into it, which
+is why measured $\alpha_\mathrm{s}$ routinely exceeds 1 and why the same product
+differs between two rooms. Expect the measured value to run above the
+predicted $\alpha_\mathrm{dif}$ by roughly 0.1 to 0.2 in the mid bands, more as the
+specimen shrinks and its perimeter-to-area ratio rises. The corollary for
+model fitting is the important half: fit material parameters against a tube
+measurement, or against the diffuse prediction of a model you trust, and never
+against a datasheet $\alpha_\mathrm{s}$; the finite-size surplus would be absorbed
+into a wrong flow resistivity and then propagate into every construction you
+predict from it. What the prediction *is* good for is comparing
+constructions, sizing a treatment before it exists, and feeding a room
+calculation that expects random-incidence input; a specification written
+against a measured $\alpha_\mathrm{s}$ still has to be closed with a measurement.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/oblique_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/oblique_absorption.svg" alt="Left panel: absorption coefficient against incidence angle from 0 to 90 degrees for a 50 mm hard-backed porous layer at 250, 500, 1000 and 2000 hertz, each solid bulk-reacting curve shadowed by a dashed locally reacting one, with the 78 degree truncation marked. Right panel: the integrated diffuse-field coefficient against the locally reacting statistical coefficient over frequency, with the 0.951 ceiling of the closed form drawn as a dotted line" width="88%"></picture>
+
+*The integrand the Paris average consumes, and the two ways of averaging it.
+Left: $\alpha(\theta)$ of the same 50 mm layer at four frequencies, each
+solid bulk-reacting curve (`layered_absorber(..., angle_rad=theta)`, in which the
+fluid layers refract) shadowed by the locally reacting curve obtained from the
+same normal-incidence surface impedance. The two agree at normal incidence by
+construction, separate through the 40°–75° range where the Paris integrand
+carries most of its weight (the bulk model absorbing more, because the wave
+refracts and travels further inside the layer) and converge again as both
+collapse towards zero at grazing. The choice of reaction model is therefore a
+choice about the part of the integral that matters most. Right: the two integrated results over frequency, with the
+0.951 maximum of the locally reacting closed form drawn as a ceiling no
+passive impedance can pass.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# alpha(theta) at one frequency, both ways.
+theta = np.radians(np.linspace(0.0, 88.0, 60))
+f_one = np.array([1000.0])
+layers_one = [materials.PorousLayer(thickness_m=0.05, medium=materials.miki(f_one, 20000.0))]
+bulk = [float(materials.layered_absorber(f_one, layers_one, angle_rad=float(t)).absorption[0])
+        for t in theta]
+z_normal = materials.layered_absorber(f_one, layers_one).normalized_impedance[0]
+local = [1.0 - abs((z_normal * np.cos(t) - 1.0) / (z_normal * np.cos(t) + 1.0)) ** 2
+         for t in theta]
+print(round(bulk[0], 3), round(bulk[-1], 3))     # 0.937 0.161
+print(round(local[0], 3), round(local[-1], 3))   # 0.937 0.138
+```
+
+</details>
+
 The classical layers above absorb with bulk or with a quarter-wave cavity.
 Their resonant metamaterial relatives, rigid panels of sub-millimetre slits
 loaded by Helmholtz resonators that slow the sound and reach perfect
 absorption ($\alpha = 1$) at critical coupling in panels only $\lambda/38$
 deep, moved to their own guide:
-[Metamaterial Absorbers](metamaterial-absorbers.md) covers the
-transfer-matrix model, the critical-coupling design solver and the FDTD
+[Metamaterial Absorbers](metamaterial-absorbers.md) covers
+the transfer-matrix model, the critical-coupling design solver and the FDTD
 cross-check of the meshed cell.
 
-
 ## Practical notes
-
-**Parameters are inputs.** Nothing on this page measures anything: the five
-JCA parameters, the frame's shear modulus and Poisson coefficient and the
-sheet geometries all enter as numbers the caller supplies. Of their
-characterisation methods only the flow resistivity has a guide
-([Airflow Resistance](airflow-resistance.md)); an inverse fit of the remaining
-parameters against a measured impedance is a `scipy.optimize` exercise, not a
-library function. The four relations above estimate four of them from published
-correlations, which is a different thing from measuring them and is labelled as
-such wherever the estimate is worse than a factor of two.
 
 **Fit ranges.** Delany–Bazley warns (and extrapolates) outside
 $0.01 < X < 1$ and Miki outside $0.01 < f/\sigma < 1$; treat sub-range
 values as qualitative. JCA needs four extra
 parameters but behaves physically everywhere; with
 $\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ and
-$\alpha_\infty = 1$ it tracks Delany–Bazley over the fit range; that expression
-is `viscous_characteristic_length`.
+$\alpha_\infty = 1$ it tracks Delany–Bazley over the fit range.
 
 **Rigid or limp frame.** Every equivalent-fluid model above assumes a
 motionless frame, which only holds above the decoupling frequency
@@ -840,18 +1266,55 @@ refracts and travels inside the layers). `statistical_absorption` assumes
 local reaction, a good approximation for high flow resistivity, partitioned
 cavities or thin resonant facings; for thick, light porous layers integrate
 the bulk model with `diffuse_field_absorption` instead (Mechel Sect. D.6).
-Either way the prediction is for a laterally infinite sample: the finite-size
-edge effect that lets a measured ISO 354 $\alpha_\mathrm{s}$ exceed the predicted
-$\alpha_\mathrm{dif}$, and even exceed 1.0, is not modelled here.
 
-**Where the numbers were checked.** The models are pinned digit-exact to the
+**Where the numbers were checked.** No standard governs these prediction
+models; they are textbook and journal methods implemented clean-room from
+the sources in the references below. The models are pinned digit-exact to the
 printed coefficient tables (Bies Table D.1, Miki Eqs. 30–34), the solver to
 the closed forms above and to the `TransferMatrix` recovery of the
 [impedance-tube page](impedance-tube.md), the MPP to Maa's own approximation
 (stated ~6 % agreement with the exact Eq. 2), design example and Table I,
 and the Paris integral to its locally reacting closed form. Misprints
 found in the sources during this work are recorded in the
-[errata registry](../../ERRATA.md).
+[errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
+
+## What this guide covers
+
+- **Covered.** The textbook and journal methods of Mechel, Bies, Cox & D'Antonio, Miki
+  (1990), Maa (1998) and Johnson, Koplik & Dashen (1987), implemented clean-room
+  as described above, together with the Biot theory of Allard & Atalla chapters
+  6 and 11. That covers the equivalent-fluid porous models (`delany_bazley`,
+  `miki`, `johnson_champoux_allard`, `limp_frame`), the poroelastic layer
+  (`biot_waves`, `biot_surface_impedance`, `PoroelasticLayer`), the
+  transfer-matrix multilayer solver (`layered_absorber` with `AirLayer`,
+  `PorousLayer`, `PoroelasticLayer`, `PerforatedPlateLayer`,
+  `MicroperforatedPlateLayer` and `MembraneLayer`) and the Paris-integral
+  random-incidence coefficients (`diffuse_field_absorption`,
+  `statistical_absorption`). The sheet transfer impedances the layer classes
+  consume are also exposed on their own, which is how a resonant sheet is
+  designed rather than merely evaluated: `perforated_plate_impedance`,
+  `microperforated_plate_impedance`, `membrane_impedance` and
+  `perforation_end_correction`.
+
+- **Not covered.** Nothing here measures anything: the five JCA parameters, the frame's shear
+  modulus and Poisson coefficient and the sheet geometry are all inputs, and
+  section 1.1 says where they come from without implementing any of those
+  characterisation methods (only the inverse fit against a measured impedance is
+  shown, and that is `scipy.optimize`, not this library). The buildability rules
+  at the end of section 3 are engineering practice with no standard behind them,
+  and the finite-size difference between a predicted $\alpha_\mathrm{dif}$ and a
+  measured $\alpha_\mathrm{s}$ is stated but not modelled; nothing here reproduces the
+  edge effect. Cox & D'Antonio's book covers diffusers as well as absorbers, but
+  this guide only implements the absorber half of it. Schroeder phase-grating
+  diffuser prediction lives in a separate module (`materials.diffusers.design`),
+  documented in [Diffusers and Their
+  Coefficients](../diffusers/diffusers.md) and, for the
+  resonator-loaded deep-subwavelength panels, in
+  [Metadiffusers](../diffusers/metadiffusers.md). The
+  critically coupled slit and Helmholtz-resonator absorber
+  (`slit_helmholtz_absorber`, `critical_coupling_design`) is the subject of
+  [Metamaterial
+  Absorbers](metamaterial-absorbers.md).
 
 ## See also
 
@@ -864,9 +1327,6 @@ found in the sources during this work are recorded in the
 - [Metamaterial Absorbers](metamaterial-absorbers.md): the
   slow-sound slit panels and the critical-coupling condition that push
   perfect absorption into the deep-subwavelength regime.
-- [Diffusers and Their Coefficients](../diffusers/diffusers.md): the diffuser
-  half of Cox & D'Antonio, implemented separately; this guide covers only
-  the absorber half of the book.
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
@@ -874,67 +1334,23 @@ found in the sources during this work are recorded in the
 
 ## References
 
-- Mechel, F. P. (Ed.). (2008). *Formulas of acoustics* (2nd ed.). Springer.
-  [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
-  Sections D.3–D.6 (layer reflection, multilayer scheme, diffuse-field
-  integrals) and G.11 (empirical porous relations).
-- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
-  Modelling sound absorbing materials* (2nd ed.). Wiley.
-  ISBN 978-0-470-74661-5.
-  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
-  Chapter 6: the Biot theory of an elastic-framed porous material, its elastic
-  coefficients, its two compressional waves and its shear wave, and the surface
-  impedance and quarter-wave frame resonance of a hard-backed layer
-  (Eqs 6.107-6.111). Chapter 11: the transfer-matrix method, the six-variable
-  poroelastic layer matrix (Table 11.1), the coupling matrices (Sect. 11.4) and
-  the global assembly (Sect. 11.5). Section 11.3.4: the rigid and limp frame
-  limits of the Biot theory, the decoupling frequency and the limp effective
-  density (Eqs 11.53-11.55, after Panneton 2007).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  Appendix D: porous-material properties, Table D.1 coefficient sets and
-  the layered-construction recursions D.91–D.99.
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  Transfer-matrix modelling (Sect. 2.6), porous models (Sect. 6.5) and
-  resonant-absorber design equations (Sects. 7.3/7.5).
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting
-  outdoor sound* (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+  Chapter 6: the Biot theory of an elastic-framed porous material, its elastic coefficients, its two compressional waves and its shear wave, and the surface impedance and quarter-wave frame resonance of a hard-backed layer (Eqs 6.107-6.111). Chapter 11: the transfer-matrix method, the six-variable poroelastic layer matrix (Table 11.1), the coupling matrices (Sect. 11.4) and the global assembly (Sect. 11.5). Section 11.3.4: the rigid and limp frame limits of the Biot theory, the decoupling frequency and the limp effective density (Eqs 11.53-11.55, after Panneton 2007). ISBN 978-0-470-74661-5.
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
   Chapter 5: ground-impedance models, including the JCA family.
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  Section 1.3.2.2: the equivalent-gas model and the Delany–Bazley SI form.
-- Miki, Y. (1990). Acoustical properties of porous materials —
-  Modifications of Delany–Bazley models. *Journal of the Acoustical Society
-  of Japan (E)*, 11(1), 19–24.
-  [doi:10.1250/ast.11.19](https://doi.org/10.1250/ast.11.19).
-  The positive-real regression implemented in `miki`.
-- Maa, D.-Y. (1998). Potential of microperforated panel absorber.
-  *Journal of the Acoustical Society of America*, 104(5), 2861–2866.
-  [doi:10.1121/1.423870](https://doi.org/10.1121/1.423870).
-  The exact MPP impedance (Eq. 2), end corrections, design formulas and the
-  Fig. 5 example pinned in the tests.
-- Johnson, D. L., Koplik, J., & Dashen, R. (1987). Theory of dynamic
-  permeability and tortuosity in fluid-saturated porous media. *Journal of
-  Fluid Mechanics*, 176, 379–402.
-  [doi:10.1017/S0022112087000727](https://doi.org/10.1017/S0022112087000727).
-  The dynamic-tortuosity model behind the JCA effective density.
-- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
-  absorbent materials. *Applied Acoustics*, 3(2), 105–116.
-  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  Appendix D: porous-material properties, Table D.1 coefficient sets and the layered-construction recursions D.91-D.99.
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  Transfer-matrix modelling (Sect. 2.6), porous models (Sect. 6.5) and resonant-absorber design equations (Sects. 7.3/7.5).
+- **Delany, M. E., & Bazley, E. N. (1970).** Acoustical properties of fibrous absorbent materials. *Applied Acoustics*, *3*(2), 105-116. https://doi.org/10.1016/0003-682X(70)90031-9
   The original empirical relations and their stated validity.
-
-## Standards
-
-No standard governs these prediction models; they are textbook and journal
-methods (Mechel; Bies, Hansen & Howard; Cox & D'Antonio; Attenborough & Van
-Renterghem; Miki 1990; Maa 1998; Johnson et al. 1987) implemented
-clean-room from the cited sources. The measurement standards they connect to
-(ISO 9053-1/-2 for [flow resistivity](airflow-resistance.md),
-ISO 10534-1/-2 and ASTM E2611 for the [impedance tube](impedance-tube.md),
-ISO 354 / ISO 11654 for
-[random-incidence absorption and rating](absorption-measurement.md)) live in
-their own guides.
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  Section 1.3.2.2: the equivalent-gas model and the Delany-Bazley SI form.
+- **Johnson, D. L., Koplik, J., & Dashen, R. (1987).** Theory of dynamic permeability and tortuosity in fluid-saturated porous media. *Journal of Fluid Mechanics*, *176*, 379-402. https://doi.org/10.1017/S0022112087000727
+  The dynamic-tortuosity model behind the JCA effective density.
+- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. https://doi.org/10.1121/1.423870
+  The exact MPP impedance (Eq. 2), end corrections, design formulas and the Fig. 5 example pinned in the tests.
+- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
+  Sections D.3-D.6 (layer reflection, multilayer scheme, diffuse-field integrals) and G.11 (empirical porous relations).
+- **Miki, Y. (1990).** Acoustical properties of porous materials — Modifications of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*, *11*(1), 19-24. https://doi.org/10.1250/ast.11.19
+  The positive-real regression implemented in miki.

@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/levels/time-weighting.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Time Weighting and Integration
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/time-weighting/
+
+# Time Weighting
 
 A displayed sound level is always a *time-weighted* level: before anything
 reaches the readout, the squared, frequency-weighted pressure passes
@@ -16,15 +18,17 @@ descriptions of a needle movement, standardized for analog meters in
 ANSI S1.4-1983 and IEC 60651 and carried into IEC 61672-1 as the F and S
 exponential constants; IMPULSE was added in the same era for impact noise
 and has since been dropped from the requirements, surviving in instruments
-only for legacy procedures (the "Choosing F, S or I" guidance below says
-when each is defensible; Bies, Hansen & Howard 2017, §3.6 covers the
-instrument practice).
+only for legacy procedures (the [choosing guidance](#choosing-f-s-or-i)
+below says when each is defensible; Bies, Hansen & Howard 2017, §3.6
+covers the instrument practice).
 
 Two sibling pages complete the chain. The detector output is the level
-track that the percentile levels $L_N$ of [Levels](levels.md) are defined
-on, while the integrated metrics ($L_\mathrm{eq}$, SEL) bypass the detector
-entirely; and the full IEC 61672-1 instrument chain that wraps this
-detector (weighting, ranges, periodic tests) is the subject of
+track that the percentile levels $L_N$ of
+[Integrated and Statistical Levels](levels.md) are
+defined on, while the integrated
+metrics ($L_\mathrm{eq}$, SEL) bypass the detector entirely; and the full
+IEC 61672-1 instrument chain that wraps this detector (weighting, ranges,
+periodic tests) is the subject of
 [Build a sound level meter](../sound-level-meter.md).
 
 ## 1. The exponential detector
@@ -51,14 +55,18 @@ that is why level analyses discard the first instants of a recording.
 
 * **Fast (`fast`):** $\tau = 125\ \text{ms}$. Standard for noise fluctuations.
 * **Slow (`slow`):** $\tau = 1000\ \text{ms}$. Standard for steady noise.
-* **Impulse (`impulse`):** **Asymmetric** ballistics. 35 ms rise time for rapid
-  onset capture, 1500 ms decay for readability.
+* **Impulse (`impulse`):** **Asymmetric** ballistics, 35 ms attack and 1.5 s
+  decay. Both numbers are specified, not tuned: ANSI S1.4-1983 clause 2.7
+  defines the impulse sound level as 35 ms exponential time averaging for
+  increasing portions of the signal and a 1500 ms time constant for decreasing
+  portions.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting.gif" alt="Animation: a tone burst driving the RC exponential detector, the capacitor charging and draining, while the Fast, Slow and Impulse meter needles follow their own ballistics" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting.webm)
+**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
+
+*The three detectors on one 0.5 s noise burst: Fast rises and falls with it,
+Slow never reaches its level, and Impulse rises with Fast and then holds.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -112,6 +120,14 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - \mathrm{e}^{-1/(f_\mathrm{s} \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - \mathrm{e}^{-1/(f_\mathrm{s} \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
 
+A time constant and a decay rate are the same statement. An exponentially
+decaying mean square falls at a constant $10/(\tau \ln 10)$ decibels per
+second, which is why IEC 61672-1 clause 5.8.1 can specify F and S twice over:
+as design-goal constants of 0.125 s and 1 s, and as design-goal decay rates of
+34.7 dB/s and 4.3 dB/s. The same arithmetic turns the 1.5 s decreasing-portion
+constant of the analog IMPULSE characteristic into 2.9 dB/s, the fall an
+operator was meant to be able to read off a moving needle.
+
 The asymmetry has a consequence worth stating: unlike F and S, Impulse is not a
 filter. Its coefficient depends on the signal, so an I-weighted level is not
 additive; the I-weighted level of two sources running together cannot be
@@ -130,16 +146,62 @@ derived from the two measured separately, while their $L_\mathrm{eq}$ values can
   aircraft-certification levels, which are built from Slow-weighted samples.
 - **Impulse** is legacy, and deprecated for rating. It was a 1960s attempt
   to make a meter needle track the perceived loudness of impacts; it does
-  not (the 35 ms attack still misses very short impulses, and the 1.5 s hold
+  not (the 35 ms attack still misses very short impulses, and the 1.5 s decay
   exaggerates duration). It entered the international standards with
   IEC 60651 and was dropped from the requirements of its successor
   IEC 61672-1, whose first edition (2002) explains why: I-weighted levels
-  are not suitable for rating impulsive sounds. It survives in meters only
-  for continuity with older national requirements. Modern practice rates
-  impulsiveness with
+  are not suitable for rating impulsive sounds. Modern *international*
+  practice rates impulsiveness with
   $L_\mathrm{Aeq}$ plus an adjustment (ISO 1996-1 Table A.1, or the onset analysis
   of [Impulsive-sound prominence](../../environment/assessment/impulsive-sound.md)) and assesses
-  hearing-damage risk with $L_\mathrm{Cpeak}$, never with I-weighted levels.
+  hearing-damage risk with $L_\mathrm{Cpeak}$, never with I-weighted levels. Some
+  national rules still require the I weighting explicitly: the Spanish
+  RD 1367/2007 grades its impulsive correction $K_\mathrm{i}$ on
+  $L_\mathrm{AIeq} - L_\mathrm{Aeq}$ (see
+  [Spanish Noise Regulation](../../environment/assessment/spanish-noise-regulation.md)),
+  which is why `mode='impulse'` is a first-class option here and not a
+  compatibility shim.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ballistics_vs_duration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ballistics_vs_duration.svg" alt="Peak envelope level relative to the steady reading, in decibels, against tone-burst duration from one millisecond to two seconds on a logarithmic axis, with one measured curve per detector: Impulse highest, then Fast, then Slow. All three approach zero decibels for bursts of a second or more and fall steeply for short ones, reaching minus 18, minus 21 and minus 30 decibels at one millisecond. Open circles from IEC 61672-1 Table 4 Equation 7 sit exactly on the Fast and Slow curves, a vertical marker at 100 milliseconds annotates the 7.6 decibel gap between Fast and Slow there, and an annotation notes that even Impulse loses 18 decibels on a one-millisecond burst" width="88%"></picture>
+
+*How much of an event each detector keeps, as a function of how long the event
+lasts. The measured curves land on the Table 4 reference points, so the whole
+table is one line of algebra. The gap between two curves at a given duration is
+the reason a maximum level has to name its time weighting; and the absolute
+loss is why very short impulses are rated with $L_\mathrm{Cpeak}$ instead: even
+Impulse, the ballistics designed for impacts, is 18 dB low on a 1 ms burst.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+fs = 48000
+t = np.arange(int(3.0 * fs)) / fs
+tone = np.sin(2 * np.pi * 4000 * t)
+durations = np.geomspace(0.001, 2.0, 30)
+
+plt.figure()
+for mode in ('fast', 'slow', 'impulse'):
+    reference = filters.time_weighting(tone, fs, mode=mode)[int(2.5 * fs):].mean()
+    peaks = []
+    for t_b in durations:
+        burst = np.zeros_like(t)
+        stop = int(0.5 * fs) + int(t_b * fs)
+        burst[int(0.5 * fs):stop] = tone[int(0.5 * fs):stop]
+        peaks.append(10 * np.log10(
+            filters.time_weighting(burst, fs, mode=mode).max() / reference))
+    plt.semilogx(durations * 1e3, peaks, label=mode)
+plt.axvline(100.0, linewidth=0.8)
+plt.xlabel('Toneburst duration [ms]')
+plt.ylabel('Peak level re the steady reading [dB]')
+plt.legend()
+plt.show()
+```
+
+</details>
 
 ## 3. `time_weighting()` / `TimeWeighting` parameters
 
@@ -148,19 +210,44 @@ derived from the two measured separately, while their $L_\mathrm{eq}$ values can
 | `x` | 1D or 2D array, or `Signal` | pressure (any scale) | non-empty | Squared internally; output is a mean-square envelope |
 | `fs` | int | Hz | > 0; taken from `x` when `x` is a `Signal` | |
 | `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | $\tau$ = 125 ms / 1 s / 35 ms attack + 1.5 s decay |
+| `initial_state` | `None` / `'zero'` / `'first'` / float / array | mean square of $x$ | default `None` (= `'zero'`) | Integrator state $y[-1]$; see sections 5 and 6 |
 | `TimeWeighting(fs, mode)` (class) | — | — | — | Stateful variant for streaming: `process(x)` carries the integrator state between blocks |
+| `TimeWeighting.reset()` | — | — | — | Drops the carried state so the next `process()` starts from rest |
 
 The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
 the level functions, which do it for you.
 
 ## 4. Verified ballistics (IEC 61672-1 Table 4)
 
+Those reference values are not a lookup table with no formula behind it.
+IEC 61672-1 gives them in Note 1 to Table 4 as Equation (7), the exact response
+of the section 1 detector to an isolated 4 kHz toneburst of duration $T_\mathrm{b}$:
+
+$$
+\Delta_{\mathrm{ref}} = 10\log_{10}\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)\ \text{dB}
+$$
+
+Read it out loud and the whole table follows. On Fast ($\tau = 125$ ms) a
+200 ms burst gives $-0.98$ dB, a 50 ms burst $-4.82$ dB and a 10 ms burst
+$-11.14$ dB (the three panels below). A 100 ms burst gives $-2.59$ dB on Fast
+and $-10.21$ dB on Slow, and that 7.6 dB is the number quoted in the
+[choosing guidance](#choosing-f-s-or-i) above. The physics is one sentence: a
+detector with memory $\tau$ cannot reach its steady value on an event shorter
+than $\tau$, so **every meter under-reads every short event**, by an amount
+that depends only on $T_\mathrm{b}/\tau$. That is why a maximum level is meaningless
+without its ballistics, and why impulses short compared with 125 ms are rated
+with $L_\mathrm{Cpeak}$ instead.
+
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the
-standard's reference values: the example below verifies the 200 ms Fast
-burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
-and 1 s down to 2 ms for S, at class 1 acceptance limits:
+standard's reference values: the example below verifies the three Table 4 rows
+drawn in the figure; the CI suite covers the full table, from 1 s down to 1 ms
+for F and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.svg" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+
+*Fast envelope peaks at −1.0, −4.8 and −11.1 dB relative to the steady tone for
+the 200, 50 and 10 ms bursts of Table 4; the CI suite checks the full table
+from 1 s down to 1 ms.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -198,22 +285,28 @@ plt.show()
 
 ## 5. Initial state
 
-By default, the exponential integrator starts from rest (`y[-1] = 0`);
-`initial_state=None` and `initial_state='zero'` are the same thing. Passing
-`'first'` seeds the integrator with the square of the very first sample,
-$x[0]^2$: an unbiased but extremely noisy estimate of the mean square (one
-degree of freedom), and for a tone it depends entirely on the phase at the
-cut: a sine starting at a zero crossing makes `'first'` bit-identical to
-`'zero'`. A float resumes a state you saved yourself (which is what block
-processing does in section 6), and an array broadcastable to the input shape
-without the time axis does the same per channel.
+The integrator needs a starting value for $y[-1]$, and there are four ways to
+give it.
 
-If the recorded segment is a continuation of a signal already running, seed
-the integrator with something robust: the mean square of the first half
-second is a far better estimate than a single sample. If the record is the
-*start* of the event, do not seed at all: let it start from rest and discard
-the first $5\tau$ (0.6 s Fast, 5 s Slow), which is exactly what `ln_levels`
-does internally before computing percentiles.
+- **`None` (the default) and `'zero'` are the same thing**, a start from rest, so
+  the level climbs through the settling ramp of section 1.
+- **`'first'` seeds it with the square of the very first sample**, $x[0]^2$. That
+  is an unbiased but extremely noisy estimate of the mean square (one degree of
+  freedom) and for a tone it depends entirely on the phase at the cut. In the
+  snippet below it is *exactly zero*, because a sine starting at $t = 0$ starts
+  at a zero crossing, so `'first'` there is bit-identical to `'zero'`.
+- **A float** resumes a state you saved yourself, which is what block processing
+  does in section 6.
+- **An array** broadcastable to the input shape without the time axis does the
+  same per channel.
+
+If the record is a continuation of a signal already running, seed the integrator
+with something robust: the mean square of the first half second,
+`initial_state=float(np.mean(recording[:fs // 2] ** 2))`, is a far better
+estimate than a single sample. If the record is the *start* of the event, do not
+seed at all: let it start from rest and discard the first $5\tau$ (0.6 s Fast,
+5 s Slow), which is exactly what `ln_levels` does internally before computing
+percentiles.
 
 ```python
 import numpy as np
@@ -273,9 +366,29 @@ The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
 [numba](https://numba.pydata.org/) is installed (`pip install "phonometry[perf]"`).
 Without numba a pure-Python fallback produces identical results, just slower.
 
-See [Integrated & Statistical Levels](levels.md) for $L_\mathrm{eq}$/$L_N$ metrics
-built on these envelopes, and [Why phonometry](../../start/why-phonometry.md) for the IEC
+See [Integrated and Statistical Levels](levels.md) for
+$L_\mathrm{eq}$/$L_N$ metrics built on these envelopes, and
+[Why phonometry](../../start/why-phonometry.md) for the IEC
 61672-1 tone-burst verification.
+
+## What this guide covers
+
+- **Covered.** IEC 61672-1:2013's exponential time-weighting detector (clause 3.8) with the
+  Fast and Slow time constants (clause 5.8.1), implemented as the recursive
+  filter of `time_weighting` and the streaming `TimeWeighting` class, verified
+  in CI against the class 1 tone-burst references of Table 4. The legacy
+  asymmetric Impulse ballistics (35 ms attack, 1.5 s decay), carried into the
+  international standards from the FAST/SLOW/IMPULSE characteristics of ANSI
+  S1.4-1983.
+
+- **Not covered.** IEC 61672-1's wider instrument chain (frequency weighting, level ranges,
+  periodic tests) is not on this page; it is the subject of [Build a sound level
+  meter](../sound-level-meter.md). ANSI S1.4-1983 is cited only
+  for the historical origin of the F and S constants, not implemented as its own
+  instrument specification. Modern impulsiveness rating ($L_\mathrm{Aeq}$ plus an
+  adjustment, or onset analysis) is on the [Impulsive-sound
+  prominence](../../environment/assessment/impulsive-sound.md) page, not
+  built on the Impulse weighting here.
 
 ## See also
 
@@ -291,29 +404,9 @@ built on these envelopes, and [Why phonometry](../../start/why-phonometry.md) fo
 
 ## References
 
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The exponential-detector definition, the F and S time constants and the
-  Table 4 toneburst responses the ballistics are verified against in CI.
-- American National Standards Institute. (1983). *Specification for sound
-  level meters* (ANSI S1.4-1983).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
-  The classic analog meter specification: the FAST/SLOW dynamic
-  characteristics the F and S constants descend from, and the IMPULSE
-  characteristic (35 ms rise, slow decay) that IEC 61672-1 no longer
-  specifies.
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  Sections 3.2 and 3.6 (sound level meters and the measurement of
-  time-varying sound: what the F/S/I readouts mean in instrument
-  practice). ISBN 978-1-4987-2405-0.
-
-## Standards
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications*: the exponential time-weighting detector (clause 3.8)
-with the F and S design-goal time constants (clause 5.8.1), and the 4 kHz toneburst reference
-responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
-in CI.
+- **American National Standards Institute. (1983).** [*Specification for sound level meters*](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985) (ANSI S1.4-1983).
+  The classic analog meter specification: the FAST/SLOW dynamic characteristics the F and S constants descend from, and the IMPULSE characteristic that IEC 61672-1 no longer specifies, defined in clause 2.7 as a 35 ms exponential-time-averaging constant for increasing portions of the signal and a 1500 ms constant for decreasing portions.
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  Sections 3.2 and 3.6 (sound level meters and the measurement of time-varying sound: what the F/S/I readouts mean in instrument practice). ISBN 978-1-4987-2405-0.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The exponential time-weighting detector (clause 3.8) with the F and S design-goal time constants and decay rates (clause 5.8.1), the maximum time-weighted sound level (clause 3.7) and its hold feature (clause 5.1.14), and the 4 kHz toneburst reference responses of Table 4 and its Equation (7) (class 1 acceptance limits) the ballistics are verified against in CI.

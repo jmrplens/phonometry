@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/heavy-impact-sources.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/
 
 # Heavy and Soft Impact Sources (ISO 16283-2)
 
@@ -20,8 +22,52 @@ tapping-machine chain lives in
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/heavy_impact_sources_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/heavy_impact_sources.svg" alt="Two panels: the octave-band impact force exposure levels of the rubber ball and the bang machine with their printed tolerance bands from 31.5 Hz to 500 Hz, and the ISO 717-2 Annex D rating of a field measurement showing the measured octave levels, their A-weighted contributions and the resulting single number" width="92%"></picture>
 
 *Left: the two source specifications are pure spectra of force, not geometry.
-Right: the rating adds the A-weighted band contributions in energy, so the
-63 Hz band decides almost everything.*
+Right: the rating adds the A-weighted band contributions in energy, and the
+A-weighting is 23 dB steeper at 63 Hz than at 500 Hz, so the quietest measured
+band ends up deciding the number.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import building
+
+fig, (ax_src, ax_rate) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+
+# Left: the printed nominal spectra inside their printed tolerance bands.
+x = np.arange(5)
+for source in ("rubber_ball", "bang_machine"):
+    spec = building.heavy_impact_source_specification(source)
+    limits = building.heavy_impact_source_limits(source)
+    _f, lower, upper = limits.frequencies, limits.lower, limits.upper
+    label = source.replace("_", " ")
+    ax_src.fill_between(x, lower, upper, alpha=0.30, label=f"{label} tolerance")
+    ax_src.plot(x, spec.force_exposure_level, "-o", label=f"{label} nominal")
+ax_src.set_xticks(x, ["31.5", "63", "125", "250", "500"])
+ax_src.set(xlabel="Frequency [Hz]",
+           ylabel="Impact force exposure level LFE [dB re 1 N]")
+ax_src.legend()
+
+# Right: ISO 717-2:2020 Table D.4, measured levels against their A-weighted
+# contributions, with the energy sum drawn across them.
+res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])
+xr = np.arange(4)
+ax_rate.bar(xr - 0.19, res.levels, width=0.36, label="Li,Fmax (measured)")
+ax_rate.bar(xr + 0.19, res.corrected, width=0.36, label="Li,Fmax + A (Table D.3)")
+ax_rate.axhline(res.rating, label=f"LiA,Fmax = {res.rating} dB")
+ax_rate.set_xticks(xr, ["63", "125", "250", "500"])
+ax_rate.set(xlabel="Frequency [Hz]",
+            ylabel="Maximum impact sound pressure level [dB]")
+ax_rate.text(0.02, 0.03, f"unrounded sum = {res.unrounded:.6f} dB",
+             transform=ax_rate.transAxes, va="bottom", ha="left")
+ax_rate.legend()
+plt.show()
+```
+
+</details>
 
 ## Both sources are specified by the energy of their force pulse
 
@@ -34,9 +80,14 @@ L_\mathrm{FE} = 10\log_{10}\!\left[\frac{1}{T_\mathrm{ref}}
 \int_{t_1}^{t_2}\frac{F^2(t)}{F_0^2}\,\mathrm{d}t\right]\ \text{dB re 1 N},
 $$
 
-with $F_0 = 1$ N, $T_\mathrm{ref} = 1$ s and $t_2 - t_1$ the duration of the
-impact. Both characteristics require a **single-peak** waveform of
-$20 \pm 2$ ms (JIS A 1418-2:2019 A.2 b)). The octave-band values are printed
+with $F_0 = 1$ N (ISO 16283-2:2020 Annex A), $T_\mathrm{ref} = 1$ s and
+$t_2 - t_1$ the duration of the impact. Watch the reference: EN 15657 refers
+its blocked-force levels to $F_0 = 10^{-6}$ N, 120 dB away, so a force level
+carried between this page and
+[Structure-borne sound power of equipment](../design/structure-borne-power.md)
+without conversion is wrong by exactly that. Both sources require a **single-peak** waveform of
+$20 \pm 2$ ms (JIS A 1418-2:2019 A.2 b), where the two are called the
+soft and the hard *impact characteristic*). The octave-band values are printed
 identically in ISO 16283-2:2020 Table A.1, ISO 10140-5:2021 Table F.1 and
 JIS A 1418-2:2019 Table A.2 for the ball; the bang machine appears only in
 JIS A 1418-2:2019 Table A.1.
@@ -49,12 +100,15 @@ JIS A 1418-2:2019 Table A.1.
 | 250 | 17.0 ± 2.0 | 11.5 ± 2.0 |
 | 500 | 12.5 ± 2.0 | 5.5 ± 2.0 |
 
-The bang machine puts 8 dB more energy into the two lowest octaves and 7 dB
+The bang machine puts 8 to 9 dB more energy into the two lowest octaves (8 dB
+at 31.5 Hz, 9 dB at 63 Hz) and 7 dB
 less into the top one, which is why the two sources are not interchangeable and
 why a floor can pass one and fail the other.
 
 ```python
 from phonometry import building
+# `heavy_impact_source_specification` and `heavy_impact_source_limits` are the
+# imports of the figure block above.
 
 spec = building.heavy_impact_source_specification("rubber_ball")
 print(spec.drop_height_m, spec.effective_mass)      # 1.0 m, 2.5 kg
@@ -65,7 +119,10 @@ freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
 print(list(zip(freqs, lower, upper))[0])          # (31.5, 46.0, 48.0)
 
 # A calibration run: five measured octave-band LFE against the printed table.
-check = building.check_heavy_impact_source([39.4, 30.2, 23.6, 18.5, 12.9])
+# Name the source: the check defaults to the rubber ball, and the bang machine
+# limits fetched above would reject a conforming ball outright.
+check = building.check_heavy_impact_source([39.4, 30.2, 23.6, 18.5, 12.9],
+                                           source="rubber_ball")
 print(check.passes, list(check.within_tolerance))
 check.plot()   # measured LFE over the tolerance band (needs matplotlib)
 ```
@@ -126,6 +183,22 @@ $0.8 \pm 0.1$, dropped from $(100 \pm 1)$ cm measured from the bottom of the
 ball; and a car tyre inflated to $(2.4 \pm 0.2)\times 10^5$ Pa with an
 effective mass of $(7.3 \pm 0.2)$ kg, dropped from 85 cm.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_heavy_impact_sources_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_heavy_impact_sources.svg" alt="Three impact sources over one floor slab: the ISO tapping machine with five 500 g hammers falling 40 mm, the 180 mm rubber ball with its 30 mm wall and the one metre drop dimensioned from the bottom of the ball, and the bang machine tyre dropped 85 cm, with the JIS Annex C calibration chain below showing the octave filter placed before the analyser" width="92%"></picture>
+
+### Which source
+
+The choice is not free, and it is not a matter of taste. The **rubber ball** is
+the source international standardisation adopted: ISO 16283-2:2020 Annex A and
+ISO 10140-5:2021 Annex F both specify it, ISO 10052:2021 Clause 6.3.2 measures
+with it, and it is light enough to use on a lightweight timber floor without
+risk. The **bang machine** exists only in JIS A 1418-2:2019 and is used where
+national practice calls for it, chiefly in Japan and Korea; its 7.3 kg tyre
+dropped from 85 cm delivers 8 to 9 dB more force in the two lowest octaves,
+which is precisely what makes it more searching on a heavy slab and what makes
+it capable of damaging a light floor. Use the ball unless a national regulation
+or a client specification names the bang machine, and never quote a result from
+one against a limit written for the other.
+
 ## The receiving room: a maximum level cannot be corrected like an average
 
 The rated quantity is a **maximum** of a Fast time-weighted level, not an
@@ -152,8 +225,59 @@ burst. It has a removable singularity at $C = 1$ (i.e. $T = 1{,}7275$ s) where
 its value is $1/e$. When $T = T_0$ the bracket collapses to 1 and the whole
 correction reduces to the volume term, as it must.
 
+The constant $1{,}7275$ s is **not** an integration limit: it is the Fast time
+weighting written as a reverberation time. An exponential decay of $T$ seconds
+has an energy time constant $\tau = T/(6\ln 10) = T/13{,}82$, so a room with
+$T = 13{,}82 \times 0{,}125\ \text{s} = 1{,}7275\ \text{s}$ decays with
+exactly the Fast detector's own $0{,}125$ s time constant, and $C = T/1{,}7275$
+is the ratio of the two. Well below $C = 1$ the detector keeps up with the
+decay and the correction behaves like the energy-average
+$10\log_{10}(T/T_0)$; well above it the detector cannot follow, the peak it
+reports stops growing with $T$, and the correction saturates. ISO 16283-2:2020
+prints the constant without deriving it and refers to its Reference [1] for the
+background.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fast_reverberation_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fast_reverberation_correction.svg" alt="The term subtracted from a measured level against the receiving-room reverberation time from 0.2 to 5 seconds: the Fast-maximum term 10 lg of g(C) over g(C0) rising to about 5 dB, against the energy-average term 10 lg of T over T0 rising to 10 dB, the region where they differ by more than 1 dB shaded, with T0 = 0.5 s and T = 1.7275 s marked" width="88%"></picture>
+
+*Both curves are the term the standardization *subtracts* from the measured
+level, so they are directly comparable. At $T = T_0$ they vanish together, as
+they must. Above it they separate: the energy-average correction keeps growing
+without limit, because energy keeps accumulating, while the Fast term flattens,
+because a 0.125 s detector stops resolving more decay. At $T = 5$ s the
+energy-average rule would take off 10.0 dB and the Fast rule takes off 5.1 dB,
+and that divergence is the whole reason ISO 16283-2 defines a separate
+standardization for a maximum.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import building
+
+t = np.linspace(0.2, 5.0, 481)
+fast = np.asarray(building.fast_reverberation_correction(t), dtype=float)
+energy = 10 * np.log10(t / 0.5)
+print(round(float(fast[-1]), 1), round(float(energy[-1]), 1))    # 5.1 10.0
+
+fig, ax = plt.subplots()
+ax.fill_between(t, fast, energy, where=np.abs(fast - energy) > 1.0,
+                interpolate=True, alpha=0.25, label="more than 1 dB apart")
+ax.plot(t, fast, label="Fast maximum: 10 lg[g(C)/g(C0)]")
+ax.plot(t, energy, "--", label="energy average: 10 lg(T/T0)")
+ax.set(xlabel="Receiving-room reverberation time T [s]",
+       ylabel="Term subtracted from the measured level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 from phonometry import building
+# `fast_reverberation_correction` is the import of the figure block above.
 
 freqs = [63.0, 125.0, 250.0, 500.0]
 li_fmax = [65.3, 64.5, 58.0, 55.8]           # energy-averaged over ball positions
@@ -167,6 +291,58 @@ res.plot()   # measured and standardized spectra (needs matplotlib)
 # One-third-octave measurements combine into octaves with Formula (20):
 print(building.heavy_impact_octave_levels([60.0] * 6))   # [64.77 64.77]: 60 dB + 10 lg 3 per octave
 ```
+
+## Measuring in the field (ISO 16283-2:2020, Clauses 6 to 9)
+
+The functions above consume levels that have already been averaged over
+positions. ISO 16283-2:2020 says how those positions are chosen, and the rubber
+ball differs from the tapping machine at almost every step.
+
+**Dropping the ball (Clause 7.2.3).** Vertical free fall from
+$(100 \pm 1)$ cm, measured from the **bottom** of the ball to the surface of
+the floor under test, not from the operator's hand and not from the centre of
+the ball. **Four or more** positions on the floor or stairs under test; on a
+lightweight joisted floor, one of them should be over a joist and one at the
+centre of the floor, because those are the two extremes of the driving-point
+mobility.
+
+**Microphones (Clauses 7.3.1, 7.3.2, 7.6).** Fixed positions only: the
+mechanized continuously moving microphone and the manual scan that the tapping
+machine may use are **not** available for the ball, because a maximum level
+cannot be spatially averaged along a path the way an energy average can. Fixed
+positions may be on a tripod with nobody in the room, or with an operator
+present whose trunk stays at least an arm's length from the microphone.
+Distribute them through the permitted space, with no two in the same plane
+relative to the boundaries and no regular grid, keeping at least 0.7 m between
+positions, 0.5 m from the room boundaries and 1.0 m from the partition being
+excited. The number of microphone positions equals the number of source
+positions or an integer multiple of it: with four or five source positions, at
+least two measurements at each from at least two different microphone
+positions; with six or more, one measurement per source position at a different
+microphone position each time.
+
+**Averaging, in two stages (Clauses 7.8.3 and 7.3.4).** First energy-average
+the maximum levels over the microphone positions belonging to one ball position
+(Formula (14)); then energy-average those per-position results over the ball
+positions (Formula (9)). Only then apply the standardization of Formulae (4),
+(5) and (6). Averaging everything in one pass is not the same operation.
+
+**Two things the tapping machine does that the ball does not.** The
+low-frequency corner procedure of Clause 8 applies to the tapping machine only:
+NOTE 2 to Clause 6 says plainly that no link has yet been shown between corner
+and central-zone measurements for a *maximum* Fast-weighted level, so there is
+nothing to combine. What does reach $L'_{\mathrm{i,Fmax},V,T}$ from that corner of
+the standard is the 63 Hz octave reverberation time of Clause 10.4, and it
+arrives here as one of the band reverberation times you supply. And the ball's level is **not corrected for background
+noise** (Clause 9 NOTE), because it cannot be established whether a maximum
+representing the background affected the maximum representing the impact.
+Instead, keep the background low and say so.
+
+The survey method reaches the same quantity by a shorter route:
+[ISO 10052:2021 Clause 6.3.2](insulation-survey.md#running-the-survey-clauses-5-and-6)
+measures the Fast maximum in octave bands over about 10 s from at least two
+fixed positions more than 0.7 m apart, one near the centre and one at a
+different height, at least 0.5 m from the boundaries and 1.0 m from the impact.
 
 ## The single number is an A-weighted sum, not a shifted curve
 
@@ -189,7 +365,7 @@ The worked example of Table D.4 is reproduced exactly, including the
 deliberately unrounded intermediate the standard prints:
 
 ```python
-from phonometry import building
+# `a_weighted_max_impact_level` is the import of the figure block above.
 
 # ISO 717-2:2020 Table D.4: a field measurement in octave bands.
 res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])
@@ -203,71 +379,56 @@ Because the A-weighting is 23 dB steeper at 63 Hz than at 500 Hz, a heavy
 source's rating is dominated by whichever band survives that slope. For the
 Table D.4 spectrum the four A-weighted contributions are 39.1, 48.3, 49.3 and
 52.6 dB, so the 500 Hz band carries the most weight even though 63 Hz is the
-loudest band by 10 dB.
+loudest measured band, 9.5 dB above it.
+
+Read the 55 dB the way an impact quantity is read: **higher is worse**, as for
+every impact level on this site. It is a maximum, not an average, so it is not
+comparable with an $L'_{\mathrm{n}T,\mathrm{w}}$ or an $L'_\mathrm{n,w}$ from the tapping machine, and
+ISO sets no limit on it: heavy-impact criteria are national. The most
+developed of them is Korea's, where floor impact sound in apartment housing has
+been regulated since 2004 and the rules were rewritten in August 2022: the
+heavyweight source became the rubber ball, the evaluation index became exactly
+the $L'_\mathrm{iA,Fmax}$ of this section (through KS F ISO 10140-5 and
+KS F ISO 717-2), and the mandatory performance standard was set at **49 dB**,
+tightened from the 50 dB of the previous bang-machine scheme. Above that
+threshold sit four grades at 4 dB intervals, grade 1 being the best:
+$L \le 37$, $37 < L \le 41$, $41 < L \le 45$ and $45 < L \le 49$ dB. Against
+that scale, the 55 dB of the worked example is a floor that fails the standard
+outright. Because the number is set by the low-frequency bands, what moves it
+is mass and structural decoupling (a thicker slab, a floating floor on a soft
+resilient layer, a decoupled ceiling) and *not* a soft covering, which acts
+where the A-weighting has already discarded the energy.
 
 ## What this guide covers
 
-**Covered.** The impact force exposure level of ISO 16283-2:2020
-Formula (A.1) from a sampled force record, via
-`building.impact_force_exposure_level`; the printed octave-band specifications
-of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2021 Table F.1 (rubber ball) and
-JIS A 1418-2:2019 Tables A.1 and A.2 (both characteristics) with their
-tolerances, via `building.heavy_impact_source_specification`,
-`building.heavy_impact_source_limits` and
-`building.check_heavy_impact_source`; the standardized maximum impact sound
-pressure level of Formulae (4), (5) and (6) and the octave synthesis of
-Formula (20), via `building.standardized_max_impact_level`,
-`building.fast_reverberation_correction` and
-`building.heavy_impact_octave_levels`; and the normative A-weighted rating of
-ISO 717-2:2020 Annex D with the Table D.3 corrections, via
-`building.a_weighted_max_impact_level`.
+- **Covered.** The impact force exposure level of ISO 16283-2:2020 Formula (A.1) from a
+  sampled force record, via `building.impact_force_exposure_level`; the printed
+  octave-band specifications of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2021
+  Table F.1 (rubber ball) and JIS A 1418-2:2019 Tables A.1 and A.2 (both
+  characteristics) with their tolerances, via
+  `building.heavy_impact_source_specification`,
+  `building.heavy_impact_source_limits` and
+  `building.check_heavy_impact_source`; the standardized maximum impact sound
+  pressure level of Formulae (4), (5) and (6) and the octave synthesis of
+  Formula (20), via `building.standardized_max_impact_level`,
+  `building.fast_reverberation_correction` and
+  `building.heavy_impact_octave_levels`; and the normative A-weighted rating of
+  ISO 717-2:2020 Annex D with the Table D.3 corrections, via
+  `building.a_weighted_max_impact_level`.
 
-**Not covered.** The field measurement procedure itself (the four or more
-drop positions of ISO 10140-3 Annex A and the microphone positions) is not
-automated: the functions consume levels that were already energy-averaged over
-positions. The ISO 16283-2 low-frequency corner procedure covers the
-tapping machine alone, which is what its Clause 8 heading says and what
-NOTE 2 to Clause 6 explains; the 63 Hz octave reverberation time of Clause 10.4
-does reach $L'_{\mathrm{i,Fmax},V,T}$, and arrives here as the band values the
-caller supplies. There is no prediction model
-that takes a floor construction to a heavy-impact level; Hopkins states
-plainly that the complexity of the input force and the use of a
-time-weighted maximum leave no simple counterpart to the tapping-machine
-prediction. No accredited worked example exists anywhere that carries a real
-floor from measured $L_\mathrm{i,Fmax}$ through to $L'_{\mathrm{iA,Fmax},V,T}$, so the
-standardization chain is anchored on its own $T = T_0$ identity and on a
-published 25-band reproduction of Formula (4).
-
-## References
-
-- ISO 16283-2:2020, *Acoustics — Field measurement of sound insulation in
-  buildings and of building elements — Part 2: Impact sound insulation*.
-  Definition 3.16 and Formulae (4), (5), (6), (9), (15) and (20); Annex A.2
-  (rubber ball) with Table A.1 and Formula (A.1).
-- ISO 10140-5:2021, *Acoustics — Laboratory measurement of sound insulation of
-  building elements — Part 5: Requirements for test facilities and equipment*.
-  Annex F (normative): F.1 the modified tapping machine, F.2 the rubber ball
-  with Table F.1.
-- ISO 10140-3:2010, Annex A (informative), *Measurement using heavy and soft
-  impact sources*.
-- JIS A 1418-2:2019, *Acoustics — Measurement of floor impact sound insulation
-  of buildings — Part 2: Method using standard heavy impact sources*.
-  Annex A (normative) with Tables A.1 and A.2, Annex B (informative)
-  construction examples, Annex C (informative) force calibration.
-- ISO 717-2:2020, *Acoustics — Rating of sound insulation in buildings and of
-  building elements — Part 2: Impact sound insulation*. Annex D (normative),
-  Formula (D.1), Tables D.1 to D.4.
-- Hopkins, C. (2007). *Sound Insulation*. Butterworth-Heinemann, Section 3.6.4.
-
-## Standards
-
-| Standard | Scope in this guide |
-|---|---|
-| ISO 16283-2:2020 | Field measurement with the rubber ball: the source spectrum (Annex A) and the standardized maximum level (Formulae (4) to (6), (20)) |
-| ISO 10140-5:2021 | Laboratory requirements: Annex F, the heavy and soft impact sources |
-| ISO 10140-3:2010 | Laboratory measurement with heavy and soft sources (Annex A) |
-| JIS A 1418-2:2019 | Both impact force characteristics with their tolerances and construction examples |
-| ISO 717-2:2020 | Annex D, the A-weighted maximum impact sound pressure level |
+- **Not covered.** The field procedure documented above is not automated: the functions consume
+  levels that were already energy-averaged over the microphone positions of one
+  ball position and then over the ball positions, and nothing checks the drop
+  height, the four-or-more source positions, the microphone separations or the
+  two-stage averaging. Nor is the horizontal-arrangement guidance of ISO
+  16283-2:2020 Annex E, which is informative. There is no prediction model that
+  takes a floor construction to a heavy-impact level; Hopkins states plainly
+  that the complexity of the input force and the use of a time-weighted maximum
+  leave no simple counterpart to the tapping-machine prediction. No accredited
+  worked example exists anywhere that carries a real floor from measured
+  $L_\mathrm{i,Fmax}$ through to $L'_{\mathrm{iA,Fmax},V,T}$, so the standardization chain is
+  anchored on its own $T = T_0$ identity and on a published 25-band reproduction
+  of Formula (4).
 
 ## See also
 
@@ -279,3 +440,22 @@ published 25-band reproduction of Formula (4).
   engine that rates the tapping-machine quantities.
 - [Floor-Covering Impact Improvement (ISO 16251-1)](../design/impact-improvement.md):
   the improvement a soft covering gives against the light source.
+- API reference: [`building.measurement.heavy_impact`](https://docs.jmrp.io/phonometry/reference/api/building/heavy-impact/).
+- Theory: [Sound insulation and absorption, measured](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354): the impact-level normalisations of ISO 10140 and ISO 717-2 that the rubber ball and bang machine feed.
+
+## References
+
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  Section 3.6.4 describes the heavy impact sources and explains why no simple prediction counterpart exists. ISBN 978-0-7506-6526-1.
+- **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/42089.html) (ISO 10140-3:2010).
+  Annex A (informative), the laboratory measurement with heavy and soft impact sources.
+- **International Organization for Standardization. (2020).** [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/77436.html) (ISO 16283-2:2020).
+  Annex A.2 and Table A.1 specify the rubber ball; definition 3.16 and Formulae (4), (5) and (6) give the Fast-weighted standardization, Formula (20) the octave synthesis.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
+  Annex D (normative) gives the A-weighted maximum impact sound pressure level, its Table D.3 corrections and the Table D.4 worked example reproduced on this page.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment*](https://www.iso.org/standard/79482.html) (ISO 10140-5:2021).
+  Annex F (normative) prints the same rubber-ball spectrum as Table F.1 and specifies the modified tapping machine.
+- **Japanese Standards Association. (2019).** [*Acoustics — Measurement of floor impact sound insulation of buildings — Part 2: Method using standard heavy impact sources*](https://www.jisc.go.jp/) (JIS A 1418-2:2019).
+  The only primary source for the bang machine: Annex A Tables A.1 and A.2 with tolerances, the 20 ms single-peak requirement, and the Annex B construction examples.
+- **Kim, K. W., Park, S. H., Shin, H. K., & Kim, K. C. (2023).** Changes of floor impact sound regulations and future improvement directions in Korea. *Proceedings of Forum Acusticum 2023 (10th Convention of the European Acoustics Association)*. https://doi.org/10.61782/fa.2023.0364
+  Table 1 records the August 2022 revision: the heavyweight source became the rubber ball, the index L'iA,Fmax through KS F ISO 10140-5 and KS F ISO 717-2, the mandatory standard 49 dB (from 50 dB) and the four grades at 4 dB intervals. The only published regulatory scale for the quantity this page computes.

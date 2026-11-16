@@ -1,10 +1,35 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/materials-surfaces.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/
 
 # Theory: Materials and Surfaces
 
-This page collects the theory behind materials and surfaces: surface scattering and diffusion, in-situ road-surface absorption, and acoustic material characterisation from the weighted absorption rating to airflow resistance and the impedance tube. It is part of the [theory reference](index.md). The ISO 354 reverberation-room measurement that feeds the ISO 11654 rating is covered in [Theory: Rooms and Buildings](rooms-buildings.md).
+This page collects the theory behind materials and surfaces: surface scattering and diffusion, in-situ road-surface absorption, and acoustic material characterisation from the weighted absorption rating to airflow resistance and the impedance tube. It is part of the [theory reference](index.md). The ISO 354 reverberation-room measurement that feeds the ISO 11654 rating is covered in [Rooms and Buildings](rooms-buildings.md).
 
 ## Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)
+
+The two parts of ISO 17497 answer different questions about the same surface,
+and their answers do not substitute for one another. Part 1 measures **how
+much** of the reflected energy leaves the specular direction: one number per
+band, which is exactly what a geometrical or ray-based room model consumes as
+its scattering probability. Part 2 measures **how uniformly** the reflected
+energy is spread over angle, which is what tells a designer whether a diffuser
+works, and it is deliberately blind to how much energy was redirected at all.
+The classic failure is to read one as the other: a set of battens that merely
+sends the reflection off in a different direction scores a high scattering
+coefficient and a low normalised diffusion coefficient, because redirection is
+not dispersion (Cox & D'Antonio 3rd ed., §5.1 and Fig. 5.2). The measurement
+conditions differ too: Part 1 is a random-incidence reverberation-room method
+restricted to shallow samples that absorb little ($\alpha_\mathrm{s} \le 0.50$,
+clause 6.3.4), Part 2 a free-field method with neither restriction, so a
+surface can legitimately have only one of the two coefficients published.
+
+Both run from 0 to 1, and neither reaches 1 in practice. Scattering rises with
+frequency as the surface relief becomes comparable with the wavelength, and a
+surface meant to be flat stays low across the band: ISO 17497-1 Table 1 caps
+the base plate of the apparatus itself at 0.05 to 0.25, which is the standard's
+own definition of "not scattering". Real diffusers rarely exceed a diffusion
+coefficient of 0.7 (ISO 17497-2, definition 3.9, Note 1).
 
 ### Random-incidence scattering coefficient (ISO 17497-1)
 
@@ -32,9 +57,30 @@ scatter little: Table 1 caps its coefficient (Formula 6) at 0.05–0.25 across
 presentation (clause 8.3), but values above 1 near grazing bands are kept
 (clause 6.3.2). The Annex A uncertainty chain ($u_\alpha$, Formulae A.3/A.4;
 $u_s$, Formula A.5; $U = 2 u_s$) is implemented. Since the standard prints no
-worked example, the oracle is a synthetic end-to-end chain
+worked example, the reference value is a synthetic end-to-end chain
 ($V = 200$ m³, $S = 10$ m², $T = 8.0/6.0/7.5/5.0$ s → $s = 0.093$) plus the
 Formula A.5 hand value $u_s = 0.0297$.
+
+**What the four decays require.** The mechanism only works if the rotation is
+sampled properly and the sample is big enough to be a surface rather than an
+object. At full scale ($N = 1$) the sample is circular with a diameter of at
+least 3.0 m, or square with a 2.65 m edge on a base plate of at least 3.75 m
+diameter, and its structural depth must stay below $d/16$ of the turntable
+diameter or the method stops measuring roughness (clauses 6.3.1–6.3.2); no part
+of the turntable comes closer than 1.0 m to a room wall (6.2), and a sample with
+rotational symmetry is offset from the rotation axis by at least $d/8$ (6.3.3).
+Every linear dimension, and the room volume of $V \ge 200$ m³, scales by $1/N$
+(by $N^{-3}$ for the volume) in a scale model. Each of the four reverberation
+times is the arithmetic mean over at least two source and three microphone
+positions, six combinations in all (clause 7.3). The rotating decays are built
+from $n$ phase-locked averages at equal steps of $360^\circ/n$ with
+$60 \le n \le 120$, $n = 72$ (5°) preferred, and the excitation must be
+identical from step to step (clause 7.3): it is precisely the angle-to-angle
+decorrelation that registers as the extra "absorption" the coefficient is built
+from, so a drifting signal fakes scattering. For the same reason the room must
+be time-invariant across the whole set: diffusers fixed, no rotating vanes, no
+ventilation or air circulation running (6.1.1), and temperature and relative
+humidity measured before and after each of the four situations (7.4).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" width="88%"></picture>
 
@@ -43,10 +89,30 @@ Formula A.5 hand value $u_s = 0.0297$.
 ### Directional diffusion coefficient (ISO 17497-2)
 
 ISO 17497-2:2012 measures, in the free field, how uniformly a surface spreads
-its reflected polar response over $n$ microphones. The autocorrelation-based
-coefficient (clause 8.1, Formula 5) is
+its reflected polar response over $n$ microphones. Those microphones map a
+semicircle around the sample's reference point (a two-dimensional goniometer,
+in an anechoic room or a reflection-free zone) for a single-plane surface, or a
+hemisphere (three-dimensional goniometer) for one that scatters in both planes
+(clause 4), at an angular resolution of 5° or finer in both azimuth and
+elevation, which is where an arc of 37 receivers over 180° comes from.
+Far-field conditions are taken as met when at least 80 % of the receivers lie
+outside the specular zone, for which the standard's working geometry is a 10 m
+source distance and a 5 m receiver radius (clause 6.2.2); nearer arrangements
+are legitimate for a near-field application but must be reported with the
+source and receiver locations and the sample dimensions (6.2.1), because $d$ is
+a property of *that* surface at *that* size and distance, not a material
+constant. Each
+source-receiver pair needs the impulse response with the test surface present
+and the one with it absent, which is subtracted to remove background
+reflections, plus a source response measured on the reference point whenever
+more than one source or microphone is used (clause 7.3); the reflection is then
+time-windowed away from the direct sound and the edge diffraction before the
+levels $L_i$ are formed. The flat-reference measurement that the normalisation
+below removes is a further, complete run on a plane surface of the same size.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" width="92%"></picture>
+
+The autocorrelation-based coefficient (clause 8.1, Formula 5) is
 
 $$
 d_\theta = \frac{\left( \sum_i p_i \right)^2 - \sum_i p_i^2}{(n - 1) \sum_i p_i^2},
@@ -59,14 +125,12 @@ Formula 8 solid-angle factors ($A_i = (4\pi/\Delta\phi) \sin^2(\Delta\theta/4)$
 at the zenith). Normalizing against a flat reference reflector of the same
 size removes edge diffraction (clause 8.2, Formula 7):
 $d_{\theta,\mathrm{n}} = (d_\theta - d_{\theta,\mathrm{r}})/(1 - d_{\theta,\mathrm{r}})$. The
-random-incidence value averages the source angles with weights 1:3:3:3:3 for
-0°, ±30°, ±60° (clause 8.4). Anchors: the model-predicted 37-receiver arc of
-the published six-period $N = 7$ QRD (Cox & D'Antonio 3rd ed., Appendix B;
-Hargreaves et al. 2000, Table I) at 1000 Hz gives $d_\theta = 0.1099$, its
-flat reference $0.0049$ and $d_{\theta,\mathrm{n}} = 0.1055$; the band-averaged model
-predictions match the published Appendix B BEM normalised diffusion in the
-200-400 Hz bands within 0.01 (a low-band anchor: the broadband 100-5000 Hz
-mean absolute deviation is about 0.09); zenith area factor 1.5710.
+random-incidence value averages over the source positions: for a
+two-dimensional boundary measurement the preferred sources sit at 0°, ±30° and
+±60° from the reference normal (clause 6.2.2) and are averaged with weights
+1:3:3:3:3, the outer four standing in for the solid angle they represent, while
+a hemispherical measurement averages the Table 1 source positions with equal
+weights (clause 8.4).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the predicted reflected sound-pressure level of a six-period N=7 quadratic-residue diffuser over 37 receivers from -90 to 90 degrees, the energy concentrated in a fan of discrete grating lobes, giving an autocorrelation diffusion coefficient d of about 0.11" width="72%"></picture>
 
@@ -79,9 +143,19 @@ is why $d_\theta$ is 0.11 where the flat reference of the same size scores
 0.005, and why it is still nowhere near 1: the numerator rewards an even
 response, and a comb of lobes is not even.*
 
+Reference values: the model-predicted 37-receiver arc of
+the published six-period $N = 7$ QRD (Cox & D'Antonio 3rd ed., Appendix B;
+Hargreaves et al. 2000, Table I) at 1000 Hz gives $d_\theta = 0.1099$, its
+flat reference $0.0049$ and $d_{\theta,\mathrm{n}} = 0.1055$; the band-averaged model
+predictions match the published Appendix B BEM normalised diffusion in the
+200-400 Hz bands within 0.01 (a low-band anchor: the broadband 100-5000 Hz
+mean absolute deviation is about 0.09); zenith area factor 1.5710.
+
 See the [Diffusers guide](../../materials/diffusers/diffusers.md) for usage.
 
 ## In-situ road surface absorption (ISO 13472-1, ISO 13472-2)
+
+### Extended surface method (ISO 13472-1)
 
 ISO 13472-1:2002 (extended surface method) recovers the normal-incidence
 absorption of a road surface in place, from one microphone above it: the
@@ -101,15 +175,20 @@ image path. Ratioing the road measurement against one on a highly reflective
 reference surface cancels the entire electro-acoustic chain along with $K_\mathrm{r}$
 (Annex B). The 5 ms window bounds the sampled area (Annex A closed form:
 radius ≈ 1.34 m for the standard geometry) and the valid range is
-250 Hz – 4 kHz in one-third octaves. ISO 13472-2:2010 (spot method,
-250–1600 Hz) instead couples a small impedance tube to the surface and defers
-the mathematics to the ISO 10534-2 transfer-function method below (its
+250 Hz – 4 kHz in one-third octaves.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" width="92%"></picture>
+
+### Spot method (ISO 13472-2)
+
+Where Part 1 works at a stand-off of about a metre in the open, ISO 13472-2:2010
+presses a small impedance tube against the surface, trading the 250 Hz – 4 kHz
+range for 250–1600 Hz and a sample the size of the tube mouth. It defers the
+mathematics to the ISO 10534-2 transfer-function method below (its
 clauses 4/5.7/6.6); the implementation reuses that module, adding the Part 2
 geometry and validity limits ($f_\mathrm{u} = 0.58\ c_0/d$; microphone spacing bounds
 $0.45\ c_0/f_\mathrm{max}$ and $0.05\ c_0/f_\mathrm{min}$, clause 5.4) and the Annex A
 subtractive correction for internal system losses.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" width="92%"></picture>
 
 See the [In-situ Road-Surface Absorption guide](../../materials/surfaces/road-absorption.md) for usage.
 
@@ -142,13 +221,28 @@ See the [Sound Absorption Measurement and Rating guide](../../materials/absorber
 ### Airflow resistance (ISO 9053-1/2)
 
 Airflow resistivity $\sigma = R\,A/d$ is the key transport parameter of a
-porous absorber. ISO 9053-1:2018 (static method) drives a steady flow through
+porous absorber: the Delany-Bazley and Miki regressions predict a material's
+complex impedance and wavenumber from $\sigma$ alone, and the
+Johnson-Champoux-Allard model takes it as the first of its five parameters.
+What governs absorption, though, is the resistance of the **whole layer**,
+$R_\mathrm{s} = \sigma d$, against the characteristic impedance of air: a rigidly backed
+layer works best for $\rho_0 c_0 \lesssim \sigma d \lesssim 4 \rho_0 c_0$, so a
+50 mm blanket wants roughly 8 to 33 kPa·s/m², which is where commercial
+absorbers cluster. Below that window the layer is acoustically transparent and
+above it the wave reflects off the front face before the pores can do any work.
+Since a rigidly backed layer still needs about a quarter wavelength of depth to
+develop its absorption, no resistivity buys absorption at frequencies whose
+quarter wavelength exceeds the depth available, which is why a thin, very
+resistive layer is a worse low-frequency absorber than a thick, moderately
+resistive one; the
+[Airflow Resistance guide](../../materials/absorbers/airflow-resistance.md#4-what-the-resistivity-feeds)
+draws the window and gives the material ranges.
+
+ISO 9053-1:2018 (static method) drives a steady flow through
 the specimen and fits $\Delta p = a\,u + b\,u^2$ through the origin
 (clause 7.5); since $R_\mathrm{s} = \Delta p / u = a + b\,u$, the linear coefficient is
 the zero-velocity specific resistance, reported at the reference velocity
-$u = 0.5$ mm/s. ISO 9053-2:2020 (alternating method) replaces the flowmeter
-with a ~2 Hz piston and a microphone in a closed cavity (clause 8.7,
-Formula 2):
+$u = 0.5$ mm/s.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance.svg" alt="ISO 9053-1 static-method airflow resistance: the measured pressure drop against linear airflow velocity, fitted with a through-origin quadratic, with the specific airflow resistance evaluated at the 0.5 mm/s reference velocity" width="80%"></picture>
 
@@ -158,6 +252,10 @@ linear coefficient $a$ (the fit extrapolated back to zero velocity), evaluated
 at the 0.5 mm/s reference velocity, which is why the reference velocity has to
 be stated with any resistivity that is quoted.*
 
+ISO 9053-2:2020 (alternating method) replaces the flowmeter
+with a ~2 Hz piston and a microphone in a closed cavity (clause 8.7,
+Formula 2):
+
 $$
 R = \kappa'\ \frac{p_\mathrm{s}}{2 \pi f V}\ \frac{h_\mathrm{t}}{h_\mathrm{s}}\ 10^{(L_{p\mathrm{s}} - L_{p\mathrm{t}})/20}
 $$
@@ -165,8 +263,11 @@ $$
 Only a level *difference* enters, so the sound-level device needs no
 absolute calibration. The effective exponent $\kappa'$ (Annex A,
 Formula A.7) corrects the adiabatic $\kappa$ for wall heat conduction through
-the thermal boundary layer $b = \sqrt{2 c_0 l_\mathrm{h} / \omega}$ (Formulae A.4/A.5).
-The Annex A.3 worked example (100 mm closed cylinder at 2 Hz: $b = 1.83$ mm,
+the thermal boundary layer $\delta_h = \sqrt{2 c_0 l_\mathrm{h} / \omega}$
+(Formulae A.4/A.5; ISO 9053-2 writes it $b$, renamed here to keep it apart from
+the quadratic fit coefficient above).
+The Annex A.3 worked example (100 mm closed cylinder at 2 Hz:
+$\delta_h = 1.83$ mm,
 $\kappa' = 1.370 = 0.978\,\kappa$) is reproduced, and the validity guards of
 Formula 3 (transfer ratio < 0.3) and Formula 4 (10 dB background margin) are
 enforced.
@@ -177,9 +278,13 @@ See the [Airflow Resistance guide](../../materials/absorbers/airflow-resistance.
 
 A tube below its cut-on frequency ($f d < 0.58\ c_0$ circular,
 $< 0.50\ c_0$ rectangular; microphone-spacing limits $f s < 0.45\ c_0$ and
-$f > c_0/(20 s)$; clauses 4.2–4.5) carries only plane waves, so the surface
-reflection factor of a sample is fully observable. ISO 10534-2
-(transfer-function method) compares the measured two-microphone transfer
+$f > c_0/(20 s)$, where $s$ is the microphone spacing throughout this
+subsection and not the scattering coefficient of the first section;
+clauses 4.2–4.5) carries only plane waves, so the surface
+reflection factor of a sample is fully observable. ISO 10534-2:1998
+(transfer-function method: the clause and equation numbers here are that
+edition's, and ISO 10534-2:2023 renumbers them) compares the measured
+two-microphone transfer
 function $H_{12}$ with the analytic incident and reflected ones
 $H_\mathrm{I} = \mathrm{e}^{-j k_0 s}$, $H_\mathrm{R} = \mathrm{e}^{+j k_0 s}$ (Annex D) to give (clause 7,
 Eq. 17):
@@ -190,11 +295,53 @@ r = \frac{H_{12} - H_\mathrm{I}}{H_\mathrm{R} - H_{12}}\ \mathrm{e}^{2 j k_0 x_1
 $$
 
 with the complex wavenumber's attenuation lower bound
-$k_0'' = 1.94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Eq. A.18). ISO 10534-1
+$k_0'' = 1.94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Eq. A.18).
+
+**$H_{12}$ as measured is not the $H_{12}$ this formula wants.** It carries the
+amplitude and, far more damagingly, the phase mismatch of the two channels
+(microphone, preamplifier and analyser channel together) and clause 7.5 requires
+one of two corrections before anything above is evaluated: interchange the two
+microphones for every specimen measurement and combine the two transfer
+functions (7.5.1, Eq. 8), or measure a calibration factor $H_\mathrm{c}$ once, as the
+geometric mean of the interchanged pair on an absorptive specimen, and divide it
+out of every subsequent measurement (7.5.2, Eqs. 10 and 13), which is the route
+`microphone_calibration_factor` and `apply_microphone_calibration` implement. It matters more
+than it looks: the method infers a complex reflection factor from the small phase
+difference between two positions a few centimetres apart, so at the
+low-frequency end that difference is itself small and a residual channel phase
+error of a fraction of a degree is indistinguishable from real specimen
+reactance. The symptom is a low-frequency absorption curve that drifts below
+zero or above unity and does not repeat between mountings.
+
+The specimen mounting is part of the same contract (clause 6). The sample fits
+snugly in the holder but is neither compressed nor squeezed until it bulges, its
+edge is sealed against leaks, and its front face sits normal to the tube axis at
+a position known to ±0.5 mm: the same tolerance the standard puts on the
+reference plane's distance to the nearest microphone (7.1), because that
+distance is $x_1$ in the formula above. An uneven back face is levelled with a
+putty layer against the backing plate, since an unintended air gap turns a
+porous layer into a resonant absorber and moves the whole curve; at least two
+specimens are measured under identical mounting conditions, and more when the
+material is laterally inhomogeneous. The two spacing bounds quoted above are
+what force a wide-band measurement into two spacer positions.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="ISO 10534-2 two-microphone impedance tube: a loudspeaker radiating a plane wave down the tube, two microphones flush in the wall at spacing s and distance x1 from the specimen face, the test specimen against a rigid backing, and the incident and reflected waves" width="92%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result.svg" alt="ISO 10534-2 two-microphone tube result for a 50 mm porous absorber: the normal-incidence absorption coefficient rising from about 0.2 at 200 Hz towards 0.97 above 1 kHz, with the reflection-factor magnitude falling as its mirror image" width="80%"></picture>
+
+*What the formula returns: $\alpha$ and $|r|$ for a 50 mm porous absorber over
+the working band of a 100 mm tube. The two curves are the same information
+($\alpha = 1 - |r|^2$), so the figure is really one measurement drawn twice, and
+the rise with frequency is the layer thickness growing against the wavelength.*
+
+ISO 10534-1:1996
 (standing-wave-ratio method) is the closed-form classic:
-$|r| = (s - 1)/(s + 1)$ from the max/min ratio $s = 10^{\Delta L/20}$ and the
+$|r| = (\mathrm{SWR} - 1)/(\mathrm{SWR} + 1)$ from the max/min ratio
+$\mathrm{SWR} = 10^{\Delta L/20}$ and the
 phase from the first-minimum position (Eqs. 12–26); an SWR of 3 gives exactly
-$|r| = 0.5$ and $\alpha = 0.75$. ASTM E2611-19 adds transmission: four
+$|r| = 0.5$ and $\alpha = 0.75$. (The standard writes the ratio $s$; it is
+spelled out here to keep it apart from the microphone spacing above.)
+ASTM E2611-19 adds transmission: four
 microphones decompose the up- and downstream fields into the $A, B, C, D$
 waves (Eqs. 17–20) and a two-load (or symmetric one-load) solve yields the
 specimen's 2×2 **transfer matrix** $[p; u]_0 = T\,[p; u]_d$ (Eqs. 16/22–24),
@@ -205,27 +352,20 @@ $$
 TL = 20 \log_{10} \frac{\left| T_{11} + T_{12}/\rho c + \rho c\ T_{21} + T_{22} \right|}{2},
 $$
 
-plus the hard-backed reflection
-$R = (T_{11} - \rho c\,T_{21})/(T_{11} + \rho c\,T_{21})$ (Eq. 27), the
+plus the hard-backed reflection coefficient
+$r_{hb} = (T_{11} - \rho c\,T_{21})/(T_{11} + \rho c\,T_{21})$ (Eq. 27, written
+$R$ there; renamed here because $R$ is the airflow resistance two subsections
+above), the
 material wavenumber $\arccos(T_{11})/d$ (Eq. 29) and the characteristic
 impedance $\sqrt{T_{12}/T_{21}}$ (Eq. 30). The three standards deliberately
 keep their own sign ansatz and temperature units (ISO in kelvin, ASTM in
 Celsius), and near-singular load solves raise a warning. Since neither
-standard prints a numeric example, the oracles are physics identities: the
+standard prints a numeric example, the reference values are physics identities
+that must hold exactly: the
 analytic air-layer matrix ($\det T = 1$, $T_{11} = T_{22}$,
-$TL = 0\ \text{dB}$, hard-backed $|R| = 1$), synthetic round-trips that
+$TL = 0\ \text{dB}$, hard-backed $|r_{hb}| = 1$), synthetic round-trips that
 recover a known $r$, and
 two-load recovery of an asymmetric reciprocal specimen.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="ISO 10534-2 two-microphone impedance tube: a loudspeaker radiating a plane wave down the tube, two microphones flush in the wall at spacing s and distance x1 from the specimen face, the test specimen against a rigid backing, and the incident and reflected waves" width="92%"></picture>
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result.svg" alt="ISO 10534-2 two-microphone tube result for a 50 mm porous absorber: the normal-incidence absorption coefficient rising from about 0.2 at 200 Hz towards 0.97 above 1 kHz, with the reflection-factor magnitude falling as its mirror image" width="80%"></picture>
-
-*What the ISO 10534-2 formula returns: $\alpha$ and $|r|$ for a 50 mm porous
-absorber over the working band of a 100 mm tube. The two curves are the same
-information ($\alpha = 1 - |r|^2$), so the figure is really one measurement
-drawn twice, and the rise with frequency is the layer thickness growing against
-the wavelength.*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube.svg" alt="ASTM E2611 four-microphone transmission-loss tube: a sound source, two microphones upstream and two downstream of the test specimen at spacings s1 and s2 and offsets l1 and l2, an adjustable termination for the two-load method, the upstream A and B and downstream C and D travelling waves, and the transfer matrix and transmission-loss relations" width="92%"></picture>
 
@@ -240,48 +380,23 @@ See the [Impedance Tube guide](../../materials/absorbers/impedance-tube.md) for 
 
 ## References
 
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  ISBN 978-1-4987-4099-9.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  Absorber and diffuser measurement and design, by the authors behind the
-  ISO 17497-2 diffusion-coefficient method.
-- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
-  Modelling sound absorbing materials* (2nd ed.). Wiley.
-  ISBN 978-0-470-74661-5.
-  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
-  The porous-material theory linking the airflow-resistance and
-  impedance-tube quantities of the characterisation section.
-- International Organization for Standardization. (2004). *Acoustics —
-  Sound-scattering properties of surfaces — Part 1: Measurement of the
-  random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004+A1:2014, the edition implemented here).
-  [iso.org catalogue](https://www.iso.org/standard/31397.html).
-  The turntable scattering-coefficient method and its Annex A uncertainty
-  chain.
-- International Organization for Standardization. (2012). *Acoustics —
-  Sound-scattering properties of surfaces — Part 2: Measurement of the
-  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
-  [iso.org catalogue](https://www.iso.org/standard/55293.html).
-  The free-field directional diffusion coefficient and its solid-angle area
-  weighting.
-- International Organization for Standardization. (1998). *Acoustics —
-  Determination of sound absorption coefficient and impedance in impedance
-  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
-  Europe as EN ISO 10534-2:2001; since revised as
-  [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
-  [iso.org catalogue](https://www.iso.org/standard/22851.html).
-  The two-microphone transfer-function method of the impedance-tube
-  section.
-- ASTM International. (2019). *Standard test method for normal incidence
-  determination of porous material acoustical properties based on the
-  transfer matrix method* (ASTM E2611-19, the edition implemented here;
-  since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
-  [ASTM store](https://store.astm.org/e2611-19.html).
-  The four-microphone transfer-matrix decomposition and its transmission
-  loss.
-- International Organization for Standardization. (2018). *Acoustics —
-  Determination of airflow resistance — Part 1: Static airflow method*
-  (ISO 9053-1:2018).
-  [iso.org catalogue](https://www.iso.org/standard/69869.html).
+- **Allard, J. F., & Atalla, N. (2009).** *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+  ISBN 978-0-470-74661-5. The porous-material theory linking the airflow-resistance and impedance-tube quantities of the characterisation section.
+- **ASTM International. (2019).** [*Standard test method for normal incidence determination of porous material acoustical properties based on the transfer matrix method*](https://store.astm.org/e2611-19.html) (ASTM E2611-19).
+  The four-microphone transfer-matrix decomposition and its transmission loss. The edition implemented here; since revised as ASTM E2611-24 (https://store.astm.org/e2611-24.html).
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  ISBN 978-1-4987-4099-9. Absorber and diffuser measurement and design, by the authors behind the ISO 17497-2 diffusion-coefficient method.
+- **International Organization for Standardization. (1998).** [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 2: Transfer-function method*](https://www.iso.org/standard/22851.html) (ISO 10534-2:1998).
+  The two-microphone transfer-function method of the impedance-tube section. Adopted in Europe as EN ISO 10534-2:2001; since revised as ISO 10534-2:2023 (https://www.iso.org/standard/81294.html).
+- **International Organization for Standardization. (2004).** [*Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room*](https://www.iso.org/standard/31397.html) (ISO 17497-1:2004+A1:2014).
+  The edition implemented here: the turntable scattering-coefficient method and its Annex A uncertainty chain.
+- **International Organization for Standardization. (2012).** [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
+  The free-field directional diffusion coefficient and its solid-angle area weighting.
+- **International Organization for Standardization. (2018).** [*Acoustics — Determination of airflow resistance — Part 1: Static airflow method*](https://www.iso.org/standard/69869.html) (ISO 9053-1:2018).
   The static airflow-resistance method and its reference velocity.
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+  Open access. Deep-subwavelength panel diffusers whose slow-sound resonant slots reach the diffusion of a Schroeder or quadratic-residue diffuser in a fraction of the depth; co-authored with Cox, behind the ISO 17497-2 diffusion-coefficient method.
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+  Open access. A transfer-matrix-method tutorial for rigidly-backed resonant absorbers with the critical-coupling condition for perfect absorption, using the same layer machinery as the multilayer impedance-tube prediction here.
+- **Jiménez, N., Romero-García, V., & Groby, J.-P. (2018).** Perfect absorption of sound by rigidly-backed high-porous materials. *Acta Acustica united with Acustica*, *104*(3), 396-409. https://doi.org/10.3813/AAA.919183
+  The critical-coupling condition applied to a rigidly-backed layer of ordinary high-porosity absorber, connecting the porous-material models of the characterisation section to perfect single-frequency absorption.

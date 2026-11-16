@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/duct-path.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Duct-borne noise: fan to room
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/
+
+# Duct-Borne Noise: Fan to Room
 
 Air-conditioning noise is not predicted, it is *accounted for*. You start
 from the sound power the fan puts into the duct, walk down the path, and at
@@ -15,13 +17,15 @@ That bookkeeping is what `noise_control.duct_path` implements, with the
 element models of `noise_control.hvac` feeding it and
 `noise_control.duct_modes` marking the frequency above which the whole
 one-dimensional picture stops being exact. The reference throughout is
-Long, *Architectural Acoustics* (2nd ed., Academic Press 2014), Chapters 13
-and 14, whose Table 14.9 is the worked sheet this guide is built around,
-with the ASHRAE *HVAC Applications Handbook* Chapter 49 for the air
-terminal devices and Bies, Hansen & Howard for the splitter silencers and
-the plenums. The reactive four-pole silencers of
-[Silencers](silencers.md) and the rest of the installation methods in
-[Industrial noise control](noise-control.md) are the companion pages.
+Long, *Architectural Acoustics* (2nd ed.), Chapters 13 and 14, whose
+Table 14.9 is the worked sheet this guide is built around, with the ASHRAE
+*HVAC Applications Handbook* Chapter 49 for the air terminal devices and
+Bies, Hansen & Howard for the splitter silencers and the plenums. The
+reactive four-pole silencers of
+[Silencers](silencers.md) and the rest of the installation
+methods in
+[Industrial noise control](noise-control.md) are the
+companion pages.
 
 ## 1. The sheet, and how it adds up
 
@@ -56,28 +60,50 @@ for row in path.table():
           f"{[round(float(v)) for v in row['values']]}")
 ```
 
+```text
+ S Fan, centrifugal FC, 5000 cfm, 2 in w. [90, 86, 82, 79, 77, 75, 71, 61]
+ 2 Elbow, 36 x 24 in, unlined             [0, -1, -2, -3, -3, -3, -3, -3]
+   Sum                                    [90, 85, 80, 76, 74, 72, 68, 58]
+   Self-noise                             [41, 39, 36, 29, 20, 6, 0, 0]
+   Combined                               [90, 85, 80, 76, 74, 72, 68, 58]
+ 3 Silencer, 3 ft, standard pressure drop [-7, -12, -16, -28, -35, -35, -28, -17]
+   Sum                                    [83, 73, 64, 48, 39, 37, 40, 41]
+   Self-noise                             [49, 43, 44, 42, 42, 45, 35, 24]
+   Combined                               [83, 73, 64, 49, 44, 46, 41, 41]
+Lp Received level                         [83, 73, 64, 49, 44, 46, 41, 41]
+```
+
 Three conventions matter, and they are worth stating once because every
-published sheet states them differently.
+published sheet states them differently. All three can be read off the rows
+above.
 
 **Attenuations are positive.** Every element model in `noise_control.hvac`
 returns a loss as a positive number of decibels, and the cascade subtracts
 it. Printed worksheets show the same quantity as a negative level change,
 so `DuctPathResult.table()` flips the sign back for the `"attenuation"`
 rows: the table reads like the reference, the arithmetic does not have to.
+The minus signs on the two element rows above are that flip, not a
+subtraction the reader has to make.
 
 **Regenerated noise adds on a power basis.** The self-noise of an element
 is a sound power level in its own right, not a correction to the incoming
 level, so it is combined as
 $10\log_{10}(10^{L/10} + 10^{L_\text{sn}/10})$ rather than added
 arithmetically. That is why the `Self-noise` row sits between the `Sum` and
-the `Combined` row and never touches the attenuation.
+the `Combined` row and never touches the attenuation. Watch the silencer's
+triple above: at 63 Hz the running level is 83 dB and the self-noise 49 dB,
+so the combination is still 83 dB and the silencer's own noise is invisible;
+at 2 kHz the attenuation has done its work, the sum is down to 37 dB against
+a self-noise of 45 dB, and the combination comes out at 46 dB: the element
+bought to remove the fan is now the loudest thing in that band.
 
 **There is a self-noise floor.** Long's sheet uses a 0 dB sound power level
 wherever an element has no regenerated-noise data, and also as a floor
 under any computed level that would go negative, which is why his received
 spectrum bottoms out near 0 dB instead of running off to minus infinity.
 `self_noise_floor` reproduces that (default `0.0`) and `None` switches it
-off entirely.
+off entirely; it engages in the 4 kHz and 8 kHz rows of the full sheet in
+section 6, where the supply path runs past it.
 
 ## 2. The source: fan sound power
 
@@ -115,14 +141,44 @@ print(noise_control.fan_casing_attenuation().values)          # what the housing
 fan.plot()                                      # the band spectrum, one line
 ```
 
+The `fan_type` string is the first decision of the whole calculation and the
+largest single lever in it, because it selects the row of Table 13.5 that sets
+both the level and the shape. The function takes `"airfoil_large"` and
+`"airfoil_small"` (backward-curved or backward-inclined centrifugal wheels above
+and below 36 in), `"forward_curved"`, three radial rows by total pressure, three
+`"vaneaxial_hub_*"` rows by hub ratio, two `"tubeaxial_*"` rows by wheel
+diameter, and `"propeller"`. Ranked as a designer ranks them: the airfoil and
+backward-inclined centrifugals are the quiet, efficient choice for ducted air
+(86/86/88/80/76/69/65/63 dB for this duty), forward-curved wheels are cheap and
+compact but much noisier at low frequency (99/99/89/…), and vaneaxial and
+propeller fans put their energy into the mid and high bands
+(propeller: 99/97/104/102/101/98/92/88 dB). The spectrum shape changes with the
+row, not only the level, so the choice decides which silencer will be needed.
+
+$1200$ in `blade_passing_frequency(1200.0, 24)` is the shaft speed in
+**revolutions per minute** and 24 the blade count; the increment $C_\text{BFI}$
+it produces is dropped whole into the single octave band containing the result.
+A fan whose blade tone lands in the band that already governs the design is
+worth reselecting rather than silencing. And because that increment represents a
+*pure tone* inside an octave band, a sheet that passes on band levels can still
+be judged intrusive; that is one of the limits listed at the end of this guide.
+
 Two habits keep this honest. The law assumes ideal inlet and outlet flow
 conditions, so a fan boxed into a plant room with a bad inlet is louder
 than it says; and ASHRAE's own current guidance is that a fan's sound power
 "is best obtained from manufacturers' test data" to AMCA Standard 300 or
 ASHRAE Standard 68. Treat Eq. 13.1 as the early-design fallback, not as the
-answer. The fan radiates the same power from its intake and from its
-discharge, which is why the supply and return paths of a real sheet start
-from the *same* row.
+answer. What that test is matters too: **ISO 5136** determines the sound power
+a fan radiates *into a duct* with an in-duct microphone carrying a slit sampling
+tube behind a turbulence screen, precisely because a bare microphone in a
+flowing duct measures its own wind noise long before it measures the fan (the
+standard puts the ceiling at 15 m/s for a foam ball, 20 m/s for a nose cone and
+40 m/s for the sampling tube). So a fan's duct-borne sound power cannot be
+obtained by standing beside the machine with a sound level meter: that measures
+the casing-radiated power of `fan_casing_attenuation` instead, which is the
+other row of the same source. The fan radiates the same power from its intake
+and from its discharge, which is why the supply and return paths of a real sheet
+start from the *same* row.
 
 `fan_efficiency_correction` is a step function, and a brutal one: a fan
 running at 90 per cent of its peak static efficiency adds nothing, one at
@@ -133,12 +189,54 @@ other side of the same source: the power the housing radiates into the
 plant room instead of into the duct, zero at 63 and 125 Hz because a
 vibrating casing radiates low frequency as freely as the unhoused fan.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fan_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fan_sound_power.svg" alt="Octave-band sound power of a 5000 cfm forward-curved fan at 2 inches water gauge, from 63 Hz to 8 kHz, at three operating points: 90 per cent of peak static efficiency running from 93 dB down to 61 dB, 80 per cent 6 dB above it and 55 per cent 12 dB above it, three parallel curves. A fainter fourth curve is the same fan with its blade tone moved into the 2 kHz band, showing the 2 dB increment leaving the 500 Hz band and appearing at 2 kHz. The casing attenuation runs along the bottom from 0 dB at 63 and 125 Hz to 25 dB at 8 kHz, and an inset plots the efficiency correction as a staircase from 16 dB at 40 per cent to 0 dB above 90 per cent" width="88%"></picture>
+
+*The source row, and the two decisions inside it. The efficiency staircase of
+the inset is a level shift of the whole spectrum, so a fan selected 25 points
+off its best point costs 12 dB before any silencer is priced, more than most
+lined duct runs buy back. The blade increment is small (2 dB for this fan type)
+but it lands whole in one octave, so what matters is which one. The casing curve
+is not a loss on this path at all: it is the power the housing radiates into the
+plant room instead of into the duct.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `fan_sound_power`, `fan_casing_attenuation` and `fan_efficiency_correction`
+# are imported above; CFM and IN_WG are the two unit constants.
+duty = dict(volume_flow=5000 * CFM, fan_static_pressure_pa=2 * IN_WG,
+            fan_type="forward_curved")
+
+# One line for one fan: the band spectrum.
+noise_control.fan_sound_power(relative_efficiency_percent=80.0, **duty).plot()
+plt.show()
+
+fig, ax = plt.subplots()
+for efficiency in (90.0, 80.0, 55.0):
+    res = noise_control.fan_sound_power(relative_efficiency_percent=efficiency, **duty)
+    ax.semilogx(res.frequencies, res.values, "o-",
+                label=f"{efficiency:.0f} % of peak")
+casing = noise_control.fan_casing_attenuation()
+ax.semilogx(casing.frequencies, casing.values, "s-.", label="Casing")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 3. What the run takes out
 
 Everything between the fan and the room removes something, and most of it
 is free. The models are Long Chapter 14 with the Reynolds (1990)
 regressions, and they all return an `HVACSpectrumResult` with `.values`,
-`.plot()` and `.report()`.
+`.plot()` and `.report()`. Every model takes the analysis bands as its first
+argument, and `None` means the default octave bands from 63 Hz to 8 kHz,
+the set the published sheets use; pass your own vector when the sheet runs on
+different bands.
 
 **Straight ducts.** An unlined rectangular duct loses energy into the
 induced motion of its own walls, so the loss grows with the
@@ -243,7 +341,7 @@ import numpy as np
 
 IN, FT = 0.0254, 0.3048
 sil = noise_control.splitter_silencer_insertion_loss(
-    frequencies=None, height_m=24 * IN, length=5 * FT,
+    frequencies=None, height_m=24 * IN, length=5 * FT,      # None -> the default octave bands
     airway_widths=[0.10] * 5, splitter_thickness_m=0.10,
 )
 print(np.round(sil.values, 1))
@@ -255,8 +353,61 @@ Read that estimate for what it is. The 5 ft unit Long's return path
 actually specifies is a low-frequency design worth 16 and 21 dB at 63 and
 125 Hz, where this geometry-only model gives 6 and 9. Published dynamic
 insertion loss from the manufacturer, measured with the design airflow and
-in the design direction, is what belongs in the sheet; the model is for
-sizing the airway before there is a manufacturer.
+in the design direction to
+[ISO 7235](silencers.md#3-how-a-silencer-is-measured-iso-7235),
+is what belongs in the sheet; the model is for sizing the airway before there is
+a manufacturer.
+
+Element selection is a decision about *shape* (which band does this element buy
+me?), so the whole of section 3 belongs on one sheet of paper rather than in six
+printed arrays.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_attenuation_elements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_attenuation_elements.svg" alt="Four octave-band panels from 63 Hz to 8 kHz. Panel a, a 36 by 24 inch run over 5 feet: bare duct falling from 1.1 dB to 0.2, an externally wrapped one starting higher at 2.2 dB and vanishing above 500 Hz, and the same run with 25 mm of lining reaching 12.8 dB at 1 kHz, drawn with and without the side-wall contribution. Panel b, one 24 inch bend in four constructions, the lined square bend reaching 11 dB and the round bend flat at 3, with the W over lambda equals one abscissa marked near 563 Hz. Panel c, the open end of a 300 mm duct by the Bies table and by Long's closed form, agreeing within a decibel from 12 dB at 63 Hz down to zero at 1 kHz. Panel d, the five-airway splitter model rising to 34 dB at 1 kHz, with the two low-frequency values of the unit Long's sheet specifies marked as open diamonds 10 and 12 dB above the model" width="92%"></picture>
+
+*Four families, four different jobs. Lining a run changes the order of
+magnitude in the mid bands and does nothing at 63 Hz; a wrapped bare duct does
+the opposite, and both are useless above 1 kHz. The elbow tables are keyed on
+$W/\lambda$, which is why the same bend behaves alike in ducts of different size
+one octave apart. The two end-reflection methods agree within a decibel over the
+bands both cover, so the choice between them is not worth an argument. And the
+splitter panel is the honest one: the geometry-only regression cannot see the
+10 to 12 dB of low-frequency performance a real low-frequency unit is designed
+for, which is why that row comes from a datasheet.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `bands`, IN and FT as above; every model returns an HVACSpectrumResult.
+
+# One line for one element:
+noise_control.lined_rectangular_duct_attenuation(bands, 36 * IN, 24 * IN, 5 * FT, 1 * IN,
+                                                 include_unlined=True).plot()
+plt.show()
+
+# By hand: the bend family of panel (b), keyed on W / lambda.
+fig, ax = plt.subplots()
+for label, kwargs in (("Square, lined", dict(bend_type="square", lined=True)),
+                      ("Square, bare", dict(bend_type="square")),
+                      ("Square, vanes", dict(bend_type="square", vanes=True)),
+                      ("Round, bare", dict(bend_type="round"))):
+    el = noise_control.elbow_insertion_loss(bands, 24 * IN, **kwargs)
+    ax.semilogx(el.frequencies, el.values, "o-", label=label)
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Insertion loss [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+One condition travels with the lined-elbow column and is easy to lose: the
+tables assume **the duct lining extends at least three duct diameters up- and
+downstream of the bend**, so `lined=True` describes a lined run that contains a
+bend rather than a lined bend in a bare duct. A bend in bare duct takes the
+unlined column; taking the lined one instead overstates the attenuation by the
+whole tabulated increment, 10 dB in the mid bands for the square bend above.
 
 ## 4. What the system puts back
 
@@ -302,10 +453,16 @@ that is what a real sheet uses. When there is none to hand,
 `diffuser_sound_power` is Reynolds's estimate as Long Eqs. 13.27 to 13.33:
 an overall level
 $L_W = 10\log_{10} S_\mathrm{G} + 30\log_{10}\xi + 60\log_{10} U_\mathrm{G} - 31.3$ from the
-face area, the approach velocity $U_\mathrm{G} = Q/S_\mathrm{G}$ and the normalised
-pressure-drop coefficient $\xi$, spread over the octaves by the shape
-function $C_D = -11.82 - 0.15 A - 1.13 A^2$ ($-5.82$ for a round device)
-about the peak band $f_\mathrm{P} = 48.8\,U_\mathrm{G}$.
+face area $S_\mathrm{G}$, the approach velocity $U_\mathrm{G} = Q/S_\mathrm{G}$ and the normalised
+pressure-drop coefficient $\xi = 334.9\,\Delta p/(\rho_0 U_\mathrm{G}^2)$ of Eq. 13.28.
+Long writes all four in foot-pound units ($S_\mathrm{G}$ in ft², $U_\mathrm{G}$ in ft/s,
+$\Delta p$ in inches of water gauge); `diffuser_sound_power` takes and returns
+SI and converts internally, which is why the constants here are quoted on
+Long's units. The spectrum follows as $L_{W,\text{oct}} = L_W + C_D$ with the
+shape function $C_D = -11.82 - 0.15 A - 1.13 A^2$ for a rectangular device
+($-5.82$ for a round one), where $A$ is the distance in octaves from the peak
+band $f_\mathrm{P} = 48.8\,U_\mathrm{G}$ (Eq. 13.32, $U_\mathrm{G}$ in **ft/s**), counted on Long's band
+numbering with band 0 at 32 Hz.
 
 ```python
 from phonometry import noise_control
@@ -319,6 +476,11 @@ print(np.round(noise_control.diffuser_sound_power(None, (24 * IN) ** 2,
                                                   pressure_drop_pa=0.05 * IN_WG).values, 1))
 # [ 33.4  32.4  29.1  23.6  15.9   5.9  -6.4 -21. ]
 # Long Table 14.9 prints 33/32/29/23/15/4/0/0 for that row.
+
+# The peak band the shape function is counted from, on Long's units:
+face_velocity = 312 * CFM / (24 * IN) ** 2 / 0.3048   # 1.3 ft/s
+print(round(48.8 * face_velocity, 1))                 # fP = 63.4 Hz
+print(round(np.log2(48.8 * face_velocity / 32.0)))    # band 1: the 63 Hz octave
 ```
 
 The sixth power of velocity in Eq. 13.27 is the design rule: about 18 dB
@@ -343,6 +505,76 @@ Fifteen decibels in the neck against two decibels 1.5 m back in the duct,
 for the same pressure ratio, is the entire design rule: throttle far from
 the outlet, or balance the system by sizing the ductwork instead.
 
+Both of this section's models are governed by a slope, and slopes are what
+figures are for.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_regenerated_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_regenerated_noise.svg" alt="Two octave-band panels from 63 Hz to 8 kHz. On the left, the self-noise of a five-passage 24 inch silencer at airway velocities of 5, 10, 20 and 40 metres per second: four parallel spectra about 17 decibels apart, running from 24 to 74 decibels at 63 Hz. On the right, the sound power of a 24 by 24 inch diffuser at 312, 624 and 1248 cubic feet per minute, three curves whose peak band moves up one octave for each doubling of the flow, marked by dotted vertical lines at 63, 125 and 250 Hz" width="92%"></picture>
+
+*The two exponents, drawn. The silencer's is the harsher: 55 lg of the airway
+velocity puts four parallel curves 16.6 dB apart for every doubling, in every
+band at once, which is why a silencer sized for pressure drop rather than for
+face velocity becomes the loudest element in the run. The diffuser's peak band
+moves as well as its level ($f_\mathrm{P} = 48.8\,U_\mathrm{G}$ in Long's units) so a faster
+outlet is not simply louder, it moves its noise into the bands a criterion curve
+judges most harshly. The crossing that matters on a real sheet is where one of
+these curves meets the attenuated fan level: past it, the element bought to
+solve the problem is the problem.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `silencer_self_noise` and `diffuser_sound_power` as imported above.
+bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+
+# One line for one element:
+noise_control.silencer_self_noise(bands, airway_velocity=20.0, n_passages=5,
+                                  height_m=24 * IN).plot()
+plt.show()
+
+fig, ax = plt.subplots()
+for velocity in (5.0, 10.0, 20.0, 40.0):
+    res = noise_control.silencer_self_noise(bands, airway_velocity=velocity, n_passages=5,
+                                            height_m=24 * IN)
+    ax.semilogx(res.frequencies, res.values, "o-", label=f"{velocity:.0f} m/s")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## 4.1 The path that is not in the sheet: breakout
+
+The cascade above accounts only for what stays **inside** the duct. A duct
+crossing an occupied space is also a radiating surface, and ASHRAE HVAC
+Applications Chapter 49 states that transmission below 250 Hz through duct
+breakout is often a major acoustical limitation. The power leaving through the
+walls is
+
+$$
+L_{W,\text{out}} = L_{W,\text{in}} + 10\log_{10}(S/A) - \mathrm{TL}_\text{out},
+$$
+
+with $S = 2L(a+b)$ the radiating surface area of a rectangular duct and
+$A = ab$ its cross-section. For this page's own 36 × 24 in trunk over a 3 m run
+that geometric term is $10\log_{10}[2 \times 3 \times (0.914 + 0.610)/(0.914
+\times 0.610)] = 12.1$ dB, so a wall transmission loss in the teens puts the
+radiated power within a few decibels of what is still inside the duct.
+
+The exposure is worst exactly where the sheet still has all its level: at low
+frequency, and in the first metres after the fan, before any silencer. A reader
+can complete this sheet, pass NC 30, and still fail the room on rumble radiated
+by the trunk crossing the ceiling void. The sheet cannot see it, because
+breakout leaves the path the sheet is walking. The design rules that follow are
+short: get the attenuation in **before** the duct crosses the space, prefer
+round or dual-wall duct and a radiused discharge take-off over a
+high-aspect-ratio rectangular trunk, and treat lagging as a last resort rather
+than a fix, because lagging a rectangular duct is often ineffective. Nothing in
+this library models breakout; it is named here so that it is not forgotten.
+
 ## 5. From sound power to room level
 
 The last step converts the sound power arriving at the terminal device into
@@ -366,12 +598,47 @@ Long's sheet prints 5 to 7 dB for that room across the bands, so a single
 mean absorption of 0.15 lands in the right place; a per-band absorption
 gives a per-band room effect, which is what the carpet actually does.
 
+Three of the four inputs deserve naming. The **distance** is the straight line
+from the terminal device to the listener's head, and 1.83 m is the 6 ft Long
+uses for a seated occupant under a ceiling diffuser; halving it costs 6 dB in
+the direct term only, which is why the room effect flattens out once the
+reverberant term takes over. The **directivity** $Q$ is 2 for a device flush in
+one surface, 4 where a wall meets the ceiling and 8 in a corner, because a
+grille in a corner puts its power into an eighth of the sphere. And the formula
+is written for **one source**: a room served by four diffusers each carrying a
+quarter of the flow is roughly $10\log_{10}4 = 6$ dB louder at a point
+equidistant from them than a single-diffuser sheet predicts. The honest
+calculation runs one path per outlet and combines them with
+`combine_duct_paths`, exactly as the supply and return paths are combined in
+section 6. Several outlets over one listener is the commonest reason a passing
+sheet fails on site.
+
+### 5.1 The verdict: criterion curve, exceedance and rating
+
 Pass `target=` and `criterion=` to `duct_path` and the result rates itself.
 `criterion_curve` samples the NC or RC curve at the analysis bands,
 `exceedance` is the band-by-band excess over it, `meets_target` is the
 band-by-band verdict a design sheet applies, and `rating` is the full
 `NCResult` or `RCResult` derived by the ANSI/ASA S12.2-2019 procedure,
-which is a different question and can differ from the tangency verdict.
+which is a different question and can differ from the tangency verdict. A
+spectrum can rate NC-27 and still poke through the NC 30 curve in one band,
+because the standard's designation procedure and a sheet's "no band above the
+curve" are different questions; `meets_target` answers the second.
+
+That distinction has to be settled before the job is built, because the design
+verdict and the commissioning verdict must be the **same quantity**. An
+acceptance test specifies: every terminal device serving the space running at
+the design flow with the balancing dampers in their final positions (which is
+where the 15 dB neck penalty of `air_terminal_damper_correction` actually shows
+up, and it is not in any design sheet); microphone positions in the occupied
+zone rather than under a diffuser; the system switched off to establish the
+background level, with the correction rule agreed in advance; and the rating
+procedure applied to the measured octave-band spectrum rather than read off by
+tangency. Write into the specification whichever verdict is going to be
+measured (band-by-band against the curve, or the S12.2 rating), and not one for
+the design and the other for the test.
+[Room-noise criteria](../../buildings/rooms/room-noise.md) has the rating
+procedure itself.
 
 ### The same step by VDI 2081
 
@@ -420,6 +687,19 @@ lined elbow, plenum, grille), each ending in the room effect of a
 20 x 20 x 8 ft carpeted office, combined and checked against NC 30. Every
 row below is the one Long prints, including the manufacturer data for the
 silencers and the terminal devices, which is what a real sheet uses.
+
+Thirteen rows of a table are hard to hold in the head; the same thirteen rows
+as a building are not.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_duct_path_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_duct_path.svg" alt="Sectional schematic of Long's installation. On the left a plant room with the fan, drawn radiating the same sound power into two runs. Above the office ceiling, the supply run left to right as six boxes stamped with the sheet codes 2 to 7: elbow 36 by 24 inches, 3 foot silencer, 5 foot lined duct, 25 per cent branch, 18 by 12 inch lined duct and 6 feet of 12 inch flexible duct, ending in the ceiling diffuser stamped 8. Above it the return run as four boxes stamped 2 to 5, elbow, silencer, lined elbow and plenum, running back to the plant room from the grille stamped 6. On the right the 20 by 20 by 8 foot office with a seated occupant 1.83 metres below the diffuser, marked Q = 2 and NC 30. A legend distinguishes rows that only attenuate, rows that attenuate and regenerate, and rows that are self-noise only" width="92%"></picture>
+
+*The sheet as a place. The two runs start from the same fan row because a fan
+radiates the same power from its intake and its discharge; the codes on the
+boxes are the `code=` strings the snippet below stamps on each `DuctElement`,
+so a row that fails in the table can be pointed at in the building. The last
+line of the legend is the answer this whole sheet arrives at, before any
+arithmetic: the return path, not the supply, is what the office hears above
+1 kHz.*
 
 ```python
 import numpy as np
@@ -529,17 +809,17 @@ for row in total.table():
     print(f"{row['kind']:<12} {row['label'][:26]:<26} "
           f"{[round(float(v)) for v in row['values']]}")
 
-total.report("duct-path.pdf")            # needs phonometry[report]
+supply.report("duct-path-supply.pdf")    # the fiche previewed below
+total.report("duct-path.pdf")            # the combination; needs phonometry[report]
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is the **supply half** of the sheet, regenerated with
+`make reports` and kept rendered in the repository. Click the preview to open
+the PDF:
 
-[![Duct-borne noise path calculation example report: a metadata header with the client, the noise source, the test environment and the date, the octave-band path table listing the fan sound power, each element attenuation as a negative level change, the self-noise rows of the elbow, the silencer and the diffuser, the room effect, the received level and the NC 30 curve, and beneath it the boxed room criterion NC-22.6 at 125 Hz with the verdict that no band exceeds NC 30 beside the cascade chart of every element against the criterion curve](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/duct_path_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/duct_path_example.pdf)
+[![Duct-borne noise path calculation example report (PDF): Duct-borne noise path calculation example report: a metadata header with the client, the noise source, the test environment and the date, the octave-band path table listing the fan sound power, each element attenuation as a negative level change, the self-noise rows of the elbow, the silencer and the diffuser, the room effect, the received level and the NC 30 curve, and beneath it the boxed room criterion NC-22.6 at 125 Hz with the verdict that no band exceeds NC 30 beside the cascade chart of every element against the criterion curve.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/duct_path_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/duct_path_example.pdf)
 
-*Duct-borne noise path fiche (`DuctPathResult.report`): the supply path of the
-worked sheet element by element, rated NC-22.6 and passing NC 30 with 5 dB to
-spare at 63 Hz.*
+Duct-borne noise path fiche (DuctPathResult.report): the supply path of the worked sheet element by element, rated NC-22.6, governed at 125 Hz, and passing its NC 30 target in every band.
 
 ## 7. What reproduces, and what does not
 
@@ -579,7 +859,44 @@ by band:
   57/48/41/35/31/29/28/27; the library's `nc_curve(30)` returns
   57/48/41/35/**32**/29/28/27, the values of ANSI/ASA S12.2-2019 Table 1.
   Long is using the original Beranek 1957 curve. The difference does not
-  change the verdict here, but it is worth knowing which NC you are quoting.
+  change the verdict here, but it is worth knowing which NC you are
+  quoting.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_sheet_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_sheet_verification.svg" alt="Six octave-band panels comparing Long's printed Table 14.9 rows, drawn as filled markers, with the library's computed values drawn as a line, the difference shaded between them. The fan panel disagrees by up to 13 dB and the printed spectrum is not a level shift of the computed one; the flexible-duct panel disagrees by up to 11 dB with the printed row much higher at low frequency; the two lined ducts agree within 2 dB; the supply diffuser agrees within 1 dB in every band that carries level; and the NC 30 curve differs by 1 dB in the 1 kHz band alone" width="92%"></picture>
+
+*Where the sheet is a calculation and where it is a datasheet, seen at a glance.
+The two lined runs and the diffuser sit inside the sheet's own rounding, so those
+rows really are the printed equations. The fan and the flexible duct do not, and
+the shape of the disagreement says why: the fan's printed spectrum is not a level
+shift of the tabulated one, so it comes from other data, and the flexible-duct
+row is far above ASHRAE Table 14.4 at low frequency, which is where its breakout
+lives. The last panel is the one to remember when quoting a rating: Long's NC 30
+is the original Beranek 1957 curve and differs from ANSI/ASA S12.2-2019 Table 1
+by 1 dB, in the 1 kHz band alone.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Every model is imported above; nc_curve returns the 10-band curve aligned
+# with room.NC_OCTAVE_BANDS_HZ, which starts at 16 Hz, so the sheet's eight bands are
+# nc_curve(30)[2:].
+printed = [3, 3, 5, 11, 25, 22, 16, 13]      # Long's 18 x 12 in, 6 ft row
+computed = noise_control.lined_rectangular_duct_attenuation(
+    bands, 18 * IN, 12 * IN, 6 * FT, 1 * IN, include_unlined=True).values
+
+fig, ax = plt.subplots()
+ax.fill_between(bands, printed, computed, alpha=0.25)
+ax.semilogx(bands, printed, "o", label="Long's printed row")
+ax.semilogx(bands, computed, "-", label="the library")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 None of that is a defect of the sheet. It is what a real duct-borne
 calculation looks like: the elements a manufacturer publishes (fans,
@@ -591,20 +908,25 @@ is the point.
 ## 8. The plane-wave limit
 
 Every element model above, and every four-pole silencer in
-[Silencers](silencers.md), is one-dimensional. It assumes a single sound
-pressure describes the whole duct cross section, which is true only below
-the frequency at which the first higher-order acoustic mode cuts on. Above
-it several modes propagate at once, each with its own axial wavenumber, and
-a plane-wave prediction quietly stops being right.
+[Silencers](silencers.md), is one-dimensional. It assumes
+a single sound pressure describes the whole duct cross section, which is
+true only below the frequency at which the first higher-order acoustic mode
+cuts on. Above it several modes propagate at once, each with its own axial
+wavenumber, and a plane-wave prediction quietly stops being right.
 
 `noise_control.duct_modes` implements the cut-on analysis of Norton &
 Karczub, *Fundamentals of Noise and Vibration Analysis for Engineers*
 (2nd ed.), section 7.3: circular ducts by Eq. 7.6 with the
 $\pi\alpha_{pq}$ eigenvalues of Table 7.1 that solve
-$J'_p(\kappa_{pq} a_\mathrm{i}) = 0$, rectangular ducts by Eq. 7.10, and the
-mean-flow correction of Eqs. 7.8 and 7.9, in which a uniform axial flow of
-Mach number $M$ lowers every cut-on frequency by $\sqrt{1 - M^2}$ and
-moves the cut-on itself from $k_x = 0$ to
+$J'_p(\kappa_{pq} a_\mathrm{i}) = 0$, rectangular ducts by Eq. 7.10,
+
+$$
+(f_\text{co})_{pq} = \frac{c}{2}\sqrt{(p/a)^2 + (q/b)^2}\,\sqrt{1 - M^2},
+$$
+
+and the mean-flow correction of Eqs. 7.8 and 7.9, in which a uniform axial
+flow of Mach number $M$ lowers every cut-on frequency by $\sqrt{1 - M^2}$
+and moves the cut-on itself from $k_x = 0$ to
 $k_x = -M\kappa_{pq}/\sqrt{1 - M^2}$.
 
 ```python
@@ -627,29 +949,30 @@ Those ventilation numbers are blunt: in that duct plane waves are the whole
 story only up to the 250 Hz octave, and a 36 x 24 in supply trunk gives up at
 188 Hz.
 
-What a number cannot say is that cut-on is a **switch**, not a slope. The
-clip below simulates the 0.65 m dimension of that same duct as a 2D slice
-with rigid walls, and drives it twice with one off-axis source that excites
-the plane mode and the first transverse mode together: at 180 Hz, below the
-263.8 Hz just printed, and at 400 Hz above it. Below cut-on the transverse
-mode is evanescent, decaying as $\mathrm{e}^{-\alpha x}$ with $1/\alpha = 0.28$ m,
-which puts it 20 dB down one duct width from the source, so the lumpy near
-field dies there and every later
-wavefront crosses the section flat. Above cut-on it propagates, the two modes
-run at different axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m)
-and beat along the duct every 3.45 m, and the profile across the section
-never settles.
+What a number cannot say is that cut-on is a **switch**, not a slope. The clip
+below simulates the 0.65 m dimension of that same duct as a 2D slice, rigid
+walls, and drives it twice with one off-axis source that excites the plane
+mode and the first transverse mode together: once at 180 Hz, below the
+263.8 Hz the snippet just printed, and once at 400 Hz above it. Nothing else
+differs. Below cut-on the transverse mode is *evanescent*: it decays as
+$\mathrm{e}^{-\alpha x}$ with $1/\alpha = 0.28$ m, which puts it 20 dB down 0.65 m from
+the source (one duct width), so the lumpy near field dies there and every
+wavefront after it crosses the section flat. Above cut-on it propagates, the two modes run at different
+axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m at 400 Hz) and beat
+along the duct every 3.45 m, and the profile across the section never settles.
+The panel beside each strip draws that profile at a fixed station 5 m
+downstream against its own section average, which is the single pressure the
+one-dimensional models above carry, so "a single sound pressure describes the
+whole cross section" is either true on screen or visibly false.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.gif" alt="Animation: the same rigid duct driven at 180 Hz and at 400 Hz, with wavefronts that flatten across the section within half a duct width in the lower-frequency strip and a field that stays lumpy the whole length of the duct in the higher-frequency one" width="640" height="360" loading="lazy"></picture>
+**Video:** [A rigid duct driven below and above its first cut-on frequency](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_duct_cut_on.webm): The same 0.65 metre rigid duct is driven at 180 Hz and at 400 Hz by one off-axis source. In the 180 Hz strip the lumpy field near the source flattens within half a duct width and every later wavefront crosses the section as a straight line, and the profile panel beside it collapses onto its own average. In the 400 Hz strip the field stays lumpy the whole length of the duct, the two propagating modes beat along it, and the profile panel swings far away from the average on every cycle.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.webm)
-
-The panel beside each strip draws the instantaneous profile across the
-section at a station 5 m downstream against its own section average, which is
-the single pressure a one-dimensional model carries. That is why a
-transfer-matrix silencer model has a **ceiling frequency** rather than an
-accuracy budget: below cut-on the second mode is not small, it is absent, and
-above it the model describes one of several waves that are all there.
+That is why a transfer-matrix silencer model has a **ceiling frequency**
+rather than an accuracy budget: below cut-on the second mode is not small,
+it is absent, and above it the model is describing one of several waves that
+are all there. The
+[Silencers](silencers.md) four-pole algebra
+inherits the same limit.
 
 At 15 m/s the flow correction is invisible: $M = 0.044$ gives
 $\sqrt{1 - M^2} = 0.999$, which moves the first cut-on by 0.2 Hz. It earns
@@ -705,7 +1028,7 @@ plt.show()
 
 </details>
 
-Two results carry this limit for you. Every `ReactiveSilencerResult` now
+Two results carry this limit for you. Every `ReactiveSilencerResult`
 reports the first cut-on of its widest cross section as
 `plane_wave_limit`, and `duct_path` accepts a `section=` description of the
 duct it is walking. Both raise a `PlaneWaveWarning` when the analysis grid
@@ -743,46 +1066,51 @@ survive past cut-on.
 
 ## What this guide covers
 
-**Covered.** The fan source (`fan_sound_power`, `fan_efficiency_correction`,
-`blade_passing_frequency`, `fan_casing_attenuation`; Long Eq. 13.1 with
-Tables 13.5-13.8); the run attenuations (lined and unlined rectangular and
-circular ducts, `flexible_duct_insertion_loss`, `elbow_insertion_loss`,
-`split_loss`, `end_reflection_loss` in both published methods,
-`splitter_silencer_insertion_loss`, `plenum_attenuation`); the regenerated
-noise (`silencer_self_noise`, `flow_noise_straight_duct`, `flow_noise_bend`,
-`diffuser_sound_power`, and the ASHRAE Chapter 49 screening rules
-`air_terminal_velocity_limit` and `air_terminal_damper_correction`);
-`room_effect` and the criterion machinery; the cascade itself (`duct_path`,
-`combine_duct_paths`, `.table()`, `.report()`); and the `duct_modes` cut-on
-analysis.
+- **Covered.** The fan source model (`fan_sound_power`, `fan_efficiency_correction`,
+  `blade_passing_frequency`, `fan_casing_attenuation`; Long Eq. 13.1 with Tables
+  13.5-13.8); the run attenuations (lined and unlined rectangular and circular
+  ducts, `flexible_duct_insertion_loss`, `elbow_insertion_loss`, `split_loss`,
+  `end_reflection_loss` in both published methods,
+  `splitter_silencer_insertion_loss`, `plenum_attenuation`); the regenerated
+  noise (`silencer_self_noise`, `flow_noise_straight_duct`, `flow_noise_bend`,
+  `diffuser_sound_power` and the ASHRAE Chapter 49 screening rules
+  `air_terminal_velocity_limit` and `air_terminal_damper_correction`);
+  `room_effect` and the criterion machinery; the cascade itself (`duct_path`,
+  `combine_duct_paths`, `.table()`, `.report()`); and the `duct_modes` cut-on
+  analysis.
 
-**Not covered.** Nothing is predicted where the manufacturer publishes it: the
-sheet expects the published fan and terminal figures. There is no dissipative
-liner model (the splitter estimate is a lined-duct regression and the plenum
-is Wells' closed form), and above the first cut-on the element models rest on
-their empirical fit alone. Four paths of a real installation sit outside the
-calculation entirely, which is usually why a passing sheet meets a failing
-room: **duct breakout** from a trunk radiating through its own walls into a
-space it merely crosses; **break-in and crosstalk** between two rooms served by
-the same run, whatever the partition between them; **structure-borne
-transmission** of fan vibration through hangers, plinths and slab, whose
-dynamic transfer stiffness belongs to
-[Transfer stiffness (ISO 10846)](../../vibration/structural/transfer-stiffness.md);
-and the **octave resolution itself**, which averages a blade-passing tone into
-its band and so understates how a pure tone will be judged.
+- **Not covered.** No fan or terminal-device data is predicted where the manufacturer publishes
+  it, and this sheet expects the published figure. There is no dissipative-liner
+  model: the splitter estimate is a lined-duct regression and the plenum attenuation
+  is Wells' closed form. Above the first cut-on the element models stand on their
+  empirical fit alone. And **four noise paths of a real installation are outside
+  this calculation entirely**, which is why a passing sheet and a failing room
+  are usually one of them:
+
+  - **Duct breakout**, treated in section 4.1: a large low-frequency-carrying
+    trunk radiating through its own walls into a space it merely crosses,
+    frequently the governing path near a plant room.
+  - **Duct break-in and crosstalk**: two rooms served by the same run hearing each
+    other through it, regardless of the partition between them.
+  - **Structure-borne transmission of fan vibration** through hangers, plinths
+    and the slab, which no airborne sheet can see and which is treated with
+    isolators, and whose dynamic transfer stiffness is measured in
+    [Transfer stiffness (ISO 10846)](../../vibration/structural/transfer-stiffness.md).
+  - **The octave-band resolution itself**, which averages a blade-passing tone
+    into its band and so understates how a pure tone will be judged.
 
 ## See also
 
-- [Silencers](silencers.md): the reactive four-pole elements (expansion
-  chambers, Helmholtz, quarter-wave and extended-tube resonators) whose
-  validity ends at the same cut-on frequency.
-- [Industrial noise control](noise-control.md): the rest of the
-  installation, the individual HVAC duct methods and machine-enclosure
-  insertion loss.
-- [Room-noise criteria (NC / RC Mark II)](../../buildings/rooms/room-noise.md): the ANSI/ASA
-  S12.2-2019 families the received spectrum is judged against.
-- [Steady-state room field](../../buildings/rooms/room-image-sources.md): the room constant
-  behind the room effect and the plenum reverberant term.
+- [Silencers](silencers.md): the reactive four-pole
+  elements (expansion chambers, Helmholtz, quarter-wave and extended-tube
+  resonators) whose validity ends at the same cut-on frequency.
+- [Industrial noise control](noise-control.md): the rest
+  of the installation, the individual HVAC duct methods and
+  machine-enclosure insertion loss.
+- [Room-noise criteria (NC / RC Mark II)](../../buildings/rooms/room-noise.md):
+  the ANSI/ASA S12.2-2019 families the received spectrum is judged against.
+- [Steady-state room field](../../buildings/rooms/room-image-sources.md): the
+  room constant behind the room effect and the plenum reverberant term.
 - API reference:
   [`noise_control`: duct path](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-path/),
   [`noise_control.duct_modes`](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-modes/),
@@ -790,37 +1118,15 @@ its band and so understates how a pure tone will be judged.
 
 ## References
 
-- Long, M. (2014). *Architectural acoustics* (2nd ed.). Academic Press.
-  ISBN 978-0-12-398258-2.
-  The fan sound-power model (Ch. 13, Eq. 13.1 and Tables 13.5-13.8) and the
-  diffuser self-noise model (Ch. 13, Eqs. 13.27-13.33), the duct
-  attenuation, flexible duct, split loss, end reflection, silencer
-  self-noise and room effect of Ch. 14, and the worked duct-borne sheet of
-  Table 14.9 this guide is built around.
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152). The
-  end-reflection table (§8.13), the elbow insertion loss (§8.11), the
-  splitter-muffler reduction to lined ducts (§8.10.5, Eq. 8.241), the
-  plenum chamber (§8.17) and the flow-generated noise of ducts and bends
-  (§8.15).
-- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and
-  vibration analysis for engineers* (2nd ed.). Cambridge University Press.
-  [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
-  The higher-order duct modes, the cut-on frequencies of circular and
-  rectangular ducts and the mean-flow correction (§7.3, Eqs. 7.6-7.10).
-- ASHRAE (2019). *ASHRAE handbook: HVAC applications* (SI ed.), Chapter 49,
-  Noise and vibration control. ASHRAE. The air terminal velocity limits
-  (Table 9) and the volume-damper corrections (Table 10), and the guidance
-  that fan sound power is best taken from manufacturer test data.
-- Verein Deutscher Ingenieure. (2001). *Geräuscherzeugung und Lärmminderung
-  in Raumlufttechnischen Anlagen* (VDI 2081 Blatt 1:2001-07). Section 6.7.3:
-  the level an air outlet produces in a room (Equation (36)), the equivalent
-  absorption area a reverberation time implies (Equation (37)) and the
-  reverberation radius $r_H = 0{,}2\sqrt{A}$. Element 20 of the worked example in its
-  Part 2:2005-05 is the case checked here.
-- Air-Conditioning, Heating and Refrigeration Institute. *AHRI Standard
-  885: Procedure for estimating occupied space sound levels in the
-  application of air terminals and air outlets*. The industry row
-  structure of the duct-borne calculation sheet (Table 8) that
-  `DuctPathResult.table()` and `.report()` follow.
+- **Air-Conditioning, Heating and Refrigeration Institute. (n.d.).** *Procedure for estimating occupied space sound levels in the application of air terminals and air outlets* (AHRI Standard 885).
+  The industry row structure of the duct-borne calculation sheet (Table 8) that DuctPathResult.table() and .report() follow.
+- **American Society of Heating, Refrigerating and Air-Conditioning Engineers. (2019).** *ASHRAE handbook: HVAC applications (SI edition), Chapter 49, Noise and vibration control*. ASHRAE.
+  The air terminal velocity limits (Table 9), the volume-damper corrections (Table 10) and the guidance that fan sound power is best taken from manufacturer test data.
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  The end-reflection table (§8.13), the elbow insertion loss (§8.11), the reduction of a splitter muffler to lined ducts (§8.10.5, Eq. 8.241), the plenum chamber (§8.17) and the flow-generated noise of ducts and bends (§8.15).
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+  The fan sound-power model (Ch. 13, Eq. 13.1 with Tables 13.5-13.8) and the diffuser self-noise model (Ch. 13, Eqs. 13.27-13.33), the duct attenuation, flexible duct, split loss, end reflection, silencer self-noise and room effect of Ch. 14, and the worked duct-borne sheet of Table 14.9 this guide is built around.
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+  The higher-order acoustic modes of ducts, the cut-on frequencies of circular and rectangular cross sections and the mean-flow correction (§7.3, Eqs. 7.6-7.10).
+- **Verein Deutscher Ingenieure. (2001).** *Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen* (VDI 2081 Blatt 1:2001-07).
+  Section 6.7.3: the level an air outlet produces in a room (Equation (36)), the equivalent absorption area a reverberation time implies (Equation (37)) and the reverberation radius rH = 0,2 sqrt(A). Element 20 of the worked example in its Part 2:2005-05 is the case checked here.

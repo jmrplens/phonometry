@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/lab-application-rules.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/
 
 # Linings, Floor Coverings, Joints and Rain (ISO 10140-1)
 
@@ -354,11 +356,9 @@ ISO 717-2:2020 Table 4 cannot give: they start at 100 Hz (see the
 [errata registry](../../ERRATA.md)). The sheet says so where the number would
 go.
 
-[![ISO 10140-1 Figure H.4 example report: the form's header with manufacturer, product, reference floor type, mass per unit area, curing time and the climate of the source room, the one-third-octave table of Ln,0 and delta L beside the delta L diagram with the ISO 717-2 rating range dashed, the boxed delta Lw = 15 dB and CI,delta, the two floor ratings and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.pdf)
+[![ISO 10140-1 Figure H.4 example report (PDF): The form of ISO 10140-1:2021 Figure H.4 filled with the floor and the covering of ISO 717-2:2020 Annex C: the header with manufacturer, product, type of reference floor, mass per unit area, curing time and the climate of the source room, the one-third-octave table of Ln,0 and delta L beside the delta L diagram with the frequency range of the ISO 717-2 rating dashed, the boxed delta Lw = 15 dB with CI,delta, the two floor ratings of H.5 i), the note on CI,r,50-2500 and a PASS verdict.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_floor_covering_example.pdf)
 
-*The form of Figure H.4 (`LaboratoryFloorCoveringImprovementResult.report`), filled
-with the floor and the covering of ISO 717-2:2020 Annex C: $\Delta L_\mathrm{w}
-= 15$ dB, as Table C.2 prints it.*
+The form of Figure H.4 (LaboratoryFloorCoveringImprovementResult.report), with delta Lw = 15 dB as ISO 717-2:2020 Table C.2 prints it.
 
 ## Joints: the sound reduction index per metre (Annex J)
 
@@ -584,9 +584,9 @@ seal.report("joint.pdf", metadata=ReportMetadata(
     test_signal="Pink noise", source_volume=53.0, receiving_volume=51.0))
 ```
 
-[![ISO 10140-1 Figure J.7 example report: the form's header with the test length, separation wall, test noise and the maximum joint sound reduction index, the one-third-octave table of Rs from 100 Hz to 5000 Hz beside its diagram with the two top bands as minimum values, the boxed Rs,w (C; Ctr) with the enlarged-range terms and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.pdf)
+[![ISO 10140-1 Figure J.7 example report (PDF): The form of ISO 10140-1:2021 Figure J.7 for an EPDM rebate seal: the header with the test length, the separation wall, the test noise, the room volumes and the maximum joint sound reduction index of the arrangement, the one-third-octave table of Rs from 100 Hz to 5000 Hz beside its diagram, with the 4000 Hz band as a minimum value and the 5000 Hz band in brackets at the maximum, the boxed Rs,w (C; Ctr) with C100-5000 and Ctr,100-5000, and a PASS verdict.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_1_joint_example.pdf)
 
-*The form of Figure J.7 (`LaboratoryJointInsulationResult.report`), Rs,w (C; Ctr).*
+The form of Figure J.7 (LaboratoryJointInsulationResult.report), Rs,w (C; Ctr).
 
 ## Rain on a roof (Annex K)
 
@@ -910,94 +910,56 @@ normalized levels, which are what makes two laboratories comparable, need the
 laboratory's own reference measurement (K.6, K.5 f)). No reference specimen is
 defined for large roofs (ISO 10140-5:2021 I.3).
 
-## References
-
-- International Organization for Standardization. (2021). *Acoustics — Laboratory
-  measurement of sound insulation of building elements — Part 1: Application
-  rules for specific products* (ISO 10140-1:2021). Third edition.
-  Annex G (linings: ΔR, the curing condition of G.4 and the report of G.5),
-  Annex H (floor coverings: Formulae (H.1) to (H.3), the three categories of
-  covering, the tapping-machine positions and the form of Figure H.4),
-  Annex J (joints: Formulae (J.1) and (J.2), the test element of J.2, the gap
-  widths of J.4 and the form of Figure J.7) and Annex K (rainfall sound:
-  Formulae (K.1) to (K.5) and the 18 $C_j$ of Table K.2).
-- International Organization for Standardization. (2021). *Acoustics — Laboratory
-  measurement of sound insulation of building elements — Part 2: Measurement
-  of airborne sound insulation* (ISO 10140-2:2021). Second edition. A.3, the
-  correction for flanking through the filler wall that Annex J applies to a
-  joint, and Table A.1, the typical flanking spectrum of a small test opening.
-- International Organization for Standardization. (2021). *Acoustics — Laboratory
-  measurement of sound insulation of building elements — Part 5: Requirements
-  for test facilities and equipment* (ISO 10140-5:2021). Annexes B and C build
-  the standard basic elements and the four reference floors and refer to
-  ISO 717 for their curves; Annex H specifies the two artificial rains
-  (Tables H.1 and H.2) and Annex I the reference glass pane (Table I.1,
-  Formulae (I.1) to (I.3)). Annex F specifies the rubber ball of H.6.1.
-- International Organization for Standardization. (2020). *Acoustics — Rating of
-  sound insulation in buildings and of building elements — Part 1: Airborne
-  sound insulation* (ISO 717-1:2020). Clauses 4.4 and 4.5 with Annex B rate a
-  joint, $R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$) with $C_{100\text{-}5000}$ and
-  $C_\mathrm{tr,100\text{-}5000}$, also with its indicative bands taken as
-  infinitely high; Annex D rates a lining on a standard basic element
-  (Formulae (D.1) to (D.4)); Annex E prints the reference curves of the three
-  elements, Table E.1, with every single number under them.
-- International Organization for Standardization. (2020). *Acoustics — Rating of
-  sound insulation in buildings and of building elements — Part 2: Impact
-  sound insulation* (ISO 717-2:2020). Clauses 5 and 6 rate a floor covering on
-  the heavyweight and on the lightweight reference floors; Table 4 prints the
-  four reference curves; A.2.2 and A.2.3 give the adaptation terms
-  $C_{\mathrm{I}\Delta}$ and $C_{\mathrm{I}\Delta,\mathrm{t}}$.
-
 ## Standards
 
-ISO 10140-1:2021 Annex G: the sound reduction improvement index $\Delta R$ of
-G.1, its octave values, the single numbers $\Delta R_\mathrm{w}$,
-$\Delta(R_\mathrm{w} + C)$ and $\Delta(R_\mathrm{w} + C_\mathrm{tr})$ with every
-enlarged-range term on the three standard basic elements (ISO 717-1:2020
-Annex D, Formulae (D.1) to (D.4)), the direct differences of Formula (D.2), and
-the curing condition of G.4. Annex H: $\Delta L$ of Formula (H.1), the octave
-values of Formula (H.2), the weighted reductions $\Delta L_\mathrm{w}$ and
-$\Delta L_\mathrm{t,n,w}$ with $C_{\mathrm{I}\Delta}$ and
-$C_{\mathrm{I}\Delta,\mathrm{t}}$ on all four reference floors (ISO 717-2:2020
-Clauses 5 and 6, A.2.2, A.2.3), the two ratings of H.5 i), the heavy/soft
-improvement of Formula (H.3), and the form of Figure H.4 as a `.report()` PDF.
-Annex J: the sound reduction index of joints per metre of Formula (J.1), the
-correction for the test arrangement of Formula (J.2) with the rules of
-ISO 10140-2:2021 A.3 (no correction from 10 dB, the fixed 1,3 dB below 6 dB,
-the lower limit at $R_\mathrm{s,max}$ below 3 dB), the ISO 717-1 single
-numbers with $C_{100\text{-}5000}$ and $C_\mathrm{tr,100\text{-}5000}$, the
-rating with infinitely high indicative bands and the 1 dB bracket rule, the
-length and width of the test element (J.2.1, J.2.2), the gap-width readings
-(J.2.2), the gap widths of a variable slit with the check that the three of
-J.4 were measured and the single numbers against the gap width (J.4,
-J.5.2 h) and i), Figures J.8 and J.9), and the form of
-Figure J.7 as a `.report()` PDF. Annex K: Formulae (K.1) to (K.5), the 18 $C_j$ of
-Table K.2, three generator positions, the background correction, the rain
-classes of Table K.1, the artificial rains and tolerances of ISO 10140-5:2021
-Tables H.1 and H.2 with the rate check of H.2.3, and the reference-pane
-correction of its Annex I (Table I.1, Formulae (I.1) to (I.3)). The reference
-curves of ISO 717-1:2020 Table E.1 and ISO 717-2:2020 Table 4 are published
-read-only tables.
+- **Covered.** ISO 10140-1:2021 Annex G: the sound reduction improvement index $\Delta R$ of
+  G.1, its octave values, the single numbers $\Delta R_\mathrm{w}$,
+  $\Delta(R_\mathrm{w} + C)$ and $\Delta(R_\mathrm{w} + C_\mathrm{tr})$ with every
+  enlarged-range term on the three standard basic elements (ISO 717-1:2020
+  Annex D, Formulae (D.1) to (D.4)), the direct differences of Formula (D.2), and
+  the curing condition of G.4. Annex H: $\Delta L$ of Formula (H.1), the octave
+  values of Formula (H.2), the weighted reductions $\Delta L_\mathrm{w}$ and
+  $\Delta L_\mathrm{t,n,w}$ with $C_{\mathrm{I}\Delta}$ and
+  $C_{\mathrm{I}\Delta,\mathrm{t}}$ on all four reference floors (ISO 717-2:2020
+  Clauses 5 and 6, A.2.2, A.2.3), the two ratings of H.5 i), the heavy/soft
+  improvement of Formula (H.3), and the form of Figure H.4 as a `.report()` PDF.
+  Annex J: the sound reduction index of joints per metre of Formula (J.1), the
+  correction for the test arrangement of Formula (J.2) with the rules of
+  ISO 10140-2:2021 A.3 (no correction from 10 dB, the fixed 1,3 dB below 6 dB,
+  the lower limit at $R_\mathrm{s,max}$ below 3 dB), the ISO 717-1 single
+  numbers with $C_{100\text{-}5000}$ and $C_\mathrm{tr,100\text{-}5000}$, the
+  rating with infinitely high indicative bands and the 1 dB bracket rule, the
+  length and width of the test element (J.2.1, J.2.2), the gap-width readings
+  (J.2.2), the gap widths of a variable slit with the check that the three of
+  J.4 were measured and the single numbers against the gap width (J.4,
+  J.5.2 h) and i), Figures J.8 and J.9), and the form of
+  Figure J.7 as a `.report()` PDF. Annex K: Formulae (K.1) to (K.5), the 18 $C_j$ of
+  Table K.2, three generator positions, the background correction, the rain
+  classes of Table K.1, the artificial rains and tolerances of ISO 10140-5:2021
+  Tables H.1 and H.2 with the rate check of H.2.3, and the reference-pane
+  correction of its Annex I (Table I.1, Formulae (I.1) to (I.3)). The reference
+  curves of ISO 717-1:2020 Table E.1 and ISO 717-2:2020 Table 4 are published
+  read-only tables.
 
-**Not covered.** The mounting, specimen and procedure requirements of the four annexes are
-documented above and checked only where G.4, J.2 and ISO 10140-5 H.1 put a
-verdict on them: nothing checks the covering category, the specimen sizes, the
-number and placement of tapping-machine positions, the load, the floor
-temperature, the slope of a roof or the 5 min of steady rain, and for a joint
-nothing checks the uniform cross-section, the shape of Figure J.1, that the
-gap readings are evenly spread, the force of 100 N/m behind the minimum gap
-width or the time a sealing band takes to expand. A working range other than
-the 3 mm of J.4, which J.5.2 h) allows for comparisons, is read with `at_gap`
-but not drawn. The wooden mock-up of H.6.2
-has no reference curve of its own. The form of Figure H.4 asks for a
-$C_{\mathrm{I,r,50\text{–}2500}}$ that the reference floor cannot give, since
-Table 4 starts at 100 Hz (recorded in the [errata registry](../../ERRATA.md));
-the sheet says so in its place, and the bare floor's own enlarged-range term is
-available from `weighted_impact_rating_extended`. The measurements that feed
-these annexes, $R$, $L_\mathrm{n}$ and the reverberation times, are those of
-[Laboratory Insulation Measurement](insulation-lab.md), and the other annexes
-of ISO 10140-1 are mounting rules for that $R$ and $L_\mathrm{n}$ (walls,
-doors, windows, glazing, small technical elements, floors, shutters).
+- **Not covered.** The mounting, specimen and procedure requirements of the four annexes are
+  documented above and checked only where G.4, J.2 and ISO 10140-5 H.1 put a
+  verdict on them: nothing checks the covering category, the specimen sizes, the
+  number and placement of tapping-machine positions, the load, the floor
+  temperature, the slope of a roof or the 5 min of steady rain, and for a joint
+  nothing checks the uniform cross-section, the shape of Figure J.1, that the
+  gap readings are evenly spread, the force of 100 N/m behind the minimum gap
+  width or the time a sealing band takes to expand. A working range other than
+  the 3 mm of J.4, which J.5.2 h) allows for comparisons, is read with `at_gap`
+  but not drawn. The wooden mock-up of H.6.2
+  has no reference curve of its own. The form of Figure H.4 asks for a
+  $C_{\mathrm{I,r,50\text{–}2500}}$ that the reference floor cannot give, since
+  Table 4 starts at 100 Hz (recorded in the [errata registry](../../ERRATA.md));
+  the sheet says so in its place, and the bare floor's own enlarged-range term is
+  available from `weighted_impact_rating_extended`. The measurements that feed
+  these annexes, $R$, $L_\mathrm{n}$ and the reverberation times, are those of
+  [Laboratory Insulation Measurement](insulation-lab.md), and the other annexes
+  of ISO 10140-1 are mounting rules for that $R$ and $L_\mathrm{n}$ (walls,
+  doors, windows, glazing, small technical elements, floors, shutters).
 
 ## See also
 
@@ -1020,3 +982,16 @@ doors, windows, glazing, small technical elements, floors, shutters).
   [`building.measurement.joint_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/joint-insulation/),
   [`building`: rainfall sound](https://docs.jmrp.io/phonometry/reference/api/building/rainfall-sound/)
   and [`building.measurement.ratings`](https://docs.jmrp.io/phonometry/reference/api/building/ratings/).
+
+## References
+
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
+  Clauses 4.4 and 4.5 with Annex B rate a joint, Rs,w (C; Ctr) with C100-5000 and Ctr,100-5000, also with its indicative bands taken as infinitely high; Annex D rates a lining on a standard basic element (Formulae (D.1) to (D.4)); Annex E prints the reference curves of the three elements, Table E.1, with every single number under them.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
+  Clauses 5 and 6 rate a floor covering on the heavyweight and on the lightweight reference floors; Table 4 prints the four reference curves; A.2.2 and A.2.3 give the adaptation terms CIΔ and CIΔ,t.
+- **International Organization for Standardization. (2021).** *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2021).
+  Annex G (linings: ΔR, the curing condition of G.4 and the report of G.5), Annex H (floor coverings: Formulae (H.1) to (H.3), the three categories of covering, the tapping-machine positions and the form of Figure H.4), Annex J (joints: Formulae (J.1) and (J.2), the test element of J.2, the gap widths of J.4 and the form of Figure J.7) and Annex K (rainfall sound: Formulae (K.1) to (K.5) and the 18 C_j of Table K.2). Third edition.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/79487.html) (ISO 10140-2:2021).
+  A.3, the correction for flanking through the filler wall that Annex J applies to a joint, and Table A.1, the typical flanking spectrum of a small test opening. Second edition.
+- **International Organization for Standardization. (2021).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment*](https://www.iso.org/standard/79482.html) (ISO 10140-5:2021).
+  Annexes B and C build the standard basic elements and the four reference floors and refer to ISO 717 for their curves; Annex H specifies the two artificial rains (Tables H.1 and H.2) and Annex I the reference glass pane (Table I.1, Formulae (I.1) to (I.3)). Annex F specifies the rubber ball of H.6.1.

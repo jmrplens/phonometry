@@ -88,7 +88,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
+#: The two errata registers, written by hand in each language.
+ERRATA = ROOT / "docs" / "ERRATA.md"
+ERRATA_ES = ROOT / "docs" / "ERRATA.es.md"
 CONTENT = ROOT / "site" / "src" / "content" / "docs"
 
 #: Blob root used to rewrite the source documents' repo-relative links, which
@@ -249,7 +251,7 @@ EDITIONS: tuple[Edition, ...] = (
     # agent get; it is simply no longer copied into the site.
     Edition(
         lang="en",
-        source=DOCS / "ERRATA.md",
+        source=ERRATA,
         start=re.compile(r"^During the clean-room implementation"),
         said_on_index=(
             SaidOnIndex(
@@ -271,7 +273,7 @@ EDITIONS: tuple[Edition, ...] = (
     ),
     Edition(
         lang="es",
-        source=DOCS / "ERRATA.es.md",
+        source=ERRATA_ES,
         start=re.compile(r"^Durante la implementación en sala limpia"),
         said_on_index=(
             SaidOnIndex(
@@ -1921,7 +1923,7 @@ def rendered_pages(
     :return: The index pages and every family page, both languages.
     :rtype: dict[pathlib.Path, str]
     """
-    check_edition_parity(DOCS / "ERRATA.md", DOCS / "ERRATA.es.md")
+    check_edition_parity(ERRATA, ERRATA_ES)
     registries = {edition.lang: read_registry(edition) for edition in EDITIONS}
     headings = [heading for heading, _ in registries["en"].entries]
     pages = plan_families(headings)
@@ -2001,8 +2003,8 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "These errata families correct works no page of the site cites, so the "
             "bibliography has nothing to name them by. Add each to the references "
-            "of the guide that implements it (its Spanish twin too, and the "
-            "References section of its docs/ mirror), or, with no such guide, of "
+            "of the guide that implements it (its Spanish twin too, then run "
+            "make llms), or, with no such guide, of "
             "/reference/bibliography/; or, where the registry spells a cited "
             "document differently, say so in DESIGNATED_AS:",
             file=sys.stderr,

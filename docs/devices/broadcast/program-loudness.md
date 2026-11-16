@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/broadcast/program-loudness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Programme loudness and true peak (ITU-R BS.1770 / EBU R 128)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/
+
+# Programme loudness and true peak (BS.1770 / EBU R 128)
 
 **ITU-R BS.1770-5** defines how broadcast and streaming measure the loudness
 of a programme: **K-weighting**, mean-square power in **gated 400 ms blocks**
@@ -44,7 +46,30 @@ t = np.arange(20 * fs) / fs
 x = np.zeros((5, t.size))                     # L, R, C, Ls, Rs
 x[0] = np.sin(2 * np.pi * 997.0 * t)          # 0 dB FS on the left channel
 print(round(broadcast.integrated_loudness(x, fs), 2))   # -3.01  LKFS
+
+# The same waveform on two channels instead of one (see below):
+mono = np.sin(2 * np.pi * 997.0 * t)
+print(round(broadcast.integrated_loudness(mono, fs), 2))               # -3.01
+print(round(broadcast.integrated_loudness(np.vstack([mono, mono]), fs), 2))  # 0.00
 ```
+
+### Channels are summed, not averaged
+
+Formula 2 sums $G_i z_i$ over the channels, so the channel count is part of the
+measurement: the same waveform carried on two channels is exactly
+$10\log_{10} 2 = 3.01$ LU louder than on one. The anchor above shows it: that
+full-scale 997 Hz sine reads −3.01 LKFS on a single channel and 0.00 LKFS as
+dual mono, which is what the last two lines of the snippet above print.
+
+Meter the delivery format, not a stem. A mono podcast delivered as one channel
+is compliant at −23 LUFS as one channel; duplicating it to stereo before
+metering makes it read −20 LUFS and invites a 3 dB correction in the wrong
+direction. The same arithmetic is why the LFE is excluded (Table 3, $G = 0$)
+and why the surround weights are 1.41: the sum is a loudness sum over the
+reproduction layout, so changing the layout changes the number legitimately.
+The `np.vstack` in the snippets below is exactly this (dual mono, the stereo
+delivery of a mono source), and it is why they read 3.01 LU above the
+single-channel value of the same waveform.
 
 The biquad coefficients are tabulated at 48 kHz (Tables 1-2) and returned
 verbatim at that rate; any other rate re-derives them through the analog
@@ -69,6 +94,13 @@ spherical-head shelf and the RLB high-pass roll-off:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k_weighting_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k_weighting_response.svg" alt="K-weighting magnitude frequency response on a logarithmic frequency axis: the combined blue curve rolls off below a few hundred hertz through the RLB high-pass and rises to a +4 dB plateau above 2 kHz set by the spherical-head shelf, with the two stages drawn as light companion curves" width="96%"></picture>
 
+*The two stages, and the whole of the frequency dependence in BS.1770. The RLB
+high-pass removes the sub-100 Hz energy the ear does not integrate into
+loudness, and the +4 dB spherical-head shelf above about 2 kHz stands in for the
+diffraction gain of a head in a sound field. The −0.691 constant in $L_\mathrm{K}$ is
+what makes the two of them together read exactly −3.01 LKFS on a full-scale
+997 Hz sine.*
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -81,6 +113,22 @@ plt.show()
 ```
 
 </details>
+
+That is the whole model: two biquads and a mean square. It is worth being
+explicit about what such a measure cannot do, because the question a reader
+arrives with is usually "is this *the* loudness?". The chain is linear and
+level-independent by construction; doubling a programme's gain adds exactly
+6 dB to $L_\mathrm{K}$, which is precisely what makes normalisation a single
+multiplication, and precisely what a real ear does not do. There is no masking,
+no critical-band summation, no equal-loudness contour and no binaural
+summation anywhere in it. So BS.1770 ranks *similar* material reliably, which is
+what broadcast delivery needs, and is known to be less reliable across very
+different spectra: heavily low-frequency music against dialogue being the
+standard example, and the reason the RLB high-pass exists at all. When the
+question really is perceived magnitude rather than delivery level, the
+psychoacoustic models are in
+[Loudness (ISO 532)](../../perception/psychoacoustics/loudness.md), which
+reports sones and a specific-loudness pattern instead of a single gated number.
 
 ## 2. Gating and the programme loudness
 
@@ -114,7 +162,33 @@ what makes wide-loudness-range programmes match on air. EBU R 128 normalises
 this integrated value to **−23.0 LUFS**; where the target is not practically
 achievable (live programmes, for example) a tolerance of ±1.0 LU is
 permitted, and quality-control workflows allow ±0.2 LU for measurement
-error. The figure makes the gate visible on a shaped-noise programme with a
+error.
+
+The gate also sets a floor on what can be measured at all. The integrated
+loudness needs **at least one 400 ms gating block above the −70 LUFS absolute
+gate**; below that (an item shorter than a block, or digital silence
+throughout), `integrated_loudness` returns `-inf`, which is a *no measurement*
+answer and not a very quiet programme. Just above that floor the answer is
+weak rather than absent: an item of a few seconds leaves only a handful of
+surviving blocks, so the integrated value inherits their scatter, which is why
+short-form delivery specifications normally normalise on the momentary or
+short-term maximum instead of on I. (Non-finite samples are rejected outright
+rather than gated.)
+
+The order of those two passes is what makes the gate hard to picture from a
+finished trace. The relative threshold is not a constant the meter knows in
+advance: it is computed from the blocks that survived the absolute gate, so it
+only exists once there is material to compute it from, and it keeps moving
+while the programme plays. A block that was counted early can therefore stop
+counting later, without anything about that block having changed. The clip
+runs the decision block by block on a louder, five-section programme, so the
+threshold can be watched sliding:
+
+**Video:** [The relative loudness threshold sliding as a programme plays, and blocks dropping out behind it](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_loudness_gating.webm): Sixty seconds of a five-section programme are metered into 597 gating blocks, each drawn as a square that is solid while it counts and hollow once it is gated out. The dashed relative threshold is recomputed from the survivors after every block: it starts low, so every block counts, and climbs as louder material arrives until it settles at -34.3 LUFS, at which point blocks that were counted earlier have gone hollow behind it. The histogram beside the trace counts the same blocks into loudness bins, its bars greying below the sliding threshold. Four readouts settle at an integrated loudness of -23.0 LUFS against an ungated energy mean of -24.3 LUFS, a difference of 1.28 LU, and 154 of the 597 blocks never counted. A closing act applies the deeper loudness-range gate at -44.1 LUFS and slides the 10th and 95th percentile edges onto -36.8 and -19.1 LUFS for a loudness range of 17.7 LU.
+
+The gate is a decision taken per block, not a filter over the signal. Because the relative threshold is derived from the survivors of the first pass, it is data-dependent and retroactive: the quiet opening and the fade-out end up excluded not because they fell below a fixed level, but because the rest of the programme turned out to be loud enough to raise the threshold above them.
+
+The figure makes the gate visible on a shaped-noise programme with a
 long quiet tail:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_gating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_gating.svg" alt="EBU R 128 metering of 20 seconds of programme on the -23 LUFS target followed by 40 seconds of quiet ambience about 29 LU lower: the momentary and short-term traces step down at 20 seconds, the dashed integrated line stays at -23.0 LUFS because the relative gate drops the tail, and a dash-dotted line marks the ungated mean sinking to -27.7 LUFS" width="96%"></picture>
@@ -193,6 +267,14 @@ the per-channel true peaks and the channel weights; its `.plot()` draws the
 loudness trace of the programme:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness.svg" alt="EBU R 128 metering of a one-minute synthetic programme with ambience, dialogue, music and fade-out sections: the grey momentary loudness breathes around the blue short-term trace, the red dashed integrated loudness sits exactly on the -23 LUFS target, and a shaded band marks the loudness range between its 10th and 95th percentile edges" width="96%"></picture>
+
+*One synthetic programme through the three time scales: quiet ambience, then
+dialogue, then music, then a fade-out. The momentary trace (400 ms) breathes
+with every syllable; the short-term trace (3 s) is the one an operator rides,
+and it departs from M wherever the material is dense or transient rather than
+steady. The integrated line is flat by definition: it is one number for the
+whole programme, and the shaded band is the P10 to P95 spread that the
+loudness range reports.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -290,8 +372,11 @@ programmes shorter than a minute: too few 3 s windows.
 
 Digital sample peaks lie: the true maximum of the reconstructed waveform
 generally falls *between* samples, and a sample-peak meter under-reads a
-badly phased tone at $f_\mathrm{s}/4$ by 3 dB (worst case
-$20\log_{10}\cos(\pi f_{\mathrm{norm}}/n)$ for oversampling ratio $n$).
+badly phased tone at $f_\mathrm{s}/4$ by 3 dB. The worst case is bounded by
+$20\log_{10}\cos(\pi f_{\mathrm{norm}}/n)$, where $n$ is the oversampling ratio
+and $f_{\mathrm{norm}} = f/f_\mathrm{s}$ is the tone frequency normalised to the sampling
+rate, which is exactly why $f_\mathrm{s}/4$ is the worst case, since
+$f_{\mathrm{norm}} = 1/4$ maximises the bound over the audio band.
 BS.1770-5 Annex 2 therefore meters the **true peak** on a signal oversampled
 to at least 192 kHz (4× at 48 kHz), in **dBTP** (dB relative to 100 % full
 scale):
@@ -311,9 +396,52 @@ print(round(float(broadcast.true_peak_level(x, fs)), 2))                #  0.12
 The interpolator recovers the inter-sample excursion the sample grid missed
 (the residual +0.12 dB is interpolation ripple from the abrupt tone edges,
 inside the +0.2/−0.4 dB tolerance that EBU Mode meters must meet).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/true_peak_intersample_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/true_peak_intersample.svg" alt="Two panels. Left, twelve samples of the full-scale 12 kHz tone at a quarter-cycle phase offset: every sample dot sits at 0.707 of full scale on the dashed sample-peak line at minus 3.01 dBFS, while the band-limited reconstruction drawn through them touches plus and minus one, and the 4 times oversampled grid is marked along the bottom. Right, the worst-case under-read 20 log cos of pi f_norm over n against normalised frequency for oversampling ratios of 1, 2, 4 and 8, with the BS.1770 minimum of 4 marked at f_norm equal to one quarter where minus 0.17 decibel remains" width="92%"></picture>
+
+*Left: the mechanism. Sampling a full-scale $f_\mathrm{s}/4$ tone at the wrong phase puts
+**every** sample at $1/\sqrt{2}$, so a sample-peak meter reads −3.01 dBFS while
+the waveform that will actually leave a converter reaches full scale. Right: the
+bound, against the oversampling ratio. At the 4× BS.1770 asks for, 0.17 dB of
+the excursion is still missed at the worst frequency, which is part of why the
+ceiling is −1 dBTP and not 0.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The page's own signal, metered whole and drawn twelve samples at a time.
+sample_peak = float(broadcast.true_peak_level(x, fs, oversample=1))
+true_peak = float(broadcast.true_peak_level(x, fs))
+t_fine = np.linspace(0.0, 11 / fs, 2000)
+fine = np.sin(2 * np.pi * (fs / 4) * t_fine + np.pi / 4)
+
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12, 5))
+axl.plot(t_fine * 1000.0, fine, label="band-limited reconstruction")
+axl.plot(np.arange(12) / fs * 1000.0, x[:12], "o", label="samples at 48 kHz")
+axl.axhline(np.abs(x[:12]).max(), linestyle="--")   # sample peak, -3.01 dBFS
+axl.axhline(1.0, linestyle="--")                    # the true excursion
+axl.set(xlabel="Time [ms]", ylabel="Amplitude [FS]")
+axl.legend()
+
+f_norm = np.linspace(0.0, 0.5, 400)
+for ratio in (1, 2, 4, 8):
+    axr.plot(f_norm, 20.0 * np.log10(np.cos(np.pi * f_norm / ratio)),
+             label=f"n = {ratio}")
+axr.set(xlabel="Tone frequency / sampling rate", ylabel="Under-read [dB]",
+        ylim=(-7.0, 0.4))
+axr.legend()
+plt.show()
+```
+
+</details>
+
 EBU R 128 caps production at **−1 dBTP**; distribution codecs often need
 more headroom. This is the same oversampled-peak machinery behind the
-C-weighted `lc_peak` of [Integrated & Statistical Levels](../../signals/levels/levels.md).
+C-weighted `lc_peak` of
+[Integrated & Statistical Levels](../../signals/levels/levels.md).
 
 ## 6. Multichannel programmes and Annex 3
 
@@ -334,11 +462,109 @@ weights = broadcast.channel_weight([0, 30, -30, 90, -90], [0, 0, 0, 0, 0])
 # -> [1. 1. 1. 1.41 1.41]; pass as program_loudness(..., weights=weights)
 ```
 
+Those are two inequalities describing a picture, and the picture answers the
+question a rigger actually asks: which loudspeakers of *this* layout fall
+inside the zone:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/channel_weight_map_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/channel_weight_map.svg" alt="A map of the BS.1770 Annex 3 channel weight over azimuth from minus 180 to 180 degrees and elevation from minus 90 to 90 degrees. Two shaded rectangles between 60 and 120 degrees of azimuth on either side and within plus or minus 30 degrees of elevation carry the weight 1.41, plus 1.5 decibels; everything else is 1.0. The 5.1 loudspeakers L, R and C sit at weight 1.00, Ls and Rs at 110 degrees fall inside the shaded zones at 1.41, and the upper-layer U plus 110 at 45 degrees of elevation falls outside at 1.00" width="92%"></picture>
+
+*The weight is a property of the loudspeaker's **position**, not of the
+channel's name. Ls and Rs of a 5.1 layout land inside the mid-layer side zone
+and take +1.5 dB; the same azimuth lifted to the upper layer does not. That is
+why Table 3 and Annex 3 agree on 5.1 and part company on 22.2.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The map is the function itself, evaluated over the sphere.
+az, el = np.meshgrid(np.linspace(-180.0, 180.0, 361),
+                     np.linspace(-90.0, 90.0, 181))
+weight = broadcast.channel_weight(az, el)
+
+fig, ax = plt.subplots(figsize=(11, 5.6))
+ax.contourf(az, el, weight, levels=[1.2, 2.0])
+ax.contour(az, el, weight, levels=[1.2])
+for name, a, e in (("L", -30.0, 0.0), ("R", 30.0, 0.0), ("C", 0.0, 0.0),
+                   ("Ls", -110.0, 0.0), ("Rs", 110.0, 0.0),
+                   ("U+110", 110.0, 45.0)):
+    ax.plot([a], [e], "o")
+    ax.annotate(f"{name}  ({broadcast.channel_weight(a, e):.2f})", (a, e))
+ax.set(xlabel="Azimuth [°]", ylabel="Elevation [°]")
+plt.show()
+```
+
+</details>
+
 Object-based audio (Annex 4) is measured by rendering to a loudspeaker
 configuration first and metering the render; the rendering itself is out of
 scope here.
 
-## EBU R 128 report (`.report()`)
+## 7. Normalising to the target
+
+Metering is half of R 128; the other half is the single gain that follows it,
+and the order of operations matters more than the arithmetic does.
+
+First, what `program_loudness` expects: a `[channels, samples]` array in
+full-scale units, where 1.0 is 0 dBFS. A `soundfile.read` returns
+`(samples, channels)`, so it has to be transposed, and integer PCM has to be
+scaled to ±1 first. Second, *what* is metered: the programme **as delivered**.
+Line-up tone, slate, countdown and black are part of the file and not part of
+the programme, so they are trimmed before metering: a 1 kHz line-up tone at
+−18 dBFS sails through the absolute gate and drags the integrated value with it.
+And the whole programme is measured, not an excerpt, because the relative gate
+is computed from the programme's own survivors.
+
+Then the gain. Normalisation is a **single static gain** of (target − I) dB
+applied to the whole programme:
+
+```python
+from scipy import signal
+
+# A finished stereo programme, standing in for the delivered master: three
+# sections of shaped noise 13 LU apart. In practice this is
+#   data, fs = soundfile.read(path)      # (samples, channels), -1.0 to 1.0
+#   programme = data.T                   # program_loudness wants [ch, samples]
+rng = np.random.default_rng(128)
+sos = signal.butter(2, 2000.0, fs=fs, output="sos")
+sections = []
+for level_dbfs, seconds in [(-31.0, 12.0), (-24.0, 12.0), (-37.0, 12.0)]:
+    noise = signal.sosfilt(sos, rng.standard_normal(int(seconds * fs)))
+    sections.append(10 ** (level_dbfs / 20) * noise / np.sqrt(np.mean(noise ** 2)))
+programme = np.concatenate(sections)
+
+res = broadcast.program_loudness(np.vstack([programme, programme]), fs)
+gain_db = -23.0 - res.integrated
+print(round(res.integrated, 2), round(gain_db, 2))    # -23.86  0.86
+
+normalised = programme * 10 ** (gain_db / 20)
+after = broadcast.program_loudness(np.vstack([normalised, normalised]), fs)
+print(round(after.integrated, 2), round(after.loudness_range, 2))   # -23.0 13.02
+print(round(after.true_peak, 2))                      # -9.96, was -10.82
+print(after.true_peak <= -1.0)                        # the R 128 ceiling: True
+```
+
+Because the gain is linear and applies everywhere, it shifts M, S and I by
+exactly that many decibels and leaves **LRA unchanged**: the loudness range is
+a difference of percentiles, and a constant offset cancels out of it. Which
+blocks survive the gate is unchanged too, for the same reason.
+
+The true peak, however, moves with the gain, and that is the one conflict R 128
+leaves you to resolve. A quiet, wide-range programme needing +8 LU whose maximum
+true peak already sits at −6 dBTP lands at +2 dBTP: normalised correctly and
+over the ceiling. The order is *normalise, then check*: never reduce the gain
+to fit the peak, because that breaks the delivery level everything else depends
+on. The two legitimate resolutions are a true-peak limiter applied to the
+loudest moments (which lowers LRA slightly, and should be declared) or a
+renegotiated target for that delivery.
+
+The delivery record is three numbers, not one: the integrated loudness **I**,
+the loudness range **LRA** and the maximum true peak **max TP**. They are
+exactly the three the fiche below boxes.
+
+## 8. EBU R 128 report (`.report()`)
 
 `ProgramLoudnessResult.report(path)` renders a one-page PDF compliance fiche
 laid out like a broadcast loudness-delivery sheet: a standard-basis line, an
@@ -356,21 +582,28 @@ The stacked layout (compliance table on top, plot below) differs from the
 narrow two-panel body of the other fiches because the compliance table needs
 four columns and the loudness-vs-time trace is landscape. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](../../buildings/insulation/insulation-ratings.md#report-metadata-reportmetadata);
-a supplied `requirement` is read as the target programme loudness in LUFS
-(defaulting to the EBU R 128 −23.0 LUFS), and the fiche passes when the
-integrated loudness is within the selected R 128 tolerance of it and the true
-peak is at or below −1.0 dBTP. The tolerance follows the `tolerance` keyword:
-the default `"qc"` applies the ±0.2 LU measurement-error allowance of R 128
-item i) (loudness workflows such as Quality Control), and `"live"` applies the
-±1.0 LU tolerance of item h), permitted only where the Target Level is not
-achievable practically (live programmes, for example); the applied rule and
-its R 128 item are printed on the fiche. The verdict is evaluated on the
-loudness rounded to the displayed 0.1 LU, so the printed numbers can never
-contradict it. Rendering needs reportlab and, for the figure the fiche embeds,
-matplotlib (`pip install "phonometry[report,plot]"`); only `engine="reportlab"`
-is supported. The fiche renders in English by default; pass `language="es"` for
-a Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
+[ISO 717 insulation fiche](../../buildings/insulation/insulation-ratings.md#iso-717-report-report).
+
+**What drives the verdict.** A supplied `requirement` is read as the target
+programme loudness in LUFS (defaulting to the EBU R 128 −23.0 LUFS), and the
+fiche passes when the integrated loudness is within the selected R 128 tolerance
+of it *and* the true peak is at or below −1.0 dBTP. Nothing else votes.
+
+**The tolerance switch**, which is the one setting that changes whether a
+delivery passes. It follows the `tolerance` keyword: the default `"qc"` applies
+the **±0.2 LU** measurement-error allowance of R 128 item i), for loudness
+workflows such as Quality Control, and `"live"` applies the **±1.0 LU**
+tolerance of item h), which is permitted only where the Target Level is not
+practically achievable (a live programme, typically). The applied rule and its
+R 128 item are printed on the fiche, so a reader can always see which was used.
+The verdict is then evaluated on the loudness *rounded to the displayed 0.1 LU*,
+so the printed numbers can never contradict the verdict beside them.
+
+**Practicalities.** Rendering needs reportlab and, for the figure the fiche
+embeds, matplotlib (`pip install "phonometry[report,plot]"`); only
+`engine="reportlab"` is supported. The fiche renders in English by default; pass
+`language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator), e.g.
 `res.report("loudness_fiche_es.pdf", language="es")`.
 
 ```python
@@ -388,15 +621,14 @@ res.report(
 )                                          # I (LUFS), LRA (LU), true peak (dBTP)
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -23.0 LUFS (LRA = 10.0 LU, max TP = -20.4 dBTP) single number and a PASS verdict against the -23.0 LUFS target under the default ±0.2 LU QC tolerance of EBU R 128 item i)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
+[![EBU R 128 programme-loudness example report (PDF): One-page programme-loudness compliance fiche: a metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -23.0 LUFS (LRA = 10.0 LU, max TP = -20.4 dBTP) single-number result and a PASS verdict against the -23.0 LUFS target under the default ±0.2 LU QC tolerance of EBU R 128 item i).](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
 
-*Programme-loudness compliance fiche (`ProgramLoudnessResult.report`), I in
-LUFS with LRA in LU and true peak in dBTP.*
+Programme-loudness compliance fiche (ProgramLoudnessResult.report), I in LUFS with LRA in LU and true peak in dBTP.
 
-## 7. Validation
+## 9. Validation
 
 Every synthesizable "minimum requirements" signal of EBU Tech 3341 (cases
 1-6 and 9-23) and Tech 3342 (cases 1-4) runs in the test suite with its
@@ -412,6 +644,30 @@ cases also run everywhere without the audio. The
 independent [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) meter is
 a useful cross-check for real recordings; it was not used as a source for
 this implementation.
+
+## What this guide covers
+
+- **Covered.** ITU-R BS.1770-5 Annex 1: the K-weighting pre-filter of Tables 1-2, and the
+  channel-weighted integrated loudness with its two-stage gate (Formulae 1-7,
+  Table 3). `k_weighting`, `k_weighting_coefficients` and `program_loudness`
+  implement these. Annex 2's oversampled true-peak level runs through
+  `true_peak_level`. Annex 3's position-dependent channel weights for advanced
+  sound systems run through `channel_weight`. EBU R 128's −23.0 LUFS target and
+  −1 dBTP ceiling sit on top of that. EBU Tech 3341's
+  momentary/short-term/integrated meter and EBU Tech 3342's loudness range come
+  from the same `program_loudness` result, with `loudness_range()` also
+  standalone.
+
+- **Not covered.** BS.1770-5 Annex 4, object-based audio, is out of scope. The guide notes that
+  rendering to a loudspeaker layout has to happen first, and phonometry
+  implements no spatial-audio renderer for that step. EBU Tech 3343 is cited
+  only as production practice around these numbers: guidance, not an algorithm,
+  and nothing here runs it. There is no normalisation *helper* either: section 7
+  shows the single gain, and applying it is one multiplication. And nothing on
+  this page is a loudness **model**: K-weighting is a fixed linear filter, so
+  masking, level dependence, critical bands and binaural summation are all
+  outside it by construction; those live in [Loudness (ISO
+  532)](../../perception/psychoacoustics/loudness.md).
 
 ## See also
 
@@ -429,43 +685,15 @@ this implementation.
 
 ## References
 
-- International Telecommunication Union. (2023). *Algorithms to measure
-  audio programme loudness and true-peak audio level* (Recommendation
-  ITU-R BS.1770-5).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770/en).
-  The K-weighting, channel weights, gating and true-peak algorithms.
-- European Broadcasting Union. (2023). *Loudness normalisation and permitted
-  maximum level of audio signals* (EBU R 128).
-  [tech.ebu.ch/publications/r128](https://tech.ebu.ch/publications/r128).
-  The −23.0 LUFS target, the −1 dBTP ceiling and the normalisation practice.
-- European Broadcasting Union. (2023). *Loudness metering: 'EBU Mode'
-  metering to supplement loudness normalisation* (EBU Tech 3341).
-  [tech.ebu.ch/publications/tech3341](https://tech.ebu.ch/publications/tech3341).
-  The M/S/I time scales and the minimum-requirements test signals.
-- European Broadcasting Union. (2023). *Loudness range: A measure to
-  supplement loudness normalisation* (EBU Tech 3342).
-  [tech.ebu.ch/publications/tech3342](https://tech.ebu.ch/publications/tech3342).
-  The LRA algorithm, its reference implementation and its test signals.
-- European Broadcasting Union. (2023). *Guidelines for production of
-  programmes in accordance with EBU R 128* (EBU Tech 3343).
-  [tech.ebu.ch/publications/tech3343](https://tech.ebu.ch/publications/tech3343).
+- **European Broadcasting Union. (2023).** [*Guidelines for production of programmes in accordance with EBU R 128*](https://tech.ebu.ch/publications/tech3343) (EBU Tech 3343).
   The production practice around the numbers on this page.
-- Steinmetz, C. J., & Reiss, J. D. (2021). *pyloudnorm: A simple yet
-  flexible loudness meter in Python*. 150th AES Convention.
-  [github.com/csteinmetz1/pyloudnorm](https://github.com/csteinmetz1/pyloudnorm).
+- **European Broadcasting Union. (2023).** [*Loudness metering: 'EBU Mode' metering to supplement loudness normalisation*](https://tech.ebu.ch/publications/tech3341) (EBU Tech 3341).
+  The EBU Mode momentary/short-term/integrated (M/S/I) time scales, validated against the synthesizable Table 1 minimum-requirements test signals with their official tolerances.
+- **European Broadcasting Union. (2023).** [*Loudness normalisation and permitted maximum level of audio signals*](https://tech.ebu.ch/publications/r128) (EBU R 128).
+  The −23.0 LUFS target level, the −1 dBTP ceiling and the normalisation practice.
+- **European Broadcasting Union. (2023).** [*Loudness range: A measure to supplement loudness normalisation*](https://tech.ebu.ch/publications/tech3342) (EBU Tech 3342).
+  The loudness range (LRA) algorithm, its reference implementation and its test signals, validated against its Table 1 signals at ±1 LU.
+- **International Telecommunication Union. (2023).** [*Algorithms to measure audio programme loudness and true-peak audio level*](https://www.itu.int/rec/R-REC-BS.1770/en) (Recommendation ITU-R BS.1770-5).
+  The K-weighting pre-filter (Annex 1, Tables 1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae 1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its Attachment 1 under-read bound) and the position-dependent channel weights for advanced sound systems (Annex 3, Tables 4-5), in the edition approved in November 2023.
+- **Steinmetz, C. J., & Reiss, J. D. (2021).** [pyloudnorm: A simple yet flexible loudness meter in Python](https://github.com/csteinmetz1/pyloudnorm). *150th AES Convention*.
   An independent BS.1770 implementation, useful as a cross-check.
-
-## Standards
-
-Recommendation ITU-R BS.1770-5, *Algorithms to measure audio programme loudness
-and true-peak audio level*: the K-weighting pre-filter (Annex 1, Tables
-1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae
-1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its
-Attachment 1 under-read bound) and the position-dependent channel weights
-for advanced sound systems (Annex 3, Tables 4-5). EBU R 128 (2023),
-*Loudness normalisation and permitted maximum level of audio signals*: the
-−23.0 LUFS target level and −1 dBTP maximum. EBU Tech 3341 (2023): the EBU
-Mode momentary/short-term/integrated time scales, validated against the
-synthesizable Table 1 minimum-requirements signals with their official
-tolerances. EBU Tech 3342 (2023): the loudness range, validated against its
-Table 1 signals at ±1 LU.

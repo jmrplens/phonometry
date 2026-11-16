@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/control-valve-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Control valve noise (IEC 60534-8-3)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/
+
+# Control Valve Noise (IEC 60534-8-3)
 
 A control valve is usually the loudest thing in a process plant, and it is
 loud for a reason worth stating plainly: throttling turns pressure into
@@ -323,6 +325,7 @@ a constant: NOTE 1 gives 0,93 for straight pattern globe valves, says some
 rotary valves may be as low as 0,7, and admits there are no data for the rest.
 `Expander` defaults to the 0,93 and to Table 4's own *expander* row, which is
 $A_\eta = -3{,}0$ and not the valve's figure.
+
 ## 6. Trims designed to be quiet
 
 Everything above is Clause 5, which is a valve with ordinary trim. A valve
@@ -408,31 +411,52 @@ eight differ by a quarter of a term that is itself only a few decibels. What
 the correction really tracks is $p_1/p_n$, the pressure the earlier stages
 took out.
 
+## What this guide covers
+
+- **Covered.** IEC 60534-8-3:2010, Clause 5, Clause 6 and the outlet-flow half of Clause 7,
+  against all seven worked examples of Annex A. Clause 5 for a valve with
+  standard trim: the
+  pressure ratios of 5.1 and 5.2 with the five regimes they define, the valve
+  style modifier and jet diameter of 5.3, the regime-dependent stream power,
+  acoustical efficiency and peak frequency of Table 3, the internal level at the
+  pipe wall of Equation (18), the third-octave spectrum of Equation (19), the
+  pipe transmission loss of 5.5 with its ring and coincidence frequencies, and
+  the external level of 5.6 in bands and as one A-weighted number. Clause 6 for
+  a trim built to be quiet: the drilled cage of 6.2 with Equation (26), the
+  multistage substitution of 6.3 with Equations (27) to (29) and its NOTE 3
+  branch, the stage correction of Equation (31), and the multipath multistage
+  case of 6.4. And Clause 7 for the flow leaving the valve outlet once it passes
+  Mach 0,3, with the transition piece, its stream power and efficiency, and
+  Equation (43), which adds it to the trim inside the pipe.
+
+- **Not covered yet.** The experimentally determined efficiency factors of Clause 8, which are a
+  laboratory procedure rather than a calculation; Clause 9, which combines a
+  valve with two or more fixed-area stages installed downstream of it. The
+  hydrodynamic case, where the fluid is a liquid and the sources are the
+  turbulence of the jet and the cavitation that joins it once the corrected
+  threshold is passed, is IEC 60534-8-4 and has
+  [a page of its own](valve-cavitation.md).
 
 ## See also
 
-- [Reactive Silencers](silencers.md): the four-pole chain that would be put
-  downstream of a valve this loud.
-- [Duct-Borne Noise](duct-path.md): the same question for a ventilation
-  system, where the source is a fan rather than a jet.
-- [HVAC Noise the German Way (VDI 2081)](vdi2081-air-systems.md): another
-  chain that ends in a level rather than in a sound power.
-- [Sound Power in a Duct](../emission/sound-power-in-duct.md): the ISO 5136
-  measurement of what a source puts into a pipe, which is the measured
-  counterpart of what this page predicts.
-- API reference: [`noise_control.valves`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves/).
+- [Reactive Silencers](silencers.md): the
+  four-pole chain that would be put downstream of a valve this loud.
+- [Duct-Borne Noise](duct-path.md): the same
+  question for a ventilation system, where the source is a fan rather than a
+  jet.
+- [HVAC Noise (VDI 2081)](vdi2081-air-systems.md):
+  another chain that ends in a level rather than in a sound power.
+- [Sound Power in a Duct](../emission/sound-power-in-duct.md):
+  the ISO 5136 measurement of what a source puts into a pipe, which is the
+  measured counterpart of what this page predicts.
+- API reference:
+  [`noise_control.valves`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves/).
 
-## Standards
+## References
 
-IEC 60534-8-3:2010, Clause 5, for a valve with standard trim: the pressure
-ratios of 5.1 and 5.2, the geometry of 5.3, the regime-dependent quantities of
-Table 3, the internal level and spectrum of 5.4, the pipe transmission loss of
-5.5 and the external level of 5.6, with Tables 1, 4, 5, 6 and 7. Clause 6 for
-the trims built to be quiet: the drilled cage of 6.2, the multistage
-substitution of 6.3 and the multipath multistage case of 6.4. And the
-outlet-flow half of Clause 7, for the flow leaving a valve outlet that has
-passed Mach 0,3. Validated against all seven worked examples of Annex A in the
-[conformance report](../../CONFORMANCE.md); the three defects that annex
-carries are in the [errata register](../../ERRATA.md). Clause 8 and Clause 9
-are not implemented yet; the hydrodynamic case of IEC 60534-8-4 has
-[a page of its own](valve-cavitation.md).
+- **International Electrotechnical Commission. (2010).** *Industrial-process control valves — Part 8-3: Noise considerations — Control valve aerodynamic noise prediction method* (IEC 60534-8-3:2010).
+  The whole of this page: Clause 5 with its Tables 1, 3, 4, 5, 6 and 7, and the seven worked examples of Annex A.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The 33 one-third-octave bands from 12,5 Hz to 20 kHz that Table 5 indexes and every spectrum on this page is carried on.
+- **Reethof, G., & Ward, W. C. (1986).** A theoretically based valve noise prediction method for compressible fluids. *Journal of Vibration, Acoustics, Stress, and Reliability in Design*, *108*(3), 329-338. https://doi.org/10.1115/1.3269349
+  Where the five regimes and the acoustical efficiency of each of them come from.

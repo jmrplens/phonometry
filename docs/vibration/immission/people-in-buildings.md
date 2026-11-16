@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/people-in-buildings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/
 
 # Vibration and people in buildings (DIN 4150-2)
 
@@ -87,18 +89,34 @@ rule still be regarded as met", the standard concludes, and the verdict says
 so, with `within_uncertainty` set for anyone who wants to read it more
 strictly.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Section through a dwelling with the triaxial transducer at the middle of the floor panel, x towards the source and a fourth channel beside it; the meter's chain and ten 30 second clocks with a maximum of 0.25 and a clock maximum r.m.s. of 0.23; the day split into 8 hours of night and 16 hours of day with the rest hours; and the order of the assessment against the guide values of a residential area, with the two formulae at the foot" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Left: a section through a two-storey building, with a source standing on the ground outside it and three dashed arcs spreading from it into the ground. In the upper room a triaxial transducer on a small three-footed base stands at the middle of the floor panel, which two half-span dimensions under the slab mark; its z arrow points up, x points towards the source and y leaves the section as a foreshortened diagonal, and a person stands beside it. A second transducer sits in the window recess of the outer wall, where the horizontals may also be taken, and a third on the ground beside the source is the fourth channel. Notes underneath: on the floor of the room itself, x and y along the outer walls with x towards the source if possible, three channels at once, set down loose while the peaks stay at or below 3 metres per second squared with its horizontals only to 40 hertz, and the spiked device, about 2.5 kilograms together with the transducer, on a carpet. Right: the meter's chain from a band limit of 1 hertz to 80 hertz through the KB weighting with its 5.6 hertz corner to a running r.m.s. with a 0.125 second time constant, then ten 30 second clocks of a steady record in x with each clock's maximum drawn as a step above a dashed line at 0.1; the largest maximum is 0.25 and the clock maximum r.m.s. is 0.23 over ten clocks. Below it a day bar from 22:00 to 22:00, 8 hours of night and 16 hours of day with the rest hours from 6 to 7 and from 19 to 22 shaded, and the guide values of a residential area: 0.15, 3 and 0.07 by day, 0.1, 0.2 and 0.05 by night. Across the bottom, the order of the assessment: KB F max at or below A u, which 0.25 is not; at or below A o, which it is; rare short events, up to 3 a day, which a steady source is not; then KB FTr is formed from KB FTm and the exposure time and compared with A r, met only if the exposure lasts 1.5 hours or less. The box at the foot gives the clock maximum r.m.s. as the root of the mean square of the clock maxima, and the assessment vibration severity as KB FTm times the root of T e over T r" width="100%"></picture>
 
-**How the measurement goes.** Use a DIN 45669-1 meter, checked before and after,
-and measure on the floor of the room itself: `z` usually at the middle of the
-floor panel, `x` and `y` along the outer walls with `x` towards the source where
-possible, the three at once unless the vibration is steady, and a fourth channel
-near the source. Set down loose, a transducer holds while the peaks stay at or
-below 3 m/s², its horizontals only to 40 Hz; on a carpet it stands on the spiked
-device, about 2,5 kg with the transducer, pressed and tapped through the
-covering. Capture the characteristic exposure, form $KB_\mathrm{Fmax}$ and, where it is
-needed, $KB_\mathrm{FTr}$ by day and by night with the rest hours apart, and report the
-positions, the coupling, the meter and its settings.
+### How the measurement goes
+
+Use a meter to DIN 45669-1, working from 1 Hz to 80 Hz, and check the chain
+before and after measuring, with a calibrator, a tap test or the vibration
+already there. Measure on the floor of the room itself, where the strongest
+vibration is expected; for the vertical that is usually the middle of the floor
+panel. Take `z` and two horizontals along the outer walls, `x` towards the
+source where possible; the horizontals may also go by a wall or in a door or
+window recess. Record the three at once, or one after another only when the
+vibration is steady, with a fourth channel near the source to tell it from
+other disturbances. Prefer a hard surface: set down loose, a transducer holds
+while the peaks stay at or below 3 m/s², its horizontals only to 40 Hz, and on
+a carpet it stands on the spiked device, about 2,5 kg with the transducer,
+pressed and tapped through the covering. Measure long enough to capture the
+characteristic exposure, mark an untypical state as such, and form $KB_\mathrm{Fmax}$
+and, where it is needed, $KB_\mathrm{FTr}$ separately by day and by night, recording the
+rest hours apart. Clock maxima of 0,1 or less count as zero, because vibration
+that weak is as a rule not felt, and the clock still counts in $N$. A
+disturbance is kept out by interrupting the clock maxima, erasing at most the
+running clock and the one before it, and is judged, where possible, with the
+source running and stopped. The report names the institution and the person
+responsible, the purpose, the date and measuring times, the sources and how
+they ran, a site plan and the propagation conditions, the measuring and
+immission point, the directions and the coupling, the meter with make, type and
+number, its settings and the rest of the equipment, the quantities measured,
+the disturbances and the subjective observations.
 
 ## 2. The assessment vibration severity
 
@@ -321,32 +339,32 @@ print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
 
 ## What this guide covers
 
-The **guide values** of Table 1 by area, time of day and kind of source, the
-**procedure** of Clause 6.2 as a verdict with the criterion that decided it,
-and the **assessment vibration severity** of Formulae (4a), (4b) and (5)
-with the exposure $A_\mathrm{r}$ allows.
+- **Covered.** The **guide values** of Table 1 by area, time of day and kind of source, the
+  **procedure** of Clause 6.2 as a verdict with the criterion that decided it,
+  and the **assessment vibration severity** of Formulae (4a), (4b) and (5)
+  with the exposure $A_\mathrm{r}$ allows.
 
-The **source rules** of Clause 6.5: rare short events on $A_\mathrm{o}$ alone, the
-railway on $A_\mathrm{u}$ and $A_\mathrm{r}$ with the factor 1,5 of an urban surface line, and
-the construction site's **Table 2** by duration and stage with the
-interpolation of Figure 3.
+- **Covered.** The **source rules** of Clause 6.5: rare short events on $A_\mathrm{o}$ alone, the
+  railway on $A_\mathrm{u}$ and $A_\mathrm{r}$ with the factor 1,5 of an urban surface line, and
+  the construction site's **Table 2** by duration and stage with the
+  interpolation of Figure 3.
 
-**Annex A** in full: the clock maximum r.m.s. of a class of train, the spread
-of its square, the assessment severity by classes and the interval the spread
-puts on it; and **Figure D.1**, trains an hour against $A_\mathrm{r}$. And **Clause
-7**, the estimate of $KB_\mathrm{Fmax}$ from a peak velocity with Table 3.
+- **Covered.** **Annex A** in full: the clock maximum r.m.s. of a class of train, the spread
+  of its square, the assessment severity by classes and the interval the spread
+  puts on it; and **Figure D.1**, trains an hour against $A_\mathrm{r}$. And **Clause
+  7**, the estimate of $KB_\mathrm{Fmax}$ from a peak velocity with Table 3.
 
-**No judgement of the cases the standard leaves open.** An existing railway
-line, a construction site beyond 78 working days, a hospital next to one, and
-whatever 6.2 sends to an individual assessment are decided case by case in
-the standard, and are not decided here.
+- **Not covered.** **No judgement of the cases the standard leaves open.** An existing railway
+  line, a construction site beyond 78 working days, a hospital next to one, and
+  whatever 6.2 sends to an individual assessment are decided case by case in
+  the standard, and are not decided here.
 
-**The measurement is described, not checked.** Where the transducers go, how
-they are coupled and how long a measurement runs are Clause 5 and
-DIN 45669-2, set out above for the person measuring. Of all that, the library
-puts a number only to the loose-mounting limits, the wax limit of Table 1 and
-the mass loading of 7.2.4, on the meter's page; the quantities themselves come
-from the meter of DIN 45669-1, which forms them from a record.
+- **Not covered.** **The measurement is described, not checked.** Where the transducers go, how
+  they are coupled and how long a measurement runs are Clause 5 and
+  DIN 45669-2, set out above for the person measuring. Of all that, the library
+  puts a number only to the loose-mounting limits, the wax limit of Table 1 and
+  the mass loading of 7.2.4, on the meter's page; the quantities themselves come
+  from the meter of DIN 45669-1, which forms them from a record.
 
 ## See also
 
@@ -362,25 +380,9 @@ from the meter of DIN 45669-1, which forms them from a record.
 
 ## References
 
-- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 2:
-  Einwirkungen auf Menschen in Gebäuden* (DIN 4150-2:1999-06). The assessment
-  quantities of 6.1, the procedure of 6.2 with Figure 2, the guide values of
-  Table 1, the assessment vibration severity of Formulae (4a), (4b) and (5),
-  the rules by source of 6.5 with Table 2 and the interpolation of Figure 3,
-  the estimate of Clause 7 with Formulae (6) and (7) and Table 3, and Annex A
-  with Formulae (A.1) to (A.4). Annex C is the oracle of the conformance rows.
-  Clause 5 on the measurement and the report of Clause 8 are prose, set out in
-  the measurement section.
-- Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
-  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
-  The meter whose KB_Fmax and clock maxima this standard judges, and the 5.6 Hz
-  corner frequency Formula (6) carries. The three simultaneous channels and the
-  fourth near the source of 5.1.2, the interruption and back-erasure of the
-  clock maxima of 5.1.6.4, and the check before a measurement of 6.5.
-- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
-  Teil 2: Messverfahren* (DIN 45669-2:2005-06). The floor positions of 5.1.3,
-  the directions of 5.2, the couplings of 5.3.2 and 5.3.3 with Table 1, the
-  measuring time of 6.1, the disturbances of 7.2.2 and the report of Clause 9,
-  as the measurement section describes them. The loose-mounting limits, the wax
-  limit and the mass loading are implemented on the meter's page; the rest is
-  prose.
+- **Deutsches Institut für Normung. (1999).** *Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden* (DIN 4150-2:1999-06).
+  The assessment quantities of Clause 6.1, the procedure of 6.2 with Figure 2, the guide values of Table 1, the assessment vibration severity of Formulae (4a), (4b) and (5), the source-specific rules of 6.5 with Table 2 and the interpolation of Figure 3, the estimate of Clause 7 with Formulae (6) and (7) and Table 3, and Annex A with Formulae (A.1) to (A.4). Annex C is the oracle of the conformance rows. Clause 5 on the measurement and the report of Clause 8 are text, set out in the measurement section.
+- **Deutsches Institut für Normung. (2005).** *Messung von Schwingungsimmissionen — Teil 2: Messverfahren* (DIN 45669-2:2005-06).
+  The measurement section: the floor positions of 5.1.3, the directions of 5.2, the couplings of 5.3.2 and 5.3.3 with Table 1, the measuring time of 6.1, the disturbances of 7.2.2 and the report of Clause 9. The loose-mounting limits, the wax limit and the mass loading are implemented on the meter's page; the rest is text.
+- **Deutsches Institut für Normung. (2010).** *Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
+  The meter whose KB_Fmax and clock maxima this standard assesses, and the corner frequency of 5,6 Hz that Formula (6) carries. The three simultaneous channels and the fourth near the source of 5.1.2, the interruption and back-erasure of the clock maxima of 5.1.6.4, and the check before a measurement of 6.5.

@@ -20,6 +20,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_fence_names
+from github_edition import EDITION_MARK
 
 
 def _page(tmp_path: pathlib.Path, body: str) -> pathlib.Path:
@@ -235,13 +236,13 @@ def test_a_fence_that_does_not_parse_is_flagged(tmp_path: pathlib.Path) -> None:
 
 
 def test_the_route_key_is_shared_by_the_language_twins() -> None:
-    """The Spanish twin and the docs mirror resolve to the English route."""
+    """The Spanish twin resolves to the English route; a page of docs/ keeps its own."""
     english = check_fence_names.CONTENT / "signals" / "levels" / "page.mdx"
     spanish = check_fence_names.CONTENT / "es" / "signals" / "levels" / "page.mdx"
-    mirror = check_fence_names.DOCS / "signals" / "levels" / "page.md"
+    by_hand = check_fence_names.DOCS / "contributing" / "page.md"
     assert check_fence_names._route(english) == "signals/levels/page"
     assert check_fence_names._route(spanish) == "signals/levels/page"
-    assert check_fence_names._route(mirror) == "docs/signals/levels/page"
+    assert check_fence_names._route(by_hand) == "docs/contributing/page"
 
 
 def test_a_stale_registry_line_is_reported(
@@ -258,3 +259,31 @@ def test_a_stale_registry_line_is_reported(
 def test_the_shipped_tree_reads_in_order() -> None:
     """Every committed page passes the gate CI runs."""
     assert check_fence_names.main() == 0
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``make llms`` writes the edition's fences from the English page, read here.
+
+    So a placeholder is registered once, under the page's route, and the
+    edition needs no ``docs/`` line of its own.
+    """
+    content = tmp_path / "content"
+    content.mkdir()
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    page = content / "page.mdx"
+    page.write_text("```python\nprint(1)\n```\n", encoding="utf-8")
+    edition = docs / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: x. -->\n\n```python\nprint(1)\n```\n",
+        encoding="utf-8",
+    )
+    by_hand = docs / "notes.md"
+    by_hand.write_text("```python\nprint(1)\n```\n", encoding="utf-8")
+    monkeypatch.setattr(check_fence_names, "CONTENT", content)
+    monkeypatch.setattr(check_fence_names, "DOCS", docs)
+    assert check_fence_names._checked_pages() == [page, by_hand]
+    monkeypatch.setitem(check_fence_names.PLACEHOLDERS, "docs/page", frozenset())
+    assert "docs/page" in check_fence_names._stale_placeholder_routes()

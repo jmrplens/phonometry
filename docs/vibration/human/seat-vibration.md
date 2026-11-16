@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/human/seat-vibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# What a seat does to the vibration (ISO 10326-1)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/
+
+# What a seat does to the vibration
 
 A driver does not sit on the floor of the machine. The seat is in between, and
 whether it helps is not obvious: a suspension seat is a spring and a damper,
@@ -71,20 +73,30 @@ except ValueError as error:
 inside the tolerance, so their means are the two numbers the SEAT factor is
 built from.*
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Side view of a suspension seat on a vibration simulator with a test person on the mounting disc, the seat accelerometer S under the person and the platform accelerometer P within 100 mm of the vertical through it; the disc of Figure 2 in section; the same weighted r.m.s. chain at both points; and SEAT = a_wS / a_wP with the corrected magnitude at the foot" width="100%"></picture>
+### How the measurement goes
 
-**How the measurement goes.** Calibrate the chain to ISO 16063-1 before and
-after each series, check the safety requirements of ISO 13090-1, and run a
-suspension seat in under a 75 kg inert mass first. Fix the platform
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Laboratory arrangement for testing a vehicle seat. On the left, from the side: a suspension seat with a spring and a damper on the platform of a vibration simulator that drives it vertically from below, its backrest leaning back ten degrees plus or minus five, and a test person sitting on it with the feet on a separate support and the thighs clear of the front of the cushion. The mounting disc lies on the cushion under the person's pelvis and carries the seat accelerometer S; a dash-dot line drops from S to the platform, where the platform accelerometer P stands no more than 100 millimetres from it. On the right, the disc in section, 250 plus or minus 50 millimetres across and no more than 12 millimetres high, with the accelerometers in a central cavity on a metal disc of 75 plus or minus 5 millimetres and 1.5 plus or minus 0.2 millimetres thick, a rim of 3 plus or minus 1 millimetres, in rubber or plastics of 80 to 90 durometer. Below it, P and S go through the same weighted r.m.s. chain to ISO 8041: a_wP is the mean of the runs with the input within tolerance, and a_wS the mean of three runs, each within 5 percent of it. Four notes give the platform circle, the disc position with its 15 degree axis tolerance, the 75 kilogram run-in and the warm-up, and the two test persons with the feet support. A box at the foot carries SEAT equals a_wS over a_wP, and the corrected magnitude a*_wS equals SEAT times a*_wP" width="100%"></picture>
+
+Use a measuring chain that meets ISO 8041, alike at the platform and at the
+seat, and calibrate it to ISO 16063-1 before and after each test series. Mount
+the seat, check the safety requirements of ISO 13090-1, and, if the seat has a
+suspension, run it in: a 75 kg inert mass on the cushion, the seat adjusted for
+a 100 kg operator, and a sine near the natural frequency of the suspension at
+75 % of its full amplitude, until the seat settles. Set the ride height as 8.1.3
+describes and an adjustable backrest to about 10° back. Fix the platform
 accelerometer inside a 200 mm circle centred directly below the seat
 accelerometer, and tape the disc to the cushion so its accelerometers lie
 midway between the ischial tuberosities. Train the test persons in preliminary
-runs until they hold a normal, still posture, weigh each of them, set the feet
-support so the thighs do not press on the front of the cushion, and drive the
-prescribed input until three consecutive runs give seat values within ± 5 % of
-their mean, with the platform inside its input tolerances. The mean of those
-seat values is $a_\mathrm{wS}$ and the mean of the platform values from the
-same runs is $a_\mathrm{wP}$, one pair per test person.
+runs until they hold a normal, still posture throughout. Weigh each of them
+just before their series, set the feet support so the thighs do not press on
+the front of the cushion, and drive the prescribed input without a break
+through each run; a warm-up of up to 10 min helps. Repeat until three
+consecutive runs give seat values within ± 5 % of their mean, with the platform
+inside its input tolerances. The mean of those seat values is $a_\mathrm{wS}$
+and the mean of the platform values from the same runs is $a_\mathrm{wP}$, one
+pair per test person, since Clause 11 asks each of them to pass. Report the
+run-in duration, the disc, the masses of the test persons and the SEAT factor
+or the corrected magnitude.
 
 ## 2. Correcting to the input that was intended
 
@@ -152,32 +164,32 @@ is therefore a statement about the seat, not a verdict about the machine.
 
 ## What this guide covers
 
-The **SEAT factor** of Formula (2), from the runs of one test, with the ± 5 %
-agreement 10.2.1 requires of three consecutive runs enforced rather than
-assumed.
+- **Covered.** The **SEAT factor** of Formula (2), from the runs of one test, with the ± 5 %
+  agreement 10.2.1 requires of three consecutive runs enforced rather than
+  assumed.
 
-The **correction to an intended input** of 10.2.3, as Formula (4) with the
-SEAT factor substituted, which is what the clause's prose asks for and what
-its printed Formula (3) fails to say.
+- **Covered.** The **correction to an intended input** of 10.2.3, as Formula (4) with the
+  SEAT factor substituted, which is what the clause's prose asks for and what
+  its printed Formula (3) fails to say.
 
-The **transmissibility at resonance** of Formula (5), and the test masses of
-10.3 and 9.5.1.
+- **Covered.** The **transmissibility at resonance** of Formula (5), and the test masses of
+  10.3 and 9.5.1.
 
-**No acceptance values**, because the standard states none: Clause 11 leaves
-them to the application standard for the machine, and nothing here supplies a
-default. The input spectral classes those standards prescribe, such as the
-earth-moving machinery classes of ISO 7096, are not implemented either.
+- **Not covered.** **No acceptance values**, because the standard states none: Clause 11 leaves
+  them to the application standard for the machine, and nothing here supplies a
+  default. The input spectral classes those standards prescribe, such as the
+  earth-moving machinery classes of ISO 7096, are not implemented either.
 
-**Nothing weights a signal here.** The accelerations this page divides are
-already frequency-weighted; the weightings themselves, and the r.m.s.
-integration behind them, are in [human vibration
-exposure](human-vibration.md).
+- **Not covered.** **Nothing weights a signal here.** The accelerations this page divides are
+  already frequency-weighted; the weightings themselves, and the r.m.s.
+  integration behind them, are in [human vibration
+  exposure](human-vibration.md).
 
-**No laboratory.** The simulator tolerances of Clause 9, the transducer
-mounting of 5.2, the semi-rigid disc, the test persons and posture of 8.2, the
-run-in periods of 8.1.2 and the test report of Clause 12 are described in the
-standard and none of them is implemented: this page is the arithmetic that
-follows a test, not the test.
+- **Not covered.** **No laboratory.** The simulator tolerances of Clause 9, the transducer
+  mounting of 5.2, the semi-rigid disc, the test persons and posture of 8.2, the
+  run-in periods of 8.1.2 and the test report of Clause 12 are described in the
+  standard and none of them is implemented: this page is the arithmetic that
+  follows a test, not the test.
 
 ## See also
 
@@ -191,21 +203,5 @@ follows a test, not the test.
 
 ## References
 
-- International Organization for Standardization. (2016). *Mechanical
-  vibration — Laboratory method for evaluating vehicle seat vibration — Part 1:
-  Basic requirements* (ISO 10326-1:2016).
-  Clause 10: the SEAT factor of Formula (2), the ± 5 % of 10.2.1, the
-  correction of 10.2.3 and the damping test of 10.3 with its 75 kg inert mass.
-
-## Standards
-
-ISO 10326-1:2016, *Mechanical vibration — Laboratory method for evaluating
-vehicle seat vibration — Part 1: Basic requirements*: the arithmetic of
-Clause 10 and the tolerances it is run under. The SEAT factor of Formula (2),
-the three consecutive runs within ± 5 % of their mean (10.2.1), the correction
-to the intended input of 10.2.3 (Formula (4); the printed Formula (3) is an
-identity and is registered in the errata), and the transmissibility at
-resonance of Formula (5) with the 75 kg ± 1 % inert mass of 10.3 and the 60 kg
-of 9.5.1. Clause 11 states no acceptance value and neither does this library;
-the laboratory requirements of Clauses 5 to 9 and the test report of Clause 12
-are not implemented.
+- **International Organization for Standardization. (2016).** [*Mechanical vibration — Laboratory method for evaluating vehicle seat vibration — Part 1: Basic requirements*](https://www.iso.org/standard/67659.html) (ISO 10326-1:2016).
+  Clause 10: the SEAT factor of Formula (2), the three consecutive runs within ± 5 % of 10.2.1, the correction of 10.2.3 with Formulae (3) and (4), and the damping test of 10.3 with Formula (5) and its 75 kg inert mass. Clause 11 leaves the acceptance values to the application standard. The printed Formula (3) is an identity; see the errata.

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-intensity.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/
 
 # Sound Insulation by Intensity (ISO 15186)
 
@@ -13,20 +15,31 @@ the intensity sound reduction index $R_I$ and its $K_\mathrm{c}$-modified form, 
 element-normalized level difference of small building elements, the surface
 qualification indicator and the accredited test fiches. The pressure-based
 laboratory chain lives in
-[Laboratory Insulation Measurement](insulation-lab.md); the probe physics
-and its field indicators are the subject of the
+[Laboratory Insulation Measurement](insulation-lab.md); the
+probe physics and its field indicators are the subject of the
 [Sound Intensity guide](../../devices/emission/intensity.md).
 
 ## Measuring the transmitted power directly (ISO 15186-1)
 
+The quantity being measured is a **surface integral**: the net sound power
+crossing an imaginary surface drawn around the radiating face of the specimen,
+$W = \int_S \mathbf{I} \cdot \mathbf{n}\, \mathrm{d}S$, where $\mathbf{I}$ is
+the time-averaged intensity vector and $\mathbf{n}$ the outward normal. Two
+consequences follow, and between them they are the whole method. First, a
+source *outside* the closed surface contributes nothing to the integral: what
+enters through one face leaves through another, so a flanking wall radiating
+into the same receiving room cancels itself out and only the enclosed specimen
+survives. Second, the sign matters: a patch of surface where energy is
+flowing back *towards* the specimen subtracts, which is why the standard
+carries a minus-sign rule (Clause 6.4.6) that no pressure-based method needs.
+The probe reads $\mathbf{I} \cdot \mathbf{n}$ point by point and the operator
+performs the integration by moving it, which makes the scan pattern part of
+the measurement rather than a matter of technique.
 
-The [ISO 10140 laboratory method](insulation-lab.md) reads the transmitted
-power *indirectly*, from the
-receiving-room level and its absorption area; this breaks down when flanking
-paths leak power the room integrates in anyway. The **sound-intensity** method
-(ISO 15186) sidesteps that: an intensity probe scans a measurement surface that
-encloses the specimen and measures the radiated power *directly*, so only the
-element under test contributes. It is the tool of choice when flanking is high
+That is what the pressure method cannot do. It reads the transmitted power
+*indirectly*, from the receiving-room level and its absorption area, and the
+room integrates every watt that arrives whichever path carried it. The
+intensity method is therefore the tool of choice when flanking is high
 (ISO 15186-1:2000, Clause 1). From the source-room level $L_{p1}$ and the
 average normal intensity level $L_{I\mathrm{n}}$ over the surface (area $S_\mathrm{m}$), for a
 specimen of area $S$,
@@ -37,11 +50,20 @@ $$
 
 where the $6$ dB is the diffuse-field offset between the sound pressure level
 and the incident intensity level. The same formula gives the apparent index
-$R'_I$ in the field (ISO 15186-2). Because the intensity method slightly
-*underestimates* the power radiated into a real receiving room, a **modified
-index** $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ reproduces the ISO 10140-2 pressure result; the
-adaptation term $K_\mathrm{c}$ (Annex B) is $10 \log_{10}(1 + S_{\mathrm{b}2}\lambda/8V_2)$ for a
-well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. For small
+$R'_I$ in the field (ISO 15186-2). The intensity scan measures the transmitted
+power directly. The reverberation-room pressure method does not: it infers the
+power from the receiving-room level and so *underestimates* it, which makes the
+ISO 10140-2 $R$ come out slightly high. The **modified index**
+$R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ adds that same bias back to the intensity result, so an
+intensity measurement can be quoted against pressure-method data
+(ISO 15186-1, Clause 3.10 NOTE 1). Report $R_I$ when the aim is the true
+transmitted power; report $R_{I,\mathrm{M}}$ when the aim is comparability with an
+ISO 10140-2 result. Earlier revisions of this guide blamed the bias on the
+intensity method itself, which would have called for subtracting $K_\mathrm{c}$, not
+adding it. The adaptation term $K_\mathrm{c}$ (Annex B) is $10 \log_{10}(1 + S_{\mathrm{b}2}\lambda/8V_2)$ for a
+well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. The
+first form is the Waterhouse boundary-energy term, which makes the second
+readable as that same term evaluated at a fixed $S_{\mathrm{b}2}/V_2$. For small
 elements the **element normalized level difference** replaces $10\log_{10}(S_\mathrm{m}/S)$
 with $10\log_{10}(S_\mathrm{m}/A_0) + 10\log_{10} N$ ($A_0 = 10\ \text{m}^2$, $N$ element units).
 
@@ -63,6 +85,9 @@ print(res.rating.rating)                     # 38  ->  RI,w (ISO 717-1 engine)
 
 # Qualify the measurement surface: FpI = Lp - LIn must stay < 10 dB (< 6 dB when
 # the receiving side is absorbing); the probe's residual index must exceed FpI+10.
+# Lp is the receiving-room pressure level measured over the same surface, if
+# possible simultaneously with the scan (Clause 6.4.2). Here it sits 6 dB above
+# LIn, i.e. exactly on the absorbing-specimen criterion.
 fpi = building.surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
 print(round(float(fpi[0]), 1))               # 6.0
 
@@ -74,11 +99,7 @@ res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
 *The modified index $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ lifts $R_I$ (most at the low bands,
 where $K_\mathrm{c}$ is largest), so an intensity measurement reproduces the ISO 10140-2
 pressure result. The automatic rating is formed only for exactly 16
-one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
-otherwise). Subareas scanned separately are combined first with
-`subarea_intensity_level` (Formulas (11)-(12)); a subarea whose net energy flows back
-towards the specimen enters with a negative area, applying the minus-sign rule
-of Clause 6.4.6 while $S_\mathrm{m}$ keeps the unsigned area sum.*
+one-third-octave or 5 octave values.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -113,27 +134,170 @@ plt.show()
 
 </details>
 
-Both levels are already-measured inputs: the scanning probe, the
-two-microphone acquisition and the phase-mismatch calibration behind $L_{p1}$
-and $L_{I\mathrm{n}}$ are not implemented, and nothing here enforces the Clause 6.4
-acquisition either (the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
-0.3 m/s scan speed, the 90°-rotated second scan with its 1.0 dB validity
-test, the 10 dB background margin); so a single scan will produce a number
-just as readily as a qualified pair.
+## Scanning the measurement surface (Clause 6.4)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Section through a laboratory suite: the source room with a loudspeaker clear of the walls and five microphone positions for Lp1, the specimen flush in the test opening, and on the receiving side a box-shaped measurement surface at distance d whose front is split into three subareas and whose four sides are subareas too, with the p-p probe normal to it, intensity leaving through one subarea and flowing back through another. Below, the two scans turned 90 degrees with their 1.0 dB agreement, a corner panel for ISO 15186-3, and a box with the intensity sound reduction index and the pressure-intensity indicator limits" width="100%"></picture>
+A method defined by how a probe is moved is not documented by its formula.
+Everything below fixes a number that the formula then consumes, and none of it
+is checked by the functions on this page.
 
-**How the measurement goes.** The probe and analyser meet IEC 61043 class 1,
-are checked on the residual-intensity testing device before each use, and need a
-pressure-residual intensity index more than 10 dB above the $F_{pI}$ the scan
-gives. Take $L_{p1}$ in the source room as ISO 140-3 asks. On the receiving
-side, scan a surface that encloses the specimen, the flat opening of a niche at
-least 0.1 m deep or else a box, at 0.1 m to 0.3 m, with the probe normal to it
-and reading outwards, in lines one measurement distance apart at a constant
-0.1 m/s to 0.3 m/s. Scan again with the path turned 90°: the mean stands only if
-the two differ by less than 1.0 dB in every band and $F_{pI}$ stays at 10 dB or
-less, 6 dB for an absorbing receiving face. Both levels have to clear the
-background by 10 dB.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Section through a laboratory transmission suite. On the left, the source room with a loudspeaker low in the room, clear of the walls, and five microphone positions spread through the room for the room average Lp1. In the middle, the specimen of ten square metres fills the test opening of the separating wall, flush with its receiving face. On the receiving side a dashed measurement surface forms a shallow box in front of the specimen, its sides as deep as the measurement distance d of 0.1 to 0.3 metres and each side a subarea of its own; for a four by two and a half metre opening at 0.2 metres its area Sm is 12.6 square metres. The front of the box is split into three subareas: a p-p probe held normal to the surface sits on the first, two arrows cross the second outwards, and an arrow points back towards the specimen through the third, whose area enters Formula 11 with a minus sign. Below, one panel draws the two scan patterns, vertical lines and then horizontal lines turned 90 degrees, beside the rules: lines one measurement distance apart, a steady 0.1 to 0.3 metres per second, time per subarea following its area, and the mean of the pair kept only if the two differ by less than 1.0 decibel in every band. A second panel shows ISO 15186-3: microphones less than 50 millimetres from the specimen for LpS, the probe on the measurement surface, an absorber on the wall opposite, the formula with 9 decibels, scans differing by less than 2.0 decibels up to 80 hertz and 1.0 decibel from 100 to 160 hertz, and the thickness limits for an absorbing face of the specimen in the source room. A box at the foot carries the intensity sound reduction index with its 6 decibels and the pressure-intensity indicator limits of 10 and 6 decibels, and three lines give the IEC 61043 class 1 probe, the 10 decibel background test and the plane ISO 15186-2 uses before a whole wall in a building, with its indicator 7 decibels under the residual index, or under 6 decibels for an absorbing element" width="100%"></picture>
+
+### How the measurement goes
+
+The analyser and its probe have to meet IEC 61043 class 1, with a
+pressure-residual intensity index more than 10 dB above the $F_{pI}$ you
+expect. Before each use, let the instrument warm up, set both microphones with
+a class 0 or class 1 sound calibrator, and measure the residual index on the
+residual-intensity testing device. Drive the source room and take $L_{p1}$ as
+ISO 140-3 asks. On the receiving side, the measurement surface is the flat
+opening of a niche at least 0.1 m deep, and otherwise a box, at a measurement
+distance of 0.1 m to 0.3 m. Scan it with the probe normal to the surface and
+reading outwards, in lines about one measurement distance apart, at a constant
+0.1 m/s to 0.3 m/s, giving each subarea time in proportion to its area. A
+negative intensity, or $F_{pI}$ above 10 dB (6 dB for a specimen whose
+receiving face absorbs), means moving the surface out by 5 cm to 10 cm before
+adding absorption. Scan again with the path turned 90°: the mean of the pair
+stands only if the two differ by less than 1.0 dB in every band. With $F_{pI}$
+below 10 dB, lower the source by 10 dB: if $F_{pI}$ moves by less than 1 dB,
+both levels clear the background by 10 dB. Report $R_I$ to one decimal
+beside $F_{pI}$ and the residual index in every band, with $S$, $S_\mathrm{m}$,
+the measurement distance and the probe's microphones and spacer.
+
+**The surface (Clause 6.4.1).** The measurement surface totally encloses the
+test specimen. A specimen in a niche deeper than 0.1 m is normally measured on
+the flat surface of the niche opening; otherwise, and for most small building
+elements, the surface is box-shaped. Choose the measurement distance in the
+**0.1 m to 0.3 m** band. Below 0.1 m the near field of the vibrating element
+makes the intensity change sign repeatedly, so the integral stops converging;
+above 0.3 m a box-shaped surface picks up too much of the room.
+
+**Qualifying the surface (Clause 6.4.2).** Measure $L_{I\mathrm{n}}$ and, if possible
+simultaneously, the surface-averaged pressure level $L_p$, and form the
+surface pressure-intensity indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ (Formula (10)).
+The surface fails qualification if the measured intensity is negative, or if
+$F_{pI} > 10$ dB for a sound-reflecting specimen or $> 6$ dB for one with an
+absorbing surface facing the receiving room. The remedy is **ordered**: first
+increase the measurement distance by 5 cm to 10 cm; only if that fails, add
+absorption to the receiving room. The criterion applies per scan and per
+loudspeaker position, and to the *total* surface, not to individual subareas
+(for discrete positions, to the surface average). The standard's rule of thumb
+for how much absorption is enough is $S/A < 1.25$, with $S$ the measurement
+surface and $A$ the receiving room's absorption area, and the more flanking
+there is the larger $A$ has to be.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_field_indicator_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_field_indicator.svg" alt="The surface pressure-intensity indicator FpI per one-third-octave band from 100 Hz to 3150 Hz, exceeding the 10 dB reflecting-specimen criterion in the three lowest bands and settling at 6.5 dB above 630 Hz, with the 10 dB and 6 dB criterion lines drawn" width="88%"></picture>
+
+*Qualification is per band, and it fails where a receiving room is least
+absorbent. Here the three lowest bands sit above the 10 dB line, so the surface
+is not qualified for a reflecting specimen at all and the scan is not yet a
+result; and even the qualified part sits above the 6 dB line, so this surface
+could not be used for a specimen with an absorbing face. The remedy is ordered
+by the standard: add 5 cm to 10 cm of measurement distance first, and only then
+put absorption into the receiving room.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+# `np` and `building` are the imports of the first block above.
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]
+l_p = np.array([64.0, 63.0, 61.5, 59.0, 57.5, 56.0, 55.0, 54.0,
+                53.0, 52.0, 51.0, 50.5, 50.0, 50.0, 51.0, 55.0])
+l_in_q = np.array([51.5, 51.5, 51.0, 49.5, 49.0, 48.0, 47.5, 47.0,
+                   46.5, 45.5, 44.5, 44.0, 43.5, 43.5, 44.5, 48.5])
+f_pi = building.surface_pressure_intensity_indicator(l_p, l_in_q)
+print(int((f_pi > 10.0).sum()), "bands fail the reflecting criterion")   # 3
+
+fig, ax = plt.subplots()
+x = np.arange(len(freqs))
+ax.fill_between(x, 0.0, f_pi, where=f_pi > 10.0, alpha=0.25,
+                label="surface not qualified")
+ax.plot(x, f_pi, "-o", label="FpI = Lp - LIn (Formula (10))")
+ax.axhline(10.0, ls="--", label="10 dB: reflecting specimen (6.4.2)")
+ax.axhline(6.0, ls=":", label="6 dB: absorbing specimen")
+ax.set_xticks(x, [str(f) for f in freqs], rotation=45, fontsize=8)
+ax.set(xlabel="Frequency [Hz]",
+       ylabel="Surface pressure-intensity indicator FpI [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+**The scan (Clause 6.4.3).** Hold the probe **normal** to the surface with its
+positive direction pointing outwards, away from the element. Scan in parallel
+lines, turning at each edge, with the line spacing normally equal to the
+measurement distance and denser where radiation is irregular (leaks). Keep the
+scan speed constant between **0.1 m/s and 0.3 m/s**, make the scanning time of
+each subarea proportional to its area, and interrupt the measurement when
+crossing from one subarea to the next rather than stopping mid-area. Where a
+box-shaped surface meets the partition, scan as close to the wall as possible:
+that intersection is where radiated power is most easily lost out of the
+integral.
+
+**Two scans, not one (Clause 6.4.5).** For each fixed loudspeaker position,
+carry out **two complete scans** with the scanning path turned 90° between
+them. If they differ by less than 1.0 dB in every band, the result is their
+arithmetic average; if any band differs by more, **the measurement is not
+valid**: repeat the pair, and if it still fails, change the line density, the
+surface or the environment. With several loudspeaker positions, run a
+qualifying pair for each and report the arithmetic mean of all scans. With a
+moving loudspeaker, each scan takes one complete traverse (at least one for
+doors, windows and small elements, two for walls) and the total
+scanning/traverse time per pattern is at least 120 s for windows, doors and
+small elements and at least 600 s for walls.
+
+**Discrete positions instead (Clause 6.4.4).** Space the positions at roughly
+the measurement distance, denser for leaky or inhomogeneous specimens but at
+constant distance, follow the grade 2 procedure of ISO 9614-1 and check the
+array with its Annex B, and dwell at least 10 s per position. A moving
+loudspeaker needs at least two traverses over the complete set of positions
+for doors, windows and small elements, and eight for walls.
+
+**Background noise (Clause 6.5).** Both the pressure level and the intensity
+level must exceed the background by at least 10 dB. The standard's own test is
+elegant: with $F_{pI} < 10$ dB, drop the source level by 10 dB; if $F_{pI}$
+moves by less than 1 dB, the requirement is met.
+
+### Combining subareas, and the sign that comes with them
+
+A large or inhomogeneous specimen is scanned as several subareas $S_{\mathrm{m}i}$, and
+`subarea_intensity_level` performs the area-weighted energy average of Formula (11)
+with $S_\mathrm{m} = \sum_i |S_{\mathrm{m}i}|$ (Formula (12)). Clause 6.4.6 adds the rule with no
+counterpart anywhere in the pressure methods: where a subarea's net intensity
+points the *wrong way* (energy flowing back towards the test object), a minus
+sign goes before that $S_{\mathrm{m}i}$ in Formula (11). Express it by passing that
+subarea's area as a negative number; its energy is then subtracted from the
+numerator while $S_\mathrm{m}$ keeps the unsigned sum.
+
+```python
+# `np` and `building` are the imports of the first block above.
+
+# Three subareas of one 12 m2 surface: the two panes and the frame. The frame
+# strip reads a net inward flow, so its area enters Formula (11) negative.
+l_in_sub = np.array([
+    np.full(16, 41.0),    # 5.0 m2, outward
+    np.full(16, 39.0),    # 5.5 m2, outward
+    np.full(16, 33.0),    # 1.5 m2, INWARD -> negative area
+])
+combined = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
+l_in_comb, s_m = combined.levels, combined.measurement_area
+print(round(float(l_in_comb[0]), 2), s_m)     # 39.36 12.0
+
+# Ignoring the sign inflates the transmitted power, i.e. lowers RI:
+l_in_naive = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5]).levels
+print(round(float(l_in_naive[0] - l_in_comb[0]), 2))   # 0.24
+```
+
+A subarea reading inward is not a curiosity to be signed away. It means the
+enclosing surface is cutting through the field of something *outside* it (a
+flanking element, a second source in the receiving room), so the qualification
+of Clause 6.4.2 should be re-checked before the number is reported at all.
+$S_\mathrm{m}$ keeps the unsigned area because it is the area actually scanned, which
+is what the $10\log_{10}(S_\mathrm{m}/S)$ term of $R_I$ needs.
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
@@ -146,13 +310,18 @@ background by 10 dB.
 | `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
 | `frequencies` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
 | `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room $S_{\mathrm{b}2}$ / $V_2$ for Formula (B.1) |
+| `n` | int | element units | ≥ 1, default `1` | Number of identical elements (`intensity_element_normalized_difference` only) |
 
 `intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` returns an array and
-`subarea_intensity_level()` a `SubareaIntensityLevel` (`levels`, `measurement_area`).
+`subarea_intensity_level()` a `SubareaIntensityLevel` (`levels`, `measurement_area`). The `rating` fields are formed only
+for exactly 16 one-third-octave or 5 octave values and are `None` otherwise,
+so a scan taken over the full ISO 15186-1 range of 100 Hz to 5000 Hz
+(Clause 6.6, 18 bands) must be trimmed to the ISO 717-1 range before it can be
+rated.
 
 ## ISO 15186-1 intensity test report (`.report()`)
 
@@ -205,20 +374,20 @@ res.report("RIw_kc.pdf", metadata=metadata, verbose=True)  # f | RI | RI,M
 The example fiche is regenerated with `make reports` and kept in the
 repository. Click the preview to open the PDF:
 
-[![Intensity ISO 15186-1 example report: metadata header, one-third-octave RI table beside the measured-versus-shifted-reference curve, boxed RI,w (C; Ctr), the intensity-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.pdf)
+[![Intensity ISO 15186-1 example report (PDF): One-page laboratory intensity sound insulation test report of a building element: the metadata header (client, specimen description, mounting, sample area, room volumes, climate), the one-third-octave RI table beside the measured-versus-shifted-reference curve, the boxed RI,w (C; Ctr) rating evaluated per ISO 717-1, the intensity-method statement and a PASS verdict against the 30 dB requirement.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_intensity_example.pdf)
 
-*Intensity fiche (`IntensityReductionResult.report`), $R_{I,\mathrm{w}}(C; C_\mathrm{tr})$.*
+Intensity fiche (IntensityReductionResult.report), RI,w (C; Ctr).
 
 ## Small building elements: the element-normalized level difference
 
 For a **small building element** (a ventilator, a socket, a small window) the
 intensity method reports the element-normalized level difference $D_{I,\mathrm{n,e}}$
 (Formula (8)) instead, normalized to the reference absorption area
-$A_0 = 10\ \text{m}^2$.
-`IntensityElementNormalizedResult.report()` writes the same one-page fiche
-through the shared renderer, boxing `DI,n,e,w (C; Ctr)` rated per ISO 717-1;
-`verbose=True` shows the ISO 717 evaluation per band and a `requirement` adds a
-PASS/FAIL verdict (the element insulation passes at or above the target).
+$A_0 = 10\ \text{m}^2$. `IntensityElementNormalizedResult.report()` writes the
+same one-page fiche through the shared renderer, boxing `DI,n,e,w (C; Ctr)`
+rated per ISO 717-1; `verbose=True` shows the ISO 717 evaluation per band and a
+`requirement` adds a PASS/FAIL verdict (the element insulation passes at or
+above the target).
 
 ```python
 import numpy as np
@@ -230,6 +399,7 @@ l_in = np.array([57.9, 62.0, 60.6, 55.7, 55.9, 55.6, 53.5, 51.7,
 res = building.intensity_element_normalized_difference(
     np.full(16, lp1), l_in, measurement_area=sm, n=n
 )
+res.plot()   # DI,n,e vs shifted ISO 717-1 reference (needs matplotlib)
 metadata = ReportMetadata(
     specimen="Trickle ventilator in a 100 mm masonry wall",
     measurement_standard="ISO 15186-1",
@@ -237,7 +407,6 @@ metadata = ReportMetadata(
     report_id="PHN-2026-0151",
     requirement=30.0,                                   # DI,n,e,w >= 30 dB -> PASS
 )
-res.plot()   # DI,n,e vs shifted ISO 717-1 reference (needs matplotlib)
 res.report("DIne.pdf", metadata=metadata)               # DI,n,e,w (C; Ctr)
 ```
 
@@ -287,9 +456,9 @@ plt.show()
 
 </details>
 
-[![Intensity ISO 15186-1 element example report: metadata header, one-third-octave DI,n,e table beside the measured-versus-shifted-reference curve, boxed DI,n,e,w (C; Ctr), the intensity-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.pdf)
+[![Intensity ISO 15186-1 element example report (PDF): One-page laboratory element-normalized sound intensity insulation test report of a small building element: the metadata header (client, specimen description, mounting, element area), the one-third-octave DI,n,e table beside the measured-versus-shifted-reference curve, the boxed DI,n,e,w (C; Ctr) rating evaluated per ISO 717-1, the intensity-method statement and a PASS verdict against the 30 dB requirement.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.pdf)
 
-*Element intensity fiche (`IntensityElementNormalizedResult.report`), $D_{I,\mathrm{n,e,w}}(C; C_\mathrm{tr})$.*
+Element intensity fiche (IntensityElementNormalizedResult.report), DI,n,e,w (C; Ctr).
 
 ## Laboratory or field (ISO 15186-2)
 
@@ -304,10 +473,8 @@ radiates, partial surfaces isolate which element (the wall itself, a window,
 a leaky junction) carries the transmitted power, which no pressure-based
 field method can resolve. Qualify each scan with the same
 pressure-intensity indicator, and expect the probe's own limits (the
-[spacer phase error](../../devices/emission/intensity.md)) to set the usable low-frequency range.
-Part 2's own field procedure (the loudspeaker positions, the façade cases) is
-not implemented: the formulas here apply unchanged to field data, but nothing
-checks how that data was acquired.
+[spacer phase error](../../devices/emission/intensity.md)) to set the usable
+low-frequency range.
 
 ## Low frequencies: the pressure on the specimen (ISO 15186-3)
 
@@ -329,47 +496,87 @@ Part 1. Close to a rigid boundary a diffuse field carries twice the
 mean-square pressure it carries away from one, so a microphone 50 mm from the
 specimen reads 3 dB above the room average of the same field. Part 1's room
 average carries no such build-up and subtracts 6; the surface average carries
-it and subtracts 9. A NOTE under Formula (7) bounds the assumption: it holds
-for a specimen with a reflecting surface in the source room, still works
-behind 100 mm of porous absorber, should be read only from 50 Hz to 80 Hz
-behind 100 mm to 200 mm of it, and is not valid behind anything thicker.
+it and subtracts 9. Everything else in the formula (the measurement-surface
+area ratio, the sign of the intensity, the subarea combination) is the method
+you already have.
 
-Clause 6.6 requires filters at 50 Hz, 63 Hz and 80 Hz and allows 100 Hz,
-125 Hz and 160 Hz to be added; the ceiling is Clause 1.1's, which applies this
-part over 50 Hz to 160 Hz and says it is mainly intended for 50 Hz to 80 Hz.
-Six bands is the whole method, which is why no single-number rating comes out
-of it, and Clause 1.1 says what to do instead: combine these results with
-ISO 140-3 and ISO 15186-1 into one curve over 50 Hz to 5000 Hz. The Clause 6.4.2
-indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ is the same as everywhere else in the
-series, and both of its levels are read on the measurement surface in the
-*receiving* room, not the surface level Formula (7) is built from. Its two
-limits distinguish the specimen: $F_{pI} > 10$ dB refuses a sound-reflecting one
-and $F_{pI} > 6$ dB one presenting a sound-absorbing surface in the receiving
-room. Since the standard asks for that second pressure measurement only "if
-possible", `l_p` is optional and its absence leaves the verdict unanswered
-rather than guessed.
+The price is a validity condition Part 1 does not have. The doubling is only
+3 dB if the surface reflects, so a NOTE under Formula (7) restricts it: the
+formula holds for a specimen with a reflecting surface in the source room,
+still works for moderately absorbing ones (100 mm of porous absorber), should
+be read only from 50 Hz to 80 Hz behind 100 mm to 200 mm of absorber, and is
+not valid behind anything thicker. Nothing in the library can see the
+specimen, so this one is on you.
+
+**How many microphones (Clause 6.3).** Distributed evenly but
+*asymmetrically* over the whole surface, edges and corners included, at least
+30 s of integration each:
+
+| Test specimen | Minimum fixed microphone positions |
+| :--- | :--- |
+| Small building elements (ISO 140-10) | 2 for each element mounted in the test wall |
+| Other elements up to 3 m² | 6 |
+| Others | 12 |
+
+**The bands.** Clause 6.6 requires filters at 50 Hz, 63 Hz and 80 Hz and
+allows 100 Hz, 125 Hz and 160 Hz to be added; the ceiling itself is Clause
+1.1's, which applies this part over 50 Hz to 160 Hz and says it is mainly
+intended for 50 Hz to 80 Hz. Six bands is the whole method, which is why no
+single-number rating comes out of it; ISO 717-1 needs sixteen. Passing a band
+outside that range is refused rather than extrapolated, and Clause 1.1 says
+what to do instead: combine these results with ISO 140-3 and ISO 15186-1 into
+one curve over 50 Hz to 5000 Hz.
+
+**Qualifying the surface (Clause 6.4.2).** The indicator is the same
+$F_{pI} = L_p - L_{I\mathrm{n}}$ as everywhere else in the series, and both of its
+levels are read on the measurement surface in the *receiving* room; it is not
+the surface level Formula (7) is built from. The limits distinguish the
+specimen, not the room: $F_{pI} > 10$ dB refuses a sound-reflecting specimen and
+$F_{pI} > 6$ dB one that presents a sound-absorbing surface in the receiving
+room, which is the two-absorbing-sides case, since a specimen absorbing on one
+side is mounted with that side towards the source (Clause 5.3). The receiving
+room always has an efficient absorber on the wall opposite the specimen; that
+is a facility requirement, not a case. Clause 6.5 adds the 10 dB background
+margin and its own test: with $F_{pI} < 10$ dB, drop the source by 10 dB, and if
+$F_{pI}$ moves by less than 1 dB the requirement is met.
+
+Because the standard only asks for that second pressure measurement "if
+possible", `l_p` is optional here. Without it there is no indicator and no
+verdict, and the result says so rather than guessing:
 
 ```python
 import numpy as np
 from phonometry import building
 
-# A light partition, 10 m2, scanned over a 12.6 m2 box surface.
+# A light partition, 10 m2, scanned over a 12.6 m2 box surface. LpS is the
+# average over the surface of the specimen in the source room; LIn and Lp are
+# read together on the measurement surface in the receiving room.
 freqs = [50.0, 63.0, 80.0, 100.0, 125.0, 160.0]
+lp_surface = np.array([88.4, 89.1, 90.3, 91.0, 91.4, 91.8])
+l_in = np.array([61.6, 60.9, 59.8, 57.9, 56.0, 53.9])
+l_p = np.array([74.0, 72.0, 69.4, 66.1, 63.1, 60.3])
+
 res = building.low_frequency_intensity_reduction(
-    np.array([88.4, 89.1, 90.3, 91.0, 91.4, 91.8]),
-    np.array([61.6, 60.9, 59.8, 57.9, 56.0, 53.9]),
-    measurement_area=12.6, area=10.0,
-    l_p=np.array([74.0, 72.0, 69.4, 66.1, 63.1, 60.3]),
-    frequencies=freqs,
+    lp_surface, l_in, measurement_area=12.6, area=10.0,
+    l_p=l_p, frequencies=freqs,
 )
-print(np.round(res.r_i, 1))                         # [16.8 18.2 20.5 23.1 25.4 27.9]
+print(np.round(res.r_i, 1))                       # [16.8 18.2 20.5 23.1 25.4 27.9]
 print(np.round(res.surface_pressure_intensity_indicator, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
-print(res.qualified.tolist())    # [False, False, True, True, True, True]
+print(res.qualified.tolist())   # [False, False, True, True, True, True]
+print(res.indicator_limit)      # 10.0
+
+# Without the receiving-side pressure there is no Clause 6.4.2 answer at all.
+bare = building.low_frequency_intensity_reduction(
+    lp_surface, l_in, measurement_area=12.6, area=10.0, frequencies=freqs,
+)
+print(bare.surface_pressure_intensity_indicator, bare.qualified)   # None None
 ```
 
-A refused band is flagged, not dropped: the standard's answer to an indicator
-over the limit is to improve the measurement environment, so the index is
-still computed and the verdict travels beside it.
+A refused band is flagged, not dropped. The standard's answer to
+$F_{pI}$ over the limit is to improve the measurement environment: increase the
+measurement distance by 5 cm to 10 cm first, then reduce flanking or improve
+the absorber opposite. That is why the index is still computed and the verdict
+travels beside it.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/low_frequency_intensity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/low_frequency_intensity.svg" alt="Left: the low-frequency intensity sound reduction index per one-third-octave band from 50 Hz to 160 Hz as bars, with the 50 Hz and 63 Hz bands hatched because their surface pressure-intensity indicator exceeds 10 dB, and the indicator drawn as a curve on a twin axis against its 10 dB limit line. Right: the calculated limp-panel sound reduction index of Annex A with the 4 dB tolerance the annex allows shaded around it and a measured curve staying inside" width="92%"></picture>
 
@@ -378,21 +585,66 @@ indicator falls past its limit, so the two lowest bands are computed but not
 qualified. Right, the facility: Annex A's calculated limp-panel curve and the
 4 dB either side of it that a measurement has to stay within.*
 
-### Small elements, and a sign the series disagrees on
+<details>
+<summary>Show the code for this figure</summary>
 
-Formula (8) normalizes a small element to $A_0 = 10$ m² as Part 1 does, with
-the 9 dB of the surface measurement in place of 6:
+```python
+import matplotlib.pyplot as plt
+
+# res is the LowFrequencyIntensityResult computed above. One line:
+res.plot()   # RI bars, refused bands hatched, FpI and its limit on a twin axis
+plt.show()
+
+# By hand, and the Annex A panel beside it.
+calculated = building.limp_panel_reduction_index(
+    freqs, surface_mass=10.0, area=10.0, temperature_c=23.0,
+)
+measured = calculated + np.array([2.6, -1.8, 1.1, -2.9, 0.7, -1.4])
+x = np.arange(len(freqs))
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+bars = axl.bar(x, res.r_i, width=0.68)
+for bar, ok in zip(bars, res.qualified, strict=True):
+    if not ok:
+        bar.set_hatch("///")
+axl.set_xticks(x, [f"{f:g}" for f in freqs])
+axl.set(xlabel="Frequency [Hz]", ylabel="Sound reduction index [dB]")
+twin = axl.twinx()
+twin.plot(x, res.surface_pressure_intensity_indicator, "-o", color="#2ca02c", label="FpI")
+twin.axhline(res.indicator_limit, ls="--", color="#d62728", label="FpI limit")
+twin.set_ylabel("Surface pressure-intensity indicator [dB]")
+twin.legend()
+axr.fill_between(x, calculated - 4.0, calculated + 4.0, alpha=0.2,
+                 label="4.0 dB tolerance (Annex A)")
+axr.plot(x, calculated, "-o", label="calculated (A.1)")
+axr.plot(x, measured, "--s", label="measured")
+axr.set_xticks(x, [f"{f:g}" for f in freqs])
+axr.set(xlabel="Frequency [Hz]", ylabel="Sound reduction index [dB]")
+axr.legend()
+plt.show()
+```
+
+</details>
+
+### Small elements at low frequencies, and a sign the series disagrees on
+
+Formula (8) normalizes a small element to the reference absorption area
+$A_0 = 10$ m² exactly as Part 1 does, with the 9 dB of the surface measurement
+in place of 6:
 
 $$
 D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} - 10\lg\frac{A_0}{S_\mathrm{m}} - 10\lg N \right]\ \mathrm{dB}
 $$
 
-The $10\lg N$ inside the bracket is subtracted, so it reaches $D_{I\mathrm{n,e}}$
-**added**: the sign this library derives, and the opposite of what
-ISO 15186-1 prints for the same quantity. Two parts of one series print the
-two signs; this is the one that agrees with the physics and with
+Read the bracket carefully. The $10\lg N$ inside it is *subtracted*, so the term
+reaches $D_{I\mathrm{n,e}}$ **added**, which is the sign this library derives, and the
+opposite of what ISO 15186-1 prints for the same quantity. Two parts of one
+series print the two signs; this is the one that agrees with the physics
+(installing $N$ units raises the transmitted power by $10\lg N$, so recovering
+the per-unit figure has to add it back) and with the pressure-based
 ISO 10140-2 Formula (6). The Part 1 print is registered in
-[ERRATA](../../ERRATA.md).
+[ERRATA](../../ERRATA.md), and Part 1's implementation warns
+whenever $N > 1$ puts it at odds with its own page. Nothing warns here,
+because here the page and the physics agree.
 
 ```python
 # Four identical trickle ventilators inside one 2.0 m2 measurement surface.
@@ -401,14 +653,16 @@ element = building.low_frequency_element_normalized_difference(
     measurement_area=2.0, n_elements=4, frequencies=freqs,
 )
 print(np.round(element.d_i_n_e, 1))     # [32. 33. 34. 36. 37. 39.]
+print(element.n_elements)                 # 4
 ```
 
 ### Qualifying the facility (Annex A)
 
-Annex A is normative: measure a limp panel of more than 1 m², calculate what
-it should read, and require the two to agree within **4,0 dB** from 50 Hz to
-160 Hz. The calculated half is forced transmission alone: mass law reduced by
-the radiation efficiency of a plate driven by a diffuse field,
+Annex A is normative, and it is what a laboratory does before it reports
+anything: measure a limp panel of more than 1 m², calculate what it should
+read, and require the two to agree within **4,0 dB** from 50 Hz to 160 Hz. The
+calculated half is forced transmission and nothing else: mass law reduced by
+the radiation efficiency of a plate driven by a diffuse field:
 
 $$
 R = R_0 - 10\lg 2\sigma_\mathrm{d}, \qquad
@@ -418,9 +672,13 @@ $$
 
 with the air taken at the climate of the test,
 $\rho c = 427\sqrt{273/(273+\theta)}\cdot B/B_0$ and $c = 331 + 0{,}6\,\theta$.
+The panel is limp *by assumption*. The 160 Hz ceiling is not the annex's own:
+Clause 1.1 applies the whole of this part over 50 Hz to 160 Hz, and says it is
+mainly intended for 50 Hz to 80 Hz.
 
 ```python
-# Annex A, Table A.1: 12,5 mm plaster board, 10 kg/m2, over a 10 m2 opening.
+# Annex A, Table A.1: 12,5 mm plaster board, 10 kg/m2, over a 10 m2 opening,
+# at 1 013 hPa and 23 degC.
 calc = building.limp_panel_reduction_index(
     freqs, surface_mass=10.0, area=10.0,
     temperature_c=23.0, static_pressure_pa=101300.0,
@@ -428,60 +686,99 @@ calc = building.limp_panel_reduction_index(
 print(np.round(calc, 1))    # [10.7 11.9 13.4 14.8 16.3 17.9]
 ```
 
-Those six values are the printed table, band for band, and they anchor all
-five formulas. The steel-sandwich column beside them is not an oracle: no reading
-of the inputs printed next to it reproduces it, and the one that would takes an
-area and a surface mass moved together, the mass landing heavier than solid
-steel of the stated thickness. It too is in [ERRATA](../../ERRATA.md).
+Those six values are the printed table, band for band, and they are the
+conformance anchor for all five formulas. The steel-sandwich column beside
+them in the same table is not: no reading of the inputs printed next to it
+reproduces it, and the one that would takes an area and a surface mass moved
+together, the mass landing heavier than solid steel of the stated thickness. It
+is registered in [ERRATA](../../ERRATA.md) and is deliberately
+not used as an oracle.
 
-## References
+### `low_frequency_intensity_reduction()`, `low_frequency_element_normalized_difference()` and `limp_panel_reduction_index()` parameters
 
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  The reference monograph for laboratory sound-insulation measurement,
-  including the intensity route and its relation to the pressure methods.
-- International Organization for Standardization. (2000). *Acoustics —
-  Measurement of sound insulation in buildings and of building elements
-  using sound intensity — Part 1: Laboratory measurements*
-  (ISO 15186-1:2000).
-  [iso.org catalogue](https://www.iso.org/standard/26097.html).
-  The intensity sound reduction index, the $K_\mathrm{c}$ adaptation and the element
-  normalized level difference this page implements.
-- International Organization for Standardization. (2003). *Acoustics —
-  Measurement of sound insulation in buildings and of building elements
-  using sound intensity — Part 2: Field measurements* (ISO 15186-2:2003).
-  [iso.org catalogue](https://www.iso.org/standard/30105.html).
-  The field counterpart, giving the apparent index $R'_I$ of the installed
-  element.
-- International Organization for Standardization (2002). *Acoustics —
-  Measurement of sound insulation in buildings and of building elements
-  using sound intensity — Part 3: Laboratory measurements at low
-  frequencies* (ISO 15186-3:2002).
-  [iso.org catalogue](https://www.iso.org/standard/31395.html).
-  The low-frequency variant: the source level is read on the surface of the
-  specimen and 9 dB is subtracted instead of 6, with the normative limp-panel
-  qualification of Annex A.
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `lp_surface` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Pressure over the surface of the specimen, $L_{p\mathrm{S}}$ |
+| `l_in` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Normal intensity level over the measurement surface |
+| `measurement_area` | float | m² | > 0 | Measurement-surface area $S_\mathrm{m}$ |
+| `area` | float | m² | > 0 | Specimen area $S$; the limp panel of Annex A needs $S \\geq 1$ m² |
+| `l_p` | 1D or 2D array | dB | one/band / `None` | Receiving-side pressure on the measurement surface, for Formula (5) |
+| `frequencies` | 1D array | Hz | 50 to 160 / `None` | Mid-band frequencies; Clause 6.6 admits no others |
+| `absorbing_specimen_surface` | bool | — | default `False` | `True` tightens the Clause 6.4.2 limit to 6 dB |
+| `n_elements` | int | element units | ≥ 1, default `1` | Number $N$ of units (`low_frequency_element_normalized_difference` only) |
+| `surface_mass` | float | kg/m² | > 0 | Limp-panel surface mass $m$ (`limp_panel_reduction_index`) |
+| `temperature_c` / `static_pressure_pa` | float | °C / Pa | default 23 °C, 101 300 Pa | The climate of Formulas (A.4) and (A.5) |
 
-## Standards
+`low_frequency_intensity_reduction()` returns a `LowFrequencyIntensityResult`
+(`r_i`, `surface_pressure_intensity_indicator`, `qualified`,
+`indicator_limit`), `low_frequency_element_normalized_difference()` a
+`LowFrequencyElementResult` (`d_i_n_e` and the same three), and
+`limp_panel_reduction_index()` a plain array. Neither result carries a rating:
+Clause 7 asks for the index to one decimal beside the indicator, and six bands
+cannot feed ISO 717-1.
 
-ISO 15186-1:2000, which defines the intensity sound reduction index $R_I$,
-its $K_\mathrm{c}$-modified form $R_{I,\mathrm{M}}$ (Annex B), the element normalized level
-difference $D_{I,\mathrm{n,e}}$ and the surface pressure-intensity indicator;
-ISO 15186-2:2003, which carries the same quantities into the field as the
-apparent $R'_I$; and ISO 15186-3:2002, which reads the source level on the
-surface of the specimen so the method reaches 50 Hz, and qualifies the
-facility on a limp panel (Annex A). The single-number ratings reuse ISO 717-1,
-which Part 3's six bands cannot feed.
+## What this guide covers
+
+- **Covered.** ISO 15186-1:2000's intensity sound reduction index $R_I$ (Clause 3.8), its
+  $K_\mathrm{c}$-modified $R_{I,\mathrm{M}}$ (Annex B) and the element-normalized $D_{I,\mathrm{n,e}}$
+  (Clause 3.9), with the subarea combination of Formulas (11)-(12) and the
+  surface pressure-intensity indicator, via
+  `building.intensity_sound_reduction`, `building.adaptation_term_kc`,
+  `building.intensity_element_normalized_difference`,
+  `building.surface_pressure_intensity_indicator` and
+  `building.subarea_intensity_level`; the single-number ratings reuse the verified ISO
+  717-1 engine, and both results write the one-page test fiche through
+  `.report()`. ISO 15186-3:2002's low-frequency variant is covered too: the
+  surface-pressure index $R_I$ of Formula (7), the element-normalized
+  $D_{I\mathrm{n,e}}$ of Formula (8), the Clause 6.4.2 qualification against both of
+  its limits, the Clause 6.6 band range and the normative limp-panel
+  qualification of Annex A, via `building.low_frequency_intensity_reduction`,
+  `building.low_frequency_element_normalized_difference` and
+  `building.limp_panel_reduction_index`.
+
+- **Not covered.** The sound-intensity measurement itself (the scanning probe, the two-microphone
+  acquisition and phase-mismatch calibration behind $L_{p1}$ and $L_{I\mathrm{n}}$) is
+  not implemented: both levels are taken as already-measured inputs, and the ISO
+  15186-1 report fiche states explicitly that it has no field for the
+  measurement-surface geometry or the scanning-versus-discrete-point acquisition
+  method. Nothing here enforces the Clause 6.4 acquisition documented above
+  either (the 0.1–0.3 m stand-off, the 0.1–0.3 m/s scan speed, the 90°-rotated
+  second scan and its 1.0 dB validity test, the 10 dB background margin), so a
+  single scan will produce a number just as readily as a qualified pair. ISO
+  15186-2's own field procedure (loudspeaker positions, the façade cases) is not
+  implemented either: the formulas here apply unchanged to field data, but
+  nothing checks how that data was acquired. The same holds of Part 3's
+  procedure: the microphone counts of its Table 1, the 50 mm stand-off, the two
+  90°-rotated scans and their 2,0 dB / 1,0 dB agreement test, the 10 dB
+  background margin and the source-room absorption limits under Formula (7) are
+  documented above and enforced nowhere. Part 3 results carry no single-number
+  rating and no `.report()` fiche, because six bands cannot feed ISO 717-1 and
+  the standard's Clause 8 report has no worked form here.
 
 ## See also
 
-- [Laboratory Insulation Measurement](insulation-lab.md): the ISO 10140
-  pressure method that the $K_\mathrm{c}$ adaptation reproduces.
-- [Field Insulation Measurement (ISO 16283)](insulation-field.md): the
-  pressure-based field quantities and their single-number ratings.
-- [Insulation Ratings (ISO 717)](insulation-ratings.md): the
-  reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
-- [Sound Intensity](../../devices/emission/intensity.md): the two-microphone probe, its field
-  indicators and the residual-index qualification behind every scan.
+- [Laboratory Insulation Measurement](insulation-lab.md):
+  the ISO 10140 pressure method that the $K_\mathrm{c}$ adaptation reproduces.
+- [Field Insulation Measurement (ISO 16283)](insulation-field.md):
+  the pressure-based field quantities and their single-number ratings.
+- [Insulation Ratings (ISO 717)](insulation-ratings.md):
+  the reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
+- [Sound Intensity](../../devices/emission/intensity.md): the two-microphone
+  probe, its field indicators and the residual-index qualification behind
+  every scan.
+- [Theory](../../reference/theory/rooms-buildings.md): the
+  reference-curve derivation behind the weighted single-number ratings.
 - API reference: [`building.measurement.intensity_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/intensity-insulation/).
+
+## References
+
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  The reference monograph for laboratory sound-insulation measurement, including the intensity route and its relation to the pressure methods. ISBN 978-0-7506-6526-1.
+- **International Organization for Standardization. (2000).** [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 1: Laboratory measurements*](https://www.iso.org/standard/26097.html) (ISO 15186-1:2000).
+  The sound-intensity sound reduction index R_I, its Kc-modified form and the element normalized level difference (laboratory); the tool of choice when flanking is high (Clause 1).
+- **International Organization for Standardization. (2002).** [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 3: Laboratory measurements at low frequencies*](https://www.iso.org/standard/31395.html) (ISO 15186-3:2002).
+  The low-frequency variant: the source-room level is read on the surface of the specimen and 9 dB is subtracted instead of 6 (Clause 3.8), with the normative limp-panel qualification of Annex A.
+- **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 2: Field measurements*](https://www.iso.org/standard/30105.html) (ISO 15186-2:2003).
+  The field counterpart of the intensity method, giving the apparent index R'\_I.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
+  The reference-curve rating behind R_I,w (C; Ctr) and D_I,n,e,w, which Part 3's six bands cannot feed; implemented in the insulation ratings guide.

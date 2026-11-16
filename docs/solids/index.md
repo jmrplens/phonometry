@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/solids/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/solids/
 
 # Elastic solids
 
@@ -59,21 +61,21 @@ Neither table can be checked against the other until one of them is converted,
 and that is what the six functions here are for: three speeds, three inverses,
 and a seventh for the column two of those books share.
 
-**No shear or bending waves.** The longitudinal family is what a materials
-table prints and what the conversions need. The bending wave that actually
-radiates from a wall is computed where it is used, in
-`phonometry.vibration.structural` and `phonometry.building.prediction`, from
-the bending stiffness of the plate rather than from a wave speed.
+- **Not covered.** **No shear or bending waves.** The longitudinal family is what a materials
+  table prints and what the conversions need. The bending wave that actually
+  radiates from a wall is computed where it is used, in
+  `phonometry.vibration.structural` and `phonometry.building.prediction`, from
+  the bending stiffness of the plate rather than from a wave speed.
 
-**No anisotropy.** Every relation here is for a homogeneous isotropic solid
-with one modulus and one Poisson ratio. An orthotropic panel has two of each
-and two critical frequencies, and that is `orthotropic_critical_frequencies`
-in `phonometry.building`.
+- **Not covered.** **No anisotropy.** Every relation here is for a homogeneous isotropic solid
+  with one modulus and one Poisson ratio. An orthotropic panel has two of each
+  and two critical frequencies, and that is `orthotropic_critical_frequencies`
+  in `phonometry.building`.
 
-**No temperature or ageing.** The constants are the ones a source printed for
-one specimen at one moment. Concrete stiffens for years and a polymer softens
-with the room; neither is modelled here, and a table that holds a range says
-so in its own entry.
+- **Not covered.** **No temperature or ageing.** The constants are the ones a source printed for
+  one specimen at one moment. Concrete stiffens for years and a polymer softens
+  with the room; neither is modelled here, and a table that holds a range says
+  so in its own entry.
 
 ## What is here
 

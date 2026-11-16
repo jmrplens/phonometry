@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/free-field-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/
 
 # Free Field and Reference Sources (ISO 26101 / ISO 6926)
 
@@ -648,40 +650,40 @@ the [errata registry](../../ERRATA.md) has the details.
 
 ## What this guide covers
 
-**Covered.** The ISO 26101:2017 divergence loss method with the criteria of the Annex A
-that ISO 3745:2012/Amd.1:2017 wrote: the monitor correction of Formula (1),
-the estimate and deviations of Formulae (2) and (4) with the starting value of
-Formula (3), the source strength $b$ fitted as the midpoint of its admissible
-interval, the mathematical origin fixed or searched inside the box the test
-source occupies (5.1.3.2, A.3.3), the limits of Table A.1 for anechoic and
-hemi-anechoic rooms, the frequencies of A.2.3 and the reduced range, the
-maximum qualified radius of A.2.4, the traverse count, the targets a) to e),
-the working area and the path angles of A.3.3, the points, equal spacing and
-largest spacing of A.4.3 beside the spatial resolution and traverse length of
-ISO 26101 A.4.3 and 5.1.4.3, the 6 dB background margin of 5.1.2.2 c), the
-test source directionality of Annex B and Table B.1, the reflecting plane of
-A.2.5, and the verdict as `sound_power_anechoic` consumes it. ISO 6926:2016:
-the requirements of clause 5 (Table 1 and the supply variation of 5.2, the
-spectrum of 5.4, the directivity index of 5.5 and the recalibration of 5.6),
-the calibration in a hemi-anechoic room of clause 8 with Formula (2), $C_1$,
-the $C_2$ of Annex A, $C_3$ and the Annex B intensity bands, the
-reproducibility of Table 2, and the calibration as every comparison method
-consumes it, read at the conditions of the test where ISO 3741 and ISO 3743
-ask for it.
+- **Covered.** The ISO 26101:2017 divergence loss method with the criteria of the Annex A
+  that ISO 3745:2012/Amd.1:2017 wrote: the monitor correction of Formula (1),
+  the estimate and deviations of Formulae (2) and (4) with the starting value of
+  Formula (3), the source strength $b$ fitted as the midpoint of its admissible
+  interval, the mathematical origin fixed or searched inside the box the test
+  source occupies (5.1.3.2, A.3.3), the limits of Table A.1 for anechoic and
+  hemi-anechoic rooms, the frequencies of A.2.3 and the reduced range, the
+  maximum qualified radius of A.2.4, the traverse count, the targets a) to e),
+  the working area and the path angles of A.3.3, the points, equal spacing and
+  largest spacing of A.4.3 beside the spatial resolution and traverse length of
+  ISO 26101 A.4.3 and 5.1.4.3, the 6 dB background margin of 5.1.2.2 c), the
+  test source directionality of Annex B and Table B.1, the reflecting plane of
+  A.2.5, and the verdict as `sound_power_anechoic` consumes it. ISO 6926:2016:
+  the requirements of clause 5 (Table 1 and the supply variation of 5.2, the
+  spectrum of 5.4, the directivity index of 5.5 and the recalibration of 5.6),
+  the calibration in a hemi-anechoic room of clause 8 with Formula (2), $C_1$,
+  the $C_2$ of Annex A, $C_3$ and the Annex B intensity bands, the
+  reproducibility of Table 2, and the calibration as every comparison method
+  consumes it, read at the conditions of the test where ISO 3741 and ISO 3743
+  ask for it.
 
-**Not covered.** No source prints a worked example, so the fit is anchored in closed forms and
-in the printed tables, and the rule that fits $b$ and the origin, the
-tolerance on equal spacing and the band that holds the edge of a spacing rule
-are this library's design (sections 2 and 4). The working area and the
-declared range of the supply are taken as declared, and a calibration made
-with the manufacturer's $C_2$ is not carried to the conditions of a test. The continuous traverse of 5.1.4.3 is taken as
-the points derived from its record; the qualification of a room for a
-specific source by the alternative of ISO 3745 Annex B, the measurement
-uncertainty of ISO 26101 5.1.6, which A.2.2 excludes, and the atmospheric
-correction of ISO 26101 NOTE 2 are not performed. The ISO 6926 calibration in
-a reverberation room (clause 9) is taken as its result, the levels a
-verdict can judge; the sound intensity of Annex B is taken as measured by
-ISO 9614-3.
+- **Not covered.** No source prints a worked example, so the fit is anchored in closed forms and
+  in the printed tables, and the rule that fits $b$ and the origin, the
+  tolerance on equal spacing and the band that holds the edge of a spacing rule
+  are this library's design (sections 2 and 4). The working area and the
+  declared range of the supply are taken as declared, and a calibration made
+  with the manufacturer's $C_2$ is not carried to the conditions of a test. The continuous traverse of 5.1.4.3 is taken as
+  the points derived from its record; the qualification of a room for a
+  specific source by the alternative of ISO 3745 Annex B, the measurement
+  uncertainty of ISO 26101 5.1.6, which A.2.2 excludes, and the atmospheric
+  correction of ISO 26101 NOTE 2 are not performed. The ISO 6926 calibration in
+  a reverberation room (clause 9) is taken as its result, the levels a
+  verdict can judge; the sound intensity of Annex B is taken as measured by
+  ISO 9614-3.
 
 ## See also
 
@@ -702,35 +704,9 @@ ISO 9614-3.
 
 ## References
 
-- International Organization for Standardization. (2017). *Acoustics — Test
-  methods for the qualification of free-field environments* (ISO 26101:2017). The divergence
-  loss method of clause 5.1: Formulae (1) to (4), the traverses of 5.1.3.2,
-  the traverse length of 5.1.4.3, Table A.1, the spatial resolution of A.4.3
-  and the test source directionality of Annex B with Table B.1.
-- International Organization for Standardization. (2017). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms — Amendment 1* (ISO 3745:2012/Amd.1:2017). Replaces
-  Annex A of ISO 3745:2012 with one that defers to ISO 26101:2017, 5.1:
-  Table A.1, the frequency range of A.2.3, the maximum qualified radius of
-  A.2.4, the reflecting plane of A.2.5, the traverse paths of A.3.3 and the
-  spatial resolution of A.4.3.
-- International Organization for Standardization. (2016). *Acoustics —
-  Requirements for the performance and calibration of reference sound sources
-  used for the determination of sound power levels* (ISO 6926:2016). Third
-  edition. The performance requirements of clause 5 with Table 1, the
-  calibration in a hemi-anechoic room of clause 8 with Formulae (1) and (2),
-  Table 2, Annex A on C2 and Annex B on sound intensity at low frequencies.
-  The Spanish adoption UNE-EN ISO 6926:2016 was read for cross-checks.
-
-## Standards
-
-ISO 26101:2017, *Acoustics — Test methods for the qualification of free-field environments*: the
-divergence loss method of clause 5.1, Formulae (1) to (4), Table A.1, A.4.3
-and the test source directionality of Annex B. ISO 3745:2012/Amd.1:2017,
-*Amendment 1*: the replacement Annex A, its Table A.1 and the requirements of
-A.2.3, A.2.4, A.2.5, A.3.3 and A.4.3. ISO 6926:2016, *Acoustics —
-Requirements for the performance and calibration of reference sound sources
-used for the determination of sound power levels*: the requirements of
-clause 5, the calibration of clause 8 with Formulae (1) and (2), Table 2,
-Annex A and Annex B.
+- **International Organization for Standardization. (2016).** *Acoustics — Requirements for the performance and calibration of reference sound sources used for the determination of sound power levels* (ISO 6926:2016).
+  Third edition. The performance requirements of clause 5 with Table 1, the calibration in a hemi-anechoic room of clause 8 with Formulae (1) and (2), Table 2, Annex A on C2 and Annex B on sound intensity at low frequencies. The Spanish adoption UNE-EN ISO 6926:2016 was read for cross-checks.
+- **International Organization for Standardization. (2017).** *Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms — Amendment 1* (ISO 3745:2012/Amd.1:2017).
+  Replaces Annex A of ISO 3745:2012 with one that defers to ISO 26101:2017, 5.1: Table A.1, the frequency range of A.2.3, the maximum qualified radius of A.2.4, the reflecting plane of A.2.5, the traverse paths of A.3.3 and the spatial resolution of A.4.3.
+- **International Organization for Standardization. (2017).** *Acoustics — Test methods for the qualification of free-field environments* (ISO 26101:2017).
+  The divergence loss method of clause 5.1: Formulae (1) to (4), the traverses of 5.1.3.2, the traverse length of 5.1.4.3, Table A.1, the spatial resolution of A.4.3 and the test source directionality of Annex B with Table B.1.

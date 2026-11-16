@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/filters/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/
 
 # Octave filtering
 
@@ -66,25 +68,25 @@ parameters) consumes the band signals or band levels these pages produce.
 
 ## What this section does not cover
 
-`verify_filter_class` checks a designed digital response against Table 1 of
-IEC 61260-1 and grades the effective bandwidth (5.12) and the summation of
-outputs (5.16) on it as IEC 61260-2 computes them, and `verify_time_invariance`
-runs the swept test of 5.14 through the bank itself; a class verdict here is a
-statement about the design and not about a device. The tests IEC 61260-2 and
-IEC 61260-3 run on a physical filter (overload, linearity, self-generated
-noise, the environmental influence quantities) need the instrument in a
-laboratory and are not run here; `verify_filter_periodic` grades the results a
-laboratory brings back from the periodic tests, and says what they cannot
-show. Near Nyquist the bilinear
-transform warps the frequency axis and the bank carries no correction for it,
-unlike the fitted `high_accuracy` design of the weighting filters:
-`verify_filter_class` grades every band up to half the input rate, the alias
-images a decimated band reads included, and reports the stopband beyond it as
-`range_limited` rather than verified, so keep the top band edge comfortably
-below Nyquist or raise `fs`.
-Two operations do not stream: zero-phase forward-backward filtering needs the
-whole signal, and rank statistics such as L90 have to be computed once on the
-pooled envelope. And the per-channel path never mixes channels: delay
-between two microphones, or how much of one channel a second explains, is [Correlation
-and delay](../spectra/correlation-delay.md) and [Multiple and
-partial coherence](../spectra/miso-coherence.md).
+- **Not covered.** `verify_filter_class` checks a designed digital response against Table 1 of
+  IEC 61260-1 and grades the effective bandwidth (5.12) and the summation of
+  outputs (5.16) on it as IEC 61260-2 computes them, and `verify_time_invariance`
+  runs the swept test of 5.14 through the bank itself; a class verdict here is a
+  statement about the design and not about a device. The tests IEC 61260-2 and
+  IEC 61260-3 run on a physical filter (overload, linearity, self-generated
+  noise, the environmental influence quantities) need the instrument in a
+  laboratory and are not run here; `verify_filter_periodic` grades the results a
+  laboratory brings back from the periodic tests, and says what they cannot
+  show. Near Nyquist the bilinear
+  transform warps the frequency axis and the bank carries no correction for it,
+  unlike the fitted `high_accuracy` design of the weighting filters:
+  `verify_filter_class` grades every band up to half the input rate, the alias
+  images a decimated band reads included, and reports the stopband beyond it as
+  `range_limited` rather than verified, so keep the top band edge comfortably
+  below Nyquist or raise `fs`.
+  Two operations do not stream: zero-phase forward-backward filtering needs the
+  whole signal, and rank statistics such as L90 have to be computed once on the
+  pooled envelope. And the per-channel path never mixes channels: delay
+  between two microphones, or how much of one channel a second explains, is [Correlation
+  and delay](../spectra/correlation-delay.md) and [Multiple and
+  partial coherence](../spectra/miso-coherence.md).

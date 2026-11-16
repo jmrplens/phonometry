@@ -125,11 +125,16 @@ import sys
 import unicodedata
 from typing import TYPE_CHECKING
 
+from github_edition import is_edition_copy
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping, Sequence
 
 #: Where the prose lives: the module docstrings that become the API reference,
-#: and the three editions of the guides.
+#: the guides in both languages and the hand-written files of ``docs/``. The
+#: GitHub edition of the guides under ``docs/`` is written from the English
+#: pages, so :func:`collect` leaves it out: a page and its edition are one
+#: scope, read once at its source.
 DEFAULT_ROOTS = (
     "src/phonometry",
     "docs",
@@ -204,18 +209,17 @@ _RD1367: dict[tuple[str, str], str] = {
 }
 
 DECLARED: dict[str, dict[tuple[str, str], str]] = {
-    "docs/reference/glossary.md": _GLOSSARY,
     "site/src/content/docs/reference/glossary.mdx": _GLOSSARY,
+    # The cards themselves: the page is one tag, and its edition copy is
+    # where the checks read the text site/src/data/glossary.mjs writes.
+    "docs/reference/glossary.md": _GLOSSARY,
     "site/src/content/docs/es/reference/glossary.mdx": _GLOSSARY,
-    "docs/materials/diffusers/diffusers.md": _DIFFUSERS,
     "site/src/content/docs/materials/diffusers/diffusers.mdx": _DIFFUSERS,
     "site/src/content/docs/es/materials/diffusers/diffusers.mdx": _DIFFUSERS,
-    "docs/materials/diffusers/metadiffusers.md": _DIFFUSERS,
     "site/src/content/docs/materials/diffusers/metadiffusers.mdx": _DIFFUSERS,
     "site/src/content/docs/es/materials/diffusers/metadiffusers.mdx": _DIFFUSERS,
     "src/phonometry/environment/assessment/spain.py": _RD1367,
     "site/src/content/docs/reference/api/environment/spain.md": _RD1367,
-    "docs/environment/assessment/spanish-noise-regulation.md": _RD1367,
     "site/src/content/docs/environment/assessment/spanish-noise-regulation.mdx": (
         _RD1367
     ),
@@ -1184,7 +1188,7 @@ def collect(roots: list[str], *, everything: bool = False) -> list[pathlib.Path]
         paths.extend(
             p
             for p in sorted(target.rglob("*"))
-            if p.suffix in _SUFFIXES and p.is_file()
+            if p.suffix in _SUFFIXES and p.is_file() and not is_edition_copy(p)
         )
     # Matched on the posix spelling, not on ``str(p)``: the pattern writes its
     # directory anchors with forward slashes, and on Windows ``str`` hands back

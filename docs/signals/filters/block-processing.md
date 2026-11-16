@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/filters/block-processing.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/block-processing/
 
 # Block Processing
 
@@ -10,16 +12,37 @@ must behave exactly as if they had seen the whole signal at once.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" width="86%"></picture>
 
-The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
-`TimeWeighting` classes support block (streaming) processing: the internal
-filter state is carried between calls, so concatenated block outputs match a
-single full-signal pass.
+The `OctaveFilterBank`, `WeightingFilter` (any weighting curve: A, C, Z and
+the special B, D, G and AU) and `TimeWeighting` classes support block
+(streaming) processing: the internal filter state is carried between calls, so
+concatenated block outputs match a single full-signal pass. Streaming costs
+the weighting filters nothing: their accurate `high_accuracy` design is a
+plain cascade of second-order sections at the input rate, so a streamed
+A-weighting is the same filter an offline call runs, at any sample rate (see
+[Frequency Weighting](../levels/weighting.md) and
+[Special Weightings](../levels/special-weightings.md)). It used
+to reach its sections through an interpolation and a decimation stage, which
+cannot be split across blocks, so streaming had to fall back to the plain
+bilinear design.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
 
 *With `stateful=True` the concatenated block outputs match the continuous
 result exactly; without state, every block boundary restarts the filter
 transient.*
+
+A stateful bank is necessarily a *different bank*, and the figure's own code
+says so twice: both the streamed and the offline bank are built with
+`design=FilterDesign(resample=False)`. Decimation cannot carry state across
+blocks, so every band of a streaming bank runs at the input rate, and the
+offline pass it is compared against has to be built the same way. Compare a
+streamed result against the *default* `octave_filter(x, fs, fraction=3)`
+instead and you will see a residual: measured on 4 s of pink noise at 48 kHz,
+the two designs differ by at most 0.083 dB, with a median of 0.007 dB and the
+largest differences in the low bands (0.083 dB at 50 Hz). That is expected, not
+a bug, and it does not change the class, but if you are validating a streaming
+pipeline, build both sides the same way or you will be chasing the design
+difference instead of the state carry.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -70,7 +93,7 @@ steady-state (like `scipy.signal.sosfilt_zi`) with
 stateful mode are summarized in the
 [constraints table](#stateful-mode-constraints) at the end of this guide.
 
-## Example
+## Example: streaming a WAV file block by block
 
 This example streams a WAV file with [`soundfile`](https://pysoundfile.readthedocs.io/),
 an optional dependency (`pip install soundfile`). Any block source works just as
@@ -100,6 +123,45 @@ for frame in sf.blocks("measurement.wav", blocksize=256, overlap=0):
     # further signal processing
     ...
 ```
+
+## Accumulating a level across blocks
+
+The commonest streaming task is the one the pitfalls above say is easy: the
+$L_\mathrm{eq}$, or the band spectrum, of a recording that does not fit in memory.
+It *is* easy, and it is exact rather than approximate, because $L_\mathrm{eq}$ has no
+time constant and no detector, only a sum of squares and a sample count:
+
+```python
+total_square, n_samples = 0.0, 0
+
+for x in audio_stream(block):        # your capture callback
+    total_square += float(np.sum(np.square(x)))
+    n_samples += x.shape[-1]
+
+leq = 10 * np.log10(total_square / (n_samples * (2e-5) ** 2))
+```
+
+Two traps sit in those four lines. Weighting each block equally (averaging the
+per-block mean squares) is only correct when every block has the same length,
+and the last one usually does not; accumulate the sum and the count separately,
+as above, and the arithmetic takes care of it. And never average the per-block
+*decibel* readings: that is the arithmetic-mean error of
+[Integrated and Statistical Levels](../levels/levels.md), it is
+one-sided, and it always under-reads.
+
+The band version is the same accumulator with a vector on the left:
+
+```python
+band_squares = np.zeros(bank.n_bands)   # from your stateful OctaveFilterBank
+
+for x in audio_stream(block):        # your capture callback
+    bands = bank.filter(x, sigbands=True, detrend=False,
+                              calculate_level=False).bands
+    band_squares += np.sum(np.square(bands), axis=-1)
+```
+
+Percentiles do not accumulate this way. Stream the *envelope*, keep it, and
+compute the percentiles once on the pooled result.
 
 ## Time weighting across blocks
 
@@ -159,12 +221,82 @@ value the functional API hands back as `initial_state` (see
   result.
 - **The first block still carries the onset transient.** State starts at
   rest, so the filter settles during the first instants exactly as in a
-  single pass. Use `steady_ic=True` to start in step-response steady state,
-  or discard the settling time once (not once per block).
+  single pass. How long that is follows from the bandwidth: a band settles in
+  a few times $1/B$, and with $B = 0.231\,f_\mathrm{m}$ for one-third octaves that is
+  about a second at 12.5 Hz, a tenth of a second at 125 Hz and thirteen
+  milliseconds at 1 kHz (the record-length rule of
+  [Filter Banks](filter-banks.md#how-long-must-the-record-be)).
+  An exponential detector adds its own $5\tau$ on top: 0.6 s on Fast, 5 s on
+  Slow. `steady_ic=True` starts the sections in the steady state of a *step*,
+  which removes the DC-related transient but not a band-pass ring-in, so for
+  the low bands the honest remedy is still to discard the first seconds of the
+  stream once (not once per block). In practice: start the logger a few seconds
+  before the interval you intend to report.
 - **One stream per object.** A stateful instance holds the memory of one
   signal; feeding two interleaved streams through it corrupts both. Create
   one filter object per stream: the design cost is paid once at
   construction, not per block.
+- **A lost or repeated buffer voids the guarantee silently.** Bit-exactness
+  assumes the blocks really were consecutive. Count blocks or compare the
+  device timestamps, and mark the gap in the output rather than pretending the
+  stream was continuous.
+- **Design the filters at the rate the device actually opened**, not the rate
+  you asked for. Read the stream's sample rate back at start-up and assert it
+  once; a bank designed for 48 kHz fed 44.1 kHz samples reports plausible
+  numbers for the wrong bands.
+- **Clipping has to be detected per block.** The loop replaces the
+  instrument's overload indicator, so test each block for runs at full scale
+  and report a flagged block as invalid rather than averaging it in.
+- **An unattended logger needs its own bookkeeping**: a calibrator tone at the
+  start and the end of the deployment, and a fixed level-storage interval.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/streaming_level_seams_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/streaming_level_seams.svg" alt="Two panels of A-weighted Fast level against time. Left, eight 100 ms blocks of a level-stepping noise: the continuous single-pass trace and the stateful streamed trace lie exactly on top of each other with a maximum error of 0 dB, while the stateless trace collapses to 30 dB at every block boundary and climbs back through the detector ramp, up to 64 dB below the true level at a seam. Right, the same first 0.8 s magnified with the first 0.63 seconds shaded: the steady_ic False trace climbs from 30 dB through the settling ramp while the steady_ic True trace starts near 64 dB, and the two converge once the ramp is over" width="94%"></picture>
+
+*The pitfalls above, in the domain a streaming reader actually watches. Carried
+state costs nothing and gains everything: the blue trace is the grey one. Reset
+per block and every seam becomes a fresh detector ramp: tens of decibels, at a
+rate set by the block length rather than by the sound. The right panel is the
+third pitfall: the first $5\tau$ belongs to the detector, `steady_ic=True`
+starts elsewhere rather than at the truth, and neither of them is the level
+until the ramp is over.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fs, block = 48000, 4800                      # 100 ms blocks
+rng = np.random.default_rng(17)
+x = np.concatenate([a * rng.standard_normal(block)
+                    for a in (0.02, 0.02, 0.08, 0.08, 0.02, 0.02, 0.05, 0.05)])
+n_blocks = x.size // block
+
+
+def to_db(env):
+    return 10 * np.log10(np.maximum(env, 1e-16) / (2e-5) ** 2)
+
+
+# Both sides run the same default design; streaming needs no concession.
+reference = to_db(filters.time_weighting(
+    filters.weighting_filter(x, fs, weighting="A"), fs,
+    mode="fast"))
+
+aw = filters.WeightingFilter(fs, "A", stateful=True)
+tw = filters.TimeWeighting(fs, mode="fast")
+streamed = np.concatenate([to_db(tw.process(aw.filter(
+    x[i * block:(i + 1) * block]))) for i in range(n_blocks)])
+print(f"max |streamed - continuous| = {np.max(np.abs(streamed - reference)):.3g} dB")
+# max |streamed - continuous| = 0 dB
+
+plt.plot(np.arange(x.size) / fs, reference, linewidth=3, alpha=0.4)
+plt.plot(np.arange(x.size) / fs, streamed)
+plt.xlabel("Time [s]")
+plt.ylabel("LAF [dB re 20 uPa]")
+plt.show()
+```
+
+</details>
 
 ## Real-time level meter pattern
 
@@ -179,13 +311,32 @@ fs, block = 48000, 4800  # 100 ms blocks
 aw = filters.WeightingFilter(fs, "A", stateful=True)
 env = filters.TimeWeighting(fs, mode="fast")  # the class is inherently stateful
 
+laf_max = -np.inf
+
 for x in audio_stream(block):            # your capture callback
     y = env.process(aw.filter(x))
     spl = 10 * np.log10(y[..., -1] / (2e-5) ** 2)  # instantaneous LAF
+    laf_max = max(laf_max, 10 * np.log10(y.max() / (2e-5) ** 2))
     print(spl)  # your display update
 ```
 
-### Stateful-mode constraints
+`y[..., -1]` is the detector output *at the instant the block ends*, so the
+block length is the display rate and nothing between block ends is ever
+observed. With a 125 ms Fast constant a block of 20 to 100 ms tracks the
+envelope faithfully; blocks much longer than $\tau$ turn the display into a
+sparse sample of it. The running maximum above exists for the same reason: a
+peak that occurs mid-block never appears in the displayed samples, so
+$L_\mathrm{AFmax}$ has to be accumulated as the maximum *inside* each block. And the
+first blocks contain the detector's own attack ramp ($5\tau$: 0.6 s Fast, 5 s
+Slow), which must be excluded from any maximum or percentile.
+
+## Stateful-mode constraints
+
+Streaming forbids anything that needs the whole signal or that recomputes
+something per block. Each row below is enforced with an exception rather than
+silently ignored. `high_accuracy` is no longer among them: it used to resolve
+to the plain bilinear design in stateful mode and to raise when passed `True`,
+and now it means the same thing either way.
 
 | Option | Stateful behavior | Why |
 | :--- | :--- | :--- |
@@ -194,6 +345,30 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | no constraint: defaults to `True` as everywhere else (see [Frequency Weighting](../levels/weighting.md)) | The accurate design is a plain cascade of second-order sections at the input rate, so it carries state like any other |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
+
+## What this guide covers
+
+- **Covered.** IEC 61260-1:2014 and IEC 61672-1:2013 exactly as far as [Filter
+  Banks](filter-banks.md), [Frequency
+  Weighting](../levels/weighting.md) and [Time
+  Weighting](../levels/time-weighting.md) already implement them:
+  `stateful=True` on `OctaveFilterBank`, `WeightingFilter` and `TimeWeighting`
+  carries the direct-form-II-transposed section state ($z_1$, $z_2$), or the
+  envelope's last value for `TimeWeighting`, across block boundaries, so the
+  concatenated streamed output is bit-exact with a single full-signal pass. This
+  page adds no normative content of its own; it only proves and documents that
+  equivalence.
+
+- **Not covered.** `zero_phase` forward-backward filtering needs the whole signal, so it is
+  unsupported in stateful mode; use the offline path of [Filter
+  Banks](filter-banks.md) instead. What the accurate
+  weighting design itself costs, and the band it is fitted over, belong to
+  [Frequency Weighting](../levels/weighting.md) rather than here:
+  this page only shows that streaming reproduces it. Rank statistics such as
+  $L_{90}$ do not stream either:
+  stream the envelope and compute percentiles once on the pooled result, as
+  [Integrated and Statistical Levels](../levels/levels.md)
+  describes.
 
 ## See also
 
@@ -206,20 +381,9 @@ for x in audio_stream(block):            # your capture callback
 
 ## References
 
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Open Library record](https://openlibrary.org/isbn/9780131988422).
-  The direct-form filter structures and state recursion behind the carried
-  state equation above.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications*; block
-processing adds no normative content of its own: the streamed filters are the
-same designs those standards govern (see [Filter Banks](filter-banks.md),
-[Frequency Weighting](../levels/weighting.md) and [Time Weighting](../levels/time-weighting.md)),
-and carrying the internal filter state across blocks is exactly what makes the
-concatenated output identical to a single full-signal pass, so every class and
-tolerance claim of the underlying pages holds unchanged in streaming use.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The streamed frequency and time weightings are the same designs this standard governs; the carried state keeps the class and tolerance claims of the Frequency Weighting and Time Weighting pages valid in streaming use.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  Block processing adds no normative content of its own: the streamed octave and fractional-octave filters are the same designs this standard governs, and carrying the internal filter state across blocks is exactly what makes the concatenated output identical to a single full-signal pass, so every class and tolerance claim of the Filter Banks page holds unchanged in streaming use.
+- **Oppenheim, A. V., & Schafer, R. W. (2010).** [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
+  The direct-form filter structures and state recursion behind the carried state equation (ISBN 978-0-13-198842-2).

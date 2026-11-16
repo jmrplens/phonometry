@@ -60,6 +60,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from github_edition import is_edition_file
 from markdown_fences import code_lines, page_lines
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
@@ -73,8 +74,9 @@ _REPO = Path(__file__).resolve().parent.parent
 _ROOT = _REPO / "src" / "phonometry"
 
 #: Trees of hand-written pages. The API reference is generated from the
-#: docstrings, which are read at their source, and ``superpowers/`` is local
-#: working notes.
+#: docstrings and the GitHub edition of the guides under ``docs/`` from the
+#: site pages, both read at their source (:func:`_pages` tells the edition by
+#: its opening), and ``superpowers/`` is local working notes.
 _PAGE_ROOTS = (_REPO / "site" / "src" / "content" / "docs", _REPO / "docs")
 _PAGE_SKIP = ("reference/api/", "superpowers/")
 
@@ -284,7 +286,9 @@ def _pages() -> Iterator[Path]:
     """Every hand-written page, in a stable order."""
     for root in _PAGE_ROOTS:
         for path in sorted(root.rglob("*.md*")):
-            if not any(part in path.as_posix() for part in _PAGE_SKIP):
+            if not any(
+                part in path.as_posix() for part in _PAGE_SKIP
+            ) and not is_edition_file(path):
                 yield path
 
 

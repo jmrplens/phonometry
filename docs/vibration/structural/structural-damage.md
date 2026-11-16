@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/structural/structural-damage.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Vibration damage to structures (DIN 4150-3)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/
+
+# Vibration damage to structures
 
 Everything else in this section follows vibration because it ends up as
 **sound**. This page follows it because it ends up as a **crack**. A pile
@@ -21,7 +23,62 @@ criterion and certifies nothing. Exceed them and nothing follows automatically. 
 have to occur; what has run out is the cheap answer, and the stress
 calculation has to be done instead.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines.svg" alt="Guideline peak velocity against frequency for the three building classes of DIN 4150-3 Table 1, flat to 10 Hz and rising after it, with the topmost-floor and buried-pipeline values beside it as paired short-term and long-term bars" width="94%"></picture>
+## 1. What is measured
+
+Clause 5.1 fixes the quantity before it fixes any number. At the **foundation**,
+the three components $v_x$, $v_y$ and $v_z$ of the particle velocity are
+recorded separately and the largest peak of the three, $|v_i|_\mathrm{max}$, is
+the value judged; the standard then writes it $v_i$ and so does this page. The
+transducers go in the lowest storey, on the foundation or the outside wall, and
+on an unbasemented building no more than 0,5 m above ground level, preferably
+on the side facing the excitation.
+
+In the **topmost floor plane** the quantity changes: the larger of the two
+horizontal components, measured in or close to the outside wall. That
+measurement is not a second excitation. It is the building's horizontal answer
+to the one at its foundation, which is why the guideline value there does not
+depend on frequency at all: the response is already at the structure's own
+frequencies.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points.svg" alt="Section through a three-storey dwelling with no basement, with a piling rig on the ground to its left and dashed waves running from the pile through the ground toward the building. Four numbered points are marked. Point 1 is a transducer in the lowest storey, on the inner face of the outside wall that faces the source, just above the ground floor slab. Point 2 is on the same outside wall just under the top slab, with arrows for the two horizontal directions x and y, x pointing out of the building toward the source. Point 3 stands on a floor at mid-span, the span split into two equal halves, with an arrow for the vertical direction z. Point 4 is a buried pipeline drawn in cross-section running past the building, more than 2 metres from the outside wall and dimensioned as such, bared at one spot with a transducer on its crown. Below, two enlarged details. The first shows the foundation point with its three directions close together on the inner face of the outside wall, x pointing out toward the source, under a dashed line 0,5 m above the ground level outside. The second shows the pipe along its axis with the transducers on the pipe itself, z, y and x recorded and x along the axis, a dashed substitute point on the ground above it marked as only an estimate, usually larger than on the pipe, and the pipe judged on Table 2 by material. Three boxes at the foot say what is read at each building point: the largest peak of the three components at the foundation, against Table 1 at the frequency of that peak; the larger horizontal peak in the topmost floor plane, against one value per class; and a vertical velocity of 20 millimetres per second or less on the floor, for short-term vibration. The lines underneath give a reading of 5,1 millimetres per second at 16,5 hertz at the foundation of a dwelling against the 6,6 read off Bild 1, the meter and its calibration, the frequency and acceleration limits for a transducer set down loose, and when several points or storeys are measured at once" width="100%"></picture>
+
+### How the measurement goes
+
+Use a vibration meter that meets DIN 45669-1, function-checked and calibrated at
+a reference frequency and amplitude for the job. At the foundation, three
+transducers go close together in the lowest storey, on the foundation of the
+outside wall, on the wall or in a recess of it, preferably on the side facing the
+source and, without a basement, no higher than 0,5 m above ground level. They
+record $z$ and two horizontal directions at right angles, one parallel to a side
+wall and preferably $x$ pointing at the source; a large footprint takes several
+points at once. Loose steps, loose slabs and hollow-sounding surfaces are
+unsuitable, and on a hard surface a transducer set down loose holds only to
+100 Hz vertically and 40 Hz horizontally at 3 m/s² or less; otherwise it is
+glued, screwed or plastered on. In the topmost floor plane, $x$ and $y$ go in or
+close to the outside wall; where relevant, on the floors expected to vibrate
+most, $z$ goes at about mid-span. On a pipeline the transducers go on the pipe
+where possible, bared only at the measuring point, one horizontal direction along
+the axis; the ground above is a substitute where the source is neither close
+beside the pipe nor a short distance below it, and gives only an estimate,
+usually larger. Record the whole event, or representative stretches, and where
+possible judge extraneous vibration by comparing the readings with and without
+the source acting. Read the peak of each component and its frequency, and report
+what Annex A lists: every point, its direction and its distance to the source.
+
+## 2. Short-term vibration, and why the guideline rises with frequency
+
+Short-term vibration is vibration that does not occur often enough to build up
+resonance in the structure: construction work, blasting, a passing train on a
+line that is not busy. Table 1 gives its guideline values for three building
+classes, and at the foundation they depend on frequency.
+
+They rise, and the reason is that the standard is really about strain. The
+same velocity at a lower frequency means a larger displacement, and it is the
+displacement across a wall that opens a crack in the plaster. So a building
+tolerates a fast wiggle better than a slow one, and the guideline value climbs
+from 1 Hz to 100 Hz. Above 100 Hz the 100 Hz value may be used.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines.svg" alt="Three panels. The large left panel plots the guideline peak velocity against frequency from 1 to 100 hertz for the three building classes: each curve is flat to 10 hertz and then rises in two straight segments, commercial and industrial from 20 to 50 millimetres per second, dwellings from 5 to 20, and especially sensitive buildings from 3 to 10, with the area below the lowest curve shaded. The top right panel gives the topmost floor plane values as paired horizontal bars, short-term against long-term: 40 against 10, 15 against 5, and 8 against 2,5 millimetres per second. The bottom right panel gives the buried pipeline values the same way: welded steel 100 against 50, concrete and flanged metal 80 against 40, masonry and plastic 50 against 25." width="94%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -53,52 +110,9 @@ plt.show()
 
 </details>
 
-## 1. What is measured
-
-Clause 5.1 fixes the quantity before it fixes any number. At the
-**foundation**, the three components $v_x$, $v_y$ and $v_z$ of the particle
-velocity are recorded separately and the largest peak of the three,
-$|v_i|_\mathrm{max}$, is the value judged; the standard then writes it $v_i$
-and so does this page. The transducers go in the lowest storey, on the
-foundation or the outside wall, and on an unbasemented building no more than
-0,5 m above ground level, preferably on the side facing the excitation.
-
-In the **topmost floor plane** the quantity changes: the larger of the two
-horizontal components, measured in or close to the outside wall. That
-measurement is not a second excitation. It is the building's horizontal answer
-to the one at its foundation, which is why the guideline value there does not
-depend on frequency: the response is already at the structure's own
-frequencies.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points.svg" alt="Section through a three-storey dwelling with no basement and a piling rig beside it: the foundation point in the lowest storey on the outside wall facing the source, the two horizontal directions in the topmost floor plane, the vertical direction on a floor at mid-span, and a buried pipeline more than 2 metres away, with enlarged details of the foundation point under its 0,5 m limit and of the transducers on the pipe" width="100%"></picture>
-
-**How the measurement goes.** Use a vibration meter that meets DIN 45669-1,
-checked and calibrated at a reference frequency and amplitude for the job. At the
-foundation, three transducers go close together in the lowest storey, on the
-outside wall or its foundation, preferably on the side facing the source and,
-without a basement, no higher than 0,5 m above ground level, recording $z$ and
-two horizontal directions at right angles, one parallel to a side wall and
-preferably $x$ pointing at the source. On a hard surface a transducer set down
-loose holds only to 100 Hz vertically and 40 Hz horizontally at 3 m/s² or less.
-In the topmost floor plane, $x$ and $y$ go in or close to the outside wall; where
-relevant, on the floors expected to vibrate most, $z$ goes at about mid-span; on
-a pipeline, the transducers go on the pipe itself, bared only at the measuring
-point. Where possible, extraneous vibration is judged by comparing the readings
-with and without the source acting. Read the peak of each component and its
-frequency, and report what Annex A lists.
-
-## 2. Short-term vibration, and why the guideline rises with frequency
-
-Short-term vibration is vibration that does not occur often enough to build up
-resonance in the structure: construction work, blasting, a passing train on a
-line that is not busy. Table 1 gives its guideline values for three building
-classes, and at the foundation they depend on frequency.
-
-They rise, and the reason is that the standard is really about strain. The
-same velocity at a lower frequency means a larger displacement, and it is the
-displacement across a wall that opens a crack in the plaster. So a building
-tolerates a fast wiggle better than a slow one, and the guideline value climbs
-from 1 Hz to 100 Hz. Above 100 Hz the 100 Hz value may be used.
+*The three tables at once. The left panel is Bild 1: the guideline value at
+the foundation, flat to 10 Hz and rising after it. The right panels are the
+values that carry no frequency, each with the long-term value beside it.*
 
 Table 1 prints the middle band as a range, "5 bis 15" for a dwelling between
 10 Hz and 50 Hz, and a range does not say what 30 Hz is worth. Bild 1 says it:
@@ -148,8 +162,10 @@ it at run time with the three names it accepts.
 A floor or ceiling gets its own sentence rather than a table. Clause 5.2: if
 the vertical velocity at the point of largest vibration, in general mid-span,
 stays at or below 20 mm/s, no reduction in the serviceability of the floor is
-expected. The value is published as `FLOOR_VERTICAL_MM_S`, and for a building
-in row 3 of Table 1 the standard notes that even that may have to be reduced.
+expected. The value is published as
+[`FLOOR_VERTICAL_MM_S`](https://docs.jmrp.io/phonometry/reference/api/vibration/building-damage/),
+and for a building in row 3 of Table 1 the standard notes that even that may
+have to be reduced.
 
 ## 4. Buried pipelines
 
@@ -192,8 +208,8 @@ for name in vibration.BUILDING_CLASSES:
 # commercial 40.0 10.0 / residential 15.0 5.0 / sensitive 8.0 2.5
 ```
 
-Asking for a long-term value at the foundation raises, because Table 3 does
-not have that column.
+Asking for a long-term value at the foundation raises, because Table 3 does not
+have that column.
 
 ## 6. From a velocity to a stress
 
@@ -208,8 +224,8 @@ $$
 $$
 
 No length, no depth, no span: the dimensions cancel, which is the whole reason
-the formula is worth having. A velocity measured where the amplitude is
-largest is enough. The mode coefficient $k_n$ lies between 1 and 1,3 in the
+the formula is worth having. A velocity measured where the amplitude is largest
+is enough. The mode coefficient $k_n$ lies between 1 and 1,3 in the
 technically important cases, so it can move the answer by less than a third,
 and $G_\mathrm{ges}/G_\mathrm{balken}$ is 1 for a beam carrying nothing but
 itself.
@@ -239,45 +255,59 @@ Below that, `BuildingDamageWarning` says so: four storeys still return
 is an extrapolation of a rule offered for taller buildings rather than the
 rule itself.
 
+## What this guide covers
+
+- **Covered.** The **guideline values** of DIN 4150-3 as published: Table 1 at the foundation
+  against frequency and in the topmost floor plane, Table 2 for buried
+  pipelines, Table 3 for long-term vibration, the doubling of row 1 for massive
+  engineering structures (5.1), the 50 % reduction of Table 2 for long-term
+  vibration (6.3) and the 20 mm/s vertical value for floors (5.2).
+
+- **Covered.** The reading of **Bild 1** between the printed corner values: straight lines on
+  a linear frequency axis, so a value inside a band is defined rather than left
+  to the reader.
+
+- **Covered.** The **bending stress** of Formula (1) in 6.2 and the storey estimate
+  $f_i \approx 10/n$ of 6.4.
+
+- **Not covered.** **Nothing predicts the vibration**: the guideline values are compared against a
+  measurement you supply. Prediction of ground-borne vibration from a source to
+  a building, which is DIN 4150-1, is not here but in [Predicting vibration
+  before measuring](../immission/vibration-prediction.md), and
+  neither is the human perception of vibration in buildings of DIN 4150-2, which
+  [Vibration and people in buildings](../immission/people-in-buildings.md)
+  assesses; the meter of DIN 45669-1 is in [Measuring vibration
+  immission](../immission/vibration-meter.md). For people
+  rather than structures, see also the [human
+  vibration](../human/index.md) pages.
+
+- **Not covered.** **The stress route is one formula, not a design check.** Clauses 4.2 to 4.4,
+  which determine the dynamic stresses by measurement or calculation and compare
+  them against the permissible ones, are what a reader has to do when a
+  guideline value is exceeded; only the closed-form bridge of 6.2 is implemented.
+  Fatigue, settlement of non-cohesive soils under repeated vibration (4.6, Annex
+  C) and foundation displacement are described in the standard and not modelled
+  here.
+
+- **Not covered.** **The measurement is described, not checked.** Where the transducers go, how
+  they are set down and what the report carries are 5.4, Annex A and the
+  DIN 45669 parts 5.4 refers to, set out above for the person measuring. None of
+  that is implemented here, and neither is the instrument itself.
+
 ## See also
 
 - [Evaluating machine vibration (ISO 20816-1)](../machinery/machine-vibration-evaluation.md):
-  the same shape of question asked of a machine rather than of a building.
+  the same shape of question asked of a machine rather than of a building, and
+  answered by evaluation zones instead of guideline values.
 - [Human vibration exposure (ISO 2631, ISO 5349)](../human/human-vibration.md):
-  what the same vibration does to a person.
+  what the same vibration does to a person, weighted for the body rather than
+  for the structure.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   the elements inserted to keep the vibration out in the first place.
 
 ## References
 
-- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil
-  3: Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
-  The measured quantity of 5.1, the short-term guideline values of Table 1
-  with the curves of Bild 1, the ceiling rule of 5.2, the buried-pipeline
-  values of Table 2, the long-term values of Table 3 and the 50 % reduction of
-  6.3, the bending stress of Formula (1) in 6.2 and the storey estimate of
-  6.4. The measuring points, directions and report of 5.4, the pipeline notes
-  of D.1 and the worked dwelling of D.2 are prose, set out in the measurement
-  section.
-- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
-  Teil 2: Messverfahren* (DIN 45669-2:2005-06). Where the transducers of a
-  building measurement go and how they are set down: the foundation positions
-  of 5.1.2, the measuring directions of 5.2, the loose-mounting limits of
-  5.3.2, the measurement time of 6.1, the check before use of 6.3 and the
-  comparison with the source stopped of 7.2.2.
-
-## Standards
-
-DIN 4150-3:1999-02, *Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf
-bauliche Anlagen*: the guideline values for the peak particle velocity by
-building class, measurement location and how often the vibration occurs
-(Tables 1, 2 and 3, with Bild 1 fixing the reading between the printed corner
-values), the vertical value for floors (5.2), the doubling of row 1 for
-massive engineering structures (5.1), the 50 % reduction of the pipeline table
-for long-term vibration (6.3), the bending stress of Formula (1) in 6.2 and
-the storey estimate of 6.4. Prediction (DIN 4150-1), human perception in
-buildings (DIN 4150-2) and the instrument requirements of DIN 45669-1 are not
-part of this page: they are on
-[Predicting vibration before measuring](../immission/vibration-prediction.md),
-[Vibration and people in buildings](../immission/people-in-buildings.md) and
-[Measuring vibration immission](../immission/vibration-meter.md).
+- **Deutsches Institut für Normung. (1999).** *Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
+  The measured quantity of 5.1, the short-term guideline values of Table 1 with the curves of Bild 1, the ceiling rule of 5.2, the buried-pipeline values of Table 2, the long-term values of Table 3 and the 50 % reduction of 6.3, the bending stress of Formula (1) in 6.2 and the storey estimate of 6.4. The measuring points, directions and report of 5.4, the pipeline notes of D.1 and the worked dwelling of D.2 are prose, set out in the measurement section.
+- **Deutsches Institut für Normung. (2005).** *Messung von Schwingungsimmissionen — Teil 2: Messverfahren* (DIN 45669-2:2005-06).
+  Where the transducers of a building measurement go and how they are set down: the foundation positions of 5.1.2, the measuring directions of 5.2, the loose-mounting limits of 5.3.2, the measurement time of 6.1, the check before use of 6.3 and the comparison with the source stopped of 7.2.2.

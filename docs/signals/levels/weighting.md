@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/levels/weighting.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/weighting/
 
 # Frequency Weighting (A, C, Z)
 
@@ -15,8 +17,8 @@ the historical B and D and the AU curve, is
 at 48 kHz: A, which discards the bass; C, which keeps it; and Z, which
 weights nothing at all. The inset magnifies the small positive region of A
 around 2.5 kHz. The special B, D and AU curves have their own chart in
-[Special Weightings](special-weightings.md), together with the infrasound
-G curve.*
+[Special Weightings](special-weightings.md), together with
+the infrasound G curve.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -58,10 +60,15 @@ plt.show()
   high-pass the wind noise yourself if the recording extends below 10 Hz.
 
 The `weighting` argument also accepts the four special weightings, charted and
-documented in [Special Weightings](special-weightings.md): `'G'` for
-infrasound (ISO 7196), the historical `'B'` (ANSI S1.4-1983) and `'D'`
-(IEC 537), and `'AU'` for audible sound in the presence of ultrasound
+documented in [Special Weightings](special-weightings.md):
+`'G'` for infrasound (ISO 7196), the historical `'B'` (ANSI S1.4-1983) and
+`'D'` (IEC 537), and `'AU'` for audible sound in the presence of ultrasound
 (IEC 61012).
+
+The one-line answer is `filters.weighting_filter(recording, fs, weighting='A')`.
+Section 2 shows it on a runnable signal, section 5 explains why the default
+design is fitted at the sample rate rather than transformed from the printed
+prototype, and section 6 proves the result meets class 1.
 
 ## 1. Where the curves come from
 
@@ -78,9 +85,9 @@ $$
 
 C is a band-pass with double poles at $f_1$ and $f_4$ (2 zeros at the origin);
 A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
-through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z applies
-no shaping inside the specified band; its design goal is 0 dB everywhere from
-10 Hz to 20 kHz. The full pole/zero derivation is in the
+through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z applies no shaping inside
+the specified band; its design goal is 0 dB everywhere from 10 Hz to
+20 kHz. The full pole/zero derivation is in the
 [Theory](../../reference/theory/signal-analysis.md) page.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting.svg" alt="Equal-loudness contours per ISO 226 on the left, with the 40-phon contour highlighted; on the right the A-weighting curve overlaid on the inverted 40-phon contour, showing that A is the flipped contour frozen into a realizable filter" width="92%"></picture>
@@ -137,6 +144,54 @@ print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum.svg" alt="One-third-octave band levels of two signals, each drawn unweighted, A-weighted and C-weighted. On the left, a 50 Hz rumble under a light hiss: the unweighted and C-weighted curves coincide on a 77 dB spike in the 50 Hz band, while the A-weighted curve cuts that same band to 47 dB, and the box reads LAeq 52.6 dB, LCeq 75.7 dB, C minus A 23.1 dB. On the right, broadband pink noise: all three curves lie within a couple of decibels of each other from 1 kHz upward and the A curve falls away below it, and the box reads LAeq 54.6 dB, LCeq 56.4 dB, C minus A 1.8 dB" width="92%"></picture>
+
+*The same three band levels for two signals. A concentrated low-frequency
+source (left) puts almost all its energy where A cuts hardest, so C − A reaches
+23 dB and the A-weighted level alone says nothing about it. Broadband pink
+noise (right) gives C − A = 1.8 dB, which is the regime the first bullet
+describes.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+for curve, style in (("Z", "-"), ("C", "--"), ("A", ":")):
+    filtered = filters.octave_filter(
+        filters.weighting_filter(x, fs, weighting=curve), fs, fraction=3)
+    band_levels, centres = filtered.levels, filtered.frequencies
+    ax.semilogx(centres, band_levels, style, label=f"{curve}-weighted bands")
+ax.set(xlabel="Band centre frequency [Hz]", ylabel="Band level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### What A-weighting cannot do
+
+A is a fixed filter derived from pure-tone equal-loudness data at one loudness
+level, and it is applied to complex spectra at every level. Three assumptions
+follow, and each breaks in a way worth naming. It says nothing about how bands
+*combine*, because the contours were measured with single tones; it is frozen
+at the 40-phon contour, so loud low-frequency sound is systematically
+under-rated as the real contours flatten with level; and it has no time
+structure at all, so an impulse and a steady sound of the same energy receive
+identical treatment.
+
+Each of those has a proper instrument. For perceived loudness, use the ISO 532
+models of [Loudness](../../perception/psychoacoustics/loudness.md) rather
+than a different weighting curve. For content below 20 Hz, use the G curve of
+ISO 7196 ([Special Weightings](special-weightings.md)).
+For tonal or impulsive character, use the ISO 1996-1 adjustments
+([Environmental Levels](../../environment/assessment/environmental-levels.md)).
+None of that makes A wrong to use: A-weighted levels are the quantity the
+limits are written in, so a report states the A-weighted level and adds the
+other metrics as supporting evidence, never as a substitute.
+
 ## 2. Basic usage
 
 ```python
@@ -155,7 +210,46 @@ c_weighted_signal = filters.weighting_filter(recording, fs, weighting='C')
 ```
 
 The special weightings take the same `weighting` argument; each is documented,
-with its own response chart, in [Special Weightings](special-weightings.md).
+with its own response chart, in
+[Special Weightings](special-weightings.md).
+
+### Weighting a spectrum, not a waveform
+
+The commonest desk task is not weighting a recording but A-weighting a table of
+one-third-octave band levels, and there are two routes that do not give the
+same answer. The **exact** one is what a meter does: weight the waveform, then
+band-filter it.
+
+```python
+band_source = signals.noise_signal(fs, duration_s=20.0, color="pink", rms=0.05, seed=3)
+filtered = filters.octave_filter(
+    filters.weighting_filter(band_source, fs, weighting="A"), fs, fraction=3)
+weighted_bands, centres = filtered.levels, filtered.frequencies
+print(f"energy sum of the A-weighted bands "
+      f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
+print(f"LAeq of the same signal          "
+      f"{signals.laeq(band_source, fs):.2f} dB")
+# energy sum of the A-weighted bands 62.85 dB
+# LAeq of the same signal          62.81 dB
+```
+
+The **table** route is the one you are forced into when the data arrives as
+band levels already: add the tabulated $A(f_\mathrm{m})$ to each band level. It is an
+approximation, because A slopes steeply across the low bands, so its
+energy-weighted mean *inside* a band is not its value at the mid frequency.
+Measured against the exact route on the same pink noise: the two agree to
+better than 0.1 dB from 100 Hz to 8 kHz, the table route reads up to 0.7 dB low
+in the lowest bands (where A rises by about 12 dB per octave) and up to 1 dB
+high in the topmost band at 48 kHz (where A falls steeply and the band is
+clipped by Nyquist), while the *totals* agree to a few hundredths. So the error
+is not one-sided: it follows the sign of the curvature of the weighting across
+the band.
+
+Report which route produced a weighted spectrum. The totals will agree; the
+band levels will not, and a band-by-band comparison between a meter's
+A-weighted spectrum and a table-corrected one will show tenths of a decibel
+that are method, not measurement. The same argument applies unchanged to C and
+to G.
 
 ## 3. `weighting_filter()` / `WeightingFilter` parameters
 
@@ -163,7 +257,7 @@ with its own response chart, in [Special Weightings](special-weightings.md).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array, or `Signal` | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0; taken from `x` when `x` is a `Signal` | |
-| `weighting` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](special-weightings.md); `'Z'` is a bypass; `'468'` is the ITU-R BS.468-4 programme-level curve, which needs the fitted design and refuses `high_accuracy=False` |
+| `weighting` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](special-weightings.md); `'Z'` is implemented as a bypass of a response the standard specifies as flat; `'468'` is the ITU-R BS.468-4 programme-level curve, and its skirt is steep enough that it needs the fitted design and refuses `high_accuracy=False` |
 | `high_accuracy` | bool | — | default `True` | Fit the analog prototype at $f_\mathrm{s}$ instead of transforming it blind; keeps A/C in class 1 at every sample rate. Details in §5 |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
@@ -188,9 +282,9 @@ for recording in batch:
 
 ## 5. High-frequency accuracy (`high_accuracy`)
 
-The curves of §1 are analog: poles and zeros in the $s$ plane. Turning them
-into a digital filter with the bilinear transform is exact in magnitude and
-wrong in frequency: it puts the prototype's response at
+The curves of section 1 are analog: poles and zeros in the $s$ plane. Turning
+them into a digital filter with the bilinear transform is exact in magnitude
+and wrong in frequency: it puts the prototype's response at
 $2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ instead of at $2 \pi f$, and the
 error grows quadratically toward Nyquist. At $f_\mathrm{s} = 48$ kHz that plain
 design reads 15.7 dB below the A design goal at the 19 952.6 Hz row, and at
@@ -212,7 +306,11 @@ prototype over each standard's own band:
 
 A and C therefore verify to **class 1 at every sample rate from 8 kHz up**, and
 at every Table 3 row their deviation stays inside the 0.05 dB the table itself
-is rounded to.
+is rounded to. The path used to reach its sections through an interpolation
+and a decimation stage instead, and the anti-alias filter of those stages had
+its transition band on the input Nyquist frequency: at $f_\mathrm{s} = 32$ kHz
+that put the 15 848.9 Hz row 16.2 dB below the A design goal, over the
+−16.0 dB class 1 limit, so A verified only to class 2 there.
 
 The band the fit controls is the curve's own standardised range, clipped at
 the top to 99.5 % of the Nyquist frequency, enough to contain every frequency
@@ -307,6 +405,28 @@ for block in blocks:
 
 See [Block Processing](../filters/block-processing.md) for the streaming workflow and
 [Theory](../../reference/theory/signal-analysis.md) for the analytic curve definitions.
+
+> [!NOTE]
+> **Above a few kilohertz the filter is the smallest term**
+>
+> The fitted design removes the *filter's* contribution to the
+> high-frequency error, and once it is gone the filter stops being what decides
+> the reading. Three larger terms take over, and all three live in the
+> instrument, not in the code.
+>
+> A free-field microphone is calibrated for sound arriving from its reference
+> direction, so it must be pointed at the source; indoors, in a diffuse field,
+> that capsule reads high at high frequencies and a random-incidence capsule is
+> the right choice instead. A windscreen carries its own frequency-dependent
+> insertion loss, which IEC 61672-1 treats as part of the instrument (clause
+> 5.3.3, "Windscreens") and whose stated correction has to be applied before any
+> high-frequency band level, or any A-weighted level near the top of the range,
+> means anything. And the operator is a reflector: use a tripod and stand back.
+>
+> The class chain of the
+> [calibration guide](../metrology/calibration.md) says the rest:
+> a class 1 verdict for the filter is one link, and the weakest link sets the
+> accuracy of the reading.
 
 ## 6. Verifying against the tolerance tables (IEC 61672-1)
 
@@ -410,15 +530,17 @@ plt.show()
 
 </details>
 
-## Quick answers
+## What this guide covers
 
-### When should I use C-weighting instead of A-weighting?
+- **Covered.** IEC 61672-1:2013 for the A, C and Z curves: the Annex E analytic definition
+  from four corner frequencies, the `high_accuracy` design that keeps class 1
+  tolerances at every sample rate from 8 kHz up, and the Table 3 class 1/class 2
+  acceptance limits checked by `verify_weighting_class`.
 
-Use C-weighting for peak sound pressure and high-level noise, and use the difference $L_\mathrm{Ceq} - L_\mathrm{Aeq}$ as a low-frequency indicator: below about 10 dB the A-weighted level rates the spectrum fairly, while around 15 to 20 dB or more the energy is concentrated at low frequencies and the A-weighted level understates the problem. The HML method of ISO 4869-2 keys on exactly this C minus A difference for hearing-protector selection.
-
-### Is A-weighting accurate near 16 kHz at a 48 kHz sample rate?
-
-Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error reaches −2.7 dB at 12.5 kHz, outside the IEC 61672-1 class 1 tolerance (+2.0/−2.5 dB). The default `high_accuracy=True` fits the prototype at the sample rate instead, which leaves 0.0003 dB anywhere in the table at 48 kHz and 0.008 dB at 32 kHz, so class 1 holds at every sample rate from 8 kHz up. §5 has the numbers and the band the fit controls.
+- **Not covered.** The special curves, the infrasound G of ISO 7196, the historical B (ANSI
+  S1.4-1983) and D (IEC 537) and the AU of IEC 61012, together with the
+  verification of B and AU against their tolerance tables, have their own guide:
+  [Special Weightings](special-weightings.md).
 
 ## See also
 
@@ -432,31 +554,31 @@ Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error r
 - API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
 - Theory: [Weighting Curves (IEC 61672-1)](../../reference/theory/signal-analysis.md#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 
+## Quick answers
+
+### How do I apply A-weighting to a signal in Python?
+
+Call `filters.weighting_filter(recording, fs, weighting='A')` on a calibrated
+signal. It returns the A-weighted time signal, filtered with the pole-zero
+design of IEC 61672-1:2013 within class 1 tolerances, so
+`signals.leq()` on the output is the $L_\mathrm{Aeq}$. The same function applies C,
+Z, B, D, AU and the infrasound G weighting through its `weighting` argument.
+
+### When should I use C-weighting instead of A-weighting?
+
+Use C-weighting for peak sound pressure and high-level noise, and use the difference $L_\mathrm{Ceq} - L_\mathrm{Aeq}$ as a low-frequency indicator: below about 10 dB the A-weighted level rates the spectrum fairly, while around 15 to 20 dB or more the energy is concentrated at low frequencies and the A-weighted level understates the problem. The HML method of ISO 4869-2 keys on exactly this C minus A difference for hearing-protector selection.
+
+### Is A-weighting accurate near 16 kHz at a 48 kHz sample rate?
+
+Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error reaches −2.7 dB at 12.5 kHz, outside the IEC 61672-1 class 1 tolerance (+2.0/−2.5 dB). The default `high_accuracy=True` fits the prototype at the sample rate instead, which leaves 0.0003 dB anywhere in the table at 48 kHz and 0.008 dB at 32 kHz, so class 1 holds at every sample rate from 8 kHz up. §5 has the numbers and the band the fit controls.
+
 ## References
 
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  The original equal-loudness measurements whose 40-phon contour the A-curve
-  inverts (section 1).
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [iso.org catalogue](https://www.iso.org/standard/83117.html).
-  The modern successors of the Fletcher-Munson curves, drawn in the diagram
-  of section 1.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The normative A/C/Z definitions, the analytic Annex E curves and the
-  Table 3 acceptance limits verified in section 6.
-
-## Standards
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications*: the A, C and Z frequency-weighting curves (the
-Annex E analytic definition from four corner frequencies, normalized to 0 dB
-at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps at every
-sample rate from 8 kHz up, and the Table 3 class 1/class 2 acceptance
-limits checked by
-`verify_weighting_class`; the special G, B, D and AU curves are covered in
-[Special Weightings](special-weightings.md).
+- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+  The original equal-loudness measurements whose 40-phon contour the A-curve inverts (section 1).
+- **International Electrotechnical Commission. (1979).** *Sound level meters* (IEC 651:1979).
+  The superseded edition whose Table V publishes the laboratory-grade Type 0 tolerance mask that verify_weighting_class offers as edition='1979' in section 6, read from the identical British adoption BS 5969:1981.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The normative A, C and Z frequency-weighting curves (the Annex E analytic definition from four corner frequencies, normalized to 0 dB at 1 kHz), the class 1 tolerances the high_accuracy design keeps at every sample rate from 8 kHz up, and the Table 3 class 1/class 2 acceptance limits checked by verify_weighting_class in section 6.
+- **International Organization for Standardization. (2023).** [*Acoustics — Normal equal-loudness-level contours*](https://www.iso.org/standard/83117.html) (ISO 226:2023).
+  The modern successors of the Fletcher-Munson curves, drawn in the diagram of section 1.

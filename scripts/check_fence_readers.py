@@ -169,11 +169,6 @@ EXEMPT: dict[tuple[str, str], str] = {
         "because what it checks is that code is left out of the words a page shows; "
         "nothing in it reads a fence"
     ),
-    ("site/scripts/mirror-bibliography.test.mjs", "<script>"): (
-        "fixtures: the page this test hands the mirror writer shows a marker inside "
-        "a fenced example, because what it checks is that the copy leaves it as "
-        "code; nothing in it reads a fence"
-    ),
     ("site/scripts/bibliography-entries.test.mjs", "<script>"): (
         "fixtures: the guides these tests hand the bibliography writer show a "
         "marker inside a fenced example, because what they check is that a marker "
@@ -236,6 +231,12 @@ EXEMPT: dict[tuple[str, str], str] = {
         "fixtures: the pages these tests hand the Markdown renderer carry "
         "fences, because what they check is that the copy keeps each fence "
         "and its body byte for byte; nothing in them reads a fence"
+    ),
+    ("site/src/lib/agent-md/test/edition.test.mjs", "<script>"): (
+        "fixtures: the pages these tests hand the GitHub edition carry "
+        "fences, because what they check is that an anchor or a link inside "
+        "one is never read or rewritten, and that a collapsible or an alert "
+        "keeps the fence's lines; nothing in them reads a fence"
     ),
 }
 

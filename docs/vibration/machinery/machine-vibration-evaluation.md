@@ -1,13 +1,16 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/machinery/machine-vibration-evaluation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Evaluating machine vibration (ISO 20816-1)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/
 
-[Machine fault frequencies](machine-diagnostics.md) answers *where a fault would
-show*. This page answers the question a plant asks first: **is this machine
-acceptable at all**. The two are different trades. A kinematic line tells you
-what is wrong; a severity grade tells you whether to keep running, and it comes
-from one broad-band number, and 4.3.3 says which one: the largest of the
-magnitudes measured over the agreed positions and directions.
+# Evaluating machine vibration
+
+[Machine fault frequencies](machine-diagnostics.md)
+answers *where a fault would show*. This page answers the question a plant asks
+first: **is this machine acceptable at all**. The two are different trades. A
+kinematic line tells you what is wrong; a severity grade tells you whether to
+keep running. It comes from one broad-band number, and 4.3.3 says which one:
+the largest of the magnitudes measured over the agreed positions and
+directions.
 
 ISO 20816-1:2016 is the basis document of the ISO 20816 series, which merged
 and replaced ISO 10816-1 and ISO 7919-1. It fixes the shape of the judgement
@@ -34,7 +37,7 @@ same bearing half, and at the same positions on every bearing of the machine.
 A single probe per plane is allowed only where it is known to give adequate
 information.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_vibration_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_vibration_positions.svg" alt="Elevation of a machine train on a common baseplate: a motor and a driven machine joined by a coupling, each end carried on a pedestal bearing. On the near bearing an accelerometer stands on the housing, with three arrows leaving it, one vertical, one horizontal to the left and one drawn as a foreshortened diagonal for the axial direction that leaves the plane of the drawing. On the far bearing two non-contacting probes reach the shaft from above at plus and minus forty-five degrees, and a dashed leader carries up to a cross-section of the bearing bore in which the two probes are drawn ninety degrees apart with the angle marked ninety degrees plus or minus five. A strip along the bottom shows the chain a reading runs through, from transducer to conditioning to processing" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_vibration_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_vibration_positions.svg" alt="Elevation of a machine train on a common baseplate: a motor and a driven machine joined by a coupling, each end carried on a pedestal bearing. On the near bearing an accelerometer stands on the housing, with three arrows leaving it, one vertical, one horizontal to the left and one drawn as a foreshortened diagonal for the axial direction that leaves the plane of the drawing. On the far bearing two non-contacting probes reach the shaft from above at plus and minus forty-five degrees, and a dashed leader carries up to a cross-section of the bearing bore in which the two probes are drawn ninety degrees apart with the angle marked ninety degrees plus or minus five. A strip along the bottom shows the chain a reading runs through, from transducer to conditioning to processing." width="92%"></picture>
 
 *The two measurement families of Clause 4.4, on one train. The axial arrow is
 drawn as a foreshortened diagonal because it leaves the plane of an elevation.*
@@ -82,7 +85,7 @@ at high frequency (6.3.2.1). So the criterion of Figure 9 is flat only between
 two corner frequencies, and slopes outside them. Annex C.2 writes it as
 Formula (C.1), and `allowable_velocity` is that formula:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vibration_zones_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vibration_zones.svg" alt="Log-log plot of allowable root-mean-square velocity in millimetres per second against frequency from 2 to 3000 hertz. Three curves rise together from the left, flatten between the corner frequencies at 10 hertz and 1 kilohertz, and fall together to the right; they are the limits of zones A, B and C, at 1.12, 2.87 and 7.17 millimetres per second on the plateau. The four bands they divide the plane into are shaded and labelled: zone A newly commissioned at the bottom, then zone B unrestricted operation, zone C limited operation, and zone D damage filling the top. Two dashed vertical lines mark the corner frequencies, labelled f sub x and f sub y" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vibration_zones_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vibration_zones.svg" alt="Log-log plot of allowable root-mean-square velocity in millimetres per second against frequency from 2 to 3000 hertz. Three curves rise together from the left, flatten between the corner frequencies at 10 hertz and 1 kilohertz, and fall together to the right; they are the limits of zones A, B and C, at 1.12, 2.87 and 7.17 millimetres per second on the plateau. The four bands they divide the plane into are shaded and labelled: zone A newly commissioned at the bottom, then zone B unrestricted operation, zone C limited operation, and zone D damage filling the top. Two dashed vertical lines mark the corner frequencies, labelled f sub x and f sub y." width="92%"></picture>
 
 *One curve, moved onto the three boundaries by the factor `Zbound`. Below the
 lower corner the criterion holds displacement constant, above the upper one it
@@ -144,7 +147,7 @@ The trap is that a broad-band magnitude cannot express a change. Annex D makes
 the point with a machine whose vibration fell from 3 mm/s to 2.5 mm/s while its
 phase swung from 40° to 180°:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vector_change_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vector_change.svg" alt="Polar diagram of vibration magnitude against phase. A solid vector runs from the origin to 3 millimetres per second at 40 degrees, the initial state; a second solid vector runs to 2.5 millimetres per second at 180 degrees, the final state; and a dashed line joins the two tips, the change. The dashed line is by far the longest of the three. The title reads that the magnitude changed by minus 0.5 millimetres per second while the vector changed by 5.17" width="70%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vector_change_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_vector_change.svg" alt="Polar diagram of vibration magnitude against phase. A solid vector runs from the origin to 3 millimetres per second at 40 degrees, the initial state; a second solid vector runs to 2.5 millimetres per second at 180 degrees, the final state; and a dashed line joins the two tips, the change. The dashed line is by far the longest of the three. The title reads that the magnitude changed by minus 0.5 millimetres per second while the vector changed by 5.17." width="70%"></picture>
 
 *The magnitude fell by half a millimetre per second. The vibration moved by
 5.2, ten times as much.*
@@ -211,7 +214,7 @@ Each of the four classes is then stated **twice**, once in displacement and
 once in velocity, and 5.2.3 settles the disagreement: the more restrictive
 severity zone applies.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/industrial_machine_zones_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/industrial_machine_zones.svg" alt="Two bar panels, velocity in millimetres per second on the left and displacement in micrometres on the right. Each panel shows four stacked bars, one per machine class: group 1 rigid, group 1 flexible, group 2 rigid and group 2 flexible. Every bar is divided into four coloured bands, zone A at the bottom through zone D at the top, with the boundary value printed beside each division. A dashed line with a marker crosses the group 2 rigid bar at 2.0 millimetres per second in the left panel, inside zone B, and at 50 micrometres in the right panel, inside zone C" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/industrial_machine_zones_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/industrial_machine_zones.svg" alt="Two bar panels, velocity in millimetres per second on the left and displacement in micrometres on the right. Each panel shows four stacked bars, one per machine class: group 1 rigid, group 1 flexible, group 2 rigid and group 2 flexible. Every bar is divided into four coloured bands, zone A at the bottom through zone D at the top, with the boundary value printed beside each division. A dashed line with a marker crosses the group 2 rigid bar at 2.0 millimetres per second in the left panel, inside zone B, and at 50 micrometres in the right panel, inside zone C." width="100%"></picture>
 
 *The same machine, read two ways. Velocity says zone B; displacement says zone
 C; the grade is C.*
@@ -285,7 +288,7 @@ is generally the same for every machine of a design and is *not* tied to the
 baseline. It will normally lie within zone C or D, and should not exceed 1.25
 times the upper limit of zone C.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_alarm_trip_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_alarm_trip.svg" alt="A velocity axis in millimetres per second banded into the four evaluation zones. Two bars mark baselines, one at 0.9 millimetres per second inside zone A and one at 2.9 inside zone C, with an arrow rising from each to its ALARM setting: 1.6 for the first and 3.5 for the second. A dotted line at 3.5 marks the cap of 1.25 times the upper limit of zone B, which the second ALARM has run into, and a dash-dotted line at 5.62 marks the TRIP of 1.25 times the upper limit of zone C" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_alarm_trip_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_alarm_trip.svg" alt="A velocity axis in millimetres per second banded into the four evaluation zones. Two bars mark baselines, one at 0.9 millimetres per second inside zone A and one at 2.9 inside zone C, with an arrow rising from each to its ALARM setting: 1.6 for the first and 3.5 for the second. A dotted line at 3.5 marks the cap of 1.25 times the upper limit of zone B, which the second ALARM has run into, and a dash-dotted line at 5.62 marks the TRIP of 1.25 times the upper limit of zone C." width="100%"></picture>
 
 *The quiet machine gets an alarm inside zone B. The one that has drifted runs
 into the cap.*
@@ -388,80 +391,43 @@ block, in up to three orthogonal directions, two of them perpendicular to the
 gear axis; a housing panel that supports no bearing does not give a true
 indication of the unit.
 
-## Covered and not covered
+- **Covered.** The four evaluation zones and the grading of 6.3.2.3, the frequency-shaped
+  criterion of Figure 9 as Formula (C.1) with the zone factors of Annex C.2, the
+  typical ranges and ladder of Table C.1, and the vector reading of a change from
+  Annex D, through `ZoneBoundaries`, `evaluation_zone`, `allowable_velocity`
+  and `vibration_vector_change`. For industrial machines, the boundaries of
+  Tables A.1 and A.2 in both quantities, the most-restrictive rule of 5.2.3, the
+  significant change of 5.3 and the ALARM and TRIP settings of 5.4, through
+  `INDUSTRIAL_MACHINE_ZONES`, `industrial_machine_zone`,
+  `assess_operational_change`, `alarm_limit` and `trip_limit`. For gear units, the three rating
+  tables and the classification of ISO 20816-9, and the two rating curves of
+  its Annex A, through `GEAR_UNIT_ZONES`, `GEAR_UNIT_CLASSES`,
+  `gear_unit_zone_boundaries`, `gear_shaft_displacement_limit` and
+  `gear_housing_velocity_limit`.
 
-Covered: the four evaluation zones and the grading, the frequency-shaped
-criterion of Figure 9 with the zone factors of Annex C.2, the typical ranges
-and ladder of Table C.1, and the vector reading of a change from Annex D. For
-industrial machines, the boundaries of Tables A.1 and A.2 in both quantities,
-the most-restrictive rule of 5.2.3, the significant change of 5.3 and the
-ALARM and TRIP settings of 5.4. For gear units, the three rating tables and the
-classification of ISO 20816-9, and the two rating curves of its Annex A.
-
-Not covered: the zone boundaries of the machine-specific parts this page
-does not name, which
-this page takes as inputs; the shaft criterion of Figure 10, whose values
-Annex C.1 declines to give for machines no part covers, on the grounds that
-such machines are not normally fitted with shaft transducers; and the current
-third edition of Part 3, ISO 20816-3:2022, which is not held here, so its
-predecessor supplies the industrial boundaries.
+- **Not covered.** The zone boundaries of the machine-specific parts this page does not name, which it takes
+  as inputs; the shaft criterion of Figure 10, whose values Annex C.1 declines to
+  give for machines no part covers, on the grounds that such machines are not
+  normally fitted with shaft transducers; and the current third edition of Part
+  3, ISO 20816-3:2022, which is not held here, so its predecessor supplies the
+  industrial boundaries.
 
 ## See also
 
-- [Machine fault frequencies](machine-diagnostics.md): where a fault would
-  show, once the severity says something is worth looking for.
+- [Machine fault frequencies](machine-diagnostics.md):
+  where a fault would show, once the severity says something is worth looking
+  for.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](../structural/mechanical-mobility.md):
   the frequency-response vocabulary behind the housing response that a
   non-rotating measurement reads.
-- [Human vibration exposure](../human/human-vibration.md): the same
-  motion judged against a person rather than against a machine.
+- [Human vibration exposure](../human/human-vibration.md):
+  the same motion judged against a person rather than against a machine.
 
 ## References
 
-- International Organization for Standardization. (2016). *Mechanical
-  vibration — Measurement and evaluation of machine vibration — Part 1:
-  General guidelines* (ISO 20816-1:2016).
-  [iso.org catalogue](https://www.iso.org/standard/63180.html).
-  The evaluation zones (6.3.2.3), the frequency-shaped criterion (6.3.2.1 and
-  Formula (C.1)), the typical boundary ranges of Table C.1 and the vector
-  analysis of a change (Annex D). This first edition cancelled and replaced
-  ISO 7919-1:1996 and ISO 10816-1:1995.
-- International Organization for Standardization. (2009). *Mechanical
-  vibration — Evaluation of machine vibration by measurements on non-rotating
-  parts — Part 3: Industrial machines with nominal power above 15 kW and
-  nominal speeds between 120 r/min and 15 000 r/min when measured in situ*
-  (ISO 10816-3:2009).
-  The machine groups (4.2), the support classification (4.3), the zone
-  boundaries of Tables A.1 and A.2, the most-restrictive rule (5.2.3), the
-  significant change (5.3) and the ALARM and TRIP settings (5.4). Superseded
-  by ISO 20816-3:2022, which is not held here.
-- International Organization for Standardization. (2020). *Mechanical
-  vibration — Measurement and evaluation of machine vibration — Part 9: Gear
-  units* (ISO 20816-9:2020).
-  The rating system: the units of Table 1, the shaft and housing measurements
-  of Clause 6, the evaluation zones of 8.2, the acceptance ceiling of 8.3, the
-  boundary tables 2, 3 and 4, the classification of Table 5, and the rating
-  curves of Annex A.
-
-## Standards
-
-ISO 20816-1:2016, *Mechanical vibration — Measurement and evaluation of machine
-vibration — Part 1: General guidelines*: the measurement positions of 4.4, the
-vibration severity of 4.3.3, the four evaluation zones of 6.3.2.3, Criterion II
-of 6.3.3, the velocity criterion of Figure 9 as Formula (C.1) with the zone
-factors of Annex C.2, the typical boundary ranges of Table C.1, and the vector
-change of Annex D.
-
-ISO 10816-3:2009, *Mechanical vibration — Evaluation of machine vibration by
-measurements on non-rotating parts — Part 3: Industrial machines with nominal
-power above 15 kW and nominal speeds between 120 r/min and 15 000 r/min when
-measured in situ*: the machine groups of 4.2, the support classification of
-4.3, the zone boundaries of Tables A.1 and A.2 in both quantities with the
-measurement band Annex A states, the most-restrictive rule of 5.2.3, the significant
-change of 5.3, and the ALARM and TRIP settings of 5.4.
-
-ISO 20816-9:2020, *Mechanical vibration — Measurement and evaluation of machine
-vibration — Part 9: Gear units*: the units of Table 1, the shaft and housing
-measurements of Clause 6, the evaluation zones of 8.2, the acceptance ceiling
-of 8.3, the zone boundaries of Tables 2, 3 and 4, the classification of
-Table 5, and the rating curves of Figures A.1 and A.2.
+- **International Organization for Standardization. (2009).** *Mechanical vibration — Evaluation of machine vibration by measurements on non-rotating parts — Part 3: Industrial machines with nominal power above 15 kW and nominal speeds between 120 r/min and 15 000 r/min when measured in situ* (ISO 10816-3:2009).
+  The machine groups of 4.2 and the support classification of 4.3, the zone boundaries of Tables A.1 and A.2 in both quantities with the measurement band Annex A states, the most-restrictive rule of 5.2.3, the significant change of 5.3 and the ALARM and TRIP settings of 5.4. This edition has been superseded by ISO 20816-3:2022, which is not held here; the boundaries are taken from the edition that is.
+- **International Organization for Standardization. (2016).** [*Mechanical vibration — Measurement and evaluation of machine vibration — Part 1: General guidelines*](https://www.iso.org/standard/63180.html) (ISO 20816-1:2016).
+  The measurement positions of 4.4, the vibration severity of 4.3.3, the four evaluation zones of 6.3.2.3, Criterion II of 6.3.3, the velocity criterion of Figure 9 as Formula (C.1) with the zone factors of Annex C.2, the typical boundary ranges of Table C.1 and the vector change of Annex D. This first edition cancelled and replaced ISO 7919-1:1996 and ISO 10816-1:1995.
+- **International Organization for Standardization. (2020).** *Mechanical vibration — Measurement and evaluation of machine vibration — Part 9: Gear units* (ISO 20816-9:2020).
+  The rating system: the units of Table 1, the shaft and housing measurements of Clause 6, the evaluation zones of 8.2, the acceptance ceiling of 8.3, the boundary tables 2, 3 and 4, the classification of Table 5, and the rating curves of Annex A.

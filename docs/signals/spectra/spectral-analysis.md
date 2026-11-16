@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/spectral-analysis.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Calibrated spectral analysis (Bendat & Piersol)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/
+
+# Calibrated spectral analysis
 
 A spectrum without its uncertainty is half a measurement. This page covers the
 Welch spectral estimators of `phonometry.signals` that report, next to the
@@ -11,12 +13,11 @@ effective number of averages, the normalized random error and chi-square
 confidence intervals; the **coherent output spectrum** that splits a measured
 output into the part linearly explained by the input and the noise remainder,
 with the spectral signal-to-noise ratio; a **fractional-octave smoother** with
-a constant-power kernel; **colored-noise generators** with an exact
-power-law slope for exercising all of the above; the **window figures of
-merit** of Harris (1978) for choosing the taper; and a **Thomson multitaper
-estimator** (Percival & Walden, 1993) for records too short to segment.
-Every error formula is a closed form from the sources, verified by seeded
-Monte Carlo in the test suite.
+a constant-power kernel; and **colored-noise generators** with an exact
+power-law slope for exercising all of the above. A **Thomson multitaper
+estimator** (Percival & Walden, 1993) completes the family for records too
+short to segment. Every error formula is a closed form from the sources,
+verified by seeded Monte Carlo in the test suite.
 
 ## 1. Power spectral density with its statistical error
 
@@ -27,6 +28,18 @@ detrending is applied, so absolute calibration is preserved: a signal in
 pascals yields Pa²/Hz. Two scalings are available: `'density'` (units²/Hz,
 integrates to the signal power) and `'spectrum'` (units², reads the power of
 discrete tones directly).
+
+The price of preserving the calibration is that any DC offset or slow drift
+stays in the record and leaks. The offset lands in the DC bin, and the Hann
+taper's sidelobes spread a fraction of it over the first few bins, so an
+uncorrected offset appears as a spurious low-frequency rise that no amount of
+averaging removes. When the lowest bins matter, subtract the mean or high-pass
+the record explicitly before the call (that is a change to the *signal*, not a
+setting on the estimator), and note that the same offset is invisible in a
+fractional-octave display, because no band reaches DC. The same condition
+returns in
+[Data qualification](../metrology/data-qualification.md), whose
+level-crossing and peak statistics are written for a zero-mean process.
 
 The estimator is a fixed pipeline: the window sets the resolution bandwidth,
 and the effective averages follow from the record length (the raw segment
@@ -90,7 +103,82 @@ a larger random error; the two requirements on segment length pull in
 opposite directions, which is exactly the trade-off the reported numbers make
 visible.
 
+### Choosing the segment length, and then the record length
+
+The bias formula is more useful read backwards. Keeping a resonance peak's bias
+under 1 dB means $\varepsilon_\mathrm{b} \ge -0.2$, hence $B_\mathrm{e} \le 0.775\,B_\mathrm{r}$; keeping
+it under a tenth of a decibel means $B_\mathrm{e} \le 0.263\,B_\mathrm{r}$. The familiar rule of
+thumb (three or four analysis bandwidths across the half-power width of the
+narrowest feature that matters) is exactly this formula, and now it has a
+number attached to it.
+
+Work forward from the measurement rather than from a habitual `nperseg`. A mode
+at 100 Hz with $Q = 50$ has $B_\mathrm{r} = f/Q = 2$ Hz. Holding its bias under 2 %
+(0.09 dB) needs $B_\mathrm{e} \le B_\mathrm{r}\sqrt{3 \times 0.02} = 0.49$ Hz, and for the Hann
+taper $B_\mathrm{e} = 1.5\,f_\mathrm{s}/\texttt{nperseg}$, so at 48 kHz that is
+`nperseg` $\ge 147\,000$, i.e. segments of at least **3.1 s**. Asking for a 10 %
+random error then needs $n_\mathrm{d} = 100$ effective averages, which at 50 % overlap
+means a record of about **150 s**:
+
+```python
+target_bias = 0.02                     # 2 % on the peak, about 0.09 dB
+b_r, q = 100.0 / 50.0, 100             # a 100 Hz mode with Q = 50
+b_e = b_r * (3 * target_bias) ** 0.5   # the analysis bandwidth it allows
+nperseg = 1.5 * 48000 / b_e            # Hann: Be = 1.5 fs / nperseg
+record_s = q * 0.5 * nperseg / 48000   # nd = 100 averages at 50 % overlap
+print(round(b_e, 2), int(nperseg), round(record_s))     # 0.49 146969 153
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_segment_tradeoff_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_segment_tradeoff.svg" alt="Left: the Welch estimate of a 25 hertz wide resonance at 1 kilohertz computed with segment lengths of 512, 1024, 4096 and 16384 samples; the short segments clip and broaden the peak while the long ones resolve it. Right: the resolution bias and the random error in decibels against segment length on a logarithmic axis, the bias falling steeply and the random error rising slowly, crossing near 7400 samples, with the measured peak deficit following the bias" width="92%"></picture>
+
+*The same 25 Hz-wide resonance seen at four segment lengths. At
+`nperseg = 512` the analysis bandwidth is 140.6 Hz, five times the resonance
+width, and the peak reads about 8 dB low and far too broad; by 4096 the
+bandwidth is 17.6 Hz and the peak is essentially resolved. The right panel puts
+the two errors on one axis: the bias falls as $B_\mathrm{e}^2$ and the random error rises
+as $n_\mathrm{d}^{-1/2}$, and they are equal near `nperseg = 7400` for this resonance,
+which is the segment length to choose if there is no reason to favour one error
+over the other.*
+
+The two decisions are independent: **the segment length is set by the sharpest
+feature that matters, the record length by the precision you want.** Lengthening
+the segments without lengthening the record trades one error for the other and
+buys nothing. And 150 s of record is 150 s over which the process has to stay
+stationary, which is a claim, not an assumption, and the one
+[Data qualification](../metrology/data-qualification.md) decides.
+When the record simply cannot be that long, the multitaper estimator of section
+7 is the escape.
+
+### From digital units to dB SPL
+
+`power_spectral_density` scales whatever it is given and applies no calibration
+of its own, so the sensitivity factor goes on the *record*, before the estimate:
+
+```python
+calibration_factor = 1.002             # Pa per digital unit, from the calibrator
+pressure = calibration_factor * record
+psd = signals.power_spectral_density(pressure, fs)      # now in Pa^2/Hz
+```
+
+The ordinate is then $10\log_{10}(G_{xx}/p_0^2)$ dB re (20 µPa)²/Hz, and with
+`scaling="spectrum"` the same call reads a discrete tone's level directly as
+$10\log_{10}(P/p_0^2)$ dB. To get from there to the band level an acoustic
+report contains, integrate the density over the band, sum the bins and multiply
+by the bin spacing, and divide by $p_0^2$; `fractional_octave_smoothing` in
+section 4 is a display smoother and not a substitute for that integration, as
+that section spells out. The factor itself comes from
+[Calibration and dBFS](../metrology/calibration.md).
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing.svg" alt="Welch power spectral density of pink noise in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band shaded around the estimate, the 1/3-octave smoothed curve on top and the exact -3.01 dB per octave power law as a dashed reference line" width="82%"></picture>
+
+*What 20 s of record buys, read off the figure. 467 segments of 4096 samples
+give 442 equivalent averages, a normalized random error of 0.047 and a 95 %
+chi-square band 0.81 dB wide, so the ragged estimate is never more than about
+0.8 dB from the smoothed curve anywhere in the decade, and the shaded band, not
+the ripple, is the honest statement of what is known. Both curves fit
+−3.007 dB/octave against the exact −3.01 dB/octave of pink noise. Smoothing
+narrows nothing: it redraws the same estimate, and the interval below it still
+applies.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -127,8 +215,7 @@ plt.show()
 
 `cross_spectral_density` estimates the complex $G_{xy}(f)$ between two channels
 with the same Welch core, and reports the ordinary coherence
-$\gamma^2_{xy} = |G_{xy}|^2/(G_{xx}\,G_{yy})$ together with the Bendat &
-Piersol random errors of
+$\gamma^2_{xy} = |G_{xy}|^2/(G_{xx}\,G_{yy})$ together with the Bendat & Piersol random errors of
 the magnitude and phase (Eqs. 9.33 and 9.52, with the measured coherence in
 place of the unknown true value, as the book recommends for measured data):
 
@@ -231,8 +318,7 @@ $$
 $$
 
 For additive uncorrelated output noise of known level the coherence has the
-closed form $\gamma^2 = \mathrm{SNR}/(1+\mathrm{SNR})$, which makes the whole
-chain verifiable with a
+closed form $\gamma^2 = \mathrm{SNR}/(1+\mathrm{SNR})$, which makes the whole chain verifiable with a
 synthetic signal:
 
 ```python
@@ -252,10 +338,9 @@ res.plot()                               # Gyy, Gvv, Gnn and the SNR panel
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/coherent_output_snr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/coherent_output_snr.svg" alt="Two panels for the coherent output spectrum of a white noise system with additive noise: the measured output spectrum with the coherent part about 1.5 decibels below it and the uncorrelated noise floor about 6 decibels lower still, and below them the spectral signal-to-noise ratio fluctuating around the dashed closed-form line at 4.1 decibels" width="86%"></picture>
 
-*The exact split of the snippet's model: $G_{vv} = \gamma^2 G_{yy}$ explains
-the output except for the flat noise remainder $G_{nn}$, and the spectral SNR
-scatters around its closed form $10\log_{10}(0.64/0.25) = 4.1$ dB at every
-frequency.*
+*The exact split of the snippet's model: $G_{vv} = \gamma^2 G_{yy}$ explains the output
+except for the flat noise remainder $G_{nn}$, and the spectral SNR scatters
+around its closed form $10\log_{10}(0.64/0.25) = 4.1$ dB at every frequency.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -302,6 +387,43 @@ negligible once $n_\mathrm{d}$ reaches a
 few hundred, and another reason to average generously before trusting a low
 coherence.
 
+## Two channels in practice
+
+Sections 2 and 3 both start from a pair of records, and everything they report
+is only as good as the pair. Two halves: how to acquire it, and how to read a
+coherence that comes back below one.
+
+**Acquisition.** Use one interface with *simultaneously sampled* inputs, or
+measure the inter-channel skew and remove it. A converter that sequences its
+channels puts a fixed skew straight into the cross-spectrum phase and therefore
+into every group delay read off it: one sample of skew at 48 kHz is 20.8 µs,
+which is 15° of phase at 2 kHz and a flat 20.8 µs error on any delay estimate.
+Set both gains before the run and do not touch them, because the coherent output
+split of section 3 assumes the two channels share a fixed scale. Validate the
+pair once with a **zero-baseline run**: feed both channels the same signal (the
+generator split into both inputs, or the two microphones side by side) and
+confirm that the measured delay is a small fraction of a sample and the
+coherence is unity across the band. That one run separates a chain problem from
+a physics problem for every measurement afterwards.
+
+**Reading a coherence below one.** It is not automatically an SNR problem, and
+Bendat & Piersol name five causes with different fixes:
+
+| What you see | The cause | The fix |
+| :--- | :--- | :--- |
+| Coherence flat across the band, consistent with $\gamma^2 = \mathrm{SNR}/(1+\mathrm{SNR})$ | uncorrelated noise at either sensor (the modelled case of section 3) | average more, raise the level, get closer |
+| Coherence falling progressively with frequency, worse as the record is segmented shorter | a bulk propagation delay comparable with the segment length | align the records first, or raise `nperseg` well above the delay; see [Correlation and delay](correlation-delay.md) |
+| Sharp dips exactly at the resonances | resolution bias: the analysis bandwidth smears the peak differently in the two channels | lengthen the segment; the $\varepsilon_\mathrm{b}$ formula of section 1 says by how much |
+| Low at the harmonics of a strong tone while broadband coherence stays high | non-linearity, a rattle or a clipped channel | fix the path, or work below the level at which it appears |
+| Low over a band with no obvious structure | a second, uncorrelated source is also driving the output | the [MISO page](miso-coherence.md): one input cannot explain two sources |
+
+Two closing cautions. The coherence estimate is biased **high** by
+$(1-\gamma^2)^2/n_\mathrm{d}$, so a low coherence read from a handful of averages is even
+lower than it looks. And read the other way, a coherence near one *is* the
+acceptance criterion that makes the whole estimate reportable: quote it band by
+band beside the transfer function, because the bands where it falls are exactly
+the bands where the numbers above it mean nothing.
+
 ## 4. Fractional-octave smoothing
 
 `fractional_octave_smoothing` averages a spectrum over a rectangular window
@@ -312,6 +434,12 @@ Bendat & Piersol recommend for the spectra of resonant systems
 room responses. The average is always computed on **power** (amplitudes are
 squared first, dB levels converted and back), so band power is conserved
 rather than amplitude, and a flat spectrum passes through exactly unchanged.
+
+The three `domain=` values name what the ordinate you hand it *is*, because the
+averaging is always done on power and the conversion back has to know where it
+started: a density or a power spectrum (`"power"`, the default), a linear
+magnitude such as a frequency-response $|H|$ (`"amplitude"`, squared first), or
+a curve already in decibels (`"db"`, converted and converted back).
 
 ```python
 import numpy as np
@@ -331,6 +459,34 @@ A single spectral line with PSD ordinate $P$ (units²/Hz) in a bin of width
 $\Delta f$ smooths to the closed-form level
 $P\,\Delta f / (f_0(2^{1/2n} - 2^{-1/2n}))$
 over one kernel width, the oracle pinned in the tests.
+
+### A smoothed density is still a density
+
+Smoothing changes the *resolution* of the estimate, never its units. The output
+of `fractional_octave_smoothing` is a density in units²/Hz, exactly as the input
+was; flat white noise smooths to the same flat density, whereas the
+one-third-octave **band levels** of that same white noise rise 3 dB per band.
+Overlay a smoothed PSD on a filter-bank spectrum without converting and the two
+disagree by 20 to 30 dB, and neither is wrong.
+
+The conversion is one term. A fractional-octave band of centre frequency $f_\mathrm{c}$
+has bandwidth $B_n = f_\mathrm{c}\,(2^{1/2n} - 2^{-1/2n})$, that is $0.2316\,f_\mathrm{c}$ in one
+third of an octave and $0.7071\,f_\mathrm{c}$ in a full octave, so
+
+$$
+L_\text{band} = 10\log_{10}\!\left(\frac{G(f_\mathrm{c})\,B_n}{p_0^2}\right),
+$$
+
+which at 1 kHz in one-third octave adds $10\log_{10}(0.2316 \times 1000) =
+23.65$ dB to the density level, and 3 dB more for every octave upward. Summing
+the PSD bins across the band and multiplying by the bin spacing is the exact
+form; the expression above is its flat-within-the-band approximation.
+
+Which presentation belongs where: the **smoothed density** for comparing
+loudspeaker and room magnitude responses, where the eye wants a curve at
+constant relative resolution; the **band level** for anything that faces a
+criterion, or that has to agree with `octave_filter` and `OctaveFilterBank`:
+see [Levels](../levels/levels.md).
 
 ## 5. Colored-noise generators
 
@@ -364,13 +520,35 @@ the regression slope of each color lands within a few thousandths of a
 dB/octave of the exact value; the conformance suite pins the pink slope at
 -3.0116 against the exact -3.0103.
 
+Those slopes are density slopes, and they are not what a fractional-octave
+display of the same signal shows. A band's width grows in proportion to its
+centre frequency, so a band level is the density plus $10\log_{10} B_n$ with
+$B_n \propto f_\mathrm{c}$: **every colour reads 3 dB per octave higher in a band display
+than its density slope suggests.** White noise, whose density is flat, therefore
+rises 3 dB per octave through an octave-band filter bank, and pink noise, at
+−3 dB/octave, comes out flat, which is why pink is the reference stimulus for
+room and loudspeaker work, and why an octave-band spectrum of white noise
+sloping upward is not a bug. Red noise falls 3 dB per octave in a band display
+and blue rises 6. The same +3 dB per octave applies to any density-versus-band
+comparison in this library; section 4 above gives the exact conversion, and
+[Levels](../levels/levels.md) is where the band side lives.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_colors_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_colors.svg" alt="Welch spectral densities of the five noise colours over 20 hertz to 20 kilohertz, each normalised to its own 1 kilohertz level so the five straight lines fan out from a single point: violet rising at 6 dB per octave, blue at 3, white flat, pink falling at 3 and red at 6, each with its exact power law dashed underneath and the measured regression slope in the legend" width="88%"></picture>
+
+*The five generators over three decades, each normalised to its own 1 kHz level
+so the slopes fan out from one point, with the exact power law dashed
+underneath. The measured regression slopes land within four thousandths of a
+decibel per octave of the exact values, and the residual is the random error of
+the *estimator*, not of the generator: the same seed reproduces the record bit
+for bit.*
+
 ## 6. Choosing the window
 
-Every estimator on this page accepts any window `scipy.signal.get_window`
-knows, but the choice is a quantified trade-off, not a preference.
-`window_metrics` computes the figures of merit Harris (1978) tabulated, for
-any taper and length, sampled DFT-even exactly as the Welch estimators apply
-it:
+Every estimator on this page accepts any window
+`scipy.signal.get_window` knows, but the choice is a quantified
+trade-off, not a preference. `window_metrics` computes the figures of merit
+Harris (1978) tabulated, for any taper and length, sampled DFT-even exactly
+as the Welch estimators apply it:
 
 - **ENBW** (equivalent noise bandwidth, in bins): how much wider than one
   bin the effective analysis bandwidth is. This is the same number the PSD
@@ -403,6 +581,44 @@ the Dirichlet kernel evaluated half a bin off center.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff.svg" alt="Spectra of the rectangular, Hann, Hamming and Blackman windows over 16 DFT bins, showing the trade-off between main-lobe width and sidelobe level, with each window's equivalent noise bandwidth and highest sidelobe level in the legend" width="82%"></picture>
 
+*The trade in one picture, and it costs 44.8 dB of leakage floor to buy 0.73 of
+a bin. Going from rectangular to Blackman drops the highest sidelobe from
+−13.3 dB to −58.1 dB while the ENBW widens from 1.000 to 1.727 bins and the
+−3 dB main lobe from 0.886 to 1.644 bins. Hann sits where the module's default
+sits: −31.5 dB for 1.500 bins. Read the two axes together, a narrow main lobe
+separates two tones of similar level, a low sidelobe floor finds a weak tone
+beside a strong one, and no window does both.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import signals
+
+n, oversample = 1024, 256
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for name in ("boxcar", "hann", "hamming", "blackman"):
+    res = signals.window_metrics(name, n)
+    spectrum = np.abs(np.fft.rfft(res.taps, n=n * oversample))
+    level = 20.0 * np.log10(spectrum / spectrum[0])
+    bins = np.arange(level.size) / oversample
+    shown = bins <= 16.0
+    ax.plot(bins[shown], level[shown],
+            label=(f"{name}: ENBW {res.enbw_bins:.2f} bins, "
+                   f"sidelobe {res.highest_sidelobe_level:.1f} dB"))
+ax.set_xlim(0.0, 16.0)
+ax.set_ylim(-100.0, 5.0)
+ax.set_xlabel("Frequency offset [DFT bins]")
+ax.set_ylabel("Level re main lobe [dB]")
+ax.legend(loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
 The Hann default of this module is the balanced choice: fast sidelobe
 falloff (-18 dB/octave) protects noise spectra from leakage, ENBW 1.5 costs
 only 1.76 dB against the rectangular window, and its overlap correlation at
@@ -433,18 +649,19 @@ Because the tapers are orthogonal the eigenspectra are nearly uncorrelated,
 so the average carries about $2K$ chi-square degrees of freedom from a
 single record - the same statistical machinery as the Welch result (random
 error, chi-square confidence interval), without segmenting. The
-half-bandwidth $W = NW\,f_\mathrm{s}/N$ is set through the duration x half-bandwidth
-product $NW$ (default 4). $2W$ is the resolution of the estimate (reported
-as `resolution_bandwidth`), and only the tapers below the Shannon number
-$2NW$ keep their spectral-window energy inside the design band - their
+design parameter is the dimensionless duration-times-half-bandwidth product
+$p = NW$ (default 4), and for a record of $N_\mathrm{r}$ samples at $f_\mathrm{s}$ it fixes the
+half-bandwidth $W = p\,f_\mathrm{s}/N_\mathrm{r}$ in hertz. $2W$ is the resolution of the estimate
+(reported as `resolution_bandwidth`), and only the tapers below the Shannon
+number $2p$ keep their spectral-window energy inside the design band - their
 concentrations $\lambda_k$ are reported as `eigenvalues`, and the default
-taper count is $K = 2NW - 1$, all tapers with near-unity concentration.
-Larger $NW$ admits more tapers (lower variance) at the cost of resolution.
+taper count is $K = 2p - 1$, all tapers with near-unity concentration.
+Larger $p$ admits more tapers (lower variance) at the cost of resolution.
 
 ```python
 from phonometry import signals
 
-res = signals.multitaper_psd(record, fs)                 # NW = 4, K = 7, adaptive
+res = signals.multitaper_psd(record, fs)                 # p = NW = 4, K = 7, adaptive
 print(res.degrees_of_freedom.mean())             # ~2K from one record
 print(res.eigenvalues)                           # taper concentrations
 res.plot()                                       # density with the CI band
@@ -480,7 +697,17 @@ scaling spreads over the $2W$ band). The Slepian tapers themselves come from
 quadruple-precision table of Percival & Walden (Table 382) to machine
 precision, which is the anchor oracle of the test suite.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence.svg" alt="Thomson multitaper spectral density of a 171 millisecond pink noise record in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band around the seven-taper adaptive estimate, the single-taper estimate as a jagged gray context line and the exact -3.01 dB per octave power law as a dashed reference" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence.svg" alt="Left: the multitaper spectral density of a 171 millisecond pink noise record with its 95 percent confidence band, against a Welch estimate with only 6.7 effective averages and a visibly wider band, a single-taper estimate as a jagged grey line and the exact minus 3.01 dB per octave law dashed. Right: a 60 dB tone over a pink floor, where the Hann-windowed Welch estimate leaves a wider skirt around the tone than the adaptive multitaper, and the equivalent degrees of freedom drop from about nine to five where the adaptive weights spend them" width="94%"></picture>
+
+*Left, the case the text claims multitaper wins: a 171 ms record. Welch with a
+2048-sample segment fits only $n_\mathrm{d} = 6.7$ effective averages into it, so its
+confidence band is visibly the wider of the two and its curve the rougher, while
+the 7-taper adaptive estimate carries 13.7 equivalent degrees of freedom from
+the same record. Right, the other reason to reach for it: a 60 dB tone over a
+pink floor. The Hann taper leaves a broader skirt around the tone than the
+adaptive weights do, and the price is printed on the right-hand axis, the
+equivalent degrees of freedom fall wherever the weights bought that protection,
+which is exactly what widens the confidence interval there.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -520,36 +747,42 @@ Welch average cannot give; stay with `power_spectral_density` for long
 records, where segment averaging is cheaper than $K$ full-length FFTs and
 the two estimators agree.
 
-## Relation to the H1/H2 estimators
+## Consistency with the frequency-response and intensity estimators
 
-The [frequency-response estimators](../../devices/electroacoustics/electroacoustics.md) `transfer_function`
-and `coherence`, the two-microphone [sound intensity](../../devices/emission/intensity.md) probe and
-these estimators all share one Welch core (same taper, overlap policy and
-detrend-off calibration), so a PSD, a coherence and an $H_1$ computed with the
-same segment length are mutually consistent bin by bin. The same cross-spectral
-matrix underlies [multiple and partial coherence](miso-coherence.md), which
-extends the ordinary coherence to several correlated inputs and one
+The [frequency-response estimators](../../devices/electroacoustics/electroacoustics.md)
+form the same cross-spectra into transfer functions: $H_1 = G_{xy}/G_{xx}$,
+unbiased when the noise is on the output, and $H_2 = G_{yy}/G_{yx}$, unbiased
+when it is on the input. The two-microphone
+[sound intensity](../../devices/emission/intensity.md) probe forms the
+imaginary part of $G_{xy}$. Those estimators,
+`transfer_function` and `coherence`, the intensity probe and these estimators
+all share one Welch core (same taper, overlap policy and detrend-off
+calibration), so a PSD, a coherence and an $H_1$ computed with the same segment
+length are mutually consistent bin by bin. The same cross-spectral matrix
+underlies [multiple and partial coherence](miso-coherence.md),
+which extends the ordinary coherence to several correlated inputs and one
 output.
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol's Welch estimators (*Random Data*, 4th ed., 2010,
-Sections 5.2, 8.5, 9.1-9.2 and 11.5): `power_spectral_density` and
-`cross_spectral_density` with the effective number of averages, the chi-square
-confidence intervals and the resolution-bias error; the coherent output
-spectrum and the spectral SNR; the Harris (1978) window figures of merit in
-`window_metrics`; and the Thomson (1982) multitaper estimator of
-`multitaper_psd`, following Percival & Walden Chapters 7-8.
-`fractional_octave_smoothing` and `noise_signal` complete the toolbox.
+- **Covered.** Bendat & Piersol's Welch estimators (*Random Data*, 4th ed., 2010, Sections
+  5.2, 8.5, 9.1-9.2 and 11.5): `power_spectral_density` and
+  `cross_spectral_density` with the effective number of averages, chi-square
+  confidence intervals and the resolution-bias error; the coherent output
+  spectrum and spectral SNR; the Harris (1978) window figures of merit of
+  `window_metrics`; and the Thomson (1982) multitaper estimator of
+  `multitaper_psd`, following Percival & Walden's Chapters 7-8.
+  `fractional_octave_smoothing` and `noise_signal` complete the toolbox.
 
-**Not covered.** The frequency-response estimators `transfer_function` and
-`coherence`, and the sound-intensity probe, share this page's Welch core but
-are documented on
-[Electroacoustics](../../devices/electroacoustics/electroacoustics.md) and
-[Sound intensity](../../devices/emission/intensity.md). So is multiple and
-partial coherence, on [MISO coherence](miso-coherence.md). And these are a
-textbook's estimators, not a certification standard, so there is no clause
-number and no compliance limit to check the page against.
+- **Not covered.** The frequency-response estimators `transfer_function` and `coherence`, and the
+  sound-intensity probe, share this page's Welch core but are documented on the
+  [electroacoustics](../../devices/electroacoustics/electroacoustics.md) and
+  [sound intensity](../../devices/emission/intensity.md) pages, not here. So
+  is multiple and partial coherence, on the [MISO
+  coherence](miso-coherence.md) page. This page
+  implements Bendat & Piersol's textbook estimators, not a certification
+  standard, so it carries no clause numbers or compliance limits to check
+  against.
 
 ## See also
 
@@ -563,31 +796,13 @@ number and no compliance limit to check the page against.
 
 ## References
 
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Sections 5.2 and 8.5 (autospectra and their random/bias errors,
-  chi-square intervals), 9.1–9.2 (cross-spectra, coherent output spectrum
-  and their errors) and 11.5 (Welch processing, tapering and overlap).
-- Welch, P. D. (1967). The use of fast Fourier transform for the estimation
-  of power spectra: A method based on time averaging over short, modified
-  periodograms. *IEEE Transactions on Audio and Electroacoustics*, 15(2),
-  70–73. [doi:10.1109/TAU.1967.1161901](https://doi.org/10.1109/TAU.1967.1161901).
-  The overlapped-segment variance formula behind the effective number of
-  averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).
-- Harris, F. J. (1978). On the use of windows for harmonic analysis with the
-  discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51–83.
-  [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837).
-  The window figures of merit (Table 1) computed by `window_metrics`.
-- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
-  *Proceedings of the IEEE*, 70(9), 1055–1096.
-  [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
-  The multitaper method: Slepian tapers, eigenspectra and the adaptive
-  weights implemented by `multitaper_psd`.
-- Percival, D. B., & Walden, A. T. (1993). *Spectral Analysis for Physical
-  Applications: Multitaper and Conventional Univariate Techniques*.
-  Cambridge University Press. ISBN 978-0-521-43541-3.
-  [doi:10.1017/CBO9780511622762](https://doi.org/10.1017/CBO9780511622762).
-  Chapter 7 (multitaper estimation: eigenspectra, adaptive weighting,
-  equivalent degrees of freedom) and Chapter 8 (the Slepian sequences);
-  the Table 382 eigenvalues anchor the taper oracle in the test suite.
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Sections 5.2 and 8.5 (autospectra and their random/bias errors, chi-square intervals), 9.1-9.2 (cross-spectra, coherent output spectrum and their errors) and 11.5 (Welch processing, tapering and overlap). ISBN 978-0-470-24877-5.
+- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. https://doi.org/10.1109/PROC.1978.10837
+  The window figures of merit (Table 1): equivalent noise bandwidth, coherent gain, scalloping loss, worst-case processing loss, highest sidelobe level and main-lobe width, computed by window_metrics for any scipy taper.
+- **Percival, D. B., & Walden, A. T. (1993).** *Spectral analysis for physical applications: Multitaper and conventional univariate techniques*. Cambridge University Press. https://doi.org/10.1017/CBO9780511622762
+  Chapter 7 (multitaper estimation: eigenspectra, adaptive weighting, equivalent degrees of freedom) and Chapter 8 (computing the Slepian sequences); the Table 382 eigenvalues anchor the taper oracle in the test suite. ISBN 978-0-521-43541-3.
+- **Thomson, D. J. (1982).** Spectrum estimation and harmonic analysis. *Proceedings of the IEEE*, *70*(9), 1055-1096. https://doi.org/10.1109/PROC.1982.12433
+  The multitaper method: Slepian tapers, eigenspectra and the adaptive weights implemented by multitaper_psd.
+- **Welch, P. D. (1967).** The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms. *IEEE Transactions on Audio and Electroacoustics*, *15*(2), 70-73. https://doi.org/10.1109/TAU.1967.1161901
+  The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).

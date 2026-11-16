@@ -64,13 +64,7 @@ NOT_A_CHECKOUT = "not a git checkout, so there is nothing to ask git about"
 #: answer, so that a test reaching them runs in a tree with no ``.git`` as it
 #: does in a checkout, keyed ``"path::function"`` by the code that starts git,
 #: with the reason.
-TOLERATES_NO_CHECKOUT: dict[str, str] = {
-    "scripts/generate_llms.py::_ignored_paths": (
-        "lists the files git ignores under docs/ to leave them out, with "
-        "check=False: a tree with no .git holds none, and the empty answer "
-        "git's refusal gives is the right one"
-    ),
-}
+TOLERATES_NO_CHECKOUT: dict[str, str] = {}
 
 #: The files whose frames start a process for someone else: the standard
 #: library's, this suite's bounded runner and this plugin.

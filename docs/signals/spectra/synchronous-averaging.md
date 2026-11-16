@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/synchronous-averaging.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Time synchronous averaging (McFadden 1987)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/
+
+# Time synchronous averaging
 
 A rotating machine repeats its signature once per revolution. Buried in
 broadband noise and in the tones of every other shaft, that repetitive
@@ -10,10 +12,17 @@ into successive length-$T$ blocks and averages them. Every component
 synchronous with $T$ reinforces; everything asynchronous, noise and the
 harmonics of unrelated shafts, averages down. `time_synchronous_average`
 implements the model of P. D. McFadden, *A revised model for the extraction
-of periodic waveforms by time domain averaging* (Mechanical Systems and
-Signal Processing 1(1), 1987, 83-95).
+of periodic waveforms by time domain averaging* (1987).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average.svg" alt="Two-panel figure. Left: one noisy period of a signal in faint grey swings far above and below a smooth curve; the average of forty periods, in blue, lies almost exactly on the dashed red true waveform, so the asynchronous noise has been removed. Right: the comb-filter magnitude across the orders between 31 and 33, with unit-height teeth at the integer orders; for N = 20 a deep node falls exactly on the interfering tone marked at 32.05 orders, whereas the power-of-two N = 32 leaves a side lobe there and lets the tone through" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average.svg" alt="Two-panel figure. Left: one noisy period of a signal in faint grey swings far above and below a smooth curve; the average of forty periods, in blue, lies almost exactly on the dashed red true waveform, so the asynchronous noise has been removed. Right: the comb-filter magnitude across the orders between 31 and 33, with unit-height teeth at the integer orders; for N = 20 a deep node falls exactly on the interfering tone marked at 32.05 orders, whereas the power-of-two N = 32 leaves a side lobe there and lets the tone through." width="92%"></picture>
+
+*Two things worth reading separately. Left, the $\sqrt N$ law doing its work:
+the noise on one period has an rms of 0.83, and after 40 averages the averaged
+waveform departs from the true one by 0.138 rms, a factor 6.0 against the
+$\sqrt{40} = 6.32$ the law predicts. Right, the choice that costs nothing: at
+order 32.05 the comb of $N = 20$ is 6×10⁻¹⁴, while the habitual power of two
+$N = 32$ still passes 0.19 of the interfering tone. Twenty averages beat
+thirty-two here, and only because of where the node lands.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -210,6 +219,69 @@ So a power-of-two number of averages, convenient as it is, is not in general
 the optimal choice: the interfering orders present in the machine should set
 $N$.
 
+## Where the period comes from, and how steady it must be
+
+Everything above takes $T$ as given. In a real measurement $T$ has to be
+*measured*, and the assumption hiding behind a scalar `period_s` is that the shaft
+holds that period for the whole record, which is the dominant failure mode of
+the technique and fails silently.
+
+**Getting the period.** Instrument the shaft with a once-per-revolution pulse: an
+optical sensor against a single strip of reflective tape, an inductive probe on
+a keyway, or the index output of an encoder. Record that channel simultaneously
+with the vibration, and take $T$ as the mean interval between pulses over the
+analysed span. Do not take it from the nameplate speed; a nameplate is a rating,
+not a measurement, and a machine under load is not on its nameplate.
+
+**How steady it must be.** The comb algebra of section 1 answers this exactly. A
+relative period error $\delta$ moves the $k$-th harmonic from the comb tooth at
+order $k$ to order $k(1+\delta)$, where the same Dirichlet kernel attenuates it
+by
+
+$$
+\left|\frac{\sin(\pi k N \delta)}{N \sin(\pi k \delta)}\right| ,
+$$
+
+so the loss grows with the harmonic number **and** with the number of averages:
+exactly the two things one wants large. Keeping that loss under 1 dB needs
+roughly $k N \delta < 0.25$. Averaging 40 revolutions and expecting the 10th
+harmonic intact therefore demands the period be right to better than
+$0.25/(10 \times 40) = 6.3 \times 10^{-4}$, that is **0.06 % speed stability**;
+the 20th order at $N = 40$ demands 0.03 %. A machine holding speed to 1 % loses
+everything above the first order or two, progressively, and the resulting
+waveform looks smooth, which reads as a healthy gear.
+
+**The remedies, in order.** Take the period from the tacho rather than from the
+nameplate; slice on the measured pulse intervals (one average per speed plateau
+if the speed steps); angularly resample the record against the tacho (order
+tracking) before averaging when the speed drifts continuously; and failing all
+three, average fewer revolutions and accept the $\sqrt{N}$ penalty, because a
+short average at the right period beats a long average at the wrong one.
+
+**The acceptance check.** `residual_rms` should fall as $1/\sqrt{N}$. If it
+stops falling, either the speed drifted or what is left is synchronous and no
+number of averages will remove it.
+
+### Setting up the measurement
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tsa_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tsa_setup.svg" alt="Elevation of a single-stage gearbox drawn to scale: the input shaft at 1800 revolutions per minute carrying one strip of reflective tape with an optical tacho head aimed at it 20 mm away, a 37-tooth pinion driving an 89-tooth wheel, a stud-mounted accelerometer on the bearing housing nearest the pinion with its axis in the load direction, and both cables running to a two-channel front end on one clock at 25.6 kHz; an inset shows the tacho pulse train above the vibration record with the slice boundaries aligned" width="92%"></picture>
+
+- **Transducer and mounting.** A stud- or adhesive-mounted accelerometer on the
+  bearing housing nearest the gear of interest, with its axis in the load
+  direction. A magnet base collapses the usable band to a couple of kilohertz
+  and hides the mesh harmonics the average exists to show.
+- **Sample rate from the content you want to keep.** A 37-tooth pinion at
+  1800 r/min meshes at $37 \times 30 = 1110$ Hz, so keeping five mesh harmonics
+  needs $f_\mathrm{s} \ge 2.56 \times 5550 = 14.2$ kHz: 16 kHz in practice, 25.6 kHz on
+  an analyser that offers it.
+- **Record length of $N+1$ revolutions**, with $N$ chosen by the
+  interfering-order rule of section 3 rather than by habit.
+- **Both channels on one simultaneously sampling front end**, at a gain fixed
+  for the whole run: a channel skew shifts every block boundary and rotates the
+  averaged waveform.
+- **Record the operating point**: speed, load, oil temperature, because a TSA
+  waveform is comparable only with another taken at the same one.
+
 ## 4. Non-integer samples per period
 
 When $f_\mathrm{s} T$ is an integer, the period boundaries fall on samples, the blocks
@@ -217,8 +289,8 @@ are sliced directly, and a noiseless periodic signal is recovered to machine
 precision (`interpolated` is `False`). When $f_\mathrm{s} T$ is not an integer the
 boundaries fall between samples; each block is then aligned to a common
 integer grid by the band-limited fractional delay of
-[`fractional_delay`](test-signals.md), and the waveform is recovered within
-that interpolation error (`interpolated` is `True`):
+[`fractional_delay`](test-signals.md), and the waveform is
+recovered within that interpolation error (`interpolated` is `True`):
 
 ```python
 fs = 8192.0
@@ -236,9 +308,10 @@ By default the average uses as many whole periods as the record holds; pass
 spans.
 
 The band-limited alignment shares its kernel with the sub-sample
-impulse-response alignment of the [test-signals page](test-signals.md), and
-the recovered waveform, being exactly one period, can be tiled to reconstruct
-the synchronous part of the signal for subtraction or for order analysis.
+impulse-response alignment of the
+[test-signals page](test-signals.md), and the recovered
+waveform, being exactly one period, can be tiled to reconstruct the
+synchronous part of the signal for subtraction or for order analysis.
 
 ## Which diagnostics tool, and when
 
@@ -248,10 +321,10 @@ about a rotating machine, and they compose rather than compete:
 - **TSA** needs the period (a tacho pulse or a trusted shaft speed) and
   returns *the waveform itself*, one revolution of it: the tool when you
   want to see what a specific shaft or gear does per turn, tooth by tooth.
-- **The [cepstrum](cepstrum-echoes.md)** needs no reference and detects
-  *any* periodic family in the spectrum (harmonics, sidebands): the tool
-  when the period is unknown or several families overlap and must be
-  separated.
+- **The [cepstrum](cepstrum-echoes.md)** needs no
+  reference and detects *any* periodic family in the spectrum (harmonics,
+  sidebands): the tool when the period is unknown or several families
+  overlap and must be separated.
 - **The [envelope spectrum](cepstrum-echoes.md#5-the-envelope-spectrum-modulations-as-lines)**
   finds periodicities of the *amplitude*: the tool for bearing-style
   faults, whose repetition rate modulates a high-frequency resonance
@@ -262,40 +335,46 @@ subtract; the `residual` field is the record with the synchronous part
 removed, which is exactly what the envelope spectrum should be run on once
 the strong gear components no longer mask the modulation.
 
+What comes out of that chain is a set of *lines*, and the diagnosis is carried
+by their frequencies rather than by their amplitudes. The kinematic families of
+the machine (ball-pass frequency outer and inner race, ball spin, cage,
+gear-mesh frequency and its shaft-rate sidebands, blade passing, motor slip and
+pole pass) are computed from the geometry and the shaft speed and drawn onto
+the measured envelope spectrum at
+[machine fault frequencies](../../vibration/machinery/machine-diagnostics.md).
+Because those families are expressed in *orders of the shaft*, the same tacho
+signal that fixes the averaging period fixes the family frequencies too: a speed
+error corrupts the averaging and the identification together.
+
 ## What this guide covers
 
-**Covered.** McFadden's revised model for time domain averaging (*Mechanical
-Systems and Signal Processing*, 1987): the comb-filter description of the
-average (Eq. 8, magnitude Eq. 9) in `comb_filter_response`, the square-root
-noise-reduction law reported as `noise_reduction` and `amplitude_snr_gain`,
-and the choice of $N$ that places a comb node on an interfering order,
-following the paper's own 32.05-order example. `time_synchronous_average` also
-implements the band-limited fractional-delay alignment used when $f_\mathrm{s} T$ is not
-an integer.
+- **Covered.** McFadden's revised model for time domain averaging (*Mechanical Systems and
+  Signal Processing*, 1987): the comb-filter description of the average (Eq. 8,
+  magnitude Eq. 9) implemented by `comb_filter_response`, the square-root
+  noise-reduction law reported as `noise_reduction` and `amplitude_snr_gain`,
+  and the choice of $N$ that places a comb node on an interfering order,
+  following the paper's own 32.05-order example. `time_synchronous_average` also
+  implements the band-limited fractional-delay alignment used when $f_\mathrm{s} T$ is
+  not an integer.
 
-**Not covered.** Synchronous averaging needs a period it is given. Finding that
-period, or detecting periodic families without one, is the job of the
-[cepstrum](cepstrum-echoes.md), and locating amplitude-modulation
-periodicities such as bearing faults is the
-[envelope spectrum](cepstrum-echoes.md#5-the-envelope-spectrum-modulations-as-lines);
-neither is on this page. McFadden's paper is not a certification standard, so
-there is no compliance clause to check the implementation against.
+- **Not covered.** TSA needs a known period; finding that period, or detecting periodic families
+  without one, is the job of the
+  [cepstrum](cepstrum-echoes.md), not of this page.
+  Locating amplitude-modulation periodicities, such as bearing faults, is the
+  [envelope
+  spectrum](cepstrum-echoes.md#5-the-envelope-spectrum-modulations-as-lines),
+  also outside this page. McFadden's paper is not a certification standard, so
+  there is no compliance clause to check the implementation against.
 
 ## See also
 
-- [Cepstrum and echoes](cepstrum-echoes.md): reference-free detection of
-  harmonic and sideband families, and the envelope spectrum.
-- [Correlation and delay](correlation-delay.md): the Hilbert envelope
-  behind envelope analysis.
-- [Test signals](test-signals.md): the fractional-delay kernel the
-  non-integer period alignment uses.
+- [Cepstrum and echoes](cepstrum-echoes.md): reference-free detection of harmonic and sideband families, and the envelope spectrum.
+- [Correlation and delay](correlation-delay.md): the Hilbert envelope behind envelope analysis.
+- [Test signals](test-signals.md): the fractional-delay kernel the non-integer period alignment uses.
+- [Machine fault frequencies](../../vibration/machinery/machine-diagnostics.md): the bearing and gear families the residual's envelope spectrum is read against.
+- API reference: [`signals.synchronous_average`](https://docs.jmrp.io/phonometry/reference/api/signals/synchronous-average/).
 
 ## References
 
-- McFadden, P. D. (1987). A revised model for the extraction of periodic
-  waveforms by time domain averaging. *Mechanical Systems and Signal
-  Processing*, 1(1), 83-95.
-  [doi:10.1016/0888-3270(87)90043-2](https://doi.org/10.1016/0888-3270(87)90043-2).
-  The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9)
-  and the node-selection rule for rejecting a non-harmonic interfering
-  order.
+- **McFadden, P. D. (1987).** A revised model for the extraction of periodic waveforms by time domain averaging. *Mechanical Systems and Signal Processing*, *1*(1), 83-95. https://doi.org/10.1016/0888-3270(87)90085-9
+  The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.

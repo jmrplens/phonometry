@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/
 
 # Noise control
 
@@ -93,21 +95,21 @@ occupational limit applies, in [Occupational exposure
 
 ## What this section does not cover
 
-Nothing here is a measurement: every number is predicted from geometry and
-declared data, and the measurement standards named above are cited as the
-source of a supplier's figures, not implemented. Within the predictions, three
-limits are structural. **Only reactive silencer elements are computed**:
-dissipative duct-lining silencers are discussed for selection but are not
-modelled from liner properties anywhere in the library, and on the HVAC page
-the lined-elbow figure is a table lookup (Bies Table 8.11) and the plenum
-attenuation is Wells' closed form driven by a declared mean absorption; neither is a liner
-model. **Mean flow is outside the element matrices**:
-convection, temperature gradients and the flow-dependent impedance of
-perforates do not appear, so a silencer carrying significant flow is predicted
-as though it were not. And `enclosure_insertion_loss` **never predicts the
-panel's transmission loss**: you supply R measured or from another model, and
-the module combines it with the interior correction; predicting R itself is
-[Insulation design](../../buildings/design/index.md). Above the
-higher-order-mode cut-on frequency the plane-wave assumption every duct model
-rests on stops holding, which the duct-path page states and which no method
-here works around.
+- **Not covered.** Nothing here is a measurement: every number is predicted from geometry and
+  declared data, and the measurement standards named above are cited as the
+  source of a supplier's figures, not implemented. Within the predictions, three
+  limits are structural. **Only reactive silencer elements are computed**:
+  dissipative duct-lining silencers are discussed for selection but are not
+  modelled from liner properties anywhere in the library, and on the HVAC page
+  the lined-elbow figure is a table lookup (Bies Table 8.11) and the plenum
+  attenuation is Wells' closed form driven by a declared mean absorption; neither is a liner
+  model. **Mean flow is outside the element matrices**:
+  convection, temperature gradients and the flow-dependent impedance of
+  perforates do not appear, so a silencer carrying significant flow is predicted
+  as though it were not. And `enclosure_insertion_loss` **never predicts the
+  panel's transmission loss**: you supply R measured or from another model, and
+  the module combines it with the interior correction; predicting R itself is
+  [Insulation design](../../buildings/design/index.md). Above the
+  higher-order-mode cut-on frequency the plane-wave assumption every duct model
+  rests on stops holding, which the duct-path page states and which no method
+  here works around.

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/surfaces/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/surfaces/
 
 # Surfaces measured in place
 
@@ -56,16 +58,16 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-**Edition status matters here more than anywhere else in this area.** The
-implementation follows ISO 13472-1:2002 and ISO 13472-2:2010; both have since
-been revised (2022 and 2025 respectively), and those revisions are **not**
-implemented, so a report that cites the current edition cannot cite these
-functions without qualification. The spot method's own signal processing is
-not duplicated either: only its geometry, validity and correction helpers live
-here, and the two-microphone transfer-function reduction is the ISO 10534-2
-routine of [Impedance Tube](../absorbers/impedance-tube.md).
-Nothing in this subsection measures the noise a surface *generates*: the
-tyre-road source term is CNOSSOS territory, in [Environmental
-sources](../../environment/sources/index.md), and no in-situ method is provided
-for any surface other than a road: a wall or a ceiling measured in place is
-outside both parts of ISO 13472.
+- **Not covered.** **Edition status matters here more than anywhere else in this area.** The
+  implementation follows ISO 13472-1:2002 and ISO 13472-2:2010; both have since
+  been revised (2022 and 2025 respectively), and those revisions are **not**
+  implemented, so a report that cites the current edition cannot cite these
+  functions without qualification. The spot method's own signal processing is
+  not duplicated either: only its geometry, validity and correction helpers live
+  here, and the two-microphone transfer-function reduction is the ISO 10534-2
+  routine of [Impedance Tube](../absorbers/impedance-tube.md).
+  Nothing in this subsection measures the noise a surface *generates*: the
+  tyre-road source term is CNOSSOS territory, in [Environmental
+  sources](../../environment/sources/index.md), and no in-situ method is provided
+  for any surface other than a road: a wall or a ceiling measured in place is
+  outside both parts of ISO 13472.

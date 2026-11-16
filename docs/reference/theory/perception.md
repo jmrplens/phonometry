@@ -1,8 +1,27 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/perception.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/perception/
 
 # Theory: Perception and Hearing
 
 This page collects the theory behind hearing and psychoacoustics: the equal-loudness contours, the Zwicker, Moore-Glasberg and Sottek loudness models, the sound-quality metrics tonality, roughness and sharpness, tone prominence, the speech metrics STI and SII, and the statistics of hearing thresholds and hearing loss. It is part of the [theory reference](index.md).
+
+Each section keeps the notation of the standard it describes, and five letters
+are reused between them. Where two collide the section says which is meant, but
+the table is here for anyone scrolling back to a formula:
+
+| Symbol | Meaning | Section |
+| :--- | :--- | :--- |
+| $N$ | Count of tone-band bins | Tone prominence (ECMA-418-1) |
+| $N$ | Total loudness, in sone | Zwicker and advanced loudness (ISO 532) |
+| $N$ | Noise-induced permanent threshold shift, in dB | Hearing loss (ISO 1999) |
+| $S$ | Smoothed loudness state | Moore-Glasberg time-varying (ISO 532-3) |
+| $S$ | Sharpness, in acum | Sharpness (DIN 45692) |
+| $T$ | $T_f$, threshold of hearing at $f$, in dB | Equal-loudness contours (ISO 226) |
+| $T$ | Tonality, in tu$_\mathrm{HMS}$ | Sottek Hearing Model (ECMA-418-2) |
+| $L_\mathrm{U}$ | Magnitude of the linear transfer function, normalised at 1 kHz | Equal-loudness contours (ISO 226) |
+| $L_\mathrm{U}$ | Mean level of the upper contiguous critical band | Tone prominence, PR (ECMA-418-1) |
+| $L_\mathrm{N}$ | Loudness level, in phon | Equal-loudness contours, Zwicker |
 
 ## Equal-loudness contours (ISO 226:2023)
 
@@ -26,40 +45,11 @@ The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred thi
 
 The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz**; above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
+See the [Loudness guide](../../perception/psychoacoustics/loudness.md) for usage.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
 
 *The ISO 226:2023 contours from Formula (1), 20 to 90 phon, with the hearing threshold.*
-
-See the [Loudness guide](../../perception/psychoacoustics/loudness.md) for usage.
-
-## Tone prominence: TNR and PR (ECMA-418-1)
-
-Both methods operate on a Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1) and use the clause 10 critical-band model. The critical bandwidth centred on a tone at $f$ is (Formula 2):
-
-$$
-\Delta f_\mathrm{c} = 25.0 + 75.0 \left(1.0 + 1.4 \left(\tfrac{f}{1000}\right)^2\right)^{0.69} \ \text{Hz}
-$$
-
-Band edges are placed **arithmetically** for $f \le 500$ Hz (Formulae 4–5): $f_{1,2} = f \mp \Delta f_\mathrm{c} / 2$, and **geometrically** above (Formulae 7–8): $f_1 = -\Delta f_\mathrm{c}/2 + \sqrt{\Delta f_\mathrm{c}^2 + 4 f^2}/2$, $f_2 = f_1 + \Delta f_\mathrm{c}$.
-
-**TNR** (clause 11). The tone band spans the spectral minima on both sides of the peak within 15 % of $\Delta f_\mathrm{c}$ (clause 11.2). The tone power subtracts the straight line connecting the band-edge bins (Formula 9): over $N$ tone-band bins, $P_t = \sum_k P_k - (P_{\text{lo}} + P_{\text{hi}})\ N/2$. The masking-noise power is the remaining critical-band power rescaled to the full critical bandwidth (Formula 10): $P_n = (P_{\text{band}} - P_t) \cdot \Delta f_\mathrm{c} / \Delta f_{\text{band}}$, and $\mathrm{TNR} = 10\log_{10}(P_t/P_n)$ (Formula 11). The prominence criterion (Formulae 12–13) is
-
-$$
-\mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
-$$
-
-**PR** (clause 12) compares the level of the critical band centred on the tone, $L_\mathrm{M}$, with the mean power of the two **contiguous** critical bands $L_\mathrm{L}$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Tone-to-noise ratio of a 250 Hz fan tone plotted against the ECMA-418-1 prominence criterion: the criterion falls from about 17 dB at 89 Hz to a flat 8 dB above 1 kHz, and the assessed tone sits at 15.1 dB, 2.1 dB above the 13.0 dB criterion at 250 Hz, so it is prominent" width="88%"></picture>
-
-*The TNR criterion drawn rather than evaluated, over the 89.1 Hz – 11.2 kHz
-range of interest, with one assessed tone on it. Because the criterion is
-$8.0 + 8.33\log_{10}(1000/f_\mathrm{t})$ below 1 kHz and flat above, the same
-tone-to-noise ratio is judged against a different threshold at every frequency:
-the example tone clears its 13.0 dB threshold at 250 Hz by 2.1 dB, while a
-10 dB tone would be prominent anywhere above 1 kHz and not prominent here.*
-
-See the [Prominent Discrete Tones guide](../../perception/psychoacoustics/tone-prominence.md) for usage.
 
 ## Zwicker loudness (ISO 532-1)
 
@@ -92,15 +82,31 @@ $$
 
 below 1 sone the reference program uses $L_\mathrm{N} = 40 (N + 0.0005)^{0.35}$, floored at 3 phon.
 
+See the [Loudness guide](../../perception/psychoacoustics/loudness.md) for usage.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
 
 *Specific loudness N′(z) over the Bark axis: energy spread over many critical bands sums to more sones than the same band level in a single band.*
 
-See the [Loudness guide](../../perception/psychoacoustics/loudness.md) for usage.
-
 ## Advanced loudness models & sound quality
 
 ISO 532-1 is one of three loudness models; two newer families refine the auditory front-end and add the sound-quality metrics tonality and roughness.
+
+All three are calibrated so that a 1 kHz tone at 40 dB SPL is 1 sone, so they
+agree at that anchor and diverge away from it (most visibly in level dependence,
+where Zwicker doubles the sone value every 10 dB and the Sottek model grows by
+about 1.65×) and in their treatment of narrowband against broadband signals.
+Sone values from different models are therefore not interchangeable: the model
+belongs beside every number, and two models must never be mixed in one
+comparison. The division of labour is what usually settles the choice.
+**ISO 532-1** is the stationary workhorse that most product-noise regulations
+still name, and it is the loudness the sharpness definition below is built on.
+**ISO 532-2** refines the auditory filters and adds binaural summation, still for
+stationary signals. **ISO 532-3** carries that chain into the time domain for
+sounds up to a few seconds. **ECMA-418-2** is the route to take when tonality and
+roughness have to come from the same front end as the loudness. When two models
+disagree, the useful question is which one the receiving standard names, not
+which is nearer the truth.
 
 ### Moore-Glasberg loudness (ISO 532-2:2017, ISO 532-3:2023)
 
@@ -131,6 +137,9 @@ S(t) = \alpha\ x(t) + (1 - \alpha)\ S(t - 1)
 $$
 
 using a fast time constant on the attack and a slower one on the release. This yields the **short-term loudness** $S'(t)$ (attack/release near 20–30 ms) and the **long-term loudness** $S''(t)$ (near 0.1–0.75 s); the peak long-term loudness $N_{\max} = \max_t S''(t)$ predicts the loudness of sounds up to about 5 s.
+
+See the [Advanced Loudness guide](../../perception/psychoacoustics/advanced-loudness.md)
+for usage and the model-choice table.
 
 ### Sottek Hearing Model (ECMA-418-2:2025)
 
@@ -200,11 +209,57 @@ Aures curve, which is why the choice of weighting changes a sharpness value
 only for sounds with energy above the knee (15 to 15.8 Bark, about 2.5 to
 3 kHz) and leaves everything below it untouched.*
 
+**What these three numbers are for.** Each unit is anchored on a reference sound
+(1 tu$_\mathrm{HMS}$ for a 1 kHz tone at 40 dB, 1 asper for a fully modulated
+70 Hz-modulated tone, 1 acum for the 920–1080 Hz narrowband noise at 60 dB)
+precisely because
+no standard states an absolute criterion for any of them. There is no roughness
+or tonality that "fails". They earn their keep as *differences* between design
+variants of the same product, measured the same way, with the same model. Orders
+of magnitude for reading a result: a fan or motor with an audible whine typically
+lands a few tenths of a tu$_\mathrm{HMS}$, reported with its tonal frequency
+$f_{\mathrm{ton}}$ beside it, and a broadband sound with no periodic component
+sits near zero; a roughness of a few tenths of an asper is already an obtrusive
+beating or buzz, since 1 asper is a *fully* modulated tone at the worst
+modulation rate; sharpness near or below 1 acum is unremarkable and values above
+about 2 acum read as shrill. Differences of the order of 10 % in any of the three
+are around the smallest a listener reliably notices, so quoting more precision
+than that invites over-interpretation.
+
 See the [Sound Quality Metrics guide](../../perception/psychoacoustics/sound-quality.md) for usage.
+
+## Tone prominence: TNR and PR (ECMA-418-1)
+
+Both methods operate on a Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1) and use the clause 10 critical-band model. The critical bandwidth centred on a tone at $f$ is (Formula 2):
+
+$$
+\Delta f_\mathrm{c} = 25.0 + 75.0 \left(1.0 + 1.4 \left(\tfrac{f}{1000}\right)^2\right)^{0.69} \ \text{Hz}
+$$
+
+Band edges are placed **arithmetically** for $f \le 500$ Hz (Formulae 4–5): $f_{1,2} = f \mp \Delta f_\mathrm{c} / 2$, and **geometrically** above (Formulae 7–8): $f_1 = -\Delta f_\mathrm{c}/2 + \sqrt{\Delta f_\mathrm{c}^2 + 4 f^2}/2$, $f_2 = f_1 + \Delta f_\mathrm{c}$.
+
+**TNR** (clause 11). The tone band spans the spectral minima on both sides of the peak within 15 % of $\Delta f_\mathrm{c}$ (clause 11.2). The tone power subtracts the straight line connecting the band-edge bins (Formula 9): over $N$ tone-band bins, $P_t = \sum_k P_k - (P_{\text{lo}} + P_{\text{hi}})\ N/2$. The masking-noise power is the remaining critical-band power rescaled to the full critical bandwidth (Formula 10): $P_n = (P_{\text{band}} - P_t) \cdot \Delta f_\mathrm{c} / \Delta f_{\text{band}}$, and $\mathrm{TNR} = 10\log_{10}(P_t/P_n)$ (Formula 11). The prominence criterion (Formulae 12–13) is
+
+$$
+\mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
+$$
+
+**PR** (clause 12) compares the level of the critical band centred on the tone, $L_\mathrm{M}$, with the mean power of the two **contiguous** critical bands $L_\mathrm{L}$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Tone-to-noise ratio of a 250 Hz fan tone plotted against the ECMA-418-1 prominence criterion: the criterion falls from about 17 dB at 89 Hz to a flat 8 dB above 1 kHz, and the assessed tone sits at 15.1 dB, 2.1 dB above the 13.0 dB criterion at 250 Hz, so it is prominent" width="88%"></picture>
+
+*The TNR criterion drawn rather than evaluated, over the 89.1 Hz – 11.2 kHz
+range of interest, with one assessed tone on it. Because the criterion is
+$8.0 + 8.33\log_{10}(1000/f_\mathrm{t})$ below 1 kHz and flat above, the same
+tone-to-noise ratio is judged against a different threshold at every frequency:
+the example tone clears its 13.0 dB threshold at 250 Hz by 2.1 dB, while a
+10 dB tone would be prominent anywhere above 1 kHz and not prominent here.*
+
+See the [Prominent Discrete Tones guide](../../perception/psychoacoustics/tone-prominence.md) for usage.
 
 ## Modulation transfer and STI (IEC 60268-16)
 
-Speech intelligibility rides on the slow intensity modulations of the speech envelope. The **modulation transfer function** $m(F)$ of a transmission channel is the ratio of received to emitted modulation depth of the octave-band intensity envelope at modulation frequency $F$; the full STI evaluates it at the 14 one-third-octave modulation frequencies 0.63–12.5 Hz in the seven octave bands 125 Hz – 8 kHz (A.2.2). From a measured impulse response the **Schroeder closed form** gives it directly (indirect method):
+Speech intelligibility rides on the slow intensity modulations of the speech envelope. The clause numbers below are those of IEC 60268-16 Ed. 5 (2020). The **modulation transfer function** $m(F)$ of a transmission channel is the ratio of received to emitted modulation depth of the octave-band intensity envelope at modulation frequency $F$; the full STI evaluates it at the 14 one-third-octave modulation frequencies 0.63–12.5 Hz in the seven octave bands 125 Hz – 8 kHz (A.2.2). From a measured impulse response the **Schroeder closed form** gives it directly (indirect method):
 
 $$
 m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
@@ -216,23 +271,19 @@ $$
 m'_k = m_k \cdot \frac{I_k}{I_k + I_{\mathrm{n},k}} = \frac{m_k}{1 + 10^{-\mathrm{SNR}_k/10}}
 $$
 
-and when absolute band levels are known the full correction $m'_k = m_k I_k / (I_k + I_{\mathrm{am},k} + I_{\mathrm{rt},k} + I_{\mathrm{n},k})$ adds the auditory masking intensity $I_{\mathrm{am},k}$ (from the next lower octave band, Table A.2) and the absolute reception threshold $I_{\mathrm{rt},k}$ (Table A.3). Each corrected $m$ maps to an **effective SNR**, clipped to the ±15 dB range where intelligibility actually varies, then to a transmission index (A.5.4/A.5.5):
+and when absolute band levels are known the full correction $m'_k = m_k I_k / (I_k + I_{\mathrm{am},k} + I_{\mathrm{rt},k} + I_{\mathrm{n},k})$ adds the auditory masking intensity $I_{\mathrm{am},k}$ (from the next lower octave band, Table A.2) and the absolute reception threshold $I_{\mathrm{rt},k}$ (Table A.3). Those two are *absolute-level* terms, so they only mean anything when the chain is calibrated in dB SPL at the listening position and the source is driven at a defined speech level. That splits the measurement in two: an uncalibrated impulse response gives $m$, and with a separately measured background spectrum it gives the noise term as well, but the masking and reception-threshold terms are then left out rather than guessed; a calibrated measurement with the source radiating the standard speech spectrum at speaking height gives the full correction. It is also why a direct STIPA reading from a hand-held meter and an indirect STI from an impulse response of the same room can disagree when the source level was never set. Each corrected $m$ maps to an **effective SNR**, clipped to the ±15 dB range where intelligibility actually varies, then to a transmission index (A.5.4/A.5.5):
 
 $$
 \mathrm{SNR}_{\mathrm{eff}} = 10 \log_{10} \frac{m}{1 - m}\ \text{dB}, \qquad \mathrm{TI} = \frac{\mathrm{SNR}_{\mathrm{eff}} + 15}{30}
 $$
 
-The band MTI is the mean TI over the modulation frequencies, and the STI weights the bands with the male factors $\alpha_k$, $\beta_k$ of Ed. 5 Table A.1 (A.5.6):
+The band MTI is the mean TI over the modulation frequencies, and the STI weights the bands with the male factors $\alpha_k$, $\beta_k$ of Table A.1 (A.5.6):
 
 $$
 \mathrm{STI} = \sum_{k=1}^{7} \alpha_k\ \mathrm{MTI}_k - \sum_{k=1}^{6} \beta_k \sqrt{\mathrm{MTI}_k\ \mathrm{MTI}_{k+1}}
 $$
 
-truncated to 1.0. STIPA (Annex B) samples the same physics with just two modulation frequencies per band (Table B.1) on a test signal with source modulation index 0.55; the received depths are measured by sine/cosine correlation of the ~100 Hz low-passed intensity envelopes $I_k(t)$ over an integer number of modulation periods:
-
-$$
-m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0.55}
-$$
+truncated to 1.0.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti.svg" alt="Modulation transfer index per octave band from 125 Hz to 8 kHz for a hall with a 0.9 s reverberation time and a 15 dB speech-to-noise ratio: the seven bars sit close together between about 0.54 and 0.60, giving STI = 0.58 with the Annex F rating E" width="88%"></picture>
 
@@ -251,11 +302,35 @@ curve falls steeply through the range where a room is still usable and
 flattens once the modulation has already been destroyed, which is why halving
 a long reverberation time buys less intelligibility than halving a short one.*
 
-See the [Speech Transmission Index guide](../../perception/speech/speech-transmission.md) for usage.
+STIPA (Annex B) samples the same physics with just two modulation frequencies per band (Table B.1) on a test signal with source modulation index 0.55; the received depths are measured by sine/cosine correlation of the ~100 Hz low-passed intensity envelopes $I_k(t)$ over an integer number of modulation periods:
+
+$$
+m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0.55}
+$$
+
+**Reading the index.** STI is scaled 0 to 1 across the range over which
+intelligibility actually varies, and the informative Annex F qualification bands
+cut that range into 0.04-wide letters with edges at 0.36, 0.40 … 0.76, from U
+below 0.36 to A+ at 0.76 and above; `STIResult.rating` returns the letter, and
+Annex G Table G.1 gives an example use for each band: band G (0.48-0.52) is
+labelled the target value for voice-alarm systems, which is where the familiar
+"STI ≥ 0.5" requirement comes from, and H (0.44-0.48) the normal lower limit
+for such systems. Two cautions come with the letter. Annexes F and G are
+informative, and Edition 5's own Scope says the document does not provide
+criteria for certifying a transmission channel, so a project requirement belongs
+in the contract as a numeric STI with the letter used to report it. And the
+0.04 band width is itself set by the typical uncertainty of a direct
+measurement, which for STIPA runs about 0.02 to 0.03 (wider than the 0.02
+half-width of a band), so a value within about 0.02 of an edge may legitimately
+be graded either side, and the STI is quoted beside the letter and averaged over
+several positions rather than trusted at one.
+
+See the [Speech Transmission Index guide](../../perception/speech/speech-transmission.md) for usage,
+the Annex G table of typical uses and the position-averaging rule.
 
 ## Speech Intelligibility Index (ANSI S3.5)
 
-Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997) predicts intelligibility from what the listener can actually hear: 18 one-third-octave bands 160 Hz – 8 kHz, each contributing its band importance $I_i$ (Table 3, $\sum I_i = 1$, peaking near 2 kHz). All inputs are equivalent spectrum levels (clauses 3.11/3.55). Speech masks itself upward: each band's masking spectrum $Z_i$ (clause 5.4) accumulates the lower bands along slopes $C_i = -80 + 0.6\,(B_i + 10 \log_{10} f_i - 6.353)$ dB, and the disturbance is the **larger** of masking and hearing floor, $D_i = \max(Z_i, X'_i)$ (clause 5.6), with $X'_i = X_i + T'_i$ the reference internal noise spectrum plus the listener's hearing-threshold shift (clauses 5.5/5.6). The band audibility clips the speech-to-disturbance margin into $[0, 1]$ (clause 5.8), a level-distortion factor discounts overly loud presentation (clause 5.7), and the index sums (clause 6):
+Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997; the clause numbers below are that edition's) predicts intelligibility from what the listener can actually hear: 18 one-third-octave bands 160 Hz – 8 kHz, each contributing its band importance $I_i$ (Table 3, $\sum I_i = 1$, peaking near 2 kHz).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_band_procedures_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_band_procedures.svg" alt="The band-importance function of the four ANSI S3.5-1997 band procedures overlaid on one logarithmic frequency axis: the 21 critical bands, the 17 equally-contributing critical bands, the 18 one-third-octave bands and the 6 octave bands, each drawn as a step across its own band limits. All four trace the same rise to a maximum around 2 kHz, and the wider the bands the higher the step, the octave function peaking at 0.265 against 0.090 for the one-third-octave function" width="90%"></picture>
 
@@ -265,13 +340,31 @@ total of 1.0 redistributed over wider or narrower bands, which is why the
 octave steps stand at 0.265 where the one-third-octave steps stand at 0.090. A
 band lost at 2 kHz costs several times what the same band costs at 160 Hz.*
 
+All inputs are **equivalent spectrum levels** (clauses 3.11/3.55), that is
+per-hertz quantities: a measured one-third-octave band level becomes $E'_i$ or
+$N'_i$ only after subtracting $10\log_{10}$ of that band's bandwidth in hertz
+(about 23.6 dB in the 1 kHz band and over 30 dB at the top of the range), which
+is why the standard speech spectra sit near 25 dB at 1 kHz for a normal voice.
+Each of the three inputs comes from a defined measurement: the speech input is
+either one of the four built-in vocal efforts, defined at 1 m in front of the
+talker, or a measured speech spectrum referred to the listener's position; the
+noise input is measured at that same listener position with the talker silent
+and over the same integration time; and the threshold input is the listener's
+audiogram in dB HL at the same frequencies, zero for normal hearing. The check
+that catches the classic error is the anchor below: a normal-effort spectrum in
+quiet with normal hearing must score about 0.996, so an index that pins near 1.0
+for an obviously noisy scene means band levels were passed where spectrum levels
+were expected.
+
+Speech masks itself upward: each band's masking spectrum $Z_i$ (clause 5.4) accumulates the lower bands along slopes $C_i = -80 + 0.6\,(B_i + 10 \log_{10} f_i - 6.353)$ dB, and the disturbance is the **larger** of masking and hearing floor, $D_i = \max(Z_i, X'_i)$ (clause 5.6), with $X'_i = X_i + T'_i$ the reference internal noise spectrum plus the listener's hearing-threshold shift (clauses 5.5/5.6). The band audibility clips the speech-to-disturbance margin into $[0, 1]$ (clause 5.8), a level-distortion factor discounts overly loud presentation (clause 5.7), and the index sums (clause 6):
+
 $$
 A_i = \operatorname{clip}\Big( \frac{E'_i - D_i + 15}{30},\ 0,\ 1 \Big), \qquad
 L_i = \operatorname{clip}\Big( 1 - \frac{E'_i - U_i - 10}{160},\ 0,\ 1 \Big), \qquad
 \mathrm{SII} = \sum_{i=1}^{18} I_i\ L_i\ A_i .
 $$
 
-The same chain runs over the standard's other three band tables, selected with `method=`: the 21 critical bands of Table 1, the 17 equally-contributing critical bands of Table 2 and the 6 octave bands of Table 4. Those three express the masking slope through the tabulated band width, $C_i = -80 + 0.6\,(B_i + 10 \log_{10} W_i)$, which is the same formula the $10 \log_{10} f_i - 6.353$ above abbreviates for a one-third-octave band; the octave-band procedure omits the spread of masking altogether, since an octave band is already wider than the spread being modelled. The Table 3 standard speech spectra for the normal, raised, loud and shout vocal efforts are built in (25.01 / 33.86 / 42.16 / 51.31 dB at 1 kHz); $U_i$ in the level-distortion factor is always the normal-effort spectrum. The anchor values: the normal-effort spectrum in quiet with normal hearing scores SII ≈ 0.996, the masking-spectrum reference values are matched to $10^{-4}$, and the vocal-effort spectra are cross-verified against the Google and CRAN reference implementations.
+The same chain runs over the standard's other three band tables, selected with `method=`: the 21 critical bands of Table 1, the 17 equally-contributing critical bands of Table 2 and the 6 octave bands of Table 4. Those three express the masking slope through the tabulated band width, $C_i = -80 + 0.6\,(B_i + 10 \log_{10} W_i)$, which is the same formula the $10 \log_{10} f_i - 6.353$ above abbreviates for a one-third-octave band; the octave-band procedure omits the spread of masking altogether, since an octave band is already wider than the spread being modelled. The Table 3 standard speech spectra for the normal, raised, loud and shout vocal efforts are built in (25.01 / 33.86 / 42.16 / 51.31 dB at 1 kHz); $U_i$ in the level-distortion factor is always the normal-effort spectrum.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg" alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) as one labelled family: the standard speech spectrum level in dB SPL over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum" width="90%"></picture>
 
@@ -282,23 +375,64 @@ not lift the family uniformly: shouting adds 27.6 dB at 2.5 kHz, 26.3 dB at
 1 kHz and **−1.6 dB** at 160 Hz, so the spectrum tilts as well as rises, and the
 extra effort is spent where the importance function above is largest.*
 
+Reference values: the normal-effort spectrum in quiet with normal hearing scores
+SII = 0.996; the Table 3 masking reference values are reproduced within
+$10^{-4}$ dB of spectrum level; and the four vocal-effort spectra are verified
+band by band against two independent public implementations, Google's
+`speech_intelligibility_index` and the R `SII` package (both in the references,
+used for verification only).
+
+**Reading the index.** The SII is an *audibility fraction*, not a score: it says
+what proportion of the importance-weighted speech cues reach the listener above
+masking and threshold. ANSI S3.5 maps it to a percentage of words or sentences
+correct only through transfer functions specific to the speech material and the
+listeners, so the same 0.5 supports high sentence scores and much lower
+nonsense-syllable scores, and an SII should never be quoted as "X % intelligible"
+without naming the material. As practical anchors: above about 0.75 is the design
+target where unfamiliar material must be understood, 0.45 to 0.75 is workable for
+familiar material in a known context, and below about 0.3 connected speech cannot
+be relied on. Differences of a few hundredths are inside the uncertainty of the
+input spectra and mean nothing. Which of the two speech metrics to reach for
+follows from what is being asked: the **SII** answers questions about a
+*listener*, because it is the only one of the two that takes an audiogram and a
+vocal effort as input; the **STI** answers questions about a *room or a system*,
+because it takes an impulse response and a background spectrum and says nothing
+about who is listening.
+
 See the [Speech Intelligibility guide](../../perception/speech/speech-intelligibility.md) for usage.
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
-ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults: the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
+ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults: the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz).
+
+The two columns differ only in how the sound reaches the head, and the standard
+is exact about it (clause 1). Both apply to **binaural** listening by
+otologically normal 18-to-25-year-olds, and both are referred to the sound
+pressure level measured **with the listener absent**, at the point where the
+centre of the head would be. The free-field column applies to pure tones in a
+free progressive plane wave with the subject facing the source (frontal
+incidence); the diffuse-field column applies to one-third-octave bands of white
+or pink noise in a diffuse field, and up to 8 kHz to any narrower noise band as
+well. That difference in geometry is exactly why the columns coincide below
+1 kHz and separate above it: at high frequency the frontal-incidence head and
+pinna gain exceeds the all-direction average, so less free-field level is needed
+for the same threshold. It also means these are calibration references for a
+sound-field audiometric setup (ISO 8253-2), not a curve to compare a room
+measurement against.
+
+ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
 
 $$
 \Delta H_\mathrm{md} = a\ (Y - 18)^b \ \text{dB},
 $$
 
-and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = \Delta H_\mathrm{md} + z(Q)\ s$, using the upper spread $s_\mathrm{u}$ for $z \ge 0$ (worse than median) and the lower spread $s_\mathrm{l}$ otherwise, each a degree-5 polynomial in $Y - 18$ per sex and frequency (clause 4.3, Tables 2–5). At age 18 every deviation is zero by construction. The formulae are established to 80 years at and below 2 kHz and to 70 years above; beyond that the evaluation is an extrapolation. Anchors: at 60 years the medians evaluate to 7.85 dB (male, 1 kHz), 20.21 dB (male, 4 kHz) and 15.32 dB (female, 4 kHz), matching the Table 1 formula to $10^{-3}$.
+and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = \Delta H_\mathrm{md} + z(Q)\ s$, using the upper spread $s_\mathrm{u}$ for $z \ge 0$ (worse than median) and the lower spread $s_\mathrm{l}$ otherwise, each a degree-5 polynomial in $Y - 18$ per sex and frequency (clause 4.3, Tables 2–5). At age 18 every deviation is zero by construction. The formulae are established to 80 years at and below 2 kHz and to 70 years above; beyond that the evaluation is an extrapolation. Reference values: at 60 years the medians evaluate to 7.85 dB (male, 1 kHz), 20.21 dB (male, 4 kHz) and 15.32 dB (female, 4 kHz), matching the Table 1 formula to $10^{-3}$.
+
+See the [Hearing Threshold guide](../../perception/hearing/hearing-threshold.md) for usage.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold.svg" alt="Two panels. Left: the ISO 7029 median hearing-threshold deviation for men at ages 20, 40, 60 and 80 on an inverted audiogram axis, with the 10 to 90 percent fractile band around the 70-year curve; the loss deepens toward high frequencies and with age. Right: the ISO 389-7 free-field and diffuse-field reference threshold, coinciding below 1 kHz and diverging above, dipping to a minimum near 3 to 4 kHz" width="96%"></picture>
 
 *The ISO 7029 median age shift with its fractile band (left) and the ISO 389-7 free- and diffuse-field reference thresholds (right).*
-
-See the [Hearing Threshold guide](../../perception/hearing/hearing-threshold.md) for usage.
 
 ## Noise-induced hearing loss (ISO 1999)
 
@@ -322,64 +456,49 @@ The Annex D worked examples (Tables D.1–D.4; e.g. 100 dB / 40 yr at 3 kHz: 29/
 at 4 kHz is what makes noise-induced loss recognisable in a clinic, and it is
 here only because $L_0$ is lowest (75 dB) in that band. Mind the fractile
 direction the paragraph above states: the edge of the shaded band showing the
-**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth,
-which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
+**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth
+, which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
 this case runs 19.5 / 26.0 / 36.0 dB at `fractile` 0.10 / 0.50 / 0.90.*
 
 See the [Noise-Induced Hearing Loss guide](../../perception/hearing/noise-induced-hearing-loss.md) for usage.
 
 ## References
 
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  The original equal-loudness measurements behind the contour concept of the
-  first section.
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3rd ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  The critical-band, masking and loudness psychoacoustics underneath the
-  Zwicker model and the sharpness and roughness sensations.
-- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
-  room acoustics and its use for estimating speech intelligibility in
-  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
-  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
-  The modulation-transfer framework of the STI section.
-- French, N. R., & Steinberg, J. C. (1947). Factors governing the
-  intelligibility of speech sounds. *The Journal of the Acoustical Society of
-  America*, 19(1), 90-119.
-  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+- **American National Standards Institute. (1997).** [*Methods for calculation of the speech intelligibility index*](https://webstore.ansi.org/standards/asa/ansiasas31997r2017) (ANSI S3.5-1997 (R2017)). Acoustical Society of America.
+  The SII section: the clause 3.11/3.55 equivalent spectrum levels, the clause 5.4-5.8 masking and audibility chain, the clause 6 summation and the Tables 1-4 band procedures with their importance functions.
+- **Deutsches Institut für Normung. (2009).** [*Messtechnische Simulation der Hörempfindung Schärfe*](https://www.dinmedia.de/en/standard/din-45692/117635111) (DIN 45692:2009-08).
+  The sharpness section: Equation (1), the clause 5.2 calibration window and the Table A.2 target values, with the Annex B weighting functions.
+- **Ecma International. (2024).** [*Psychoacoustic metrics for ITT equipment — Part 1: Prominent discrete tones*](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf) (ECMA-418-1:2024 (3rd ed.)).
+  The critical-band model and the TNR and PR procedures of the tone-prominence section. The linked PDF is the free download.
+- **Ecma International. (2025).** [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
+  The Sottek Hearing Model: the Clause 5 auditory front end, the tonality of Clause 6, the roughness Formulae 113-117 and the sharpness input of Clause 7.1.10. The edition read is the 4th, of June 2025, whose PDF the linked page carries free.
+- **Fastl, H., & Zwicker, E. (2007).** *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+  The critical-band, masking and loudness psychoacoustics underneath the Zwicker model and the sharpness and roughness sensations.
+- **Fletcher, H., & Munson, W. A. (1933).** Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+  The original equal-loudness measurements behind the contour concept of the first section.
+- **French, N. R., & Steinberg, J. C. (1947).** Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. https://doi.org/10.1121/1.1916407
   The articulation-band experiments behind the SII band-importance function.
-- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
-  steady-state broad-band noise. *The Journal of the Acoustical Society of
-  America*, 56(5), 1585–1593.
-  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
-  A field study of the exposure-response relations later codified in
-  ISO 1999.
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [iso.org catalogue](https://www.iso.org/standard/83117.html).
-  The Formula (1)/(2) contour model and the Table 1 parameters of the
-  equal-loudness section.
-- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
-  equipment — Part 1: Prominent discrete tones* (3rd ed.).
-  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
-  The critical-band model and the TNR and PR procedures of the
-  tone-prominence section.
-- International Organization for Standardization. (2005). *Acoustics —
-  Reference zero for the calibration of audiometric equipment — Part 7:
-  Reference threshold of hearing under free-field and diffuse-field listening
-  conditions* (ISO 389-7:2005).
-  [iso.org catalogue](https://www.iso.org/standard/38976.html).
-  The Table 1 free-field and diffuse-field reference thresholds of the
-  hearing-threshold section.
-- International Organization for Standardization. (2017). *Acoustics —
-  Statistical distribution of hearing thresholds related to age and gender*
-  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
-  The age-dependent median shift and fractile spreads of the presbycusis
-  model.
-- International Organization for Standardization. (2013). *Acoustics —
-  Estimation of noise-induced hearing loss* (ISO 1999:2013).
-  [iso.org catalogue](https://www.iso.org/standard/45103.html).
-  The NIPTS model, its fractiles and the HTLAN compressed sum of the
-  hearing-loss section.
+- **Google. (2019).** [*speech_intelligibility_index*](https://github.com/google/speech_intelligibility_index). GitHub.
+  One of the two independent public implementations the four vocal-effort spectra were cross-verified against band by band. Used for verification only.
+- **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
+  The modulation-transfer framework of the STI section.
+- **International Electrotechnical Commission. (2020).** [*Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index*](https://webstore.iec.ch/en/publication/26771) (IEC 60268-16:2020 (Edition 5)).
+  The STI section: the A.2.2 modulation frequencies, the A.5.4/A.5.5 index mapping, the Table A.1 band weights, the Table A.2/A.3 masking and reception-threshold data, the Annex B STIPA method and the Annex F qualification bands.
+- **International Organization for Standardization. (2005).** [*Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions*](https://www.iso.org/standard/38976.html) (ISO 389-7:2005).
+  The Table 1 free-field and diffuse-field reference thresholds of the hearing-threshold section.
+- **International Organization for Standardization. (2013).** [*Acoustics — Estimation of noise-induced hearing loss*](https://www.iso.org/standard/45103.html) (ISO 1999:2013).
+  The NIPTS model, its fractiles and the HTLAN compressed sum of the hearing-loss section.
+- **International Organization for Standardization. (2017).** [*Acoustics — Methods for calculating loudness — Part 1: Zwicker method*](https://www.iso.org/standard/63077.html) (ISO 532-1:2017).
+  The Zwicker loudness section: the Annex A.4 reference program the implementation is a clean-room port of, its Tables A.1-A.7 and the clause 6.3 time-varying chain.
+- **International Organization for Standardization. (2017).** [*Acoustics — Methods for calculating loudness — Part 2: Moore-Glasberg method*](https://www.iso.org/standard/63078.html) (ISO 532-2:2017).
+  The stationary Moore-Glasberg model of the advanced-loudness section: the roex auditory filters, the excitation pattern and the binaural summation.
+- **International Organization for Standardization. (2017).** [*Acoustics — Statistical distribution of hearing thresholds related to age and gender*](https://www.iso.org/standard/42916.html) (ISO 7029:2017).
+  The age-dependent median shift and fractile spreads of the presbycusis model.
+- **International Organization for Standardization. (2023).** [*Acoustics — Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher method*](https://www.iso.org/standard/69856.html) (ISO 532-3:2023).
+  The time-varying extension of Part 2 (Formulae 2-5 and 7-9), with the short-term and long-term loudness smoothers of the same section.
+- **International Organization for Standardization. (2023).** [*Acoustics — Normal equal-loudness-level contours*](https://www.iso.org/standard/83117.html) (ISO 226:2023).
+  The Formula (1)/(2) contour model and the Table 1 parameters of the equal-loudness section.
+- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. https://doi.org/10.1121/1.1903482
+  A field study of the exposure-response relations later codified in ISO 1999.
+- **Warnes, G. R. (2018).** [*SII: Calculate ANSI S3.5-1997 Speech Intelligibility Index (version 1.0.3.1)*](https://cran.r-project.org/src/contrib/Archive/SII/). CRAN archive.
+  The second independent implementation used for the same band-by-band cross-verification of the vocal-effort spectra. Archived from CRAN in 2022; the last release is the one used.

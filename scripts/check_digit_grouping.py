@@ -15,7 +15,8 @@ SI Brochure follows, is a thin space that does not break.
 
 This refuses the ordinary space and asks for U+202F, NARROW NO-BREAK SPACE. It
 is in the font the figures are drawn with and in every web font the site loads,
-and it survives the plain-Markdown twins and ``llms.txt`` unchanged.
+and it survives the Markdown copies of the pages, the GitHub edition under
+``docs/`` and ``llms.txt`` unchanged.
 
 **Where it does not apply.** Figure and diagram labels are exempt, and the
 reason is that the defect cannot occur there: a label is drawn as a single line
@@ -43,15 +44,18 @@ import sys
 import tokenize
 from pathlib import Path
 
+from github_edition import is_edition_copy
 from markdown_fences import code_lines, page_lines
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 #: The repository, for paths a reader can click.
 _REPO = Path(__file__).resolve().parent.parent
 
-#: Everything whose text reflows when it is read: the guides and their plain
-#: twins, the registries, the release notes, and the docstrings that become
-#: reference pages. Figure generators are deliberately absent.
+#: Everything whose text reflows when it is read: the guides, the hand-written
+#: files of ``docs/``, the registries, the release notes, and the docstrings
+#: that become reference pages. Figure generators are deliberately absent, and
+#: the GitHub edition of the guides under ``docs/`` is left out by
+#: :func:`_files`.
 _ROOTS: tuple[str, ...] = (
     "docs",
     "site/src/content/docs",
@@ -64,7 +68,8 @@ _ROOTS: tuple[str, ...] = (
 )
 
 #: Generated from the sources above, so a finding there is a finding here that
-#: has already been reported once.
+#: has already been reported once. The GitHub edition of the guides is
+#: generated too, and told by its opening rather than by its path.
 _SKIP: tuple[str, ...] = ("llms", "node_modules", ".astro")
 
 #: The separator the grouping is written with.
@@ -177,6 +182,7 @@ def _files() -> list[Path]:
             if path.is_file()
             and path.suffix in {".md", ".mdx", ".py"}
             and not any(skip in str(path) for skip in _SKIP)
+            and not is_edition_copy(path)
         )
     return out
 

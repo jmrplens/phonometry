@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/machinery/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/machinery/
 
 # Machinery
 
@@ -65,21 +67,21 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-These are **predictions, not detections**. Nothing here decides whether a line
-is present, only where it would be if it were: the overlay is a set of
-expectations to read a measured spectrum against, and the reading is yours. A
-loaded bearing slips a little, so expect the measured peak within a per cent
-or two of the prediction rather than exactly on it.
+- **Not covered.** These are **predictions, not detections**. Nothing here decides whether a line
+  is present, only where it would be if it were: the overlay is a set of
+  expectations to read a measured spectrum against, and the reading is yours. A
+  loaded bearing slips a little, so expect the measured peak within a per cent
+  or two of the prediction rather than exactly on it.
 
-The severity verdict is a page of its own now:
-[Evaluating machine vibration](machine-vibration-evaluation.md)
-carries the ISO 20816-1 zones and criteria. What is still absent is the
-trending that feeds them. The amplitude criteria that turn a present
-line into an assessment (crest-factor and kurtosis trending, and the velocity
-severity bands the machine-specific parts of ISO 20816 print) are outside
-this module, and rotor
-balancing (ISO 21940) and order tracking are absent from the library
-altogether. One published convention differs between sources and is flagged on
-the guide rather than hidden: the pole-pass frequency is standard
-condition-monitoring practice rather than Norton's, who gives the slip
-frequency itself as the broken-bar sideband spacing.
+- **Not covered.** The severity verdict is a page of its own now:
+  [Evaluating machine vibration](machine-vibration-evaluation.md)
+  carries the ISO 20816-1 zones and criteria. What is still absent is the
+  trending that feeds them. The amplitude criteria that turn a present
+  line into an assessment (crest-factor and kurtosis trending, and the velocity
+  severity bands the machine-specific parts of ISO 20816 print) are outside
+  this module, and rotor
+  balancing (ISO 21940) and order tracking are absent from the library
+  altogether. One published convention differs between sources and is flagged on
+  the guide rather than hidden: the pole-pass frequency is standard
+  condition-monitoring practice rather than Norton's, who gives the slip
+  frequency itself as the broken-bar sideband spacing.

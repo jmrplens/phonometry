@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/io/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/
 
 # Files
 
@@ -90,35 +92,35 @@ a node, without storing its snapshots.
 
 ## What this section does not cover
 
-**No playback, no editing, no effects.** This is a file layer for
-measurements, not an audio workstation: nothing here plays a sound, trims a
-region by ear, or applies gain. There is deliberately no lossy writing of
-*audio* either: no measurement ends in an MP3, and a library whose job is
-preserving levels should not make one easy to produce. The videos the
-[video guide](videos.md) writes are pictures of a plot or a
-simulation, not recordings, and are encoded as any video is.
+- **Not covered.** **No playback, no editing, no effects.** This is a file layer for
+  measurements, not an audio workstation: nothing here plays a sound, trims a
+  region by ear, or applies gain. There is deliberately no lossy writing of
+  *audio* either: no measurement ends in an MP3, and a library whose job is
+  preserving levels should not make one easy to produce. The videos the
+  [video guide](videos.md) writes are pictures of a plot or a
+  simulation, not recordings, and are encoded as any video is.
 
-**AAC/M4A stays external.** Dictaphone and phone recordings in MP4
-containers are not decoded; the honest route is a one-line
-`ffmpeg -i note.m4a note.wav` and then `read()`, with the same lossy caveat
-either way. Likewise the DAQ formats that are not audio at all (TDMS
-(LabVIEW) and UFF (modal analysis)) have their own Python readers, `npTDMS`
-and `pyuff`, and pretending they are audio files would serve neither.
+- **Not covered.** **AAC/M4A stays external.** Dictaphone and phone recordings in MP4
+  containers are not decoded; the honest route is a one-line
+  `ffmpeg -i note.m4a note.wav` and then `read()`, with the same lossy caveat
+  either way. Likewise the DAQ formats that are not audio at all (TDMS
+  (LabVIEW) and UFF (modal analysis)) have their own Python readers, `npTDMS`
+  and `pyuff`, and pretending they are audio files would serve neither.
 
-**Ambisonic files are tolerated, not interpreted.** A B-format `.amb` file
-or an ambisonic GUID reads fine and its channels come back labelled, but no
-FuMa-to-AmbiX conversion matrix is applied: channel 0 of a FuMa file
-carries W at −3 dB, and turning that into a pressure without saying so
-would be a silent level change. This is exactly the class of default this
-module exists to refuse.
+- **Not covered.** **Ambisonic files are tolerated, not interpreted.** A B-format `.amb` file
+  or an ambisonic GUID reads fine and its channels come back labelled, but no
+  FuMa-to-AmbiX conversion matrix is applied: channel 0 of a FuMa file
+  carries W at −3 dB, and turning that into a pressure without saying so
+  would be a silent level change. This is exactly the class of default this
+  module exists to refuse.
 
-**No manufacturer's data ships with the library.** A data sheet is revised
-under the same title, its terms rarely allow copying it, and the value a
-project needs is the one on the sheet it was specified against, so your
-catalogues stay in your files and in the objects `read_catalogue` hands
-back: the library keeps no copy and opens no link a file names. For the same
-reason a table of a manufacturer pasted into an issue or a pull request is
-never merged.
+- **Not covered.** **No manufacturer's data ships with the library.** A data sheet is revised
+  under the same title, its terms rarely allow copying it, and the value a
+  project needs is the one on the sheet it was specified against, so your
+  catalogues stay in your files and in the objects `read_catalogue` hands
+  back: the library keeps no copy and opens no link a file names. For the same
+  reason a table of a manufacturer pasted into an issue or a pull request is
+  never merged.
 
 ## Before and after these pages
 
@@ -133,6 +135,6 @@ rest of the library receive a calibrated signal and never learn it came
 from a file.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the
+[What do you need to measure?](../start/tasks.md) indexes it by the
 job and [All guides](../README.md) lists every page with a line
 on each.

@@ -38,6 +38,20 @@
 //       With `--public` in the same run, both are written from one rendering,
 //       so the llms files the build publishes carry the copies byte for byte
 //       (package.json `prebuild`).
+//   node scripts/agent-md.mjs --docs <dir>
+//       Writes the GitHub edition into <dir> (`../docs` from `make llms`):
+//       every English page the edition holds (src/lib/agent-md/edition.mjs),
+//       as the GitHub flavour of its copy writes it, at <route>.md or, for a
+//       page written as its folder's index, <route>/index.md; each file opens
+//       with a comment naming its source and one line with the way back to
+//       <dir>/README.md and the address the page is published at, and a link
+//       to another page of the edition is relative. A file a previous run
+//       wrote that this one does not write is removed; every other file of
+//       <dir> is left alone. The run fails before a file is written on any
+//       issue the renderer records, and when <dir>/README.md, the edition's
+//       hand-kept front door, does not link every page or links a file that
+//       is not there (rule F3). It combines with `--dump`, as `make llms`
+//       runs it.
 //   node scripts/agent-md.mjs --census
 //       Parses and writes every page under src/content/docs, then reports
 //       which components the pages use and whether each has a writer, the raw
@@ -48,7 +62,9 @@
 //   node scripts/agent-md.mjs --page <route> [--flavour agent|github]
 //       Prints one page's copy: `signals/filters/filter-banks`,
 //       `es/signals/filters/filter-banks`, or `` / `es` for the two homes.
-//       Issues go to stderr, and any issue makes the exit status 1.
+//       With `--flavour github`, a page of the GitHub edition is printed as
+//       `--docs` writes its file. Issues go to stderr, and any issue makes the
+//       exit status 1.
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
@@ -56,12 +72,25 @@ import { fileURLToPath } from 'node:url';
 
 import { fileOfRoute, pageFiles, readEntry } from '../src/lib/agent-md/content.mjs';
 import { handwrittenTargets, removeWrittenCopies } from '../src/lib/agent-md/copies.mjs';
+import {
+  documentAnchors,
+  editionLinks,
+  editionOpening,
+  editionPages,
+  githubAnchors,
+  inEdition,
+  isEditionFile,
+  numbersInCode,
+  readmeProblems,
+  sitePage,
+} from '../src/lib/agent-md/edition.mjs';
 import { pageMarkdown, titleOf } from '../src/lib/agent-md/page.mjs';
-import { CONTENT_DIR, SITE_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
+import { CONTENT_DIR, REPO_DIR, SITE_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
 import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
 import { unreadPage } from './check-markdown-writers.mjs';
 import { verifiedProvider } from '../src/lib/agent-md/verified.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { FULL_TEXT_KINDS, hasMarkdownCopy, pageKind, routeOf } from '../src/lib/page-markdown.mjs';
 import { implementedStandards } from '../src/lib/reference-chips.ts';
 import { firstPublished } from '../src/lib/page-dates.mjs';
@@ -162,13 +191,124 @@ export function dumpRefusal(dir) {
   return undefined;
 }
 
+/** An address of the site in a Markdown text, up to its first blank or bracket. */
+const SITE_ADDRESS = /https:\/\/docs\.jmrp\.io\/phonometry[^\s)>\]]*/gu;
+
 /**
- * Writes every page's copy under `publicOut`, and the English pages the llms
- * files carry, with routes.json, under `dumpDir`; either may be left out.
+ * The files of the GitHub edition, as `--docs` writes them: every page the
+ * edition holds, or only `only` and the pages they link to with a fragment,
+ * whose headings a link's fragment is held to.
+ *
+ * @param {{
+ *   docsDir: string,
+ *   registry: Map<string, import('../src/lib/agent-md/types.mjs').ComponentMarkdown>,
+ *   contentDir?: string,
+ *   only?: ReadonlySet<string>,
+ * }} options  `only` is a set of routes; every page by default.
+ * @returns {Promise<{
+ *   files: Map<string, string>,
+ *   pages: import('../src/lib/agent-md/edition.mjs').EditionPage[],
+ *   problems: string[],
+ *   kept: number,
+ * }>}  `files` by path relative to `docsDir`; `problems` one line each, the
+ *   renderer's issues and the README's; `kept` how many links keep the site's
+ *   address because GitHub would not find their fragment on the target.
+ */
+export async function editionFiles({ docsDir, registry, contentDir = CONTENT_DIR, only }) {
+  const pages = editionPages(contentDir);
+  const byRoute = new Map(pages.map((page) => [page.route, page]));
+  const byPath = new Map(pages.map((page) => [page.path, page]));
+  /** @type {Map<string, string>} */
+  const rendered = new Map();
+  /** @type {string[]} */
+  const problems = [];
+  const render = async (page) => {
+    if (rendered.has(page.route)) return rendered.get(page.route);
+    const { markdown, issues } = await pageMarkdown(page.file, { registry, flavour: 'github', contentDir });
+    for (const issue of issues) {
+      problems.push(`  ${relative(contentDir, page.file).split(sep).join('/')}${issue.line ? `:${issue.line}` : ''}  [${issue.kind}] ${issue.message}`);
+    }
+    rendered.set(page.route, markdown);
+    return markdown;
+  };
+  const wanted = only ? pages.filter((page) => only.has(page.route)) : pages;
+  for (const page of wanted) await render(page);
+  // A link's fragment is held to the headings of the page it leads to, so
+  // those pages are rendered too.
+  for (const page of wanted) {
+    for (const [url] of rendered.get(page.route).matchAll(SITE_ADDRESS)) {
+      const target = sitePage(url);
+      const linked = target?.fragment ? byRoute.get(target.route) : undefined;
+      if (linked) await render(linked);
+    }
+  }
+  /** @type {Map<string, Set<string>>} */
+  const anchors = new Map();
+  const anchorsOf = (path) => {
+    if (!anchors.has(path)) {
+      const page = byPath.get(path);
+      if (page && !rendered.has(page.route)) throw new Error(`${path} was not rendered before a link to it was read`);
+      anchors.set(path, page ? githubAnchors(rendered.get(page.route)) : documentAnchors(join(docsDir, path)));
+    }
+    return anchors.get(path);
+  };
+  /** @type {Map<string, string>} */
+  const files = new Map();
+  let kept = 0;
+  for (const page of wanted) {
+    const linked = editionLinks(rendered.get(page.route), page, { pages: byRoute, anchorsOf });
+    kept += linked.kept.length;
+    files.set(page.path, `${editionOpening(page)}\n\n${numbersInCode(linked.markdown)}`);
+  }
+  if (!only) {
+    const readme = join(docsDir, 'README.md');
+    if (existsSync(readme)) {
+      // A file of the edition no planned page writes is removed by this run,
+      // so it does not count as there: a link to it would dangle once it goes.
+      const present = (path) => {
+        const file = join(docsDir, path);
+        return existsSync(file) && !(path.endsWith('.md') && isEditionFile(readCommittedText(file)));
+      };
+      for (const problem of readmeProblems(readCommittedText(readme), pages, present)) {
+        problems.push(`  ${problem}`);
+      }
+    } else problems.push(`  ${relative(SITE_DIR, readme)} is missing: it is the edition's front door, and links every page of it`);
+  }
+  return { files, pages, problems, kept };
+}
+
+/**
+ * The files of a directory that a previous run of `--docs` wrote: the
+ * Markdown files that open with the edition's comment.
+ *
+ * @param {string} dir
+ * @returns {string[]}  Paths relative to `dir`.
+ */
+export function editionFilesUnder(dir) {
+  /** @type {string[]} */
+  const found = [];
+  const walk = (current) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.name.endsWith('.md') && isEditionFile(readCommittedText(path))) {
+        found.push(relative(dir, path).split(sep).join('/'));
+      }
+    }
+  };
+  if (existsSync(dir)) walk(dir);
+  return found.sort();
+}
+
+/**
+ * Writes every page's copy under `publicOut`, the English pages the llms
+ * files carry, with routes.json, under `dumpDir`, and the GitHub edition
+ * under `docsDir`; any of them may be left out.
  *
  * @param {{
  *   publicOut?: string,
  *   dumpDir?: string,
+ *   docsDir?: string,
  *   undated?: boolean,
  *   contentDir?: string,
  *   dates?: import('../src/lib/agent-md/page.mjs').PageDates,
@@ -177,7 +317,7 @@ export function dumpRefusal(dir) {
  *   which by default are asked of git, and which `undated` leaves out.
  * @returns {Promise<number>}  The exit status.
  */
-export async function writePages({ publicOut, dumpDir, undated = false, contentDir = CONTENT_DIR, dates: given }) {
+export async function writePages({ publicOut, dumpDir, docsDir, undated = false, contentDir = CONTENT_DIR, dates: given }) {
   const refusal = dumpDir && dumpRefusal(dumpDir);
   if (refusal) {
     console.error(`[agent-md] ${refusal}`);
@@ -190,8 +330,8 @@ export async function writePages({ publicOut, dumpDir, undated = false, contentD
   const carried = (route) => isEnglish(route) && FULL_TEXT_KINDS.includes(pageKind(route));
   // A dump alone renders only the pages it carries; the copies for public/
   // need every page, and a run that writes both renders each page once.
-  const files = publicOut ? all : all.filter((file) => carried(routeOfFile(file)));
-  const dates = undated ? undefined : (given ?? (await pageDates()));
+  const files = publicOut ? all : dumpDir ? all.filter((file) => carried(routeOfFile(file))) : [];
+  const dates = undated || files.length === 0 ? undefined : (given ?? (await pageDates()));
   // What each page's "Verified by" line states, from the join the line is drawn by.
   const verified = verifiedProvider(contentDir);
   /** @type {Map<string, string>} */
@@ -209,10 +349,14 @@ export async function writePages({ publicOut, dumpDir, undated = false, contentD
     if (publicOut) copies.set(join(publicOut, route, 'index.md'), markdown);
     if (dumpDir && carried(route)) dumped.set(route, markdown);
   }
+  const edition = docsDir ? await editionFiles({ docsDir, registry, contentDir }) : undefined;
+  if (edition) problems.push(...edition.problems);
   if (problems.length > 0) {
     console.error(`[agent-md] FAIL ${problems.length} issue(s); no copy was written:`);
     for (const problem of problems) console.error(problem);
-    console.error('  Run `pnpm run check:markdown-writers` for the remedy of each kind.');
+    if (problems.length > (edition?.problems.length ?? 0)) {
+      console.error('  Run `pnpm run check:markdown-writers` for the remedy of each kind.');
+    }
     return 1;
   }
   // A file at a copy's place that no run wrote (docs/ holds 42 index.md files
@@ -259,6 +403,20 @@ export async function writePages({ publicOut, dumpDir, undated = false, contentD
     writeFileSync(join(dumpDir, ROUTES_FILE), `${JSON.stringify({ pages: routes }, null, 1)}\n`, 'utf8');
     console.log(
       `[agent-md] dumped ${dumped.size} English copies${undated ? ' without their dates' : ''} and ${routes.length} routes into ${relative(SITE_DIR, dumpDir) || '.'}`,
+    );
+  }
+  if (docsDir && edition) {
+    const stale = editionFilesUnder(docsDir).filter((path) => !edition.files.has(path));
+    for (const path of stale) rmSync(join(docsDir, path));
+    for (const [path, text] of edition.files) {
+      const target = join(docsDir, path);
+      mkdirSync(dirname(target), { recursive: true });
+      writeFileSync(target, text, 'utf8');
+    }
+    console.log(
+      `[agent-md] wrote the GitHub edition into ${relative(SITE_DIR, docsDir) || '.'}: ${edition.files.size} pages` +
+        `${stale.length ? `, ${stale.length} no longer in it removed` : ''}; ${edition.kept} link(s) keep the site's address, ` +
+        'their fragment being no heading GitHub anchors on the target',
     );
   }
   return 0;
@@ -342,6 +500,14 @@ async function page(route, flavour) {
     return 2;
   }
   const registry = await loadRegistry();
+  if (flavour === 'github' && inEdition(clean)) {
+    // A page of the GitHub edition, as --docs writes its file.
+    const { files, pages, problems } = await editionFiles({ docsDir: join(REPO_DIR, 'docs'), registry, only: new Set([clean]) });
+    const path = pages.find((one) => one.route === clean)?.path;
+    process.stdout.write(files.get(path) ?? '');
+    for (const problem of problems) console.error(problem.trim());
+    return problems.length > 0 ? 1 : 0;
+  }
   // One page: the same two readers as a full run, one pass each over the
   // history.
   const { dateOf } = await loadContentDates({ siteRoot: SITE_DIR });
@@ -368,10 +534,15 @@ async function main(args) {
     const value = at === -1 ? undefined : args[at + 1];
     return value === undefined || value.startsWith('--') ? undefined : value;
   };
-  if (args.includes('--public') || args.includes('--dump')) {
+  if (args.includes('--public') || args.includes('--dump') || args.includes('--docs')) {
     const dump = option('--dump');
     if (args.includes('--dump') && !dump) {
       console.error('--dump needs a directory');
+      return 2;
+    }
+    const docs = option('--docs');
+    if (args.includes('--docs') && !docs) {
+      console.error('--docs needs a directory');
       return 2;
     }
     if (args.includes('--undated') && args.includes('--public')) {
@@ -381,6 +552,7 @@ async function main(args) {
     return writePages({
       publicOut: args.includes('--public') ? resolve(option('--out') ?? join(SITE_DIR, 'public')) : undefined,
       dumpDir: dump ? resolve(dump) : undefined,
+      docsDir: docs ? resolve(docs) : undefined,
       undated: args.includes('--undated'),
     });
   }
@@ -397,7 +569,7 @@ async function main(args) {
     return page(option('--page') ?? '', flavour);
   }
   console.error(
-    'usage: node scripts/agent-md.mjs [--public [--out <dir>]] [--dump <dir> [--undated]] | --census | --page <route> [--flavour agent|github]',
+    'usage: node scripts/agent-md.mjs [--public [--out <dir>]] [--dump <dir> [--undated]] [--docs <dir>] | --census | --page <route> [--flavour agent|github]',
   );
   return 2;
 }

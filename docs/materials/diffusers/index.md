@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/diffusers/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/
 
 # Diffusers and surfaces
 
@@ -62,17 +64,17 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-Both prediction models here are **design estimates, not measurements**. The
-Fraunhofer far field the diffuser and metadiffuser pages share loses accuracy
-at low frequency, at grazing angles and over strongly absorbing surfaces, and
-it ignores edge diffraction, so it grades a well-depth sequence before it is
-built and does not replace an ISO 17497-2 measurement; the metadiffuser model
-is locally reacting on top of that, with no coupling between wells. Only the
-quadratic-residue depth sequence has a dedicated helper: primitive-root and
-modulated arrangements are discussed as design guidance and enter through the
-explicit depth or reflection arguments. The inverse problem, solving resonator
-geometries for a target phase profile, is not automated: the workflow matches
-phases by evaluation. On the measurement side the library reduces the data but
-does not run the rig: the ISO 17497-1 turntable and the ISO 17497-2 goniometer
-supply the reverberation times and the polar response, and what is implemented
-is the arithmetic that turns them into a coefficient.
+- **Not covered.** Both prediction models here are **design estimates, not measurements**. The
+  Fraunhofer far field the diffuser and metadiffuser pages share loses accuracy
+  at low frequency, at grazing angles and over strongly absorbing surfaces, and
+  it ignores edge diffraction, so it grades a well-depth sequence before it is
+  built and does not replace an ISO 17497-2 measurement; the metadiffuser model
+  is locally reacting on top of that, with no coupling between wells. Only the
+  quadratic-residue depth sequence has a dedicated helper: primitive-root and
+  modulated arrangements are discussed as design guidance and enter through the
+  explicit depth or reflection arguments. The inverse problem, solving resonator
+  geometries for a target phase profile, is not automated: the workflow matches
+  phases by evaluation. On the measurement side the library reduces the data but
+  does not run the rig: the ISO 17497-1 turntable and the ISO 17497-2 goniometer
+  supply the reverberation times and the polar response, and what is implemented
+  is the arithmetic that turns them into a coefficient.

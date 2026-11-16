@@ -22,6 +22,7 @@ if _SCRIPTS not in sys.path:
 
 import check_subscript_slope as css
 import pytest
+from github_edition import EDITION_MARK
 
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.
@@ -708,3 +709,18 @@ def test_a_figure_setting_an_upright_running_index_fails(
     _figure(images, "plate_levels", "Position level $L_{\\mathrm{v},i}$ [dB]")
     _, failures = css.check([], images, every_image=True)
     assert failures == []
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here.
+
+    Read with it, a page's two slopes would be counted twice, and the edition's
+    file would need a declaration of its own.
+    """
+    maths = "$L_i$ and $L_\\mathrm{i}$\n"
+    edition = _write(tmp_path, "page.md", f"{EDITION_MARK}page.mdx: x. -->\n\n{maths}")
+    by_hand = _write(tmp_path, "notes.md", maths)
+    assert css.collect([str(tmp_path)]) == [by_hand]
+    assert edition not in css.collect([str(tmp_path)], everything=True)

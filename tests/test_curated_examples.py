@@ -24,6 +24,7 @@ import inspect
 import pathlib
 import pkgutil
 import re
+import sys
 import typing
 import warnings
 
@@ -32,6 +33,11 @@ import pytest
 import phonometry
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "scripts"))
+
+import github_edition
+
 _SPAN = re.compile(r"`([^`\n]+)`")
 _BY_POSITION = (
     inspect.Parameter.POSITIONAL_ONLY,
@@ -40,13 +46,27 @@ _BY_POSITION = (
 
 
 def _pages() -> list[pathlib.Path]:
-    """The curated table, every guide under docs/ and every site guide.
+    """The curated table, the other hand-written files of docs/ and every site guide.
 
     The site's API pages are generated from the docstrings, which are the
-    package's own, so the guides are the ``.mdx`` pages alone.
+    package's own, so they are left out; every other site page is read, an
+    ``.md`` guide as well as an ``.mdx`` one (the environment pages are
+    ``.md``). The GitHub edition under docs/ is written from those pages and
+    is not read again.
     """
-    pages = sorted((_ROOT / "docs").rglob("*.md"))
-    pages += sorted((_ROOT / "site" / "src" / "content" / "docs").rglob("*.mdx"))
+    pages = [
+        page
+        for page in sorted((_ROOT / "docs").rglob("*.md"))
+        if not github_edition.is_edition_file(page)
+    ]
+    content = _ROOT / "site" / "src" / "content" / "docs"
+    api = {content / "reference" / "api", content / "es" / "reference" / "api"}
+    pages += sorted(
+        page
+        for suffix in ("*.md", "*.mdx")
+        for page in content.rglob(suffix)
+        if not any(page.is_relative_to(root) for root in api)
+    )
     return [page for page in pages if page.stem != "upgrading"]
 
 

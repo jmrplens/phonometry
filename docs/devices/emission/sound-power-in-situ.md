@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-in-situ.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/
 
 # Sound Power in Situ by Comparison (ISO 3747)
 
@@ -10,35 +12,44 @@ same room as the machine, the same three or four microphones listen to each
 source in turn from the reverberant part of the room, and because both
 sources see the same room the room cancels: the sound power of the source
 under test is the calibrated power of the reference source carried across by
-the difference of the two mean levels. The method reaches engineering grade 2
-where the field is reverberant enough and the source not too directional, and
-survey grade 3 otherwise; an impulsive source gets a sound energy level
-instead of a sound power level by the same route. Which route fits which job
-is weighed in [Sound Power](sound-power.md).
+the difference of the two mean levels. The method reaches engineering
+grade 2 where the field is reverberant enough and the source not too
+directional, and survey grade 3 otherwise; an impulsive source gets a sound
+energy level instead of a sound power level by the same route. This guide
+covers the per-position background correction with its 6 dB and 15 dB rules,
+the one- and several-location forms, the single-event path, the Table 2
+grade, the clause 9 uncertainty and the Annex C reference conditions. Which
+route fits which job is weighed in
+[Sound Power](sound-power.md).
 
 ## 1. The comparison in situ (ISO 3747)
 
-The microphone positions must lie where the field is **reverberant**, which
-the standard measures as the excess of sound pressure level over the free
-field, $\Delta L_f \ge 7$ dB (clause 4.1, Annex A). Three or four positions
-are used, at least 2 m apart, none closer than 0,5 m to any boundary,
-distributed as evenly as possible round the machine, each either in sight of
-every sound-emitting area or screened from all of them (clause 7.4.1); the
-reference source goes as close to the acoustic centre as it can, on top of a
-directional machine where it cannot simulate the emission pattern and
-alongside only failing that, where positions closer than 0,5 m to the
-reference box are to be avoided. One location is normally enough; where the
-largest dimension of the reference box exceeds the measurement distance, the
-source is run at several, along the sides one measurement distance apart when
-the machine is omnidirectional and one per clearly definable emission area
-when it has them, and where that dimension does not exceed the measurement
-distance and an omnidirectional machine cannot take the source on top, four
-locations are used, one adjacent to each vertical side of the box
-(clause 7.3). Both sources and the background are read at the same positions,
-the reference source for 30 s (clause 7.5), in **octave bands from 125 Hz
-to 8 kHz** (clause 3.11); Table D.1 tabulates a 63 Hz row besides, for use
-only where the environment and the instrumentation are satisfactory there
-(footnote a), which is why the API accepts that band too.
+The environment is the whole method, so the standard begins with it. The
+microphone positions must lie where the field is **reverberant**, which the
+standard measures as the excess of sound pressure level over the free field,
+$\Delta L_f \ge 7$ dB (clause 4.1, Annex A): the level the reference source
+produces at a microphone must be at least 7 dB above what it would produce
+in a free field at that distance. Three or four positions are used, at
+least 2 m apart, none closer than 0,5 m to any boundary, distributed as
+evenly as possible round the machine, each of them either in sight of every
+sound-emitting area or screened from all of them (clause 7.4.1); the
+reference source goes as close to the acoustic centre as it can, for a
+directional machine where it simulates the emission pattern, on top of it
+where that is impractical and alongside only failing that, where positions
+closer than 0,5 m to the reference box are to be avoided. One location is
+normally enough; where the largest dimension of the reference box exceeds
+the measurement distance the source is run at several, along the sides one
+measurement distance apart when the machine is omnidirectional and one per
+clearly definable emission area when it has them, and where that dimension
+does not exceed the measurement distance and an omnidirectional machine
+cannot take the source on top, four locations are used, one adjacent to each
+vertical side of the box (clause 7.3). Both sources and the background are
+read at the **same positions with the same microphone orientations**, the
+reference source for 30 s (clause 7.5), and the whole determination is made
+in **octave bands from 125 Hz to 8 kHz** (clause 3.11); Table D.1 tabulates
+a 63 Hz row besides, for use only where the environment and the
+instrumentation are satisfactory there (footnote a), which is why the API
+accepts that band too.
 
 The background is corrected **position by position** before anything is
 averaged (clause 8.1, Eq. 7):
@@ -48,29 +59,62 @@ K_{1i} = -10 \log_{10}\left(1 - 10^{-0.1\,\Delta L_{pi}}\right),
 \qquad \Delta L_{pi} = L'_{pi(\mathrm{ST})} - L_{pi(\mathrm{B})},
 $$
 
-with three rules round it: a margin above 15 dB needs no correction, a
-margin between 6 dB and 15 dB takes Eq. 7, and a margin **below 6 dB** caps
-the correction at **1,3 dB** and turns the band into an upper bound that the
-report must flag as not meeting the background requirement.
-`sound_power_in_situ` applies all three, returns the per-position $K_{1i}$
-and flags every band where some margin fell below 6 dB in
-`background_requirement_met`, and in `upper_bound` the bands where the
-machine's margin alone fell short, the only ones 8.1 reads as upper bounds:
-a short margin of the reference source caps its own correction and lowers
-the level instead. The corrected levels are energy-averaged over
-the positions (Eq. 8, 9) and the sound power level in each octave band is
-the comparison itself (clause 8.3.1, Eq. 11):
+with three rules round it. A margin above 15 dB needs no correction at that
+position. A margin between 6 dB and 15 dB takes Eq. 7, which runs from
+1,26 dB at 6 dB to 0,14 dB at 15 dB. A margin **below 6 dB** caps the
+correction at **1,3 dB** and reduces the accuracy of the result: the level
+may still be reported, but as an upper bound, and the report must say that
+the background requirement was not met. `sound_power_in_situ` applies all
+three, returns the per-position $K_{1i}$ it used, and flags every band where
+some margin fell below 6 dB in `background_requirement_met`, band by band,
+so the flag can travel into the report with the level it qualifies; it marks
+in `upper_bound` the bands where the machine's margin alone fell short, the
+only ones 8.1 reads as upper bounds, since a short margin of the reference
+source caps its own correction and lowers the level instead. The
+reference source is corrected the same way, with the same background reading
+unless it brought its own (clause 7.5 takes one reading for both), and the
+corrected levels are energy-averaged over the positions (Eq. 8, 9):
+
+$$
+\overline{L_{p(\mathrm{ST})}} = 10 \log_{10}\left[\frac{1}{n}\sum_{i=1}^{n} 10^{0.1\,L_{pi(\mathrm{ST})}}\right],
+\qquad L_{pi(\mathrm{ST})} = L'_{pi(\mathrm{ST})} - K_{1i}.
+$$
+
+The sound power level in each octave band is then the comparison itself
+(clause 8.3.1, Eq. 11):
 
 $$
 L_W = L_{W(\mathrm{RSS})} - \overline{L_{p(\mathrm{RSS})}} + \overline{L_{p(\mathrm{ST})}} .
 $$
 
-With the reference source at $m$ locations, its calibrated powers and its
-per-location means are each energy-averaged over the locations first
-(clause 8.3.2, Eq. 12), and the correction of the reference source is
-evaluated per location and per position. Table 1 of the standard, which
-sorts the microphone positions by line of sight to each source, is guidance
-for placing them and is not evaluated by the library.
+Where the reference source was run at $m$ locations, its calibrated powers
+and its per-location means are each energy-averaged over the locations first
+(clause 8.3.2, Eq. 12), so a location that samples the room better does not
+outvote one that samples it worse:
+
+$$
+L_W = 10 \log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{0.1\,L_{Wj(\mathrm{RSS})}}\right]
+- 10 \log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{0.1\,\overline{L_{pj(\mathrm{RSS})}}}\right]
++ \overline{L_{p(\mathrm{ST})}} .
+$$
+
+Eq. 12 collapses to Eq. 11 when the locations are indistinguishable, and
+the background correction of the reference source is evaluated per location
+and per position, because the margin it comes from depends on both even
+though the standard prints $K_{1i(\mathrm{RSS})}$ without the location index.
+
+Table 1 of the standard is worth reading before placing anything, though it
+is guidance and not arithmetic. It sorts the microphone positions by line of
+sight: a position that sees the source under test but not the reference
+source strongly overestimates the machine, one that sees the reference
+source but not the machine strongly underestimates it, and where both are in
+sight the sign of the error follows which of the two is nearer, vanishing
+when the two measurement distances agree within 10 %. The positions to
+choose are the ones in that last zone. Where they cannot all be there,
+clause 7.4.3 balances the set instead, one position in a + zone, one in a
++/− zone and one or two in − zones, and Annex B recommends a single position
+in the zone the machine screens. The library evaluates none of this: it
+takes the levels it is given and assumes the positions were chosen well.
 
 ```python
 import numpy as np
@@ -116,21 +160,27 @@ print(np.round(res.background_correction[1], 2))  # position 2: [1.3 0.57 0.26 0
 print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineering 1.5 3.2
 ```
 
-The 125 Hz band is the one to read twice: at one of the four positions the
+The 125 Hz band is the one to read twice. At one of the four positions the
 margin over the floor is below 6 dB for the machine, and it is below 6 dB at
 every position for the quieter reference source, so both corrections take
-their 1,3 dB cap. The band fails the background requirement, which is what
-the `False` says, but the 88,8 dB it reports is **no upper bound**: the
+their 1,3 dB cap there. The band fails the background requirement, which is
+what the `False` says, but the 88,8 dB it reports is **no upper bound**: the
 machine's capped $K_1$ reads high, the reference source's capped $K_{1i}$
-reads low, and nothing says which wins, so `upper_bound` stays `False`.
+reads low, and nothing says which wins, so `upper_bound` stays `False`. Every other band clears 6 dB everywhere, 250 Hz with
+corrections of half a decibel that Eq. 7 evaluates rather than ignores, and
+from 1 kHz up the margin passes 15 dB at two or three of the four positions,
+where the correction is zero; the correction the others still take stays
+below 0,25 dB.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, both K1 are capped at 1.3 dB, and the band fails clause 8.1 and is no upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar cross-hatched as failing the background requirement, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
 
-*The comparison position by position: both sources at the four microphones
-after the Eq. 7 correction above, with the hollow markers showing where each
-level was before it, and Eq. 11 band by band below, with the calibrated
-$L_{W(\mathrm{RSS})}$ beside it and the 125 Hz band, short of the background
-requirement, cross-hatched.*
+*The comparison position by position. Above, both sources at the four
+microphones after the Eq. 7 correction, with the hollow markers showing
+where each level was before it; the reference source sits below the machine
+at the low end and above it from 1 kHz up, which is what the shape of the
+calibrated curve below does to the result. Below, Eq. 11 band by band, with
+the calibrated $L_{W(\mathrm{RSS})}$ beside it and the 125 Hz band, short of
+the background requirement, cross-hatched.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -139,7 +189,7 @@ requirement, cross-hatched.*
 import matplotlib.pyplot as plt
 
 # res is the InSituSoundPowerResult computed above. One line:
-res.plot()   # LW bars, LWA in the title, the upper-bound band hatched
+res.plot()   # LW bars, LWA in the title, the failing band cross-hatched
 plt.show()
 
 # By hand: both sources per position above, Eq. 11 below.
@@ -188,40 +238,52 @@ print(np.round(two.sound_power_level, 1))       # [89.1 92.  93.  92.2 89.3 85.1
 print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ.svg" alt="Plan of a corner of a workroom: the machine inside its dashed reference box, the reference sound source on the side it emits towards and 0.5 m clear of the box, four microphone positions 1.5 m out tagged with their zones from Table 1, the three readings taken at every position, the rules for several source locations, and Equation 11 with the Annex A excess over the free field" width="100%"></picture>
+### How the measurement goes
 
-**How the measurement goes.** Apply a class 1 calibrator to every microphone
-before and after each series, and discard the series if the two readings differ
-by more than 0,5 dB. Listen to the machine first: where the sound from one
-component predominates, the geometric centre of that component is the acoustic
-centre, and the reference box is drawn just round that component, down to the
-floor it stands on; where no component sounds more than the rest, leave out any
-component that clearly emits nothing and take the geometric centre and the box
-of what is left. Survey the directivity 1 m from the reference box:
-within ±2 dB the machine counts as omnidirectional, and beyond ±7 dB the result
-stays at survey grade. Set the reference source as close to the acoustic centre
-as you can: for a directional machine, where it simulates the emission pattern,
-otherwise on top, and only failing that alongside, avoiding positions closer
-than 0,5 m to the reference box. One location normally does. Where the largest
-dimension of the reference box is greater than the measurement distance, use
-several: along the sides, one measurement distance apart, for an
-omnidirectional machine, and one per area for a machine with clearly definable
-emission areas. Where that dimension does not exceed the measurement distance
-and an omnidirectional machine cannot take the source on top, use four
-locations, one adjacent to each vertical side of the box. Place three or four
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ.svg" alt="Plan of a corner of a workroom, with a hatched wall along the top and down the left side. In the middle stands the machine inside its dashed reference box, 2.2 m by 1.4 m, with an arrow from its upper side marked main emission. A dotted ring 1 m out from the box marks the directivity survey, taken first at 1.5 m height, whose range of ±4 dB makes the machine directional. The reference sound source sits on that emitting side, at least 0.5 m clear of the box. Four numbered microphone positions stand 1.5 m from the box, each tagged with its zone from Table 1 of the standard. Position 1, above the right-hand corner, is joined by one dashed line to the box and another to the reference source, 1.5 m and 1.6 m, equal within 10 %, which is the plus-or-minus zone; position 2, on the same side but nearer the source, is a minus; position 3, out to the left of the machine, is nearer the machine than the source, a plus; position 4, below the machine, has its line to the source cut by the machine, the screened zone where Annex B recommends a single position. Positions 1 and 2 are at least 2 m apart, and position 3 keeps at least 0.5 m from the wall. Captions under the plan ask for three or four positions, each in sight of every emitting area or screened from all of them, and name the four zones. On the right, one panel lists the three readings taken at every position with the same orientation: the machine running, the reference source for 30 s, and the background just before or after. A second panel shows a machine longer than the measurement distance, with reference source locations along both sides one measurement distance apart, and gives the three rules for several locations: an omnidirectional machine takes locations along the sides one measurement distance apart, a machine with distinct emitting areas one location per area, and an omnidirectional machine whose largest dimension does not exceed the measurement distance, where nothing can go on top, one location by each vertical side; with a single emitting side, as here, one location does. A box at the foot carries Equation 11, the sound power level as the calibrated power of the reference source minus its mean level plus the mean level of the machine, and the Annex A excess over the free field, at least 7 dB where the microphones stand. Three lines under it give the background correction by margin, the class 1 instruments and calibration, and the conditions for grade 2" width="100%"></picture>
+
+Use class 1 instruments and filters, and a class 1 calibrator on every
+microphone before and after each series, discarding the series if the two
+readings differ by more than 0,5 dB. Listen to the machine first: where the
+sound of one component predominates, the geometric centre of that component
+is the acoustic centre and the reference box is drawn just round that
+component, down to the floor it stands on; where no component sounds more
+than any other, leave out every component that clearly emits nothing and take
+the geometric centre and the box of what is left. Then survey the
+directivity 1 m from the reference box, normally 1,5 m up and at 2 m
+intervals or less along a side: within ±2 dB the machine counts as
+omnidirectional, and beyond ±7 dB the result stays at survey grade. Put the
+reference source as close to the acoustic centre as you can: for a
+directional machine, where it simulates the emission pattern, otherwise on
+top, and only failing that alongside, avoiding positions closer than 0,5 m to
+the reference box. One location normally does. Where the largest dimension of
+the reference box is greater than the measurement distance, use several:
+along the sides, one measurement distance apart, for an omnidirectional
+machine, and one per area for a machine with clearly definable emission
+areas. Where that dimension does not exceed the measurement distance and an
+omnidirectional machine cannot take the source on top, use four locations,
+one adjacent to each vertical side of the box. Place three or four
 microphones round the machine, at least 2 m apart and 0,5 m from every
-boundary, where $\Delta L_f \ge 7$ dB, seeking positions as far from the source
-as from the box, within 10 %. At each position read the machine, the reference
-source for about 30 s and the background just before or after, correct each
-position for background, and report the band and A-weighted levels to 0,1 dB
-with the grade and the expanded uncertainty.
+boundary, where Annex A gives $\Delta L_f \ge 7$ dB, seeking positions as far
+from the source as from the box, within 10 %; where they cannot all be there,
+take one nearer the box, one equally far and one or two nearer the source. At
+each position, with the same orientation, read the machine, the reference
+source for about 30 s and the background just before or after, in octave
+bands from 125 Hz to 8 kHz; an impulsive machine takes at least five events.
+Correct each position for background: above 15 dB nothing, 6 dB to 15 dB by
+Eq. 7, below 6 dB 1,3 dB at most, and that band fails the requirement, which
+the report must flag, and is an upper bound where only the machine's margin
+fell short. Record what the aural examination found, the dimensions of the
+reference box, the measurement distance, the positions, the source locations
+and $\Delta L_f$, and report band and A-weighted levels to 0,1 dB with the
+grade, $U$, its coverage factor and probability.
 
 ### `sound_power_in_situ()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 2D array | dB | `(n, bands)` | Measured $L'_{pi(\mathrm{ST})}$, one row per microphone position, three or four positions (7.4.1) |
-| `reference_levels` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer but not for background |
+| `reference_levels` | 2D or 3D array | dB | `(n, bands)` or `(m, n, bands)` | The reference source at the same positions, one grid per location, corrected per its manufacturer for speed, temperature and pressure but not for background |
 | `reference_sound_power_levels` | 1D or 2D array, or `ReferenceSourceCalibration` | dB | `(bands,)` or `(m, bands)` | Calibrated $L_{W(\mathrm{RSS})}$, per location when each was calibrated in its own similar position (Eq. 12); a [`ReferenceSourceCalibration`](free-field-qualification.md) is summed from its one-third octave bands into the octaves at `frequencies` |
 | `frequencies` | 1D array | Hz | 63 Hz to 8 kHz octaves | Nominal octave mid-band frequencies of Table D.1; required. Clause 3.11 puts the general-purpose range at 125 Hz to 8 kHz; the 63 Hz row of Table D.1 carries footnote a, which allows it only where the test environment, the reference sound source and the instrumentation are satisfactory at that frequency |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(n, bands)` | $L_{pi(\mathrm{B})}$; one spectrum serves every position. `None` warns and leaves `background_requirement_met` `False` in every band, since 7.5 measures it at each position and 8.1 needs the margin |
@@ -248,32 +310,36 @@ A press stroke or a door slam has no steady power to report. Clause 8.4
 measures the **single event level** $L_E$ at each position instead, either
 one event at a time, at least five of them (clause 7.6), or once over a run
 of $N$ successive events, and clause 8.5 turns the mean into a **sound energy
-level** $L_J$ in dB re 1 pJ by the same comparison. Measured one at a time,
-each event is corrected for background with Eq. 14 and the corrected levels
-are energy-averaged into the mean single event level of the position
-(Eq. 13, 15); measured once over $N$ events, the level is corrected and
-reduced by $10 \log_{10} N$ to one event (Eq. 16, 17). The per-position
-levels are energy-averaged (Eq. 18), and
+level** $L_J$ in dB re 1 pJ by the same comparison, with the reference source
+still read time-averaged over 30 s. Measured one at a time, each event is
+corrected for background with Eq. 14 (Eq. 7 with the event level in the
+margin) and the corrected levels are energy-averaged into the mean single
+event level of the position (Eq. 13, 15); measured once over $N$ events, the
+level is corrected and reduced by $10 \log_{10} N$ to one event (Eq. 16, 17).
+The per-position levels are energy-averaged over the positions (Eq. 18), and
 
 $$
 L_J = L_{W(\mathrm{RSS})} - \overline{L_{p(\mathrm{RSS})}} + \overline{L_{E(\mathrm{ST})}}
 $$
 
-(Eq. 19), or its several-location form (Eq. 20). `sound_energy_in_situ`
-takes the events as a 3D `(n, N, bands)` array or as a 2D `(n, bands)`
-measurement with `n_events=N`, and returns the same result type with
-`quantity='energy'`, the level in `sound_energy_level` and the Annex D total
-in `sound_energy_level_a`.
+(Eq. 19), or its several-location form (Eq. 20), which is Eq. 12 with the
+event mean in the last term. `sound_energy_in_situ` takes the events as a
+3D `(n, N, bands)` array for the one-at-a-time form or as a 2D `(n, bands)`
+measurement with `n_events=N` for the other, and returns the same result type
+with `quantity='energy'`, the level in `sound_energy_level` and the Annex D
+total in `sound_energy_level_a`.
 
-Eq. 14 subtracts the **time-averaged** background level from a
-**time-integrated** event level, asking only that both be measured over the
-same integration time $T$; as printed the difference is a true margin for
-$T$ = 1 s, and for a longer $T$ the background holds $10 \log_{10}(T/T_0)$ dB
-more energy over the event's interval (clause 3.4, NOTE 1). ISO 3741 and ISO
-3744 print the same line, so it is the family's convention and not a
-misprint of this part; the library applies Eq. 14 as printed by default and
-offers `integration_time` to carry the background to the event's interval
-first.
+One line of Eq. 14 deserves a note. It subtracts the **time-averaged**
+background level $L_{pi(\mathrm{B})}$ from a **time-integrated** event level,
+and asks only that both be measured over the same integration time $T$. As
+printed, the difference is a true signal-to-background margin for $T$ = 1 s;
+for a longer $T$ the background holds $10 \log_{10}(T/T_0)$ dB more energy
+over the event's interval than its time-averaged level says (clause 3.4,
+NOTE 1), and the margin is overstated by that much. ISO 3741 and ISO 3744
+print the same line for their single-event clauses, so it is the family's
+convention and not a misprint of this part. The library applies Eq. 14 as
+printed by default and offers `integration_time` to carry the background to
+the event's interval first; the two agree at $T$ = 1 s.
 
 ```python
 # The same room, a press beside the compressor: six strokes measured one at a
@@ -297,8 +363,12 @@ print(round(energy.sound_energy_level_a, 1))      # 109.7 dB(A) re 1 pJ
 print(round(energy.expanded_uncertainty, 1))      # 5.0 dB: grade 2 with sigma_omc = 2 dB
 ```
 
-The 5,0 dB is the standard's own example in clause 9.5, reproduced because
-the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
+The 125 Hz band fails the background requirement here too, and for the
+reason the steady determination gave: the reference source's own margin over
+the floor is below 6 dB there, and the flag follows both sources, so it is no
+upper bound either. The 5,0 dB is the standard's
+own example in clause 9.5, reproduced because the inputs are the same:
+grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 
 ### `sound_energy_in_situ()` parameters
 
@@ -313,39 +383,68 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 
 **Grade (Table 2).** Engineering grade 2 needs the A-weighted excess
 $\Delta L_{f\mathrm{A}} \ge 7$ dB at every microphone position and a source
-directivity range within ±7 dB (clause 7.2); either indicator failing, or
-not determined, gives survey grade 3. The table pairs each grade with a
-typical upper bound of the reproducibility of the method, **1,5 dB** for
-grade 2 and **4,0 dB** for grade 3. The excess itself is Annex A (Eq. A.1),
+directivity range within ±7 dB from the survey of clause 7.2, taken 1 m from
+the reference box at intervals of 2 m or less; either indicator failing, or
+not determined at all, gives survey grade 3. The table pairs each grade with
+a typical upper bound of the reproducibility of the method, **1,5 dB** for
+grade 2 and **4,0 dB** for grade 3, valid for a relatively flat spectrum in
+which the 250 Hz to 4 kHz octaves carry the A-weighted level; a source
+dominated by bands below 500 Hz reproduces worse than that. The excess itself
+is Annex A (Eq. A.1),
 
 $$
 \Delta L_f(r) = L_{p(\mathrm{RSS}),r} - L_{W(\mathrm{RSS})} + 11\ \mathrm{dB} + 20 \log_{10}\frac{r}{r_0},
 \qquad r_0 = 1\ \mathrm{m},
 $$
 
-which `excess_sound_pressure_level` evaluates.
+measured along a line of sight from the reference source at varying $r$,
+and it is zero in a free field: `excess_sound_pressure_level` evaluates it
+and broadcasts, so one calibrated power serves a whole traverse.
 
-**Uncertainty (clause 9).** $\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 +
-\sigma_\mathrm{omc}^2}$ (Eq. 22) and $U = k\,\sigma_\mathrm{tot}$ (Eq. 23),
-with $k$ = 2 for the two-sided 95 % interval or 1,6 for a one-sided
-comparison with a limit value; $\sigma_\mathrm{omc}$ is the user's number
-(9.2, E.3), near 0,5 dB for a steady source, 2 dB with material flow, 4 dB
-for a press under load. The standard's example (9.5), grade 2 with
+**Uncertainty (clause 9).** The standard deviation of reproducibility of the
+method and the deviation of the operating and mounting conditions of the
+source, $\sigma_\mathrm{omc}$, combine in quadrature (Eq. 22) and the
+expanded uncertainty follows with the coverage factor (Eq. 23):
+
+$$
+\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2},
+\qquad U = k\,\sigma_\mathrm{tot},
+$$
+
+with $k$ = 2 for the two-sided 95 % interval the standard assumes, or 1,6
+for a one-sided comparison with a limit value. $\sigma_\mathrm{omc}$ is the
+user's number, from repeated determinations under the conditions of clause
+9.2 and E.3; the NOTE of 9.2 puts it near 0,5 dB for a steady source, 2 dB
+for one with material flow and 4 dB for stone breaking, metal cutting or a
+press under load. The standard's own example (clause 9.5), grade 2 with
 $\sigma_\mathrm{omc}$ = 2,0 dB and $k$ = 2, gives
-$U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB. Without a `sigma_omc_db` the result
-leaves `sigma_tot` and `expanded_uncertainty` `NaN`.
+$U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB, which the energy example above
+reproduces. Without a `sigma_omc_db` the result carries `sigma_r0` and leaves
+`sigma_tot` and `expanded_uncertainty` `NaN` rather than reporting a method
+uncertainty as if it were the whole.
 
-**Reference conditions (Annex C).** The radiation-impedance correction
-$C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}((273{,}15 + \theta)/296)$
-carries the level to 101,325 kPa and 23,0 °C, the same $C_2$ as ISO 3741
-clause 9.1.4, and Eq. C.2 estimates the static pressure from the altitude,
-$p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$ with $a$ = 2,2560 × 10⁻⁵ m⁻¹
-and $b$ = 5,2553. The result exposes `c2` and the properties
-`sound_power_level_at_reference_conditions` and `sound_energy_level_at_reference_conditions` (Eq. C.1, C.3).
-$\theta_\mathrm{ref}$ is printed as 296 K beside a reference temperature of
-23,0 °C (296,15 K), so at exactly the reference conditions $C_2$ is
-+0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
-library keeps the family's rounding.
+**Reference conditions (Annex C).** Eq. 11 gives the level at the
+meteorological conditions of the test. Annex C carries it to 101,325 kPa and
+23,0 °C with the radiation-impedance correction
+
+$$
+C_2 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}} + 15 \log_{10}\frac{273{,}15 + \theta}{\theta_\mathrm{ref}},
+\qquad \theta_\mathrm{ref} = 296\ \mathrm{K},
+$$
+
+the same $C_2$ as ISO 3741 clause 9.1.4 (the library evaluates it through
+that module), valid for a monopole and a mean value for other sources, and
+estimates the static pressure from the altitude of the site when no barometer
+was read (Eq. C.2): $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$
+with $a$ = 2,2560 × 10⁻⁵ m⁻¹ and $b$ = 5,2553. The result exposes `c2` and
+the properties `sound_power_level_at_reference_conditions` and `sound_energy_level_at_reference_conditions`
+(Eq. C.1, C.3); the A-weighted total under reference conditions is
+`sound_power_level_a + c2`, since the shift is the same in every band. One
+detail of the annex is worth knowing: $\theta_\mathrm{ref}$ is printed as
+296 K beside a reference temperature of 23,0 °C, which is 296,15 K, so at
+exactly the reference conditions $C_2$ is +0,003 3 dB and not zero. ISO 3741
+and ISO 3744 print the same 296 K, so it is the family's rounding and the
+library keeps it.
 
 ```python
 # A plant 640 m above sea level, at 27 degC, with no barometer on site.
@@ -365,69 +464,59 @@ print(np.round(emission.excess_sound_pressure_level([81.0, 76.5, 73.8], 92.5, [1
 ```
 
 **A-weighted totals (Annex D).** $L_{W\mathrm{A}}$ and $L_{J\mathrm{A}}$ are the
-energy sums of the band levels plus the Table D.1 corrections $C_k$ (−26,2,
-−16,1, −8,6, −3,2, 0,0, 1,2, 1,0 and −1,1 dB from 63 Hz to 8 kHz, the ISO
-3744 Annex E octave values digit for digit); every `frequencies` entry must
-be one of those eight nominal centres, distinct and in ascending order.
+energy sums of the band levels plus the Table D.1 corrections $C_k$, which
+are −26,2, −16,1, −8,6, −3,2, 0,0, 1,2, 1,0 and −1,1 dB from 63 Hz to 8 kHz,
+the ISO 3744 Annex E octave values digit for digit; the library reads them
+from the shared table and requires every entry of `frequencies` to be one of
+those eight nominal centres, distinct and in ascending order; the 63 Hz row
+is for use only where the environment and the instrumentation are
+satisfactory there (Table D.1, footnote a).
 
 ## What this guide covers
 
-**Covered.** The ISO 3747 comparison in situ (`sound_power_in_situ`): the
-per-position background correction of clause 8.1 with its 6 dB and 15 dB
-rules and the 1,3 dB cap, the mean corrected levels of clause 8.2, the sound
-power level for one (Eq. 11) or several (Eq. 12) reference-source locations,
-the single-event levels of clause 8.4 in both forms and the sound energy
-level of clause 8.5 (`sound_energy_in_situ`), the Table 2 grade with its
-$\sigma_{R0}$, the clause 9 uncertainty (Eq. 22, 23), the Annex A excess of
-sound pressure level (`excess_sound_pressure_level`), the Annex C reference
-conditions with Eq. C.2 (`static_pressure_from_altitude`) and the Annex D
-A-weighted totals.
+- **Covered.** The ISO 3747 comparison in situ (`sound_power_in_situ`): the per-position
+  background correction of clause 8.1 with its 6 dB and 15 dB rules and the
+  1,3 dB cap, the mean corrected levels of clause 8.2, the sound power level
+  for one (Eq. 11) or several (Eq. 12) reference-source locations, the
+  single-event levels of clause 8.4 in both forms and the sound energy level
+  of clause 8.5 (`sound_energy_in_situ`), the Table 2 grade with its
+  $\sigma_{R0}$, the clause 9 uncertainty (Eq. 22, 23), the Annex A excess of
+  sound pressure level (`excess_sound_pressure_level`), the Annex C reference
+  conditions with Eq. C.2 (`static_pressure_from_altitude`) and the Annex D
+  A-weighted totals.
 
-**Not covered.** The Annex E uncertainty budget (Table E.2 and its
-sensitivity coefficients) is documented but not modelled: $\sigma_{R0}$ is
-the typical upper bound of Table 2 by grade, not a machine-specific value
-from a round robin (9.3.2) or from the model of 9.3.3. The zoning of Table 1,
-the directivity survey of clause 7.2 and the placement rules of clause 7.3
-are the operator's decisions, made before the levels exist. The reference
-source's own corrections for speed, temperature and static pressure are its
-manufacturer's, applied before the levels arrive.
+- **Not covered.** The Annex E uncertainty budget (Table E.2 and its sensitivity coefficients)
+  is documented but not modelled: $\sigma_{R0}$ is the typical upper bound of
+  Table 2 by grade, not a machine-specific value from a round robin (9.3.2) or
+  from the model of 9.3.3. The zoning of Table 1, the directivity survey of
+  clause 7.2 and the placement rules of clause 7.3 are the operator's
+  decisions, made before the levels exist; the library takes the levels and the
+  two indicators the grade needs. The reference source's own corrections for
+  speed, temperature and static pressure are its manufacturer's, applied before
+  the levels arrive. The other in situ routes are their own guides:
+  [Sound Power by Pressure Methods](sound-power-pressure.md)
+  for the enveloping surface, [Sound Power by Intensity Scanning](sound-power-intensity.md)
+  for the probe.
 
 ## See also
 
-- [Sound Power](sound-power.md): choosing among the determination routes,
-  the accuracy grades and the ISO 4871 noise-emission declaration.
-- [Sound Power in the Reverberation Room](sound-power-reverberation.md): the
-  precision comparison of ISO 3741 in a qualified room, whose $C_2$ this
+- [Sound Power](sound-power.md): choosing among the
+  determination routes, the accuracy grades and the ISO 4871 noise-emission
+  declaration.
+- [Sound Power in the Reverberation Room](sound-power-reverberation.md):
+  the precision comparison of ISO 3741 in a qualified room, whose $C_2$ this
   guide shares.
-- [Sound Power by Pressure Methods](sound-power-pressure.md): the enveloping
-  surface for a source that can be measured in its direct field.
-- [Sound Power by Intensity Scanning](sound-power-intensity.md): the routes
-  that tolerate steady background noise without a reference source.
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](sound-power-pressure.md):
+  the enveloping surface for a source that can be measured in its direct field.
+- [Sound Power by Intensity Scanning (ISO 9614)](sound-power-intensity.md):
+  the routes that tolerate steady background noise without a reference source.
+- [Levels](../../signals/levels/levels.md): energy averaging, the single
+  event level and the A-weighting behind $L_{W\mathrm{A}}$.
+- API reference: [`emission`: sound power in situ](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-situ/).
 
 ## References
 
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering/survey methods for use in situ
-  in a reverberant environment* (ISO 3747:2010).
-  [iso.org catalogue](https://www.iso.org/standard/46426.html).
-  The comparison method of this guide: the background correction of clause
-  8.1, the mean levels and the sound power and sound energy levels of clauses
-  8.2 to 8.5, the Table 2 grades, the clause 9 uncertainty and Annexes A, C
-  and D.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52053.html).
-  The precision comparison method of a qualified room, whose Eq. 21 is
-  Eq. 11 of this guide plus the same radiation-impedance correction $C_2$.
-
-## Standards
-
-ISO 3747:2010, *Acoustics — Determination of sound power levels and sound
-energy levels of noise sources using sound pressure — Engineering/survey
-methods for use in situ in a reverberant environment*: the comparison with
-a reference sound source, the background correction of clause 8.1, the
-several-location forms, the single-event path, the Table 2 grades, the
-clause 9 uncertainty and Annexes A, C and D.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering/survey methods for use in situ in a reverberant environment*](https://www.iso.org/standard/46426.html) (ISO 3747:2010).
+  The comparison method of this guide: the background correction of clause 8.1, the mean levels and the sound power and sound energy levels of clauses 8.2 to 8.5, the Table 2 grades, the clause 9 uncertainty and Annexes A, C and D.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The precision comparison method of a qualified room, whose Eq. 21 is Eq. 11 of this guide plus the same radiation-impedance correction C2 (clause 9.1.4), reused here for Annex C.

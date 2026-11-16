@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/materials/
 
 # Materials and surfaces
 
@@ -137,22 +139,22 @@ The mechanical property a floating floor is designed around.
 
 ## What this section does not cover
 
-Everything here characterises a **material or a surface**, never a
-construction. The transmission loss of a wall, the impact improvement of a
-floor and the flanking paths of a junction are [Sound
-insulation](../buildings/insulation/index.md) and [Insulation
-design](../buildings/design/index.md); this section supplies the coefficients
-they consume. Two boundaries inside the measurements themselves are worth
-knowing before you start. The in-situ road methods implement ISO 13472-1:2002
-and ISO 13472-2:2010; **their 2022 and 2025 revisions are not implemented**.
-And the resilient-layer measurement expects a resonant frequency that has
-already been extrapolated to zero force amplitude by clause 7 of EN 29052-1, a
-procedure that is not implemented, and an airflow resistivity supplied as an
-input rather than measured in place. Nothing in this section predicts a
-material from its chemistry or its manufacture: the models run forwards from
-measured macroscopic parameters (flow resistivity, porosity, tortuosity) to
-an impedance, and there is no inverse solver that recovers those parameters
-from a measured impedance curve.
+- **Not covered.** Everything here characterises a **material or a surface**, never a
+  construction. The transmission loss of a wall, the impact improvement of a
+  floor and the flanking paths of a junction are [Sound
+  insulation](../buildings/insulation/index.md) and [Insulation
+  design](../buildings/design/index.md); this section supplies the coefficients
+  they consume. Two boundaries inside the measurements themselves are worth
+  knowing before you start. The in-situ road methods implement ISO 13472-1:2002
+  and ISO 13472-2:2010; **their 2022 and 2025 revisions are not implemented**.
+  And the resilient-layer measurement expects a resonant frequency that has
+  already been extrapolated to zero force amplitude by clause 7 of EN 29052-1, a
+  procedure that is not implemented, and an airflow resistivity supplied as an
+  input rather than measured in place. Nothing in this section predicts a
+  material from its chemistry or its manufacture: the models run forwards from
+  measured macroscopic parameters (flow resistivity, porosity, tortuosity) to
+  an impedance, and there is no inverse solver that recovers those parameters
+  from a measured impedance curve.
 
 ## Before and after these pages
 
@@ -171,6 +173,6 @@ value this library reads from a printed page, one table per catalogue, with
 the book and the page each row was read on.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

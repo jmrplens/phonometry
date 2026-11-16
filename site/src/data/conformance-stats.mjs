@@ -10,8 +10,8 @@
  *
  * Page *bodies*, that is. Frontmatter is static YAML, parsed before MDX
  * compiles, so the meta descriptions and the JSON-LD blocks declared there
- * cannot import this module however the page is authored. Those, and the
- * plain-markdown mirror under `docs/`, and the `.zenodo.json` description, are
+ * cannot import this module however the page is authored. Those, the files of
+ * `docs/` written by hand and the `.zenodo.json` description are
  * rewritten instead by `scripts/check_conformance_claims.py --write`, which
  * `make conformance` runs right after regenerating the report. Between the two
  * mechanisms nothing states the counts by hand.

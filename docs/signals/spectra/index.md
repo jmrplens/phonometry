@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/
 
 # Signals and spectra
 
@@ -164,18 +166,18 @@ no page here carries clause numbers or acceptance limits, and no result is a
 compliance verdict. Three capabilities a reader looks for are genuinely
 absent.
 
-**Multiple arrivals are not separated.** `time_delay` and `echo_detection`
-report the single largest peak, so a record with a direct path plus several
-reflections needs manual peak-picking or repeated calls on narrowed bands.
+- **Not covered.** **Multiple arrivals are not separated.** `time_delay` and `echo_detection`
+  report the single largest peak, so a record with a direct path plus several
+  reflections needs manual peak-picking or repeated calls on narrowed bands.
 
-**There is no multi-sensor geometry.** Delay estimation is pairwise; there is
-no built-in TDOA solver, no beamformer and no source localisation, and a
-multiple-output system needs one `miso_coherence` call per output.
+- **Not covered.** **There is no multi-sensor geometry.** Delay estimation is pairwise; there is
+  no built-in TDOA solver, no beamformer and no source localisation, and a
+  multiple-output system needs one `miso_coherence` call per output.
 
-**There are no perceptual features.** The cepstrum is the plain
-linear-frequency one, with no mel warping and no MFCC variant. Two estimators
-that share this section's Welch core are documented where they are used
-instead: the transfer function and ordinary coherence on
-[Electroacoustics](../../devices/electroacoustics/electroacoustics.md),
-and the two-microphone intensity probe on [Sound
-intensity](../../devices/emission/intensity.md).
+- **Not covered.** **There are no perceptual features.** The cepstrum is the plain
+  linear-frequency one, with no mel warping and no MFCC variant. Two estimators
+  that share this section's Welch core are documented where they are used
+  instead: the transfer function and ordinary coherence on
+  [Electroacoustics](../../devices/electroacoustics/electroacoustics.md),
+  and the two-microphone intensity probe on [Sound
+  intensity](../../devices/emission/intensity.md).

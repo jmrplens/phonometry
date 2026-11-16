@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-in-duct.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Sound Power in a Duct (ISO 5136)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/
+
+# Sound Power in a Duct
 
 A ducted fan does not radiate into a room. What leaves it travels down the
 duct it is bolted to, and a hemisphere of microphones around the casing would
@@ -35,20 +37,7 @@ in the bands at and below 160 Hz and 10 s above (clause 7.2.2), and must
 stand at least 6 dB above the background and above the turbulence noise the
 shield lets through (clause 7.2.1, Annex B).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Side section of a fan on the ISO 5136 rig: the inlet and outlet test ducts with their anechoic terminations, a microphone in a sampling tube in each pointing back at the fan, the minimum lengths of the test duct and of the run to the measurement plane, and panels for the measurement plane, the sampling tube and the mean around the duct" width="88%"></picture>
-
-**How the measurement goes.** Build each test duct straight and circular, at
-least six diameters and 4 m long, with the measurement plane at least four
-diameters and 2 m from its fan-side end, an anechoic termination within Table 5
-and the throttle beyond it. Check the type 1 chain with a class 1 calibrator
-before and after each series. Mount the sampling tube vibration-isolated from
-the wall, at the radius of Table 7, pointing at the fan and with its microphone
-end rounded on the inlet side, and average round the duct over three or more
-positions (at least 30 s up to 160 Hz, 10 s from 200 Hz), by multiplexing, or
-over one revolution of 30 s or more. Keep every band at least 6 dB above the
-background and the turbulence, read the outlet with and without the
-straightener and keep the lower level, and report the levels re 1 pW with
-$2\sigma_R$ as the uncertainty.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Side section of a fan on the ISO 5136 rig, measured in both its ducts at once. Air enters at the left through a bell mouth and an anechoic termination into the inlet test duct, marked U less than 0, and passes a transition and an intermediate duct to the fan. From there it runs through an intermediate duct with a straight run on each side of a star flow straightener two diameters long, then a transition into the outlet test duct, marked U greater than 0, which ends in a second anechoic termination with the throttle at its far end. In each test duct a microphone in a sampling tube hangs from the wall and points back at the fan. Dimensions under each test duct, from its fan-side end: at least four diameters and 2 m to the measurement plane, at least six diameters and 4 m for the whole duct. Below, three panels: the measurement plane seen along the duct, with three microphone positions 120 degrees apart at radius r, 2r/d being 0.65 from 0.5 m, 0.8 below it and 0.5 for a nose cone or foam ball, so a 0.63 m duct puts r at 0.20 m; the sampling tube, with its nose cone, porous slit and microphone, at most 22 mm across; and the three ways to the mean around the duct with their averaging times. A box at the foot carries Equations 9 to 12, the energy mean of three or more readings, the same level from a multiplexed or traversed reading, and the step to sound power, and three lines under it the instruments, the 6 dB margins, the reflection coefficient of the termination and the reading with and without the straightener" width="100%"></picture>
 
 Clause 8 turns the readings into a level and the level into a power. The
 positions are energy-averaged and the combined correction $C$ added
@@ -151,6 +140,28 @@ plt.show()
 ```
 
 </details>
+
+### How the measurement goes
+
+Build the airway first. Each test duct is straight, circular and coaxial with
+the fan, at least six diameters and 4 m long, with the measurement plane at
+least four diameters and 2 m from its fan-side end, ending in an anechoic
+termination within Table 5. The throttle goes beyond it, at least 10 dB quieter
+than the fan. Set the operating point by ISO 5801 and check the type 1 chain
+with a class 1 calibrator on the bare microphone before and after each series.
+Mount the sampling tube vibration-isolated from the duct wall, at the radius of
+Table 7, aligned with the axis to ±5° and pointing at the fan, with its
+microphone end rounded on the inlet side, and take the mean round the duct:
+three or more equally spaced positions for at least 30 s up to 160 Hz and 10 s
+from 200 Hz, multiplexing for 30 s a band, or one revolution of 30 s or more.
+Every band has to stand at least 6 dB above the background with the fan
+stopped, and above the turbulence of Annex B; where it does not, report it as
+measured, uncorrected, with the note of clause 7.2.1. On the outlet side,
+measure with and without the star straightener at the same operating point and
+keep the lower level in each band. The report states compliance, gives the
+levels in decibels re 1 pW, names the fan, its operating conditions, the
+instruments, the shield and any agreed options, and should quote $2\sigma_R$ as
+the uncertainty.
 
 ## 2. A ducted fan on its outlet duct
 
@@ -265,6 +276,13 @@ true sound power level". The missing modal correction is the reason the two
 shields are limited to low velocities and the sampling tube is preferred
 (clause 4, NOTE 5).
 
+The same NOTE 5 also says the uncertainties of Table 2 "refer to the sampling
+tube only and can be expected to increase for other shields", and it puts no
+number on the increase. So the reproducibility a nose cone or a foam ball
+result carries is the sampling tube's, which makes it a lower bound rather
+than that shield's own figure, and the call says so with a
+`SoundPowerWarning` rather than leave it to be read off a table.
+
 ```python
 cone = emission.sound_power_in_duct(
     levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=12.0,
@@ -335,63 +353,47 @@ one above, will reproduce worse than 2 dB in that band.
 
 ## What this guide covers
 
-**Covered.** The ISO 5136:2003 in-duct determination (`sound_power_in_duct`):
-the energy average over the circumferential positions (Eq. 9) or the
-multiplexed level (Eq. 11), the combined correction $C = C_1 + C_2 + C_{3,4}$
-(Eq. 10) with the Annex A polynomial of the sampling tube for 0.15 m to 2 m
-ducts (`flow_modal_correction`, Tables A.1 to A.6, verified against every
-cell of Table D.1) and the convective term of Eq. 8 for the nose cone and
-foam ball, the plane-wave relation of Eq. 12 with the duct air's $\rho c$, the
-A-weighted total of Annex C over the 27 bands of Table C.1, and the
-reproducibility of Table 2 doubled into the 95 % statement of clause 9.2
-(`in_duct_reproducibility`), with the bands the standard gives for
-information only flagged as such.
+- **Covered.** The ISO 5136:2003 in-duct determination (`sound_power_in_duct`): the energy
+  average over the circumferential positions (Eq. 9) or the multiplexed level
+  (Eq. 11), the combined correction $C = C_1 + C_2 + C_{3,4}$ (Eq. 10) with the
+  Annex A polynomial of the sampling tube for 0.15 m to 2 m ducts
+  (`flow_modal_correction`, Tables A.1 to A.6, verified against every cell of
+  Table D.1) and the convective term of Eq. 8 for the nose cone and foam ball,
+  the plane-wave relation of Eq. 12 with the duct air's $\rho c$, the A-weighted
+  total of Annex C over the 27 bands of Table C.1, and the reproducibility of
+  Table 2 doubled into the 95 % statement of clause 9.2
+  (`in_duct_reproducibility`), with the bands the standard gives for
+  information only flagged as such.
 
-**Not covered.** The facility and the instrument are assumed qualified. The
-reflection coefficient of the anechoic termination (Table 5, Annex F), the
-directivity limits of the sampling tube (Eq. 6, Table 6), the signal-to-noise
-check against turbulence (Annex B, Tables B.1 and G.1), the duct geometry and
-transitions of clause 5.2 and the swirl angle of Annex J are checks the
-laboratory makes, not terms of $L_W$, and none of them is computed. $C_1$ and
-$C_2$ are inputs: the standard tabulates neither, only how to measure them.
-The informative Annexes H and I, which extend the coefficient tables below
-0.15 m and above 2 m, are outside the standard's own scope and are not
-implemented, so a duct outside 0.15 m to 2 m is refused.
+- **Not covered.** The facility and the instrument are assumed qualified. The reflection
+  coefficient of the anechoic termination (Table 5, Annex F), the directivity
+  limits of the sampling tube (Eq. 6, Table 6), the signal-to-noise check
+  against turbulence (Annex B, Tables B.1 and G.1), the duct geometry and
+  transitions of clause 5.2 and the swirl angle of Annex J are checks the
+  laboratory makes, not terms of $L_W$, and none of them is computed. $C_1$
+  and $C_2$ are inputs: the standard tabulates neither, only how to measure
+  them. The informative Annexes H and I, which extend the coefficient tables
+  below 0.15 m and above 2 m, are outside the standard's own scope and are not
+  implemented, so a duct outside 0.15 m to 2 m is refused.
 
 ## See also
 
-- [Sound Power](sound-power.md): choosing among the determination routes, the
-  accuracy grades and the ISO 4871 noise-emission declaration a measured
-  $L_{W\mathrm{A}}$ feeds.
+- [Sound Power](sound-power.md): choosing among the
+  determination routes, the accuracy grades and the ISO 4871 noise-emission
+  declaration a measured $L_{W\mathrm{A}}$ feeds.
 - [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](sound-power-pressure.md):
   the enveloping surface, for a fan that can be run unducted.
 - [Sound Power in the Reverberation Room (ISO 3741)](sound-power-reverberation.md):
   the diffuse-field route for a machine small enough to travel.
-- [Duct acoustics](../noise-control/duct-path.md): the higher-order duct
-  modes whose cut-on bounds the plane-wave range of Eq. 12.
+- [Duct acoustics](../noise-control/duct-path.md): the higher-order
+  duct modes whose cut-on bounds the plane-wave range of Eq. 12.
 - [Levels](../../signals/levels/levels.md): energy averaging and the
   A-weighting behind $L_{W\mathrm{A}}$.
 - API reference: [`emission`: sound power in a duct](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-duct/).
 
 ## References
 
-- International Organization for Standardization. (2003). *Acoustics —
-  Determination of sound power radiated into a duct by fans and other
-  air-moving devices — In-duct method* (ISO 5136:2003).
-  [ISO Online Browsing Platform](https://www.iso.org/obp/ui/#iso:std:iso:5136:ed-2:v1:en).
-  Clause 8 (Eqs 9 to 12), the corrections of 5.3.3 and 5.3.4 with the Annex A
-  coefficients and the Annex D example, the A-weighting of Annex C and the
-  reproducibility of Table 2 that this guide implements.
-- Arnold, F. (1999). *Experimentelle und numerische Untersuchung zur
-  Schalleistungsbestimmung in Strömungskanälen*. Fortschritt-Berichte VDI,
-  Reihe 7, Nr. 353. VDI Verlag (Dissertation, TU Berlin, 1998). Reference
-  [24] of ISO 5136, the source of the combined mean flow velocity and modal
-  correction of the sampling tube and of its Annex A coefficients.
-
-## Standards
-
-ISO 5136:2003, *Acoustics — Determination of sound power radiated into a duct
-by fans and other air-moving devices — In-duct method*: the averaging and
-correction of the in-duct level (clause 8), the sampling-tube correction of
-clause 5.3.3.4 with the Annex A coefficients, the omni-directional shields of
-clause 5.3.4, the A-weighting of Annex C and the reproducibility of Table 2.
+- **Arnold, F. (1999).** *Experimentelle und numerische Untersuchung zur Schalleistungsbestimmung in Strömungskanälen*. VDI Verlag.
+  Fortschritt-Berichte VDI, Reihe 7, Nr. 353 (Dissertation, TU Berlin, 1998). Reference \[24\] of ISO 5136, the source of the combined mean flow velocity and modal correction of the sampling tube and of its Annex A coefficients.
+- **International Organization for Standardization. (2003).** [*Acoustics — Determination of sound power radiated into a duct by fans and other air-moving devices — In-duct method*](https://www.iso.org/obp/ui/#iso:std:iso:5136:ed-2:v1:en) (ISO 5136:2003).
+  Clause 8 (Eqs 9 to 12), the corrections of 5.3.3 and 5.3.4 with the Annex A coefficients and the Annex D example, the A-weighting of Annex C and the reproducibility of Table 2 that this guide implements.

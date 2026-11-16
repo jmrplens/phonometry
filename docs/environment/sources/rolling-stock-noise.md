@@ -1,53 +1,81 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/sources/rolling-stock-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/
 
 # Railway rolling-stock noise: the ISO 3095 type test
 
-A train passing a microphone is two sources at once, the vehicle and the track
-it runs on. ISO 3095 is the type test of rolling stock: it fixes where the
-microphones stand, what they record and how the runs are averaged, and for the
-test at constant speed it fixes the track as well, through the rail roughness
-of EN 15610 and the track decay rates of EN 15461. The implemented texts are
-ISO 3095:2013 (third edition), the transit exposure level of ISO 3095:2005 read
-from BS EN ISO 3095:2005, EN 15610:2009 read from BS EN 15610:2009 and
-EN 15461:2008+A1:2010 read from BS EN 15461:2008+A1:2010, each identical to the
-European or international text.
+A train passing a microphone is two sources at once: the vehicle, with its
+wheels, its traction equipment and its bodywork, and the track it runs on,
+whose rails are rough and whose response to a wheel spreads the vibration
+along them. ISO 3095 is the type test of rolling stock, the method a vehicle
+is measured by so that the result says something about the vehicle. It fixes
+where the microphones stand, what they record and how the runs are averaged,
+and for the test at constant speed it fixes the track too: a vehicle measured
+on a rough, lively track is louder than the same vehicle on a smooth, well
+damped one, and the result is only comparable between sites whose tracks are
+alike. That second half is two more standards, EN 15610 for the roughness of
+the rails and EN 15461 for how fast vibration decays along them, and this page
+covers all three.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_pass_by_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_pass_by.svg" alt="A-weighted level with time weighting F against time over a 14 s record of a 100 m unit passing at 80 km/h, 7.5 m from the track: the level rises from about 64 dB to a plateau near 82 dB and falls back; the shaded measurement interval runs from 4 s to 8.5 s, the pass-by time of the unit, with the equivalent level of 81.3 dB over it and the maximum of 81.9 dB marked" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_pass_by_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_pass_by.svg" alt="A-weighted level with time weighting F against time over a 14 s record of a 100 m unit passing at 80 km/h, 7.5 m from the track: the level rises from about 64 dB to a plateau near 82 dB while the unit passes and falls back to about 62 dB; the shaded measurement interval runs from 4 s to 8.5 s, the pass-by time of the unit, with the equivalent level over it of 81.3 dB drawn as a horizontal line and the maximum of 81.9 dB marked" width="92%"></picture>
+
+*One pass-by: the level history, the interval the unit takes to pass, and the
+two numbers read from it.*
 
 ## 1. Four tests, and the one that needs a track
 
+ISO 3095:2013 has four tests. Each has its own microphone positions and its
+own measured quantity, and all of them take at least three runs per position,
+which are valid when they lie within 3 dB of each other (9.3).
+
 | Test | Quantity | Microphones | Result | Clause |
 | :--- | :--- | :--- | :--- | :--- |
-| Stationary | $L_{p\mathrm{Aeq},T}$, $T \geq 20$ s | 7,5 m from the track centreline, 1,2 m above the top of rail, every 3 m to 5 m along both sides, plus two at 30° off each end of the unit (only the ends with a cab for a trailer unit) | Positions energy averaged by length; mean of three sets, rounded | 5 |
-| Constant speed | $L_{p\mathrm{Aeq},T_p}$ | 7,5 m and 1,2 m; 25 m and 3,5 m allowed from 200 km/h | Mean of three runs, rounded; the louder side | 6 |
-| Starting, maximum level | $L_{p\mathrm{AFmax}}$ | 7,5 m and 1,2 m, 10 m ahead of the unit and along a unit over 50 m | Highest rounded mean | 7.5 |
-| Starting, averaged level | $L_{p\mathrm{Aeq},T}$ | 25 m and 3,5 m, 10 m ahead of the unit | Highest rounded mean | 7.6 |
-| Braking | $L_{p\mathrm{AFmax}}$, from 30 km/h | 7,5 m and 1,2 m, opposite the first car at standstill | Highest rounded mean | 8 |
+| Stationary | $L_{p\mathrm{Aeq},T}$, $T \geq 20$ s | 7,5 m from the track centreline, 1,2 m above the top of rail, at the middle of equal areas 3 m to 5 m long along both sides of every car, plus two at 30° on a 7,5 m half circle off each end of the unit (for a trailer unit, only off the ends with a cab) | The positions energy averaged by the length each stands for, per set; the mean of three sets, rounded to the integer | 5 |
+| Constant speed | $L_{p\mathrm{Aeq},T_p}$ over the pass-by time | 7,5 m and 1,2 m on both sides; 25 m and 3,5 m allowed at 200 km/h and above | The mean of three runs per side and speed, rounded; the louder side | 6 |
+| Starting, maximum level | $L_{p\mathrm{AFmax}}$ | 7,5 m and 1,2 m, at a cross section 10 m ahead of the unit and along a unit longer than 50 m | The highest of the rounded means | 7.5 |
+| Starting, averaged level | $L_{p\mathrm{Aeq},T}$ | 25 m and 3,5 m, 10 m ahead of the unit | The highest of the rounded means | 7.6 |
+| Braking | $L_{p\mathrm{AFmax}}$, full service braking from 30 km/h | 7,5 m and 1,2 m, opposite the middle of the first car at standstill, ±10 m | The highest of the rounded means | 8 |
 
-Three runs are valid when they lie within 3 dB of each other (9.3). Only the
-constant-speed test needs a reference track (6.2).
+Only the constant-speed test needs a reference track. The starting and
+braking tests ask for a track without joints or visible defects (7.3, 8.2),
+but only at constant speed does the rolling noise the track shares in dominate
+the result, and only there does the standard limit the rail roughness and the
+decay rates (6.2), both printed as numbers. A vehicle can still be measured on
+a track that misses either limit, but its result then belongs to that site.
 
-## How the measurement goes
+### How the measurement goes
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rolling_stock_site_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rolling_stock_site.svg" alt="Section across the track and plan of an ISO 3095 pass-by site: microphone A 7.5 m from the track centreline and 1.2 m above the top of rail, B at 7.5 m and 3.5 m, C at 25 m and 3.5 m for 200 km/h and above; in plan, the shaded triangle between the microphone and the track reaching 2d either side that must allow free propagation, and a circle of radius 3d free of large reflecting objects" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rolling_stock_site_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rolling_stock_site.svg" alt="Section across the track and plan of an ISO 3095 pass-by site. In section: a car on a ballasted track, the top of rail as the datum, microphone A 7.5 m from the track centreline and 1.2 m above the top of rail, the additional position B at 7.5 m and 3.5 m, and position C at 25 m and 3.5 m for 200 km/h and above, with the ground anywhere from 0 m to 2 m below the top of rail. In plan: a train on the track, a microphone at distance d, the shaded triangle between the microphone and the track reaching 2d along the track either side that must allow free propagation, and a circle of radius 3d around the microphone free of barriers, hills, rocks, bridges and buildings." width="92%"></picture>
+
+*The microphones of the constant-speed test and the area around them that has
+to be free.*
 
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
-| Microphone | 7,5 m from the track centreline, 1,2 m above the top of rail, both sides; 25 m and 3,5 m allowed from 200 km/h | 6.4.1 |
-| Free propagation | The triangle to twice the microphone distance either side: ground 0 m to −2 m from the top of rail, no other track, no snow, water, ice, tarmac or concrete, nobody inside | 6.1.1 |
-| Reflecting objects | None large within three times the measurement distance | 6.1.1 |
-| Background | At least 10 dB under the pass-by level | 6.1.3 |
-| Record | Starting and ending at least 10 dB below the level at the front and at the rear | 6.6.3 |
-| Track | Roughness under Figure 2, decay rates over Figure 3, curve radius and gradient of 6.2.2 | 6.2 |
+| Microphone | 7,5 m from the track centreline, 1,2 m above the top of rail, both sides of the unit (one side is enough when the two are acoustically identical); 25 m and 3,5 m allowed from 200 km/h; 7,5 m and 3,5 m recommended as well when there are sources high on the unit | 6.4.1, 6.4.2 |
+| Free propagation | Over the triangle between the track and the microphone, reaching twice the microphone distance along the track either side: the ground 0 m to −2 m from the top of rail, no other track, no snow or tall vegetation, no water, ice, tarmac or concrete, nobody inside | 6.1.1 |
+| Reflecting objects | None large within three times the measurement distance of the microphone | 6.1.1 |
+| Background | $L_{p\mathrm{Aeq},T}$ over 20 s of background at least 10 dB under the pass-by level, in every band of interest when spectra are asked for | 6.1.3 |
+| Speed | Held within ±5 % over the measurement section, measured with a maximum permissible error of 3 % | 6.6.2 |
+| Record | Starting at least 10 dB below the level when the front of the train is opposite the microphone and ending 10 dB below the level when the rear is | 6.6.3 |
+| Track | A consistent superstructure over twice the microphone distance either side; ballast, wooden or concrete sleepers, no shielding; no joints or visible defects; the roughness and decay-rate limits of 6.2.5 and 6.2.6; a curve radius of 1 000 m, 3 000 m or 5 000 m depending on the speed, and a gradient of at most 5:1 000 where powered units are tested | 6.2 |
 
 ## 2. The pass-by level and the transit exposure level
 
-The constant-speed quantity is $L_{p\mathrm{Aeq},T}$ over the pass-by time
-$T_p = l/v$ of the unit (6.6.3). The 2005 edition also defined the transit
-exposure level, the energy of the whole passage spread over the pass-by time,
-$\mathrm{TEL} = L_{p\mathrm{Aeq},T} + 10 \lg (T/T_p)$ (ISO 3095:2005, 3.14,
-Formula 10); Formula B.1 of the 2013 edition keeps the same form for a single
-trailer, over the pass-by time of half the unit.
+The quantity of the constant-speed test is the A-weighted equivalent level over
+a measurement interval $T$ from $T_1$ to $T_2$ (3.14),
+
+$$
+L_{p\mathrm{Aeq},T} = 10 \lg \left( \frac{1}{T} \int_{T_1}^{T_2}
+\frac{p_\mathrm{A}^2(t)}{p_0^2}\,\mathrm{d}t \right)\ \mathrm{dB},
+$$
+
+and for a multiple unit or a fixed formation the interval is the pass-by time
+of the whole unit, from its front to its rear, $T_p = l/v$ (6.6.3). Inside a
+train the interval runs from the centre of the first unit under test to the
+centre of the last. `pass_by_measurement` A-weights a pressure record, keeps
+the level history $L_{p\mathrm{AF}}(t)$ with time weighting F, and reads the
+equivalent level and the maximum within the interval it is given:
 
 ```python
 import numpy as np
@@ -57,30 +85,65 @@ fs = 16000
 length_m, speed_kmh, distance_m = 100.0, 80.0, 7.5
 tp = environment.pass_by_time(length_m, speed_kmh=speed_kmh)
 t = np.arange(int(14.0 * fs)) / fs
-front_s = 4.0
-x_front = speed_kmh / 3.6 * (t - front_s)
+front_s = 4.0                                  # the front passes the microphone at 4 s
+x_front = speed_kmh / 3.6 * (t - front_s)      # metres the front is past the microphone
+# The unit as an incoherent line source of its own length: the mean square at
+# the microphone follows the angle the unit subtends there.
 angle = np.arctan(x_front / distance_m) - np.arctan((x_front - length_m) / distance_m)
 rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
 print(round(tp, 2), round(passby.equivalent_level, 1), round(passby.max_level, 1))
-# 4.5 81.3 81.9
+# 4.5 81.3 81.9   T_p in s, L_pAeq,Tp and L_pAFmax in dB
+```
+
+6.6.3 also asks that the record itself start at least 10 dB below the level
+when the front is opposite the microphone and end 10 dB below the level when
+the rear is. Given when the front and the rear pass, the result keeps both
+margins and says whether they are enough.
+
+The 2005 edition of the standard defined one more quantity, the **transit
+exposure level**: the energy of the whole passage, measured over an interval
+long enough to hold all of it, spread over the pass-by time alone (ISO
+3095:2005, 3.14, Formulae 8 to 10),
+
+$$
+\mathrm{TEL} = 10 \lg \left( \frac{1}{T_p} \int_0^T
+\frac{p_\mathrm{A}^2(t)}{p_0^2}\,\mathrm{d}t \right)
+= L_{p\mathrm{Aeq},T} + 10 \lg \frac{T}{T_p}\ \mathrm{dB}.
+$$
+
+The 2013 edition dropped it, but it is still quoted, and its form survives in
+Formula B.1, where a single trailer at the end of a train is measured from its
+centre onwards and the energy spread over the pass-by time of half the unit.
+Pass the pass-by time to `pass_by_measurement` and the result carries the
+energy of its interval spread over it:
+
+```python
 whole = environment.pass_by_measurement(
     p, fs, start_s=0.0, end_s=14.0, pass_by_time_s=tp,
     front_passing_s=front_s, rear_passing_s=front_s + tp,
 )
+print(round(whole.start_margin_db, 1), round(whole.end_margin_db, 1), whole.recording_interval_sufficient)
+# 14.0 17.8 True
 print(round(whole.equivalent_level, 1), round(whole.normalized_level, 1))
-# 77.1 82.0   L_pAeq,T over the record, and TEL
+# 77.1 82.0   L_pAeq,T over the whole 14 s record, and TEL
 ```
 
-## 3. Three runs and a rounded mean
+The transit exposure level is 0,7 dB above the pass-by level here because it
+also counts the energy of the approach and the departure, which the pass-by
+level leaves out. `transit_exposure_level` is Formula 10 on its own, for a
+level and two durations already known.
 
-`rolling_stock_test` averages the runs of each position, rounds the mean to
-the integer (a half goes up) and keeps the highest; `stationary_test` averages
-a set on energy weighted by length, $(\pi/2) \times 7{,}5$ m for the end
-positions (Formulae 1 and 2). `type_test_speeds`, `min_curve_radius` and
-`acceleration_test_positions` (Figure 10) state the small rules around them.
+## 3. Three runs, a rounded mean and the louder side
+
+Every test ends the same way: the runs of each position are averaged
+arithmetically, the mean is rounded to the nearest integer decibel, and the
+result is the highest of those means, the louder side at constant speed and
+the loudest position when starting or braking (6.7.1, 7.5.4, 7.6.4, 8.7).
+`rolling_stock_test` does it for any of the four methods, and says whether the
+runs of every position lie within the 3 dB of 9.3:
 
 ```python
 test = environment.rolling_stock_test(
@@ -88,118 +151,499 @@ test = environment.rolling_stock_test(
 )
 print(dict(test.reported_levels), test.final_level, test.valid)
 # {'left': 82.0, 'right': 81.0} 82.0 True
+```
+
+The standard rounds to the nearest integer without a rule for a value that
+falls on the half; the library rounds a half up, and says so in the result's
+documentation. A speed normalisation, where one is asked for, goes on the runs
+before this (6.7.1).
+
+The clauses around the test are small rules the library states as functions:
+the type-test speeds of 6.6.2, 80 km/h and the maximum speed or the maximum
+alone up to 80 km/h; the smallest curve radius of 6.2.2; and the positions of
+the maximum level starting test, 10 m ahead of the unit, 10 m ahead of its
+middle when it is longer than 50 m, and evenly between them when those two
+are more than 50 m apart (7.5.1.1, Figure 10):
+
+```python
+print(environment.type_test_speeds(160.0), environment.min_curve_radius(160.0))
+# (80.0, 160.0) 5000.0
 print(environment.acceleration_test_positions(108.0))
-# [-10.  17.  44.]
+# [-10.  17.  44.]   metres behind the front of the unit, as Figure 10 draws them
+```
+
+The stationary test averages the positions of a set on energy, weighting each
+by the length of the unit it stands for, $(\pi/2) \times 7{,}5$ m for the
+positions off the ends (5.8.1, Formulae 1 and 2), and reports the mean of
+three sets rounded to the integer:
+
+```python
+# A 20 m locomotive: four 5 m areas a side, and two positions off each end.
+side = [66.0, 68.5, 70.0, 67.0]
+ends = [64.0, 63.5]
+mesh = np.array(side + side + ends + ends)
+sets = mesh + np.array([[0.0], [0.4], [-0.3]])  # three sets, one row each
+lengths = [5.0] * 8 + [environment.STATIONARY_END_POSITION_LENGTH_M] * 4
+standing = environment.stationary_test(sets, lengths)
+print(standing.set_levels.round(2), standing.reported_level)
+# [66.31 66.71 66.01] 66.0
 ```
 
 ## 4. The reference track
 
-**Rail roughness (EN 15610).** A record is cleared of narrow upward spikes
-(7.2), raised to where a wheel of 0,375 m radius would rest (7.3), and turned into a
-one-third octave band spectrum by Method A (7.4.2) with the band synthesis of
-Annex C, $L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)$ with $r_0 = 1\ \mu$m. The
-limit is Figure 2 of ISO 3095, which prints its twenty-two values beside the
-points (`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`); the Annex B listing of EN 15610
-prints them again.
+### 4.1 The roughness of the rails (EN 15610)
 
-**Method B (EN 15610 7.4.3).** The record runs through digital one-third
-octave band filters and each band is the mean square of its output, once 2 m
-are discarded at either end for the filter transients; a record needs 5 m
-(NOTE 1) and the records of a line 15 m analysed in total, which
-`check_reference_track` judges. The filters "shall comply with EN 61260", the
-1995 edition: `roughness_filter_bank` is the library's own `OctaveFilterBank`
-run at the record's samples per metre, order 4 Butterworth sections on the
-base-ten bands Method A reports, class 0 of EN 61260:1995 on Table 1, on the
-integrated response of 4.5.3 and on the summation of 4.9. Every band runs at
-the record's own rate, without the band-by-band decimation the library's banks
-use by default: a band then has no alias at all, so the grade here reaches the
-Nyquist wavenumber of the record and covers exactly what a record goes
-through. A band is reported
-when its filter has settled to within 0,15 dB (the class 0 tolerance of 4.5.3)
-over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
-0,5 m.
+A rail's **acoustic roughness** is the height of its running surface along
+it, measured with a probe on a line along the rail head (EN 15610, 3.1). The
+record is processed in three stages before its spectrum is taken (7.1). The
+joints, welds and defects are edited out by the operator. Narrow upward
+spikes, from grains of dirt under the probe, are removed: a spike is where the
+second derivative falls below $-10^7\ \mathrm{\mu m/m^2}$ and the first
+derivative changes sign, its edges are where the slope falls below
+$5 \times 10^3\ \mathrm{\mu m/m}$, and it is replaced by a straight line when
+its height is more than $w^2/a$ with $a = 3$ m, so a narrow peak goes and a
+broad one, which a wheel does feel, stays (7.2). Every point is then raised to
+where a wheel of 0,375 m radius would rest on it, because the probe reaches
+into pits a wheel rolls over (7.3).
+
+Method A of 7.4.2 then cuts the record into segments at least 1 m long
+overlapping by half, removes the trend of each, applies a Hanning window and
+averages their spectra; the one-third octave band value is the energy of the
+lines inside the band, the two lines that straddle an edge counted for the
+part of their width inside it (Annex C). The level is
+$L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)$ dB with $r_0 = 1\ \mathrm{\mu m}$
+(3.3), and a segment resolves wavelengths up to a quarter of its length (7.5),
+so a 1 m segment reports from the 0,25 m band down.
+
+```python
+limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+x = np.arange(0.0, 20.0, 1.0e-3)               # 20 m of rail, one sample per millimetre
+
+def rail(offsets_db, seed):
+    """A record whose bands sit 3 dB under the limit, or where offsets_db says."""
+    rng = np.random.default_rng(seed)
+    r = np.zeros_like(x)
+    for wavelength, level in limit.items():
+        target = level + offsets_db.get(wavelength, -3.0)
+        k = 10.0 ** np.linspace(-0.045, 0.045, 10) / wavelength  # ten lines across the band
+        amplitude = np.sqrt(2.0 * 10.0 ** (target / 10.0) / k.size)
+        for kk in k:
+            r += amplitude * np.cos(2.0 * np.pi * kk * x + rng.uniform(0.0, 2.0 * np.pi))
+    return r
+
+# Rail 1 a little corrugated from 5 cm to 2,5 cm, rail 2 at 4 cm and 3,15 cm.
+left = rail({0.05: -1.0, 0.04: 2.0, 0.0315: 2.5, 0.025: 0.5}, seed=1)
+right = rail({0.04: 1.0, 0.0315: 1.5}, seed=2)
+left[7300] += 25.0                             # a grain of dirt under the probe
+spectra = [
+    environment.acoustic_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+    for r in (left, right)
+]
+print(spectra[0].n_segments, spectra[0].wavelengths_m[0], spectra[0].wavelengths_m[-1])
+# 39 0.25 0.0025
+print(round(spectra[0].level_at(0.0315), 1), round(spectra[1].level_at(0.0315), 1), limit[0.0315])
+# -2.6 -3.6 -5.0   dB re 1 um: both rails over the limit in the 3,15 cm band
+```
+
+The limit is ISO 3095's Figure 2, and the figure prints its value beside
+every point, twenty-two of them from 0,4 m to 3,15 mm, so the library reads
+the numbers rather than a curve (`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`). The
+Annex B listing of EN 15610 types the same twenty-two values as its "2007 TSI
+limit", a second printing the conformance suite checks the first against. Up
+to 190 km/h the roughness has to be known from 0,003 m to 0,10 m, and above
+it to 0,25 m (6.2.5). The spectra of the records of one line are averaged on
+their mean squares (`average_roughness_spectra`, 7.6), and 6.4.3 sets how
+many lines a rail is measured on by the width of its running band
+(`roughness_measurement_lines`).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_roughness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_roughness.svg" alt="One-third octave band roughness level in dB re 1 µm against wavelength from 40 cm to 0.25 cm, longest wavelength on the left: the Figure 2 limit falls from 17.1 dB at 40 cm to −11.0 dB at 0.315 cm, and the spectra of the two rails lie about 2 dB to 4 dB under it except between 5 cm and 2.5 cm, where they come closer and rise over it in the 4 cm to 2.5 cm bands by up to 2.4 dB, and drop steeply in the 0.25 cm band, past the end of the limit; the title gives the verdict on the reference track, passes, through Annex C, whose effect on the pass-by level is 0.57 dB" width="88%"></picture>
+
+*The two rails against the limit of Figure 2: under it everywhere but at
+4 cm and 3,15 cm, where both exceed it, and at 2,5 cm, where one does. The
+track passes only through Annex C (section 4.4), and the title says so.*
+
+**Method B, filters along the rail (7.4.3).** The other way to the same
+spectrum runs the processed record through digital one-third octave band
+filters and takes the mean square of what comes out of each. A filter starts
+from rest at the head of the record and rings for a while, so 2 m of every
+output are discarded at either end; a record needs 5 m to leave the 1 m a
+spectrum needs (NOTE 1), and the records of one line need at least 15 m
+analysed in total once those ends are gone. The filters "shall comply with
+EN 61260", the 1995 edition EN 15610 dates in its references. The bank here
+is the library's own `filters.OctaveFilterBank`, run at the record's samples
+per metre, so that its frequencies are wavenumbers and its bands are the
+base-ten bands Method A reports (`roughness_filter_bank`). Graded by
+`filters.verify_filter_class` against that edition, it is class 0, the
+tightest, and its integrated response (4.5.3) and the sum of its outputs
+(4.9) are within class 0 as well. Every band runs at the record's own rate,
+without the band-by-band decimation the library's banks use by default.
+4.8 asks the anti-alias filters of a sampled-data system to keep the
+wavenumbers that fold onto a band within Table 1; undecimated, a band has no
+alias at all, and the grade reaches the Nyquist wavenumber of the record and
+covers exactly what a record goes through.
+
+The bank is of order 4, the lowest that is class 0, for a reason the standard
+leaves unsaid: a filter's ringing lasts longer the longer the wavelength of
+its band, and 7.4.3 allows 2 m whatever the band. A band is reported only
+when, over the length analysed, its filter has built up to within 0,15 dB of
+its steady output, the class 0 tolerance of 4.5.3; a 5 m record therefore
+reports from the 0,25 m band, the quarter of the metre it analyses (7.5), and
+the 20 m records here from the 0,5 m band. The listing of Annex B runs its
+filters forward and back with `filtfilt`, which squares their response and
+takes them out of every class of EN 61260 (section 7).
 
 ```python
 from phonometry import filters
 
 bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
 print(bank.order, bank.n_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
-# 4 24 0
+# 4 24 0   order, bands from 0,5 m to 2,5 mm, class of EN 61260:1995
+filtered = [
+    environment.filtered_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+    for r in (left, right)
+]
+print(filtered[0].method, filtered[0].record_length_m, filtered[0].wavelengths_m[0])
+# B 16.0 0.5   20 m less 2 m at either end, and the longest band whose filter settles
+print(round(filtered[0].level_at(0.0315), 1), round(spectra[0].level_at(0.0315), 1))
+# -2.5 -2.6   dB re 1 um in the 3,15 cm band, Method B and Method A
+```
+
+On a stationary record the two methods agree to the precision their
+estimates allow. A tone read by Method A exactly reads within the class 0
+limits of the filter's relative attenuation by Method B, and a record spread
+evenly across a band reads within the 0,15 dB of its integrated response; on
+these rails the two spectra differ by a few tenths of a decibel, the scatter
+of averaging a few metres of random roughness. `check_reference_track` holds
+each line analysed by Method B to its 15 m: the two rails above, at 16 m each,
+meet it.
+
+The tone is the check to run first. A cosine of 3 µm amplitude at 1 cm has an
+rms of $3/\sqrt{2}$ µm and so a level of $10\lg(9/2)$ dB re 1 µm in the 1 cm
+band. With the spike removal of 7.2 and the curvature processing of 7.3 switched
+off, so that both methods receive the record as it was written, they read it
+alike to the third decimal:
+
+```python
 x = np.arange(0.0, 20.0, 1.0e-3)
-record = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
+tone = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
 raw = {"spike_removal": False, "curvature_processing": False}
-filtered = environment.filtered_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
-fourier = environment.acoustic_roughness_spectrum(record, sample_spacing_m=1.0e-3, **raw)
-print(filtered.record_length_m, filtered.wavelengths_m[0])
-# 16.0 0.5
-print(round(filtered.level_at(0.01), 3), round(fourier.level_at(0.01), 3))
+tone_b = environment.filtered_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+tone_a = environment.acoustic_roughness_spectrum(tone, sample_spacing_m=1.0e-3, **raw)
+print(round(tone_b.level_at(0.01), 3), round(tone_a.level_at(0.01), 3))
 # 6.532 6.532   10 lg(9/2) dB re 1 um by both methods
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg" alt="Roughness level in dB re 1 µm against wavelength of one 20 m record by both methods: Method A from 25 cm and Method B from 50 cm down to 0.25 cm, within a few tenths of a decibel of each other where both report, about 3 dB under the Figure 2 limit" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_roughness_methods.svg" alt="One-third octave band roughness level in dB re 1 µm against wavelength from 50 cm to 0.25 cm of one 20 m record analysed by both methods: Method A, on 1 m Fourier segments, starts at 25 cm, and Method B, through order 4 one-third octave filters with 2 m discarded at either end, starts at 50 cm; from 25 cm down the two curves lie within a few tenths of a decibel of each other, about 3 dB under the Figure 2 limit drawn dashed from 40 cm to 0.315 cm" width="88%"></picture>
 
-**Track decay rate (EN 15461).** From the band magnitudes of the responses on
-the hammer grid of Figure 2, Formula 1 gives
-$\mathrm{DR} = 4{,}343 / \sum |A(x_n)|^2/|A(x_0)|^2\,\Delta x_n$ dB/m, with the floor
-$\mathrm{DR}_\mathrm{min} = 4{,}343/x_\mathrm{max}$ of Formula 2. The limits are the table beside Figure 3
-of ISO 3095 (`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`).
+*One record, two analyses: Method B reaches the 0,5 m band from 16 m of
+record, Method A stops at a quarter of its 1 m segments, and where both report
+they agree to the scatter of the estimate.*
 
-**The verdict.** `check_reference_track` judges both, and the curve radius and
-gradient of 6.2.2, into one verdict read from `.passes` (it has no truth value
-of its own). Annex C accepts a roughness over the limit when its effect on the
-pass-by level is at most 1 dB (`check_small_roughness_deviations`, on the quadratic average of the rails, at the speed judged and against the limit judged), and Annex E
-bounds what the roughness of two sites could change (`roughness_comparability`).
+### 4.2 How fast vibration decays along the rail (EN 15461)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_roughness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_roughness.svg" alt="Roughness level in dB re 1 µm of two rails against wavelength, with the Figure 2 limit falling from 17.1 dB at 40 cm to −11.0 dB at 0.315 cm; both rails lie under it except in the 4 cm to 2.5 cm bands, where one or both exceed it by up to 2.4 dB; the track passes through Annex C, with an effect of 0.57 dB" width="88%"></picture>
+The **track decay rate** is the attenuation of the vibration along the rail,
+in decibels per metre, one value per one-third octave band (EN 15461, 3.6).
+An accelerometer sits on the rail at the middle of a sleeper bay and a hammer
+strikes the rail at the positions of Figure 2, every quarter bay out to two and
+a half, then more sparsely, to 66 bays (6.7,
+`track_decay_excitation_positions`). From the band magnitudes $|A(x_n)|$ of
+the responses, the direct one $A(x_0)$ first, Formula 1 estimates the rate
+from the integral of the squared response rather than from a fitted slope,
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay.svg" alt="Vertical and lateral track decay rates in dB/m on a logarithmic axis from 100 Hz to 5 kHz, both above the Figure 3 lower limits drawn dashed" width="88%"></picture>
+$$
+\mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
+\frac{|A(x_n)|^2}{|A(x_0)|^2}\,\Delta x_n}\ \mathrm{dB/m},
+$$
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_small_deviation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_small_deviation.svg" alt="Measured and revised A-weighted pass-by spectra at 160 km/h, the revised one 0.7 dB to 1.6 dB lower at 1 kHz, 1.25 kHz and 1.6 kHz; the Annex C effect is 0.57 dB, accepted" width="88%"></picture>
+where $\Delta x_n$ is the length of rail each position stands for (Annex A).
+A grid that stops at $x_\mathrm{max}$ cannot measure a rate below
+$\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}$ (Formula 2), and a band whose rate is not at least
+twice that is unsuitable; the farthest response also has to be 10 dB below the
+direct one (6.7).
+
+```python
+bands = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
+         800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0]
+# The rates a ballasted track with concrete sleepers might have, dB/m.
+vertical = [9.0, 8.0, 6.0, 4.0, 3.0, 3.5, 7.0, 8.0, 7.0, 3.0, 1.2, 0.9, 0.9, 1.0, 1.1, 1.3, 1.5, 1.8]
+lateral = [6.0, 5.0, 4.0, 3.0, 3.0, 2.2, 1.2, 0.9, 0.7, 0.6, 0.5, 0.5, 0.6, 0.8, 0.9, 1.0, 1.2, 1.4]
+x_hammer = environment.track_decay_excitation_positions(sleeper_spacing_m=0.6)
+
+def responses(rates_db_per_m):
+    """Exponentially decaying band magnitudes on the hammer grid, one row per position."""
+    beta = np.asarray(rates_db_per_m) / (20.0 * np.log10(np.e))
+    return np.exp(-np.outer(x_hammer, beta))
+
+decay = [
+    environment.track_decay_rate(responses(vertical), frequencies=bands, direction="vertical"),
+    environment.track_decay_rate(responses(lateral), frequencies=bands, direction="lateral"),
+]
+print(x_hammer[-1], round(decay[0].min_measurable_db_per_m, 3), decay[1].far_field_sufficient)
+# 39.6 0.11 True
+print(round(decay[0].rate_at(1000.0), 2), round(decay[1].rate_at(1000.0), 2))
+# 1.19 0.5
+```
+
+Formula 1 returns 1,19 dB/m for a response that decays at exactly 1,2 dB/m:
+on the grid of Figure 2 the sum stands in for the integral, and it reads an
+exponential about 1 % low. The limits are ISO 3095's Figure 3, which prints
+them in a table beside its curves, fourteen bands from 250 Hz to 5 kHz for each
+direction (`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`); below 250 Hz it sets
+none.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay.svg" alt="Track decay rate in dB/m on a logarithmic axis from 0.01 to 100 against the one-third octave bands from 100 Hz to 5 kHz: the vertical rate peaks at about 8 dB/m between 400 Hz and 630 Hz and falls to about 0.9 dB/m at 1.25 kHz, above its Figure 3 lower limit of 6 dB/m and 0.8 dB/m there; the lateral rate falls from 6 dB/m at 100 Hz to 0.5 dB/m at 1 kHz, above its own lower limit, which bottoms at 0.2 dB/m" width="88%"></picture>
+
+*Both decay rates above the lower limits of Figure 3, the vertical one only
+just in the 1,25 kHz and 1,6 kHz bands.*
+
+### 4.3 The verdict
+
+`check_reference_track` brings the two halves together with the geometry of
+6.2.2 and returns one verdict, whose `passes` is the answer and whose
+`conditions` are every requirement it judged, each with the clause it comes
+from and the numbers it was judged on. When the decay rates come with their
+grid, the floor of Formula 2 and the 10 dB drop of EN 15461 are judged too.
+The verdict has no truth value of its own, so it cannot be tested with `if`
+by mistake; the answer is `.passes`.
+
+```python
+check = environment.check_reference_track(
+    spectra, decay, speed_kmh=160.0, curve_radius_m=6000.0, track_gradient_ratio=0.002
+)
+print(check.passes)
+# False
+for condition in check.failed:
+    print(condition.clause, "|", condition.requirement, "|", condition.detail)
+# 6.2.5 | roughness at or below the limit of Figure 2 | exceeds by 2.4 dB at 0.0315 m
+```
+
+EN 15610 clause 8 allows no band above the limit, and neither does 6.2.5 on
+its own. It adds one way out.
+
+### 4.4 Small deviations: Annex C
+
+Annex C accepts a track whose roughness exceeds the limit when the exceedance
+changes the pass-by level by no more than 1 dB, judged at each speed on a
+measured pass-by spectrum. The rails are averaged on their mean squares; the
+**just-compliant** spectrum is the measured one held down to the limit
+(Formula C.1); both are carried from wavelength to frequency at the train
+speed, $f = v/\lambda$, and their band energies redistributed over the
+normalised one-third octave bands, the synthesis of EN 15610 Annex C adapted
+to bands of unequal width; their difference is the correction
+$\Delta L_{r,\mathrm{rail}}(f)$ (Formula C.2). The measured noise spectrum
+less that correction is the **revised** spectrum (Formula C.3), the least
+that could have been measured on a compliant track, and the effect is the
+energy sum of the measured spectrum less that of the revised one (Formula
+C.4):
+
+```python
+noise = [68.0, 69.5, 71.0, 72.5, 74.0, 76.0, 78.0, 80.5, 83.0,
+         85.5, 87.0, 87.5, 86.5, 84.5, 82.0, 79.0, 75.5, 72.0]   # L_pAeq,Tp(f) at 160 km/h, dB
+average = environment.average_roughness_spectra(spectra)
+small = environment.check_small_roughness_deviations(
+    average, noise, frequencies=bands, speed_kmh=160.0
+)
+print(round(small.level_increase, 2), small.passes)
+# 0.57 True
+check = environment.check_reference_track(
+    spectra, decay, speed_kmh=160.0, curve_radius_m=6000.0,
+    track_gradient_ratio=0.002, small_deviations=small,
+)
+print(check.passes)
+# True
+```
+
+At 160 km/h the 5 cm to 2,5 cm bands land between 890 Hz and 1,8 kHz, which is
+where this pass-by spectrum peaks, so the correction is 0,7 dB to 1,6 dB in
+the three bands from 1 kHz to 1,6 kHz and the effect on the level is 0,57 dB:
+the track is accepted for this vehicle at this speed. The same exceedance at
+another speed falls on other frequencies and has to be judged again, and
+`check_reference_track` refuses an Annex C verdict computed at another speed,
+on anything but the quadratic average of the rails it judges (C.2.1), or
+against any limit but the one it judges them against (Formula C.1).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_small_deviation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_small_deviation.svg" alt="A-weighted one-third octave band pass-by level from 100 Hz to 5 kHz at 160 km/h: the measured spectrum rises from 68 dB to a peak of 87.5 dB at 1.25 kHz and falls to 72 dB at 5 kHz; the revised spectrum follows it except at 1 kHz, 1.25 kHz and 1.6 kHz, where it lies 0.7 dB to 1.6 dB lower; the title gives the effect on the pass-by level, 0.57 dB, accepted" width="88%"></picture>
+
+*What the roughness above the limit could have added, band by band, and in
+total less than the 1 dB Annex C allows.*
+
+<details>
+<summary>Show the code for these figures</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+passby.plot()                     # the level history and the interval T_p
+check.plot(panel="roughness")     # the rails against Figure 2
+check.plot(panel="decay")         # the decay rates against Figure 3
+small.plot()                      # the Annex C spectra
+plt.show()
+```
+
+</details>
+
+Annex E answers a neighbouring question, whether two test sites are
+comparable in roughness: `roughness_comparability` forms the minimum and
+maximum envelopes of their two roughness spectra (Formula E.1), carries each
+through the Annex C chain against each site's noise spectrum and bounds the
+difference roughness alone could make in the pass-by level (Formulae E.4 and
+E.5).
 
 ## 5. The uncertainty of Annex G
 
-$u = a/\sqrt{3}$ for an input known by its limits (Formula G.2),
-$u_\mathrm{c} = \sqrt{\sum u^2}$ (Formula G.5) and $U = 2u_\mathrm{c}$ (Formula
-G.6). `pass_by_uncertainty` reproduces the worked budget of Table G.2:
-55,68 dB, 0,83 dB and 1,66 dB.
+Annex G treats the result as the reading plus uncorrelated corrections, so
+every sensitivity coefficient is 1 (Formulae G.1 and G.4); an input known
+only by its limits $\pm a$ has $u = a/\sqrt{3}$ (Formula G.2), the combined
+standard uncertainty is the root sum of squares (Formula G.5) and the
+expanded uncertainty is twice that (Formula G.6). Table G.2 works the budget
+of a standstill measurement through, and it is the numeric oracle of the
+module:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_uncertainty.svg" alt="Each input's share of the variance of the Table G.2 result, largest first, led by the level linearity of the meter, the tripod and the ground level; combined uncertainty 0.83 dB, expanded 1.66 dB" width="88%"></picture>
+```python
+from phonometry import metrology
 
-The printed tables disagree in three places (the 25 m distance of Table G.1
-printed as 0,004 dB; the ground level at 7,5 m, 0,55 dB in Table G.1 and
-0,30 dB in Table G.2; the wind screen interval with its bounds out of order),
-the spike-removal loop of the EN 15610 listing leaves out the change of sign
-of 7.2 c) and never ends on a sharp bend of the rail, and the Method B filters
-of the same listing, third-order Butterworth run forward and back, are 6,02 dB
-down at their band edges (just inside them, where Table 1 allows at most 5,5 dB
-for class 2) and read a flat band about 0,6 dB low, outside every class of
-EN 61260 that 7.4.3 requires; see the
-[errata registry](../../ERRATA.md).
+rows = [  # Table G.2: input, mean value correction and standard uncertainty, dB
+    ("cal, reference", 0.0, 0.14), ("cal, long term", 0.0, 0.04),
+    ("cal, supply voltage", 0.0, 0.06), ("cal, distortion factor", 0.105, 0.06),
+    ("slm, direction", 0.0, 0.25), ("slm, frequency", 0.0, 0.25),
+    ("slm, level linearity", 0.0, 0.46), ("calibrator, meteorological", 0.0, 0.14),
+    ("slm, wind screen", 0.06, 0.03), ("tripod", 0.0, 0.35),
+    ("distance", 0.0, 0.06), ("ground level", 0.515, 0.30), ("rounding", 0.0, 0.29),
+]
+budget = environment.pass_by_uncertainty(
+    55.0, [metrology.Quantity(value=v, uncertainty=u, name=n) for n, v, u in rows]
+)
+print(round(budget.level, 2), round(budget.combined_uncertainty_db, 2),
+      round(budget.expanded_uncertainty_db, 2))
+# 55.68 0.83 1.66   Table G.2 prints 55,68, 0,83 and 1,66
+print(round(metrology.rectangular(0.0, 0.8).uncertainty, 2))
+# 0.46   the level linearity row of Table G.1, +/-0,8 dB over the square root of 3
+```
 
-## What this page does not cover
+Figure G.1 draws each input's share of the variance, largest first, and the
+result draws the same bars in the same order; the conformance suite checks the
+order against the figure's labels.
 
-The measurement itself (the stationary mesh, finding $T_1$ and $T_2$ inside a
-train, the site and weather checks, Annex B beyond Formula B.1), the speed
-normalisation of 6.7.1, which has no formula, the tonal difference of 6.7.2,
-Annex F, the editing of rail defects, the measurement of the frequency
-response functions of EN 15461, and the roughness of wheels.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_uncertainty.svg" alt="Bar chart of each input's share of the variance of the result, largest first: the level linearity of the sound level meter about 0.31, the tripod 0.18, the ground level 0.13, the rounding 0.12, the direction and the frequency response of the meter 0.09 each, the calibrator reference and meteorological terms 0.03 each, and five inputs under 0.01; the title gives the combined standard uncertainty 0.83 dB and the expanded uncertainty 1.66 dB" width="88%"></picture>
 
-Nor does it join records for wavelengths longer than a quarter of a record,
-the reach the library applies. EN 15610 7.5 has the measured records
-concatenated by overlapping them, rules that "the overlap shall not be used
-for spectral components of 0,1 m or less" and asks for the concatenation
-method to be described in the report. It sets no length of overlap, no way to
-line two records up or to match their heights, no rule for how the samples
-they share are combined and no test that a join is valid (its NOTE only asks
-for attention to that), so the standard leaves the joining method to the
-tester, who must describe it in the report.
+*The budget of Table G.2 as Figure G.1 draws it: the linearity of the meter,
+the tripod and the ground carry three fifths of the variance.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+budget.plot()
+plt.show()
+```
+
+</details>
+
+## 6. The rest of the standard
+
+Three smaller pieces complete the tests. Annex A characterises impulsive noise
+by the steepest rise of $L_{p\mathrm{AF}}(t)$ over the stretches that climb
+without a break by at least 10 dB (Formula A.1). 6.3.4 accepts a vehicle
+coupled to the unit under test when it adds no more than 2,0 dB to the
+pass-by level, both levels rounded to one decimal. Annex D corrects a level
+for a steady background it stands more than 3 dB above (Formula D.1).
+
+```python
+times = np.arange(0.0, 3.0, 0.01)              # an L_pAF history every 10 ms
+levels = np.full(times.size, 70.0)
+levels[100:121] = 70.0 + 0.6 * np.arange(21)   # 12 dB in 0.2 s, from 1 s
+levels[121:] = 82.0
+print(round(environment.impulsiveness_rise_speed(times, levels).rise_speed_db_per_s, 1))
+# 60.0   dB/s
+neutral = environment.check_adjacent_vehicle_neutrality(83.04, 81.06)
+print(neutral.difference, neutral.passes)
+# 1.9 True
+print(round(environment.background_level_increase(78.0, 72.0), 2))
+# 1.26   dB the background adds to the 78 dB measured
+```
+
+## 7. Where the printed text disagrees with itself
+
+The oracle rows of Table G.1 and Table G.2 do not all agree, and the
+[errata registry](../../ERRATA.md) has the arithmetic of each:
+the standard uncertainty of the 25 m microphone distance is printed as
+0,004 dB where its interval gives 0,04 dB; the ground level at 7,5 m is
+0,55 dB in Table G.1 and 0,30 dB in Table G.2, which Formula G.2 gives; and the
+interval of the wind screen is printed with its bounds out of order. None of
+them changes a number the library computes: the conformance rows read Table
+G.2 as printed and hold the Table G.1 rows that Formula G.2 reproduces. In
+EN 15610, the spike-removal loop of the Annex B listing repeats while any
+second derivative is below the threshold, without the change of sign that
+clause 7.2 c) also asks of a spike, so it never ends on a sharp bend of the
+rail that is no spike at all. Neither it nor the clause's "until no further
+spike is detected", read literally, ends on a peak that is detected and then
+kept by the height test; the library ends the sweep when a pass removes
+nothing, which is how it reads the clause. The same listing does Method B with
+third-order Butterworth filters run forward and back (`filtfilt`), which
+squares their response: 6,02 dB down just inside the band edges, where
+Table 1 of EN 61260:1995 allows at most 5,5 dB for class 2, and a filter
+integrated response of $-0{,}58$ dB to $-0{,}59$ dB, where 4.5.3 allows $\pm 0{,}5$ dB.
+Clause 7.4.3 asks for filters that comply with EN 61260; the listing's do not,
+in any band or class, and read a band whose spectrum is flat about 0,6 dB low.
+The library's bank is class 0 on both.
+
+## What this guide covers
+
+- **Covered.** The computations of ISO 3095:2013 from measured records and levels:
+  `pass_by_measurement` (the equivalent level over any interval, the maximum
+  with time weighting F, the record margins of 6.6.3 and the transit exposure
+  level of ISO 3095:2005 or Formula B.1), `transit_exposure_level`,
+  `pass_by_time`, `stationary_unit_level` and `stationary_test` (Formulae 1 to
+  3 and 5.8.1), `rolling_stock_test` for the constant-speed, starting and
+  braking tests with the spread of 9.3, `type_test_speeds`,
+  `min_curve_radius`, `acceleration_test_positions`,
+  `impulsiveness_rise_speed` (Annex A), `check_adjacent_vehicle_neutrality`
+  (6.3.4), `background_level_increase` (Annex D), `check_small_roughness_deviations`
+  (Annex C), `roughness_comparability` (Annex E), `check_reference_track` (6.2)
+  and `pass_by_uncertainty` (Annex G). From EN 15610:2009, the spike removal,
+  the curvature processing, Method A with the band synthesis of Annex C, Method B
+  with its filter bank graded against EN 61260:1995 (`filtered_roughness_spectrum`,
+  `roughness_filter_bank`) and the 15 m it asks of each line, the average of 7.6
+  and the lines of 6.4.3; from EN 15461:2008+A1:2010, the decay
+  rate of Formula 1 on the grid of Figure 2 with the floor of Formula 2 and the
+  10 dB drop. The limits of Figures 2 and 3 are read-only tables, and every
+  result draws itself with `.plot()`.
+
+- **Not covered.** The measurement itself: laying out the stationary mesh, finding $T_1$ and
+  $T_2$ inside a train, the site and weather checks, which are the tester's, and
+  the special cases of Annex B beyond Formula B.1. The speed normalisation 6.7.1
+  mentions, for which the standard gives no formula; the tonal difference, which
+  6.7.2 hands to ISO 1996-2 or DIN 45681; the platform, stopping-point and bridge
+  measurements of Annex F. In EN 15610, the editing out of joints, welds and
+  defects (Annex A shows what they look like; the operator does it), and the
+  joining of records of 7.5. A record yields wavelengths up to a quarter of its
+  length, which the library applies; to assess longer ones, 7.5 has the
+  measured records concatenated by overlapping them, rules that "the overlap
+  shall not be used for spectral components of 0,1 m or less" and asks for the
+  concatenation method to be described in the report. It sets no length of
+  overlap, no way to line two records up or to match their heights, no rule for
+  how the samples they share are combined and no test that a join is valid (its
+  NOTE only asks for attention to that), so the standard leaves the joining
+  method to the tester, who must describe it in the report. In EN 15461,
+  the measurement of the frequency response functions: the rates are computed
+  from their band magnitudes. The roughness of the wheels, which the rail
+  standards do not cover.
 
 ## See also
 
-- [CNOSSOS-EU railway source emission](cnossos-rail-emission.md): the
-  prediction side, from roughness spectra to a sound power per metre.
-- [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md):
-  the road's counterpart.
-- [Errata in published sources](../../ERRATA.md): the ISO 3095 and EN 15610
-  entries.
-- API reference: [`environment.sources.rolling_stock_noise`](https://docs.jmrp.io/phonometry/reference/api/environment/rolling-stock-noise/).
+- [CNOSSOS-EU railway source emission](cnossos-rail-emission.md): the prediction side of the same noise, where rail and wheel roughness spectra and transfer functions become a sound power per metre.
+- [Vibration next to a railway (DIN 45672)](../../vibration/immission/railway-vibration.md): what the same trains put into the ground and the buildings beside the track.
+- [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md): the road's counterpart, where the surface is measured through the traffic on it.
+- [Errata in published sources](../../ERRATA.md): the three ISO 3095 entries of Tables G.1 and G.2, and the two EN 15610 entries on the listing of Annex B, its spike-removal loop and its filters run forward and back.
+- API reference: [`environment.sources.rolling_stock_noise`](https://docs.jmrp.io/phonometry/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](https://docs.jmrp.io/phonometry/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](https://docs.jmrp.io/phonometry/reference/api/environment/track-decay/).
+
+## References
+
+- **European Committee for Standardization. (2009).** *Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation* (EN 15610:2009).
+  The rail roughness the reference track of ISO 3095 6.2.5 is judged by: the spike removal of 7.2, the curvature processing of 7.3, Method A of 7.4.2 with the band synthesis of Annex C, Method B of 7.4.3 with its filters held to EN 61260:1995, the average of 7.6 and the measurement lines of 6.4.3. Read from BS EN 15610:2009, which is identical to it.
+- **European Committee for Standardization. (2010).** *Railway applications — Noise emission — Characterisation of the dynamic properties of track sections for pass by noise measurements* (EN 15461:2008+A1:2010).
+  The track decay rates the reference track of ISO 3095 6.2.6 is judged by: the grid of Figure 2, the 10 dB drop of 6.7, Formula 1 and the floor of Formula 2, with Annex A. Read from BS EN 15461:2008+A1:2010, which is identical to it.
+- **International Organization for Standardization. (2005).** *Railway applications — Acoustics — Measurement of noise emitted by railbound vehicles* (ISO 3095:2005).
+  The second edition, read from BS EN ISO 3095:2005, which is identical to it: the transit exposure level of 3.14 and its Formulae 8 to 10, which the 2013 edition dropped.
+- **International Organization for Standardization. (2013).** *Acoustics — Railway applications — Measurement of noise emitted by railbound vehicles* (ISO 3095:2013).
+  The implemented edition (third edition, 2013-08-01): the stationary test of clause 5 and Formulae 1 to 3, the constant-speed test of clause 6 with the reference track of 6.2 and the limits Figures 2 and 3 print, the starting tests of clause 7 with the positions of Figure 10, the braking test of clause 8, the spread of 9.3, the rise speed of Annex A, Formula B.1, the small deviations of Annex C, the background correction of Annex D, the comparability of Annex E and the uncertainty budget of Annex G with its example, Table G.2.

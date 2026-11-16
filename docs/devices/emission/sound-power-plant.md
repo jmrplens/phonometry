@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-plant.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Sound Power of Multisource Industrial Plants (ISO 8297)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-plant/
+
+# Sound Power of Multisource Industrial Plants
 
 A petrochemical complex, a quarry or a crushing plant is too large for the
 enveloping surface of ISO 3744 and too full of sources for any one of them to
@@ -91,9 +93,11 @@ plt.show()
 
 </details>
 
+### How the measurement goes
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_plant_contour_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_plant_contour.svg" alt="Plan and section of an ISO 8297 measurement. On the plan, after Figure 1, an L-shaped plant area S_p, hatched, sits inside a rectangular measurement contour of length l that encloses the measurement area S_m; fourteen microphone positions stand on the contour at equal spacing, each with an arrow pointing at the plant at right angles to the contour. Dotted lines from two positions give the distance d_i to the nearest point of the plant perimeter, a dimension between two neighbours reads D_m at most twice the average distance, and two dashed lines from a position on the top side bound the aspect angle of at most 180 degrees. Under the plan, the average distance is the mean of the d_i, above 0.05 times the square root of S_p and 5 m and at most 0.5 times that root and 35 m. In section, a microphone on a mast at height h points horizontally at three sources whose midpoints average to the characteristic height H, with h equal to H plus 0.025 times the square root of S_m and at least 5 m. A panel lists the readings at each position: octave bands from 63 Hz to 4 kHz, at least 1 min each, with the plant running; the background with the plant stopped, corrected by Table 2, invalid under 6 dB, 1 dB off from 6 to 8 dB, 0.5 dB at 9 and 10 dB and nothing above; a class 1 calibrator in each series; and a contour further out where a level exceeds the mean by more than 5 dB. The footer adds the 5 % accuracy of l, S_m and H, the conditions of clause 6 and the limit of 10 % on omitted positions" width="100%"></picture>
 
-**How the measurement goes.** Draw a first contour on the plot plan, lay the positions on it and check
+Draw a first contour on the plot plan, lay the positions on it and check
 9.1.1 a) and b) there; if they fail, draw another (9.1.2.3; NOTE 6 expects one
 iteration to be enough). Measure $l$, $S_\mathrm{m}$ and $H$ on the plan, raise the
 microphones to the height of 9.3 (as high as possible above 5 m where it
@@ -530,29 +534,29 @@ reads the table, and every result carries it as `uncertainty_db`.
 
 ## What this guide covers
 
-**Covered.** The ISO 8297:1994 engineering method, every step that turns the plan and the
-readings into numbers: the contour and its positions, directions and
-distances from two polygons (`plant_measurement_contour`), the characteristic
-height with NOTE 7 (`plant_characteristic_height_m`), the microphone height of
-9.3, the window of 9.1.1 a) and the largest aspect angle of 9.1.1 b) on the
-contour; the background correction of Table 2, the steady reading of 9.5.2
-and the steadiness of an integrated reading of 9.5.3; the nine steps of
-clause 10 (`plant_sound_power`) with the air absorption of Table 3 or of
-ISO 3891 Annex A for the weather at the measurement; the uncertainty of
-Table 1; the verdict on 1.2, 6 b), 7.1, 9.1, 9.3, 9.5.1, 9.5.3 and 10.2
-(`check_plant_measurement`); and the parts of a plant put together
-(`partial_plant_contributions`). The standard prints no worked example, so
-the conformance report anchors the chain in its three tables, the bound of
-NOTE 11, ISO 3891 Table 9 and closed forms.
+- **Covered.** The ISO 8297:1994 engineering method, every step that turns the plan and the
+  readings into numbers: the contour and its positions, directions and
+  distances from two polygons (`plant_measurement_contour`), the characteristic
+  height with NOTE 7 (`plant_characteristic_height_m`), the microphone height of
+  9.3, the window of 9.1.1 a) and the largest aspect angle of 9.1.1 b) on the
+  contour; the background correction of Table 2, the steady reading of 9.5.2
+  and the steadiness of an integrated reading of 9.5.3; the nine steps of
+  clause 10 (`plant_sound_power`) with the air absorption of Table 3 or of
+  ISO 3891 Annex A for the weather at the measurement; the uncertainty of
+  Table 1; the verdict on 1.2, 6 b), 7.1, 9.1, 9.3, 9.5.1, 9.5.3 and 10.2
+  (`check_plant_measurement`); and the parts of a plant put together
+  (`partial_plant_contributions`). The standard prints no worked example, so
+  the conformance report anchors the chain in its three tables, the bound of
+  NOTE 11, ISO 3891 Table 9 and closed forms.
 
-**Not covered.** Left to the measurement team by choice, although some of it carries a
-printed number: the accuracy the plan is read to (±5 %, and ±30 % for
-$\bar{d}/\sqrt{S_\mathrm{p}}$), the calibration intervals of 7.3, the
-reflecting surfaces and the wind of clause 6 a) and c), and the report of
-clause 12. The sound power
-of sources raised above the plant (clause 11) belongs to other standards and
-is not summed into the plant's. Table 3 is used as printed where it departs
-from the ISO 3891 coefficient it cites.
+- **Not covered.** Left to the measurement team by choice, although some of it carries a
+  printed number: the accuracy the plan is read to (±5 %, and ±30 % for
+  $\bar{d}/\sqrt{S_\mathrm{p}}$), the calibration intervals of 7.3, the
+  reflecting surfaces and the wind of clause 6 a) and c), and the report of
+  clause 12. The sound power
+  of sources raised above the plant (clause 11) belongs to other standards and
+  is not summed into the plant's. Table 3 is used as printed where it departs
+  from the ISO 3891 coefficient it cites.
 
 ## See also
 
@@ -571,27 +575,7 @@ from the ISO 3891 coefficient it cites.
 
 ## References
 
-- International Organization for Standardization. (1994). *Acoustics —
-  Determination of sound power levels of multisource industrial plants for
-  evaluation of sound pressure levels in the environment — Engineering
-  method* (ISO 8297:1994). The contour of 9.1, the plant dimensions of 9.2, the
-  microphone height and direction of 9.3 and 9.4, the background correction of
-  Table 2, the nine steps of clause 10 with the air absorption of Table 3, and
-  the uncertainty of Table 1 that this guide implements; read in the identical
-  British adoption BS ISO 8297:1994.
-- International Organization for Standardization. (1978). *Acoustics —
-  Procedure for describing aircraft noise heard on the ground* (ISO 3891:1978,
-  withdrawn). Annex A, the SAE ARP 866A attenuation coefficient that ISO 8297
-  Table 3 was taken from and that this guide evaluates for the weather at the
-  measurement.
-
-## Standards
-
-ISO 8297:1994, *Acoustics — Determination of sound power levels of multisource
-industrial plants for evaluation of sound pressure levels in the environment —
-Engineering method*: the measurement contour (9.1), the plant dimensions (9.2),
-the microphone height and direction (9.3, 9.4), the background correction of
-Table 2, clause 10 with the air absorption of Table 3, the uncertainty of
-Table 1 and the requirements of clauses 1.2, 6, 7.1 and 9.5. ISO 3891:1978,
-Annex A: the attenuation coefficient of the air for the weather at the
-measurement.
+- **International Organization for Standardization. (1978).** *Acoustics — Procedure for describing aircraft noise heard on the ground* (ISO 3891:1978).
+  Annex A, the SAE ARP 866A attenuation coefficient that ISO 8297 Table 3 was taken from and that this guide evaluates for the weather at the measurement. Withdrawn.
+- **International Organization for Standardization. (1994).** *Acoustics — Determination of sound power levels of multisource industrial plants for evaluation of sound pressure levels in the environment — Engineering method* (ISO 8297:1994).
+  The contour of 9.1, the plant dimensions of 9.2, the microphone height and direction of 9.3 and 9.4, the background correction of Table 2, the nine steps of clause 10 with the air absorption of Table 3, and the uncertainty of Table 1 that this guide implements; read in the identical British adoption BS ISO 8297:1994.

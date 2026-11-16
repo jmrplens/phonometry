@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/propagation/outdoor-propagation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/
 
 # Outdoor Sound Propagation
 
@@ -184,6 +186,39 @@ sites, housing; Annex A) and reflections off vertical obstacles (Clause 7.5) are
 **not implemented**: the standard treats them as informative and they are left
 to the caller.
 
+### Turning a real source into point sources
+
+Every equation below is written for a **point** source, so the first modelling
+step is turning a real plant into a set of them (Clause 4). An extended source
+(a road, a rail line, an industrial site) is divided into sections, a line source
+into line sections and an area source into area sections, each carrying its own
+sound power and directivity and each represented by a point source at its
+centre. A group of point sources may then be collapsed into a single equivalent
+point source in the middle of the group, but only when all three of the
+standard's conditions hold: the sources have approximately the same strength and
+the same height above the local ground plane, the propagation conditions from
+each of them to the receiver are the same, and the distance $d$ from the
+equivalent source to the receiver exceeds twice the largest dimension $H_\mathrm{max}$
+of the group ($d > 2H_\mathrm{max}$). If $d \le 2H_\mathrm{max}$, or if the propagation
+conditions differ between sub-sources (one screened by a building, another not),
+Clause 4 requires the group to be split back into its components.
+
+Applied to the case this section runs: a compressor hall whose radiating
+surfaces span 30 m collapses into one point source only beyond 60 m, so the
+200 m receiver below is legitimate while a 50 m receiver on the same site is
+not, and there the hall has to be modelled face by face. The sound power itself
+is out of scope: it comes from a measurement of the ISO 3740 family or from the
+supplier's declaration, in the eight octave bands from 63 Hz to 8 kHz. When only
+an A-weighted $L_{W\mathrm{A}}$ is available, the standard's own fallback (Clause 1,
+Note 1) is to evaluate the attenuation terms at 500 Hz and apply them to that
+single number: an estimate, not a band prediction. The two CNOSSOS-EU emission
+guides,
+[road](../sources/cnossos-road-emission.md) and
+[rail](../sources/cnossos-rail-emission.md), stop exactly
+where this rule starts: both deliver a sound power *per metre of source line*
+and both declare the segmentation out of scope, so choosing the segment length
+and summing the segments energetically is the caller's engineering decision.
+
 The geometry of the screening term fixes the vocabulary: the diffraction edge
 splits the source-to-receiver distance into $d_\mathrm{ss}$ and $d_\mathrm{sr}$, and the extra
 path length over the edge is $z = d_\mathrm{ss} + d_\mathrm{sr} - d$. When the line of sight
@@ -220,6 +255,39 @@ grazing incidence to zero as the clearance deepens, never below zero.
   $A_\mathrm{bar} = D_z - A_\mathrm{gr} \ge 0$ (Eq. (12), Note 13); for a lateral barrier
   $A_\mathrm{bar} = D_z$ and the ground term is retained (Eq. (13)).
 
+### Choosing the ground factors
+
+$G_\mathrm{s}$, $G_\mathrm{m}$ and $G_\mathrm{r}$ are not a vague softness: each is the *porous fraction* of
+a region whose extent the standard fixes (7.3.1, figure 1). Measured along the
+ground-plane distance $d_\mathrm{p}$, the **source region** runs $30 h_\mathrm{s}$ from the source
+towards the receiver (capped at $d_\mathrm{p}$), the **receiver region** runs $30 h_\mathrm{r}$
+back from the receiver, and the **middle region** is whatever is left between
+them. Hard cover (paving, water, ice, concrete, tamped ground) is $G = 0$;
+porous cover (grass, trees, farmland) is $G = 1$; a mixed region takes the
+fraction of its length that is porous.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_regions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_regions.svg" alt="Section to scale of a 200 m path with a source and a receiver 1.5 m above the ground: the source region shaded over the first 45 m as 30 times hs, the receiver region shaded over the last 45 m as 30 times hr, and the 110 m middle region between them hatched into 70 m of grass and 40 m of asphalt with Gm = 70/110 = 0.64; a formula box gives q = 1 minus 30 times (hs plus hr) over dp and an inset repeats the same path at 60 m where the source and receiver regions overlap, q = 0 and the middle region does not exist" width="92%"></picture>
+
+On the 200 m example of this section ($h_\mathrm{s} = h_\mathrm{r} = 1.5$ m, so $d_\mathrm{p} \approx d$)
+that is a 45 m source region, a 45 m receiver region and 110 m of middle:
+setting all three factors to 1.0 claims the whole 200 m is grass. A path leaving
+the plant across a 20 m concrete apron takes $G_\mathrm{s} = 25/45 \approx 0.55$, and a
+middle region of 70 m of grass and 40 m of asphalt takes
+$G_\mathrm{m} = 70/110 \approx 0.64$.
+
+The middle region can also disappear. Table 3, note 2 defines
+$q = 1 - 30(h_\mathrm{s} + h_\mathrm{r})/d_\mathrm{p}$ when $d_\mathrm{p} > 30(h_\mathrm{s} + h_\mathrm{r})$ and $q = 0$ below it, and
+$A_\mathrm{m}$ is proportional to $q$: with these two heights the threshold sits at
+$d_\mathrm{p} = 30(1.5 + 1.5) = 90$ m, so on a 60 m path `ground_middle` is **ignored
+entirely**: passing 0.0 or 1.0 returns the identical $A_\mathrm{gr}$, silently. The
+same $q$ gives the sanity check for the whole term. Over hard ground everywhere
+$A_\mathrm{s} = A_\mathrm{r} = -1.5$ dB and $A_\mathrm{m} = -3q$ in every band, so the 200 m path must
+return $A_\mathrm{gr} = -4.65$ dB ($q = 0.55$) and the 60 m path the familiar $-3$ dB of
+a perfectly reflecting plane. Run that check before trusting a ground factor:
+it is the one case with a closed-form answer. Water and ice count as hard ground
+for the fit, but ISO 9613-2 does not claim to cover propagation over water at
+all.
+
 `outdoor_propagation_attenuation` assembles the four terms into an
 `OutdoorAttenuation` result whose per-band arrays sum, band by band, to
 `a_total`, so the divergence, atmospheric, ground and barrier contributions stay
@@ -229,6 +297,12 @@ cap, atmospheric absorption bites only at 8 kHz, and the ground dip lives in the
 mid bands.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
+
+*The four terms are signed and sum to the total: divergence is a flat 57.0 dB at
+200 m, the barrier saturates at its 20 dB cap from 2 kHz up, the air only bites
+at 8 kHz (18.7 dB of the 95.8 dB total), and the ground is a **gain** of 4.65 dB
+at 63 Hz, which is why the barrier there has to spend $A_\mathrm{gr}$ before it buys
+anything.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -308,7 +382,56 @@ lp = environment.predicted_receiver_level(
         temperature_c=15.0, relative_humidity_percent=70.0),
 )
 print(np.round(lp, 1))            # [28.8 26.7 24.  21.1 17.9 16.2 12.7 -0.8]
+
+# Dz on its own: the diffraction insertion loss of Eq. (14), before Eq. (12)
+dz = environment.barrier_attenuation(barrier, 200.0, bands)
+print(np.round(dz, 2))            # [ 9.13 11.24 13.73 16.45 19.31 20.   20.   20.  ]
+print(np.allclose(att.a_bar, np.maximum(dz - att.a_gr, 0.0)))   # True
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_level_cascade_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_level_cascade.svg" alt="Waterfall chart over the eight octave bands from a flat 95 dB source sound power level down to the predicted downwind receiver level, with one descending step per attenuation term: divergence, atmospheric absorption, ground effect and barrier screening, the ground step rising instead of falling at 63 Hz, and the final level marked in each band" width="88%"></picture>
+
+*Where the 95 dB of source power goes, band by band: divergence spends the same
+57.0 dB everywhere, the barrier is worth nothing at 250 Hz and 20 dB above 2 kHz,
+and at 8 kHz the air alone removes 18.7 dB and takes the receiver level below
+0 dB. The 63 Hz column is the only one where a step goes up: the ground returns
+4.65 dB before the barrier takes it away again.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `att`, `bands` and `lw` are the objects the snippet above already built.
+level = lw.copy()
+fig, ax = plt.subplots()
+for term, label in [(att.a_div, "-Adiv"), (att.a_atm, "-Aatm"),
+                    (att.a_gr, "-Agr"), (att.a_bar, "-Abar")]:
+    ax.bar(np.arange(len(bands)), -term, bottom=level, label=label)
+    level = level - term
+ax.plot(np.arange(len(bands)), level, "D-", color="black", label="LfT(DW)")
+ax.set_xticks(np.arange(len(bands)))
+ax.set_xticklabels([f"{b:g}" for b in bands])
+ax.set_xlabel("Octave-band centre frequency [Hz]")
+ax.set_ylabel("Level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+`barrier_attenuation` returns $D_z$ itself: the raw diffraction insertion loss
+of Eq. (14), which is *not* what the composite reports. For a top-edge barrier
+`a_bar` is `np.maximum(dz - a_gr, 0)` (Eq. (12), Note 13), and the equality
+printed above is the cleanest way to see that the ground effect is spent rather
+than kept: at 250 Hz the screened path had 13.79 dB of ground attenuation and
+13.73 dB of diffraction, so the barrier contributes exactly nothing. $D_z$ is
+also where the 20 dB single-edge and 25 dB double-edge caps bite, so printing it
+is how a reader learns that the wall has saturated and extra height buys nothing
+(here, from 2 kHz upwards). Only for a lateral barrier (`lateral=True`,
+Eq. (13)) does `a_bar` equal $D_z$.
 
 `predicted_receiver_level` composes $L_{fT}(DW) = L_W + D_\mathrm{c} - A$ with
 $D_\mathrm{c}$ the `DirectivityCorrection` (`index` $+$ `d_omega`). Pass `c0=` to subtract the
@@ -328,11 +451,27 @@ auto-wired** into `outdoor_propagation_attenuation` (which always uses the
 general per-region method of 7.3.1); combine them by hand when the alternative
 method is appropriate.
 
+$h_\mathrm{m}$ is **not** the average of the two end heights. Figure 3 defines it as
+$h_\mathrm{m} = F/d$, where $F$ is the area enclosed between the straight source-receiver
+line and the ground profile: over flat ground it reduces to
+$(h_\mathrm{s} + h_\mathrm{r})/2$, over a cutting it collapses towards zero, and over a valley
+crossed by a high path it grows well beyond either end height. That single term
+is how the alternative method absorbs terrain shape, and reading it as a height
+is the mistake that flatters a prediction. Note the direction of the clamp:
+$A_\mathrm{gr}$ is capped below at 0, so a path riding high above the ground earns no
+ground attenuation at all (at $d = 200$ m, $h_\mathrm{m} = 8$ m still gives 3.32 dB but
+$h_\mathrm{m} = 8$ m at 50 m gives 0.00 dB), while a grazing path earns the full 4.8 dB.
+The three validity conditions travel with the formula: the A-weighted level
+alone, porous or mostly-porous ground, and no pure tone. Anything else goes back
+to the per-region method of 7.3.1.
+
 ```python
 from phonometry import environment
 
-# Alternative ground term (mean path height hm = 2 m, d = 200 m)
+# Alternative ground term (mean path height hm = F/d = 2 m, d = 200 m)
 print(round(environment.ground_attenuation_alternative(200.0, 2.0), 2))          # 4.43 dB
+# The clamp: a high path over a short distance earns nothing at all
+print(round(environment.ground_attenuation_alternative(50.0, 8.0), 2))           # 0.0 dB
 # Its companion solid-angle index (add to Dc when using Eq. (10))
 print(round(environment.directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 # Long-term meteorological correction (C0 = 2 dB) to subtract from LAT(DW)
@@ -379,7 +518,7 @@ quantity, so that two implementations can be compared where a single formula
 would not separate them; it also fixes the envelope a result has to stay
 inside, $\pm 0{,}05$ dB per band and on the total. The seven that ISO 9613-2
 answers on its own (T01 to T07) are checked band by band in the
-[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
+[conformance report](../../CONFORMANCE.md).
 The other twelve build their ray paths by the additional recommendations of
 its Clause 5, over barriers and around buildings, and are not implemented.
 
@@ -413,9 +552,7 @@ wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
 builds the lobe pattern of that interference, and the level sampled on an arc
 converges to the two-path image-source model, dips included.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ground_effect_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ground_effect.gif" alt="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ground_effect.webm)
+**Video:** [Ground-effect interference over rigid ground (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_ground_effect.webm): A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls.
 
 ### `Barrier` and the screening term
 
@@ -433,9 +570,7 @@ over the edge and fills
 the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
 works when the wavelength is short next to the path difference.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_barrier_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_barrier.gif" alt="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_barrier.webm)
+**Video:** [Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_barrier.webm): A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB.
 
 ### `outdoor_propagation_attenuation()` parameters
 
@@ -452,6 +587,23 @@ works when the wavelength is short next to the path difference.
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
 `a_total` and `d_omega`, all one value per band; its `.plot()` draws the
 stacked per-band breakdown with the total overlaid (the figure above).
+
+> [!NOTE]
+> **The method is octave-band only.** ISO 9613-2 is defined for the eight nominal
+> octave bands from 63 Hz to 8 kHz, and its Table 3 has no finer resolution, so
+> every frequency passed in is mapped to the *nearest nominal octave* for the
+> ground term while divergence and atmospheric absorption stay continuous in
+> frequency. A one-third-octave call therefore returns a stepped $A_\mathrm{gr}$, not a
+> refined one: over 400 / 500 / 630 / 800 Hz on porous ground at 100 m,
+> `a_gr` comes back as 7.65 / 7.65 / 7.65 / 1.76 dB (three bands sharing the
+> 500 Hz octave, then the 1 kHz octave) while `a_atm` moves smoothly through
+> 0.216 / 0.280 / 0.348 / 0.419 dB. Run the prediction in octaves and distribute
+> afterwards if a finer spectrum is needed, or use the wave-acoustic
+> `ground_effect` of
+> [Ground effect and barriers](ground-barriers.md)
+> when the interference structure inside an octave is the point. Nothing below
+> 63 Hz or above 8 kHz is covered at all, so a low-frequency assessment falls
+> outside this method.
 
 ### `Barrier` fields
 
@@ -522,8 +674,8 @@ is 0,012 dB, a quarter of what the report allows.
 The comparison itself, each result against the limits of its certified result
 as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
 and what a faster configuration of a mapping program costs is measured by the
-quantiles of Annex C of the same standard: both are in [Quality of outdoor
-sound software (ISO 17534-1)](software-quality.md).
+quantiles of Annex C of the same standard: both are in [Quality of Outdoor
+Sound Software (ISO 17534-1)](software-quality.md).
 
 ## 4. Scope, assumptions and pitfalls
 
@@ -578,6 +730,60 @@ whether a real barrier delivers its computed $D_z$:
   of building the barrier is correspondingly smaller than its nominal $D_z$;
   the two effects do not stack.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/iso9613_screening_anatomy_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/iso9613_screening_anatomy.svg" alt="Two panels on the ISO 9613-2 screening term. Left: the diffraction insertion loss Dz at 500 Hz against barrier height for a 200 m path, one curve for a single edge, one for a double edge with an edge separation of 2 m and one for the single edge with the meteorological factor Kmet, with the 20 dB and 25 dB caps drawn as horizontal ceilings the curves run into. Right: Dz against octave-band frequency for a 4 m screen next to Abar = Dz minus Agr over porous ground, the gap between the two curves being the ground effect the barrier has to spend before it buys anything, and Abar clamped at zero in the 250 Hz band" width="88%"></picture>
+
+*Left: extra height stops paying once $D_z$ meets its cap: beyond about 7 m of
+screen on this path the single-edge curve is flat at 20 dB, and $K_\mathrm{met}$ has
+already taken 1 to 2 dB off it at 200 m. Right: the two curves are the same
+barrier; the gap between them is $A_\mathrm{gr}$, and where the ground was already
+worth more than the diffraction (the 250 Hz octave) the net $A_\mathrm{bar}$ is zero.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `environment` is the module imported by the section 1 snippet.
+heights = np.linspace(1.6, 12.0, 60)
+single, double = [], []
+for h in heights:
+    # A screen midway on a 200 m path; dss = dsr from the geometry.
+    leg = float(np.hypot(100.0, h - 1.5))
+    single.append(float(environment.barrier_attenuation(
+        environment.Barrier(source_to_edge=leg, edge_to_receiver=leg),
+        200.0, [500.0])[0]))
+    double.append(float(environment.barrier_attenuation(
+        environment.Barrier(source_to_edge=leg, edge_to_receiver=leg,
+                            edge_separation=2.0), 200.0, [500.0])[0]))
+fig, ax = plt.subplots()
+ax.plot(heights, single, label="Single edge")
+ax.plot(heights, double, label="Double edge, e = 2 m")
+ax.axhline(20.0, linestyle=":", label="20 dB cap")
+ax.axhline(25.0, linestyle=":", label="25 dB cap")
+ax.set_xlabel("Barrier height [m]")
+ax.set_ylabel("Dz at 500 Hz [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The clear-sight case the vocabulary paragraph describes is one call away, and it
+is worth running once: $D_z$ does not drop to zero the moment the sight line
+clears the edge, it decays from $10 \log_{10} 3 = 4.77$ dB over the first few
+centimetres of path difference.
+
+```python
+for extra in (0.0, 0.001, 0.010, 0.050):   # path difference above the edge [m]
+    clear = environment.Barrier(source_to_edge=100.0 + extra / 2,
+                                edge_to_receiver=100.0 + extra / 2,
+                                line_of_sight_clear=True)
+    print(round(float(environment.barrier_attenuation(clear, 200.0, [500.0])[0]), 3))
+# 4.771, 4.728, 4.323, 1.845 dB at 500 Hz
+```
+
 An obstacle must also qualify as a barrier at all (Clause 7.4): surface
 density at least 10 kg/m², a closed surface without large gaps, and a
 horizontal extent normal to the path larger than the wavelength. A slatted
@@ -601,7 +807,14 @@ different questions:
   It bundles *emission* models for road, rail and industrial sources (and
   delegates aircraft to ECAC Doc 29) with its own propagation part derived
   from the French NMPB 2008 method, producing the $L_\mathrm{den}$/$L_\mathrm{night}$
-  indicators the Directive reports.
+  indicators the Directive reports. This library implements the CNOSSOS-EU
+  *emission* half on
+  [CNOSSOS-EU road emission](../sources/cnossos-road-emission.md)
+  and
+  [CNOSSOS-EU rail emission](../sources/cnossos-rail-emission.md);
+  the CNOSSOS-EU *propagation* method of 2.5 is **not** implemented, so
+  carrying a CNOSSOS line power through the ISO 9613-2 chain on this page is an
+  engineering estimate and not the normative chain the Directive prescribes.
 
 The propagation parts disagree by design, not by accident. CNOSSOS-EU
 evaluates every path twice, once under a homogeneous atmosphere and once
@@ -663,13 +876,9 @@ result.report(
 )
 ```
 
-Rendered examples of both fiches, regenerated with `make reports`, are kept in
-the repository. Click either preview to open the PDF:
+[![ISO 9613-2 outdoor propagation example report (PDF): One-page ISO 9613-2 prediction fiche: a metadata header with the propagation distance, a per-band table of the source power level Lw and the divergence, atmospheric, ground and barrier attenuation terms with the total A and the downwind level LfT(DW), the attenuation-breakdown plot and the boxed A-weighted downwind level LAT(DW) = 29.9 dB with a PASS verdict against a 50 dB limit.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_outdoor_attenuation_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_outdoor_attenuation_example.pdf)
 
-[![ISO 9613-2 outdoor propagation example report: a metadata header with the propagation distance, a per-band table of the source power level Lw and the divergence, atmospheric, ground and barrier attenuation terms with the total A and the downwind level LfT(DW), the attenuation-breakdown plot and the boxed A-weighted downwind level LAT(DW) = 29.9 dB with a PASS verdict against a 50 dB limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_outdoor_attenuation_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_outdoor_attenuation_example.pdf)
-
-*Outdoor propagation fiche (`OutdoorAttenuation.report`), the A-weighted
-downwind level at the receiver.*
+Outdoor propagation fiche (OutdoorAttenuation.report), the A-weighted downwind level at the receiver.
 
 Before committing the fiche, `result.plot()` draws the same per-band
 attenuation breakdown interactively (the stacked figure of section 2).
@@ -683,7 +892,9 @@ import numpy as np
 from phonometry import ReportMetadata, environment
 
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
-result = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5)
+# hs = 1 m, barrier 4 m high at 50 m, receiver 1.5 m high at 100 m *from the
+# source*; method="exact" is the wave-theoretic rigid half-plane the fiche names.
+result = environment.barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact")
 result.report(
     "barrier_insertion_loss.pdf",
     metadata=ReportMetadata(
@@ -693,90 +904,42 @@ result.report(
 )
 ```
 
-[![Barrier insertion loss example report: a metadata header naming the ground model, a per-band table of the insertion loss, the insertion-loss spectrum plot and the boxed mean insertion loss IL = 12.9 dB with a PASS verdict against an 8 dB minimum; the basis line names the wave-theoretic rigid-screen diffraction model, a complement to the ISO 9613-2 screening term](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_barrier_insertion_loss_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_barrier_insertion_loss_example.pdf)
+[![Barrier insertion loss example report (PDF): One-page barrier insertion-loss prediction fiche: a metadata header naming the ground model, a per-band table of the insertion loss, the insertion-loss spectrum plot and the boxed mean insertion loss IL = 12.9 dB with a PASS verdict against an 8 dB minimum. The basis line names the wave-theoretic rigid-screen diffraction model, a complement to the ISO 9613-2 screening term.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_barrier_insertion_loss_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9613_barrier_insertion_loss_example.pdf)
 
-*Barrier insertion loss fiche (`BarrierInsertionLoss.report`), the mean
-insertion loss over the octave bands.*
+Barrier insertion loss fiche (BarrierInsertionLoss.report), the mean insertion loss over the octave bands.
 
 Here too `result.plot()` previews the insertion-loss spectrum of the fiche;
-the [ground and barriers guide](ground-barriers.md) draws the same result
-against the exact half-plane and coherent-ground models.
+the [ground and barriers guide](ground-barriers.md) draws the
+same result against the exact half-plane and coherent-ground models.
 
 ## See also
 
 - [Spherical ground effect and advanced barriers](ground-barriers.md): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
 - [Atmospheric refraction](atmospheric-refraction.md): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
-- [Quality of outdoor sound software (ISO 17534-1)](software-quality.md): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](software-quality.md): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
 - [CNOSSOS-EU road emission](../sources/cnossos-road-emission.md) and [CNOSSOS-EU rail emission](../sources/cnossos-rail-emission.md): the source strengths the comparison in section 4 refers to.
 - [Environmental noise levels](../assessment/environmental-levels.md): what happens to the predicted level once it becomes an assessed one.
 - API reference: [`environment.propagation.outdoor_propagation`](https://docs.jmrp.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
-- Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
+- Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-iso-9613-12): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
 ## References
 
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  The wave-based theory (parabolic equation, fast field program, refraction
-  and turbulence) that quantifies what the favourable-condition assumption
-  and the $K_\mathrm{met}$ factor approximate.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Ground impedance models, the spherical-wave reflection coefficient behind
-  the ground dip of section 2, and the meteorological effects on barriers.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  The screen-attenuation chart against Fresnel number that Eq. (14)'s
-  diffraction term descends from.
-- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
-  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
-  Office of the European Union.
-  [doi:10.2788/31776](https://doi.org/10.2788/31776),
-  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+  Ground impedance models, the spherical-wave reflection coefficient behind the ground dip of section 2, and the meteorological effects on barriers.
+- **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
+  The implemented pure-tone attenuation coefficient of section 1: alpha (Eq. (5)) with the oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity conversion and the exact Table 1 midbands (Eq. (6), Note 5).
+- **International Organization for Standardization. (1996).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation*](https://www.iso.org/standard/20649.html) (ISO 9613-2:1996).
+  The implemented attenuation chain of section 2: the downwind receiver level (Eq. (3)/(4)) assembled from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the ground effect (Eq. (9), Table 3) with its A-weighted alternative (Eq. (10)/(11)), barrier screening (Eqs. (12)-(17)) and the meteorological correction (Eq. (21)/(22)). A revised edition was published in 2024; this module implements the 1996 method.
+- **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
+  Only the clause 8.1.2.1 conversion m = alpha/(10 lg e) behind air_power_attenuation_per_m; the reverberation-room method itself is covered in the Room Acoustics guide.
+- **International Organization for Standardization. (2015).** [*Acoustics — Software for the calculation of sound outdoors — Part 3: Recommendations for quality assured implementation of ISO 9613-2 in software according to ISO 17534-1*](https://www.iso.org/standard/66128.html) (ISO/TR 17534-3:2015).
+  The nineteen worked test cases and the ±0,05 dB envelope they are judged by; the length-weighted region ground factors of 6.2.5 behind region_ground_factors; and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
+- **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. https://doi.org/10.2788/31776
   The common EU framework contrasted with ISO 9613-2 in section 4.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17426.html).
-  The implemented pure-tone attenuation coefficient of section 1.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; a revised edition was published in 2024,
-  this module implements the 1996 method).
-  [iso.org catalogue](https://www.iso.org/standard/20649.html).
-  The implemented attenuation chain of section 2.
-- International Organization for Standardization. (2015). *Acoustics —
-  Software for the calculation of sound outdoors — Part 3: Recommendations for
-  quality assured implementation of ISO 9613-2 in software according to
-  ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/66128.html).
-  The nineteen worked test cases, the +/-0,05 dB envelope they are judged by,
-  and the two reductions of section 2: the region ground factors and the mean
-  path height.
-
-## Standards
-
-ISO 9613-1:1993, *Acoustics — Attenuation of sound during
-propagation outdoors — Part 1: Calculation of the absorption of sound by the
-atmosphere*: the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
-oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
-conversion and the exact Table 1 midbands (Eq. (6), Note 5). ISO 9613-2:1996,
-*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General
-method of calculation*: the downwind receiver level (Eq. (3)/(4)) assembled
-from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the
-ground effect (Eq. (9), Table 3) with its A-weighted alternative
-(Eq. (10)/(11)), barrier screening (Eqs. (12)–(17)) and the meteorological
-correction (Eq. (21)/(22)). ISO/TR 17534-3:2015, *Acoustics — Software for the
-calculation of sound outdoors — Part 3: Recommendations for quality assured
-implementation of ISO 9613-2 in software according to ISO 17534-1*: the
-length-weighted region ground factors of 6.2.5 behind `region_ground_factors`,
-and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
-ISO 354:2003, *Acoustics — Measurement of sound
-absorption in a reverberation room*: only the clause 8.1.2.1 conversion
-$m = \alpha/(10 \log_{10} e)$ behind `air_power_attenuation_per_m`; the reverberation-room
-method itself is covered in the [Room Acoustics guide](../../buildings/rooms/room-acoustics.md).
+- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. https://doi.org/10.1016/0003-682X(68)90020-0
+  The screen-attenuation chart against Fresnel number that Eq. (14)'s diffraction term descends from.
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+  ISBN 978-1-4020-0390-5. The wave-based theory (parabolic equation, fast field program, refraction and turbulence) that quantifies what the favourable-condition assumption and the K_met factor approximate.

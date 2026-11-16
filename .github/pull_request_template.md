@@ -31,12 +31,12 @@ Regenerated where this change touches them:
 
 - [ ] `make conformance`, with `docs/CONFORMANCE.md` and everything else it
       rewrites committed (it also updates the counts quoted in `.zenodo.json`,
-      `docs/` and the site frontmatter, so never edit those by hand)
+      the READMEs and the site frontmatter, so never edit those by hand)
 - [ ] `make api-docs`, with `site/src/content/docs/reference/api/` and
       `site/src/generated/api-sidebar.mjs` committed
-- [ ] `make llms`, with `llms.txt` and the overview and glossary mirrors
-      under `docs/` committed (the shards and `llms-full.txt` are written
-      by the site build)
+- [ ] `make llms` after any change to a site page, with `llms.txt` and the
+      GitHub edition under `docs/` committed (the shards and `llms-full.txt`
+      are written by the site build)
 - [ ] `make figures` (generation, then `scripts/check_figure_contrast.py` and
       `scripts/check_figures.py`), with the regenerated images committed
       (figures come from `scripts/generate_graphs.py`, never by hand)

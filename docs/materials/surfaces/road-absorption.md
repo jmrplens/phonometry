@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/surfaces/road-absorption.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/
 
 # In-situ Road-Surface Absorption
 
@@ -32,12 +34,51 @@ K_\mathrm{r} = \frac{d_\mathrm{s} - d_\mathrm{m}}{d_\mathrm{s} + d_\mathrm{m}},
 $$
 
 which equals $2/3$ for the mandatory geometry $d_\mathrm{s} = 1.25$ m, $d_\mathrm{m} = 0.25$ m.
-The absorption follows from the windowed incident and reflected spectra
-$H_\mathrm{i}$, $H_\mathrm{r}$:
+Both heights are held to within 0.005 m through the averaging, and the
+acoustic centres of source and microphone lie on one line normal to the
+surface with the microphone axis parallel to it. The absorption follows from
+the windowed incident and reflected spectra $H_\mathrm{i}$, $H_\mathrm{r}$:
 
 $$
 \alpha(f) = 1 - \frac{1}{K_\mathrm{r}^2}\left|\frac{H_\mathrm{r}(f)}{H_\mathrm{i}(f)}\right|^2.
 $$
+
+### 1.1 What is subtracted
+
+The microphone hears the direct wave and the road reflection in the same
+impulse response, and the mandatory geometry puts them only
+$2 d_\mathrm{m} / c \approx 1.5$ ms apart, far too little to gate apart at the bottom
+of the reported band. ISO 13472-1 therefore requires the **subtraction
+technique** (Clause 4.2) rather than plain time windowing, and that is the
+step the two arrays this page's functions consume come out of:
+
+1. Rig the source and the microphone so that their separation **cannot**
+   change: the standard asks for a fixed, stable mechanical connection
+   between them, because the subtraction is a cancellation of two nominally
+   identical waveforms.
+2. Measure over the road and average until the impulse response is stable:
+   **at least 50** responses (Clause 4.3), which is what beats the background
+   noise and the meteorological variation.
+3. Repeat the identical measurement with the rig taken away from any
+   reflecting surface. That free-field response **is** $h_\mathrm{i}$. Correct any
+   residual time shift between the two takes, and make them within a short
+   time of each other (the standard recommends under 10 minutes) because
+   the delay is temperature dependent.
+4. Subtract: $h_\mathrm{r} = h_\text{road} - h_\mathrm{i}$. Everything the two takes share
+   (the direct wave, the loudspeaker, the microphone, the whole chain)
+   cancels, and what survives is the surface reflection alone.
+5. Window $h_\mathrm{i}$ and $h_\mathrm{r}$ with the **same** window applied at their own
+   arrival times ($T_{\mathrm{w},\text{direct}} = T_{\mathrm{w},\text{reflected}}$), transform,
+   and form $\alpha$ with $K_\mathrm{r}$.
+
+Two acceptance conditions ride on that chain. The signal-to-noise ratio must
+exceed **10 dB in every one-third-octave band from 250 Hz to 4 kHz**
+(Clause 7.4), and no calibration of level is needed at all: the method is a
+ratio of two transfer functions from the same chain (Clause 6.1). But the
+Annex B reference measurement of section 1.2 is not optional for the same
+reason. The snippets below start from an `hi` and an `hr` that stand in for
+that pair; in the field they are the free-field reference and the windowed
+road reflection, in that order.
 
 ```python
 import numpy as np
@@ -63,6 +104,55 @@ print(round(kr, 4))                # 0.6667
 print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 ```
 
+### 1.2 The reference surface (Annex B)
+
+The raw ratio $|H_\mathrm{r}/H_\mathrm{i}|^2/K_\mathrm{r}^2$ assumes that the electro-acoustic chain and
+the geometry factor cancel exactly. They do not: the loudspeaker and the
+microphone have their own responses along paths of different length, and the
+mandatory $K_\mathrm{r} = 2/3$ is a plane-wave idealisation of a finite geometry. At
+the bottom of the band, where a dense road absorbs a few percent, that
+residual error is comparable with the quantity being measured, which is why
+Annex B makes a **reference measurement mandatory**, not advisory.
+
+The fix is one extra measurement per set-up. Lay a highly reflecting plate
+(plane, smooth, dense and jointless, and large enough to cover the whole
+maximum sampled area) on the same spot, and repeat the entire procedure over
+it with the rig geometry unchanged. The measured pressure reflection factor of
+the reference is then the chain's own error function $e(f)$, because the plate
+itself reflects everything; dividing the road's measured factor by it removes
+$e(f)$ and, since the geometry is identical, the $K_\mathrm{r}$ factor with it:
+
+$$
+\alpha_\text{road}(f) = 1 -
+  \left|\frac{Q_{p,\text{road,meas}}(f)}{Q_{p,\text{ref,meas}}(f)}\right|^2 .
+$$
+
+```python
+import numpy as np
+
+# `materials` is imported by the block above. Two complex pressure reflection
+# factors from the identical set-up: one over the road, one over the reference
+# plate. Their ratio is Annex B.
+freq = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
+q_road = np.array([0.97, 0.94, 0.88, 0.72, 0.55]) * np.exp(-0.05j * freq / 1e3)
+q_ref = np.array([1.02, 1.01, 1.00, 0.99, 0.98]) * np.exp(-0.05j * freq / 1e3)
+print(np.round(materials.absorption_reference_corrected(q_road, q_ref), 3))
+# [0.096 0.134 0.226 0.471 0.685]
+
+# Uncorrected, the same road data would read:
+print(np.round(1.0 - np.abs(q_road) ** 2, 3))
+# [0.059 0.116 0.226 0.482 0.698]
+```
+
+The plate must itself be verified: a sample of its material is measured in an
+impedance tube per ISO 10534-1 or ISO 10534-2 to confirm an absorption
+coefficient below **0.05** over the reported range, which is what licenses the
+assumption $|Q_{p,\text{ref}}| = 1$. A portable reference surface must also be
+rigid enough that it cannot resonate. In practice the reference is the first
+thing to reach for when a measured spectrum shows small negative absorptions
+in the lowest bands: as the printed values above show, the correction moves
+the 250 Hz band by more than the value itself.
+
 **Adrienne window (Clause 6.4).** The time window that isolates the reflection
 mandates only a sharp leading edge, a 5 ms flat portion and a cosine-squared or
 Blackman-Harris trailing edge; the exact durations are reported per measurement,
@@ -76,6 +166,57 @@ w = materials.adrienne_window(48000.0)
 print(w.shape[0])          # 504 samples at 48 kHz
 print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 ```
+
+That length is the method's single free parameter, and it is a trade with two
+ends. The **total** window duration sets the lowest frequency the transform
+can resolve: 10.5 ms is about 95 Hz, and a 220 Hz lower limit needs roughly
+5 ms of flat portion, which is why the reported band starts at 250 Hz and not
+lower. Lengthening it buys low-frequency validity, and every millisecond added
+also admits reflections from the mast, the vehicle, the operator and anything
+else within the corresponding radius, and enlarges the patch of road that
+contributes to the answer. The practical rule: choose the longest window that
+stays clear of the first parasitic arrival visible in the raw impulse
+response, apply the same window to the free-field reference and to the
+reflection, and **report the shape and the durations with the result**, since
+the standard fixes neither and two laboratories using different windows are
+not measuring the same thing. A spectrum that rises implausibly in the lowest
+reported bands is the usual sign of a window that is too short, or of a
+parasitic arrival inside it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/adrienne_window_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/adrienne_window.svg" alt="Three stacked panels on a common time axis: the free-field reference impulse response with the Adrienne window placed on the direct sound; the response measured over the road where the direct and reflected arrivals overlap, their 1.47 millisecond separation dimensioned, the subtracted surface reflection and the 10.5 millisecond Adrienne window drawn over it with a parasitic arrival just outside the gate; and the resulting windowed incident and reflected spectra with the 95 hertz reciprocal-window limit marked and the region below the reported 250 hertz band shaded" width="88%"></picture>
+
+*The whole method in three traces. The two arrivals are 1.47 ms apart on the
+mandatory geometry, so no gate separates them; the middle panel's red trace is
+what subtraction leaves once the free-field reference has been taken away.
+The green gate is the Adrienne window at its default 0.5 + 5 + 5 ms, whose
+total duration sets both the 95 Hz floor marked in the bottom panel and the
+1.34 m radius of road that contributes. The parasitic arrival at 15.8 ms is
+outside it; it would not be if the window were lengthened to reach lower in
+frequency.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `materials` is imported above. The window itself, placed at the reflected
+# arrival of the mandatory geometry (2 dm / c after the direct sound).
+fs = 48000.0
+w = materials.adrienne_window(fs)
+t = np.arange(w.size) / fs + (1.5 / 340.0) - 0.5e-3
+fig, ax = plt.subplots()
+ax.plot(t * 1e3, w)
+ax.axvline(1.0 / 340.0 * 1e3, linestyle=":", label="direct arrival")
+ax.axvline(1.5 / 340.0 * 1e3, linestyle="--", label="reflected arrival")
+ax.set_xlabel("Time [ms]")
+ax.set_ylabel("Window")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 **End-to-end spectrum.** `in_situ_absorption_spectrum` runs the whole chain (the
 windowed incident and reflected impulse responses to the narrow-band absorption
@@ -198,13 +339,89 @@ plt.show()
 
 </details>
 
+### 1.3 Before you press record
+
+That radius is not a number to admire; it is a clearance you walk. Compute it,
+pace it out, and check what is inside. ISO 13472-1 Clauses 7 and 8 give the
+gates that decide whether a measurement may be made at all, and they, not the
+signal processing, are what usually invalidates a roadside campaign.
+
+- **The maximum sampled area must be clear.** Any object other than the
+  pavement (a fence, a rock, a barrier, a parked car) is a reflecting object.
+  None may be inside the sampled area, and anything outside it must be farther
+  from the microphone than $d_\mathrm{s}$, that is farther than 1.25 m. The microphone
+  stand itself must not influence the measurement.
+- **The surface must be visually homogeneous** and free of changes in the
+  material, and it must be **dry**. On a surface with a significant void
+  content, verify that the pores are dry too, not just the surface. Wet
+  measurements are legitimate for research, and their results cannot be used
+  to classify or qualify a surface.
+- **Wind** at microphone height must not exceed 5 m/s.
+- **Temperature**: ambient air between 0 °C and 35 °C, and the road surface
+  between 0 °C and 50 °C.
+- **The reference surface of section 1.2 must cover at least the same
+  sampled area**, so the radius sizes the plate you have to carry as well as
+  the clearance you have to find.
+
+The measurement itself is a thirteen-step procedure whose order matters:
+check the surface and the weather, place the rig, compute and walk the
+radius, choose the source and the signal, average at least 50 responses over
+the road, take the free-field reference with the rig clear of everything,
+subtract, window, transform, form the reflection factor with $K_\mathrm{r}$, repeat the
+whole thing over the reference plate, and only then average into one-third
+octaves. A result reported without the window shape and durations, and without
+the reference measurement, is not an ISO 13472-1 result.
+
+### 1.4 When the site forces an angle
+
+Everything above is the **mandatory normal-incidence geometry**: source and
+microphone on the same vertical over the surface. Annex F provides for an
+oblique arrangement, and the library follows it. Two things change and both
+are exposed:
+
+- The geometrical-spreading factor acquires an angular form,
+  $K_{\mathrm{r},\theta}^2 = 1 - \cos^2\theta\,(1 - K_\mathrm{r}^2)$, computed by
+  `geometric_spreading_factor_angle` and used automatically when
+  `in_situ_absorption_spectrum` is given an `incidence_angle_rad`. Both take the
+  angle in **radians**, unlike the degrees the rest of this page quotes.
+- The sampled area stops being the circle in the figure above. It becomes the
+  intersection of the surface with an ellipsoid of revolution whose foci are
+  the source and the microphone, so it is an **ellipse stretched along the
+  direction of incidence**, whose major axis `msa_major_axis` returns from the
+  window width and the projected source-to-microphone distance. At 30° the
+  1.34 m circle becomes an ellipse 3.43 m along its major axis, so the clear
+  zone to be checked grows with the angle and the measurement averages over
+  more pavement, and less symmetrically.
+
+```python
+import numpy as np
+
+# `materials` is imported above. Thirty degrees off normal, with the same two
+# heights: the spreading factor rises towards one and the sampled area stops
+# being a 1.34 m circle. Both helpers take the angle in RADIANS.
+print(round(float(materials.geometric_spreading_factor()), 4))           # 0.6667
+print(round(float(materials.geometric_spreading_factor_angle(
+    np.radians(30.0))), 4))                                              # 0.7638
+
+# The projected source-to-microphone distance on the surface, (ds + dm) tan(theta),
+# is what stretches the ellipse.
+dp = 1.5 * np.tan(np.radians(30.0))
+print(round(dp, 3))                                                      # 0.866
+print(round(float(materials.max_sampled_area_radius(5.0e-3)), 3))        # 1.343
+print(round(float(materials.msa_major_axis(5.0e-3, dp)), 3))             # 3.432
+```
+
+Keep the normal-incidence geometry wherever the site allows it: it is the
+arrangement the comparison with the spot method assumes, and the one published
+road data are quoted for.
+
 ## 2. Spot method (ISO 13472-2)
 
 For smaller patches, ISO 13472-2 seals a short circular tube onto the surface and
 measures the absorption with the two-microphone transfer-function method of
 ISO 10534-2. The library provides the spot-method geometry and validity helpers;
 the transfer-function DSP itself is the impedance-tube routine
-`two_microphone_impedance` (see [Impedance Tube](../absorbers/impedance-tube.md)).
+`two_microphone_impedance` (see the [Impedance Tube guide](../absorbers/impedance-tube.md)).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube.svg" alt="ISO 13472-2 spot method: a short circular tube sealed onto the road surface with a loudspeaker at the top and two microphones flush in the tube wall at spacing s, measuring absorption over 250 to 1600 Hz via the ISO 10534-2 two-microphone transfer-function method" width="92%"></picture>
 
@@ -234,33 +451,92 @@ $$
 
 with $d$ the tube diameter, and the microphone spacing $s$ must sit between
 $0.05\,c_0/f_\mathrm{min}$ and $0.45\,c_0/f_\mathrm{max}$. The reported range is the
-one-third-octave bands 250–1600 Hz.
+one-third-octave bands 250–1600 Hz, and the standard's own definition of a
+frequency range is by band *edges*: those centre frequencies mean 220 Hz to
+1800 Hz in narrow bands, which is where the two arguments below come from.
 
 ```python
 from phonometry import materials
 
 # Upper usable frequency of a 100 mm tube and the valid spacing window.
 print(round(materials.spot_tube_upper_frequency(0.100, speed_of_sound=343.0), 1))      # 1989.4 Hz
+# 220 Hz and 1800 Hz are the outer edges of the 250 Hz and 1600 Hz bands.
 s_min, s_max = materials.spot_microphone_spacing_bounds(
     speed_of_sound=343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```
 
-The frequency window is the price of portability: the tube diameter that
-keeps the mouth sealable on real pavement caps the upper bands at 1600 Hz,
-and the microphone spacing, which has to stay above 5 % of a wavelength,
-caps the lower ones at 250 Hz (the tube length only has to let a plane wave
-form), a narrower window than the 250–4000 Hz of the subtraction technique. Within it, the reduction is the
+Three numbers, three different limits, and they do reconcile. The 1989 Hz is
+the plane-wave ceiling of the 100 mm bore; the reported range stops one band
+below it because a band is only usable when its *whole* width is inside the
+valid range, and the 1600 Hz band reaches 1800 Hz. The 250 Hz floor is a
+**spacing** limit, not a length limit: below $f_\mathrm{min}$ the two microphones are
+closer than 5 % of a wavelength apart and there is no phase difference left to
+resolve. Tube length answers a different question: it must be long enough for
+a plane wave to form, which Clause 5.4.2 meets by putting the microphones at
+least $3d$ from the source (a minimum length of 480 mm for the 100 mm tube).
+The resulting spacing window, 78 mm to 86 mm here, is why the standard
+specifies $(81 \pm 4)$ mm for a single microphone pair. It is a narrower
+window than the
+250–4000 Hz of the subtraction technique. Within it, the reduction is the
 ISO 10534-2 chain unchanged: the transfer function between the two
 microphones separates incident and reflected waves, and the standard's
 Annex A additionally subtracts the internal losses of the system (measured
 once against a rigid plate) so the tube's own dissipation is not billed to
 the road; that correction is `spot_internal_loss_correction`.
 
-Nothing in code enforces the acquisition around either method: the averaging,
-the free-field reference, the signal-to-noise checks, the seal verification
-and the weather limits are the operator's, and the library only sees the two
-impulse responses (or the transfer function) that come out of them.
+### 2.1 A position, step by step
+
+The tube is portable and the procedure is short, which is exactly why it is
+worth writing down: almost everything that goes wrong with a spot measurement
+goes wrong in the two minutes before the source is switched on. Clauses 6 to 8
+give the order.
+
+1. **Check the gates first.** The surface must be smooth, flat, free of debris
+   and dry; the air between 5 °C and 30 °C and the road surface between 5 °C
+   and 45 °C, out of direct sunlight and away from strong heat sources; test
+   at night where that cannot be met. If any of these fails, the measurement
+   cannot be carried out.
+2. **Warm up.** Switch the system on and leave it running for **at least
+   15 minutes**. The method lives on phase accuracy, and the electronics, the
+   loudspeaker coil and the tube itself all have to be thermally stable.
+3. **Calibrate the microphones** by the ISO 10534-2 Clause 7.5 procedure,
+   before each measurement series and after each hour of measurement, for
+   every microphone position used. That calibration is what corrects the phase
+   and amplitude mismatch between the two capsules.
+4. **Take the reference measurement** on a totally reflective specimen:
+   a 10 mm steel plate is the standard's own example. Its one-third-octave
+   absorption must come out below **0.03**; the result feeds the Annex A
+   internal-loss correction, and it is taken at the same location immediately
+   before or after the series.
+5. **Measure the background** with the source off, and require at least
+   **10 dB** signal-to-noise in every band against it. Stay at least **25 m**
+   from passing heavy vehicles and motorcycles, and discard any run a passing
+   vehicle disturbed.
+6. **Seal.** Lay a bead of sealant in the fixture's groove, sized to the
+   surface texture: a few millimetres on a smooth surface, thicker on a
+   coarse one. Press the fixture onto the road: the right amount is when a
+   little material squeezes out. If almost none does, lift the fixture, check
+   for a **continuous circular impression**, add sealant and repeat. Then
+   mount the tube without moving the fixture and check for leaks around the
+   perimeter, for instance by listening through an open tube.
+7. **Run and check.** Average until the result is stable, or over 50 sweeps or
+   bursts if there is no live read-out. If the signal-to-noise ratio is too
+   low, raise the source level, remove the noise source or wait.
+8. **Verify the seal again.** Lift the fixture and confirm the sealing
+   material was in tight contact in a closed circle. If in doubt, re-seal and
+   repeat the position: an air leak reads as absorption and there is nothing
+   in the data to distinguish the two.
+
+Two more things about the reduction. Systems commonly carry **two microphone
+pairs** and splice their narrow-band results, each pair over the part of the
+band where its spacing is optimal (`spot_microphone_spacing_bounds` gives that
+window for any pair). And the Annex A internal-loss correction is applied
+**after** the narrow-band results have been averaged into one-third octaves
+and **before** negative bands are clipped to zero: the standard deliberately
+lets the FFT produce negative narrow-band values and clips only at the end.
+Finish by repeating at **at least four positions** and reporting the mean and
+the standard deviation per band.
 
 ## Subtraction or spot?
 
@@ -288,60 +564,96 @@ introduction says both should give similar results between 315 Hz and
   patch and minutes per point. Surface types and acceptance criteria aside,
   that practical difference is usually what decides.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_method_windows_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_method_windows.svg" alt="Two panels: on top, the reported one-third-octave ranges of the two methods drawn as bars on a common log-frequency axis, 250 to 4000 hertz for the subtraction technique and 250 to 1600 hertz for the spot tube, with the 315 to 1600 hertz interval where Part 2 expects them to agree shaded; below, the plane-wave ceiling of the spot tube falling as the bore grows, the 100 millimetre worked example marked at 1989 hertz and the region below the 1800 hertz top band edge shaded to show that a bore above 111 millimetres no longer covers the reported range" width="88%"></picture>
+
+*Why the choice is made on bandwidth as much as on logistics. The spot tube's
+ceiling is set by its own bore, and the bore has two jobs that pull against
+each other: it must be wide enough to seal on a textured pavement and narrow
+enough to keep plane waves up to the top of the reported range. At 111 mm the
+two requirements meet; beyond it the 1600 Hz band is no longer covered. The
+shaded interval on top is where Part 2's introduction expects the two methods
+to agree, and it is also the interval a comparison between them should be
+judged on.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `materials` is imported above. The plane-wave ceiling against the bore.
+bores = np.linspace(0.055, 0.155, 300)
+ceiling = [materials.spot_tube_upper_frequency(d, speed_of_sound=343.0) for d in bores]
+fig, ax = plt.subplots()
+ax.plot(bores * 1e3, ceiling)
+ax.axhline(1800.0, linestyle="--")     # top edge of the 1600 Hz band
+ax.set_xlabel("Tube diameter d [mm]")
+ax.set_ylabel("Plane-wave ceiling [Hz]")
+plt.show()
+```
+
+</details>
+
 Both methods report the same quantity, the normal-incidence absorption
 coefficient in one-third-octave bands, so a low-absorption lane can be
 surveyed with the spot tube and anchored with a subtraction measurement at a
 few positions.
 
+## What this guide covers
+
+- **Covered.** ISO 13472-1:2002's subtraction technique: the Clause 4.1 geometrical spreading
+  (`materials.geometric_spreading_factor`), the Clause 6.4 Adrienne time window
+  (`materials.adrienne_window`), the narrow-band and one-third-octave reduction
+  (`materials.in_situ_absorption_coefficient`,
+  `materials.one_third_octave_absorption`,
+  `materials.in_situ_absorption_spectrum`) and the Annex A sampled-area radius
+  (`materials.max_sampled_area_radius`), with the Annex B reference-surface
+  correction (`materials.absorption_reference_corrected`) and the Annex F
+  oblique-incidence case (`materials.geometric_spreading_factor_angle`,
+  `materials.msa_major_axis`, and the `incidence_angle_rad` argument of
+  `materials.in_situ_absorption_spectrum`); and ISO 13472-2:2010's spot-method
+  plane-wave frequency limit, microphone-spacing geometry and Annex A
+  internal-loss correction (`materials.spot_tube_upper_frequency`,
+  `materials.spot_microphone_spacing_bounds`,
+  `materials.spot_internal_loss_correction`).
+
+- **Not covered.** Both in-situ road standards have since been revised (ISO 13472-1:2022, ISO
+  13472-2:2025); only the earlier 2002 and 2010 editions are implemented here,
+  as the reference notes above flag. ISO 13472-2's own transfer-function
+  processing is not implemented in this module either: only the geometry,
+  validity and correction helpers are provided, and the actual two-microphone
+  DSP is the ISO 10534-2 routine of the [Impedance Tube
+  guide](../absorbers/impedance-tube.md). Neither the
+  acquisition itself nor the field gates are enforced anywhere in code: the
+  averaging, the free-field reference, the signal-to-noise checks, the seal
+  verification and the weather limits of sections 1.1 to 1.4 and 2.1 are the
+  operator's, and the library only sees the two arrays that come out of them.
+
 ## See also
 
-- [Impedance Tube](../absorbers/impedance-tube.md): the ISO 10534-2 two-microphone method
-  the spot tube defers its mathematics to, and the laboratory instrument the
-  spot method miniaturises.
-- [Diffusers and Their Coefficients](../diffusers/diffusers.md): the other family of
-  surface measurements, grading where a surface sends its reflection rather
-  than how much it absorbs.
-- [Sound Absorption Measurement and Rating](../absorbers/absorption-measurement.md): the
-  laboratory (reverberation-room) absorption measurement and its rating, for
-  materials that can be brought indoors.
-- [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): where the absorption
-  of the ground surface enters the propagation models.
+- [Impedance Tube](../absorbers/impedance-tube.md): the ISO 10534-2
+  two-microphone method the spot tube defers its mathematics to, and the
+  laboratory instrument the spot method miniaturises.
+- [Diffusers and Their Coefficients](../diffusers/diffusers.md): the
+  other family of surface measurements, grading where a surface sends its
+  reflection rather than how much it absorbs.
+- [Sound Absorption Measurement and Rating](../absorbers/absorption-measurement.md):
+  the laboratory (reverberation-room) absorption measurement and its rating,
+  for materials that can be brought indoors.
+- [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): where
+  the absorption of the ground surface enters the propagation models.
 - API reference: [`materials.surfaces.road_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/road-absorption/).
+- Theory: [In-situ road surface absorption](../../reference/theory/materials-surfaces.md#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2): the ISO 13472 subtraction and the geometry that makes an in-situ measurement possible at all.
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
 ## References
 
-- International Organization for Standardization. (2002). *Acoustics —
-  Measurement of sound absorption properties of road surfaces in situ —
-  Part 1: Extended surface method* (ISO 13472-1:2002, the edition
-  implemented here; since revised as
-  [ISO 13472-1:2022](https://www.iso.org/standard/77032.html)).
-  [iso.org catalogue](https://www.iso.org/standard/35387.html).
-  The subtraction technique of section 1: the mandatory geometry, the
-  Adrienne window and the Annex A sampled-area radius.
-- International Organization for Standardization. (2010). *Acoustics —
-  Measurement of sound absorption properties of road surfaces in situ —
-  Part 2: Spot method for reflective surfaces* (ISO 13472-2:2010, the
-  edition implemented here; since revised as
-  [ISO 13472-2:2025](https://www.iso.org/standard/84925.html)).
-  [iso.org catalogue](https://www.iso.org/standard/32304.html).
-  The spot method of section 2: the plane-wave limits, the microphone
-  spacing window and the deferral to ISO 10534-2.
-- International Organization for Standardization. (1998). *Acoustics —
-  Determination of sound absorption coefficient and impedance in impedance
-  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998).
-  [iso.org catalogue](https://www.iso.org/standard/22851.html).
-  The two-microphone transfer-function reduction the spot method reuses,
-  implemented in the [Impedance Tube](../absorbers/impedance-tube.md) guide.
-
-## Standards
-
-ISO 13472-1:2002 (in-situ absorption, extended surface) and ISO 13472-2:2010
-(in-situ absorption, spot method); the spot method's transfer-function DSP is
-the ISO 10534-2:1998 routine of the [Impedance Tube](../absorbers/impedance-tube.md)
-guide. Both road standards have since been revised (ISO 13472-1:2022,
-ISO 13472-2:2025); the earlier editions are the implemented ones. Numerical
-conformance against the standards' worked examples and closed forms is
-tracked in [CONFORMANCE.md](../../CONFORMANCE.md).
+- **International Organization for Standardization. (1998).** [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 2: Transfer-function method*](https://www.iso.org/standard/22851.html) (ISO 10534-2:1998).
+  The two-microphone transfer-function reduction the spot method reuses, implemented in the Impedance Tube guide.
+- **International Organization for Standardization. (2002).** [*Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 1: Extended surface method*](https://www.iso.org/standard/35387.html) (ISO 13472-1:2002).
+  The subtraction technique of section 1: the mandatory geometry, the Adrienne window and the Annex A sampled-area radius. Since revised as ISO 13472-1:2022 (https://www.iso.org/standard/77032.html); the 2002 edition is the implemented one.
+- **International Organization for Standardization. (2010).** [*Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 2: Spot method for reflective surfaces*](https://www.iso.org/standard/32304.html) (ISO 13472-2:2010).
+  The spot method of section 2: the plane-wave limits, the microphone spacing window and the deferral to ISO 10534-2. Since revised as ISO 13472-2:2025 (https://www.iso.org/standard/84925.html); the 2010 edition is the implemented one.

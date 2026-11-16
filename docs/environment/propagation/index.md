@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/propagation/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/
 
 # Outdoor sound
 
@@ -111,22 +113,22 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-These are point-to-point models, not a mapping engine. Each call takes one
-source, one receiver and the ground between them; there is no terrain
-elevation profile, no building geometry and no GIS layer, both refraction
-models assume flat ground at height zero and a profile that varies with height
-alone rather than along the path, and how a source line is broken into point
-sources is declared out of scope by CNOSSOS itself. The **CNOSSOS-EU
-propagation method of section 2.5 is not implemented**: it is a different
-model from ISO 9613-2, so a calculation that pairs CNOSSOS source powers with
-the path here is not a CNOSSOS calculation. The coherent barrier-on-ground
-model weights its four diffracted paths with a single reflection coefficient
-computed over the overall geometry, so it is coherent and reciprocal but is
-not a boundary-element solution, and no model here computes turbulent
-scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
-and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
-outright. Nothing on these pages produces an environmental rating: no Lden, no
-limit value and no verdict on a site (those are [Assessment and
-regulation](../assessment/index.md)); the single number and the
-position check of EN 1793-5 are about a product and its measurement, and the
-TRC form of ISO 17534-1 judges a program, not a site.
+- **Not covered.** These are point-to-point models, not a mapping engine. Each call takes one
+  source, one receiver and the ground between them; there is no terrain
+  elevation profile, no building geometry and no GIS layer, both refraction
+  models assume flat ground at height zero and a profile that varies with height
+  alone rather than along the path, and how a source line is broken into point
+  sources is declared out of scope by CNOSSOS itself. The **CNOSSOS-EU
+  propagation method of section 2.5 is not implemented**: it is a different
+  model from ISO 9613-2, so a calculation that pairs CNOSSOS source powers with
+  the path here is not a CNOSSOS calculation. The coherent barrier-on-ground
+  model weights its four diffracted paths with a single reflection coefficient
+  computed over the overall geometry, so it is coherent and reciprocal but is
+  not a boundary-element solution, and no model here computes turbulent
+  scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
+  and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
+  outright. Nothing on these pages produces an environmental rating: no Lden, no
+  limit value and no verdict on a site (those are [Assessment and
+  regulation](../assessment/index.md)); the single number and the
+  position check of EN 1793-5 are about a product and its measurement, and the
+  TRC form of ISO 17534-1 judges a program, not a site.

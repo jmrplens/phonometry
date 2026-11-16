@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/broadcast/quasi-peak.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/
 
 # Quasi-peak programme meter (ITU-R BS.468-4)
 
@@ -11,9 +13,9 @@ needed: reading the weighted signal with any other meter, "e.g. an r.m.s.
 meter", gives signal-to-noise figures "that are not directly comparable" with
 the ones the Recommendation describes.
 
-The curve is `weighting_filter(weighting="468")`
-([Frequency weightings](../../signals/levels/weighting.md)). The detector is
-`broadcast.quasi_peak_meter`.
+The curve is
+[`weighting_filter(weighting="468")`](../../signals/levels/weighting.md). The
+detector is `broadcast.quasi_peak_meter`.
 
 ## 1. What clause 2 specifies, and what it does not
 
@@ -26,9 +28,10 @@ possible arrangement* after full-wave rectification.
 
 What clause 2 gives instead is **eleven acceptance windows**. Table 2 reads a
 single 5 kHz tone burst at eight durations from 1 ms to 200 ms; Table 3 reads
-a train of 5 ms bursts at 2, 10 and 100 per second. Every cell is a percentage
-of the reading the *same* tone gives steadily, so both tables are ratios and
-every absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
+a train of 5 ms bursts at 2, 10 and 100 per second. Every cell is a
+percentage of the reading the *same* tone gives steadily, so both tables are
+ratios and every absolute factor, the network's +11.7 dB at 5 kHz
+included, cancels.
 
 | Stimulus | Lower | Reference | Upper | Window |
 |---|---:|---:|---:|---:|
@@ -81,12 +84,30 @@ print(round(result.level, 2), result.level_unit)        # -2.42 dBqps
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter.svg" alt="Quasi-peak detector reading a train of sixteen 5 millisecond bursts of 5 kilohertz tone at 10 per second. Grey vertical bars mark the rectified 468-weighted bursts, reaching 1.10 volts. The blue detector output climbs from zero over the first half second, then ripples gently along 0.58 volts for the rest of the train, and decays smoothly after the last burst at 1.55 seconds, falling to 0.16 volts by 2.1 seconds. A red dashed line marks the reading of 0.5867 volts, minus 2.42 dBqps, and a green dotted line above it marks the 0.775 volts the same tone would read steadily, 0 dBqps" width="96%"></picture>
 
-The whole content of clause 2 in one picture: the needle rises over the first
+*The whole content of clause 2 in one picture: the needle rises over the first
 half second, ripples once the charge between bursts and the decay in the gaps
 balance, and falls away after the train stops. The gap between the two
 horizontal lines is Table 3's 10 bursts per second cell, drawn to scale: the
 train reads 75.7 % of the steady tone against a printed 77 %, inside the 72 to
-82 % window.
+82 % window.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import broadcast, signals
+
+fs = 48000
+# `amplitude` is the one the snippet above measures on the steady tone.
+burst = signals.tone_burst(fs, 5000.0, 25, amplitude=amplitude,
+                           n_repetitions=16, repetition_rate=10.0,
+                           post_silence=0.5)
+broadcast.quasi_peak_meter(burst.signal, fs).plot()
+plt.show()
+```
+
+</details>
 
 The result carries the `trace` the figure draws, sample for sample with the
 record, so the ballistics are visible rather than hidden behind a scalar. Set
@@ -103,9 +124,9 @@ first:
 - **The detector reads the r.m.s. of a steady sine, not its peak.** A
   quasi-peak meter is not a peak meter with slow ballistics; the scale factor
   is fixed by that sentence.
-- **dBqps is a voltage level.** phonometry measures the factor at the caller's
-  own sample rate rather than storing one fitted at 48 kHz, because the
-  chain's steady-sine gain moves by 0.0147 dB across 32, 44.1, 48, 96 and
+- **dBqps is a voltage level.** phonometry measures the factor at the
+  caller's own sample rate rather than storing one fitted at 48 kHz, because
+  the chain's steady-sine gain moves by 0.0147 dB across 32, 44.1, 48, 96 and
   192 kHz and clause 2.6 admits no such slack.
 
 ```python
@@ -131,13 +152,22 @@ than printing `20 lg(p / 0.775)` under a name clause 3 reserves for voltages.
 
 The three time constants in `broadcast.BS468_BALLISTICS` are a **fit to the
 eleven reference readings**. They appear nowhere in BS.468-4 and must never be
-attributed to it: a peak rectifier (charge 1.41 ms, discharge 293 ms) followed
-by a symmetric first-order reading device (140 ms), on the full-wave rectified
-output of the weighting network, with the reading taken as the maximum of the
-last stage. Clause 2.5 treats "the reading device" as an object of its own,
-and it is needed: a peak rectifier alone cannot meet the tables, its best fit
-landing 4.3 dB out at the worst point with only four of the eleven readings
-inside their windows.
+attributed to it.
+
+```python
+from phonometry import broadcast
+
+print(broadcast.BS468_BALLISTICS)
+# QuasiPeakBallistics(charge=0.0014096, discharge=0.2932, reading_device=0.13999)
+```
+
+A peak rectifier (charge 1.41 ms, discharge 293 ms) followed by a symmetric
+first-order reading device (140 ms), on the full-wave rectified output of the
+weighting network, with the reading taken as the maximum of the last stage.
+Clause 2.5 treats "the reading device" as an object of its own, and it is
+needed: a peak rectifier alone cannot meet the tables, its best fit landing
+4.3 dB out at the worst point with only four of the eleven readings inside
+their windows.
 
 How well the tables identify those three numbers depends on the question
 asked, so the question is stated. Holding the other two at their shipped
@@ -177,8 +207,8 @@ and ±0.056 dB, and its two middle constants move by factors of 3.0 and 2.1
 under a change in the last decimal of the objective. Past three constants the
 fit is fitting the rounding of the table.
 
-The six choices behind the numbers (full-wave rectification as the absolute
-value, the asymmetric one-pole rectifier, the symmetric reading device, the
+The six choices behind the numbers (full-wave rectification as $|x|$, the
+asymmetric one-pole rectifier, the symmetric reading device, the
 maximum-over-the-record reading rule, the steady-tone reference and running
 the ballistics at the input rate) are inseparable. Change any one and the
 three constants have to be refitted.
@@ -186,16 +216,6 @@ three constants have to be refitted.
 ## 5. Conformance
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test.svg" alt="Block diagram of the ITU-R BS.468-4 measuring set above a table of the checks clause 2 puts it through. A generator feeds the input terminals, marked with an input impedance of at least 20 kilohms and a 600 ohm termination within 1 percent where one is fitted. Inside a dashed outline the signal runs through the weighting network and its amplifier, 0 decibels at 1 kilohertz and plus 12.2 decibels at 6.3 kilohertz, then an attenuator whose ranges the tests of 2.1 to 2.3 hold, reset and step, then the quasi-peak detector, defined by its readings rather than by a time constant, then a reading device with a needle, scaled in dBqps with 0.775 volts reading 0 decibels. A dashed red path around the network is the unweighted mode, used by the reversibility test alone. Below, one row for the calibration and one for each method of measurement, each with a sketch of its stimulus: a steady 1 kilohertz sine at 0.775 volts that must read 0 decibels; single 5 kilohertz bursts of whole periods, 1 to 200 milliseconds, a 5 millisecond burst reading 34 to 46 percent of the steady tone; trains of 5 millisecond bursts at 2, 10 and 100 per second with their Table 3 windows; isolated 0.6 millisecond bursts stepped down 20 decibels, the readings following the steps within 1 decibel overall; 1 millisecond rectangular pulses and the same pulses reversed, whose readings may differ by 0.5 decibels at most, the only row in the unweighted mode; and a 1 kilohertz tone switched on suddenly, whose momentary excess reading must stay under 0.3 decibels. A box at the foot gives the table readings as 20 lg of the reading over the steady reading, with Table 2's 40 percent printed as minus 8.0 decibels, and the level in dBqps as 20 lg of the reading over 0.775 volts" width="100%"></picture>
-
-**How the measurement goes.** Calibrate to 2.6 first: a steady 1 kHz sine at
-0.775 V r.m.s. must read 0.775 V, 0 dB. Every test but 2.4 runs through the
-weighting network. Single 5 kHz bursts of whole periods for Table 2 and trains
-of 5 ms bursts at 2, 10 and 100 per second for Table 3 go in at the level where
-a steady 5 kHz tone would read 80 % of full scale; isolated 0.6 ms bursts
-stepped down 20 dB from full scale have to follow within ±1 dB overall on every
-range; and the 1 kHz tone switched on suddenly must overshoot by less than
-0.3 dB. Only 2.4 is unweighted: reversing the polarity of 1 ms d.c. pulses that
-read 80 % of full scale may change the reading by 0.5 dB at most.
 
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
 specified: a 5 kHz sine starting at a zero crossing and lasting an integral
@@ -232,14 +252,33 @@ Four further clauses are computable and pass **by construction** rather than
 by measurement, because rectification, first-order recursions and a maximum
 are positively homogeneous and cannot overshoot a monotone step: clause 2.1's
 two attenuator variants, clause 2.3's ±1 dB over 20 dB of 0.6 ms bursts,
-clause 2.4's 0.5 dB reversibility (the absolute value is blind to polarity, so
-the difference is exactly zero) and clause 2.5's 0.3 dB overswing cap. The
-rest of clauses 2.3, 2.6 and 2.7 has nothing to compute at all: overload
-capacity above full scale, the law of a logarithmic stage, a calibrated scale
-range of at least 20 dB, an input impedance of at least 20 kΩ and a 600 Ω
-termination are instrument hardware. So is "80 % of full scale", which
-constrains where a real needle sits during the test rather than the quantity,
-which is why this library models no full scale at all.
+clause 2.4's 0.5 dB reversibility ($|-x| = |x|$, so the difference is exactly
+zero) and clause 2.5's 0.3 dB overswing cap. The rest of clauses 2.3, 2.6 and
+2.7 has nothing to compute at all: overload capacity above full scale, the law
+of a logarithmic stage, a calibrated scale range of at least 20 dB, an input
+impedance of at least 20 kΩ and a 600 Ω termination are instrument hardware.
+So is "80 % of full scale", which constrains where a real needle sits during
+the test rather than the quantity, which is why this library models no full
+scale at all.
+
+### How the measurement goes
+
+Calibrate first, to 2.6: a steady 1 kHz sine of 0.775 V r.m.s., with under 1 %
+total harmonic distortion, must read 0.775 V, 0 dB. The input impedance should
+be at least 20 kΩ, and 600 Ω ±1 % where a termination is provided. Every test
+but 2.4 runs through the weighting network. For 2.1, set the level at which a
+steady 5 kHz tone would read 80 % of full scale and apply single bursts of whole
+periods from a zero crossing, one for each duration of Table 2, read once with
+the attenuators untouched and once reset for each duration to hold the reading
+near 80 %. For 2.2, apply 5 ms bursts at 2, 10 and 100 per second at that level,
+attenuators untouched, and check Table 3 on every range. For 2.3, bring isolated
+0.6 ms bursts to full scale on the most sensitive range and step them down 20 dB
+in all: the readings have to follow within ±1 dB overall, range by range. For
+2.4, switch to the unweighted mode, apply 1 ms rectangular d.c. pulses, 100 per
+second or fewer, reading 80 % of full scale, and reverse their polarity: the
+readings may differ by 0.5 dB at most. For 2.5, switch the 1 kHz tone on suddenly
+at 0 dB: the momentary excess reading must stay under 0.3 dB. Noise read on an
+instrument that passes is expressed in dBqps.
 
 ## 6. What no oracle can check
 
@@ -282,35 +321,42 @@ fitted. The conformity evidence is real and it is published, in
 [`docs/CONFORMANCE.md`](../../CONFORMANCE.md), through
 `verify_quasi_peak_dynamics`.
 
+## What this guide covers
+
+- **Covered.** ITU-R BS.468-4 clause 2: the quasi-peak detector, its eleven Table 2 and
+  Table 3 acceptance windows, and the clause 2.6 calibration that fixes the
+  dBqps scale. `quasi_peak_meter` runs the detector, `QuasiPeakResult` carries
+  the reading and the needle, `BS468_BALLISTICS` holds the three fitted time
+  scales and `verify_quasi_peak_dynamics` checks all eleven windows at any
+  sample rate. Clauses 2.1, 2.3, 2.4 and 2.5 are exercised in the test suite as
+  properties of the chain. Clause 1's weighting network is
+  `weighting_filter(weighting="468")`.
+
+- **Not covered.** Annex 2's unweighted response is a graphical tolerance template offered "for
+  guidance" and explicitly outside the scope of the Recommendation; it has no
+  table, no formula and no filter order, so nothing here implements it. The
+  Annex 1 constant-resistance realization is an alternative hardware build of
+  the same response, with coupled windings whose coupling coefficients the
+  figure does not give, and adds nothing a software implementation needs. The
+  instrument requirements of clauses 2.3, 2.6 and 2.7 (overload capacity, the
+  law of a logarithmic stage, the calibrated scale range, input impedance and
+  the 600 Ω termination) are hardware and are not modelled. There is no
+  `.report()` fiche, for the reason in section 6.
+
 ## See also
 
-- [Programme loudness & true peak](program-loudness.md): the other ITU-R BS
-  meter, and the opposite design: a gated mean square with published
-  coefficients where this one is a peak follower with none.
+- [Programme loudness & true peak](program-loudness.md):
+  the other ITU-R BS meter, and the opposite design: a gated mean square with
+  published coefficients where this one is a peak follower with none.
 - [Frequency weightings](../../signals/levels/weighting.md): the 468 curve
   itself, beside A, C and Z.
 - [Test signals](../../signals/spectra/test-signals.md): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
-- [Microphones (IEC 60268-4)](../electroacoustics/microphones.md): where a
-  stated dB(468) self-noise figure comes from, and why it stays a
+- [Microphones (IEC 60268-4)](../electroacoustics/microphones.md):
+  where a stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](index.md): the section overview.
-
-## References
-
-- International Telecommunication Union. (1986). *Measurement of
-  audio-frequency noise voltage level in sound broadcasting* (Recommendation
-  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468/en).
-  The weighting network of clause 1 and the quasi-peak detector of clause 2.
-- International Electrotechnical Commission. (1985). *Sound system equipment —
-  Part 1: General* (IEC 60268-1:1985).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Appendix A, with Amendment 1:1988: the same network and meter, as Table AI,
-  Fig. A1 and Tables AII and AIII.
-- Audio Engineering Society. (2015). *AES standard method for digital audio
-  engineering - Measurement of digital audio equipment* (AES17-2015),
-  clause 5.2.7. The same curve shifted by −5.63 dB and read with an r.m.s.
-  detector, renamed CCIR-RMS for exactly that reason.
+- API reference: [`broadcast.quasi_peak`](https://docs.jmrp.io/phonometry/reference/api/broadcast/quasi-peak/).
 
 ## Standards
 
@@ -323,3 +369,12 @@ so the dynamics of any conforming detector are a design choice inside those
 eleven windows; the three time scales this library uses are a fit, identified
 by the tables only to within a factor of 1.61 to 2.09, and least of all in
 the reading device.
+
+## References
+
+- **Audio Engineering Society. (2015).** [*AES standard method for digital audio engineering — Measurement of digital audio equipment*](https://www.aes.org/publications/standards/search.cfm?docID=21) (AES17-2015).
+  Clause 5.2.7 uses the same curve shifted by -5.63 dB with an r.m.s. detector and renames the result CCIR-RMS, which is precisely not the measurement on this page.
+- **International Electrotechnical Commission. (1985).** [*Sound system equipment — Part 1: General*](https://webstore.iec.ch/en/publication/1204) (IEC 60268-1:1985).
+  Appendix A, with Amendment 1:1988: the same network and the same meter, as Table AI, Fig. A1 and Tables AII and AIII. Two of its cells are misprints and one of those was corrected by the amendment; see docs/ERRATA.md.
+- **International Telecommunication Union. (1986).** [*Measurement of audio-frequency noise voltage level in sound broadcasting*](https://www.itu.int/rec/R-REC-BS.468/en) (Recommendation ITU-R BS.468-4).
+  Clause 1 and Fig. 1a for the weighting network, clause 2 for the quasi-peak detector (the Table 2 and Table 3 acceptance windows, the clause 2.6 calibration) and clause 3 for the unit dBqps.

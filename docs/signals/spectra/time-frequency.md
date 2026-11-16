@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/time-frequency.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/
 
 # Time-frequency analysis
 
@@ -59,9 +61,15 @@ res.plot()                         # dB image over the time-frequency plane
 ```
 
 The segment length is the whole design decision: $T_B = \text{nperseg}/f_\mathrm{s}$
-of time resolution against $B_\mathrm{e} \approx 1/T_B$ of frequency resolution, a
-product of one
-(Section 12.6.4.2). Long segments pin frequencies and smear transients;
+of time resolution against $B_\mathrm{e} = \mathrm{ENBW}/T_B$ of frequency resolution,
+so their product $T_B B_\mathrm{e}$ is fixed by the taper alone: 1 for a rectangular
+window, **1.5 for the Hann default used here** (Section 12.6.4.2, and the
+window figures of merit on the
+[spectral-analysis page](spectral-analysis.md#6-choosing-the-window)).
+The tiling diagram above draws the untapered case, where that product is exactly
+one. Halving the segment length buys twice the time resolution and costs exactly
+half the frequency resolution; nothing buys both.
+Long segments pin frequencies and smear transients;
 short segments do the opposite. And because each cell is a single
 *unaveraged* estimate, random data carries a per-cell normalized random
 error of 1 (Eq. 8.158 with $n_\mathrm{d} = 1$; Bendat & Piersol quote
@@ -70,7 +78,64 @@ deterministic structure (tones, sweeps, transients), while the averaged
 [Welch estimate](spectral-analysis.md) is the low-variance
 tool for the stationary background.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram.webp" alt="Calibrated spectrogram in dB SPL of a synthetic four-second outdoor scene: a siren sweeping sinusoidally between 600 and 1200 hertz traces a bright oscillating ridge at 70 decibels, a broadband impact at two and a half seconds draws a vertical stripe, and a pink noise floor at 45 decibels fills the background, with the color bar reading absolute sound pressure level" width="82%"></picture>
+Put a number on that. A single periodogram cell of random data is chi-square
+with two degrees of freedom, so its level has a standard deviation of about
+**5.6 dB** and a 90 % spread of roughly **17 dB**, the mottled texture of the
+noise floor in the figure below, and the reason a single bright cell means
+nothing at all. The reading rule follows: a feature is real when it **persists
+across neighbouring columns or bins**, because the cell-to-cell fluctuation is
+independent while structure is not, so the eye is doing the averaging the
+estimator refused to do. Both remedies cost something: averaging adjacent
+columns trades time resolution for variance and converges toward the Welch
+estimate, and smoothing across frequency with the fractional-octave kernel of
+the [spectral analysis page](spectral-analysis.md)
+trades frequency resolution for the same thing. Which is exactly why a noise
+floor should be *quantified* from a PSD and only *displayed* on a spectrogram.
+
+### Choosing the segment for the event
+
+The trade-off is fixed, so the choice has to come from the thing being measured.
+
+**For a transient**, keep $T_B$ below the decay you want to see. The 12 ms decay
+of the impact in the figure below asks for segments of a few milliseconds,
+about 256 samples at 48 kHz, and the frequency resolution then follows at about
+190 Hz, whether you wanted it or not.
+
+**For a component whose frequency moves** at a rate $r$ in Hz/s, the tone leaves
+its own resolution bandwidth inside a single segment unless $B_\mathrm{e} \ge r\,T_B$.
+With $B_\mathrm{e} = 1.5/T_B$ that gives an optimum $T_B = \sqrt{1.5/r}$. The siren below
+sweeps at up to about 950 Hz/s, so segments shorter than **40 ms** keep the ridge
+sharp, and the 1024-point choice at 16 kHz is 64 ms, already past it, which is
+why the ridge thickens at the steepest part of the sweep. A run-up sweeping a
+500 Hz order at 100 Hz/s wants segments of about 0.12 s and nothing longer.
+
+The two requirements routinely conflict, as they do in the figure's own scene.
+The honest recipe: choose $T_B$ from the fastest thing that must stay sharp,
+check the resulting $B_\mathrm{e}$ against the closest two components that must stay
+separate, and when the two cannot both be met, say so in the caption instead of
+splitting the difference. `res.time_resolution` and `res.resolution_bandwidth`
+report the pair actually delivered, so the choice can be stated in a report.
+
+One acquisition note, because it is the failure that looks like a result:
+capture transients with a pre-trigger of at least one segment, fix the gain in
+advance and verify that no sample clips, as a clipped impact draws a full-height
+stripe that looks exactly like a broadband event.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram.webp" alt="Calibrated spectrogram in dB SPL of a synthetic four-second outdoor scene: a siren sweeping sinusoidally between 600 and 1200 hertz traces a bright oscillating ridge at 70 decibels, a broadband impact at two and a half seconds draws a vertical stripe, and a pink noise background whose broadband level is 45 decibels fills the image at a much lower per-cell level, with the color bar reading absolute sound pressure level" width="82%"></picture>
+
+*Reading it: the siren ridge really does read 70 dB SPL, because a tone puts all
+its power inside one resolution bandwidth and the `'spectrum'` cell is therefore
+its mean square. The pink background does **not** read 45 dB anywhere. That
+45 dB is its *broadband* level spread over the whole band, and each cell carries
+only the part inside one $B_\mathrm{e}$, some 25 dB lower here, for a 1024-point segment
+at 16 kHz. To recover a level from noise, convert cells to a density by
+subtracting $10\log_{10} B_\mathrm{e}$ and integrate over the band of interest, or use
+`'density'` and integrate directly. And the impact's peak cell is not the
+impact's level either: a transient shorter than the segment spreads its energy
+over the whole column, so that reading depends on `nperseg`. The colour bar is an
+absolute scale for tonal structure and a bandwidth-dependent one for everything
+else; when absolute band levels over time are the goal, the band spectrogram of
+[Levels](../levels/levels.md) is the right tool.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -155,11 +220,49 @@ res.plot()                               # power spectrum in dB over the band
 One distinction matters and the result states it: the **grid** can be made
 arbitrarily fine (`n_points`), but the **resolution** - the ability to
 separate two tones - is set by the record length and taper, reported as
-`resolution_bandwidth` ($B_\mathrm{e} = f_\mathrm{s} \sum w^2/(\sum w)^2$, i.e. $1/T$
-untapered, $1.5/T$ for Hann). Zooming refines the sampling of the same underlying spectrum;
+`resolution_bandwidth` ($B_\mathrm{e} = f_\mathrm{s} \sum w^2/(\sum w)^2$, i.e. $1/T_\mathrm{r}$
+untapered and $1.5/T_\mathrm{r}$ for Hann, the same taper factor as section 1, applied
+here to the record duration $T_\mathrm{r}$ rather than to a segment, because the zoom FFT
+transforms the whole record). Zooming refines the sampling of the same underlying spectrum;
 only a longer record separates closer tones.
 
+**Dynamic range is a separate question, and the zoom does not help with it.**
+The chirp-Z still evaluates the DFT of the *tapered whole record*, so a strong
+component outside the zoom band leaks into it through the taper's sidelobes
+exactly as it would in an ordinary FFT: the zoom band buys resolution of the
+grid, not rejection. Hann's first sidelobe is −31.5 dB, which is nowhere near
+enough to see a sideband 50 dB below a carrier a few hertz away. The control is
+the `window` argument (default `"hann"`): pass `window="blackman"`, or a Kaiser
+with a high beta, to trade main-lobe width for sidelobe rejection, remembering
+that the wider main lobe raises $B_\mathrm{e}$ and therefore the closest spacing you can
+separate, so the two goals pull against each other. The
+[window figures of merit](spectral-analysis.md#6-choosing-the-window)
+put numbers on that trade. When even the best taper is not enough, pre-filter or
+notch the dominant component before zooming: no window substitutes for removing
+the energy.
+
+**And the machine has to hold still.** Separating two lines 3 Hz apart near
+1 kHz needs about a second of record, and over that second the shaft must hold
+its speed to better than 3 parts in 1000 (0.3 %) or the rotor line alone smears
+wider than the separation you are trying to resolve, and no zoom recovers it. In
+general the speed stability required is the target resolution divided by the
+frequency of the line, which gets harsh fast: 0.5 Hz at 5 kHz is 0.01 %. Check
+it before you trust the zoom: run a spectrogram of the same record and confirm
+the line is horizontal across the analysis window, or read the shaft period from
+a tacho over the record. When the machine does drift, angularly resample against
+the tacho, order tracking, so the lines become stationary in order rather than
+in frequency.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zoom_fft_resolution_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zoom_fft_resolution.svg" alt="Zoom FFT of a one-second record containing tones at 997 and 1000 hertz: the coarse 1024-point FFT with 8 hertz bins shows a single broad lump, while the zoom FFT over 980 to 1016 hertz draws two separate mainlobes whose peaks sit exactly on the dotted true-tone frequencies" width="82%"></picture>
+
+*What separates the two tones is the second of record, not the zoom. The coarse
+view uses 1024 of the 8192 samples, so its 8 Hz bins cannot hold two lines 3 Hz
+apart and it shows one lump at 1000 Hz. The zoom transforms the **whole**
+record, whose Hann resolution bandwidth is 1.5 Hz, and puts a 0.25 Hz grid on
+it: the peaks land on 997.00 and 1000.00 Hz at −1.94 and −6.02 dB, the
+amplitudes of the two tones. A finer grid on a 1024-sample record would have
+changed nothing: this is the distinction the section makes between sampling
+density and resolution.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -212,44 +315,36 @@ component's frequency in time, the
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol's calibrated spectrogram (Section 12.6.4.2):
-tapered, overlapped STFT segments kept as separate time columns instead of
-averaged, in `spectrogram`, with the exact Welch-module scaling and the
-Eq. 8.158 random error of an unaveraged cell. The zoom FFT of Section 11.5.4
-(Eqs. 11.122-11.130): band-limited, arbitrarily fine-grid spectra computed as
-the chirp-Z equivalent of the book's demodulate-decimate-DFT chain, in
-`zoom_fft`. Both share the Harris (1978) window catalogue behind the segment
-taper.
+- **Covered.** Bendat & Piersol's calibrated spectrogram (Section 12.6.4.2): tapered,
+  overlapped STFT segments kept as separate time columns instead of averaged,
+  implemented by `spectrogram` with the exact Welch-module scaling and the Eq.
+  8.158 random error of an unaveraged cell. The zoom FFT of Section 11.5.4 (Eqs.
+  11.122-11.130): band-limited, arbitrarily fine-grid spectra computed as the
+  chirp-Z equivalent of the book's demodulate-decimate-DFT chain, implemented by
+  `zoom_fft`. Both share the Harris (1978) window catalogue behind the segment
+  taper.
 
-**Not covered.** The constant-bandwidth, STFT family only. Its
-constant-percentage-bandwidth counterpart, the one a sound level meter draws,
-is `OctaveFilterBank.spectrogram` on [Levels](../levels/levels.md). Tracking a
-single component's instantaneous frequency over time is the Hilbert `envelope`
-of [Correlation, time delay and envelope](correlation-delay.md). As on the
-spectral-analysis page, these are a textbook's estimators and not a
-certification standard.
+- **Not covered.** This is the constant-bandwidth, STFT-based family only. The
+  constant-percentage-bandwidth, sound-level-meter counterpart is
+  `OctaveFilterBank.spectrogram` on the
+  [Levels](../levels/levels.md) page. Tracking a single
+  component's instantaneous frequency over time is the Hilbert envelope of
+  `envelope`, on the [Correlation and
+  delay](correlation-delay.md) page, not this one. As
+  with the spectral-analysis page, this implements Bendat & Piersol's
+  estimators, not a certification standard.
 
 ## See also
 
-- [Spectral analysis](spectral-analysis.md): the averaged Welch estimate
-  for the stationary background, and the window figures of merit behind
-  the segment taper.
-- [Levels](../levels/levels.md): the fractional-octave-band spectrogram with
-  sound-level-meter ballistics.
-- [Correlation and delay](correlation-delay.md): the Hilbert instantaneous
-  frequency for tracking one component.
+- [Spectral analysis](spectral-analysis.md): the averaged Welch estimate for the stationary background, and the window figures of merit behind the segment taper.
+- [Levels](../levels/levels.md): the fractional-octave-band spectrogram with sound-level-meter ballistics.
+- [Correlation and delay](correlation-delay.md): the Hilbert instantaneous frequency for tracking one component.
+- API reference: [`signals.time_frequency`](https://docs.jmrp.io/phonometry/reference/api/signals/time-frequency/).
+- Theory: [Frequency Resolution vs FFT Bin Spacing](../../reference/theory/signal-analysis.md#frequency-resolution-vs-fft-bin-spacing): the bin spacing against the effective resolution, which is the trade this page spends its whole length on.
 
 ## References
 
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Section 12.6.4.2 (spectrograms and their random errors), Section 11.5.4
-  (zoom transform procedures, Eqs. 11.122-11.130) and Sections 8.5.1/8.5.4
-  (resolution bandwidth and the statistical errors of unaveraged estimates).
-- Harris, F. J. (1978). On the use of windows for harmonic analysis with
-  the discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51-83.
-  [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837).
-  The taper catalogue behind the segment window: main-lobe width versus
-  sidelobe leakage, the trade-off that sets what a spectrogram column can
-  resolve at a given segment length.
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Section 12.6.4.2 (spectrograms and their random errors), Section 11.5.4 (zoom transform procedures, Eqs. 11.122-11.130) and Sections 8.5.1/8.5.4 (resolution bandwidth and the statistical errors of unaveraged estimates). ISBN 978-0-470-24877-5.
+- **Harris, F. J. (1978).** On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. https://doi.org/10.1109/PROC.1978.10837
+  The taper catalogue behind the segment window: main-lobe width versus sidelobe leakage, the trade-off that sets what a spectrogram column can resolve at a given segment length.

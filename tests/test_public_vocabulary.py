@@ -43,6 +43,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 from check_parameter_units import DIMENSIONLESS
+from github_edition import is_edition_file
 from markdown_spans import blank_inline_spans
 
 import phonometry
@@ -2395,7 +2396,8 @@ def _docstrings() -> Iterator[tuple[str, str]]:
 
 #: The API pages generated from the docstrings, which the docstring half of the
 #: test reads at their source. ``docs/reference/api/index.md`` is written by
-#: hand and read with the guides.
+#: hand and read with the guides; the GitHub edition under ``docs/`` is written
+#: from the English guides and is not read again.
 _GENERATED_API = _ROOT / "site" / "src" / "content" / "docs" / "reference" / "api"
 
 
@@ -2403,7 +2405,7 @@ def _pages() -> Iterator[tuple[str, str]]:
     roots = (_ROOT / "docs", _ROOT / "site" / "src" / "content" / "docs")
     for root in roots:
         for path in sorted([*root.rglob("*.md"), *root.rglob("*.mdx")]):
-            if _GENERATED_API not in path.parents:
+            if _GENERATED_API not in path.parents and not is_edition_file(path):
                 yield str(path.relative_to(_ROOT)), path.read_text(encoding="utf-8")
 
 

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-high-frequency.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/
 
 # Sound Power in the 16 kHz Octave (ISO 9295)
 
@@ -393,31 +395,31 @@ standard would ask.
 
 ## What this guide covers
 
-**Covered.** The ISO 9295:2015 determination of the sound power level in the 16 kHz
-octave band: the energy mean over orientations or revolutions (Formula (1)),
-the analyser bandwidth under a moving microphone and the sideband sum
-(Formulae (2) and (3)), the room constant from the measured reverberation
-time through the Eyring relation (Formulae (4) and (5)) or from the air
-absorption of Annex A (Formula (7), `air_absorption_np_per_m`, pinned to the
-581 correctly printed cells of Tables 1 and 2), the direct level of
-Formula (6), the comparison with a reference sound source for broadband noise
-and for tones (Formulae (8) and (9)), the free-field correction of
-Formula (10), the reference meteorological conditions of clause 10.1 through
-the $C_1$ and $C_2$ of ISO 3741, the 10 dB reporting range of clause 13 c), and
-the levels Table 3 asks to determine for each type of noise
-(`high_frequency_levels_to_determine`).
+- **Covered.** The ISO 9295:2015 determination of the sound power level in the 16 kHz
+  octave band: the energy mean over orientations or revolutions (Formula (1)),
+  the analyser bandwidth under a moving microphone and the sideband sum
+  (Formulae (2) and (3)), the room constant from the measured reverberation
+  time through the Eyring relation (Formulae (4) and (5)) or from the air
+  absorption of Annex A (Formula (7), `air_absorption_np_per_m`, pinned to the
+  581 correctly printed cells of Tables 1 and 2), the direct level of
+  Formula (6), the comparison with a reference sound source for broadband noise
+  and for tones (Formulae (8) and (9)), the free-field correction of
+  Formula (10), the reference meteorological conditions of clause 10.1 through
+  the $C_1$ and $C_2$ of ISO 3741, the 10 dB reporting range of clause 13 c), and
+  the levels Table 3 asks to determine for each type of noise
+  (`high_frequency_levels_to_determine`).
 
-**Not covered.** The room, the boom and the instruments are assumed qualified: the ISO 3741
-qualification of the room and the flatness of the chain are checks the
-laboratory makes, the reference source comes calibrated (for broadband noise
-as the ISO 6926 calibration of
-[Free Field and Reference Sources](free-field-qualification.md) if the
-laboratory made it here), and the $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
-monitored. The background correction is ISO 3741's, applied to the levels
-before they are passed (`reverberation_background_correction`). The
-free-field method is ISO 3744 as the library implements it, plus
-Formula (10). The uncertainty of clause 11 is a statement, $u(L_W) \approx \sigma_\mathrm{tot}$, with standard
-deviations of reproducibility of 3 dB or less in the 16 kHz octave.
+- **Not covered.** The room, the boom and the instruments are assumed qualified: the ISO 3741
+  qualification of the room and the flatness of the chain are checks the
+  laboratory makes, the reference source comes calibrated (for broadband noise
+  as the ISO 6926 calibration of
+  [Free Field and Reference Sources](free-field-qualification.md)
+  if the laboratory made it here), and the $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
+  monitored. The background correction is ISO 3741's, applied to the levels
+  before they are passed (`reverberation_background_correction`). The
+  free-field method is ISO 3744 as the library implements it, plus
+  Formula (10). The uncertainty of clause 11 is a statement, $u(L_W) \approx \sigma_\mathrm{tot}$, with standard
+  deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 
 ## See also
 
@@ -436,31 +438,9 @@ deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 
 ## References
 
-- International Organization for Standardization. (2015). *Acoustics —
-  Determination of high-frequency sound power levels emitted by machinery and
-  equipment* (ISO 9295:2015). Read in its Spanish adoption, UNE-EN ISO
-  9295:2015. Formulae (1) to (10), Tables 1 and 2, Table 3 and the normative
-  Annex A that this guide implements.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [ISO](https://www.iso.org/standard/17426.html). The pure-tone attenuation
-  coefficient that Annex A of ISO 9295 writes in nepers per metre and extends
-  to 22.4 kHz.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010). [ISO](https://www.iso.org/standard/52053.html). The
-  reverberation-room technique ISO 9295 builds on, and the corrections C1 and
-  C2 of clause 9.1.4 that its clause 10.1 applies for the reference
-  meteorological conditions.
-
-## Standards
-
-ISO 9295:2015, *Acoustics — Determination of high-frequency sound power
-levels emitted by machinery and equipment*: the energy mean of Formula (1),
-the moving-microphone bandwidth and sideband sum of Formulae (2) and (3), the
-room constant of Formulae (4), (5) and (7) with the air absorption of Annex A,
-the sound power level of Formulae (6), (8) and (9), the free-field correction
-of Formula (10), the reference meteorological conditions of clause 10.1 and
-the levels to determine of Table 3.
+- **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
+  The pure-tone attenuation coefficient that Annex A of ISO 9295 writes in nepers per metre and extends to 22.4 kHz.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The reverberation-room technique ISO 9295 builds on, and the corrections C1 and C2 of clause 9.1.4 that its clause 10.1 applies for the reference meteorological conditions.
+- **International Organization for Standardization. (2015).** *Acoustics — Determination of high-frequency sound power levels emitted by machinery and equipment* (ISO 9295:2015).
+  Read in its Spanish adoption, UNE-EN ISO 9295:2015. Formulae (1) to (10), Tables 1 and 2, Table 3 and the normative Annex A that this guide implements.

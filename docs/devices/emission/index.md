@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/
 
 # Sound power and intensity
 
@@ -133,31 +135,31 @@ judged against.
 
 ## What this section does not cover
 
-The determination methods start after the facility and the probe have been
-qualified. The free-field qualification of an anechoic or hemi-anechoic room
-is performed, by ISO 26101 against the amended ISO 3745 Annex A, in
-[Free Field and Reference Sources](free-field-qualification.md),
-and so are the room checks of ISO 3743, in
-[Sound Power in Small Test Rooms](sound-power-test-rooms.md): the volume, surfaces
-and acoustic adequacy of the hard-walled room of Part 1
-(`check_hard_walled_room`) and the reverberation time, surfaces and
-suitability of the special reverberation room of Part 2
-(`check_special_room_reverberation`, `check_special_room_surfaces`,
-`check_special_room_suitability`).
-ISO 3741's reverberation-room qualification (eigenfrequency counting or a
-reference-source comparison) and the IEC 61043 residual-intensity test of a
-probe-and-analyser chain are **assumed, not performed**: the library warns
-on the coarse advisory criteria the standards state explicitly (the Table 1
-minimum volume, the position count, an inter-position spread above 1.5 dB, the
-ISO 3744 K₂ validity) and grades a residual-intensity index you measured
-yourself. The C₃ meteorological correction of ISO 3745 likewise needs an
-air-absorption coefficient you supply; it is not computed from ISO 9613-1
-here.
+- **Not covered.** The determination methods start after the facility and the probe have been
+  qualified. The free-field qualification of an anechoic or hemi-anechoic room
+  is performed, by ISO 26101 against the amended ISO 3745 Annex A, in
+  [Free Field and Reference Sources](free-field-qualification.md),
+  and so are the room checks of ISO 3743, in
+  [Sound Power in Small Test Rooms](sound-power-test-rooms.md): the volume, surfaces
+  and acoustic adequacy of the hard-walled room of Part 1
+  (`check_hard_walled_room`) and the reverberation time, surfaces and
+  suitability of the special reverberation room of Part 2
+  (`check_special_room_reverberation`, `check_special_room_surfaces`,
+  `check_special_room_suitability`).
+  ISO 3741's reverberation-room qualification (eigenfrequency counting or a
+  reference-source comparison) and the IEC 61043 residual-intensity test of a
+  probe-and-analyser chain are **assumed, not performed**: the library warns
+  on the coarse advisory criteria the standards state explicitly (the Table 1
+  minimum volume, the position count, an inter-position spread above 1.5 dB, the
+  ISO 3744 K₂ validity) and grades a residual-intensity index you measured
+  yourself. The C₃ meteorological correction of ISO 3745 likewise needs an
+  air-absorption coefficient you supply; it is not computed from ISO 9613-1
+  here.
 
-One route stops short of its standard: on the vibration route, the measurement
-clauses 5 to 7 of both parts of ISO/TS 7849 are laboratory practice rather
-than code, and only the single-machine radiation factor of Formula 8 is
-implemented, so a batch or family determination needs an already-averaged
-value. And nothing here reduces a machine's emission: quieting a source is
-[Noise control](../noise-control/index.md), and a declared
-emission value is the input to that work, not its result.
+- **Not covered.** One route stops short of its standard: on the vibration route, the measurement
+  clauses 5 to 7 of both parts of ISO/TS 7849 are laboratory practice rather
+  than code, and only the single-machine radiation factor of Formula 8 is
+  implemented, so a batch or family determination needs an already-averaged
+  value. And nothing here reduces a machine's emission: quieting a source is
+  [Noise control](../noise-control/index.md), and a declared
+  emission value is the input to that work, not its result.

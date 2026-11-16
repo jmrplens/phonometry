@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/aircraft/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/
 
 # Aircraft noise
 
@@ -88,33 +90,33 @@ land-use study is finally judged on.
 
 ## What this section does not cover
 
-**Single events only.** The Doc 29 chain builds single-event contours; it does
-not assemble the cumulative multi-event indices, an Lden-style sum over a
-full flight schedule, that a complete noise-contour study needs on top of
-them. That last step is where a land-use decision is actually made, and it is
-not here.
+- **Not covered.** **Single events only.** The Doc 29 chain builds single-event contours; it does
+  not assemble the cumulative multi-event indices, an Lden-style sum over a
+  full flight schedule, that a complete noise-contour study needs on top of
+  them. That last step is where a land-use decision is actually made, and it is
+  not here.
 
-**No aircraft is modelled from first principles.** NPD tables and noise
-hemispheres are *inputs*: the library interpolates the tables published for a
-type and does not synthesise them from engine data, and the ANP database is
-read and never written (version 2.3 ships as-is). A trajectory, on the other
-hand, is computed: an entry that publishes procedural steps rather than fixed
-points is flown through the ECAC Doc 29 Vol. 2 Appendix B performance model,
-which turns a published procedure into a profile for the aerodrome and weather
-it is flown from.
+- **Not covered.** **No aircraft is modelled from first principles.** NPD tables and noise
+  hemispheres are *inputs*: the library interpolates the tables published for a
+  type and does not synthesise them from engine data, and the ANP database is
+  read and never written (version 2.3 ships as-is). A trajectory, on the other
+  hand, is computed: an entry that publishes procedural steps rather than fixed
+  points is flown through the ECAC Doc 29 Vol. 2 Appendix B performance model,
+  which turns a published procedure into a profile for the aerodrome and weather
+  it is flown from.
 
-**Three specific gaps.** Rotorcraft hover, idle and taxi run on the Table 3
-derived sources, but the guidance's last resort for a type with no hover data
-at all (two side-line level-flight microphones corrected to the 150 m hover
-circle by the Annex 16 integrated method) is not modelled. The
-measurement-system verifier checks IEC 61265:1995 and not the superseding 2018
-edition. And sonic boom is not touched anywhere in the library.
+- **Not covered.** **Three specific gaps.** Rotorcraft hover, idle and taxi run on the Table 3
+  derived sources, but the guidance's last resort for a type with no hover data
+  at all (two side-line level-flight microphones corrected to the 150 m hover
+  circle by the Annex 16 integrated method) is not modelled. The
+  measurement-system verifier checks IEC 61265:1995 and not the superseding 2018
+  edition. And sonic boom is not touched anywhere in the library.
 
-Finally, the CNOSSOS-EU aircraft source of sections 2.6 and 2.7 is **not**
-implemented: aircraft noise here is the ICAO and ECAC family, which is a
-different set of models from the road and rail sources of [Environmental
-sources](../environment/sources/index.md), and the two must not be mixed
-inside one strategic map without saying so.
+- **Not covered.** Finally, the CNOSSOS-EU aircraft source of sections 2.6 and 2.7 is **not**
+  implemented: aircraft noise here is the ICAO and ECAC family, which is a
+  different set of models from the road and rail sources of [Environmental
+  sources](../environment/sources/index.md), and the two must not be mixed
+  inside one strategic map without saying so.
 
 ## Before and after these pages
 
@@ -127,6 +129,6 @@ reference: they stay inside the guides above, beside the flight geometry that
 motivates them.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

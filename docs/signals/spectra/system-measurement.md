@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/system-measurement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/
 
 # System measurement: Golay, shaped sweeps, inversion
 
@@ -16,21 +18,29 @@ target spectrum for the next measurement's sweep.
 
 The two acquisition tools recover the response through their own
 deconvolution: correlation with the pair for Golay, spectral division by the
-sweep's spectrum for shaped sweeps. The two-channel frame of the diagram
-belongs to the broadband-noise workflow: the electrical drive is the
-reference, the microphone is the response, and the Welch cross-spectra
-between them give the H1 frequency response plus a coherence that polices
-it. The regularized inversion then works on the measured response as a
-post-processing step.
+sweep's spectrum for shaped sweeps. All three tools on this page sit in the same
+two-channel frame the diagram draws: a generator drives the loudspeaker under
+test, with one channel carrying the electrical reference and one the microphone.
+They differ only in the excitation and the deconvolution. The Golay pair of
+section 1 recovers the response by correlation with the codes; the shaped sweep
+of section 2 by spectral division; and the broadband-noise route the diagram
+itself annotates, which belongs to the
+[electroacoustics guide](../../devices/electroacoustics/electroacoustics.md),
+by the $H_1 = G_{xy}/G_{xx}$ estimator with a coherence that polices it. The
+regularized inversion of section 3 then works on whichever measured response
+comes out.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_system_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_system_measurement.svg" alt="Two-channel frequency-response measurement chain: a signal generator producing broadband noise or a sweep feeds a power amplifier and the loudspeaker under test, a measurement microphone picks up the acoustic output, channel 1 carries the electrical reference x(t) and channel 2 the microphone response y(t), dual-channel FFT analysis with Welch-averaged Hann segments at 50 percent overlap yields the spectra Gxx, Gyy and Gxy, and two result boxes give the H1 estimator Gxy over Gxx, unbiased with output noise, and the coherence gamma squared equal to the squared magnitude of Gxy over Gxx times Gyy, which is one for a noiseless linear path and drops with noise, distortion or a drifting, misaligned delay" width="92%"></picture>
 
 ## 1. Complementary Golay pairs
 
-A Golay pair are two binary sequences $a$, $b$ of length $L = 2^n$, built by
-a two-line recursion - append $b$ to $a$, and $-b$ to $a$ (Havelock Part I
-Ch. 6, Eq. (1)). Their defining property is *algebraic*, not approximate: the
-two periodic autocorrelations sum to
+A Golay pair is two binary sequences $a$ and $b$ of length $L = 2^n$, built by a
+two-line recursion (Havelock Part I Ch. 6, Eq. (1)): starting from
+$a_1 = (+1, +1)$ and $b_1 = (+1, -1)$, each step sets
+$a_{k+1} = [\,a_k \mid b_k\,]$ and $b_{k+1} = [\,a_k \mid -b_k\,]$, doubling
+the length every time; thus `golay_pair(14)` returns two codes of
+$2^{14} = 16384$ samples. Their defining property is *algebraic*, not
+approximate: the two periodic autocorrelations sum to
 
 $$
 \sum_j a_j a_{j+k} + b_j b_{j+k} \;=\;
@@ -113,7 +123,7 @@ plt.show()
 </details>
 
 The result is the same
-`ImpulseResponseResult` the sweep
+[`ImpulseResponseResult`](https://docs.jmrp.io/phonometry/reference/api/rooms/impulse-response/) the sweep
 and MLS front ends return, so everything downstream -
 [room parameters](../../buildings/rooms/room-acoustics.md), decay curves,
 [STI](../../perception/speech/speech-transmission.md) - consumes it unchanged.
@@ -126,10 +136,44 @@ across the period instead of separating like a sweep's, and the two
 sequential steady states make the pair the most exposed of the family to time
 variance (Xiang's Sec. 2) - the price of the exact complementarity.
 
+### Running the pair
+
+The snippet above fakes the acquisition with `lfilter`, which quietly assumes a
+sample-accurate, zero-latency loop. A real run has four decisions.
+
+**Emission.** Play each code back to back and **discard at least one whole
+period** before keeping anything, so the system reaches the periodic steady
+state the circular correlation assumes (the same condition the aliasing warning
+enforces, seen from the other side). Then keep a whole number of periods, and
+repeat for the second code without touching gain or geometry.
+
+**Alignment, which is the one that fails silently.** The recovery is a circular
+cross-correlation, so any latency between the emitted and recorded streams
+appears as a *rotation* of the impulse response: annoying but recoverable. The
+real damage is that **both recordings must be cut at the same offset**: the
+exact complementarity only survives if the $a$ and $b$ records are aligned with
+each other to the sample, and a one-sample discrepancy destroys the sidelobe
+cancellation the whole method rests on, leaving a raised floor that looks like
+noise. Get the offset once with a loopback channel: record the electrical drive
+alongside the microphone and measure it with `time_delay` from the
+[delay estimation](correlation-delay.md) page, then
+apply the same cut to both.
+
+**Level and background.** Set the amplifier so the code's peak leaves headroom
+at both the loudspeaker and the converter: Golay codes are binary, so their
+crest factor is the worst of the family, and clipping shows up as a raised noise
+floor rather than as an obvious artefact. Record a period of silence first and
+check that the response sits well above it, because the pair rejects noise only
+by averaging periods.
+
+**Time invariance,** which the page already names: keep the room closed, the
+temperature steady, and run the two codes back to back rather than an hour
+apart.
+
 ## 2. Sweeps with an arbitrary target spectrum
 
 A sweep's energy at a given frequency can be set two ways: by its amplitude,
-or by *how long it dwells there*. Mueller & Massarani's frequency-domain
+or by *how long it dwells there*. Müller & Massarani's frequency-domain
 synthesis (Secs. 4.2-4.3) uses the second lever: define the target magnitude
 $|H(f)|$, make the group delay grow in proportion to the target's power,
 
@@ -156,6 +200,14 @@ sweep.plot()
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/shaped_sweep_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/shaped_sweep.svg" alt="Two panels for a pink shaped sweep from 50 hertz to 5 kilohertz: the time-domain waveform with a nearly constant envelope over two seconds, and below it the Welch spectrum of the sweep falling three decibels per octave exactly on top of the dashed pink target line inside the shaded sweep band" width="88%"></picture>
+
+*The two panels are the same statement seen twice. The envelope is flat because
+the shape was bought with dwell time rather than amplitude, which is why the
+crest factor is 4.22 dB, 1.2 dB above the swept sine's ideal 3.01 and about
+6 dB below shaped noise of the same spectrum. The measured Welch spectrum fits
+−3.013 dB/octave and stays within 0.74 dB of the pink target across the whole
+50 Hz-5 kHz band, so what the amplifier sees is the target and not an
+approximation of it.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -203,7 +255,7 @@ is the sweep's time-frequency trajectory, and `crest_factor_db` the achieved
 peak-to-RMS ratio. The purpose of the shaping is signal-to-noise engineering:
 matching the emitted spectrum to the ambient noise floor (or to a
 loudspeaker's power-handling limits) buys a frequency-independent SNR that no
-post-processing can recover (Mueller & Massarani Sec. 3).
+post-processing can recover (Müller & Massarani Sec. 3).
 
 Deconvolution needs nothing new - the result acts as its own reference array
 for the [spectral method](../../buildings/rooms/room-acoustics.md) of
@@ -235,12 +287,63 @@ deconvolution's band-limiting kernel is zero-phase, so a small anticausal
 tail sits at the very end of the full deconvolution buffer - keep
 `return_full=True` when hunting for tenth-of-a-dB accuracy at the band edges.
 
+### Choosing the target, the level and the duration
+
+`emphasis = np.array([12.0, 6.0, 0.0, 0.0])` above is an assertion, not a
+measurement. Five decisions turn it into one.
+
+- **The target comes from the background.** Measure the background at the
+  microphone position first with `power_spectral_density`, smooth it to third
+  octaves, and use its *shape* plus the margin you want as the sweep target. The
+  emitted spectrum then tracks the noise and the deconvolved response has a flat
+  signal-to-noise ratio, instead of a good midrange and a useless bottom octave.
+- **The duration follows from the margin you are short of.** Doubling the sweep
+  length buys about 3 dB of SNR in the deconvolved response, so the duration is
+  arithmetic, bounded above by the time-invariance of the system: a room with
+  moving air, or a loudspeaker heating up, sets the ceiling long before the
+  arithmetic does.
+- **The record needs a tail.** The excitation must carry a silence at least as
+  long as the system's decay after the sweep, which is what the `np.zeros(fs)`
+  in the snippets above is for.
+- **The low-frequency emphasis has a physical cap.** Driver excursion and
+  amplifier headroom stop you long before the synthesis does. Raise the level
+  until the response stops being linear and then back off: compare two runs 6 dB
+  apart, and if the deconvolved responses differ, you were already past it.
+- **Shaping does not cost the distortion separation.** That separation is a
+  property of the sweep's *group delay*, not of its magnitude: the $k$-th
+  harmonic of an instantaneous frequency $f$ arrives at the time the sweep
+  passes $kf$, so as long as the group delay is monotonic (which the recursion
+  guarantees for any non-zero target), the distortion products still deconvolve
+  to times before the linear response. Shaping only changes how far before,
+  because a target that dwells longer at low frequencies spreads the harmonic
+  packets differently from the exponential sweep's constant per-octave dwell.
+  [Swept-sine distortion](../../devices/electroacoustics/swept-sine-distortion.md)
+  is where those separated packets are read.
+
 ## 3. Regularized spectral inversion
 
+### Measuring the response you are going to invert
+
+The inversion is only as good as its input, and a measured loudspeaker response
+is not a synthetic band-pass. Measure on the reference axis at a stated distance
+(1 m is the IEC 60268-5 convention the
+[loudspeakers guide](../../devices/electroacoustics/loudspeakers.md) uses)
+with a measurement microphone, in an anechoic room if you have one. If you do
+not, put source and microphone as far from every surface as the room allows and
+**time-gate the impulse response before the first reflection**. That gate sets
+the lowest valid frequency: for a source and microphone 1.2 m above a hard floor
+and 1 m apart, the floor reflection arrives 4.7 ms after the direct sound, so
+the gated response is only valid above roughly $1/4.7\ \text{ms} \approx
+210$ Hz. Set `f_range` inside the band the gate actually validated and let the
+regularization cap everything outside it, because equalizing an ungated in-room
+response builds the room's modes into the filter, and they move with the
+microphone. Below the gate's limit, a ground-plane measurement is the usual
+alternative.
+
 Equalizing with a measured response means inverting it, and a plain
-reciprocal $1/H(f)$ explodes wherever the system radiates little energy - a
-notch in-band, everything out-of-band - turning an equalizer into a noise
-amplifier. Mueller & Massarani confine the inversion with a band-pass
+reciprocal $1/H(f)$ explodes wherever the system radiates little energy (a
+notch in-band, everything out-of-band), turning an equalizer into a noise
+amplifier. Müller & Massarani confine the inversion with a band-pass
 (Secs. 3.1, 4.5); the general form of that confinement is Kirkeby & Nelson's
 frequency-dependent Tikhonov regularization,
 
@@ -276,6 +379,13 @@ inv.plot()
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/regularized_inversion_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/regularized_inversion.svg" alt="Magnitudes over log frequency for a regularized inversion of a band-pass response: the measured response in blue, the inverse filter in red mirroring it inside the shaded equalized band from 200 hertz to 4 kilohertz, and the equalized product in green reading exactly zero decibels across the band and rolling off outside it where the regularization caps the gain" width="88%"></picture>
+
+*The green curve is the whole test: inside the equalized band it departs from
+0 dB by at most 9×10⁻⁶ dB, which is $\varepsilon/(|H|^2+\varepsilon)$ evaluated
+bin by bin and not a fitted result. Outside it the red inverse stops rather than
+climbing: the boost is capped at −6.03 dB relative to the in-band unity, the
+analytic $1/(2\sqrt\varepsilon)$ maximum. A plain $1/H$ would run off the top of
+this axis in the same two regions where the blue response runs off the bottom.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -341,9 +451,33 @@ flat_recording = inv.apply(recorded)             # delay already removed
 inv.plot()   # measured, inverse and equalized magnitudes (figure above)
 ```
 
+### Inverting a measured response
+
+Two habits separate a working equalizer from a noise amplifier.
+
+**Smooth the magnitude first.** A sixth- to third-octave
+`fractional_octave_smoothing` is the usual choice, so that the inverse targets
+the trend rather than the nulls. A null is a local interference pattern: it
+moves with the microphone, so it cannot be equalized anywhere except at that
+point, and boosting it spends headroom to amplify noise.
+
+**Regularize like a measurement, not like a synthetic.** On a measured response
+`regularization_inside` belongs in the range 1e-3 to 1e-2, which limits the
+in-band flattening to a few tenths of a decibel and caps the boost; the 1e-6
+default that yields the 1e-5 dB flatness above only makes sense on a noiseless
+synthetic response, and expecting that number from a real measurement is the
+mistake. Read the two reported numbers accordingly: `flatness_db` is how flat
+the band comes out, `max_gain_db` the worst-case boost the filter can ever
+apply: the number to check against the amplifier's headroom before playing
+anything through it.
+
+The asymmetry practitioners rely on is worth stating outright: **cut deep and
+boost shyly.** A peak is a resonance and exists everywhere; a dip is usually
+interference and exists only at the microphone.
+
 ### Closing the loop: pre-emphasis from a measured response
 
-The two halves of this page compose into Mueller & Massarani's own workflow
+The two halves of this page compose into Müller & Massarani's own workflow
 (their Fig. 18): measure the loudspeaker, invert its response in the
 transmission band, and hand the inverse magnitude to the sweep synthesis as
 the target - the next measurement then radiates a *flat* acoustic spectrum,
@@ -373,10 +507,20 @@ sweep.plot()   # waveform and spectrum against the inverted-response target
 ## Relation to the other tools
 
 The Golay pair joins `sweep_signal` and `mls_signal` in the
-[ISO 18233 acquisition family](../../buildings/rooms/room-acoustics.md); pick the
-sweep for distortion rejection, the MLS for legacy hardware, the pair when
-exact noise-free deconvolution of a time-invariant system matters (HRTF rigs,
-calibration fixtures). Harmonic analysis of what sweeps *discard* lives in
+[ISO 18233 acquisition family](../../buildings/rooms/room-acoustics.md), and
+the three differ on four axes that decide a real measurement:
+
+| | Golay pair | Exponential sweep | MLS |
+| :--- | :--- | :--- | :--- |
+| SNR per unit time | all three are deterministic and gain 3 dB per doubling of measurement time, but the pair spends half its time on each code and so pays **3 dB** against a single sweep of the same total length | reference | as the pair, minus the second code |
+| Distortion | smeared over the period as a noise-like floor | separated into a region *before* the linear response, where it can be read or discarded | smeared, as the pair |
+| Time variance | the most fragile: two identical steady states are required, and drift raises the noise floor rather than producing an obvious error | a single pass, so only the pass has to be stationary | one periodic pass |
+| Truncation | a decay longer than one period wraps onto the start (the aliasing warning above) | only needs enough silence appended | wraps, as the pair |
+
+So: the sweep for distortion rejection, the MLS for legacy hardware, and the
+pair when exact, correlation-noise-free deconvolution of a *stationary fixture*
+matters (HRTF rigs, calibration fixtures): where 3 dB of signal-to-noise ratio
+is cheap and the last decimal of the impulse response is what you came for. Harmonic analysis of what sweeps *discard* lives in
 [swept-sine distortion](../../devices/electroacoustics/swept-sine-distortion.md). The Welch
 machinery used to verify the shaped sweep is the
 [calibrated spectral analysis](spectral-analysis.md) page,
@@ -385,20 +529,21 @@ and the equalized responses feed the same downstream chain as every
 
 ## What this guide covers
 
-**Covered.** The complementary Golay pair (Golay 1961; Havelock, Kuwano &
-Vorländer eds., 2008, Part I Ch. 6 by Xiang): the append recursion, the exact
-complementary-autocorrelation identity and the summed-correlation recovery, in
-`golay_pair` and `golay_impulse_response`. The group-delay sweep synthesis of
-Müller & Massarani (2001, Secs. 4.2-4.3), in `shaped_sweep_signal`. The
-frequency-dependent Tikhonov regularization of Kirkeby & Nelson (1999, Eq. 17
-and Sec. 2.4), in `regularized_inverse_filter`.
+- **Covered.** The complementary Golay pair (Golay 1961; Havelock, Kuwano & Vorländer eds.,
+  2008, Part I Ch. 6 by Xiang): the append recursion, the exact
+  complementary-autocorrelation identity and the summed-correlation recovery,
+  implemented by `golay_pair` and `golay_impulse_response`. The group-delay
+  sweep synthesis of Müller & Massarani (2001, Secs. 4.2-4.3), implemented by
+  `shaped_sweep_signal`. The frequency-dependent Tikhonov regularization of
+  Kirkeby & Nelson (1999, Eq. 17 and Sec. 2.4), implemented by
+  `regularized_inverse_filter`.
 
-**Not covered.** These are measurement-engineering methods from the
-transfer-function literature rather than a certification standard, so no
-compliance clause exists to check them against. Kirkeby & Nelson's original
-inversion targets multi-loudspeaker reproduction, with a matrix regularization
-for crosstalk cancellation between channels; `regularized_inverse_filter`
-implements the single-channel, scalar case of their Eq. 17 and nothing else.
+- **Not covered.** These are measurement-engineering methods from the transfer-function
+  literature, not a certification standard, so there is no compliance clause to
+  check against. Kirkeby & Nelson's original inversion targets multi-loudspeaker
+  sound reproduction, with a matrix regularization for crosstalk cancellation
+  between several channels. `regularized_inverse_filter` implements only the
+  single-channel, scalar case of their Eq. 17.
 
 ## See also
 
@@ -411,21 +556,11 @@ implements the single-channel, scalar case of their Eq. 17 and nothing else.
 
 ## References
 
-- Golay, M. J. E. (1961). Complementary series. *IRE Transactions on
-  Information Theory*, 7(2), 82-87.
-  [doi:10.1109/TIT.1961.1057620](https://doi.org/10.1109/TIT.1961.1057620).
-- Havelock, D., Kuwano, S., & Vorländer, M. (Eds.) (2008). *Handbook of
-  Signal Processing in Acoustics*. Springer. ISBN 978-0-387-77698-9.
-  [doi:10.1007/978-0-387-30441-0](https://doi.org/10.1007/978-0-387-30441-0).
-  Part I Chapter 6 (Xiang, Digital Sequences): the Golay recursion, the
-  complementary-autocorrelation identity of Eq. (2) and the recovery
-  procedure of Eq. (4).
-- Kirkeby, O., & Nelson, P. A. (1999). Digital filter design for inversion
-  problems in sound reproduction. *Journal of the Audio Engineering
-  Society*, 47(7/8), 583-595.
-- Müller, S., & Massarani, P. (2001). Transfer-function measurement with
-  sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
-  Frequency-domain sweep construction (Sec. 4.2), the group-delay recursion
-  for arbitrary magnitude spectra (Sec. 4.3) and the band-limited inversion
-  discussion (Secs. 3.1, 4.5). The extended "Director's Cut" edition was
-  consulted.
+- **Golay, M. J. E. (1961).** Complementary series. *IRE Transactions on Information Theory*, *7*(2), 82-87. https://doi.org/10.1109/TIT.1961.1057620
+  The original construction of the complementary pairs of §1.
+- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. https://doi.org/10.1007/978-0-387-30441-0
+  Part I Chapter 6 (Xiang, Digital Sequences): the Golay recursion of §1, the complementary-autocorrelation identity of Eq. (2) and the frequency-domain recovery procedure of Eq. (4) and Fig. 2. ISBN 978-0-387-77698-9.
+- **Kirkeby, O., & Nelson, P. A. (1999).** [Digital filter design for inversion problems in sound reproduction](https://aes.org/publications/elibrary-page/?id=12098). *Journal of the Audio Engineering Society*, *47*(7/8), 583-595.
+  The frequency-dependent Tikhonov regularization of §3 (their Eq. (17)) and the modeling delay that makes the mixed-phase inverse causal (Sec. 2.4).
+- **Müller, S., & Massarani, P. (2001).** [Transfer-function measurement with sweeps](https://aes.org/publications/elibrary-page/?id=10189). *Journal of the Audio Engineering Society*, *49*(6), 443-471.
+  The sweep-synthesis chapter behind §2: frequency-domain construction from magnitude and group delay (Sec. 4.2), the group-delay recursion for arbitrary magnitude spectra (Sec. 4.3, Eqs. (11)-(12)) and the band-limited inversion discussion of Secs. 3.1 and 4.5. The extended "Director's Cut" edition was consulted.

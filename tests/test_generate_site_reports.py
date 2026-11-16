@@ -544,7 +544,7 @@ def _edition(
 ) -> generate_site_reports.Edition:
     return generate_site_reports.Edition(
         lang="en",
-        source=generate_site_reports.DOCS / "ERRATA.md",
+        source=generate_site_reports.ERRATA,
         start=generate_site_reports.EDITIONS[0].start,
         said_on_index=said,
     )

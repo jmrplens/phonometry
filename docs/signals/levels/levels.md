@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/levels/levels.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/levels/
 
 # Integrated and Statistical Levels
 
@@ -23,23 +25,27 @@ Bies, Hansen & Howard 2017, §2.5 surveys them side by side):
   $L_{90}$ as the background level, $L_{10}$ as the intrusive traffic
   indicator, $L_{50}$ as the median. Two signals with the same $L_\mathrm{Aeq}$
   can have very different $L_{10} - L_{90}$ spreads.
+- **The loudest moment of the interval**: the maximum time-weighted level
+  $L_\mathrm{AFmax}$ or $L_\mathrm{ASmax}$, which names its own ballistics because the two
+  differ on the same event.
 - **Single events of different durations, compared fairly**: SEL, the
   event's whole energy normalized to one second.
 - **Hearing-risk screening**: $L_\mathrm{Cpeak}$ and the dose measures, which
   feed the occupational workflow of
-  [Occupational Noise Exposure](../../perception/hearing/occupational-exposure.md).
+  [Occupational exposure (ISO 9612)](../../perception/hearing/occupational-exposure.md).
 - **Long-term community annoyance**: $L_\mathrm{den}$/$L_\mathrm{dn}$ and the ISO
   1996-1 rating levels, which weight evening and night energy before
   averaging the day: the subject of
-  [Environmental levels](../../environment/assessment/environmental-levels.md).
+  [Environmental Levels](../../environment/assessment/environmental-levels.md).
 
 Two boundaries with the sibling pages are worth keeping sharp. The
 integrated metrics here deliberately bypass the exponential detector:
 $L_\mathrm{eq}$ and SEL have no time constant, and Fast/Slow ballistics enter
 only through the percentile levels, which are defined on the time-weighted
-level track (see [Time Weighting](time-weighting.md)). And everything on
-this page assumes the signal is already in pascals: the sensitivity factor
-that gets it there is the subject of [Calibration](../metrology/calibration.md).
+level track (see [Time Weighting](time-weighting.md)).
+And everything on this page assumes the signal is already in pascals: the
+sensitivity factor that gets it there is the subject of
+[Calibration](../metrology/calibration.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="A calibrated pressure record drawn as a waveform between the times t1 and t2 that bound the stated interval T, with a short impulse, a longer event and the background labelled above it. The record passes through a frequency weighting box, A, C or Z, each 0 dB at 1 kHz, and splits into four columns. The first, A or Z weighted, averages the square: the squared record is a row of spikes and its mean over T a low flat line, which gives Leq and LAeq over T, and SEL, the same energy referred to 1 s against the reference exposure of 400 times ten to the minus twelve pascal-squared seconds. The second, A weighted, time-weights the square: a fast F track with a time constant of 0.125 s and a slower, lower S track with 1 s, a dot on the top of each for LAFmax and LASmax, and three dashed lines for L10, L50 and L90 read off the F track once its first five time constants are left out. The third, C weighted, holds the greatest excursion of either sign, the impulse, marked by dashed lines at plus and minus that pressure, for LCpeak with no average and no time constant; one cycle of 500 Hz reads 3.5 dB over the LC of the steady signal it is cut from. The fourth, A weighted, integrates the square: a running curve that steps up at the impulse, by about a fifth of the total, and climbs most during the event, ending at the sound exposure E in pascal-squared hours, kept until reset, and LEX,8h spreads that exposure over 8 h, 3.2 pascal-squared hours being exactly 90 dB and 1.01 being 85 dB. A box at the foot writes SEL as LAeq plus 10 lg of T over 1 s, LEX,8h as LAeq plus 10 lg of T over 8 h and as 10 lg of E over p0 squared times 8 h, and says that the maxima, the percentiles and the peak cannot be had from that energy and need the record itself" width="100%"></picture>
 
@@ -99,8 +105,42 @@ spread over 10 dB it already costs a couple of decibels. The few normative
 formulas that do average decibels directly are deliberate approximations and
 say so (ISO 1996-2 offers one as a substitute for repeated-measurement
 uncertainty and warns it inflates once levels spread beyond 3 dB, see the
-uncertainty section of [Environmental levels](../../environment/assessment/environmental-levels.md));
+uncertainty section of
+[Environmental Levels](../../environment/assessment/environmental-levels.md));
 everywhere else, energy.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/energy_vs_arithmetic_mean_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/energy_vs_arithmetic_mean.svg" alt="Left panel: two bars, a half period at 60 dB and a half period at 80 dB, with the arithmetic mean of the decibel values marked at 70 dB and the true energy mean Leq at 77 dB, the seven-decibel gap between them annotated. Right panel: the difference between Leq and the arithmetic mean of the level values against the standard deviation of those levels from zero to twelve decibels, one curve for a Gaussian spread following 0.115 sigma squared and one for a two-level spread, both rising monotonically from zero, with the five-decibel standard deviation that corresponds to a ten-decibel spread marked at about two and a half decibels" width="88%"></picture>
+
+*The arithmetic mean of decibels always under-reads. The error is the gap on
+the left, it grows with the spread of the levels being combined: about
+2.5 dB once they range over 10 dB, and it never changes sign, so it does not
+average out over many measurements.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The right panel is the error law in closed form. For levels normally
+# distributed with standard deviation sigma the energy mean sits
+# 0.115 sigma^2 above their arithmetic mean; for two levels one sigma either
+# side of the mean it sits 10 log10 cosh(sigma ln10 / 10) above it.
+sigma = np.linspace(0.0, 12.0, 121)
+gaussian = (np.log(10) / 20.0) * sigma ** 2
+two_level = 10 * np.log10(np.cosh(sigma * np.log(10) / 10))
+
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.plot(sigma, gaussian, label="Gaussian spread (0.115 sigma squared)")
+ax.plot(sigma, two_level, "--", label="two levels, one sigma either side")
+ax.axvline(5.0, color="0.5", linewidth=0.8)   # a 10 dB range
+ax.set(xlabel="Standard deviation of the levels [dB]",
+       ylabel="Leq minus the arithmetic dB mean [dB]")
+ax.legend(loc="upper left")
+plt.show()
+```
+
+</details>
 
 ### `leq()` / `laeq()` parameters
 
@@ -191,9 +231,14 @@ plt.show()
 
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies the chosen weighting curve first, and
-`calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
-(~5τ) is discarded before taking percentiles, so the leading settling ramp is
-not counted in the low percentiles.
+`calibration_factor`/`dbfs` behave as in `leq`. `ln_levels` discards the first
+$5\tau$ of the envelope before taking percentiles (0.625 s on Fast, 5 s on
+Slow) because at $5\tau$ the integrator is 99.3 % settled and the leading ramp
+would otherwise drag the low percentiles down. On a recording shorter than
+$10\tau$ that discard is capped at half the samples, so check that the segment
+is long enough for the ballistics chosen: a 0.3 s segment analysed on Slow
+loses its first 0.15 s and reports percentiles of an envelope that never
+settled.
 
 Formally, $L_N$ is the $(100-N)$-th percentile of the distribution of the
 time-weighted level: the recording is first turned into a level-vs-time
@@ -203,6 +248,53 @@ $L_{10}$ from a Slow envelope is systematically lower than from a Fast one on
 impulsive noise, so regulations always name the time weighting.
 
 ### Reading Leq against the percentiles
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/level_distribution_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/level_distribution.svg" alt="Left panel: two Fast level histories over sixty seconds sharing one LAeq line at 61 dB, a steady traffic-like noise wandering between 55 and 66 dB and a flat 53 dB background punctuated by three short 78 dB events. Right panel: their exceedance curves, level against percentage of the time exceeded, with L10, L50 and L90 marked on each. The steady curve falls smoothly from 66 to 55 dB across the whole range, while the event curve is flat at 53 dB from about 6 % onwards and rises steeply only in its first few per cent, and the two annotations read L10 minus L90 of 8.0 dB against 0.5 dB, and LAeq minus L50 of 1.7 dB against 7.6 dB" width="88%"></picture>
+
+*The same $L_\mathrm{Aeq}$, two opposite noises. The steady one has the wide
+percentile spread and an $L_\mathrm{eq}$ that sits just above its median; the one
+carried by three brief events has almost no percentile spread at all: the
+events occupy 4 % of the record, so no percentile below $L_{10}$ can see them,
+and an $L_\mathrm{eq}$ 7.6 dB above the median. Percentiles read the shape of the
+distribution; $L_\mathrm{eq}$ reads only its energy.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# Two 60 s signals: a steady noise whose level wanders with sigma = 3 dB, and
+# a quiet background with three short events 25 dB above it.
+fs_d, seconds = 8000, 60.0
+n = int(fs_d * seconds)
+rng = np.random.default_rng(21)
+t_d = np.arange(n) / fs_d
+
+slow = sum(rng.normal() * np.sin(2 * np.pi * k * t_d / seconds
+                                 + rng.uniform(0, 2 * np.pi)) for k in range(1, 12))
+steady = 0.02 * 10 ** ((3.0 * slow / np.std(slow)) / 20) * rng.standard_normal(n)
+
+peaky = 0.004 * rng.standard_normal(n)
+for centre in (12.0, 31.0, 47.0):
+    i0, i1 = int((centre - 0.4) * fs_d), int((centre + 0.4) * fs_d)
+    peaky[i0:i1] += (0.004 * 10 ** (25 / 20) * np.hanning(i1 - i0)
+                     * rng.standard_normal(i1 - i0))
+peaky *= 10 ** ((signals.laeq(steady, fs_d) - signals.laeq(peaky, fs_d)) / 20)
+
+# The right panel: ln_levels accepts any set of exceedance percentages, so the
+# whole exceedance curve is one call per signal.
+percentages = tuple(range(1, 100))
+fig, ax = plt.subplots(figsize=(9, 4))
+for name, x_d in (("steady noise", steady), ("three events", peaky)):
+    curve = signals.ln_levels(x_d, fs_d, n=percentages, weighting="A")
+    ax.plot(percentages, [float(curve[p]) for p in percentages], label=name)
+    for p in (10, 50, 90):
+        ax.plot(p, float(curve[p]), "o")
+ax.set(xlabel="Percentage of the time exceeded [%]", ylabel="Level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 $L_\mathrm{eq}$ and the $L_N$ family answer different questions about the same
 level history. $L_\mathrm{eq}$ is an energy mean, so the loudest moments dominate
@@ -229,7 +321,7 @@ One caution: percentiles do not combine. Two hours with known $L_{90}$
 values do not yield the two-hour $L_{90}$ by any formula; recompute it from
 the pooled envelope. $L_\mathrm{eq}$ values, by contrast, combine exactly by
 time-weighted energy averaging, which is what the `composite_rating_level`
-of [Environmental levels](../../environment/assessment/environmental-levels.md) does.
+of [Environmental Levels](../../environment/assessment/environmental-levels.md) does.
 
 ### `ln_levels()` parameters
 
@@ -242,23 +334,66 @@ of [Environmental levels](../../environment/assessment/environmental-levels.md) 
 | `weighting` | str | — | any `weighting_filter` curve: `'A'`, `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'468'`, `'Z'` (default) | Frequency weighting before the envelope (`'Z'` leaves it unweighted) |
 | `calibration_factor` / `dbfs` | float / bool | — | as `leq` | Same semantics as in `leq()` |
 
+## Maximum time-weighted level (LAFmax, LASmax)
+
+Beside the $L_\mathrm{eq}$, most noise reports carry the largest level the meter's
+needle reached: the **maximum time-weighted level**, the greatest value the
+frequency- and time-weighted level attains within the stated interval
+(IEC 61672-1:2013, 3.7; clause 5.1.14 requires a hold feature for it). It is
+not a separate measurement, only the maximum of the level track the percentiles
+are already computed on:
+
+```python
+weighted = filters.weighting_filter(varying, fs, weighting="A")
+la_fmax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="fast").max()
+                        / (2e-5) ** 2)
+la_smax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="slow").max()
+                        / (2e-5) ** 2)
+print(f"LAFmax = {la_fmax:.1f} dB   LASmax = {la_smax:.1f} dB")
+# LAFmax = 66.8 dB   LASmax = 64.8 dB
+```
+
+Both weightings are part of the name, and for good reason: the same events read
+1.9 dB lower on Slow here, and a 100 ms burst reads about 7.6 dB lower on Slow
+than on Fast (the arithmetic is the tone-burst law of
+[Time Weighting](time-weighting.md)). Report
+$L_\mathrm{AFmax}$ or $L_\mathrm{ASmax}$, never a bare "Lmax".
+
+A maximum is a rank-free extreme, so it is decided by one envelope sample and
+by the ballistics rather than by the bulk of the record. On this signal it
+lands within a tenth of a decibel of $L_{10}$, because the loud level is held
+for half of every second; on an impulsive record the maximum runs far above
+every percentile. Screen it before reporting it: wind gusts, a knocked cable
+and a closing door all produce a perfectly valid maximum of the wrong thing,
+and remember that a logger storing the track more coarsely than about $\tau/2$
+(60 ms on Fast, 500 ms on Slow) clips the very maximum it was deployed to
+capture.
+
+Do not confuse it with $L_\mathrm{Cpeak}$ below. The peak is the largest instantaneous
+pressure with no averaging at all; $L_\mathrm{AFmax}$ is the largest 125 ms
+mean square. For impulsive sources the peak sits 10 to 20 dB above the maximum
+time-weighted level, which is why the hearing-risk criteria are written on the
+peak and never on $L_\mathrm{AFmax}$.
+
 ## Peak, event and occupational metrics
 
 ```python
 import numpy as np
 from phonometry import signals
 
-# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+rng = np.random.default_rng(3)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
-# C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = signals.lc_peak(recording, fs, calibration_factor=sensitivity)
+# A single event: a 4 s pass-by, noise under a Gaussian energy envelope.
+t = np.arange(int(4.0 * fs)) / fs
+event = 0.25 * np.exp(-0.5 * ((t - 2.0) / 0.6) ** 2) * rng.standard_normal(t.size)
 
-# A single noise event and a work-shift sample (slices of a real recording)
-event = recording
-shift_sample = recording
+# A work-shift sample: 10 s taken as representative of a steady 85 dB(A) job.
+shift_sample = 0.4865 * rng.standard_normal(int(10.0 * fs))
+
+# C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
+peak = signals.lc_peak(event, fs, calibration_factor=sensitivity)
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = signals.sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -266,7 +401,20 @@ lae = signals.sel(event, fs, weighting="A", calibration_factor=sensitivity)
 # Daily noise dose (IEC 61252): exposure in Pa²·h and LEX,8h / LEP,d
 E = signals.sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 lex = signals.lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+
+print(f"event: LCpeak {peak:.1f} dB(C) | "
+      f"LAeq {signals.laeq(event, fs):.1f} dB | LAE {lae:.1f} dB")
+print(f"shift: E {E:.2f} Pa2h | LEX,8h {lex:.1f} dB")
+# event: LCpeak 91.7 dB(C) | LAeq 73.5 dB | LAE 79.5 dB
+# shift: E 1.01 Pa2h | LEX,8h 85.0 dB
 ```
+
+The three roles are deliberately different signals. The 4 s event has an
+$L_{\mathrm{A}E}$ 6.0 dB above its own $L_\mathrm{Aeq}$, because $10\log_{10}4 = 6.0$. The
+shift sample is *extrapolated*, not repeated: `duration_hours=8` says these
+10 s represent the whole eight hours, so $L_\mathrm{EX,8h}$ comes back equal to the
+sample's $L_\mathrm{Aeq}$ and only the exposure $E$ carries the duration: 8 h at
+85 dB(A) is $8 \times (0.3557\ \text{Pa})^2 = 1.01\ \text{Pa}^2\text{h}$.
 
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
 IEC 61672-1:2013 Table 5, `sel` against the Table 4 $L_{\mathrm{A}E}$ toneburst
@@ -279,6 +427,66 @@ at 48 kHz is only 6 samples/cycle). Set `oversample=1` to detect the peak on the
 original sample grid. With `duration_hours`, the input is treated as a
 representative sample of that exposure period; without it, the input is the
 whole event.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/peak_oversampling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/peak_oversampling.svg" alt="Left panel: two and a half cycles of an 8 kHz tone sampled at 48 kHz, six sample dots per cycle drawn on the reconstructed continuous waveform with the crest falling exactly midway between two samples, the true peak at 1.0 and the largest sample at 0.87 marked and labelled as 1.25 dB low. Right panel: the worst-case under-read in decibels against samples per cycle from three to forty-eight on a logarithmic axis, one curve for each oversample value 1, 2, 4 and 8; the oversample-one curve runs between about 0.8 and 2.8 decibels, oversample 2 between 0.3 and 1.2, and the oversample-eight curve is flat below a tenth of a decibel" width="88%"></picture>
+
+*The peak of a sampled waveform almost never lands on a sample: at six samples
+per cycle the worst case loses 1.25 dB, and where the samples fall relative to
+the crest is exactly what a measurement cannot control. The default
+`oversample=8` pulls the residual below a tenth of a decibel at every rate the
+audible band can produce, while the raw grid stays between 0.8 and 2.8 dB
+wrong across the same range.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# The right panel, measured on the function itself: for each rate, take the
+# worst case over the phase of the tone, because where the samples fall
+# relative to the crest is exactly what a measurement cannot control.
+t_tone = np.arange(int(0.05 * fs)) / fs
+per_cycle = np.array([3.0, 4.0, 6.0, 8.0, 12.0, 24.0, 48.0])
+phases = np.linspace(0.0, 2 * np.pi, 46)
+
+for k in (1, 2, 4, 8):
+    worst = []
+    for n_samples in per_cycle:
+        tones = [np.sin(2 * np.pi * (fs / n_samples) * t_tone + p) for p in phases]
+        worst.append(max(signals.lc_peak(tone, fs, oversample=16)
+                         - signals.lc_peak(tone, fs, oversample=k)
+                         for tone in tones))
+    plt.semilogx(per_cycle, worst, marker="o", label=f"oversample={k}")
+plt.gca().set(xlabel="Samples per cycle", ylabel="Worst under-read [dB]")
+plt.legend()
+plt.show()
+```
+
+</details>
+
+Two things beyond the arithmetic decide whether an $L_\mathrm{Cpeak}$ means anything.
+**What the number means.** In the European occupational framework (Directive
+2003/10/EC, Article 3, the scheme the
+[occupational exposure guide](../../perception/hearing/occupational-exposure.md)
+assesses against) the peak action values are 135 and 137 dB(C) with an exposure
+limit value of 140 dB(C), alongside the $L_\mathrm{EX,8h}$ values of 80, 85 and 87 dB.
+A peak reading in the 120s is unremarkable in industry, while a reading above
+135 dB(C) is a finding in its own right whatever the daily dose says. The
+weighting is C rather than A because the peak is an *instantaneous* pressure:
+an A-weighting filter would reshape the very waveform whose extreme is being
+measured, so C is the near-flat compromise that still bounds the infrasonic
+content.
+
+**What the chain has to deliver.** The peak is the one metric on this page
+decided by a single sample, with no averaging to hide any damage done to it, so
+it inherits everything the recorder did. Set the gain from the highest peak the
+assessment must be able to prove and keep about 12 dB of headroom above it;
+discard any record whose extreme sample belongs to a run at full scale, because
+a clipped peak reads low and looks perfectly plausible. C weighting passes wind
+and handling transients almost unattenuated, so an unscreened capsule reports
+the wind rather than the machine, and a peak inconsistent with the rest of the
+record should be listened to before it is reported. The capture settings this
+assumes are set out step by step in
+[Build a sound level meter](../sound-level-meter.md).
 
 ### SEL: comparing events of different duration
 
@@ -330,6 +538,50 @@ plt.show()
 
 </details>
 
+#### Delimiting the event
+
+SEL is an integral, so the answer depends entirely on where the integration
+starts and stops: every sample handed to `sel` is counted as event energy,
+background included. A record padded with background inflates the result by
+$10\log_{10}(1 + E_\mathrm{b}/E_\mathrm{e})$: 0.4 dB when the background carries a tenth of the
+event energy, 1.8 dB when it carries half, both larger than the repeatability
+most pass-by procedures ask for. The convention that makes two pass-bys
+comparable is the window between the two instants at which the time-weighted
+level falls 10 dB below its maximum, which captures roughly 90 % of the energy
+of a typical pass-by:
+
+```python
+env = filters.time_weighting(x, fs, mode="fast")
+track = 10 * np.log10(np.maximum(env, 1e-12))
+inside = np.flatnonzero(track >= track.max() - 10.0)
+i0, i1 = inside[0], inside[-1]
+
+print(f"10 dB-down window: {(i1 - i0) / fs:.2f} s")
+print(f"SEL over the window {signals.sel(x[i0:i1], fs, dbfs=True):.2f} dBFS | "
+      f"over the whole 8 s {signals.sel(x, fs, dbfs=True):.2f} dBFS")
+# 10 dB-down window: 3.36 s
+# SEL over the window -7.73 dBFS | over the whole 8 s -7.58 dBFS
+```
+
+The 0.15 dB between those two numbers is the acceptance check: compute the SEL
+over the 10 dB-down interval and again over a window twice as wide, and if they
+differ by more than a few tenths the background is not negligible and the event
+has not been isolated.
+
+The residual noise carries its own rule, and it is not optional. When the
+specific sound stands only 3 to 10 dB above the residual, the level must be
+corrected energetically before it is reported;
+`environment.residual_sound_correction(measured_level, residual_level)` returns
+that correction with a `reliable` flag and a `reportable_upper_bound`. Below
+3 dB no correction may be reported at all: only the uncorrected level, as an
+upper bound, because an event less than 3 dB above the background is not a
+measured event. The usual estimator of the residual is the $L_{90}$ of the same
+record, which is why the percentile section above comes first.
+
+One last connection back to the figure: the SEL and the $L_\mathrm{eq}$ printed in its
+caption differ by exactly $10\log_{10}T$, so they are one measurement expressed
+twice, not two measurements.
+
 ### Noise dose: sound exposure and LEX,8h
 
 Occupational regulations limit the daily *dose*, not the level. IEC 61252
@@ -338,13 +590,70 @@ integral of the squared A-weighted pressure) and the equivalent
 **normalized 8 h level**:
 
 $$
-E = \int_0^T p_\mathrm{A}^2(t)\ dt \quad [\text{Pa}^2\text{h}], \qquad
-L_\mathrm{EX,8h} = 10\log_{10}\frac{E}{8\ \text{h} \cdot p_0^2}
+E = \int_0^T p_\mathrm{A}^2(t)\ dt \quad [\text{Pa}^2\text{h}],\ t\ \text{in hours}
+\qquad
+L_\mathrm{EX,8h} = 10\log_{10}\frac{E}{T_0\,p_0^2}, \quad T_0 = 8\ \text{h}
 $$
 
+The unit annotation only holds if $t$ is in hours: integrate in seconds and you
+get Pa²s, which is the same exposure expressed 3600 times larger: 35.6 dB out
+if you then feed it to the $L_\mathrm{EX,8h}$ formula. In practice you integrate in
+seconds and divide by 3600, which is what `sound_exposure` does internally
+(mean square × duration in hours).
+
 The anchor worth memorizing: **3.2 Pa²h ⇔ exactly 90 dB over 8 h** (the CI
-suite enforces it). Half the dose is −3 dB; double duration at the same level
-is +3 dB.
+suite enforces it). It falls straight out of the formula: 90 dB is
+$p_\mathrm{A,rms} = 20\,\mu\mathrm{Pa} \times 10^{4.5} = 0.6325$ Pa, and
+$8\ \text{h} \times (0.6325\ \text{Pa})^2 = 3.2\ \text{Pa}^2\text{h}$. Half the
+dose is −3 dB; double duration at the same level is +3 dB.
+
+That last sentence is a modelling choice, not arithmetic, and it deserves its
+name: IEC 61252 and ISO 1999 rate exposure by total A-weighted **energy**: the
+equal-energy hypothesis, which is why the implementation is a plain integral of
+the squared pressure with no threshold and no exchange-rate parameter. Under it,
+85 dB(A) for 8 h, 88 dB(A) for 4 h and 91 dB(A) for 2 h are the same exposure.
+National schemes that use a 5 dB exchange rate instead, or that ignore
+everything below an 80 or 90 dB threshold, produce different numbers from the
+same recording, so `lex_8h` is the ISO 1999 and European-directive quantity and
+must not be reported as, or converted into, a dose percentage from one of those
+schemes. The API carries a second assumption in the same place: with
+`duration_hours` the recording is treated as *representative* of the whole
+period, so a sample taken during an unrepresentative few minutes biases the
+whole day directly, which is precisely what the ISO 9612 sampling strategies
+exist to control.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dose_exchange_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dose_exchange.svg" alt="A-weighted level from 80 to 110 decibels against exposure duration from one minute to eight hours on a logarithmic axis, with three straight iso-exposure contours for LEX,8h of 80, 85 and 87 decibels, each labelled with its sound exposure in pascal-squared-hours, all sloping upward by three decibels per halving of duration, and the anchor point of 90 decibels for eight hours marked at 3.2 pascal-squared-hours" width="88%"></picture>
+
+*Every point on one line is the same daily exposure. The 3 dB slope per
+halving of duration is the equal-energy hypothesis drawn: the sound exposure
+$E$ is constant along each contour, which is why it labels the line rather than
+an axis.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# One contour: the levels that give a fixed LEX,8h as the duration shrinks.
+# Computed through lex_8h itself rather than from the formula, so the line is
+# the library's own arithmetic.
+hours = np.geomspace(1 / 60, 8.0, 40)
+sample = 0.4865 * np.random.default_rng(1).standard_normal(2 * fs)  # 84.9 dB(A)
+base = float(signals.laeq(sample, fs))
+
+# lex_8h(sample, duration_hours=h) - LAeq(sample) is the 10 log10(h / 8)
+# normalisation, so the contour level is the target minus that offset.
+fig, ax = plt.subplots(figsize=(9, 4.5))
+for target in (80.0, 85.0, 87.0):
+    levels = [target - (signals.lex_8h(sample, fs, duration_hours=h) - base)
+              for h in hours]
+    ax.semilogx(hours, levels, label=f"LEX,8h = {target:.0f} dB")
+ax.plot(8.0, 90.0, "o", label="the 3.2 Pa2h anchor")
+ax.set(xlabel="Exposure duration [h]", ylabel="A-weighted level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### Peak / event / dose parameters
 
@@ -361,10 +670,12 @@ job samples, with the normative ISO 9612 uncertainty budget, continues in
 
 Turning these levels into the regulatory day-evening-night indicators and
 reporting them defensibly is
-[Environmental levels](../../environment/assessment/environmental-levels.md): the $L_\mathrm{den}$ and $L_\mathrm{dn}$
-descriptors, the composite rating levels of ISO 1996-1 with their character
-adjustments, and the ISO 1996-2 determination chain of tonal adjustment,
-residual-noise correction and the measurement uncertainty budget.
+[Environmental Levels](../../environment/assessment/environmental-levels.md): the
+$L_\mathrm{den}$ and $L_\mathrm{dn}$ descriptors, the composite rating levels of
+ISO 1996-1 with their
+character adjustments, and the ISO 1996-2 determination chain of tonal
+adjustment, residual-noise correction and the measurement uncertainty
+budget.
 
 ## Octave Spectrogram (levels over time)
 
@@ -465,13 +776,71 @@ plt.show()
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 
+> [!NOTE]
+> **The frame is not what sets the time resolution**
+>
+> In a fractional-octave spectrogram the low-frequency time resolution is set by
+> the *band filter*, not by `window_time`. A band of bandwidth $B$ needs a few
+> times $1/B$ to settle, and for one-third octaves $B = 0.231\,f_\mathrm{m}$, so the
+> 0.125 s default is right at 1 kHz and silently wrong at the bottom of the same
+> bank: every frame in the lowest band of the default `fraction=3` bank reports
+> filter transient rather than band level. Choose `window_time` from the lowest
+> band you actually intend to read, or raise `limits[0]` for the frames you plan
+> to interpret. Nothing in the API warns when the frame is too short.
+>
+> | Lowest band read | $B$ [Hz] | Shortest useful `window_time` |
+> | :--- | ---: | ---: |
+> | 12.5 Hz (the default bank's first band) | 2.9 | ≈ 1 s |
+> | 125 Hz | 29 | ≈ 0.1 s |
+> | 1 kHz | 231 | ≈ 0.013 s |
+>
+> The same arithmetic, applied to a whole record instead of one frame, is the
+> record-length rule of
+> [Filter Banks](../filters/filter-banks.md#how-long-must-the-record-be).
+
+Read the published figure with that in mind. The sweep is the bright diagonal,
+the two tone bursts are the horizontal segments at 4 kHz and 250 Hz, and the
+vertical smear at the low-frequency end of the sweep is the band response time
+itself, not a property of the source. Raising `overlap` makes the display
+smoother but buys interpolation, not resolution: the frames overlap, the
+filters do not get faster.
+
 See [Calibration and dBFS](../metrology/calibration.md) to convert digital units to physical
 SPL, and [Time Weighting](time-weighting.md) for the envelope details. The
 ISO 9612 occupational strategies continue in
 [Occupational Noise Exposure](../../perception/hearing/occupational-exposure.md), the ECMA-418-1
 tonal-prominence verdicts in [Prominent Discrete Tones](../../perception/psychoacoustics/tone-prominence.md),
 and the ISO 226 equal-loudness contours live with the perception metrics in
-[Loudness](../../perception/psychoacoustics/loudness.md).
+[Loudness](../../perception/psychoacoustics/loudness.md). Whether a single $L_\mathrm{eq}$ is a fair
+summary of a measurement at all is a stationarity question - the
+[data qualification](../metrology/data-qualification.md) tests answer it
+objectively from segment mean squares.
+
+## What this guide covers
+
+- **Covered.** IEC 61672-1:2013's Fast/Slow/Impulse envelope ballistics behind the percentile
+  levels, the C-weighted peak of clause 5.13 (`lc_peak`, verified against Table 5)
+  and the sound exposure level (`sel`, verified against the Table 4 $L_{\mathrm{A}E}$
+  column); IEC 61252:1993's sound exposure and $L_\mathrm{EX,8h}$ (`sound_exposure`,
+  `lex_8h`); the fractional-octave-band spectrogram of
+  `OctaveFilterBank.spectrogram`; and the ISO 1683:2015 reference values every
+  level is counted from, published as `metrology.REFERENCE_VALUES`.
+
+- **Not covered.** The ISO 1996-1 whole-day indicators ($L_\mathrm{den}$, $L_\mathrm{dn}$, rating levels) and
+  the ISO 1996-2 determination procedures have moved to [Environmental
+  Levels](../../environment/assessment/environmental-levels.md). IEC 61252
+  was revised in 2025; only the formulae of the implemented first edition (1993)
+  are here, not the newer one.
+
+## See also
+
+- [Environmental Levels (ISO 1996-1/-2)](../../environment/assessment/environmental-levels.md): the $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators, rating levels and the ISO 1996-2 determination chain built on the levels of this page.
+- [Time Weighting](time-weighting.md): the Fast/Slow/Impulse detector the percentile levels are defined on.
+- [Calibration](../metrology/calibration.md): the sensitivity factor that turns digital units into the pascals every level here assumes.
+- [Occupational exposure (ISO 9612)](../../perception/hearing/occupational-exposure.md): the workplace measurement strategies the dose measures feed.
+- [Multichannel and Performance](../filters/multichannel.md): per-channel levels and how to combine them energetically.
+- API reference: [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](https://docs.jmrp.io/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
+- Theory: [Event and dose metrics](../../reference/theory/signal-analysis.md#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
 
 ## Quick answers
 
@@ -531,54 +900,15 @@ p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
 print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 ```
 
-## See also
-
-- [Environmental Levels (ISO 1996-1/-2)](../../environment/assessment/environmental-levels.md): the $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators, rating levels and the ISO 1996-2 determination chain built on the levels of this page.
-- [Time Weighting](time-weighting.md): the Fast/Slow/Impulse detector the percentile levels are defined on.
-- [Calibration](../metrology/calibration.md): the sensitivity factor that turns digital units into the pascals every level here assumes.
-- [Occupational exposure (ISO 9612)](../../perception/hearing/occupational-exposure.md): the workplace measurement strategies the dose measures feed.
-- [Multichannel and Performance](../filters/multichannel.md): per-channel levels and how to combine them energetically.
-- API reference: [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](https://docs.jmrp.io/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
-- Theory: [Event and dose metrics](../../reference/theory/signal-analysis.md#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
-
 ## References
 
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The envelope ballistics behind the percentile levels, the C-weighted peak
-  and the SEL toneburst references the implementation is verified against.
-- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).
-  *Fundamentals of acoustics* (4th ed.). Wiley. ISBN 978-0-471-84789-2.
-  [Publisher page](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
-  The sound-pressure, energy and level definitions underneath Leq, SEL and
-  the dose measures.
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  Section 2.5 (the noise measures: Leq, L10/L90 and their intended
-  uses) and Section 2.15 (environmental noise surveys). ISBN
-  978-1-4987-2405-0.
-
-## Standards
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications*: the Fast/Slow/Impulse envelope ballistics behind
-`ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
-bursts) and the sound exposure level verified against the Table 4 LAE column.
-IEC 61252, *Electroacoustics — Specifications for personal sound exposure
-meters*: the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
-(≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB.
-ISO 1683:2015, *Acoustics. Preferred reference values for acoustical and
-vibratory levels*: Tables 1 to 3, the reference value every level here is
-counted from, published as `metrology.REFERENCE_VALUES`, and note b of
-Table 2, the 26.0 dB between the air and water pressure references. The ISO 1996-1/-2
-environmental indicators and determination procedures are covered in
-[Environmental levels](../../environment/assessment/environmental-levels.md).
-
-**Not covered.** **IEC 61252 was revised in 2025; only the formulae of the
-implemented first edition (1993) are here**, not the newer one. The ISO 1996-1
-whole-day indicators ($L_\mathrm{den}$, $L_\mathrm{dn}$, the rating levels) and the
-ISO 1996-2 determination procedures are not on this page either; they are in
-[Environmental levels](../../environment/assessment/environmental-levels.md).
-
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  Section 2.5 (the noise measures: Leq, L10/L90 and their intended uses) and Section 2.15 (environmental noise surveys). ISBN 978-1-4987-2405-0.
+- **International Electrotechnical Commission. (1993).** [*Electroacoustics — Specifications for personal sound exposure meters*](https://webstore.iec.ch/en/publication/5054) (IEC 61252:1993).
+  The sound exposure E in Pa²h and the normalized 8 h level LEX,8h (≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. Since revised as IEC 61252:2025 (https://webstore.iec.ch/en/publication/68929); the first edition is the implemented one.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The Fast/Slow/Impulse envelope ballistics behind the percentile levels, the C-weighted peak of clause 5.13 (verified against the Table 5 tone bursts) and the sound exposure level verified against the Table 4 LAE column.
+- **International Organization for Standardization. (2015).** *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).
+  Tables 1 to 3, the reference value every level on this page is counted from (20 µPa for sound in air), published as metrology.REFERENCE_VALUES; note b of Table 2, the 26.0 dB between the air and water pressure references. Read in the Spanish adoption UNE-EN ISO 1683:2016.
+- **Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).** [*Fundamentals of acoustics*](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892) (4th ed.). Wiley.
+  The sound-pressure, energy and level definitions underneath Leq, SEL and the dose measures (ISBN 978-0-471-84789-2).

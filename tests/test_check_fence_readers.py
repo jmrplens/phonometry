@@ -116,7 +116,7 @@ def test_the_even_odd_rule_is_not_a_fence(tmp_path: pathlib.Path) -> None:
 
 
 def test_the_overview_heading_reader_is_refused(tmp_path: pathlib.Path) -> None:
-    """``scripts/mirror_overviews.py`` closed a fence on three of anything."""
+    """The retired overview writer's heading reader closed a fence on three of anything."""
     assert _shapes(
         tmp_path,
         """

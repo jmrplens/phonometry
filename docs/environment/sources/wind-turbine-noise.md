@@ -1,38 +1,73 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/sources/wind-turbine-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/
+
+# Wind-turbine noise: sound power and tonal audibility
 
 IEC 61400-11 measures the acoustic emission of a wind turbine. This page covers
 its two closed-form quantities: the **apparent sound power level** referred to
 an equivalent point source at the rotor centre, and the **tonal audibility**
 that decides whether a discrete tone (blade-passing, gearbox, generator) is
-audible above the masking noise. Both are validated against the standard's
-formulas, and the audibility also against a hand-derived synthetic-tone oracle.
+audible above the masking noise. Both are checked against the standard's
+formulas, and the audibility also against a synthetic tone whose audibility is
+worked out by hand.
 
-## 1. Apparent sound power level
+## Apparent sound power level
 
 With the reference microphone on a ground board at the horizontal distance
 $R_0 = H + D/2$ (hub height $H$, rotor diameter $D$), the slant distance to
-the rotor centre is $R_1 = \sqrt{H^2 + R_0^2}$ and the per-band apparent sound
-power level is
-
-$$
-L_{W\mathrm{A},i} = L_{p,i} - 6 + 10\log_{10}\frac{4\pi R_1^2}{S_0}, \qquad S_0 = 1\ \mathrm{m}^2,
-$$
-
-energy-summed over bands (Formula 27). The −6 dB accounts for the ground-board
-pressure doubling.
+the rotor centre is $R_1 = \sqrt{H^2 + R_0^2}$ and the apparent sound power
+level is $L_{W\mathrm{A},i} = L_{p,i} - 6 + 10\log_{10}(4\pi R_1^2/S_0)$ per band
+($S_0 = 1\ \text{m}^2$), energy-summed over bands (Formula 27). The −6 dB accounts for the
+ground-board pressure doubling.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400.svg" alt="Side view of a horizontal-axis wind turbine with hub height H and rotor diameter D, a microphone lying on a flat ground board downwind at the horizontal distance R0 = H + D/2 from the tower centreline, the slant distance R1 from the rotor centre to the microphone with the board inclination angle phi between 25 and 40 degrees, and a met mast measuring wind speed and direction; a plan-view inset shows the Figure 3 pattern with the reference position downwind and three optional positions at plus and minus 60 degrees and upwind, and the annotations give R1 equals the square root of H squared plus R0 squared and the apparent sound power formula LWA,i = Lp,i minus 6 plus 10 lg(4 pi R1 squared over S0)" width="94%"></picture>
 
 ```python
 from phonometry import environment
 
-# Background-corrected A-weighted one-third-octave band levels L_p,i (dB).
-band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
+# Background-corrected A-weighted one-third-octave band levels L_p,i (dB),
+# here the 250 Hz to 1 kHz bands of a downwind ground-board measurement.
+band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]          # 250, 400, 500, 800, 1000 Hz
 r1 = environment.slant_distance(hub_height_m=80.0, rotor_diameter_m=100.0)
+print(round(r1, 2))                                   # 152.64 m
 lwa = environment.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
+print(round(float(lwa), 2))                           # 112.98 dB(A) re 1 pW
 ```
+
+### The measurement position in practice
+
+The −6 dB above is only the board's pressure doubling if the board really is a
+board. IEC 61400-11:2012+A1:2018 fixes what that means, and a tripod microphone
+or a small plate gives an incoherent reflection instead, which puts the apparent
+sound power out by an unknown amount rather than a correctable one.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_board_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_board.svg" alt="Two panels of the IEC 61400-11 ground-board microphone mounting. Plan: the circular board with its minimum diameter of 1.0 m dimensioned, the microphone at the centre with its axis pointing at the turbine, and the optional split line drawn off the centre line and parallel to that axis with its maximum 1 mm gap called out. Section: the board edge with a soil fillet levelling the gap underneath, the board thickness annotated as at least 12.0 mm for plywood or hard chip-board and at least 2.5 mm for metal, the capsule with its diaphragm in the plane of the board and a diameter of at most 13 mm, the primary windscreen drawn as a half sphere of open-cell foam about 90 mm across centred on the diaphragm, and a ghosted secondary windscreen tagged as usable only in high wind and only if its insertion loss is documented and corrected band by band" width="92%"></picture>
+
+| Requirement | Value | Clause |
+| :--- | :--- | :--- |
+| Measurement chain | IEC 61672 class 1; filters IEC 61260 class 1; 1/3 octaves from 20 Hz to 10 kHz determined simultaneously; narrowband over 20 Hz to 11 200 Hz | 6.1.2, 6.1.3, 6.1.4 |
+| Microphone diaphragm | ≤ 13 mm, in a plane **normal to the board**, axis pointing at the turbine | 6.1.2, 6.1.5 |
+| Board | Circular, diameter ≥ 1,0 m, acoustically hard: plywood or hard chip-board ≥ 12,0 mm, or metal ≥ 2,5 mm | 6.1.5 |
+| A split board | Pieces level in one plane, gap < 1 mm, split off the centre line and **parallel** to the microphone axis | 6.1.5 |
+| Seating | Flat on the ground, edges and gaps underneath levelled out with soil | 7.1 |
+| Windscreen | Primary: half an open-cell foam sphere ≈ 90 mm across, centred on the diaphragm. Secondary only where a high wind makes the low-frequency signal-to-noise ratio inadequate, and then its frequency response must be documented and **corrected in 1/3-octave bands** | 6.1.5, Annex E |
+| Direction | Within ±15° of the downwind direction at the time of measurement | 7.1 |
+| Distance | $R_0$ to ±20 %, at most ±30 m, measured to ±2 %, and as close to $R_0$ as possible; using the tolerance has to be justified in the report | 7.1 |
+| Inclination | $\varphi$ between 25° and 40°, adjusting the position inside the tolerances above if necessary | 7.1 |
+| Reflections | The calculated influence of any reflecting structure < 0,2 dB | 7.1 |
+| Calibration | Class 1 IEC 60942 calibrator on the microphone immediately **before and after** every session, and again whenever a microphone is disconnected and reconnected | 6.1.6, 7.2.2 |
+| Traceable verification | Acoustic calibrator 12 months; microphone, sound level meter, recorder, anemometer, power and temperature transducers 24 months; spectrum analyser 36 months | 6.3 |
+
+The causal chain is worth holding on to. The board is what makes the reflection
+coherent, so the board decides whether the −6 dB is a constant or a guess; the
+foam hemisphere is what keeps the wind that drives the emission from also
+driving the microphone's own self-noise; and the secondary windscreen is the one
+piece of the setup that changes the answer without changing the sound, which is
+why the standard makes its insertion loss a documented, band-by-band correction
+rather than an accepted loss. One measurement position is required and three
+more are optional: the reference position is downwind and the others exist to
+document how the emission varies around the machine, not to be averaged with it.
 
 ### Why "apparent"
 
@@ -62,74 +97,147 @@ interference pattern a tripod microphone would sample (see
 
 A turbine's noise emission rises with wind speed toward rated power, so a
 single number would be meaningless without its operating point: IEC 61400-11
-reports $L_{W\mathrm{A}}$ *as a function of wind speed*. Sound and wind are logged in
-synchronized 10 s averages, and every period is sorted into a wind-speed
-**bin 0.5 m/s wide centred on integer and half-integer hub-height wind
-speeds**, with at least 10 periods of total noise and 10 of background
-(turbine parked) per bin. The hub-height wind speed itself is preferably not
-an anemometer reading at all: it is derived from the measured electric power
-through the turbine's power curve (Clause 8.2.1), the most repeatable proxy
-for the wind the rotor actually sees, with the nacelle anemometer and a met
-mast as fallbacks. The measured range must at least cover 0.8 to 1.3 times
-the wind speed at 85 % of maximum power (roughly 6 to 10 m/s at 10 m height
-for a large machine). Within each bin the spectra are averaged, interpolated
-to the bin centre and background-corrected; a total-minus-background margin
-of 3 dB or less voids the bin, between 3 and 6 dB flags it with an asterisk. For
-comparability with consent conditions and older editions, Formula (29) also
-maps each result to the wind speed at 10 m height over a **reference
-roughness length** $z_{0\mathrm{ref}} = 0.05$ m (a logarithmic wind profile), giving
-$L_{W\mathrm{A},10\mathrm{m}}$ at integer 10 m wind speeds regardless of the site's actual
-terrain. The library implements the closed-form quantities of this pipeline
-(slant distance, per-band apparent power, tonal audibility), and Formula (29)
-is `environment.logarithmic_wind_speed`, on the
-[receptor page](wind-turbine-receptor.md); the binning,
-averaging and uncertainty machinery operates on whole measurement campaigns
-and stays out of scope. So does the IEC TS 61400-14 declaration route, which
-turns a batch of measured machines into the declared value a planning authority
-receives. And two things a wind-turbine reader often arrives looking for sit
-outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
-into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
-measurements under 7.2.1 with no rating method attached). Amplitude modulation
-at a dwelling is rated by clause 13 of IEC TS 61400-11-2, on the
-[receptor page](wind-turbine-receptor.md); infrasound falls to national
-guidance.
+reports $L_{W\mathrm{A}}$ *as a function of wind speed*.
 
-## 2. Tonal audibility
+**How a bin is filled.** Sound and wind are logged in synchronized 10 s
+averages, and every period is sorted into a wind-speed **bin 0.5 m/s wide
+centred on integer and half-integer hub-height wind speeds**, with at least 10
+periods of total noise and 10 of background (turbine parked) per bin. Within
+each bin the spectra are averaged, interpolated to the bin centre and
+background-corrected; a total-minus-background margin of 3 dB or less voids the
+bin, between 3 and 6 dB flags it with an asterisk.
+
+**Where the wind speed comes from.** Preferably not from an anemometer at all:
+it is derived from the measured electric power through the turbine's power curve
+(Clause 8.2.1), the most repeatable proxy for the wind the rotor actually sees,
+with the nacelle anemometer and a met mast as fallbacks. The measured range must
+at least cover 0.8 to 1.3 times the wind speed at 85 % of maximum power (roughly
+6 to 10 m/s at 10 m height for a large machine).
+
+**Why the abscissa is reported twice.** For comparability with consent
+conditions and older editions, Formula (29) also maps each result to the wind
+speed at 10 m height over a **reference roughness length** $z_{0\mathrm{ref}} = 0.05$ m
+(a logarithmic wind profile), giving $L_{W\mathrm{A},10\mathrm{m}}$ at integer 10 m wind speeds
+regardless of the site's actual terrain. The library implements the closed-form quantities of this pipeline
+(slant distance, per-band apparent power, tonal audibility); the binning,
+averaging and uncertainty machinery operates on whole measurement campaigns
+and stays out of scope.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_apparent_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_apparent_power.svg" alt="The A-weighted apparent sound power level of an 80 m hub, 100 m rotor turbine against hub-height wind speed, one marker per 0.5 m per second bin from 4 to 12 m per second. The curve rises from about 98.6 dB at 4 m per second through its steepest part near 7 m per second and flattens at about 110 dB above 10 m per second as the machine reaches rated power. One low bin is shaded and struck through because its total minus background margin is under 3 dB, and a neighbouring bin carries an asterisk because its margin is between 3 and 6 dB. A twin abscissa above the plot repeats the same series against the Formula 29 wind speed at 10 m height over the reference roughness length of 0.05 m" width="88%"></picture>
+
+*The quantity this standard reports is a curve, not a number: the same machine
+is 98.6 dB(A) at 4 m/s and 109.9 dB(A) at 12 m/s. The shape is the machine's
+control strategy: steepest where the rotor is accelerating, flat once it is at
+rated power, so quoting a single $L_{W\mathrm{A}}$ without its wind speed says nothing.
+The struck bin and the asterisked one are the standard's own bookkeeping: below
+a 3 dB total-minus-background margin the bin is void, between 3 and 6 dB it is
+reported with a flag. The upper axis is the same series against the Formula (29)
+10 m reference wind speed, which is what a consent condition is usually written
+in and is not the speed the rotor saw.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `environment` is imported by the snippet above. The per-bin band levels here
+# are synthetic: a real campaign supplies them, background-corrected and
+# interpolated to the bin centre.
+r1 = environment.slant_distance(hub_height_m=80.0, rotor_diameter_m=100.0)
+bins = np.arange(4.0, 12.5, 0.5)
+shape = np.array([-4.0, -1.5, 0.0, -1.0, -3.0])   # 250 Hz to 1 kHz
+lwa = [float(environment.apparent_sound_power_level(
+    44.0 + 12.0 / (1.0 + np.exp(-(v - 7.0))) + shape, r1)) for v in bins]
+
+fig, ax = plt.subplots()
+ax.plot(bins, lwa, "o-")
+ax.set_xlabel("Hub-height wind speed [m/s]")
+ax.set_ylabel("Apparent sound power level LWA [dB(A) re 1 pW]")
+plt.show()
+```
+
+</details>
+
+## Tonal audibility
 
 From a narrowband spectrum (1–2 Hz resolution), the lines in the **critical
 band** about the tone,
-
-$$
-\mathrm{CBW} = 25 + 75\,[\,1 + 1.4\,(f_\mathrm{c}/1000)^2\,]^{0.69}\ \mathrm{Hz},
-$$
-
-are classified into masking noise and tone lines (the 70 %-lowest energy mean,
-the +6 dB criteria; tone lines must additionally lie within 10 dB of the
+$\mathrm{CBW} = 25 + 75\,[\,1 + 1.4\,(f_\mathrm{c}/1000)^2\,]^{0.69}$ Hz, are
+classified into masking noise and tone lines (the 70 %-lowest energy mean, the
++6 dB criteria; tone lines must additionally lie within 10 dB of the
 *highest* line above the threshold, and that highest line is the frequency of
 the tone, subclauses 9.5.3/9.5.4). The candidate itself must first pass the
 9.5.2 *possible tone* screening: a local maximum more than 6 dB above the
-band energy average excluding the maximum and its adjacent lines. The
-masking-noise level $L_{p\mathrm{n}}$ follows Formula 31, the tonality is
-$\Delta L_\mathrm{tn} = L_{p\mathrm{t}} - L_{p\mathrm{n}}$, and the tonal audibility is
+band energy average excluding the maximum and its adjacent lines.
 
-$$
-\Delta L_\mathrm{a} = \Delta L_\mathrm{tn} - L_\mathrm{a}, \qquad L_\mathrm{a} = -2 - \log_{10}\!\big[1 + (f/502)^{2.5}\big],
-$$
+For a candidate between **20 and 70 Hz** the Zwicker expression is not
+meaningful (it is at the bottom of the audible range) and subclause 9.5.3
+replaces it with the fixed **absolute 20-120 Hz band**. The returned
+`critical_bandwidth` is then 100 Hz for every such candidate and the band is
+*not centred on the tone*, which is why a low-frequency
+`WindTurbineTonalityResult` cannot be reconciled with the formula printed above.
+For a wind turbine that is not a corner case: blade-passing harmonics and
+low-speed gearbox tones live exactly there. The
+masking-noise level $L_{p\mathrm{n}}$ follows Formula 31, the
+tonality is $\Delta L_\mathrm{tn} = L_{p\mathrm{t}} - L_{p\mathrm{n}}$, and the tonal audibility is
+$\Delta L_\mathrm{a} = \Delta L_\mathrm{tn} - L_\mathrm{a}$ with
+$L_\mathrm{a} = -2 - \log_{10}\!\big[1 + (f/502)^{2.5}\big]$, reported when
+$\Delta L_\mathrm{a} \ge -3\ \text{dB}$ and audible when $\Delta L_\mathrm{a} > 0$.
 
-reported when $\Delta L_\mathrm{a} \ge -3\ \text{dB}$; a tone is audible when
-$\Delta L_\mathrm{a} > 0$.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_audibility_criterion_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_audibility_criterion.svg" alt="Two panels against tone frequency on a logarithmic axis from 20 Hz to 10 kHz. Left: the IEC 61400-11 critical bandwidth, flat near 100 Hz through the low and mid bands and opening steeply above 500 Hz to 2 kHz wide at 10 kHz, with the fixed 20 to 120 Hz low-frequency band of subclause 9.5.3 drawn as a separate flat segment over the 20 to 70 Hz candidate range and the ISO 1996-2 Table C.1 bandwidth drawn as a stepped dashed line for contrast. Right: the audibility criterion La, which falls from minus 2 dB at low frequency to minus 4.5 dB at 5 kHz, redrawn as the tonality a tone must reach to be audible and to be reportable, so a 100 Hz tone needs about half a decibel more emergence than a 1 kHz one" width="88%"></picture>
 
-For a candidate between 20 and 70 Hz the Zwicker band above is not what the
-standard uses: subclause 9.5.3 substitutes the fixed absolute 20–120 Hz band,
-so `critical_bandwidth` comes back as 100 Hz for every such candidate and the
-band is *not centred on the tone*. A low-frequency result cannot be reconciled
-with the CBW formula printed above. Blade-passing harmonics and low-speed
-gearbox tones live exactly there, so for a wind turbine this is no corner case.
+*Left: two different critical bandwidths live on this page. The IEC 61400-11
+Zwicker band is what `WindTurbineTonalityResult.critical_bandwidth` reports
+(117.3 Hz for the 500 Hz tone of the fiche below), while
+`environment.critical_bandwidth` is the **ISO 1996-2 Table C.1** band (100 Hz
+up to 500 Hz and 20 % of $f_\mathrm{c}$ above it) used by the ISO tonal-audibility
+route on the environmental-levels page. They are not interchangeable. Right: the
+criterion is nearly flat below 500 Hz and then tightens, so a low-frequency tone
+is judged on almost the same emergence as a mid-frequency one; the reportable
+line sits 3 dB below the audible one everywhere.*
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality.svg" alt="A wind-turbine narrowband spectrum with a discrete tone near 200 Hz standing above a shaped broadband floor, the critical band about the tone shaded, the masking-noise level drawn as a horizontal line, and the tonal audibility annotated" width="82%">
-</picture>
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `environment` is the module imported by the snippets above.
+fc = np.geomspace(20.0, 10000.0, 400)
+zwicker = 25.0 + 75.0 * (1.0 + 1.4 * (fc / 1000.0) ** 2) ** 0.69
+la = -2.0 - np.log10(1.0 + (fc / 502.0) ** 2.5)
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.4))
+left.loglog(fc, zwicker, label="IEC 61400-11 critical band (Zwicker)")
+left.loglog(fc, [environment.critical_bandwidth(float(f)) for f in fc], "--",
+            label="ISO 1996-2 Table C.1")
+left.plot([20.0, 70.0], [100.0, 100.0], lw=4,
+          label="9.5.3: fixed 20-120 Hz band")
+left.set(xlabel="Tone frequency fc [Hz]", ylabel="Critical bandwidth [Hz]")
+left.legend(fontsize="small")
+
+right.semilogx(fc, -la, label="Tonality needed to be audible")
+right.semilogx(fc, -la - 3.0, "--", label="Tonality needed to be reportable")
+right.set(xlabel="Tone frequency [Hz]",
+          ylabel="Required tonality dLtn [dB]")
+right.legend(fontsize="small")
+plt.show()
+```
+
+</details>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality.svg" alt="A wind-turbine narrowband spectrum with a discrete tone near 200 Hz standing above a shaped broadband floor, the critical band about the tone shaded, the masking-noise level drawn as a horizontal line, and the tonal audibility annotated" width="82%"></picture>
+
+*What the method actually compares. The 200 Hz line stands 22 dB above the
+shaped floor, but the verdict is not that number: inside the 102.9 Hz critical
+band the classified tone lines sum to $L_{p\mathrm{t}}$ = 62.2 dB and the masking noise
+to $L_{p\mathrm{n}}$ = 55.6 dB, so the tonality is 6.6 dB. Only after subtracting the
+audibility criterion $L_\mathrm{a} = -2.0$ dB at this frequency does the reportable
+quantity appear, $\Delta L_\mathrm{a}$ = 8.6 dB, well over the 0 dB that makes the tone
+audible. The shaded band, not the line height, is what sets it.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -171,40 +279,54 @@ fields are non-standard fallbacks and such spectra must be **excluded** from
 the 9.5.1 energy averaging of $\Delta L_\mathrm{a}$ over the spectra of a wind-speed bin
 (`is_audible` also requires an identified tone). The tone frequency and the
 $L_\mathrm{a}$ criterion anchor to the highest classified tone line, not the probed
-candidate. The audibility formula is the ISO 1996-2 Annex C one; what is
+candidate. The audibility formula coincides with ISO 1996-2 Annex C; what is
 specific to IEC 61400-11 is the determination of the tone and masking levels
-and the Zwicker critical band from the spectrum. IEC 61400-11 itself stops at
-$\Delta L_\mathrm{a}$ and prescribes no rating adjustment. The 9.5.1 energy average over
-the spectra of a wind-speed bin is a *mean* audibility, the quantity
-ISO 1996-2:2017 Table J.1 was written for
-(`tonal_adjustment_from_mean_audibility`, integer 0–6 dB); the piecewise
-(C.4)–(C.6) law of `tonal_adjustment` applies to a single spectrum's
-$\Delta L_\mathrm{ta}$, and the two differ by 1 to 2 dB on the same input.
+and the Zwicker critical band from the spectrum. IEC 61400-11 stops at
+$\Delta L_\mathrm{a}$ and prescribes no adjustment, so which mapping gives the rating
+adjustment $K_\mathrm{t}$ depends on the edition the assessment is made under. The
+9.5.1 energy average over the spectra of a wind-speed bin is a *mean*
+audibility, which is the quantity ISO 1996-2:2017 Table J.1 was written for:
+[`tonal_adjustment_from_mean_audibility`](../assessment/environmental-levels.md),
+integer 0-6 dB (or `coarse=True` for the 0/3/6 ladder of its note). The
+piecewise (C.4)-(C.6) law of `tonal_adjustment` is the 2007 Annex C mapping and
+applies to one spectrum's $\Delta L_\mathrm{ta}$, and the two differ by 1 to 2 dB on
+the same input: $\Delta L = 5$ dB gives $K_\mathrm{t} = 3$ by Table J.1 and 1.0 dB by
+Annex C, $\Delta L = 9$ dB gives 4 dB and 5.0 dB. The notation differs too:
+this page's $\Delta L_\mathrm{a}$ is that page's $\Delta L_\mathrm{ta}$, and the two printings
+carry the criterion with opposite signs.
 
 ### Assessment report (`.report()`)
 
 Tonal audibility is the part of a wind-turbine assessment that ends in a
-document handed to a regulator, so the result renders one.
-`WindTurbineTonalityResult.report(path)` writes a one-page fiche following
-IEC 61400-11:2012+A1:2018 subclauses 9.5.2 to 9.5.8: a standard-basis line, an
-optional metadata header (source/situation, client, measurement position,
-instrumentation, date), the critical-band analysis table (tone frequency,
-critical bandwidth, tone level $L_{p\mathrm{t}}$, masking-noise level $L_{p\mathrm{n}}$, tonality
-$\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal audibility $\Delta L_\mathrm{a}$)
-beside the narrowband spectrum with the critical band, the masking level and
-the tone marked, then the boxed $\Delta L_\mathrm{a}$ with the tone frequency and the
-audibility decision, an optional PASS/FAIL row, a note on how $\Delta L_\mathrm{a}$ is
-built, and the fixed disclaimer in the footer.
+document handed to a regulator, and the result writes that document:
+`WindTurbineTonalityResult.report(path)` renders a one-page PDF fiche laid out
+like the tonality assessment of an environmental-noise laboratory, following
+**IEC 61400-11:2012+A1:2018** (subclauses 9.5.2 to 9.5.8): a standard-basis
+line, an optional metadata header block (source/situation, client, measurement
+position, instrumentation and date), a critical-band analysis table (tone
+frequency, critical bandwidth, tone level $L_{p\mathrm{t}}$, masking-noise level
+$L_{p\mathrm{n}}$, tonality $\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal
+audibility $\Delta L_\mathrm{a}$) beside the narrowband-spectrum plot with the critical
+band, the masking level and the tone marked, the boxed tonal audibility
+$\Delta L_\mathrm{a}$ together with the tone frequency and the audibility decision, an
+optional PASS/FAIL verdict row and a note on how $\Delta L_\mathrm{a}$ is built, and a
+footer with the fixed disclaimer.
 
-A supplied `requirement` is the **maximum acceptable** tonal audibility in dB,
-so a *less* audible tone passes. Rendering needs reportlab and, for the
-embedded figure, matplotlib (`pip install "phonometry[report,plot]"`); only
-`engine="reportlab"` is supported, and `language="es"` renders a Spanish fiche.
+It uses the same `ReportMetadata` container and rendering engine as the
+[ISO 532-1 loudness fiche](../../perception/psychoacoustics/loudness.md#iso-532-1-report-report);
+a supplied `requirement` is read as the maximum acceptable tonal audibility
+$\Delta L_\mathrm{a}$ in dB (a less audible tone passes). Rendering needs reportlab and,
+for the figure the fiche embeds, matplotlib (`pip install
+"phonometry[report,plot]"`); only `engine="reportlab"` is supported. The fiche
+renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator), e.g.
+`res.report("tonality_fiche_es.pdf", language="es")`.
 
 ```python
-from phonometry import ReportMetadata
+from phonometry import environment, ReportMetadata
 
 # The 500 Hz gearbox tone over the flat 30 dB floor of the snippet above.
+res = environment.wind_turbine_tonality(levels, frequencies=frequencies)
 res.report(
     "tonality_fiche.pdf",
     metadata=ReportMetadata(
@@ -216,49 +338,57 @@ res.report(
 )                                   # tonal audibility (dB) and the decision
 ```
 
-[![IEC 61400-11 wind-turbine tonal audibility example report: a metadata header, a critical-band analysis table (tone frequency 500.0 Hz, critical bandwidth 117.3 Hz, tone level Lpt = 60.0 dB, masking-noise level Lpn = 45.9 dB, tonality dLtn = 14.1 dB, audibility criterion La = -2.3 dB) beside the narrowband-spectrum plot with the critical band shaded and the masking level drawn, the boxed tonal audibility dLa = 16.4 dB at the 500.0 Hz tone with the decision that the tone is audible, and a FAIL verdict against a maximum acceptable audibility of 6.0 dB](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61400_wind_turbine_tonality_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61400_wind_turbine_tonality_example.pdf)
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-*Wind-turbine tonal-audibility fiche (`WindTurbineTonalityResult.report`): a
-30 dB masking floor under a 60 dB tone leaves $\Delta L_\mathrm{a}$ = 16.4 dB, far past
-the 0 dB audibility line and past a 6 dB acceptance requirement.*
+[![IEC 61400-11 wind-turbine tonal audibility example report (PDF): One-page wind-turbine tonal-audibility fiche: a metadata header, a critical-band analysis table (tone frequency 500.0 Hz, critical bandwidth 117.3 Hz, tone level Lpt = 60.0 dB, masking-noise level Lpn = 45.9 dB, tonality ΔL_tn = 14.1 dB, audibility criterion La = -2.3 dB) beside the narrowband-spectrum plot with the critical band shaded and the masking level drawn, the boxed tonal audibility ΔL_a = 16.4 dB at the 500.0 Hz tone with the decision that the tone is audible, and a FAIL verdict against a maximum acceptable audibility of 6.0 dB.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61400_wind_turbine_tonality_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61400_wind_turbine_tonality_example.pdf)
+
+Wind-turbine tonal-audibility fiche (WindTurbineTonalityResult.report), tonal audibility ΔL_a in dB with the audibility decision.
+
+## What this guide covers
+
+- **Covered.** The closed-form quantities of IEC 61400-11:2012+A1:2018: `slant_distance`
+  (Formulae 1 and 2), `apparent_sound_power_level` (Formula 26) and the
+  tonal-audibility chain of subclauses 9.5.2 to 9.5.8 through
+  `wind_turbine_tonality`, with its `.report()` fiche. The Formula (29) mapping
+  of a 10 m wind speed to hub height over $z_{0\mathrm{ref}} = 0{,}05$ m is
+  `environment.logarithmic_wind_speed`, on the
+  [receptor page](wind-turbine-receptor.md). The
+  instrumentation and position requirements of clauses 6 and 7 are documented
+  above as the conditions those formulae assume, and the measurement-position
+  tolerances are drawn.
+
+- **Not covered.** The measurement campaign itself: the 10 s averaging, the 0,5 m/s wind-speed
+  binning with its 10 + 10 periods, the background correction, the interpolation
+  to bin centres and the uncertainty budget of clause 9.3 all operate on whole
+  campaigns and are the user's. The declaration route of IEC TS 61400-14, which turns a batch of
+  measured machines into the single number a planning authority receives, is not
+  implemented either. And two things a wind-turbine reader often arrives looking
+  for are outside IEC 61400-11 altogether: **amplitude modulation** (the
+  "swish", which is folded into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and
+  **infrasound**. Both are listed in 7.2.1 as *optional* measurements with no
+  rating method attached. Amplitude modulation at a dwelling is rated by clause
+  13 of IEC TS 61400-11-2, on the
+  [receptor page](wind-turbine-receptor.md);
+  infrasound falls to national guidance, and the psychoacoustic route to both
+  starts at [Fluctuation strength and
+  roughness](../../perception/psychoacoustics/sound-quality.md) and at
+  [Special weightings](../../signals/levels/special-weightings.md) for the
+  G-weighted infrasound level.
 
 ## See also
 
 - [Environmental noise levels](../assessment/environmental-levels.md): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
 - [Tone audibility](../../perception/psychoacoustics/tone-audibility.md): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
-- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](wind-turbine-receptor.md): what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
+- [Wind turbine sound at a dwelling](wind-turbine-receptor.md): IEC TS 61400-11-2, what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
 - API reference: [`environment.sources.wind_turbine`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine/).
 
 ## References
 
-- International Electrotechnical Commission. (2018). *Wind turbines —
-  Part 11: Acoustic noise measurement techniques* (IEC 61400-11:2012+AMD1:2018
-  CSV). [IEC webstore](https://webstore.iec.ch/en/publication/63367).
-  The implemented edition: the measurement geometry of section 1, the
-  wind-speed binning and the tonal-audibility chain of section 2.
-- International Electrotechnical Commission. (2005). *Wind turbines —
-  Part 14: Declaration of apparent sound power level and tonality values*
-  (IEC TS 61400-14:2005).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5432).
-  How a manufacturer turns IEC 61400-11 measurements of a batch of turbines
-  into declared values with a stated uncertainty, the number a planning
-  authority actually receives.
-- International Organization for Standardization. (2017). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 2:
-  Determination of sound pressure levels* (ISO 1996-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/59766.html).
-  The tonal-audibility criterion the IEC method reuses comes from the
-  Annex C of its 2007 edition (the 2017 edition carries the tonal methods
-  in Annexes J and K), and its Table J.1 mapping,
-  `tonal_adjustment_from_mean_audibility`, consumes the bin-mean audibility.
-
-## Standards
-
-IEC 61400-11:2012+A1:2018, *Wind turbines — Part 11: Acoustic
-noise measurement techniques*: the apparent sound power level (Formula 26), the
-critical bandwidth (Formula 30), the masking-noise level (Formula 31) and the
-tonality/audibility (Formulae 32–34). The tonal-audibility formula coincides
-with ISO 1996-2 Annex C. The full measurement pipeline (wind-speed binning,
-regression to standardised speeds and the uncertainty budgets) is out of scope
-here; these are the underlying closed forms.
+- **International Electrotechnical Commission. (2005).** [*Wind turbines — Part 14: Declaration of apparent sound power level and tonality values*](https://webstore.iec.ch/en/publication/5432) (IEC TS 61400-14:2005).
+  How a manufacturer turns IEC 61400-11 measurements of a batch of turbines into declared values with a stated uncertainty, the number a planning authority actually receives.
+- **International Electrotechnical Commission. (2018).** [*Wind turbines — Part 11: Acoustic noise measurement techniques*](https://webstore.iec.ch/en/publication/63367) (IEC 61400-11:2012+AMD1:2018 CSV).
+  The implemented edition: the measurement geometry and the tonal-audibility chain (apparent sound power Formula 26, critical bandwidth Formula 30, masking level Formula 31, tonality/audibility Formulae 32-34). The full measurement pipeline, with its wind-speed binning, its regression to standardised wind speeds and its uncertainty budgets, is out of scope here.
+- **International Organization for Standardization. (2017).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 2: Determination of sound pressure levels*](https://www.iso.org/standard/59766.html) (ISO 1996-2:2017).
+  The tonal-audibility criterion the IEC method reuses comes from the Annex C of its 2007 edition (the 2017 edition carries the tonal methods in Annexes J and K), and its Table J.1 mapping, tonal_adjustment_from_mean_audibility, is the one that consumes the bin-mean audibility.

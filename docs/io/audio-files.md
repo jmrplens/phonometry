@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/io/audio-files.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/audio-files/
 
 # Reading and writing measurement audio
 
@@ -536,47 +538,15 @@ libsndfile under the LGPL, which the base install deliberately avoids.
 
 ## References
 
-- European Broadcasting Union. (2011). *Specification of the Broadcast Wave
-  Format (BWF) — A format for audio data files in broadcasting, Version 2.0*
-  (EBU Tech 3285). [EBU](https://tech.ebu.ch/publications/tech3285).
-  The `bext` chunk this page reads and writes field by field: originator,
-  the sample-accurate since-midnight time reference, CodingHistory, and the
-  five EBU R 128 loudness values of version 2.
-- European Broadcasting Union. (1999). *Format for CodingHistory field in
-  Broadcast Wave Format files, BWF* (EBU R 98).
-  [EBU](https://tech.ebu.ch/publications/r098).
-  The grammar of the CodingHistory line every written chunk carries, and of
-  the line a conversion appends to it.
-- International Telecommunication Union. (2025). *Long-form file format for
-  the international exchange of audio programme materials with metadata*
-  (Recommendation ITU-R BS.2088-2).
-  [ITU](https://www.itu.int/rec/R-REC-BS.2088/en).
-  The 64-bit RF64/BW64 container an overnight recording promotes to past
-  4 GiB, read here through its ds64 sizes; it superseded EBU Tech 3306.
-- Internet Engineering Task Force. (2024). *Free Lossless Audio Codec*
-  (RFC 9639). [IETF](https://datatracker.ietf.org/doc/rfc9639/).
-  The lossless codec this page archives to: bit-exact integer samples up to
-  32 bits, which is what lets a WAV-to-FLAC-to-WAV round trip return the
-  identical codes.
-- International Telecommunication Union. (2023). *Algorithms to measure
-  audio programme loudness and true-peak audio level* (Recommendation
-  ITU-R BS.1770-5). [ITU](https://www.itu.int/rec/R-REC-BS.1770/en).
-  The loudness algorithm behind `bext="loudness"`: the five version-2
-  fields are measured by the library's own implementation on the samples
-  being written.
-- Lipshitz, S. P., Wannamaker, R. A., & Vanderkooy, J. (1992). Quantization
-  and dither: A theoretical survey. *Journal of the Audio Engineering
-  Society, 40*(5), 355-375.
-  [AES](https://aes.org/publications/elibrary-page/?id=7047).
-  Why the optional dither is triangular-PDF at one LSB, why it is offered
-  only when quantising to 16 bits, and why it stays opt-in for data that
-  faces numerical analysis.
-
-## Standards
-
-EBU Tech 3285 (2011), *Specification of the Broadcast Wave Format (BWF),
-Version 2.0*: the `bext` chunk read and written field by field at its
-published offsets, with the version-2 loudness fields filled by
-measurement; ITU-R BS.2088-2 (2025): the RF64/BW64 64-bit container
-resolved through `ds64`; RFC 9639 (2024): the FLAC archives `convert()`
-produces and reads back bit-exactly.
+- **European Broadcasting Union. (1999).** [*Format for CodingHistory field in Broadcast Wave Format files, BWF*](https://tech.ebu.ch/publications/r098) (EBU R 98).
+  The grammar of the CodingHistory line every written chunk carries, and of the line a conversion appends to it.
+- **European Broadcasting Union. (2011).** [*Specification of the Broadcast Wave Format (BWF) — A format for audio data files in broadcasting, Version 2.0*](https://tech.ebu.ch/publications/tech3285) (EBU Tech 3285).
+  The bext chunk this page reads and writes field by field: originator, the sample-accurate since-midnight time reference, CodingHistory, and the five EBU R 128 loudness values of version 2.
+- **International Telecommunication Union. (2023).** [*Algorithms to measure audio programme loudness and true-peak audio level*](https://www.itu.int/rec/R-REC-BS.1770/en) (Recommendation ITU-R BS.1770-5).
+  The loudness algorithm behind bext="loudness": the five version-2 fields are measured by the library's own implementation on the samples being written.
+- **International Telecommunication Union. (2025).** [*Long-form file format for the international exchange of audio programme materials with metadata*](https://www.itu.int/rec/R-REC-BS.2088/en) (Recommendation ITU-R BS.2088-2).
+  The 64-bit RF64/BW64 container an overnight recording promotes to past 4 GiB, read here through its ds64 sizes; it superseded EBU Tech 3306.
+- **Internet Engineering Task Force. (2024).** [*Free Lossless Audio Codec*](https://datatracker.ietf.org/doc/rfc9639/) (RFC 9639).
+  The lossless codec this page archives to: bit-exact integer samples up to 32 bits, which is what lets a WAV-to-FLAC-to-WAV round trip return the identical codes.
+- **Lipshitz, S. P., Wannamaker, R. A., & Vanderkooy, J. (1992).** [Quantization and dither: A theoretical survey](https://aes.org/publications/elibrary-page/?id=7047). *Journal of the Audio Engineering Society*, *40*(5), 355-375.
+  Why the optional dither is triangular-PDF at one LSB, why it is offered only when quantising to 16 bits, and why it stays opt-in for data that faces numerical analysis.

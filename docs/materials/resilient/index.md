@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/resilient/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/resilient/
 
 # Resilient layers
 
@@ -54,13 +56,13 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-The measurement starts one step after the signal. Clause 7's extraction of the
-resonant frequency from the raw excitation-response record (by sinusoidal,
-white-noise or pulse excitation) and its extrapolation to zero force
-amplitude are **not implemented**: pass a resonant frequency that has already
-been extrapolated. The lateral airflow resistivity is an input, not a
-measurement. Clause 6's specimen-selection requirement of at least three 200
-mm × 200 mm specimens is not enforced, so nothing here objects if you
-characterise a material from one. And the layer's other properties (creep
-under long-term load, compressive strength, thermal performance) are outside
-the standard and outside the library.
+- **Not covered.** The measurement starts one step after the signal. Clause 7's extraction of the
+  resonant frequency from the raw excitation-response record (by sinusoidal,
+  white-noise or pulse excitation) and its extrapolation to zero force
+  amplitude are **not implemented**: pass a resonant frequency that has already
+  been extrapolated. The lateral airflow resistivity is an input, not a
+  measurement. Clause 6's specimen-selection requirement of at least three 200
+  mm × 200 mm specimens is not enforced, so nothing here objects if you
+  characterise a material from one. And the layer's other properties (creep
+  under long-term load, compressive strength, thermal performance) are outside
+  the standard and outside the library.

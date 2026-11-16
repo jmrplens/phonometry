@@ -458,9 +458,9 @@ repository.
   `ReportPreview.astro` author the raw URL and `src/lib/media.mjs` rewrites it
   to the local copy. A missing assets checkout stops the build rather than
   warning, since a site without its videos is broken.
-- **The GitHub README and the guide twins under `docs/`** load figures from
-  this repository and clips from the assets repository, both at `main`,
-  through `raw.githubusercontent.com`, because GitHub renders them with no
+- **The GitHub README and the GitHub edition of the guides under `docs/`**
+  load figures from this repository and clips from the assets repository,
+  both through `raw.githubusercontent.com`, because GitHub renders them with no
   build step.
 - **The PyPI README** is generated from the GitHub one by `make pypi-readme`,
   which pins every link into this repository to the release tag and every
@@ -510,7 +510,7 @@ integers are authoritative. Nothing else states them by hand:
 - the Astro pages import them from `site/src/data/conformance-stats.mjs`, which
   reads that document at build time;
 - everything with no build step to interpolate through (`.zenodo.json`, the
-  plain-markdown mirror under `docs/`, the READMEs at the root and the one the
+  files of `docs/` written by hand, the READMEs at the root and the one the
   PyOctaveBand stub publishes, the landing-page meta descriptions and the
   JSON-LD blocks in the site frontmatter) is rewritten by the second step
   of `make conformance`, which is
@@ -544,15 +544,24 @@ stale:
 
 ```bash
 make api-docs   # site/src/content/docs/reference/api/ and site/src/generated/api-sidebar.mjs
-make llms       # llms.txt, and the section indexes and glossary under docs/
+make llms       # llms.txt, and the GitHub edition of the guides under docs/
 ```
 
-A change to a page's frontmatter `references` changes the bibliography, which
-the site build writes from them. Its GitHub copy, `docs/reference/bibliography.md`,
-is written by `make bibliography-mirror` (it needs the site's dependencies,
-`pnpm install` in `site/`); run it before `make llms`, which cuts the
-bibliography's shards from that copy, and commit both. The docs workflow fails
-while the copy is not what the references write.
+The GitHub edition is every English guide, overview and start page of the
+site and the reference pages written as guides (the glossary, the
+bibliography, the theory pages and the determinism page), less the pages
+`EDITION_LEFT_OUT` names in `site/src/lib/agent-md/edition.mjs`, each with its
+reason; the API reference, the catalogues and the errata families have no file
+in it. Each page is plain Markdown at `docs/<route>.md`, or at
+`docs/<route>/index.md` for a page written as its folder's index, written from
+the page's own source, so a page's GitHub copy changes when the page does:
+commit both. A change to a page's frontmatter `references` changes the
+bibliography, which the site build writes from them, and its copy in the
+edition with it. A new guide joins the edition by its kind, and two lists name
+it: its route goes into `site/src/lib/agent-md/test/edition-routes.json`,
+which `pnpm run test:agent-md` holds the edition to in both directions, and
+its line into `docs/README.md`, the edition's front door, written by hand,
+without which `make llms` fails.
 
 `make api-docs` reads every public module's `__all__` and docstrings, so run it
 after changing a public name, a signature or a docstring. `make llms` reads
@@ -695,8 +704,8 @@ bibliography, so the document an entry corrects has to be cited by a page:
 the edition its heading prints, for a standard, and the works its `SOURCES`
 row lists, for any other source. `make site-reports` stops on one that no
 page cites, and `python scripts/generate_site_reports.py --list-unmatched`
-lists them all: add each to the references of the guide that implements it,
-its Spanish twin and its docs/ mirror. Where the registry spells a cited
+lists them all: add each to the references of the guide that implements it
+and its Spanish twin, then run `make llms`. Where the registry spells a cited
 document otherwise than the guides and the two are one text, add the
 spelling to `DESIGNATED_AS` instead; an adoption whose defects may be its
 own, a translation above all, is cited under its own designation

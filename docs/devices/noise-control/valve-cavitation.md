@@ -1,12 +1,15 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/valve-cavitation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Hydrodynamic valve noise (IEC 60534-8-4)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/
+
+# Hydrodynamic Valve Noise (IEC 60534-8-4)
 
 Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
 choke the way a gas does, so a control valve on a water line cannot build
-the shock cells that [the aerodynamic part](control-valve-noise.md) spends
-five regimes on. It makes noise two ways instead, and the whole of
-IEC 60534-8-4 is the sum of them: **turbulence** in the jet leaving the vena contracta, and
+the shock cells that [the aerodynamic
+part](control-valve-noise.md) spends five
+regimes on. It makes noise two ways instead, and the whole of IEC 60534-8-4 is
+the sum of them: **turbulence** in the jet leaving the vena contracta, and
 **cavitation**, once the pressure there falls low enough for the liquid to
 flash to vapour and the bubbles to collapse again downstream.
 
@@ -218,8 +221,9 @@ Those three are printed in Table A.1 as 141,9 dB, **51,76 dB** and 77,4 dB.
 The middle one is printed without its minus sign, and it cannot be: its own
 two inputs, $-44{,}71$ and $-7{,}053$ dB, sum to $-51{,}763$, and the row
 below only reproduces its printed 77,4 dB with the negative value.
-[The errata register](../../ERRATA.md) records it, along with three
-intermediates of the same table that its own equations do not reproduce.
+[The errata register](../../ERRATA.md) records it, along with
+three intermediates of the same table that its own equations do not
+reproduce.
 
 ## 5. One equation, printed two ways
 
@@ -299,34 +303,49 @@ $d_o = 5{,}2\sqrt{N_{34} C_n}$, and Clause 3 declares $d_o$ in metres, which
 for any real last stage it cannot be: 37,7 of anything is millimetres. Divide
 by a thousand before handing it to Equation (12).
 
+## What this guide covers
+
+- **Covered.** IEC 60534-8-4:2005, Clauses 4, 5 and 6, against all three worked examples of
+  Annex A. The preliminary calculations of Clause 4: the differential pressure
+  ratio of Equation (1), the capped differential of Equation (2), the
+  characteristic pressure ratio of Equations (3a) and (3b) with the inlet
+  correction of (3c), the jet diameter of (4), the vena contracta velocity of
+  (5) and the stream power of (6). The noise prediction of Clause 5: the two
+  acoustical efficiencies of Equations (8) and (9) and the sound power of (7a)
+  and (7b), the internal level at the pipe wall of (10), the Strouhal number and
+  both peak frequencies of (11) to (13), the ring frequency and transmission
+  loss of (14) to (17) with the floor of the NOTE, the external level of (18a)
+  and (18b), and the whole frequency route of 5.4 in bands. And Clause 6 for a
+  multistage trim: the stage pressures and ratios of Equations (23a) to (26),
+  the energy sum of (27), and the last-stage differential, style modifier and
+  seat diameter of 6.3.2.
+
+- **Not covered yet.** The measurement of $x_{Fz}$ itself, which is the laboratory procedure of
+  IEC 60534-8-2 and not a calculation, and the typical curves of Figures 4 to 9
+  that stand in for it: this page takes the value as an argument. Flashing, the
+  regime past $x_F = 1$ where the liquid leaves the valve as vapour, which the
+  method excludes and the library refuses rather than extrapolates.
+
 ## See also
 
-- [Control Valve Noise (IEC 60534-8-3)](control-valve-noise.md): the same
-  chain for a compressible fluid, where five flow regimes take the place of
-  one threshold.
-- [Reactive Silencers](silencers.md): the four-pole chain that would be put
-  downstream of a line this loud.
-- [Duct-Borne Noise](duct-path.md): the same question for a ventilation
-  system, where the source is a fan rather than a jet.
-- [Errata in published sources](../../ERRATA.md): the seven entries this page
-  rests on, from a sign to an equation printed two ways.
-- API reference: [`noise_control.valves_hydrodynamic`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
+- [Control Valve Noise (IEC 60534-8-3)](control-valve-noise.md):
+  the same chain for a compressible fluid, where five flow regimes take the
+  place of one threshold.
+- [Reactive Silencers](silencers.md): the
+  four-pole chain that would be put downstream of a line this loud.
+- [Duct-Borne Noise](duct-path.md): the same
+  question for a ventilation system, where the source is a fan rather than a
+  jet.
+- [Errata in published sources](../../ERRATA.md): the seven
+  entries this page rests on, from a sign to an equation printed two ways.
+- API reference:
+  [`noise_control.valves_hydrodynamic`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
 
-## Standards
+## References
 
-IEC 60534-8-4:2005, Clauses 4, 5 and 6. The preliminary calculations of
-Clause 4: the pressure ratio of Equation (1), the capped differential of (2),
-the characteristic
-pressure ratio of (3a) to (3c), the jet diameter of (4), the vena contracta
-velocity of (5) and the stream power of (6). The prediction of Clause 5: the
-two acoustical efficiencies of (8) and (9), the sound power of (7a) and (7b),
-the internal level of (10), the Strouhal number and both peak frequencies of
-(11) to (13), the transmission loss of (14) to (17) with the floor of the
-NOTE, the external level of (18a) and (18b), and the band route of 5.4. And
-Clause 6 for a multistage trim: the stage pressures and ratios of (23a) to
-(26), the energy sum of (27), and the last stage of 6.3.2. Validated against
-all three worked examples of Annex A in the
-[conformance report](../../CONFORMANCE.md); the seven defects that annex and
-its clauses carry are in the [errata register](../../ERRATA.md). The
-laboratory measurement of x_Fz (IEC 60534-8-2) and the flashing regime past
-x_F = 1 are not implemented.
+- **International Electrotechnical Commission. (2005).** *Industrial-process control valves — Part 8-4: Noise considerations — Prediction of noise generated by hydrodynamic flow* (IEC 60534-8-4:2005).
+  The whole of this page: Clauses 4, 5 and 6 with their Tables 1 and 2, and the three worked examples of Annex A.
+- **International Electrotechnical Commission. (2010).** *Industrial-process control valves — Part 8-3: Noise considerations — Control valve aerodynamic noise prediction method* (IEC 60534-8-3:2010).
+  Where the valve style modifier and the jet diameter come from: 4.3 and 4.4 of the hydrodynamic part send the reader there rather than printing them again.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The one-third-octave bands from 50 Hz to 20 kHz that 5.4.1 names and every spectrum on this page is carried on.

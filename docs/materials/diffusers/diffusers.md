@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/diffusers/diffusers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/
 
 # Diffusers and Their Coefficients
 
@@ -26,17 +28,104 @@ tens of centimetres deep, have their own guide:
 ## 1. Random-incidence scattering coefficient (ISO 17497-1)
 
 The scattering coefficient $s$ is the fraction of reflected energy that does
-**not** leave the surface in the specular direction. ISO 17497-1 measures it in a
-reverberation room from four reverberation-time situations. The turntable and
-its reflecting base plate stay in the room for all four; what changes is
-whether the test sample is on the plate and whether the turntable is held
-**stationary** or **rotating** (Table 2). Averaging the impulse responses in
-phase over the rotation keeps the specular reflection and cancels the
-scattered part, which then shows as extra absorption.
+**not** leave the surface in the specular direction. ISO 17497-1 measures it in
+a reverberation room from four reverberation times. The turntable and its rigid
+circular base plate stay in the room for all four, symmetrical about the axis
+of rotation and sized to the sample; what changes is whether the **test sample**
+is on the plate and whether the plate **turns** (Table 2):
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" width="92%"></picture>
+| | Test sample | Turntable |
+| :--- | :--- | :--- |
+| $T_1$ | not present | not rotating |
+| $T_2$ | present | not rotating |
+| $T_3$ | not present | rotating |
+| $T_4$ | present | rotating |
 
-**Absorption from reverberation time (Clause 6).** Each situation converts to a
+$(T_1, T_2)$ is an ordinary ISO 354 absorption measurement of the specimen and
+yields the random-incidence $\alpha_\mathrm{s}$; $(T_3, T_4)$ repeats it under rotation
+and yields the specular $\alpha_\mathrm{spec}$. The area $S$ in both formulas is the
+**specimen** area, not the base-plate area. The pair $(T_1, T_3)$ is not waste
+either: it is the base-plate quality check of Eq. (6), below.
+
+Sanity check before you compute anything: adding the sample always shortens the
+decay, so $T_2 < T_1$ and $T_4 < T_3$. A negative absorption coefficient means
+the members of a pair went in the wrong way round.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable and base plate at least 1 m from the walls, two fixed loudspeaker positions and three fixed microphone positions, the turntable the only thing that moves, and the Table 2 mapping of T1 to T4 onto the random-incidence and specular absorption coefficients from which the scattering coefficient is derived" width="92%"></picture>
+
+**Why rotating the sample produces a second absorption coefficient
+(Clause 4).** Band-pass filtered reflections from the same rough surface at
+different orientations share an identical leading edge and differ in the tail:
+the head is the coherent specular component, the tail is the scattered one.
+Averaging the impulse responses *phase-locked* to the excitation over many
+orientations therefore adds the specular parts in phase while the scattered
+parts interfere destructively, and the surviving decay is the one a purely
+specular surface with some extra apparent loss would have given. That apparent
+extra loss is the scattered energy, which is why $\alpha_\mathrm{spec} \ge \alpha_\mathrm{s}$
+and why Eq. (5) reads as a fraction of non-specular energy. Two consequences
+follow directly and are easy to violate: the averaging must be synchronous
+with the acquisition, so a freely spinning turntable that smears the impulse
+response does not do this; and the specimen must present the same surface, in
+a different orientation, at every average, which is why it is circular and
+centred on the axis.
+
+### 1.1 The rig and the run
+
+Every term in Eq. (5) is a difference of two nearly equal decay times, so the
+method inherits the sensitivity of an ISO 354 measurement twice over. The
+conditions below are what make those differences mean anything, and the
+snippets further down cannot repair a run that broke them.
+
+- **Bands and scale.** One-third-octave bands from 100 Hz to 5000 Hz at full
+  scale (Clause 5). The method is routinely run on 1:$N$ physical scale
+  models, where every centre frequency multiplies by $N$ and every length in
+  this list divides by it: that is how surfaces too large for any
+  reverberation room are graded at all.
+- **Room.** Volume $V \ge 200\,N^{-3}$ m³ (Clause 6.1.2), and an empty-room
+  equivalent absorption area $A_1 \le 0.30\,V^{2/3}$ (Clause 6.1.3), whose
+  rule-of-thumb form is $A_1/S \le 1$: too absorbent a room leaves the four
+  decays too short to differ measurably. Diffusing elements must be **fixed**
+  (rotating vanes are explicitly banned, unlike ISO 354), the room and its
+  contents invariant, and any air-circulation system switched off
+  (Clause 6.1.1).
+- **Turntable and base plate.** A circular rigid base plate symmetrical about
+  the axis of rotation and sized to the largest dimension of the sample, with
+  no part of the turntable closer than $N^{-1} \times 1.0$ m to the room walls
+  (Clause 6.2).
+- **Specimen.** Circular, diameter at least $N^{-1} \times 3.0$ m; or square
+  with an edge of at least $N^{-1} \times 2.65$ m, flush-mounted on a base
+  plate of at least $N^{-1} \times 3.75$ m diameter (Clause 6.3.1): this is
+  where the 10 m² of the snippet below comes from. The structural depth must
+  stay under $h \le d/16$ of the turntable diameter $d$ (Clause 6.3.2), the
+  perimeter must be sealed but **not** boxed in by a rigid border of fixed
+  height (Clause 6.3.3), a rotationally symmetric specimen must be displaced
+  from the axis by at least $d/8$ so that rotation really changes the
+  orientation, and the specimen's own absorption should stay under
+  $\alpha_\mathrm{s} = 0.50$ (Clause 6.3.4).
+- **Excitation and averaging.** A deterministic signal, evaluated by the
+  integrated impulse-response method (Clause 7.1): periodic pseudo-random
+  noise or a sweep per ISO 18233. Either radiate continuously for one whole
+  revolution of the turntable (with a 5 s period and one revolution per
+  minute, 12 signal periods) or take $n$ measurements with the sample stepped
+  by $\Delta\varphi = 360°/n$, with $60 \le n \le 120$ and $n = 72$ (5° steps)
+  preferred, the excitation identical each time and the averaging phase-locked
+  (Clause 7.3).
+- **Positions.** At least two source and three microphone positions, six
+  measurements in all, arithmetically averaged (Clause 7.3). The same six
+  positions are used for all four situations.
+- **Evaluation.** Backward integration restricted to the linear slope, the
+  integration limit at $-30$ dB and the reverberation time read between $-5$
+  and $-20$ dB (Clause 7.5). $T_1$, $T_2$ and $T_3$ decay linearly, but
+  **$T_4$ is a superposition of two decays and only the first is evaluated**;
+  reading the late slope of $T_4$ is the single commonest way to invent
+  scattering that is not there.
+- **Settling and climate.** Do not start until $15/N$ minutes after leaving
+  the room and closing the door, and take the four situations as rapidly as
+  possible (Clause 7.3). Measure temperature and relative humidity in the room
+  before and after **each** of the four situations and use the mean per
+  situation (Clause 7.4).
+
+**Absorption from reverberation time (Clause 8.1).** Each situation converts to a
 Sabine absorption coefficient with the standard's own air-attenuation term:
 
 $$
@@ -46,9 +135,9 @@ $$
 
 where $V$ is the room volume, $S$ the sample area, $T$ the reverberation time,
 $c$ the speed of sound (Eq. (2): $c = 343.2\sqrt{(273.15+t)/293.15}$) and $m$ the
-power attenuation coefficient of air. The **stationary** pair gives the
-random-incidence absorption $\alpha_\mathrm{s}$ (Eq. (1)); the **rotating** pair gives the
-specular absorption $\alpha_\mathrm{spec}$ (Eq. (4)).
+power attenuation coefficient of air. The **static** pair $(T_1, T_2)$ gives the
+random-incidence absorption $\alpha_\mathrm{s}$ (Eq. (1)); the **rotating** pair
+$(T_3, T_4)$ gives the specular absorption $\alpha_\mathrm{spec}$ (Eq. (4)).
 
 **Scattering coefficient (Eq. (5)).** The two combine into
 
@@ -64,17 +153,59 @@ energy everywhere, raising $\alpha_\mathrm{spec}$ towards 1 and $s$ towards 1.
 from phonometry import materials
 
 # Four reverberation-time situations reduced to two absorption coefficients.
-# alpha_s from the stationary pair (Eq. 1); alpha_spec from the rotating pair
-# (Eq. 4). V = 200 m^3, S = 10 m^2, c = 343.2 m/s throughout.
-alpha_s = materials.random_incidence_absorption(200.0, 10.0, c1=343.2, t1=8.0,
-                                         c2=343.2, t2=6.0)
-alpha_spec = materials.specular_absorption_coefficient(200.0, 10.0, c3=343.2, t3=7.5,
-                                                c4=343.2, t4=5.0)
+# alpha_s from the static pair (Eq. 1); alpha_spec from the rotating pair
+# (Eq. 4). V = 200 m^3, S = 10 m^2 (the SAMPLE area), c = 343.2 m/s throughout.
+alpha_s = materials.random_incidence_absorption(200.0, 10.0,
+                                         c1=343.2, t1=8.0,   # T1 base plate, static
+                                         c2=343.2, t2=6.0)   # T2 sample, static
+alpha_spec = materials.specular_absorption_coefficient(200.0, 10.0,
+                                                c3=343.2, t3=7.5,  # T3 base plate, rotating
+                                                c4=343.2, t4=5.0)  # T4 sample, rotating
 s = materials.scattering_coefficient(alpha_spec, alpha_s)   # Eq. (5)
 print(round(float(alpha_s), 4))     # 0.1343
 print(round(float(alpha_spec), 4))  # 0.2148
 print(round(float(s), 4))           # 0.0931
 ```
+
+**Climate is not a detail (Clause 7.4).** That snippet passes one speed of
+sound and no air attenuation at all, which is only safe when the four
+situations really did share a climate. The API takes a separate $c$ and $m$
+for every situation because the standard does: the correction term
+$-4(V/S)(m_2 - m_1)$ subtracts the air's own absorption, and in the top bands
+it is comparable with the specimen's. Compute $c$ from Eq. (2) with
+`speed_of_sound`, and $m$ from the ISO 9613-1 pure-tone attenuation with
+`power_attenuation_from_alpha` (Eq. (3), $m \approx \alpha/4.343$ for $\alpha$
+in dB/m), once per situation, from the mean of the readings taken before and
+after it:
+
+```python
+import numpy as np
+
+# The four situations run in sequence over half an hour: the room warms by
+# 1.5 K and the relative humidity falls by 9 points while they are measured.
+temps = [20.0, 20.5, 21.0, 21.5]        # degC, mean per situation (Clause 7.4)
+# The ISO 9613-1 pure-tone attenuation at 5 kHz for those four climates, in
+# dB/m: air_attenuation(5000.0, t, rh) in the Outdoor Sound Propagation guide.
+alpha = [0.04062, 0.04189, 0.04334, 0.04502]
+c = [float(materials.speed_of_sound_iso17497(temperature_c=t))
+     for t in temps]                                             # Eq. (2)
+m = [float(materials.power_attenuation_from_alpha(a)) for a in alpha]  # Eq. (3)
+print(np.round(c, 2))    # [343.2  343.49 343.78 344.08]
+print(np.round(m, 5))    # [0.00935 0.00965 0.00998 0.01037]   1/m at 5 kHz
+
+alpha_s = materials.random_incidence_absorption(200.0, 10.0,
+    c1=c[0], t1=8.0, m1=m[0], c2=c[1], t2=6.0, m2=m[1])
+alpha_spec = materials.specular_absorption_coefficient(200.0, 10.0,
+    c3=c[2], t3=7.5, m3=m[2], c4=c[3], t4=5.0, m4=m[3])
+print(round(float(materials.scattering_coefficient(alpha_spec, alpha_s)), 4))
+# 0.0816   against 0.0931 for the same four decays with the drift ignored
+```
+
+Nine points of humidity across the four situations move the 5 kHz scattering
+coefficient by 0.012: an eighth of the value, in the direction that
+*over*-reports it. That is the whole reason Clause 6.1.1 wants the room
+untouched and Clause 7.3 wants the run finished quickly; the correction
+repairs a drift that was measured, not one that was guessed at afterwards.
 
 Over a full one-third-octave measurement, `scattering_coefficient_spectrum`
 pairs the per-band $\alpha_\mathrm{spec}$ and $\alpha_\mathrm{s}$ with their band centres and
@@ -85,7 +216,7 @@ import numpy as np
 from phonometry import materials
 
 # A 13-band measurement (250-4000 Hz): the random-incidence absorption alpha_s
-# (stationary sample) and the specular absorption alpha_spec (rotating
+# (sample on the static turntable) and the specular absorption alpha_spec (rotating
 # turntable). A diffuser scatters more with frequency, so s(f) rises.
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
                   1250, 1600, 2000, 2500, 3150, 4000], float)
@@ -97,12 +228,16 @@ print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="Two stacked panels over the 13 one-third-octave bands from 250 to 4000 Hz: on top the flat random-incidence absorption coefficient measured with the static turntable and the specular absorption coefficient measured with the rotating turntable climbing above it, with the gap between them shaded as the numerator of Equation 5; below, the resulting scattering coefficient rising from near zero towards 0.84 at 4 kHz" width="88%"></picture>
 
-*The scattering coefficient climbs with frequency: at low frequency the surface
-relief is small compared with the wavelength and the reflection stays specular
-($s \to 0$); as the wavelength shrinks the relief scatters more energy out of
-the specular direction ($s \to 1$).*
+*Eq. (5) drawn as it is computed. The shaded gap in the upper panel is the
+numerator, $\alpha_\mathrm{spec} - \alpha_\mathrm{s}$: the static pair $(T_1, T_2)$ gives the
+lower curve and the rotating pair $(T_3, T_4)$ the upper one, so the whole
+measurement exists to open that gap. The scattering coefficient below climbs
+with frequency because the surface relief is small against the wavelength at
+the bottom of the band ($s \to 0$) and comparable with it at the top
+($s \to 1$). The denominator $1 - \alpha_\mathrm{s}$ is the flat lower curve, which is
+why an absorbing specimen makes $s$ uncertain.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -113,7 +248,7 @@ import numpy as np
 from phonometry import materials
 
 # A 13-band measurement (250-4000 Hz): the random-incidence absorption alpha_s
-# (stationary sample) and the specular absorption alpha_spec (rotating
+# (sample on the static turntable) and the specular absorption alpha_spec (rotating
 # turntable). A diffuser scatters more with frequency, so s(f) rises.
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
                   1250, 1600, 2000, 2500, 3150, 4000], float)
@@ -125,25 +260,52 @@ result = materials.scattering_coefficient_spectrum(alpha_spec, alpha_s, frequenc
 result.plot()
 plt.show()
 
-# By hand, from the result's fields, mirroring what ScatteringResult.plot() draws:
-fig, ax = plt.subplots()
-ax.semilogx(result.frequencies, result.scattering, "o-", color="#1f77b4")
-ax.set_xlabel("Frequency [Hz]")
-ax.set_ylabel("Scattering coefficient s")
-ax.set_ylim(0.0, 1.0)
-ax.set_title("Random-incidence scattering coefficient (ISO 17497-1)")
+# By hand, the two panels of the figure: the alpha pair with the Eq. (5)
+# numerator filled, and the s(f) that ScatteringResult.plot() draws.
+fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
+top.fill_between(freqs, alpha_s, alpha_spec, color="#2ca02c", alpha=0.25)
+top.semilogx(freqs, alpha_spec, "s-", color="#d62728", label=r"$\alpha_\mathrm{spec}$")
+top.semilogx(freqs, alpha_s, "o-", color="#1f77b4", label=r"$\alpha_\mathrm{s}$")
+top.set_ylabel("Absorption coefficient")
+top.set_ylim(0.0, 1.0)
+top.legend()
+bottom.semilogx(result.frequencies, result.scattering, "o-", color="black")
+bottom.set_xlabel("Frequency [Hz]")
+bottom.set_ylabel("Scattering coefficient s")
+bottom.set_ylim(0.0, 1.0)
 plt.show()
 ```
 
 </details>
 
-**Base-plate check (Clause 6.2, Table 1).** The empty base plate must itself
-scatter only negligibly, or it would bias the result. ISO 17497-1 caps the
-base-plate scattering coefficient per one-third-octave band; the library exposes
-those limits and a checker.
+### 1.2 Is the measurement usable?
+
+Two checks decide that, and both are already in the library.
+
+**Base-plate check (Clause 6.2, Eq. (6), Table 1).** Under ideal conditions
+$T_1$ and $T_3$ are equal: the empty base plate is the same absorber whether
+it turns or not. A base plate that is not quite symmetrical about the axis
+shortens $T_3$, and Eq. (6) reads that asymmetry back out as a spurious
+scattering coefficient of the arrangement itself: the same arithmetic as
+Eq. (5), applied to the pair that carries no specimen:
+
+$$
+s_\mathrm{base} = 55.3\,\frac{V}{S}\left(\frac{1}{c_3 T_3} - \frac{1}{c_1 T_1}\right)
+        - 4\,\frac{V}{S}\,(m_3 - m_1).
+$$
+
+The error is assumed to persist when the specimen is present, so ISO 17497-1
+caps $s_\mathrm{base}$ per one-third-octave band (Table 1) and the arrangement is
+disqualified above the cap.
 
 ```python
 from phonometry import materials
+
+# The same T1 and T3 as above: the base plate alone, static and rotating.
+s_base = materials.base_plate_scattering(200.0, 10.0,
+                                         c1=343.2, t1=8.0,   # T1
+                                         c3=343.2, t3=7.5)   # T3
+print(round(float(s_base), 4))   # 0.0269
 
 # The normative per-band ceilings (Table 1): 0.05 up to 500 Hz, rising to 0.25.
 # materials.BASE_PLATE_BANDS_HZ is the band tuple; materials.BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
@@ -166,15 +328,61 @@ measured at N times the frequency shown.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/base_plate_scattering_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/base_plate_scattering.svg" alt="The scattering coefficient of a base plate alone over the 18 one-third-octave bands of Table 1, at the full-scale frequency f/N from 100 Hz to 5 kHz, rising from 0.01 to 0.2, drawn against the stepped limit of the table, which holds at 0.05 to 500 Hz, steps to 0.10, 0.15, 0.20 and 0.25; the point at 1 kHz, 0.105 against 0.10, is ringed as over the limit" width="88%"></picture>
 
-**Test-report fiche.** `ScatteringResult.report(path)` renders a one-page
-accredited scattering test report (ISO 17497-1): a metadata header, the
-per-one-third-octave table of the random-incidence absorption $\alpha_\mathrm{s}$ and the
-scattering coefficient $s$ beside the $s(f)$ curve on a categorical band axis,
-and a boxed characterisation headline (no pass/fail). `verbose=True` adds the
-specular absorption $\alpha_\mathrm{spec}$ column and `language="es"` renders the
-Spanish fiche; it needs the report extra (`pip install "phonometry[report]"`).
+**Uncertainty (Annex A).** The six position measurements of each situation
+give a standard uncertainty of its mean reverberation time (Eqs. (A.1) and
+(A.2)); those propagate into $u(\alpha_\mathrm{s})$ and $u(\alpha_\mathrm{spec})$
+(Eqs. (A.3) and (A.4)) and on into $u_s$ (Eq. (A.5)), with the expanded
+uncertainty $U = 2u_s$ at the 95 % level.
 
-[![ISO 17497-1 scattering example report: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.pdf)
+```python
+import numpy as np
+
+# The six position measurements behind each of the four averaged times.
+t1 = [8.05, 7.94, 8.12, 7.88, 8.03, 7.98]
+t2 = [6.03, 5.95, 6.08, 5.92, 6.01, 6.01]
+t3 = [7.56, 7.44, 7.61, 7.39, 7.52, 7.48]
+t4 = [5.04, 4.95, 5.09, 4.92, 5.01, 4.99]
+u = {k: float(materials.reverberation_time_uncertainty(v))
+     for k, v in (("t1", t1), ("t2", t2), ("t3", t3), ("t4", t4))}   # Eq. (A.1)
+print(round(u["t1"], 4), round(u["t4"], 4))    # 0.0347 0.025
+
+u_alpha_s = materials.absorption_coefficient_uncertainty(   # Eq. (A.3)
+    200.0, 10.0, speed_of_sound=343.2, t_a=np.mean(t2), u_a=u["t2"],
+                          t_b=np.mean(t1), u_b=u["t1"])
+u_alpha_spec = materials.absorption_coefficient_uncertainty(   # Eq. (A.4)
+    200.0, 10.0, speed_of_sound=343.2, t_a=np.mean(t4), u_a=u["t4"],
+                          t_b=np.mean(t3), u_b=u["t3"])
+unc = materials.scattering_coefficient_uncertainty(   # Eq. (A.5)
+    0.2148, 0.1343, u_alpha_spec, u_alpha_s)
+print(round(float(unc.u_scattering), 4), round(float(unc.expanded), 4))
+# 0.0052 0.0103   ->  s = 0.093 +/- 0.010 at 95 %
+
+# The same six-position scatter on an absorbing specimen (alpha_s = 0.50, the
+# Clause 6.3.4 ceiling): the (1 - alpha_s) denominator of Eq. (5) inflates it.
+print(round(float(materials.scattering_coefficient_uncertainty(
+    0.60, 0.50, u_alpha_spec, u_alpha_s).expanded), 4))   # 0.0173
+```
+
+That last pair of numbers is the practical limit of the method: the same rig
+and the same repeatability give an expanded uncertainty of 0.010 on a
+lightly absorbing specimen and 0.017 once the specimen absorbs half the
+incident energy, because Eq. (5) divides by $1 - \alpha_\mathrm{s}$. It is also why
+Clause 6.3.4 asks for $\alpha_\mathrm{s} \le 0.50$ in the first place.
+
+### Scattering test-report fiche
+
+`ScatteringResult.report(path)` renders a one-page accredited scattering test
+report (ISO 17497-1): a metadata header (specimen, sample area $S$, room volume
+$V$, test room, climate), the per-one-third-octave table of the random-incidence
+absorption $\alpha_\mathrm{s}$ and the scattering coefficient $s$ beside the $s(f)$ curve
+on a categorical band axis, and a boxed characterisation headline. It is a
+characterisation, so there is no pass/fail verdict. `verbose=True` adds the
+specular absorption $\alpha_\mathrm{spec}$ column, and `language="es"` renders the
+Spanish fiche. It needs the report extra (`pip install "phonometry[report]"`).
+
+[![ISO 17497-1 scattering-coefficient example report (PDF): One-page random-incidence scattering fiche: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.pdf)
+
+Random-incidence scattering fiche (ScatteringResult.report), the alpha_s and s spectra.
 
 ## 2. Diffusion coefficient (ISO 17497-2)
 
@@ -184,6 +392,110 @@ polar arc and records the reflected level $L_i$ at each angle; the coefficient i
 the normalised autocorrelation of the polar energy distribution.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" width="92%"></picture>
+
+### 2.1 From three impulse responses to one level
+
+"Records the reflected level" hides the whole measurement. A microphone on the
+arc hears the direct sound, the sample's reflection and everything else in the
+room, and Clause 7 is the recipe that leaves only the middle one. For **each**
+source-receiver pair (Clause 7.3):
+
+1. Measure $h_1(t)$, the impulse response with the test surface in place.
+2. Measure $h_2(t)$, the same thing with the test surface removed. Nothing
+   else may move between the two takes; the subtraction below is only as good
+   as that.
+3. Measure $h_3(t)$, again without the test surface, with the source centred
+   on the reference point and facing the receiver. This one is needed once the
+   rig has more than one microphone or source position.
+
+Clause 7.4 then reduces them. Subtracting $h_2$ from $h_1$ cancels everything
+the room contributes and leaves the sample's own reflection; dividing that
+residue by $h_3$ in the frequency domain removes the loudspeaker and
+microphone from the answer, so what survives is a property of the surface
+rather than of the equipment (Formula (1)):
+
+$$
+h_4(t) = \mathcal{F}^{-1}\!\left[
+  \frac{\mathcal{F}\{h_1(t) - h_2(t)\}}{\mathcal{F}\{h_3(t)\}}
+\right].
+$$
+
+A **rectangular** window is then placed over $h_4$: unity where the sample's
+reflections are, zero elsewhere (Clause 7.4.3). Its edges come from the
+shortest and the longest sample-to-receiver path: the shortest from plain
+geometry, the longest from paths that are not first-order reflections, which
+is why the standard recommends looking at the impulse response rather than
+computing the window blind. Two traps sit here: the deconvolution moves the
+direct sound in $h_4$ away from where it sits in $h_3$, so the window cannot
+be positioned from $h_3$; and the window length sets the low-frequency
+resolution, so a short gate quietly destroys the low bands.
+
+The measurement is then accepted or rejected on a number. Inside the window,
+the flat reference panel must show a signal-to-noise ratio of at least
+**40 dB**, computed band by band from Formula (2) as the ratio of the energy
+of $h_1 - h_2$ to the energy of $h_2$ over the window length. "Noise" here is
+not only random error: an unwanted reflection that survived the subtraction
+counts against the same 40 dB. After the transform, each one-third-octave
+level $L'$ is obtained by numerical integration with at least three spectral
+points inside the band, and zero padding may not be used to reach that count
+(Clause 7.4.4).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_measurement_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_measurement_chain.svg" alt="Five stacked time traces of the ISO 17497-2 data reduction: the response with the sample showing a direct pulse, the sample reflection and a later room reflection; the background response without the sample; their difference with the room contribution gone; the deconvolved sample response; and the same trace with the rectangular window drawn over the reflection, its edges annotated with the shortest and longest sample-to-receiver path times" width="88%"></picture>
+
+*The chain of Clause 7.4 on the page's own N = 7 QRD geometry, drawn on one
+millisecond axis. Panel (c) is where the room disappears; panel (e) is the only
+free choice in the whole measurement, and its two edges are the shortest and
+longest sample-to-receiver path times. Everything outside the window is thrown
+away, including any reflection the subtraction failed to cancel.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Synthetic stand-ins for the three measured responses, on the standard
+# geometry (source 10 m, arc 5 m): a direct pulse, the sample reflection
+# spread over the well delays, and a late room reflection present in both
+# h1 and h2 so that the subtraction removes it exactly.
+fs, n = 96000.0, 4096
+t = np.arange(n) / fs
+
+def pulse(delay, amp, f0=2000.0, q=6.0):
+    env = np.exp(-((t - delay) * f0 / q) ** 2)
+    return amp * env * np.cos(2 * np.pi * f0 * (t - delay))
+
+direct = pulse(1.0e-3, 1.0)
+room = pulse(9.0e-3, 0.35)
+sample = sum(pulse(4.4e-3 + k * 0.12e-3, 0.30 / (1 + k)) for k in range(7))
+h1, h2 = direct + sample + room, direct + room
+h4 = h1 - h2                       # Formula (1) with a flat h3
+window = ((t > 3.9e-3) & (t < 6.2e-3)).astype(float)
+
+fig, axes = plt.subplots(5, 1, sharex=True, figsize=(10, 9))
+for ax, y, label in zip(axes, (h1, h2, h1 - h2, h4, h4 * window),
+                        ("h1: sample present", "h2: sample removed",
+                         "h1 - h2: room gone", "h4: deconvolved",
+                         "windowed")):
+    ax.plot(t * 1e3, y)
+    ax.set_ylabel(label, fontsize=8)
+axes[-1].plot(t * 1e3, window * np.abs(h4).max(), "--")
+axes[-1].set_xlabel("Time [ms]")
+plt.show()
+```
+
+</details>
+
+Two more conditions decide whether the levels mean anything. The loudspeaker
+must illuminate the whole sample as an omnidirectional source would, to within
+$\pm 2$ dB in magnitude and $\pm 20°$ in phase over the reference flat surface,
+and the microphones must respond to every conceivable reflection path within
+$\pm 1$ dB and $\pm 10°$ (Clause 7.2). And the **same chain, on the same rig,
+must be run again over a flat reference panel of the same footprint**: that
+second set of levels is what supplies the $d_\mathrm{ref}$ of the normalised
+coefficient $d_\mathrm{n}$ of Formula (7). A normalised coefficient quoted
+against a reference measured elsewhere is not a normalised coefficient.
 
 *A note on symbols before the formulas.* ISO 17497-2 writes the normalised
 coefficient $d_\mathrm{n}$, its n upright because it stands for "normalized",
@@ -204,9 +516,54 @@ $$
 
 A perfectly uniform polar response ($L_i$ all equal) gives $d = 1$; a single
 sharp specular lobe gives $d = 0$. When receivers subtend unequal solid angles,
-Formula (6) area-weights each energy by $N_i$ from Formula (8), and those area
-factors are evaluated in **radians**, which is why a 5° spacing at the zenith
-produces a weight near 1.57, not 51.9.
+Formula (6) area-weights each energy by $N_i = A_i / A_\text{min}$ (unrelated
+to the sequence order $N$ of section 3) from
+Formula (8), with
+
+$$
+A_i = \frac{4\pi}{\Delta\phi}\sin^2\frac{\Delta\theta}{4}\ (\theta = 0),
+\qquad
+A_i = 2\sin\theta\,\sin\frac{\Delta\theta}{2}\ (0 < \theta < 90°),
+\qquad
+A_i = \sin\frac{\Delta\theta}{2}\ (\theta = 90°).
+$$
+
+Every angle in those three forms is handled in **radians**, including the
+$\Delta\phi$ under the $4\pi$ of the zenith term; that is what keeps the
+zenith dimensionally consistent with the other two. On the standard
+5° × 5° hemisphere the areas come out 0.0685 at the zenith, 0.0076 at
+$\theta = 5°$ (the smallest, so $A_\text{min}$) and 0.0436 at the pole, so the
+weights run 9.01 at the zenith, 1 on the first ring off it and 5.74 at the
+pole. Check yours with `materials.area_factors(elevations, delta_theta=5.0)`
+before feeding a hand-built weight vector into Formula (6).
+
+### 2.2 The far field, and why 10 m and 5 m
+
+Those distances are not a convention. ISO 17497-2 defines the far field as the
+region in which the reflected level falls by 6 dB per doubling of distance
+(3.4), and makes the practical test geometric: **at least 80 % of the receiver
+positions must lie outside the specular zone** (Clause 6.2.2), the angular
+sector into which a flat panel of the same footprint would send the source's
+reflection. A source at 10 m from the reference point and an arc of 5 m radius
+is the arrangement that satisfies that for a typical test panel; shrink the arc
+and more receivers fall inside the specular zone, which makes the panel look
+more diffusing than it is. The 5° receiver spacing is a maximum
+($\Delta\theta \le 5°$, $\Delta\varphi \le 5°$), not a suggestion, and the
+five source positions the two-dimensional technique uses (0°, $\pm 30°$, and
+$\pm 60°$ from the reference normal) are the ones behind the
+`TWO_DIMENSIONAL_SOURCE_WEIGHTS` of the random-incidence snippet below.
+
+Two legitimate departures exist, and both must be reported with the
+coefficient. A diffuser meant for close listening is *also* graded in the near
+field, at application-realistic positions, because that is where focusing shows
+up; the far-field test still runs alongside it (Clause 6.2.1). And a rig whose
+radii differ from 10 m and 5 m corrects its levels to that pair with
+Formulas (3) and (4): the combined distance is $r = 2 r_1 r_2/(r_1 + r_2)$ and
+the correction is $\varepsilon\,10\lg(r/6.67)$ dB, with $\varepsilon = 2$ for
+spherical and 1 for cylindrical spreading (Clause 7.4.5). On a true arc that
+correction is the same for every receiver, so it cancels inside Formula (5) and
+leaves $d$ untouched; it matters when the receiver radii differ from each
+other, which is exactly why the standard asks for an arc wherever possible.
 
 The rig those formulas assume is worth drawing to scale.
 `plot_goniometer_geometry` lays out the standard arrangement in plan: the
@@ -217,7 +574,8 @@ at 10 m on the normal.
 
 *The polar arc behind every $L_i$ of Formula (5), to scale: 37 receivers every
 5 degrees at 5 m, the source twice as far out on the normal, and the sample a
-sliver at the centre.*
+sliver at the centre. The sample is that small on purpose: it is what keeps
+80 % of those receivers outside the specular zone.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -239,9 +597,21 @@ plane wavefront hits a flat rigid panel and a Schroeder diffuser (an $N = 7$
 quadratic-residue profile), and the scattered energy on the receiver arc turns
 a collimated specular beam ($d = 0.32$) into a wide fan ($d = 0.63$).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_diffusion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_diffusion.gif" alt="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" width="640" height="360" loading="lazy"></picture>
+Those two numbers are not comparable with the coefficients computed below. The
+simulated panels are a single short period read in the near field of a 2-D
+grid; the prediction that follows is a six-period 3.6 m array read in the far
+field, where the periodicity funnels the energy into a few grating lobes and
+drives every coefficient down. Diffusion coefficients only compare within one
+geometry, one arc and one distance; that is why ISO 17497-2 fixes all three.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_diffusion.webm)
+**Video:** [Flat panel versus Schroeder diffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_diffusion.webm): A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63.
+
+Measured polar data are bulky, so the example that follows uses *predicted*
+levels instead: the far-field model of section 3 evaluated on a published
+diffuser geometry, which produces exactly the 37 levels $L_i$ the chain of
+section 2.1 would deliver. What the coefficient does to those levels is
+identical either way; where they come from is section 3's subject, and the
+quadratic-residue vocabulary below is defined there.
 
 The single-plane response below is the far-field prediction of a published
 diffuser geometry: an $N = 7$ quadratic-residue diffuser of 6 periods, 3.6 m
@@ -382,15 +752,46 @@ plt.show()
 
 </details>
 
-**Test-report fiche.** Collected across the one-third-octave bands, the
-diffusion coefficient $d(f)$ forms a `DiffusionSpectrum`
-(`materials.diffusion_spectrum(d, frequencies=freqs, ...)`), whose `report(path)` renders a
-one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
-$d$ beside the $d(f)$ band-axis curve, with a boxed characterisation headline.
-Per Clause 8.4 the random-incidence coefficient is itself a per-band quantity,
-the average of the directional coefficients over the source positions band by
-band (not a mean across frequency). `verbose=True` adds the normalised $d_\mathrm{n}$
-column to the table (the curve always draws $d_\mathrm{n}$ as a companion when present).
+### 2.3 Reading the number
+
+The page has now printed 0.1099, 0.0049, 0.1055 and 0.2231, and none of them
+means anything without a scale. ISO 17497-2 bounds $d$ between 0 and 1, and its
+own definition note is blunt about the top of that range: complete diffusion
+would give 1, but **real diffusers rarely exceed 0.7** (3.9). A flat panel of
+the same footprint scores a few thousandths on the same rig, commercial
+diffusers occupy roughly the 0.2 to 0.6 band inside their working range, and a
+polar response uniform at every angle (which is what 1 requires) does not
+exist.
+
+So why does the worked example land at 0.11 rather than at a brochure number?
+Because it is one frequency, one source direction and six repeats of one
+period: the grating lobes of a periodic array dominate a single-frequency
+polar response, and Formula (5) reads a fan of lobes as poor uniformity. The
+quantity that grades a product is the band-by-band random-incidence
+$d_\mathrm{n}$, averaged over the source positions of Clause 8.4, which is
+both higher and smoother. Three reading rules follow:
+
+- Compare $d_\mathrm{n}$, never $d$, between products of different size:
+  the normalisation is what removes the edge diffraction that every finite
+  panel shows and that grows as the panel shrinks.
+- Read the whole spectrum. Diffusion falls away below the frequency at which
+  the surface relief is comparable with the wavelength, and again above the
+  frequency at which the wells stop behaving as single-mode waveguides
+  (section 3).
+- A single number with no band and no source position is not an ISO 17497-2
+  result, whatever it is printed beside.
+
+### Diffusion test-report fiche
+
+Collected across the one-third-octave bands, the diffusion coefficient $d(f)$
+forms a `DiffusionSpectrum`, whose `report(path)` renders a one-page diffusion
+test report (ISO 17497-2, Clause 8.5): the per-band table of $d$ beside the
+$d(f)$ band-axis curve, with a boxed characterisation headline. Per Clause 8.4,
+the random-incidence coefficient is itself a per-band quantity, the average of
+the directional coefficients over the source positions band by band (**not** a
+mean across frequency), so `d` here is one coefficient per band. `verbose=True`
+adds the normalised $d_\mathrm{n}$ column to the table (the curve always
+draws it as a companion when it is present).
 
 ```python
 import numpy as np
@@ -407,19 +808,17 @@ spectrum.plot()    # d(f) on the band axis (needs matplotlib)
 spectrum.report("diffusion.pdf")   # one-page fiche (needs phonometry[report])
 ```
 
-[![ISO 17497-2 diffusion example report: a metadata header, the per-one-third-octave table of the diffusion coefficient d beside the d(f) band-axis curve (with the normalised d_n drawn as a companion curve), and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.pdf)
+[![ISO 17497-2 diffusion-coefficient example report (PDF): One-page diffusion fiche: a metadata header, the per-one-third-octave table of the diffusion coefficient d beside the d(f) band-axis curve (with the normalised d_n drawn as a companion curve), and the boxed characterisation headline over the tested frequency range.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.pdf)
 
-A single band's polar response is itself reportable:
-`DiffusionResult.report(path)` renders the corrected receiver-angle /
-reflected-level table beside the semicircular polar plot, boxing that band's
-directional diffusion coefficient.
+Diffusion fiche (DiffusionSpectrum.report), the per-band random-incidence d(f) with the normalised d_n companion curve.
 
-[![ISO 17497-2 polar-response example report: a metadata header, the corrected reflected level per receiver angle beside the semicircular polar plot, and the boxed directional diffusion coefficient](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_polar_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_polar_example.pdf)
+A single band's polar response is itself reportable: `DiffusionResult.report(path)`
+renders the corrected receiver-angle / reflected-level table beside the
+semicircular polar plot, boxing that band's directional diffusion coefficient.
 
-*Single-source polar-response fiche (`DiffusionResult.report`), the reflected
-level over the receiver arc. The spectrum fiche above grades a surface across
-frequency; this one is the raw evidence behind a single band of it, and it is
-what a goniometer session actually produces.*
+[![ISO 17497-2 polar-response example report (PDF): One-page single-source polar-response fiche: a metadata header, the corrected reflected level per receiver angle beside the semicircular polar plot, and the boxed directional diffusion coefficient.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_polar_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_polar_example.pdf)
+
+Single-source polar-response fiche (DiffusionResult.report), the reflected level over the receiver arc. The spectrum fiche above grades a surface across frequency; this one is the raw evidence behind a single band of it, and it is what a goniometer session actually produces.
 
 ## 3. Designing a Schroeder diffuser
 
@@ -454,8 +853,8 @@ A handful of design rules follow directly from the geometry:
 - **The design frequency sets the depth.** The deepest well is
   $d_\mathrm{max} = \max(s_n)\,\lambda_0/(2N)$, close to half a wavelength for large
   $N$; halve $f_0$ and the diffuser gets twice as deep. This is the cost that
-  the [metadiffuser](metadiffusers.md) attacks: at 500 Hz an $N = 5$ design
-  already calls for wells 27.4 cm deep.
+  the [metadiffuser](metadiffusers.md) attacks: at 500 Hz an
+  $N = 5$ design already calls for wells 27.4 cm deep.
 - **The sequence repeats what the prime provides.** $s_n$ is symmetric about
   $n = 0$ and periodic in $N$, so one period has $N$ wells and the profile is
   built by repeating it. The flat-phase property also holds at the harmonics
@@ -473,13 +872,93 @@ A handful of design rules follow directly from the geometry:
   lobing penalty measured on the polar response above. Modulating two
   different sequences (or a sequence and its inverse) breaks the periodicity
   and recovers diffusion; primitive-root sequences ($s_n = r^n \bmod N$)
-  additionally suppress the specular lobe at the design frequency.
+  additionally suppress the specular lobe at the design frequency, an effect
+  that is strongest over one or two periods and dilutes as periods are added.
+
+The first two rules together define the band a design actually works over, and
+the model reproduces both.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/qrd_working_band_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/qrd_working_band.svg" alt="Predicted diffusion coefficient of an N = 7 quadratic-residue diffuser designed for 500 Hz with 10 cm wells and five periods, over a fine frequency grid from 200 to 6000 Hz: the curve rises to a peak at the 500 Hz design frequency, collapses onto the near-zero flat-panel reference in a broad notch centred on 3500 Hz, and the region above 1715 Hz is shaded as the band in which a well is no longer a single-mode waveguide" width="88%"></picture>
+
+*The two design rules, drawn on a fine grid rather than at band centres so
+that both are resolved. At $N f_0 = 3500$ Hz every well is a whole number of
+half-wavelengths deep, the phase sequence vanishes, and the panel's predicted
+diffusion falls onto the flat reference. Above $f_\mathrm{max} = c/(2w) = 1715$ Hz
+the single-plane-wave picture inside a 10 cm well no longer holds, so what the
+model draws there is an extrapolation rather than a prediction.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `materials` is imported by the blocks above. The design of this section on a
+# fine linear grid: one-third-octave centres are too coarse to resolve the
+# N f0 collapse at 3500 Hz.
+c, width = 343.0, 0.10
+grid = np.linspace(200.0, 6000.0, 601)
+depths = materials.qrd_well_depths(7, 500.0, speed_of_sound=c)
+qrd = materials.predicted_diffusion_spectrum(width, grid, depths=depths,
+                                             n_repetitions=5, normalize=False)
+flat = materials.predicted_diffusion_spectrum(width, grid,
+                                              depths=np.zeros_like(depths),
+                                              n_repetitions=5, normalize=False)
+fig, ax = plt.subplots()
+ax.axvspan(c / (2 * width), grid[-1], color="#9e9e9e", alpha=0.16)
+ax.axvline(7 * 500.0, color="#d62728", linestyle="--")
+ax.plot(grid, qrd.diffusion, color="#1f77b4", label="N = 7 QRD")
+ax.plot(grid, flat.diffusion, color="#9e9e9e", linestyle="--", label="Flat")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Predicted diffusion coefficient d")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The fourth rule is worth testing rather than believing, because the model
+takes an arbitrary depth array through the `depths` argument and the
+comparison costs nothing.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuser_modulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuser_modulation.svg" alt="Two panels comparing six repeats of one N = 7 quadratic-residue period against the same period alternated with its inverse over the same 4.2 m footprint: on the left a semicircular polar plot at 1 kHz where the modulated arrangement fills the arc more evenly and reaches a diffusion coefficient of 0.32 against 0.22, and on the right the normalised diffusion coefficient band by band from 250 to 2000 Hz, where the modulated arrangement is higher in every band except the 500 Hz design frequency" width="92%"></picture>
+
+*Same 42 wells, same 4.2 m of wall, one difference: whether the period repeats
+or alternates with its inverse. Modulation buys diffusion across the working
+band (0.32 against 0.22 at 1 kHz) and gives it back at the design frequency
+itself, which is the one place where the unbroken quadratic-residue sequence
+has its flat-magnitude property to spend.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `materials` is imported by the blocks above.
+base = materials.qrd_well_depths(7, 500.0)
+inverse = base.max() - base
+periodic = np.tile(base, 6)
+modulated = np.concatenate([base if k % 2 == 0 else inverse for k in range(6)])
+bands = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000], float)
+fig, ax = plt.subplots()
+for depths, label in ((periodic, "Periodic"), (modulated, "Modulated")):
+    spectrum = materials.predicted_diffusion_spectrum(0.10, bands,
+                                                      depths=depths, n_repetitions=1)
+    ax.semilogx(bands, spectrum.normalized, "o-", label=label)
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Normalised diffusion coefficient")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 `qrd_well_depths` evaluates the depth sequence and
 `predict_diffuser_polar_response` grades the design before anything is built,
-which is the subject of the next section. Only the quadratic-residue sequence
-has a dedicated helper: a primitive-root, modulated or otherwise custom
-profile enters through the explicit `depths` or `reflection` arguments.
+which is the subject of the next section.
 
 ### Predicting diffusion from a diffuser design
 
@@ -697,8 +1176,8 @@ not mean uniform; decent $d$ does not mean much energy was scattered at all.
 - **The diffusion coefficient qualifies diffusers.** When the task is to break
   up an echo, a flutter or a focusing reflection, what matters is that the
   reflected energy is spread over angle, and $d$ measures exactly that. The
-  normalised $d_\mathrm{n}$ (Formula (7)) additionally subtracts the edge diffraction
-  that every finite panel exhibits, so products of different sizes can be
+  normalised $d_\mathrm{n}$ (Formula (7)) additionally subtracts the edge
+  diffraction that every finite panel exhibits, so products of different sizes can be
   compared fairly.
 
 Swapping them fails in both directions: a diffusion coefficient dropped into a
@@ -709,69 +1188,63 @@ one-third-octave-band functions that generally rise once the surface relief is
 no longer small against the wavelength; a frequency-blind single number
 ("scatters 90 % of the sound") is neither of them.
 
+## What this guide covers
+
+- **Covered.** ISO 17497-1:2004+A1:2014's random-incidence scattering coefficient (the Clause
+  8.1 absorption-from-reverberation-time relations and Eq. (5)) with the Table 1
+  base-plate ceilings, via `materials.random_incidence_absorption`,
+  `materials.specular_absorption_coefficient`,
+  `materials.scattering_coefficient`,
+  `materials.scattering_coefficient_spectrum` and
+  `materials.check_base_plate_scattering`; ISO 17497-2:2012's directional and
+  random-incidence diffusion coefficient (Formulas (5) to (8)) via
+  `materials.directional_diffusion` and `materials.random_incidence_diffusion`;
+  and the Schroeder design toolkit (`materials.quadratic_residue_sequence`,
+  `materials.qrd_well_depths`) with the Cox & D'Antonio Fraunhofer
+  diffuser-prediction model (`materials.predict_diffuser_polar_response`,
+  `materials.predicted_diffusion_spectrum`). The published values of section 4 come from Cox & D'Antonio 3e Appendices B and D and Tables C.1 to C.3, read row by row into `materials.PUBLISHED_SCATTERING` (measured to ISO 17497-1), `materials.PUBLISHED_DIFFUSION` (computed following ISO 17497-2) and `materials.PUBLISHED_PREDICTED_SCATTERING` (computed), with `materials.scattering_named`, `materials.diffusion_named` and `materials.predicted_scattering_named` to look them up.
+
+- **Not covered.** The Fraunhofer diffuser-prediction model is a design estimate, not part of ISO
+  17497-2 itself, and its own stated limits (it loses accuracy at low frequency,
+  at grazing angles and for strongly absorbing surfaces, and it ignores edge
+  diffraction) mean it is no substitute for a measured diffusion coefficient.
+  Primitive-root and modulated arrangements are discussed as design guidance in
+  section 3, but only the quadratic-residue depth sequence has a dedicated
+  helper; other profiles enter through the explicit `depths` or `reflection`
+  arguments. Resonator-loaded deep-subwavelength panels are the subject of the
+  [Metadiffusers guide](metadiffusers.md).
+
+  The published tables of section 4 are representative values with a spread of their own, not specifications: the same battens measured by two teams differ by up to 0.2, and the boundary element rows of Appendix C were never built. Neither set replaces a measurement of the surface a project actually uses.
+
 ## See also
 
-- [Metadiffusers](metadiffusers.md): the deep-subwavelength version of the
-  Schroeder designs of section 3, slits loaded by Helmholtz resonators that
-  reach the same reflection phases from a panel a few centimetres thick.
-- [In-situ Road-Surface Absorption](../surfaces/road-absorption.md): the other surface
-  family measured in the field rather than the laboratory, with the ISO 13472
-  subtraction and spot methods.
-- [Sound Absorption Measurement and Rating](../absorbers/absorption-measurement.md): the
-  same reverberation room used by ISO 17497-1, measuring absorption instead of
-  scattering.
-- [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the full ISO 9613-1
-  atmospheric-absorption model whose pure-tone coefficient the ISO 17497-1
-  air-attenuation relations consume.
+- [Metadiffusers](metadiffusers.md): the deep-subwavelength
+  version of the Schroeder designs of section 3, slits loaded by Helmholtz
+  resonators that reach the same reflection phases from a panel a few
+  centimetres thick.
+- [In-situ Road-Surface Absorption](../surfaces/road-absorption.md): the
+  other surface family measured in the field rather than the laboratory, with
+  the ISO 13472 subtraction and spot methods.
+- [Sound Absorption Measurement and Rating](../absorbers/absorption-measurement.md):
+  the same reverberation room used by ISO 17497-1, measuring absorption
+  instead of scattering.
+- [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): the
+  full ISO 9613-1 atmospheric-absorption model whose pure-tone coefficient the
+  ISO 17497-1 air-attenuation relations consume.
 - API reference: [`materials.diffusers.scattering_diffusion`](https://docs.jmrp.io/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
+- Theory: [Surface scattering and diffusion](../../reference/theory/materials-surfaces.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the derivation of the scattering and diffusion coefficients and why the two are different quantities.
 
 ## References
 
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  ISBN 978-1-4987-4099-9.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  The reference monograph on diffuser theory and design, by the authors
-  behind the ISO 17497-2 diffusion-coefficient method: the
-  scattering-versus-diffusion distinction, the
-  measurement rigs and the design guidance this page condenses. Appendix B
-  (Normalized diffusion coefficient table, pp. 481-485) is the published BEM
-  anchor for the diffuser-prediction model on this page.
-- Hargreaves, T. J., Cox, T. J., Lam, Y. W., & D'Antonio, P. (2000). Surface
-  diffusion coefficients for room acoustics: Free-field measures of
-  single-plane diffusion. *The Journal of the Acoustical Society of America*,
-  108(4), 1710-1720.
-  [doi:10.1121/1.1310192](https://doi.org/10.1121/1.1310192).
-  The free-field diffusion-coefficient method behind ISO 17497-2; its Table I
-  documents the commercial $N = 7$ QRD geometry (0.2 m maximum well depth) used
-  in the worked example above.
-- Audio Engineering Society. (2001). *AES information document for room
-  acoustics and sound reinforcement systems — Characterization and
-  measurement of surface scattering uniformity* (AES-4id-2001). *Journal of
-  the Audio Engineering Society*, 49(3), 149-165.
-  [AES standards in print](https://www.aes.org/publications/standards/list.cfm).
-  The single-plane free-field diffusion-coefficient procedure that
-  ISO 17497-2 later standardised.
-- International Organization for Standardization. (2004). *Acoustics —
-  Sound-scattering properties of surfaces — Part 1: Measurement of the
-  random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004+A1:2014, the edition implemented here).
-  [iso.org catalogue](https://www.iso.org/standard/31397.html).
-  The turntable method implemented in section 1 of this page and the
-  base-plate limits of the standard's Table 1.
-- International Organization for Standardization. (2012). *Acoustics —
-  Sound-scattering properties of surfaces — Part 2: Measurement of the
-  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
-  [iso.org catalogue](https://www.iso.org/standard/55293.html).
-  The goniometer autocorrelation coefficient behind section 2 of this page,
-  its area weighting and the normalised $d_\mathrm{n}$.
-
-## Standards
-
-ISO 17497-1:2004+A1:2014 (scattering coefficient), ISO 17497-2:2012 (diffusion
-coefficient), and ISO 9613-1:1993, from which only the pure-tone attenuation
-coefficient $\alpha$ consumed by the ISO 17497-1 Clause 8 air-attenuation relations
-(Eqs. (2)/(3)); the full atmospheric-absorption model is covered in
-[Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md). Numerical conformance
-against the standards' worked examples and closed forms is tracked in
-[CONFORMANCE.md](../../CONFORMANCE.md).
+- **Audio Engineering Society. (2001).** [*AES information document for room acoustics and sound reinforcement systems — Characterization and measurement of surface scattering uniformity*](https://www.aes.org/publications/standards/list.cfm) (AES-4id-2001).
+  The single-plane free-field diffusion-coefficient procedure (published in J. Audio Eng. Soc. 49(3), 149-165) that ISO 17497-2 later standardised.
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  ISBN 978-1-4987-4099-9. The reference monograph on diffuser theory and design, by the authors behind the ISO 17497-2 diffusion-coefficient method: the scattering-versus-diffusion distinction, the measurement rigs and the design guidance this page condenses. Appendix B (Normalized diffusion coefficient table, pp. 481-485) is the published BEM anchor for the diffuser-prediction model on this page.
+- **Hargreaves, T. J., Cox, T. J., Lam, Y. W., & D'Antonio, P. (2000).** Surface diffusion coefficients for room acoustics: Free-field measures of single-plane diffusion. *The Journal of the Acoustical Society of America*, *108*(4), 1710-1720. https://doi.org/10.1121/1.1310192
+  The free-field diffusion-coefficient method behind ISO 17497-2; its Table I documents the commercial N = 7 QRD geometry (0.2 m maximum well depth) used in the worked example of this page.
+- **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
+  Only the pure-tone attenuation coefficient alpha consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the full atmospheric-absorption model lives in the Outdoor Sound Propagation guide.
+- **International Organization for Standardization. (2004).** [*Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room*](https://www.iso.org/standard/31397.html) (ISO 17497-1:2004+A1:2014).
+  The edition implemented here: the turntable method of section 1 and the base-plate limits of the standard's Table 1.
+- **International Organization for Standardization. (2012).** [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
+  The goniometer autocorrelation coefficient behind section 2 of this page, its area weighting and the normalised d_n.

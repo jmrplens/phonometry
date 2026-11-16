@@ -1,21 +1,24 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/absorbers/metamaterial-absorbers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/
 
 # Metamaterial Absorbers
 
 A porous blanket absorbs low frequencies only by growing thick: the
-[porous models](porous-absorbers.md) put the useful absorption where the layer
-is a fair fraction of the wavelength, which at 300 Hz means tens of
-centimetres. Acoustic metamaterial absorbers break that rule with resonance
-instead of bulk. A rigid panel of thin closed slits, each loaded by Helmholtz
-resonators, slows the sound inside the slit until a 3 cm panel resonates where
-a plain cavity of the same depth would need to be ten times deeper, and tuning
-the panel's internal losses against its leakage produces **perfect
-absorption**, $\alpha = 1$, at a design frequency where the panel is only
-$\lambda/38$ deep; published designs of the same family reach $\lambda/88$
-(Jiménez et al. 2016). This guide covers the critical-coupling condition that
-makes perfect absorption possible, the slow-sound slit panel implemented in
-the library, and the classical resonant absorbers re-read through the same
-lens.
+[porous models](porous-absorbers.md) put the useful
+absorption where the layer is a fair fraction of the wavelength, which at
+300 Hz means tens of centimetres. Acoustic metamaterial absorbers break that
+rule with resonance instead of bulk. A rigid panel of thin closed slits, each
+loaded by Helmholtz resonators, slows the sound inside the slit so drastically
+that a 3 cm panel resonates at about 300 Hz, where an empty quarter-wave
+cavity would have to be ten times deeper, since 3 cm of plain air resonates at
+2.9 kHz (section 3). Tuning the panel's internal losses against its leakage then
+produces **perfect absorption**, $\alpha = 1$, at a design frequency where the
+panel is only $\lambda/38$ deep; published designs of the same family reach
+$\lambda/88$ (Jiménez et al. 2016). This guide covers the critical-coupling
+condition that makes perfect absorption possible, the slow-sound slit panel
+implemented in the library, and the classical resonant absorbers re-read
+through the same lens.
 
 ## 1. Critical coupling: when loss exactly balances leakage
 
@@ -46,6 +49,16 @@ loss to match. The balance is delicate by design, and the library's
 returned geometry the normalised impedance sits at $1 + 0j$ and the
 reflection at zero.
 
+Two lengths set the panel geometry and appear in every call below. The
+**lattice step** `lattice_step_m` = $a$ is the spacing between successive
+resonators *along* one slit, so a slit loaded by $N$ resonators is
+$L = N a$ deep: that, and not the resonator's own cavity, is what makes the
+panel 30 mm thick in the example. The **period** `period_m` = $d$ is the spacing
+between slits *across* the panel face, so one slit of height $h$ serves each
+period and the front face is referred to the cell area $S_0 = d\,a$. The
+resonator itself is described separately by its neck and cavity sides and
+lengths.
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -66,24 +79,70 @@ print(round(z.real, 2), round(z.imag, 2))       # 1.0 -0.0  (matched)
 print(round(float(np.abs(res.reflection[0])), 3))   # 0.0   (reflection zero)
 ```
 
+Those two printed numbers are the whole of the evidence for the match, which
+is a pity, because the balance is easier to see than to read:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/critical_coupling_impedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/critical_coupling_impedance.svg" alt="Left panel: the real and imaginary parts of the normalised surface impedance at 300 hertz against slit height over half to two and a half times the solved value, with horizontal guides at one and zero and the solved height marked where both are met, and a companion axis showing the absorption at 300 hertz peaking exactly there. Right panel: the impedance locus in the complex plane from 150 to 500 hertz for the under-damped, critically coupled and over-damped slits, with the matched point one plus zero j marked; the critically coupled loop passes through it and the other two miss it on either side" width="90%"></picture>
+
+*What `critical_coupling_design` is solving. Left: sweep the slit height at
+the design frequency and the two matching conditions cross the same point,
+$\mathrm{Re}(z) = 1$ and $\mathrm{Im}(z) = 0$ at 0.978 mm, where the
+absorption reaches 1. Right: the same three slits as loci in the complex
+plane. Over-damped and under-damped fail for opposite reasons, and the locus
+says which side you are on; the absorption curve alone does not.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# The impedance at 300 Hz as a function of slit height, in one line each.
+for factor in (0.6, 1.0, 1.7):
+    z_h = materials.slit_helmholtz_absorber(
+        np.array([300.0]), design.resonator, slit_height_m=factor * design.slit_height_m,
+        lattice_step_m=3.0e-2, period_m=5.0e-2,
+    ).normalized_impedance[0]
+    print(factor, round(z_h.real, 2), round(z_h.imag, 2))
+# 0.6 2.61 3.34   over-damped: too resistive, and no longer resonant at 300 Hz
+# 1.0 1.0 -0.0    matched
+# 1.7 0.52 -1.93  under-damped: too little loss
+```
+
+</details>
+
 ## 2. The slow-sound slit panel
 
-A rigid panel of thin closed slits, each loaded on its upper wall by an array
-of Helmholtz resonators, is a locally reacting, deep-subwavelength absorber
-(Jiménez et al. 2017). The resonators slow the sound in the slit, pulling its
-resonance far below the quarter-wavelength frequency, and the visco-thermal
-losses of the sub-millimetre slit and the resonator necks make *perfect*
-absorption possible: when the intrinsic loss balances the leakage, the
+A rigid panel perforated by a periodic array of thin closed slits, each slit
+loaded on its upper wall by an array of Helmholtz resonators, is a locally
+reacting, deep-subwavelength absorber (Jiménez et al. 2017). The resonators
+slow the sound inside the slit, pulling the slit resonance far below the
+quarter-wavelength frequency, so a panel a few centimetres deep resonates in
+the low hundreds of hertz. The visco-thermal losses in the sub-millimetre
+slit and in the resonator necks are what make *perfect* absorption possible:
+when the intrinsic loss exactly balances the leakage of the structure the
 reflection zero lands on the real-frequency axis and $\alpha = 1$ (critical
-coupling). The panel transfer matrix is the chain
-$T = M_{\Delta l}\,\prod_n (M_\mathrm{s}\,M_\mathrm{HR}^{(n)}\,M_\mathrm{s})$; the rigidly-backed
-reflection factor is
+coupling).
+
+The panel transfer matrix is the chain
+$T = M_{\Delta l}\,\prod_n (M_\mathrm{s}\,M_\mathrm{HR}^{(n)}\,M_\mathrm{s})$ of half-lattice slit
+steps (with slit characteristic impedance $Z_\mathrm{s} = \sqrt{\kappa_\mathrm{s} \rho_\mathrm{s}}/S_\mathrm{s}$),
+resonators as shunt point scatterers $[[1,0],[1/Z_\mathrm{HR},1]]$, and a
+slit-radiation end correction. The rigidly-backed reflection factor is
 $R = (T_{11}\cos\theta - Z_0 T_{21})/(T_{11}\cos\theta + Z_0 T_{21})$ with
-$Z_0 = \rho_0 c_0 / S_0$. The slit uses the narrow-channel visco-thermal
-parameters and the square necks and cavities the rectangular-duct series of
-Stinson (1991). `critical_coupling_design` inverts the model, tuning
-the cavity length and the slit height so both matching conditions
-$\mathrm{Re}(Z)\cos\theta = Z_0$ and $\mathrm{Im}(Z) = 0$ hold.
+$Z_0 = \rho_0 c_0 / S_0$ and $\alpha = 1 - |R|^2$. The slit uses the
+narrow-channel visco-thermal parameters and the square necks and cavities the
+rectangular-duct series of Stinson (1991).
+
+Every symbol in that chain: $M_\mathrm{s}$ is the half-lattice step of the slit itself,
+$M_\mathrm{HR}^{(n)}$ the shunt admittance of the $n$-th resonator with $Z_\mathrm{HR}$ its
+input impedance (neck plus cavity, with the radiation end corrections of
+Jiménez et al. 2016), and $M_{\Delta l}$ the radiation correction of the slit
+mouth. $\kappa_\mathrm{s}$, $\rho_\mathrm{s}$ and $S_\mathrm{s}$ are the visco-thermal effective bulk
+modulus, effective density and cross-section of the slit. $S_0 = d\,a$ is the
+area of one period of the panel face, so $Z_0 = \rho_0 c_0/S_0$ is the
+section 1 matching impedance *referred to that same area*: the panel is
+matched when the sound entering one period is exactly consumed by it. Note the
+symbol does double duty: in section 1 $Z_0$ is the medium impedance
+$\rho_0 c_0$, here it is that impedance divided by a cross-section.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain.svg" alt="Schematic section of one period of the slit panel, from the face on the left to the rigid backing on the right. A plane wave arrives at angle theta and leaves as the reflection R, with the air in front referred to Z0 = rho0 c0 / S0. A slit 0.978 mm high runs the 30 mm depth of the panel and is closed at the backing, and a Helmholtz resonator with a neck 3 mm wide and 1 mm long and a cavity 27 mm wide and 44.7 mm long opens into its upper wall halfway along. Labels place each matrix where it acts: M delta l at the mouth, x1 = 0; M s over each 15 mm half step either side of the neck; M HR at the resonator; and v = 0 at the backing, x1 = L, with L = N a = 30 mm for one resonator. Three panels below write the matrices out. The mouth is a series radiation mass whose slit end correction is 1.12 mm for h over d = 0.0196. The half step holds the cosine and sine of ks a/2 with the slit impedance Zs, built from the visco-thermal effective density and bulk modulus of the narrow slit, the density being 1.355 minus 0.203j kg/m³ at 300 Hz against 1.205 in free air. The resonator is a shunt admittance, 1 over ZHR, its neck and cavity treated as square visco-thermal ducts, the 1 mm neck carrying 2.08 mm of end correction, 1.18 mm towards the cavity and 0.90 mm towards the slit, and acting below its own resonance as a compliance that softens the slit without adding mass. A box multiplies the matrices into T over the N resonators, gives R of theta from T11 and T21 and the absorption as one minus the squared magnitude of R, and notes that the backing stops the particle velocity, so the face sees Z = T11 / T21. Two boxes at the foot state critical coupling, Re(Z) cos theta = Z0 and Im(Z) = 0, which puts the zero of R on the real-frequency axis so that R = 0 and alpha = 1, and the 300 Hz design at normal incidence: the slit height sets the loss, the 44.7 mm cavity sets the resonance, and the normalised impedance is 1 + 0j in a panel lambda/38 deep" width="100%"></picture>
 
@@ -94,6 +153,21 @@ product into a surface impedance. Critical coupling is then two conditions on
 that impedance, and the design meets both with a 0.978 mm slit and a 44.7 mm
 cavity.*
 
+Watch what the solver actually changes. Given a target frequency it retunes
+the resonator's **cavity length** and solves for the **slit height**; the
+lattice step and the period stay as passed. For the 300 Hz design below the
+cavity goes from the 30 mm of the starting resonator to 44.7 mm and the slit
+lands at 0.978 mm, while the panel stays 30 mm deep because
+$L = N a = 1 \times 30$ mm, which is $\lambda/38$ at 300 Hz. A reader who
+wants a deeper panel adds resonators, not cavity.
+
+`critical_coupling_design` inverts the model: given a target frequency and
+angle it tunes the cavity length (which sets the resonance) and the slit
+height (which sets the loss) so both matching conditions
+$\mathrm{Re}(Z)\cos\theta = Z_0$ and $\mathrm{Im}(Z) = 0$ hold, placing the
+reflection zero on the real axis. The returned geometry then gives
+$\alpha \approx 1$ at the design frequency.
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -102,8 +176,11 @@ base = materials.HelmholtzResonator(
     neck_length_m=1.0e-3, neck_side_m=3.0e-3,
     cavity_length_m=30.0e-3, cavity_side_m=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2)
+design = materials.critical_coupling_design(
+    300.0, base, lattice_step_m=3.0e-2, period_m=5.0e-2,
+)
 print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
+print(round(design.slit_height_m * 1e3, 3))    # solved slit height, mm
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
@@ -174,11 +251,12 @@ plt.show()
 
 </details>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber.svg" alt="Absorption of a slit panel loaded by one Helmholtz resonator: the critically-coupled design reaches alpha = 1 at 300 Hz, while narrowing or widening the slit breaks the balance and lowers the peak; the panel depth is lambda/38" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber.svg" alt="Absorption of a slit panel loaded by one Helmholtz resonator: the critically-coupled design reaches alpha = 1 at 300 Hz, while narrowing the slit (more loss) or widening it (less loss) breaks the balance and lowers the peak; the panel depth is lambda/38" width="80%"></picture>
 
-*One resonator, one slit, one loss-versus-leakage balance: the critically
+*One resonator, one slit, one loss-versus-leakage balance. The critically
 coupled design reaches $\alpha = 1$ at 300 Hz in a panel only $\lambda/38$
-deep; detuning the slit height drops the peak below one.*
+deep; narrowing the slit over-damps the resonance and widening it
+under-damps it, both dropping the peak below one.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -215,9 +293,40 @@ with the model's visco-thermal effective fluids. At the design slit height
 the standing wave collapses and the tone dies inside the panel; at 1.7 times
 the height the loss balance breaks and the reflection rebuilds it.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_slit_absorber_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_slit_absorber.gif" alt="Animation: a 300 Hz plane tone in a 2D FDTD tube meets the meshed critical-coupling cell, its 0.98 mm slit and Helmholtz resonator resolved on the grid and shown in a zoomed panel; at the design slit height the pressure envelope stays flat and the annotated library absorption is 1.00, while the 1.7 times wider slit stands a deep wave in front of the panel and the absorption drops to 0.34" width="640" height="360" loading="lazy"></picture>
+**Video:** [Inside the slow-sound slit absorber in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_slit_absorber.webm): A 300 Hz plane tone in a 2D FDTD tube meets the meshed critical-coupling cell, its 0.98 mm slit and Helmholtz resonator resolved on the grid and shown in a zoomed panel. At the design slit height the pressure envelope stays flat and the annotated library absorption is 1.00; the 1.7 times wider slit stands a deep wave in front of the panel and the absorption drops to 0.34.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_slit_absorber.webm)
+### Off normal incidence
+
+Every snippet and figure above is at normal incidence, and the matching
+condition carries a $\cos\theta$: $\mathrm{Re}(Z)\cos\theta = Z_0$. The
+structure is locally reacting, so the internal chain is angle-independent and
+only the front-face air impedance moves with $\theta$; a panel matched at
+normal incidence therefore becomes progressively mismatched as the angle
+grows, without the resonance moving in frequency. How much it costs is a
+question the model answers directly, and the answer is milder than the
+algebra suggests:
+
+```python
+# The same 300 Hz design, evaluated off normal. Both the solver and the
+# evaluator take `angle_rad` in radians.
+for degrees in (0.0, 15.0, 30.0, 45.0, 60.0):
+    off = materials.slit_helmholtz_absorber(
+        np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
+        lattice_step_m=3.0e-2, period_m=5.0e-2, angle_rad=np.radians(degrees),
+    )
+    print(degrees, round(float(off.absorption[0]), 3))
+# 0.0 1.0 / 15.0 1.0 / 30.0 0.995 / 45.0 0.971 / 60.0 0.889
+```
+
+The peak stays at 300 Hz and falls only to 0.89 at 60°, which is what the
+source paper means by *quasi-omnidirectional* absorption. Two design options
+follow. Tune at the angle the panel will mostly see (`critical_coupling_design`
+takes the same `angle_rad` argument) when the installation has a dominant
+direction; or accept the normal-incidence design, which is the more tolerant
+choice across angle. Either way, expect a
+reverberation-room measurement of such a panel to come out below the
+normal-incidence $\alpha = 1$, since the diffuse field weights exactly the
+oblique angles where the match is worst.
 
 ## 3. How slow is the sound?
 
@@ -258,6 +367,97 @@ section 1 places its reflection zero. Slow sound moves the resonance into the
 deep-subwavelength regime; critical coupling then makes that resonance
 perfectly absorbing.
 
+Four scalars are a thin account of a dispersion relation, so here it is:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_dispersion_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_dispersion.svg" alt="Phase speed inside the loaded slit divided by the free-air speed, against frequency from 50 to 3000 hertz, falling from about 0.2 to a minimum of 0.08 near 380 hertz and then rising steeply past the resonator resonance at 484 hertz, above which the region is greyed as a closed branch. A flat line at unity marks the empty slit, the 300 hertz design frequency is marked at 0.11, and a second axis reads the quarter-wave frequency of the fixed 30 mm depth built from that phase speed, crossing the design frequency where the panel resonates" width="86%"></picture>
+
+*The mechanism the guide is named after, over frequency. The empty slit sits
+on 1 by definition; the loaded one falls to a minimum of 0.08 $c_0$ near
+379 Hz and then climbs steeply as the resonators pass their own resonance at
+485 Hz, above which the propagating branch closes. At the 300 Hz design point
+the phase speed is 0.11 $c_0$ = 37 m/s, which makes the fixed 30 mm depth a
+quarter wavelength at 308 Hz, where the panel resonates. The same 30 mm of
+plain air would be a quarter wave at 2858 Hz, and that ratio is the whole
+argument for the panel being thin. The same curve explains the 2 cm
+metadiffuser panel of the
+[metadiffuser guide](../diffusers/metadiffusers.md).*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+f_sweep = np.geomspace(50.0, 3000.0, 400)
+swept = materials.slit_helmholtz_absorber(
+    f_sweep, design.resonator, slit_height_m=design.slit_height_m,
+    lattice_step_m=3.0e-2, period_m=5.0e-2,
+)
+c_ratio = 2 * np.pi * f_sweep / swept.effective_wavenumber.real / 343.0
+print(round(float(c_ratio.min()), 3), round(float(f_sweep[c_ratio.argmin()])))  # 0.08 381
+```
+
+</details>
+
+### Where the effective wavenumber comes from
+
+The wavenumber the result returns is not a fitted number: it is the product of
+two visco-thermal models the library also exposes on their own. The empty slit
+already has a complex effective density and bulk modulus, set by the viscous
+and thermal boundary layers against its walls, which is why a sub-millimetre
+slit is lossy at all, and each resonator adds a shunt impedance in parallel
+with it.
+
+```python
+# The empty slit, at the design frequency and slit height.
+channel = materials.slit_effective_properties(
+    np.array([300.0]), slit_height_m=design.slit_height_m
+)
+rho_e, k_e = channel.effective_density, channel.bulk_modulus
+print(np.round(rho_e, 3))      # [1.355-0.203j]  against free air 1.205 kg/m^3
+print(f"{k_e[0]:.3e}")         # 1.332e+05+7.725e+03j  against adiabatic 1.419e+05 Pa
+
+# One resonator's shunt impedance, either side of its own resonance at 484 Hz.
+z_hr = materials.helmholtz_resonator_impedance(
+    np.array([300.0, 484.0, 800.0]), design.resonator,
+    slit_height_m=design.slit_height_m, lattice_step_m=3.0e-2,
+)
+print(np.sign(z_hr.imag))      # [-1. -1.  1.]  compliance below, mass above
+```
+
+Below its own resonance the shunt is a compliance: it softens the slit
+without adding moving mass, and that is exactly what lowers the phase speed.
+`materials.rectangular_duct_properties(f, side_m=1.0e-3)` gives the same
+effective pair for a square duct when the guiding geometry is a duct rather
+than a slit, and all three take the air as a `Fluid` (`fluid=`, by default
+`materials.ABSORBER_AIR`: speed of sound, density, viscosity, Prandtl number,
+heat-capacity ratio, static pressure), so a design for a hot exhaust duct or
+a cabin at altitude changes one argument rather than the model.
+
+Both visco-thermal models are held to the limits they must reach exactly. As
+the boundary layers vanish in a wide channel, the effective density and bulk
+modulus tend to those of free air, $\rho_0$ and $\kappa_0$; as
+$\omega \to 0$, $j\omega\rho$ tends to the Poiseuille flow resistivity of the
+channel, $12\eta/h^2$ for a slit of height $h$ and $28.454\,\eta/w^2$ for a
+square duct of side $w$. The tests and the conformance report check both:
+
+```python
+f_dc = np.array([1.0e-2])                     # 0.01 Hz: steady flow
+eta = materials.ABSORBER_AIR.viscosity
+slit = materials.slit_effective_properties(f_dc, slit_height_m=1.2e-3)
+duct = materials.rectangular_duct_properties(f_dc, side_m=3.0e-3)
+sigma_slit = (1j * 2 * np.pi * f_dc * slit.effective_density)[0].real
+sigma_duct = (1j * 2 * np.pi * f_dc * duct.effective_density)[0].real
+print(round(sigma_slit, 1), round(12 * eta / 1.2e-3**2, 1))       # 153.3 153.3
+print(round(sigma_duct, 2), round(28.454 * eta / 3.0e-3**2, 2))   # 58.17 58.17
+```
+
+Those limits are what settle the square-duct series as Jiménez et al. (2017)
+print it in Eqs. (7) and (8): its leading constant of 4 gives sixteen times
+$\rho_0$ where only 64 reaches both. That constant, and a slit-radiation term
+printed in the opposite time convention, which would raise the resonance an
+added mass must lower, are the two entries of the
+[errata registry](../../ERRATA.md) on these papers; the library
+implements 64 and the added-mass sign.
+
 ## 4. Classical resonant absorbers through the same lens
 
 Critical coupling is not exclusive to metamaterials; it is the organising
@@ -279,90 +479,156 @@ principle hiding inside the classical resonant absorbers of the
   the flexural loss of a limp sheet; the same loss-versus-leakage balance
   governs their peak, and adding masses to the membrane (the decorated
   membrane of the metamaterials literature) tunes the resonance downward the
-  way the loading resonators tune the slit. They appear here as context only:
-  the classical membrane layer is implemented in the
-  [multilayer solver](porous-absorbers.md), and the decorated membrane is not
-  implemented in the library.
+  way the loading resonators tune the slit.
 - **The design question is always the same.** Pick the resonance with the
   geometry, then match the loss to the leakage. The porous-layer models ask
   "how thick"; the resonant family asks "how lossy", and
   `critical_coupling_design` answers it for the slit panel exactly.
 
-The price of resonance is bandwidth: a critically coupled peak is narrow, and
-away from it the panel reflects like the rigid wall it almost is. Broadband
-metamaterial absorbers stack detuned cells side by side (the iridescent
-absorber of Jiménez et al. 2017 chains resonators of graded dimensions for
-exactly this reason); in the library the spectrum of any candidate geometry comes
-from `slit_helmholtz_absorber` over a frequency array, so a graded design is
-a loop over cells.
+The price of resonance is bandwidth, and it is worth a number rather than an
+adjective. The 300 Hz design keeps $\alpha \geq 0.8$ from 282 Hz to 320 Hz and
+$\alpha \geq 0.5$ from 266 Hz to 341 Hz, a third of an octave, against a
+50 mm porous blanket that gives about 0.68 at 500 Hz and keeps working over
+decades above it. A metamaterial absorber is therefore a tool for a *known*
+tonal or modal problem, not a general treatment: it buys depth with bandwidth.
+
+The usual answer is to stop asking one cell to do the work. Chaining $N$
+resonators along one slit is what the library's own list argument is for:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/graded_slit_absorber_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/graded_slit_absorber.svg" alt="Absorption against frequency from 120 to 700 hertz for three panels: a single critically coupled cell with one narrow peak reaching 1.0 near 320 hertz, a chain of four graded resonators along one slit with two lobes reaching 1.0 near 150 hertz and 0.95 near 295 hertz, and a chain of four identical resonators with two lower lobes. Shaded bars beneath each curve mark where each exceeds 0.8, totalling 38, 51 and 22 hertz respectively" width="86%"></picture>
+
+*What a chain buys, and what it costs. Measured as the total frequency
+interval above $\alpha = 0.8$, not as the span between the outermost points,
+which for a chain hides a dip: one cell gives 38 Hz, the four graded
+resonators give 51 Hz in two lobes, and four *identical* resonators of the
+same total depth give only 22 Hz. So the extra stages alone do not buy
+bandwidth: detuning them is what makes the depth pay, which is the whole idea
+behind the rainbow-trapping designs of Jiménez et al. (2017). The cost is
+geometric and unavoidable, since $L = N a$: the four-stage panel is 120 mm
+deep against the single cell's 30 mm, and its slit height (1.2 mm here) is a
+compromise no longer critically coupled to any one stage.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# `slit_helmholtz_absorber` takes a list: that is the chain along the slit.
+f_chain = np.linspace(120.0, 700.0, 700)
+graded = [materials.critical_coupling_design(target, base, lattice_step_m=3.0e-2,
+                                             period_m=5.0e-2).resonator
+          for target in (250.0, 320.0, 410.0, 520.0)]
+chain = materials.slit_helmholtz_absorber(f_chain, graded, slit_height_m=1.20e-3,
+                                          lattice_step_m=3.0e-2, period_m=5.0e-2)
+step = float(f_chain[1] - f_chain[0])
+print(round(float(chain.absorption.max()), 3),
+      round(float(np.sum(chain.absorption >= 0.8)) * step))     # 0.999 51
+```
+
+</details>
+
+## 5. From the solver to a measured panel
+
+Nothing above has been built. Four things stand between the solved geometry
+and a panel that can be put in front of an instrument.
+
+**The slit tolerance is a design parameter.** The solved slit is 0.978 mm, and
+the loss balance is set by that sub-millimetre dimension. Holding the design
+frequency at 300 Hz, a slit machined 0.02 mm narrow or wide still gives
+$\alpha = 0.997$; at ±0.05 mm it is 0.982 and 0.984; at ±0.10 mm it has
+fallen to 0.931 and 0.939. So a few hundredths of a millimetre is the working
+tolerance, and a tenth is where the panel stops being *perfect*. Note which
+way the two errors fail: a narrow slit over-damps ($z = 1.09 + 0.27\mathrm{j}$
+at −0.05 mm) and a wide one under-damps ($0.93 - 0.24\mathrm{j}$ at
++0.05 mm). Err wide. The visco-thermal model assumes smooth rigid walls, so
+additive-manufacturing roughness is *extra* loss that pushes an as-designed
+panel towards over-damping; a prototype cut slightly wide and trimmed converges
+from the right side.
+
+**A periodic panel does not fit an arbitrary tube.** ISO 10534-2 Clause 6
+requires a specimen with a regular lateral structure to be cut *along the lines
+of symmetry* of that structure, and where the structural units do not fit the
+tube cross-section, to be measured on several specimens with the cut moved
+relative to the structure. The 50 mm period here does not fit a 29 mm tube at
+all and fits a 100 mm circular tube only as two whole periods across one
+diameter, which is not a symmetric cut. The clean route is a **square or
+rectangular tube whose side is an integer number of periods**, with the rigid
+tube walls acting as the symmetry planes of the infinite array, and then the
+plane-wave ceiling has to be recomputed for that geometry with
+`plane_wave_frequency_range(..., shape="rectangular")` on the maximum side
+length, not on a nominal diameter.
+
+**Put the reference plane where the model does.** The tube's $x = 0$ is the
+panel face, not the mouth of the slit and not the front of the frame; a
+millimetre of error there rotates the measured impedance without touching the
+absorption, exactly as the
+[impedance-tube guide](impedance-tube.md#3-transfer-function-method-iso-10534-2)
+describes.
+
+**Or measure it as a surface.** If the panel is meant for a room rather than
+for a duct, the honest verification is a 10–12 m² specimen in a reverberation
+room to [ISO 354](absorption-measurement.md), and the
+result will be the random-incidence coefficient, not the $\alpha = 1$ the
+normal-incidence design promises, for the reason set out under off-normal
+incidence above.
+
+## What this guide covers
+
+- **Covered.** The slit + Helmholtz-resonator metamaterial absorber of Jiménez et al.
+  (2016/2017): the transfer-matrix chain with the Stinson (1991) visco-thermal
+  effective parameters, the resonator impedance with its radiation end
+  corrections and the slit-radiation term (`slit_helmholtz_absorber`, with
+  `HelmholtzResonator` as the geometry container and the retrieved
+  `effective_wavenumber` and `effective_impedance` exposed on the result), and
+  the critical-coupling design solver (`critical_coupling_design`) that tunes
+  cavity length and slit height until the reflection zero sits on the
+  real-frequency axis. The two visco-thermal building blocks the chain is
+  assembled from are exposed as well (`slit_effective_properties`,
+  `rectangular_duct_properties` and `helmholtz_resonator_impedance`, all taking
+  the air as a `Fluid`), and `slit_helmholtz_absorber` accepts a *list* of
+  resonators, which is the graded chain of section 4.
+
+- **Not covered.** No measurement standard governs these prediction models; section 5 sets out
+  the route a built panel would be verified along, in the [impedance
+  tube](impedance-tube.md) (ISO 10534-2) or the
+  [reverberation room](absorption-measurement.md)
+  (ISO 354), but nothing here performs any of it: the tolerance and angle
+  figures quoted are model evaluations, and the roughness of a printed slit, the
+  frame, the mounting and the finite panel size are all outside the model. The
+  membrane and decorated-membrane absorbers of section 4 are discussed as
+  context only; the classical perforated, microperforated and membrane layers
+  are implemented in [Porous and Multilayer
+  Absorbers](porous-absorbers.md), and the
+  resonator-loaded slit used as a phase element rather than an absorber is the
+  subject of [Metadiffusers](../diffusers/metadiffusers.md).
 
 ## See also
 
-- [Porous and Multilayer Absorbers](porous-absorbers.md): the equivalent-fluid
-  and resonant layers of the classical family, including the Maa
-  microperforated panel that section 4 re-reads.
-- [Metadiffusers](../diffusers/metadiffusers.md): the same slit and resonator cell tuned
-  for controlled reflection phase instead of perfect absorption; its ternary
-  designs borrow the critically coupled slit as their `0` state.
-- [Impedance Tube](impedance-tube.md): the normal-incidence measurement a
-  built panel would be verified in, and the virtual FDTD tube behind the
-  animation above.
-- [Airflow Resistance](airflow-resistance.md): the viscous physics of the
-  narrow channels, measured on the bulk material.
+- [Porous and Multilayer Absorbers](porous-absorbers.md):
+  the equivalent-fluid and resonant layers of the classical family, including
+  the Maa microperforated panel that section 4 re-reads.
+- [Metadiffusers](../diffusers/metadiffusers.md): the same slit and
+  resonator cell tuned for controlled reflection phase instead of perfect
+  absorption; its ternary designs borrow the critically coupled slit as their
+  `0` state.
+- [Impedance Tube](impedance-tube.md): the normal-incidence
+  measurement a built panel would be verified in, and the virtual FDTD tube
+  behind the animation above.
+- [Airflow Resistance](airflow-resistance.md): the viscous
+  physics of the narrow channels, measured on the bulk material.
 - API reference: [`materials.absorbers.slow_sound`](https://docs.jmrp.io/phonometry/reference/api/materials/slow-sound/).
+- Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the surface-impedance and absorption definitions the resonator models are evaluated against.
 
 ## References
 
-- Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).
-  Iridescent perfect absorption in critically-coupled acoustic metamaterials
-  using the transfer matrix method. *Applied Sciences*, 7(6), 618.
-  [doi:10.3390/app7060618](https://doi.org/10.3390/app7060618). The slit +
-  Helmholtz-resonator transfer-matrix model and the critical-coupling
-  condition implemented in `slit_helmholtz_absorber`, plus the graded
-  (iridescent) broadband chains of section 4.
-- Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P.
-  (2016). Ultra-thin metamaterial for perfect and quasi-omnidirectional sound
-  absorption. *Applied Physics Letters*, 109(12), 121902.
-  [doi:10.1063/1.4962328](https://doi.org/10.1063/1.4962328). The resonator
-  impedance (Eq. A23) and its radiation end corrections (Eqs. A24-A27), and
-  the published $\lambda/88$ perfect absorber cited in the introduction.
-- Stinson, M. R. (1991). The propagation of plane sound waves in narrow and
-  wide circular tubes, and generalization to uniform tubes of arbitrary
-  cross-sectional shape. *Journal of the Acoustical Society of America*,
-  89(2), 550-558. [doi:10.1121/1.400379](https://doi.org/10.1121/1.400379).
-  The visco-thermal effective parameters of the slit and the square necks
-  and cavities.
-- Maa, D.-Y. (1998). Potential of microperforated panel absorber.
-  *Journal of the Acoustical Society of America*, 104(5), 2861-2866.
-  [doi:10.1121/1.423870](https://doi.org/10.1121/1.423870).
-  The MPP impedance and design formulas whose $r = 1$ peak condition
-  section 4 identifies with critical coupling.
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  ISBN 978-1-4987-4099-9.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  The classical resonant-absorber designs the metamaterial family extends.
-- Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021). *Acoustic waves in
-  periodic structures, metamaterials, and porous media* (Topics in Applied
-  Physics, Vol. 143). Springer.
-  [doi:10.1007/978-3-030-84300-7](https://doi.org/10.1007/978-3-030-84300-7).
-  The book-length treatment of critical coupling, slow sound and resonant
-  metamaterial absorbers.
-
-## Standards
-
-No standard governs these prediction models; they are journal methods
-(Jiménez et al. 2016/2017; Stinson 1991) implemented clean-room from the
-cited sources. The model is pinned to its exact analytic anchors: the
-critical-coupling design reaches $\alpha = 1$ at the design frequency, the
-slit and square-duct effective densities reduce to the Poiseuille flow
-resistivities $12\eta/h^2$ and $28.454\eta/w^2$ as $\omega \to 0$, and the
-effective parameters tend to $\rho_0$, $\kappa_0$ as the boundary layers
-vanish. A built panel would be measured in the
-[impedance tube](impedance-tube.md) (ISO 10534-2) or the
-[reverberation room](absorption-measurement.md) (ISO 354): nothing here
-performs any of that verification, and the roughness of a printed slit, the
-frame, the mounting and the finite panel size are all outside the model.
-Misprints found in
-the source papers during this work are recorded in the
-[errata registry](../../ERRATA.md).
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  ISBN 978-1-4987-4099-9. The classical resonant-absorber designs the metamaterial family extends.
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+  The slit + Helmholtz-resonator transfer-matrix model and the critical-coupling (perfect-absorption) condition implemented in slit_helmholtz_absorber, plus the graded (iridescent) broadband chains of section 4.
+- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. https://doi.org/10.1063/1.4962328
+  The resonator impedance (Eq. A23), its radiation end corrections (Eqs. A24-A27), the worked slow-sound examples and the published lambda/88 perfect absorber cited in the introduction.
+- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. https://doi.org/10.1007/978-3-030-84300-7
+  Topics in Applied Physics, Vol. 143. The book-length treatment of critical coupling, slow sound and resonant metamaterial absorbers.
+- **Maa, D.-Y. (1998).** Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. https://doi.org/10.1121/1.423870
+  The MPP impedance and design formulas whose r = 1 peak condition section 4 identifies with critical coupling.
+- **Stinson, M. R. (1991).** The propagation of plane sound waves in narrow and wide circular tubes, and generalization to uniform tubes of arbitrary cross-sectional shape. *The Journal of the Acoustical Society of America*, *89*(2), 550-558. https://doi.org/10.1121/1.400379
+  The visco-thermal effective density and bulk modulus of the slit and of the square necks and cavities.

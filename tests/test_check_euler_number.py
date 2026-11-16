@@ -20,6 +20,7 @@ if _SCRIPTS not in sys.path:
 
 import check_euler_number as cen
 import pytest
+from github_edition import EDITION_MARK
 
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.
@@ -230,3 +231,17 @@ def test_the_base_of_the_natural_logarithm_is_the_constant(
         "$\\ln x = \\log_e x$, $\\log_{e} y$ and $\\log_\\mathrm{e} z$\n",
     )
     assert cen.file_findings(path.read_text(encoding="utf-8"), ".md") == [1, 1]
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here."""
+    maths = "$e^{-t}$\n"
+    edition = tmp_path / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\n{maths}", encoding="utf-8"
+    )
+    by_hand = tmp_path / "notes.md"
+    by_hand.write_text(maths, encoding="utf-8")
+    assert cen.collect([str(tmp_path)]) == [by_hand]

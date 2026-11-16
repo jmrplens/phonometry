@@ -30,7 +30,13 @@ vacuous.
    split and recomposed by :mod:`conformance.references`, character for
    character, and then has to have an entry in ``docs/reference/bibliography.md``.
    A book cited from ``src`` and missing from the bibliography is a source the
-   reader cannot resolve; the sweep that added this guard found one.
+   reader cannot resolve; the sweep that added this guard found one. That file
+   is the site's bibliography as ``make llms`` writes it for GitHub, read here
+   because it is the one place the list exists as text: the site page builds
+   its entries from the references of the pages that cite each work, so its
+   source holds none, and CI fails while the file differs from what the site
+   would write. A missing work is added to the references of a page that cites
+   it, and ``make llms`` writes it here.
 
 3. **The registry, so the guard has something to be true of.**
    :data:`SOURCED` names every table in ``src`` transcribed from a book or a
@@ -100,6 +106,7 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PACKAGE = pathlib.Path(phonometry.__file__).resolve().parent
+#: The site's bibliography written out (rule 2 of the module docstring).
 BIBLIOGRAPHY = ROOT / "docs" / "reference" / "bibliography.md"
 
 #: The field a record uses to say where it was read.
@@ -548,15 +555,24 @@ NOT_TRANSCRIBED: dict[tuple[str, str], str] = {
     "named for Eq. 6.29, which consumes them",
 }
 
+#: How every entry of the bibliography opens: a list item whose author and
+#: year are in bold, as the site's bibliography prints them and as its GitHub
+#: copy is written from the page (an entry without the bold reads the same).
+#: The three readers of an entry below build on it, so that its shape is
+#: stated once.
+_ENTRY_OPENING = r"^- (?:\*\*)?"
+
 #: One bibliography entry: the lead surname, or the organisation, it opens
-#: with. A person is written ``- Cremer, L., ...`` and a body that authors its
-#: own handbook is written ``- ASHRAE (2019). ...``, which is the APA shape for
-#: a corporate author and was invisible to the first version of this pattern:
-#: it required a comma or a full stop straight after the lead, so every
-#: organisation in the bibliography was missing from the ratchet and a table
-#: transcribed from one of their handbooks could sit in ``src`` uncited while
-#: the gate reported green. Found by ASHRAE Chapter 49.
-_BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)(?:[,.]| \()", re.MULTILINE)
+#: with. A person is written ``- **Cremer, L., ...`` and a body that authors
+#: its own handbook is written ``- **ASHRAE (2019). ...``, which is the APA
+#: shape for a corporate author and was invisible to the first version of this
+#: pattern: it required a comma or a full stop straight after the lead, so
+#: every organisation in the bibliography was missing from the ratchet and a
+#: table transcribed from one of their handbooks could sit in ``src`` uncited
+#: while the gate reported green. Found by ASHRAE Chapter 49.
+_BIBLIOGRAPHY_ENTRY = re.compile(
+    _ENTRY_OPENING + r"(?P<lead>[^\s,.*]+)(?:[,.]| \()", re.MULTILINE
+)
 
 #: A body the banners cite by the abbreviation its handbook goes by, with the
 #: name the bibliography lists it under. APA spells a group author out in full
@@ -577,7 +593,9 @@ ABBREVIATED_BODIES: Mapping[str, str] = MappingProxyType(
 def _lists_body(text: str, name: str, year: str = r"[^)]+") -> bool:
     """Whether *text* holds an entry that opens with the body *name* and *year*."""
     return (
-        re.search(rf"^- {re.escape(name)}\. \({year}\)\.", text, re.MULTILINE)
+        re.search(
+            rf"{_ENTRY_OPENING}{re.escape(name)}\. \({year}\)\.", text, re.MULTILINE
+        )
         is not None
     )
 
@@ -773,8 +791,8 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
         if not lead:
             continue
         # The same two shapes ``_BIBLIOGRAPHY_ENTRY`` accepts: a person,
-        # written ``- Cremer, L., ...``, and an organisation that authors
-        # its own handbook, written ``- ASHRAE (2019). ...``. A corporate
+        # written ``- **Cremer, L., ...``, and an organisation that authors
+        # its own handbook, written ``- **ASHRAE (2019). ...``. A corporate
         # designation usually carries its year, so the lead ends up being
         # "ASHRAE (2019)" and the full stop follows it; one written without
         # a year would reach here as "ASHRAE" and be rejected against an
@@ -787,7 +805,9 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
             body = ABBREVIATED_BODIES.get(abbreviated["body"])
             if body is not None and _lists_body(text, body, abbreviated["year"]):
                 continue
-        if not re.search(rf"^- {re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE):
+        if not re.search(
+            rf"{_ENTRY_OPENING}{re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE
+        ):
             problems.append(
                 f"{cite!r} names {designation!r}, which has no entry in "
                 "docs/reference/bibliography.md"

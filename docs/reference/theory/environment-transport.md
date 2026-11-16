@@ -1,8 +1,20 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/environment-transport.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/environment-transport/
 
 # Theory: Environment and Transport
 
 This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](index.md).
+
+Each section keeps its own standard's notation, and four letters are reused
+across them. Read them per section:
+
+| Symbol | In the propagation sections | In the sound-power sections |
+| :--- | :--- | :--- |
+| $A$ | Octave-band attenuation, in dB (ISO 9613-2) | Equivalent absorption area of the room, in m² |
+| $A_0$ | — | Reference absorption area, 1 m²; except in the ISO 3745 air term, where $A_0 = a(f)\,r$ is a dimensionless absorption product |
+| $C_1$, $C_2$ | Barrier constants in $D_z$ (ISO 9613-2) | Meteorological corrections (ISO 3745, ISO 3741) |
+| $K$ | — | $K_1$ background, $K_2$ reverberant field, $K_\mathrm{I}$ impulse adjustment, and plain $K$ the bias-error factor of the intensity methods; $K_\mathrm{met}$ is the ISO 9613-2 barrier meteorological factor |
 
 ## Environmental descriptors (ISO 1996-1)
 
@@ -26,11 +38,35 @@ $$
 
 The adjustments $K_i$ cover time-of-day penalties (ISO 1996-1 Table A.1: evening 5 dB, night 10 dB) as well as source-character adjustments (e.g. tonal penalties), which the ECMA-418-1 TNR/PR assessments can justify objectively.
 
+**What the penalties are, and what the number means.** The +5 and +10 dB are not
+physics: nothing about the sound changes at 19:00. They encode a dose-response
+finding: the same acoustic energy is reported as more annoying when it
+interrupts an evening at home or a night's sleep, so $L_\mathrm{den}$ is an
+*annoyance* indicator built out of acoustic levels and must never be read back
+as one. On the scale it lives on, a rural night sits in the 40s, a quiet
+residential street in the mid-50s and a façade on a busy urban arterial in the
+high 60s, and the Environmental Noise Directive reports strategic maps in 5 dB
+$L_\mathrm{den}$ bands from 55 dB upward. The weighting also decides where a mitigation
+is worth applying: an hour of night enters with $10 \times 8/24$ against the
+day's $12/24$, so a decibel bought at night is worth about 6.7 times a decibel
+bought during the day, but only once the night is loud enough to matter, and
+the crossover is arithmetic. The night term overtakes the day term when the
+night level comes within about 8 dB of the day level; in the profile below the
+night is 14.4 dB below the day, so it contributes only 12.5 % of the total
+against the day's 51.3 %, and 3 dB off the day moves $L_\mathrm{den}$ by 1.3 dB where
+3 dB off the night moves it by 0.3 dB. Check the split before choosing where to
+spend.
+
+See the [Environmental Levels guide](../../environment/assessment/environmental-levels.md) for usage.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
 
-*A 24-hour $L_\mathrm{Aeq}$ profile split into day, evening and night, the +5/+10 dB penalties and the resulting $L_\mathrm{den}$.*
-
-See the [Environmental levels guide](../../environment/assessment/environmental-levels.md) for usage.
+*A 24-hour $L_\mathrm{Aeq}$ profile split into day, evening and night, the +5/+10 dB
+penalties and the resulting $L_\mathrm{den}$ of 64.3 dB, an urban arterial façade,
+squarely inside the range the Directive maps. The day averages 64.4 dB, the
+evening 62.6 dB and the night 50.0 dB; the penalties lift the evening and night
+lines above their own levels, and $L_\mathrm{den}$ still lands within 0.1 dB of the
+day, because a night that quiet cannot move it.*
 
 ## Impulsive-sound prominence (NT ACOU 112)
 
@@ -40,7 +76,18 @@ $$
 P = 3 \log_{10}(\text{onset rate}) + 2 \log_{10}(\text{level difference}),
 $$
 
-designed to peak around 15 for very sudden, loud impulses. The adjustment to the measurement-period level takes the governing (highest-$P$) impulse (clause 8, Formula 2):
+designed to peak around 15 for very sudden, loud impulses.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets.svg" alt="A-weighted Fast level history of three hammer strikes over a 55 dB(A) background across six seconds: each strike rises from about 52 dB to 89 dB, the detected onset start and end points are marked with the least-squares onset line, the governing level difference of 36.8 dB is annotated, and the title reports a prominence of 11.34 with an adjustment of 11.42 dB, category highly impulsive" width="90%"></picture>
+
+*Both inputs of $P$ are geometry on this trace, which is why the method needs a
+level history and not a level. The onset rate is the slope of the fitted line
+through the rise, in dB/s, and the qualifying threshold of 10 dB/s is a
+steepness on this axis; the level difference is the height of the same rise.
+Three strikes are detected here and only the steepest-and-tallest one governs
+the adjustment.*
+
+The adjustment to the measurement-period level takes the governing (highest-$P$) impulse (clause 8, Formula 2):
 
 $$
 K_\mathrm{I} = 1.8\ (P - 5)\ \text{dB} \quad (P > 5;\ \text{else } K_\mathrm{I} = 0),
@@ -54,18 +101,17 @@ $$
 
 $K_\mathrm{I}$ is exactly the kind of source-character adjustment that enters the ISO 1996-1 composite rating level above. The anchors $P(1000\ \text{dB/s}, 30\ \text{dB}) = 9 + 2\log_{10} 30 = 11.95$ and $K_\mathrm{I}(P{=}10) = 9.0$ dB are reproduced exactly.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets.svg" alt="A-weighted Fast level history of three hammer strikes over a 55 dB(A) background across six seconds: each strike rises from about 52 dB to 89 dB, the detected onset start and end points are marked with the least-squares onset line, the governing level difference of 36.8 dB is annotated, and the title reports a prominence of 11.34 with an adjustment of 11.42 dB, category highly impulsive" width="90%"></picture>
-
-*Both inputs of $P$ are geometry on this trace, which is why the method needs a
-level history and not a level. The onset rate is the slope of the fitted line
-through the rise, in dB/s, and the qualifying threshold of 10 dB/s is a
-steepness on this axis; the level difference is the height of the same rise.
-Three strikes are detected here and only the steepest-and-tallest one governs
-the adjustment.*
+**Which document to cite.** ISO has since published the same construction as
+ISO/PAS 1996-3:2022, so a survey report may cite either; the prominence $P$ and
+the adjustment $K_\mathrm{I}$ implemented here follow the NT ACOU 112 formulation that the
+PAS reproduces. What requires an adjustment at all is ISO 1996-2:2017, the
+measurement part: the objective procedure only decides how large the adjustment
+is, and it is ISO 1996-1 that then combines the adjusted periods into a rating
+level.
 
 See the [Impulse Prominence guide](../../environment/assessment/impulsive-sound.md) for usage.
 
-## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
+## Outdoor propagation (ISO 9613-1/2)
 
 ### Atmospheric absorption (ISO 9613-1)
 
@@ -95,6 +141,21 @@ $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Note 5) used to compute that table. The s
 $\alpha$ is the only route to the ISO 354 power attenuation coefficient
 $m = \alpha/(10 \log_{10} e)$, exposed as `air_power_attenuation_per_m`.
 
+That $\pm 10$ % is not unconditional. Table 1 is tabulated from 50 Hz to 10 kHz,
+−20 to +50 °C and 10 to 100 % relative humidity at one atmosphere, and the
+$\pm 10$ % accuracy is claimed only for molar water-vapour concentrations
+between 0.05 % and 5 % with the temperature between 253 and 323 K (Clause 7.1);
+outside that humidity window it degrades to about $\pm 20$ % (7.2) and below
+$h = 0.005$ % to about $\pm 50$ % (7.3). Because $\alpha$ multiplies path length, that percentage
+becomes a level error that grows with distance: the same $\pm 20$ % on a
+coefficient of 30 dB/km is $\pm 0.2$ dB at 30 m and $\pm 6$ dB at a kilometre,
+which is why atmospheric absorption is usually the largest single uncertainty in
+a long-range prediction and why a *measured* humidity is worth more than a
+carefully measured temperature: the relaxation frequencies move with humidity,
+so the attenuation in a given band is far more sensitive to it. Interpolating
+the printed table is expressly discouraged (Clause 6.4); the equations, which is
+what the library evaluates, are the intended route.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency, on a linear decibel ordinate over a logarithmic frequency axis, for the reference 20 degrees Celsius and 50 percent relative humidity atmosphere, produced by the AtmosphericAttenuation result plot method" width="80%"></picture>
 
 *The ISO 9613-1 coefficient for the 20 °C, 50 % relative-humidity reference atmosphere: the $f^2$ rise spans two decades from 50 Hz to 10 kHz.*
@@ -112,8 +173,9 @@ less: 0 °C at 70 % and 20 °C at 50 % differ by 0.02 dB/km at 1 kHz.*
 
 ### Outdoor propagation, general method (ISO 9613-2)
 
-ISO 9613-2:1996 predicts the octave-band level at a receiver **downwind** of a
-point source (or the equivalent moderate temperature inversion) as
+ISO 9613-2:1996 predicts the octave-band level at a receiver under **downwind
+propagation**: a light wind blowing from source to receiver, or the moderate
+ground-based temperature inversion that bends rays the same way (clause 5), as
 $L_{fT}(DW) = L_W + D_\mathrm{c} - A$ (Eq. (3)), where $D_\mathrm{c}$ is the directivity correction
 and $A$ is the octave-band attenuation, a sum of independent physical mechanisms
 (Eq. (4)):
@@ -121,6 +183,19 @@ and $A$ is the octave-band attenuation, a sum of independent physical mechanisms
 $$
 A = A_\mathrm{div} + A_\mathrm{atm} + A_\mathrm{gr} + A_\mathrm{bar} + A_\mathrm{misc}.
 $$
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
+
+*The four terms at their true relative sizes, band by band, for a 200 m path
+over porous ground with a 4 m barrier. $A_\mathrm{div}$ is 57 dB in every band because
+it is pure geometry. $A_\mathrm{atm}$ is nothing at 63 Hz and 18.7 dB at 8 kHz, so it
+is the term that decides how far high frequencies travel and no other. $A_\mathrm{gr}$
+is where the low bands live and is **negative** at 63 Hz (−4.6 dB: the ground
+reflection adds energy rather than removing it). $A_\mathrm{bar}$ is at its 20 dB cap
+from 2 kHz up but falls to zero at 250 Hz, because the top-edge form subtracts
+the ground effect the screened path gives away, $A_\mathrm{bar} = D_z - A_\mathrm{gr} \geq 0$,
+and 250 Hz is exactly where $A_\mathrm{gr}$ peaks. Which term is worth refining
+depends entirely on the band and the geometry.*
 
 The library implements the four general terms of Clause 7; the informative
 $A_\mathrm{misc}$ (foliage, industrial sites, housing) and reflections are left to the
@@ -148,27 +223,39 @@ $\lambda = 340/f$ and the meteorological factor $K_\mathrm{met}$ (Eq. (18)); $D_
 capped at 20 dB (single) or 25 dB (double). For a top-edge barrier the ground
 effect of the screened path is folded into the screening term,
 $A_\mathrm{bar} = D_z - A_\mathrm{gr} \ge 0$ (Eq. (12), Note 13); for a lateral (vertical-edge)
-barrier $A_\mathrm{bar} = D_z$ and the ground term is kept (Eq. (13)). The long-term
+barrier $A_\mathrm{bar} = D_z$ and the ground term is kept (Eq. (13)). (The standard
+fixes $\lambda = 340/f$ inside the screening term rather than deriving $c$ from
+the temperature, so the barrier attenuation is temperature-independent by
+construction; the atmospheric-absorption term above is not.) The long-term
 average level subtracts the meteorological correction $C_\mathrm{met}$ (Eq. (6),
-(21)/(22)). The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband
-noise up to 1000 m (Table 5).
+(21)/(22)).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
-
-*The four terms at their true relative sizes, band by band, for a 200 m path
-over porous ground with a 4 m barrier. $A_\mathrm{div}$ is 57 dB in every band because
-it is pure geometry. $A_\mathrm{atm}$ is nothing at 63 Hz and 18.7 dB at 8 kHz, so it
-is the term that decides how far high frequencies travel and no other. $A_\mathrm{gr}$
-is where the low bands live and is **negative** at 63 Hz (−4.6 dB: the ground
-reflection adds energy rather than removing it). $A_\mathrm{bar}$ is at its 20 dB cap
-from 2 kHz up but falls to zero at 250 Hz, because the top-edge form subtracts
-the ground effect the screened path gives away, $A_\mathrm{bar} = D_z - A_\mathrm{gr} \geq 0$,
-and 250 Hz is exactly where $A_\mathrm{gr}$ peaks. Which term is worth refining
-depends entirely on the band and the geometry.*
+**Where the method applies, and what counts as a barrier.** It is defined for the
+eight nominal octave midbands from 63 Hz to 8 kHz and for point sources, an
+extended source being decomposed into point sub-sources (clauses 4–5), so a
+one-third-octave chain or a 31.5 Hz band is outside it. It predicts the
+*downwind* level; an upwind or crosswind situation is reached only through the
+long-term correction $C_\mathrm{met}$, never by evaluating Eq. (3) directly. The
+A-weighted-only ground form of Eq. (10) carries two further conditions of its
+own: porous or mostly porous ground, and a sound that is not a pure tone. And an
+object earns a $D_z$ only if it qualifies as a barrier under clause 7.4: a
+surface density of at least 10 kg/m², a closed surface with no large gaps, and a
+horizontal dimension normal to the source-receiver line greater than the
+wavelength, so a slatted fence, a hedge or a wall the sound simply passes
+around is modelled as *no barrier at all*, not as a weak one. Crediting one is
+worth many decibels of error in the wrong direction. Finally, Table 5 gives the
+accuracy by geometry rather than as one range: about $\pm 1$ dB only for a mean
+source-receiver height between 5 and 30 m at distances under 100 m, and about
+$\pm 3$ dB in every other case within 1000 m, with no accuracy stated beyond
+1000 m, where the method is an extrapolation.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" width="92%"></picture>
 
-### Occupational noise exposure and uncertainty (ISO 9612)
+## Occupational noise exposure (ISO 9612)
+
+The quantity itself, $L_\mathrm{EX,8h}$, is defined from sound exposure in
+[Signal Analysis](signal-analysis.md#event-and-dose-metrics);
+this section is about measuring it in a workplace and bounding its uncertainty.
 
 ISO 9612:2009 is the engineering method (accuracy grade 2) for a worker's daily
 noise exposure level $L_\mathrm{EX,8h}$, normalised to a nominal 8 h day. Three
@@ -180,6 +267,22 @@ The *job-based* method (Clause 10) energy-averages $N \ge 5$ random samples over
 homogeneous exposure group (Eq. 11) and normalises the effective-day duration
 (Eq. 12); the *full-day* method (Clause 11) does the same arithmetic on whole-day
 measurements (Eq. 13).
+
+**Where the microphone goes.** With a sound level meter the preferred position is
+the worker's head position *with the worker absent*, in the centre plane of the
+head, on a line with the eyes and with the microphone axis parallel to the
+direction of view, and where the worker must be present, at 0.1 m to 0.4 m from
+the entrance of the external ear canal on the side of the more exposed ear
+(clause 12.4). A body-worn personal sound exposure meter has its microphone on
+top of the shoulder, at least 0.1 m from the ear-canal entrance on the more
+exposed side and about 0.04 m above the shoulder, with microphone and cable
+fastened so that clothing and handling cannot fake a result (12.3). A field
+calibration is performed before and after each series, and a drift above 0.5 dB
+discards the series (12.2). That geometry is what the $u_3 = 1.0$ dB below buys:
+it is not a property of the instrument but the price of the position, and in the
+job and full-day budgets it is usually the second-largest term after the
+sampling spread, so a position taken loosely does not merely widen the interval,
+it quietly voids the grade-2 claim.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg" alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day, task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times), all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1" width="92%"></picture>
 
@@ -219,13 +322,20 @@ See the [Outdoor Propagation guide](../../environment/propagation/outdoor-propag
 
 The sound power level $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) is an
 *emission* quantity: unlike a pressure level it does not depend on the receiver
-distance or the room. Three families of methods recover it, one per measured
-quantity: a **sound pressure** over an enveloping surface (ISO 3744/3746, and
-ISO 3745 when the room is anechoic) or in a diffuse field (ISO 3741), a **sound
-intensity** held at discrete points (ISO 9614-1) or scanned over that same
-surface (ISO 9614-2 and ISO 9614-3), and the **surface velocity** of the
-radiating casing, which takes no acoustic measurement at all: ISO/TS 7849, whose
-radiation factor is the radiation efficiency derived in the
+distance or the room. Three families recover it, one per measured quantity, and
+the choice is dictated by the room available. **Sound pressure** over an
+enveloping surface in a free field above a reflecting plane assumes the
+intensity normal to that surface is the mean-square pressure divided by
+$\rho c$: ISO 3744 (engineering) and ISO 3746 (survey) below, and ISO 3745
+(precision) when the room is anechoic; read in a diffuse field instead, that
+same pressure turns the room's own absorption into the calibration, which is
+ISO 3741. **Sound intensity** measures the flux directly and needs no qualified
+room at all, at the price of a two-channel probe and the field indicators that
+police it: ISO 9614-1 at discrete points, and ISO 9614-2 (engineering) and
+ISO 9614-3 (precision) by scanning. **Surface velocity** reads the radiating
+casing with an accelerometer and takes no acoustic measurement at all, paying
+for that freedom with a radiation factor: that is ISO/TS 7849, whose factor is
+the radiation efficiency derived in the
 [vibration reference](vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The seven sound power routes, one row for each measured quantity, every cell carrying the same five attributes. The sound pressure row: the ISO 3744/3746 hemispherical enveloping surface over a reflecting plane, the ISO 3745 fixed microphone array in a wedge-lined anechoic room, and the ISO 3741 diffuse field of a reverberation room. The sound intensity row: the ISO 9614-1 measurement surface cut into ten segments with the probe held still at a point in each, the ISO 9614-2 serpentine scan swept over that same surface, and the tighter ISO 9614-3 precision scan. The surface velocity row carries one route across the full width, ISO/TS 7849 with an accelerometer on a radiating casing and no microphone at all" width="92%"></picture>
@@ -245,10 +355,41 @@ $K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (from $p_\mathrm{src}^2 = p_\math
 The **reverberant field** of a non-anechoic room adds a near-uniform energy
 density $4P/(A c)$ to the direct $P/(S c)$, so the surface level exceeds the
 free-field value by their ratio, $K_2 = 10 \log_{10}(1 + 4 S/A)$, with $A$ the
-room's equivalent absorption area. The surface area is the closed form of the
+room's equivalent absorption area.
+
+**Neither correction is unconditional, and both gate the result.** For $K_1$,
+ISO 3744 clause 8.2.3 sets a ladder on the margin: above 15 dB the correction is
+taken as zero, between 6 and 15 dB the formula applies, and below 6 dB it is
+capped at the value it reaches at 6 dB (1.3 dB), and the reported power becomes
+an *upper bound* rather than a determination. (ISO 3746 uses the same shape with
+coarser A-weighted thresholds: 10 dB, 3 dB and a 3 dB cap.) The honest response
+to a 2 dB margin is a quieter time of day or a measurement surface closer to the
+source, not a larger correction. For $K_2$, it may be neglected below 0.5 dB, and
+the engineering method is valid only while $K_{2\mathrm{A}} \le 4$ dB (7 dB for the
+ISO 3746 survey method, clause 4.3), so a room that returns 6 dB is not a
+correction to apply but a room to reject. And read the direction of $K_2$
+carefully: it grows with $4S/A$, so enlarging the measurement surface makes the
+room correction *worse*, which is the opposite of the intuition most operators
+bring to it.
+
+The surface is built on the **reference box**, the smallest right parallelepiped
+that just encloses the source, whose sides are $l_1$, $l_2$ and $l_3$; over one
+reflecting plane the characteristic dimension is
+$d_0 = \sqrt{(l_1/2)^2 + (l_2/2)^2 + l_3^2}$ (clause 7.1). A hemispherical
+surface needs a radius $r \ge 2 d_0$, at least 1 m (0.5 m for small products)
+and at most 16 m (7.2.3); a box surface needs a measurement distance
+$d \ge 0.25$ m, preferably 1 m (7.2.4): that $d$ is the one in the formulas
+below. The area is then the closed form of the
 geometry: a hemisphere $S = 2 \pi r^2$ over one reflecting plane (halved and
 quartered for two and three planes), a one-plane box $S = 4(ab + bc + ca)$ with
-$a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$, $c = l_3 + d$. ISO 3746 (survey) shares
+$a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$, $c = l_3 + d$. The microphone positions
+are normative rather than free: Annex B tabulates equal-area coordinates on the
+hemisphere; Table B.1 for sources that may emit discrete tones, Table B.2 for
+broadband ones, of which the engineering grade uses 10 key positions over one
+reflecting plane (5 over two, 3 over three), with the survey method taking a
+reduced subset. `measurement_positions()` returns them scaled to the chosen
+radius, and `plot_microphone_positions()` draws the array before anything is
+measured. ISO 3746 (survey) shares
 the maths with looser criteria. The expanded uncertainty is
 $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$.
 
@@ -327,15 +468,41 @@ the divergence theorem the power through a closed surface is
 $P = \sum_i \langle I_{\mathrm{n},i} \rangle\ S_i$. A steady source *outside* the surface
 contributes zero net flux (its energy enters and leaves), which is why
 intensity rejects stationary background noise, but it can still drive a band's
-$P$ negative, in which case that band is not determinable. Two normative field
-indicators gate validity: the surface pressure-intensity indicator
-$F_{pI} = [L_p] - L_W + 10 \log_{10}(S/S_0)$ (reactivity) and the
+$P$ negative, in which case that band is not determinable.
+
+**What the indicators are judging.** The surface is divided into at least four
+contiguous segments (clause 8.2) and each is swept continuously along parallel
+lines whose mean spacing does not exceed the mean distance from that segment to
+the source surface, with the probe axis held normal to the surface throughout
+(8.1). A manual sweep runs at 0.1 to 0.5 m/s (0 to 1 m/s mechanically) and lasts
+at least 20 s per segment; the segment stands at least 200 mm off an extended
+vibrating surface, or 100 mm off a small compact one (8.2). The engineering
+grade takes **two** sweeps per segment along orthogonal paths and records each
+separately (8.3.1), and it is the agreement between those two that the Table 2
+repeatability criterion tests, which is why a failing band is far more often a
+scanning problem than an instrument problem. Two checks belong on site rather
+than in the calculation: a windscreen wherever a mean flow above 4 m/s cannot be
+ruled out (5.3), and the probe-reversal check of 6.2.2: rotate the probe 180°,
+and the two indicated intensities must have opposite signs and differ by less
+than 1.5 dB in the maximum band, or the phase match has not survived the
+environment.
+
+Two normative field
+indicators then gate validity: the surface pressure-intensity indicator
+$F_{pI} = \bar{L}_p - L_W + 10 \log_{10}(S/S_0)$ (reactivity) and the
 negative-partial-power indicator
 $F_{+/-} = 10 \log_{10}(\sum_i \lvert P_i \rvert / \lvert \sum_i P_i \rvert)$
 (recirculation), together with the probe's dynamic capability
 $L_\mathrm{d} = \delta_{pI0} - K$ ($K = 10$ dB grade 2, 7 dB grade 3), which must exceed
 $F_{pI}$. A band earns the engineering grade when $L_\mathrm{d} > F_{pI}$, $F_{+/-} \le 3$ dB
 and the two repeated sweeps agree within the Table 2 limit.
+
+The same two indicators carry three sets of names across the ISO 9614 family:
+ISO 9614-1 calls them $F_2$ (pressure-intensity), $F_3$ (negative partial power)
+and $F_4$ (field non-uniformity); Part 2 writes $F_{pI}$ and $F_{+/-}$; Part 3
+writes $F_{pI_\mathrm{n}}$ and $F_\mathrm{S}$. Each subsection here uses its own part's symbols. The
+$F_2$-to-$F_4$ naming is the one used in
+[Sound intensity](signal-analysis.md#sound-intensity-iec-61043).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" width="92%"></picture>
 
@@ -369,88 +536,44 @@ net power is negative are not determinable (clause 9.2) and are flagged. A
 uniform normal intensity recovers the power exactly (100 µW over 3.75 m² →
 80.0 dB re 1 pW), independent of how the surface is segmented.
 
-See the [Sound Power guide](../../devices/emission/sound-power.md) for usage.
+See the [Sound Power guide](../../devices/emission/sound-power.md) for the choice
+of method, and the
+[pressure](../../devices/emission/sound-power-pressure.md),
+[reverberation-room](../../devices/emission/sound-power-reverberation.md),
+[intensity-scanning](../../devices/emission/sound-power-intensity.md),
+[discrete-point intensity](../../devices/emission/intensity.md) and
+[surface-vibration](../../devices/emission/vibration-sound-power.md) guides for
+usage.
 
 ## References
 
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  The wave-based outdoor propagation theory behind the engineering
-  approximations of the ISO 9613-2 section.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  The ground impedance and meteorological effects underlying the
-  ground-effect and barrier terms.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  The screen-attenuation chart that the barrier insertion-loss formulas
-  descend from.
-- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  The intensity physics behind the scanning methods: active intensity and
-  the p-p error budget.
-- International Organization for Standardization. (2016). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 1:
-  Basic quantities and assessment procedures* (ISO 1996-1:2016).
-  [iso.org catalogue](https://www.iso.org/standard/59765.html).
-  The composite rating level and Table A.1 adjustments of the descriptors
-  section.
-- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
-  adjustment of LAeq* (Nordtest Method NT ACOU 112).
-  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  The onset-rate prominence and LAeq adjustment of the impulsive-sound
-  section.
-- International Organization for Standardization. (2022). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 3:
-  Objective method for the measurement of prominence of impulsive sounds and
-  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
-  [iso.org catalogue](https://www.iso.org/standard/77035.html).
-  The ISO successor built on the NT ACOU 112 prominence.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17426.html).
+- **Attenborough, K., & Van Renterghem, T. (2021).** *Predicting outdoor sound* (2nd ed.). CRC Press. https://doi.org/10.1201/9780429470806
+  The ground impedance and meteorological effects underlying the ground-effect and barrier terms.
+- **Fahy, F. J. (1995).** *Sound intensity* (2nd ed.). E&FN Spon. https://doi.org/10.4324/9780203475386
+  ISBN 978-0-419-19810-9. The intensity physics behind the scanning methods: active intensity and the p-p error budget.
+- **International Organization for Standardization. (1993).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere*](https://www.iso.org/standard/17426.html) (ISO 9613-1:1993).
   The pure-tone attenuation coefficient and its relaxation physics.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
-  implemented one).
-  [iso.org catalogue](https://www.iso.org/standard/20649.html).
-  The attenuation chain (divergence, air, ground, barrier) of the
-  general-method section.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of occupational noise exposure — Engineering method*
-  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
-  The three measurement strategies and the Annex C uncertainty budget of
-  the occupational section.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for an essentially free
-  field over a reflecting plane* (ISO 3744:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52055.html).
-  The enveloping-surface method with its background and reverberant-field
-  corrections.
-- International Organization for Standardization. (2012). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms* (ISO 3745:2012).
-  [iso.org catalogue](https://www.iso.org/standard/45362.html).
-  The precision anechoic method with its meteorological corrections and
-  microphone arrays.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52053.html).
-  The diffuse-field method with the Waterhouse correction and the
-  comparison method.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17427.html).
-  The field indicators and dynamic-capability criterion shared by the
-  intensity-scanning methods.
+- **International Organization for Standardization. (1993).** [*Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points*](https://www.iso.org/standard/17427.html) (ISO 9614-1:1993).
+  The field indicators and dynamic-capability criterion shared by the intensity-scanning methods.
+- **International Organization for Standardization. (1996).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation*](https://www.iso.org/standard/20649.html) (ISO 9613-2:1996).
+  The attenuation chain (divergence, air, ground, barrier) of the general-method section. Revised in 2024; the 1996 method is the implemented one.
+- **International Organization for Standardization. (2009).** [*Acoustics — Determination of occupational noise exposure — Engineering method*](https://www.iso.org/standard/41718.html) (ISO 9612:2009).
+  The three measurement strategies and the Annex C uncertainty budget of the occupational section.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane*](https://www.iso.org/standard/52055.html) (ISO 3744:2010).
+  The enveloping-surface method with its background and reverberant-field corrections.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The diffuse-field method with the Waterhouse correction and the comparison method.
+- **International Organization for Standardization. (2012).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms*](https://www.iso.org/standard/45362.html) (ISO 3745:2012).
+  The precision anechoic method with its meteorological corrections and microphone arrays.
+- **International Organization for Standardization. (2016).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures*](https://www.iso.org/standard/59765.html) (ISO 1996-1:2016).
+  The composite rating level and Table A.1 adjustments of the descriptors section.
+- **International Organization for Standardization. (2017).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 2: Determination of sound pressure levels*](https://www.iso.org/standard/59766.html) (ISO 1996-2:2017).
+  The survey standard that requires an adjustment for prominent impulsive sounds in the first place; the objective procedure only decides how large it is.
+- **International Organization for Standardization. (2022).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq*](https://www.iso.org/standard/77035.html) (ISO/PAS 1996-3:2022).
+  The ISO successor built on the NT ACOU 112 prominence.
+- **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. https://doi.org/10.1016/0003-682X(68)90020-0
+  The screen-attenuation chart that the barrier insertion-loss formulas descend from.
+- **Nordtest. (2002).** [*Acoustics: Prominence of impulsive sounds and for adjustment of LAeq*](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/) (NT ACOU 112:2002).
+  The onset-rate prominence and LAeq adjustment of the impulsive-sound section.
+- **Salomons, E. M. (2001).** *Computational atmospheric acoustics*. Kluwer Academic Publishers. https://doi.org/10.1007/978-94-010-0660-6
+  ISBN 978-1-4020-0390-5. The wave-based outdoor propagation theory behind the engineering approximations of the ISO 9613-2 section.

@@ -57,13 +57,15 @@ import pathlib
 import sys
 
 from ast_scan import binding_of, forget_trees, own_names, scope_nodes
+from github_edition import is_edition_file
 from markdown_fences import page_kind, python_fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: The documentation trees that carry sequential examples. The generated API
 #: reference is excluded: its fences are signatures rendered from docstrings,
-#: not a narrative.
+#: not a narrative. So is the GitHub edition of the guides under ``docs/``,
+#: whose fences are its English page's, read here at their source.
 CONTENT = ROOT / "site" / "src" / "content" / "docs"
 DOCS = ROOT / "docs"
 
@@ -93,29 +95,6 @@ PLACEHOLDERS: dict[str, frozenset[str]] = {
     "devices/electroacoustics/electroacoustics": frozenset(
         {"fs", "idle", "idle_output", "output", "signal", "x", "y"}
     ),
-    "docs/aircraft/aircraft-noise": frozenset({"spl"}),
-    "docs/aircraft/rotorcraft-noise": frozenset(
-        {
-            "h_50_level",
-            "h_60_climb",
-            "h_70_level",
-            "hemispheres",
-            "measured_levels",
-            "positions",
-            "times",
-            "tx",
-            "ty",
-            "tz",
-        }
-    ),
-    "docs/devices/electroacoustics/electroacoustics": frozenset(
-        {"fs", "idle_output", "output", "signal", "x", "y"}
-    ),
-    "docs/signals/filters/block-processing": frozenset(
-        {"audio_blocks", "audio_stream"}
-    ),
-    "docs/signals/levels/time-weighting": frozenset({"audio_blocks"}),
-    "docs/signals/spectra/spectral-analysis": frozenset({"record"}),
     "signals/filters/block-processing": frozenset({"audio_blocks", "audio_stream"}),
     "signals/levels/time-weighting": frozenset({"audio_blocks"}),
     "signals/spectra/spectral-analysis": frozenset({"record"}),
@@ -271,6 +250,16 @@ def _pages() -> list[pathlib.Path]:
     return found
 
 
+def _checked_pages() -> list[pathlib.Path]:
+    """The pages of :func:`_pages` the rule is held on: all but the GitHub edition.
+
+    A file of the edition carries its English page's fences, read there.
+    Telling one opens the file, so this list opens every page of ``docs/``;
+    :func:`_pages` opens none.
+    """
+    return [path for path in _pages() if not is_edition_file(path)]
+
+
 def check_page(path: pathlib.Path) -> list[str]:
     """The reading-order offences of one page.
 
@@ -332,9 +321,17 @@ def check_page(path: pathlib.Path) -> list[str]:
 
 
 def _stale_placeholder_routes() -> list[str]:
-    """Registry lines whose route no longer has a page, so the line is dead."""
-    routes = {_route(path) for path in _pages()}
-    return sorted(set(PLACEHOLDERS) - routes)
+    """Registry lines whose route has no page the rule is held on, so the line is dead.
+
+    A route whose page is a file of the GitHub edition is dead too: its fences
+    are its English page's, registered under that page's route.
+    """
+    routes = {_route(path): path for path in _pages()}
+    return sorted(
+        route
+        for route in PLACEHOLDERS
+        if route not in routes or is_edition_file(routes[route])
+    )
 
 
 def main() -> int:
@@ -344,11 +341,11 @@ def main() -> int:
     :rtype: int
     """
     problems: list[str] = []
-    for path in _pages():
+    for path in _checked_pages():
         problems.extend(check_page(path))
     problems.extend(
         f"scripts/check_fence_names.py: PLACEHOLDERS entry {route!r} "
-        "matches no page; delete the line."
+        "matches no page the rule is held on; delete the line."
         for route in _stale_placeholder_routes()
     )
     in_ci = os.environ.get("GITHUB_ACTIONS") == "true"
@@ -356,7 +353,7 @@ def main() -> int:
         target, _, message = problem.partition(": ")
         print(f"::error file={target}::{message}" if in_ci else problem)
     if not problems:
-        pages = _pages()
+        pages = _checked_pages()
         fences = sum(
             len(python_fences(p.read_text(encoding="utf8"), kind=page_kind(p.name)))
             for p in pages

@@ -7,7 +7,7 @@ tries to connect, how long a run may go on once its client has closed the
 connection, the keep-alive a node's ssh server should use, the CuPy and
 Python of the GPU image, the Python, NumPy and SciPy a node needs, and the
 matplotlib a Python node that writes videos needs, the floor of the
-package's ``plot`` extra, in English, in Spanish and in its docs/ mirror. Each phrase is built here from
+package's ``plot`` extra, in English and in Spanish. Each phrase is built here from
 the constant or the lock entry that decides it, so a change to one leaves
 the pages failing until they say the new number.
 
@@ -63,7 +63,6 @@ _DEPENDENCIES = {"numpy": "NumPy", "scipy": "SciPy"}
 #: The pages and their language.
 _PAGES = [
     ("site/src/content/docs/simulation/remote-node.mdx", "en"),
-    ("docs/simulation/remote-node.md", "en"),
     ("site/src/content/docs/es/simulation/remote-node.mdx", "es"),
 ]
 

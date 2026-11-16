@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/assessment/impulsive-sound.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/
 
 # Impulsive-sound prominence (NT ACOU 112)
 
@@ -10,7 +12,7 @@ from two properties of each impulse's onset in the A-weighted, time-weighting-F
 level history: how fast it rises (the **onset rate**) and how far it rises (the
 **level difference**).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112.svg" alt="Flow from the A-weighted time-weighting-F level history, where an onset is a stretch whose gradient exceeds 10 dB/s, to the per-impulse onset rate and level difference, then the predicted prominence P equals 3 times log of the onset rate plus 2 times log of the level difference (the highest P over 30 minutes governs), then the adjustment KI equals 1.8 times (P minus 5) dB for P above 5 and zero otherwise, and finally the rating level combining the impulse-adjusted equivalent levels over the reference time" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112.svg" alt="Flow from the A-weighted level history (an onset is where the gradient exceeds 10 dB/s) to the onset rate and level difference, the predicted prominence P = 3 lg(OR) + 2 lg(LD), the adjustment KI = 1.8 (P - 5) for P above 5, and the rating level over the reference time" width="82%"></picture>
 
 ## 1. Predicted prominence (clause 7)
 
@@ -31,9 +33,7 @@ adjustment "for sounds with onset rates larger than 10 dB/s" only):
 warns about them, and never lets them set the governing prominence or a
 $K_\mathrm{I}$ (the adjustment is 0 dB when no event qualifies).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_onset_detection_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_onset_detection.gif" alt="Animation: a magnifier scans the A-weighted level history, highlights the onset stretch steeper than 10 dB per second, and the onset rate, level difference, prominence and adjustment KI boxes light up in turn" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_onset_detection.webm)
+**Video:** [Detecting an impulse onset in the level history](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_onset_detection.webm): A magnifier scans the A-weighted Fast level history L_AF; where the level climbs faster than 10 dB/s the onset stretch is highlighted, and the onset rate (200 dB/s), level difference (30 dB), prominence P and adjustment KI boxes light up in turn.
 
 ```python
 from phonometry import environment
@@ -77,7 +77,7 @@ highest prominence. The **rating level** over a longer reference time combines
 the impulse-adjusted equivalent levels of the sub-intervals (clause 8, Note 1):
 
 $$
-L_{\mathrm{Ar},T} = 10\,\log_{10}\!\left(\frac{1}{T}\sum_N \Delta t_N\,
+L_{\mathrm{Ar},T} = 10\,\log_{10}\left(\frac{1}{T}\sum_N \Delta t_N\,
 10^{(L_{\mathrm{Aeq},N} + K_{\mathrm{I},N})/10}\right).
 $$
 
@@ -92,9 +92,15 @@ print(round(environment.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.
 The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governing
 `prominence` and its `adjustment`, and its `.plot()` draws the $K_\mathrm{I}(P)$ curve
 with the impulses marked. The method is a supplement to the environmental-noise
-measurement of ISO 1996-2.
+measurement of [ISO 1996-2](environmental-levels.md).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence.svg" alt="Two panels. Left: the predicted prominence P rising with onset rate (log axis) for level differences of 5, 15 and 30 dB, reaching about 15 for a very sudden, loud impulse. Right: the adjustment KI as a function of prominence, flat at zero up to the threshold P = 5 and then linear at 1.8 dB per unit, with three example impulses marked and the governing one at KI = 13 dB" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence.svg" alt="Left: the predicted prominence P rising with onset rate on a log axis for level differences of 5, 15 and 30 dB, reaching about 15 for a sudden loud impulse. Right: the adjustment KI, flat at zero up to the threshold P = 5 then linear, with three impulses marked and the governing one at KI = 13 dB" width="96%"></picture>
+
+*Both inputs matter but not equally: at a fixed onset rate, going from a 5 dB to
+a 30 dB level difference moves the prominence far less than an order of magnitude
+of onset rate does. Below P = 5 the adjustment is identically zero, so an impulse
+that does not qualify costs nothing at all, which is why the qualification test
+is the part of the method to get right.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -153,6 +159,20 @@ print(round(onset.onset_rate), round(onset.level_difference))  # 100 30
 print(round(onset.prominence, 2))                              # 8.95
 ```
 
+**What the recording has to be.** The chain reads a level history, so the
+conditions that make one valid are the conditions of the whole method: a class 1
+measurement chain calibrated before and after the session, and a signal in
+pascals, because although the adjustment itself is calibration-insensitive (it
+is built from level *differences*) the reported and adjusted $L_\mathrm{Aeq}$ are not.
+The level history has to be sampled fast enough to resolve the rise (the method
+works on a 10 ms to 25 ms grid, which is the `dt` argument below), and the
+governing impulse is the one with the highest $P$ over a **30-minute** assessment
+period. Three things invalidate a period rather than lowering its score: no onset
+qualifying at the 10 dB/s gradient at all (the adjustment is then 0 dB and the
+period says nothing about the source), events overlapping so that one impulse
+starts on the decay tail of the previous one, and a level history that saturated
+or clipped at either end of the range.
+
 From a calibrated time signal (in pascal) the whole chain runs end to end:
 
 ```python
@@ -182,7 +202,30 @@ print(round(result.adjusted_laeq, 1))   # 91.1  dB (LAeq + KI)
 result.plot()   # the LpAF history with the detected onsets (needs matplotlib)
 ```
 
+Three keyword arguments of that call decide whether the number is defensible, and
+none of them is optional in practice:
+
+| Argument | Default | What it does |
+| :--- | :--- | :--- |
+| `dt` | `0.02` s | The logging interval of the level history. The method needs 10 ms to 25 ms; a coarser grid flattens the fitted onset rate and under-reports $P$, which is the caveat two paragraphs down made settable |
+| `calibration_offset` | `0.0` dB | Added to the level history to bridge a digital scale to a calibrated one: the difference between the calibrator's known level and the level this same processing reports for the calibration recording. It moves $L_\mathrm{Aeq}$ and the adjusted $L_\mathrm{Aeq}$ and leaves $K_\mathrm{I}$ alone |
+| `laeq` | `None` | Supply the $L_\mathrm{Aeq}$ measured over the assessment period instead of letting it be computed from the excerpt, which is what a real report does |
+| `reference_pressure_pa` | `2e-05` Pa | Only change it for a non-air medium |
+| `onset_rate_method` | `'least_squares'` | The fit over the detected rise |
+
+`environment.sound_pressure_level_history(x, fs, *, dt=..., calibration_offset=...)`
+is the same Clause 4 step on its own (A-weighting, F time weighting and
+resampling onto the 10-25 ms grid) for a caller who wants the history without
+the adjustment. It warm-starts the F integrator at the first window's mean
+square, so the beginning of a record does not register as an onset of the
+processing itself.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulsive_sound_onsets.svg" alt="A-weighted Fast level history of three hammer strikes over a 55 dB(A) background across six seconds: each strike rises from about 52 dB to 89 dB, the detected onset start and end points are marked with the least-squares onset line, the governing level difference of 36.9 dB is annotated, and the title reports a prominence of 11.31 with an adjustment of 11.36 dB, category highly impulsive" width="90%"></picture>
+
+*The three strikes are deliberately well separated, 1.6 s apart against a 0.08 s
+decay, so each onset starts from the same background and each fit has the whole
+rise to itself. That is the easy case: the two field errors described below both
+show up as a shallower fitted line on a visibly steep edge.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -243,21 +286,32 @@ rating level, it never replaces it.
 
 ## 5. Assessment report (`.report()`)
 
+An assessment report has to carry more than the fiche computes. State the
+standard applied and the edition; the source and the situation; the measurement
+position and the assessment period; the governing impulse with its onset rate and
+level difference; the prominence $P$ and the adjustment $K_\mathrm{I}$; the source
+category the result puts the source in; and the $L_\mathrm{Aeq}$ the adjustment rides
+on, with the instrumentation and calibration behind it. The fiche below fills the
+computed half automatically (the per-impulse table, the governing $P$, $K_\mathrm{I}$ and
+the category) and takes the rest from `ReportMetadata`, which is why the
+metadata block is not decoration: without it the sheet documents an arithmetic
+result and not a measurement.
+
 `ImpulseProminenceResult.report(path)` renders a one-page PDF fiche laid out
 like an impulsive-sound assessment report of an environmental-noise laboratory,
-following NT ACOU 112:2002 (carried into ISO/PAS 1996-3:2022): a standard-basis
-line, an optional metadata header block (source/situation, client, measurement
-position, instrumentation and date, with the 30-minute assessment period always
-shown), a full-width per-impulse table (onset rate, level difference, predicted
-prominence $P$ and whether the onset qualifies as an impulse) above the
-adjustment-curve plot $K_\mathrm{I}(P)$ with the candidate impulses marked, the boxed
-governing prominence $P$ together with the derived $L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$
-(Formula 2), an optional PASS/FAIL verdict row and a prominence-category note,
-and a footer with the fixed disclaimer.
+following **NT ACOU 112:2002** (carried into ISO/PAS 1996-3:2022): a
+standard-basis line, an optional metadata header block (source/situation,
+client, measurement position, instrumentation and date, with the 30-minute
+assessment period always shown), a full-width per-impulse table (onset rate,
+level difference, predicted prominence $P$ and whether the onset qualifies as an
+impulse) above the adjustment-curve plot $K_\mathrm{I}(P)$ with the candidate
+impulses marked, the boxed governing prominence $P$ together with the derived
+$L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$ (Formula 2), an optional PASS/FAIL
+verdict row and a prominence-category note, and a footer with the fixed
+disclaimer.
 
-It uses the same `ReportMetadata` container
-(documented under [Insulation ratings](../../buildings/insulation/insulation-ratings.md#report-metadata-reportmetadata))
-and rendering engine as the [ISO 532-1 loudness fiche](../../perception/psychoacoustics/loudness.md#iso-532-1-report-report);
+It uses the same `ReportMetadata` container and rendering engine as the
+[ISO 532-1 loudness fiche](../../perception/psychoacoustics/loudness.md#iso-532-1-report-report);
 a supplied `requirement` is read as the maximum acceptable governing prominence
 $P$ (a less prominent impulse passes). Rendering needs reportlab and, for the
 figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
@@ -268,7 +322,7 @@ decimal separator), e.g. `res.report("impulse_fiche_es.pdf", language="es")`.
 ```python
 from phonometry import environment, ReportMetadata
 
-# The three-impulse pile-driving set (onset rate dB/s, level difference dB).
+# The three-impulse pile-driving set from §1 (onset rate dB/s, level diff. dB).
 res = environment.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
 res.report(
     "impulse_fiche.pdf",
@@ -281,13 +335,32 @@ res.report(
 )                                   # governing P and the LAeq adjustment KI (dB)
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
+The example fiche is regenerated with `make reports` and kept rendered in the
 repository; click the preview to open the PDF.
 
-[![NT ACOU 112 impulsive-sound prominence example report: metadata header, a per-impulse table of the onset rate, level difference and predicted prominence P, the KI(P) adjustment-curve plot with the candidate impulses marked, the boxed governing prominence P = 12.25 with the LAeq adjustment KI = 13.0 dB (NT ACOU 112:2002 Formula 2) and a FAIL verdict against a maximum governing prominence of 10](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.pdf)
+[![NT ACOU 112 impulsive-sound prominence example report (PDF): One-page impulsive-sound assessment fiche: a metadata header, a per-impulse table of the onset rate, level difference and predicted prominence P, the KI(P) adjustment-curve plot with the candidate impulses marked, the boxed governing prominence P = 12.25 with the LAeq adjustment KI = 13.0 dB (NT ACOU 112:2002 Formula 2) and a FAIL verdict against a maximum governing prominence of 10.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.pdf)
 
-*Impulsive-sound prominence fiche (`ImpulseProminenceResult.report`), governing
-prominence $P$ with the $L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$.*
+Impulsive-sound prominence fiche (ImpulseProminenceResult.report), governing prominence P with the LAeq adjustment KI.
+
+## What this guide covers
+
+- **Covered.** NT ACOU 112:2002: the onset definition (clauses 4.5 to 4.7), the predicted
+  prominence $P$ (clause 7, Formula 1), the graduated adjustment $K_\mathrm{I}$ (clause
+  8, Formula 2) and the rating level over a reference time (clause 8, Note 1),
+  through `impulse_prominence`, `predicted_prominence`, `impulse_adjustment` and
+  `rating_level`. ISO/PAS 1996-3:2022 is covered for the objective measurement
+  chain built on the same prominence formula: $L_{p\mathrm{AF}}$ sampling, onset
+  detection and merging, and the least-squares onset rate and level difference,
+  through `impulsive_sound_adjustment` and `detect_onsets`.
+
+- **Not covered.** NT ACOU 112's Note 4 (clause 7) records an older Nordic guideline: a flat 5 dB
+  adjustment based on subjective judgement, recommended when $K_\mathrm{I} > 3$ for noise
+  characteristic of working operations, offered as a fallback where the
+  graduated method cannot be applied. Only the graduated $K_\mathrm{I}$ of Formula 2 is
+  implemented; the flat 5 dB alternative is not. ISO 1996-1's Table A.1 category
+  adjustments (5 dB regular, 12 dB highly impulsive) are covered only as the
+  assessor's-judgement baseline that this measurement replaces, not as a
+  function of their own.
 
 ## See also
 
@@ -296,36 +369,9 @@ prominence $P$ with the $L_\mathrm{Aeq}$ adjustment $K_\mathrm{I}$.*
 
 ## References
 
-- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
-  adjustment of LAeq* (Nordtest Method NT ACOU 112).
-  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  The implemented method, freely downloadable from the Nordtest archive.
-- International Organization for Standardization. (2016). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 1:
-  Basic quantities and assessment procedures* (ISO 1996-1:2016).
-  [iso.org catalogue](https://www.iso.org/standard/59765.html).
-  The rating framework and the Table A.1 category adjustments (5 dB regular,
-  12 dB highly impulsive) that the measured prominence calibrates against.
-- International Organization for Standardization. (2022). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 3:
-  Objective method for the measurement of prominence of impulsive sounds and
-  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
-  [iso.org catalogue](https://www.iso.org/standard/77035.html).
+- **International Organization for Standardization. (2016).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures*](https://www.iso.org/standard/59765.html) (ISO 1996-1:2016).
+  The rating framework and the Table A.1 category adjustments (5 dB regular, 12 dB highly impulsive) that the measured prominence calibrates against.
+- **International Organization for Standardization. (2022).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq*](https://www.iso.org/standard/77035.html) (ISO/PAS 1996-3:2022).
   The ISO successor built on the NT ACOU 112 onset-rate prominence.
-
-## Standards
-
-NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and
-for adjustment of LAeq*: the predicted prominence (clause 7, Formula 1), the
-adjustment to $L_\mathrm{Aeq}$ (clause 8, Formula 2) and the rating level (clause 8,
-Note 1), with the onset defined in clauses 4.5-4.7.
-
-**Not covered.** Only the graduated $K_\mathrm{I}$ of Formula 2 is implemented. NT ACOU
-112's Note 4 to clause 7 records an older Nordic guideline: a flat 5 dB
-adjustment from subjective judgement, recommended when $K_\mathrm{I} > 3$ for noise
-characteristic of working operations and offered where the graduated method
-cannot be applied. That fallback is not implemented. **ISO 1996-1**
-Table A.1's category adjustments (5 dB regular, 12 dB highly impulsive) appear
-here only as the assessor's-judgement baseline this measurement replaces, not
-as a function of their own.
-
+- **Nordtest. (2002).** [*Acoustics: Prominence of impulsive sounds and for adjustment of LAeq*](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/) (NT ACOU 112:2002).
+  The implemented method, freely downloadable from the Nordtest archive: the predicted prominence (clause 7, Formula 1), the adjustment to LAeq (clause 8, Formula 2) and the rating level (clause 8, Note 1), with the onset defined in clauses 4.5-4.7.

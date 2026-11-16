@@ -16,8 +16,10 @@ documents that do.
   `llms.txt`, the conformance report under `scripts/conformance/`) and the
   guards, `scripts/check_*.py`, that CI runs.
 - `tests/`: the test suite.
-- `docs/`: the plain-markdown mirror of the documentation that GitHub serves,
-  and `docs/contributing/`, the contributor style guide.
+- `docs/`: the GitHub edition of the guides, which `make llms` writes from the
+  site pages, the documents written there by hand (the README, the errata
+  registers, the curated API table), the conformance report `make conformance`
+  writes, and `docs/contributing/`, the contributor style guide.
 - `site/`: the documentation website, built with pnpm.
 
 ## Setup

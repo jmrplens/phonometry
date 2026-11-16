@@ -225,9 +225,9 @@ points on the ANSI band edges.*
 **Full documentation website: https://docs.jmrp.io/phonometry/**
 (English / Español)
 
-The same content is browsable as Markdown in
-[docs/](https://github.com/jmrplens/phonometry/blob/main/docs/README.md);
-a map of where to start:
+The English guides are also browsable as Markdown in
+[docs/](https://github.com/jmrplens/phonometry/blob/main/docs/README.md),
+written from the same pages; a map of where to start:
 
 | Area | Guides |
 | :--- | :--- |

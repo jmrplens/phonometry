@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/silencer-measurement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Measuring a silencer (ISO 7235 and ISO 11691)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/
+
+# Measuring a Silencer (ISO 7235 and ISO 11691)
 
 Everything a silencer model computes comes from geometry. The figure a
 supplier publishes does not. It is an **insertion loss measured by
@@ -156,7 +158,7 @@ One thing to know about Table 6: its rows read 50, 63, 80, 100, 125 and then
 no limit at all. Every other row names a single band, and 160 Hz is a
 one-third-octave centre like the rest, so it is read here as belonging to the
 last row. The gap is in the [errata
-register](../../ERRATA.md).
+register](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
 
 ## 5. How repeatable any of this is
 
@@ -265,9 +267,7 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_open_end_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_open_end.gif" alt="Animation: a 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_open_end.webm)
+**Video:** [The open end of a duct in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_open_end.webm): A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19.
 
 *Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
 inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
@@ -367,7 +367,7 @@ by that one factor rather than shifted, and comes out 0,069 % low. That is far
 under the uncertainty of a pressure-loss test, and using the printed constants
 is what reproduces a result computed to the standard, so the library keeps
 both. It is recorded in the [errata
-register](../../ERRATA.md) as
+register](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md) as
 a property of the source rather than as a defect.
 
 Equation (9) rather than (8) is used when the flow meter and the test object
@@ -529,29 +529,45 @@ nearest half decibel and has to state which of them were extrapolated rather
 than measured directly. `.plot()` draws that distinction, shading the two ends
 of the range that are extrapolation.
 
-## Standards
+## What this guide covers
 
-ISO 7235:2003, ISO 11691:1995 and ISO 5135:1999, read from BS EN ISO 7235:2009,
-BS EN ISO 11691:2009 and BS EN ISO 5135:1999, which endorse them without
-modification. Implemented, from ISO 7235 and ISO 11691: Equation (1) of both
-with the reverberation-time correction of ISO 7235 6.3; the octave fold of
-ISO 11691 Equation (2); ISO 7235 Table 6 and the three-or-five rule of 6.2.1;
-ISO 11691 Table 1 and all three columns of ISO 7235 Table 7, with the coverage
-factor of 7.9; the scope of ISO 11691 1.1 and 4.5; the open-end transmission
-loss and reflection coefficient of Equations (B.3) and (B.4) with the solid
-angles of Table B.1; the transmission loss of Equation (6) and the flow-noise
-sound power of Equation (7); the cut-on frequencies of Equations (4) and (5);
-and the flow half of 6.5, from the gas law of Equations (10), (21) and (22) to
-the substitution average of Equation (18) and the settling length of
-6.5.2.2.1. From ISO 5135: the duct sound power level of Equation (1),
-Equation (2), which is ISO 7235 (B.3) written out again, and the least-squares
-operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
-range. Checked in the [conformance report](../../CONFORMANCE.md); the gap
-Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
-[errata register](../../ERRATA.md). Not implemented: the facility requirements
-themselves, the flow measurement of ISO 5167-1 and the ISO 3741 determination
-the receiving side is handed to. ISO 11820, which measures a silencer in situ, has
-[a page of its own](in-situ-noise-control.md).
+- **Covered.** The arithmetic of the substitution measurement: Equation (1) of both
+  standards through `substitution_insertion_loss`, with the reverberation-time
+  correction of ISO 7235 6.3; the octave fold of ISO 11691 Equation (2) through
+  `octave_insertion_loss`; ISO 7235 Table 6 and the three-or-five rule of 6.2.1
+  through `microphone_spread_limit` and `microphone_positions_required`; the
+  reproducibility of ISO 11691 Table 1 and of all three columns of ISO 7235
+  Table 7, with the expanded uncertainty of 7.9; and the scope ISO 11691 draws
+  in 1.1 and 4.5, including the area-ratio check that warns outside it. The
+  open end of the duct: Equations (B.3) and (B.4) through
+  `open_end_transmission_loss` and `open_end_reflection_coefficient`, with the
+  five solid angles of Table B.1; the transmission loss of Equation (6) and the
+  flow-noise sound power of Equation (7); and the cut-on frequencies of
+  Equations (4) and (5) that the modal-filter requirement of 5.2.2.3 steps at.
+  And the flow half of 6.5: the gas law of Equations (10), (21) and (22), the
+  volume flow rate of (8) and (9), the velocity head of (13), (16), (19) and
+  (20), the total pressure of (11), the area-change correction of (12), the
+  pressure loss coefficient of (14) and (17), the substitution average of (18),
+  and the settling length of 6.5.2.2.1. From ISO 5135: the duct sound power
+  level of Equation (1); Equation (2), which is Equation (B.3) of ISO 7235
+  written out again and is served by the same function; and the least-squares
+  operating line of 5.5.2 through `fit_operating_line`, with the 3 dB limit on
+  the fit, the half-to-twice range it may be read over, and a `.plot()` that
+  shades the part of that range which is extrapolation.
+
+- **Not covered.** Nothing here builds a test facility or checks one: the modal-filter
+  attenuation, the anechoic termination's reflection coefficient, the
+  substitution duct's dimensional tolerance and the limiting insertion loss are
+  described but not computed, and Equation (7) is given the room correction
+  rather than deriving it. The flow measurement itself is not modelled: the
+  differential-pressure devices of ISO 5167-1, the velocity survey and the
+  piezometric ring are procedure rather than arithmetic. Nothing here builds a
+  reverberation room or qualifies one: the ISO 3741 determination both
+  standards hand their receiving side to is a separate page, and the background
+  corrections, the discrete-tone check and the room qualification belong to it.
+  ISO 11820, which measures a silencer in situ where the substitution trick is
+  usually impossible, is not computed here either: it has
+  [a page of its own](in-situ-noise-control.md).
 
 ## See also
 
@@ -563,9 +579,21 @@ the receiving side is handed to. ISO 11820, which measures a silencer in situ, h
 - [HVAC Noise the German Way (VDI 2081)](vdi2081-air-systems.md):
   the splitter-silencer insertion loss predicted from geometry, for comparison
   with what a laboratory would measure.
-- [Errata in published sources](../../ERRATA.md): the gap Table 6 of ISO 7235
-  leaves at 160 Hz, and the two printed gas-law constants.
-- API reference: [`noise_control.silencer_measurement`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-measurement/).
 - [Industrial noise control](noise-control.md):
   the rival closed form for the end reflection, and the air-terminal
   corrections a diffuser is selected with.
+- [Errata in published sources](../../ERRATA.md): the gap Table 6
+  of ISO 7235 leaves at 160 Hz, and the two printed gas-law constants.
+- API reference:
+  [`noise_control.silencer_measurement`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-measurement/).
+
+## References
+
+- **International Organization for Standardization. (1995).** *Acoustics — Measurement of insertion loss of ducted silencers without flow — Laboratory survey method* (ISO 11691:1995).
+  The survey-grade sibling: its Equations (1) and (2), Table 1, and the scope it draws in 1.1 and 4.5. Read from BS EN ISO 11691:2009, which endorses it without modification.
+- **International Organization for Standardization. (1997).** [*Acoustics – Determination of sound power levels of noise from air-terminal devices, air-terminal units, dampers and valves by measurement in a reverberation room*](https://www.iso.org/standard/22490.html) (ISO 5135:1997).
+  The sound power of an air-terminal device in a reverberation room: Equation (1), the end reflection loss of Equation (2) with the solid angles of Table 1, and the straight-line fit of 5.5.2. Read from BS EN ISO 5135:1999, which is identical with it and dates this guide's citations of it.
+- **International Organization for Standardization. (2003).** [*Acoustics — Laboratory measurement procedures for ducted silencers and air-terminal units — Insertion loss, flow noise and total pressure loss*](https://www.iso.org/standard/30385.html) (ISO 7235:2003).
+  The measurement itself: Equation (1), the reverberation correction of 6.3, Table 6 and the rule of 6.2.1, and Table 7 with the coverage factor of 7.9. Read from BS EN ISO 7235:2009, which endorses it without modification.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The sound power determination both standards hand the receiving side to, and the source of the reverberation times the correction of 6.3 needs.

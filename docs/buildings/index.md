@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/
 
 # Rooms and buildings
 
@@ -117,40 +119,40 @@ and from the physics of the element itself.
 
 ## What this section does not cover
 
-**The library starts after the microphone and stops before the geometry.** On
-the measurement side, position averaging happens once positions are supplied
-(the insulation functions energy-average per-position spectra for you), but
-nothing verifies how the measurement was made: the position counts and
-placements, the corner positions the ISO 16283 low-frequency procedure is fed
-from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
-are the operator's job. The exception is the ISO 16032 engineering method for
-service-equipment noise,
-which checks its own position ladder, the distances of its 7.3 and the height
-of its corner position and its 0.2 m from obstacles (7.2), and the numbers its
-draft sets for the measurement itself: the calibration deviation, the
-background measured over approximately 30 s against the tolerance the operator
-gives, a background that varies, disturbed periods and the calculation against
-the instrument. Elsewhere, measuring the background noise is the operator's
-job too, and two corrections are implemented: the ISO 10140-4
-laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
-correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
-margin. The field levels of an insulation index must arrive already
-corrected. On the prediction side, the element ratings, the
-junction indices and the covering improvements are inputs you supply from
-measurement or from a standard's own annex; none is derived from a drawing.
+- **Not covered.** **The library starts after the microphone and stops before the geometry.** On
+  the measurement side, position averaging happens once positions are supplied
+  (the insulation functions energy-average per-position spectra for you), but
+  nothing verifies how the measurement was made: the position counts and
+  placements, the corner positions the ISO 16283 low-frequency procedure is fed
+  from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
+  are the operator's job. The exception is the ISO 16032 engineering method for
+  service-equipment noise,
+  which checks its own position ladder, the distances of its 7.3 and the height
+  of its corner position and its 0.2 m from obstacles (7.2), and the numbers its
+  draft sets for the measurement itself: the calibration deviation, the
+  background measured over approximately 30 s against the tolerance the operator
+  gives, a background that varies, disturbed periods and the calculation against
+  the instrument. Elsewhere, measuring the background noise is the operator's
+  job too, and two corrections are implemented: the ISO 10140-4
+  laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
+  correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
+  margin. The field levels of an insulation index must arrive already
+  corrected. On the prediction side, the element ratings, the
+  junction indices and the covering improvements are inputs you supply from
+  measurement or from a standard's own annex; none is derived from a drawing.
 
-**Nothing here is a wave solver or a room model.** There is no geometry
-importer, no material database, no ray tracer and no auralisation: the room
-pages take dimensions, absorption coefficients and impulse responses and give
-back parameters, and the image-source model is specular only. An actual
-low-frequency field in a real shape is [wave
-simulation](../simulation/index.md).
+- **Not covered.** **Nothing here is a wave solver or a room model.** There is no geometry
+  importer, no material database, no ray tracer and no auralisation: the room
+  pages take dimensions, absorption coefficients and impulse responses and give
+  back parameters, and the image-source model is specular only. An actual
+  low-frequency field in a real shape is [wave
+  simulation](../simulation/index.md).
 
-**And a prediction is not a verdict.** The single-number ratings and the
-national indices are computed here, but the limit values they are judged
-against are national (the Spanish code is implemented as a worked example of
-one such framework, not as the rule everywhere), and the requirement always
-comes from your regulation.
+- **Not covered.** **And a prediction is not a verdict.** The single-number ratings and the
+  national indices are computed here, but the limit values they are judged
+  against are national (the Spanish code is implemented as a worked example of
+  one such framework, not as the rule everywhere), and the requirement always
+  comes from your regulation.
 
 ## Before and after these pages
 
@@ -163,6 +165,6 @@ buildings theory](../reference/theory/rooms-buildings.md), from the Schroeder in
 to the EN 12354 path sums.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

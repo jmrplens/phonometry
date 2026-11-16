@@ -46,6 +46,11 @@ def _module() -> ModuleType:
 
 _MODULE = _module()
 
+if str(_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "scripts"))
+
+import github_edition
+
 
 def _pyproject() -> dict[str, object]:
     with (_ROOT / "pyproject.toml").open("rb") as handle:
@@ -685,8 +690,6 @@ _PYTHON_STATEMENTS = (
     "README_PYPI.md",
     ".zenodo.json",
     "llms.txt",
-    "docs/start/getting-started.md",
-    "docs/start/index.md",
     "site/src/content/docs/start/getting-started.mdx",
     "site/src/content/docs/es/start/getting-started.mdx",
     "site/src/content/docs/start/index.md",
@@ -697,7 +700,6 @@ _PYTHON_STATEMENTS = (
 _FLOOR_STATEMENTS = (
     "README.md",
     "README_PYPI.md",
-    "docs/start/getting-started.md",
     "site/src/content/docs/start/getting-started.mdx",
     "site/src/content/docs/es/start/getting-started.mdx",
 )
@@ -940,8 +942,9 @@ def test_the_release_the_others_take_is_not_said_to_be_what_pip_installs(
     assert [clause for clause in clauses if re.search(r"\bpip\b", clause)] == []
 
 
-#: Where the documentation pages are written: the mirror GitHub serves and the
-#: site's sources, in both languages.
+#: Where the documentation pages are written: the site's sources, in both
+#: languages, and the files of ``docs/`` written by hand. The GitHub edition
+#: under ``docs/`` is written from the English pages and left out.
 _DOC_TREES = ("docs", "site/src/content/docs")
 
 #: A table row that says how to install an extra, which group 1 names.
@@ -949,7 +952,6 @@ _EXTRA_ROW = re.compile(r'^\|.*`pip install "phonometry\[([\w-]+)\]"`')
 
 #: The rows the test below must find, so that it cannot pass on finding none.
 _KNOWN_EXTRA_ROWS = {
-    "docs/simulation/compute.md",
     "site/src/content/docs/simulation/compute.mdx",
     "site/src/content/docs/es/simulation/compute.mdx",
 }
@@ -968,7 +970,9 @@ def _extra_rows_that_name_a_version() -> list[tuple[str, str, set[str]]]:
     found: list[tuple[str, str, set[str]]] = []
     for tree in _DOC_TREES:
         for path in sorted((_ROOT / tree).rglob("*.md*")):
-            if path.suffix not in {".md", ".mdx"}:
+            if path.suffix not in {".md", ".mdx"} or github_edition.is_edition_file(
+                path
+            ):
                 continue
             for row in path.read_text(encoding="utf-8").splitlines():
                 match = _EXTRA_ROW.match(row)

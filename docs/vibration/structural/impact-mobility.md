@@ -1,14 +1,13 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/structural/impact-mobility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/impact-mobility/
 
 # Mobility by impact excitation (ISO 7626-5)
 
 An instrumented hammer is the quickest way to measure a mobility: no exciter
 to attach, no drive rod to align, and the excitation point moves from one
-location to the next in seconds. **ISO 7626-5:2019** (*Mechanical vibration and
-shock — Experimental determination of mechanical mobility — Part 5:
-Measurements using impact excitation with an exciter which is not attached to
-the structure*) is the part of the ISO 7626 series that makes that measurement
-accurate. It measures the same
+location to the next in seconds. **ISO 7626-5:2019** is the part of the ISO 7626
+series that makes that measurement accurate. It measures the same
 frequency-response functions as
 [ISO 7626-2](mechanical-mobility.md), but the
 record it works on has a peculiar shape: a force pulse a few milliseconds long,
@@ -619,7 +618,34 @@ windowed.report(
 )   # one-page fiche (needs phonometry[report,plot])
 ```
 
-[![ISO 7626-5 impact-mobility example report: a metadata header, a table of the characteristic points (the FRF type, the frequency range, the peak frequency and mobility, the phase there, the impacts averaged, the exponential window and the coherence at the peak) beside the averaged mobility spectrum, and the boxed peak mobility with a note that the peaks carry the window's damping](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_5_impact_mobility_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_5_impact_mobility_example.pdf)
+[![ISO 7626-5 impact-mobility example report (PDF): One-page mechanical-mobility fiche for an impact measurement: a metadata header, a table of the characteristic points (the FRF type, the frequency range of 5 to 800 hertz, the peak at 50 hertz, the peak mobility of 0.0404, the phase there, five impacts averaged, an exponential window of 4.6 per second and a coherence of 1.000 at the peak) beside the averaged mobility spectrum, and the boxed peak mobility with a note that the peaks carry the window's damping.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_5_impact_mobility_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_5_impact_mobility_example.pdf)
+
+Impact-mobility fiche (ImpactMobilityResult.report): the averaged estimate, the impacts and the window it carries.
+
+## What this guide covers
+
+- **Covered.** ISO 7626-5:2019's processing of impact records: the energy spectral density of
+  3.3 and 3.4 (`energy_spectral_density`), the force window of 8.5.1
+  (`force_window`), the exponential window of 8.5.2 (`exponential_window`,
+  `exponential_decay_rate`), the averaged H1 estimate over impacts of 8.6 with
+  the coherence of 9.1 (`impact_mobility`, `ImpactMobilityResult`), the damping
+  correction of Annex A both as Formula (A.3) and as the exact pole shift
+  (`exponential_window_correction`), with a single-mode rational-fraction fit to
+  estimate the damping (`single_mode_fit`, `ImpactMobilityResult.fit_mode`), and
+  the verdicts on the record: double hits (6.4), the force spectrum across the
+  range of interest (6.2, 6.3), overload (8.4), the response decay (8.3, 8.5.2),
+  the coherence (9.1) and the channel-to-channel match of the analyser (8.1).
+  The calibration of 7.2 runs through the ISO 7626-2 rigid-mass check.
+
+- **Not covered.** The part's guidance on hardware is described, not computed: the choice of tip
+  and impactor mass (6.1, 6.3), the 10° alignment of the impact (6.1), the
+  suspension of clause 5 and the alias-protection test of 8.1. The limits of the
+  force-spectrum check and the double-hit threshold are the caller's and the
+  library's, because the part prints none. The single-mode fit is one estimator
+  among many and needs a band with one resonance in it: closely spaced modes need
+  a multi-mode curve fitter, which is not provided, and zoom analysis (8.3 b) is
+  not implemented. The repeatability, reciprocity, linearity and attached-exciter
+  comparisons of 9.2 to 9.5 are left to the operator.
 
 ## See also
 
@@ -634,41 +660,11 @@ windowed.report(
 
 ## References
 
-- International Organization for Standardization. (2019). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 5: Measurements using impact excitation with an exciter which is not
-  attached to the structure* (ISO 7626-5:2019).
-  The whole page: windows, averaging, coherence, the checks on the record and
-  the correction of Annex A.
-- International Organization for Standardization. (2015). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 2: Measurements using single-point translation excitation with an
-  attached vibration exciter* (ISO 7626-2:2015).
-  [iso.org catalogue](https://www.iso.org/standard/62483.html).
-  The rigid-mass calibration of 7.5.2 and the random-error formula of Annex A.
-- International Organization for Standardization. (2011). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 1: Basic terms and definitions, and transducer specifications*
-  (ISO 7626-1:2011).
-  [iso.org catalogue](https://www.iso.org/standard/50426.html).
-  The FRF family the estimate is expressed in.
-- International Organization for Standardization. (2018). *Mechanical
-  vibration, shock and condition monitoring — Vocabulary* (ISO 2041:2018).
-  The damping ratio, the damping coefficient over the critical one (3.2.96),
-  against which Formula (A.3) is first order; ISO 7626-5 takes its terms from
-  it (clause 3).
-
-## Standards
-
-ISO 7626-5:2019, *Mechanical vibration and shock — Experimental determination
-of mechanical mobility — Part 5: Measurements using impact excitation with an
-exciter which is not attached to the structure*: the energy spectral density of
-3.3 and 3.4, the double hits of 6.4, the calibration of 7.2, the channel match
-of 8.1, the sampling and decay rules of 8.3, saturation (8.4), the force window
-of 8.5.1, the exponential window of 8.5.2, the averaging of 8.6, the coherence
-of 9.1 and the correction of Annex A, Formulas (A.1) to (A.3). The part prints
-no worked example, so conformance is anchored on closed forms: a resonator
-struck by a Gaussian pulse, whose response is known exactly, gives its mobility
-back from the averaged estimate, and its damping and mobility back after
-exponential windowing and the Annex A correction. ISO 7626-2:2015 supplies the
-rigid-mass calibration that 7.2 refers to.
+- **International Organization for Standardization. (2011).** [*Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications*](https://www.iso.org/standard/50426.html) (ISO 7626-1:2011).
+  The FRF family (Table 1) the estimate is expressed in: accelerance from an accelerometer, converted to mobility.
+- **International Organization for Standardization. (2015).** [*Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 2: Measurements using single-point translation excitation with an attached vibration exciter*](https://www.iso.org/standard/62483.html) (ISO 7626-2:2015).
+  The operational calibration on a rigid mass of 7.5.2, which ISO 7626-5 7.2 calls essentially the same procedure, and the random-error formula of Annex A that the coherence check reports.
+- **International Organization for Standardization. (2018).** *Mechanical vibration, shock and condition monitoring — Vocabulary* (ISO 2041:2018).
+  The damping ratio, the damping coefficient over the critical one (3.2.96), against which Formula (A.3) is first order; ISO 7626-5 takes its terms from it (clause 3).
+- **International Organization for Standardization. (2019).** *Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 5: Measurements using impact excitation with an exciter which is not attached to the structure* (ISO 7626-5:2019).
+  The whole page: the energy spectral density of 3.3 and 3.4, the double hits of 6.4, the calibration of 7.2, the channel match of 8.1, the sampling and decay rules of 8.3, saturation (8.4), the force window of 8.5.1, the exponential window of 8.5.2, the averaging of 8.6, the coherence of 9.1 and the correction of Annex A, Formulas (A.1) to (A.3). It prints no worked example, so conformance is anchored on closed forms: a resonator struck by a Gaussian pulse, whose response is known exactly, gives its mobility and its damping back.

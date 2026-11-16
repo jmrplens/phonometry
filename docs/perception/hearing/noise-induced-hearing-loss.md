@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/hearing/noise-induced-hearing-loss.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/
 
 # Noise-induced hearing loss (ISO 1999)
 
@@ -12,7 +14,7 @@ into the **hearing threshold level associated with age and noise** (HTLAN).
 Both are defined at the six audiometric frequencies 500 Hz to 6000 Hz, where
 noise damage concentrates (the characteristic 4 kHz notch).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_nihl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_nihl.svg" alt="Two converging lanes. Left: age, sex and a population fractile with database A (ISO 7029) give the age threshold H (HTLA). Right: the 8-hour-normalised exposure level and the exposure duration in years give the median NIPTS N50 (N50 equals u plus v times log of t over t0, times the squared excess of the level over the cut-off L0), then the fractile NIPTS N by adding the standard-normal quantile times the upper or lower spread. The two components combine into the hearing threshold associated with age and noise, HTLAN, equal to H plus N minus H times N over 120" width="86%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_nihl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_nihl.svg" alt="Two converging lanes: age, sex and a fractile give the age threshold H (HTLA, ISO 7029); the 8-hour-normalised level and duration give the median NIPTS N50 and then the fractile NIPTS N; the two combine into HTLAN = H + N - H*N/120" width="86%"></picture>
 
 ## 1. Noise-induced permanent threshold shift (clause 6.3)
 
@@ -21,7 +23,7 @@ of the excess of the noise exposure level over a frequency-dependent cut-off
 $L_0$ (ISO 1999 clause 6.3.1, Formula 2, Table 1):
 
 $$
-N_{50} = \left[u + v\,\log_{10}\!\frac{t}{t_0}\right](L_\mathrm{EX,8h} - L_0)^2,
+N_{50} = \left[u + v\,\log_{10}\frac{t}{t_0}\right](L_\mathrm{EX,8h} - L_0)^2,
 $$
 
 with $t$ the exposure in years and $t_0 = 1$ year; below $L_0$ the effect is
@@ -57,6 +59,58 @@ the noise causes no permanent shift. For durations under 10 years the median is
 extrapolated from the 10-year value (Formula 3); a subset of the frequencies
 can be requested with `frequencies=`.
 
+**What $L_\mathrm{EX,8h}$ must be.** The first argument is the A-weighted noise
+exposure level normalised to a nominal eight-hour day, in practice the result
+of an
+[ISO 9612 survey](occupational-exposure.md) of the
+homogeneous exposure group, which is the standard ISO 1999 references
+normatively for it. It is the level **at the unprotected ear**: the Scope says
+in as many words that none of its levels account for hearing protectors, which
+would both reduce the effective exposure and change the spectrum at the ear, so
+feeding an attenuated or "effective" level is not a conservative shortcut but a
+different quantity. Report the protector separately. The model also treats the
+level as constant over the whole duration, so a career of changing jobs is
+split into segments and each predicted on its own level rather than averaged
+first: Formula (2) is quadratic in the excess over $L_0$, so averaging before
+squaring under-predicts. And the duration is *exposure* years, not age and not
+years of employment.
+
+The level is also the variable a hearing-conservation decision acts on, and it
+is the one the two figures on this page hold fixed:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/nipts_level_growth_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/nipts_level_growth.svg" alt="Two panels. Left: the median NIPTS after 40 years against the 8-hour-normalised exposure level from 75 to 100 dB(A), one curve per audiometric frequency; each curve leaves zero at its own cut-off level L0 of 93, 89, 80, 77, 75 and 77 dB, marked with a dot, and then grows quadratically, the 4000 Hz curve reaching about 41 dB at 100 dB(A). Right: the 4000 Hz curve alone for 10, 20, 30 and 40 years, with two arrows showing that a 3 dB step from 85 to 88 dB(A) adds 4.5 dB of shift while the same step from 95 to 98 dB(A) adds 8.4 dB" width="96%"></picture>
+
+*Below its cut-off $L_0$ the model returns exactly zero, and above it the shift
+is quadratic in the excess, so equal decibel reductions are worth
+progressively more the louder the job. On the right, at 4 kHz over a 40-year
+career, taking 3 dB off an 88 dB(A) job recovers 4.5 dB of median shift, while
+taking the same 3 dB off a 98 dB(A) job recovers 8.4 dB. That asymmetry, not
+the notch shape, is what a control measure is bought against.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `hearing` and the result `r` come from the first snippet on this page.
+levels = np.arange(75.0, 100.5, 0.5)
+fig, (ax_f, ax_t) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+for k, f in enumerate(r.frequencies):
+    ax_f.plot(levels, [hearing.nipts(x, 40.0, 0.5).median[k] for x in levels],
+              label=f"{f:g} Hz")
+ax_f.legend()
+
+for years in (10, 20, 30, 40):
+    ax_t.plot(levels, [hearing.nipts(x, years, 0.5).median[4] for x in levels],
+              label=f"{years} yr")     # index 4 is 4000 Hz
+ax_t.legend()
+plt.show()
+```
+
+</details>
+
 A longer, louder career makes the shape unmistakable:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/nipts_audiogram_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/nipts_audiogram.svg" alt="ISO 1999 noise-induced permanent threshold shift after 40 years at an 8 h-normalised 95 dB(A), on an inverted audiogram axis from 500 Hz to 6000 Hz: the median is near zero at 500 Hz and deepens to about 26 dB at 4000 Hz before recovering at 6000 Hz, and the 10 to 90 percent fractile band around it reaches nearly 37 dB for the most susceptible tenth" width="88%"></picture>
@@ -87,25 +141,56 @@ cut-off level $L_0$ and the coefficients $u$, $v$ of Table 1 are lowest where
 the ear is most vulnerable, so the same $L_\mathrm{EX,8h}$ buys far more shift at
 4 kHz than at 500 Hz.
 
-**Test-report fiche.** `NIPTSResult.report(path)` renders the one-page
-prediction an occupational-hygiene service issues for an exposure group,
-following ISO 1999:2013 clause 6.3: a prediction-basis line, an optional
-metadata header (company, worker or group, workplace, date of assessment), a
-table of the median $N_{50}$ and the fractile NIPTS at the six audiometric
-frequencies beside the spectrum plot with its fractile band, and the boxed
-shift averaged over the 2/3/4 kHz hearing-handicap set together with the
-exposure conditions: $L_\mathrm{EX,8h}$, the duration in years and the population
-percentage $Q$. Two notes keep it honest and both are printed on the fiche:
-the values are a statistical prediction for the exposed population, not
-anyone's audiogram, and ISO 1999 leaves the choice of handicap frequencies to
-the user. `verbose=True` adds the $d_\mathrm{u}$/$d_\mathrm{l}$ spread columns; a `requirement`
-in the metadata is read as the maximum acceptable representative NIPTS and adds
-a PASS/FAIL row, so a *smaller* shift passes. Rendering needs reportlab and
-matplotlib (`pip install "phonometry[report,plot]"`), only
-`engine="reportlab"` is supported, and `language="es"` renders a Spanish fiche.
+### Where the model applies
+
+Formula (2) is a quadratic with no upper bound, so it keeps returning
+plausible-looking numbers well outside the data that fitted it. Four limits
+matter, and the library says so at three of them by raising
+`NoiseInducedHearingLossWarning`:
+
+- **Duration.** The median is specified for 10 to 40 years, with Formula (3)
+  extrapolating down to 1 year. A six-month exposure or a fifty-year career is
+  outside the fitted range and warns.
+- **Level.** The Annex D worked examples span 85 dB to 100 dB, and Scope NOTE 4
+  restricts validity to the stated ranges of levels; above 100 dB the guide
+  warns, and use above 200 Pa (140 dB) is recognised as extrapolation by the
+  Scope itself.
+- **Fractile.** Clause 6.3.2 calls the tails below $Q$ = 5 % and above 95 %
+  unreliable and says they should not be estimated, so the 0.9 / 0.1 pair used
+  in the examples above already sits close to the practical edge, and anything
+  beyond warns.
+- **The character of the noise.** This one is silent, because no argument
+  carries it. Scope NOTE 3 says the prediction method is based primarily on
+  data collected with essentially **broadband, steady, non-tonal** noise, and
+  the Scope covers noise below roughly 10 kHz that is steady, intermittent,
+  fluctuating or irregular. An impulsive or strongly tonal exposure is
+  therefore a use outside the evidence rather than a computation error, and the
+  Introduction sets blast and high-impulse noise apart explicitly. NOTE 4 adds
+  a second silent limit: the simplifications behind the data assume a daily
+  exposure duration no longer than 12 h.
+
+### NIPTS report (`.report()`)
+
+`NIPTSResult.report(path)` renders a one-page PDF fiche laid out like the
+noise-induced hearing loss prediction an occupational-hygiene service issues
+for an exposure group, following **ISO 1999:2013** (clause 6.3): a
+prediction-basis line, an optional metadata header block (company,
+worker(s)/group, workplace and date of assessment), a table of the median
+$N_{50}$ and the fractile NIPTS at the six audiometric frequencies beside the
+result's own spectrum plot with its fractile band, the boxed shift averaged
+over the 2/3/4 kHz hearing-handicap set together with the exposure conditions
+($L_\mathrm{EX,8h}$, the duration in years and the population percentage $Q$), and the
+notes that keep the fiche honest: the values are a statistical prediction for
+the exposed population rather than anyone's audiogram, and ISO 1999 leaves the
+choice of handicap frequencies to the user. `verbose=True` adds the spread
+columns $d_\mathrm{u}$/$d_\mathrm{l}$; a `requirement` in the metadata is read as the maximum
+acceptable representative NIPTS and adds a PASS/FAIL row (a smaller shift
+passes). Rendering needs reportlab and matplotlib
+(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
+supported, and `language="es"` renders a Spanish fiche.
 
 ```python
-from phonometry import ReportMetadata, hearing
+from phonometry import hearing, ReportMetadata
 
 # The 90 dB(A) / 20 year case above, most-susceptible tenth.
 res = hearing.nipts(90.0, 20.0, fractile=0.9)
@@ -119,7 +204,12 @@ res.report(
 )                                   # NIPTS averaged over 2/3/4 kHz (dB)
 ```
 
-[![ISO 1999 NIPTS prediction example report: a metadata header (company, worker group, workplace, date of assessment), a table of the median N50 and the NIPTS at the requested fractile from 500 Hz to 6000 Hz (12.9 dB and 17.8 dB at 4000 Hz), the spectrum plot with its 10-90 % fractile band, and the boxed predicted NIPTS averaged over 2/3/4 kHz = 13.9 dB for a noise exposure LEX,8h = 90 dB over 20 years at population fractile Q = 10 %](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_nipts_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_nipts_example.pdf)
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+[![ISO 1999 NIPTS prediction example report (PDF): One-page noise-induced hearing loss prediction fiche: a metadata header (company, worker group, workplace, date of assessment), a table of the median N50 and the NIPTS at the requested fractile from 500 Hz to 6000 Hz (12.9 dB and 17.8 dB at 4000 Hz), the spectrum plot with its 10-90 % fractile band, and the boxed predicted NIPTS averaged over 2/3/4 kHz = 13.9 dB for a noise exposure LEX,8h = 90 dB over 20 years at population fractile Q = 10 %.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_nipts_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_nipts_example.pdf)
+
+NIPTS prediction fiche (NIPTSResult.report), the shift averaged over the 2/3/4 kHz hearing-handicap set.
 
 ## 2. Age and noise combined: HTLAN (clause 6.1)
 
@@ -149,7 +239,7 @@ h.plot()   # the three curves of the figure below: HTLA, NIPTS and HTLAN
 At 4 kHz the age component (20.2 dB) and the noise component (24.8 dB) combine
 to 40.8 dB rather than their 45.0 dB sum; the compression term removes 4.2 dB.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted (audiogram) axis, with the 10 to 90 percent fractile band around the 40-year curve; the loss deepens toward a maximum near 4 kHz and grows with duration. Right: for a 60-year-old man exposed 30 years at 95 dB, the age component (HTLA), the noise component (NIPTS) and their HTLAN combination, which lies below the simple sum because of the compression term" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted audiogram axis with the 10 to 90 percent band around the 40-year curve, deepening toward 4 kHz. Right: for a 60-year-old man exposed 30 years at 95 dB, the age (HTLA), noise (NIPTS) and combined HTLAN curves, the HTLAN lying below the simple sum" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -187,8 +277,8 @@ symbol means, because they are easy to conflate:
   loss the noise causes, and nothing else. It is what an ideal hearing-
   conservation programme would prevent. On its own it is not an audiogram.
 - **HTLA** ($H$) is the *age* threshold alone (the ISO 7029 component of the
-  [hearing-threshold](hearing-threshold.md) guide), the loss the same person
-  would have with no occupational noise.
+  [hearing-threshold](hearing-threshold.md) guide), the loss
+  the same person would have with no occupational noise.
 - **HTLAN** ($H'$) is the *total* threshold: age **and** noise combined by
   Formula (1). This is what an audiometer measures, and the only one of the
   three you can compare against a real audiogram.
@@ -201,6 +291,80 @@ of the two components, it can already shave a few dB while $H + N$ is below
 40 dB; 40 dB is only a rough marker for where the effect becomes noticeable,
 not a hard boundary, and the correction grows steadily in the regime of a
 long, loud exposure where both terms are large.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/htlan_compression_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/htlan_compression.svg" alt="A filled contour map of the decibels removed by the HN/120 term over the plane of the age component H from 0 to 60 dB against the noise component N from 0 to 60 dB. The removed amount is a hyperbolic family growing from 0 in the bottom-left corner to about 30 dB at H = N = 60 dB. The dashed line where H + N equals 40 dB crosses contours of between about 2 and 3 dB rather than following one, and the worked case at H = 20.2 and N = 24.8 dB is marked, where 4.2 dB is removed from the 45.0 dB sum" width="72%"></picture>
+
+*The correction is a product, so it has no threshold: the dashed $H + N = 40$ dB
+line cuts across the contours instead of following one. A large age component
+makes a modest noise component compress, and the other way round: 4.2 dB is
+already gone at the worked case, and a worker with 40 dB from each cause loses
+13.3 dB from the sum.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `hearing` is the import of the first snippet on this page.
+grid = np.linspace(0.0, 60.0, 121)
+h, n = np.meshgrid(grid, grid)
+removed = h + n - hearing.age_and_noise_threshold(h, n)
+print(round(float(removed[-1, -1]), 1))          # 30.0 dB at H = N = 60
+
+fig, ax = plt.subplots(figsize=(8.2, 6.4))
+cs = ax.contourf(h, n, removed, levels=np.arange(0.0, 31.0, 2.0), cmap="YlOrRd")
+fig.colorbar(cs, ax=ax)
+ax.plot([0.0, 40.0], [40.0, 0.0], "--")          # H + N = 40 dB
+plt.show()
+```
+
+</details>
+
+### Comparing with a measured audiogram
+
+HTLAN is comparable only with an audiogram taken the way the underlying
+databases were taken, and ISO 1999 makes the technique part of the comparison
+rather than an implementation detail: clause 6.2.3 states that because
+audiometric measurement techniques affect threshold measurements, the same
+technique should be used to establish the HTLA database as is used to obtain or
+verify the threshold of the noise-exposed population. Change the earphone or
+the threshold procedure and the offset between measured and predicted moves.
+In practice that means:
+
+- **Pure-tone air conduction.** Annex A.1 says database A *is* the ISO 7029
+  distribution of the normal threshold of hearing by air conduction, so a bone
+  conduction threshold is not the quantity being predicted.
+- **A declared, calibrated earphone.** dB HL is transducer-specific: 0 dB HL is
+  the reference equivalent threshold sound pressure level of ISO 389-1
+  (supra-aural), ISO 389-2 (insert) or ISO 389-8 (circumaural) for the earphone
+  actually fitted. Record which, and its calibration.
+- **A stated threshold procedure.** ISO 8253-1:2010 clause 6.2.3 specifies two
+  manual procedures, ascending and bracketing, which differ only in the
+  sequence of presentations and, properly carried out, give substantially the
+  same thresholds. Record which one, and note that a procedure outside that
+  clause can move the threshold by several decibels on average.
+- **The same six frequencies.** `nipts` and `htlan` return 500, 1000, 2000,
+  3000, 4000 and 6000 Hz. An audiogram that omits 3 kHz or 6 kHz cannot be
+  compared where the noise notch lives.
+- **A fixed ear convention.** Worse ear, better ear or the two-ear average are
+  three different comparisons against the same prediction, and ISO 1999 leaves
+  the choice to the user, so it belongs in the report rather than in the
+  analyst's head.
+- **A noise-free interval before the test.** NIPTS is *permanent* shift, and it
+  is preceded by a reversible temporary threshold shift; ISO 8253-1 clause 5.1
+  says significant noise exposure before audiometry shall be avoided or else
+  noted. A mid-shift audiogram measures TTS on top of the permanent loss and
+  will exceed the predicted HTLAN for a reason the model does not describe.
+  Record the elapsed time since the last exposure.
+
+One caution that applies to the whole comparison: the Scope states that the
+standard is based on statistical data and cannot be applied to the prediction
+or assessment of an individual's hearing loss except in terms of statistical
+probabilities. A single audiogram sitting above the median is not evidence of
+anything; a *distribution* of audiograms sitting above the predicted fractiles
+is.
 
 **Fence caveats.** ISO 1999 gives thresholds and their distribution; it does
 *not* define a "hearing handicap" or a compensable fence. A **fence** is a
@@ -219,31 +383,27 @@ The `NIPTSResult` carries the `median` ($N_{50}$), the
 `spread_upper`/`spread_lower`
 and the `value` at the requested fractile; the `HTLANResult` carries `htla`,
 `nipts` and the combined `threshold`. Both expose `.plot()`. The age component
-alone is the subject of the [hearing-threshold](hearing-threshold.md) guide.
+alone is the subject of the
+[hearing-threshold](hearing-threshold.md) guide.
 
-One substitution the standard allows is not implemented: clauses 6.2.3 and
-6.2.4 let a **database B**, an age threshold measured on a national control
-population, replace database A. Only database A exists here, so `htlan`
-always draws its age component from ISO 7029:2017. For a database-B
-assessment, `age_and_noise_threshold(htla, nipts_value)` runs Formula (1) on an
-externally supplied HTLA array; computing database B itself is out of scope.
+### HTLAN report (`.report()`)
 
-**Test-report fiche.** `HTLANResult.report(path)` renders the companion fiche
-for the combined threshold, following ISO 1999:2013 clause 6.1. It carries the
-same prediction-basis line and metadata header as the NIPTS fiche, but its
-table has three columns (the age component $H$, the noise component $N$ and
-the combined $H'$ at each audiometric frequency) beside the three-curve plot,
-and the boxed value is the threshold averaged over the 2/3/4 kHz
-hearing-handicap set, printed with the listener and exposure conditions (age
-and sex, $L_\mathrm{EX,8h}$ over the exposure years, and the population percentage
-$Q$). One note is specific to this fiche: the age component is database A
-evaluated from ISO 7029:2017, whose values differ from the illustrative
-Table A.3 selection of ISO 1999, which derives from an earlier edition.
-`verbose=True` gives the compression term $HN/120$ its own column, and a
-`requirement` is read as the maximum acceptable representative HTLAN.
+`HTLANResult.report(path)` renders the companion fiche for the combined
+threshold, following **ISO 1999:2013** clause 6.1: the same prediction-basis
+line and metadata header as the NIPTS fiche, but a table that carries the age
+component $H$, the noise component $N$ and the combined $H'$ at each
+audiometric frequency, beside the three-curve plot, with the boxed threshold
+averaged over the 2/3/4 kHz hearing-handicap set and the listener and exposure
+conditions (age and sex, $L_\mathrm{EX,8h}$ over the exposure years, and the
+population percentage $Q$). Its notes add the one that matters here: the age
+component is database A evaluated from ISO 7029:2017, whose values differ from
+the illustrative Table A.3 selection of ISO 1999, which derives from an earlier
+edition. `verbose=True` adds the compression term $HN/120$ as its own column,
+and a `requirement` in the metadata is read as the maximum acceptable
+representative HTLAN.
 
 ```python
-from phonometry import ReportMetadata, hearing
+from phonometry import hearing, ReportMetadata
 
 # The 60-year-old machine operator of this section, median.
 res = hearing.htlan(60, "male", 95.0, 30.0, fractile=0.5)
@@ -257,7 +417,31 @@ res.report(
 )                                   # HTLAN averaged over 2/3/4 kHz (dB HL)
 ```
 
-[![ISO 1999 HTLAN prediction example report: a metadata header, a table of the age component H, the noise component N and the combined threshold H' from 500 Hz to 6000 Hz (20.2, 24.8 and 40.8 dB at 4000 Hz), the plot of the three curves, and the boxed predicted hearing threshold level averaged over 2/3/4 kHz = 33.0 dB HL for a 60-year-old male listener exposed at LEX,8h = 95 dB over 30 years at population fractile Q = 50 %](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_htlan_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_htlan_example.pdf)
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+[![ISO 1999 HTLAN prediction example report (PDF): One-page hearing threshold level prediction fiche for age and noise: a metadata header, a table of the age component H, the noise component N and the combined threshold H' from 500 Hz to 6000 Hz (20.2, 24.8 and 40.8 dB at 4000 Hz), the plot of the three curves, and the boxed predicted hearing threshold level averaged over 2/3/4 kHz = 33.0 dB HL for a 60-year-old male listener exposed at LEX,8h = 95 dB over 30 years at population fractile Q = 50 %.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_htlan_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1999_htlan_example.pdf)
+
+Age-plus-noise threshold fiche (HTLANResult.report), the HTLAN averaged over the 2/3/4 kHz hearing-handicap set.
+
+## What this guide covers
+
+- **Covered.** ISO 1999:2013 as implemented by `nipts` and `htlan`: the median NIPTS of
+  clause 6.3.1 (Formula 2, extrapolated below 10 years by Formula 3, Table 1)
+  and its population fractile of clause 6.3.2 (Formulae 4-7, Tables 2-3),
+  together with the HTLAN combination of clause 6.1 (Formula 1) run by
+  `age_and_noise_threshold`, all validated against the Annex D worked examples.
+  The age component is database A, evaluated from ISO 7029:2017, the edition
+  clause 6.2.2 references undated.
+
+- **Not covered.** Clauses 6.2.3 and 6.2.4 let the user substitute a database B for database A:
+  an age threshold measured on a control population of the country under
+  consideration. Only database A is implemented, so `htlan` always draws its age
+  component from ISO 7029:2017. `age_and_noise_threshold` accepts an external HTLA
+  array for that case, but computing database B itself is not phonometry's job.
+  ISO 1999 does not define a "hearing handicap" or a compensable fence: that
+  line is set by national regulation, and nothing here applies one, so you must
+  supply and check it yourself.
 
 ## See also
 
@@ -275,29 +459,9 @@ res.report(
 
 ## References
 
-- International Organization for Standardization. (2013). *Acoustics —
-  Estimation of noise-induced hearing loss* (ISO 1999:2013).
-  [iso.org catalogue](https://www.iso.org/standard/45103.html).
-  The implemented model: the median NIPTS, its statistical distribution and
-  the HTLAN combination, with the Annex D worked examples used to validate it.
-- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
-  steady-state broad-band noise. *The Journal of the Acoustical Society of
-  America*, 56(5), 1585–1593.
-  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
-  One of the field studies whose exposure-response data underpin the NIPTS
-  relations later codified in ISO 1999.
-- National Institute for Occupational Safety and Health. (1998). *Criteria for
-  a recommended standard: Occupational noise exposure — Revised criteria 1998*
-  (DHHS/NIOSH Publication No. 98-126).
-  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
-  [free PDF](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
-  A freely available criteria document reviewing the same exposure-response
-  evidence and the fence and hearing-conservation issues discussed above.
-
-## Standards
-
-ISO 1999:2013, *Acoustics — Estimation of noise-induced hearing
-loss*: the HTLAN combination (clause 6.1, Formula 1), the median NIPTS
-(clause 6.3.1, Formulae 2-3, Table 1) and its statistical distribution
-(clause 6.3.2, Formulae 4-7, Tables 2-3), validated against the worked examples
-of Annex D. The age component (database A) is ISO 7029:2017.
+- **International Organization for Standardization. (2013).** [*Acoustics — Estimation of noise-induced hearing loss*](https://www.iso.org/standard/45103.html) (ISO 1999:2013).
+  The implemented model: the HTLAN combination (clause 6.1, Formula 1), the median NIPTS (clause 6.3.1, Formulae 2-3, Table 1) and its statistical distribution (clause 6.3.2, Formulae 4-7, Tables 2-3), validated against the worked examples of Annex D. The age component (database A) is ISO 7029:2017.
+- **National Institute for Occupational Safety and Health. (1998).** [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). https://doi.org/10.26616/NIOSHPUB98126
+  A freely available criteria document (the linked PDF is the free download) reviewing the same exposure-response evidence and the fence and hearing-conservation issues discussed on this page.
+- **Passchier-Vermeer, W. (1974).** Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. https://doi.org/10.1121/1.1903482
+  One of the field studies whose exposure-response data underpin the NIPTS relations later codified in ISO 1999.

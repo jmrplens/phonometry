@@ -244,11 +244,11 @@ version = {file = "VERSION"}
 line-length = 88
 target-version = "py312"
 # Markdown is excluded on purpose. Ruff formats fenced Python inside `.md` but
-# does not recognise `.mdx` at all, and every snippet in `docs/` is mirrored by
-# hand into `site/src/content/docs/` in English and Spanish. Formatting one
-# side would silently drift the three copies apart, and the aligned trailing
-# comments those snippets use to show expected output are a teaching device,
-# not an accident.
+# does not recognise `.mdx` at all: the guides are `.mdx` pages, and the GitHub
+# edition under `docs/` is written from them by `make llms`, code blocks byte
+# for byte, so formatting the `.md` side would only make it differ from its
+# page until the next run. The aligned trailing comments those snippets use to
+# show expected output are a teaching device, not an accident.
 extend-exclude = ["*.md"]
 # The node bootstrap runs on whatever Python a node has, so that an old one
 # can say it is too old instead of failing to parse the file: it is held to

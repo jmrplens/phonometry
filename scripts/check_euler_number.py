@@ -16,8 +16,9 @@ about seventy italic and forty upright on the site alone, often a few lines
 apart on one page.
 
 What this reads: every ``$...$``, ``$$...$$``, ``:math:`...``` and
-``.. math::`` region of the docstrings and of the three editions of the
-guides, the errata register and the drawing modules included, and the source
+``.. math::`` region of the docstrings, of the guides in both languages and of
+the hand-written files of ``docs/``, the errata register and the drawing
+modules included, and the source
 of every text of every figure and plate under ``.github/images`` (matplotlib
 keeps a figure's mathtext in an XML comment ahead of its glyphs, and the plate
 canvas keeps the label it was handed). An ``e`` standing alone on the baseline,
@@ -61,9 +62,12 @@ from check_subscript_slope import (
     _UPRIGHT_WRAPPERS,
     tex_regions,
 )
+from github_edition import is_edition_copy
 
-#: Where the prose lives: the docstrings that become the API reference, and the
-#: three editions of the guides, the errata register among them.
+#: Where the prose lives: the docstrings that become the API reference, the
+#: guides in both languages, and the hand-written files of ``docs/``, the errata
+#: register among them. The GitHub edition of the guides under ``docs/`` is
+#: written from the English pages and left out by :func:`collect`.
 DEFAULT_ROOTS = ("src/phonometry", "docs", "site/src/content/docs")
 
 #: Where the figures and the plates are written.
@@ -227,7 +231,11 @@ def image_findings(svg: str) -> list[str]:
 
 
 def collect(roots: list[str]) -> list[pathlib.Path]:
-    """The prose files to read, in a stable order."""
+    """The prose files to read, in a stable order.
+
+    A file a root names is read as named; a walked directory leaves out a file
+    of the GitHub edition, which ``make llms`` writes from a page read here.
+    """
     paths: list[pathlib.Path] = []
     for root in roots:
         target = pathlib.Path(root)
@@ -237,7 +245,7 @@ def collect(roots: list[str]) -> list[pathlib.Path]:
         paths.extend(
             p
             for p in sorted(target.rglob("*"))
-            if p.suffix in _SUFFIXES and p.is_file()
+            if p.suffix in _SUFFIXES and p.is_file() and not is_edition_copy(p)
         )
     return paths
 

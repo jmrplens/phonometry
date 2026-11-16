@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-test-rooms.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/
 
 # Sound Power in Small Test Rooms (ISO 3743)
 
@@ -704,62 +706,62 @@ res.report(
 direct.report("printer_iso3743_2.pdf", language="es", verbose=True)
 ```
 
-The example fiches, regenerated with `make reports`, are kept rendered in the
-repository. Click a preview to open the PDF:
+The example fiches are regenerated with `make reports` and kept rendered in
+the repository; click a preview to open the PDF.
 
-[![One-page ISO 3743-1 sound power determination fiche: a header with the client, the bench-top blender as noise source, the 60 cubic metre hard-walled test room, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean level of the source, the mean level and the calibrated sound power level of the reference sound source and the determined LW, with the 125 Hz value of 89.1 dB marked by an asterisk, the sound power spectrum with its expanded uncertainty and the 125 Hz upper bound in the legend, the boxed A-weighted sound power level LWA = 100.1 dB(A) re 1 pW with the total LW, the comparison method and an expanded uncertainty of 3.6 dB at coverage factor 2, a PASS verdict against a declared 102 dB(A), and basis lines giving the Eq. 10 to 14 chain with its background corrections, the sentence naming the starred band an upper bound, the uncertainty from Table 3 and the Annex B A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.pdf)
+[![ISO 3743-1 hard-walled test room sound power example report (PDF): One-page ISO 3743-1 sound power determination fiche: a header with the client, the bench-top blender as noise source, the 60 cubic metre hard-walled test room, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean level of the source, the mean level and the calibrated sound power level of the reference sound source and the determined LW, with the 125 Hz value of 89.1 dB marked by an asterisk, the sound power spectrum with its expanded uncertainty and the 125 Hz upper bound in the legend, the boxed A-weighted sound power level LWA = 100.1 dB(A) re 1 pW with the total LW, the comparison method and an expanded uncertainty of 3.6 dB at coverage factor 2, a PASS verdict against a declared 102 dB(A), and basis lines giving the Eq. 10 to 14 chain with its background corrections, the sentence naming the starred band an upper bound, the uncertainty from Table 3 and the Annex B A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_1_hard_walled_power_example.pdf)
 
-*Hard-walled test room fiche (`HardWalledSoundPowerResult.report`): the ISO 3743-1 comparison of the blender with the reference sound source, its 125 Hz band an upper bound.*
+Hard-walled test room fiche (HardWalledSoundPowerResult.report): the ISO 3743-1 comparison of the blender with the reference sound source, its 125 Hz band an upper bound.
 
-[![One-page ISO 3743-2 sound power determination fiche: a header with the client, the desktop printer as noise source, the 72 cubic metre special reverberation test room with a nominal reverberation time of 0.77 s, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean sound pressure level and the determined LW to the nearest half decibel, the sound power spectrum with its expanded uncertainty, the boxed A-weighted sound power level LWA = 75.8 dB(A) re 1 pW from the A-weighted levels by Formula 9, with the total LW, the Annex F band total of 75.8 dB(A), the direct method with the room volume and nominal reverberation time and an expanded uncertainty of 4.1 dB at coverage factor 2, a PASS verdict against a declared 77 dB(A), and basis lines giving Formula 8 with the Table 4 background corrections and Formula 9, the uncertainty from Table 5 and the Annex F A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.pdf)
+[![ISO 3743-2 special reverberation test room sound power example report (PDF): One-page ISO 3743-2 sound power determination fiche: a header with the client, the desktop printer as noise source, the 72 cubic metre special reverberation test room with a nominal reverberation time of 0.77 s, the instrumentation and the climate, the octave-band table from 125 Hz to 8 kHz of the mean sound pressure level and the determined LW to the nearest half decibel, the sound power spectrum with its expanded uncertainty, the boxed A-weighted sound power level LWA = 75.8 dB(A) re 1 pW from the A-weighted levels by Formula 9, with the total LW, the Annex F band total of 75.8 dB(A), the direct method with the room volume and nominal reverberation time and an expanded uncertainty of 4.1 dB at coverage factor 2, a PASS verdict against a declared 77 dB(A), and basis lines giving Formula 8 with the Table 4 background corrections and Formula 9, the uncertainty from Table 5 and the Annex F A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3743_2_special_room_power_example.pdf)
 
-*Special reverberation test room fiche (`SpecialRoomSoundPowerResult.report`): the ISO 3743-2 direct method on the printer, with the A-weighted level read as clause 4 describes it.*
+Special reverberation test room fiche (SpecialRoomSoundPowerResult.report): the ISO 3743-2 direct method on the printer, with the A-weighted level read as clause 4 describes it.
 
 ## What this guide covers
 
-**Covered.** ISO 3743-1:2010: the room criteria of 4.2 to 4.4 (`check_hard_walled_room`),
-the survey of 7.4 with Table 2 (`hard_walled_source_locations`), the means of
-Eq. 9 to 12, the background correction of 8.1.3 on the means with its 6 dB,
-15 dB and 1,3 dB rules, the sound power level of Eq. 14
-(`sound_power_hard_walled`), the sound energy level of Eq. 15 to 20
-(`sound_energy_hard_walled`), the Table 3 reproducibility with Eq. 22 and 23,
-the round robin of Eq. 24 (`reproducibility_from_round_robin`), Annex A and
-the Annex B totals. ISO 3743-2:2018: the reverberation parameter of
-Formula (1) and its NOTE (`reverberation_parameter`), the limiting curves of
-6.3 with a centred or given $T_\mathrm{nom}$, the volume of 6.2, the
-climate of 6.6 and the source size of clause 5
-(`check_special_room_reverberation`), the surfaces of 6.4
-(`check_special_room_surfaces`), the suitability evaluation of 6.7
-against the calibrated levels or an ISO 6926 calibration read at the
-conditions of the test (`check_special_room_suitability`), the survey of
-9.4 with Table 3 and the
-spectral character of 9.5 (`special_room_source_locations`), Table 4
-(`special_room_background_correction`), the direct Formula 9
-(`sound_power_special_room`) and the comparison Formula 10
-(`sound_power_special_room_comparison`), the Table 5 reproducibility, Annex E
-and the Annex F totals. Both results write the one-page test sheet through
-`.report()`, with the upper bounds of Part 1 and the other bands that fail
-the background requirement marked and stated apart.
+- **Covered.** ISO 3743-1:2010: the room criteria of 4.2 to 4.4 (`check_hard_walled_room`),
+  the survey of 7.4 with Table 2 (`hard_walled_source_locations`), the means of
+  Eq. 9 to 12, the background correction of 8.1.3 on the means with its 6 dB,
+  15 dB and 1,3 dB rules, the sound power level of Eq. 14
+  (`sound_power_hard_walled`), the sound energy level of Eq. 15 to 20
+  (`sound_energy_hard_walled`), the Table 3 reproducibility with Eq. 22 and 23,
+  the round robin of Eq. 24 (`reproducibility_from_round_robin`), Annex A and
+  the Annex B totals. ISO 3743-2:2018: the reverberation parameter of
+  Formula (1) and its NOTE (`reverberation_parameter`), the limiting curves of
+  6.3 with a centred or given $T_\mathrm{nom}$, the volume of 6.2, the
+  climate of 6.6 and the source size of clause 5
+  (`check_special_room_reverberation`), the surfaces of 6.4
+  (`check_special_room_surfaces`), the suitability evaluation of 6.7
+  against the calibrated levels or an ISO 6926 calibration read at the
+  conditions of the test (`check_special_room_suitability`), the survey of
+  9.4 with Table 3 and the
+  spectral character of 9.5 (`special_room_source_locations`), Table 4
+  (`special_room_background_correction`), the direct Formula 9
+  (`sound_power_special_room`) and the comparison Formula 10
+  (`sound_power_special_room_comparison`), the Table 5 reproducibility, Annex E
+  and the Annex F totals. Both results write the one-page test sheet through
+  `.report()`, with the upper bounds of Part 1 and the other bands that fail
+  the background requirement marked and stated apart.
 
-**Not covered.** The uncertainty budgets of Annex C (Part 1) and Annex D (Part 2) are
-informative and not modelled: $\sigma_{R0}$ is the typical upper bound of
-Table 3 or Table 5, not a value from a round robin or a model. The
-placement rules (source location, microphone distances from the source and
-the surfaces, traverse paths and their speed) are the operator's decisions,
-made before the levels exist, and the instrumentation tolerances of Table 2
-of Part 2 are the instrument's. The design guidance of Annex B of Part 2 (the
-room proportions of Table B.1, the membrane absorber of Formula B.1) is
-advice for building a room, not a criterion the room is judged by. Part 2
-leaves isolated bursts to ISO 3744 and ISO 3745 by its scope; Part 1 gives
-them a sound energy level. The reference sound source is taken as
-calibrated: its characteristics and calibration tolerances, Annex A of Part 2
-(A.1 and Table A.1: ±1 dB from 100 Hz to 160 Hz, ±0,5 dB from 200 Hz to
-4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
-calibration certificate's and are not judged here. An ISO 6926 calibration
-made in [Free Field and Reference Sources](free-field-qualification.md), which judges the
-requirements of ISO 6926, is taken by either comparison as `reference_sound_power_levels`, and by
-the suitability evaluation of 6.7 as `calibrated_power_levels`, and read at
-the conditions of the test.
+- **Not covered.** The uncertainty budgets of Annex C (Part 1) and Annex D (Part 2) are
+  informative and not modelled: $\sigma_{R0}$ is the typical upper bound of
+  Table 3 or Table 5, not a value from a round robin or a model. The
+  placement rules (source location, microphone distances from the source and
+  the surfaces, traverse paths and their speed) are the operator's decisions,
+  made before the levels exist, and the instrumentation tolerances of Table 2
+  of Part 2 are the instrument's. The design guidance of Annex B of Part 2 (the
+  room proportions of Table B.1, the membrane absorber of Formula B.1) is
+  advice for building a room, not a criterion the room is judged by. Part 2
+  leaves isolated bursts to ISO 3744 and ISO 3745 by its scope; Part 1 gives
+  them a sound energy level. The reference sound source is taken as
+  calibrated: its characteristics and calibration tolerances, Annex A of Part 2
+  (A.1 and Table A.1: ±1 dB from 100 Hz to 160 Hz, ±0,5 dB from 200 Hz to
+  4 kHz, ±1 dB from 5 kHz to 10 kHz) and ISO 6926 for Part 1, are its
+  calibration certificate's and are not judged here. An ISO 6926 calibration
+  made in [Free Field and Reference Sources](free-field-qualification.md), which judges the
+  requirements of ISO 6926, is taken by either comparison as `reference_sound_power_levels`, and by
+  the suitability evaluation of 6.7 as `calibrated_power_levels`, and read at
+  the conditions of the test.
 
 ## See also
 
@@ -775,50 +777,14 @@ the conditions of the test.
 - [Sound Power by Pressure Methods](sound-power-pressure.md):
   the enveloping surface of ISO 3744, ISO 3745 and ISO 3746 for a source
   measured in its direct field.
-- [API reference](../../reference/api/index.md): the ISO 3743 functions and
-  results under `phonometry.emission`.
-
+- API reference: [`emission`: sound power in a hard-walled room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-hard-walled/),
+  [`emission`: sound power in a special reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-special-room/).
 
 ## References
 
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for small movable
-  sources in reverberant fields — Part 1: Comparison method for a
-  hard-walled test room* (ISO 3743-1:2010). The comparison method of
-  section 1: the room criteria of 4.2 to 4.4, the survey of 7.4, the
-  background correction of 8.1.3, Eq. 14 and Eq. 20, the Table 3
-  reproducibility and Annexes A and B.
-- International Organization for Standardization. (2018). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  pressure — Engineering methods for small, movable sources in reverberant
-  fields — Part 2: Methods for special reverberation test rooms*
-  (ISO 3743-2:2018). The special room of section 2: the reverberation-time
-  curve of 6.3, the surfaces of 6.4, the suitability evaluation of 6.7,
-  Tables 3 and 4, the direct Formula 9 and the comparison Formula 10, the
-  Table 5 reproducibility and Annexes E and F.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52053.html).
-  The precision reverberation-room method the two parts sit below: the
-  Waterhouse term the special room builds into its reverberation curve, and
-  the $C_1 + C_2$ whose altitude figures the informative annexes of ISO 3743
-  quote.
-
-## Standards
-
-ISO 3743-1:2010, *Acoustics — Determination of sound power levels and sound
-energy levels of noise sources using sound pressure — Engineering methods for
-small movable sources in reverberant fields — Part 1: Comparison method for a
-hard-walled test room*: the room criteria, the source-location survey, the
-comparison with a reference sound source for the sound power and the sound
-energy level, the Table 3 reproducibility and Annexes A and B.
-
-ISO 3743-2:2018, *Acoustics — Determination of sound power levels of noise
-sources using sound pressure — Engineering methods for small, movable sources
-in reverberant fields — Part 2: Methods for special reverberation test rooms*:
-the reverberation-time curve, the surfaces and the suitability of the room,
-the survey of Table 3, the background correction of Table 4, the direct and
-the comparison methods, the Table 5 reproducibility and Annexes E and F.
+- **International Organization for Standardization. (2010).** *Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for small movable sources in reverberant fields — Part 1: Comparison method for a hard-walled test room* (ISO 3743-1:2010).
+  The comparison method of section 1: the room criteria of 4.2 to 4.4, the survey of 7.4, the background correction of 8.1.3, Eq. 14 and Eq. 20, the Table 3 reproducibility and Annexes A and B.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The precision reverberation-room method the two parts sit below: the Waterhouse term the special room builds into its reverberation curve, and the C1 + C2 whose altitude figures the informative annexes of ISO 3743 quote.
+- **International Organization for Standardization. (2018).** *Acoustics — Determination of sound power levels of noise sources using sound pressure — Engineering methods for small, movable sources in reverberant fields — Part 2: Methods for special reverberation test rooms* (ISO 3743-2:2018).
+  The special room of section 2: the reverberation-time curve of 6.3, the surfaces of 6.4, the suitability evaluation of 6.7, Tables 3 and 4, the direct Formula 9 and the comparison Formula 10, the Table 5 reproducibility and Annexes E and F.

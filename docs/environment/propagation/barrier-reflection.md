@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/propagation/barrier-reflection.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Sound reflection of a noise barrier in situ (EN 1793-5)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/
+
+# Sound reflection of a noise barrier in situ
 
 A road noise barrier is declared by its absorption, and EN 1793-1 measures that
 in a reverberation room: a sample lying on the floor, sound arriving from every
@@ -393,27 +395,27 @@ says which it is.
 
 ## What this guide covers
 
-**Covered.** EN 1793-5:2016 from the impulse responses on: the geometry of the grid and
-Formula (2) (Table 2), the signal subtraction with its sub-sample alignment and
-the reduction factor of Formula (6) (5.5.4), the Adrienne window of 5.5.5 with
-Formula (7) and its placement (5.5.6), the sound reflection index of Formula
-(1) with the directivity correction of Formula (3) and the gain factor of
-Formula (4), the averages of 5.5.5 and 5.6.2.3 over microphones and grid
-positions, the single number $DL_{RI}$ of 5.8 with the EN 1793-3 spectrum, the
-sampled area of Formula (8), the two position checks of 5.6.2.5 and 5.6.2.6
-against Table 3, the expanded uncertainty from Table A.1, and the low
-frequency limit of 5.5.7 by the construction of Garai and Guidorzi. Tables 2
-and 3, NOTE 1 of 5.6.1, the three windows and the example of Annex B (Tables
-B.1 and B.2) are conformance checks.
+- **Covered.** EN 1793-5:2016 from the impulse responses on: the geometry of the grid and
+  Formula (2) (Table 2), the signal subtraction with its sub-sample alignment and
+  the reduction factor of Formula (6) (5.5.4), the Adrienne window of 5.5.5 with
+  Formula (7) and its placement (5.5.6), the sound reflection index of Formula
+  (1) with the directivity correction of Formula (3) and the gain factor of
+  Formula (4), the averages of 5.5.5 and 5.6.2.3 over microphones and grid
+  positions, the single number $DL_{RI}$ of 5.8 with the EN 1793-3 spectrum, the
+  sampled area of Formula (8), the two position checks of 5.6.2.5 and 5.6.2.6
+  against Table 3, the expanded uncertainty from Table A.1, and the low
+  frequency limit of 5.5.7 by the construction of Garai and Guidorzi. Tables 2
+  and 3, NOTE 1 of 5.6.1, the three windows and the example of Annex B (Tables
+  B.1 and B.2) are conformance checks.
 
-**Not covered.** Obtaining the impulse responses, by MLS or sweep and deconvolution (5.4.3),
-which is the [room impulse response](../../buildings/rooms/room-impulse-response.md)
-machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
-5.5.3, which a laboratory states rather than computes; the meteorological and
-surface conditions of 5.7; and the far-field indicators of Annex C, which the
-standard leaves to the QUIESST reports. The low frequency limit follows Figure
-14 at microphone 5 and not at microphones 2 and 8, so it does not choose the
-lowest reliable band: that stays with the report.
+- **Not covered.** Obtaining the impulse responses, by MLS or sweep and deconvolution (5.4.3),
+  which is the [room impulse response](../../buildings/rooms/room-impulse-response.md)
+  machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
+  5.5.3, which a laboratory states rather than computes; the meteorological and
+  surface conditions of 5.7; and the far-field indicators of Annex C, which the
+  standard leaves to the QUIESST reports. The low frequency limit follows Figure
+  14 at microphone 5 and not at microphones 2 and 8, so it does not choose the
+  lowest reliable band: that stays with the report.
 
 ## See also
 
@@ -424,26 +426,11 @@ lowest reliable band: that stays with the report.
 
 ## References
 
-- CEN (2016). *EN 1793-5:2016 Road traffic noise reducing devices - Test
-  method for determining the acoustic performance - Part 5: Intrinsic
-  characteristics - In situ values of sound reflection under direct sound field
-  conditions*. The implemented edition, read from BS EN 1793-5:2016: the grid
-  and its geometry (3.10 to 3.15, Tables 2 and 3), Formula (1) with the
-  corrections of Formulas (2) to (4), the subtraction and Formula (6) of 5.5.4,
-  the Adrienne window of 5.5.5 and Formula (7), its placement (5.5.6), the low
-  frequency limit (5.5.7), the sampled area of Formula (8), the position checks
-  of 5.6.2.5 and 5.6.2.6, DL_RI (5.8), Table A.1 and the example of Annex B.
-- CEN (1997). *EN 1793-3:1997 Road traffic noise reducing devices - Test
-  method for determining the acoustic performance - Part 3: Normalized traffic
-  noise spectrum*. Table 1, read from the BS EN 1793-3:1998 edition.
-- Garai, M., & Guidorzi, P. (2000). European methodology for testing the
-  airborne sound insulation characteristics of noise barriers in situ:
-  experimental verification and comparison with laboratory data. *Journal of
-  the Acoustical Society of America*, 108(3), 1054-1067.
-  [doi:10.1121/1.1286811](https://doi.org/10.1121/1.1286811). Section III.D,
-  the window and its first notch as the low frequency limit.
-- Guidorzi, P., & Garai, M. (2013). Advancements in sound reflection and
-  airborne sound insulation measurement on noise barriers. *Open Journal of
-  Acoustics*, 3(2A), 25-38.
-  [doi:10.4236/oja.2013.32A004](https://doi.org/10.4236/oja.2013.32A004). The
-  QUIESST revision the 2016 standard adopted.
+- **European Committee for Standardization. (1997).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 3: Normalized traffic noise spectrum* (EN 1793-3:1997).
+  Table 1, the eighteen relative A-weighted one-third octave band levels DL_RI is weighted by. Read from the BS EN 1793-3:1998 edition.
+- **European Committee for Standardization. (2016).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 5: Intrinsic characteristics — In situ values of sound reflection under direct sound field conditions* (EN 1793-5:2016).
+  The implemented edition: the grid and its geometry (3.10 to 3.15, Tables 2 and 3), Formula (1) with the corrections of Formulas (2) to (4), the subtraction and Formula (6) of 5.5.4, the Adrienne window of 5.5.5 and Formula (7), its placement (5.5.6), the low frequency limit (5.5.7), the sampled area of Formula (8), the position checks of 5.6.2.5 and 5.6.2.6, DL_RI (5.8), Table A.1 and the example of Annex B. Read from BS EN 1793-5:2016.
+- **Garai, M., & Guidorzi, P. (2000).** European methodology for testing the airborne sound insulation characteristics of noise barriers in situ: experimental verification and comparison with laboratory data. *The Journal of the Acoustical Society of America*, *108*(3), 1054-1067. https://doi.org/10.1121/1.1286811
+  Section III.D: the window that ends where the first unwanted component arrives, and the first notch of its spectrum as the low frequency limit, about 160 Hz for the 7,9 ms window. The construction behind the low frequency limit here.
+- **Guidorzi, P., & Garai, M. (2013).** Advancements in sound reflection and airborne sound insulation measurement on noise barriers. *Open Journal of Acoustics*, *3*(2A), 25-38. https://doi.org/10.4236/oja.2013.32A004
+  The QUIESST revision the 2016 standard adopted: the nine-microphone grid, the sub-sample alignment and the directivity correction.

@@ -1,27 +1,29 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/diffusers/metadiffusers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/
 
 # Metadiffusers
 
 A Schroeder diffuser earns its diffusion with depth: the
-[design equations](diffusers.md) turn a phase sequence into wells whose maximum
-depth approaches half the design wavelength, so a diffuser for the low hundreds of hertz
-is tens of centimetres thick, and that thickness is what keeps phase-grating
-diffusers out of small rooms, studios and vehicles. A **metadiffuser**
-(Jiménez, Cox, Romero-García and Groby, 2017) reaches the same reflection
-phases from a panel one to two orders of magnitude thinner: each well becomes
-a thin closed slit loaded by Helmholtz resonators, and the resonators slow the
-sound inside the slit so drastically that a 2 cm panel behaves like wells
-27 cm deep. This guide covers the slow-sound mechanism, the published
-quadratic-residue metadiffuser evaluated end to end, and the design recipe
-that maps any Schroeder sequence onto a deep-subwavelength panel.
+[design equations](diffusers.md) turn a phase sequence into
+wells whose maximum depth approaches half the design wavelength, so a diffuser for the
+low hundreds of hertz is tens of centimetres thick, and that thickness is what
+keeps phase-grating diffusers out of small rooms, studios and vehicles. A
+**metadiffuser** (Jiménez, Cox, Romero-García and Groby, 2017) reaches the
+same reflection phases from a panel one to two orders of magnitude thinner:
+each well becomes a thin closed slit loaded by Helmholtz resonators, and the
+resonators slow the sound inside the slit so drastically that a 2 cm panel
+behaves like wells 27 cm deep. This guide covers the slow-sound mechanism, the
+published quadratic-residue metadiffuser evaluated end to end, and the design
+recipe that maps any Schroeder sequence onto a deep-subwavelength panel.
 
 ## 1. Slow sound in a loaded slit
 
 The unit cell is the same one the
-[slow-sound absorber](../absorbers/metamaterial-absorbers.md) is built from: a slit of
-height $h_n$ runs the depth $L$ of the panel and is loaded, along its upper
-wall, by an array of Helmholtz resonators on a lattice step $a$. The slit
-chain is evaluated with the transfer-matrix method,
+[slow-sound absorber](../absorbers/metamaterial-absorbers.md) is built
+from: a slit of height $h_n$ runs the depth $L$ of the panel and is loaded,
+along its upper wall, by an array of Helmholtz resonators on a lattice step
+$a$. The slit chain is evaluated with the transfer-matrix method,
 
 $$
 T = M_{\Delta l}\,\prod_m \left(M_\mathrm{s}\,M_\mathrm{HR}^{(m)}\,M_\mathrm{s}\right),
@@ -48,28 +50,35 @@ absorbers:
   one. A phase profile that a classical grating writes with depth, the
   metadiffuser writes with resonator tuning.
 - **Critical coupling adds a third state.** Driving one slit to
-  [critical coupling](../absorbers/metamaterial-absorbers.md) balances its visco-thermal
-  loss against its leakage and produces a reflection zero: $R_n \approx 0$.
-  Ternary sequences (reflection values $+1$, $-1$, $0$) need exactly that
-  perfectly absorbing state, which no rigid well can provide.
+  [critical coupling](../absorbers/metamaterial-absorbers.md) balances
+  its visco-thermal loss against its leakage and produces a reflection zero:
+  $R_n \approx 0$. Ternary sequences (reflection values $+1$, $-1$, $0$) need
+  exactly that perfectly absorbing state, which no rigid well can provide.
 
 `metadiffuser_reflection` runs that chain once per well (two-dimensional
 resonators, visco-thermal losses and end corrections included) and returns the
 per-well complex reflection $R_n(f)$; `metadiffuser_polar_response` and
 `metadiffuser_diffusion_spectrum` reduce that spatial profile through the same
 Fraunhofer far field and ISO 17497-2 coefficient used for the
-[classical designs](diffusers.md). A `None` entry in the well sequence stands
-for a flat rigid strip ($R = 1$), the $+1$ state of ternary designs.
+[classical designs](diffusers.md). A `None` entry in the well
+sequence stands for a flat rigid strip ($R = 1$), the $+1$ state of ternary
+designs.
 
 ## 2. The published quadratic-residue metadiffuser
 
 The published design packs a whole $N = 5$ quadratic-residue diffuser into a
 35 cm x 2 cm panel: five slits, each loaded by two resonators, on a 7 cm
-pitch. Its first slit reaches critical coupling (the reflection zero the
-ternary `0` state is built from), and at the 2 kHz evaluation frequency the
-panel scatters like the 27.4 cm deep QRD it mimics.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry.svg" alt="To-scale cross-section of the published quadratic-residue metadiffuser: a 350 by 20 millimetre panel over a rigid backing with five numbered slits opening at the face, each loaded by two Helmholtz resonators whose necks and cavities shelve sideways into the septum between slits; dimension lines mark the 350 millimetre width, the 70 millimetre pitch, the 14.7 millimetre first slit and the 20 millimetre depth, with the incident sound arriving from above" width="92%"></picture>
+pitch. This is a *quadratic-residue* design, so all five slits are meant to
+reflect with $|R_n|$ near one and to differ only in phase. Two of them, slits 1
+and 4, do come close to critical coupling (their absorption peaks at 0.99)
+but at 2305 Hz and 2260 Hz, above the 2 kHz the phase profile is tuned for,
+where they still reflect 0.97 of the incident pressure. The critically coupled
+slit that a
+*ternary* sequence needs as its `0` state is the same kind of cell driven
+deliberately onto resonance at the working frequency, which is what
+[`critical_coupling_design`](../absorbers/metamaterial-absorbers.md)
+solves for. This published panel is the QRD case, and at 2 kHz it scatters
+like the 27.4 cm deep diffuser it mimics.
 
 As in the published far-field comparison, the polar response repeats the
 five-well sequence six times (`n_repetitions=6`, a 2.1 m panel):
@@ -82,6 +91,8 @@ from phonometry import materials
 # resonators each in a 35 cm x 2 cm panel (7 cm pitch), tuned to mimic a
 # QRD designed for 500 Hz whose wells would run up to 27.4 cm deep.
 mm = 1e-3
+# The row order follows the published table; HelmholtzResonator takes
+# (neck_length_m, neck_side_m, cavity_length_m, cavity_side_m), hence the reshuffle.
 rows = [  # slit h, neck l_n, cavity l_c, neck w_n, cavity w_c  [mm]
     (14.7, 13.0, 16.4, 6.2, 9.0),
     (30.9, 9.1, 4.3, 3.5, 9.0),
@@ -89,18 +100,25 @@ rows = [  # slit h, neck l_n, cavity l_c, neck w_n, cavity w_c  [mm]
     (15.7, 13.3, 17.0, 6.3, 9.0),
     (20.3, 18.0, 20.7, 3.2, 9.0),
 ]
-wells = [
-    materials.MetadiffuserWell(
-        slit_height_m=h * mm,
-        resonators=2 * (materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm),),
-    )
-    for h, ln, lc, wn, wc in rows
-]
+wells = []
+for h, ln, lc, wn, wc in rows:
+    resonator = materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm)
+    # two identical resonators per slit
+    wells.append(materials.MetadiffuserWell(slit_height_m=h * mm, resonators=(resonator, resonator)))
 
 f = np.arange(1800.0, 2601.0, 5.0)
 panel = materials.metadiffuser_reflection(f, wells, depth_m=0.02, period_m=0.07)
 alpha1 = panel.well_absorption[0]
 print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
+
+# What the panel absorbs where it is used, not where it resonates.
+i2k = int(np.argmin(np.abs(f - 2000.0)))
+print(np.round(panel.well_absorption[:, i2k], 3))
+# [0.054 0.009 0.009 0.055 0.032]
+print(round(float(panel.absorption[i2k]), 3))       # 0.032
+peak = int(f[panel.absorption.argmax()])
+print(round(float(panel.absorption.max()), 3), peak)
+# 0.253 2260
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
 polar = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02,
@@ -108,7 +126,68 @@ polar = materials.metadiffuser_polar_response(2000.0, wells, depth_m=0.02,
 print(round(polar.coefficient, 2))                             # 0.32
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry.svg" alt="To-scale cross-section of the published quadratic-residue metadiffuser: a 350 by 20 millimetre panel over a rigid backing with five numbered slits opening at the face, each loaded by two Helmholtz resonators whose necks and cavities shelve sideways into the septum between slits; dimension lines mark the 350 millimetre width, the 70 millimetre pitch, the 14.7 millimetre first slit and the 20 millimetre depth, with the incident sound arriving from above" width="92%"></picture>
+
+*One period to scale: five slits from 14.7 mm to 30.9 mm tall on a 70 mm
+pitch inside a 350 mm × 20 mm panel, each loaded by two Helmholtz resonators
+shelved sideways into the septum that separates it from its neighbour. The
+whole panel is 20 mm deep against the 686 mm wavelength of its 500 Hz
+reference design, one part in 34.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `panel` is the MetadiffuserResult computed above, and it retains the
+# geometry it was computed for, so it redraws its own cross-section:
+panel.plot_geometry()
+plt.show()
+
+# From a bare well list, without computing a reflection first, the same
+# drawing comes from materials.plot_metadiffuser_panel_geometry(
+#     wells, depth_m=0.02, period_m=0.07).
+```
+
+</details>
+
+At the 2 kHz design frequency the panel is essentially a phase grating: it
+reflects 96.8 % of the incident energy and absorbs 3.2 %, per slit no more
+than 5.5 %. Three hundred hertz higher it is a different surface. Slits 1 and
+4 pass through critical coupling at 2305 Hz and 2260 Hz with absorption
+coefficients of 0.99, so two fifths of the panel area briefly becomes a
+near-perfect absorber and the face average reaches 0.25. `.plot()` on the
+result draws exactly that.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_absorption.svg" alt="Absorption coefficient against frequency from 1800 to 2600 hertz for the five slits of the published metadiffuser and their face average: slits 2, 3 and 5 stay in the low percent range across the band, while slit 4 peaks at 0.99 near 2260 hertz and slit 1 at 0.99 near 2305 hertz, lifting the face average from 0.03 at the 2 kilohertz design frequency to about 0.25 between the two resonances" width="88%"></picture>
+
+*A metadiffuser is not lossless, and the loss is not flat. At the design
+frequency the face average is 0.03, which a room model can usually ignore
+beside the diffusion coefficient; between the two critical-coupling peaks it
+is 0.25, which it cannot. The panel doubles as a narrow-band absorber at
+2.3 kHz whether or not that was wanted, and the absorption spectrum belongs on
+the datasheet next to the diffusion spectrum.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `panel` is the MetadiffuserResult computed above. One line:
+panel.plot()
+plt.show()
+```
+
+</details>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_polar_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_polar.svg" alt="Semicircular polar plot at 2 kilohertz comparing the far-field response of the 2 centimetre metadiffuser panel, drawn as a solid line, with the 27.4 centimetre deep quadratic residue diffuser it mimics, drawn dashed: the two grating-lobe patterns overlap almost exactly across the whole minus 90 to plus 90 degree arc" width="92%"></picture>
+
+*The claim of the whole guide, in one overlay: the same grating lobes in the
+same directions at the same levels, from a panel 13.7 times thinner. Both
+responses are six periods of the five-well sequence, a 2.1 m array, so the
+only difference between them is how each well reaches its reflection phase.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -156,28 +235,29 @@ animation below meshes both panels for real (the metadiffuser at 0.25 mm, slits,
 necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 27 cm QRD and the 2 cm panel throw out nearly the same scattered fan.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_metadiffuser_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_metadiffuser.gif" alt="Animation: a 2 kHz plane wavefront hits a Schroeder diffuser with wells down to 27 centimetres and, beside it, the 2 centimetre metadiffuser whose real slits and resonators are meshed at 0.25 millimetres; the total field and the persistent scattered envelope show both panels spraying nearly identical fans, with the arc diffusion coefficients annotated" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_metadiffuser.webm)
+**Video:** [Schroeder diffuser vs metadiffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_metadiffuser.webm): A 2 kHz plane wavefront hits a Schroeder diffuser with wells down to 27 centimetres and, beside it, the 2 centimetre metadiffuser of the published design, whose real slits, necks and cavities are meshed at 0.25 millimetres. The total field and the persistent scattered envelope show both panels spraying nearly identical diffuse fans, and the receiver-arc diffusion coefficients confirm it quantitatively.
 
 ## 3. The design recipe: phases first, geometry second
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="The metadiffuser prediction in three bands: the target quadratic residue diffuser beside the 2 cm panel at the same scale with the phase each well has to return, slit 1 enlarged with its transfer-matrix chain along the depth and the loop that tunes it, and six periods with their five grating lobes and the diffusion coefficient" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="Three bands, top to bottom. First, one period of the target quadratic residue diffuser designed for 500 hertz, drawn in section with wells 6.9, 27.4, 27.4 and 6.9 centimetres deep and one flat well, beside a table of the sequence 1, 4, 4, 1, 0, those depths and the phase each well has to return at 2 kilohertz: plus 72, minus 72, minus 72, plus 72 and 0 degrees; at the right, at the same scale, the 35 by 2 centimetre metadiffuser with its five slits. Second, slit 1 enlarged, 14.7 millimetres tall and 20 millimetres deep, with two Helmholtz resonators 10 millimetres apart shelved into the septum, and beside it the transfer-matrix chain laid along the depth: the radiation end correction at the mouth, half a lattice step of slit either side of each resonator, the resonators as shunts and the rigid backing, which a box turns into the reflection coefficient of the slit; an arrow loops back to the table, tuning the geometry slit by slit until the phase of each reflection is its target. Third, the period repeated six times into a 2.1 metre panel under a semicircle of receivers every 5 degrees, with five grating lobes near 0, plus and minus 29 and plus and minus 78.5 degrees, and three boxes with the Fraunhofer far field, the grating directions and the diffusion coefficient normalised against a flat panel of the same width" width="100%"></picture>
 
-*Phases first, geometry second, the far field last. The two panels at the top
-share one scale: 27.4 cm of wells against 2 cm of slits.*
+*The whole prediction in one figure, for the published panel. The quadratic
+residues fix one phase per well; each slit is then tuned, through the
+transfer-matrix chain, until it returns that phase from 20 mm of depth; and
+only then do six periods go through the far field to a diffusion coefficient.
+The two panels at the top share one scale: 27.4 cm of wells against 2 cm of
+slits.*
 
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
-sequence exactly as for a [classical design](diffusers.md): the quadratic
-residues $s_n = n^2 \bmod N$ give the target well depths
+sequence exactly as for a [classical design](diffusers.md):
+the quadratic residues $s_n = n^2 \bmod N$ give the target well depths
 $d_n = s_n \lambda_0/(2N)$ and hence the target reflection phases
 $\varphi_n = -2 k d_n$ at the evaluation frequency. Second, tune each slit
 (its height, and the neck and cavity of its resonators) until the chain
 reproduces that phase from the fixed panel depth $L$. The per-well reflection
-returned by `metadiffuser_reflection` is the quantity to match; the inverse
-problem is not automated, so the matching is done by evaluating candidate
-geometries; for the published design at 2 kHz the five slits land within a
-few degrees of the QRD targets while keeping $|R_n|$ near one:
+returned by `metadiffuser_reflection` is the quantity to match; for the
+published design at 2 kHz the five slits land within a few degrees of the QRD
+targets while keeping $|R_n|$ near one:
 
 ```python
 import numpy as np
@@ -197,6 +277,87 @@ k = 2 * np.pi * 2000.0 / 343.0
 targets = np.degrees(np.angle(np.exp(-2j * k * depths)))
 print(np.round(targets))                            # [ 72. -72. -72.  72.   0.]
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_phase_match_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_phase_match.svg" alt="Two panels: on the left the reflection phase of each of the five slits at 2 kilohertz plotted against the slit index, the metadiffuser squares sitting on top of the open circles of the quadratic residue diffuser targets with the reflection magnitude annotated beside each point; on the right the phase error of each slit against its target from 1600 to 2600 hertz, all five curves passing through zero at 2 kilohertz and leaving a shaded plus or minus ten degree band within a couple of hundred hertz either side" width="92%"></picture>
+
+*Left: the whole trick. Five slits 20 mm deep land on the phases of wells up
+to 27.4 cm deep, within 3°, while still reflecting 0.97 to 1.00 of the
+incident pressure. Right: the limit of the trick. The rigid well's phase is
+linear in frequency and the loaded slit's is not, so the match is exact only
+where it was driven to zero. Slits 2 and 3 have identical geometry and their
+curves coincide; slit 5, the zero-depth member of the sequence, is the only
+one that stays within 10° over more than a few hundred hertz.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `wells` and `depths` come from the blocks above.
+sweep = np.linspace(1600.0, 2600.0, 201)
+swept = materials.metadiffuser_reflection(sweep, wells, depth_m=0.02, period_m=0.07)
+k_sweep = 2 * np.pi * sweep / 343.0
+target_phase = np.angle(np.exp(-2j * np.outer(depths, k_sweep)))
+error = np.degrees(np.angle(np.exp(1j * (np.angle(swept.reflection)
+                                         - target_phase))))
+fig, ax = plt.subplots()
+ax.axhspan(-10.0, 10.0, color="#2ca02c", alpha=0.15)
+labels = ("slit 1", "slit 2", "slit 3", "slit 4", "slit 5")
+for row, label in zip(error, labels):
+    ax.plot(sweep, row, label=label)
+ax.set_ylim(-100.0, 100.0)
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Phase error against the QRD target [deg]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+**Step two, worked.** The paragraph above says "tune each slit until the chain
+reproduces that phase", which is a search, not a formula, and the page owes
+the reader one. The parameter space of a slit is four numbers: its height,
+and the neck length, neck side and cavity length of its resonators, and
+`metadiffuser_reflection` on one panel is cheap, so the search is a loop. The
+panel depth $L$ is fixed by the application before anything else is chosen;
+after that the cavity length is the coarse control on the resonance and hence
+on the phase, the neck is the fine control, and the slit height is the coarse
+control on how much loss the slit carries. Sweeping the one coarse parameter
+recovers the published cavity length to within a grid step:
+
+```python
+import numpy as np
+
+# `rows`, `wells` and `targets` come from the blocks above. Rebuild the panel
+# with a candidate cavity length in slit 1 and keep the geometry that lands
+# nearest its target phase while still reflecting almost everything.
+def panel_with(cavity_mm):
+    trial = [(14.7, 13.0, cavity_mm, 6.2, 9.0)] + rows[1:]
+    built = []
+    for h, ln, lc, wn, wc in trial:
+        resonator = materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm)
+        built.append(materials.MetadiffuserWell(slit_height_m=h * mm, resonators=(resonator, resonator)))
+    return materials.metadiffuser_reflection(np.array([2000.0]), built,
+                                             depth_m=0.02, period_m=0.07)
+
+best = None
+for cavity_mm in np.linspace(4.0, 22.0, 60):
+    r1 = complex(panel_with(cavity_mm).reflection[0, 0])
+    if abs(r1) < 0.9:            # the designer's own floor on |R_n|
+        continue
+    err = abs(np.degrees(np.angle(np.exp(
+        1j * (np.angle(r1) - np.radians(targets[0]))))))
+    if best is None or err < best[1]:
+        best = (cavity_mm, err)
+print(round(best[0], 2), round(best[1], 1))   # 16.81 1.1
+# The published table gives 16.4 mm for this slit: one grid step away.
+```
+
+Five such loops, one per slit, are the whole inverse problem. The library
+leaves them explicit rather than wrapping them because the cost function is
+the designer's: how much phase error is acceptable, where the floor on
+$|R_n|$ sits, and how much absorption the application can afford.
 
 A 2 cm panel hitting the phases of 27.4 cm wells to within a few degrees is
 the whole trick, and the limits of the trick are worth stating plainly:
@@ -221,75 +382,150 @@ The reduction to a graded coefficient is then identical to the classical
 workflow: `metadiffuser_polar_response` for one frequency,
 `metadiffuser_diffusion_spectrum` for the band-by-band normalised coefficient,
 both against the same-footprint flat reference of ISO 17497-2 Formula (7).
-The model is locally reacting (wells do not couple internally), and the
-reduction inherits the Fraunhofer limits of the
-[classical page](diffusers.md): accuracy falls at low frequency, at grazing
-angles and where edge diffraction matters, so the chain grades candidate
-designs rather than replacing an ISO 17497-2 measurement.
+Running that check on the published panel is the only honest way to state its
+bandwidth, and the answer is narrower than the single-frequency overlay
+suggests:
+
+```python
+import numpy as np
+
+# Both panels are six repetitions of five 7 cm wells, so the only difference
+# between them is how each well reaches its phase.
+bands = np.array([500, 630, 800, 1000, 1250, 1600, 2000,
+                  2500, 3150, 4000, 5000], float)
+meta = materials.metadiffuser_diffusion_spectrum(bands, wells, depth_m=0.02,
+                                                 period_m=0.07, n_repetitions=6)
+qrd = materials.predicted_diffusion_spectrum(
+    0.07, bands, depths=depths, n_repetitions=6, include_obliquity=False)
+print(np.round(meta.normalized, 2))
+# [0.   0.   0.   0.01 0.08 0.11 0.32 0.17 0.24 0.12 0.06]
+print(np.round(qrd.normalized, 2))
+# [-0.    0.    0.02  0.39  0.29  0.09  0.32 -0.    0.04  0.14  0.  ]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_spectrum.svg" alt="Normalised diffusion coefficient over the one-third-octave bands from 500 to 5000 hertz for the 2 centimetre metadiffuser panel and the 27.4 centimetre deep quadratic residue diffuser it mimics, both six periods: the region below 980 hertz is shaded because no grating lobe exists there, the two curves meet at 0.32 at the 2 kilohertz tuning frequency, and elsewhere they follow different paths" width="88%"></picture>
+
+*The equivalence is a point, not a band. At 2 kHz the two panels score 0.32
+and 0.32; a third of an octave either side they are different surfaces, and
+the metadiffuser loses the 1 kHz and 1.25 kHz bands the deep grating keeps,
+because its slits have not yet reached the target phases there. Below
+$c/L = 980$ Hz the shaded region is not a property of either design: the 35 cm
+period is shorter than a wavelength, no grating lobe exists to be filled, and
+the normalised coefficient of any panel of this period collapses towards zero.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `meta` and `qrd` are the two DiffusionSpectrum objects computed above.
+fig, ax = plt.subplots()
+ax.axvspan(bands[0], 343.0 / (5 * 0.07), color="#9e9e9e", alpha=0.16)
+ax.semilogx(bands, qrd.normalized, "o--", label="QRD, wells up to 27.4 cm")
+ax.semilogx(bands, meta.normalized, "s-", label="Metadiffuser, panel 2 cm")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Normalised diffusion coefficient")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The design rule that follows is the one the bullets above imply: tune at the
+centre of the band the application needs, run this check before committing,
+and read the single-frequency polar overlay as an illustration rather than a
+specification.
+
+## 4. Building one, and checking it
+
+Everything above is a model of a panel that does not exist yet. Three things
+stand between the table of millimetres and a surface on a wall.
+
+**Fabrication.** The chain assumes rigid, smooth, airtight walls. Print or
+machine in a stiff material and keep the septa between slits thick enough not
+to flex at the working frequency; a septum that moves adds a compliance the
+model does not have. Expect printed necks to come out undersized and rougher
+than drawn, both of which raise the visco-thermal loss inside the resonator
+and shave $|R_n|$, the quantity this design keeps between 0.97 and 1.00, so
+there is not much of it to give away.
+
+**Tolerance.** State it in degrees rather than adjectives, using the loop of
+section 3 backwards: rebuild the panel with one neck side perturbed and read
+the phase that comes back. On the published slit 1 a $\pm 0.1$ mm error on the
+6.2 mm neck moves its reflection phase by a few degrees at 2 kHz, which the
+figure above puts in context: it is small against the dispersion the design
+already carries across a third of an octave, and large against the 3° the
+five slits currently sit within.
+
+**Verification, at two scales.** One cell at a time, `metadiffuser_reflection`
+returns exactly what a two-microphone measurement of that cell in a
+rectangular impedance tube one period wide would give, including
+`well_absorption`, so a single slit can be checked before the panel is
+committed. That is the
+[impedance tube](../absorbers/impedance-tube.md) method
+unchanged. The whole panel is graded on an ISO 17497-2 goniometer, which needs
+the six-period 2.1 m array and a flat reference panel of the same footprint
+measured under the identical chain; the
+[diffusers guide](diffusers.md) gives that
+procedure. Because the design is tuned at one frequency, the band-by-band
+$d_\mathrm{n}$ from that measurement, not the coefficient at 2 kHz, is the
+honest grade.
+
+## What this guide covers
+
+- **Covered.** The Jiménez et al. (2017) metadiffuser model: the per-well slit and
+  Helmholtz-resonator transfer-matrix chain with visco-thermal effective
+  parameters, end corrections and the slit-radiation term
+  (`metadiffuser_reflection`, with `MetadiffuserWell` and `HelmholtzResonator`
+  as the geometry containers and `None` wells as flat rigid strips), and its
+  reduction through the Fraunhofer far field to the ISO 17497-2 directional
+  diffusion coefficient (`metadiffuser_polar_response`) and the band-by-band
+  normalised spectrum (`metadiffuser_diffusion_spectrum`).
+
+- **Not covered.** No standard governs the model itself: it is the journal method of
+  Jiménez et al. (2017), implemented from the cited papers, and ISO 17497-2
+  only grades what it predicts. The model is locally reacting (wells do not
+  couple internally) and shares the
+  stated limits of the Fraunhofer far field: it loses accuracy at low frequency,
+  at grazing angles and where edge diffraction matters, so it grades designs
+  rather than replacing an ISO 17497-2 measurement. The inverse problem (solving
+  resonator geometries for a target phase profile) is not automated; the
+  workflow of section 3 matches phases by evaluation. The critical-coupling
+  design solver for a single slit lives in [Metamaterial
+  Absorbers](../absorbers/metamaterial-absorbers.md).
 
 ## See also
 
-- [Diffusers and Their Coefficients](diffusers.md): the ISO 17497-1/-2
-  coefficients this panel is graded by, and the classical Schroeder designs
-  whose phase sequences it borrows.
-- [Metamaterial Absorbers](../absorbers/metamaterial-absorbers.md): the same slit and
-  resonator cell tuned for perfect absorption instead of controlled phase,
-  with the critical-coupling theory behind the ternary `0` state.
-- [Porous and Multilayer Absorbers](../absorbers/porous-absorbers.md): the classical
-  equivalent-fluid and resonant layers the metamaterial cells are built from.
-- [2D FDTD wave simulation](../../simulation/fdtd-simulation.md): the wave solver behind the
-  animation above, meshing the real slit and resonator geometry.
+- [Diffusers and Their Coefficients](diffusers.md): the
+  ISO 17497-1/-2 coefficients this panel is graded by, and the classical
+  Schroeder designs whose phase sequences it borrows.
+- [Metamaterial Absorbers](../absorbers/metamaterial-absorbers.md): the
+  same slit and resonator cell tuned for perfect absorption instead of
+  controlled phase, with the critical-coupling theory behind the ternary `0`
+  state.
+- [Porous and Multilayer Absorbers](../absorbers/porous-absorbers.md):
+  the classical equivalent-fluid and resonant layers the metamaterial cells
+  are built from.
+- [2D FDTD wave simulation](../../simulation/fdtd-simulation.md): the wave
+  solver behind the animation above, meshing the real slit and resonator
+  geometry.
 - API reference: [`materials.diffusers.metadiffuser`](https://docs.jmrp.io/phonometry/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
+- Theory: [Surface scattering and diffusion](../../reference/theory/materials-surfaces.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the scattering and diffusion coefficients the deep-subwavelength designs are judged by.
 
 ## References
 
-- Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).
-  Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*,
-  7, 5389.
-  [doi:10.1038/s41598-017-05710-5](https://doi.org/10.1038/s41598-017-05710-5).
-  The metadiffuser model implemented here: slits loaded by Helmholtz
-  resonators reproduce Schroeder phase profiles and ternary sequences from
-  panels 1/46 to 1/20 of the design wavelength thick, including the
-  quadratic-residue design of section 2.
-- Jiménez, N., Cox, T. J., Groby, J.-P., & Romero-García, V. (2019). Beyond
-  phase grating diffusers using locally-resonant metamaterials. *Proceedings
-  of the 23rd International Congress on Acoustics (ICA 2019)*, Aachen.
-  [Proceedings PDF](https://pub.dega-akustik.de/ICA2019/data/articles/000706.pdf).
-  The congress companion to the 2017 paper: the transfer-matrix chain,
-  the slow-sound dispersion picture and the far-field comparisons that
-  section 3 condenses.
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  ISBN 978-1-4987-4099-9.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  The Schroeder sequences, the Fraunhofer far-field model and the
-  diffusion-coefficient machinery the metadiffuser is evaluated with.
-- Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).
-  Iridescent perfect absorption in critically-coupled acoustic metamaterials
-  using the transfer matrix method. *Applied Sciences*, 7(6), 618.
-  [doi:10.3390/app7060618](https://doi.org/10.3390/app7060618). The slit +
-  Helmholtz-resonator transfer-matrix chain each well is evaluated with, and
-  the critical-coupling condition behind the ternary `0` state.
-- Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P.
-  (2016). Ultra-thin metamaterial for perfect and quasi-omnidirectional sound
-  absorption. *Applied Physics Letters*, 109(12), 121902.
-  [doi:10.1063/1.4962328](https://doi.org/10.1063/1.4962328). The resonator
-  impedance (Eq. A23) and its radiation end corrections (Eqs. A24-A27) used
-  in every loaded slit.
-- Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021). *Acoustic waves in
-  periodic structures, metamaterials, and porous media* (Topics in Applied
-  Physics, Vol. 143). Springer.
-  [doi:10.1007/978-3-030-84300-7](https://doi.org/10.1007/978-3-030-84300-7).
-  The book-length treatment of resonant metamaterial absorbers and
-  diffusers; the modern companion to Cox & D'Antonio for this whole family.
-
-## Standards
-
-No standard governs the metadiffuser model itself; it is a journal method
-(Jiménez et al. 2017) implemented clean-room from the cited sources. Its
-output is graded by ISO 17497-2:2012 (diffusion coefficient), covered in
-[Diffusers and Their Coefficients](diffusers.md), and its unit cell is the
-slit and Helmholtz-resonator chain of
-[Metamaterial Absorbers](../absorbers/metamaterial-absorbers.md). Numerical conformance
-against the published designs and closed forms is tracked in
-[CONFORMANCE.md](../../CONFORMANCE.md).
+- **Cox, T. J., & D'Antonio, P. (2017).** *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  ISBN 978-1-4987-4099-9. The Schroeder sequences, the Fraunhofer far-field model and the diffusion-coefficient machinery the metadiffuser is evaluated with.
+- **International Organization for Standardization. (2012).** [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
+  The directional diffusion coefficient the far field of the panel is reduced to, and its normalisation against a flat reference of the same footprint (Formula (7)); the goniometer measurement that grades a built panel is in the Diffusers guide.
+- **Jiménez, N., Cox, T. J., Groby, J.-P., & Romero-García, V. (2019).** [Beyond phase grating diffusers using locally-resonant metamaterials](https://pub.dega-akustik.de/ICA2019/data/articles/000706.pdf). *Proceedings of the 23rd International Congress on Acoustics (ICA 2019)*.
+  The congress companion to the 2017 paper: the transfer-matrix chain, the slow-sound dispersion picture and the far-field comparisons that section 3 condenses.
+- **Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017).** Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+  The metadiffuser model implemented here: slits loaded by Helmholtz resonators reproduce Schroeder phase profiles and ternary sequences from panels 1/46 to 1/20 of the design wavelength thick, including the quadratic-residue design of section 2.
+- **Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).** Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+  The slit + Helmholtz-resonator transfer-matrix chain each well is evaluated with, and the critical-coupling condition behind the ternary 0 state.
+- **Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016).** Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. https://doi.org/10.1063/1.4962328
+  The resonator impedance (Eq. A23) and its radiation end corrections (Eqs. A24-A27) used in every loaded slit.
+- **Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021).** *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. https://doi.org/10.1007/978-3-030-84300-7
+  Topics in Applied Physics, Vol. 143. The book-length treatment of resonant metamaterial absorbers and diffusers; the modern companion to Cox & D'Antonio for this whole family.

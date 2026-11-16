@@ -4,10 +4,11 @@ r"""Refuse an em dash in the prose the project publishes.
 The house style writes its prose without the em dash: a clause that would hang
 off one is a sentence of its own, a parenthesis, a colon or a comma, chosen by
 what the sentence needs. The rule covers everything a reader sees under the
-project's name, which is more than the pages of the site: the docs mirrors,
-the CHANGELOG, the README, the docstrings the API reference is generated from,
-the titles, labels and annotations drawn into the figures, and the robots.txt
-the site serves, which a crawler and anyone who opens it read as written.
+project's name, which is more than the pages of the site: the files of
+``docs/`` that are not the GitHub edition, the CHANGELOG, the README, the
+docstrings the API reference is generated from, the titles, labels and
+annotations drawn into the figures, and the robots.txt the site serves, which
+a crawler and anyone who opens it read as written.
 
 What is NOT prose keeps its dash, and every exemption below says why:
 
@@ -140,6 +141,7 @@ import tokenize
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from github_edition import is_edition_file
 from markdown_fences import (
     PageLine,
     cell_spans,
@@ -166,14 +168,19 @@ _RAW_ROLES = ("html", "raw")
 #: so that no reading of the prose around it takes it for a dash of that prose.
 _MATHS_DASH = "\ue000"
 
-#: Where the published prose lives: the pages and their mirrors, the data
-#: modules the site's pages are built from (the glossary cards, the home page's
-#: text and examples, the Spanish catalogue notes), the package docstrings the
-#: API reference is generated from, the text the figure and diagram
-#: generators draw, and the one plain-text file of the site with prose of its
-#: own, the robots.txt it serves under its subpath. Tests are not published and
-#: keep their dashes, and the llms mirrors and the generated API pages are
-#: regenerated from what is listed here and need no scan of their own.
+#: Where the published prose lives: the pages, the files of ``docs/`` that are
+#: not the GitHub edition (the ones written by hand, and the conformance report,
+#: whose words no other root holds), the data modules the site's pages are
+#: built from (the glossary cards, the home page's text and examples, the
+#: Spanish catalogue notes), the package docstrings the API reference is
+#: generated from, the text the figure and diagram generators draw, and the one
+#: plain-text file of the site with prose of its own, the robots.txt it serves
+#: under its subpath. The generated API pages sit among the pages and are read
+#: with them, the words their generator writes around each docstring included.
+#: Tests are not published and keep their dashes, and the llms files and the
+#: GitHub edition of the guides under ``docs/`` (left out by
+#: :func:`published_files`) are written from what is listed here and need no
+#: scan of their own.
 DEFAULT_ROOTS = (
     "docs",
     "site/src/content/docs",
@@ -1879,6 +1886,10 @@ _UNPUBLISHED = ("docs/superpowers",)
 
 
 def iter_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
+    """The files under *roots* of a kind the guard reads, in a stable order.
+
+    Listed by name only: no file is opened to make the list.
+    """
     files: list[pathlib.Path] = []
     for root in roots:
         base = pathlib.Path(root)
@@ -1892,6 +1903,21 @@ def iter_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
                 and not any(str(p).startswith(u) for u in _UNPUBLISHED)
             )
     return files
+
+
+def published_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
+    """The files of :func:`iter_files` whose prose is read.
+
+    A file a root names is read as named. A walked directory leaves out a file
+    of the GitHub edition of the guides, which ``make llms`` writes from its
+    site page: the page is read here, and a dash in the edition is a dash of
+    its page or of the data the page draws on. Telling one opens the file, so
+    this list opens every Markdown file :func:`iter_files` names.
+    """
+    named = {pathlib.Path(root) for root in roots if pathlib.Path(root).is_file()}
+    return [
+        path for path in iter_files(roots) if path in named or not is_edition_file(path)
+    ]
 
 
 #: What a clean run says: every form the guard refuses, so a green run does
@@ -1911,7 +1937,7 @@ def main() -> int:
     args = parser.parse_args()
     total = 0
     files = 0
-    for path in iter_files(tuple(args.paths)):
+    for path in published_files(tuple(args.paths)):
         found = findings(path)
         if not found:
             continue

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/vibration-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/
 
 # Predicting vibration before measuring (DIN 4150-1)
 
@@ -231,27 +233,27 @@ point of Figure A.18, labelled all groups of a hall of 252 machines, sits at
 
 ## What this guide covers
 
-**Propagation**: the far-field boundary of Formula (1), the decay of
-Formula (2) with the exponents of Figure 1 and the damping of the ground,
-and the damping factor of Figure 2 on its own.
+- **Covered.** **Propagation**: the far-field boundary of Formula (1), the decay of
+  Formula (2) with the exponents of Figure 1 and the damping of the ground,
+  and the damping factor of Figure 2 on its own.
 
-**The building**: the natural frequency of Formula (3) and its guide values
-by storeys, the transfer of a foundation and a floor at resonance, and the
-storey formula of Formula (4). **The sources**: the blast and the falling
-mass of Formulae (5) and (6), the machine hall of Formula (7) with the
-nomogram of Figure 3 read off the page, the excitation frequencies of a
-track, and the frequency bands, ranges and constants Clause 5 gives its
-sources.
+- **Covered.** **The building**: the natural frequency of Formula (3) and its guide values
+  by storeys, the transfer of a foundation and a floor at resonance, and the
+  storey formula of Formula (4). **The sources**: the blast and the falling
+  mass of Formulae (5) and (6), the machine hall of Formula (7) with the
+  nomogram of Figure 3 read off the page, the excitation frequencies of a
+  track, and the frequency bands, ranges and constants Clause 5 gives its
+  sources.
 
-**No constants for a real case.** The `k`, `b` and `m` of a blast and the
-`k` and `m` of an impact are the user's; the standard prints none and the
-library carries none. The measured cases of Annex A are described in the
-standard and not reproduced here, and its two figures drawn from the
-formulas are held as conformance rows, not offered as data.
+- **Not covered.** **No constants for a real case.** The `k`, `b` and `m` of a blast and the
+  `k` and `m` of an impact are the user's; the standard prints none and the
+  library carries none. The measured cases of Annex A are described in the
+  standard and not reproduced here, and its two figures drawn from the
+  formulas are held as conformance rows, not offered as data.
 
-**No near field.** Nearer than `R₁` the standard asks for a numerical or
-experimental investigation of its own, and the library refuses the
-distance.
+- **Not covered.** **No near field.** Nearer than `R₁` the standard asks for a numerical or
+  experimental investigation of its own, and the library refuses the
+  distance.
 
 ## See also
 
@@ -265,14 +267,8 @@ distance.
   the wave speeds of the ground that the wavelength here comes from.
 - API reference:
   [`vibration.immission.prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/prediction/).
+
 ## References
 
-- Deutsches Institut für Normung. (2001). *Erschütterungen im Bauwesen —
-  Teil 1: Vorermittlung von Schwingungsgrößen* (DIN 4150-1:2001-06).
-  Formulae (1) to (7), the exponents of Figure 1, the damping curves of
-  Figure 2, the nomogram of Figure 3 read off the page, and the guide values
-  and frequency bands Clauses 4 and 5 give for the ground, the building and
-  each kind of source. The measured cases of Annex A are
-  described, not implemented; Figures A.18 and A.19, which the standard draws
-  from Formulae (7) and (2) with every parameter printed, are the conformance
-  rows.
+- **Deutsches Institut für Normung. (2001).** *Erschütterungen im Bauwesen — Teil 1: Vorermittlung von Schwingungsgrößen* (DIN 4150-1:2001-06).
+  Formulae (1) to (7), the exponents of Figure 1, the damping curves of Figure 2, the nomogram of Figure 3 read off the page, and the guide values and frequency bands Clauses 4 and 5 give for the ground, the building and each kind of source. The measured cases of Annex A are described, not implemented; Figures A.18 and A.19, which the standard draws from Formulae (7) and (2) with every parameter printed, are the conformance rows.

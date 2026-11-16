@@ -7,7 +7,7 @@ as a glob and stops with "no matches found" before pip runs, so every install
 command the project publishes quotes the requirement that carries extras, as
 in ``pip install "phonometry[torch]"`` and ``pip install -e ".[full]"``. This
 reads every tracked text file a reader copies a command from (the pages and
-their mirrors, the site's home page, the docstrings and the messages the
+their copies, the site's home page, the docstrings and the messages the
 library raises, the README, the llms files, the CHANGELOG, the workflows and
 the Makefile) and names each command with an unquoted one, by file and line.
 

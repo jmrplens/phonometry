@@ -2,7 +2,7 @@
 """The registry as one committed document.
 
 ``docs/conformance.json`` is what the checks produce and what every consumer
-reads: the Markdown mirror, the two site pages, the counts quoted in the prose,
+reads: the Markdown report, the two site pages, the counts quoted in the prose,
 and the pull-request comment. Before it existed each of those parsed the
 report's headline sentence with its own regular expression, in two languages,
 and the limit every check is judged against - the number a metrology library is

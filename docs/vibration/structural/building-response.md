@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/structural/building-response.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Predicting a building's own frequency (ISO 4866)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/building-response/
+
+# Predicting a building's own frequency
 
 [Vibration damage to structures](structural-damage.md)
 reads a measured velocity against a guideline value that depends on frequency,
@@ -166,31 +168,31 @@ D.4: a number to sanity-check a measured decay against, not one to assume.
 
 ## What this guide covers
 
-The four **empirical predictors** of Annex D: the storey rule of D.2, the
-three code forms (D.1), (D.2) and (D.3) with the coefficient ranges D.2 prints
-for each, and the $f = 46/h$ fit D.2 closes with, as frequencies or as periods.
+- **Covered.** The four **empirical predictors** of Annex D: the storey rule of D.2, the
+  three code forms (D.1), (D.2) and (D.3) with the coefficient ranges D.2 prints
+  for each, and the $f = 46/h$ fit D.2 closes with, as frequencies or as periods.
 
-The **error** those predictions carry: the ± 50 % band of D.2, published as a
-constant and as bounds around any prediction.
+- **Covered.** The **error** those predictions carry: the ± 50 % band of D.2, published as a
+  constant and as bounds around any prediction.
 
-The **damping range** measured in D.4, as a range and not as an estimator,
-because the annex offers none.
+- **Covered.** The **damping range** measured in D.4, as a range and not as an estimator,
+  because the annex offers none.
 
-**Nothing here measures a frequency.** The main body of ISO 4866, which is the
-measurement this annex is the fallback for, is not implemented: no transducer
-requirements, no data acquisition, no modal extraction from a measured
-response.
+- **Not covered.** **Nothing here measures a frequency.** The main body of ISO 4866, which is the
+  measurement this annex is the fallback for, is not implemented: no transducer
+  requirements, no data acquisition, no modal extraction from a measured
+  response.
 
-**The classifications are not here.** Annex B classifies buildings, foundations
-and soils into the groups and classes that decide what tolerance a structure
-gets, and Annex A gives ranges of structural response; both are described in
-the standard and neither is implemented. Annex E, the vibrational interaction
-of a foundation with the soil, is likewise out.
+- **Not covered.** **The classifications are not here.** Annex B classifies buildings, foundations
+  and soils into the groups and classes that decide what tolerance a structure
+  gets, and Annex A gives ranges of structural response; both are described in
+  the standard and neither is implemented. Annex E, the vibrational interaction
+  of a foundation with the soil, is likewise out.
 
-**No computer model.** D.3 names the ESDU methods for core, shear and frame
-buildings, and says a method not calibrated against reliable experimental data
-should not be assumed more accurate than the empirical predictors. None of
-them is implemented here, and this page is not a substitute for one.
+- **Not covered.** **No computer model.** D.3 names the ESDU methods for core, shear and frame
+  buildings, and says a method not calibrated against reliable experimental data
+  should not be assumed more accurate than the empirical predictors. None of
+  them is implemented here, and this page is not a substitute for one.
 
 ## See also
 
@@ -205,22 +207,5 @@ them is implemented here, and this page is not a substitute for one.
 
 ## References
 
-- International Organization for Standardization. (2010). *Mechanical
-  vibration and shock — Vibration of fixed structures — Guidelines for the
-  measurement of vibrations and evaluation of their effects on structures*
-  (ISO 4866:2010).
-  Annex D: the storey rule and the three code forms of D.2 with their
-  coefficient ranges, the f = 46/h fit D.2 closes with and the ± 50 % accuracy
-  it admits, and the measured damping values of D.4.
-
-## Standards
-
-ISO 4866:2010, *Mechanical vibration and shock — Vibration of fixed structures
-— Guidelines for the measurement of vibrations and evaluation of their effects
-on structures*: Annex D only. The four empirical predictors of the fundamental
-translation frequency with the coefficient ranges D.2 prints, the measured
-`f = 46/h` fit D.2 closes with and the ± 50 % accuracy it admits, and the
-damping values of D.4, which the annex reports without offering an estimator.
-The measurement the annex is a fallback for, the classifications of Annex B, the
-response ranges of Annex A and the soil interaction of Annex E are not
-implemented.
+- **International Organization for Standardization. (2010).** *Mechanical vibration and shock — Vibration of fixed structures — Guidelines for the measurement of vibrations and evaluation of their effects on structures* (ISO 4866:2010).
+  Annex D: the storey rule and the three code forms of D.2 with their coefficient ranges, the f = 46/h fit D.2 closes with and the ± 50 % accuracy it admits, and the measured damping values of D.4. The building and foundation classification of Annex B and the response ranges of Annex A are described here and not implemented.

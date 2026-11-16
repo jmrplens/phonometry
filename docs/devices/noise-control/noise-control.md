@@ -1,14 +1,25 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/noise-control.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Industrial noise control: HVAC and enclosures
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/
 
-Three passive measures dominate applied noise control, and the
-`noise_control` domain covers all three with the engineering theory of Bies,
-Hansen & Howard, *Engineering Noise Control* (5th ed., CRC Press 2017):
-**reactive silencers** in a duct (the four-pole transmission-matrix method),
-the passive attenuations and regenerated noise of an **HVAC** run, and the
-insertion loss of a **machine enclosure**. The radiating piston of the
-[loudspeaker guide](../electroacoustics/loudspeakers.md) is the companion radiator model.
+# Industrial Noise Control: HVAC and Enclosures
+
+Three passive measures dominate applied noise control: a **silencer** in the
+duct, the attenuation and regenerated noise of the **HVAC run** itself, and a
+**machine enclosure**. This page holds the second and the third, with the
+engineering theory of Bies, Hansen & Howard: the ASHRAE tables and closed forms
+for bends, end reflection, plenums and flow noise, and an enclosure model that
+combines a panel transmission loss you supply with the reverberant build-up
+inside the enclosure. The first, the reactive four-pole silencer, has its own
+guide, [Silencers](silencers.md), which covers
+the closed-form expansion chamber, the Helmholtz, quarter-wave and
+extended-tube resonators, the independent FDTD cross-check and the trade-off
+against dissipative linings.
+
+Everything below is a **prediction** from declared geometry and declared
+material data. Section 2.2 names the standards that measure the same quantity
+on the finished article, and says why a declared figure and a computed one are
+not interchangeable.
 
 The three families in one scene: enclose the source, silence the path,
 shield the receiver. Each measure carries the value its section computes,
@@ -16,42 +27,34 @@ here or in the silencer guide.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_control_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_control.svg" alt="Noise-control scene split into three zones: at the source a machine inside a lined enclosure rated IL = R − C = 25 dB at 500 Hz, along the path a 113 mm duct with a 0.30 m expansion chamber of area ratio 4 peaking at 6.5 dB of transmission loss at 286 Hz, a lined elbow worth 6 dB at 1 kHz and an open end reflecting 18 dB at 63 Hz, and at the receiver an operator cabin rated by the same formula at 31 dB at 1 kHz, with a person standing inside" width="92%"></picture>
 
-The path measure, the silencer itself, has its own guide:
-[Silencers](silencers.md) covers the reactive four-pole method, the
-closed-form expansion chamber, the Helmholtz, quarter-wave and
-extended-tube resonators, the independent FDTD cross-check and the
-trade-off against dissipative linings. This page keeps the rest of the
-installation: what the duct run adds and removes on its own, and what an
-enclosure around the machine actually delivers. Chaining those element
-models end to end, from the fan sound power to the room criterion, is
-[Duct-borne noise: fan to room](duct-path.md).
-
 ## 1. HVAC duct attenuation and flow noise
 
-`noise_control.hvac` gathers the Bies Chapter 8 duct methods:
-
-- `end_reflection_loss`: the low-frequency reflection back up an open duct end
-  (ASHRAE Table 8.14, interpolated over diameter and frequency; it passes
-  exactly through the tabulated nodes).
-- `elbow_insertion_loss`: the insertion loss per bend for square/round,
-  vaned/unvaned and lined/unlined elbows keyed by $W/\lambda$ (ASHRAE
-  Table 8.11).
-- `plenum_attenuation`: the plenum-chamber transmission loss by Wells' method
-  (Eq. (8.275)), whose reverberant term uses the plenum
-  [room constant](../../buildings/rooms/room-image-sources.md).
-- `flow_noise_straight_duct`, `flow_noise_bend`: the flow-generated (self)
-  noise sound power of straight ducts and mitred bends (VDI 2081, Eqs. (8.251),
-  (8.254)).
+A ventilation run attenuates fan noise at bends, at the open duct end and in
+plenums, and regenerates noise wherever the airflow is disturbed. `phonometry.noise_control.hvac`
+gathers the Bies Chapter 8 methods.
 
 ```python
+import numpy as np
 from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
+
+# Low-frequency reflection back up an open duct end (ASHRAE Table 8.14).
 er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
-el = hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square", lined=True)
 er.plot()   # the band attenuation (or regenerated Lw) in one line (needs matplotlib)
-tl = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2)      # Wells' method, dB
+
+# Insertion loss of a lined square 90-degree elbow (ASHRAE Table 8.11).
+el = hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square", lined=True)
+print(np.round(el.values, 1))                    # [0. 0. 1. 6. 11. 10.] dB
+
+# Plenum-chamber TL by Wells' method (closed form).
+tl = hvac.plenum_attenuation(exit_area=0.1, line_of_sight=1.0,
+                             wall_area=20.0, mean_absorption=0.2)
+print(round(tl, 1))                              # 12.9 dB
+
+# Flow-generated (self) noise of a straight duct (VDI 2081).
 fn = hvac.flow_noise_straight_duct(bands, flow_velocity=10.0, area=0.04)
+print(round(float(fn.values[3]), 1))             # 32.4 dB, regenerated L_W at 500 Hz
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection.svg" alt="Duct end reflection loss per octave band for flush duct terminations of 150, 300 and 600 mm diameter: the reflection back up the duct grows steeply towards low frequency and shrinks with duct size, exceeding 17 dB at 63 Hz for the 150 mm duct and vanishing above 1 kHz" width="88%"></picture>
@@ -90,6 +93,87 @@ plt.show()
 
 </details>
 
+The bend is the element a designer is usually still free to choose, and the
+same airflow that a bend attenuates is what regenerates noise a little further
+down the run. Both belong on one sheet.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_elbow_flow_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_elbow_flow_noise.svg" alt="Two panels. Left: octave-band insertion loss of a 300 mm elbow for four constructions, a lined square bend reaching 11 dB above 1 kHz, a bare square bend peaking at 8 dB and falling back to 3 dB, a vaned square bend at 6 dB and a round bend flat at 3 dB, with the W over lambda equals one abscissa marked near 1.1 kHz. Right: flow-generated sound power of the same 0.04 square metre duct at 5, 10 and 20 metres per second, three parallel spectra about 16 dB apart per doubling, plus a mitred bend at 10 metres per second which lies above the 20 metres per second straight duct below 500 Hz and below it above" width="92%"></picture>
+
+*A lined square bend is worth three to four times a round one above 1 kHz and
+essentially nothing below 250 Hz, where $W/\lambda$ is small and the bend is
+acoustically invisible; the elbow tables are keyed on that ratio, which is why
+a 300 mm duct and a 600 mm duct behave alike one octave apart. On the right,
+the same run is a source: the straight-duct level rises by 15.6 dB at 63 Hz and
+21.6 dB at 4 kHz for each doubling of the mean velocity, and one mitred bend at
+10 m/s puts more low-frequency power into the duct than a straight run at twice
+the speed.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np                    # hvac: imported in the snippet above
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+
+# One line for one element: the HVACSpectrumResult of the lined square bend.
+hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square",
+                          lined=True).plot()
+plt.show()
+
+# By hand: the four bend constructions of the left panel.
+fig, ax = plt.subplots()
+for label, kwargs in (("Square, lined", {"bend_type": "square", "lined": True}),
+                      ("Square, bare", {"bend_type": "square"}),
+                      ("Square, vanes", {"bend_type": "square", "vanes": True}),
+                      ("Round, bare", {"bend_type": "round"})):
+    el = hvac.elbow_insertion_loss(bands, width_m=0.3, **kwargs)
+    ax.semilogx(el.frequencies, el.values, "o-", label=label)
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Insertion loss [dB per bend]")
+ax.legend()
+plt.show()
+
+# And the right panel: the same duct as a source, at three velocities.
+fig, ax = plt.subplots()
+for velocity in (5.0, 10.0, 20.0):
+    fn = hvac.flow_noise_straight_duct(bands, flow_velocity=velocity, area=0.04)
+    ax.semilogx(fn.frequencies, fn.values, "o-", label=f"U = {velocity:.0f} m/s")
+ax.semilogx(bands, hvac.flow_noise_bend(bands, flow_velocity=10.0, area=0.04,
+                                        height_m=0.2).values, "s--",
+            label="Mitred bend, 10 m/s")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Two conditions travel with those two curves. The lined-elbow values assume
+**the duct lining extends at least three duct diameters up- and downstream of
+the bend**, so `lined=True` describes a lined run that contains a bend, not a
+lined bend in an otherwise bare duct; a bend in bare duct takes the unlined
+column, and taking the lined one instead overstates the attenuation by the
+whole tabulated increment, 10 dB in the mid bands for the 300 mm square bend
+above. And the flow-noise model is for a straight, undisturbed run: a damper, a
+badly made transition or the bend itself regenerates far more, which is why
+`flow_noise_bend` exists and why throttling belongs as far from the outlet as
+the layout allows.
+
+The velocity is the one design variable that governs the whole of the second
+panel. The sound power carries $50\log_{10}U$, so the velocity term alone costs
+15.1 dB per doubling, and because the spectrum shape also shifts upward the
+delivered band levels of this duct rise by 15.6 dB at 63 Hz and 21.6 dB at
+4 kHz between 10 and 20 m/s. The fiche below passes its 45 dB(A) requirement at
+12 m/s with 38.8 dB(A); the same duct at 17 m/s returns 48.1 dB(A) and fails,
+with no other change. Hence the customary design velocities: roughly 7 to
+10 m/s in plant-room mains, 4 to 5 m/s in branches and 2 to 3 m/s in the last
+run before an occupied room. Hence the rule that oversizing ductwork is
+the cheapest silencer there is. What the model returns is a **sound power
+level for one element**: it has to be entered into a path calculation and
+combined on a power basis with everything else, which is what
+[Duct-Borne Noise](duct-path.md) does.
+
 Wells' plenum formula takes only two truly geometric inputs, the
 inlet-to-outlet line of sight $r$ and the outlet area, plus the lined wall
 area; `plot_plenum_geometry` draws exactly those, honouring $r$ and its
@@ -100,6 +184,30 @@ angle off the inlet axis.
 *Only $r$ and its angle off the inlet axis fix the drawn box; $S_\text{out}$
 and $S_\mathrm{w}$ enter Wells' method as bare areas, so any plenum sharing these four
 numbers has the same predicted attenuation.*
+
+The formula, Bies Equation (8.275), is a sum of two terms inside one
+logarithm, a direct term $\cos\theta/\pi r^2$ and a reverberant term
+$(1-\alpha)/S_\mathrm{w}\alpha$, which is the reciprocal of the plenum's
+[room constant](../../buildings/rooms/room-image-sources.md), and which of
+them dominates decides which design move is worth making. For the plenum
+drawn above ($r = 1.2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0.2$) the two are 0.221 and
+0.667, so the reverberant term rules: doubling the line of sight to 2.4 m buys
+0.9 dB and swinging the outlet a full radian off the inlet axis buys 0.6 dB,
+while raising the lining absorption from 0.2 to 0.6 buys 4.2 dB. Line it first.
+Once it *is* lined the balance inverts: at $\alpha = 0.6$ the reverberant term
+falls to 0.111, below the direct one, and the same two geometric moves are now
+worth 3.0 dB and 1.8 dB, 19.0 dB against 15.2 dB when both are made. The
+practical order is therefore: line the plenum, then take the outlet off the
+inlet axis so that no straight line joins the two openings, then lengthen the
+path.
+
+Read the result for what it is. Wells' method assumes a chamber large compared
+with the wavelength and a reverberant interior, it holds above the inlet
+cut-on, and it **under**predicts the low-frequency loss by 5 to 10 dB, so a
+well-offset lined plenum worth 10 to 20 dB in the mid bands is not being fully
+credited at 63 Hz. It also carries no frequency dependence of its own beyond
+$\alpha$, and it says nothing about the flow noise the plenum's own inlet and
+outlet generate, which has to be added separately from the models above.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -115,27 +223,26 @@ plt.show()
 
 </details>
 
-Rectangular ducts use the equivalent diameter $D = \sqrt{4S/\pi}$. Bies 5th
-ed. gives the duct end reflection only as the ASHRAE table (no closed form in
-that edition); this module reproduces and interpolates it.
+The end-reflection method interpolates its ASHRAE table (it passes exactly
+through the tabulated nodes) and the elbow method reads Table 8.11 by the band
+its $W/\lambda$ falls in; the plenum (Wells) and flow-noise (VDI
+2081) methods are closed forms. `end_reflection_loss`, `elbow_insertion_loss`,
+`flow_noise_straight_duct` and `flow_noise_bend` return an `HVACSpectrumResult`
+(attenuation or regenerated sound power level) with `.plot()`; `plenum_attenuation`
+returns the transmission loss directly. Rectangular ducts use the equivalent
+diameter $D = \sqrt{4S/\pi}$.
 
-Two conditions travel with those models. The lined-elbow values assume the
-lining extends **at least three duct diameters up- and downstream of the bend**,
-so `lined=True` describes a lined run that contains a bend rather than a lined
-bend in a bare duct; a bend in bare duct takes the unlined column. And the
-flow-noise model is for a straight, undisturbed run: the sound power carries
-$50\log_{10}U$, so the velocity term alone costs 15.1 dB per doubling, and
-because the spectrum shape also shifts upward the band levels of a 0.04 m² duct
-rise by 15.6 dB at 63 Hz and 21.6 dB at 4 kHz between 10 and 20 m/s. Hence the
-customary design velocities: roughly 7 to 10 m/s in plant-room mains, 4 to 5 m/s
-in branches and 2 to 3 m/s in the last run before an occupied room.
+> [!NOTE]
+> Bies 5th ed. gives the duct end reflection only as the ASHRAE Table 8.14
+> look-up; there is no closed form in that edition. This module reproduces and
+> interpolates the table.
 
-**Test-report fiche.** `HVACSpectrumResult.report(path)` renders a one-page
-duct-noise fiche: the octave-band table of the spectrum beside the same curve
-plotted against frequency, the boxed single-number result (the A-weighted sound
-power level when the spectrum is regenerated noise, the mean attenuation when it
-is a loss), and, when a `requirement` is declared, the verdict against it.
-Rendering needs reportlab and, for the embedded figure, matplotlib
+An `HVACSpectrumResult` also files itself: `.report()` renders a one-page
+duct-noise fiche with the per-band table beside the spectrum, the boxed
+single-number result (the A-weighted sound power level when the spectrum is
+regenerated noise, the mean attenuation when it is a loss), and, when a
+`requirement` is declared, the verdict against it: a maximum $L_{W\mathrm{A}}$ in the
+first case, a minimum mean attenuation in the second. Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
 (`pip install "phonometry[report,plot]"`).
 
 ```python
@@ -147,7 +254,7 @@ octaves = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
 # The flow noise of a straight supply duct carrying air at 12 m/s.
 duct = hvac.flow_noise_straight_duct(octaves, flow_velocity=12.0, area=0.04)
 duct.report(
-    "hvac-duct-noise.pdf",
+    "hvac-duct-noise.pdf",              # needs phonometry[report]
     metadata=ReportMetadata(
         specimen="Straight supply duct, 0.04 m2 cross-section (design case)",
         test_room="Air-handling plant room (design case)",
@@ -157,12 +264,22 @@ duct.report(
 )
 ```
 
-[![One-page HVAC duct-noise fiche: a metadata header naming the straight supply duct and the air-handling plant room, an octave-band table of the flow-generated sound power level falling from 42.5 dB at 63 Hz to 21.8 dB at 4 kHz, the same spectrum plotted beside it, the boxed A-weighted sound power level LWA = 38.8 dB(A) re 1 pW with the overall unweighted LW = 47.0 dB re 1 pW, and a PASS verdict against a declared maximum of 45.0 dB(A).](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/hvac_duct_noise_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/hvac_duct_noise_example.pdf)
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-That PASS has very little margin: the same duct at 17 m/s returns 48.1 dB(A) and
-fails, with nothing else changed.
+[![HVAC duct noise spectrum example report (PDF): One-page HVAC duct-noise fiche: a metadata header naming the straight supply duct and the air-handling plant room, an octave-band table of the flow-generated sound power level falling from 42.5 dB at 63 Hz to 21.8 dB at 4 kHz, the same spectrum plotted beside it, the boxed A-weighted sound power level LWA = 38.8 dB(A) re 1 pW with the overall unweighted LW = 47.0 dB re 1 pW, and a PASS verdict against a declared maximum of 45.0 dB(A).](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/hvac_duct_noise_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/hvac_duct_noise_example.pdf)
+
+HVAC duct-noise fiche (HVACSpectrumResult.report), the flow-generated sound power of a straight duct at 12 m/s in a 0.04 m2 cross-section.
 
 ## 2. Machine enclosures
+
+An enclosure is a construction, and every symbol in the equation below is a
+feature of it. This is the fiche case at the end of the section, drawn: 24 m²
+of exposed shell, 30 m² of interior surface at a mean absorption of 0.30, and
+the four elements (door, penetration, cooling openings, machine mounting)
+that decide whether it delivers what the panels promise.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_enclosure_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_enclosure.svg" alt="Section through a close-fitting machine enclosure 3.0 m long and 1.8 m high standing on a slab, its wall drawn as three layers (sheet-steel mass, absorbent lining, perforated facing). Inside, the machine stands on vibration isolators clear of the shell. A hinged access door of 1.28 square metres and 15 dB transmission loss carries a compression seal at top and bottom and an unsealed 0.24 square metre gap at its foot. A cable and pipe entry passes through a sealed sleeve in the roof, a short lined duct takes cooling air out of the roof and another brings it in through the right-hand wall. The footer prints IL = R minus C with C = 3.4 dB, a mean insertion loss of 28.9 dB for the sealed shell, 21.4 dB with the door and 15.1 dB once the gap is added, against the 20 dB cap the open area sets" width="92%"></picture>
 
 A sealed enclosure reduces the radiated noise by its panel transmission loss
 $R$, minus a penalty $C$ for the reverberant build-up inside the small, hard
@@ -172,15 +289,36 @@ $$
 \mathrm{IL} = R - C,\qquad C = 10\log_{10}\!\left(0.3 + \frac{S_\mathrm{E}}{R_\mathrm{i}}\right),
 $$
 
-with the external area $S_\mathrm{E}$ and the interior room constant
-$R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i}/(1-\alpha_\mathrm{i})$ (the same `room_constant` as the
-steady-state room field). A hard interior wastes much of the panel $R$; lining
-it drives $C$ toward its floor $10\log_{10}0.3 = -5.2$ dB.
+with the external area $S_\mathrm{E}$ and the interior **room constant**
+$R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i}/(1-\alpha_\mathrm{i})$ (the same
+[`room_constant`](../../buildings/rooms/room-image-sources.md) as the steady-state
+room field).
 
-**The panel transmission loss $R$ is supplied by the caller** (measured, or
-predicted by a panel model) as a per-band array or a callable of frequency.
-This module never predicts $R$ itself; it combines a given $R$ with the
-interior absorption.
+$C$ is not a fudge factor: it is the reverberant build-up. Shut a source inside
+a small hard box and the interior level climbs above the free-field level of the
+same source until absorption balances emission, and it is *that* raised level
+the panels then have to hold back, so the enclosure delivers less than the panel
+rating a datasheet quotes. The $0.3$ is the empirical floor Bies keeps for the
+direct and near field, which no amount of lining removes, so $C$ can never fall
+below $10\log_{10}0.3 = -5.2$ dB however well the interior is treated.
+
+That turns into a design rule. $C$ changes sign at $R_\mathrm{i} = S_\mathrm{E}/0.7$: an interior
+room constant of about one and a half times the external area is break-even,
+below it the enclosure delivers less than its panels and above it slightly more.
+The figure's case ($S_\mathrm{E} = 6$ m², $S_\mathrm{i} = 5$ m², $\alpha_\mathrm{i} = 0.3$) gives
+$R_\mathrm{i} = 2.14$ m² and $C = +4.9$ dB, well on the losing side, which is where an
+unlined or lightly lined box always sits; break-even here would need
+$\alpha_\mathrm{i} = 0.63$. Because $R_\mathrm{i}$ rises steeply as $\alpha_\mathrm{i}$ approaches one, the
+step from $\alpha_\mathrm{i} = 0.3$ to $0.7$ is a factor of five in $R_\mathrm{i}$ and
+$+4.9 \to -0.9$ dB in $C$: **5.8 dB of insertion loss for the price of the
+lining**. Note that `model="norton"` drops the $0.3$ and therefore has no floor,
+so the two models agree while the interior is hard and diverge once it is well
+lined (2.0 dB apart at $\alpha_\mathrm{i} = 0.7$ for this box).
+
+**The panel transmission loss $R$ is supplied by you** as a per-band array
+(measured, or predicted by a panel model), or as a callable of frequency. This
+module never predicts $R$ itself; it combines a given $R$ with the interior
+absorption.
 
 ```python
 import numpy as np
@@ -188,10 +326,13 @@ from phonometry import noise_control
 
 bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 panel_R = np.array([18.0, 24.0, 30.0, 36.0, 42.0, 46.0])   # measured, dB
-enc = noise_control.enclosure_insertion_loss(panel_R, external_area=6.0, internal_area=5.0,
-                                             internal_absorption=0.3, frequencies=bands)
-print(np.round(enc.insertion_loss, 1))          # net IL = R - C per band
-enc.plot()
+
+enc = noise_control.enclosure_insertion_loss(
+    panel_R, external_area=6.0, internal_area=5.0,
+    internal_absorption=0.3, frequencies=bands,
+)
+print(np.round(enc.insertion_loss, 1))            # net IL = R - C per band
+enc.plot()                                         # panel R, correction C and IL
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_insertion_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_insertion_loss.svg" alt="Machine-enclosure insertion loss per octave band: the measured panel sound reduction index R as a dashed line, the flat interior correction C near 5 dB for a lined interior, and the net insertion loss IL equal to R minus C tracking about 5 dB below the panel curve" width="88%"></picture>
@@ -212,8 +353,10 @@ from phonometry import noise_control
 bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 panel_R = np.array([18.0, 24.0, 30.0, 36.0, 42.0, 46.0])   # measured, dB
 
-enc = noise_control.enclosure_insertion_loss(panel_R, external_area=6.0, internal_area=5.0,
-                                             internal_absorption=0.3, frequencies=bands)
+enc = noise_control.enclosure_insertion_loss(
+    panel_R, external_area=6.0, internal_area=5.0,
+    internal_absorption=0.3, frequencies=bands,
+)
 
 # One line — panel R, interior correction C and the net IL = R - C:
 enc.plot()
@@ -234,27 +377,11 @@ plt.show()
 
 `enclosure_insertion_loss` returns an `EnclosureInsertionLossResult` with the panel
 `panel_transmission_loss`, the interior `correction`, the net `insertion_loss`,
-the interior `room_constant` and `.plot()`.
-
-**What the enclosure actually delivers.** An enclosure is a composite, so the
-elements combine on an energy basis before $\mathrm{IL} = R - C$ is applied, and
-the result is set by the worst of them. A bare opening of relative area
-$S_\mathrm{a}/S_\mathrm{E}$ caps the composite at $10\log_{10}(S_\mathrm{E}/S_\mathrm{a})$ whatever the panels are:
-one per cent of open area caps it at 20 dB. For the sheet-steel case below
-(mean panel $R$ = 32.3 dB, $S_\mathrm{E}$ = 24 m²), a 1.28 m² door at $R$ = 15 dB takes
-the mean insertion loss from 28.9 dB to 21.4 dB, and adding a 0.24 m² gap at the
-door foot takes it to 15.1 dB. `composite_transmission_loss(areas,
-reduction_indices)` builds that composite and `enclosure_insertion_loss` takes
-its result directly as the panel $R$. Cooling openings become short lined ducts
-rather than holes, and the machine must not touch the shell or share its slab,
-because a rigid contact bypasses the panels entirely.
-
-**Test-report fiche.** `EnclosureInsertionLossResult.report(path)` renders a one-page
-enclosure fiche: the octave-band table of the supplied panel $R$, the interior
-correction $C$ and the net $\mathrm{IL}$, the three curves plotted beside it,
-and the boxed mean insertion loss with the mean panel $R$ and the external and
-internal surface areas, plus the verdict against a declared minimum mean
-insertion loss.
+the interior `room_constant`, and `.plot()`. It also files itself: `.report()`
+renders a one-page enclosure fiche with the per-band $R$, $C$ and
+$\mathrm{IL}$ table beside the three curves, the boxed mean insertion loss with
+the surface areas it was computed from, and, when a `requirement` is declared,
+the verdict against that minimum mean insertion loss.
 
 ```python
 import numpy as np
@@ -263,11 +390,12 @@ from phonometry import ReportMetadata, noise_control
 octaves = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 sheet_steel_R = np.array([18.0, 22.0, 28.0, 33.0, 38.0, 42.0, 45.0])
 
-case = noise_control.enclosure_insertion_loss(sheet_steel_R, external_area=24.0,
-                                              internal_area=30.0, internal_absorption=0.30,
-                                              frequencies=octaves)
+case = noise_control.enclosure_insertion_loss(
+    sheet_steel_R, external_area=24.0, internal_area=30.0,
+    internal_absorption=0.30, frequencies=octaves,
+)
 case.report(
-    "enclosure.pdf",
+    "enclosure.pdf",                    # needs phonometry[report]
     metadata=ReportMetadata(
         specimen="Sheet-steel close-fitting machine enclosure (design case)",
         test_room="Machine hall, line 3 (design case)",
@@ -277,39 +405,142 @@ case.report(
 )
 ```
 
-[![One-page machine-enclosure fiche: a metadata header naming the sheet-steel close-fitting enclosure and the machine hall, an octave-band table of the supplied panel transmission loss R, the interior correction C and the net insertion loss IL (18.0, 3.4 and 14.6 dB at 63 Hz up to 45.0, 3.4 and 41.6 dB at 4 kHz), the R, C and IL curves plotted beside it, the boxed mean insertion loss IL = 28.9 dB with the mean panel R = 32.3 dB and the external and internal surface areas SE = 24.00 m2 and Si = 30.00 m2, and a PASS verdict against a declared minimum of 20.0 dB.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/enclosure_insertion_loss_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/enclosure_insertion_loss_example.pdf)
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-**And how it would be measured.** ISO 11546-1:1995 determines the same quantity
-under laboratory conditions for declaration, ISO 11546-2:1995 in situ for
-acceptance: the sound power level (or the level at a specified position) is
-determined with the enclosure and again without it, at identical microphone
-positions and with the machine at the same operating point, and the difference
-is reported band by band over at least 100 Hz to 5 kHz in third octaves.
-What has to be recorded includes the **leak ratio** (open area over interior
-surface area, with the openings described) and the **fill ratio** (source volume
-over interior volume): the two numbers a prediction never captures.
+[![Machine enclosure insertion loss example report (PDF): One-page machine-enclosure fiche: a metadata header naming the sheet-steel close-fitting enclosure and the machine hall, an octave-band table of the supplied panel transmission loss R, the interior correction C and the net insertion loss IL (18.0, 3.4 and 14.6 dB at 63 Hz up to 45.0, 3.4 and 41.6 dB at 4 kHz), the R, C and IL curves plotted beside it, the boxed mean insertion loss IL = 28.9 dB with the mean panel R = 32.3 dB and the external and internal surface areas SE = 24.00 m2 and Si = 30.00 m2, and a PASS verdict against a declared minimum of 20.0 dB.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/enclosure_insertion_loss_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/enclosure_insertion_loss_example.pdf)
+
+Machine-enclosure fiche (EnclosureInsertionLossResult.report), the net insertion loss IL = R - C the sheet-steel design case delivers.
+
+### 2.1 What the enclosure actually delivers: leaks, doors and openings
+
+An enclosure is a **composite**, so the elements combine on an energy basis
+before $\mathrm{IL} = R - C$ is applied at all, and the result is set by the
+worst of them rather than by the panels. Two facts follow. A door of 1.28 m²
+at $R = 15$ dB in the 24 m² shell above pulls the mean composite $R$ from
+32.3 dB down to 24.7 dB and the mean insertion loss from 28.9 to 21.4 dB. And a
+**bare opening**
+of relative area $S_\mathrm{a}/S_\mathrm{E}$ caps the composite at $10\log_{10}(S_\mathrm{E}/S_\mathrm{a})$ no
+matter what the panels are: one per cent of open area caps it at 20 dB, ten per
+cent at 10 dB. Add a 0.24 m² gap at the door foot (one per cent of this shell,
+the width of a badly hung door), and the fiche's 28.9 dB becomes 15.1 dB.
+
+The combination is the area-weighted energy sum, and a bare opening enters it
+with $R = 0$ ($\tau = 1$):
+
+$$
+R_\text{composite} = -10\log_{10}\!\left[\frac{1}{\sum_n S_n}
+\sum_n S_n\,10^{-R_n/10}\right].
+$$
+
+```python
+import numpy as np                          # enclosure_insertion_loss: imported above
+
+octaves = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+sheet_steel = np.array([18.0, 22.0, 28.0, 33.0, 38.0, 42.0, 45.0])
+door = np.full_like(octaves, 15.0)          # gasketed access door
+opening = np.zeros_like(octaves)            # a bare gap: R = 0, tau = 1
+
+areas = np.array([24.0 - 1.28 - 0.24, 1.28, 0.24])[:, None]
+elements = np.vstack([sheet_steel, door, opening])
+built = -10.0 * np.log10((areas * 10.0 ** (-elements / 10.0)).sum(0)
+                         / areas.sum())
+
+leaky = noise_control.enclosure_insertion_loss(
+    built, external_area=24.0, internal_area=30.0,
+    internal_absorption=0.30, frequencies=octaves,
+)
+print(round(float(np.mean(leaky.insertion_loss)), 1))    # 15.1 dB, not 28.9
+print(round(10 * np.log10(24.0 / 0.24), 1))              # 20.0 dB, the cap
+```
+
+The library writes that sum for you as `composite_transmission_loss(areas,
+reduction_indices)`, and `enclosure_insertion_loss` takes its result directly
+as the panel $R$, so a real sheet is two calls rather than the arithmetic
+above.
+
+That is why a door seal, a cable sleeve and a gasketed panel joint are design
+elements with their own $R$ and not details. Cooling openings cannot simply be
+sealed either: an enclosed machine has to breathe, so the inlet and the outlet
+become short lined ducts or splitter silencers whose own insertion loss must
+exceed the panel's; the models are in section 1 and in
+[Silencers](silencers.md). The slit and
+circular-aperture transmission models that give a gap its own frequency-
+dependent $R$ are in
+[Panel sound insulation](../../buildings/design/panel-sound-insulation.md).
+
+The last bypass is not airborne at all. A machine bolted to the shell, or
+standing on the same slab, drives the enclosure as a radiating extension of
+itself and the whole airborne calculation stops applying, which is why the
+drawing puts the machine on isolators and keeps it clear of the walls. And note
+the low-frequency limit of the interior correction: it assumes a diffuse field
+inside the box, which a few cubic metres of air does not have below its first
+modes, so the 63 and 125 Hz entries of a small enclosure are estimates.
+
+### 2.2 How the same insertion loss is measured
+
+The number this module produces is a prediction. The quantity itself is
+measured by **ISO 11546-1:1995** under laboratory conditions, for declaration,
+and **ISO 11546-2:1995** in situ, for acceptance and verification. Both are
+substitution measurements of one shape: determine the sound power level (or the
+sound pressure level at a specified position) **with** the enclosure and again
+**without** it, and report the difference band by band:
+$D_W = L_W(\text{without}) - L_W(\text{with})$, ISO 11546-1 Equation (1), over
+at least 100 Hz to 5 kHz in third octaves or 125 Hz to 4 kHz in octaves, 50 Hz
+to 10 kHz and 63 Hz to 8 kHz being preferred (clause 6.2).
+
+Four conditions decide whether the result means anything. The **source** should
+be the actual machine: clause 4 makes that the preferred method and restricts
+the reciprocity and artificial-source alternatives to enclosures under 2 m³,
+excluding close-fitting enclosures like the one drawn above entirely. Its
+**operating condition must not change** between the two series (clause 6.1.2),
+and active elements such as cooling fans must be running (clause 6.1.3). The
+**microphone positions must be the same** with and without, so the
+environmental corrections cancel and the level difference is the power
+difference without either being converted (clause 6.1.4). And the **test
+environment** has to be good enough for the sound-power standard chosen from
+Table 1: ISO 11546-2 Table C.1 asks for an environmental correction
+$K_2 \le 2$ dB and a signal at least 6 dB above the background for ISO 3744,
+against $K_2 \le 7$ dB and 3 dB for the survey-grade ISO 3746, which is the
+practical ceiling on how large a measured insertion loss can be in a workshop.
+Verify the whole chain with a class 1 calibrator to $\pm 0.3$ dB before and
+after each series (clause 5).
+
+What must be recorded is listed in clause 9, and two entries are the ones a
+prediction never captures: the **leak ratio** $\theta$, the total open area
+divided by the total interior surface area, with a description of the openings;
+and the **fill ratio** $\phi$, the source volume over the interior volume.
+Alongside them go the enclosure identification and drawings, the panel, window,
+door and joint construction, the connection between enclosure and machine, the
+interior and exterior volumes and areas, the interior surfaces, and the floor
+mountings. A declared value is then verified to ISO 4871. Without that record a
+supplier's figure travels only as far as its geometry does, and comparing it
+with a value computed here compares two different things.
 
 ## What this guide covers
 
-**Covered.** The Bies §8.11-8.17 / ASHRAE HVAC methods:
-`hvac.end_reflection_loss` (interpolated table) and
-`hvac.elbow_insertion_loss` (Table 8.11 lookup),
-`hvac.plenum_attenuation` (Wells' closed form) and
-`hvac.flow_noise_straight_duct` / `flow_noise_bend` (VDI 2081), and the
-machine-enclosure insertion loss of Bies §7.4, Eqs. (7.103) and (7.111),
-through `enclosure_insertion_loss`, which combines a supplied panel
-transmission loss with the interior room-constant correction, together with the
-`composite_transmission_loss` of panels, doors and openings that feeds it.
+- **Covered.** The Bies §8.11-8.17 / ASHRAE HVAC methods: `hvac.end_reflection_loss`
+  (interpolated table) and `hvac.elbow_insertion_loss` (Table 8.11 lookup),
+  `hvac.plenum_attenuation` (Wells closed form) and
+  `hvac.flow_noise_straight_duct`/`flow_noise_bend` (VDI 2081). The machine-
+  enclosure insertion loss of Bies §7.4 (Eqs. (7.103),
+  (7.111)), `enclosure_insertion_loss`, combining a supplied panel transmission
+  loss with the interior room-constant correction, and the composite of panels,
+  doors and openings that feeds it (`composite_transmission_loss`).
 
-**Not covered.** The reactive elements (expansion chambers, side branches,
-extended tubes) live in [Silencers](silencers.md). Dissipative duct-lining
-silencers are modelled from liner properties nowhere in the library: the
-lined-elbow figure here is a table lookup (Bies Table 8.11) and the plenum is
-Wells' closed form driven by a declared mean absorption: neither is a liner
-model. Nothing on this page is a measurement: the ISO 11546 procedure of
-section 2 is described so a
-declared figure can be read, not implemented. Structure-borne transmission from
-a machine into its enclosure or its slab is outside every model here.
+- **Not covered.** The reactive silencer elements (expansion chambers, side branches, extended
+  tubes) have moved to
+  [Silencers](silencers.md), and dissipative
+  duct-lining silencers are not modelled from liner properties anywhere: the
+  lined-elbow figure here is a table lookup (Bies Table 8.11) and the plenum is
+  Wells' closed form driven by a declared mean absorption: neither is a liner
+  model.
+  `enclosure_insertion_loss` never predicts the panel transmission loss $R$
+  itself; you supply it measured or from another model, and the module only
+  combines it with the interior correction. Nothing here is a measurement: the
+  ISO 11546 procedure of section 2.2 is described so that a declared figure can
+  be read, not implemented, and structure-borne transmission from a machine into
+  its enclosure or its slab is outside every model on the page.
 
 ## See also
 
@@ -328,7 +559,7 @@ a machine into its enclosure or its slab is outside every model here.
 - [Panel sound insulation](../../buildings/design/panel-sound-insulation.md):
   the panel transmission loss this page asks you to supply, and the slit and
   circular-aperture models behind the composite of section 2.1.
-- [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
+- [Conformance report](../../CONFORMANCE.md):
   the closed forms and worked anchors these implementations are validated
   against.
 - API reference:
@@ -337,12 +568,11 @@ a machine into its enclosure or its slab is outside every model here.
 
 ## References
 
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152). The
-  HVAC duct methods (§8.11–8.17) and the machine-enclosure noise reduction
-  (§7.4).
-- Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control
-  engineering* (2nd ed.). Wiley.
-  [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568). The
-  companion treatment of ducts and enclosures.
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  The HVAC duct methods (§8.11-8.17) and the machine-enclosure noise reduction (§7.4) of this page.
+- **International Organization for Standardization. (1995).** [*Acoustics — Determination of sound insulation performances of enclosures — Part 1: Measurements under laboratory conditions (for declaration purposes)*](https://www.iso.org/standard/19500.html) (ISO 11546-1:1995).
+  The substitution measurement of the enclosure insertion loss of section 2.2: the choice of method (Clause 4), the with/without series (Clause 6) and what has to be recorded (Clause 9).
+- **International Organization for Standardization. (1995).** [*Acoustics — Determination of sound insulation performances of enclosures — Part 2: Measurements in situ (for acceptance and verification purposes)*](https://www.iso.org/standard/21033.html) (ISO 11546-2:1995).
+  The in-situ form of the same measurement, with the environmental-correction and background-noise requirements of Table C.1.
+- **Vér, I. L., & Beranek, L. L. (2006).** *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. https://doi.org/10.1002/9780470172568
+  The companion treatment of the ducts and enclosures of this page.

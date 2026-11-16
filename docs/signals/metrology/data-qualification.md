@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/metrology/data-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/
+
+# Data qualification: stationarity and peaks
 
 Every average in this documentation - a [PSD](../spectra/spectral-analysis.md), a
 [Leq](../levels/levels.md), a
@@ -19,6 +21,51 @@ say whether averaging is allowed.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification.svg" alt="Decision flow diagram of data qualification: a time record, before trusting any PSD, Leq or GUM average, is split into 20 equal segments whose mean square values form a sequence, the reverse arrangement count A with trend-free mean 95 is compared against the Table A.6 acceptance region, above 64 and at most 125, at the 5 percent level, and the diamond branches to a green stationary box, steady noise with A equal to 91 accepted so the chi-square intervals and error formulas hold, or to a red nonstationary box, a 20 percent gain ramp with A equal to 7 rejected, advising to split at the change or move to short-time analysis; footnotes name the runs test companion and the mean-square blind spot for frequency glides" width="92%"></picture>
 
+## 0. Before the tests: validating the record
+
+Bendat & Piersol's Section 10.3 covers three activities and this module
+implements one of them. *Qualification*, the tests below, asks whether a
+record is stationary. *Validation* asks whether it is a record of the thing at
+all, and it comes first, because every defect in the list below either fails the
+stationarity test for the wrong reason or, worse, passes it. Validation stays
+manual, as the book describes it, but it is six lines of numpy and a decision
+each:
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(0)
+x = 0.15 * rng.standard_normal(1 << 16)   # your record, in digital units
+
+full_scale = 1.0                          # 1.0 for float audio, 32768 for int16
+clipped = int(np.count_nonzero(np.abs(x) >= 0.999 * full_scale))
+dead = int(np.max(np.diff(np.flatnonzero(np.diff(x) != 0.0), prepend=0)))
+offset = float(np.mean(x) / np.std(x))
+spikes = int(np.count_nonzero(np.abs(x - np.mean(x)) > 5 * np.std(x)))
+kurtosis = float(np.mean((x - np.mean(x)) ** 4) / np.std(x) ** 4)
+print(clipped, dead, round(offset, 4), spikes, round(kurtosis, 2))
+```
+
+| Defect | The check | The decision |
+| :--- | :--- | :--- |
+| Clipping | samples at or above 0.999 of full scale | more than a handful and the record is edited or rejected: clipping deflates the high-level crossings of section 4 and inflates every mean square |
+| Dropouts, dead channel | the longest run of identical consecutive samples | any run longer than a few milliseconds is a transmission fault, not a signal |
+| DC offset, infrasonic drift | the record mean against its standard deviation, and the sub-20 Hz share of the PSD against the band of interest | remove the mean and high-pass before section 4, whose formulas assume a zero-mean process |
+| Spikes, transient contamination | samples beyond 5σ, or a kurtosis far above 3 on a supposedly Gaussian record | edit them out and say so, or qualify the record in pieces |
+| Mains hum | peaks at 50 or 60 Hz and their harmonics in a [Welch PSD](../spectra/spectral-analysis.md) | a fault in the chain, not in the source; fix the grounding rather than the data |
+
+The synthetic record above prints `0 1 0.0024 0 3.02`, which is what clean looks
+like: no clipped samples, no repeated sample, an offset of 0.002σ, not one
+excursion beyond 5σ in 65 536 Gaussian samples, and a kurtosis of 3.0 as a
+Gaussian record must have.
+
+Alongside the numbers, the acquisition metadata has to travel with the file or
+none of this is reconstructible later: sample rate, bit depth, gain setting,
+the [calibration factor](calibration.md) and the take
+it came from, microphone and windscreen, and (outdoors) wind speed and
+temperature. The rule is simply that validation precedes qualification: edit or
+reject first, then test for stationarity.
+
 ## 1. The reverse arrangement test
 
 Given a sequence of $N$ observations $x_1, \dots, x_N$ - parameter estimates,
@@ -36,8 +83,8 @@ pushes $A$ to an extreme (0 for a rising sequence, $N(N-1)/2$ for a falling
 one), so the hypothesis of *no trend* is accepted at significance $\alpha$
 when $A$ falls inside a two-sided region - B&P Table A.6, whose
 $\alpha = 0.05$ rows `trend_test` reproduces exactly and the conformance
-suite pins. The book's Example 4.4 (twenty observations, $A = 86$, accepted
-between 64 and 125) runs verbatim:
+suite pins. The book's Example 4.4 (twenty observations, $A = 86$, accepted in
+$(64, 125]$) runs verbatim:
 
 ```python
 from phonometry import metrology
@@ -46,12 +93,20 @@ values = [5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
           5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0]
 
 res = metrology.trend_test(values)                  # B&P Example 4.4
-print(res.statistic, res.bounds)          # 86, (64, 125)
+print(res.statistic, res.bounds)          # 86, (64, 125] — half-open
 print(res.trend_free, round(res.p_value, 3))   # True, 0.586
 res.plot()
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/trend_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/trend_test.svg" alt="Two sequences of twenty observations plotted against the sample index: Bendat and Piersol Example 4.4, which fluctuates around five with eighty-six reverse arrangements and is accepted as trend free, and the same fluctuations with an added rising drift climbing from about five to nine, whose thirty-eight reverse arrangements fall below the lower acceptance bound of sixty-four and are rejected as trended at the five percent level" width="82%"></picture>
+
+*The test never looks at the fitted slope, only at the order of the values. On
+the left, Bendat & Piersol's own Example 4.4: $A = 86$, comfortably inside the
+$(64, 125]$ acceptance region, $p = 0.586$. On the right, the same twenty
+fluctuations with a drift added that carries them from 5.2 to 9.0: the
+fluctuations are unchanged, but the ordering is not, and $A$ falls to 38, below
+the lower bound, at $p = 0.0001$. A monotonic drift is what pushes $A$ towards
+zero, which is why the counting works without knowing the distribution.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -82,6 +137,11 @@ plt.show()
 
 </details>
 
+`bounds` is **half-open**: the hypothesis of no trend is accepted when
+`lower < A <= upper`, so $A = 125$ passes and $A = 64$ does not. The runs test
+of section 3 uses the same convention, and so does the stationarity verdict of
+section 2.
+
 The p-value comes from the exact null distribution of $A$ (the inversion
 counts of a random permutation), computed up to $N = 100$ - the range of
 Table A.6 - and from the book's normal approximation beyond; the verdict
@@ -89,6 +149,21 @@ follows the book's tabulated region. `.plot()` draws the tested sequence
 against its sample index with the count, the acceptance region and the
 verdict in the legend (for `method="runs"` it also marks the sequence
 median that classifies each value).
+
+**How to read the verdict.** It is a hypothesis test, not a measurement.
+`trend_free = True` means the data give *no evidence* of a trend at the chosen
+level, which is a much weaker statement than "the record is stationary";
+$p = 0.586$ says the observed count is entirely ordinary for a trend-free
+sequence, and a $p$ just above 0.05 says almost nothing either way. The
+consequence that bites in practice is multiplicity: at $\alpha = 0.05$ one
+stationary record in twenty is rejected by construction, so screening the 31
+one-third-octave bands of a perfectly stationary record produces one or two
+rejections as the *expected* outcome. A single failing band is therefore not
+evidence of anything; a run of adjacent failing bands, or a failure of the
+broadband record, is. `alpha=` is the knob: tighten it when many bands are
+screened, loosen it when one record must be qualified conservatively. The
+acceptance bounds move with it, because they come from the exact null
+distribution rather than from a table lookup.
 
 ## 2. Stationarity of a record
 
@@ -119,6 +194,14 @@ res.plot()
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test.svg" alt="Twenty segment mean square values for two noise records: a steady record whose values fluctuate around one with a reverse arrangement count of ninety-one, accepted as stationary, and the same noise with a twenty percent gain ramp whose segment mean squares climb steadily to one point five, giving only seven reverse arrangements, rejected as nonstationary at the five percent level" width="82%"></picture>
+
+*The same twenty-segment sequence tells a stationarity story with the same
+arithmetic. The steady record's segment mean squares stay between 0.982 and
+1.034 and give $A = 91$, inside $(64, 125]$. The 20 % gain ramp lifts them from
+1.016 to 1.476 (a change of a factor 1.45, which no eye would call dramatic on
+a time trace) and $A$ collapses to 7. Twenty numbers and a pair counted
+against a table are enough; nothing about the record's bandwidth or units
+enters.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -153,16 +236,101 @@ plt.show()
 The result records the per-segment sequence (`segment_values`,
 `segment_times`), the count, the Table A.6 `bounds`, the exact `p_value`
 and the `stationary` verdict; `.plot()` draws the sequence with the verdict
-in the legend. The default of 20 segments matches the book's worked
-examples - more segments resolve faster drifts but each interval must stay
-long against the record's lowest frequencies for the values to be
-independent.
+in the legend. Note that the same reverse-arrangement count answers to two
+different attribute names in the two result classes, because only one of them
+has a per-segment sequence to carry:
+
+| | `trend_test` → `TrendTestResult` | `stationarity_test` → `StationarityTestResult` |
+| :--- | :--- | :--- |
+| the count $A$ | `statistic` | `trend_statistic` |
+| the verdict | `trend_free` | `stationary` |
+| acceptance region | `bounds` (half-open) | `bounds` (half-open) |
+| exact p-value | `p_value` | `p_value` |
+| the sequence | `values` | `segment_values`, `segment_times`, `n_segments` |
+
+The default of 20 segments matches the book's worked examples - more segments
+resolve faster drifts but each interval must stay long against the record's
+lowest frequencies for the values to be independent.
+
+**How small a drift can it see?** Each segment mean square is itself a random
+variable: for a band of width $B$ observed for $T_\text{seg}$ seconds its
+normalized random error is $1/\sqrt{B\,T_\text{seg}}$. Take the default 20
+segments over a 10 s record of the 1 kHz one-third-octave band
+($B = 231$ Hz, $T_\text{seg} = 0.5$ s): $BT = 116$, so each segment value
+scatters by about 9 %, which is 0.4 dB. A drift much smaller than that cannot be
+separated from the scatter, while a monotonic drift of a couple of segment
+standard deviations across the record is rejected almost every time.
+
+Two design consequences follow, and they point in opposite directions to the
+obvious move. To see a *smaller* drift, lengthen the **record**, not the segment
+count: the scatter falls as $1/\sqrt{T_\text{seg}}$ while the trend stays put,
+so splitting the same record into more segments makes each one noisier. And keep
+$T_\text{seg}$ well above $1/B$: at least $BT = 5$ per interval, and no fewer
+than ten cycles of the lowest frequency of interest. Otherwise, the segment
+values stop being independent and the tabulated acceptance region no longer
+applies. A
+20-segment test of a record band-limited to 20 Hz and above therefore needs
+intervals of at least 0.5 s, and so a record of at least 10 s.
+
+One shape of nonstationarity escapes this test by construction: a source that
+alternates between two steady states (a machine that loads and unloads, traffic
+in platoons) produces a non-monotonic segment sequence that the reverse
+arrangement test can happily accept while the record is plainly not stationary.
+That is what `method="runs"` in section 3 is for, and the honest answer is
+usually to split the record by state (`segment_times` shows where) and qualify
+each part on its own.
 
 Two caveats from the book are worth repeating. A record can be
 nonstationary with a stationary mean square (a frequency glide, for
 instance), so pass `statistic="mean"` or test band-filtered versions when
 that matters; and the test needs the *trend* to be slow against the segment
 length, or it dissolves into the random fluctuation of the segment values.
+
+The first caveat is the one that costs a reader a wrong result, because it makes
+the test *accept* a record it should reject. It is worth seeing:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_glide_blind_spot_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_glide_blind_spot.svg" alt="Three stacked panels. Top: the instantaneous frequency of a constant-amplitude glide rising linearly from 200 Hz to 2 kHz over eight seconds, with the 200 to 400 Hz band shaded. Middle: the twenty segment mean squares of the full-band record, flat at 0.5 with a reverse arrangement count of 96 inside the acceptance region, accepted. Bottom: the same record band-limited to 200 to 400 Hz, whose segment mean squares collapse to zero after the third segment, giving a count of 173 above the upper bound, rejected" width="88%"></picture>
+
+*A constant-amplitude glide from 200 Hz to 2 kHz is as nonstationary as a record
+gets, and the full-band mean square cannot see it: the twenty segment values span
+0.4998 to 0.5002 and the count $A = 96$ sits comfortably inside $(64, 125]$.
+Band-limit the same record to 200-400 Hz first and the segment values collapse
+once the glide leaves the band, giving $A = 173$, above the upper bound, and
+rejected. The remedy in the caveat above is not a formality: what the test sees
+depends entirely on the statistic and the band you hand it.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal
+
+# stationarity_test is the one imported in section 2 above.
+fs = 8192.0
+t = np.arange(1 << 16) / fs
+glide = np.sin(2 * np.pi * (200 * t + (2000 - 200) / (2 * t[-1]) * t ** 2))
+sos = signal.butter(6, [200 / (fs / 2), 400 / (fs / 2)], btype="band",
+                    output="sos")
+
+full = metrology.stationarity_test(glide, fs)
+banded = metrology.stationarity_test(signal.sosfiltfilt(sos, glide), fs)
+print(full.trend_statistic, full.stationary)       # 96 True   -- blind
+print(banded.trend_statistic, banded.stationary)   # 173 False -- caught
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
+for ax, res, label in ((ax1, full, "full band"),
+                       (ax2, banded, "200-400 Hz")):
+    ax.plot(np.arange(1, res.n_segments + 1), res.segment_values, "o-")
+    ax.set_ylim(-0.03, 0.58)
+    ax.set_title(f"{label}: A = {res.trend_statistic}, accept {res.bounds}")
+    ax.set_xlabel("Segment index")
+    ax.set_ylabel("Segment mean square")
+plt.show()
+```
+
+</details>
 
 ## 3. The runs test
 
@@ -192,7 +360,7 @@ print(metrology.trend_test(alternating, method="runs").trend_free)   # False
 *The two-sided verdict of the runs test: 20 runs is unremarkable for 40
 Gaussian observations (left, accepted), but the same count from a strictly
 alternating 20-value sequence exceeds its upper bound (right, rejected):
-too *many* runs is as non-random as too few.*
+too **many** runs is as non-random as too few.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -274,6 +442,15 @@ res.plot()
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_level_crossings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_level_crossings.svg" alt="Measured level-crossing rates of a bandlimited Gaussian noise record between eight hundred and twelve hundred hertz, plotted as dots against the crossing level from minus three point five to plus three point five signal units on a logarithmic rate axis, falling from about two thousand crossings per second at level zero to a few per second at three sigma, with the Rice exponential curve passing through every measured point" width="82%"></picture>
 
+*Two moments of the spectrum predict a curve spanning nearly three decades of
+rate. The measured zero-crossing rate of this 800-1200 Hz record is
+2012.7 crossings per second against Example 5.13's closed form
+$2\sqrt{f_\mathrm{c}^2 + B^2/12} = 2013.3$, an apparent frequency of 1007 Hz; from there
+the Rice exponential $N_a = N_0 \mathrm{e}^{-a^2/2\sigma_x^2}$ tracks the counts to
+within 2 % out to $2\sigma$, where the rate has already fallen to 268/s. Past
+$3\sigma$ the count is a handful of events per second and the scatter is the
+statistics of the record, not a failure of the model.*
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -311,6 +488,36 @@ high-level crossings, impulsive contamination as an excess. Count-based
 rates need the record comfortably oversampled: a crossing between two
 samples of the same sign goes uncounted.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_nongaussian_screen_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_nongaussian_screen.svg" alt="Left: level-crossing rates of three records of the same variance and bandwidth against crossing level in units of sigma, each with its own Rice curve. The Gaussian reference lies on its curve, the record hard-clipped at 2.5 sigma has no crossings at all beyond the clip level, and the record with sparse six-sigma spikes lies above its curve in both tails. Right: the irregularity factor of a two-kilohertz low-pass record with a noise floor 50 decibels down, plotted against the analysis upper cut-off, flat at the closed-form 0.745 near the physical band and falling to 0.47 at 22 kilohertz" width="92%"></picture>
+
+*Left: what the screen actually looks like. Three records with the same variance
+and the same 800-1200 Hz band, each drawn with its own Rice curve so the
+deviation is a model mismatch and not a scaling artefact. The Gaussian reference
+sits on the curve at every level. Hard clipping at 2.5σ leaves the rates
+untouched below the clip level and removes them entirely above it: the signature
+is a cliff, not a slope. Sparse 6σ spikes lift both tails above the curve beyond
+about 2.5σ while barely moving the centre. Right: the companion warning of
+section 5, measured. A record that is ideal low-pass noise to 2 kHz plus a flat
+floor 50 dB down keeps $r$ at its closed-form 0.745 while the analysis band stays
+near the physical one, and loses it as the band opens: 0.74 at 6 kHz, 0.71 at
+13 kHz, 0.47 at 22 kHz. A noise floor you would never notice on a spectrum plot
+costs a third of the irregularity factor once the analysis band is ten times too
+wide.*
+
+Finally, the low-frequency half of the same argument, which section 4 opened with
+and never returned to: **the Rice formulas are written for a zero-mean process**.
+Subtract the record mean and high-pass away everything below the physically
+meaningful band before counting: 20 Hz for an audio-band acoustic record, the
+transducer's own lower cut-off for a vibration record. Wind and building rumble
+sit almost entirely in $m_0$ and contribute almost nothing to $m_2$, so they
+inflate $\sigma_x$ while leaving $\sigma_v$ alone and bias $N_0$ and every
+level-crossing rate low; a slow DC drift can suppress the crossings of the low
+levels altogether, and a record that never returns to zero has no zero crossings
+at all. The rule is symmetric: band-limit at both ends, the low end for $m_0$ and
+the high end for $m_4$, and quote the band you used whenever you report an
+apparent frequency or an irregularity factor, because neither number means
+anything without it.
+
 ## 5. Peaks: rates, the irregularity factor and heights
 
 The same moments fix the expected rate of local maxima
@@ -346,6 +553,14 @@ res.plot()   # empirical exceedance against the Rice mixture (figure below)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_peak_distribution_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_peak_distribution.svg" alt="Peak-height exceedance probability of low-pass Gaussian noise on a logarithmic axis against the standardized peak height from minus two point five to four point five: the empirical staircase from half a million samples follows the Rice mixture curve for irregularity factor zero point seven four six, clearly below the dashed Rayleigh limit and above the dotted Gaussian limit, with a visible fraction of negative maxima" width="82%"></picture>
+
+*One number decides which curve the peaks follow. Ideal low-pass noise has the
+closed-form $r = \sqrt5/3 = 0.745$, and the record measures 0.746, which is
+also why 12.6 % of its 39 534 maxima are **negative**, an impossibility underRayleigh. The empirical staircase sits on the Rice mixture for that $r$ and
+between the two limits everywhere: the chance of a peak beyond $4\sigma$ is
+$2.5\times10^{-4}$, a quarter below the Rayleigh $\mathrm{e}^{-8} = 3.4\times10^{-4}$.
+Assuming the Rayleigh limit on a record that is not narrowband over-predicts the
+extremes.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -404,7 +619,7 @@ all assume the record is stationary, as does the very idea of *the* $L_\mathrm{e
 a measurement in [Levels](../levels/levels.md). When a record fails
 the test, split it at the change (the `segment_values` sequence shows
 where), analyse the pieces, or move to the short-time views - the
-[calibrated spectrogram](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/) - that do not
+[calibrated spectrogram](../spectra/time-frequency.md) - that do not
 assume stationarity. And when it passes, the
 [GUM machinery](gum-uncertainty.md) can propagate the
 *remaining* random error of every averaged estimate with a clean
@@ -412,20 +627,20 @@ conscience.
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 (the reverse
-arrangement trend test in `trend_test`, its exact and normal-approximation
-p-values and Example 4.4), the Wald & Wolfowitz (1940) runs test
-(`trend_test(method="runs")`), the Section 10.3.1.1 segment mean-square
-stationarity procedure with Example 10.3 (`stationarity_test`), and the
-Rice (1945) level-crossing and peak statistics of Section 5.5
-(`level_crossing_rate`, `peak_statistics`, the irregularity factor and its
-Rayleigh/Gaussian peak-height limits).
+- **Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 (the reverse arrangement trend
+  test, `trend_test`, its exact and normal-approximation p-value and Example
+  4.4), the Wald & Wolfowitz (1940) runs test (`trend_test(method="runs")`), the
+  Section 10.3.1.1 segment mean-square stationarity procedure with Example 10.3
+  (`stationarity_test`), and the Rice (1945) level-crossing and peak statistics
+  of Section 5.5 (`level_crossing_rate`, `peak_statistics`, the irregularity
+  factor and its Rayleigh/Gaussian peak-height limits).
 
-**Not covered.** The book's Section 10.3 is titled "data qualification" much
-more broadly, and also covers classification, validation and editing. Only its
-quantitative core, the segment mean-square stationarity test, is implemented.
-Classifying a record's type, validating it against physical limits and editing
-out glitches stay manual steps, the way the book describes them.
+- **Not covered.** Section 10.3 of the book is titled "data qualification" more broadly and also
+  covers classification, validation and editing procedures;
+  `phonometry.metrology` implements only its quantitative core, the segment
+  mean-square stationarity test. Classifying a record's type, validating it
+  against physical limits, or editing out glitches stay manual steps the way the
+  book describes them, outside this module.
 
 ## See also
 
@@ -438,21 +653,9 @@ out glitches stay manual steps, the way the book describes them.
 
 ## References
 
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Section 4.5.2 with Table A.6 (the nonparametric reverse arrangement trend
-  test, its mean and variance, the tabulated percentage points and
-  Example 4.4), Section 10.3 (data qualification; the segment mean-square
-  stationarity procedure of 10.3.1.1 and Example 10.3) and Section 5.5
-  (level crossings and peak values, Examples 5.12-5.15). The runs companion
-  appeared in the third edition's percentage points of the run distribution.
-- Wald, A., & Wolfowitz, J. (1940). On a test whether two samples are from
-  the same population. *The Annals of Mathematical Statistics*, 11(2),
-  147-162. [doi:10.1214/aoms/1177731909](https://doi.org/10.1214/aoms/1177731909).
-  The exact conditional distribution of the number of runs.
-- Rice, S. O. (1945). Mathematical analysis of random noise. *The Bell
-  System Technical Journal*, 24(1), 46-156.
-  [doi:10.1002/j.1538-7305.1945.tb00453.x](https://doi.org/10.1002/j.1538-7305.1945.tb00453.x).
-  The original level-crossing and peak derivations (Parts I-II are in
-  volume 23, 1944).
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Section 4.5.2 with Table A.6 (the nonparametric reverse arrangement trend test, its mean and variance, the tabulated percentage points and Example 4.4), Section 10.3 (data qualification: classification, validation, editing; the segment mean-square stationarity procedure of 10.3.1.1 and Example 10.3) and Section 5.5 (level crossings and peak values: Eqs. (5.195)-(5.196), (5.206), (5.211), (5.217)-(5.223) and Examples 5.12-5.15). ISBN 978-0-470-24877-5. The runs companion appeared in the third edition's percentage points of the run distribution.
+- **Rice, S. O. (1945).** Mathematical analysis of random noise. *The Bell System Technical Journal*, *24*(1), 46-156. https://doi.org/10.1002/j.1538-7305.1945.tb00453.x
+  The original derivations of the expected level-crossing and maxima rates and the peak distribution of Gaussian noise that Bendat & Piersol Section 5.5 presents (their Ref. 6; Parts I-II are in volume 23, 1944).
+- **Wald, A., & Wolfowitz, J. (1940).** On a test whether two samples are from the same population. *The Annals of Mathematical Statistics*, *11*(2), 147-162. https://doi.org/10.1214/aoms/1177731909
+  The exact conditional distribution of the number of runs, from which the runs-about-the-median acceptance regions are computed.

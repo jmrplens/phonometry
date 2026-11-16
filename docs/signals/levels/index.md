@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/levels/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/
 
 # Levels and weighting
 
@@ -74,26 +76,26 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-These pages implement the signal processing of a sound level meter, not the
-meter. The rest of IEC 61672-1 (level ranges, overload indication, the
-self-generated noise floor, the directional response) is measured nowhere in
-the library. Of those requirements, the level range control (Clause 17) and
-the overload indication (Clause 20) are graded from the results a
-laboratory returns from the IEC 61672-3 periodic tests of a physical meter
-([Periodic tests of a sound level
-meter](../metrology/sound-level-meter-periodic-tests.md)); the
-self-generated noise is recorded there for information only (IEC 61672-3
-11.1.2, NOTE 2), and the directional response belongs to pattern evaluation
-(IEC 61672-2). So
-nothing here assigns a class to a physical instrument; [Build a sound level
-meter](../sound-level-meter.md) states exactly what a class
-verdict from the library does and does not mean. Two curves come without a
-verdict of any kind: ISO 7196 defines a single ±1 dB tolerance for G with no
-class structure, and the withdrawn IEC 537 left no tolerance table behind for
-D, so both curves filter a signal but neither reaches
-`verify_weighting_class`, and they are pinned against their published tables
-in the conformance report instead. The noise dose is the 1993 first edition of
-IEC 61252 only, not the 2025 revision. And a dose is a quantity, not a
-verdict: the exposure strategies, the sampling plan and the limits that decide
-whether a worker is over-exposed are [Occupational exposure (ISO
-9612)](../../perception/hearing/occupational-exposure.md).
+- **Not covered.** These pages implement the signal processing of a sound level meter, not the
+  meter. The rest of IEC 61672-1 (level ranges, overload indication, the
+  self-generated noise floor, the directional response) is measured nowhere in
+  the library. Of those requirements, the level range control (Clause 17) and
+  the overload indication (Clause 20) are graded from the results a
+  laboratory returns from the IEC 61672-3 periodic tests of a physical meter
+  ([Periodic tests of a sound level
+  meter](../metrology/sound-level-meter-periodic-tests.md)); the
+  self-generated noise is recorded there for information only (IEC 61672-3
+  11.1.2, NOTE 2), and the directional response belongs to pattern evaluation
+  (IEC 61672-2). So
+  nothing here assigns a class to a physical instrument; [Build a sound level
+  meter](../sound-level-meter.md) states exactly what a class
+  verdict from the library does and does not mean. Two curves come without a
+  verdict of any kind: ISO 7196 defines a single ±1 dB tolerance for G with no
+  class structure, and the withdrawn IEC 537 left no tolerance table behind for
+  D, so both curves filter a signal but neither reaches
+  `verify_weighting_class`, and they are pinned against their published tables
+  in the conformance report instead. The noise dose is the 1993 first edition of
+  IEC 61252 only, not the 2025 revision. And a dose is a quantity, not a
+  verdict: the exposure strategies, the sampling plan and the limits that decide
+  whether a worker is over-exposed are [Occupational exposure (ISO
+  9612)](../../perception/hearing/occupational-exposure.md).

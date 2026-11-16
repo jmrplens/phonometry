@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/propagation/software-quality.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Quality of outdoor sound software (ISO 17534-1)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/software-quality/
+
+# Quality of Outdoor Sound Software (ISO 17534-1)
 
 A noise map is computed by a program, and two programs that implement the
 same method do not always agree. ISO 17534-1:2015 does not predict a level
@@ -397,31 +399,31 @@ $R(q_{0,9}) = 361$ by Formula (C.2).
 
 ## What this guide covers
 
-**Covered.** ISO 17534-1:2015, the parts that are arithmetic: the comparison
-of a program's results with the limits of the certified results (clause 7.1, the
-TRC form of Tables B.1 and B.2, the ±0,05 dB of Table A.5, note a), limits
-included; the ranking positions of Table C.1 and Formulas (C.1) and (C.2) and
-the characteristic values of C.4, with the mean and the estimated standard
-deviation of C.5; the uniform sample of C.2 with the 2 m exclusion and the
-1:100 recommendation, and the chainages of C.3; and the round-robin result of
-4.5.2 and A.3. Table C.1, read also in Tables 5 and 6 of VDI 3723 Blatt 1,
-the example of C.4 and Table B.2 are reproduced in the
-[conformance report](../../CONFORMANCE.md).
+- **Covered.** **ISO 17534-1:2015, the parts that are arithmetic:** the comparison of a
+  program's results with the limits of the certified results (clause 7.1, the
+  TRC form of Tables B.1 and B.2, the ±0,05 dB of Table A.5, note a), limits
+  included; the ranking positions of Table C.1 and Formulas (C.1) and (C.2) and
+  the characteristic values of C.4, with the mean and the estimated standard
+  deviation of C.5; the uniform sample of C.2 with the 2 m exclusion and the
+  1:100 recommendation, and the chainages of C.3; and the round-robin result of
+  4.5.2 and A.3. Table C.1, read also in Tables 5 and 6 of VDI 3723 Blatt 1,
+  the example of C.4 and Table B.2 are reproduced in the
+  [conformance report](../../CONFORMANCE.md).
 
-**Covered, by a reading of the text.** Three conventions the text leaves
-open: the ordinals of C.2 counted from zero, the chainages of C.3 in whole metres, and a level difference taken as
-the modified configuration minus the reference one. The seam between Table
-C.1 and Formula (C.2) is applied as printed, for the reasons of section 3.
+- **Covered, by a reading of the text.** **Three conventions the text leaves open:** the ordinals of C.2 counted from
+  zero, the chainages of C.3 in whole metres, and a level difference taken as
+  the modified configuration minus the reference one. The seam between Table
+  C.1 and Formula (C.2) is applied as printed, for the reasons of section 3.
 
-**Not covered.** The requirements on documents: the official documentation a
-method must have (clause 4), the declaration of conformity and the grade-of-implementation form
-of Annex B, the software properties of 5.2, and the QA data format of Annex D.
-The programs themselves: nothing here runs a noise map or a modified
-configuration; the levels to compare come from the program under test. The
-method-specific test cases are those of ISO/TR 17534-3 for ISO 9613-2, and T08
-to T19 of that report, which need barriers, buildings and reflections, are not
-implemented (see the [Outdoor Sound
-Propagation](outdoor-propagation.md) guide).
+- **Not covered.** The requirements on documents: the official documentation a method must have
+  (clause 4), the declaration of conformity and the grade-of-implementation form
+  of Annex B, the software properties of 5.2, and the QA data format of Annex D.
+  The programs themselves: nothing here runs a noise map or a modified
+  configuration; the levels to compare come from the program under test. The
+  method-specific test cases are those of ISO/TR 17534-3 for ISO 9613-2, and T08
+  to T19 of that report, which need barriers, buildings and reflections, are not
+  implemented (see the [Outdoor Sound
+  Propagation](outdoor-propagation.md) guide).
 
 ## See also
 
@@ -437,34 +439,13 @@ Propagation](outdoor-propagation.md) guide).
 
 ## References
 
-- International Organization for Standardization. (2015). *Acoustics —
-  Software for the calculation of sound outdoors — Part 1: Quality
-  requirements and quality assurance* (ISO 17534-1:2015). The test-case
-  comparison of clause 7.1 with the TRC form of Annex B and the ±0,05 dB of
-  Table A.5, note a; the characteristic values of Annex C (Table C.1 and
-  Formulas (C.1) and (C.2)); the round-robin result of 4.5.2 and A.3. Read from
-  BS ISO 17534-1:2015.
-- International Organization for Standardization. (2015). *Acoustics —
-  Software for the calculation of sound outdoors — Part 3: Recommendations for
-  quality assured implementation of ISO 9613-2 in software according to
-  ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/66128.html). Test case T03,
-  Table 6, row L_A.
-- Deutsches Institut für Normung. (2006). *Akustik — Software-Erzeugnisse zur
-  Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und
-  Prüfbestimmungen* (DIN 45687:2006-05). Annex F.4, the provenance of Table C.1
-  and of Formulas (C.1) and (C.2).
-- Verein Deutscher Ingenieure. (1993). *Anwendung statistischer Methoden bei
-  der Kennzeichnung schwankender Geräuschimmissionen* (VDI 3723 Blatt 1:1993-05).
-  Tables 5 and 6, the source of Table C.1, and the limit of 50 values.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method of
-  calculation* (ISO 9613-2:1996).
-  [iso.org catalogue](https://www.iso.org/standard/20649.html).
-
----
-
-← [Outdoor propagation (ISO 9613-2)](outdoor-propagation.md) ·
-[Spherical ground and barriers](ground-barriers.md) ·
-[Atmospheric refraction](atmospheric-refraction.md) ·
-[Documentation index](../../README.md)
+- **Deutsches Institut für Normung. (2006).** *Akustik — Software-Erzeugnisse zur Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und Prüfbestimmungen* (DIN 45687:2006-05).
+  The national standard Annex C of ISO 17534-1 was taken from. Its Annex F.4 bases Table C.1 on VDI 3723 Blatt 1 and gives Formulas (C.1) and (C.2) as a supplement to that guideline above 50 values, in sufficient agreement with E VDI 2450 Blatt 5, and it prints (C.2) exactly as ISO 17534-1 does.
+- **International Organization for Standardization. (1996).** [*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation*](https://www.iso.org/standard/20649.html) (ISO 9613-2:1996).
+  The calculation method whose implementation the T03 example checks.
+- **International Organization for Standardization. (2015).** *Acoustics — Software for the calculation of sound outdoors — Part 1: Quality requirements and quality assurance* (ISO 17534-1:2015).
+  The implemented parts: the test-case comparison of clause 7.1 with the TRC form of Annex B (Tables B.1 and B.2) and the ±0,05 dB of Table A.5, note a; the characteristic values of Annex C (C.2 to C.5, Table C.1 and Formulas (C.1) and (C.2)); and the round-robin result of 4.5.2 and A.3. Read from BS ISO 17534-1:2015, whose pages carry the ISO text unchanged.
+- **International Organization for Standardization. (2015).** [*Acoustics — Software for the calculation of sound outdoors — Part 3: Recommendations for quality assured implementation of ISO 9613-2 in software according to ISO 17534-1*](https://www.iso.org/standard/66128.html) (ISO/TR 17534-3:2015).
+  The method-specific test cases for ISO 9613-2; test case T03 (Table 6, row L_A) is the TRC form worked on this page.
+- **Verein Deutscher Ingenieure. (1993).** *Anwendung statistischer Methoden bei der Kennzeichnung schwankender Geräuschimmissionen* (VDI 3723 Blatt 1:1993-05).
+  The source DIN 45687 names for Table C.1: its Tables 5 and 6 give the same ranks from 20 to 50 values, symmetric, and it stops at 50 without a formula, pointing to VDI 2450 Blatt 5 for larger samples.

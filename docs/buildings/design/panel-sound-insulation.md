@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/design/panel-sound-insulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Predicting Panel Sound Insulation (mass law, coincidence, double walls)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/
+
+# Predicting Panel Sound Insulation
 
 A laboratory test measures the sound reduction index $R$ of a finished element;
 this page instead **predicts** $R(f)$ from the physical properties of the
@@ -9,17 +11,87 @@ airborne insulation of a single panel (the mass law and the coincidence dip),
 the double wall (its mass-spring-mass resonance), the transmission through slits
 and apertures that caps any real construction, the radiation efficiency of a
 bending plate, and the point mobilities that set the vibrational power a
-structure absorbs. The measured counterparts these predictions feed live in
-[Predicting Sound Insulation (EN 12354)](insulation-prediction.md) and
-[Field Insulation Measurement (ISO 16283)](../insulation/insulation-field.md).
+structure absorbs. Beside those it carries three shortcuts and special cases the
+same sources give: the **plateau method**, a hand estimate of a single panel's
+whole curve from a table of materials (Norton 3.9.1); the **orthotropic panel**,
+where a corrugated or ribbed sheet has two critical frequencies and therefore a
+coincidence *range* instead of a dip (Vigran 6.5.3); and the **wall-tie bridge**
+that limits a masonry cavity wall whatever its leaves are worth (Hopkins
+4.3.5.4). The measured counterparts these predictions feed live in
+[Predicting Sound Insulation (EN 12354)](insulation-prediction.md)
+and [Field Insulation Measurement (ISO 16283)](../insulation/insulation-field.md).
+
+**A note on two symbols before the formulae start.** The sound reduction index
+$R$ of the European standards and the transmission loss $TL$ of the North
+American literature this page follows are the *same quantity*,
+$TL \equiv R = -10\lg\tau$; the page keeps each source's own symbol so its
+formulae can be checked against the printed text, which is why the results expose
+`transmission_loss` and rate it as $R_\mathrm{w}$. Likewise, this page writes the mass per
+unit area $m''$, which is Bies's and Hopkins's notation for the $m'$ used
+throughout the ISO 12354 guides; $m$ alone is reserved elsewhere on the site for
+the air power-attenuation coefficient of the reverberation formulae, in 1/m.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Four panels: the single-panel mass law with its coincidence dip, the double wall with the mass-spring-mass resonance and cavity gain, the plate radiation efficiency rising to unity above the critical frequency, and a composite wall whose 1 % open slit caps R at the open-area limit" width="92%"></picture>
+
+*The four models of this page as a map, each panel a section below. Top left,
+the single leaf: 6 dB per octave until Sharp's coincidence dip, 11.9 dB under
+the mass law in the 2.5 kHz band. Top right, splitting the same 24 kg/m² in
+two: 3.4 dB **worse** than one leaf at the 89 Hz mass-spring resonance and
+47.7 dB better at 5 kHz. Bottom left, radiation efficiency: 0.011 at 100 Hz,
+2.61 at coincidence, and only slowly back towards 1. Bottom right, the leak
+that ends the argument: 1 % of the area left open holds $R$ at 20.0 dB no
+matter what the wall is worth.*
+
+<details>
+<summary>Show the code for the concept figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import building, vibration
+
+bands = np.array([50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float)
+fig, ax = plt.subplots(2, 2, figsize=(12, 9))
+
+bp = vibration.plate_bending_stiffness(6.2e10, 0.006, 0.24)
+fc = vibration.coincidence_frequency(15.0, bp)
+ml = building.mass_law_transmission_loss(bands, 15.0, incidence="field")
+sp = building.single_panel_transmission_loss(bands, 15.0, critical_frequency=fc, loss_factor=0.024)
+ax[0, 0].semilogx(bands, ml, "--", label="field-incidence mass law")
+ax[0, 0].semilogx(bands, sp.transmission_loss, "-o", ms=3, label="single panel R (Sharp)")
+ax[0, 0].axvline(fc, ls=":", color="r"); ax[0, 0].set_title("Single panel")
+
+dw = building.double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
+ax[0, 1].semilogx(bands, building.mass_law_transmission_loss(bands, 24.0), "--", label="single leaf")
+ax[0, 1].semilogx(bands, dw.transmission_loss, "-o", ms=3, label="double wall")
+ax[0, 1].axvline(building.mass_spring_mass_resonance(12.0, 12.0, 0.075), ls=":", color="r")
+ax[0, 1].set_title("Double wall")
+
+sig = vibration.radiation_efficiency(bands, 1.5, 1.25, fc)
+ax[1, 0].loglog(bands, sig.radiation_efficiency, "-o", ms=3, label=r"$\sigma(f)$")
+ax[1, 0].axhline(1.0, ls=":"); ax[1, 0].set_title("Radiation efficiency")
+
+wall = sp.transmission_loss
+comp = [float(building.composite_transmission_loss([0.99, 0.01], [w, 0.0])) for w in wall]
+ax[1, 1].semilogx(bands, wall, "-o", ms=3, label="solid wall")
+ax[1, 1].semilogx(bands, comp, "-s", ms=3, label="wall + 1 % slit")
+ax[1, 1].axhline(20.0, ls=":"); ax[1, 1].set_title("Composite with aperture")
+
+for a in ax.flat:
+    a.set_xlabel("Frequency [Hz]"); a.legend(fontsize=8); a.grid(alpha=0.3)
+fig.suptitle("Theoretical panel sound insulation")
+fig.tight_layout(); plt.show()
+```
+
+</details>
 
 ## Single panel: the mass law and coincidence (Bies 7.2)
 
 A limp, non-stiff panel transmits sound by being driven bodily by the incident
-pressure. The **normal-incidence mass law** (Bies Eq. 7.40) and its diffuse-field
-form (Eq. 7.42) are
+pressure; the heavier it is and the higher the frequency, the more it resists.
+The **normal-incidence mass law** (Bies Eq. 7.40) and its diffuse-field form
+(Eq. 7.42) are
 
 $$
 TL_0 = 10 \log_{10}\!\left[ 1 + \left(\frac{\pi f\, m''}{\rho_0 c_0}\right)^2 \right],
@@ -27,18 +99,25 @@ TL_0 = 10 \log_{10}\!\left[ 1 + \left(\frac{\pi f\, m''}{\rho_0 c_0}\right)^2 \r
 $$
 
 with $m''$ the mass per unit area and $\Delta_{\text{band}} = 5.5$ dB (one-third
-octave) or $4.0$ dB (octave). The mass law rises **6 dB per octave and 6 dB per
-doubling of mass**. At the **coincidence (critical) frequency** (Bies Eq. 7.3)
+octave) or $4.0$ dB (octave). Above the argument's knee the mass law rises
+**6 dB per octave and 6 dB per doubling of mass**, the two facts every
+insulation calculation rests on.
+
+A real panel is also stiff, so at the **coincidence (critical) frequency**
+(Bies Eq. 7.3)
 
 $$
-f_\mathrm{c} = \frac{c_0^2}{2\pi}\sqrt{\frac{m''}{B'}} = \frac{0.55\, c_0^2}{c_\mathrm{L}\, h},
+f_\mathrm{c} = \frac{c_0^2}{2\pi}\sqrt{\frac{m''}{B'}}
+    = \frac{0.55\, c_0^2}{c_\mathrm{L}\, h},
 $$
 
-the free bending wavelength matches the trace wavelength and the panel goes
-transparent: the **coincidence dip**. Sharp's method holds the field-incidence
-mass law up to $f_\mathrm{c}/2$, drops through a straight line in $\log f$, and from $f_\mathrm{c}$
-upward follows Eq. 7.44 with the loss factor $\eta$; the dip sits at Bies
-design-chart point B, $TL = 20\log_{10}(f_\mathrm{c} m'') + 10\log_{10}\eta - 44$.
+the free bending wavelength matches the trace wavelength of the incident sound
+and the panel goes transparent: the **coincidence dip**. Sharp's method holds
+the field-incidence mass law up to $f_\mathrm{c}/2$, drops through a straight line in
+$\log f$, and from $f_\mathrm{c}$ upward follows (Eq. 7.44)
+$TL = 10\log_{10}[1 + (\pi f m''/\rho_0 c_0)^2] + 10\log_{10}(2\eta f/\pi f_\mathrm{c})$ with the loss
+factor $\eta$. The dip sits at Bies design-chart point B,
+$TL = 20\log_{10}(f_\mathrm{c} m'') + 10\log_{10}\eta - 44$.
 
 The whole section in one sketch: a diffuse field drives a single leaf, and the
 predicted $R(f)$ climbs with the mass law until the coincidence dip. A 12.5 mm
@@ -66,7 +145,24 @@ res.plot()   # predicted R(f) with the critical frequency marked (needs matplotl
 ```
 
 The predicted spectrum plugs straight into the ISO 717-1 rating through
-`res.rating()`, and into EN 12354 as the "predicted" element $R$.
+`res.rating()`, and into EN 12354 as the "predicted" element $R$ where the
+standard would otherwise demand a laboratory measurement.
+
+**Which loss factor is $\eta$?** The **total** loss factor of the element *as
+mounted*, not the material's internal loss factor. In a mounted element the total
+is internal plus radiation plus the losses at the edges, and for a heavy element
+in a test opening the edge term dominates: ISO 12354-1 Annex C gives
+$\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485\sqrt{f}) \approx 0{,}01 +
+m'/(485\sqrt{f})$ for elements below 800 kg/m², reachable without leaving the
+library as `laboratory_total_loss_factor`. For this 15 kg/m² pane that estimate
+is 0,011 at 500 Hz, barely above the internal value; for a 484 kg/m² concrete
+floor it is 0,055, five times the material figure. The measured route is the
+structural reverberation time and $\eta = 2{,}2/(fT_\mathrm{s})$, the same quantity the
+[ISO 10848](../insulation/flanking-lab.md) and
+[EN 15657](structure-borne-power.md) guides measure.
+The stake is worth knowing: the dip depth carries $10\lg\eta$, so a factor of
+three in $\eta$ moves the coincidence region by 4,8 dB and changes nothing below
+$f_\mathrm{c}/2$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/single_panel_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/single_panel_rating.svg" alt="Predicted sound reduction index of a 6 mm float glass pane per one-third-octave band against the shifted ISO 717-1 reference curve, with the coincidence dip at about 2100 Hz marked, the unfavourable deviations shaded and the Rw rating annotated" width="80%"></picture>
 
@@ -108,7 +204,7 @@ ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 alpha=0.3, label="unfavourable deviations")
 ax.axvline(fc, ls=":", color="tab:green", label=f"fc = {fc:.0f} Hz")
 ax.set_xlabel("Frequency [Hz]")
-ax.set_ylabel("Sound reduction index R [dB]")
+ax.set_ylabel(r"Sound reduction index $R$ (transmission loss $\mathrm{TL}$) [dB]")
 ax.set_title(f"Rw = {w.rating} dB  (C={w.c:+d}; Ctr={w.ctr:+d})")
 ax.legend()
 plt.show()
@@ -120,15 +216,14 @@ The clip below watches coincidence happen in a 2D
 [elastic FDTD field](../../simulation/elastic-waves.md): a 10 mm
 steel plate immersed in air, driven by a sustained plane wave at 45 degrees,
 with both frequencies picked from the library's `coincidence_frequency`. At
-$f_\mathrm{c}/2 = 602$ Hz the measured transmission lands on the oblique mass law; at
-$2f_\mathrm{c} = 2410$ Hz the 45-degree trace equals $\lambda_\mathrm{B}$ exactly and the
-trace-matched plate re-radiates a 45-degree beam that grows along the plate,
-pinning the transmitted level at the $f_\mathrm{c}/2$ figure even though the mass law
-demands 12 dB
-more blocking at four times the frequency. The air drives the heavy steel so
-weakly that the resonant bending wave needs tens of metres of illuminated
-plate to build up fully, which is why a real coincidence dip, not total
-transparency, is what measurements show.
+`fc/2` = 602 Hz the measured transmission lands on the oblique mass law; at
+`2 fc` = 2410 Hz the 45-degree trace equals the bending wavelength exactly
+and the trace-matched plate re-radiates a 45-degree beam that grows along the
+plate, pinning the transmitted level at the `fc/2` figure even though the
+mass law demands 12 dB more blocking at four times the frequency. The air
+drives the heavy steel so weakly that the resonant bending wave needs tens of
+metres of illuminated plate to build up fully, which is why a real
+coincidence dip, not total transparency, is what measurements show.
 
 What the plate lets through is about 47 dB under the incident wave, so on the
 colour scale the standing wave above the plate sets, the transmitted field
@@ -137,9 +232,7 @@ with the display gain printed on them (x150, that is +44 dB); the gain is the
 same on the two so the panels stay comparable, and the level annotations are
 the measured, physical ones.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.gif" alt="Animation: two side-by-side 2D elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees; at 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law, while at 2410 Hz, twice the coincidence frequency, the trace wavelength matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.webm)
+**Video:** [Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_coincidence.webm): Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated.
 
 ### Quick estimates: the plateau method (Norton 3.9.1)
 
@@ -148,13 +241,12 @@ hand for decades. The **plateau method** (Norton & Karczub 2003, Section 3.9.1,
 after Watters) approximates the whole field-incidence curve of a single panel
 from three numbers per material, tabulated in `PLATEAU_MATERIALS` from Norton's
 Table 3.1: the surface density per millimetre of thickness, the height of the
-coincidence plateau in decibels, and the frequency ratio $B/A$ that sets its
+coincidence plateau in decibels, and the frequency ratio `B/A` that sets its
 width.
 
 The construction has three parts:
 
-1. the **field-incidence mass law**
-   $TL = 10\log_{10}(1 + (\pi f m''/\rho_0 c_0)^2) - 5\ \text{dB}$
+1. the **field-incidence mass law** `TL = 10 lg(1 + (π f m''/ρ₀c₀)²) − 5 dB`
    (Norton Eqs. 3.104 and 3.106), rising 6 dB per octave;
 2. a horizontal **coincidence plateau** at the tabulated height, with point
    **A** where the mass-law line reaches it;
@@ -165,7 +257,7 @@ It needs neither the bending stiffness nor the loss factor - the tabulated
 plateau absorbs both - and it assumes a diffuse field on both sides of a panel
 whose length and width are at least twenty times its thickness.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plateau_transmission_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plateau_transmission_loss.svg" alt="Transmission loss in decibels against one-third-octave bands from 100 hertz to 10 kilohertz for a 6 mm float glass panel, comparing two curves. Both rise together at 6 decibels per octave from about 15.5 decibels at 100 hertz to 25.5 decibels at 315 hertz. Above that the physical model keeps rising to a peak near 35.5 decibels at 1 kilohertz, dips to about 28.5 decibels at the 2033 hertz critical frequency marked by a dotted vertical line, and then climbs steeply to 49 decibels at 10 kilohertz, while the plateau estimate flattens at the tabulated 27 decibel coincidence height across a shaded band from point A at 374 hertz to point B at 3742 hertz and then recovers at 10 decibels per octave to 41 decibels" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plateau_transmission_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plateau_transmission_loss.svg" alt="Transmission loss in decibels against one-third-octave bands from 100 hertz to 10 kilohertz for a 6 mm float glass panel, comparing two curves. Both rise together at 6 decibels per octave from about 15.5 decibels at 100 hertz to 25.5 decibels at 315 hertz. Above that the physical model keeps rising to a peak near 35.5 decibels at 1 kilohertz, dips to about 28.5 decibels at the 2033 hertz critical frequency marked by a dotted vertical line, and then climbs steeply to 49 decibels at 10 kilohertz, while the plateau estimate flattens at the tabulated 27 decibel coincidence height across a shaded band from point A at 374 hertz to point B at 3742 hertz and then recovers at 10 decibels per octave to 41 decibels." width="88%"></picture>
 
 *The two curves are the same line below point A. Above it the plateau estimate
 replaces the entire coincidence region with one flat value, which is exactly
@@ -199,8 +291,7 @@ plt.show()
 </details>
 
 A worked check against the book: an 8 m x 3 m solid brick wall 110 mm thick at
-2.1 kg/m² per mm ($m'' = 231\ \text{kg/m}^2$) gives 35.8 dB in the 63 Hz
-octave, on the
+2.1 kg/m² per mm ($m'' = 231\ \text{kg/m}^2$) gives 35.8 dB in the 63 Hz octave, on the
 mass-law line, then the brick plateau of 37 dB across the 125 Hz and 250 Hz
 octaves, then 10 dB per octave above point B - Norton's printed answer to his
 problem 3.11 exactly, band for band, in the two regions the construction fixes
@@ -250,8 +341,8 @@ print(glass.table, round(by_row.plateau_start), round(by_row.plateau_end))
 
 The physical model has its own Norton-flavoured variant for the region above
 coincidence: `coincidence_model="cremer"` replaces Sharp's Eq. 7.44 with
-Cremer's empirical $TL = TL_0 + 10\log_{10}(f/f_\mathrm{c} - 1) + 10\log_{10}\eta - 2\ \text{dB}$
-(Norton Eq. 3.110), and runs the mass law right up to $f_\mathrm{c}$ with no interpolated
+Cremer's empirical `TL = TL₀ + 10 lg(f/fc − 1) + 10 lg η − 2 dB`
+(Norton Eq. 3.110), and runs the mass law right up to `fc` with no interpolated
 bridge. Both rise at about 10 dB per octave far above coincidence; they differ
 in how they leave the dip.
 
@@ -412,7 +503,8 @@ ax.semilogx(bands, flat.transmission_loss, "-o", ms=4, label="flat sheet")
 ax.semilogx(bands, corrugated.transmission_loss, "-s", ms=4,
             label="corrugated, integral")
 ax.semilogx(bands, heckl.transmission_loss, "--", label="Heckl approximation")
-ax.set(xlabel="Frequency [Hz]", ylabel="Transmission loss TL [dB]")
+ax.set(xlabel="Frequency [Hz]",
+       ylabel=r"Sound reduction index $R$ (transmission loss $\mathrm{TL}$) [dB]")
 ax.legend()
 plt.show()
 ```
@@ -428,17 +520,20 @@ sections *between* the ribs rather than to any coincidence effect.
 
 ## Double wall: the mass-spring-mass resonance (Bies 7.2.6)
 
-Two leaves separated by a cavity behave as a mass-spring-mass system. Below its
-**resonance** (Bies Eq. 7.62, Hopkins Eq. 4.73)
+Two leaves separated by a cavity behave as a mass-spring-mass system, with the
+cavity air (or fill) the spring. Below its **resonance** (Bies Eq. 7.62,
+Hopkins Eq. 4.73)
 
 $$
 f_0 = \frac{1}{2\pi}\sqrt{\frac{s''\,(m_1 + m_2)}{m_1\, m_2}}
     = 60\sqrt{\frac{m_1 + m_2}{m_1\, m_2\, d}}\quad\text{(empty air gap)},
 $$
 
-the pair follows the mass law of the *combined* mass; above it the two mass laws
-add, boosted by the cavity, until $f_\mathrm{l} = c_0/(2\pi d)$ where the boost saturates
-at 6 dB (Eq. 7.64). A porous fill lowers $f_0$.
+the pair moves as one and follows the mass law of the *combined* mass; above it
+the two mass laws add, boosted by the cavity, until the limiting frequency
+$f_\mathrm{l} = c_0/(2\pi d)$ where the boost saturates at 6 dB (Eq. 7.64). A porous
+fill (any [`PorousMediumResult`](../../materials/absorbers/porous-absorbers.md)) softens
+the cavity and lowers $f_0$.
 
 ```python
 from phonometry import building
@@ -469,7 +564,7 @@ own cross-section with `dw.plot_geometry()`.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/double_wall_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/double_wall_geometry.svg" alt="To-scale cross-section of a lightweight double wall: two grey plasterboard leaves of 8.8 kg/m2 each, drawn 12.6 mm thick, separated by the 100 mm cavity, the incident-sound arrow arriving from the left and the mass-spring-mass resonance f0 = 90 Hz annotated in the cavity" width="80%"></picture>
 
 *The whole model in one section: the two thin leaves are the masses, the
-100 mm air gap is the spring, and $f_0 = 90$ Hz is where the dip of every
+100 mm air gap is the spring, and $f_0$ = 90 Hz is where the dip of every
 double-wall curve sits.*
 
 <details>
@@ -503,7 +598,10 @@ up, and they open a structure-borne path from one leaf to the other.
 
 *Left: a soft tie rolls the structure-borne coupling off as $1/f^3$, a stiff
 one stays on the rigid ceiling for another two octaves. Right: the same ties
-lift the resonance from 26 Hz to 50 Hz, extending the combined-mass branch.*
+lift the resonance from 26 Hz to 50 Hz, extending the combined-mass branch.
+Both panels are built by the two snippets of this section: the right one by
+`double_wall_transmission_loss` with and without `tie_stiffness_per_area`, the
+left one by `wall_tie_coupling_loss_factor(...).plot()`.*
 
 **The tie as a spring (Hopkins Eq. 4.89).** A tie is characterised by a single
 number, its dynamic stiffness $s_{X\,\text{mm}}$ at a cavity width $X$,
@@ -605,17 +703,18 @@ $$
 R = -10\log_{10}\!\left( \frac{1}{\sum_n S_n} \sum_n S_n\, 10^{-R_n/10} \right),
 $$
 
-so a bare opening of relative area $S_\mathrm{a}/S$ caps the composite at $10\log_{10}(S/S_\mathrm{a})$:
-a 1 % opening can never do better than 20 dB, whatever the wall.
+so a bare opening of relative area $S_\mathrm{a}/S$ caps the composite at
+$10\log_{10}(S/S_\mathrm{a})$; a 1 % opening can never do better than 20 dB, whatever the
+wall.
 
 ```python
 from phonometry import building
 
-# A 2 mm x 100 mm-deep slit: transmission peaks at the depth's half-wavelength
-# resonances.
-print(building.slit_resonance_frequencies(0.1, 0.002, n_orders=2).round().tolist())   # [~1500, ~3100]
+# A 2 mm x 100 mm-deep slit: its transmission peaks at the half-wavelength
+# resonances of the slit depth.
+print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, n_orders=2).round().tolist())  # [~1500, ~3100]
 
-# A wall of Rw = 50 dB with 1 % of its area open as a slit is capped:
+# A wall of Rw = 50 dB with 1 % of its area left open as a slit is capped:
 print(round(float(building.composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))   # 20.0
 ```
 
@@ -638,7 +737,7 @@ import numpy as np
 from phonometry import building
 
 f = np.geomspace(100.0, 5000.0, 200)
-result = building.slit_transmission_coefficient(f, 0.002, 0.1)
+result = building.slit_transmission_coefficient(f, width_m=0.002, depth=0.1)
 
 # One line: the wall section with the slit to scale.
 result.plot_geometry()
@@ -648,8 +747,7 @@ plt.show()
 </details>
 
 The clip below puts the two regimes side by side in a 2D FDTD field: a plane
-front meets a rigid 0.10 m wall with a 25 mm slit ($\lambda/20$ at 686 Hz)
-and with a
+front meets a rigid 0.10 m wall with a 25 mm slit (λ/20 at 686 Hz) and with a
 0.50 m opening (one wavelength). The narrow slit re-radiates what it swallows
 as a cylindrical wave, the Gomperts transmission of the model annotated; the
 wavelength-sized opening lets the front through nearly intact and casts
@@ -660,30 +758,91 @@ behind the wall rides the display gain each panel prints (x10, that is
 maps below keep one shared scale, which is where the two openings are
 compared level for level.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_aperture_slit_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_aperture_slit.gif" alt="Animation: a 686 Hz plane wave in a 2D FDTD field hits a rigid wall with a 25 mm slit and, in a second panel, a 0.50 m opening; the narrow slit re-radiates a cylindrical wave into the half space behind, drawn with an annotated ten-fold display gain (+20 dB) and with the Gomperts transmission coefficient of 0.55 annotated, while the wavelength-sized opening passes a beam with sharp-edged shadows at unit gain, both RMS maps on the same colour scale" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_aperture_slit.webm)
+**Video:** [Sound through a wall aperture in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_aperture_slit.webm): A 686 Hz plane wave in a 2D FDTD field hits a rigid wall with a 25 mm slit and, in a second panel, a 0.50 m opening. The narrow slit re-radiates a cylindrical wave into the half space behind, drawn with an annotated ten-fold display gain (+20 dB) and with the Gomperts transmission coefficient of 0.55 annotated; the wavelength-sized opening passes a beam with sharp-edged shadows at unit gain, both RMS maps on the same colour scale.
 
 ## Radiation efficiency of a bending plate (Hopkins 2.9)
 
-The airborne power a vibrating plate radiates, divided by the characteristic
-impedance of air $\rho_0 c_0$, the plate area $S$ and its mean-square velocity
-$\langle v^2 \rangle$, is its **radiation efficiency**
-$\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$ (Hopkins Eq. 2.198), the
-radiation factor $\varepsilon$ that [Sound Power from Surface
-Vibration](../../devices/emission/vibration-sound-power.md) (ISO 7849) otherwise
-takes as a measured input. The divisor is the power a large baffled piston of
-the same area and the same mean-square velocity would radiate, so $\sigma = 1$
-means "as efficient as a piston". Below the critical frequency the plate
-radiates weakly; above it $\sigma \to 1$ (Leppington/Maidanik, Eqs 2.227-2.230):
-$\sigma = (1 - f_\mathrm{c}/f)^{-1/2}$ for $f > f_\mathrm{c}$.
+The airborne power a vibrating plate actually radiates, divided by the
+characteristic impedance of air $\rho_0 c_0$, the plate area $S$ and its
+mean-square velocity $\langle v^2 \rangle$ averaged over time and surface, is
+its **radiation efficiency** $\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$
+(Hopkins Eq. 2.198), the radiation factor $\varepsilon$ that [Sound Power from
+Surface Vibration](../../devices/emission/vibration-sound-power.md)
+(ISO 7849) otherwise takes as a measured input. The divisor is the power a large
+baffled piston of the same area and the same mean-square velocity would radiate,
+so $\sigma = 1$ means "as efficient as a piston". And, as the numbers below
+show, a plate can beat that near coincidence.
+
+There are three regimes, not two (Leppington/Maidanik, Hopkins
+Eqs 2.227-2.230). **Well below $f_\mathrm{c}$** the bending wavelength is shorter than
+the acoustic one, adjacent half-waves cancel each other's volume flow, and only
+the uncancelled strips at the edges and corners radiate. That is why the
+calculation needs the plate's two dimensions and its edge condition: a clamped
+edge radiates more than a simply supported one, and a plate with baffles
+perpendicular to its edges more than one flush in an infinite baffle: the
+`boundary` and `baffle` arguments select between them. **Around $f_\mathrm{c}$** the
+trace wavelength of the bending wave matches the acoustic wavelength, the
+Leppington form $(1 - f_\mathrm{c}/f)^{-1/2}$ diverges and is capped by the
+at-coincidence expression; the pane below peaks at $\sigma = 2.6$ in the 2 kHz
+band. **Only far above $f_\mathrm{c}$** does $\sigma$ settle towards 1: a third of an
+octave past coincidence this pane is still at 1.74.
+
+$$
+\sigma = \frac{1}{\sqrt{1 - f_\mathrm{c}/f}} \quad (f > f_\mathrm{c}), \qquad
+\sigma \to 1 \quad (f \gg f_\mathrm{c}) .
+$$
+
+Two consequences are worth carrying away. A *small* plate is a relatively
+better radiator than a large one of the same material below $f_\mathrm{c}$, because the
+radiating edge strip is a larger fraction of it: the 1.5 × 1.25 m pane below
+gives $\sigma = 0.011$ at 100 Hz, a 0.5 × 0.4 m pane of the same glass 0.034.
+And the coincidence dip in $R$ and the coincidence peak in $\sigma$ are the
+same event seen from the two sides: the same $\sigma$ reappears in the
+transmission factor of the detailed EN 12354 model and as the radiation factor
+ISO 7849 measures.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_panels_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_panels.svg" alt="Left: radiation efficiency against frequency for a 1.5 by 1.25 metre glass pane and a 0.5 by 0.4 metre pane of the same glass, both with the critical frequency and the unity line marked, showing the smaller pane radiating three times better below coincidence. Right: the baffled simply supported plate the model assumes, drawn to scale" width="92%"></picture>
+
+*Three regimes on one axis. Below $f_\mathrm{c}$ the two panes differ by a factor of three
+in $\sigma$ although they are the same glass: the smaller one radiates
+relatively better, because its uncancelled edge strip is a larger fraction of it.
+At coincidence both peak above unity, the 1.5 × 1.25 m pane at 2.61 in the 2 kHz
+band that straddles $f_\mathrm{c}$ = 2 107 Hz. Above it $\sigma$ falls back towards 1 only
+slowly: still 1.74 one third of an octave past coincidence and 1.32 at 5 kHz. The
+right-hand panel is the geometry the model assumes and the reason it needs two
+dimensions and an edge condition.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+sig_big = vibration.radiation_efficiency(bands, 1.5, 1.25, fc)
+sig_small = vibration.radiation_efficiency(bands, 0.5, 0.4, fc)
+
+fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(11, 4.5))
+ax_l.loglog(bands, sig_big.radiation_efficiency, "-o", ms=3, label="1.5 x 1.25 m")
+ax_l.loglog(bands, sig_small.radiation_efficiency, "-s", ms=3, label="0.5 x 0.4 m")
+ax_l.axhline(1.0, ls=":")
+ax_l.axvline(fc, ls=":", color="r")
+ax_l.set(xlabel="Frequency [Hz]", ylabel=r"Radiation efficiency $\sigma$")
+ax_l.legend()
+
+# One line — the baffled plate the model assumes:
+sig_big.plot_geometry(ax=ax_r)
+plt.show()
+```
+
+</details>
 
 ```python
 from phonometry import emission, vibration
 
 # The 6 mm glass pane (1.5 x 1.25 m) of the single-panel example above.
 sig = vibration.radiation_efficiency(bands, 1.5, 1.25, fc)
-print(sig.radiation_efficiency[bands == 2000].round(2))    # ~2.5 (peak at coincidence)
+print(sig.radiation_efficiency[bands == 2000].round(2))
+# 2.6, the coincidence peak: the plate out-radiates a piston near fc
 
 # Feed the prediction straight into ISO 7849 as the radiation factor:
 lw = emission.sound_power_from_vibration(velocity_level=80.0, area=1.875,
@@ -697,11 +856,17 @@ sig.plot()   # sigma(f) with the coincidence peak (needs matplotlib)
 
 The vibrational power a point force injects is $W = \tfrac12 |F|^2\,\mathrm{Re}\{Y\}$
 (Cremer Eq. 5.23), so the driving-point **mobility** $Y$ (the reciprocal of the
-impedance) sets how much energy a structure absorbs. An infinite thin plate is a
-pure resistance $Z = 8\sqrt{B'\,m''}$ (real, frequency independent); an infinite
-beam has $Y = (1-\mathrm{j})/(4 m' c_\mathrm{B})$ (45 degrees, falling as
-$\omega^{-1/2}$). They supply the receiver mobility EN 12354-5 needs when no
-measurement exists.
+impedance) sets how much energy a structure absorbs. For infinite structures
+these are closed forms: an infinite thin plate is a pure resistance
+$Z = 8\sqrt{B'\,m''}$ (real, frequency independent), while an infinite beam has
+$Y = (1-\mathrm{j})/(4 m' c_\mathrm{B})$ (45 degrees, falling as $\omega^{-1/2}$). They
+supply the receiver mobility EN 12354-5 needs when no measurement exists.
+`infinite_plate_point_mobility` and `infinite_beam_point_mobility` return the
+same quantities bundled as an ISO 7626 `MobilityResult`, so they plot, convert
+and report like any measured FRF; the
+[mechanical mobility guide](../../vibration/structural/mechanical-mobility.md#5-reference-mobilities-when-nothing-has-been-measured)
+reads them against the SDOF resonator and adds the moment and longitudinal-rod
+cases.
 
 ```python
 from phonometry import vibration
@@ -712,54 +877,7 @@ w = vibration.injected_power(force_n=10.0, mobility=1.0 / z_plate)
 print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' m''))
 ```
 
-<details>
-<summary>Show the code for the concept figure</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import building, vibration
-
-bands = np.array([50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-                  1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float)
-fig, ax = plt.subplots(2, 2, figsize=(12, 9))
-
-bp = vibration.plate_bending_stiffness(6.2e10, 0.006, 0.24)
-fc = vibration.coincidence_frequency(15.0, bp)
-ml = building.mass_law_transmission_loss(bands, 15.0, incidence="field")
-sp = building.single_panel_transmission_loss(bands, 15.0, critical_frequency=fc, loss_factor=0.024)
-ax[0, 0].semilogx(bands, ml, "--", label="field-incidence mass law")
-ax[0, 0].semilogx(bands, sp.transmission_loss, "-o", ms=3, label="single panel R (Sharp)")
-ax[0, 0].axvline(fc, ls=":", color="r"); ax[0, 0].set_title("Single panel")
-
-dw = building.double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
-ax[0, 1].semilogx(bands, building.mass_law_transmission_loss(bands, 24.0), "--", label="single leaf")
-ax[0, 1].semilogx(bands, dw.transmission_loss, "-o", ms=3, label="double wall")
-ax[0, 1].axvline(building.mass_spring_mass_resonance(12.0, 12.0, 0.075), ls=":", color="r")
-ax[0, 1].set_title("Double wall")
-
-sig = vibration.radiation_efficiency(bands, 1.5, 1.25, fc)
-ax[1, 0].loglog(bands, sig.radiation_efficiency, "-o", ms=3, label=r"$\sigma(f)$")
-ax[1, 0].axhline(1.0, ls=":"); ax[1, 0].set_title("Radiation efficiency")
-
-wall = sp.transmission_loss
-comp = [float(building.composite_transmission_loss([0.99, 0.01], [w, 0.0])) for w in wall]
-ax[1, 1].semilogx(bands, wall, "-o", ms=3, label="solid wall")
-ax[1, 1].semilogx(bands, comp, "-s", ms=3, label="wall + 1 % slit")
-ax[1, 1].axhline(20.0, ls=":"); ax[1, 1].set_title("Composite with aperture")
-
-for a in ax.flat:
-    a.set_xlabel("Frequency [Hz]"); a.legend(fontsize=8); a.grid(alpha=0.3)
-fig.suptitle("Theoretical panel sound insulation")
-fig.tight_layout(); plt.show()
-```
-
-</details>
-
-## Function parameters
-
-Every argument of this page in one place, with its units and its admissible
-range:
+### Function parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -784,94 +902,91 @@ range:
 and hole functions return an `ApertureTransmissionResult`
 (`transmission_coefficient`, `transmission_loss`, `.plot()`);
 `radiation_efficiency` a `RadiationEfficiencyResult` (`radiation_efficiency`,
-`radiation_index`, `.plot()`).
-
-**Where the closed forms stop being valid.** Nothing in the code refuses an
-argument outside these ranges, so the three bounds below are the reader's to
-enforce. Sharp's coincidence method is stated for frequencies above
-$1.5\times$ the first panel resonance. Gomperts' slit is inviscid and holds
-for $w < 0.3\lambda$; a narrower slit at a higher frequency leaves the model
-behind. The plate radiation efficiency is Leppington's "method no. 1", one
-of several in that paper and not interchangeable with the others.
+`radiation_index`, `.plot()`). The predictions carry the modelling caveats of
+their sources (Sharp's method above $1.5\times$ the first panel resonance;
+Gomperts' inviscid slit valid for $w < 0.3\lambda$; Leppington "method no. 1").
+Nothing in the code refuses an argument outside the first two bounds, so they
+are the reader's to enforce: a slit of a given width leaves Gomperts' model as
+the frequency rises and $0.3\lambda$ shrinks towards $w$.
 
 ## What this guide covers
 
-**Covered.** The closed forms themselves, not the measurements behind them:
-Bies' §7.2 mass law and Sharp's coincidence method (Eqs 7.40/7.42/7.44) for a
-single panel; the double-wall mass-spring-mass resonance with its saturating
-cavity boost (Eqs 7.62-7.64); Hopkins' Gomperts slit and the Wilson & Soroka
-circular hole with the area-weighted composite sum (Eq. 4.92); the
-Leppington/Maidanik plate radiation efficiency (Eqs 2.227-2.230); and the
-Cremer Table 5.1 point impedances and mobilities of infinite plates and beams
-with the injected-power relation, via `single_panel_transmission_loss`,
-`double_wall_transmission_loss`, `slit_transmission_coefficient`,
-`composite_transmission_loss`, `radiation_efficiency`,
-`infinite_plate_impedance`, `infinite_beam_mobility` and `injected_power`.
-Vigran's orthotropic chapter joins them: the coincidence *range* of a ribbed or
-corrugated panel and its flattened $R$ by the diffuse-field integral or Heckl's
-closed form (Eqs 6.107-6.113), the Timoshenko equivalent stiffnesses of a
-sinusoidal corrugation (Eq. 3.115) and the orthotropic plate eigenfrequency
-(Eq. 3.113). Masonry cavity walls add Hopkins' wall-tie bridge
-(Sections 3.11.3.2 and 4.3.5.4.1): the Table A4 dynamic stiffnesses, the tie
-array in parallel with the cavity air (Eq. 4.89, through the
-`tie_stiffness_per_area` keyword) and the point-connection coupling loss factor
-with a linear-spring connector (Eqs 4.87, 4.88).
+- **Covered.** The source formulae themselves: Bies' §7.2 mass law and Sharp's coincidence
+  method (Eqs 7.40/7.42/7.44) for a single panel, the double-wall
+  mass-spring-mass resonance and its saturating cavity boost (Eqs 7.62-7.64),
+  Hopkins' Gomperts slit and Wilson & Soroka circular-hole transmission
+  coefficients with the area-weighted composite sum (Eq. 4.92), the
+  Leppington/Maidanik plate radiation efficiency (Eqs 2.227-2.230), and the
+  Cremer Table 5.1 point impedances and mobilities of infinite plates and beams
+  with the injected-power relation, via `single_panel_transmission_loss`,
+  `double_wall_transmission_loss`, `slit_transmission_coefficient`,
+  `composite_transmission_loss`, `radiation_efficiency`,
+  `infinite_plate_impedance`, `infinite_beam_mobility` and `injected_power`.
+  Vigran's orthotropic chapter joins them: the coincidence range of a ribbed or
+  corrugated panel and its flattened transmission loss by either the
+  diffuse-field integral or Heckl's closed form (Eqs 6.107-6.113), the
+  Timoshenko equivalent stiffnesses of a sinusoidal corrugation (Eq. 3.115) and
+  the orthotropic plate eigenfrequency (Eq. 3.113), via
+  `orthotropic_transmission_loss`, `orthotropic_critical_frequencies`,
+  `corrugated_plate_stiffness`, `corrugated_plate_mass_factor` and
+  `orthotropic_plate_resonance`. Masonry cavity walls add the wall-tie bridge of
+  Hopkins' Sections 3.11.3.2 and 4.3.5.4.1: the Table A4 dynamic stiffnesses,
+  the tie array acting in parallel with the cavity air (Eq. 4.89, reached
+  through the `tie_stiffness_per_area` keyword of `mass_spring_mass_resonance`
+  and `double_wall_transmission_loss`) and the point-connection coupling loss
+  factor with a linear-spring connector (Eqs 4.87 and 4.88), via
+  `wall_tie_stiffness`, `wall_tie_stiffness_per_area` and
+  `wall_tie_coupling_loss_factor`.
 
-**Not covered.** Every prediction stops where its source stops, and the three
-numerical bounds are stated in [Function parameters](#function-parameters)
-above: Sharp below $1.5\times$ the first panel resonance, Gomperts above
-$w = 0.3\lambda$, and Leppington's other formulations. The orthotropic models
-are infinite-panel models: below about $0.7 f_{\mathrm{c}1}$ Heckl's branch
-underestimates $R$ on small panels, and the 2 kHz to 4 kHz dip real corrugated
-cladding shows comes from resonances of the sections between the ribs, which
-neither route predicts. Only the sinusoidal corrugation has equivalent
-stiffnesses here; trapezoidal cladding needs its own, from the literature
-Vigran cites. On the wall-tie side the inputs are printed data but no published
-$R$ of a bridged masonry cavity wall is tabulated, so the per-band penalty the
-ties cause has **no numeric oracle**: only the resonance shift is anchored
-(Hopkins Fig. 4.35, 26 Hz to 50 Hz). The coupling loss factor is not fed into a
-full statistical energy analysis: combining it with the airborne path would
-need the whole room-plate-cavity-plate-room chain.
-
-## References
-
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  Section 7.2: the mass law, coincidence frequency, Sharp's single-panel method
-  and the double-wall model.
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  Section 2.9 (plate radiation efficiency) and Section 4.3.10 (slits, holes and
-  apertures, composite transmission).
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  Chapter 5, Table 5.1: the point impedances and mobilities of infinite
-  structures and the injected-power relation.
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Sections 3.7.3.3 (orthotropic plate eigenfrequencies, Eqs 3.113-3.115 after
-  Timoshenko & Woinowsky-Krieger) and 6.5.3 (orthotropic panel transmission,
-  Eqs 6.107-6.113 after Heckl 1960 and Hansen 1993).
-
-- Hopkins, C., Wilson, R., & Craik, R. J. M. (1999). Dynamic stiffness as an
-  acoustic specification parameter for wall ties used in masonry cavity walls.
-  *Applied Acoustics*, 58, 51-68.
-  [doi:10.1016/S0003-682X(98)00068-1](https://doi.org/10.1016/S0003-682X(98)00068-1).
-  The measurement behind the 50 mm rows of Hopkins' Table A4.
+- **Not covered.** Each prediction stays inside the validity range its source states, which the
+  guide flags but does not extend past: Sharp's method (and so
+  `single_panel_transmission_loss`) is not valid below about $1.5\times$ the
+  panel's first resonance, where the panel's own low-frequency modal behaviour,
+  not the mass law, governs; Gomperts' slit model holds only for a narrow slit,
+  $w < 0.3\lambda$, so a wide aperture falls outside it; and only Leppington's
+  "method no. 1" for radiation efficiency is implemented, not his other
+  published formulations. The orthotropic models are infinite-panel models on
+  the same footing: below about $0.7f_{\mathrm{c}1}$ Heckl's branch underestimates $R$ on
+  small panels, and the 2 kHz to 4 kHz dip that real corrugated cladding shows
+  comes from resonances of the panel sections between the ribs, which neither
+  route predicts. Only the sinusoidal ("wavy") corrugation has equivalent
+  stiffnesses here; trapezoidal cladding needs its own, from the literature
+  Vigran cites. The wall-tie model is on the same footing on its output side:
+  the inputs are printed data, but no published sound reduction index of a
+  bridged masonry cavity wall is tabulated, so the per-band penalty the ties
+  cause has no numeric oracle and only the resonance shift is anchored (Hopkins
+  Fig. 4.35, 26 Hz to 50 Hz). The coupling loss factor is not fed into a full
+  statistical energy analysis here; combining it with the airborne path would
+  need the whole room-plate-cavity-plate-room chain.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](insulation-prediction.md): assembles
-  predicted or measured element $R$ into the in-situ $R'_\mathrm{w}$.
+- [Predicting Sound Insulation (EN 12354)](insulation-prediction.md):
+  assembles predicted or measured element $R$ into the in-situ $R'_\mathrm{w}$.
 - [Sound Power from Surface Vibration (ISO 7849)](../../devices/emission/vibration-sound-power.md):
   consumes the predicted radiation efficiency as its radiation factor.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](../../vibration/structural/mechanical-mobility.md):
   the measured counterpart of the theoretical point mobilities.
-- [Porous and multilayer absorbers](../../materials/absorbers/porous-absorbers.md): the cavity-fill models
-  a double wall consumes.
+- [Porous and multilayer absorbers](../../materials/absorbers/porous-absorbers.md): the
+  cavity-fill models a double wall consumes.
 - API reference: [`building.prediction.panel_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](https://docs.jmrp.io/phonometry/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](https://docs.jmrp.io/phonometry/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](https://docs.jmrp.io/phonometry/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/point-mobility/).
+- Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the mass law, the coincidence dip and the transmission coefficient the panel models return.
+
+## References
+
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  Section 7.2: the mass law (Eq. 7.40/7.42), coincidence frequency (Eq. 7.3), Sharp's single-panel method (7.2.4.1) and the double-wall model (7.2.6, Eq. 7.62-7.64). ISBN 978-1-4987-2405-0.
+- **Craik, R. J. M., & Wilson, R. (1995).** Sound transmission through masonry cavity walls. *Journal of Sound and Vibration 179(1), 79-96*. https://doi.org/10.1006/jsvi.1995.0006
+  Table 1: the same tie types measured at an 85 mm cavity (butterfly 1,1 MN/m, double-triangle 4,3 MN/m), which corroborate the ordering of Table A4 but not its values, since the dynamic stiffness is defined at a given cavity width.
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+  Chapter 5, Table 5.1: the compilation of point impedances and mobilities of infinite structures (plate Z = 8 sqrt(B' m''), beam, rod) and the injected-power relation W = 0.5 \|F\|^2 Re{Y} (Eq. 5.23). ISBN 978-3-540-22696-3.
+- **Hall, R., & Hopkins, C. (2001).** The measurement of dynamic stiffness of wall ties used in masonry cavity walls. *Proceedings of the Institute of Acoustics 23(8), 259-266*.
+  The 100 mm cavity row of Hopkins' Table A4: the proprietary vertical-twist tie at 43,4 MN/m.
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  Section 2.9 (plate radiation efficiency, Leppington/Maidanik Eqs 2.227-2.230) and Section 4.3.10 (slits, holes and apertures, Gomperts Eq. 4.99, Wilson & Soroka Eq. 4.102, composite Eq. 4.92). ISBN 978-0-7506-6526-1.
+- **Hopkins, C., Wilson, R., & Craik, R. J. M. (1999).** Dynamic stiffness as an acoustic specification parameter for wall ties used in masonry cavity walls. *Applied Acoustics 58, 51-68*. https://doi.org/10.1016/S0003-682X(98)00068-1
+  The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1,7 MN/m, double-triangle 16,1 MN/m and vertical-twist 94,0 MN/m.
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+  Section 3.9.1: the plateau method after Watters, with Table 3.1 (surface density per millimetre, plateau height and the B/A frequency ratio) behind PLATEAU_MATERIALS; Eqs. 3.104/3.106 (field-incidence mass law), Eq. 3.110 (the above-coincidence branch of the coincidence_model='cremer' variant) and problem 3.11, the worked brick wall reproduced here. ISBN 978-0-521-49913-2.
+- **Vigran, T. E. (2008).** *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+  Sections 3.7.3.3 (orthotropic plate eigenfrequencies, Eqs 3.113-3.115 after Timoshenko & Woinowsky-Krieger) and 6.5.3 (orthotropic panel transmission, Eqs 6.107-6.113 after Heckl 1960 and Hansen 1993). ISBN 978-0-415-42853-8.

@@ -1,14 +1,15 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/room-to-room.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Room to room: partition, receiving room, criterion
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/
+
+# Room to Room: Partition, Receiving Room, Criterion
 
 A machine runs in one room, a wall separates that room from an occupied one,
-and someone wants to know what the occupant hears. It is a short chain, and
-every link of it is a piece the library already had: the reverberant level
-the machine builds up on the source side, the transmission loss of the wall,
-the absorption of the receiving room, and the criterion curve the result is
-laid against. What was missing was the joint, and the joint is the one place
-where the arithmetic surprises people: **the noise reduction is not the
+and someone wants to know what the occupant hears. It is a short chain of four
+links (the reverberant level the machine builds up on the source side, the
+transmission loss of the wall, the absorption of the receiving room, and the
+criterion the result is laid against), and the joint between the second and the
+third is where the arithmetic surprises people: **the noise reduction is not the
 transmission loss of the wall.**
 
 `noise_control.room_to_room` is that joint, and this page walks Norton &
@@ -19,6 +20,11 @@ Chapter 4: §4.6 for the sound power models, §4.9 for the room-to-room
 balance and §4.10 for the enclosure. Its problems 4.16, 4.18 and 4.21 carry
 printed octave-band answers, and all three are pinned in the
 [conformance report](../../CONFORMANCE.md).
+
+Here is the whole page in one drawing: Norton's problem 4.18 in section, with
+every symbol of the balance sitting where it physically belongs.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_to_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_to_room.svg" alt="Section through two rooms sharing a wall, drawn at fifty pixels per metre. On the left an 8 by 10 by 3 metre plant room with a bare floor and an absorbent ceiling, a blower standing on the floor against a wall with the quarter-space wedge of its Q = 4 position shaded and its radiated arcs drawn. In the middle the 5 by 3 metre separating wall, hatched, with a thin reverse arrow for the power it returns to the source room. On the right a 5 by 5 by 3 metre operator room with a carpet, the same absorbent ceiling and a standing occupant. A dashed arc rises over the wall through the ceiling void for the flanking path. Below, three lines give the source-side, partition and receiving-side numbers at 125 Hz, and the footer prints the balance with the crossing where the receiving room's absorption area passes the 15 square metres of the wall" width="92%"></picture>
 
 Where the *partition itself* comes from is a different question, answered by
 [Panel sound insulation](../../buildings/design/panel-sound-insulation.md) (mass law, coincidence,
@@ -38,10 +44,14 @@ $$
 $$
 
 with $\text{NR} = L_{p1} - L_{p2}$ the noise reduction between the two
-reverberant fields, $\text{TL} = 10\log_{10}(1/\tau)$ the transmission loss of the
-partition (the quantity UNE calls the sound reduction index $R$), $S_\mathrm{w}$ the
-area of the partition and $S_2 \alpha_2$ the equivalent absorption area of
-the receiving room.
+reverberant fields, $\text{TL} = 10\log_{10}(1/\tau)$ the **transmission loss**
+of the partition (the name Norton & Karczub and the North American literature
+use for the quantity ISO 10140-2 measures and ISO 717-1 rates as the **sound
+reduction index** $R$; they are the same number, and its single-number rating is
+the $R_\mathrm{w}$ used below, so the $R$ and $R_\mathrm{w}$ of a laboratory test report drop
+straight into this equation (see
+[Insulation ratings (ISO 717)](../../buildings/insulation/insulation-ratings.md)). $S_\mathrm{w}$ is the area of the partition and $S_2 \alpha_2$ the equivalent absorption
+area of the receiving room.
 
 Read the logarithm and the whole page follows. A **large partition into a
 hard room** delivers *less* than its transmission loss: a lot of area
@@ -54,6 +64,29 @@ The $\tau S_\mathrm{w}$ term is the power the partition itself passes back into 
 source room. At any realistic transmission loss it is worth a few
 hundredths of a decibel, so it is off by default and
 `include_partition_transmission=True` switches it on.
+
+### What a measurement of the same pair reports
+
+The $\text{NR}$ of this equation is the raw **level difference** $D$ that a
+field measurement of the two rooms returns. Measurement standards do not report
+$D$ raw, and for the reason this section has just given: $D$ depends on the
+receiving room. They normalise it, either to a reference reverberation time,
+$D_{\mathrm{n}T} = D + 10\log_{10}(T/T_0)$ with $T_0 = 0.5$ s (the quantity most
+residential regulations are written in), or to a reference absorption area of
+10 m², $D_\mathrm{n} = D - 10\log_{10}(A/10)$. The wall's own quantity is $R$, and the
+field version of it, $R' = D + 10\log_{10}(S/A)$, includes flanking and is
+therefore always below the laboratory $R$ this calculation assumes.
+
+The consequence is worth stating flatly: a computed $\text{NR}$ and a certified
+$D_{\mathrm{n}T,\mathrm{w}}$ for the same wall are different numbers by construction, and
+comparing them without renormalising is the commonest way to conclude that the
+model is wrong when it is not. The receiving-room reverberation time has to be
+measured in the same session, because it is what carries the normalisation.
+[Field sound insulation](../../buildings/insulation/insulation-field.md) has
+the source and microphone positions, the minimum separations and the
+background-noise correction; [Laboratory sound
+insulation](../../buildings/insulation/insulation-lab.md) has where a
+declared $R$ comes from.
 
 ## 2. Three partitions, one receiving room
 
@@ -103,6 +136,47 @@ has not started, the room is down to 22.8 m², and every wall now delivers
 the same brick wall is worth 4.9 dB more than its transmission loss. The
 same three walls, ranked the same way, but the numbers a specification would
 quote move by more than 5 dB depending on a room the wall never touches.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_to_room_partitions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_to_room_partitions.svg" alt="Two stacked octave-band panels from 125 Hz to 4 kHz. Above, the noise reduction minus the transmission loss for the three partitions: the three curves fall exactly on top of one another, starting at plus 0.5 dB at 125 Hz, dipping to minus 0.2 dB at 250 Hz and rising to plus 4.9 dB at 4 kHz. Below, the receiving room's equivalent absorption area rising from 27 square metres at 125 Hz through a dip to 23 at 250 Hz and on to 75 at 4 kHz, against the fixed 24 square metres of the partition drawn as a horizontal dashed line, with the region above the line shaded" width="88%"></picture>
+
+*Subtract each wall's transmission loss from the noise reduction it delivers
+and the three partitions collapse onto one curve, because the difference,
+$-10\log_{10}[S_\mathrm{w}/(S_2\alpha_2)]$, contains no property of the wall at all. It
+is the lower panel: the gap changes sign exactly where the receiving room's
+absorption area crosses the 24 m² of the partition. Ranking three walls is safe;
+quoting the decibels one of them "gives" is not.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `bands`, `receiving` and `partitions` as built above.
+
+# One line per wall: the RoomToRoomResult draws both spectra, the criterion
+# and the noise reduction against the transmission loss.
+noise_control.room_to_room_transmission(
+    partitions["125 mm plastered brick"], 8.0 * 3.0, receiving, frequencies=bands,
+    source=noise_control.SourceRoom(level=90.0),
+).plot()
+plt.show()
+
+# By hand: the gap each wall shows, and the room behind it.
+fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
+for name, tl in partitions.items():
+    res = noise_control.room_to_room_transmission(tl, 8.0 * 3.0, receiving, frequencies=bands,
+                                                  source=noise_control.SourceRoom(level=90.0))
+    top.semilogx(bands, res.noise_reduction - np.asarray(tl, float),
+                 "o-", label=name)
+top.axhline(0.0)
+bottom.semilogx(bands, receiving, "o-", label="Receiving-room absorption")
+bottom.axhline(8.0 * 3.0, ls="--", label="Partition area")
+bottom.set_xlabel("Frequency [Hz]")
+plt.show()
+```
+
+</details>
 
 ## 3. The chain, end to end
 
@@ -164,6 +238,23 @@ for row in chain.table():
           f"{[round(float(v), 1) for v in row['values']]}")
 ```
 
+Two similarly named functions do two different jobs in that snippet, and
+swapping them is silent. $A = S\alpha$, `equivalent_absorption_area`, is the
+area that turns the diffuse-field intensity on the walls,
+$\langle p^2 \rangle/(4\rho_0 c_0)$, into the power the room removes (Norton and
+Karczub, Equation (4.98)), and it is what appears in the receiving-room balance
+of Equation (4.101). $R = S\alpha/(1-\alpha)$, `room_constant`, is the room
+constant of the steady-state relation, which also accounts for the energy that
+survives its first reflection and goes on feeding the reverberant field, and it
+is what $L_{p1} = L_W + 10\log_{10}(4/R)$ needs on the source side. The two
+coincide for a live room and diverge as $\alpha$ grows (they differ by
+$10\log_{10}[1/(1-\alpha)]$, 0.5 dB at $\alpha = 0.1$ and 3.0 dB at
+$\alpha = 0.5$), and using the absorption area where the room constant belongs
+biases the answer towards predicting *too much* noise reduction.
+`equivalent_absorption_area` also takes discrete objects and an air-absorption
+term, which is how furniture, people and, in a large room, the air itself enter
+the receiving side.
+
 ```text
 Source sound power level     [105.0, 103.0, 98.0, 108.0, 107.0, 109.0]
 Source room level            [107.0, 101.7, 93.8, 102.4, 100.6, 101.9]
@@ -178,8 +269,8 @@ Required transmission loss   [51.4, 48.4, 42.4, 53.0, 52.9, 54.7]
 Norton's printed answer is 72.3 / 60.4 / 41.4 / 41.0 / 33.8 / 30.7 dB, which
 this reproduces to a tenth. Two rows are worth staring at. The **noise
 reduction climbs from 34.7 dB to 71.2 dB** while the transmission loss only
-climbs from 39 to 67, because the operator room's absorption grows seven
-fold across the range while the wall is fixed at 15 m²; the little room does
+climbs from 39 to 67, because the operator room's absorption grows sevenfold
+across the range while the wall is fixed at 15 m²; the little room does
 half the work at high frequency and none at all at 125 Hz. And the
 **required transmission loss row is not monotone**: the wall needs 51.4 dB
 at 125 Hz where it has 39, and 42.4 dB at 500 Hz where it already has 50. A
@@ -308,6 +399,46 @@ nothing and the level to lose is only 5 dB, while at 8 kHz the compressor
 has quietened down. A panel chosen for its 500 Hz to 2 kHz figure is the
 right panel here.
 
+`enclosure_required_transmission_loss` returns an `EnclosureInsertionLossResult`, so
+`required.plot()` draws that shape and its two causes in one line:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_required_tl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_required_tl.svg" alt="Octave-band chart from 63 Hz to 8 kHz of Norton problem 4.16. Green bars give the target insertion loss, rising from 5 dB at 63 Hz to 37 dB from 1 kHz to 4 kHz; red bars give the interior correction, falling from plus 9.5 dB at 63 Hz through zero near 400 Hz to about minus 2.4 dB above 2 kHz; and the required panel transmission loss runs as a curve peaking at 35.2 dB at 1 kHz and falling to 14.5 dB at 63 Hz and 31.6 dB at 8 kHz, with Norton's printed answers marked as open diamonds on it and the library's default Bies model drawn dashed a decibel or two above from 500 Hz upwards" width="88%"></picture>
+
+*The requirement is the sum of the two bar families, and they peak in different
+places: the target insertion loss keeps climbing to 1 kHz while the interior
+correction falls from +9.5 dB at 63 Hz, where a 50 mm blanket is acoustically
+thin, to −2.4 dB above 2 kHz, where the lining has taken the interior room
+constant past the radiating area. The dashed Bies default carries the 0.3 floor
+discussed below and sits up to 1.8 dB above Norton's model once the lining
+dominates.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `required` is the EnclosureInsertionLossResult built above.
+
+# One line: the target IL, the interior correction and the required panel R.
+required.plot()
+plt.show()
+
+# By hand, from the per-band fields the result carries:
+fig, ax = plt.subplots()
+ax.semilogx(required.frequencies, required.insertion_loss, "s--",
+            label="Target IL")
+ax.semilogx(required.frequencies, required.correction, "^:",
+            label="Interior correction")
+ax.semilogx(required.frequencies, required.panel_transmission_loss, "o-",
+            label="Required panel R")
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Two footnotes on that snippet, both about being faithful to the source.
 `model="norton"` matters: the library's default enclosure model is Bies,
 Hansen & Howard's Equation (7.111), which carries a $0.3$ inside the
@@ -322,6 +453,21 @@ And the NC-45 column is Norton's own, taken from his problem statement. It
 reads 41 dB in the 8 kHz band where ANSI/ASA S12.2-2019 Table 1 (which
 `nc_curve` implements) reads 42 dB; they agree in every other band. Using
 the printed column keeps the oracle the published one.
+
+One caveat carries over from section 6 and bites harder here. The required
+panel transmission loss is an upper bound in exactly the way the partition's
+is, and for sharper reasons: an enclosure is small, so the ratio of its
+unavoidable openings (access door, cable and pipe entries, cooling apertures,
+conveyor slots) to its total area is far higher than a wall's, and an open
+fraction of one per cent caps the achieved insertion loss near 20 dB whatever
+the 35 dB panel this calculation asks for. The machine must also not touch the
+enclosure or share its base: a bolted contact radiates the machine's vibration
+from the outer skin and bypasses the panels entirely. Put the openings into the
+calculation rather than hoping. The composite route and the drawn construction
+are in
+[Industrial noise control §2.1](noise-control.md#21-what-the-enclosure-actually-delivers-leaks-doors-and-openings),
+and use the same `flanking_penalty` below as the honest place to record
+whatever is left unmodelled.
 
 ## 6. What the prediction does not know
 
@@ -341,9 +487,7 @@ transmission loss the calculation used. Each path shrinks at every element
 and junction it crosses, which is why no single one has to be large for the
 sum of the three to dominate a good partition.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths.gif" alt="Animation: energy pulses leaving the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, every path label lighting up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths.webm)
+**Video:** [Energy pulses over the direct and flanking paths](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_flanking_paths.webm): Energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room.
 
 `DesignCriterion.flanking_penalty` is the explicit debit for that, in
 decibels off the
@@ -368,67 +512,116 @@ prediction models of EN 12354 are the right tool, and those live in
 [Building sound insulation prediction](../../buildings/design/insulation-prediction.md) and
 [Flanking transmission](../../buildings/insulation/flanking-lab.md).
 
-The other assumption is diffusivity. Equation (4.101) is a diffuse-field
-balance in both rooms, so it has nothing to say below each room's Schroeder
-frequency (`schroeder_frequency`), where discrete modes rule. The 5 m x 5 m
-x 3 m operator room above, 75 m3, has for a
-half-second reverberation time a Schroeder frequency of 163 Hz, which is
-exactly why the 125 Hz band of problem 4.18 - the band that governs the
-whole answer - should be read as an estimate and not as a number.
+The other assumption is diffusivity, and it fails in two directions. In
+frequency: Equation (4.101) is a diffuse-field balance in both rooms, so it has
+nothing to say below each room's Schroeder frequency (`schroeder_frequency`),
+where discrete modes rule. The 5 m × 5 m × 3 m operator room above, 75 m³, has
+a Schroeder frequency of 163 Hz for a half-second reverberation time, which is
+exactly why the 125 Hz band of problem 4.18 (the band that governs the whole
+answer) should be read as an estimate and not as a number. The call is
+`schroeder_frequency(0.5, 75.0)`, reverberation time first and volume second,
+and it returns 163.3 Hz for that room.
 
-Both levels are also reverberant-field averages, and the desk pushed against the
-partition hears more: the direct field the partition radiates. Barron,
-*Industrial Noise Control and Acoustics* (2003), section 7.5, Equations (7-71)
-and (7-72), adds it inside the logarithm of Equation (4.101) as
-`S_w/(S_2 alpha_2) + g`, with `g = 1/4` closer to the wall than
-`r* = (S_w/2 pi)^(1/2)` and `g = S_w/(8 pi r_2^2)` beyond it, so that Norton's
-equation is the far limit. `receiver_distance_m` switches it on, in the chain and
-in the required transmission loss.
+In space: both levels are **reverberant-field spatial averages**. $L_{p2}$ is
+what a roving microphone would report over the receiving room, not the level at
+the desk pushed against the party wall, where the direct field of the radiating
+surface adds a few decibels (the next subsection puts a number on it). The same holds in
+reverse on the source side: $L_{p1}$ is the reverberant level that drives the
+whole partition, and a person standing beside the machine is in its direct field
+and hears more, so a *measured* source-room level has to be taken away from both
+the machine and the wall to be the right input. It is the reason the field
+standards keep their microphone positions half a wavelength from every surface.
+Past the partition's own direct field, below, it is also the reason this
+calculation cannot answer where in the receiving room to put the workstation;
+when that is the question, the image-source and ray methods of
+[Room image sources and steady field](../../buildings/rooms/room-image-sources.md)
+are the tool.
+
+### A receiver next to the partition
+
+Barron, *Industrial Noise Control and Acoustics* (Marcel Dekker, 2003), section
+7.5, carries the direct field of the partition into the receiving room. Close to
+the wall the power it radiates is spread over its face; farther out the wall
+behaves as a source of directivity 2; and the two descriptions meet at
+$r^* = (S_\mathrm{w}/2\pi)^{1/2}$. His Equations (7-71) and (7-72), written over
+the variables of Equation (4.101), add one term inside the logarithm,
+
+$$
+\text{NR} = \text{TL}
+- 10\log_{10}\!\left[\frac{S_\mathrm{w}}{S_2 \alpha_2} + g\right],
+\qquad
+g = \begin{cases}
+1/4 & r_2 < r^* \\
+S_\mathrm{w} / (8 \pi r_2^2) & r_2 \geq r^*
+\end{cases}
+$$
+
+with $r_2$ the distance of the receiver from the partition. The two branches
+agree at $r^*$, and the second one vanishes as $r_2$ grows, so Norton's equation
+is the far limit of Barron's pair. `receiver_distance_m` switches the term on.
+Barron's Example 7-6 is a paper mill: a Jordan refiner with a sound power level
+of 105 dB stands in a room of 900 m² of surface at an average absorption
+coefficient of 0,05, and an operator sits 1,5 m from the 16 m² wall, of 30 dB
+transmission loss, in a room of 100 m² at 0,35. The refiner is 4 m from the wall
+with a directivity factor of 2, which moves the level Barron prints beside it
+and not the reverberant level that drives the wall:
 
 ```python
 import numpy as np
 from phonometry import noise_control, room
 
-# Barron (2003) Example 7-6: an operator 1,5 m from a 16 m2 wall of TL 30 dB.
 source = noise_control.SourceRoom(
-    power_level=105.0, room_constant=room.room_constant(900.0, 0.05), directivity=2.0,
+    power_level=105.0,
+    room_constant=room.room_constant(900.0, 0.05),   # 47.37 m2
+    directivity=2.0,
+)
+receiving = room.room_constant(100.0, 0.35)          # 53.85 m2, Barron's R2
+
+far = noise_control.room_to_room_transmission(
+    30.0, 16.0, receiving, frequencies=[1000.0], source=source,
 )
 near = noise_control.room_to_room_transmission(
-    30.0, 16.0, room.room_constant(100.0, 0.35), frequencies=[1000.0],
-    source=source, receiver_distance_m=1.5,
+    30.0, 16.0, receiving, frequencies=[1000.0], source=source, receiver_distance_m=1.5,
 )
+print(np.round(far.received_level, 1))    # [59.]
 print(np.round(near.received_level, 1))   # [61.6]
 ```
 
-Barron prints 61,7 dB with the 0,1 dB he adds to every level, which the library
-does not add. He writes the receiving room over its room constant
-`R_2 = S_2 alpha_2/(1 - alpha_2)`, so that is what goes in as the receiving
-absorption. Without the direct field the level is 59,0 dB: the operator, inside
-the 1,60 m of `r*`, hears 2,65 dB more than the reverberant level, and the excess
-is down to 0,1 dB at 10 m.
+Barron prints 61,7 dB, which is this 61,6 dB plus the 0,1 dB he adds to every
+level for the characteristic impedance of air; the library does not add it, as
+`steady_state_spl` does not. Two readings of his page stand between the two
+numbers. He writes the reverberant term of the receiving room over its room
+constant $R_2 = S_2\alpha_2/(1-\alpha_2)$ where Norton writes $S_2\alpha_2$, so
+his 53,85 m² goes in as the receiving absorption. And his example is one band,
+so the band centre given here only labels it. His $r^*$ is 1,60 m, the operator
+stands inside it and gets the whole quarter: 2,65 dB over the reverberant level.
+At 3 m the excess is 0,9 dB and at 10 m it is 0,1 dB, which is where Equation
+(4.101) becomes the answer again. `required_transmission_loss` carries the same
+term, so a wall specified with a receiver distance is specified for the desk at
+that distance.
 
 ## What this guide covers
 
-**Covered.** The Norton & Karczub §4.9 power balance (Eq. 4.101) as
-`room_to_room_transmission`, with `SourceRoom`, `equivalent_absorption_area`,
-`mean_absorption` and `room_constant`; the source-room level from a sound power
-level through the §4.6 Table 4.5 source models (constant power, constant
-volume, constant pressure) and the directivity of the machine's position;
-`DesignCriterion` with its target, its flanking allowance and its ANSI/ASA
-S12.2-2019 rating, NC by default and RC Mark II with
-`DesignCriterion(family="RC")`, plus `.required_transmission_loss`,
-`.exceedance`, `.meets_target` and `.table()`; and the §4.10 enclosure equation
-(Eq. 4.115) through `enclosure_required_transmission_loss` in both interior
-models listed by `ENCLOSURE_MODELS`. With `receiver_distance_m`, the direct field
-of the partition at a receiver, Barron (2003) Equations (7-71) and (7-72).
+- **Covered.** The Norton & Karczub §4.9 power balance (Eq. 4.101) as
+  `room_to_room_transmission`, with `SourceRoom`, `equivalent_absorption_area`,
+  `mean_absorption` and `room_constant`; the source-room level from a sound
+  power level through the §4.6 Table 4.5 source models (constant power, constant
+  volume, constant pressure) and the directivity of the machine's position;
+  `DesignCriterion` with its target, its flanking allowance and its ANSI/ASA
+  S12.2-2019 rating, in the NC family by default and in the RC Mark II family
+  with `DesignCriterion(family="RC")`; `.required_transmission_loss`,
+  `.exceedance`, `.meets_target` and `.table()`; and the §4.10 enclosure
+  equation (Eq. 4.115) through `enclosure_required_transmission_loss`, in both
+  the Norton and the Bies interior models listed by `ENCLOSURE_MODELS`. With
+  `receiver_distance_m`, the direct field of the partition at a receiver in the
+  receiving room, Barron (2003) Equations (7-71) and (7-72), in the chain and in
+  the required transmission loss.
 
-**Not covered.** The transmission loss of the partition itself, which is
-measured or predicted elsewhere; flanking as a modelled path rather than the
-flat allowance used here; and the leaks and openings of an enclosure, which
-need the composite of
-[Industrial noise control](noise-control.md). The whole chain is a diffuse-field
-argument, so it says nothing below either room's Schroeder frequency, or closer
-to a surface other than the partition than roughly half a wavelength.
+- **Not covered.** The transmission loss of the partition itself, which is measured or predicted
+  elsewhere; flanking as a modelled path rather than a flat allowance; the leaks
+  and openings of an enclosure, which need the composite of the industrial
+  noise-control guide; and anything below each room's Schroeder frequency, or
+  closer to a surface other than the partition than about half a wavelength.
 
 ## See also
 
@@ -452,26 +645,13 @@ to a surface other than the partition than roughly half a wavelength.
 
 ## References
 
-- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and
-  vibration analysis for engineers* (2nd ed.). Cambridge University Press.
-  [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
-  The sound power models of §4.6 (Table 4.5, Eqs. 4.53-4.56), the
-  room-to-room balance of §4.9 (Eqs. 4.92-4.101), the enclosure design
-  equation of §4.10 (Eqs. 4.102-4.115), and the worked problems 4.16, 4.18
-  and 4.21 with their printed octave-band answers, which this guide is built
-  around.
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
-  control* (5th ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152). The
-  steady-state room relations (§6.4, Eqs. 6.43-6.44) behind
-  `steady_state_spl` and `room_constant`, and the enclosure insertion loss
-  of §7.4.2 (Eqs. 7.103, 7.111) that is the library's default enclosure
-  model.
-- ANSI/ASA S12.2-2019. *Criteria for evaluating room noise*. The NC curves
-  of Table 1 and the RC Mark II family of Annex D that the chain is rated
-  against.
-- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press. The Schroeder
-  frequency (Eq. 3.44) that bounds the diffuse-field assumption from below.
-- Barron, R. F. (2003). *Industrial noise control and acoustics*. Marcel Dekker.
-  The direct field of the partition in the receiving room (section 7.5,
-  Eqs. 7-71 and 7-72) and Example 7-6, which `receiver_distance_m` reproduces.
+- **Acoustical Society of America. (2019).** [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
+  The NC curves of Table 1 and the RC Mark II family of Annex D that the chain is rated against.
+- **Barron, R. F. (2003).** *Industrial noise control and acoustics*. Marcel Dekker.
+  The direct field of the partition in the receiving room (section 7.5, Eqs. 7-71 and 7-72) and Example 7-6, an operator 1,5 m from the wall, which receiver_distance_m reproduces.
+- **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  The steady-state room relations (section 6.4, Eqs. 6.43-6.44) behind steady_state_spl and room_constant, and the enclosure insertion loss of section 7.4.2 (Eqs. 7.103, 7.111) that is the library default enclosure model.
+- **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+  The Schroeder frequency (Eq. 3.44) that bounds the diffuse-field assumption from below.
+- **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+  The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure design equation of section 4.10 (Eqs. 4.102-4.115) and the worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers, which this guide is built around.

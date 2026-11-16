@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/assessment/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/
 
 # Assessment and regulation
 
@@ -102,18 +104,18 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-The library starts where the sound level meter stops. ISO 1996-2 fixes the
-receiver positions and the façade corrections that turn a raw measurement into
-the level these functions expect, and those position and correction procedures
-are **not implemented**: only the arithmetic that follows once you have
-applied them. The same is true nationally: the Annex IV measurement procedures
-of RD 1367/2007 (microphone positions, series duration, number of
-measurements) are not implemented either, and the acoustic zoning, noise maps
-and action plans of Ley 37/2003 are planning instruments rather than
-calculations. Two published alternatives are deliberately absent: only the
-graduated KI of NT ACOU 112 Formula 2 is implemented, not the flat 5 dB
-fallback of its Note 4, and the ISO 1996-1 Table A.1 category adjustments
-appear only as the assessor's-judgement baseline the measurement replaces.
-Finally, no limit table other than the Spanish one is built in: a limit is
-national, and the library gives you the rating level to compare against
-whichever one applies.
+- **Not covered.** The library starts where the sound level meter stops. ISO 1996-2 fixes the
+  receiver positions and the façade corrections that turn a raw measurement into
+  the level these functions expect, and those position and correction procedures
+  are **not implemented**: only the arithmetic that follows once you have
+  applied them. The same is true nationally: the Annex IV measurement procedures
+  of RD 1367/2007 (microphone positions, series duration, number of
+  measurements) are not implemented either, and the acoustic zoning, noise maps
+  and action plans of Ley 37/2003 are planning instruments rather than
+  calculations. Two published alternatives are deliberately absent: only the
+  graduated KI of NT ACOU 112 Formula 2 is implemented, not the flat 5 dB
+  fallback of its Note 4, and the ISO 1996-1 Table A.1 category adjustments
+  appear only as the assessor's-judgement baseline the measurement replaces.
+  Finally, no limit table other than the Spanish one is built in: a limit is
+  national, and the library gives you the rating level to compare against
+  whichever one applies.

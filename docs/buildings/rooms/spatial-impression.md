@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/rooms/spatial-impression.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/
 
 # Spatial impression (ISO 3382-1)
 
@@ -225,24 +227,44 @@ were never recorded are missing from the numerator and from the denominator
 alike, and which way the fraction then moves depends on how lateral the part
 that was lost was.
 
+## What this guide covers
+
+- **Covered.** The spatial measures of ISO 3382-1:2009: the early lateral energy fraction of
+  Equation (A.14) and its cosine-weighted variant of Equation (A.15), with the
+  modulus the second prints; the late lateral sound level of Equation (A.16)
+  against the free-field reference at 10 m, and its energy average over four
+  octave bands of Equation (A.17); and the normalised interaural cross
+  correlation function of Equation (B.1) with the coefficient of Equation (B.2),
+  with the square root and the modulus both prints, over any of the three time
+  windows B.4 names.
+
+- **Not covered yet.** The equipment and the geometry the measurement asks for: the dummy-head
+  geometry of B.3, the source directivity limits of Table 1, the stage support
+  of Annex C, and the measurement uncertainty of Clause 7.
+
 ## See also
 
-- [Sound strength G (ISO 3382-1)](sound-strength.md): the other quantity of
-  Annex A that needs a calibrated source and the same free-field reference.
-- [Room Acoustic Parameters](room-acoustics.md): the decay times and energy
-  ratios one microphone is enough for.
-- [Measuring the Room Impulse Response](room-impulse-response.md): the
-  ISO 18233 acquisition of the responses this page pairs up.
-- [Image sources and the steady-state room field](room-image-sources.md):
+- [Sound Strength G](sound-strength.md): the other
+  quantity of Annex A that needs a calibrated source and the same free-field
+  reference.
+- [Room Acoustic Parameters](room-acoustics.md): the
+  decay times and energy ratios one microphone is enough for.
+- [Measuring the Room Impulse Response](room-impulse-response.md):
+  the ISO 18233 acquisition of the responses this page pairs up.
+- [Image Sources and the Steady-State Field](room-image-sources.md):
   where the early reflections this page weighs come from.
+- [Conformance report](../../CONFORMANCE.md):
+  the closed-form reflection geometries the lateral measures and the
+  interaural correlation are validated against.
 - API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
-## Standards
+## References
 
-ISO 3382-1:2009, Annex A (informative) A.2.4 and A.2.5 and Annex B
-(informative): the early lateral energy fraction of Equations (A.14) and
-(A.15), the late lateral sound level of Equation (A.16) with the energy
-average of Equation (A.17), and the interaural cross correlation of
-Equations (B.1) and (B.2). Validated against closed-form reflection
-geometries and against the printed characters a text layer deletes, in the
-[conformance report](../../CONFORMANCE.md).
+- **Barron, M., & Marshall, A. H. (1981).** Spatial impression due to early lateral reflections in concert halls: The derivation of a physical measure. *Journal of Sound and Vibration*, *77*(2), 211-232. https://doi.org/10.1016/S0022-460X(81)80020-X
+  Where the early lateral energy fraction comes from, and the subjective experiments that fixed its 80 ms window.
+- **Bradley, J. S., & Soulodre, G. A. (1995).** Objective measures of listener envelopment. *The Journal of the Acoustical Society of America*, *98*(5), 2590-2597. https://doi.org/10.1121/1.413225
+  The experiments behind the late lateral sound level and its 80 ms boundary.
+- **Hidaka, T., Beranek, L. L., & Okano, T. (1995).** Interaural cross-correlation, lateral fraction, and low- and high-frequency sound levels as measures of acoustical quality in concert halls. *The Journal of the Acoustical Society of America*, *98*(2), 988-1007. https://doi.org/10.1121/1.414451
+  The comparison of the interaural coefficient with the lateral fraction that Annex B's time windows follow.
+- **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  A.2.4, A.2.5 and Annex B: the lateral energy measures, the late lateral sound level and the interaural cross correlation coefficient.

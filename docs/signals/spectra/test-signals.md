@@ -1,20 +1,39 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/test-signals.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Test signals and sample-rate tools (IEC 60268-1)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/test-signals/
+
+# Test signals and sample-rate tools
 
 A measurement is only as trustworthy as its stimulus and its sample-rate
-bookkeeping. This page covers the signal toolbox of `phonometry.signals`:
-**tone bursts** with the exact gating IEC 60268-1 prescribes, the
-**colored-noise generators** (detailed in the
-[spectral analysis guide](spectral-analysis.md#5-colored-noise-generators)),
-**resampling** whose anti-alias rejection is a stated, verifiable
-specification rather than a library default, and **fractional delay** that
-shifts a record by any sub-sample amount with band-limited exactness.
+bookkeeping. This page covers the signal toolbox of `phonometry.signals`, in
+the order the sections take it: **tone bursts** with the exact gating
+IEC 60268-1 prescribes, **resampling** whose anti-alias rejection is a stated,
+verifiable specification rather than a library default, **fractional delay**
+that shifts a record by any sub-sample amount with band-limited exactness, and
+the **colored-noise generators**, whose spectral verification lives in the
+[spectral analysis guide](spectral-analysis.md#5-colored-noise-generators).
 
 Before the details, the family portrait: what each stimulus looks like in
 time and where its energy sits over frequency.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_test_signals_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_test_signals.svg" alt="Grid of five labelled test-signal miniatures: white noise with a jagged waveform and a flat power spectral density of 0 dB per octave, equal power per hertz; pink noise with a smoother waveform and a minus 3 dB per octave density, equal power per octave; an MLS binary chip stream of period 2 to the m minus 1 samples with a flat line spectrum; a time-frequency sketch where a linear sweep is a straight line while the exponential sweep hugs low frequencies and spends equal time per octave; and an IEC 60268-1 tone burst of whole periods starting at a zero crossing, 25 periods of 5 kHz lasting 5 ms" width="92%"></picture>
+
+Five stimuli, and what separates them. **Noise** excites everything at once and
+needs averaging to beat its own randomness. An **MLS** is deterministic and
+periodic, so one circular cross-correlation gives an impulse response in a
+single pass. A **sweep** concentrates its energy at one frequency at a time,
+which is what buys both its crest factor and the separation of harmonic
+distortion into negative times. A **gated burst** probes dynamic behaviour
+rather than steady response.
+
+Only two of the five are covered here, so this is where the other three live:
+the noise generators and their spectral verification on
+[spectral analysis](spectral-analysis.md#5-colored-noise-generators);
+the MLS and the exponential sweep as the ISO 18233 acquisition pair of
+[room acoustics](../../buildings/rooms/room-acoustics.md); the shaped sweep
+and the Golay pair on
+[system measurement](system-measurement.md); and the
+tone burst in the next section.
 
 ## 1. Tone bursts (IEC 60268-1)
 
@@ -47,6 +66,14 @@ crossing, the burst energy has the closed form $A^2 N/2$ exactly, which is how
 the generator is verified.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_train_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_train.svg" alt="IEC 60268-1 tone bursts: a single 5 ms burst of 5 kHz tone starting at a zero crossing with its rectangular gating envelope, and a repetitive train of four bursts at 10 bursts per second with a 5 percent duty cycle" width="82%"></picture>
+
+*Every number in the picture is exact rather than nominal, which is the point of
+Clause A2.1. The burst is 240 samples, 25 full periods of 5 kHz at 48 kHz, and
+the first sample of the gate falls on a zero of the tone, so its energy is
+$A^2N/2 = 120$ to the last digit. In the train below, the period is 4800 samples
+and the duty cycle 0.05 exactly: the burst occupies one twentieth of each
+repetition, which is what makes the train usable for meter ballistics where the
+off time has to be as well defined as the on time.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -83,10 +110,23 @@ plt.show()
 </details>
 
 These are the bursts behind the
-[Fast/Slow/Impulse ballistics](../levels/time-weighting.md) reference responses
-(IEC 61672-1 Table 4 uses 4 kHz tonebursts of 200, 50 and 10 ms) and the
-quasi-peak dynamic tests of IEC 60268-1 itself (5 kHz bursts of 1 to 200 ms,
-Table AII).
+[Fast/Slow/Impulse ballistics](../levels/time-weighting.md) reference
+responses (IEC 61672-1 Table 4 uses 4 kHz tonebursts of 200, 50 and 10 ms)
+and the quasi-peak dynamic tests of IEC 60268-1 itself (5 kHz bursts of
+1 to 200 ms, Table AII).
+
+**What gating does in frequency, and what the duty cycle costs in level.**
+Multiplying a tone by a rectangle convolves its line with the gate's transform,
+a sinc whose first nulls sit $1/T_\text{burst}$ either side of the carrier:
+±200 Hz for a 5 ms burst, ±100 Hz for a 10 ms one. So it is the burst
+*duration*, not the carrier, that decides whether the stimulus fits inside a
+band filter, and why a short burst through a fractional-octave filter shows the
+filter's own settling rather than the burst. In level, a train's equivalent
+continuous level is the burst level plus $10\log_{10}(\text{duty cycle})$: the
+5 % train above therefore sits exactly **13.0 dB** below the burst's own level,
+which is the quantity a detector-ballistics test compares against. The reference
+responses those numbers feed are in
+[Time weighting](../levels/time-weighting.md).
 
 ## 2. Resampling with a stated anti-alias specification
 
@@ -175,6 +215,20 @@ Several estimators resample internally at fixed rates (the ECMA-418-2
 psychoacoustics at 48 kHz, STOI at 10 kHz); this function is the public,
 documented counterpart for preparing records outside those chains.
 
+Three things worth deciding before resampling at all. **The specification has a
+price:** the default 5 % transition width gives up the top 5 % of the smaller
+Nyquist band, so a 44.1 → 48 kHz conversion is flat only to about 21 kHz; a
+record whose content reaches Nyquist needs a narrower `transition_width` (and
+the extra taps that come with it) rather than a silent truncation. **Order
+matters:** resampling is a filtering operation, so RMS-based levels survive it
+while peak-based ones do not: band-limited interpolation can place a
+reconstructed sample *above* the original peak (the intersample-peak effect), so
+`lc_peak` and any crest factor belong at the original rate, or behind an
+explicit true-peak oversampling. **And often the answer is not to resample:**
+the library's fractional-octave filters design themselves at whatever rate they
+are given, so converting to a "standard" rate before analysis usually buys
+nothing and costs the band edge.
+
 ## 3. Fractional delay
 
 `fractional_delay` shifts a record by any number of samples, including
@@ -185,8 +239,9 @@ boundary conventions cover the two use cases:
 - `mode="linear"` (default) zero-pads the record past the shift, so samples
   leaving one end land in padding instead of wrapping around. Use it for
   transients and impulse responses; it is bit-identical to the alignment
-  kernel inside [`align_impulse_responses`](correlation-delay.md). An
-  integer delay reduces to an exact sample shift.
+  kernel inside
+  [`align_impulse_responses`](correlation-delay.md#3-impulse-response-delay-and-alignment).
+  An integer delay reduces to an exact sample shift.
 - `mode="circular"` applies the ramp over the record itself and wraps. For
   periodic records it is exact: a tone centered on a DFT bin delayed by
   `D` samples equals the analytically delayed tone to machine precision,
@@ -206,71 +261,61 @@ its real part). Any properly sampled signal is band-limited below Nyquist,
 so in practice the operation is exact; for synthetic corner cases, odd
 lengths avoid the bin entirely.
 
-## 4. Colored noise
-
-The deterministic colored-noise generators (`noise_signal`: white, pink,
-red, blue, violet with an exact power-law slope and bit-reproducible seeds)
-complete the toolbox; they are documented with their spectral verification
-in the [spectral analysis guide](spectral-analysis.md#5-colored-noise-generators).
-
 ## Where these tools are used
+
+The deterministic colored-noise generators (`noise_signal`: white, pink, red,
+blue and violet, with an exact power-law slope and bit-reproducible seeds) round
+out the toolbox and are documented, with their spectral verification and their
+measured slopes, in the
+[spectral analysis guide](spectral-analysis.md#5-colored-noise-generators).
 
 The [window figures of merit](spectral-analysis.md#6-choosing-the-window)
 quantify the taper every spectral estimate in the library rests on; the
 burst generator feeds ballistics and dynamic-response testing; and the
 resampler and fractional delay are the sample-rate half of
-[correlation and delay work](correlation-delay.md), where sub-sample
-alignment is the difference between averaging impulse responses and
-smearing them.
+[correlation and delay work](correlation-delay.md), where
+sub-sample alignment is the difference between averaging impulse responses
+and smearing them.
 
 ## What this guide covers
 
-**Covered.** IEC 60268-1:1985 Appendix A, Clause A2: the tone burst that
-starts at a zero crossing of the tone and consists of an integral number of
-full periods (A2.1) and the repetitive burst train of A2.2, implemented by
-`tone_burst` and hand-checked against the Table AII durations. Bendat &
-Piersol Section 10.2's anti-alias requirement, turned into an explicit,
-checkable specification by `resample_signal`'s stopband attenuation and
-transition width.
+- **Covered.** IEC 60268-1:1985 Appendix A, Clause A2: the tone burst that "should start at the
+  zero-crossing of the tone and should consist of an integral number of full
+  periods" (A2.1) and the repetitive burst train of A2.2, implemented by
+  `tone_burst` and hand-checked against the Table AII durations. Bendat &
+  Piersol Section 10.2's anti-alias requirement, turned into an explicit,
+  checkable specification by `resample_signal`'s stopband attenuation and
+  transition width.
 
-**Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment; only the Appendix A tone-burst clauses are implemented on this page.
-Its Clause 7, the simulated programme signal, is in
-`electroacoustics.program_signal` and has its walk-through in the
-[Headphones and Earphones (IEC 60268-7)](../../devices/electroacoustics/headphones.md)
-guide. The device parts are not covered here, but they are not untouched
-either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers
-(IEC 60268-5) and headphones (IEC 60268-7) have their own guides under
-[Electroacoustics](../../devices/electroacoustics/index.md), and the speech
-transmission index of IEC 60268-16 has the
-[Speech Transmission Index](../../perception/speech/speech-transmission.md)
-guide; only the connector parts are absent from the library altogether.
-`fractional_delay` and the coloured-noise generators of `noise_signal` are
-general-purpose DSP tools with no governing standard of their own, and their
-accuracy claims are closed-form, not normative.
+- **Not covered.** IEC 60268-1:1985 is a general standard for sound system equipment; only the
+  Appendix A tone-burst clauses are implemented on this page. Its Clause 7, the
+  simulated programme signal, is in `electroacoustics.program_signal` and has
+  its walk-through in the
+  [Headphones and Earphones (IEC 60268-7)](../../devices/electroacoustics/headphones.md)
+  guide. The device parts are not covered here, but they are not untouched
+  either: amplifiers (IEC 60268-3), microphones (IEC 60268-4), loudspeakers
+  (IEC 60268-5) and headphones (IEC 60268-7) have their own guides under
+  [Electroacoustics](../../devices/electroacoustics/index.md), and the speech
+  transmission index of IEC 60268-16 has the
+  [Speech Transmission Index](../../perception/speech/speech-transmission.md)
+  guide; only the connector parts are absent from the library altogether.
+  `fractional_delay` and the colored-noise generators of `noise_signal` are
+  general-purpose DSP tools with no governing standard of their own; their
+  accuracy claims are closed-form, not normative.
 
 ## See also
 
-- [Time Weighting](../levels/time-weighting.md): the detector ballistics the tone
-  bursts exercise (IEC 61672-1 Table 4).
-- [Correlation and delay](correlation-delay.md): the alignment work built
-  on the fractional-delay kernel.
-- [Synchronous averaging](synchronous-averaging.md): period alignment with
-  the same band-limited shift when $f_\mathrm{s} T$ is not an integer.
-- [Spectral analysis](spectral-analysis.md): the colored-noise verification
-  and the window metrics.
+- [Time Weighting](../levels/time-weighting.md): the detector ballistics the tone bursts exercise (IEC 61672-1 Table 4).
+- [Correlation and delay](correlation-delay.md): the alignment work built on the fractional-delay kernel.
+- [Synchronous averaging](synchronous-averaging.md): period alignment with the same band-limited shift when $f_\mathrm{s} T$ is not an integer.
+- [Spectral analysis](spectral-analysis.md): the colored-noise verification and the window metrics.
+- [Room acoustics](../../buildings/rooms/room-acoustics.md): the MLS and exponential-sweep excitations of the family portrait, as ISO 18233 uses them.
+- [System measurement](system-measurement.md): the Golay pair and the shaped sweep, the other two members of the family.
+- API reference: [`signals`: test signals](https://docs.jmrp.io/phonometry/reference/api/signals/test-signals/).
 
 ## References
 
-- International Electrotechnical Commission. (1985). *Sound system
-  equipment — Part 1: General* (IEC 60268-1:1985).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
-  with an integral number of full periods (A2.1), repetitive burst trains
-  at a stated repetition rate (A2.2), and the Table AII burst durations the
-  sample counts are hand-checked against.
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Section 10.2 (data preparation: sampling, aliasing and the anti-alias
-  filtering requirement the resampler states explicitly).
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Section 10.2 (data preparation: sampling, aliasing and the anti-alias filtering requirement the resampler states explicitly). ISBN 978-0-470-24877-5.
+- **International Electrotechnical Commission. (1985).** [*Sound system equipment — Part 1: General*](https://webstore.iec.ch/en/publication/1204) (IEC 60268-1:1985).
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone with an integral number of full periods (A2.1), repetitive burst trains at a stated repetition rate (A2.2), and the Table AII burst durations the sample counts are hand-checked against.

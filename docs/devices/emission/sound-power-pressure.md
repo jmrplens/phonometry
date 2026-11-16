@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-pressure.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/
+
+# Sound Power by Pressure Methods
 
 Of the standardised routes to the sound power level $L_W$, the pressure
 methods are the ones that need nothing more exotic than a sound level meter:
@@ -31,9 +33,15 @@ them, and the sound power follows because a diffuse-enough surface captures
 all the radiated energy:
 
 $$
-\bar{L}_p = 10\log_{10}\left( \frac{1}{N_\mathrm{M}} \sum_i 10^{L_{pi}/10} \right), \qquad
-L_W = \bar{L}_p - K_1 - K_2 + 10\log_{10}\frac{S}{S_0},\quad S_0 = 1\ \text{m}^2 .
+\overline{L'_p} = 10\log_{10}\left( \frac{1}{N_\mathrm{M}} \sum_i 10^{L'_{pi}/10} \right), \qquad
+L_W = \overline{L'_p} - K_1 - K_2 + 10\log_{10}\frac{S}{S_0},\quad S_0 = 1\ \text{m}^2 .
 $$
+
+The prime marks what the average is taken over: here it is the **uncorrected**
+position levels, and $K_1$ and $K_2$ are subtracted from the mean afterwards, so
+$\overline{L'_p}$ is `mean_pressure_level` and $\overline{L'_p} - K_1 - K_2$ is
+`surface_pressure_level`. Section 2's ISO 3745 average is built the other way
+round and the primes are the only warning of it.
 
 Two corrections clean up the surface level. The **background-noise
 correction** removes the energy that would have been there with the source
@@ -59,7 +67,89 @@ $d$. ISO 3746 (survey) shares every formula but is coarser: fewer
 microphone positions, a 3 dB background criterion instead of 6 dB, and
 validity up to $K_2 \le 7\ \text{dB}$ instead of 4 dB.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Measurement surfaces of ISO 3744: a hemisphere of radius r enveloping a compact source on a reflecting plane, and a right parallelepiped (box) at measurement distance d around a large source, both with microphone positions marked" width="88%"></picture>
+### Sizing the surface
+
+Neither $r$ nor $d$ is a free choice, and both are measured from the
+**reference box**: the smallest right parallelepiped that just encloses the
+source, of sides $l_1 \times l_2 \times l_3$, standing on the reflecting plane
+(clause 7.1). Its origin $O$ is the centre of the box formed with its images in
+the adjoining planes, and the **characteristic source dimension** $d_0$ is the
+distance from $O$ to the farthest corner of the reference box:
+
+$$
+d_0 = \sqrt{(l_1/2)^2 + (l_2/2)^2 + l_3^2}
+$$
+
+over one reflecting plane, with $l_1$ un-halved over two planes and both $l_1$
+and $l_2$ un-halved over three. That is the $d_0$ the figure below labels, and
+the standard then bounds the surface with it: the hemisphere radius shall be at
+least $2 d_0$, not less than 1 m and not more than 16 m (clause 7.2.3; 0,5 m is
+allowed only for small products over a limited frequency range), and the box
+measurement distance shall be at least 0,25 m and preferably 1 m or more
+(clause 7.2.4, with a note that $d < 0.5$ m limits the low-frequency range).
+
+Worked on a 1,4 × 0,9 × 1,1 m floor-standing machine:
+$d_0 = \sqrt{0.7^2 + 0.45^2 + 1.1^2} = 1.38$ m, so a hemisphere needs
+$r \ge 2.8$ m and $S = 2\pi r^2 = 49.3$ m². The same machine boxed at $d = 1$ m
+gives $a = 1.7$ m, $b = 1.45$ m, $c = 2.1$ m and
+$S = 4(2.47 + 3.05 + 3.57) = 36.3$ m² (a quarter less surface), and a surface
+that stays inside a normal test hall. That is the usual reason a large or
+elongated source is boxed rather than domed, and clause 7.2.3 makes it explicit:
+where the required radius grows so large that the clause 4 environment
+requirements no longer hold, a hemisphere should not be used at all.
+
+Read backwards, this also bounds the examples on this page. The `radius=1.5`
+below is legitimate for a source of $d_0 \le 0.75$ m (a benchtop appliance or a
+small pump), and not for the 1,4 m machine just worked; the `radius=4.0` of the
+report example in section 3 covers $d_0$ up to 2 m.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Measurement surfaces of ISO 3744: a hemisphere of radius r enveloping a compact source on a reflecting plane, with the ten Annex B microphone positions marked, and a right parallelepiped (box) at measurement distance d around a large source" width="88%"></picture>
+
+The box surface carries its own array, and it is not the Annex B hemisphere
+array: `measurement_positions` deliberately raises for a box, because
+ISO 3744 defines those positions by **area subdivision** instead (Annex C,
+normative). Each of the five planes of the measurement surface is considered on
+its own and divided into equal partial areas whose side does not exceed $3d$;
+the key positions are then the centre of every partial area plus its corners,
+excluding the corners that intrude into the reflecting plane, which gives a
+minimum of nine positions when one partial area covers each plane (clause C.1;
+ten for a triangular subdivision). The survey method keeps only the partial-area
+centres. The reference direction of each microphone is normal to its face,
+except at a corner of the surface, where it points at the origin $O$ of the
+reference box (clause 7.2.2).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_box_array_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_box_array.svg" alt="Top view and side view of the ISO 3744 parallelepiped measurement surface around a 1.4 by 0.9 by 1.1 metre reference box at a measurement distance of 1 m, giving 2a = 3.4 m, 2b = 2.9 m, c = 2.1 m and S = 36.3 square metres. Each visible face is divided by a dashed line into equal partial areas because the 3.4 m side exceeds the 3d limit, key microphone positions are marked at the partial-area centres and at their corners except those in the reflecting plane, one position carries an arrow normal to its face and one corner position an arrow aimed at the origin O of the reference box" width="92%"></picture>
+
+### Setting up the measurement
+
+`levels_positions` is not any array of decibels: it is the per-position,
+per-band **time-averaged** level with the source running in its declared
+operating mode, taken through a chain the standard specifies. The whole
+instrumentation system (microphones, cables and the windscreen if one is
+fitted) shall meet IEC 61672-1 class 1, and the filters IEC 61260 class 1
+(clause 5.1). A class 1 IEC 60942 sound calibrator is applied to each microphone
+**before and after** each series to check the whole measuring chain, and, with
+no adjustment in between, the two readings shall differ by no more than
+**0,5 dB**; beyond that the series is discarded, not corrected (clause 5.2). The
+system's own compliance is verified in a traceable laboratory at intervals not
+exceeding two years, the calibrator's at intervals not exceeding one year. The
+mechanics of that check are on
+[Calibration](../../signals/metrology/calibration.md).
+
+Each microphone is oriented with its reference direction normal to the
+measurement surface, and at a corner of a box surface pointing at the origin $O$
+(clause 7.2.2), which is why a free-field capsule and a diffuse-field capsule
+are aimed differently on the same stand.
+
+Each level is time-averaged over a typical period of operation: the interval
+**should be 20 s or longer and shall be at least 10 s**, and it has to be stated
+in the test report (clause 8.2.1). A traversing microphone integrates over an
+integer number of full traverses, and at least two. The background reading is
+taken **immediately before or immediately after** the source reading, at the
+same positions and over the same interval; so `background_levels` is a
+same-day, same-array `(NM, NB)` measurement, not a spectrum copied from another
+session, and pairing mismatched readings is the most common way a $K_1$ ends up
+wrong.
 
 ```python
 import numpy as np
@@ -141,9 +231,8 @@ plt.show()
 </details>
 
 The A-weighted total $L_{W\mathrm{A}}$ is combined from the band powers with the
-ISO 3744
-Annex E A-weighting corrections, so it needs `frequencies`. Passing a
-`RoomEnvironment` as `room` (`reverberation_time` + `volume`, or
+ISO 3744 Annex E A-weighting corrections, so it needs `frequencies`. Passing
+a `RoomEnvironment` as `room` (`reverberation_time` + `volume`, or
 `absorption_area`, or `mean_absorption_coefficient` + `room_surface`) enables
 $K_2$; omit it and the field is treated as free ($K_2 = 0$). If the background margin drops below the
 grade criterion or $K_2$ exceeds the validity limit, a `SoundPowerWarning`
@@ -184,6 +273,65 @@ these habits:
   and keep the measurement distance small enough that $K_2$ stays well under
   the limit.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k1_k2_corrections_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k1_k2_corrections.svg" alt="Two panels. Left: the background correction K1 against the source-to-background margin, falling steeply from 1.26 dB at the 6 dB engineering criterion through 0.46 dB at 10 dB to 0.14 dB at 15 dB, with the region below 6 dB shaded and labelled as capped and the ISO 3746 3 dB criterion marked. Right: the environmental correction K2 against 4S/A on a logarithmic axis, with the ISO 3744 4 dB and ISO 3746 7 dB validity limits drawn and annotated with the 60 % and 80 % of the measured energy that is room rather than source, and a band showing the shift when the absorption area A is known only to plus or minus 20 per cent" width="92%"></picture>
+
+*The two corrections have opposite shapes. $K_1$ is flat until the margin
+closes and then rises steeply, which is why the standards cap it at the
+criterion rather than let the formula run on; $K_2$ grows without bound as the
+surface fills the room, and the ±20 % band shows what an estimated $A$ costs at
+the validity limit.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# K1 is read out of sound_power_pressure itself, by sweeping the background
+# under a fixed surface level; K2 is its own closed form.
+margins = np.linspace(0.5, 20.0, 200)
+k1 = [float(emission.sound_power_pressure(
+          np.full((10, 1), 80.0), "hemisphere", radius=2.0,
+          background_levels=np.full((10, 1), 80.0 - m),
+          frequencies=np.array([1000.0])).background_correction[0])
+      for m in margins]
+ratio = np.geomspace(0.05, 10.0, 200)
+
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12, 5))
+axl.plot(margins, k1)
+axl.axvline(6.0, linestyle="--")        # ISO 3744 criterion
+axl.set(xlabel="ΔLp [dB]", ylabel="K1 [dB]", ylim=(0, 4.2))
+axr.semilogx(ratio, 10.0 * np.log10(1.0 + ratio))
+axr.axhline(4.0, linestyle="--")        # ISO 3744 validity limit
+axr.set(xlabel="4S/A", ylabel="K2 [dB]")
+plt.show()
+```
+
+</details>
+
+One correction the enveloping-surface formula does **not** carry is
+meteorological. Eq. 18 assumes the reference characteristic impedance of air, so
+the determination is a determination "for the meteorological conditions at the
+time and place of the test" (clause 8.2.5). At altitudes above 500 m or
+temperatures below 10 °C that becomes a bias, and clause 8.2.5 then requires the
+result to be carried to reference conditions per **Annex G, which is
+normative**: the same kind of term the ISO 3741 and ISO 3745 sections write out
+explicitly as $C_1$ and $C_2$. The size of it: clause H.4.2.7 states that below
+500 m no meteorological or radiation-impedance correction is required, that at
+120 m and 23 °C the correction is zero, and that at 500 m it reaches 0.6 dB.
+Two of those three hold. Annex G, which is the normative text that same clause
+points at, puts the correction at 0.394 dB at 500 m and 23.0 °C, and the zero at
+120 m comes out exact, which is what shows its equations are being read as the
+standard intends. The 0.6 dB is a misprint, and it is recorded with the
+arithmetic in the [errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
+`sound_power_pressure` implements no such term and takes no temperature or
+pressure argument at all, so a determination at a mountain plant or outdoors in
+winter adds the Annex G correction afterwards: `reference_atmosphere_correction`
+evaluates $C_1 + C_2$ from the temperature and the static pressure (or the
+altitude, through Eq. G.2), and section 4 shows it applied, since Eq. G.1 adds
+it to $L_W$ exactly as Eq. G.3 adds it to $L_J$.
+
 ### `sound_power_pressure()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -207,7 +355,7 @@ Returns a `SoundPowerResult`: `sound_power_level` (per-band $L_W$),
 `surface_pressure_level` ($L_p$ after $K_1$/$K_2$), `mean_pressure_level`,
 `background_correction`/`environmental_correction` ($K_1$/$K_2$),
 `directivity_index` (apparent $DI_i^*$ per microphone position **and** frequency
-band, shape `(NM, NB)`; ISO 3744 clause 8.6), `surface_area`,
+band, shape `(NM, NB)`; ISO 3744 clause 8.4), `surface_area`,
 `sound_power_level_a` ($L_{W\mathrm{A}}$), `uncertainty` (expanded, 95 %) and `grade`.
 `measurement_positions('hemisphere', radius=…, n_reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
@@ -245,6 +393,56 @@ plt.show()
 
 </details>
 
+### How many positions, and when to add more
+
+Ten is the count for **one** reflecting plane. Against two planes the array is
+the five key positions 2, 3, 6, 7 and 9 of Table B.2; in a corner, against three
+planes, it is the three positions 1, 2 and 3 of Table B.3 (clause 8.1.1). The
+survey method uses coarser arrays again: four positions over one plane.
+
+Those counts are a starting point, not a result. Clause 8.1.1 requires
+**additional** positions if any one of three conditions holds:
+
+- **a)** the range of the A-weighted levels across the key positions exceeds
+  10 dB over one reflecting plane, 5 dB over two, or 3 dB over three;
+- **b)** the apparent A-weighted directivity index exceeds 5 dB in any
+  direction;
+- **c)** a large source radiates from only a small part of itself: the openings
+  of an otherwise enclosed machine being the standard's own example.
+
+The two have different answers. Condition a) is met by adding positions 11 to 20
+of the same table (or, equivalently, by repeating the key array with the source
+rotated −60° for Table B.1 or 180° for Table B.2): the surface is still sampled
+evenly, so the plain energy average still applies. Conditions b) and c) are met
+by a **localized investigation**, extra positions concentrated around the
+maximum numerically equal to the level range found, and those positions carry
+*unequal* segment areas, so the mean must then be the area-weighted one of
+clause 8.2.2.2 and not the equal-area average `sound_power_pressure` computes.
+Note 3 adds a priority rule that saves a lot of wasted work: when the background
+at any position is within 6 dB of the highest source level, reduce the
+background *before* adding positions, because a background that close is what is
+moving $DI_i^*$ in the first place.
+
+Both gates are one line each on the result the page has already computed:
+
+```python
+import numpy as np
+
+# The band-summed level per position (A-weight the bands first for the
+# standard's own A-weighted range; here the source is broadband enough that it
+# makes no difference to the verdict).
+lp_a = 10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=1))
+print(round(float(lp_a.max() - lp_a.min()), 2))       # 0.76 dB: condition a) clear
+print(round(float(np.abs(res.directivity_index).max()), 2))   # 1.1 dB: b) clear
+```
+
+$DI_i^*$ is the apparent directivity index of clause 8.4, the excess of the
+background-corrected level at position $i$ over the surface average, per position
+*and* per band; it is what the $K_2$ pitfall above meant by "shows up in the
+apparent directivity index". A machine that radiates 5 dB more towards one
+microphone than the surface average does not have a broken array: it has a
+directivity the ten positions cannot resolve.
+
 ## 2. Precision grade, anechoic room (ISO 3745)
 
 When the highest accuracy is required, ISO 3745 measures sound power in a
@@ -255,6 +453,17 @@ standardized microphone coordinates, a per-position background correction and an
 explicit meteorological correction.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic.svg" alt="ISO 3745 precision sound power in an anechoic room: wedge-lined walls, the device under test at the centre and a hemispherical array of microphones at a fixed radius, with the sound power level formed from the surface-averaged pressure plus the area, background and meteorological corrections" width="92%"></picture>
+
+The left-hand panel of the clip below is what that room is for. With the
+boundaries absorbing, a microphone sees only what the source sends its way, so
+the level falls with distance and the array has to sample a whole surface,
+which is why the only geometry the method needs, once the room is qualified, is
+the surface term $10\log_{10}(S/S_0)$. The right-hand panel is the
+reverberation-room alternative of
+[ISO 3741](sound-power-reverberation.md), and both
+end on the same $L_W$.
+
+**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
 
 **Sound power level (Clause 8).** The band sound power level is the
 surface-averaged pressure level plus the surface term and the corrections:
@@ -269,6 +478,39 @@ $S_0 = 1\ \text{m}^2$. $C_1$ and $C_2$ are the meteorological corrections
 the measurement radius. The microphone positions are the standardized
 unit-vector arrays of Tables D.1 (sphere), E.1 (hemisphere) and E.2 (hemisphere,
 broadband).
+
+There is no separate $K_1$ term in that formula because $\overline{L_p}$
+(unprimed, unlike section 1's) is the surface average of the levels **after**
+each one has been background-corrected on its own,
+
+$$
+\overline{L_p} = 10\log_{10}\left[\frac{1}{N_\mathrm{M}} \sum_i
+10^{0.1\left(L'_{pi} - K_{1i}\right)}\right]
+$$
+
+(clause 9.4.3.1). So the correction lives inside the average, one $K_{1i}$ per
+position, rather than being subtracted from the mean the way ISO 3744 does it.
+`mean_pressure_level` is the raw energy average and `surface_pressure_level` the
+corrected one, which is the $\overline{L_p}$ of the formula above.
+
+**The radius is not free** (clauses 8.1/8.2). It must satisfy $r \ge 2 d_0$ with
+$d_0$ the distance from the acoustic centre to the furthest point of the source
+(in a hemi-anechoic room, $r \ge 2 d_0$ or $r \ge 3 h_0$, whichever is larger,
+$h_0$ being the height of the acoustic centre above the floor), $r \ge \lambda/4$
+at the lowest frequency of interest, and $r \ge 1$ m (0.5 m only for a small,
+low-noise source over a limited band) with the whole surface inside the region
+qualified per Annex A or B. Worked: a 0.6 × 0.5 × 0.7 m benchtop source has
+$d_0 = \sqrt{0.3^2 + 0.25^2 + 0.7^2} = 0.80$ m, so $r \ge 1.6$ m; at a lowest
+band of 100 Hz, $\lambda/4 = 0.86$ m does not bind and neither does the 1 m
+floor. The `radius=1.0` of the examples below therefore fits only a source under
+about 0.5 m of characteristic dimension.
+
+**The array is not free either.** Positions 1 to 20 are used first, and 21 to 40
+are added only when the difference between the highest and lowest level in any
+band of interest is not less than half the number of positions; a check on data
+the reader already has, `levels.max(0) - levels.min(0) >= 0.5 * levels.shape[0]`.
+If 40 positions still fail it, a localized investigation is required and the
+positions then carry unequal areas, which is what `areas=` is for.
 
 ```python
 import numpy as np
@@ -285,6 +527,31 @@ res = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0)
 print(round(res.surface_area, 3))                 # 6.283  (2*pi*1^2)
 print(np.round(res.sound_power_level, 2))         # [81.85]
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_positions_arrays_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_positions_arrays.svg" alt="Two three-dimensional panels of the ISO 3745 microphone arrays on a 1 m radius. Left, the 40-position hemisphere of Table E.1 over its reflecting plane, with positions 1 to 20 in one colour and 21 to 40 in another to mark the escalation. Right, the 20-position full sphere of Table D.1 for the anechoic case, with no reflecting plane" width="92%"></picture>
+
+*The precision arrays, drawn from the same `precision_positions` call the
+snippet above makes. The first twenty sample the surface on their own; the
+second twenty are added only when the band level range triggers the escalation,
+and a localized investigation after that carries unequal areas.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (axl, axr) = plt.subplots(1, 2, subplot_kw={"projection": "3d"})
+emission.plot_microphone_positions(
+    emission.precision_positions("hemisphere", radius=1.0, n_positions=40),
+    ax=axl, radius=1.0)
+emission.plot_microphone_positions(
+    emission.precision_positions("sphere", radius=1.0, n_positions=20),
+    ax=axr, radius=1.0)
+plt.show()
+```
+
+</details>
 
 **Background and meteorological corrections.** The $K_1$ background correction is
 applied **per position** and floored where the signal-to-background difference is
@@ -316,6 +583,48 @@ plottable spectrum: the corrections fold into the
 `PrecisionSoundPowerResult` as its `c1`/`c2`/`c3` fields, and the `.report()`
 fiche prints them on its measurement-basis strip.
 
+The margins and the intervals behind those numbers are stricter than section 1's.
+The background, averaged over all positions, shall be at least **6 dB** below the
+source level in every band and at least **10 dB** below from 250 Hz to 5 kHz
+(clause 5.2.1.1), a band that cannot reach it may instead be excluded from the
+range of interest if its corrected A-weighted band power is at least 15 dB below
+the highest (clause 5.2.1.2). Where the margin falls short anyway, clause 9.4.2
+freezes $K_{1i}$ at the value the criterion produces, 1.26 dB for the bands at
+and below 200 Hz and at and above 6,3 kHz, 0,46 dB from 250 Hz to 5 kHz, and
+then *requires* the test report, and the tables and graphs in it, to state that
+those bands are upper bounds. `precision_background_correction` applies exactly
+that rule; declaring the omission is the reader's job.
+
+The averaging is longer than ISO 3744's: at least **30 s** in the bands centred
+at and below 160 Hz and at least **10 s** from 200 Hz up (clause 9.4.1), with the
+interval stated in the report, and at least two full traverses when a traversing
+microphone is used. The background is measured immediately before or immediately
+after the source, at the same positions and over the same interval. Forty
+positions at 30 s in the low bands is why a grade-1 run takes so much longer than
+the grade-2 one of section 1: the cost of the grade is mostly time.
+
+### `sound_power_anechoic()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_positions` | 2D array | dB | `(NM, NB)` | One row per position, one column per band |
+| `surface` | str | — | `'sphere'` / `'hemisphere'` | Anechoic or hemi-anechoic room |
+| `radius` | float | m | > 0 | Measurement radius $r$; bounded by $2 d_0$, $\lambda/4$ and the 1 m floor above |
+| `background_levels` | 2D array or spectrum | dB | matches `levels_positions` | Enables the per-position $K_{1i}$ of Eq. 11 |
+| `frequencies` | 1D array | Hz | one per band | Enables $L_{W\mathrm{A}}$ and the per-band $C_3$ |
+| `areas` | 1D array | m² | one per position | Unequal segment areas, for a localized investigation (clause 9.4.3.2); equal areas assumed when omitted |
+| `temperature_c` | float | °C | default `23.0` | Sets $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
+| `air_absorption_db_per_m` | float or 1D array | dB/m | default `None` | The $C_3$ air-absorption term; supplied, not computed |
+| `sigma_omc_db` | float | dB | default `0.0` | Operating and mounting standard deviation, clause 10.5 |
+| `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
+
+The last two are the whole uncertainty story, and the default hides it: left
+alone, `sigma_omc_db = 0` claims a perfectly repeatable installation and the fiche
+prints $U = 1.0$ dB. The 4.1 dB the example below reports is what the same
+determination costs once the clause 10.5 EXAMPLE value $\sigma_\text{omc} = 2.0$
+dB is admitted.
+
 Over several bands `sound_power_anechoic` returns a plottable
 `PrecisionSoundPowerResult` carrying the per-band $L_W$ and the A-weighted
 total:
@@ -332,8 +641,14 @@ base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
 rng = np.random.default_rng(7)
 levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
 
-result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
+# sigma_omc_db is the operating-and-mounting standard deviation of Clause 10.5;
+# with the EXAMPLE value 2.0 dB and the default coverage factor k = 2 the
+# expanded uncertainty U = k*sqrt(sigma_R0^2 + sigma_omc^2) is the 4.1 dB the
+# fiche below prints. Left at its default of 0 it reports 1.0 dB.
+result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0,
+                                       frequencies=freqs, sigma_omc_db=2.0)
 print(round(result.sound_power_level_a, 1))   # 89.3
+print(round(float(result.uncertainty), 1))    # 4.1  dB
 result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
 ```
 
@@ -385,8 +700,8 @@ plt.show()
 A sound power determination ends as a *document*. Every result of this page
 stays plottable while it is being worked on (`res.plot()` draws the same
 $L_W$ spectrum interactively that the fiche typesets), and the report step
-wraps it into the deliverable. Both the enveloping-surface result
-(`SoundPowerResult`, ISO 3744/3746) and the precision result
+wraps it into the deliverable. Both the enveloping-surface
+result (`SoundPowerResult`, ISO 3744/3746) and the precision result
 (`PrecisionSoundPowerResult`, ISO 3745) expose a `.report()` method that writes
 a one-page PDF fiche laid out like a sound-power test sheet: the standard-basis
 line naming the applied method and accuracy grade, an optional metadata header
@@ -410,9 +725,10 @@ precision method). Supplying `requirement` adds a PASS/FAIL verdict against a
 declared A-weighted sound-power limit (a sound-power emission is a quantity where
 less is better, so the source passes at or below the limit). `verbose=True`
 adds the energy-averaged level $L_p'$ to the table, and for the ISO 3744/3746
-surface result it also adds the $K_1$/$K_2$ correction columns (the ISO 3745
-precision result carries no $K_1$/$K_2$; its $C_1$/$C_2$/$C_3$ appear in the
-basis strip). `language="es"` renders the Spanish fiche with comma decimals.
+surface result it also adds the $K_1$/$K_2$ correction columns (the precision
+result has no $K_2$ at all and folds its per-position $K_1$ into the surface
+average, so the fiche prints $C_1$/$C_2$/$C_3$ on its basis strip in place of
+those columns). `language="es"` renders the Spanish fiche with comma decimals.
 
 ```python
 import numpy as np
@@ -444,14 +760,12 @@ res.report(
 )   # LWA = 103.7 dB(A) re 1 pW -> declared limit 105 dB(A): PASS
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-[![ISO 3744 sound power determination example report: a header with the client, the noise source, the hemi-anechoic test environment and the instrumentation and climate, the octave-band table (63 Hz to 8 kHz) of surface sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 103.7 dB(A) re 1 pW with the total LW = 105.8 dB, the expanded uncertainty U = 3.0 dB and the measurement surface S = 100.53 m2, and a PASS verdict against the declared 105 dB(A) limit, closed by a basis strip stating the applied K1 = 0.5 dB and K2 = 1.0 dB corrections](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3744_sound_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3744_sound_power_example.pdf)
+[![ISO 3744 sound power determination example report (PDF): One-page ISO 3744 sound-power determination fiche: a header with the client, the noise source, the hemi-anechoic test environment and the instrumentation and climate, the octave-band table (63 Hz to 8 kHz) of surface sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 103.7 dB(A) re 1 pW with the total LW = 105.8 dB, the expanded uncertainty U = 3.0 dB and the measurement surface S = 100.53 m2, and a PASS verdict against the declared 105 dB(A) limit, closed by a basis strip stating the applied K1 = 0.5 dB and K2 = 1.0 dB corrections.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3744_sound_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3744_sound_power_example.pdf)
 
-*Sound power determination fiche (`SoundPowerResult.report`), an ISO 3744
-engineering-grade hemisphere measurement with the $K_1$/$K_2$ corrections and
-the boxed $L_{W\mathrm{A}}$.*
+Sound power determination fiche (SoundPowerResult.report), an ISO 3744 engineering-grade hemisphere measurement with the K1/K2 corrections and the boxed LWA.
 
 The precision result writes the same sheet from the ISO 3745 side, with the
 meteorological corrections on its basis strip in place of the $K_1$/$K_2$ pair.
@@ -472,62 +786,59 @@ result.report(
 )   # LWA = 89.3 dB(A) re 1 pW, U = 4.1 dB
 ```
 
-[![ISO 3745 precision sound power determination example report: a header with the client, the noise source and the qualified anechoic room with its 40-position hemisphere array, the octave-band table from 125 Hz to 8 kHz of surface sound-pressure levels Lp and band sound-power levels LW (78.0, 79.0, 82.6, 85.8, 82.6, 78.7 and 78.0 dB), the LW spectrum peaking at 1 kHz, and the boxed A-weighted sound power level LWA = 89.3 dB(A) re 1 pW with the total LW = 90.1 dB, the expanded uncertainty U = 4.1 dB and the measurement surface S = 6.28 m2, over a basis strip stating the applied meteorological corrections C1 = -0.13 dB, C2 = 0.00 dB and C3 = 0.0 dB](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3745_precision_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3745_precision_power_example.pdf)
+[![ISO 3745 precision sound power determination example report (PDF): One-page ISO 3745 precision sound-power fiche: a header with the client, the noise source and the qualified anechoic room with its 40-position hemisphere array, the octave-band table from 125 Hz to 8 kHz of surface sound-pressure levels Lp and band sound-power levels LW (78.0, 79.0, 82.6, 85.8, 82.6, 78.7 and 78.0 dB), the LW spectrum peaking at 1 kHz, and the boxed A-weighted sound power level LWA = 89.3 dB(A) re 1 pW with the total LW = 90.1 dB, the expanded uncertainty U = 4.1 dB and the measurement surface S = 6.28 m2, over a basis strip stating the applied meteorological corrections C1 = -0.13 dB, C2 = 0.00 dB and C3 = 0.0 dB.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3745_precision_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3745_precision_power_example.pdf)
 
-*Precision sound power fiche (`PrecisionSoundPowerResult.report`), the ISO 3745
-anechoic determination: no $K_2$ at all, a 6.28 m² hemisphere instead of a
-100 m² one, and $U$ = 4.1 dB because the operating-and-mounting term dominates
-the reproducibility one.*
-
+Precision sound power fiche (PrecisionSoundPowerResult.report), the ISO 3745 anechoic determination with its meteorological corrections.
 
 ## 4. Sound energy level of a burst (clause 8.3)
 
 Everything above describes a source that runs steadily for the whole averaging
-interval: Eq. 18 reports a *rate* of energy flow. A press stroke, a door slam or
-a pneumatic exhaust radiates its energy in a fraction of a second and then
-stops, so the standard gives it the **sound energy level**
-$L_J = 10\log_{10}(J/J_0)$, $J = \int P(t)\,\mathrm{d}t$, $J_0 = 1$ pJ (clauses
-3.22 and 3.23), and determines it (clause 8.3; clause 8.4 of ISO 3746 for the
-survey grade) by the chain of section 1 with the **single event time-integrated
-sound pressure level** $L_E = 10\log_{10}[\int p^2\,\mathrm{d}t / E_0]$,
-$E_0 = (20\ \mu\text{Pa})^2$ s (clause 3.4), in place of $L_p$: measured
-through a window that encompasses the whole burst at every position at once
-(no traversing microphone, clause 8.3.1), energy-averaged over the positions
-(clause 8.3.3), corrected by the same $K_1$ (Eq. 21) and $K_2$ (Eq. 22) and
-closed by the surface term (Eq. 23):
+interval: Eq. 18 reports a *rate* of energy flow, and it characterises the
+machine only while the machine is time-invariant. A press stroke, a door slam
+or a pneumatic exhaust radiates its energy in a fraction of a second and then
+stops, so the standard gives it a quantity of its own, the **sound energy
+level**
+
+$$
+L_J = 10\log_{10}\frac{J}{J_0}, \qquad J = \int_{t_1}^{t_2} P(t)\,\mathrm{d}t, \qquad J_0 = 1\ \text{pJ}
+$$
+
+(clauses 3.22 and 3.23): the energy the event radiates, in decibels re 1 pJ,
+in place of the power it does not have. Its determination (clause 8.3, and
+clause 8.4 of ISO 3746 for the survey grade) is the chain of section 1 with one
+substitution. Each microphone records the **single event time-integrated sound
+pressure level**
+
+$$
+L_E = 10\log_{10}\left[\frac{\int_{t_1}^{t_2} p^2(t)\,\mathrm{d}t}{E_0}\right], \qquad E_0 = (20\ \mu\text{Pa})^2\ \text{s}
+$$
+
+(clause 3.4) through a window that encompasses the whole burst, at every
+position at once (a traversing microphone is not permitted, clause 8.3.1), and
+$L_E$ then goes wherever $L_p$ went: the energy average over the positions of
+8.2.2 (clause 8.3.3), the background correction $K_1$ (Eq. 21) and the
+environmental correction $K_2$ (Eq. 22), the surface term (Eq. 23):
 
 $$
 L_J = \overline{L'_E} - K_1 - K_2 + 10\log_{10}\frac{S}{S_0}.
 $$
 
-The two quantities meet on a steady source: over a window of duration $T$ the
-integral of a constant $p^2$ is $T p^2$, so $L_E = L_{p,T} + 10\log_{10}(T/T_0)$,
-$T_0 = 1$ s (clause 3.4 NOTE 1), and $L_J = L_W + 10\log_{10}(T/T_0)$. That
-identity is what the figure draws and what the library's tests pin the sound
-energy chain to, field by field.
+The two quantities meet on a steady source. Over a window of duration $T$ the
+integral of a constant $p^2$ is $T p^2$, so $L_E = L_{p,T} + 10\log_{10}(T/T_0)$
+with $T_0 = 1$ s (clause 3.4 NOTE 1), and the energy a steady source radiates
+in $T$ seconds is $L_J = L_W + 10\log_{10}(T/T_0)$: a machine of 90 dB running
+for 10 s has put out $L_J = 100$ dB. That identity is what the figure below
+draws, and what the library's own tests pin the sound energy chain to, field by
+field.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_energy_burst_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_energy_burst.svg" alt="Two panels. Left, the running single event level of an impact burst and of a steady 80 dB source through a 10 s window: the burst starts at 2 s and its curve is flat at 90 dB within about a second, the steady source climbs as 10 lg(t/T0) and reaches the same 90 dB at the dashed line T = 10 s. Right, seven octave-band bars from 125 Hz to 8 kHz of the burst's sound energy level over a 2 m hemisphere, rising from 95 dB at 125 Hz to 103.5 dB at 1 kHz and falling to 91 dB at 8 kHz, with the A-weighted total of 107.7 dB(A) in the title" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_energy_burst_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_energy_burst.svg" alt="Two panels. Left, the running single event level of an impact burst and of a steady 80 dB source through a 10 s window: the burst starts at 2 s and its curve is flat at 90 dB within about a second, the steady source climbs as 10 lg(t/T0) and reaches the same 90 dB at the dashed line T = 10 s; two chips read that all of the burst's 90 dB is in the first second and that the steady source's L_E is L_p plus 10 lg(T/T0), 80 plus 10. Right, seven octave-band bars from 125 Hz to 8 kHz of the burst's sound energy level over a 2 m hemisphere, rising from 95 dB at 125 Hz to 103.5 dB at 1 kHz and falling to 91 dB at 8 kHz, with the A-weighted total of 107.7 dB(A) in the title" width="96%"></picture>
 
-*Left, the running single event level of an impact burst and of a steady 80 dB
-source through a 10 s window: the burst's 90 dB is all there within a second of
-the impact, the steady source climbs as $10\log_{10}(t/T_0)$ and reaches the
-same 90 dB at $T$. Right, the octave-band $L_J$ of the same press stroke over a
-2 m hemisphere, with the A-weighted total in the title.*
-
-The standard asks for at least **five** events (clause 8.3.1), one at a time or
-as one reading that spans them all, and reduces both to the level of one event
-at each position: the energy average of the $N_\mathrm{e}$ readings (Eq. 19) or
-the one reading less $10\log_{10} N_\mathrm{e}$ (Eq. 20). `sound_energy_pressure`
-takes `levels_positions` as a `(Ne, NM, NB)` array of the events one at a time,
-an `(NM, NB)` reading with `n_events=Ne`, or the `(NM, NB)` mean already formed;
-`mean_single_event_level` is the same reduction on its own. The background is
-the time-averaged level measured over the same window (clause 8.3.1), and it is
-compared as its exposure over that window, $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$,
-so that the energies Eq. 21 subtracts share one reference (the two levels are
-re $E_0 = p_0^2 \cdot 1$ s and re $p_0^2$ respectively; the
-[errata registry](../../ERRATA.md) records the reading); `integration_time` is
-therefore required with `background_levels`, and the criteria and clamp are
-section 1's.
+*Left, the running single event level of an impact burst and of a steady
+80 dB source through a 10 s window: the burst's 90 dB is all there within a
+second of the impact, the steady source climbs as $10\log_{10}(t/T_0)$ and
+reaches the same 90 dB at $T$. Right, the octave-band $L_J$ of the same press
+stroke measured over a 2 m hemisphere, with the A-weighted total in the
+title.*
 
 ```python
 import numpy as np
@@ -551,6 +862,106 @@ print(round(float(burst.environmental_correction[0]), 2))  # K2 = 2.64 dB
 print(np.round(burst.sound_energy_level, 1))               # per-band LJ, peaking at 103.5 dB at 1 kHz
 print(round(burst.sound_energy_level_a, 1))                # LJA = 107.7 dB(A)
 
+burst.plot()   # LJ per band, LJA in the title (needs matplotlib)
+```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Left: the running single event level of the two sources. The burst decays
+# with a 0.35 s time constant and holds an exposure of 90 dB; the steady
+# source is 80 dB, so it reaches the same 90 dB at T = 10 s.
+p0_sq = (20e-6) ** 2
+e0 = p0_sq * 1.0
+t = np.linspace(0.0, 10.0, 4001)
+dt = t[1] - t[0]
+burst_p2 = np.where(t >= 2.0, (e0 * 1e9 / 0.35) * np.exp(-(t - 2.0) / 0.35), 0.0)
+steady_p2 = np.full_like(t, p0_sq * 1e8)
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+with np.errstate(divide="ignore"):
+    axl.plot(t, 10 * np.log10(np.cumsum(burst_p2) * dt / e0), label="impact burst")
+    axl.plot(t, 10 * np.log10(np.cumsum(steady_p2) * dt / e0), label="steady, 80 dB")
+axl.set(xlabel="Time [s]", ylabel="Single event level LE(t) [dB]", ylim=(60, 94))
+axl.legend()
+
+# Right: the LJ spectrum is the result computed above.
+burst.plot(ax=axr)
+plt.show()
+```
+
+</details>
+
+### Five events, one at a time or all at once
+
+The standard asks for at least **five** events (clause 8.3.1), measured either
+one at a time or as one reading that spans them all, and reduces both to the
+level of *one* event at each position: the energy average of the $N_\mathrm{e}$
+single readings,
+
+$$
+L'_{Ei} = 10\log_{10}\left[\frac{1}{N_\mathrm{e}}\sum_{q=1}^{N_\mathrm{e}} 10^{0.1 L'_{Ei,q}}\right]
+\qquad \text{(Eq. 19)},
+$$
+
+or the one reading less the $10\log_{10} N_\mathrm{e}$ of the events it holds,
+
+$$
+L'_{Ei} = L'_{Ei,N_\mathrm{e}} - 10\log_{10} N_\mathrm{e} \qquad \text{(Eq. 20)}.
+$$
+
+`sound_energy_pressure` takes the three forms `levels_positions` comes in: a
+`(Ne, NM, NB)` array of the events measured one at a time (Eq. 19, as in the
+snippet above), an `(NM, NB)` reading of one measurement encompassing
+`n_events=Ne` events (Eq. 20), or the `(NM, NB)` mean single event level already
+formed. Fewer than five events are accepted with a `SoundPowerWarning`, and
+`mean_single_event_level` exposes the same reduction on its own:
+
+```python
+five_at_once = emission.mean_single_event_level(np.full((10, 1), 97.0), n_events=5)
+print(round(float(five_at_once[0, 0]), 2))          # 90.01 dB: 97 - 10 lg 5 (Eq. 20)
+one_by_one = emission.mean_single_event_level(np.array([89.0, 91.0, 90.0, 90.5, 89.5]))
+print(round(float(one_by_one), 2))               # 90.06 dB: the energy mean (Eq. 19)
+```
+
+### The background is compared over the same window
+
+Clause 8.3.1 has the background measured as a *time-averaged* level over the
+same integration time $T$ as the events, and Eq. 21 forms $K_1$ from
+$\Delta L_E = \overline{L'_E} - \overline{L_{p(\mathrm{B})}}$. Those two levels
+do not share a reference: $L_E$ is an energy re $E_0 = p_0^2 \cdot 1$ s and
+$L_p$ a mean-square pressure re $p_0^2$, and $K_1$ subtracts one energy from
+another. The energy the background contributes to a window of $T$ seconds is
+its own exposure over that window, $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$
+(the same NOTE 1 identity), so that is what `sound_energy_pressure` compares
+the event level with, and why `integration_time` is required whenever
+`background_levels` is given. Read literally, a 62 dB background under a 78 dB
+burst in a 10 s window would look 16 dB down and earn no correction; as an
+energy it is 72 dB, the margin is the 6 dB engineering criterion, and $K_1$ is
+its full 1.26 dB. The [errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)
+records the reading. With the background in place, the criteria and the clamp
+are section 1's: 6 dB to 15 dB for the engineering grade, 3 dB to 10 dB for the
+survey grade of ISO 3746, and a `SoundPowerWarning` when a band falls below
+them.
+
+```python
+# 62 dB time-averaged over 10 s is 72 dB re E0; a 78 dB burst is then 6 dB above it.
+k1 = emission.sound_energy_pressure(
+    np.full((10, 1), 78.0), "hemisphere", radius=2.0,
+    background_levels=np.full(1, 62.0), integration_time=10.0,
+).background_correction
+print(round(float(k1[0]), 2))    # K1 = 1.26 dB, the value at the 6 dB criterion
+```
+
+The identity with section 1 then holds to the last digit. The same ten
+positions, background and room, with every level raised by $10\log_{10}(T/T_0)$
+for a 10 s window, give $L_J$ exactly 10 dB above $L_W$ in every band, and the
+same $K_1$, $K_2$ and expanded uncertainty, which clause 9.1 (Eq. 24) makes
+common to both quantities:
+
+```python
 # The section 1 measurement read as a 10 s window: LJ = LW + 10 lg(T/T0) exactly.
 octaves_hz = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000])
 rng = np.random.default_rng(0)
@@ -566,105 +977,128 @@ ten_seconds = emission.sound_energy_pressure(
     background_levels=quiet, integration_time=10.0, frequencies=octaves_hz, room=workshop,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   # 10.0 in every band
-
-# Annex G: a determination at 1 200 m and 8 C carried to 101.325 kPa and 23 C (Eq. G.3).
-corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
-print(round(corr.static_pressure_kpa, 1), round(corr.total, 2))   # 87.7 kPa, C1 + C2 = 0.68 dB
-lj_ref = burst.sound_energy_level + corr.total
-
-burst.plot()   # LJ per band, LJA in the title (needs matplotlib)
+print(round(ten_seconds.sound_energy_level_a - steady.sound_power_level_a, 6))  # 10.0
 ```
 
-Eq. 23 holds for the meteorological conditions of the test; above 500 m of
-altitude or below 10 °C clause 8.3.6 requires the Annex G correction
-$L_{J\mathrm{ref,atm}} = L_J + C_1 + C_2$ (Eq. G.3), which
-`reference_atmosphere_correction` evaluates from the temperature and the static
-pressure, or from the altitude through Eq. G.2. `sound_energy_pressure` takes the
-surface, position and room arguments of `sound_power_pressure` plus `n_events`,
-`background_levels` with `integration_time`, and returns a `SoundEnergyResult`
-(`sound_energy_level`, `surface_event_level`, `mean_event_level`,
-`background_correction`, `environmental_correction`, `directivity_index`,
-`surface_area`, `sound_energy_level_a`, `uncertainty`, `grade`, `n_events`,
-`integration_time`) with `.plot()`.
+### Reference meteorological conditions (Annex G)
+
+Eq. 23 holds for the meteorological conditions of the test, and above 500 m of
+altitude or below 10 °C clause 8.3.6 requires the level to be carried to the
+reference 101.325 kPa and 23.0 °C by Annex G, $L_{J\mathrm{ref,atm}} = L_J + C_1 + C_2$
+(Eq. G.3), with
+
+$$
+C_1 = -10\log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}} + 5\log_{10}\frac{273.15 + \theta}{\theta_0}, \qquad
+C_2 = -10\log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}} + 15\log_{10}\frac{273.15 + \theta}{\theta_1},
+$$
+
+$\theta_0 = 314$ K and $\theta_1 = 296$ K. $C_1$ is the reference-quantity
+correction through the characteristic impedance of the air (omitted when $K_2$
+came from the absolute comparison test of A.2), $C_2$ the radiation-impedance
+correction of a monopole. Where the static pressure was not measured, Eq. G.2
+estimates it from the altitude, $p_\mathrm{s} = p_{\mathrm{s},0}(1 - aH_\mathrm{a})^b$.
+Annex H.4.2.7's check that the correction vanishes at 120 m and 23 °C holds to
+a ten-thousandth of a decibel.
+
+```python
+# A determination at 1 200 m and 8 C, carried to 101.325 kPa and 23 C (Eq. G.3).
+corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
+print(round(corr.static_pressure_kpa, 1))    # 87.7 kPa, from Eq. G.2
+print(round(corr.c1, 3), round(corr.c2, 3), round(corr.total, 2))   # 0.386 0.291 0.68 dB
+lj_ref = burst.sound_energy_level + corr.total    # Eq. G.3; Eq. G.1 adds the same to LW
+```
+
+### `sound_energy_pressure()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_positions` | 2D or 3D array | dB | `(NM, NB)` or `(Ne, NM, NB)` | Single event levels: per-event on the first axis (Eq. 19), one reading of `n_events` events (Eq. 20), or the mean of one event |
+| `surface`, `radius`, `dimensions`, `distance`, `n_reflecting_planes` | as in section 1 | | | The same measurement surface and minimum position counts |
+| `n_events` | int or None | | `>= 1`, default `None` | $N_\mathrm{e}$ encompassed by one reading (Eq. 20); at least 5 without a warning |
+| `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Time-averaged background over the same window; enables $K_1$ (Eq. 21) |
+| `integration_time` | float | s | > 0, required with `background_levels` | The window $T$; the background is compared as its exposure $L_{p(\mathrm{B})} + 10\log_{10}(T/T_0)$ |
+| `frequencies` | 1D array | Hz | nominal band centres | Enables $L_{J\mathrm{A}}$ (Eq. E.2) |
+| `room` | `RoomEnvironment` or None | | default `None` (free field) | The room data behind $K_2$, as in section 1 |
+| `grade` | str | | `'engineering'` (default) / `'survey'` | ISO 3744 clause 8.3 vs ISO 3746 clause 8.4 |
+| `sigma_omc_db` | float | dB | default `0.0` | $\sigma_\text{omc}$, folded into $U$ as for $L_W$ |
+
+Returns a `SoundEnergyResult`: `sound_energy_level` (per-band $L_J$),
+`surface_event_level` ($\overline{L_E}$ after $K_1$/$K_2$, Eq. 22),
+`mean_event_level` ($\overline{L'_E}$), `background_correction`/
+`environmental_correction`, `directivity_index` (per position and band),
+`surface_area`, `sound_energy_level_a` ($L_{J\mathrm{A}}$), `uncertainty`,
+`grade`, `n_events` ($N_\mathrm{e}$, or `None` when the means were supplied) and
+`integration_time`. `reference_atmosphere_correction(temperature_c,
+static_pressure_kpa=…, altitude=…)` returns a `ReferenceAtmosphereCorrection`
+with
+`c1`, `c2`, their `total` and the `static_pressure_kpa` used.
+
+## What this guide covers
+
+- **Covered.** The ISO 3744/3746 enveloping-surface determination (`sound_power_pressure`):
+  the hemisphere and box surface areas, the $K_1$ background and $K_2$
+  environmental corrections with their validity limits, the Annex B microphone
+  positions (`measurement_positions`, `plot_microphone_positions`) and the Annex
+  E A-weighted total. The ISO 3745 precision determination
+  (`sound_power_anechoic`): the Annex D/E fixed arrays (`precision_positions`),
+  the per-position background correction (`precision_background_correction`, Eq.
+  11), the meteorological corrections $C_1$/$C_2$/$C_3$ and the Clause 10.5
+  expanded uncertainty (`precision_uncertainty`). Both results render the
+  accredited-style sound-power fiche through `.report()`. The sound energy level
+  $L_J$ of a noise burst over the same enveloping surface
+  (`sound_energy_pressure`, ISO 3744 clause 8.3 and ISO 3746 clause 8.4): the
+  single event levels of $N_\mathrm{e}$ events one at a time or in one reading
+  (`mean_single_event_level`, Eq. 19/20), the $K_1$ of Eq. 21 with the background
+  compared over the same window, $K_2$, Eq. 23 and the Annex E $L_{J\mathrm{A}}$,
+  and the Annex G correction to reference meteorological conditions
+  (`reference_atmosphere_correction`, Eq. G.1/G.3).
+
+- **Not covered.** Neither determination performs the facility qualification it rests on: the
+  free-field qualification of the anechoic or hemi-anechoic room is its own
+  step, by ISO 26101 against the amended ISO 3745 Annex A, in
+  [Free Field and Reference Sources](free-field-qualification.md),
+  whose verdict `sound_power_anechoic` takes as `room_qualification` and warns
+  on, and ISO 3744's $K_2$ validity only warns. ISO
+  3744's **Annex G** correction to reference meteorological conditions, required
+  above 500 m of altitude or below 10 °C (clauses 8.2.5 and 8.3.6), is evaluated
+  by `reference_atmosphere_correction` but never applied inside a determination:
+  `sound_power_pressure` and `sound_energy_pressure` take no temperature or
+  pressure argument, and the sum is added by hand. ISO 3745 defines no sound
+  energy level of its own, so a burst in the precision anechoic room has no
+  route here. The $C_3$
+  meteorological correction of ISO 3745 needs an air-absorption coefficient the
+  caller supplies (`air_absorption_db_per_m=`); this module does not compute
+  it from ISO 9613-1 itself. Choosing among the seven routes, and the ISO 4871
+  declaration a result feeds, live in [Sound
+  Power](sound-power.md).
 
 ## See also
 
-- [Sound Power](sound-power.md): choosing among the seven determination
-  routes, what the accuracy grades promise, and the ISO 4871 noise-emission
-  declaration a measured $L_{W\mathrm{A}}$ feeds.
+- [Sound Power](sound-power.md): choosing among the seven
+  determination routes, the accuracy grades and the ISO 4871 noise-emission
+  declaration.
 - [Sound Power in the Reverberation Room (ISO 3741)](sound-power-reverberation.md):
   the precision-grade diffuse-field alternative when the source can travel
   to a qualified room.
 - [Sound Power by Intensity Scanning (ISO 9614)](sound-power-intensity.md):
   the routes that tolerate the steady background noise a pressure method
   cannot subtract.
-- [Room Acoustics](../../buildings/rooms/room-acoustics.md): the reverberation time and equivalent
-  absorption area that feed $K_2$.
-- [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
-- [Theory](../../reference/theory/environment-transport.md): the $K_1$/$K_2$ and $C_1$/$C_2$
-  derivations.
+- [Room Acoustics](../../buildings/rooms/room-acoustics.md): the reverberation
+  time and equivalent absorption area that feed $K_2$.
+- [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting
+  behind $L_{W\mathrm{A}}$.
+- [Theory](../../reference/theory/environment-transport.md): the $K_1$/$K_2$
+  and $C_1$/$C_2$ derivations.
 - API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/).
+- Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface derivation of ISO 3744/3746 and the environmental correction it needs.
 
 ## References
 
-- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
-  transducers*. Academic Press. ISBN 978-0-12-391421-7.
-  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
-  Radiation and sound fields: the free-field relations between pressure and
-  power that the enveloping-surface and anechoic methods rest on.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for an essentially free
-  field over a reflecting plane* (ISO 3744:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52055.html).
-  The enveloping-surface method of section 1.
-- International Organization for Standardization. (2012). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms* (ISO 3745:2012).
-  [iso.org catalogue](https://www.iso.org/standard/45362.html).
-  The precision anechoic-room method of section 2.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Survey method using an enveloping
-  measurement surface over a reflecting plane* (ISO 3746:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52056.html).
-  The survey grade of section 1, sharing the enveloping-surface formulae
-  with coarser criteria.
-
-## Standards
-
-ISO 3744:2010, *Acoustics — Determination of sound power levels
-and sound energy levels of noise sources using sound pressure — Engineering
-methods for an essentially free field over a reflecting plane*: the
-enveloping-surface method: hemisphere and box surface areas, the $K_1$/$K_2$
-corrections, the Annex B microphone positions and the Annex E A-weighting.
-ISO 3746:2010, *… Survey method using an enveloping measurement surface over a
-reflecting plane*: the survey grade sharing the same formulae with coarser
-criteria. ISO 3745:2012, *… Precision methods for anechoic rooms and
-hemi-anechoic rooms*: the Clause 8 power level, the per-position background
-correction (Eq. 11), the meteorological corrections and the standardized
-microphone arrays of section 2.
-
-The sound energy level $L_J$ of a noise burst over the same enveloping
-surface is section 4: `sound_energy_pressure` (ISO 3744 clause 8.3, ISO 3746
-clause 8.4) with `mean_single_event_level` (Eq. 19/20) and the Annex G
-correction of `reference_atmosphere_correction` (Eq. G.1/G.3).
-
-**Not covered.** Neither determination performs the facility qualification it
-rests on: the free-field qualification of the anechoic or hemi-anechoic room
-is its own step, by ISO 26101 against the amended ISO 3745 Annex A, in
-[Free Field and Reference Sources](free-field-qualification.md), whose verdict
-`sound_power_anechoic` takes as `room_qualification` and warns on, and
-ISO 3744's $K_2$ validity only warns.
-ISO 3744 **Annex G**, the correction to reference meteorological conditions
-required above 500 m of altitude or below 10 °C (clauses 8.2.5 and 8.3.6), is
-evaluated by `reference_atmosphere_correction` but never applied inside a
-determination: `sound_power_pressure` and `sound_energy_pressure` take no
-temperature or pressure argument, and the sum is added by hand. ISO 3745
-defines no sound energy level of its own, so a burst in the precision anechoic
-room has no route here. The
-$C_3$ meteorological correction of ISO 3745 needs an air-absorption coefficient
-the caller supplies through `air_absorption_db_per_m=`; this module does not
-compute it from **ISO 9613-1** itself.
-
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+  ISBN 978-0-12-391421-7. Radiation and sound fields: the free-field relations between pressure and power that the enveloping-surface and anechoic methods rest on.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane*](https://www.iso.org/standard/52055.html) (ISO 3744:2010).
+  The enveloping-surface method of section 1: hemisphere and box surface areas, the K1/K2 corrections, the Annex B microphone positions and the Annex E A-weighting.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Survey method using an enveloping measurement surface over a reflecting plane*](https://www.iso.org/standard/52056.html) (ISO 3746:2010).
+  The survey grade of section 1, sharing the enveloping-surface formulae with coarser criteria.
+- **International Organization for Standardization. (2012).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms*](https://www.iso.org/standard/45362.html) (ISO 3745:2012).
+  The precision anechoic-room method of section 2: the Clause 8 power level, the per-position background correction (Eq. 11), the meteorological corrections and the standardized microphone arrays.

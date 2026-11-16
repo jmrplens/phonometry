@@ -20,11 +20,12 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { pageMarkdown } from '../src/lib/agent-md/page.mjs';
+import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { pageLines, splitLines } from '../src/lib/markdown-fences.mjs';
 import { readDeclaredDesignations } from './shared/search-index.mjs';
 import { pageMarkup } from './shared/markdown-spans.mjs';
-import { stripFrontmatter, stripMdx } from './shared/page-twin.mjs';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REPOSITORY = join(SITE, '..');
@@ -52,16 +53,29 @@ test('the walk of a page reads its lines alike, their line ends carriage returns
   assert.deepEqual(roles(splitLines(withCarriageReturns(text))), roles(splitLines(text)));
 });
 
-test('the markup of a page and its Markdown copy are the same with carriage returns', () => {
+test('the markup of a page and its Markdown copy are the same with carriage returns', async (t) => {
   const text = readCommittedText(GUIDE);
   const crlf = withCarriageReturns(text);
   const tags = (page) => (pageMarkup(page).match(/<ReportPreview\b/g) ?? []).length;
   assert.equal(tags(crlf), tags(text));
   // A code example that prints a mapping is code, not an expression the copy
-  // has to write as a value.
-  const building = readCommittedText(join(CONTENT, 'es', 'vibration', 'structural', 'building-response.mdx'));
-  const copy = (page) => stripMdx(stripFrontmatter(page), { value: () => undefined, origin: 'https://docs.jmrp.io' });
-  assert.equal(copy(withCarriageReturns(building)).replace(/\r\n/g, '\n'), copy(building));
+  // has to write as a value. The copy is the one the build publishes, written
+  // by scripts/agent-md.mjs from the page source.
+  const page = join('es', 'vibration', 'structural', 'building-response.mdx');
+  const building = readCommittedText(join(CONTENT, page));
+  const registry = await loadRegistry();
+  const root = scratch(t);
+  const copy = async (source, name) => {
+    const file = join(root, name, page);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, source);
+    return (await pageMarkdown(file, { registry, contentDir: join(root, name) })).markdown;
+  };
+  const lf = await copy(building, 'lf');
+  assert.match(lf, /"n_stories": 18/, 'the code example is in the copy');
+  const fromCrlf = await copy(withCarriageReturns(building), 'crlf');
+  assert.ok(!fromCrlf.includes('\r'), 'no carriage return reaches the copy');
+  assert.equal(fromCrlf, lf);
 });
 
 test('the bibliography of a page reads the same with carriage returns', async (t) => {

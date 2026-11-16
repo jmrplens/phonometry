@@ -1128,6 +1128,24 @@ test('a dataset whose url points at no table on its page fails', (t) => {
 	assert.match(ran.err, /plateau: the dataset's url points at #catalogue-plateau, and the page holds no such table/);
 });
 
+test("the overview's DataCatalog may name its page's own Markdown copy as an encoding, and no other", (t) => {
+	// Every page publishes a Markdown copy and names it in its structured data
+	// (\`encoding\`, text/markdown, its own index.md); on the overview that
+	// node is the DataCatalog, and the copy lists the catalogue pages, not
+	// their rows. A download of the rows stays refused.
+	const own = catalogueBuild();
+	for (const lang of ['en', 'es']) {
+		const article = own[`${lang}/overview`].article;
+		article.encoding = { '@type': 'MediaObject', encodingFormat: 'text/markdown', contentUrl: `${article.url}index.md` };
+	}
+	assert.equal(check(t, own).status, 0);
+	const other = catalogueBuild();
+	other['en/overview'].article.encoding = { '@type': 'MediaObject', encodingFormat: 'text/csv', contentUrl: 'https://example.org/rows.csv' };
+	const ran = check(t, other);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /\/reference\/catalogues\/: the DataCatalog claims encoding/);
+});
+
 test('an overview that is not a DataCatalog, or lists other datasets than the pages publish, fails', (t) => {
 	const built = catalogueBuild();
 	const english = built['en/overview'].article;

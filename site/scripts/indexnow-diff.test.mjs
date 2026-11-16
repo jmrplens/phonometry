@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
-import { hasMarkdownCopy, releaseHeaderKeys, withheldRoutes, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
+import { hasMarkdownCopy, releaseHeaderKeys, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
 import {
 	DEPLOY_BRANCH,
 	MANIFEST_NAME,
@@ -216,8 +216,8 @@ test('a previous manifest that cannot be read sends every URL, and says why, whe
 	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
 });
 
-test('a copy that differs only in its Version: and Install: lines hashes the same', (t) => {
-	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install']);
+test('a copy that differs only in its release lines (Version:, Install:, Pre-release:) hashes the same', (t) => {
+	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release']);
 	const stamped = (version) =>
 		Object.fromEntries(
 			Object.keys(BASE).map((route) => [
@@ -227,6 +227,27 @@ test('a copy that differs only in its Version: and Install: lines hashes the sam
 		);
 	const sent = submit(t, stamped('4.0.0'), stamped('4.0.1'));
 	assert.deepEqual(sent.urls, []);
+});
+
+test('the stamp of a pre-release, which takes its Pre-release: line away, moves no copy', (t) => {
+	// While VERSION is a pre-release every copy says it is not on PyPI yet
+	// (src/lib/agent-md/header.mjs); stamping 4.0.0rc1 as 4.0.0 drops that
+	// line from all of them at once and changes nothing a page says.
+	const stamped = (version, pre) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [
+				route,
+				guide(route, {
+					header: [
+						`Version: phonometry ${version}`,
+						'Install: pip install "phonometry[full]"',
+						...(pre ? [`Pre-release: phonometry ${version} is not on PyPI yet`] : []),
+						'License: MIT',
+					],
+				}),
+			]),
+		);
+	assert.deepEqual(submit(t, stamped('4.0.0rc1', true), stamped('4.0.0', false)).urls, []);
 });
 
 test('every other header line, and the same words in the body, still move a page', (t) => {
@@ -249,22 +270,20 @@ test('a new title, description or date moves a page whose copy did not change', 
 	}
 });
 
-test('a landing page with no copy is read from its <main>, and its asset links do not move it', (t) => {
+test('the page with no copy is read from its <main>, and its asset links do not move it', (t) => {
 	const landing = (text) => ({ title: 'phonometry', description: 'The library.', lastmod: '2026-10-01', main: `<h1>phonometry</h1><p>${text}</p><script>let x = 1;</script>`, copy: null });
-	const before = { ...BASE, '/': landing('1893 conformance checks') };
+	const before = { ...BASE, '/404/': landing('1893 conformance checks') };
 	const assets = submit(t, before, before, { head: '<link rel="stylesheet" href="/phonometry/_astro/index.C0ffee12.css">' });
 	assert.deepEqual(assets.urls, []);
-	const text = submit(t, before, { ...BASE, '/': landing('1900 conformance checks') });
-	assert.deepEqual(text.urls, [url('/')]);
+	const text = submit(t, before, { ...BASE, '/404/': landing('1900 conformance checks') });
+	assert.deepEqual(text.urls, [url('/404/')]);
 });
 
-test('a page that renders its data through a component is read from its <main>, whatever copy lies beside it', (t) => {
-	// The rule is src/lib/page-markdown.mjs's, on the site's own tree: pages
-	// such as the catalogues publish no copy, and the manifest reads what the
-	// page shows instead, as it does on the landing pages.
-	const tree = { contentDir: join(HERE, '..', 'src', 'content', 'docs'), docsDir: join(HERE, '..', '..', 'docs') };
-	const route = [...withheldRoutes(tree)].find((name) => name !== '' && name !== 'es');
-	assert.ok(route, 'the site has no page besides the landing pages that publishes no copy');
+test('a page with no copy is read from its <main>, whatever copy lies beside it', (t) => {
+	// The rule is src/lib/page-markdown.mjs's: every page written as a file
+	// publishes a copy, and the one route without one, Starlight's 404, is read
+	// from what it shows.
+	const route = '404';
 	assert.equal(hasMarkdownCopy(route), false);
 	const at = `/${route}/`;
 	const data = (row, stray = null) => ({ ...guide(at), main: `<h1>Data</h1><table><tr><td>${row}</td></tr></table>`, copy: stray });
@@ -330,11 +349,9 @@ test("what the frame puts in a page's <main> does not move it, and the page's ow
 	for (const [what, parts] of Object.entries(own)) assert.notEqual(textOf(parts), textOf(), what);
 	assert.match(textOf(), /^Data Data Density 7850 kg\/m3 A term\. Defined in: ISO 1683:2015 A guide The values are those of the sources cited\.$/);
 
-	// The same on a build: the manifest reads a page the site gives no copy
+	// The same on a build: the manifest reads the page the site gives no copy
 	// that way, so a deploy that changed only the frame submits nothing.
-	const tree = { contentDir: join(HERE, '..', 'src', 'content', 'docs'), docsDir: join(HERE, '..', '..', 'docs') };
-	const route = [...withheldRoutes(tree)].find((name) => name !== '' && name !== 'es');
-	const at = `/${route}/`;
+	const at = '/404/';
 	const page = (parts) => ({ ...guide(at), main: framed(parts), copy: null });
 	const before = { ...BASE, [at]: page() };
 	const reframed = { banner: '', anchor: 'Sección titulada «Data»', updated: 'Nov 9, 2026', next: 'Gases', credit: 'All of my projects' };
@@ -357,9 +374,9 @@ test('the build fails on a sitemap it cannot read every page of', (t) => {
 			{ ...BASE, '/x/': { ...guide('/x/'), copy: null } },
 			/https:\S+\/x\/ has a Markdown copy by src\/lib\/page-markdown\.mjs, and the build wrote no \S+index\.md/,
 		],
-		'a landing page with no <main>': [
-			{ ...BASE, '/': { ...guide('/'), copy: null, main: null } },
-			/https:\S+\/phonometry\/ has no Markdown copy by src\/lib\/page-markdown\.mjs and no <main> element/,
+		'the page with no copy and no <main>': [
+			{ ...BASE, '/404/': { ...guide('/404/'), copy: null, main: null } },
+			/https:\S+\/404\/ has no Markdown copy by src\/lib\/page-markdown\.mjs and no <main> element/,
 		],
 	};
 	for (const [name, [pages, message]] of Object.entries(cases)) {

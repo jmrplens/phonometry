@@ -165,6 +165,19 @@ const englishBibliographyUrl = `${SITE}${BASE}/reference/bibliography/`;
 const modified = route?.lastUpdated instanceof Date ? isoDay(route.lastUpdated) : undefined;
 const published = firstPublished(route?.entry?.filePath ?? '') ?? modified;
 
+// The page's Markdown copy, declared in the graph as well as in the
+// `<link rel="alternate">` below: an agent that reads only the structured data
+// learns that the text is there without parsing the head. The address is the
+// one src/routeData.ts gives the head, so a Spanish API page names the copy of
+// the English page it renders, and a page with no copy declares none.
+const markdownEncoding = route?.markdownCopy
+  ? {
+      '@type': 'MediaObject',
+      encodingFormat: 'text/markdown',
+      contentUrl: new URL(route.markdownCopy, SITE).href,
+    }
+  : undefined;
+
 // The hub pages exist to enumerate their children, and schema.org has a type
 // for exactly that. Dual-typed so nothing consuming the TechArticle reading
 // loses properties it already relied on.
@@ -319,6 +332,7 @@ const article =
         ...(published ? { datePublished: published } : {}),
         ...(modified ? { dateModified: modified } : {}),
         ...(wordCount ? { wordCount } : {}),
+        ...(markdownEncoding ? { encoding: markdownEncoding } : {}),
         ...(articleSection ? { articleSection } : {}),
         ...(mainEntity ? { mainEntity } : {}),
         ...(catalogueListing ? { dataset: catalogueListing } : {}),
@@ -405,7 +419,9 @@ const homePage =
           '@type': 'SpeakableSpecification',
           cssSelector: ['h1', '.hero .tagline'],
         },
+        ...(published ? { datePublished: published } : {}),
         ...(modified ? { dateModified: modified } : {}),
+        ...(markdownEncoding ? { encoding: markdownEncoding } : {}),
         isPartOf: { '@id': WEBSITE_ID },
         about: { '@id': SOFTWARE_ID },
       }
@@ -454,14 +470,13 @@ const jsonLd = graph.length
     og:type would leave both in the document, and Open Graph parsers take the
     first occurrence, so the override would silently lose. Starlight's head
     merge deduplicates by property, which the frontmatter route goes through. */}
-{/* A clean markdown copy of this page sits beside it (postbuild step
-    scripts/emit-page-markdown.mjs). Advertising it lets an agent fetch the
-    prose without parsing ~90% chrome out of the HTML. The address comes from
-    src/routeData.ts, which knows which pages the generator wrote one for: it
-    is absent on the 404 and on the pages src/lib/page-markdown.mjs withholds
-    (the splash pages, and the pages that show their data through a component
-    with no copy in docs/), and on a page served as fallback content it is
-    the copy of the entry actually rendered here. */}
+{/* A clean markdown copy of this page sits beside it, written from the
+    page's source before the build (scripts/agent-md.mjs --public).
+    Advertising it lets an agent fetch the prose without parsing ~90% chrome
+    out of the HTML. The address comes from src/routeData.ts, which knows
+    which pages have one: every page written as a file, the two landing pages
+    included; none on the 404; and on a page served as fallback content, the
+    copy of the entry actually rendered here. */}
 {route?.markdownCopy && (
   <link rel="alternate" type="text/markdown" href={route.markdownCopy} />
 )}

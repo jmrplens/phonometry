@@ -202,27 +202,6 @@ SHARD_LIMIT_BYTES = 200_000
 #: so. Enforced as the shards are (see :func:`_check_index_budget`).
 LLMS_TXT_LIMIT_BYTES = 200_000
 
-#: The components that render a page's data rather than wrap its prose,
-#: ``DATA_COMPONENTS`` of ``site/src/lib/page-markdown.mjs``. A page that renders
-#: one and has no copy in docs/ publishes no Markdown copy, and the index says
-#: which pages those are (see :func:`_withheld_routes`).
-DATA_COMPONENTS = (
-    "Catalogues",
-    "Conformance",
-    "ErrataFamily",
-    "Glossary",
-    "Home",
-    "ReportIndex",
-)
-
-#: The documents at the root of docs/ published at a route of their own
-#: (``TRANSPLANTED`` of ``site/src/lib/page-markdown.mjs``).
-TRANSPLANTED = {
-    "CONFORMANCE": "reference/conformance",
-    "ERRATA": "reference/errata",
-    "ERRATA.es": "es/reference/errata",
-}
-
 #: The data every catalogue page tables, written by
 #: ``scripts/generate_catalogue_data.py`` and committed.
 CATALOGUE_DATA = ROOT / "site" / "src" / "generated" / "catalogues.mjs"
@@ -399,50 +378,6 @@ def _frontmatter_field(path: pathlib.Path, name: str) -> str:
 def _description(route: str) -> str:
     """What a page is about, as its own meta description says."""
     return _frontmatter_field(_source_of(route), "description")
-
-
-def _mirror_of(route: str) -> pathlib.Path | None:
-    """The docs/ file a route's Markdown copy is written from, or None.
-
-    The rule of ``mirrorOf`` in ``site/src/lib/page-markdown.mjs``: a
-    transplanted document's route is that document, a Spanish route has no
-    mirror, and an English one has the page at its path or its folder's
-    ``index.md``.
-    """
-    for document, published in TRANSPLANTED.items():
-        if published == route:
-            return DOCS / f"{document}.md"
-    if route == "es" or route.startswith("es/"):
-        return None
-    for candidate in (DOCS / f"{route}.md", DOCS / route / "index.md"):
-        if route and candidate.is_file():
-            return candidate
-    return None
-
-
-@functools.cache
-def _withheld_routes() -> frozenset[str]:
-    """The routes, in both languages, that publish no Markdown copy.
-
-    The rule of ``withheldRoutes`` in ``site/src/lib/page-markdown.mjs``: an
-    ``.mdx`` page that renders one of :data:`DATA_COMPONENTS` and has no copy in
-    docs/. A tag counts where the page renders it, read through
-    :func:`markdown_spans.page_markup`, the reading the site's ``pageMarkup``
-    is held to; a test holds the two sets equal.
-    """
-    tag = re.compile(rf"<(?:{'|'.join(DATA_COMPONENTS)})\b")
-    withheld = set()
-    for path in sorted(CONTENT.rglob("*.mdx")):
-        relative = path.relative_to(CONTENT).with_suffix("").as_posix()
-        route = re.sub(r"(?:^|/)index$", "", relative)
-        if _mirror_of(route) is not None:
-            continue
-        text = path.read_text(encoding="utf-8")
-        if any(f"<{name}" in text for name in DATA_COMPONENTS) and tag.search(
-            page_markup(text, kind="mdx")
-        ):
-            withheld.add(route)
-    return frozenset(withheld)
 
 
 def _check_areas_cover_the_tree() -> None:
@@ -1392,51 +1327,20 @@ API_ROUTE = "reference/api"
 
 
 def _copies_sentence() -> str:
-    """Where a page's Markdown copy is, and which pages publish none.
+    """Where a page's Markdown copy is, and which pages are in English only.
 
-    Read from the site's tree, not written by hand: the English pages that
-    have no Spanish page (the API reference, by name, and any other by its
-    title) are said to be English only, their Spanish addresses showing the
-    English page and its copy; the pages that publish none are named from
-    :func:`_withheld_routes`, by kind: the landing pages, the catalogues, and
-    any other page by its English title and the languages it is withheld in.
+    Every page publishes a copy written from its own source
+    (``site/scripts/agent-md.mjs --public``), the landing pages and the pages
+    that show their data through a component included, so the sentence names
+    no page without one. It names the pages the Spanish tree does not
+    translate, whose Spanish address shows the English page.
     """
-    withheld = _withheld_routes()
-    kinds: list[str] = []
-    if {"", "es"} <= withheld:
-        kinds.append("the two landing pages")
-    catalogue = re.compile(r"(?:es/)?reference/catalogues/[^/]+")
-    catalogues = {r.removeprefix("es/") for r in withheld if catalogue.fullmatch(r)}
-    others: dict[str, set[str]] = {}
-    for route in sorted(withheld - {"", "es"}):
-        if not catalogue.fullmatch(route):
-            language = "es" if route.startswith("es/") else "en"
-            others.setdefault(route.removeprefix("es/"), set()).add(language)
-    both = [f"the {len(catalogues)} catalogues"] if catalogues else []
-    both += [
-        f'the "{_frontmatter_field(_source_of(r), "title")}" page'
-        for r, langs in others.items()
-        if langs == {"en", "es"}
-    ]
-    if both:
-        kinds.append(f"{_joined(both)} in both languages")
-    for language, name in (("es", "Spanish"), ("en", "English")):
-        titles = [
-            f'"{_frontmatter_field(_source_of(r), "title")}"'
-            for r, langs in others.items()
-            if langs == {language}
-        ]
-        if titles:
-            kinds.append(
-                f"the {name} {_joined(titles)} page{'s' if len(titles) > 1 else ''}"
-            )
     sentence = (
-        "Every page listed here but the ones named at the end of this section "
-        "has a Markdown copy beside it at `<page>/index.md`, for example "
-        f"{SITE_URL}/start/getting-started/index.md, and its Spanish twin under "
-        "`/es/` has one too where the page is translated."
+        "Every page listed here has a Markdown copy beside it at "
+        f"`<page>/index.md`, for example {SITE_URL}/start/getting-started/index.md, "
+        "and its Spanish twin under `/es/` has one too where the page is translated."
     )
-    english_only = sorted(_content_routes() - _spanish_routes() - withheld)
+    english_only = sorted(_content_routes() - _spanish_routes())
     api = [r for r in english_only if r == API_ROUTE or r.startswith(f"{API_ROUTE}/")]
     untranslated = (
         [f"the {_count(len(api), 'page')} of the API reference"] if api else []
@@ -1454,10 +1358,7 @@ def _copies_sentence() -> str:
             "Spanish address the site shows the English page, which points to "
             "its English copy."
         )
-    return (
-        f"{sentence} The {len(withheld)} pages that show their data through a "
-        f"component publish none and are read on the page itself: {_joined(kinds)}."
-    )
+    return sentence
 
 
 def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:

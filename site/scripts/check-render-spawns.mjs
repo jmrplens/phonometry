@@ -141,7 +141,11 @@ function exportsOf(text) {
 /** What a page can run: the source, the config, and what they import from outside the source. */
 function renderPath() {
 	const roots = [join(SITE, 'astro.config.mjs')].filter(existsSync);
-	if (existsSync(join(SITE, 'src'))) roots.push(...[...filesUnder(join(SITE, 'src'))].filter((path) => CODE.test(path)));
+	// A test under src/ (the Markdown writers' keep theirs in src/lib/agent-md/test/)
+	// runs in the test runner: no page imports one.
+	if (existsSync(join(SITE, 'src'))) {
+		roots.push(...[...filesUnder(join(SITE, 'src'))].filter((path) => CODE.test(path) && !/\.test\.[cm]?[jt]s$/.test(path)));
+	}
 	const seen = new Map();
 	const pending = [...roots];
 	while (pending.length > 0) {

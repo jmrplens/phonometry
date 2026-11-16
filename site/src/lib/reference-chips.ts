@@ -94,23 +94,49 @@ function isEditionOnly(text: string): boolean {
 	return /^\d+\s*(st|nd|rd|th|\.ª|ª|a)?\s*ed\.?$/i.test(text) || !/\d/.test(text);
 }
 
+/**
+ * The designation of a document the page implements: a standard's, or a
+ * numbered report's, unless the page marks it `implemented: false` or the
+ * designation names an edition rather than a document. The one test both the
+ * standards chips and the Markdown copy's `Standards:` line go through.
+ */
+function implementedDesignation(ref: Reference): string | undefined {
+	if (ref.implemented === false) return undefined;
+	const designation =
+		ref.type === 'standard' ? ref.designation : ref.type === 'report' ? ref.number : undefined;
+	if (!designation) return undefined;
+	return isEditionOnly(standardFamily(designation)) ? undefined : designation;
+}
+
 function chipFor(ref: Reference, isEs: boolean): { text: string; kind: ChipKind } | undefined {
 	// Cited, required or compared with, but not implemented here: the entry is
 	// in the bibliography and nowhere in the header.
 	if (ref.implemented === false) return undefined;
-	if (ref.type === 'standard') {
-		const text = standardFamily(ref.designation);
-		return isEditionOnly(text) ? undefined : { text, kind: 'standard' };
-	}
-	if (ref.type === 'report' && ref.number) {
-		const text = standardFamily(ref.number);
-		return isEditionOnly(text) ? undefined : { text, kind: 'standard' };
+	if (ref.type === 'standard' || (ref.type === 'report' && ref.number)) {
+		const designation = implementedDesignation(ref);
+		return designation ? { text: standardFamily(designation), kind: 'standard' } : undefined;
 	}
 	if (ref.type === 'article' || ref.type === 'book') {
 		const text = authorDate(ref.authors, ref.year, isEs);
 		return text ? { text, kind: 'reference' } : undefined;
 	}
 	return undefined;
+}
+
+/**
+ * The documents a page implements, each by its full designation, once, in
+ * frontmatter order: the standards the header chips stand for, before the
+ * chips fold the parts of one standard together and stop at nine. The page's
+ * Markdown copy lists them on its `Standards:` line
+ * (src/lib/agent-md/header.mjs).
+ */
+export function implementedStandards(references: readonly Reference[] | undefined): string[] {
+	const designations = new Set<string>();
+	for (const ref of references ?? []) {
+		const designation = implementedDesignation(ref);
+		if (designation) designations.add(designation);
+	}
+	return [...designations];
 }
 
 /**

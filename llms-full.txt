@@ -647,7 +647,7 @@ Every page above also exists in Spanish under the `/es/` prefix, for example htt
 
 ## Markdown copies
 
-Every page listed here but the ones named at the end of this section has a Markdown copy beside it at `<page>/index.md`, for example https://docs.jmrp.io/phonometry/start/getting-started/index.md, and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy. The 52 pages that show their data through a component publish none and are read on the page itself: the two landing pages, the 23 catalogues and the "Report fiches" page in both languages and the Spanish "Conformance report" and "Glossary" pages.
+Every page listed here has a Markdown copy beside it at `<page>/index.md`, for example https://docs.jmrp.io/phonometry/start/getting-started/index.md, and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy.
 
 ## Optional
 

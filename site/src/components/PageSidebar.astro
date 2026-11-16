@@ -18,11 +18,12 @@
  * spending height from a viewport that has little of it.
  *
  * This whole block is behind Starlight's own `toc` test, exactly as the default
- * is. That gate lines up with the one that matters here: the pages with no
- * table of contents are the splash layouts, which carry no prose and get no
- * markdown copy. Lining up is not the same as being the test, though, so
- * PageActions asks its own question and renders nothing on a page whose
- * markdown copy was never written.
+ * is. The pages with no table of contents are the two splash layouts, which
+ * publish a markdown copy all the same: it is advertised in their head, and a
+ * landing page offers its readers the guides rather than a copy of itself.
+ * The gate is not the test of whether a copy exists, so PageActions asks its
+ * own question and renders nothing on a page whose markdown copy was never
+ * written.
  */
 import MobileTableOfContents from 'virtual:starlight/components/MobileTableOfContents';
 import TableOfContents from 'virtual:starlight/components/TableOfContents';

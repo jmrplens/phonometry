@@ -108,6 +108,11 @@ stub/src/*.egg-info/
 # Documentation media staged into the site by scripts/stage-media.mjs from
 # .github/images and .github/reports, which are the committed originals.
 site/public/media/
+
+# The Markdown copy of every page, written into site/public/ before the build
+# by `node scripts/agent-md.mjs --public` from the page sources, which are the
+# committed originals.
+site/public/**/index.md
 site/lighthouse-results/
 
 # Fiches a snippet writes where it was run. The guides show `.report("x.pdf")`

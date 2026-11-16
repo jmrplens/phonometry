@@ -1186,6 +1186,7 @@ const BANNER = '.github/badges/conformance-summary.svg';
 const READS = {
 	'site/src/data/repo-stats.mjs': {
 		version: ['VERSION'],
+		preRelease: ['VERSION'],
 		guides: 'count',
 		apiPages: 'count',
 		figures: 'count',

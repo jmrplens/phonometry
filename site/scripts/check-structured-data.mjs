@@ -2093,9 +2093,16 @@ for (const file of files) {
 			}
 			listed.set(item?.['@id'], item);
 		}
-		if (DATASET_CLAIMS.some((field) => article[field] !== undefined)) {
-			fail(`${route}: the DataCatalog claims ${DATASET_CLAIMS.filter((field) => article[field] !== undefined).join(', ')}`);
-		}
+		// The page's own Markdown copy, which every page names as its encoding,
+		// lists the catalogue pages and none of their rows: it is no claim.
+		const ownCopy = (encoding) =>
+			typeof article.url === 'string' &&
+			encoding?.encodingFormat === 'text/markdown' &&
+			encoding?.contentUrl === `${article.url.replace(/\/?$/u, '/')}index.md`;
+		const claimed = DATASET_CLAIMS.filter(
+			(field) => article[field] !== undefined && !(field === 'encoding' && ownCopy(article.encoding)),
+		);
+		if (claimed.length > 0) fail(`${route}: the DataCatalog claims ${claimed.join(', ')}`);
 		listedDatasets[lang] = { route, listed };
 	}
 

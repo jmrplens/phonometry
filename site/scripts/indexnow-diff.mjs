@@ -295,7 +295,7 @@ export function pageRecord(dist, { loc, lastmod }) {
 		const copy = join(dir, 'index.md');
 		if (!existsSync(copy)) {
 			throw new ManifestError(
-				`${loc} has a Markdown copy by src/lib/page-markdown.mjs, and the build wrote no ${copy}: scripts/emit-page-markdown.mjs runs before the manifest.`,
+				`${loc} has a Markdown copy by src/lib/page-markdown.mjs, and the build wrote no ${copy}: scripts/agent-md.mjs --public writes every copy before the build (package.json prebuild).`,
 			);
 		}
 		text = withoutReleaseLines(readFileSync(copy, 'utf8'));

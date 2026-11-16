@@ -1,0 +1,11 @@
+{
+  "_why": "Which VERSION strings are pre-releases under PEP 440, the one table the site (isPreRelease of src/lib/pep440.mjs) and the llms generator (scripts/generate_llms.py, packaging's Version.is_prerelease) are both tested against: a pre-release, alpha, beta or release candidate, or a development release, which pip installs only when asked to; a final or a post-release is not one.",
+  "cases": {
+    "4.0.0rc1": true,
+    "4.0.0a1": true,
+    "4.0.0b2": true,
+    "4.0.0": false,
+    "4.0.0.post1": false,
+    "4.1.0.dev0": true
+  }
+}

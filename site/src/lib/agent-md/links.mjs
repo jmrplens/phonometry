@@ -1,0 +1,117 @@
+/**
+ * Root-relative links made absolute.
+ *
+ * The site's pages link each other as `/phonometry/...`, which the browser
+ * resolves against the page. A Markdown copy is read away from the site, in a
+ * chat context, a corpus or a file on disk, where `](/phonometry/...)`
+ * resolves nowhere. Every URL a writer composes is already absolute; this
+ * pass covers the links the author wrote in the page's own Markdown.
+ *
+ * The finished copy is parsed and only the destinations of `link`, `image`
+ * and `definition` nodes are rewritten, by offset. A scanner over lines
+ * cannot do this safely: an inline code span may open on one line and close
+ * on the next, and from inside it `](/` is sample text, not a link (the API
+ * page of `tone_audibility` has exactly that). On the tree, code and TeX are
+ * nodes of their own and carry no links. Protocol-relative `//host` URLs,
+ * fragments and relative paths are left as written.
+ *
+ * @module
+ */
+import { parse } from './processor.mjs';
+
+const LINK_TYPES = new Set(['link', 'image', 'definition']);
+
+/**
+ * What every root-relative destination is preceded by: the `](` of an inline
+ * link or image, or the `]:` of a definition, then optional spacing with at
+ * most one line break, an optional `<`, and a single `/`.
+ *
+ * A copy without it holds no link to rewrite, and is returned without being
+ * parsed. That is not only quicker: the GFM table extension resolves every
+ * table of a document through one list of edits that it searches from the
+ * start for each new one, so its cost grows with the square of the document's
+ * table rows. The conformance report, all tables and no root-relative link,
+ * cost more to parse for nothing than every other page together.
+ */
+const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?\/(?!\/)/u;
+
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+const escapeRegExp = (text) => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
+
+/**
+ * Every root-relative link in a Markdown document, made absolute.
+ *
+ * @param {string} markdown
+ * @param {string} origin  Site origin, such as `https://docs.jmrp.io`; a
+ *   trailing slash is tolerated.
+ * @returns {string}
+ */
+export function absolutizeRootLinks(markdown, origin) {
+  let root = origin;
+  while (root.endsWith('/')) root = root.slice(0, -1);
+  if (!ROOT_DESTINATION.test(markdown)) return markdown;
+  const tree = parse(markdown, { mdx: false });
+  /** @type {number[]} */
+  const inserts = [];
+  const visit = (node) => {
+    if (LINK_TYPES.has(node.type) && /^\/(?!\/)/u.test(node.url ?? '') && node.position) {
+      const start = node.position.start.offset;
+      const end = node.position.end.offset;
+      // The destination follows the text: `](`, `](<` for a link or image,
+      // `]:` and spacing for a definition. The last such occurrence in the
+      // node is the destination; a title, if any, comes after it.
+      const pattern = new RegExp(String.raw`(\]\(\s*<?|\]:\s*<?)(${escapeRegExp(node.url)})`, 'gu');
+      let found;
+      for (const match of markdown.slice(start, end).matchAll(pattern)) found = match;
+      if (found?.index !== undefined) inserts.push(start + found.index + found[1].length);
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(tree);
+  let out = markdown;
+  for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${root}${out.slice(at)}`;
+  return out;
+}
+
+/**
+ * Every fragment link to one of `anchors`, ids the copy leaves out, sent to
+ * the page itself: `[x](#old-id)` becomes `[x](<page>#old-id)`. The copy is
+ * parsed, as {@link absolutizeRootLinks} parses it, so a fragment written in
+ * code is left alone; a fragment to any other id is left as written.
+ *
+ * @param {string} markdown
+ * @param {ReadonlySet<string>} anchors
+ * @param {string} pageUrl  The page's address, ending in `/`.
+ * @returns {string}
+ */
+export function pointDroppedAnchors(markdown, anchors, pageUrl) {
+  if (anchors.size === 0 || !markdown.includes('](#')) return markdown;
+  const tree = parse(markdown, { mdx: false });
+  /** @type {number[]} */
+  const inserts = [];
+  const visit = (node) => {
+    const url = node.url ?? '';
+    if (LINK_TYPES.has(node.type) && url.startsWith('#') && node.position) {
+      let id = url.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        // A fragment that is no valid escape is compared as written.
+      }
+      if (anchors.has(id)) {
+        const start = node.position.start.offset;
+        const text = markdown.slice(start, node.position.end.offset);
+        const at = text.lastIndexOf(`(${url}`);
+        if (at >= 0) inserts.push(start + at + 1);
+      }
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(tree);
+  let out = markdown;
+  for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${pageUrl}${out.slice(at)}`;
+  return out;
+}

@@ -10,6 +10,7 @@
  * the sidebar gives, and the line under each is the page's own description,
  * written to say in a sentence what the catalogue holds.
  */
+import { rowCount } from '../lib/catalogue-page-list.mjs';
 import { cataloguePages } from '../lib/catalogue-pages';
 
 interface Props {
@@ -19,8 +20,6 @@ interface Props {
 const { lang = 'en' } = Astro.props;
 
 const pages = await cataloguePages(lang);
-const rowCount = (rows: number) =>
-	lang === 'es' ? `${rows} ${rows === 1 ? 'fila' : 'filas'}` : `${rows} ${rows === 1 ? 'row' : 'rows'}`;
 ---
 
 {/* The space after each name is written, because the build drops the line
@@ -30,7 +29,7 @@ const rowCount = (rows: number) =>
 		pages.map((page) => (
 			<li>
 				<a href={page.href}>{page.label}</a>{' '}
-				<span class="rows">{rowCount(page.rows)}</span>
+				<span class="rows">{rowCount(page.rows, lang)}</span>
 				<p>{page.description}</p>
 			</li>
 		))

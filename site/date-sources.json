@@ -136,7 +136,7 @@
         "site/src/content/docs/reference/reports.mdx",
         "site/src/content/docs/es/reference/reports.mdx"
       ],
-      "sources": ["site/src/data/reports.mjs", "site/src/components/ReportIndex.astro"],
+      "sources": ["site/src/data/reports.mjs", "site/src/components/ReportIndex.astro", "site/src/data/report-index-copy.mjs"],
       "counts": { "fiches": [":(glob).github/reports/*.pdf"] },
       "texts": {
         "reportsByArea": {
@@ -156,7 +156,8 @@
         "site/src/generated/catalogues.mjs",
         "site/src/components/Catalogues.astro",
         "site/src/components/CatalogueFinder.astro",
-        "site/src/components/CatalogueIndex.astro"
+        "site/src/components/CatalogueIndex.astro",
+        "site/src/data/catalogue-copy.mjs"
       ],
       "texts": {
         "cataloguePages": {
@@ -179,7 +180,8 @@
         "site/src/components/Catalogues.astro",
         "site/src/components/CatalogueFinder.astro",
         "site/src/components/CatalogueIndex.astro",
-        "site/src/data/catalogue-es.json"
+        "site/src/data/catalogue-es.json",
+        "site/src/data/catalogue-copy.mjs"
       ],
       "texts": {
         "cataloguePages": {

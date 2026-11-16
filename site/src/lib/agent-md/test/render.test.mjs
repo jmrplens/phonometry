@@ -207,6 +207,8 @@ describe('raw HTML', () => {
     assert.equal(render('Use <code>a &lt; b</code> here.\n').markdown, 'Use `a < b` here.\n');
     assert.equal(render('Press <kbd>Ctrl &amp; C</kbd>.\n').markdown, 'Press `Ctrl & C`.\n');
     assert.equal(render('a <code>x\\*y</code> b\n').markdown, 'a `x*y` b\n');
+    assert.equal(render('Use <code><em>x</em> and <strong>y</strong></code>.\n').markdown, 'Use `x and y`.\n');
+    assert.doesNotMatch(render('<code>a<br />b</code>\n').markdown, /\\/u);
   });
 
   test('br is a line break the copy keeps', () => {
@@ -215,6 +217,9 @@ describe('raw HTML', () => {
     assert.equal(render('first<br />second\n').markdown, 'first\\\nsecond\n');
     assert.equal(render('first<br />\nsecond\n').markdown, 'first\\\nsecond\n');
     assert.equal(render('last<br />\n\nNext.\n').markdown, 'last\n\nNext.\n');
+    assert.equal(render('<strong>last<br /></strong>\n\nNext.\n').markdown, '**last**\n\nNext.\n');
+    assert.equal(render('first<br /> \nsecond\n').markdown, 'first\\\nsecond\n');
+    assert.equal(render('<strong>a<br /></strong>b\n').markdown, '**a**\\\nb\n');
     const cells = '<table><tbody><tr><td>a<br />b</td></tr></tbody></table>\n';
     assert.doesNotMatch(render(cells).markdown, /\\/u);
   });
@@ -308,6 +313,19 @@ describe('links', () => {
     );
   });
 
+  test('a destination on the next line of a block quote is still made absolute', () => {
+    const source = '> [a](/phonometry/a/)\n> [b](\n>   /phonometry/b/)\n';
+    assert.equal(
+      render(source, { mdx: false }).markdown,
+      '> [a](https://docs.jmrp.io/phonometry/a/)\n> [b](\n>   https://docs.jmrp.io/phonometry/b/)\n',
+    );
+  });
+
+  test('an autolink and a bare address are left as written', () => {
+    const text = 'See <https://docs.jmrp.io/phonometry/a/> and https://docs.jmrp.io/phonometry/a/.\n';
+    assert.equal(rewriteLinks(text, () => '/elsewhere/'), text);
+  });
+
   test('a link is rewritten whole however its destination is written', () => {
     const rewrite = (url) => (url === '/old/a_b' ? '/new/' : undefined);
     assert.equal(rewriteLinks('[x](/old/a\\_b) and [y](</old/a&#95;b>).\n', rewrite), '[x](/new/) and [y](</new/>).\n');
@@ -399,6 +417,7 @@ describe('anchors the copy drops', () => {
       `See [details][target] and [here](<${page}#old>).\n\n[target]: ${page}#old\n`,
     );
     assert.equal(pointDroppedAnchors('[t]:\n  <#old>\n', anchors, page), `[t]:\n  <${page}#old>\n`);
+    assert.equal(pointDroppedAnchors('[x][t]\n\n[t]: &#35;old\n', anchors, page), `[x][t]\n\n[t]: ${page}&#35;old\n`);
   });
 });
 

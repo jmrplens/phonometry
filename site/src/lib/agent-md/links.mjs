@@ -24,7 +24,9 @@ const LINK_TYPES = new Set(['link', 'image', 'definition']);
 /**
  * What every root-relative destination is preceded by: the `](` of an inline
  * link or image, or the `]:` of a definition, then optional spacing with at
- * most one line break, an optional `<`, and a single `/`.
+ * most one line break (and the `>` of the block quotes the next line sits in),
+ * an optional `<`, and a single `/`, or an `&` that may open a character
+ * reference to one.
  *
  * A copy without it holds no link to rewrite, and is returned without being
  * parsed. That is not only quicker: the GFM table extension resolves every
@@ -33,14 +35,15 @@ const LINK_TYPES = new Set(['link', 'image', 'definition']);
  * table rows. The conformance report, all tables and no root-relative link,
  * cost more to parse for nothing than every other page together.
  */
-const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?\/(?!\/)/u;
+const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:\/(?!\/)|&)/u;
 
 /**
  * What every fragment destination is preceded by, in the same forms as
  * {@link ROOT_DESTINATION}: an inline link's `](#`, a reference definition's
- * `]: #`, either with spacing, a line break or a `<` before the `#`.
+ * `]: #`, either with spacing, a line break or a `<` before the `#`, or an
+ * `&` that may open a character reference to it (`&#35;`).
  */
-const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?#/u;
+const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:#|&)/u;
 
 /**
  * The destination as the source writes it, from just after the `](` of a link
@@ -55,7 +58,7 @@ const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?#/u;
  * @returns {{ start: number, end: number, angle: boolean } | undefined}
  */
 function writtenDestination(text, from) {
-  const lead = /^[ \t]*(?:\r?\n[ \t]*)?/u.exec(text.slice(from));
+  const lead = /^[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?/u.exec(text.slice(from));
   const at = from + (lead ? lead[0].length : 0);
   if (text[at] === '<') {
     for (let i = at + 1; i < text.length; i += 1) {
@@ -129,8 +132,12 @@ function destinations(markdown, wanted, { images = true } = {}) {
       const start = node.position.start.offset;
       const text = markdown.slice(start, node.position.end.offset);
       const opener = node.type === 'definition' ? /\]:/gu : /\]\(/gu;
+      const openers = [...text.matchAll(opener)];
+      // An autolink (`<https://...>`) and a bare address have no destination
+      // apart from their text, which is what the reader sees: left as written.
+      if (openers.length === 0 && node.type === 'link') return;
       let match;
-      for (const one of text.matchAll(opener)) {
+      for (const one of openers) {
         const written = writtenDestination(text, one.index + 2);
         if (written && decodedDestination(text.slice(written.start, written.end), written.angle) === node.url) {
           match = written;

@@ -55,7 +55,7 @@ import { readCommittedText } from '../line-ends.mjs';
 import { codeLines } from '../markdown-fences.mjs';
 import { MARKER } from '../bibliography-entries.mjs';
 import { absolutizeRootLinks, pointDroppedAnchors } from './links.mjs';
-import { escapeMarks, htmlAttribute, line, plainText as plainMarkdown, table } from './markdown-table.mjs';
+import { escapeMarks, htmlAttribute, line, LINE_BREAK, plainText as plainMarkdown, resolveBreaks, table } from './markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from './processor.mjs';
 import { rewrittenSource } from './rewrites.mjs';
 
@@ -122,6 +122,9 @@ const REPLACED_TYPES = new Set([
  * as the text they wrap.
  */
 const CODE_DROPS_MARK = new Set(['emphasis', 'strong', 'delete']);
+
+/** The HTML elements of those marks, written as their text there too. */
+const CODE_DROPS_TAG = new Set(['em', 'i', 'strong', 'b', 'del', 's']);
 
 /**
  * Node types that sit inside a paragraph rather than beside it.
@@ -829,16 +832,11 @@ function createRenderer(source, options, mode) {
     abbr: (node) => renderChildren(node),
     b: (node) => `**${renderChildren(node)}**`,
     // A bare line end inside a paragraph is a space to a Markdown reader, so
-    // the break is the backslash CommonMark and GitHub both draw as one. The
-    // line end the source already has after the tag is kept as the break's;
-    // a break that ends its paragraph breaks nothing and is dropped. A table
-    // cell, which holds no line, flattens it to a space (markdown-table.mjs).
-    br(node) {
-      const end = node.position?.end.offset;
-      const rest = end === undefined ? '' : source.slice(end);
-      if (/^[ \t]*(?:$|\r?\n[ \t]*(?:\r?\n|$))/u.test(rest)) return '';
-      return /^[ \t]*\r?\n/u.test(rest) ? '\\' : '\\\n';
-    },
+    // the break is held as LINE_BREAK until the copy is whole, and then made
+    // the backslash CommonMark and GitHub both draw, or dropped where its
+    // paragraph ends (resolveBreaks, markdown-table.mjs). Inside a code span a
+    // backslash is text, so there the break is the line end it always was.
+    br: () => (codeDepth > 0 ? '\n' : LINE_BREAK),
     caption: (node) => `**${captionText(node)}**`,
     code: (node) => codeSpan(codeChildren(node)),
     del: (node) => `~~${renderChildren(node)}~~`,
@@ -929,6 +927,7 @@ function createRenderer(source, options, mode) {
       // `\*` as `*`, and a mark, which a code span cannot carry, as its text.
       if (node.type === 'text' || node.type === 'inlineCode') return node.value ?? '';
       if (CODE_DROPS_MARK.has(node.type)) return renderChildren(node);
+      if (ELEMENT_TYPES.has(node.type) && CODE_DROPS_TAG.has(node.name)) return renderChildren(node);
     }
     if (EXPRESSION_TYPES.has(node.type)) return renderExpression(node);
     if (ELEMENT_TYPES.has(node.type)) return renderElement(node);
@@ -1037,8 +1036,8 @@ export function renderTree(tree, source, options) {
   // top-level block into the next, and a block that holds none (the
   // conformance report's hundreds of kilobytes of tables) is then never
   // parsed again for links (links.mjs says why that matters).
-  const written = createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) =>
-    absolutizeRootLinks(block, SITE.origin),
+  const written = resolveBreaks(
+    createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) => absolutizeRootLinks(block, SITE.origin)),
   );
   // A link to an anchor only an empty span carried leads nowhere in the copy,
   // which leaves the span out: it goes to the page, where the span still is.

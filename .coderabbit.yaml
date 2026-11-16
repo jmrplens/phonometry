@@ -44,7 +44,8 @@ reviews:
         `docs/` is NOT a generated mirror of the website, and edits to it are
         not build output to be skipped or regenerated. It is the plain-markdown
         edition of the guides, authored by hand for people reading the
-        repository on GitHub and for the llms.txt artifacts built from it. Each
+        repository on GitHub (the llms files are written from the site pages,
+        not from it). Each
         guide deliberately exists twice, as `docs/<path>.md` and as
         `site/src/content/docs/<path>.md` or `.mdx`, and the two are written
         differently on purpose, as rule F2 of

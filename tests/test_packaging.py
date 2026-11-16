@@ -73,8 +73,8 @@ _REPO_URL = re.compile(
 
 #: Every authored copy of the ``[full]`` NumPy caveat, in both languages, plus
 #: the generator that writes it into the llms artifacts. README_PYPI.md,
-#: llms.txt, llms-full.txt and site/public/llms/ are derived from these, so
-#: holding the sources holds all nine copies.
+#: llms.txt and the shards and llms-full.txt the site build writes are derived
+#: from these, so holding the sources holds every copy.
 _INSTALL_CAVEAT_PAGES = (
     "README.md",
     "docs/start/getting-started.md",

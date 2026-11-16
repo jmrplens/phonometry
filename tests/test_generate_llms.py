@@ -21,12 +21,15 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from llms_dump import CONTENT_ROOT, FULL_TEXT_KINDS, Dump, page_kind, site_dump
+from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -38,6 +41,11 @@ import yaml
 if TYPE_CHECKING:
     from guard_caches import FreshCaches
 
+#: The kind of each route, as site/src/lib/page-markdown.mjs ``pageKind`` gives
+#: it; site/src/lib/agent-md/test/dump.test.mjs holds ``pageKind`` to the same
+#: table.
+PAGE_KINDS = ROOT / "site" / "src" / "lib" / "agent-md" / "test" / "page-kinds.json"
+
 
 def _shard_of_links(line: str) -> str:
     """The shard whose full text a heading's links fetch.
@@ -45,7 +53,7 @@ def _shard_of_links(line: str) -> str:
     One link names the shard's own file; a shard cut into parts links each
     part, ``llms-<shard>-1.txt`` onwards, and every one must be there in order.
     """
-    names = re.findall(r"/llms/llms-([a-z0-9-]+)\.txt", line)
+    names: list[str] = re.findall(r"/llms/llms-([a-z0-9-]+)\.txt", line)
     if len(names) == 1:
         return names[0]
     shard = names[0].rsplit("-", 1)[0]
@@ -107,14 +115,13 @@ def test_the_intensity_shard_holds_only_the_intensity_routes(slug: str) -> None:
     assert "devices/emission/vibration-sound-power" in members["devices-emission"]
 
 
-def test_the_contributor_guide_stays_out_of_llms() -> None:
-    """docs/contributing/ is repository-only: it has no site page and no llms entry.
+def test_the_contributor_guide_stays_out_of_the_mirror_checks() -> None:
+    """docs/contributing/ is repository-only: it has no site page.
 
-    Without the exclusion ``_routes()`` raises, because a mirror page with no
-    page on the site is exactly what it exists to catch.
+    Without the exclusion ``_mirror_pages()`` raises, because a mirror page
+    with no page on the site is exactly what it exists to catch.
     """
-    routes = [route for _, route in llms._routes()]
-    assert not any(route.startswith("contributing") for route in routes)
+    assert not any(name.startswith("contributing/") for name in llms._mirror_pages())
 
 
 # The index lists every English page of the site and says what each is about.
@@ -168,6 +175,13 @@ def test_the_committed_index_links_every_english_page_of_the_site() -> None:
     llms._check_index_covers_the_site((ROOT / "llms.txt").read_text(encoding="utf-8"))
 
 
+def test_the_index_links_the_quick_api_table_that_llms_full_leaves_out() -> None:
+    """llms-full.txt carries the site's pages; the curated table is a file of docs/."""
+    index = (ROOT / "llms.txt").read_text(encoding="utf-8")
+    assert f"]({llms.REPO_URL}/blob/main/{llms.QUICK_API_TABLE}): " in index
+    assert (ROOT / llms.QUICK_API_TABLE).is_file()
+
+
 #: The sections of the index whose lines are not a page and what it is about:
 #: hand-written lines with words of their own, counts, shards and the API.
 _UNDESCRIBED = {
@@ -182,7 +196,10 @@ _UNDESCRIBED = {
 
 
 @pytest.mark.whole_tree
-def test_every_page_line_says_what_the_page_is_about() -> None:
+def test_every_page_line_says_what_the_page_is_about(
+    site: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(llms, "PAGES", site)
     section = ""
     described: set[str] = set()
     for line in (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines():
@@ -198,7 +215,9 @@ def test_every_page_line_says_what_the_page_is_about() -> None:
         route = found.group(1)
         assert line[found.end() :].startswith(llms._description(route)), (section, line)
         described.add(route)
-    assert {route for _, route in llms._routes()} <= described
+    # The errata families are listed with their entry counts under their own
+    # heading (see the test of the errata lines); every guide says what it is.
+    assert {r for r in llms._routes() if llms._page(r).kind == "guide"} <= described
 
 
 def test_an_errata_line_counts_the_entries_the_register_files_under_its_page(
@@ -293,6 +312,9 @@ def test_the_index_is_held_to_its_budget() -> None:
         llms._check_index_budget("x" * (llms.LLMS_TXT_LIMIT_BYTES + 1))
     committed = (ROOT / "llms.txt").read_bytes()
     assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
+
+
+_NODE = shutil.which("node")
 
 
 def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
@@ -460,3 +482,211 @@ def test_a_file_outside_the_repository_is_named_whole_in_a_refusal(
         match=re.escape(f"{pages / 'none.mdx'} tables no catalogue of {data}"),
     ):
         llms._catalogue_section()
+
+
+@pytest.fixture(scope="module")
+def site(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """A dump of the whole English site, every copy its page's source."""
+    root = tmp_path_factory.mktemp("site-dump")
+    site_dump(root, CONTENT_ROOT)
+    return root
+
+
+@pytest.mark.whole_tree
+def test_every_page_the_llms_files_carry_is_in_exactly_one_shard(
+    site: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The guides, the catalogues and the errata families, each in one shard.
+
+    The API reference and the landing page are in none: llms.txt lists the
+    first as optional reading and does the second's work itself.
+    """
+    monkeypatch.setattr(llms, "PAGES", site)
+    plan = llms._shard_plan()
+    held = [route for _slug, _label, routes in plan for route in routes]
+    pages = llms._dump()
+
+    assert sorted(held) == llms._routes()
+    assert len(held) == len(set(held))
+    assert {pages[route].kind for route in held} == {
+        "guide",
+        "catalogue",
+        "errata-family",
+    }
+    slugs = [slug for slug, _label, _routes in plan]
+    assert slugs.index("conformance") < slugs.index("errata")
+    assert all(
+        slug == f"catalogues-{routes[0].rsplit('/', 1)[1]}"
+        for slug, _label, routes in plan
+        if pages[routes[0]].kind == "catalogue"
+    )
+    errata = next(routes for slug, _label, routes in plan if slug == "errata")
+    assert errata[0] == llms.ERRATA_ROUTE
+    assert {pages[route].kind for route in errata[1:]} == {"errata-family"}
+
+
+@pytest.mark.whole_tree
+def test_a_page_left_out_of_every_shard_or_put_in_two_is_refused(
+    site: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(llms, "PAGES", site)
+    plan = llms._shard_plan()
+    slug, label, routes = plan[0]
+    dropped = [(slug, label, routes[1:]), *plan[1:]]
+    with pytest.raises(
+        SystemExit, match=rf"page\(s\) in no shard: {re.escape(routes[0])}"
+    ):
+        llms._check_every_page_in_one_shard(dropped)
+    twice = [*plan, ("extra", "Extra", [routes[0]])]
+    with pytest.raises(SystemExit, match=r"page\(s\) in two shards: .*llms-extra"):
+        llms._check_every_page_in_one_shard(twice)
+
+
+@pytest.mark.whole_tree
+def test_llms_full_carries_every_page_whole_after_the_index(
+    site: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(llms, "PAGES", site)
+    plan = llms._shard_plan()
+    index = "# phonometry\n\nThe index.\n"
+
+    full = llms.build_llms_full(index, plan)
+
+    assert full.startswith(index + "\n---\n")
+    for _slug, _label, routes in plan:
+        for route in routes:
+            assert full.count(f"\n{llms._copy(route).text}{llms.PAGE_END}") == 1, route
+    assert "/reference/api/" not in "".join(
+        line for line in full.splitlines() if line.startswith("Canonical: ")
+    )
+
+
+@pytest.mark.whole_tree
+def test_a_dump_older_than_the_site_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: Path
+) -> None:
+    """A dump left from an earlier checkout names pages that moved and misses new ones."""
+    stale = tmp_path / "stale"
+    shutil.copytree(site, stale)
+    listing = json.loads((stale / "routes.json").read_text(encoding="utf-8"))
+    gone = listing["pages"].pop(1)["route"]
+    listing["pages"].append(dict(listing["pages"][1], route="signals/moved-away"))
+    (stale / "routes.json").write_text(json.dumps(listing), encoding="utf-8")
+    monkeypatch.setattr(llms, "PAGES", stale)
+
+    with pytest.raises(
+        SystemExit,
+        match=rf"does not hold: {re.escape(gone)}.*no longer has: signals/moved-away",
+    ):
+        llms._check_dump_matches_the_tree()
+
+
+def test_a_missing_dump_or_a_text_that_is_no_copy_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(llms, "PAGES", tmp_path / "nowhere")
+    with pytest.raises(
+        SystemExit, match=r"cannot read the pages at .*routes\.json.*make llms"
+    ):
+        llms._dump()
+    with pytest.raises(
+        SystemExit, match=r"the dump's copy of x does not open as a Markdown copy"
+    ):
+        llms._split_copy("x", "Just some text.\n")
+    dump = Dump(tmp_path / "dump")
+    dump.add("x", "The body.")
+    monkeypatch.setattr(llms, "PAGES", dump.root)
+    copy = llms._copy("x")
+    assert copy.text + "\n" == (dump.root / "x" / "index.md").read_text(
+        encoding="utf-8"
+    )
+    assert copy.rest == "The body."
+
+
+@pytest.mark.whole_tree
+def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: Path
+) -> None:
+    """``--build`` writes llms.txt, llms-full.txt and every shard into public/.
+
+    A shard file the run no longer produces is removed, and so is one an older
+    layout left at the site root; ``make llms`` writes the index alone, and
+    the same index.
+    """
+    public = tmp_path / "public"
+    (public / "llms").mkdir(parents=True)
+    (public / "llms" / "llms-retired.txt").write_text("old", encoding="utf-8")
+    (public / "llms-signals.txt").write_text("old", encoding="utf-8")
+    monkeypatch.setattr(llms, "PUBLIC", public)
+    monkeypatch.setattr(llms, "SHARDS_DIR", public / "llms")
+    monkeypatch.setattr(llms, "INDEX", tmp_path / "llms.txt")
+    # main() sets the dump it reads for the module; put it back afterwards.
+    monkeypatch.setattr(llms, "PAGES", llms.PAGES)
+
+    llms.main(["--pages", str(site), "--build"])
+    llms.main(["--pages", str(site)])
+
+    written = {path.name for path in (public / "llms").iterdir()}
+    linked = set(
+        re.findall(
+            r"/llms/(llms-[a-z0-9-]+\.txt)",
+            (public / "llms.txt").read_text(encoding="utf-8"),
+        )
+    )
+    assert written == linked
+    assert "llms-retired.txt" not in written
+    assert not (public / "llms-signals.txt").exists()
+    assert (
+        (public / "llms-full.txt")
+        .read_text(encoding="utf-8")
+        .startswith((public / "llms.txt").read_text(encoding="utf-8"))
+    )
+    assert (tmp_path / "llms.txt").read_text(encoding="utf-8") == (
+        public / "llms.txt"
+    ).read_text(encoding="utf-8")
+
+
+def test_the_test_dumps_give_every_route_the_kind_the_site_gives_it() -> None:
+    """The fake dumps class each route as ``agent-md.mjs --dump`` would.
+
+    ``tests/llms_dump.py`` ports ``pageKind`` to Python to write dumps with no
+    Node, and a port drifts: a route the site came to class otherwise would
+    still be carried, or left out, by every dump these tests read. The site's
+    function and this port answer to one table.
+    """
+    data = json.loads(PAGE_KINDS.read_text(encoding="utf-8"))
+    table: dict[str, str] = data["routes"]
+    assert set(table.values()) == llms.KINDS
+    assert set(data["fullTextKinds"]) == FULL_TEXT_KINDS
+    wrong = {
+        route: (page_kind(route), kind)
+        for route, kind in table.items()
+        if page_kind(route) != kind
+    }
+    assert not wrong, f"page_kind disagrees with the site (got, wanted): {wrong}"
+
+
+_PRE_RELEASES = json.loads(
+    (ROOT / "site" / "src" / "data" / "pep440-pre-releases.json").read_text(
+        encoding="utf-8"
+    )
+)["cases"]
+
+
+@pytest.mark.parametrize(("version", "pre"), sorted(_PRE_RELEASES.items()))
+def test_a_version_is_a_pre_release_as_pep_440_and_packaging_say(
+    *, version: str, pre: bool
+) -> None:
+    """The table the site is tested on, and packaging's reading of PEP 440."""
+    assert llms._is_pre_release(version) is pre
+    assert Version(version).is_prerelease is pre
+
+
+def test_the_index_says_a_pre_release_is_not_on_pypi_yet_and_nothing_at_the_stamp() -> (
+    None
+):
+    said = "phonometry 4.0.0rc1 is a pre-release and is not on PyPI yet."
+    assert said in llms._summary("4.0.0rc1")
+    final = "\n".join(llms._summary("4.0.0"))
+    assert "not on PyPI" not in final
+    assert "pre-release" not in final

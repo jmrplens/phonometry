@@ -9,7 +9,7 @@ This page governs what a reader of phonometry sees outside the code: the guides 
 <a id="f1"></a>
 ### F1. Change a guide's English page, Spanish twin and docs/ mirror together
 
-**Why.** `docs/` is the hand-written plain-markdown edition for GitHub and llms.txt, not a generated mirror; a guide edit that touches one copy leaves two readers behind.
+**Why.** `docs/` is the hand-written plain-markdown edition for GitHub, not a generated mirror; a guide edit that touches one copy leaves two readers behind. (The llms files are written from the site pages, not from it.)
 
 **Do**
 
@@ -1832,6 +1832,11 @@ dist/<route>/index.md              the copy, each part held to the page:
   the body                         never empty; a catalogue's tables with
                                    every row the page's tables show
   ## References                    the entries the page prints
+dist/llms-full.txt, dist/llms/     every English guide, catalogue and
+                                   errata family, as its copy reads: once
+                                   in llms-full.txt and in one shard, a page
+                                   cut into parts whole again in order
+dist/llms.txt                      links every shard file, and no other
 ```
 
 **Don't**
@@ -1839,7 +1844,8 @@ dist/<route>/index.md              the copy, each part held to the page:
 ```text
 a kind of page that publishes no copy, a copy written or edited by hand, a
 header line that says something the page does not (a day other than the
-sitemap's <lastmod>), or a copy that lost the body or a row of its tables
+sitemap's <lastmod>), a copy that lost the body or a row of its tables, or an
+llms file that carries a page other than its copy reads, twice, or not at all
 ```
 
 **Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`

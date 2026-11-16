@@ -55,6 +55,21 @@
 // because the table parser's cost grows with the square of the rows in one
 // document and the conformance report's copy holds a hundred tables.
 //
+// THE LLMS FILES CARRY THE COPIES, BYTE FOR BYTE. Every English page whose
+// whole text the llms files carry (src/lib/page-markdown.mjs
+// `FULL_TEXT_KINDS`: the guides, the catalogues and the errata families) is in
+// exactly one shard of llms/ and once in llms-full.txt, as its copy reads,
+// header included; no other page is in either. A page too long for one fetch
+// is cut into the numbered parts of its shard, each part opening with the
+// page's own head, and joined back in order it is the copy again; a part that
+// continues a table opens with that table's header row and delimiter row,
+// which are taken out before the parts are joined. The files used to be cut
+// from the hand-written mirror under docs/, so what an agent fetched there was
+// not what the page said; they are written now from the same copies
+// (scripts/generate_llms.py --build, package.json `prebuild`), and this reads
+// what the build published. llms.txt links exactly the shard files the build
+// wrote.
+//
 // Usage: node scripts/check-markdown-twins.mjs [dist]   (default: dist/)
 // Exit codes: 0 every rule holds; 1 a rule failed (each finding listed, with
 // its remedy); 2 the check could not run (no build, no sitemap).
@@ -72,22 +87,21 @@ import { preRelease, version } from '../src/data/repo-stats.mjs';
 import { basePath, siteTitle, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { fileOfRoute } from '../src/lib/agent-md/content.mjs';
-import { PRE_RELEASE } from '../src/lib/agent-md/header.mjs';
+import { LEAD_OPENING, PRE_RELEASE } from '../src/lib/agent-md/header.mjs';
 import { REFERENCES_HEADING } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR } from '../src/lib/agent-md/render.mjs';
 import { rewrittenSource } from '../src/lib/agent-md/rewrites.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { codeLines } from '../src/lib/markdown-fences.mjs';
-import { VERIFIED_BY_ATTRIBUTE, releaseHeaderKeys } from '../src/lib/page-markdown.mjs';
+import { FULL_TEXT_KINDS, VERIFIED_BY_ATTRIBUTE, pageKind, releaseHeaderKeys } from '../src/lib/page-markdown.mjs';
 import { decode, isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
 import { copyDefects, frontmatterSource, headingText, stripFrontmatter } from './shared/page-twin.mjs';
 
-/** The section of the API reference, in English and served under /es/. */
-const API = /^\/reference\/api\//u;
+/** The API reference served under /es/, which has no file of its own. */
 const API_FALLBACK = /^\/es\/reference\/api\//u;
-const CATALOGUE = /^\/(?:es\/)?reference\/catalogues\/[^/]+\/$/u;
-const ERRATA_FAMILY = /^\/(?:es\/)?reference\/errata\/[^/]+\/$/u;
-const HOMES = new Set(['/', '/es/']);
+
+/** The kind of a page written as a file (src/lib/page-markdown.mjs `pageKind`). */
+const kindOf = (page) => page.content && pageKind(page.route);
 
 /**
  * One built page, as the classes read it.
@@ -113,25 +127,25 @@ export const PAGE_CLASSES = Object.freeze([
     reason:
       'The two landing pages. Their layout is a component, and their copy is what an agent ' +
       'asking "what is this library" fetches first: tagline, readout, install line and areas.',
-    matches: (page) => page.content && HOMES.has(page.route),
+    matches: (page) => kindOf(page) === 'home',
   },
   {
     id: 'api',
     twin: 'required',
     reason: 'The API reference, generated from the docstrings, in English only.',
-    matches: (page) => page.content && API.test(page.route),
+    matches: (page) => kindOf(page) === 'api',
   },
   {
     id: 'catalogue',
     twin: 'required',
     reason: 'One published catalogue per page: its copy carries the tables the page draws.',
-    matches: (page) => page.content && CATALOGUE.test(page.route),
+    matches: (page) => kindOf(page) === 'catalogue',
   },
   {
     id: 'errata-family',
     twin: 'required',
     reason: 'One family of documents of the errata register per page.',
-    matches: (page) => page.content && ERRATA_FAMILY.test(page.route),
+    matches: (page) => kindOf(page) === 'errata-family',
   },
   {
     id: 'guide',
@@ -139,12 +153,7 @@ export const PAGE_CLASSES = Object.freeze([
     reason:
       'Every other page written as a file under src/content/docs: the guides, the topic ' +
       'overviews, the start pages and the reference pages, in both languages.',
-    matches: (page) =>
-      page.content &&
-      !HOMES.has(page.route) &&
-      !API.test(page.route) &&
-      !CATALOGUE.test(page.route) &&
-      !ERRATA_FAMILY.test(page.route),
+    matches: (page) => kindOf(page) === 'guide',
   },
   {
     id: 'api-fallback',
@@ -193,6 +202,12 @@ export const REMEDIES = Object.freeze({
     'with no writer or rule (src/lib/agent-md/render.mjs), an MDX expression, an aside, a link ' +
     'that only resolves on the site, or one written relative to the file the text came from. ' +
     '`pnpm run check:markdown-writers` names the source.',
+  llms:
+    'The llms files are written before the build by `python3 ../scripts/generate_llms.py ' +
+    '--pages ../build/agent-md --build` from the copies `node scripts/agent-md.mjs --public ' +
+    '--dump ../build/agent-md` writes in the same run (package.json `prebuild`): a page that ' +
+    'differs from its copy, is missing or is there twice was written from another run, or the ' +
+    'generator cut it wrong. Build again from a clean public/, and fix the generator if it persists.',
 });
 
 /** CommonMark, GitHub tables and maths: how an agent's Markdown reader reads a copy. */
@@ -442,13 +457,286 @@ function sitemapDates(dist) {
   return dates;
 }
 
+/** What closes every page in a shard and in llms-full.txt (scripts/generate_llms.py `PAGE_END`). */
+export const PAGE_END = '\n\n---\n';
+
+/** A link of llms.txt to a shard file, capturing its name. */
+const SHARD_LINK = /\/llms\/(llms-[a-z0-9-]+\.txt)\b/gu;
+
+/** A row of a GitHub table, and the delimiter row under its header row. */
+const TABLE_ROW = /^ {0,3}\|/u;
+const TABLE_DELIMITER = /^ {0,3}\|?(?: *:?-+:? *\|)+ *:?-*:? *$/u;
+
+/**
+ * The pages an llms file carries, in order. Each opens as a copy does, with a
+ * `# ` title, a blank line and the sentence under it (src/lib/agent-md/header.mjs
+ * `LEAD_OPENING`), and is closed by {@link PAGE_END}; the file's own head (or
+ * llms.txt, at the top of llms-full.txt) comes before the first.
+ *
+ * @param {string} text
+ * @returns {{ pages: { text: string, canonical: string | undefined }[], problems: string[] }}
+ */
+export function llmsPages(text) {
+  const lines = text.split('\n');
+  const inCode = codeLines(lines);
+  const leads = Object.values(LEAD_OPENING).map((opening) => `> ${opening}`);
+  /** @type {number[]} */
+  const starts = [];
+  let offset = 0;
+  for (let i = 0; i < lines.length; i += 1) {
+    if (
+      !inCode[i] &&
+      lines[i].startsWith('# ') &&
+      lines[i + 1] === '' &&
+      leads.some((lead) => (lines[i + 2] ?? '').startsWith(lead))
+    ) {
+      starts.push(offset);
+    }
+    offset += lines[i].length + 1;
+  }
+  /** @type {{ text: string, canonical: string | undefined }[]} */
+  const pages = [];
+  /** @type {string[]} */
+  const problems = [];
+  starts.forEach((start, index) => {
+    const last = index + 1 === starts.length;
+    const raw = text.slice(start, last ? text.length : starts[index + 1]);
+    const end = last ? PAGE_END : `${PAGE_END}\n`;
+    if (!raw.endsWith(end)) {
+      problems.push(`the page that opens "${raw.slice(0, raw.indexOf('\n'))}" is not closed by a blank line and a "---" rule before what follows`);
+      return;
+    }
+    const page = raw.slice(0, -end.length);
+    pages.push({ text: page, canonical: /^Canonical: (\S+)$/mu.exec(page.slice(0, page.indexOf('\n---\n') + 1 || undefined))?.[1] });
+  });
+  return { pages, problems };
+}
+
+/**
+ * A copy, or a page in an llms file, as its head (the title through the rule
+ * that closes the header) and the lines after it.
+ *
+ * @param {string} text  Without the copy's final newline.
+ * @returns {{ head: string, rest: string[] } | undefined}
+ */
+export function headAndRest(text) {
+  const lines = text.split('\n');
+  const close = lines.indexOf('---', 3);
+  if (close === -1) return undefined;
+  const rest = lines.slice(close + 1);
+  if (rest[0] === '') rest.shift();
+  return { head: lines.slice(0, close + 1).join('\n'), rest };
+}
+
+/**
+ * The header row and delimiter row of the table some lines end inside, when
+ * they end on a row of one.
+ *
+ * @param {readonly string[]} lines
+ * @returns {[string, string] | undefined}
+ */
+function tableEndedIn(lines) {
+  if (!TABLE_ROW.test(lines.at(-1) ?? '')) return undefined;
+  let first = lines.length - 1;
+  while (first > 0 && TABLE_ROW.test(lines[first - 1])) first -= 1;
+  for (let i = first + 1; i < lines.length; i += 1) {
+    if (TABLE_DELIMITER.test(lines[i])) return [lines[i - 1], lines[i]];
+  }
+  return undefined;
+}
+
+/**
+ * The text of a page cut into parts, joined back: the rest of each part after
+ * the first, without the table header a part repeats when it opens in the
+ * middle of a table, follows the rest of the one before.
+ *
+ * @param {readonly string[][]} rests
+ * @returns {string[]}
+ */
+export function joinedParts(rests) {
+  const joined = [...(rests[0] ?? [])];
+  for (const rest of rests.slice(1)) {
+    const header = tableEndedIn(joined);
+    const repeats = header && rest[0] === header[0] && rest[1] === header[1];
+    joined.push(...(repeats ? rest.slice(2) : rest));
+  }
+  return joined;
+}
+
+/**
+ * The shard files of a build, grouped into shards: a shard in one file, or
+ * the numbered parts of one, in order.
+ *
+ * @param {string[]} names  `llms-<slug>.txt` file names.
+ * @param {(name: string) => string} read
+ * @returns {{ shards: Map<string, string[]>, problems: string[] }}
+ */
+function shardsOf(names, read) {
+  /** @type {Map<string, string[]>} */
+  const shards = new Map();
+  /** @type {string[]} */
+  const problems = [];
+  /** @type {Map<string, Map<number, string>>} */
+  const parts = new Map();
+  /** @type {Map<string, number>} */
+  const counts = new Map();
+  for (const name of names) {
+    const title = read(name).split('\n', 1)[0];
+    const part = /, part (\d+) of (\d+)$/u.exec(title);
+    const numbered = /^llms-(.+)-(\d+)\.txt$/u.exec(name);
+    if (!part) {
+      shards.set(name, [name]);
+      continue;
+    }
+    if (!numbered || Number(numbered[2]) !== Number(part[1])) {
+      problems.push(`llms/${name} opens as part ${part[1]} of ${part[2]} and is not named llms-<shard>-${part[1]}.txt`);
+      continue;
+    }
+    const slug = numbered[1];
+    if (Number(part[1]) < 1 || Number(part[1]) > Number(part[2])) {
+      problems.push(`llms/${name} opens as part ${part[1]} of ${part[2]}, past the parts llms-${slug} is cut into`);
+    }
+    if (!parts.has(slug)) parts.set(slug, new Map());
+    parts.get(slug)?.set(Number(part[1]), name);
+    if ((counts.get(slug) ?? Number(part[2])) !== Number(part[2])) {
+      problems.push(`the parts of llms-${slug} disagree on how many there are`);
+    }
+    counts.set(slug, Number(part[2]));
+  }
+  for (const [slug, found] of parts) {
+    const count = counts.get(slug) ?? 0;
+    const names = Array.from({ length: count }, (_, i) => found.get(i + 1));
+    if (names.some((name) => name === undefined) || found.size !== count) {
+      problems.push(`llms-${slug} is cut into ${count} parts and the build wrote ${found.size} of them`);
+    }
+    shards.set(`llms-${slug}`, names.filter((name) => name !== undefined));
+  }
+  return { shards, problems };
+}
+
+/**
+ * Holds the llms files of a build to the copies they carry.
+ *
+ * @param {string} dist
+ * @param {Map<string, BuiltPage>} pages
+ * @param {(kind: keyof typeof REMEDIES, message: string) => void} add
+ * @returns {{ files: number, pages: number }}
+ */
+export function checkLlmsFiles(dist, pages, add) {
+  const index = join(dist, 'llms.txt');
+  const full = join(dist, 'llms-full.txt');
+  const dir = join(dist, 'llms');
+  const missing = [index, full, dir].filter((path) => !existsSync(path));
+  if (missing.length > 0) {
+    add('llms', `the build has no ${missing.map((path) => path.slice(dist.length + 1)).join(', ')}`);
+    return { files: 0, pages: 0 };
+  }
+  const names = readdirSync(dir).filter((name) => /^llms-[a-z0-9-]+\.txt$/u.test(name)).sort();
+  const linked = new Set([...readFileSync(index, 'utf8').matchAll(SHARD_LINK)].map((found) => found[1]));
+  for (const name of names) if (!linked.has(name)) add('llms', `llms/${name} was built and llms.txt does not link it`);
+  for (const name of [...linked].sort()) if (!names.includes(name)) add('llms', `llms.txt links llms/${name}, which the build did not write`);
+
+  // Every English page whose whole text the llms files carry, with its copy:
+  // a page whose copy is missing is the copy rule's finding, not this one's.
+  /** @type {Map<string, string>} */
+  const owed = new Map();
+  for (const page of pages.values()) {
+    const kind = kindOf(page);
+    const copy = join(dist, copyOf(page.route));
+    if (kind && FULL_TEXT_KINDS.includes(kind) && !page.route.startsWith('/es/') && existsSync(copy)) {
+      owed.set(page.route, readFileSync(copy, 'utf8'));
+    }
+  }
+  // A page of an llms file is found by its text, which is its copy's, or by
+  // its head, which every part of a page cut into parts repeats; only a page
+  // that is neither is placed by its "Canonical:" line. A copy whose own
+  // header is wrong is then the header rule's finding and not this one's too.
+  /** @type {Map<string, string>} */
+  const byText = new Map();
+  /** @type {Map<string, string>} */
+  const byHead = new Map();
+  for (const [route, copy] of owed) {
+    byText.set(copy.replace(/\n$/u, ''), route);
+    const head = headAndRest(copy.replace(/\n$/u, ''))?.head;
+    if (head) byHead.set(head, route);
+  }
+  const routeOfPage = (found, where) => {
+    const known = byText.get(found.text) ?? byHead.get(headAndRest(found.text)?.head ?? '');
+    if (known) return known;
+    const route = found.canonical ? routeOfAddress(found.canonical) : undefined;
+    if (!route) add('llms', `${where} carries a page with no "Canonical:" line`);
+    else if (!owed.has(route)) {
+      add('llms', `${where} carries ${route}, ${pages.has(route) ? 'whose whole text the llms files do not carry' : 'which is no page of the build'}`);
+      return undefined;
+    }
+    return route;
+  };
+
+  // llms-full.txt: every page once, whole.
+  const inFull = new Map();
+  const fullPages = llmsPages(readFileSync(full, 'utf8'));
+  for (const problem of fullPages.problems) add('llms', `llms-full.txt: ${problem}`);
+  for (const found of fullPages.pages) {
+    const route = routeOfPage(found, 'llms-full.txt');
+    if (!route) continue;
+    inFull.set(route, (inFull.get(route) ?? 0) + 1);
+    if (`${found.text}\n` !== owed.get(route)) add('llms', `llms-full.txt carries ${route} other than its copy ${copyOf(route)}`);
+  }
+
+  // The shards: every page in exactly one, in one run across its parts.
+  const read = (name) => readFileSync(join(dir, name), 'utf8');
+  const grouped = shardsOf(names, read);
+  for (const problem of grouped.problems) add('llms', problem);
+  /** @type {Map<string, string>} */
+  const shardOf = new Map();
+  for (const [shard, files] of grouped.shards) {
+    /** @type {{ route: string, texts: string[] }[]} */
+    const runs = [];
+    for (const name of files) {
+      const found = llmsPages(read(name));
+      for (const problem of found.problems) add('llms', `llms/${name}: ${problem}`);
+      for (const one of found.pages) {
+        const route = routeOfPage(one, `llms/${name}`);
+        if (!route) continue;
+        if (runs.at(-1)?.route === route) runs.at(-1)?.texts.push(one.text);
+        else runs.push({ route, texts: [one.text] });
+      }
+    }
+    for (const { route, texts } of runs) {
+      if (shardOf.has(route)) {
+        add('llms', `${route} is in ${shardOf.get(route)} and again in ${shard}`);
+        continue;
+      }
+      shardOf.set(route, shard);
+      const copy = owed.get(route) ?? '';
+      if (texts.length === 1) {
+        if (`${texts[0]}\n` !== copy) add('llms', `${shard} carries ${route} other than its copy ${copyOf(route)}`);
+        continue;
+      }
+      const whole = headAndRest(copy.replace(/\n$/u, ''));
+      const cut = texts.map(headAndRest);
+      if (!whole || cut.some((part) => !part || part.head !== whole.head)) {
+        add('llms', `${shard} cuts ${route} into ${texts.length} parts that do not each open with its copy's head`);
+      } else if (joinedParts(cut.map((part) => part?.rest ?? [])).join('\n') !== whole.rest.join('\n')) {
+        add('llms', `${shard} cuts ${route} into ${texts.length} parts that, joined in order, are not its copy ${copyOf(route)}`);
+      }
+    }
+  }
+  for (const route of [...owed.keys()].sort()) {
+    if (!shardOf.has(route)) add('llms', `${route} is in no shard of llms/`);
+    const times = inFull.get(route) ?? 0;
+    if (times !== 1) add('llms', `${route} is in llms-full.txt ${times === 0 ? 'not at all' : `${times} times`}`);
+  }
+  return { files: names.length, pages: owed.size };
+}
+
 /**
  * Runs every rule on a build.
  *
  * @param {string} dist
  * @param {{ contentDir?: string, classes?: typeof PAGE_CLASSES }} [options]  `classes`
  *   replaces the table of page classes, for a test of the table's own rules.
- * @returns {{ findings: Map<keyof typeof REMEDIES, string[]>, stats: { pages: number, copies: number, classes: Record<string, number> } }}
+ * @returns {{ findings: Map<keyof typeof REMEDIES, string[]>, stats: { pages: number, copies: number, classes: Record<string, number>, llms: { files: number, pages: number } } }}
  */
 export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR, classes = PAGE_CLASSES } = {}) {
   /** @type {Map<keyof typeof REMEDIES, string[]>} */
@@ -493,7 +781,8 @@ export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR, classes = P
   for (const [id, count] of Object.entries(counted)) {
     if (count === 0) add('class', `the page class "${id}" matches no page of the build: remove it`);
   }
-  return { findings, stats: { pages: pages.size, copies: copies.size, classes: counted } };
+  const llms = checkLlmsFiles(dist, pages, add);
+  return { findings, stats: { pages: pages.size, copies: copies.size, classes: counted, llms } };
 }
 
 /**
@@ -678,7 +967,7 @@ export async function checkCopiesAgainstSources(dist, { contentDir = CONTENT_DIR
       site,
       catalogues: catalogues[lang],
       firstLine,
-      forms: !HOMES.has(route),
+      forms: pageKind(route) !== 'home',
     })) {
       found.push(`${route}: ${defect}`);
     }
@@ -723,6 +1012,7 @@ async function main() {
     header: 'copy header(s) that disagree with their page',
     body: 'copy(ies) that carry less than their page',
     text: 'place(s) in the copies a Markdown reader cannot use',
+    llms: 'place(s) where the llms files do not carry the copies as they read',
   };
   let failed = 0;
   for (const [kind, list] of findings) {
@@ -742,7 +1032,8 @@ async function main() {
   }
   console.log(
     `ok   every page's Markdown copy carries what the page carries: ${stats.pages} pages ` +
-      `(${classes}), ${stats.copies} copies`,
+      `(${classes}), ${stats.copies} copies; the llms files carry ${stats.llms.pages} of them ` +
+      `as they read, in ${stats.llms.files} shard files and llms-full.txt`,
   );
 }
 

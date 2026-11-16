@@ -11,9 +11,10 @@ name: Docs
 on:
   push:
     branches: ["main"]
-    # The build regenerates llms.txt from the markdown mirror before running
-    # Astro, so a change to docs/ or to the generator has to redeploy the site
-    # too: otherwise the published llms.txt silently falls behind the docs.
+    # The build writes llms.txt, the shards and llms-full.txt from the pages'
+    # Markdown copies before running Astro, so a change to the generator or to
+    # what it reads (docs/conformance.json, docs/README.md) has to redeploy the
+    # site too: otherwise the published llms files silently fall behind.
     paths:
       - "site/**"
       - "docs/**"
@@ -25,6 +26,23 @@ on:
       # the first entry already.)
       - ".github/brand/**"
       - "scripts/generate_llms.py"
+      # generate_llms.py reads where a page's code fences open and close
+      # through this module, and cuts a shard by them; it reads the errata
+      # register and a page's markup through the other three.
+      - "scripts/markdown_fences.py"
+      - "scripts/markdown_spans.py"
+      - "scripts/generate_site_reports.py"
+      - "scripts/ast_scan.py"
+      # The other scripts the job runs: the overview and glossary mirror
+      # checks before the build, and the static check of the examples the
+      # llms files restate after it. A change to one that breaks the job has
+      # to fail here, on its own pull request, and not on the next one that
+      # touches site/ (tests/test_repository_config.py holds every script a
+      # step or site/package.json runs, and what each imports, to this list).
+      - "scripts/mirror_overviews.py"
+      - "scripts/mirror_glossary.py"
+      - "scripts/check_doc_snippets.py"
+      - "scripts/check_conformance_claims.py"
       # The release commit and the package's own table.
       # site/src/data/citation.mjs reads CHANGELOG.md, CITATION.cff and
       # .zenodo.json from the repository root, and
@@ -62,6 +80,14 @@ on:
       - "docs/**"
       - ".github/brand/**"
       - "scripts/generate_llms.py"
+      - "scripts/markdown_fences.py"
+      - "scripts/markdown_spans.py"
+      - "scripts/generate_site_reports.py"
+      - "scripts/ast_scan.py"
+      - "scripts/mirror_overviews.py"
+      - "scripts/mirror_glossary.py"
+      - "scripts/check_doc_snippets.py"
+      - "scripts/check_conformance_claims.py"
       - "VERSION"
       - "pyproject.toml"
       - "CHANGELOG.md"
@@ -223,11 +249,6 @@ jobs:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('site/pnpm-lock.yaml') }}
           restore-keys: puppeteer-${{ runner.os }}-
-      - name: Check the overview and glossary mirrors, then regenerate llms.txt
-        run: |
-          python3 scripts/mirror_overviews.py --check
-          python3 scripts/mirror_glossary.py --check
-          python3 scripts/generate_llms.py
       - name: Install the site's dependencies
         # Here, before the first pnpm script, which would otherwise install
         # them on its own: pnpm 12 installs on a run that finds them missing.
@@ -236,10 +257,10 @@ jobs:
         working-directory: site
       - name: Check the bibliography's GitHub copy is the one its pages write
         # docs/reference/bibliography.md is written from the references every
-        # page declares (scripts/mirror-bibliography.mjs), and the site serves
-        # it as the English Markdown copy of the bibliography and cuts the llms
-        # shards from it. Written by hand it stayed behind the first reference
-        # a page added while the site page moved on, with every check green.
+        # page declares (scripts/mirror-bibliography.mjs), and GitHub serves it
+        # as the bibliography's plain-Markdown edition. Written by hand it
+        # stayed behind the first reference a page added while the site page
+        # moved on, with every check green.
         # Here, beside the build that writes the page from the same
         # references, a copy that is not what they write fails.
         run: pnpm run check:bibliography-mirror
@@ -305,6 +326,20 @@ jobs:
         # text, so it runs before the build.
         run: pnpm run check:render-spawns
         working-directory: site
+      - name: Check the overview and glossary mirrors, then regenerate llms.txt
+        # llms.txt is written from the pages' Markdown copies, which
+        # scripts/agent-md.mjs dumps with the parser installed above, so this
+        # runs after the install. It writes the index here, before the
+        # nine-minute build, so that a page in no shard, a shard that cannot be
+        # cut to fit one fetch or a mirror that fell behind fails in seconds;
+        # the build writes the files it publishes again, from copies with
+        # their dates (package.json `prebuild`), and the step after it holds
+        # its llms.txt to this one.
+        run: |
+          python3 scripts/mirror_overviews.py --check
+          python3 scripts/mirror_glossary.py --check
+          (cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated)
+          python3 scripts/generate_llms.py --pages build/agent-md
       - name: Test the Markdown writers on small pages made to fail them
         # The renderer, each component's writer in each language, the title,
         # header and references around a page's copy, and the two checks of
@@ -363,6 +398,22 @@ jobs:
         # cannot silence is listed in the check with its reason.
         run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
         working-directory: site
+      - name: Check llms.txt names the shard files the build wrote
+        # Before the build, this job wrote llms.txt at the repository root from
+        # a dump of the copies with no dates, the way `make llms` writes the
+        # committed file. The build wrote the one it publishes from copies that
+        # state the day each page was published and last changed. Where a
+        # shard is cut, and so which part files llms.txt links, must not depend
+        # on those dates: a writer whose text grew with them, or a dated header
+        # line the generator does not measure as one, would leave the committed
+        # index linking files the site does not serve, with every other check
+        # green, since each compares a file only with what was written beside
+        # it. The two are compared here on every build.
+        run: |
+          if ! diff -u llms.txt site/dist/llms.txt; then
+            echo "::error::The llms.txt the build publishes differs from the one written from copies without their dates: where a shard is cut depends on the dates, so the committed llms.txt would link part files the site does not serve."
+            exit 1
+          fi
       - name: Check every page's Markdown copy carries what the page carries
         # Every page publishes a copy of itself at <page>/index.md, written
         # from its source before the build (scripts/agent-md.mjs --public),
@@ -375,9 +426,24 @@ jobs:
         # a header held line by line to the page and the sitemap (canonical,
         # language, translation, release, publication day, Updated: date,
         # licence, summary), a body that is there, with every row of a
-        # catalogue's tables, and a text a Markdown reader can use.
+        # catalogue's tables, and a text a Markdown reader can use. The llms
+        # files the build wrote carry every English guide, catalogue and
+        # errata family once in llms-full.txt and in exactly one shard, as
+        # its copy reads, and llms.txt links every shard file and no other.
         run: pnpm run check:markdown-twins
         working-directory: site
+      - name: Check the Python examples the llms files restate
+        # llms-full.txt and the shards carry every guide's examples again, in
+        # the copies the build wrote, so they exist only here. The examples
+        # themselves run in Python CI (doc-snippets); this reads the copies for
+        # the shadowed import that check refuses, without running them.
+        run: python3 scripts/check_doc_snippets.py --static --restated site/dist
+      - name: Check the files the build restates the pages in state no count of standards
+        # The llms shards, llms-full.txt and every page's Markdown copy exist
+        # only in the build, so the refusal of a count of standards that the
+        # conformance job runs on a checkout cannot see them; this reads them
+        # where the build wrote them.
+        run: python3 scripts/check_conformance_claims.py --generated site/dist
 
       # Every page, component and script of the site type-checked in strict
       # mode. A catalogue row read through a field its table does not carry,

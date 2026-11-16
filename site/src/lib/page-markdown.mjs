@@ -103,6 +103,45 @@ export const DATA_COMPONENTS = Object.freeze(['Catalogues', 'Conformance', 'Erra
 export const hasMarkdownCopy = (route) => routeOf(route) !== '404';
 
 /**
+ * What kind of page a route of the content collection is, in either
+ * language: one of the two landing pages (`home`), the API reference
+ * generated from the docstrings (`api`, its index included), one published
+ * catalogue (`catalogue`), one family of the errata register
+ * (`errata-family`), or any other page (`guide`: the guides, the topic
+ * overviews, the start pages and the reference pages).
+ *
+ * The Markdown copies' check of the build (scripts/check-markdown-twins.mjs)
+ * classes every built page by it, and the llms files take their pages by it
+ * (scripts/agent-md.mjs --dump hands them the kind of every route), so the two
+ * cannot disagree about which page is which.
+ *
+ * @param {string} route  `signals/levels/levels`, `es/reference/errata/iec`,
+ *   `` or `es` for the landing pages; slashes around it are ignored.
+ * @returns {'home' | 'api' | 'catalogue' | 'errata-family' | 'guide'}
+ */
+export function pageKind(route) {
+  const bare = routeOf(route.replace(/^\/+|\/+$/gu, ''));
+  const english = bare === 'es' ? '' : bare.replace(/^es\//u, '');
+  if (english === '') return 'home';
+  if (/^reference\/api(?:\/|$)/u.test(english)) return 'api';
+  if (/^reference\/catalogues\/[^/]+$/u.test(english)) return 'catalogue';
+  if (/^reference\/errata\/[^/]+$/u.test(english)) return 'errata-family';
+  return 'guide';
+}
+
+/**
+ * The kinds of English page whose whole text the llms files carry: each in
+ * one shard of `/llms/` (or in the numbered parts of one) and in
+ * `llms-full.txt`, as its Markdown copy reads. The landing page is left out,
+ * because llms.txt is the index that does its work for an agent, and so is the
+ * API reference, which llms.txt lists as optional reading one link per module
+ * and which no agent needs whole. scripts/agent-md.mjs --dump hands
+ * scripts/generate_llms.py the copies of exactly these pages, and the copies'
+ * check of the build holds every one of them to its copy.
+ */
+export const FULL_TEXT_KINDS = Object.freeze(['guide', 'catalogue', 'errata-family']);
+
+/**
  * The address of the copy for a route, under the site's base path: the
  * landing page's copy sits at the root, `/index.md`, with no empty segment
  * before it.

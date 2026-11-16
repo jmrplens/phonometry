@@ -63,11 +63,26 @@ FIGURE_TICK_ENV = PHONOMETRY_FIGURE_TICK_AUDIT=$(FIGURE_TICK_DIR)
 # and numba caps numpy (`<2.6` today), so declaring it there would hold the
 # matrix back from the next numpy the day it ships, which is the one thing the
 # perf job's separate environment exists to prevent.
-install:
+install: site-deps
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -r requirements.txt
 	$(PYTHON) -m pip install -r requirements-dev.txt
 	$(PYTHON) -m pip install -e ".[full]"
+
+# The site's dependencies, which `make llms` needs as well as the site build:
+# the llms files are written from the pages' Markdown copies, and the copies
+# from the page sources by site/scripts/agent-md.mjs, which parses them with
+# the same unified packages the site's MDX pipeline loads. Node 24 runs it (it
+# loads two TypeScript data modules by stripping their types), and pnpm comes
+# from corepack at the version site/package.json pins in `packageManager`.
+site-deps:
+	@node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 24 ? 0 : 1)' 2>/dev/null || { \
+		echo "make site-deps: Node 24 or newer is needed (found: $$(node --version 2>/dev/null || echo none)); install it from https://nodejs.org/ and run make again."; \
+		exit 1; }
+	@command -v corepack >/dev/null 2>&1 || { \
+		echo "make site-deps: corepack is missing; it ships with Node 24, so reinstall Node or install it with npm install --global corepack."; \
+		exit 1; }
+	cd site && corepack enable && pnpm install --frozen-lockfile
 
 lint:
 	$(RUFF) check .
@@ -739,15 +754,22 @@ brand:
 # from the references every page of the site declares, as the site build writes
 # the page (site/scripts/mirror-bibliography.mjs). It needs the site's
 # dependencies (`pnpm install` in site/). Run it after changing a page's
-# references and before `make llms`, which cuts the bibliography's shards from
-# the copy; the docs workflow fails while the copy is stale.
+# references; the docs workflow fails while the copy is stale.
 bibliography-mirror:
 	cd site && $(PNPM) run mirror:bibliography
 
-llms:
+# llms.txt, from the site's own pages: agent-md.mjs dumps the English routes
+# and the Markdown copy of every page the llms files carry, without the two
+# dated header lines llms.txt does not state, and generate_llms.py writes the
+# index from that dump. The shards and llms-full.txt carry those dates, so the
+# site build writes them (site/package.json `prebuild`) and they are not
+# committed. The two mirror scripts still write the docs/ overviews and
+# glossary from the site.
+llms: site-deps
 	$(PYTHON) scripts/mirror_overviews.py
 	$(PYTHON) scripts/mirror_glossary.py
-	$(PYTHON) scripts/generate_llms.py
+	cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated
+	$(PYTHON) scripts/generate_llms.py --pages build/agent-md
 
 # Regenerate README_PYPI.md (the PyPI long description) from README.md:
 # theme-aware <picture> elements collapse to their light <img> fallback and
@@ -991,7 +1013,7 @@ type-completeness:
 
 check: lint security test
 
-.PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
+.PHONY: install site-deps lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
 	bibliography-mirror llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \

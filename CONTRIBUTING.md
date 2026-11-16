@@ -57,13 +57,26 @@ To set up your development environment:
 
 3. **Install dependencies and the package:**
    Install both production and development dependencies to run tests and
-   linters, then phonometry itself in editable mode, as CI does (`make install`
-   runs the same three lines).
+   linters, then phonometry itself in editable mode, as CI does.
    ```bash
    pip install -r requirements.txt
    pip install -r requirements-dev.txt
    pip install -e ".[full]"
    ```
+
+4. **Install the site's dependencies:**
+   `make llms` writes `llms.txt` from the site's own pages, and reads them
+   with the site's Markdown parser, so it needs Node 24 and the site's
+   packages as well as Python. pnpm comes from corepack, which ships with
+   Node, at the version `site/package.json` pins.
+   ```bash
+   cd site
+   corepack enable
+   pnpm install --frozen-lockfile
+   cd ..
+   ```
+   `make site-deps` runs the same and stops with a message when Node 24 or
+   corepack is missing; `make install` runs it and the three lines above.
 
 ## ✅ Code Quality Standards
 
@@ -531,7 +544,7 @@ stale:
 
 ```bash
 make api-docs   # site/src/content/docs/reference/api/ and site/src/generated/api-sidebar.mjs
-make llms       # llms.txt, llms-full.txt, site/public/llms/, and the section indexes and glossary under docs/
+make llms       # llms.txt, and the section indexes and glossary under docs/
 ```
 
 A change to a page's frontmatter `references` changes the bibliography, which
@@ -542,10 +555,20 @@ bibliography's shards from that copy, and commit both. The docs workflow fails
 while the copy is not what the references write.
 
 `make api-docs` reads every public module's `__all__` and docstrings, so run it
-after changing a public name, a signature or a docstring; `make llms` reads the
-guides, so run it after changing one. Commit whatever each changes: the
-"Generated API reference up to date" and "llms artifacts up to date" jobs diff
-those paths and fail on any difference.
+after changing a public name, a signature or a docstring. `make llms` reads
+every page of the site, through the Markdown copy `site/scripts/agent-md.mjs`
+writes of it, so run it after changing any page, a component a page uses or
+its Markdown writer (it needs the site's dependencies, step 4 of the setup).
+Commit whatever each changes: the "Generated API reference up to date" and
+"llms artifacts up to date" jobs diff those paths and fail on any difference.
+
+The shards under `/llms/` and `llms-full.txt` are not committed. Each page in
+them is its Markdown copy, whose header carries the day the page was first
+published and last changed, and a committed file cannot carry the date of the
+commit that commits it. The site build writes them (`site/package.json`
+`prebuild`, which runs `scripts/generate_llms.py --build` on the copies it has
+just written), and the build's check of the copies fails when a page they carry
+differs from its copy.
 
 ### 5b. Retired site addresses (auto-generated map)
 

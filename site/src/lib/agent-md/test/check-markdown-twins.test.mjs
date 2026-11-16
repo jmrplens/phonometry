@@ -18,7 +18,17 @@ import { dirname, join } from 'node:path';
 import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { PAGE_CLASSES, REMEDIES, checkMarkdownTwins, headerOf, textProblems } from '../../../../scripts/check-markdown-twins.mjs';
+import {
+  PAGE_CLASSES,
+  PAGE_END,
+  REMEDIES,
+  checkMarkdownTwins,
+  headAndRest,
+  headerOf,
+  joinedParts,
+  llmsPages,
+  textProblems,
+} from '../../../../scripts/check-markdown-twins.mjs';
 import { preRelease, version } from '../../../data/repo-stats.mjs';
 import { PRE_RELEASE } from '../header.mjs';
 import { VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
@@ -159,18 +169,71 @@ function site() {
 }
 
 /**
+ * The pages of the fixture whose whole text the llms files carry, each with
+ * the shard it travels in.
+ */
+const FULL_TEXT = Object.freeze([
+  ['/a/', 'a'],
+  ['/reference/catalogues/solids/', 'catalogues-solids'],
+  ['/reference/errata/iso/', 'errata'],
+]);
+
+/** A copy as an llms file holds a page: without its final newline. */
+const asPage = (text) => text.replace(/\n$/u, '');
+
+/**
+ * A shard file as scripts/generate_llms.py writes one: its head, then each
+ * page, closed by {@link PAGE_END}.
+ *
+ * @param {string} title  The shard's title, `x, part 1 of 2` for a part.
+ * @param {readonly string[]} pages
+ */
+function shardFile(title, pages) {
+  const head = `# phonometry: ${title}\n\nPart of ${SITE}/llms.txt. Full text of the pages in this area.\n\n---\n`;
+  return head + pages.map((one) => `\n${one}${PAGE_END}`).join('');
+}
+
+/**
+ * The llms files the generator writes for a build: llms.txt linking one
+ * shard per page of {@link FULL_TEXT}, each shard carrying that page's copy,
+ * and llms-full.txt carrying them all after the index.
+ *
+ * @param {Record<string, string | undefined>} files  The build's files.
+ * @returns {Record<string, string | undefined>}
+ */
+function llmsFiles(files) {
+  const index = ['# phonometry', '', ...FULL_TEXT.map(([, slug]) => `- [${slug}](${SITE}/llms/llms-${slug}.txt)`), ''].join('\n');
+  /** @type {Record<string, string | undefined>} */
+  const out = { 'llms.txt': index };
+  const pages = [];
+  for (const [route, slug] of FULL_TEXT) {
+    const text = files[`${route.slice(1)}index.md`];
+    if (text === undefined) continue;
+    out[`llms/llms-${slug}.txt`] = shardFile(slug, [asPage(text)]);
+    pages.push(asPage(text));
+  }
+  out['llms-full.txt'] = `${index}\n---\n${pages.map((one) => `\n${one}${PAGE_END}`).join('')}`;
+  return out;
+}
+
+/**
  * Writes a build and its content files, applies `change` to the build's files
- * first, and checks it.
+ * first, writes the llms files from the copies that leaves, applies
+ * `changeLlms` to those, and checks it.
  *
  * @param {import('node:test').TestContext} t
  * @param {(files: Record<string, string | undefined>) => void} [change]
  * @param {typeof PAGE_CLASSES} [classes]  The table of page classes, when not the check's own.
+ * @param {(files: Record<string, string | undefined>) => void} [changeLlms]
  */
-function check(t, change = () => {}, classes = PAGE_CLASSES) {
+function check(t, change = () => {}, classes = PAGE_CLASSES, changeLlms = () => {}) {
   const root = mkdtempSync(join(tmpdir(), 'check-markdown-twins-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const { dist, content } = site();
   change(dist);
+  const llms = llmsFiles(dist);
+  changeLlms(llms);
+  Object.assign(dist, llms);
   for (const [dir, files] of [['dist', dist], ['content', content]]) {
     for (const [path, text] of Object.entries(files)) {
       if (text === undefined) continue;
@@ -560,6 +623,203 @@ describe('the table of page classes', () => {
       files['404.html'] = undefined;
     });
     assert.deepEqual(found, ['class: the page class "not-found" matches no page of the build: remove it']);
+  });
+});
+
+describe('the llms files, which carry the copies as they read', () => {
+  /** A copy of /a/ with two sections, to cut. */
+  const sectioned = () =>
+    copy('/a/', { other: '/es/a/', body: ['Intro.', '', '## One', '', 'Text one.', '', '## Two', '', 'Text two.'].join('\n') });
+
+  /** /a/'s copy cut before its second section into two parts, each opening with its head. */
+  const cutAtSections = (text) => {
+    const page = headAndRest(asPage(text));
+    assert.ok(page);
+    const at = page.rest.indexOf('## Two');
+    return [
+      `${page.head}\n\n${page.rest.slice(0, at).join('\n')}`,
+      `${page.head}\n\n${page.rest.slice(at).join('\n')}`,
+    ];
+  };
+
+  /** Writes the parts of llms-a in place of its one file, and links them. */
+  const asParts = (files, parts) => {
+    files['llms/llms-a.txt'] = undefined;
+    parts.forEach((one, i) => {
+      files[`llms/llms-a-${i + 1}.txt`] = shardFile(`a, part ${i + 1} of ${parts.length}`, [one]);
+    });
+    files['llms.txt'] = (files['llms.txt'] ?? '').replace(
+      `${SITE}/llms/llms-a.txt`,
+      parts.map((_, i) => `${SITE}/llms/llms-a-${i + 1}.txt`).join(') (')
+    );
+  };
+
+  test('pass when every page owed is in one shard and once in llms-full.txt, byte for byte', (t) => {
+    const { found, stats } = check(t);
+    assert.deepEqual(found, []);
+    assert.deepEqual(stats.llms, { files: 3, pages: 3 });
+  });
+
+  test('find a shard that carries a stale body', (t) => {
+    const { found } = check(t, undefined, undefined, (files) => {
+      files['llms/llms-a.txt'] = files['llms/llms-a.txt']?.replace('The body.', 'The body as it read last week.');
+    });
+    assert.deepEqual(found, ['llms: llms-a.txt carries /a/ other than its copy /a/index.md']);
+  });
+
+  test('find llms-full.txt carrying a stale body', (t) => {
+    const { found } = check(t, undefined, undefined, (files) => {
+      files['llms-full.txt'] = files['llms-full.txt']?.replace(`Updated: ${UPDATED}`, 'Updated: 2026-10-01');
+    });
+    assert.deepEqual(found, ['llms: llms-full.txt carries /a/ other than its copy /a/index.md']);
+  });
+
+  test('find a page in no shard, and a page missing from llms-full.txt or there twice', (t) => {
+    const missing = check(t, undefined, undefined, (files) => {
+      files['llms/llms-errata.txt'] = shardFile('errata', []);
+    }).found;
+    assert.deepEqual(missing, ['llms: /reference/errata/iso/ is in no shard of llms/']);
+    const notInFull = check(t, undefined, undefined, (files) => {
+      files['llms-full.txt'] = files['llms-full.txt']?.replace(`\n${asPage(copy('/reference/errata/iso/'))}${PAGE_END}`, '');
+    }).found;
+    assert.deepEqual(notInFull, ['llms: /reference/errata/iso/ is in llms-full.txt not at all']);
+    const twice = check(t, undefined, undefined, (files) => {
+      const page = asPage(copy('/a/', { other: '/es/a/' }));
+      files['llms-full.txt'] = `${files['llms-full.txt']}\n${page}${PAGE_END}`;
+    }).found;
+    assert.deepEqual(twice, ['llms: /a/ is in llms-full.txt 2 times']);
+  });
+
+  test('find a page in two shards', (t) => {
+    const { found } = check(t, undefined, undefined, (files) => {
+      files['llms/llms-errata.txt'] = shardFile('errata', [
+        asPage(copy('/reference/errata/iso/')),
+        asPage(copy('/a/', { other: '/es/a/' })),
+      ]);
+    });
+    assert.deepEqual(found, ['llms: /a/ is in llms-a.txt and again in llms-errata.txt']);
+  });
+
+  test('find a page whose whole text the llms files do not carry: the API reference, a Spanish page', (t) => {
+    const { found } = check(t, undefined, undefined, (files) => {
+      files['llms/llms-a.txt'] = shardFile('a', [asPage(copy('/a/', { other: '/es/a/' })), asPage(copy('/es/a/', { other: '/a/' }))]);
+      files['llms-full.txt'] = `${files['llms-full.txt']}\n${asPage(copy('/reference/api/m/'))}${PAGE_END}`;
+    });
+    assert.deepEqual(found, [
+      'llms: llms-full.txt carries /reference/api/m/, whose whole text the llms files do not carry',
+      'llms: llms/llms-a.txt carries /es/a/, whose whole text the llms files do not carry',
+    ]);
+  });
+
+  test('find a shard file llms.txt does not link, a link to a file not built, and no llms files at all', (t) => {
+    const unlinked = check(t, undefined, undefined, (files) => {
+      files['llms.txt'] = files['llms.txt']?.replace(`${SITE}/llms/llms-errata.txt`, `${SITE}/llms/llms-errata-1.txt`);
+    }).found;
+    assert.deepEqual(unlinked, [
+      'llms: llms/llms-errata.txt was built and llms.txt does not link it',
+      'llms: llms.txt links llms/llms-errata-1.txt, which the build did not write',
+    ]);
+    const none = check(t, undefined, undefined, (files) => {
+      for (const name of Object.keys(files)) files[name] = undefined;
+    }).found;
+    assert.deepEqual(none, ['llms: the build has no llms.txt, llms-full.txt, llms']);
+  });
+
+  test('find a page not closed by the rule that ends it', (t) => {
+    const { found } = check(t, undefined, undefined, (files) => {
+      files['llms/llms-a.txt'] = files['llms/llms-a.txt']?.replace(/\n\n---\n$/u, '\n');
+    });
+    assert.equal(found.length, 2);
+    assert.match(found[0], /^llms: llms\/llms-a\.txt: the page that opens "# Page \/a\/" is not closed by a blank line and a "---" rule/u);
+    assert.equal(found[1], 'llms: /a/ is in no shard of llms/');
+  });
+
+  test('pass a page cut at its sections into parts that each open with its head', (t) => {
+    const { found } = check(
+      t,
+      (files) => {
+        files['a/index.md'] = sectioned();
+      },
+      undefined,
+      (files) => asParts(files, cutAtSections(sectioned())),
+    );
+    assert.deepEqual(found, []);
+  });
+
+  test('find parts out of order, a part missing, a part with another head and a part misnamed', (t) => {
+    const change = (files) => {
+      files['a/index.md'] = sectioned();
+    };
+    const [first, second] = cutAtSections(sectioned());
+    const swapped = check(t, change, undefined, (files) => asParts(files, [second, first])).found;
+    assert.deepEqual(swapped, ['llms: llms-a cuts /a/ into 2 parts that, joined in order, are not its copy /a/index.md']);
+    const lost = check(t, change, undefined, (files) => {
+      asParts(files, [first, second]);
+      files['llms/llms-a-2.txt'] = undefined;
+    }).found;
+    assert.deepEqual(lost, [
+      'llms: llms.txt links llms/llms-a-2.txt, which the build did not write',
+      'llms: llms-a is cut into 2 parts and the build wrote 1 of them',
+      'llms: llms-a carries /a/ other than its copy /a/index.md',
+    ]);
+    const otherHead = check(t, change, undefined, (files) => asParts(files, [first, second.replace('Language: en', 'Language: es')])).found;
+    assert.deepEqual(otherHead, ['llms: llms-a cuts /a/ into 2 parts that do not each open with its copy\'s head']);
+    const misnamed = check(t, change, undefined, (files) => {
+      asParts(files, [first, second]);
+      files['llms/llms-a-3.txt'] = files['llms/llms-a-2.txt'];
+      files['llms/llms-a-2.txt'] = undefined;
+      files['llms.txt'] = files['llms.txt']?.replace('llms-a-2.txt', 'llms-a-3.txt');
+    }).found;
+    assert.equal(misnamed[0], 'llms: llms/llms-a-3.txt opens as part 2 of 2 and is not named llms-<shard>-2.txt');
+    const extra = check(t, change, undefined, (files) => {
+      asParts(files, [first, second]);
+      files['llms/llms-a-3.txt'] = shardFile('a, part 3 of 2', ['stale']);
+      files['llms.txt'] = files['llms.txt']?.replace('llms-a-2.txt)', `llms-a-2.txt) (${SITE}/llms/llms-a-3.txt)`);
+    }).found;
+    assert.ok(
+      extra.includes('llms: llms/llms-a-3.txt opens as part 3 of 2, past the parts llms-a is cut into'),
+      `a part past the count is reported: ${JSON.stringify(extra)}`,
+    );
+  });
+
+  test('pass a catalogue cut between the rows of its table, each part after the first repeating the table header', (t) => {
+    const rows = ['| Material | E (GPa) |', '| --- | --- |', '| Steel | 210 |', '| Lead | 16 |'];
+    const text = asPage(copy('/reference/catalogues/solids/', { license: false, body: rows.join('\n') }));
+    const page = headAndRest(text);
+    assert.ok(page);
+    const parts = [`${page.head}\n\n${rows.slice(0, 3).join('\n')}`, `${page.head}\n\n${[rows[0], rows[1], rows[3]].join('\n')}`];
+    const write = (files, second) => {
+      files['llms/llms-catalogues-solids.txt'] = undefined;
+      files['llms/llms-catalogues-solids-1.txt'] = shardFile('catalogues-solids, part 1 of 2', [parts[0]]);
+      files['llms/llms-catalogues-solids-2.txt'] = shardFile('catalogues-solids, part 2 of 2', [second]);
+      files['llms.txt'] = files['llms.txt']?.replace(
+        `${SITE}/llms/llms-catalogues-solids.txt`,
+        `${SITE}/llms/llms-catalogues-solids-1.txt) (${SITE}/llms/llms-catalogues-solids-2.txt`,
+      );
+    };
+    assert.deepEqual(check(t, undefined, undefined, (files) => write(files, parts[1])).found, []);
+    const otherHeader = parts[1].replace('| Material | E (GPa) |', '| Material | E (MPa) |');
+    assert.deepEqual(check(t, undefined, undefined, (files) => write(files, otherHeader)).found, [
+      'llms: llms-catalogues-solids cuts /reference/catalogues/solids/ into 2 parts that, joined in order, are not its copy /reference/catalogues/solids/index.md',
+    ]);
+  });
+
+  test('read pages, heads and parts as the generator writes them', () => {
+    const one = asPage(copy('/a/'));
+    const two = asPage(copy('/reference/errata/iso/'));
+    const read = llmsPages(`# phonometry: x\n\nPart of it.\n\n---\n\n${one}${PAGE_END}\n${two}${PAGE_END}`);
+    assert.deepEqual(read.problems, []);
+    assert.deepEqual(read.pages.map((page) => [page.text, page.canonical]), [
+      [one, `${SITE}/a/`],
+      [two, `${SITE}/reference/errata/iso/`],
+    ]);
+    // A page whose body shows the opening of a copy inside a code fence is one page.
+    const fenced = asPage(copy('/a/', { body: ['```text', '# Page /b/', '', '> One page of the phonometry documentation, as Markdown.', '```'].join('\n') }));
+    const once = llmsPages(`${fenced}${PAGE_END}`);
+    assert.deepEqual(once.problems, []);
+    assert.deepEqual(once.pages.map((page) => page.text), [fenced]);
+    assert.deepEqual(joinedParts([['a', '| h |', '| --- |', '| 1 |'], ['| h |', '| --- |', '| 2 |']]), ['a', '| h |', '| --- |', '| 1 |', '| 2 |']);
+    assert.deepEqual(joinedParts([['a', ''], ['## B', 'b']]), ['a', '', '## B', 'b']);
   });
 });
 

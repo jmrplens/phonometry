@@ -763,19 +763,19 @@ const siteNodeDefects = new Map();
 const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
 
 /**
- * Whether an `@id` is a work a page cites: a standard, book, paper, report or
- * web page defined on a bibliography page (src/lib/citations.mjs). The
- * bibliography's own article and the standards bodies hang off the same
+ * Whether an `@id` is a work a page cites: a standard, book, paper, report,
+ * web page or data set defined on a bibliography page (src/lib/citations.mjs).
+ * The bibliography's own article and the standards bodies hang off the same
  * address and are not works.
  */
 const isCitedWork = (id) =>
-	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|doi|book|article|report|web)-/.test(id);
+	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|doi|book|article|report|web|dataset)-/.test(id);
 
 /**
  * The types src/lib/citations.mjs gives a cited work. A stub typed anything
  * else, an Organization say, is not naming a work, whatever its name says.
  */
-const WORK_TYPES = new Set(['CreativeWork', 'Book', 'ScholarlyArticle', 'Report', 'WebPage']);
+const WORK_TYPES = new Set(['CreativeWork', 'Book', 'ScholarlyArticle', 'Report', 'WebPage', 'Dataset']);
 
 /** Whether a reference to a work says what the work is, not only where it is defined. */
 const isNamed = (item) =>
@@ -786,11 +786,12 @@ const isNamed = (item) =>
 
 /**
  * The fields a page's stub shares with the bibliography's node for the same
- * work (src/lib/citations.mjs, `STUB_FIELDS`), compared value for value.
- * `sameAs` is compared apart: the Spanish bibliography adds the English node
- * to it, which a page's stub does not carry.
+ * work (src/lib/citations.mjs, `STUB_FIELDS`), compared value for value: a
+ * data set's licence among them. `sameAs` is compared apart: the Spanish
+ * bibliography adds the English node to it, which a page's stub does not
+ * carry.
  */
-const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url'];
+const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url', 'license'];
 
 /** A value as JSON with its keys in order, so two equal nodes compare equal. */
 const canonical = (value) =>

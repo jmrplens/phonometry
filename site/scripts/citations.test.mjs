@@ -84,6 +84,45 @@ test('a stub carries the identity of the full node and none of its detail', () =
   assert.equal(referenceStub(report, EN).reportNumber, 'Doc 29');
 });
 
+test('a data set is a Dataset under its own licence, by its creators and its repository, and a page names it with the licence', () => {
+  const deposit = {
+    type: 'dataset',
+    authors: ['Zerwas, M.', 'Kayku, S.'],
+    year: 2026,
+    title: 'Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral',
+    publisher: 'Zenodo',
+    doi: '10.5281/zenodo.20428705',
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    note: 'The impulse response of the worked case.',
+  };
+  const node = referenceNode(deposit, EN);
+  assert.equal(node['@id'], `${EN}#doi-10-5281-zenodo-20428705`);
+  assert.equal(node['@type'], 'Dataset');
+  assert.deepEqual(node.creator, [
+    { '@type': 'Person', name: 'Zerwas, M.' },
+    { '@type': 'Person', name: 'Kayku, S.' },
+  ]);
+  assert.deepEqual(node.publisher, { '@type': 'Organization', name: 'Zenodo' });
+  assert.equal(node.license, 'https://creativecommons.org/licenses/by/4.0/');
+  assert.equal(node.author, undefined);
+  assert.equal(referenceStub(deposit, EN).license, 'https://creativecommons.org/licenses/by/4.0/');
+
+  // A body that publishes data under its own name is its creator, and a data
+  // set with no DOI keys on its type, its body, its year and its title.
+  const series = {
+    type: 'dataset',
+    organization: 'Dublin City Council',
+    year: 2017,
+    title: 'Ambient sound monitoring network DCC',
+    publisher: 'data.gov.ie',
+    url: 'https://data.gov.ie/dataset/ambient-sound-monitoring-network',
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+  };
+  const seriesNode = referenceNode(series, EN);
+  assert.equal(seriesNode['@id'], `${EN}#dataset-dublin-city-council-2017-ambient-sound-monitoring-network-dcc`);
+  assert.deepEqual(seriesNode.creator, { '@type': 'Organization', name: 'Dublin City Council' });
+});
+
 test('a page that cites nothing publishes no citation properties', () => {
   assert.deepEqual(citationsFor({ references: undefined, bibliographyUrl: EN }), {});
   assert.deepEqual(citationsFor({ references: [], bibliographyUrl: EN }), {});

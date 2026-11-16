@@ -383,6 +383,7 @@ from figures.room import (
     generate_reverberation_models,
     generate_room_noise_criteria,
     generate_room_parameters_bands,
+    generate_room_parameters_chapel,
     generate_schroeder_decay,
     generate_steady_state_field,
 )
@@ -862,6 +863,7 @@ __all__ = [
     "generate_rolling_stock_uncertainty",
     "generate_room_noise_criteria",
     "generate_room_parameters_bands",
+    "generate_room_parameters_chapel",
     "generate_room_to_room_chain",
     "generate_rotorcraft_contour",
     "generate_rotorcraft_flight_conditions",

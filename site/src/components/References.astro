@@ -58,7 +58,7 @@ const sorted = sortedReferences(references, lang);
 				{sorted.map(([index, ref]) => (
 					<li id={anchors[index]}>
 						<span class="ref-who">{opening(ref, lang)}</span>
-						{citationParts(ref).map((part) => {
+						{citationParts(ref, lang).map((part) => {
 							const inner =
 								part.italic === 'cite' ? (
 									<cite>{part.text}</cite>

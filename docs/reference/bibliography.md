@@ -191,6 +191,8 @@ would be a disservice.
   Cited by [Reading and writing measurement audio](../io/audio-files.md).
 - **FFmpeg project. (n.d.).** [*FFmpeg codecs documentation*](https://ffmpeg.org/ffmpeg-codecs.html).
   Cited by [Writing animations and FDTD runs to video](../io/videos.md).
+- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
+  Cited by [Reading and writing measurement audio](../io/audio-files.md) and [Loudness](../perception/psychoacoustics/loudness.md).
 - **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/42088.html) (ISO 10140-2:2010).
   Cited by [Your own catalogues](../io/material-catalogues.md), [Laboratory Insulation Measurement](../buildings/insulation/insulation-lab.md) and [Reading a material datasheet](../materials/reading-a-datasheet.md).
 - **International Telecommunication Union. (2025).** [*Long-form file format for the international exchange of audio programme materials with metadata*](https://www.itu.int/rec/R-REC-BS.2088/en) (Recommendation ITU-R BS.2088-2).
@@ -542,6 +544,8 @@ distributed, which is exactly where the five disagree.
   Cited by [Image Sources and the Steady-State Room Field](../buildings/rooms/room-image-sources.md) and [Theory: Rooms and Buildings](theory/rooms-buildings.md).
 - **Witew, I. B., Behler, G. K., & Vorländer, M. (2017).** About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. https://doi.org/10.1007/s40857-017-0094-7
   Cited by [Reporting and source qualification (ISO 3382-1)](../buildings/rooms/reporting-and-qualification.md).
+- **Zerwas, M., & Kayku, S. (2026).** [*Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral*](https://zenodo.org/records/20428705) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.20428705
+  Cited by [Room acoustic parameters (ISO 3382-1/2)](../buildings/rooms/room-acoustics.md).
 
 ## Materials and surfaces
 
@@ -765,6 +769,10 @@ adopted.
   Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
 - **Deutsches Institut für Normung. (2006).** *Akustik — Software-Erzeugnisse zur Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und Prüfbestimmungen* (DIN 45687:2006-05).
   Cited by [Quality of Outdoor Sound Software (ISO 17534-1)](../environment/propagation/software-quality.md).
+- **Dublin City Council. (2016).** [*Ambient Sound Monitoring Network annual report for 2015*](https://www.dublincity.ie/sites/default/files/media/file-uploads/2018-07/AMBIENT_SOUND_MONITORING_NETWORK_ANNUAL_REPORT_2015.pdf).
+  Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
+- **Dublin City Council. (2017).** [*Ambient Sound Monitoring Network DCC*](https://data.smartdublin.ie/dataset/ambient-sound-monitoring-network) \[Data set\]. Smart Dublin.
+  Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
 - **European Committee for Standardization. (1997).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 3: Normalized traffic noise spectrum* (EN 1793-3:1997).
   Cited by [Spherical ground effect and advanced barriers](../environment/propagation/ground-barriers.md) and [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md).
 - **European Committee for Standardization. (2009).** *Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation* (EN 15610:2009).

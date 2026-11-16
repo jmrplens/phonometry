@@ -18,10 +18,13 @@ of the last published digit (0.5 dB); the two sites reproduce as 57.98
 and 58.81 dB, i.e. the rounding convention is pinned from two independent
 directions.
 
-The report defines night as 23:00 to 07:00. Day and evening levels per
-the END/ISO 1996 split (07-19, 19-23) have no published counterpart in
-the report's text, so they are not asserted against it; they feed
-:func:`~phonometry.environment.lden` and
+The report defines the evening as 19:00 to 23:00 and the night as 23:00
+to 07:00 (p. 9). The text quotes only the night levels, but Fig. 3 on
+p. 11 tabulates every site's annual Lday, Levening, Lnight and LDEN in
+whole decibels: 65, 63, 58 and 67 dB(A) at Ballymun, 59, 60, 59 and 65 at
+Ringsend. The day, evening and night levels per the END/ISO 1996 split
+(07-19, 19-23, 23-07) and the Lden they give are held to that table the
+same way, and they feed :func:`~phonometry.environment.lden` and
 :func:`~phonometry.environment.composite_rating_level`, which must agree
 with each other and with the hand-written ISO 1996-1:2016 Formula (6).
 There is no public function today that takes a timestamped level series
@@ -42,6 +45,12 @@ _NPZ = oracle_data.DATA / "audio" / "dublin" / "dcc_laeq_5min_2015.npz"
 #: Published annual night-time (23:00-07:00) levels, dB(A): DCC Annual
 #: Report 2015, p. 11.
 _PUBLISHED_LNIGHT = {"ballymun": 58.0, "ringsend": 59.0}
+#: The same report's Fig. 3 (p. 11): each site's annual Lday, Levening,
+#: Lnight and LDEN, dB(A), as its table prints them, in whole decibels.
+_PUBLISHED_FIG3 = {
+    "ballymun": (65.0, 63.0, 58.0, 67.0),
+    "ringsend": (59.0, 60.0, 59.0, 65.0),
+}
 #: The report's guideline both sites are named as exceeding.
 _NIGHT_GUIDELINE_DB = 55.0
 
@@ -101,6 +110,16 @@ def test_annual_lnight_matches_the_published_value(site: str) -> None:
     assert lnight == pytest.approx(published, abs=0.5)
     assert round(lnight) == published
     assert lnight > _NIGHT_GUIDELINE_DB
+
+
+@pytest.mark.parametrize("site", ["ballymun", "ringsend"])
+def test_annual_period_levels_and_lden_match_the_published_figure(site: str) -> None:
+    lday, levening, lnight = _period_levels(site)
+    computed = (lday, levening, lnight, lden(lday, levening, lnight))
+    for value, published in zip(computed, _PUBLISHED_FIG3[site], strict=True):
+        # Printed as whole numbers: half of the last digit either way.
+        assert value == pytest.approx(published, abs=0.5)
+        assert round(value) == published
 
 
 @pytest.mark.parametrize("site", ["ballymun", "ringsend"])

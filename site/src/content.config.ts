@@ -126,6 +126,22 @@ const reference = z.discriminatedUnion('type', [
     institution: z.string().min(1).optional(),
     ...referenceBase,
   }),
+  z.object({
+    type: z.literal('dataset'),
+    /** The people who made the data, or use `organization` for a corporate creator. */
+    authors: authorList.optional(),
+    organization: z.string().min(1).optional(),
+    /** The repository or portal that publishes it: "Zenodo", "data.gov.ie". */
+    publisher: z.string().min(1),
+    /**
+     * The licence the data is published under, as the address of its text
+     * (`https://creativecommons.org/licenses/by/4.0/`). A data set reused on
+     * a page is reused under the licence of its own, which is what the page's
+     * structured data says of it (src/lib/citations.mjs).
+     */
+    license: z.url(),
+    ...referenceBase,
+  }),
 ]);
 
 const references = z
@@ -133,7 +149,7 @@ const references = z
   .superRefine((refs, ctx) => {
     for (const [i, ref] of refs.entries()) {
       if (
-        (ref.type === 'web' || ref.type === 'report') &&
+        (ref.type === 'web' || ref.type === 'report' || ref.type === 'dataset') &&
         !ref.authors?.length &&
         !ref.organization
       ) {
@@ -182,8 +198,10 @@ const conformanceSide = z.object({
 });
 
 const conformanceCited = z.object({
-  // Same vocabulary as the page bibliographies above, plus `derivation`
-  // for a check whose reference is a closed form and not a document.
+  // The vocabulary of the page bibliographies above but `dataset`, which no
+  // row cites (the guides compare the measured data sets, and the conformance
+  // page says why they are not rows), plus `derivation` for a check whose
+  // reference is a closed form and not a document.
   kind: z.enum(['standard', 'book', 'article', 'report', 'web', 'derivation']),
   /** Written out in full: "ISO 16283-2", never the "-2" the citation writes. */
   designation: z.string().min(1),

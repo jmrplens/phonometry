@@ -399,7 +399,7 @@ export function referencesMarkdown(references, lang, heading) {
  * @returns {string}
  */
 export function citationMarkdown(ref, lang) {
-  return `**${fragmentText(opening(ref, lang))}**${citationParts(ref).map(partMarkdown).join('').trimEnd()}`;
+  return `**${fragmentText(opening(ref, lang))}**${citationParts(ref, lang).map(partMarkdown).join('').trimEnd()}`;
 }
 
 /**

@@ -483,6 +483,23 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
         isPartOf: container(ref),
         ...(ref.pages ? { pagination: ref.pages } : {}),
       };
+    case 'dataset':
+      // A data set is a work of its own, published under its own licence: the
+      // field data a guide reads keeps the CC BY 4.0 of its deposit, which is
+      // the licence that travels with it, never the library's. Its makers are
+      // its `creator`, as Google's dataset documentation and schema.org's own
+      // Dataset examples name them.
+      return {
+        ...common,
+        '@type': 'Dataset',
+        ...(ref.authors?.length
+          ? { creator: people(ref.authors) }
+          : ref.organization
+            ? { creator: { '@type': 'Organization', name: ref.organization } }
+            : {}),
+        publisher: { '@type': 'Organization', name: ref.publisher },
+        license: ref.license,
+      };
     case 'report':
       return {
         ...common,
@@ -515,8 +532,11 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
  * differ; check:structured-data compares every named stub with the
  * bibliography's node on the built pages. A JSON-LD processor that reads both
  * the page and the bibliography merges them into one node.
+ *
+ * A data set's licence is in the stub as well: a page that reads the data
+ * says, on that page, under which licence it does.
  */
-const STUB_FIELDS = ['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs'];
+const STUB_FIELDS = ['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs', 'license'];
 
 /** The short node a page names a work with at its first reference. */
 export function referenceStub(ref, bibliographyUrl) {

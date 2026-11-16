@@ -109,6 +109,80 @@ plt.show()
 
 </details>
 
+### A year of city noise against its published period levels
+
+The day above is synthetic, and it is a single day. The repository also keeps
+a real year: the five-minute $L_\mathrm{Aeq}$ that two permanent monitors of
+Dublin City Council logged through 2015, one at Ballymun and one at Ringsend.
+The council's annual report for that year tabulates each site's annual day,
+evening and night levels and its $L_\mathrm{den}$ in whole decibels (Fig. 3,
+p. 11), and its text quotes the night levels, 58 dB(A) at Ballymun and
+59 dB(A) at Ringsend (p. 11). The report averages logarithmically (p. 8) and
+takes the evening from 19:00 to 23:00 and, as ISO 1996-1 does, the night from
+23:00 to 07:00 (p. 9). The library takes period levels, not a series of
+stamped intervals, so the snippet files each interval itself by the hour it
+starts in (the stamps mark where an interval ends), takes the energy average
+of each period and hands the three levels to `environment.lden`.
+
+**The data.** Five-minute LAeq series from the Dublin City Council Ambient
+Sound Monitoring Network (Ballymun and Ringsend, 2015), Smart Dublin /
+[data.gov.ie](https://data.gov.ie/dataset/ambient-sound-monitoring-network),
+licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes:
+daily logs concatenated, sorted and de-duplicated; level values unmodified.
+
+The file is read from a checkout of the repository, where the oracle test
+reads it too; a wheel does not install the test data.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import environment
+
+# The committed series lives in the repository, so this runs from a checkout
+#   (or an editable install); with your own monitor's export, load that instead.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+# The council's annual report for 2015, Fig. 3 (p. 11): each site's annual Lday,
+#   Levening, Lnight and Lden, in whole dB(A).
+published = {"ballymun": (65, 63, 58, 67), "ringsend": (59, 60, 59, 65)}
+
+
+def energy_mean(levels):
+    """The energy average of a set of levels: the report's logarithmic mean."""
+    return 10 * np.log10(np.mean(10 ** (levels / 10)))
+
+
+with np.load(repo / "tests/data/audio/dublin/dcc_laeq_5min_2015.npz") as npz:
+    for site, row in published.items():
+        # Each stamp ends a five-minute interval, in seconds since 2015-01-01 00:00.
+        stamps = int(npz[f"{site}_time0_s"]) + np.concatenate(([0], np.cumsum(npz[f"{site}_dt_s"])))
+        laeq = npz[f"{site}_laeq_cdb"] / 100.0
+        # File each interval by the hour it starts in: day 07-19, evening 19-23, night 23-07.
+        hour = ((stamps - 300) // 3600) % 24
+        night = (hour >= 23) | (hour < 7)
+        evening = (hour >= 19) & (hour < 23)
+        day = ~night & ~evening
+        lday, levening, lnight = (energy_mean(laeq[period]) for period in (day, evening, night))
+        levels = (lday, levening, lnight, environment.lden(lday, levening, lnight))
+        # Lday, Levening, Lnight and Lden as computed, then as the report prints them.
+        print(f"{laeq.size} intervals at {site}:", *(f"{level:.2f}" for level in levels),
+              "dB(A), published", *row)
+# 104242 intervals at ballymun: 64.57 63.34 57.98 66.69 dB(A), published 65 63 58 67
+# 104657 intervals at ringsend: 59.35 59.66 58.81 65.38 dB(A), published 59 60 59 65
+```
+
+Both sites land on the report: every level rounds to the whole decibel Fig. 3
+prints, the night levels of 57.98 dB(A) at Ballymun and 58.81 dB(A) at
+Ringsend to the 58 and 59 its text quotes. The report prints whole decibels,
+so
+[the test](https://github.com/jmrplens/phonometry/blob/main/tests/environment/assessment/test_dublin_dcc_oracle.py)
+that holds this computation allows half a decibel either way on all four
+levels and asserts the rounding as well: rounded to the nearest decibel every
+value matches, while truncated both night levels would fall a decibel short.
+$L_\mathrm{den}$ shows the weighting at work: Ringsend is the louder site at
+night, Ballymun the louder over the weighted whole day.
+
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
 
 | Function | Key parameters | Notes |
@@ -371,6 +445,10 @@ $L_\mathrm{dn}$ (3.6.5) keeps only the +10 dB night penalty.
 
 - **British Standards Institution. (2003).** [*Description and measurement of environmental noise — Guide to quantities and procedures*](https://knowledge.bsigroup.com/products/description-and-measurement-of-environmental-noise-guide-to-quantities-and-procedures) (BS 7445-1:2003).
   The survey-practice companion of ISO 1996-1: which descriptor family fits which assessment question, and the measurement procedures around them (BS 7445-2:1991 covers the land-use data acquisition).
+- **Dublin City Council. (2016).** [*Ambient Sound Monitoring Network annual report for 2015*](https://www.dublincity.ie/sites/default/files/media/file-uploads/2018-07/AMBIENT_SOUND_MONITORING_NETWORK_ANNUAL_REPORT_2015.pdf).
+  The published annual levels the worked case reproduces: each site's Lday, Levening, Lnight and Lden in whole decibels (Fig. 3, p. 11), the night levels quoted as 58 dB(A) at Ballymun and 59 dB(A) at Ringsend (p. 11), averaged logarithmically (p. 8), with the evening from 19:00 to 23:00 and the night from 23:00 to 07:00 (p. 9).
+- **Dublin City Council. (2017).** [*Ambient Sound Monitoring Network DCC*](https://data.smartdublin.ie/dataset/ambient-sound-monitoring-network) \[Data set\]. Smart Dublin.
+  The year of five-minute LAeq of the worked case: the Ballymun and Ringsend monitors through 2015, whose series the repository keeps.
 - **International Organization for Standardization. (2007).** *Acoustics — Description, measurement and assessment of environmental noise — Part 2: Determination of sound pressure levels* (ISO 1996-2:2007).
   Annex C: the critical bandwidth of Table C.1, the audibility of Formula (C.3) and the piecewise adjustment of Formulae (C.4)-(C.6). This is the self-contained engineering method the library implements; the 2009 corrected reprint is identical here.
 - **International Organization for Standardization. (2016).** [*Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures*](https://www.iso.org/standard/59765.html) (ISO 1996-1:2016).

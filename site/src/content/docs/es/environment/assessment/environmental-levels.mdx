@@ -30,6 +30,20 @@ references:
     implemented: false
     url: "https://knowledge.bsigroup.com/products/description-and-measurement-of-environmental-noise-guide-to-quantities-and-procedures"
     note: "El complemento de práctica de medición de ISO 1996-1: qué familia de descriptores encaja con cada pregunta de evaluación, y los procedimientos de medición a su alrededor (BS 7445-2:1991 cubre la adquisición de datos para usos del suelo)."
+  - type: dataset
+    organization: "Dublin City Council"
+    year: 2017
+    title: "Ambient Sound Monitoring Network DCC"
+    publisher: "Smart Dublin"
+    url: "https://data.smartdublin.ie/dataset/ambient-sound-monitoring-network"
+    license: "https://creativecommons.org/licenses/by/4.0/"
+    note: "El año de LAeq de cinco minutos del caso resuelto: los monitores de Ballymun y Ringsend durante 2015, cuya serie guarda el repositorio."
+  - type: report
+    organization: "Dublin City Council"
+    year: 2016
+    title: "Ambient Sound Monitoring Network annual report for 2015"
+    url: "https://www.dublincity.ie/sites/default/files/media/file-uploads/2018-07/AMBIENT_SOUND_MONITORING_NETWORK_ANNUAL_REPORT_2015.pdf"
+    note: "Los niveles anuales publicados que reproduce el caso resuelto: Lday, Levening, Lnight y Lden de cada punto en decibelios enteros (Fig. 3, p. 11), con los niveles de noche citados como 58 dB(A) en Ballymun y 59 dB(A) en Ringsend (p. 11), promediados logarítmicamente (p. 8), con la tarde de 19:00 a 23:00 y la noche de 23:00 a 07:00 (p. 9)."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -144,6 +158,85 @@ plt.show()
 ```
 
 </details>
+
+<span id="un-ano-de-ruido-urbano-frente-a-sus-niveles-por-periodo-publicados"></span>
+
+### Un año de ruido urbano frente a sus niveles por periodo publicados
+
+El día de arriba es sintético, y es un solo día. El repositorio guarda
+también un año real: el $L_\mathrm{Aeq}$ de cinco minutos que registraron
+durante 2015 dos monitores permanentes del Ayuntamiento de Dublín, uno en
+Ballymun y otro en Ringsend. El informe anual del ayuntamiento de ese año
+tabula los niveles anuales de día, tarde y noche y el $L_\mathrm{den}$ de cada
+punto en decibelios enteros (Fig. 3, p. 11), y su texto cita los niveles de
+noche, 58 dB(A) en Ballymun y 59 dB(A) en Ringsend (p. 11). El informe
+promedia logarítmicamente (p. 8) y toma la tarde de 19:00 a 23:00 y, como
+ISO 1996-1, la noche de 23:00 a 07:00 (p. 9). La biblioteca recibe niveles
+por periodo, no una serie de intervalos con su marca de tiempo, así que el
+fragmento reparte él mismo cada intervalo según la hora en que empieza (las
+marcas señalan dónde termina un intervalo), toma el promedio energético de
+cada periodo y pasa los tres niveles a `environment.lden`.
+
+**Los datos.** Serie de LAeq de cinco minutos de la Ambient Sound Monitoring
+Network del Ayuntamiento de Dublín (Ballymun y Ringsend, 2015), Smart Dublin /
+[data.gov.ie](https://data.gov.ie/dataset/ambient-sound-monitoring-network),
+con licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Cambios: registros diarios concatenados, ordenados y sin duplicados; valores
+de nivel sin modificar.
+
+El archivo se lee desde un checkout del repositorio, donde también lo lee el
+test de oráculo; el paquete instalado con pip no trae los datos de test.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import environment
+
+# La serie versionada vive en el repositorio, así que esto funciona desde un
+#   checkout (o instalación editable); con la exportación de tu monitor, carga esa.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+# El informe anual del ayuntamiento para 2015, Fig. 3 (p. 11): Lday, Levening, Lnight y
+#   Lden anuales de cada punto, en dB(A) enteros.
+published = {"ballymun": (65, 63, 58, 67), "ringsend": (59, 60, 59, 65)}
+
+
+def energy_mean(levels):
+    """El promedio energético de un conjunto de niveles: la media logarítmica del informe."""
+    return 10 * np.log10(np.mean(10 ** (levels / 10)))
+
+
+with np.load(repo / "tests/data/audio/dublin/dcc_laeq_5min_2015.npz") as npz:
+    for site, row in published.items():
+        # Cada marca cierra un intervalo de cinco minutos, en segundos desde el 2015-01-01 00:00.
+        stamps = int(npz[f"{site}_time0_s"]) + np.concatenate(([0], np.cumsum(npz[f"{site}_dt_s"])))
+        laeq = npz[f"{site}_laeq_cdb"] / 100.0
+        # Cada intervalo va a la hora en que empieza: día 07-19, tarde 19-23, noche 23-07.
+        hour = ((stamps - 300) // 3600) % 24
+        night = (hour >= 23) | (hour < 7)
+        evening = (hour >= 19) & (hour < 23)
+        day = ~night & ~evening
+        lday, levening, lnight = (energy_mean(laeq[period]) for period in (day, evening, night))
+        levels = (lday, levening, lnight, environment.lden(lday, levening, lnight))
+        # Lday, Levening, Lnight y Lden calculados, y luego como los imprime el informe.
+        print(f"{laeq.size} intervalos en {site}:", *(f"{level:.2f}" for level in levels),
+              "dB(A), publicados", *row)
+# 104242 intervalos en ballymun: 64.57 63.34 57.98 66.69 dB(A), publicados 65 63 58 67
+# 104657 intervalos en ringsend: 59.35 59.66 58.81 65.38 dB(A), publicados 59 60 59 65
+```
+
+Los dos puntos caen sobre el informe: cada nivel redondea al decibelio entero
+que imprime la Fig. 3, y los niveles de noche de 57,98 dB(A) en Ballymun y
+58,81 dB(A) en Ringsend, a los 58 y 59 que cita su texto. El informe imprime
+decibelios enteros, así que
+[el test](https://github.com/jmrplens/phonometry/blob/main/tests/environment/assessment/test_dublin_dcc_oracle.py)
+que sujeta este cálculo admite medio decibelio a cada lado en los cuatro
+niveles y comprueba también el redondeo: al decibelio más próximo coinciden
+todos los valores, mientras que truncados los dos niveles de noche se
+quedarían un decibelio por debajo. El $L_\mathrm{den}$ enseña la ponderación
+en acción: Ringsend es el punto más ruidoso de noche, y Ballymun el más
+ruidoso en el día completo ponderado.
 
 ### Parámetros de `lden()` / `ldn()` / `composite_rating_level()`
 

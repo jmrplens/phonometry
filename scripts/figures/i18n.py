@@ -48,6 +48,11 @@ _LANG: Language = "en"
 _LANG_SUFFIX = ""
 
 _ES_EXACT = {
+    # ISO 3382-1 on the St. Nicholas Chapel: the deposit's published row over
+    # the computed bars and lines.
+    "Published, FH Aachen": "Publicado, FH Aachen",
+    "C50 published": "C50 publicado",
+    "C80 published": "C80 publicado",
     # IEC 61094-5 6.5: the rows of Table A.1 beside the model they come from.
     "Table A.1": "Tabla A.1",
     "One surface, two laboratories and a solver": "Una superficie, dos laboratorios y un solver",

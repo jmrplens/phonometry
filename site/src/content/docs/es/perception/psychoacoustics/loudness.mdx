@@ -34,6 +34,15 @@ references:
     designation: "ISO 532-1:2017"
     url: "https://www.iso.org/standard/63077.html"
     note: "Sonoridad estacionaria y variable en el tiempo en sonios a partir del programa de referencia normativo del Anexo A.4, con la sonoridad percentil N5/N10, validada frente al conjunto del Anexo B."
+  - type: dataset
+    authors: ["Grangeiro de Barros, A.", "Vuye, C."]
+    year: 2023
+    title: "Psychoacoustic indicators of pass-by road traffic noise"
+    publisher: "Zenodo"
+    url: "https://zenodo.org/records/7904680"
+    doi: "10.5281/zenodo.7904680"
+    license: "https://creativecommons.org/licenses/by/4.0/"
+    note: "Los pasos de vehículos del caso resuelto: cinco extractos de 4 s grabados por un NTi Audio XL2, y los niveles y el N50 que sus autores publicaron para cada uno."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -319,6 +328,99 @@ arriba. `loudness_vs_time` y `times` llevan la traza, así que un registro se
 puede recortar al estado de funcionamiento de interés antes de leer el
 percentil, y el intervalo de medición va en `ReportMetadata`, ya que la ficha
 imprime $N_5$ sin él.
+
+<span id="pasos-de-vehiculos-grabados-por-un-sonometro-de-clase-1"></span>
+
+### Pasos de vehículos grabados por un sonómetro de clase 1
+
+Todos los números de arriba salen de una señal sintética. El repositorio
+guarda también cinco pasos reales de tráfico rodado, grabados por un sonómetro
+NTi Audio XL2 a 7,5 m del centro del carril durante una campaña de paso
+estadístico de la Universidad de Amberes. El depósito que publica la campaña
+da, para cada paso, el $L_\mathrm{A,eq}$, el $L_\mathrm{A,max}$, el $L_{10}$
+y la sonoridad mediana $N_{50}$ que sus autores calcularon con PsySound3 sobre
+una ventana de 4 s centrada en el pico, y los cinco extractos son cinco de
+esas ventanas: las cuatro categorías de vehículo del depósito, con una
+furgoneta a 60 km/h y otra a 90 km/h. Así que aquí corre sobre ellos la
+misma cadena: los niveles ponderados A con `signals`, el máximo a partir de la
+envolvente ponderada A y Fast (el libro de cálculo no nombra la ponderación
+temporal; Fast reproduce todos los máximos publicados y Slow falla por varios
+decibelios), y $N_{50}$ como la mediana de la traza de sonoridad de ISO 532-1,
+el percentil vecino del $N_5$ de arriba. Un extracto es un corte, no un
+archivo que escribiera el sonómetro, así que no lleva `bext` propio: cada uno
+se calibra con el fondo de escala digital que el sonómetro de su sesión
+declaró en la grabación de la que se cortó, 129,4 o 129,5 dB SPL;
+[Leer y escribir audio de medición](/phonometry/es/io/audio-files/) lee una
+declaración del mismo tipo, 129,3 dB SPL, en la toma de calibración del
+propio sonómetro.
+
+**Los datos.** Fragmentos de pasos de vehículos de A. Grangeiro de Barros y
+C. Vuye, «Psychoacoustic indicators of pass-by road traffic noise», Zenodo,
+2023, DOI [10.5281/zenodo.7904680](https://doi.org/10.5281/zenodo.7904680),
+con licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+grabados con un sonómetro NTi Audio XL2. Cambios: extractos de 4 segundos
+cortados bit a bit y guardados en un contenedor nuevo.
+
+Los archivos se leen desde un checkout del repositorio, donde también los lee
+el test de oráculo; el paquete instalado con pip no trae los datos de test.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import filters, io, psychoacoustics, signals
+
+# Los extractos versionados viven en el repositorio, así que esto funciona desde un
+#   checkout (o instalación editable); con los WAV de tu sonómetro, pasa sus rutas.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+# Por extracto: el fondo de escala que declaró el sonómetro de su sesión (0 dBFS en dB SPL,
+#   en el bext de la grabación de la que se cortó) y después la fila del depósito:
+#   LA,eq, LA,max y L10 en dB, N50 en sonios.
+pass_bys = {
+    "passby_0566_van_60kmh.wav": (129.4, 73.905, 78.196, 77.358, 27.445),
+    "passby_0571_van_90kmh.wav": (129.4, 76.928, 82.154, 81.522, 25.821),
+    "passby_0668_passenger_car_74kmh.wav": (129.4, 75.546, 80.353, 79.525, 25.999),
+    "passby_0960_heavy_dual_axle_66kmh.wav": (129.4, 80.600, 85.993, 85.114, 38.271),
+    "passby_1558_heavy_multi_axle_62kmh.wav": (129.5, 77.537, 81.616, 81.090, 33.002),
+}
+level_gaps, loudness_gaps = [], []
+for name, (full_scale_spl, *published) in pass_bys.items():
+    take = io.read(repo / "tests/data/audio/xl2" / name)
+    cal = 2e-5 * 10 ** (full_scale_spl / 20)   # lo que vale 0 dBFS en pascales
+    laeq = float(signals.laeq(take, calibration_factor=cal))
+    # LA,max con ponderación temporal Fast: el pico del cuadrado ponderado A y promediado Fast.
+    a_fast = filters.time_weighting(filters.weighting_filter(np.asarray(take), take.fs, "A"),
+                                    take.fs, mode="fast")
+    lamax = 10 * np.log10(float(np.max(a_fast)) * cal**2 / 2e-5**2)
+    l10 = float(signals.ln_levels(take, n=(10,), mode="fast", weighting="A",
+                                  calibration_factor=cal)[10])
+    # N50: la mediana de la traza de sonoridad de ISO 532-1, superada la mitad de los 4 s.
+    n50 = float(np.median(psychoacoustics.loudness_zwicker(take, calibration_factor=cal).loudness_vs_time))
+    level_gaps += [abs(a - b) for a, b in zip((laeq, lamax, l10), published[:3], strict=True)]
+    loudness_gaps.append(100 * abs(n50 / published[3] - 1))
+    print(f"{name[7:-4]}: LAeq {laeq:.1f} ({published[0]:.1f}), LAmax {lamax:.1f} ({published[1]:.1f}), "
+          f"L10 {l10:.1f} ({published[2]:.1f}) dB, N50 {n50:.1f} ({published[3]:.1f}) sonios")
+# 0566_van_60kmh: LAeq 73.7 (73.9), LAmax 78.0 (78.2), L10 77.3 (77.4) dB, N50 28.2 (27.4) sonios
+# 0571_van_90kmh: LAeq 76.7 (76.9), LAmax 81.9 (82.2), L10 81.4 (81.5) dB, N50 26.6 (25.8) sonios
+# 0668_passenger_car_74kmh: LAeq 75.4 (75.5), LAmax 80.1 (80.4), L10 79.4 (79.5) dB, N50 26.6 (26.0) sonios
+# 0960_heavy_dual_axle_66kmh: LAeq 80.4 (80.6), LAmax 85.8 (86.0), L10 85.1 (85.1) dB, N50 39.5 (38.3) sonios
+# 1558_heavy_multi_axle_62kmh: LAeq 77.4 (77.5), LAmax 81.5 (81.6), L10 81.0 (81.1) dB, N50 34.1 (33.0) sonios
+print(f"Mayor diferencia: {max(level_gaps):.2f} dB en un nivel, {max(loudness_gaps):.1f} % en N50")  # Mayor diferencia: 0.23 dB en un nivel, 3.4 % en N50
+```
+
+Cada línea da el valor calculado con el publicado entre paréntesis. Los tres
+niveles caen a menos de 0,23 dB del libro de cálculo y $N_{50}$ a menos del
+3,4 %, dentro de los 0,3 dB y el 5 % a los que los sujeta
+[el test](https://github.com/jmrplens/phonometry/blob/main/tests/signals/test_xl2_passby_oracle.py).
+Los niveles salen un poco por debajo de los publicados y $N_{50}$ un poco por
+encima, un pequeño desvío sistemático entre dos implementaciones de la misma
+cadena, y el 5 % es la anchura de la banda de tolerancia muestra a muestra
+que la propia ISO 532-1 pone alrededor de sus trazas de sonoridad de
+referencia. Dos
+columnas publicadas quedan fuera a propósito, $L_{90}$ y $\Delta L$: las dos
+dependen de dónde arranca la envolvente Fast respecto a la ventana de 4 s, así
+que fijarían una convención de ventana, no una medida.
 
 ### Informe de ISO 532-1 (`.report()`)
 

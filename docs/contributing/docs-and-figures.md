@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and the copies written from them, the GitHub edition under `docs/` among them; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; how much HTML a page may weigh; the processes a page may start; which schema.org properties its structured data may use; what of the bibliography is written by hand; and how a check that walks `docs/` tells the GitHub edition from the files written there by hand. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and the copies written from them, the GitHub edition under `docs/` among them; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; how much HTML a page may weigh; the processes a page may start; which schema.org properties its structured data may use; what of the bibliography is written by hand; how a check that walks `docs/` tells the GitHub edition from the files written there by hand; and the credit a page gives the measured data it reads. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the copies written from them
 
@@ -1876,3 +1876,31 @@ pages = sorted(DOCS.rglob("*.md"))  # reads the edition as if it were written by
 **Enforced by:** `tests/test_github_edition.py::test_every_script_that_walks_docs_knows_the_edition`, `tests/test_github_edition.py::test_every_module_of_the_site_that_walks_docs_knows_the_edition`
 
 **Exceptions.** The first test reads every Python script under `scripts/` through its syntax tree, and a script that names the tree imports `github_edition`; the second reads the site's own code under `site/` line by line, no JavaScript parser running there, and a module that names the tree imports from `site/src/lib/agent-md/edition.mjs`, where `EDITION_MARK` and `isEditionFile` live (`site/scripts/check-math-render.mjs` walked `docs/` for a stray display delimiter and reported each one of a page a second time, at its copy). Each check that walks `docs/` holds what it does with a file of the edition to a test of its own, named `test_a_file_of_the_github_edition_is_left_to_its_generator` or, in the snippet check, `test_a_file_of_the_github_edition_is_read_at_its_site_page`. A script that names one file under `docs/` (`docs/ERRATA.md`, `docs/conformance.json`) walks no tree and needs no test of the edition. `scripts/check_published_sources.py` reads `docs/reference/bibliography.md`, a file of the edition, on purpose: the site page builds its entries from the references of the pages that cite each work, so the edition holds the only text of the list, and the drift check of CI keeps it to what the site would write. `scripts/check_quoted_extras.py` reads the files of the edition on purpose too, beside the llms files: it holds the install commands a reader copies to their quoting, and a reader browsing the repository copies them from the edition. A file named on a check's command line is read as named.
+
+## Data other people published
+
+<a id="f75"></a>
+### F75. Print on every page that reads a folder of `tests/data/audio` the attribution its README gives that folder
+
+**Why.** Three folders there hold measured data their authors published under CC BY 4.0, and the licence lets a page share it only with the credit, the licence and the changes made to it, on the page itself. `io/audio-files` read the XL2 calibration take in both languages, and in its GitHub copy, with no more than "CC BY 4.0; provenance, licence and attribution in `tests/data/audio/README.md`", and the README's removal policy still said nothing outside the tests depended on the folder.
+
+**Do**
+
+```markdown
+**The data.** Five-minute LAeq series from the Dublin City Council Ambient
+Sound Monitoring Network (Ballymun and Ringsend, 2015), Smart Dublin /
+[data.gov.ie](https://data.gov.ie/dataset/ambient-sound-monitoring-network),
+licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes:
+daily logs concatenated, sorted and de-duplicated; level values unmodified.
+```
+
+**Don't**
+
+```markdown
+The series is in `tests/data/audio/dublin/` (CC BY 4.0; provenance, licence
+and attribution in `tests/data/audio/README.md`).
+```
+
+**Enforced by:** `tests/test_data_attribution.py::test_every_page_that_reads_a_data_folder_prints_its_attribution`, `tests/test_data_attribution.py::test_every_folder_of_measured_data_is_attributed_in_the_readme`
+
+**Exceptions.** The README words each folder's string once, after `Attribution:` for the English pages and after `Atribución:` for the Spanish pages; a page prints it in its prose, never only in a code comment, a comment, the frontmatter, a code span or a tag's attribute, none of which the page shows as prose, and may wrap it and set a link on a run of its words, and nothing else. A page reads a folder when it names a path inside it or builds one in a Python fence from string literals, put side by side with `/` or `joinpath`, glued with `+`, joined by `"/".join` or given to one call together, wherever that call stands in the path; a path built from a name is not followed, so a page writes the folder it reads as a literal. Every guide the README's table of files names as reading a folder is seen reading it in both languages, or the test fails, so a page whose path the test stops following does not pass in silence. The GitHub copy of a guide is left to its generator ([F74](#f74)): `make llms` writes it from the English page, which carries the string. The API reference, which the generator writes from the docstrings, and this guide, which quotes paths in its examples, are not read. A new folder takes its strings in the README, in each language a page reads it in, before the page that reads it.

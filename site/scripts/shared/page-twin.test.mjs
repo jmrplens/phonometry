@@ -308,6 +308,36 @@ test('the References section prints one entry per work, in the order the page pr
   assert.equal(referencesMarkdown(undefined, 'en', 'References'), '');
 });
 
+// The copy escapes the brackets so that no Markdown reader takes the
+// description for a link; they show as written.
+test('a data set is cited with its bracketed description in the language of the page, and its repository as the source', () => {
+  const deposit = {
+    type: 'dataset',
+    title: 'Psychoacoustic indicators of pass-by road traffic noise',
+    authors: ['Grangeiro de Barros, A.', 'Vuye, C.'],
+    year: 2023,
+    publisher: 'Zenodo',
+    doi: '10.5281/zenodo.7904680',
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+  };
+  assert.equal(
+    referencesMarkdown([deposit], 'en', 'References'),
+    [
+      '## References',
+      '',
+      '- **Grangeiro de Barros, A., & Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Data set\\]. Zenodo. https://doi.org/10.5281/zenodo.7904680',
+    ].join('\n'),
+  );
+  assert.equal(
+    referencesMarkdown([deposit], 'es', 'Referencias'),
+    [
+      '## Referencias',
+      '',
+      '- **Grangeiro de Barros, A. y Vuye, C. (2023).** *Psychoacoustic indicators of pass-by road traffic noise* \\[Conjunto de datos\\]. Zenodo. https://doi.org/10.5281/zenodo.7904680',
+    ].join('\n'),
+  );
+});
+
 test('the frontmatter is read between its fences, for a YAML reader', () => {
   assert.equal(frontmatterSource('---\ntitle: "A"\nreferences: []\n---\nBody.\n'), 'title: "A"\nreferences: []\n');
   assert.equal(frontmatterSource('Body.\n'), '');

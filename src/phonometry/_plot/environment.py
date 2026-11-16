@@ -321,6 +321,9 @@ _STRINGS: dict[str, str] = {
     "Sorted level differences": "Diferencias de nivel ordenadas",
     "Central 80 % of the differences": "El 80 % central de las diferencias",
     "{symbol} = {value} dB at $R$ = {rank}": "{symbol} = {value} dB en $R$ = {rank}",
+    # The quantile's own index is a decimal, so it takes the language's mark.
+    "$q_{0.1}$": "$q_{0,1}$",
+    "$q_{0.9}$": "$q_{0,9}$",
     "ISO 17534-1: characteristic values of {n} level differences": (
         "ISO 17534-1: valores característicos de {n} diferencias de nivel"
     ),
@@ -2848,7 +2851,7 @@ def plot_level_difference_quantiles(
     r"""The sorted sample of ISO 17534-1 C.4 by rank, with its two quantiles.
 
     Each level difference is a point at its ranking position; the values at
-    :math:`R(q_{0,1})` and :math:`R(q_{0,9})` are marked, and the band between
+    :math:`R(q_{0.1})` and :math:`R(q_{0.9})` are marked, and the band between
     them, which holds the central 80 % of the differences, is shaded.
 
     :param result: A
@@ -2884,8 +2887,18 @@ def plot_level_difference_quantiles(
     )
     template = _t("{symbol} = {value} dB at $R$ = {rank}", language)
     for rank, value, color, symbol in (
-        (result.rank_q01, result.q01_level_difference, _C_SECONDARY, "$q_{0,1}$"),
-        (result.rank_q09, result.q09_level_difference, _C_TERTIARY, "$q_{0,9}$"),
+        (
+            result.rank_q01,
+            result.q01_level_difference,
+            _C_SECONDARY,
+            _t("$q_{0.1}$", language),
+        ),
+        (
+            result.rank_q09,
+            result.q09_level_difference,
+            _C_TERTIARY,
+            _t("$q_{0.9}$", language),
+        ),
     ):
         ax.axvline(rank, color=color, ls=":", lw=1.1, zorder=1)
         ax.plot(
@@ -2981,7 +2994,8 @@ def plot_round_robin_precision(
         color=_C_REFERENCE,
         ls="--",
         lw=1.6,
-        label=f"$q_{{0,9}}$ = {format_number(q09, language, decimals=2)} dB",
+        label=f"{_t('$q_{0.9}$', language)} = "
+        f"{format_number(q09, language, decimals=2)} dB",
     )
     ax.set_xlim(0.0, float(edges[-1]))
     ax.set_xlabel(_t(_MAX_DEVIATION_LABEL, language))

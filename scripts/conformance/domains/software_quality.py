@@ -46,7 +46,7 @@ _FORMULA_RANGE = range(51, 1001)
 @register(
     _QA,
     "ISO 17534-1:2015 Table C.1",
-    "Ranking position R(q0,1) of the 0.1-quantile, N = 20 to 50",
+    "Ranking position R(q0.1) of the 0.1-quantile, N = 20 to 50",
 )
 def _chk_table_c1_q01() -> Outcome:
     """The first column of Table C.1, row by row."""
@@ -60,7 +60,7 @@ def _chk_table_c1_q01() -> Outcome:
 @register(
     _QA,
     "ISO 17534-1:2015 Table C.1",
-    "Ranking position R(q0,9) of the 0.9-quantile, N = 20 to 50",
+    "Ranking position R(q0.9) of the 0.9-quantile, N = 20 to 50",
 )
 def _chk_table_c1_q09() -> Outcome:
     """The second column of Table C.1, row by row.
@@ -84,8 +84,8 @@ def _chk_table_c1_q09() -> Outcome:
 def _chk_vdi_3723_tables_5_and_6() -> Outcome:
     """Table C.1 read against the guideline DIN 45687 F.4 bases it on.
 
-    Column k of Table 6 (L_x;90) is R(q0,1) and column k of Table 5 (L_x;10)
-    is R(q0,9), both read on the guideline's own pages, so the ranks the
+    Column k of Table 6 (L_x;90) is R(q0.1) and column k of Table 5 (L_x;10)
+    is R(q0.9), both read on the guideline's own pages, so the ranks the
     library publishes rest on two printings of the table and not on one.
     """
     lx90 = dict(ref.VDI3723_1_TABLE_6_K)
@@ -122,23 +122,23 @@ def _chk_example_ranks() -> Outcome:
     result = _example()
     r01, r09 = ref.ISO17534_1_EXAMPLE_RANKS
     return record(
-        {"R(q0,1)": r01, "R(q0,9)": r09},
-        {"R(q0,1)": result.rank_q01, "R(q0,9)": result.rank_q09},
+        {"R(q0.1)": r01, "R(q0.9)": r09},
+        {"R(q0.1)": result.rank_q01, "R(q0.9)": result.rank_q09},
     )
 
 
 @register(
     _QA,
     "ISO 17534-1:2015 C.4, EXAMPLE",
-    "Quantiles q0,1 and q0,9 of 25 level differences, dB",
+    "Quantiles q0.1 and q0.9 of 25 level differences, dB",
 )
 def _chk_example_quantiles() -> Outcome:
     """The example prints "q0,1 = -1 dB and q0,9 = 3 dB", two values of the sample."""
     result = _example()
     q01, q09 = ref.ISO17534_1_EXAMPLE_QUANTILES_DB
     return record(
-        {"q0,1": q01, "q0,9": q09},
-        {"q0,1": result.q01_level_difference, "q0,9": result.q09_level_difference},
+        {"q0.1": q01, "q0.9": q09},
+        {"q0.1": result.q01_level_difference, "q0.9": result.q09_level_difference},
         unit="dB",
     )
 

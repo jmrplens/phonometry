@@ -22,7 +22,7 @@ is those four:
   configuration and in the faster "modified configuration" a noise map is
   actually computed with, 5.2.3 and 7.2) differ, and the standard describes
   the differences by two order statistics of a random sample of them: the
-  0.1-quantile :math:`q_{0,1}` and the 0.9-quantile :math:`q_{0,9}`, so that
+  0.1-quantile :math:`q_{0.1}` and the 0.9-quantile :math:`q_{0.9}`, so that
   80 % of the differences are expected between the two.
   :func:`level_difference_quantiles` sorts the sample, takes the ranking
   positions of :func:`ranking_positions` and returns
@@ -48,17 +48,17 @@ Table C.1 and Formulas (C.1), (C.2): a table, two formulas and a seam
 ---------------------------------------------------------------------
 
 Table C.1 prints the ranking positions for samples of 20 to 50 values, and in
-every one of its 31 rows :math:`R(q_{0,9}) = N + 1 - R(q_{0,1})`: the table
-leaves as many values below :math:`q_{0,1}` as above :math:`q_{0,9}`. For
+every one of its 31 rows :math:`R(q_{0.9}) = N + 1 - R(q_{0.1})`: the table
+leaves as many values below :math:`q_{0.1}` as above :math:`q_{0.9}`. For
 :math:`N > 50` the standard gives two formulas instead,
 
 .. math::
 
-   R(q_{0,1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right) \tag{C.1}
+   R(q_{0.1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right) \tag{C.1}
 
 .. math::
 
-   R(q_{0,9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1 \tag{C.2}
+   R(q_{0.9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1 \tag{C.2}
 
 The two formulas do not treat the table alike. Formula (C.1) continues its
 first column exactly: it reproduces all 31 rows, and it is not the rank
@@ -77,8 +77,8 @@ contradicts itself, and none of the pages read here says whether the seam is
 deliberate or a slip. Annex C is taken from DIN 45687:2006-05, Annex F,
 which prints the same table (Tables F.1 and F.2), the same two formulas ((F.1)
 and (F.2)) and the same worked example. Its F.4 bases the ranks of the table on
-VDI 3723 Blatt 1 (Table 6, column :math:`L_{x,90}`, for :math:`q_{0,1}`;
-Table 5, column :math:`L_{x,10}`, for :math:`q_{0,9}`), and introduces the
+VDI 3723 Blatt 1 (Table 6, column :math:`L_{x,90}`, for :math:`q_{0.1}`;
+Table 5, column :math:`L_{x,10}`, for :math:`q_{0.9}`), and introduces the
 formulas with "Falls die Anzahl der Stichproben N > 50 ist, gilt ergänzend zu
 VDI 3723 Blatt 1 [15] mit ausreichender Übereinstimmung zu E VDI 2450 Blatt 5
 [17]:" (printed folio 35): the formulas supplement VDI 3723 Blatt 1, the source
@@ -111,7 +111,7 @@ reading the documents establish, and it is not corrected either.
 What decides the behaviour is that both standards print (C.2) the same way.
 :func:`ranking_positions` applies what they print: Table C.1 from 20 to 50
 values, Formulas (C.1) and (C.2) above. A program that extended the symmetric
-rule past 50 would report :math:`q_{0,9}` one rank higher than this one for
+rule past 50 would report :math:`q_{0.9}` one rank higher than this one for
 half of all sample sizes, which is exactly the disagreement between two
 quality-assured implementations that ISO 17534-1 is written to prevent.
 
@@ -142,7 +142,7 @@ rather than returned with repeats.
 **The sign and the spread of a difference.** A level difference is the
 modified configuration's level minus the reference configuration's (the
 level of the contour minus the single-point level, for C.3), so a positive
-:math:`q_{0,9}` is a shortcut that overestimates. The "estimated standard
+:math:`q_{0.9}` is a shortcut that overestimates. The "estimated standard
 deviation" of C.5 is the sample standard deviation, with one degree of freedom
 fewer than the sample has values.
 """
@@ -305,14 +305,14 @@ def ranking_positions(sample_size: int | np.integer[Any]) -> tuple[int, int]:
 
     .. math::
 
-       R(q_{0,1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right), \qquad
-       R(q_{0,9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
+       R(q_{0.1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right), \qquad
+       R(q_{0.9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
 
     with IP the integer part, evaluated here in integer arithmetic so that no
     rounding of ``9N/10`` can move a rank. The table leaves as many values
     below the one quantile as above the other. Formula (C.1) continues the
     table's first column, but Formula (C.2) does not continue its second: it
-    leaves one more value above :math:`q_{0,9}` whenever the last digit of
+    leaves one more value above :math:`q_{0.9}` whenever the last digit of
     ``N`` is 1 to 5. ISO 17534-1 and DIN 45687, from which Annex C was taken,
     both print (C.2) this way, and neither says whether the seam is deliberate;
     the module docstring gives what the two documents do say, and why the
@@ -384,12 +384,12 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
     @property
     def rank_q01(self) -> int:
-        """:math:`R(q_{0,1})`, the ranking position of the 0.1-quantile."""
+        """:math:`R(q_{0.1})`, the ranking position of the 0.1-quantile."""
         return ranking_positions(self.sample_size)[0]
 
     @property
     def rank_q09(self) -> int:
-        """:math:`R(q_{0,9})`, the ranking position of the 0.9-quantile."""
+        """:math:`R(q_{0.9})`, the ranking position of the 0.9-quantile."""
         return ranking_positions(self.sample_size)[1]
 
     @property
@@ -399,7 +399,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
     @property
     def q01_level_difference(self) -> float:
-        """:math:`q_{0,1}`, the value at rank :math:`R(q_{0,1})`, in dB.
+        """:math:`q_{0.1}`, the value at rank :math:`R(q_{0.1})`, in dB.
 
         C.2, NOTE 2: 10 % of all the differences are expected below it.
         """
@@ -407,7 +407,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
     @property
     def q09_level_difference(self) -> float:
-        """:math:`q_{0,9}`, the value at rank :math:`R(q_{0,9})`, in dB.
+        """:math:`q_{0.9}`, the value at rank :math:`R(q_{0.9})`, in dB.
 
         C.2, NOTE 2: 10 % of all the differences are expected above it.
         """
@@ -438,7 +438,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
         Each difference is a point at its ranking position; the two ranks
         of C.4 and the values they pick are marked, and the band between
-        :math:`q_{0,1}` and :math:`q_{0,9}` that holds the central 80 % is
+        :math:`q_{0.1}` and :math:`q_{0.9}` that holds the central 80 % is
         shaded.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -464,15 +464,15 @@ def level_difference_quantiles(
     The sample is sorted in ascending order and the values at the ranking
     positions of :func:`ranking_positions` are the two characteristic values:
     it "shall be expected that 10 % of all level differences in the
-    calculation area are each below" :math:`q_{0,1}` "and above"
-    :math:`q_{0,9}`. For a modified configuration judged against the
+    calculation area are each below" :math:`q_{0.1}` "and above"
+    :math:`q_{0.9}`. For a modified configuration judged against the
     reference configuration (5.2.3, 7.2), pass the modified configuration's
     levels minus the reference configuration's at the same sample points
     (:func:`uniform_sample_indices` chooses them).
 
     The worked example that follows Table C.1: the 25 differences it prints
-    give :math:`R(q_{0,1}) = 2`, :math:`R(q_{0,9}) = 24`,
-    :math:`q_{0,1} = -1` dB and :math:`q_{0,9} = 3` dB.
+    give :math:`R(q_{0.1}) = 2`, :math:`R(q_{0.9}) = 24`,
+    :math:`q_{0.1} = -1` dB and :math:`q_{0.9} = 3` dB.
 
     :param level_differences: The sample of level differences, in dB, in
         any order; at least :data:`MIN_SAMPLE_SIZE` values.
@@ -729,12 +729,12 @@ class RoundRobinPrecision(OwnsArrays):
 
     @property
     def rank_q09(self) -> int:
-        r""":math:`R(q_{0,9})` for ``N`` receivers (:func:`ranking_positions`)."""
+        r""":math:`R(q_{0.9})` for ``N`` receivers (:func:`ranking_positions`)."""
         return ranking_positions(self.n_receivers)[1]
 
     @property
     def q09_level_difference(self) -> float:
-        r""":math:`q_{0,9}` of the ``N`` values of :math:`|dL_n|_{\max}`, in dB.
+        r""":math:`q_{0.9}` of the ``N`` values of :math:`|dL_n|_{\max}`, in dB.
 
         "A value showing up the precision of the calculation method applied
         with the different software applied" (A.3, Example 1).
@@ -747,7 +747,7 @@ class RoundRobinPrecision(OwnsArrays):
     ) -> Axes:
         r"""Draw the distribution of :math:`|dL_n|_{\max}`, as Figure A.3 does.
 
-        A histogram of the largest absolute deviations with :math:`q_{0,9}`
+        A histogram of the largest absolute deviations with :math:`q_{0.9}`
         marked. Figure A.3 counts them in classes 0.1 dB wide; here the
         class width is the narrowest round one (0.05 dB, 0.1 dB, 0.2 dB and
         so on) that draws the widest deviation in at most 25 classes.

@@ -69,7 +69,7 @@ def test_impact_velocity_is_the_printed_0_886() -> None:
 
 
 def test_short_pulse_coefficient_reproduces_eq_3_92() -> None:
-    """H Eq. (3.92) prints ``F2rms = 3,9 B``.
+    """H Eq. (3.92) prints ``F2rms = 3.9 B``.
 
     Independent derivation from the two printed equations it is built on:
     ``|Fn| = 2 m vo/Ti`` (Eq. 3.90, printed p. 277) and
@@ -257,7 +257,7 @@ def test_limiting_frequency_matches_the_printed_figure_4_70_panel() -> None:
     rather than a transcription one.
 
     It is worth being explicit about how strong it is. Working back from
-    ``fms = 83 Hz`` gives ``rho_s = 14,71 kg/m2``, i.e. a chipboard density of
+    ``fms = 83 Hz`` gives ``rho_s = 14.71 kg/m2``, i.e. a chipboard density of
     668.5 kg/m3, and working back from ``flimit = 521 Hz`` gives 668.3 kg/m3:
     the two agree to 0.03 %, which is why the identity holds. But neither is
     the 760 kg/m3 that Table A2 prints for chipboard and that this file uses
@@ -359,7 +359,7 @@ def test_over_critical_pulse_is_finite_over_the_whole_impact_period() -> None:
     ``vo K e^(-a t) sinh(gamma t)/gamma``. Evaluated as printed, the
     exponential underflows to zero while the hyperbolic sine overflows, and
     ``0 * inf`` is NaN. For Hopkins's 22 mm chipboard (over-critical, printed
-    p. 280) that happens at t = 0.0278 s, well inside ``Ti = 1/fi = 0,1 s``,
+    p. 280) that happens at t = 0.0278 s, well inside ``Ti = 1/fi = 0.1 s``,
     so a caller sampling one impact period would get NaN for most of it.
     """
     stiffness, impedance = _plate("chipboard", 0.022)
@@ -654,7 +654,7 @@ def test_covering_improvement_is_a_band_value_not_a_single_fourier_line() -> Non
     troughs ... at frequencies n fco where n = 3, 5, 7"), so a band centre
     that lands on one reads tens of dB high.
 
-    Hopkins's covering No. 2 has ``fco = 100,13 Hz``, which puts 500 Hz within
+    Hopkins's covering No. 2 has ``fco = 100.13 Hz``, which puts 500 Hz within
     0.2 % of ``5 fco``. Every earlier test of this function used
     200/400/800/1600/3200 Hz, all *even* multiples, so none of them saw it.
     """
@@ -890,7 +890,7 @@ def test_double_floating_floor_matches_printed_74_and_195_hz() -> None:
     (710 kg/m3), independently of the printed frequencies. The three printed
     numbers are mutually consistent only to about 1.6 %, so the tolerance is
     2 % rather than tighter: ``sqrt(s'/rho_s)/(2 pi)`` gives 119.9 Hz against
-    the printed 118 Hz, and the printed 74 and 195 imply ``fms = 120,1 Hz``
+    the printed 118 Hz, and the printed 74 and 195 imply ``fms = 120.1 Hz``
     through the identity ``fmsms,lower * fmsms,upper = fms^2`` that holds for
     two identical floors. The 118 is the odd one out. Values read off a plot
     panel carry that much slack; the closed-form identity below is the exact
@@ -1033,7 +1033,7 @@ def test_ver_model_agrees_between_hopkins_and_vigran() -> None:
     """Two books, one SEA model, two different algebraic statements.
 
     H Eq. (4.118), printed p. 519:
-    ``DeltaL = 10 lg(2,3 rhos1^2 cL1 h1 eta1 S1 omega^3/(N k^2))`` with ``N``
+    ``DeltaL = 10 lg(2.3 rhos1^2 cL1 h1 eta1 S1 omega^3/(N k^2))`` with ``N``
     the total number of mounts over the area ``S1``.
     V Eq. (8.45), printed p. 309, dominant term:
     ``10 lg(Z1 eta1 N f^3/(2 pi m1 fo^4))`` with ``N`` mounts per unit area and
@@ -1235,7 +1235,7 @@ def test_a_power_input_of_another_length_is_refused() -> None:
 
 
 def test_octave_bandwidth_factor() -> None:
-    """H Eq. (3.91): ``B = 0,23 f`` for thirds, ``B = 0,707 f`` for octaves."""
+    """H Eq. (3.91): ``B = 0.23 f`` for thirds, ``B = 0.707 f`` for octaves."""
     third = building.short_pulse_mean_square_force(1000.0, fraction=3)
     octave = building.short_pulse_mean_square_force(1000.0, fraction=1)
     assert octave / third == pytest.approx(0.707 / 0.23, rel=1e-12)

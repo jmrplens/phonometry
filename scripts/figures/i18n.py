@@ -7496,7 +7496,7 @@ def _translate_figure(fig: Figure) -> None:
                 # ``f"{v:g}"``. The formatter chooses one decimal precision for
                 # the whole axis from the tick spacing, so English draws
                 # ``0.0 0.2 ... 1.0``; ``%g`` decides per value and drew the
-                # Spanish twin as ``0  0,2 ... 1``, dropping exactly the
+                # Spanish twin as “0  0,2 ... 1”, dropping exactly the
                 # decimals that keep a tick column aligned (and its ASCII
                 # hyphen needed a fix_minus of its own). A subclass INSTALLED
                 # on the axis -- matplotlib then keeps its tick locations in

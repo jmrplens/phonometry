@@ -1121,7 +1121,7 @@ def stipa_signal(
     the seven octave-band frequencies (Ed.5 clause A.5, Ed.4 A.4), set to the
     Ed.5 male speech spectrum of clause A.6.1 (``-2,5; 0,5; 0; -6; -12; -18; -24``
     dB re the 500 Hz band) and intensity-modulated with
-    ``0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))``: the Table B.1
+    ``0.5 (1 + 0.55 (sin 2 pi f1 t - sin 2 pi f2 t))``: the Table B.1
     frequency pair of each band, 180 degrees between components, applied
     in amplitude through its square root (Annex B).
 

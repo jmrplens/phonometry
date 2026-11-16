@@ -490,7 +490,7 @@ _LONGEST_PRINTED_CELL = 32
 #: More significant figures than any of these pages prints. A page gives four
 #: or five; sixteen is what ``0.82e10`` becomes when it is written that way
 #: and read back, and it reaches the published table as
-#: ``8 199 999 999,999999``.
+#: “8 199 999 999,999999”.
 _MOST_SIGNIFICANT_FIGURES = 9
 
 

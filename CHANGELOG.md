@@ -3311,7 +3311,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that dominates that band"), which reads as a minus; each is now a comma, a
   colon, a semicolon or a parenthesis, and a frequency range reads "500 Hz to
   6000 Hz" or "89.1 Hz to 11.2 kHz". The hyphens that are a minus
-  (`32,3 - 26,3 dB`, `T30/T20 - 1`) and an interval quoted as printed
+  (“32,3 - 26,3 dB”, `T30/T20 - 1`) and an interval quoted as printed
   ("+ 1 to - 5") stay.
 - **The structure-borne power method is cited as the document it was read
   in.** The code, the fiche, the guide, the glossary, the conformance report
@@ -9730,7 +9730,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `format_frequency_axis` has already written as fixed strings, and wrong for
   everything else on a logarithmic scale: the decade axis of distances of the
   steady-state room field wrote `0.10 1.00 10.00` beside an annotation reading
-  `r_c = 1,11 m`, one figure with two separators. What decides it is the
+  “r_c = 1,11 m”, one figure with two separators. What decides it is the
   formatter, not the scale, so a panel is localised when its labels are still
   being written by the default numeric formatter, whatever it is drawn on.
 
@@ -10425,7 +10425,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is printed one way in Clause 5.1 and another in Annex A, and only the
   annex's form reproduces the annex's own numbers, so `jet_strouhal_number`
   implements both and defaults to that one. Table A.1 prints a band
-  transmission loss of `51,76 dB` where its own two inputs sum to `-51,763`.
+  transmission loss of `51.76 dB` where its own two inputs sum to `-51.763`.
   The seat diameter formula of 6.3.2 returns millimetres for a symbol declared
   in metres, which is why that function carries the unit in its name. And
   Equation (23b) computes each stage's inlet pressure from the next stage
@@ -10439,7 +10439,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   A low-noise trim does not get a different method: it gets different numbers
   fed into the same one, and Clause 6 says which. A drilled cage replaces the
-  pressure recovery factor with a geometry, `[0,9 - 0,06 l/d]`, capped at an
+  pressure recovery factor with a geometry, `[0.9 - 0.06 l/d]`, capped at an
   aspect ratio of 4 because the bracket would otherwise reach zero at 15. A
   multistage trim drops most of its pressure before the stage that makes the
   noise, so the calculation is run on that stage: `multistage_trim_conditions`
@@ -10637,7 +10637,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The last two routes carry printed integers, 37 dB and 31 dB, and both are
   the correctly rounded value of a closed form: `10 lg(1600 pi)` is 37.0127 dB
   and `10 lg(400 pi)` is 30.9921 dB. Rounded to whole decibels they land 6 dB
-  apart where the exact offsets are `10 lg 4 = 6,0206` dB apart, so the two
+  apart where the exact offsets are `10 lg 4 = 6.0206` dB apart, so the two
   routes cannot agree to better than 0.0206 dB. The library prints what the
   standard prints and a conformance row pins the gap, rather than leaving a
   future test to discover it.
@@ -10678,7 +10678,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   through `K_2` and the route through the absorption area rest on the same
   assumptions, and under the ISO 3744 definition of `K_2` they are identically
   equal. A conformance row holds them to it. The piecewise correction is
-  continuous where its 7 dB cap takes over, `-10 lg 0,2` being 6.9897 dB, so
+  continuous where its 7 dB cap takes over, `-10 lg 0.2` being 6.9897 dB, so
   the cap is the curve's own value rounded rather than a separate rule; that
   0.0103 dB step is pinned exactly, because a real discontinuity there would be
   a defect and a rounded assertion would not notice one appear.
@@ -10804,7 +10804,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the guideline reads `Q` off a chart against frequency.
 
   `room.critical_distance` follows, and with `A` and the hemispherical `Q = 2`
-  it is the `rH = 0,2 sqrt(A)` that Section 6.7.3 prints for where the
+  it is the `rH = 0.2 sqrt(A)` that Section 6.7.3 prints for where the
   reverberant field of a ventilation opening begins.
 
   New `room.sabine_absorption_area`, the familiar Sabine relation read from the
@@ -10858,7 +10858,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Table 7 of Section 6.2 is printed once, for a 1250 mm side whose limit
   frequency falls in the 125 Hz octave, and carried along the frequency axis
-  for every other size: the octave holding `c / (2 a)`, or `0,586 c / d` for a
+  for every other size: the octave holding `c / (2 a)`, or `0.586 c / d` for a
   round duct, takes the place of the table's own 125 Hz column and the whole
   row moves with it. It also tabulates lining before, after and on both sides
   of a corner separately, which the ASHRAE table does not distinguish.
@@ -10886,7 +10886,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `rounding_ratio` defaults to leaving Figure 18 out rather than to nought.
   Figure 18 is drawn for the rounding of a junction and all its curves cross
-  zero at `r / d_a = 0,15`, so nought asks for a sharp-cornered junction and is
+  zero at `r / d_a = 0.15`, so nought asks for a sharp-cornered junction and is
   worth over 6 dB at 63 Hz. That is how the guideline's own example treats its
   bend, and passing 0.15 lands back on the uncorrected law.
 
@@ -11063,7 +11063,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the place the two are written on one line.
 
   With that in hand the "does not sum back" sentence gets the reason it was
-  missing. The difference Figure 16 prints tends to `-2 - 26 lg 1,14`, which is
+  missing. The difference Figure 16 prints tends to `-2 - 26 lg 1.14`, which is
   `-2,5` dB, as `f_m / v` falls, so the energy sum grows with however many
   octaves are taken and no fixed shortfall can be quoted. Over the range the
   figure is actually drawn for it lands within half a decibel of the overall.
@@ -13150,7 +13150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   figure on one documentation page are set in one typeface rather than two and
   a single pin fixes the letters of the whole drawn corpus. The plates keep a
   deterministic per-glyph fallback for what the monospaced cuts lack and a hard
-  error for a character no face covers; all 185 distinct characters the 6,552
+  error for a character no face covers; all 185 distinct characters the 6 552
   plate labels set, in both languages, are carried by the face their own run
   asks for. Three plates rendered under an emptied fontconfig are
   pixel-identical to the normal render, which is the property the whole change
@@ -13158,7 +13158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The plates' type scale is stated in the px of the face that draws them.
   Every size in a builder is px of the outliner's face, and that face changed
   under them: DejaVu runs about 16 % wider than the Helvetica-metric face these
-  compositions were measured in, 1.156 over all 6,552 labels of the corpus in
+  compositions were measured in, 1.156 over all 6 552 labels of the corpus in
   both languages. A px of the old face is not a px of this one, so every label
   came out 16 % longer than the box, the column or the gap it was written into,
   and the plates filled with labels running under panels, through walls and
@@ -13554,7 +13554,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   exterior-system and stud fits with their anchor and glued-area corrections,
   and `lining_improvement_in_situ` for the laboratory-to-field transfer.
   Anchored on the 21 printed per-band values of ISO 12354-2:2017 Table G.4 and
-  its `DeltaLw = 32,2 dB`, reproduced to the table's printed precision of
+  its `DeltaLw = 32.2 dB`, reproduced to the table's printed precision of
   0.1 dB, on Hopkins's printed cut-off frequencies (7 000, 2 300 and 100 Hz),
   on the over/under-critical classification of his four walking surfaces, on
   the double-floating-floor resonances of his Fig. 4.73 (74 Hz and 195 Hz) and
@@ -13696,7 +13696,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   another `PorousMediumResult` that drops straight into a `PorousLayer` of the
   transfer-matrix stack. `limp_frame_applicable` and `LIMP_FRAME_CRITERIA`
   carry the published rules of thumb for when the frame may be treated as limp
-  at all (Beranek's `|Kc/Kf| < 0,05` and the 0.2 to which Doutres et al. 2007
+  at all (Beranek's `|Kc/Kf| < 0.05` and the 0.2 to which Doutres et al. 2007
   relaxed it, which for air the book states as a "bulk modulus lower than 20
   kPa"). Closed-form rather than digit-oracled: Allard & Atalla publishes no
   table of computed limp densities, so what anchors the model is the printed
@@ -14861,7 +14861,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - The equations in the library's own docstrings are written in LaTeX now, and
   the API reference renders them. They had been plain-text snippets, so the
-  reference published `LWA = 10*lg( sum_k 10^(0,1*(LWk + Ck)) )` as a code
+  reference published “LWA = 10*lg( sum_k 10^(0,1*(LWk + Ck)) )” as a code
   block where a reader wanted a typeset formula, and the generator understood
   no maths at all, so the handful of docstrings that already used the `:math:`
   role had that markup published verbatim and nothing else could state a
@@ -14939,7 +14939,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carry, which is the reason the pass region had been given opaque tones in the
   first place.
 - Twenty-nine comments in the Spanish guides wrote a value the code prints with
-  a decimal comma, so the page promised `132,4 Hz` where running the snippet
+  a decimal comma, so the page promised “132,4 Hz” where running the snippet
   gives `132.4`. Python has no locale in `print`, and the comment next to a
   `print` call is a claim about its output: the reader who types the example in
   and compares is the person the annotation is for. The rest of the Spanish
@@ -15148,8 +15148,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   emit no `√` at all over their whole text layer, so `f_T/√2` extracts as
   `f_T/2`; eleven emit no `−` either, and one textbook returns every `+` as
   `þ`. Eight further defects were found in the process and registered:
-  EN 12354-3:2000 Formula (5), whose reduced form prints `0,32 V` where the
-  standard's own `A0 = 10 m²` and `T0 = 0,5 s` give `0,032 V`, a straight 10 dB
+  EN 12354-3:2000 Formula (5), whose reduced form prints `0.32 V` where the
+  standard's own `A0 = 10 m²` and `T0 = 0.5 s` give `0.032 V`, a straight 10 dB
   (the library never used the reduced form, and the identical Formula (3) of
   Part 2 prints it correctly); ECMA-418-1 Formula (21), which repeats the
   constant term `C_L,0` where the linear coefficient `C_L,1` belongs, making
@@ -15942,8 +15942,8 @@ the whole of the migration.
 - `junction_vibration_reduction()` (EN 12354-1 Annex E): the E.7 double-leaf
   branch (K24) now uses the same per-path `mass_ratio = m'⊥,i/m'i` as every
   other branch (validity `m2/m1 > 3` reads `mass_ratio < 1/3`), evaluating
-  `3,0 + 14,1 M + 5,7 M²` as ISO 12354-1:2017 E.3.5 prints it; the 2000
-  edition's `−14,1 M` line is the same relation recast in its figure's
+  `3.0 + 14.1 M + 5.7 M²` as ISO 12354-1:2017 E.3.5 prints it; the 2000
+  edition's `−14.1 M` line is the same relation recast in its figure's
   x-axis variable (the K24 errata entry is rewritten accordingly; the
   earlier reading of the 2017 print as a sign misprint was wrong).
 - `installed_source_prediction()` (EN 12354-5): a single-number
@@ -16723,7 +16723,7 @@ the whole of the migration.
   rating `Rw (C; Ctr)` (ISO 717-1) or `Ln,w (CI)` (ISO 717-2) evaluated by the
   existing weighted-rating engine, the statement that the evaluation rests on a
   laboratory precision method, and a footer with the fixed disclaimer.
-  `verbose=True` annexes the per-band equivalent absorption area `A = 0,16 V/T`
+  `verbose=True` annexes the per-band equivalent absorption area `A = 0.16 V/T`
   (ISO 10140-4:2010) beside the reported quantity. A verdict row appears only
   when a target is supplied through `metadata.requirement` (airborne passes at
   or above it, impact at or below it). `language="es"` renders the Spanish

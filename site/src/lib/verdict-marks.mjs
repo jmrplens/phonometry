@@ -16,7 +16,7 @@
  * an `alt` a screen reader announces beside a word the row already states.
  * Inlined as a sprite, the geometry costs a kilobyte once, but every row still
  * spends about a hundred bytes on the `<svg><use>` that points at it: 200 kB
- * of the page at 1,893 rows, which was a tenth of everything Googlebot reads
+ * of the page at 1 893 rows, which was a tenth of everything Googlebot reads
  * of a page before it stops (2 MB, counted uncompressed). As a CSS image the
  * mark costs nothing per row, needs no request, cannot flash, and is still
  * invisible to assistive technology, which hears the word.

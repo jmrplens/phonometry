@@ -5,7 +5,7 @@ Validation strategy: closed-form identities from the standards' own
 formulae, and consistency with the verified ISO 717-1/2 rating engine.
 
 - Airborne ``R = L1 - L2 + 10 lg(S/A)`` (ISO 10140-2 Formula (2)) with
-  ``A = 0,16 V / T`` (ISO 10140-4 Formula (5)): reduces to ``L1 - L2`` when
+  ``A = 0.16 V / T`` (ISO 10140-4 Formula (5)): reduces to ``L1 - L2`` when
   ``S = A``, and adds ``10 lg(S/A)`` exactly for a known ratio.
 - Impact ``Ln = Li + 10 lg(A/A0)`` (ISO 10140-3 Formula (1)) with
   ``A0 = 10 m²``: reduces to ``Li`` when ``A = A0 = 10``.

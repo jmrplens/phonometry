@@ -38,22 +38,28 @@ quotations are set aside: an English sentence that quotes a Spanish clause is
 English.
 
 A comma between digits that is no decimal marker is left alone wherever it
-stands: a thousands group (``91,658,333``; the digit-grouping rule, P8, holds
-those), a list (``1,2,3``), a pair of indices in brackets or braces
+stands: a list (``1,2,3``), a pair of indices in brackets or braces
 (``a[1,2]``, ``(2,1)``, ``{2,4}``, ``k_{1,2}``) or after a letter (``k2,1``),
 a list of clauses (``5.2,5.3``), a chemical locant (``1,2-DHCP``), a list of
 coordinates (``(0,90), (45,135)``), the unit interval in each of its forms
-(``[0,1]``, ``(0,1]``, ``[0,1)``, ``(0,1)``), and everything that is code:
-an inline code span, the code of a fence, a doctest, a reStructuredText
-literal, a regular expression, a string of the test suite (test data), an SVG
-path, a dash pattern or a list of coordinates, CSV (a file, or the rows of one
-a string holds) and the data files. An index has one or two digits and no
-leading zero, so ``q_{0,1}``, ``(0,05)`` and ``R(q0,9)`` are decimals; a
-mode, whose orders start at 0, is the exception: ``(0,2)`` beside the word
-"mode" is notation, alone it is listed for a person, and after a value
-(``71,8 (0,0)``) it is a decimal. A number such as ``1,500``, which may be a
-decimal or a thousands group, is not refused: it is listed for a person to
-decide, and ``--strict`` refuses it too.
+(``[0,1]``, ``(0,1]``, ``[0,1)``, ``(0,1)``), and everything that is code: an
+inline code span that writes code or data, the code of a fence, a doctest, a
+reStructuredText literal, a regular expression, a string of the test suite
+(test data), an SVG path, a dash pattern or a list of coordinates, CSV (a
+file, or the rows of one a string holds) and the data files. An index has one
+or two digits and no leading zero, so “q_{0,1}”, ``(0,05)`` and “R(q0,9)” are
+decimals; a mode, whose orders start at 0, is the exception: ``(0,2)`` beside
+the word "mode" is notation, alone it is listed for a person, and after a
+value (``71,8 (0,0)``) it is a decimal. A number such as ``1,500``, which may
+be a decimal or a thousands group, is not refused: it is listed for a person
+to decide, and ``--strict`` refuses it too.
+
+An inline code span that writes a formula is text: a decimal comma or a
+thousands group beside a variable or a unit, which Python would not parse as
+integers (“A = 0,16 V / T”, “R(q0,1)”), is read and refused, while
+``f(1,5)`` and a span with no letter, the cell ``0,30..0,50`` a catalogue
+reads, stay code. A thousands group written with commas (``101,325 Pa``,
+``91,658,333``) is refused in English text: P8 groups with a thin space.
 
 How each file is read. Python through :mod:`tokenize` and :mod:`ast`: every
 string and bytes literal with its role in the tree (a docstring, a value of a
@@ -284,7 +290,7 @@ def _labels_main(roots: Sequence[str]) -> int:
 TOKEN = re.compile(r"(?<![0-9])[0-9]+(?:(?:,|\{,\})[0-9]+)+(?![0-9])")
 
 #: A group of the fraction written after the first three digits, which only
-#: a decimal has: ``83,523 38`` with a space, a narrow no-break space, a thin
+#: a decimal has: “83,523 38” with a space, a narrow no-break space, a thin
 #: space, a no-break space or the ``\,`` and ``~`` of LaTeX.
 _GROUP_AFTER = re.compile(r"(?: | | | |\\,|\\ |~)[0-9]{1,3}(?![0-9])")
 
@@ -652,7 +658,7 @@ def _scan(
         return
     for match in TOKEN.finditer(text):
         shape = number_shape(text, match.start(), match.end())
-        if shape not in (DECIMAL, AMBIGUOUS):
+        if shape not in (DECIMAL, AMBIGUOUS, THOUSANDS):
             continue
         if any(start < match.start() < end for start, end in quotes):
             continue
@@ -707,10 +713,67 @@ def _blank_rst_literals(text: str) -> str:
             end += 1
         if end < 0:
             break
-        pieces.extend((text[done:start], _blank(text[start : end + 2])))
+        literal = text[start : end + 2]
+        kept = literal if _formula_span(literal) else _blank(literal)
+        pieces.extend((text[done:start], kept))
         done = end + 2
     pieces.append(text[done:])
     return "".join(pieces)
+
+
+#: A letter of a variable or a unit, which a formula writes and a data cell
+#: (``0,85``, ``0,30..0,50``, ``"0,97"``) does not.
+_LETTER = re.compile(r"[A-Za-z\u0391-\u03c9\u00b5]")
+
+
+def _int_constants(code: str) -> set[tuple[int, int]] | None:
+    """The spans of the integer literals *code* holds, or ``None`` if it is no code.
+
+    *code* is read as a Python expression, then as a module; a span is a pair
+    of character offsets on its one line.
+    """
+    for mode in ("eval", "exec"):
+        try:
+            tree = ast.parse(code, mode=mode)
+        except (SyntaxError, ValueError):
+            continue
+        return {
+            (node.col_offset, node.end_col_offset or node.col_offset)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant)
+            and type(node.value) is int
+            and node.lineno == node.end_lineno == 1
+        }
+    return None
+
+
+def _formula_span(span: str) -> bool:
+    """Whether the backtick span *span* writes a formula and not code.
+
+    A span is code unless it writes a number with a decimal comma or a
+    thousands group beside a variable or a unit, which no code and no data
+    cell would: ``foo(1,5)`` passes two integers and is code, and a span with
+    no letter at all (``0,30..0,50``, the cell a catalogue reads) is data,
+    while “A = 0,16 V / T” does not parse and “R(q0,1)” passes a name and
+    an integer, so both write a decimal and are read as text.
+    """
+    inner = span.strip("`")
+    tokens = [
+        match
+        for match in TOKEN.finditer(inner)
+        if number_shape(inner, match.start(), match.end()) in (DECIMAL, THOUSANDS)
+    ]
+    if not tokens or "\n" in inner or not _LETTER.search(inner):
+        return False  # no variable and no unit: a cell, a literal, data
+    constants = _int_constants(inner)
+    if constants is None:
+        return True
+    for match in tokens:
+        parts = [part.span() for part in re.finditer(r"[0-9]+", match.group())]
+        spans = {(match.start() + a, match.start() + b) for a, b in parts}
+        if not spans <= constants:
+            return True
+    return False
 
 
 def _blank_code_spans(text: str, *, roles: bool = False) -> str:
@@ -728,6 +791,8 @@ def _blank_code_spans(text: str, *, roles: bool = False) -> str:
         span = text[start:end]
         if roles and text[:start].endswith(":math:"):
             pieces.append(span)
+        elif _formula_span(span):
+            pieces.append(span)  # a formula we write, read as text
         else:
             pieces.append(_blank(span))
         done = end
@@ -826,7 +891,7 @@ def _expression_text(span: str) -> str:
 def _shown(span: str) -> str:
     """What a span, a comment, a tag or an expression of a page leaves to read."""
     if span.startswith("`"):
-        return _blank(span)
+        return span if _formula_span(span) else _blank(span)
     if span.startswith(("$", "<!--")) or re.match(r"\{\s*/\*", span):
         return span  # maths and comments are text
     if span.startswith("<"):
@@ -1499,7 +1564,7 @@ def _comment_groups(
 
 
 #: A string that is nothing but whole numbers and the commas between them,
-#: which the plates' SVG writer takes as a dash pattern: ``"6,4"``, ``"9,4,2,4"``.
+#: which the plates' SVG writer takes as a dash pattern: “6,4”, ``"9,4,2,4"``.
 _DASH_PATTERN = re.compile(r"[1-9][0-9]*(?:,[1-9][0-9]*)+")
 
 
@@ -2077,6 +2142,7 @@ def _english_main(paths: Sequence[str], *, strict: bool, tsv: bool) -> int:
     found = english_findings(files)
     decimals = [f for f in found if f.kind == DECIMAL]
     ambiguous = [f for f in found if f.kind == AMBIGUOUS]
+    groups = [f for f in found if f.kind == THOUSANDS]
     if tsv:
         for f in found:
             print(f"{f.path}\t{f.line}\t{f.kind}\t{f.where}\t{f.token}\t{f.context}")
@@ -2090,8 +2156,14 @@ def _english_main(paths: Sequence[str], *, strict: bool, tsv: bool) -> int:
                 f"{f.path}:{f.line}: {f.token!r} is a decimal comma in English text ({f.where}): {f.context}",
                 file=sys.stderr,
             )
+        for f in groups:
+            print(
+                f"{f.path}:{f.line}: {f.token!r} groups thousands with a comma ({f.where}): {f.context}",
+                file=sys.stderr,
+            )
     print(
-        f"{len(decimals)} decimal comma(s) and {len(ambiguous)} number(s) to decide "
+        f"{len(decimals)} decimal comma(s), {len(groups)} comma thousands group(s) "
+        f"and {len(ambiguous)} number(s) to decide "
         f"in the English text of {len(files)} files."
     )
     if decimals:
@@ -2103,7 +2175,13 @@ def _english_main(paths: Sequence[str], *, strict: bool, tsv: bool) -> int:
             "(docs/contributing/prose.md#p9).",
             file=sys.stderr,
         )
-    return 1 if decimals or (strict and ambiguous) else 0
+    if groups:
+        print(
+            "\nA long number groups its digits in threes with U+202F, the narrow "
+            "no-break space, never with a comma (docs/contributing/prose.md#p8).",
+            file=sys.stderr,
+        )
+    return 1 if decimals or groups or (strict and ambiguous) else 0
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -2819,7 +2819,7 @@ def plot_vibration_meter_verification(
     The deviation ``F(f)`` of Formula (7) against frequency, with the two
     limits as a shaded region around zero. The band is drawn from the tables
     rather than from a fixed number, so it steps out from 10 % to 20 % at
-    ``1,25 f_u`` and ``0,8 f_o`` exactly where the standard steps it, and the
+    ``1.25 f_u`` and ``0.8 f_o`` exactly where the standard steps it, and the
     frequencies where the lower limit is -100 % are where the standard stops
     constraining the response from below at all.
 

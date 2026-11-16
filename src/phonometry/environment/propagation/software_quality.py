@@ -227,7 +227,7 @@ SAMPLE_CLEARANCE_M: Final = 2.0
 
 #: Table C.1 of ISO 17534-1:2015, printed folio 20: for a sample of ``N``
 #: values sorted in ascending order, the ranking positions
-#: ``(R(q0,1), R(q0,9))`` of the 0.1-quantile and the 0.9-quantile, counted
+#: ``(R(q0.1), R(q0.9))`` of the 0.1-quantile and the 0.9-quantile, counted
 #: from 1. The 31 rows from ``N`` = 20 to 50; above 50, Formulas (C.1) and
 #: (C.2) apply (see the module docstring for why the two do not join).
 RANKING_POSITIONS: Final[Mapping[int, tuple[int, int]]] = MappingProxyType(
@@ -320,7 +320,7 @@ def ranking_positions(sample_size: int | np.integer[Any]) -> tuple[int, int]:
 
     :param sample_size: ``N``, the number of values in the sample, at least
         :data:`MIN_SAMPLE_SIZE`.
-    :return: ``(R(q0,1), R(q0,9))``.
+    :return: ``(R(q0.1), R(q0.9))``.
     :raises ValueError: for a sample smaller than 20, which C.2 does not
         allow and Table C.1 does not cover, or a count that is not a whole
         number.

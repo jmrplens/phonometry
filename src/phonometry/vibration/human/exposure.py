@@ -155,22 +155,22 @@ ACCELERATION_LEVEL_REFERENCE_M_S2 = REFERENCE_VALUES["solid"]["acceleration"].va
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).
 REFERENCE_DURATION_S = 28800.0
 
-#: Daily hand-arm exposure action value ``A(8) = 2,5 m/s2`` (Directive
+#: Daily hand-arm exposure action value ``A(8) = 2.5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(a)).
 HAV_EAV_A8_M_S2 = 2.5
 #: Daily hand-arm exposure limit value ``A(8) = 5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(b)).
 HAV_ELV_A8_M_S2 = 5.0
-#: Daily whole-body exposure action value ``A(8) = 0,5 m/s2`` (Directive
+#: Daily whole-body exposure action value ``A(8) = 0.5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(a)).
 WBV_EAV_A8_M_S2 = 0.5
-#: Daily whole-body exposure limit value ``A(8) = 1,15 m/s2`` (Directive
+#: Daily whole-body exposure limit value ``A(8) = 1.15 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(b)).
 WBV_ELV_A8_M_S2 = 1.15
-#: Whole-body VDV exposure action value ``9,1 m/s^1,75`` (Directive
+#: Whole-body VDV exposure action value ``9.1 m/s^1.75`` (Directive
 #: 2002/44/EC, Article 3(2)(a), alternative dose metric).
 WBV_EAV_VDV = 9.1
-#: Whole-body VDV exposure limit value ``21 m/s^1,75`` (Directive
+#: Whole-body VDV exposure limit value ``21 m/s^1.75`` (Directive
 #: 2002/44/EC, Article 3(2)(b), alternative dose metric).
 WBV_ELV_VDV = 21.0
 

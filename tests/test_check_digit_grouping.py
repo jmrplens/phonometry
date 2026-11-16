@@ -9,7 +9,7 @@ plain space renders as two numbers whenever the line happens to break there.
 The tests that matter most are the negative ones. Two shapes in this tree look
 exactly like a grouped number and are not: the printed output of an array,
 ``0.404 0.512``, where the space separates two values, and a value followed by
-its unit, ``0,005 1/m``, where the digit belongs to the unit. A first sweep over
+its unit, “0,005 1/m”, where the digit belongs to the unit. A first sweep over
 the corpus took both for groupings and corrupted them, which is why the gate
 carries the closing conditions it does.
 """
@@ -73,7 +73,7 @@ def test_the_printed_output_of_an_array_is_not_a_grouping(
 def test_a_value_followed_by_its_unit_is_not_a_grouping(
     tmp_path: pathlib.Path,
 ) -> None:
-    """In ``0,005 1/m`` the 1 belongs to the unit, not to the number."""
+    """In “0,005 1/m” the 1 belongs to the unit, not to the number."""
     assert gate._findings(_file("alpha = 0,005 1/m as printed\n", tmp_path)) == []
 
 

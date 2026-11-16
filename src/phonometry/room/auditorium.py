@@ -523,7 +523,7 @@ def directivity_energy_average(
     :param axis: Axis the bearings run along; the last by default.
     :return: Their energy mean, in dB: a :class:`float` for a single turn,
         an array with ``axis`` removed for several.
-    :raises ValueError: If fewer than ``ceil(360 / 12,5) = 29`` bearings lie
+    :raises ValueError: If fewer than ``ceil(360 / 12.5) = 29`` bearings lie
         along ``axis``, or the levels are empty or non-finite.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number,
         or ``axis`` is not a single number.

@@ -15,7 +15,7 @@ of the one-third-octave band *in which it falls*, so the ISO 266 band edges
 ``10^((n +- 0,5)/10)`` decide the row, not proximity to a rounded nominal label:
 the two disagree by up to 1.4 % in frequency and by up to 8.8 dB in the answer.
 And the rounding happens *before* Table D.1 is read, so the
-``74,4 - 20 lg(fo) - Rw/2`` branch is evaluated at the nominal centre, not at
+``74.4 - 20 lg(fo) - Rw/2`` branch is evaluated at the nominal centre, not at
 the raw resonance.
 
 Sources and page references used as oracles below (printed page / pdf page):
@@ -93,7 +93,7 @@ def test_formula_d2_is_formula_d1_with_the_filled_cavity_stiffness() -> None:
 
     A stud cavity filled with a porous layer of ``r >= 5 kPa s/m2`` is given the
     stiffness ``0,111/d`` MN/m3, i.e. a near-isothermal value: it sits about
-    10 % above the isothermal ``p0/d = 0,1013/d`` and about 22 % below the
+    10 % above the isothermal ``p0/d = 0.1013/d`` and about 22 % below the
     adiabatic ``rho0 c0^2/d`` that H uses for an empty cavity, so a filled
     cavity resonates below an empty one of the same depth. Formula (D.2) has no
     printed worked example; only this bracketing and its identity with
@@ -196,7 +196,7 @@ def test_table_d1_reads_the_band_containing_fo_not_the_nearest_label(
 
 def test_table_d1_low_branch_evaluates_at_the_rounded_nominal_not_raw_fo() -> None:
     """Clause D.2.2 rounds ``fo`` *before* Table D.1 is read, and the
-    ``74,4 - 20 lg(fo) - Rw/2`` row is part of Table D.1.
+    ``74.4 - 20 lg(fo) - Rw/2`` row is part of Table D.1.
 
     So the formula is evaluated at the band's nominal centre, not at the raw
     resonance frequency: two linings whose resonances fall in the same band
@@ -219,8 +219,8 @@ def test_table_d1_band_edges_beat_the_nominal_geometric_mean() -> None:
     """The two rounding conventions disagree on real inputs, by up to 8.8 dB.
 
     The worst case is the 160|200 boundary, where Table D.1 changes from the
-    ``74,4 - 20 lg(fo) - Rw/2`` branch to the fixed -1 dB row. The ISO 266
-    edge is ``10^(2,25) = 177,83 Hz``; the geometric mean of the nominal
+    ``74.4 - 20 lg(fo) - Rw/2`` branch to the fixed -1 dB row. The ISO 266
+    edge is ``10^(2.25) = 177.83 Hz``; the geometric mean of the nominal
     labels 160 and 200 is 178.89 Hz. A resonance at 178.5 Hz belongs to the
     200 Hz band.
     """
@@ -236,7 +236,7 @@ def test_table_d1_band_edges_beat_the_nominal_geometric_mean() -> None:
 def test_table_d1_63_to_80_boundary() -> None:
     """The same distinction inside the low-frequency branch, worth 2.1 dB.
 
-    The 63 Hz band ends at ``10^1,85 = 70,79 Hz``; the geometric mean of the
+    The 63 Hz band ends at ``10^1.85 = 70.79 Hz``; the geometric mean of the
     labels 63 and 80 is 70.99 Hz. A lining resonance of 70.81 Hz, which the
     guide's worked stud lining produces, therefore reads off the 80 Hz row.
     """
@@ -356,8 +356,8 @@ def test_exterior_lining_formulae_d3_and_d4() -> None:
 def test_anchor_and_glued_area_corrections_d5_and_d6() -> None:
     """ISO 12354-1:2017 Formulae (D.5)/(D.6), printed p. 40.
 
-    (D.5) ``0,66 DeltaRw,ref - 1,2``, ``0,62 DeltaRA,ref - 1,3``,
-    ``0,54 DeltaRA,tr,ref - 1,6``; (D.6) ``DeltaR - 0,05 %So + 2,0``, which is
+    (D.5) ``0.66 DeltaRw,ref - 1.2``, ``0.62 DeltaRA,ref - 1.3``,
+    ``0.54 DeltaRA,tr,ref - 1.6``; (D.6) ``DeltaR - 0.05 %So + 2.0``, which is
     the identity at the 40 % reference glued area.
     """
     reference = building.lining_improvement(100.0)
@@ -423,9 +423,9 @@ def test_third_octave_centres_are_the_iso_266_nominal_series() -> None:
 def test_in_situ_transfer_formula_d8() -> None:
     """ISO 12354-1:2017 Formula (D.8), printed p. 41.
 
-    ``DeltaRsitu = DeltaRlab + a X`` with ``a = 1,35 lg(fo) - 3,5 <= 0`` and
+    ``DeltaRsitu = DeltaRlab + a X`` with ``a = 1.35 lg(fo) - 3.5 <= 0`` and
     ``X = Rw,situ - 53`` clamped to ``[-10, +7]``. The cap on ``a`` bites above
-    ``fo = 10^(3,5/1,35) = 392 Hz``, where the transfer becomes the identity.
+    ``fo = 10^(3.5/1.35) = 392 Hz``, where the transfer becomes the identity.
     """
     a = 1.35 * np.log10(100.0) - 3.5
     assert building.lining_improvement_in_situ(10.0, 100.0, 60.0) == pytest.approx(

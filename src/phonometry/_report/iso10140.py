@@ -13,7 +13,7 @@ measured-versus-shifted-reference curve, boxed single-number rating, method
 statement, optional verdict, footer) lives in :mod:`._insulation_fiche`; this
 module only holds the ISO 10140 specifics: the fixed labels and the verbose
 table that annexes the per-band equivalent sound absorption area
-``A = 0,16 V / T`` (ISO 10140-4:2010, Formula (5)).
+``A = 0.16 V / T`` (ISO 10140-4:2010, Formula (5)).
 
 reportlab, matplotlib and svglib are soft dependencies imported lazily by the
 shared renderer (reportlab and svglib ship in the ``phonometry[report]``

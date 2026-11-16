@@ -17,8 +17,8 @@ Stdlib only, like every module of this package.
 from __future__ import annotations
 
 #: Table C.1, printed folio 20 (PDF page 28): for each number ``N`` of random
-#: sample values, the ranking positions ``R(q0,1)`` and ``R(q0,9)``, as
-#: ``(N, R(q0,1), R(q0,9))``. The table is printed as two blocks side by side,
+#: sample values, the ranking positions ``R(q0.1)`` and ``R(q0.9)``, as
+#: ``(N, R(q0.1), R(q0.9))``. The table is printed as two blocks side by side,
 #: 20 to 35 on the left and 36 to 50 on the right.
 ISO17534_1_TABLE_C1: tuple[tuple[int, int, int], ...] = (
     (20, 2, 19),

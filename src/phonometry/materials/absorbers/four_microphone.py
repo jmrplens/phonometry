@@ -80,7 +80,7 @@ _ASTM_KU_CIRCULAR = 0.586
 #: largest section dimension (ASTM E2611-19, 6.2.5).
 _ASTM_KU_RECTANGULAR = 0.500
 #: Microphone-spacing factor for the upper limit: ``s`` no larger than 80 % of
-#: ``c / (2 f_u)``, i.e. ``f_u s < 0,40 c`` (ASTM E2611-19, 6.5.4).
+#: ``c / (2 f_u)``, i.e. ``f_u s < 0.40 c`` (ASTM E2611-19, 6.5.4).
 _ASTM_KU_SPACING = 0.40
 #: Lower-limit factor: spacing shall be greater than 1 % of the wavelength
 #: (ASTM E2611-19, 6.2.3), i.e. ``f_l = c / (100 s)``.

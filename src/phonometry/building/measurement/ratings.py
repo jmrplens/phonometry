@@ -1830,7 +1830,7 @@ def weighted_impact_improvement(
 
     ``one_decimal=True`` rates both curves with the 0.1 dB shift and keeps one
     decimal place, the form 5.4 prescribes when the uncertainty of ``ΔLw`` is
-    stated (its EXAMPLE, ``ΔLw = 18,9 ± 1,1``); ``Ln,r,0,w`` is then 77.6 dB for
+    stated (its EXAMPLE, ``ΔLw = 18.9 ± 1.1``); ``Ln,r,0,w`` is then 77.6 dB for
     the heavyweight floor, as A.2.2 prints.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
@@ -1905,7 +1905,7 @@ def impact_improvement_adaptation_term(
     and ISO 10140-1:2021 H.5 h) require this term in the statement of results.
 
     With ``one_decimal=True`` both terms keep one decimal place, which gives
-    ``CI,r,0 = -10,3`` dB and ``CI,t,r,0`` of 0.0 and -2.8 dB as A.2.2 and
+    ``CI,r,0 = -10.3`` dB and ``CI,t,r,0`` of 0.0 and -2.8 dB as A.2.2 and
     A.2.3 print.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per

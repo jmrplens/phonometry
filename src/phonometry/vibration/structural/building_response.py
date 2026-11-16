@@ -116,14 +116,14 @@ PERIOD_COEFFICIENT_RANGES: Mapping[CoefficientModel, tuple[float, float]] = (
     )
 )
 
-#: D.2: the storey rule as a period, ``T = 0,1 n`` seconds, which is the
+#: D.2: the storey rule as a period, ``T = 0.1 n`` seconds, which is the
 #: reciprocal of the ``f = 10/n`` hertz DIN 4150-3 6.4 also prints.
 STORY_PERIOD_COEFFICIENT_S: float = 0.1
 
 #: D.2: the fit to 163 rectangular-plan buildings, ``f = 46/h`` hertz.
 HEIGHT_FREQUENCY_CONSTANT_HZ_M: float = 46.0
 
-#: D.2: the same fit written as a period, ``T = 0,022 h`` seconds. It is the
+#: D.2: the same fit written as a period, ``T = 0.022 h`` seconds. It is the
 #: reciprocal of :data:`HEIGHT_FREQUENCY_CONSTANT_HZ_M` to two figures, which
 #: is the precision the annex prints it to.
 HEIGHT_PERIOD_COEFFICIENT_S_PER_M: float = 0.022

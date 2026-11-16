@@ -140,7 +140,7 @@ __all__ = [
 ]
 
 #: The corner of the frequency weighting, in hertz: Formula (4) divides the
-#: band-limited response by ``1 - j 5,6 Hz / f``, which is the pole that turns
+#: band-limited response by ``1 - j 5.6 Hz / f``, which is the pole that turns
 #: a velocity signal into the KB signal.
 KB_CORNER_HZ: float = 5.6
 
@@ -160,7 +160,7 @@ TAKT_DURATION_S: float = 30.0
 TAKT_SUPPRESSION_THRESHOLD: float = 0.1
 
 #: The factor between a band limit of the working range and the corner of the
-#: filter that makes it (5.2.3.2): the high pass sits at ``0,8 f_u`` and the
+#: filter that makes it (5.2.3.2): the high pass sits at ``0.8 f_u`` and the
 #: low pass at ``f_o / 0,8``, so 1 Hz to 80 Hz is made by corners at 0.8 Hz
 #: and 100 Hz.
 BAND_LIMIT_CORNER_FACTOR: float = 0.8

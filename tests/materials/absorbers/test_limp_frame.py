@@ -33,7 +33,7 @@ anywhere else that has been checked. The model is consequently anchored on:
   N.s/m4, ``phi = 0,94``, ``rho1 = 130`` kg/m3) where pure arithmetic gives
   43.27 Hz;
 * the **printed rule-of-thumb thresholds** of printed pp. 253-254: Beranek's
-  ``|Kc/Kf| < 0,05``, Doutres et al.'s relaxed ``< 0,2``, and the "bulk modulus
+  ``|Kc/Kf| < 0.05``, Doutres et al.'s relaxed ``< 0,2``, and the "bulk modulus
   lower than 20 kPa" that the latter becomes for air.
 
 The material used throughout is the soft fibrous layer of A&A Table 11.2
@@ -76,7 +76,7 @@ def test_decoupling_frequency_allard_table_6_1() -> None:
     """A&A printed p. 251: ``Fd = sigma phi^2/(2 pi rho1)``.
 
     On the glass wool of Table 6.1 (printed p. 124), pure arithmetic on three
-    columns that table prints gives ``40 000 x 0,94^2 / (2 pi x 130) = 43,27``
+    columns that table prints gives ``40 000 x 0.94^2 / (2 pi x 130) = 43.27``
     Hz.
     """
     assert materials.decoupling_frequency(

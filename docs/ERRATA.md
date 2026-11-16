@@ -95,7 +95,7 @@ in the same order.
   $L_{n,r,0} - \Delta L$ cell at 800 Hz is printed 64.0 dB
   ($= 71.0 - 7.0$) where 71.5 gives 64.5; the unfavourable deviation is
   printed 3.0 dB ($= 64.0 - 61$) where the corrected cell gives 3.5; and the
-  printed `Sum 27,9` is the sum of the thirteen unfavourable deviations
+  printed “Sum 27,9” is the sum of the thirteen unfavourable deviations
   including that 3.0, where the corrected chain gives 28.4. None of it moves
   the rating: 28.4 dB is still below the 32.0 dB shift criterion, so
   $L_{n,w,r} = 63\ \text{dB}$ and $\Delta L_w = 15\ \text{dB}$ either way. (b)
@@ -1682,7 +1682,7 @@ in the same order.
 - **Location:** Appendix A, "Noise weighting network and quasi-peak meter",
   Figure A1 "Weighting network" (printed p. 29), drawing 0641/85. The French
   print of the same artwork (printed p. 28) carries the same value as
-  `41,47 nF`.
+  “41,47 nF”.
 - **The print:** the last shunt capacitor of the ladder, the one across the
   600 Ω amplifier input, is labelled **41.47 nF**.
 - **The problem:** it should be **31.47 nF**, which is what ITU-R BS.468-4

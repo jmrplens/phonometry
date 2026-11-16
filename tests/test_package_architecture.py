@@ -3484,7 +3484,7 @@ def test_no_error_message_carries_a_comma_decimal() -> None:
 
     A comma between digits is a decimal only when a letter does not precede
     it. Subscript pairs are written the same way and are notation rather than
-    numbers, so ``k2,1`` and ``F2,b`` stay as they are while ``31,5 Hz``
+    numbers, so ``k2,1`` and ``F2,b`` stay as they are while “31,5 Hz”
     does not.
     """
     offenders: list[str] = []

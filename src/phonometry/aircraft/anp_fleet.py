@@ -178,7 +178,7 @@ _AIRCRAFT_NUMBERS = (
 )
 #: The most bytes one table of a caller's export may hold: 32 MiB, some 68 times
 #: the largest table of the EASA ANP database v2.3, its departure procedural
-#: steps at 491,047 bytes (9,379 lines); the tables of version 9 hold fewer rows.
+#: steps at 491 047 bytes (9 379 lines); the tables of version 9 hold fewer rows.
 #: The bound keeps a file at a table's name that grows while it is read, or a
 #: device behind a name, from being read without end.
 _MAX_TABLE_BYTES = 32 * 1024 * 1024

@@ -210,7 +210,7 @@ def test_table_f4_speed_ranges(surface: RoadSurface) -> None:
 
 
 def test_temperature_coefficients_match_the_directive() -> None:
-    """``K_1 = 0,08`` and ``K_2 = K_3 = 0,04 dB/degC`` (Annex II 2.2.3).
+    """``K_1 = 0.08`` and ``K_2 = K_3 = 0.04 dB/degC`` (Annex II 2.2.3).
 
     Category 4 has no rolling noise, so the Directive prints no ``K_m`` for it
     and the correction is identically zero; the stored zeros are asserted here

@@ -79,7 +79,7 @@ __all__ = [
 #: Reference equivalent absorption area constant ``S`` in Formula (2): 10 m².
 _EQUIV_AREA_REFERENCE_S = 10.0
 
-#: Repeatability factor ``σr = 0,6·σR`` (Formulae (3)/(5)).
+#: Repeatability factor ``σr = 0.6·σR`` (Formulae (3)/(5)).
 _REPEATABILITY_FACTOR = 0.6
 
 #: Condition selecting the between-laboratory σR as-is (u = σR); the other

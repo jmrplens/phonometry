@@ -231,7 +231,7 @@ def _chk_upper_corner() -> Outcome:
     "KB weighting at its own corner 5.6 Hz, relative to the band limitation",
 )
 def _chk_kb_corner() -> Outcome:
-    """Formula (4) divides by ``1 - j 5,6 Hz / f``, so 5.6 Hz is 3 dB down."""
+    """Formula (4) divides by ``1 - j 5.6 Hz / f``, so 5.6 Hz is 3 dB down."""
     band = float(abs(ph.vibration.band_limitation_response([5.6])[0]))
     weighted = float(abs(ph.vibration.kb_weighting_response([5.6])[0]))
     return numeric(1.0 / math.sqrt(2.0), weighted / band, 5e-5, places=5)

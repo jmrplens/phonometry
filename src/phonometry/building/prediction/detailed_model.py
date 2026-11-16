@@ -166,7 +166,7 @@ _REFERENCE_LENGTH: float = 1.0
 #: Upper bound on every radiation factor ("In all cases σ ≤ 2,0", Annex B).
 _MAX_RADIATION_FACTOR: float = 2.0
 
-#: Constant ``2,2`` of the structural reverberation time ``Ts = 2,2/(f ηtot)``
+#: Constant ``2.2`` of the structural reverberation time ``Ts = 2.2/(f ηtot)``
 #: (Formula C.1) and of the equivalent absorption length (Formula 11).
 _STRUCTURAL_CONSTANT: float = 2.2
 
@@ -180,7 +180,7 @@ _IMPACT_MASS_COEFFICIENT: float = 30.0
 _LAB_LOSS_CONSTANT: float = 485.0
 
 #: Constants of the high-frequency plateau transmission factor (Formula B.10):
-#: ``τplateau = (4 ρo co/(1,1 ρ cL))² · 0,02/ηtot``.
+#: ``τplateau = (4 ρo co/(1.1 ρ cL))² · 0.02/ηtot``.
 _PLATEAU_FACTOR: float = 1.1
 _PLATEAU_CONSTANT: float = 0.02
 

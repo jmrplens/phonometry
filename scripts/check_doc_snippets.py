@@ -1569,7 +1569,7 @@ def _lines_of(parts: list[_Part]) -> list[list[_Part]]:
 _ARROW = re.compile(r"(?<!\s)\s*(?:->|\u2192)")
 
 #: A comma between two digits, which a Spanish comment writes as its decimal
-#: point (``35,9 m``) or as the comma of a list it writes without spaces.
+#: point (“35,9 m”) or as the comma of a list it writes without spaces.
 _DIGIT_COMMA = re.compile(r"(?<=\d),(?=\d)")
 
 
@@ -1582,7 +1582,7 @@ def _decimal_points(texts: Sequence[str], *, in_brackets: bool) -> list[str]:
 
     Outside a bracket a comma between two digits is never a list's: read as
     one, the digits after it would be a value a word may follow as a note, so
-    that ``0,5 dB`` would state ``0.4 dB`` on its ``0``.
+    that “0,5 dB” would state ``0.4 dB`` on its ``0``.
     """
     out: list[str] = []
     # The brackets open at each comma are counted on from the last one, not

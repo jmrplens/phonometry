@@ -128,8 +128,8 @@ _ADIABATIC_KAPPA = 1.4
 #: example is computed from the pair it prints, so the conformance rows that pin that
 #: example transcribe it themselves; it is not what a caller who asks for air should
 #: be handed, because its
-#: ``C_P = 938,7 J/(kg K)`` is 27.19 J/(mol K), below the rigid-rotor diatomic floor of
-#: ``(7/2)R = 29,10``, so it is not air at any temperature, in any unit. See
+#: ``C_P = 938.7 J/(kg K)`` is 27.19 J/(mol K), below the rigid-rotor diatomic floor of
+#: ``(7/2)R = 29.10``, so it is not air at any temperature, in any unit. See
 #: ``docs/ERRATA.md``.
 _ANNEX_A_SPEED_OF_SOUND = 345.86652  # c0 (m/s), Table F.1
 _ANNEX_A_AIR_DENSITY = 1.1860848  # rho0 (kg/m3), Table F.1

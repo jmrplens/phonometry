@@ -273,8 +273,8 @@ def _match_named(ratio: float) -> str | None:
     return None
 
 
-#: LaTeX that hides a number from the patterns below. ``$1{,}73$ times too
-#: small`` states the same claim as ``1,73 times too small``, and the registry
+#: LaTeX that hides a number from the patterns below. “$1{,}73$ times too
+#: small” states the same claim as “1,73 times too small”, and the registry
 #: writes its mathematics in LaTeX, so the linter has to read both.
 _LATEX_NOISE = (
     (re.compile(r"\{,\}"), ","),

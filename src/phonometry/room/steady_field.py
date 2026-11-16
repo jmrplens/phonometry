@@ -283,7 +283,7 @@ def critical_distance(
     ``R``, the two differing by :math:`1 - \bar{\alpha}`).
 
     Written in ``A`` and with the hemispherical :math:`Q = 2` of an outlet in
-    a room surface, the same expression is the ``rH = 0,2 sqrt(A)`` that
+    a room surface, the same expression is the ``rH = 0.2 sqrt(A)`` that
     VDI 2081 Blatt 1 Section 6.7.3 prints for where the reverberant field of a
     ventilation opening begins.
 

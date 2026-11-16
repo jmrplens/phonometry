@@ -38,7 +38,7 @@ recorded in ``docs/ERRATA.md``:
   Table A.1 gives it 0.036 and a factor :math:`F_d^{0.75}`. Only the annex
   form reproduces the annex's own printed :math:`N_\mathrm{Str}`, which is why
   :data:`STROUHAL_CONSTANTS` carries both and the default is ``"annex"``.
-* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51,76 dB``,
+* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51.76 dB``,
   positive, where its own two inputs sum to :math:`-51.763` dB.
 * The seat diameter formula of 6.3.2 b), :math:`d_o = 5.2\sqrt{N_{34}C_n}`,
   returns millimetres for a symbol Clause 3 declares in metres, which is why

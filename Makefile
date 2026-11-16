@@ -216,7 +216,7 @@ euler-number:
 # the translation tables and fails on such a value (rule F29). `--labels` and
 # `--english` run one half each.
 decimal-comma:
-	$(PYTHON) scripts/check_decimal_comma.py
+	$(PYTHON) scripts/check_decimal_comma.py --strict
 
 # The words of the Spanish tables, read for the marks a keyboard without the
 # Spanish layout drops. Twenty-nine entries shipped as "Correccion", "medicion"

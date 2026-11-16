@@ -126,7 +126,7 @@ def _number(value: float, language: Language, places: int = 2) -> str:
 
 
 def _hertz(value: float, language: Language) -> str:
-    """A band frequency as a label: ``125 Hz``, ``6.3 kHz`` (``6,3 kHz``)."""
+    """A band frequency as a label: ``125 Hz``, ``6.3 kHz`` (“6,3 kHz”)."""
     text = f"{value / _KILO:g} kHz" if value >= _KILO else f"{value:g} Hz"
     return text.replace(".", ",") if language == "es" else text
 

@@ -287,8 +287,8 @@ def _rating_designation(
     inside the Table 1 family is rebuilt here at that rounding; every other case
     (an out-of-range NC spectrum, an RC designation with its spectral tag) keeps
     the object's own label. ``language`` sets the decimal separator of the
-    rating and of its governing band in either case (``NC-22,6 (31,5 Hz)`` or
-    ``>NC-70 (31,5 Hz)`` on a Spanish sheet: 16 Hz and 31.5 Hz are Table 1
+    rating and of its governing band in either case (“NC-22,6 (31,5 Hz)” or
+    “>NC-70 (31,5 Hz)” on a Spanish sheet: 16 Hz and 31.5 Hz are Table 1
     bands too), so it has to be the sheet's own.
     """
     if getattr(rating, "out_of_range", "") is None and hasattr(rating, "sil"):

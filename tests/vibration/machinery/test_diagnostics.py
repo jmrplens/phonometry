@@ -12,9 +12,9 @@ identity that the equations imply and the implementation does not:
 * **Problem 8.5** (printed p. 597; answer p. 619). Rolling-contact bearing with
   a rotating inner race and a stationary outer race: fifteen rollers, 34 mm
   pitch diameter, 6 mm roller diameter, 12.96 degrees contact angle, 2000
-  r/min. Printed answers ``fs = 33,33 Hz``, ``f_bcsor = 13,80 Hz``,
-  ``f_re = 91,6 Hz``, ``f_repfo = 207 Hz``, ``f_resf = 183,3 Hz``,
-  ``f_rciso = 19,53 Hz``, ``f_recri = 293 Hz``.
+  r/min. Printed answers ``fs = 33.33 Hz``, ``f_bcsor = 13.80 Hz``,
+  ``f_re = 91.6 Hz``, ``f_repfo = 207 Hz``, ``f_resf = 183.3 Hz``,
+  ``f_rciso = 19.53 Hz``, ``f_recri = 293 Hz``.
 * **Problem 8.6** (printed p. 597; answer p. 619). Six-blade, four-vane axial
   fan at 3500 r/min: blade-passing frequency 350 Hz, and the first lobed
   interaction patterns printed as 35 Hz and 175 Hz. Those are the speeds of

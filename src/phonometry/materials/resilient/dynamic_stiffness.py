@@ -116,7 +116,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 #: Atmospheric pressure ``p0`` used by EN 29052-1 for the enclosed-gas term
-#: (clause 8.2 NOTE: ``p0 = 0,1 MPa``), in pascals. The standard rounds one
+#: (clause 8.2 NOTE: ``p0 = 0.1 MPa``), in pascals. The standard rounds one
 #: atmosphere to 0.1 MPa; pass the true 101 325 Pa explicitly if preferred.
 _STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
 

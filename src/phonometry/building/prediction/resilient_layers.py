@@ -140,7 +140,7 @@ TAPPING_HAMMER_MASS_KG: float = 0.5
 TAPPING_DROP_HEIGHT_M: float = 0.04
 
 #: Impact repetition rate ``fi`` of the machine, in Hz: five hammers giving
-#: ten impacts per second, so ``Ti = 1/fi = 0,1 s`` (Hopkins 3.6.3).
+#: ten impacts per second, so ``Ti = 1/fi = 0.1 s`` (Hopkins 3.6.3).
 TAPPING_IMPACT_RATE_HZ: float = 10.0
 
 #: Radius ``r`` of the circular contact area assumed for the hammer, in m
@@ -149,12 +149,12 @@ TAPPING_IMPACT_RATE_HZ: float = 10.0
 TAPPING_HAMMER_RADIUS_M: float = 0.015
 
 #: Standard acceleration of free fall ``g``, in m/s²; reproduces the printed
-#: impact velocity ``vo = 0,886 m/s`` of Hopkins 3.6.3.1.
+#: impact velocity ``vo = 0.886 m/s`` of Hopkins 3.6.3.1.
 _GRAVITY: float = 9.81
 
 #: Band-width factors ``B`` of Hopkins (2007) Eq. (3.91), PDF page 305
-#: (printed p. 278): ``B = 0,23 f`` for one-third-octave bands and
-#: ``B = 0,707 f`` for octave bands.
+#: (printed p. 278): ``B = 0.23 f`` for one-third-octave bands and
+#: ``B = 0.707 f`` for octave bands.
 _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 
 #: Half-band ratios ``fupper/fcentre`` of the base-ten band system, used to
@@ -162,7 +162,7 @@ _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 #: set (3 one-third octaves, 1 octaves).
 _HALF_BAND_RATIO: dict[int, float] = {3: 10.0**0.05, 1: 10.0**0.15}
 
-#: Coefficient of the short-duration mean-square force ``F²rms = 3,9 B``
+#: Coefficient of the short-duration mean-square force ``F²rms = 3.9 B``
 #: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3.925.
 _SHORT_PULSE_COEFFICIENT: float = 3.9
 
@@ -173,20 +173,20 @@ _SHORT_PULSE_COEFFICIENT: float = 3.9
 _POWER_REFERENCE: float = REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Constant of ISO 12354-2:2017 Formula (C.2), ``fo = 160 √(s'/m')`` with ``s'``
-#: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159,15``; the
+#: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159.15``; the
 #: standard's rounded 160 is kept because its own Annex G example prints
-#: ``fo = 52,8 Hz`` for ``s' = 8 MN/m³`` and ``m' = 73,5 kg/m²``.
+#: ``fo = 52.8 Hz`` for ``s' = 8 MN/m³`` and ``m' = 73.5 kg/m²``.
 _ISO_RESONANCE_CONSTANT: float = 160.0
 
 #: Slopes of the floating-floor improvement laws, in dB per decade.
 _SLOPE_EN12354: float = 30.0
 _SLOPE_CREMER: float = 40.0
 
-#: ISO 12354-2:2017 Formula (C.4), screeds: ``13 lg(m') − 14,2 lg(s') + 20,8``.
+#: ISO 12354-2:2017 Formula (C.4), screeds: ``13 lg(m') − 14.2 lg(s') + 20.8``.
 _DELTA_LW_SCREED = (13.0, -14.2, 20.8)
 
 #: ISO 12354-2:2017 Formula (C.5), asphalt / dry floors:
-#: ``(−0,21 m' − 5,45) lg(s') + 0,46 m' + 23,8``.
+#: ``(−0.21 m' − 5.45) lg(s') + 0.46 m' + 23.8``.
 _DELTA_LW_ASPHALT = (-0.21, -5.45, 0.46, 23.8)
 
 #: How closely a quantity of a result built by hand has to be what its

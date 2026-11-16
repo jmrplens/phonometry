@@ -4,9 +4,9 @@
 Oracles, all printed:
 
 * **Vigran, Building Acoustics (2008)**, worked example following Eq. (3.115),
-  printed p. 96 (pdf p. 118): a 1 mm steel plate 1 m x 1 m (``E = 2,1e11`` Pa,
-  ``m'' = 7,8`` kg/m2, ``nu = 0,3``) has ``f_1,1 = 4,9`` Hz and
-  ``f_2,2 = 19,7`` Hz flat, and ``f_1,1 = 25,5`` Hz, ``f_2,2 = 102`` Hz once
+  printed p. 96 (pdf p. 118): a 1 mm steel plate 1 m x 1 m (``E = 2.1e11`` Pa,
+  ``m'' = 7.8`` kg/m2, ``nu = 0,3``) has ``f_1.1 = 4.9`` Hz and
+  ``f_2.2 = 19.7`` Hz flat, and ``f_1.1 = 25.5`` Hz, ``f_2,2 = 102`` Hz once
   corrugated with a sinusoid of total height 20 mm (``H = 10`` mm) and
   wavelength 100 mm. Four published values, and reproducing them requires the
   developed-length surface density Vigran warns about in the same paragraph.
@@ -154,7 +154,7 @@ def _vigran_corrugated() -> tuple[float, tuple[float, float, float]]:
 # Eigenfrequencies and equivalent stiffnesses (Vigran 3.7.3.3).
 # ---------------------------------------------------------------------------
 def test_flat_plate_eigenfrequencies_match_vigran_example() -> None:
-    """Vigran printed p. 96: ``f_1,1 = 4,9`` Hz and ``f_2,2 = 19,7`` Hz."""
+    """Vigran printed p. 96: ``f_1.1 = 4.9`` Hz and ``f_2.2 = 19.7`` Hz."""
     b = _vigran_flat_stiffness()
     kwargs: dict[str, float] = {
         "length_x": 1.0,
@@ -173,7 +173,7 @@ def test_flat_plate_eigenfrequencies_match_vigran_example() -> None:
 
 
 def test_corrugated_plate_eigenfrequencies_match_vigran_example() -> None:
-    """Vigran printed p. 96: ``f_1,1 = 25,5`` Hz and ``f_2,2 = 102`` Hz.
+    """Vigran printed p. 96: ``f_1.1 = 25.5`` Hz and ``f_2,2 = 102`` Hz.
 
     Reproducing the two published values needs the surface density to carry the
     developed length of the profile, which is exactly the caveat Vigran states
@@ -378,7 +378,7 @@ def test_heckl_recovery_branch_matches_bies_equation_760() -> None:
     """Bies Eq. (7.60): the printed constant is -23 dB for ``rho c = 414``.
 
     ``TL = 20 lg f + 10 lg m'' - 5 lg fc1 - 5 lg fc2 - 23`` above ``2 fc2``;
-    its exact value is ``10 lg(2 / rho c) = -23,15``.
+    its exact value is ``10 lg(2 / rho c) = -23.15``.
     """
     f = np.array([8000.0, 12500.0, 20000.0])
     constant = (
@@ -564,8 +564,8 @@ def test_orthotropic_damping_lifts_the_coincidence_range_only() -> None:
 def test_orthotropic_area_limits_the_incidence_angle() -> None:
     """Bies Eq. (7.36): ``cos^2(theta_L) = min(lambda/(2 pi sqrt(A)), 0.9)``.
 
-    A 10 m2 specimen at 1 kHz gives ``cos^2(theta_L) = 0,0173``, i.e.
-    ``theta_L = 82,4 deg``; the clamp at 0.9 bites only when the wavelength is
+    A 10 m2 specimen at 1 kHz gives ``cos^2(theta_L) = 0.0173``, i.e.
+    ``theta_L = 82.4 deg``; the clamp at 0.9 bites only when the wavelength is
     large compared with the panel. Both routes must agree with the equivalent
     fixed angle.
     """

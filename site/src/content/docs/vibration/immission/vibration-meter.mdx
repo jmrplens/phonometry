@@ -63,7 +63,7 @@ working range is 1 Hz to 80 Hz for buildings, so those corners are 0.8 Hz and
 blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
-`1 − j 5,6 Hz / f`, one more pole and one more zero. Normalising the result by
+`1 − j 5.6 Hz / f`, one more pole and one more zero. Normalising the result by
 1 mm/s turns it into the **KB signal**, which is dimensionless and is what
 everything downstream is built on.
 
@@ -114,7 +114,7 @@ print(f"the two band-limit corners: {corners.round(4)}")  # [0.7071 0.7071]
 ## 2. What a meter displays, and the two rules inside Formula (2)
 
 The KB signal is averaged, and the averaging is the one a sound level meter
-calls Fast: a running r.m.s. with `τ = 0,125 s` (Formula (1)). Its value at any
+calls Fast: a running r.m.s. with `τ = 0.125 s` (Formula (1)). Its value at any
 instant is the **weighted vibration severity** $KB_\mathrm{F}(t)$, and 3.10.1.2 says
 why that time constant: DIN 4150-2 judges the effect on people with it, and
 the fluctuating indication it gives below 5 Hz was taken into account when

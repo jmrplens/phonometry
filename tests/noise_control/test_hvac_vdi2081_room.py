@@ -173,7 +173,7 @@ def test_room_effect_refuses_an_ill_posed_room(
 # Section 6.7.3 as room acoustics: Equations (37) and the reverberation radius
 # ---------------------------------------------------------------------------
 def test_equation_37_is_sabine_read_the_other_way_about() -> None:
-    """``A = 0,163 V / T``, which is the 0.161 constant at 339 m/s."""
+    """``A = 0.163 V / T``, which is the 0.161 constant at 339 m/s."""
     volume, reverberation = 54.432, 0.5
     area = float(
         room.sabine_absorption_area(volume, reverberation, speed_of_sound=339.0)
@@ -202,7 +202,7 @@ def test_the_room_of_element_20_wants_about_half_a_second() -> None:
 
 
 def test_the_reverberation_radius_is_the_hemispherical_critical_distance() -> None:
-    """``rH = 0,2 sqrt(A)`` is ``sqrt(Q A / 16 pi)`` at Q = 2, not at Q = 1.
+    """``rH = 0.2 sqrt(A)`` is ``sqrt(Q A / 16 pi)`` at Q = 2, not at Q = 1.
 
     Section 6.7.3 prints the constant as 0.2 and the German column says the
     propagation is *halbkugelförmig*, hemispherical. The English column of the

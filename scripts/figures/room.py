@@ -843,7 +843,7 @@ def generate_modal_count_per_band(output_dir: str) -> None:
     )
     for centre, count in zip(bands, counts, strict=True):
         ax.annotate(
-            f"{count:,.0f}",
+            f"{count:,.0f}".replace(",", " "),  # P8: a figure groups with a space
             xy=(centre, count * 1.25),
             fontsize=9,
             color=COLOR_FG,

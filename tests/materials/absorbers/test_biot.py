@@ -145,7 +145,7 @@ def _closed_form_resonance(thickness: float) -> float:
 def _impedance_peak(thickness: float) -> float:
     """Frequency of the ``Im(Zs)`` peak of a hard-backed glass-wool layer.
 
-    Searched in the octave-wide window ``[0,6 fr, 1,5 fr]`` around the closed
+    Searched in the octave-wide window ``[0.6 fr, 1.5 fr]`` around the closed
     form Eq. (6.110), because ``Im(Zs)`` also rises monotonically towards high
     frequency once the layer becomes acoustically thick.
     """
@@ -183,8 +183,8 @@ def test_frame_moduli_match_the_printed_closed_forms() -> None:
 def test_frame_elastic_coefficient_of_the_table_6_1_glass_wool() -> None:
     """With ``nu = 0`` the printed forms collapse to ``Kc = 2 N``.
 
-    A&A Table 6.1 prints ``N = 220 (1 + j 0,1)`` N/cm2 and ``nu = 0``, so
-    ``Re(Kc) = 2 x 2,2e6 = 4,4e6`` Pa: pure arithmetic on the printed values.
+    A&A Table 6.1 prints ``N = 220 (1 + j 0.1)`` N/cm2 and ``nu = 0``, so
+    ``Re(Kc) = 2 x 2.2e6 = 4.4e6`` Pa: pure arithmetic on the printed values.
     """
     k_c = materials.frame_elastic_coefficient(
         TABLE_6_1_SHEAR_MODULUS, TABLE_6_1_POISSON_RATIO
@@ -195,7 +195,7 @@ def test_frame_elastic_coefficient_of_the_table_6_1_glass_wool() -> None:
 def test_frame_quarter_wave_resonance_allard_eq_6_110() -> None:
     """A&A Eq. (6.110), printed p. 129: ``fr = (1/4l) sqrt(Re(Kc)/rho1)``.
 
-    On the Table 6.1 glass wool, ``sqrt(4,4e6/130) = 183,97`` m/s, so a 10 cm
+    On the Table 6.1 glass wool, ``sqrt(4.4e6/130) = 183.97`` m/s, so a 10 cm
     layer resonates at **459.9 Hz** and a 5.6 cm layer at 821.3 Hz. The
     arithmetic is pure and the two are the closed-form anchors of this module.
     """
@@ -277,7 +277,7 @@ def test_frame_borne_velocity_ratio_matches_the_two_published_values() -> None:
     The printed sentence is "the ratio **modulus** ``|mu_b|`` of the velocities
     of the frame and the air for the frame-borne wave decreases from 1.0 at
     50 Hz to 0.82 at 1500 Hz", but the two values it quotes are the real part:
-    the model gives ``mu_b(1500) = 0,811 + 0,473 j``, whose real part is 1.1 %
+    the model gives ``mu_b(1500) = 0.811 + 0.473 j``, whose real part is 1.1 %
     from 0.82 while its modulus, 0.939, is 14.5 % away. ``docs/ERRATA.md``
     records the sentence and the evidence, including the parameter sweep that
     fails to bring ``|mu_b|`` anywhere near 0.82. The assertions here are
@@ -423,7 +423,7 @@ def test_impedance_peak_of_the_thin_layer_resolves_the_printed_thickness() -> No
     """A&A printed p. 129 prints the peak of the second sample at **860 Hz**.
 
     The same paragraph is internally inconsistent about that sample: its first
-    sentence says ``l = 5,4 cm`` and its third says ``l = 5,6 cm``, and the
+    sentence says ``l = 5.4 cm`` and its third says ``l = 5.6 cm``, and the
     caption of Figure 6.11 says 5.6 cm. Computing the peak from the printed
     material settles it: 5.6 cm gives 863.5 Hz (0.4 % from the printed 860 Hz)
     while 5.4 cm gives 896 Hz (4.2 % away). Only the 5.6 cm reading is
@@ -744,7 +744,7 @@ def test_attenuating_fluid_run_in_front_of_a_biot_layer_gives_the_half_space() -
 
     Two metres of the dense material attenuate by 245 nepers at 2 kHz and by
     821 nepers at 20 kHz, so over the top of the band ``cos(kx d)`` and
-    ``sin(kx d)``, of order ``e^{|Im kx| d}``, are past the ``1,8e308`` of
+    ``sin(kx d)``, of order ``e^{|Im kx| d}``, are past the ``1.8e308`` of
     ``float64``. Nothing behind such a run can be heard, so the oracle is the
     definition of the characteristic impedance: the surface impedance of a
     half-space at normal incidence is ``Zc`` of its medium, to machine

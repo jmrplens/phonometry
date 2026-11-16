@@ -509,7 +509,7 @@ def test_aerodynamic_law_is_exact_at_the_reference_speed() -> None:
 
 
 def test_impact_roughness_joint_density_law() -> None:
-    """(2.3.12): the table verbatim at ``n_l = 0,01`` and ``+10 lg(n_l/0,01)``."""
+    """(2.3.12): the table verbatim at ``n_l = 0.01`` and ``+10 lg(n_l/0.01)``."""
     single = impact_roughness_single().levels
     frequency_grid = np.asarray(single[:24])
     np.testing.assert_allclose(

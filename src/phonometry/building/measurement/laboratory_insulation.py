@@ -102,7 +102,7 @@ __all__ = [
 #: (ISO 10140-2:2010, Clause 3.3): 10 m² for the laboratory.
 _A0_LAB = 10.0
 
-#: Sabine constant in ``A = 0,16 V / T`` (ISO 10140-4:2010, Formula (5)).
+#: Sabine constant in ``A = 0.16 V / T`` (ISO 10140-4:2010, Formula (5)).
 _SABINE = 0.16
 
 #: Fixed correction (dB) applied when the signal-to-background margin is at

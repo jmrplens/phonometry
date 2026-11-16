@@ -2,7 +2,7 @@
 """Tests for the ISO 16283 field test report (``.report()`` -> PDF).
 
 The fiche's numbers are verified against the standards' own definitions
-using hand-computable syntheses: with ``T = T0 = 0,5 s`` the reverberation
+using hand-computable syntheses: with ``T = T0 = 0.5 s`` the reverberation
 correction vanishes exactly (``DnT = D``, ``L'nT = Li``), so feeding the
 ISO 717 Annex C worked-example curves as the level difference (or impact
 level) pins the fiche's rating to the published ``30 (-2; -3)`` / ``79

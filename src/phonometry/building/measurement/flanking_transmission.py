@@ -159,11 +159,11 @@ _REFERENCE_FREQUENCY = 1000.0
 _REFERENCE_LENGTH = 1.0
 
 #: Constant ``2,2`` shared by the equivalent absorption length (Formula (12)),
-#: the total loss factor ``η = 2,2/(f·Ts)`` and the modal overlap factor
+#: the total loss factor ``η = 2.2/(f·Ts)`` and the modal overlap factor
 #: (Part 4, Formula (6)).
 _STRUCTURAL_CONSTANT = 2.2
 
-#: ``2,2 · π²`` prefactor of the equivalent absorption length (Formula (12)).
+#: ``2.2 · π²`` prefactor of the equivalent absorption length (Formula (12)).
 _ABSORPTION_LENGTH_CONSTANT = _STRUCTURAL_CONSTANT * np.pi**2
 
 #: Default speed of sound in air, in m/s (20 °C). ISO 10848 gives no value.

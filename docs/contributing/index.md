@@ -332,7 +332,7 @@ Each rule on a page has the same parts:
 | [P5](prose.md#p5) | Translate every catalogue string you add or change, in `catalogue-es.json` | `scripts/generate_catalogue_data.py`, `make catalogue-data`, `CI: Every published value names its page` |
 | [P6](prose.md#p6) | Write no em dash anywhere | `scripts/check_em_dashes.py`, `CI: Markdown renders the way it reads`, review |
 | [P7](prose.md#p7) | Use no control character but tab and newline in a tracked text file | `scripts/check_control_characters.py`, `make control-characters`, `CI: No stray control character` |
-| [P8](prose.md#p8) | Group a long digit string in threes with U+202F, the narrow no-break space | `scripts/check_digit_grouping.py`, `make digit-grouping`, `CI: Every call passes the language on` |
+| [P8](prose.md#p8) | Group a long digit string in threes with U+202F, the narrow no-break space | `scripts/check_digit_grouping.py`, `make digit-grouping`, `CI: Every call passes the language on`, `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point` |
 | [P9](prose.md#p9) | Write the decimal point in English text; only a literal transcription of a print keeps the comma | `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`, `tests/test_package_architecture.py::test_no_error_message_carries_a_comma_decimal` |
 | [P10](prose.md#p10) | State what a page prints and where, never how the page was read | `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page`, review |
 | [P11](prose.md#p11) | Add a CHANGELOG entry under `[Unreleased]` for every new public name and user-visible break | review |

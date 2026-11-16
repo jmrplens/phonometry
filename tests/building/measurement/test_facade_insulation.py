@@ -7,10 +7,10 @@ identities, plus reuse of the already-verified ISO 717-1 engine. The field
 quantities are defined by unnumbered formulas inline in the Clause 3 terms.
 
 - ``D2m = L1,2m - L2`` (Clause 3.14); ``Dls,2m,nT = D2m + 10 lg(T/T0)``
-  reduces to ``D2m`` at ``T = T0 = 0,5 s`` (Clause 3.15); ``Dls,2m,n =
+  reduces to ``D2m`` at ``T = T0 = 0.5 s`` (Clause 3.15); ``Dls,2m,n =
   D2m - 10 lg(A/A0)`` with ``A = 0.16 V/T``, ``A0 = 10 m²`` reduces to
   ``D2m`` when ``A = A0`` (Clause 3.16, 3.17).
-- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` (Clause 3.12, loudspeaker) and
+- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1.5`` (Clause 3.12, loudspeaker) and
   ``R'tr,s = ... - 3`` (Clause 3.13, road traffic); with ``S = A`` the
   ``10 lg`` term vanishes so only the incidence correction remains.
 - Positions are energy-averaged (Clause 9.5.1, Formula 7), reusing the

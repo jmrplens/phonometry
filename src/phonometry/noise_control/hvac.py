@@ -336,10 +336,10 @@ _EFFICIENCY_CORRECTION: tuple[tuple[float, float], ...] = (
 #: in dB, from Section 4.3.3, and the spectral parameter ``c3`` of Equation
 #: (15) with the blade-frequency allowance ``dL_Wd`` in dB, both from Section
 #: 4.3.4. The three ``L_WSM`` values are the printed representative ones, not
-#: ``71,6 - 10 lg psi + L_USM`` recomputed. Two of the three land inside the
+#: ``71.6 - 10 lg psi + L_USM`` recomputed. Two of the three land inside the
 #: tolerance the guideline states beside the relation (RR: 34.6 against 34,
 #: within +/-1; AM: 41.6 against 42, within +/-2); assembly T does not, and
-#: which column is read decides it. The German prints ``67,3 +/-0,5`` and the
+#: which column is read decides it. The German prints “67,3 +/-0,5” and the
 #: English beside it ``67.3 +/-1``, so the representative 36 dB, 0.7 dB from
 #: the 35.3 the relation gives, is inside the English tolerance and outside the
 #: normative German one. The printed representative value is what is stored
@@ -988,7 +988,7 @@ def elbow_insertion_loss(
     ``model="vdi2081"`` reads Table 7 of VDI 2081 Part 1 Section 6.2, which is
     printed once, for a 1250 mm side, and carried along the frequency axis for
     every other size. The duct's limit frequency comes from Equation (33),
-    ``c / (2 a)``, or Equation (34), ``0,586 c / d``; the octave holding it
+    ``c / (2 a)``, or Equation (34), ``0.586 c / d``; the octave holding it
     takes the place of the table's own 125 Hz column, and the whole row moves
     with it. Below the shifted row the loss is nought, which is the guideline's
     statement that a bend reflects nothing while only plane waves run.
@@ -1315,7 +1315,7 @@ def flow_noise_bend(
         ``None`` (default) leaves it out altogether, which is how the
         guideline's own worked example treats a bend: Figure 18 is drawn for
         the rounding of a **junction**, and its curves all cross zero at
-        ``r / d_a = 0,15``, so passing 0 asks for a sharp-cornered junction and
+        ``r / d_a = 0.15``, so passing 0 asks for a sharp-cornered junction and
         is worth over 6 dB rather than nothing. Figure 18 is drawn from 0
         to 0.20.
     :return: A :class:`HVACSpectrumResult` of the band sound power level,
@@ -1608,7 +1608,7 @@ def fan_sound_power(
         itself, not an ambient pressure, and it shares neither the unit nor the
         datum of the ``static_pressure_kpa`` the ISO 3740 family takes in
         kilopascals absolute. No plausibility guard can separate the two:
-        101,325 Pa is a legitimate duty for a panel or propeller fan, so the
+        101 325 Pa is a legitimate duty for a panel or propeller fan, so the
         name is what keeps them apart.
     :param fan_type: **ASHRAE only.** One of ``"airfoil_large"`` / ``"airfoil_small"``
         (backward-curved or backward-inclined centrifugal wheels above and
@@ -1914,7 +1914,7 @@ def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> 
     """Equation (33) or (34): the frequency below which only plane waves run.
 
     The guideline prints ``c / (2 a)`` for a rectangular duct of largest side
-    ``a`` and ``0,586 c / d`` for a round one of bore ``d``, and both are the
+    ``a`` and ``0.586 c / d`` for a round one of bore ``d``, and both are the
     first cut-on frequency of the duct, which :func:`plane_wave_limit` already
     computes from the mode theory: the rectangular one exactly, and the round
     one to the three figures the guideline rounds 1.8412 over pi to: 0.586

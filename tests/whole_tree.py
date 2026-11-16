@@ -94,8 +94,8 @@ UNWRITTEN = frozenset({"__pycache__", "node_modules", "dist", ".astro"})
 
 #: How many files of :data:`TREES` a test opens from which it reads the
 #: repository whole. On 2026-11-06 the package held 469 modules, the scripts
-#: 275 files, the documentation 236, the site 1,182, the suite 767 modules
-#: and ``.github/`` 3,542 files, 3,332 of them figures, so a test that reads
+#: 275 files, the documentation 236, the site 1 182, the suite 767 modules
+#: and ``.github/`` 3 542 files, 3 332 of them figures, so a test that reads
 #: one of them whole opens hundreds of files. A test that reads a smaller
 #: part whole opens fewer (the 85 rows of the conformance package) and is
 #: marked by review; the most a test that judges no part of the repository

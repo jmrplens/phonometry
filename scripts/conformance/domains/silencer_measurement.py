@@ -355,7 +355,7 @@ def _chk_rectangular_cut_on() -> Outcome:
 
     The first higher-order mode of a rigid rectangular duct is a half
     wavelength across the larger dimension, so ``f = c / 2H``, which is the
-    ``0,5 c / H`` NOTE 2 prints. The independent route through Norton &
+    ``0.5 c / H`` NOTE 2 prints. The independent route through Norton &
     Karczub's eigenvalues has to give the same number to the last bit.
     """
     exact = ph.noise_control.rectangular_duct_cut_on(

@@ -188,7 +188,7 @@ _UNWANTED_INPUT_LIMIT_DB = 15.0
 #: The factor of ISO 10846-4:2003 Inequality (3) and ISO 10846-2:2008
 #: Inequality (2): the mass between the element and the output force
 #: transducers may carry at most 6 % of the measured force as its own inertia,
-#: ``m0 |a2| <= 0,06 |F2|``, which NOTE 1 of each states as a force-level bias
+#: ``m0 |a2| <= 0.06 |F2|``, which NOTE 1 of each states as a force-level bias
 #: of 0.5 dB.
 _OUTPUT_MASS_FACTOR = 0.06
 

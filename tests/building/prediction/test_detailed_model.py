@@ -22,7 +22,7 @@ fixture therefore
   derivation reproduces the two printed values that are self-consistent
   (external wall 1: 2.375 m; internal wall 2: 1.839 m against the printed
   1.840 m) and supplies the three that are not, and
-* uses ``ηint = 0,012 5``.
+* uses ``ηint = 0.012 5``.
 
 Both discrepancies are recorded in ``docs/ERRATA.md``. The printed tables are
 rounded but were computed unrounded, so the per-band comparisons use a 0.1 dB
@@ -203,7 +203,7 @@ def test_table_g3_in_situ_impact_level(situ: dict) -> None:
 
 
 def test_structural_reverberation_time_is_the_loss_factor_inverse(situ: dict) -> None:
-    """``Ts = 2,2/(f ηtot)`` closes the Formula (C.1) pair exactly."""
+    """``Ts = 2.2/(f ηtot)`` closes the Formula (C.1) pair exactly."""
     floor = situ["floor"]
     assert building.structural_reverberation_time(
         frequencies=BANDS, total_loss_factor=floor.total_loss_factor
@@ -285,7 +285,7 @@ def test_table_l1_apparent_index_and_rating(
 ) -> None:
     """Table L.1, the total ``R'`` per band and its ISO 717-1 rating.
 
-    Table L.1 prints ``Rw = 57,8`` and the statement line ``R'w = 57,9``: both
+    Table L.1 prints ``Rw = 57,8`` and the statement line ``R'w = 57.9``: both
     are the *continuously* shifted reference curve, one truncated and one
     rounded, not the 1 dB-step rating ISO 717-1 defines (see docs/ERRATA.md).
     The ISO 717-1 rating of the same spectrum is 57 dB.
@@ -392,7 +392,7 @@ def test_simplified_model_agrees_with_the_detailed_model(
 ) -> None:
     """Tables L.10 and L.1: the two models rate the same building alike.
 
-    The simplified single-number model of Clause 4.4 gives ``R'w = 57,0 dB``
+    The simplified single-number model of Clause 4.4 gives ``R'w = 57.0 dB``
     for the same building; the detailed per-band model of Clause 4.2 gives 57
     (the standard printing 57.8/57.9 from a continuous reference shift). The
     two agree to well within the model's own standard deviation.
@@ -751,7 +751,7 @@ def test_in_situ_transfer_direction_matches_the_printed_signs() -> None:
     sound reduction index and *loses* impact level. The symmetry test above
     would still pass with both signs flipped; halving and doubling the
     structural reverberation time pins each sign on its own, against the exact
-    ``10 lg 2 = 3,010 3 dB`` the formulae must produce.
+    ``10 lg 2 = 3.010 3 dB`` the formulae must produce.
     """
     lab = np.full(BANDS.size, 0.20)
     half, double = np.full(BANDS.size, 0.10), np.full(BANDS.size, 0.40)

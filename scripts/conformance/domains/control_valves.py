@@ -18,10 +18,10 @@ below use the values that make it self-consistent:
   printed vena contracta pressures needs ``0,984``: solving Equation (2) for
   ``(F_LP/F_P)^2`` from each printed pair gives 0.647 83 to five digits in all
   six columns, and that is ``F_p = 0,984``.
-* The equivalent orifice diameter is printed ``d_o = 0,010`` m where
-  Equation (8c) with the annex's own ``N_O = 6`` and ``A = 0,00137`` m² gives
+* The equivalent orifice diameter is printed ``d_o = 0.010`` m where
+  Equation (8c) with the annex's own ``N_O = 6`` and ``A = 0.00137`` m² gives
   0.102 m. The ``F_d = 0,30`` printed on the next row is the ratio of the
-  printed ``d_H = 0,030`` m to the larger value.
+  printed ``d_H = 0.030`` m to the larger value.
 
 Both are in ``docs/ERRATA.md``.
 """

@@ -17,10 +17,10 @@ modification.
 Four printed defects sit inside this oracle, all recorded in
 ``docs/ERRATA.md``:
 
-* Equation (12) is printed one way in Clause 5.1 (``0,02 F_L^2 C``) and
-  another in Table A.1 (``0,036 F_L^2 C F_d^0,75``). Only the second
+* Equation (12) is printed one way in Clause 5.1 (``0.02 F_L^2 C``) and
+  another in Table A.1 (``0.036 F_L^2 C F_d^0.75``). Only the second
   reproduces the annex's own ``N_Str = 0,399``, and it is the one used here.
-* Row (22a) prints ``TL(8 000 Hz) = 51,76 dB`` without its minus sign.
+* Row (22a) prints ``TL(8 000 Hz) = 51.76 dB`` without its minus sign.
 * Row (17) prints ``TL_cav`` values its own printed intermediates do not
   give, by 0.06 to 0.08 dB, which is why that row alone carries a tolerance
   of 0.1 dB.

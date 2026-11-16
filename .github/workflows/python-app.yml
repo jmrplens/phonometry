@@ -1159,7 +1159,7 @@ jobs:
       with:
         python-version: "3.13"
     - name: Fail on a decimal comma in English text
-      run: python scripts/check_decimal_comma.py --english
+      run: python scripts/check_decimal_comma.py --english --strict
 
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is

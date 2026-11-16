@@ -651,7 +651,7 @@ def test_a_spanish_comment_may_write_a_container_without_spaces() -> None:
 
 
 def test_a_spanish_comma_outside_a_bracket_is_only_a_decimal_point() -> None:
-    """Read as a list's, the comma of ``0,5 dB`` would leave a ``0`` that
+    """Read as a list's, the comma of “0,5 dB” would leave a ``0`` that
     rounds the printed ``0.4`` and a ``5`` that the unit after it makes a
     note, so a wrong value would pass.
     """
@@ -736,8 +736,8 @@ def test_an_ellipsis_meets_the_last_line_of_a_long_loop_in_linear_time() -> None
     """The values before each line end are counted on, not counted again.
 
     Each line end counted the stated values before it from the first one, so
-    the time grew with the square of the lines: 1.4 s for 5,000, 27.5 s for
-    20,000 and about a minute for 30,000.
+    the time grew with the square of the lines: 1.4 s for 5 000, 27.5 s for
+    20 000 and about a minute for 30 000.
     """
 
     def loop(lines: int) -> tuple[str, list[str]]:
@@ -1504,8 +1504,8 @@ def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
     """A complex number a print spells across its label and its values is
     looked for from where a number opens, not again from each digit of one.
 
-    Looked for from each digit, a print of 20,000 digits beside its label
-    took about 30 s on this machine, and 40,000 about two minutes.
+    Looked for from each digit, a print of 20 000 digits beside its label
+    took about 30 s on this machine, and 40 000 about two minutes.
     """
 
     def printed(count: int) -> tuple[str, dict[int, str]]:
@@ -1521,7 +1521,7 @@ def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
     """An arrow is looked for from where a run of spaces opens, in what a
     print wrote and in the comment alike, not again from each space of one.
 
-    Looked for from each space, a print of 80,000 spaces between two words
+    Looked for from each space, a print of 80 000 spaces between two words
     took about two minutes on this machine, and a comment of as many about a
     minute and a half.
     """
@@ -1549,7 +1549,7 @@ def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.
 
-    Counted again, a comment of 40,000 values took about 40 s on this machine.
+    Counted again, a comment of 40 000 values took about 40 s on this machine.
     """
 
     def comment(count: int) -> tuple[str, str]:
@@ -1567,7 +1567,7 @@ def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
     """The brackets a comment leaves open are counted on as each line joins
     it, not counted again over all of it for each line.
 
-    Counted again, a comment of 40,000 lines took about 23 s on this machine.
+    Counted again, a comment of 40 000 lines took about 23 s on this machine.
     """
 
     def script(count: int) -> str:
@@ -1583,7 +1583,7 @@ def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
     """The prints a comment does not stand for are found among those that
     open on its lines, not among every print of the page with a comment.
 
-    Found among every one, a page of 16,000 prints, each with its comment,
+    Found among every one, a page of 16 000 prints, each with its comment,
     took 60 to 260 s on this machine, as loaded.
     """
 
@@ -1607,7 +1607,7 @@ def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
     statements of its body kept once for each scope, not by scanning that
     body again for each call.
 
-    Scanned again, a function of 16,000 commented prints of a parameter
+    Scanned again, a function of 16 000 commented prints of a parameter
     named ``print`` took 17 to 19 s on this machine.
     """
 

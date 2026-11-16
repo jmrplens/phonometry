@@ -149,13 +149,13 @@ DELANY_BAZLEY_COEFFICIENTS: Mapping[DelanyBazleyPreset, tuple[float, ...]] = (
 _DELANY_BAZLEY_COEFFICIENT_COUNT = 8
 
 #: Stated validity range of the Delany-Bazley regression in ``X = rho f/sigma``,
-#: printed as ``0,01 < X < 1,0`` by Hopkins (2007) Eq. (1.174), PDF page 112
+#: printed as ``0.01 < X < 1.0`` by Hopkins (2007) Eq. (1.174), PDF page 112
 #: (printed p. 85), and again by Cox & D'Antonio 3e Sect. 6.5.1, PDF page 254
 #: (printed p. 197).
 DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
 #: Fit range of the Miki regression in ``f/sigma``. The lower limit is Miki
 #: (1990) Sect. 4.1, PDF page 4 (printed p. 22), which reads the Delany-Bazley
-#: data below ``f/sigma = 0,01`` as extrapolation; the upper limit is the
+#: data below ``f/sigma = 0.01`` as extrapolation; the upper limit is the
 #: Delany-Bazley one above, since Miki refits their data.
 MIKI_VALIDITY = (0.01, 1.0)
 #: Published upper limits on ``|K_c / K_f|`` (frame-in-vacuum bulk modulus over
@@ -165,7 +165,7 @@ MIKI_VALIDITY = (0.01, 1.0)
 #: ``"beranek"`` is Beranek's (1947) original 0.05 and ``"doutres"`` the 0.2
 #: to which Doutres et al. (2007) relaxed it with their frame structural
 #: interaction criterion (which, with ``K_f`` approximated by the isothermal
-#: value of air ``P0 = 101,3 kPa``, is the book's "lower than 20 kPa").
+#: value of air ``P0 = 101.3 kPa``, is the book's "lower than 20 kPa").
 LIMP_FRAME_CRITERIA: Mapping[Criterion, float] = MappingProxyType(
     {"beranek": 0.05, "doutres": 0.2}
 )

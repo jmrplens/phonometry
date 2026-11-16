@@ -225,7 +225,7 @@ def _chk_round_run() -> Outcome:
     "Limit frequency of a 160 mm round duct, Hz",
 )
 def _chk_limit_frequency() -> Outcome:
-    """``f_G = 0,586 c / d``, printed beside element 14 as 1245 Hz.
+    """``f_G = 0.586 c / d``, printed beside element 14 as 1245 Hz.
 
     Checked against the library's own first cut-on frequency rather than
     against the printed constant recomputed: 0.586 is the guideline's rounding

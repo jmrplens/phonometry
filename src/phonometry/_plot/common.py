@@ -920,7 +920,7 @@ def format_frequency_axis(
     power-of-ten log formatter (``10^2``, ``10^3``) that reads poorly in
     acoustics.  ``minor="thirds"`` adds unlabelled one-third-octave minor
     ticks; ``minor=None`` clears the minor ticks.  ``language="es"`` draws the
-    off-decade centres with the Spanish decimal comma (``31,5``, ``1,25k``),
+    off-decade centres with the Spanish decimal comma (``31,5``, “1,25k”),
     which the tick-label pass of :func:`~phonometry._i18n.localize_axes` cannot
     reach once the labels are fixed strings.
 

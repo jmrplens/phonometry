@@ -3,7 +3,7 @@
 
 Anchored on hand-computed closed-form values of the resonance relations
 (Formulae 2-4) and on the standard's own worked NOTE for the enclosed-gas term
-(``s'a = 111 / d`` MN/m3 for ``p0 = 0,1 MPa``, ``epsilon = 0,9``, clause 8.2) --
+(``s'a = 111 / d`` MN/m3 for ``p0 = 0.1 MPa``, ``epsilon = 0,9``, clause 8.2) --
 a genuine published numeric oracle.
 """
 

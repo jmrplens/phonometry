@@ -6,13 +6,13 @@ The four computed characteristics are checked against IEC 60268-4's own
 definitions as clean-room oracles:
 
 * **Sensitivity level** (11.1): ``L_M = 20 lg(M / 1 V/Pa)``, so 12.5 mV/Pa
-  returns ``20 lg 0,0125 = -38,06`` dB re 1 V/Pa (hand-computed) and
+  returns ``20 lg 0.0125 = -38.06`` dB re 1 V/Pa (hand-computed) and
   1 000 mV/Pa returns 0 dB exactly.
 * **Effective frequency range** (12.2): a response crossing the
   ``+/- tolerance`` limits at chosen frequencies returns exactly those
   frequencies, on either the lower or the upper limit.
 * **Directivity index** (13.2.2 via the 11.2.2 a) integral): the ideal
-  cardioid ``(1 + cos theta) / 2`` returns ``10 lg 3 = 4,77`` dB.
+  cardioid ``(1 + cos theta) / 2`` returns ``10 lg 3 = 4.77`` dB.
 * **Equivalent noise level** (17.2 d/e): ``20 lg((U_N / M) / 20 uPa)``, so
   2.5 uV over 12.5 mV/Pa is 200 uPa, i.e. 20.0 dB exactly, and the overload
   sound pressure level (15.2.2) is read from a distortion curve that reaches

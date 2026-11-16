@@ -271,13 +271,13 @@ RADIATION_SOLID_ANGLES: Mapping[str, float] = MappingProxyType(
 MODAL_FILTER_ATTENUATION: tuple[float, float] = (3.0, 5.0)
 
 #: ISO 7235:2003, Equation (4). The coefficient of the cut-on frequency of the
-#: first higher-order mode of a circular duct, ``f = 0,59 c / d``. The exact
+#: first higher-order mode of a circular duct, ``f = 0.59 c / d``. The exact
 #: value is the first zero of the derivative of the Bessel function of order
 #: one, 1.8412 / pi = 0.58607, so the printed constant sits 0.67 % high.
 CIRCULAR_CUT_ON_COEFFICIENT = 0.59
 
 #: ISO 7235:2003, Equation (5). The same for a rectangular duct of larger
-#: dimension ``H``, ``f = 0,5 c / H``. This one is exact: the first mode is a
+#: dimension ``H``, ``f = 0.5 c / H``. This one is exact: the first mode is a
 #: half wavelength across the duct.
 RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
 

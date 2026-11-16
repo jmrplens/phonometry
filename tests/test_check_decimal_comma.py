@@ -297,8 +297,44 @@ def test_a_spanish_key_of_a_javascript_or_json_object_is_kept() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_a_thousands_group_is_left_to_the_digit_grouping_rule() -> None:
-    assert gate.findings_in("91,658,333 inputs, zero exceptions.\n", "docs/a.md") == []
+def test_a_thousands_group_written_with_commas_is_refused() -> None:
+    """P8 groups a long number with U+202F; a comma group is refused, not listed."""
+    (finding,) = gate.findings_in("91,658,333 inputs, zero exceptions.\n", "docs/a.md")
+    assert (finding.token, finding.kind) == ("91,658,333", "thousands")
+    assert gate.findings_in("91\u202f658\u202f333 inputs.\n", "docs/a.md") == []
+    assert (
+        gate.findings_in("\u201c91,658,333\u201d, as the log prints it.\n", "docs/a.md")
+        == []
+    )
+
+
+@pytest.mark.parametrize(
+    ("text", "token"),
+    [
+        ("Sabine's ``A = 0,16 V / T``.\n", "0,16"),
+        ("The pole ``1,25 f_u`` of the high pass.\n", "1,25"),
+        ("The positions ``R(q0,1)`` and ``R(q0,9)``.\n", "0,1"),
+        ("Then ``32,3 - 26,3 dB`` follows.\n", "32,3"),
+    ],
+)
+def test_a_formula_in_a_code_span_writes_the_point(text: str, token: str) -> None:
+    """A span that no code would write is a formula we write, and takes the point."""
+    assert token in _decimals(text)
+    assert token in _decimals('"""Doc.\n\n' + text + '"""\n', "src/phonometry/x.py")
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Call ``f(1,5)`` with two integers.\n",
+        "The tuple ``(2,3)`` is a shape.\n",
+        "It prints \u201c0,16\u201d as the clause writes it.\n",
+        "A cell reads ``0,30..0,50`` or ``~0,85``.\n",
+        'A text such as ``"0,97"`` in a numeric field.\n',
+    ],
+)
+def test_code_and_quoted_transcriptions_in_spans_keep_the_comma(text: str) -> None:
+    assert _decimals(text) == []
 
 
 def test_an_ambiguous_number_is_reported_and_does_not_fail() -> None:
@@ -348,7 +384,7 @@ def test_a_decimal_that_looks_like_an_index_is_refused(text: str, token: str) ->
 
 def test_code_is_kept() -> None:
     text = (
-        "The span `Sum 27,9` is code.\n\n"
+        "The span `f(1,5)` is code.\n\n"
         "```text\nbands 1,2,3 and a[1,2]\n```\n\n"
         "```python\nx = f(1,5)\n```\n"
     )
@@ -367,7 +403,7 @@ def test_python_code_is_kept() -> None:
         "    '1,5'\n"
         "\n"
         "    It reads ``1,5`` and :func:`g` with :math:`x`.\n"
-        "    A literal ``:math:`x - 1```, then ``32,3 - 26,3 dB``.\n"
+        "    A literal ``:math:`x - 1```, then ``f(32,3)``.\n"
         '    """\n'
     )
     assert _decimals(source, "src/phonometry/x.py") == []

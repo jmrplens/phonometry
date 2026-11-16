@@ -327,7 +327,7 @@ def test_the_straight_runs_reproduce_table_5() -> None:
 def test_the_bend_shifts_table_7_onto_its_own_limit_frequency() -> None:
     """Element 14: a 160 mm round bend, whose limit frequency is 1245 Hz.
 
-    Equation (34) puts ``f_G = 0,586 c / d`` in the 1 kHz octave, three octaves
+    Equation (34) puts ``f_G = 0.586 c / d`` in the 1 kHz octave, three octaves
     above the 125 Hz the table is printed for, so the whole row moves three
     octaves up. That is what turns the printed 0, 1, 2, 3, 3, ... into the
     0, 0, 0, 1, 2, 3, 3, 3 of the example.
@@ -624,7 +624,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
     """Element 14: the two velocities equal, and no rounding correction.
 
     Figure 18 is drawn for the rounding of a junction, and all its curves cross
-    zero at ``r / d_a = 0,15``, so leaving it out is not the same as passing
+    zero at ``r / d_a = 0.15``, so leaving it out is not the same as passing
     nought: a sharp-cornered junction earns over 6 dB there.
     """
     bend = hvac.flow_noise_bend(

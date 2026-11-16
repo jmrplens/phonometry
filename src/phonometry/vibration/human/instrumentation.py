@@ -28,7 +28,7 @@ it: the rest are laboratory tests on hardware, not arithmetic.
 
 **Tolerances are on the factor, not on the decibel.** The standard writes its
 limits as percentages of the weighting factor, and this module keeps them
-that way. ``+26 %`` is ``+2,0 dB`` to two decimals, but the percentage is
+that way. ``+26 %`` is ``+2.0 dB`` to two decimals, but the percentage is
 what the page prints and what the acceptance test in Annex B is written in.
 
 **The band does not widen; the measurement does.** Two sentences of the
@@ -240,8 +240,8 @@ REFERENCE_ACCELERATION_M_S2: Mapping[WeightingName, float] = MappingProxyType(
 
 #: Table 1: the nominal frequency range of each weighting, in hertz, as the
 #: ``(lower, upper)`` pair the column prints. These are the nominal values
-#: printed in the table (``8 to 1 000``, ``0,5 to 80``, ``1 to 80``,
-#: ``0,1 to 0,5``), not the exact one-third-octave centres ``10**(k/10)``
+#: printed in the table (``8 to 1 000``, ``0.5 to 80``, ``1 to 80``,
+#: ``0.1 to 0.5``), not the exact one-third-octave centres ``10**(k/10)``
 #: that Annex B tabulates the response at, and they are deliberately kept
 #: that way: 5.7, 5.10, 12.11 and the Table 15 test grids all read "for all
 #: frequencies in the appropriate nominal frequency range", so the range is
@@ -288,7 +288,7 @@ ISO8041_COVERAGE_FACTOR = 2.0
 #: additional ranges, and carry two keys rather than one number that would be
 #: wrong on one of them. Clauses absent from the table are the ones that print
 #: no figure; 12.20.2 is deliberately absent because the uncertainties it
-#: prints are ``0,5 °C`` and ``10 %`` relative humidity, which are
+#: prints are ``0.5 °C`` and ``10 %`` relative humidity, which are
 #: uncertainties of the environmental conditions rather than of a deviation
 #: from a design goal.
 MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
@@ -328,7 +328,7 @@ MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
 #: and why the Part 1 keys ``13.11`` to ``14.9`` have no key here. The same
 #: rules as the Part 1 table apply to the keys: a clause absent from it prints
 #: no figure, 12.10.2 carries a second key because it prints two figures, and
-#: 12.20.2 is absent because its ``0,5 °C`` and ``10 %`` relative humidity are
+#: 12.20.2 is absent because its ``0.5 °C`` and ``10 %`` relative humidity are
 #: uncertainties of an environmental condition.
 PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
     {
@@ -1315,7 +1315,7 @@ RUNNING_RMS_DECAY_TIME_S: Mapping[Method, tuple[tuple[float, float, float], ...]
 #: prints no such column, so this is the exponential average alone.
 #:
 #: The rate band is not the reciprocal of the time band. The closed-form rate
-#: is ``20 lg(e) / (2 tau) = 4,3429 / tau`` dB/s, and the printed limits sit
+#: is ``20 lg(e) / (2 tau) = 4.3429 / tau`` dB/s, and the printed limits sit
 #: at 0.875 to 0.892 and 1.128 to 1.151 times it, while the printed times map
 #: to narrower intervals around ``2 tau ln 10``. The time column is the one
 #: that binds; the rate column is the looser statement of the same decay.
@@ -1338,7 +1338,7 @@ def running_rms_decay_time(integration_time: float, *, method: Method) -> float:
     last ``tau`` seconds of the record, so a time ``t`` after the cut its
     window still holds ``(tau - t) / tau`` of the original mean square and the
     indicated value falls as :math:`\sqrt{(\tau - t)/\tau}`, reaching 10 % at
-    ``t = 0,99 tau``. The exponential average of Eq. (3) decays in power as
+    ``t = 0.99 tau``. The exponential average of Eq. (3) decays in power as
     :math:`\mathrm{e}^{-t/\tau}`, so the indication falls as :math:`\mathrm{e}^{-t/2\tau}` and
     reaches 10 % at :math:`t = 2\tau\ln 10 = 4.605\,2\,\tau`.
 

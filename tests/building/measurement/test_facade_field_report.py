@@ -2,11 +2,11 @@
 """Tests for the ISO 16283-3 field facade report (``.report()`` -> PDF).
 
 The fiche's numbers are verified against the standard's own definitions using
-hand-computable syntheses: with ``T = T0 = 0,5 s`` the standardization term
+hand-computable syntheses: with ``T = T0 = 0.5 s`` the standardization term
 vanishes exactly (``D2m,nT = D2m``), so feeding the ISO 717-1 Annex C
 worked-example curve as the facade level difference pins the fiche's rating to
 the published ``30 (-2; -3)`` value; ``R'45`` is checked against the element
-method with the ``-1,5 dB`` loudspeaker correction. Rendering assertions are
+method with the ``-1.5 dB`` loudspeaker correction. Rendering assertions are
 structural (a one-page ``%PDF``) plus pypdf text-extraction checks of the boxed
 rating, the standard-basis line and the mandatory field-method statement.
 """

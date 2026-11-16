@@ -143,7 +143,7 @@ _register_table_e1()
 _register_table_c1()
 
 
-#: A printed range of nominal frequencies, ``"31,5 to 63"`` or ``"> 63 to < 160"``:
+#: A printed range of nominal frequencies, “31,5 to 63” or ``"> 63 to < 160"``:
 #: an optional sign, a number with a decimal comma and a space between the
 #: thousands, ``to``, and the same again. The last row of Table A.1 prints no
 #: space after its sign, which the pattern allows.

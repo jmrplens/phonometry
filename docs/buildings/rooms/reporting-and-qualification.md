@@ -25,7 +25,7 @@ The survey is made on a turntable, or from measurements every 5 degrees if
 there is none. Either way the readings are combined into **gliding 30 degree
 arcs**, and each arc is compared with a reference that is "a 360 degree
 energetic average in the measurement plane". Source and microphone are at
-least 1,5 m apart throughout.
+least 1.5 m apart throughout.
 
 ```python
 import numpy as np
@@ -86,8 +86,8 @@ The line stops where the table does. A.4 asks for "a minimum of between 6
 and 10 representative microphone positions", so a 5 000-seat arena does not
 get thirteen positions on the strength of three rows, and a 200-seat studio
 does not get four. A.4 adds the geometry the table does not: at least three
-on-stage source positions in the normal case, a source height of 1,5 m, a
-microphone height of 1,2 m at audience seat locations, positions evenly
+on-stage source positions in the normal case, a source height of 1.5 m, a
+microphone height of 1.2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
@@ -96,7 +96,7 @@ into balconies and under-balcony areas.
 ### How the measurement goes
 
 Qualify the source first. Drive it with octave bands of pink noise in a free
-field and keep the microphone at least 1,5 m away. On a turntable, average its
+field and keep the microphone at least 1.5 m away. On a turntable, average its
 output over gliding 30 degree arcs; without one, take a reading every
 5 degrees and average six neighbouring readings into each arc. Every arc is
 then held against the 360 degree energetic average in the measurement plane:
@@ -107,9 +107,9 @@ omnidirectional microphone, preferably with a diaphragm no more than 13 mm
 across, its sensitivity calibrated if $G$ is wanted. Normally use at least
 three source positions on the stage, more with a large stage or an orchestra
 pit, for instance one on the centre line and two at equal distances either
-side, with the acoustic centre 1,5 m above the floor. Take the minimum number
+side, with the acoustic centre 1.5 m above the floor. Take the minimum number
 of microphone positions from Table A.2, 6 for 500 seats up to 10 for 2 000, at
-1,2 m above the floor at seats, about 2 m apart at least, spread evenly, and
+1.2 m above the floor at seats, about 2 m apart at least, spread evenly, and
 add more where balconies split the seating. Without synchronous averaging,
 hold the source at least 45 dB over the background in every band, or at least
 35 dB when only $T_{20}$ is wanted, and average repeats of any response that

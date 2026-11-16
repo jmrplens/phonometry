@@ -15,7 +15,7 @@ the insertion loss (3.5, 5.4.2):
 
 in bands from at least 63 Hz to 8 kHz (5.3), from at least three fittings
 unless the device's repeatability is known (5.4.3), reported to the nearest
-0,1 dB and drawn with increasing values downwards (Clause 6).
+0.1 dB and drawn with increasing values downwards (Clause 6).
 
 **What it is for, and what it is not (Clause 1).** The method checks
 production spreads for type approval or certification and the change of
@@ -52,8 +52,8 @@ so
 
 (Formula (B.2)). The standard uncertainty of each level is the standard
 deviation of the mean of the repeated measurements; Table B.1 prints typical
-values, 0,5 dB open, 1,0 dB occluded, 0,3 dB, 0,5 dB and 0,2 dB, which give
-:math:`u` = 1,3 dB and :math:`U` = 2,6 dB
+values, 0.5 dB open, 1.0 dB occluded, 0.3 dB, 0.5 dB and 0.2 dB, which give
+:math:`u` = 1.3 dB and :math:`U` = 2.6 dB
 (:data:`EARMUFF_INSERTION_LOSS_UNCERTAINTY`).
 
 Clause, table and formula numbers refer to ISO 4869-3:2007(E).
@@ -198,7 +198,7 @@ _OPEN_LEVEL_U_DB = 0.5
 _OCCLUDED_LEVEL_U_DB = 1.0
 #: B.4: the coverage factor for about 95 %.
 _COVERAGE_FACTOR = 2.0
-#: Clause 6: the insertion loss is reported to 0,1 dB, one decimal place.
+#: Clause 6: the insertion loss is reported to 0.1 dB, one decimal place.
 _REPORT_DECIMALS = 1
 #: A limit reached through floating-point arithmetic is on the limit.
 _BOUNDARY_SLACK_DB = 1e-9
@@ -372,7 +372,7 @@ class InsertionLossUncertaintyBudget(RichDisplay):
 
 #: Table B.1: the typical budget, "generally valid for mid-range frequencies
 #: and for ear-muff type protectors that are not especially sensitive to the
-#: positioning on the ATF": :math:`u` = 1,3 dB and :math:`U` = 2,6 dB.
+#: positioning on the ATF": :math:`u` = 1.3 dB and :math:`U` = 2.6 dB.
 EARMUFF_INSERTION_LOSS_UNCERTAINTY = InsertionLossUncertaintyBudget(
     open_level_uncertainty_db=_OPEN_LEVEL_U_DB,
     occluded_level_uncertainty_db=_OCCLUDED_LEVEL_U_DB,
@@ -400,9 +400,9 @@ class EarmuffInsertionLossResult(OwnsArrays):
     :ivar occluded_levels: The levels with it, one row per fitting, in dB.
     :ivar open_uncertainty_db: The standard uncertainty of the mean open level
         per band, in dB: the standard deviation of the mean when at least two
-        open measurements were given, else Table B.1's 0,5 dB.
+        open measurements were given, else Table B.1's 0.5 dB.
     :ivar occluded_uncertainty_db: That of the mean occluded level, from at
-        least two fittings, else Table B.1's 1,0 dB.
+        least two fittings, else Table B.1's 1.0 dB.
     :ivar fixture_uncertainty_db: :math:`u(\delta_1)`, in dB.
     :ivar sound_field_uncertainty_db: :math:`u(\delta_2)`, in dB.
     :ivar equipment_uncertainty_db: :math:`u(\delta_3)`, in dB.
@@ -444,7 +444,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
     @property
     def reported_insertion_loss(self) -> NDArray[np.float64]:
-        """The insertion loss as Clause 6 reports it, to the nearest 0,1 dB.
+        """The insertion loss as Clause 6 reports it, to the nearest 0.1 dB.
 
         :return: One value per band, halves rounded upwards.
         """
@@ -609,9 +609,9 @@ def earmuff_insertion_loss(
 
     Annex B's uncertainty is evaluated band by band: the standard uncertainty
     of each mean level is the standard deviation of the mean of its repeated
-    measurements (B.3), or Table B.1's typical 0,5 dB open and 1,0 dB occluded
+    measurements (B.3), or Table B.1's typical 0.5 dB open and 1.0 dB occluded
     when fewer than two were given, and the three :math:`\delta` terms default
-    to Table B.1's 0,3 dB, 0,5 dB and 0,2 dB.
+    to Table B.1's 0.3 dB, 0.5 dB and 0.2 dB.
 
     The result is an insertion loss on a fixture. It screens production and
     ageing and is not the real-ear attenuation ISO 4869-2 needs (Clause 1);
@@ -702,7 +702,7 @@ def check_random_incidence_field(
 
     With the fixture removed, the level read by an omnidirectional microphone
     kept in one orientation at six positions 150 mm from the reference point,
-    on the front-back, right-left and up-down axes, stays within ±2,5 dB of
+    on the front-back, right-left and up-down axes, stays within ±2.5 dB of
     the level at the reference point, and the right and left positions within
     3 dB of each other; from the 500 Hz band up, the levels a directional
     microphone reads at the reference point in any two directions, the

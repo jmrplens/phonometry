@@ -76,16 +76,16 @@ Shape = Literal["circular", "rectangular", "square"]
 
 Complex = NDArray[np.complex128]
 
-#: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343,2 exactly).
+#: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343.2 exactly).
 _ISO_C_REF = 343.2
 #: Reference temperature of ISO 10534-2 Eqs. (5)/(7), in kelvin (293 exactly).
 _ISO_T_REF = 293.0
 #: Celsius-to-kelvin offset, in kelvin. Eqs. (5) and (7) are written in kelvin;
 #: the public arguments are in degrees Celsius, like the rest of the library.
 _ABSOLUTE_ZERO_C_OFFSET = 273.15
-#: Reference air density of ISO 10534-2 Eq. (7), in kg/m3 (1,186 exactly).
+#: Reference air density of ISO 10534-2 Eq. (7), in kg/m3 (1.186 exactly).
 _ISO_RHO_REF = 1.186
-#: Reference atmospheric pressure of ISO 10534-2 Eq. (7), in kPa (101,325).
+#: Reference atmospheric pressure of ISO 10534-2 Eq. (7), in kPa (101.325).
 _ISO_P_REF = 101.325
 #: Leading constant of the ISO 10534-2 Eq. (A.18) attenuation estimate.
 _ISO_ATTEN_CONST = 1.94e-2

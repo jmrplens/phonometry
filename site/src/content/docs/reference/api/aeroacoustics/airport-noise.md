@@ -272,7 +272,7 @@ added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the pressure is not positive, the temperature is at or below -273,15 degC, or either input is non-finite. |
+| ValueError | If the pressure is not positive, the temperature is at or below -273.15 degC, or either input is non-finite. |
 | TypeError | if `static_pressure_kpa` or `temperature_c` is not a single number. |
 
 ## lateral_attenuation

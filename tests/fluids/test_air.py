@@ -104,8 +104,8 @@ def test_the_two_unprinted_constituents_close_the_printed_diffusivity() -> None:
 def test_the_specific_heat_is_a_possible_heat_capacity_of_air() -> None:
     """A sanity bound the ratio alone cannot give.
 
-    ISO 9053-2:2020 Annex A.3 prints a C_P of 938,7 J/(kg K) for this same air
-    and credits it to this document; it is 27,19 J/(mol K), below the
+    ISO 9053-2:2020 Annex A.3 prints a C_P of 938.7 J/(kg K) for this same air
+    and credits it to this document; it is 27.19 J/(mol K), below the
     rigid-rotor diatomic floor of (7/2)R, so no diatomic gas has it. This pins
     that the library computes the annex's own value and not that one.
     """
@@ -146,7 +146,7 @@ def test_supplying_both_conditions_is_silent() -> None:
 
 
 def test_the_carbon_dioxide_default_does_not_warn() -> None:
-    """Clause F.2 names 0,000 4 for laboratory conditions; that is not a guess."""
+    """Clause F.2 names 0.000 4 for laboratory conditions; that is not a guess."""
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         air(
@@ -201,7 +201,7 @@ def test_only_the_impossible_is_refused() -> None:
 
     200 degC used to be in this list at 50 % relative humidity, which is not a
     state either: saturation there is 1 592 kPa, so at one atmosphere the most
-    the air can hold is 6,4 %, and 50 % asks for more water vapour than total
+    the air can hold is 6.4 %, and 50 % asks for more water vapour than total
     pressure. It stays, at a humidity it can actually have.
     """
     for temperature_c, relative_humidity_percent in (
@@ -241,7 +241,7 @@ def test_conditions_that_cannot_hold_together_are_refused() -> None:
     """Each argument can be a state and the combination still not be one.
 
     At 20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole
-    fraction of 1,17, and a mole fraction cannot reach 1: there is more water
+    fraction of 1.17, and a mole fraction cannot reach 1: there is more water
     vapour than total pressure. Every argument passes its own guard, so nothing
     but a guard on the fraction catches it, and without one the CIPM equations
     carry on and return a density and a speed of sound that look like
@@ -260,8 +260,8 @@ def test_conditions_that_cannot_hold_together_are_refused() -> None:
     [
         (27.0, 60_000.0, 90.0),  # the corner of the printed domain
         (20.0, 101_325.0, 100.0),  # saturated at one atmosphere
-        (60.0, 101_325.0, 100.0),  # saturated and hot: x = 0,198
-        (50.0, 60_000.0, 100.0),  # saturated and thin: x = 0,207
+        (60.0, 101_325.0, 100.0),  # saturated and hot: x = 0.198
+        (50.0, 60_000.0, 100.0),  # saturated and thin: x = 0.207
     ],
 )
 def test_air_that_can_exist_is_not_refused_by_that_guard(

@@ -160,7 +160,7 @@ def test_annex_b_variants() -> None:
 
 
 def test_annex_b_literal_factor() -> None:
-    """Formulas (B.1)/(B.2) print S = 0,11 * moment; the implementation must
+    """Formulas (B.1)/(B.2) print S = 0.11 * moment; the implementation must
     use the literal 0.11, not a self-derived per-variant constant (which
     would shift every Aures result ~4 % against other implementations).
     """

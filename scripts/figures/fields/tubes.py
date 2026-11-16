@@ -200,7 +200,7 @@ def _impedance_tube_fields(
 ) -> tuple[Any, Any, Any, Any]:
     """CW build-up in the virtual impedance tube, empty vs sample, cached.
 
-    Two 1,2 m x 0,1 m tubes: a rho c edge on the left carries a sustained
+    Two 1.2 m x 0.1 m tubes: a rho c edge on the left carries a sustained
     one-way 850 Hz plane wave in; the right end is rigid. The lower tube
     ends in a 10 cm equivalent-fluid sample. Returns the frame stacks, the
     running envelope stacks max|p(x)| over the trailing period, the frame
@@ -449,7 +449,7 @@ def _transmission_tube_fields(
 ) -> tuple[Any, Any, Any, Any]:
     """A carrier packet crossing the virtual transmission tube, cached.
 
-    Two 1,6 m x 0,1 m tubes with anechoic rho c ends: the lower one holds
+    Two 1.6 m x 0.1 m tubes with anechoic rho c ends: the lower one holds
     a 10 cm equivalent-fluid layer mid-tube, so the packet splits into a
     reflected and an attenuated transmitted part. Returns the two frame
     stacks, the frame times and the analytic transmission loss at the

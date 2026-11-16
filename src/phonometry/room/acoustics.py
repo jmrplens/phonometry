@@ -684,10 +684,10 @@ def room_parameters(
 #: filter, B = 0,71 f_c, and for one-third-octave filter, B = 0,23 f_c".
 #:
 #: These are the printed working values, not filter design values. The exact
-#: IEC 61260 band-edge widths are 2^(1/2) - 2^(-1/2) = 0,7071 and
-#: 2^(1/6) - 2^(-1/6) = 0,2316, so the printed pair is each of those rounded
-#: to two figures, 0,4 % and 0,7 % away. Since sigma follows the square root
-#: of B, that is at most 0,4 % on the answer.
+#: IEC 61260 band-edge widths are 2^(1/2) - 2^(-1/2) = 0.7071 and
+#: 2^(1/6) - 2^(-1/6) = 0.2316, so the printed pair is each of those rounded
+#: to two figures, 0.4 % and 0.7 % away. Since sigma follows the square root
+#: of B, that is at most 0.4 % on the answer.
 FILTER_BANDWIDTH_FRACTION = MappingProxyType({1: 0.71, 3: 0.23})
 
 #: The coefficients ISO 3382-1:2009, Equations (4) and (5) print, keyed by the
@@ -696,7 +696,7 @@ FILTER_BANDWIDTH_FRACTION = MappingProxyType({1: 0.71, 3: 0.23})
 #: They are the D = 20 dB and D = 30 dB rows of the general form ISO
 #: 3382-2:2008 prints as Equation (A.4), at its Table A.1 column for
 #: gamma = T/T_det = 5, which ISO 3382-1 does not print: G = 88 % with
-#: H = 1,90, and G = 55 % with H = 1,52.
+#: H = 1.90, and G = 55 % with H = 1.52.
 DECAY_UNCERTAINTY_COEFFICIENTS = MappingProxyType(
     {20.0: (0.88, 1.90), 30.0: (0.55, 1.52)}
 )
@@ -739,8 +739,8 @@ def filter_bandwidth(
 ) -> float | NDArray[np.float64]:
     """Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
-    The ``B`` of Equations (4) to (6), as the clause prints it: 0,71 times
-    the mid-band frequency for an octave filter and 0,23 times it for a
+    The ``B`` of Equations (4) to (6), as the clause prints it: 0.71 times
+    the mid-band frequency for an octave filter and 0.23 times it for a
     one-third-octave one. See :data:`FILTER_BANDWIDTH_FRACTION` for how
     those two figures sit against the exact IEC 61260 band edges.
 
@@ -786,9 +786,9 @@ def reverberation_time_standard_deviation(
 
     .. math::
 
-       \sigma(T_{20}) = 0{,}88\, T_{20} \sqrt{\frac{1 + 1{,}90/n}{N B T_{20}}},
+       \sigma(T_{20}) = 0.88\, T_{20} \sqrt{\frac{1 + 1.90/n}{N B T_{20}}},
        \qquad
-       \sigma(T_{30}) = 0{,}55\, T_{30} \sqrt{\frac{1 + 1{,}52/n}{N B T_{30}}}
+       \sigma(T_{30}) = 0.55\, T_{30} \sqrt{\frac{1 + 1.52/n}{N B T_{30}}}
 
     The uncertainty is a property of the *excitation*, not of the room: the
     interrupted-noise method restarts a random process for every decay, and

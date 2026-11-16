@@ -747,7 +747,7 @@ def test_fan_pressure_cannot_be_given_positionally() -> None:
 
 
 def test_a_fraction_where_a_percentage_belongs_is_ten_decibels() -> None:
-    """0,8 for 80 % falls to Table 13.6's bottom row and used to say nothing.
+    """0.8 for 80 % falls to Table 13.6's bottom row and used to say nothing.
 
     The table is tabulated from 50 % up, so any fraction lands in the
     catch-all row and returns its worst-case 16 dB correction where 80 %

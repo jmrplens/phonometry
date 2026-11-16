@@ -153,7 +153,7 @@ def _table2_s(nominal: int, fraction: int) -> float:
     """Grade-2 reproducibility standard deviation s (ISO 9614-2 Table 2), in dB.
 
     Octave 63-125 Hz / third 50-160 Hz -> 3; octave 250 Hz / third 200-315 Hz
-    -> 2; octave 500-4000 Hz / third 400-5000 Hz -> 1,5; third 6300 Hz -> 2,5.
+    -> 2; octave 500-4000 Hz / third 400-5000 Hz -> 1.5; third 6300 Hz -> 2.5.
     """
     if fraction == 1:
         table: dict[int, float] = {
@@ -1083,8 +1083,8 @@ class PrecisionCriteria(OwnsArrays):
     def criterion_5(self) -> NDArray[np.bool_] | None:
         r"""Scan-density convergence :math:`0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2` (Eq. C.5).
 
-        Judged settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
-        in binary, and the criterion includes 1,2.
+        Judged settled: 2.46 / 2.05 is 1.2 in decimal and a last bit over it
+        in binary, and the criterion includes 1.2.
         """
         fs1, fs2 = self.field_nonuniformity_1, self.field_nonuniformity_2
         if fs1 is None or fs2 is None:

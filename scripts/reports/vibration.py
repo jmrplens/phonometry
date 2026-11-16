@@ -153,14 +153,14 @@ def _impact_mobility_example() -> tuple[object, ReportMetadata, str]:
     """ISO 7626 fiche for an impact measurement (ISO 7626-5:2019).
 
     The resonator of the impact-mobility guide: 2 kg tuned to 50 Hz with
-    0,5 % damping, struck five times by a 0,5 ms Gaussian force pulse of
+    0.5 % damping, struck five times by a 0.5 ms Gaussian force pulse of
     different strength, with a little broad-band noise on the accelerometer.
     The records hold 4096 samples at 4096 Hz, the force window keeps the
     first 15 ms (8.5.1), the exponential window ends the record at 1 % of its
     start (8.5.2) and the estimate is averaged over the five impacts (8.6)
     across a frequency range of interest of 5 Hz to 800 Hz (3.2). The
-    windowed peak at 50 Hz is 0,040 m/(N.s), a quarter of the resonator's
-    1/c = 0,159 m/(N.s): the damping the window adds, which the fiche states
+    windowed peak at 50 Hz is 0.040 m/(N.s), a quarter of the resonator's
+    1/c = 0.159 m/(N.s): the damping the window adds, which the fiche states
     and Annex A takes away.
     """
     from scipy import signal

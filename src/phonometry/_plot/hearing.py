@@ -864,7 +864,7 @@ def plot_reat_sound_field(
     """The three sound-field conditions of ISO 4869-1 4.2.2, each on its limit.
 
     Draws, per test signal, the largest deviation of the six positions from
-    the reference point against ±2,5 dB, the absolute difference between the
+    the reference point against ±2.5 dB, the absolute difference between the
     right and left positions against 3 dB and, from 500 Hz up, the variation
     a rotated directional microphone saw against the limit Table 1 gives it.
     A check without the rotation is titled as meeting a) only, since b) was

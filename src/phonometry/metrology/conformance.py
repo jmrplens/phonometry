@@ -29,8 +29,8 @@ deviation equal to a limit of an acceptance interval demonstrates conformance
 to a specification, providing also that the uncertainty of the measurement
 from the laboratory performing a test does not exceed the specified
 maximum-permitted uncertainty". The uncertainty criterion is inclusive too:
-example 7 of IEC 60942 Table E.1 has an actual uncertainty of 0,15 dB against
-a maximum of 0,15 dB and conforms.
+example 7 of IEC 60942 Table E.1 has an actual uncertainty of 0.15 dB against
+a maximum of 0.15 dB and conforms.
 
 With two criteria there are four outcomes, and the standards number them the
 same way (IEC 60942 E.2.2, IEC 61672-1 C.2.2):
@@ -49,7 +49,7 @@ tables are reproduced to the letter as well as to the verdict.
 
 The limits may be symmetric, as IEC 60942 writes them (an acceptance limit on
 the *absolute* deviation), or asymmetric, as IEC 61672-1 writes most of its own
-(+1,0 dB; -1,2 dB in Table C.1). A symmetric limit is given as one number and
+(+1.0 dB; -1.2 dB in Table C.1). A symmetric limit is given as one number and
 an asymmetric pair as ``(lower, upper)``. One end of the pair may be open: the
 stop band of IEC 61260-1:2014 Table 1 prints a minimum relative attenuation
 and a maximum of :math:`+\infty` ("+70; +∞"), and that is an acceptance
@@ -57,8 +57,8 @@ interval with no upper limit, given as ``(70.0, math.inf)``. An interval open
 at both ends bounds nothing and is refused.
 
 A deviation that reaches a limit through floating-point arithmetic, such as a
-measured 0,2 dB plus a correction of 0,1 dB against a limit of 0,3 dB, sums
-to 0,300 000 000 000 000 04 and would be turned away by its last bit. Both
+measured 0.2 dB plus a correction of 0.1 dB against a limit of 0.3 dB, sums
+to 0.300 000 000 000 000 04 and would be turned away by its last bit. Both
 comparisons therefore accept a value within one part in :math:`10^9` of its
 bound, which is nine orders of magnitude below any resolution these standards
 report a deviation at.
@@ -266,8 +266,8 @@ class ConformanceVerification(RichDisplay):
     def share_of_acceptance_limit(self) -> float:
         """How much of its acceptance limit the deviation uses, as a fraction.
 
-        Read on the side the deviation lies: a deviation of -0,6 dB against
-        limits of +1,0 dB and -1,2 dB uses 0,5 of the lower one. Above 1 the
+        Read on the side the deviation lies: a deviation of -0.6 dB against
+        limits of +1.0 dB and -1.2 dB uses 0.5 of the lower one. Above 1 the
         deviation is outside the limits. A deviation on the far side of a
         limit of zero (a negative distortion against ``(0, 3)``) has no finite
         share and reads as infinity. An open side is never used up: on it the
@@ -396,7 +396,7 @@ def verify_conformance(
     :param uncertainty: The actual expanded uncertainty of the measurement for
         a coverage probability of 95 %, in the same unit.
     :param acceptance_limits: One non-negative number for symmetric limits
-        (``0.25`` is +/-0,25), or a ``(lower, upper)`` pair such as
+        (``0.25`` is +/-0.25), or a ``(lower, upper)`` pair such as
         ``(-1.2, 1.0)``. Both limits belong to the acceptance interval. One
         end of a pair may be open, ``(70.0, math.inf)`` for a minimum with no
         maximum, as IEC 61260-1:2014 Table 1 writes its stop band.

@@ -72,18 +72,18 @@ IEC62585_TABLE_I2_COMBINED_DB = 0.0590
 IEC62585_TABLE_I2_EFFECTIVE_DOF = 29.98
 
 #: Table I.2: "(normal) k = 2,11", an erratum (docs/ERRATA.md): the Student
-#: factor for 95 % at 29,98 degrees of freedom is 2,04, and 2,11 is the one
+#: factor for 95 % at 29.98 degrees of freedom is 2.04, and 2.11 is the one
 #: for about 17.
 IEC62585_TABLE_I2_PRINTED_K = 2.11
 
 #: Table I.2: the expanded uncertainty, printed "0,12" with a subscript guard
-#: digit "(4)", 0,124 dB, which is 2,11 times 0,0590.
+#: digit "(4)", 0.124 dB, which is 2.11 times 0.0590.
 IEC62585_TABLE_I2_PRINTED_EXPANDED_DB = 0.124
 
 #: Table I.2: the expanded uncertainty the page's own numbers give, to the
 #: guard digit the table prints it with: the Student factor for 95 % at the
-#: 29,98 effective degrees of freedom, 2,042, times the combined standard
-#: uncertainty, 0,05903 dB, is 0,1206 dB, that is 0,12(1).
+#: 29.98 effective degrees of freedom, 2.042, times the combined standard
+#: uncertainty, 0.05903 dB, is 0.1206 dB, that is 0.12(1).
 IEC62585_TABLE_I2_EXPANDED_DB = 0.121
 
 #: Table I.3, printed folio 39 (PDF page 41): the values at 8 kHz, which differ
@@ -131,20 +131,20 @@ IEC62585_TABLE_H1_KHZ: tuple[float, ...] = (
 #: permitted expanded uncertainty, as ``(clause, nominal frequency in Hz,
 #: value in dB)`` at a frequency either side of each boundary and on it.
 IEC62585_MAXIMA: tuple[tuple[int, float, float], ...] = (
-    # Clause 9: 0,25 dB up to and including 4 kHz, 0,35 dB above.
+    # Clause 9: 0.25 dB up to and including 4 kHz, 0.35 dB above.
     (9, 4000.0, 0.25),
     (9, 5000.0, 0.35),
-    # Clause 10: 0,25 dB from 63 Hz to 4 kHz, 0,35 dB to 8 kHz, 0,45 dB above.
+    # Clause 10: 0.25 dB from 63 Hz to 4 kHz, 0.35 dB to 8 kHz, 0.45 dB above.
     (10, 63.0, 0.25),
     (10, 4000.0, 0.25),
     (10, 5000.0, 0.35),
     (10, 8000.0, 0.35),
     (10, 10000.0, 0.45),
-    # Clause 11: 0,20 dB up to and including 4 kHz, 0,30 dB above.
+    # Clause 11: 0.20 dB up to and including 4 kHz, 0.30 dB above.
     (11, 4000.0, 0.20),
     (11, 5000.0, 0.30),
-    # Clauses 12 to 14: 0,25 dB to 4 kHz, 0,35 dB above 4 kHz up to 10 kHz,
-    # 0,50 dB at and above 10 kHz.
+    # Clauses 12 to 14: 0.25 dB to 4 kHz, 0.35 dB above 4 kHz up to 10 kHz,
+    # 0.50 dB at and above 10 kHz.
     (12, 4000.0, 0.25),
     (12, 8000.0, 0.35),
     (12, 10000.0, 0.50),
@@ -160,8 +160,8 @@ IEC62585_MAXIMA: tuple[tuple[int, float, float], ...] = (
 #: uncertainty (k=2) of 0,15 dB at frequencies less than and equal to 3 kHz
 #: and 0,25 dB for frequencies above 3 kHz", as ``(frequency in Hz, value in
 #: dB)``: well inside each band, at the nominal 3 kHz, and at the exact
-#: one-twelfth-octave frequencies either side of it (Table H.1, 2,985 383 and
-#: 3,162 278 kHz).
+#: one-twelfth-octave frequencies either side of it (Table H.1, 2.985 383 and
+#: 3.162 278 kHz).
 IEC62585_STATIC_PRESSURE_LIMIT_KPA = 97.0
 IEC62585_STATIC_PRESSURE_EXPANDED_DB = (
     (1000.0, 0.15),

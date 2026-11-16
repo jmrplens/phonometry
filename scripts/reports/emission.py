@@ -110,7 +110,7 @@ def _sound_power_example() -> tuple[object, ReportMetadata, str]:
     energy-averaged surface pressure levels (Eq. 12) per octave band (63 Hz to
     8 kHz) are 72, 76, 80, 82, 81, 78, 73 and 66 dB, each with the background
     noise a uniform 10 dB below, so the background correction is a uniform
-    K1 = -10*lg(1 - 10^(-1,0)) = 0.46 dB (Eq. 16), and an equivalent absorption
+    K1 = -10*lg(1 - 10^(-1.0)) = 0.46 dB (Eq. 16), and an equivalent absorption
     area A = 1500 m^2 gives K2 = 10*lg(1 + 4*S/A) = 1.03 dB (Eq. A.2), inside
     the 4 dB engineering validity limit. The surface level (Eq. 17) is then
     LW = Lp + 10*lg(S/S0) with 10*lg(S/S0) = 20.02 dB (Eq. 18), giving the band
@@ -212,42 +212,42 @@ def _precision_intensity_example() -> tuple[
     """Precision sound-power-by-intensity fiche: an ISO 9614-3 scan.
 
     The same machine as the ISO 9614-2 example, measured the way part 3 asks:
-    a box measurement surface 0,25 m off a 1,0 x 0,6 x 0,8 m floor-standing
-    unit, so the five partial surfaces are the 1,5 x 1,1 m top (1,65 m2), the
-    two 1,5 x 1,05 m long sides (1,575 m2 each) and the two 1,1 x 1,05 m ends
-    (1,155 m2 each), a measurement surface S = 7,11 m2. Each partial surface is
+    a box measurement surface 0.25 m off a 1.0 x 0.6 x 0.8 m floor-standing
+    unit, so the five partial surfaces are the 1.5 x 1.1 m top (1.65 m2), the
+    two 1.5 x 1.05 m long sides (1.575 m2 each) and the two 1.1 x 1.05 m ends
+    (1.155 m2 each), a measurement surface S = 7.11 m2. Each partial surface is
     scanned in four segments, so the Annex B indicators are formed over N = 20
     segments of the whole surface.
 
     The band sound power levels are built from a closed form rather than from
     a worked example (part 3 gives none): the surface-averaged normal intensity
     of each band is the one that yields
-    LW = 80 + 9*exp(-(lb(f/800))^2/3) dB, a machine peaking at 89,0 dB in the
+    LW = 80 + 9*exp(-(lb(f/800))^2/3) dB, a machine peaking at 89.0 dB in the
     800 Hz band over the one-third-octave bands 100 Hz to 3150 Hz. The five
-    partial surfaces share that spectrum scaled by [1,35 1,10 0,75 0,95 0,85]
+    partial surfaces share that spectrum scaled by [1.35 1.10 0.75 0.95 0.85]
     (renormalized to an area-weighted mean of 1, so the surface integral is
-    unchanged) and the four segments of each by [1,15 0,95 0,90 1,00]; the
-    field is therefore non-uniform, as FS = 0,24 records. The far long side
+    unchanged) and the four segments of each by [1.15 0.95 0.90 1.00]; the
+    field is therefore non-uniform, as FS = 0.24 records. The far long side
     sees a net inflow in the 100 Hz band (a neighbouring line radiating into
-    the surface), which is what separates the signed indicator FpIn = 12,5 dB
-    there from the unsigned Fp|In| = 11,0 dB and lifts FS to 1,1.
+    the surface), which is what separates the signed indicator FpIn = 12.5 dB
+    there from the unsigned Fp|In| = 11.0 dB and lifts FS to 1.1.
 
-    The segment pressure levels sit a band-dependent 11,0 dB (100 Hz) down to
-    1,5 dB (2 kHz and above) above the segment intensity levels, so the
+    The segment pressure levels sit a band-dependent 11.0 dB (100 Hz) down to
+    1.5 dB (2 kHz and above) above the segment intensity levels, so the
     pressure-intensity indicators take those values directly. With the probe's
     pressure-residual intensity index delta_pI0 = 18 dB the dynamic capability
     is Ld = 18 - 10 = 8 dB, which clears FpIn in every band but the 100 Hz one:
     that band fails criterion 2, is not qualified, and is the band the fiche
     names as omitted from the A-weighted determination (clause 10 f) 2)). The
-    two scans differ by 0,2 dB, inside the s/2 of Table 1 everywhere (criterion
-    1); the temporal variability over ten averaging windows is FT = 0,04, well
-    under the 0,6 of C.1.2; and halving the scan-line density (segments merged
-    in pairs) leaves the ratio FS(1)/FS(2) within the 0,83 to 1,2 band of
+    two scans differ by 0.2 dB, inside the s/2 of Table 1 everywhere (criterion
+    1); the temporal variability over ten averaging windows is FT = 0.04, well
+    under the 0.6 of C.1.2; and halving the scan-line density (segments merged
+    in pairs) leaves the ratio FS(1)/FS(2) within the 0.83 to 1.2 band of
     criterion 5, which constrains that ratio and not FS itself.
 
-    At 28 degC and 94,0 kPa the meteorological normalization of Eq. 10 is
-    -0,60 dB, so every normalized level LW0 sits 0,6 dB above its LW. The
-    determination gives LWA = 96,7 dB(A) re 1 pW against a declared limit of
+    At 28 degC and 94.0 kPa the meteorological normalization of Eq. 10 is
+    -0.60 dB, so every normalized level LW0 sits 0.6 dB above its LW. The
+    determination gives LWA = 96.7 dB(A) re 1 pW against a declared limit of
     98 dB(A), so the verdict passes.
     """
     freqs = np.array(
@@ -348,8 +348,8 @@ def _precision_intensity_example() -> tuple[
         operator="phonometry",
         report_id="EXAMPLE-9614-3",
         requirement=98.0,
-        notes="Box surface at 0,25 m; five partial surfaces, four segments "
-        "each, scanned twice at 0,15 m/s.",
+        notes="Box surface at 0.25 m; five partial surfaces, four segments "
+        "each, scanned twice at 0.15 m/s.",
     )
     return (
         result,
@@ -463,12 +463,12 @@ def _precision_sound_power_example() -> tuple[object, ReportMetadata, str]:
 
     The guide's own worked example: a mid-frequency-peaked machine measured
     over the forty standardized hemisphere positions of Annex E at a radius of
-    1 m (surface S = 2*pi*r^2 = 6,283 m2), with a base spectrum peaked near
+    1 m (surface S = 2*pi*r^2 = 6.283 m2), with a base spectrum peaked near
     1 kHz and a 1 dB per-position spread from a seeded generator, so the fiche
     and the guide print the same numbers. The determination gives an
-    A-weighted sound power level LWA = 89,3 dB(A) re 1 pW. The expanded
+    A-weighted sound power level LWA = 89.3 dB(A) re 1 pW. The expanded
     uncertainty is the Clause 10.5 example: the method's own sigma_omc =
-    2,0 dB at k = 2, over the ISO 3745 Table 1 reproducibility standard
+    2.0 dB at k = 2, over the ISO 3745 Table 1 reproducibility standard
     deviation of the band.
     """
     freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
@@ -493,7 +493,7 @@ def _precision_sound_power_example() -> tuple[object, ReportMetadata, str]:
         report_id="EXAMPLE-3745",
         notes=(
             "Precision grade: Annex E hemisphere array at r = 1 m, "
-            "meteorological corrections at the 23 C / 101,325 kPa reference, "
+            "meteorological corrections at the 23 C / 101.325 kPa reference, "
             "expanded uncertainty from the Clause 10.5 example."
         ),
     )
@@ -507,13 +507,13 @@ def _hard_walled_sound_power_example() -> tuple[object, ReportMetadata, str]:
     reference sound source read at five microphone positions, one on each side
     of the reference box and one above it (7.3), in a 60 m3 hard-walled room,
     with a ceiling duct loud at the low end. At 125 Hz the duct is within 6 dB
-    of the blender, so K1 takes its fixed 1,3 dB and the band is an upper bound
+    of the blender, so K1 takes its fixed 1.3 dB and the band is an upper bound
     (8.1.3), which the sheet marks; the louder reference source keeps 9 dB
-    there. Eq. (14) gives LWA = 100,1 dB(A) re 1 pW, and sigma_omc = 1,0 dB
+    there. Eq. (14) gives LWA = 100.1 dB(A) re 1 pW, and sigma_omc = 1.0 dB
     with the Table 3 A-weighted reproducibility gives an expanded uncertainty
-    of 3,6 dB at k = 2. The declared limit of 102 dB(A) is met. The climate of
+    of 3.6 dB at k = 2. The declared limit of 102 dB(A) is met. The climate of
     the test reaches both the determination and the header, so the C2 the
-    sheet prints is the one for 22 degC and 101,2 kPa.
+    sheet prints is the one for 22 degC and 101.2 kPa.
     """
     freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
     source = np.array(
@@ -581,10 +581,10 @@ def _special_room_sound_power_example() -> tuple[object, ReportMetadata, str]:
     The guide's own worked example: a desktop printer whose cooling fan hums in
     the 500 Hz octave, measured at six positions and two source locations in a
     72 m3 special reverberation room with a centred nominal reverberation time
-    of 0,77 s. Formula (9) gives the octave bands and, applied to the measured
-    A-weighted levels as clause 4 reads it, LWA = 75,8 dB(A) re 1 pW; the Annex F
-    band total agrees. sigma_omc = 0,5 dB with the Table 5 A-weighted
-    reproducibility gives an expanded uncertainty of 4,1 dB at k = 2. The
+    of 0.77 s. Formula (9) gives the octave bands and, applied to the measured
+    A-weighted levels as clause 4 reads it, LWA = 75.8 dB(A) re 1 pW; the Annex F
+    band total agrees. sigma_omc = 0.5 dB with the Table 5 A-weighted
+    reproducibility gives an expanded uncertainty of 4.1 dB at k = 2. The
     declared limit of 77 dB(A) is met.
     """
     freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)

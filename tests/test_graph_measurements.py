@@ -137,7 +137,7 @@ def test_graph_au_trace_is_a_plus_the_u_lowpass() -> None:
     Oracle: IEC 61012:1990 Table 1, the nominal relative response of the U
     weighting as a separate unit with its per-row tolerance. AU is A
     cascaded with U (subclause 2.2), so the difference between the figure's
-    own AU and A traces is the U response. The extra 0,2 dB of slack covers
+    own AU and A traces is the U response. The extra 0.2 dB of slack covers
     the 1 kHz row, whose published tolerance is exactly zero.
     """
     rows = [

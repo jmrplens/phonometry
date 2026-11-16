@@ -288,6 +288,11 @@ def test_table_3_is_read_as_printed_at_the_test_frequencies(meter_class: int) ->
         assert published[_number(printed[0])] == _limits(printed[meter_class])
 
 
+def _english(cell: str) -> str:
+    """A printed cell as the library names it: the decimal comma becomes the point."""
+    return re.sub(r"(?<=\d),(?=\d)", ".", cell)
+
+
 def test_table_b1_matches_the_page() -> None:
     """Every printed row, the decay-rate cell split in its F and S halves."""
     rows = iter(metrology.IEC61672_TABLE_B1)
@@ -303,7 +308,7 @@ def test_table_b1_matches_the_page() -> None:
                 assert (row.max_uncertainty, row.unit) == (_number(value), "dB/s")
             continue
         row = next(rows)
-        assert (row.requirement, row.reference) == (requirement, reference)
+        assert (row.requirement, row.reference) == (requirement, _english(reference))
         assert (row.max_uncertainty, row.unit) == (_number(printed), "dB")
     assert next(rows, None) is None
 
@@ -434,7 +439,7 @@ def _full_class_2(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
 
 
 #: How far inside and past a printed limit or maximum the verdict is read, dB:
-#: a hundredth of the 0,1 dB a meter displays.
+#: a hundredth of the 0.1 dB a meter displays.
 _STEP_DB = 0.01
 
 #: IEC 61672-3:2013 12.7 and 13.4: the nominal test frequencies, as the
@@ -642,7 +647,7 @@ _LIMITS = _limit_cases()
 
 @pytest.mark.parametrize("case", _LIMITS, ids=[c.case for c in _LIMITS])
 def test_the_verdict_flips_at_every_printed_limit(case: _Limit) -> None:
-    """Just inside and on the limit conform; 0,01 dB past it does not."""
+    """Just inside and on the limit conform; 0.01 dB past it does not."""
     inside = _verify(case.record(-_STEP_DB), case.meter_class)
     at_limit = _verify(case.record(0.0), case.meter_class)
     past = _verify(case.record(_STEP_DB), case.meter_class)
@@ -811,7 +816,7 @@ def test_an_uncertainty_past_its_maximum_makes_the_result_unusable(
 
 
 def test_time_weighting_maximum_is_wider_than_its_limit() -> None:
-    """5.8.3 allows 0,1 dB and Table B.1 0,20 dB; both are read as printed."""
+    """5.8.3 allows 0.1 dB and Table B.1 0.20 dB; both are read as printed."""
     result = _verify(_record()).requirement("time_weighting_at_1khz")
     first = result.verifications[0]
     assert (first.lower_limit, first.upper_limit) == (-0.1, 0.1)
@@ -822,10 +827,10 @@ def test_toneburst_and_peak_deviations_are_taken_from_the_tables() -> None:
     result = _verify(_record())
     burst = result.requirement("toneburst")
     assert burst.labels[:3] == ("F, 200 ms", "F, 2 ms", "F, 0.25 ms")
-    # -27,4 dB measured against the -27,0 dB of Table 4 at 0,25 ms.
+    # -27.4 dB measured against the -27.0 dB of Table 4 at 0.25 ms.
     assert burst.verifications[2].deviation == pytest.approx(-0.4)
     peak = result.requirement("c_peak")
-    # 3,6 dB measured against the 3,4 dB of Table 5, one cycle at 8 kHz.
+    # 3.6 dB measured against the 3.4 dB of Table 5, one cycle at 8 kHz.
     assert peak.verifications[0].deviation == pytest.approx(0.2)
     assert peak.labels[0] == "one cycle, 8 kHz"
 
@@ -1166,7 +1171,7 @@ def test_clause_20_is_owed_by_the_time_averaged_display_only(
 
 
 def _linearity(levels: list[float], **over: Any) -> dict[str, Any]:
-    """The fields of Clause 16 for these steps, every result 0,1 dB."""
+    """The fields of Clause 16 for these steps, every result 0.1 dB."""
     return {
         "linearity_deviations_db": [0.1] * len(levels),
         "linearity_uncertainties_db": [0.2] * len(levels),
@@ -1402,7 +1407,7 @@ def test_the_record_refuses_a_contradicted_procedure_of_16(
 
 
 def _17(rows: dict[str, list[float]]) -> dict[str, Any]:
-    """The fields of Clause 17 for these readings, each with 0,2 dB."""
+    """The fields of Clause 17 for these readings, each with 0.2 dB."""
     return {
         "range_linearity_deviations_db": rows,
         "range_linearity_uncertainties_db": {
@@ -2095,7 +2100,7 @@ def test_a_failure_outweighs_an_unusable_result_in_the_statement() -> None:
 # ---------------------------------------------------------------------------
 
 #: 4.4 as the record gives it: the 8 kHz result of Clause 12 with a total
-#: uncertainty of 0,85 dB, past the 0,70 dB of Table B.1 only by the
+#: uncertainty of 0.85 dB, past the 0.70 dB of Table B.1 only by the
 #: manufacturer's correction data.
 _OVER_BY_CORRECTIONS: dict[str, Any] = {
     "acoustic_weighting_deviations_db": [0.0, -0.9],
@@ -2165,7 +2170,7 @@ def test_a_deviation_past_its_limit_under_4_4_gives_both_reasons() -> None:
 
 
 def test_4_4_reads_clause_13_by_its_band() -> None:
-    """16 kHz: 1,00 dB of Table B.1; a total of 1,2 dB, 0,9 dB without the data."""
+    """16 kHz: 1.00 dB of Table B.1; a total of 1.2 dB, 0.9 dB without the data."""
     total = {k: [0.15] * 8 + [1.2] for k in "ACZ"}
     split = {k: [0.15] * 8 + [0.9] for k in "ACZ"}
     record = _record(

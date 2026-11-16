@@ -402,7 +402,7 @@ _SINGLE: dict[
     # NOTE: σsitu(B)=1.0 here is anomalous: it is *lower* than the 50-3150 row
     # above (B=1.3) and equal to its own σr(C)=1.0, breaking the otherwise
     # monotonic pattern. Verified digit-by-digit against the ISO 12999-1:2020(E)
-    # Table 3 (standard page 8): the standard normatively prints 1,5 / 1,0 / 1,0.
+    # Table 3 (standard page 8): the standard normatively prints 1.5 / 1.0 / 1.0.
     "r_w+ctr_50_5000": ((1.5, 1.0, 1.0), 2.4),
     # Impact: Table 5 (situation A values are estimates, footnote a).
     "ln_w": ((1.5, 1.0, 0.5), None),

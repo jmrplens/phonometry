@@ -7,10 +7,10 @@ identities, plus reuse of the already-verified ISO 717-1 engine. The field
 quantities are defined by unnumbered formulas inline in the Clause 3 terms.
 
 - ``D2m = L1,2m - L2`` (Clause 3.14); ``Dls,2m,nT = D2m + 10 lg(T/T0)``
-  reduces to ``D2m`` at ``T = T0 = 0,5 s`` (Clause 3.15); ``Dls,2m,n =
-  D2m - 10 lg(A/A0)`` with ``A = 0,16 V/T``, ``A0 = 10 m²`` reduces to
+  reduces to ``D2m`` at ``T = T0 = 0.5 s`` (Clause 3.15); ``Dls,2m,n =
+  D2m - 10 lg(A/A0)`` with ``A = 0.16 V/T``, ``A0 = 10 m²`` reduces to
   ``D2m`` when ``A = A0`` (Clause 3.16, 3.17).
-- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` (Clause 3.12, loudspeaker) and
+- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1.5`` (Clause 3.12, loudspeaker) and
   ``R'tr,s = ... - 3`` (Clause 3.13, road traffic); with ``S = A`` the
   ``10 lg`` term vanishes so only the incidence correction remains.
 - Positions are energy-averaged (Clause 9.5.1, Formula 7), reusing the
@@ -84,7 +84,7 @@ def test_d2m_is_level_difference() -> None:
 
 
 def test_dnt_reduces_to_d_at_reference_time() -> None:
-    """Dls,2m,nT = D2m when T = T0 = 0,5 s (Clause 3.15)."""
+    """Dls,2m,nT = D2m when T = T0 = 0.5 s (Clause 3.15)."""
     l1 = _flat(3, 75.0)
     l2 = _flat(3, 35.0)
     res = building.facade_insulation(l1, l2, _flat(3, 0.5))
@@ -102,8 +102,8 @@ def test_dnt_standardization_term() -> None:
 
 
 def test_d2m_n_reduces_to_d_when_absorption_equals_reference() -> None:
-    """Dls,2m,n = D2m when A = 0,16 V/T = A0 = 10 m² (Clause 3.16, 3.17)."""
-    # 0,16 * 62,5 / 1,0 = 10,0 = A0.
+    """Dls,2m,n = D2m when A = 0.16 V/T = A0 = 10 m² (Clause 3.16, 3.17)."""
+    # 0.16 * 62.5 / 1.0 = 10.0 = A0.
     res = building.facade_insulation(
         _flat(3, 72.0), _flat(3, 32.0), _flat(3, 1.0), volume=62.5
     )
@@ -121,9 +121,9 @@ def test_d2m_n_none_without_volume() -> None:
 # Element method: apparent sound reduction index (Clauses 3.12, 3.13)
 # --------------------------------------------------------------------------
 def test_r45_loudspeaker_correction() -> None:
-    """R'45° = L1,s - L2 + 10 lg(S/A) - 1,5; with S = A only -1,5 remains."""
+    """R'45° = L1,s - L2 + 10 lg(S/A) - 1.5; with S = A only -1.5 remains."""
     n = 3
-    # A = 0,16 * 62,5 / 1,0 = 10; pick S = 10 so 10 lg(S/A) = 0.
+    # A = 0.16 * 62.5 / 1.0 = 10; pick S = 10 so 10 lg(S/A) = 0.
     surf = _flat(n, 60.0)
     l2 = _flat(n, 20.0)
     res = building.facade_insulation(
@@ -396,7 +396,7 @@ def test_rating_path_reproduces_known_rw() -> None:
     """R'45° fed to weighted_rating reproduces ISO 717-1 Annex C Rw=30."""
     ref = np.asarray(_ANNEX_C_R)
     # Build L1,s so that R'45° == _ANNEX_C_R with S = A (term 0), L2 = 0:
-    # R' = L1,s - 0 - 1,5 => L1,s = R' + 1,5.
+    # R' = L1,s - 0 - 1.5 => L1,s = R' + 1.5.
     surf = ref + 1.5
     res = building.facade_insulation(
         _flat(16, 50.0),

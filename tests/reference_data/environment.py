@@ -39,13 +39,13 @@ _DATA = pathlib.Path(__file__).parent.parent / "data"
 
 # ---------------------------------------------------------------------------
 # ISO 9613-1:1993 Table 1 - pure-tone atmospheric-absorption attenuation
-# coefficient (dB/km) at one standard atmosphere (101,325 kPa). Rows are the
+# coefficient (dB/km) at one standard atmosphere (101.325 kPa). Rows are the
 # ISO 266 preferred one-third-octave frequencies but the values are computed at
 # the EXACT midband frequencies fm = 1000*10^(k/10) (Note 5). Each entry is
 # (temperature_degC, relative_humidity_percent, preferred_freq_Hz, alpha_dB_km).
 # Digit-exact transcription against the FULL standard text (37 pp): sub-tables
 # 1(a)-1(p) span -20 degC to +50 degC in 5 degC steps. The Eq. (3)-(5)
-# implementation reproduces every point to < 0,4 % (limited only by the
+# implementation reproduces every point to < 0.4 % (limited only by the
 # 3-significant-figure printed values), well inside the standard's own +/- 10 %
 # claimed accuracy (clause 7.1). The second block (20-50 degC) was added once
 # the full Table 1 became available, extending the earlier -20..+15 degC oracle.
@@ -83,17 +83,17 @@ ISO9613_1_TABLE1_CORNER = (0.0, 20.0, 2000.0, 34.6)  # dB/km
 # ---------------------------------------------------------------------------
 # ISO 9613-2:1996 outdoor sound propagation — closed-form oracles. The general
 # method (clause 7) sums independent physical terms, each with an exact limit:
-#   * Eq. (7) geometrical divergence Adiv = 20 lg(d/d0) + 11 = 51,0 dB at 100 m.
+#   * Eq. (7) geometrical divergence Adiv = 20 lg(d/d0) + 11 = 51.0 dB at 100 m.
 #   * Table 3 ground functions have exact on-ground (h = 0), fully-developed
-#     (dp -> inf) limits: b'(0) = 1,5 + 8,6 = 10,1 (250 Hz). With porous ground
+#     (dp -> inf) limits: b'(0) = 1.5 + 8.6 = 10.1 (250 Hz). With porous ground
 #     both sides (Gs = Gr = 1) and hs = hr = 0 the source and receiver regions
-#     each add (-1,5 + b'(0)), so Agr(250 Hz) = 2*(-1,5 + 10,1) = 17,2 dB.
+#     each add (-1.5 + b'(0)), so Agr(250 Hz) = 2*(-1.5 + 10.1) = 17.2 dB.
 #   * Clause 7.4 caps the diffraction term Dz at 20 dB (single edge) and 25 dB
 #     (double edge); a deep-shadow geometry saturates to those caps exactly.
 # ---------------------------------------------------------------------------
 ISO9613_2_ADIV_100M = 51.0  # Eq. (7): 20 lg(100/1) + 11
-ISO9613_2_GROUND_BPRIME_ZERO = 10.1  # Table 3 b'(h=0, dp->inf) = 1,5 + 8,6
-ISO9613_2_GROUND_AGR_250_POROUS = 17.2  # 2*(-1,5 + 10,1), hs=hr=0, Gs=Gr=1
+ISO9613_2_GROUND_BPRIME_ZERO = 10.1  # Table 3 b'(h=0, dp->inf) = 1.5 + 8.6
+ISO9613_2_GROUND_AGR_250_POROUS = 17.2  # 2*(-1.5 + 10.1), hs=hr=0, Gs=Gr=1
 ISO9613_2_BARRIER_CAP_SINGLE = 20.0  # clause 7.4 single-diffraction limit, dB
 ISO9613_2_BARRIER_CAP_DOUBLE = 25.0  # clause 7.4 double-diffraction limit, dB
 
@@ -102,8 +102,8 @@ ISO9613_2_BARRIER_CAP_DOUBLE = 25.0  # clause 7.4 double-diffraction limit, dB
 # from the printed table (page 5). The values come from ISO 9613-1 at the
 # EXACT base-10 midband frequencies; the recomputation agrees with every cell
 # to half a unit of the last printed digit, except 15 degC / 80 % / 1 kHz
-# where the print gives 4,1 while the exact-midband recomputation yields
-# 4,151 (rounds to 4,2) -- a print-side rounding artifact of ~0.05 dB/km.
+# where the print gives 4.1 while the exact-midband recomputation yields
+# 4.151 (rounds to 4.2) -- a print-side rounding artifact of ~0.05 dB/km.
 ISO9613_2_TABLE2_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
 ISO9613_2_TABLE2 = {
     # (temperature degC, relative humidity %): alpha per band, dB/km
@@ -616,7 +616,7 @@ CNOSSOS_RAIL_WAVELENGTHS: tuple[float, ...] = (
     0.8,
 )
 #: Wavelength grid of Table G-1a, which (EU) 2021/1226 left untouched, mm. It
-#: keeps the non-standard steps 120, 12, 3,2 and 1,2 mm.
+#: keeps the non-standard steps 120, 12, 3.2 and 1.2 mm.
 CNOSSOS_RAIL_WHEEL_WAVELENGTHS: tuple[float, ...] = (
     1000,
     800,
@@ -1414,7 +1414,7 @@ CNOSSOS_RAIL_G4: tuple[float, ...] = (
 
 #: Table G-5 traction sound power (2015/996 values). (EU) 2021/1226
 #: point (20)(f) replaced the 6 300 Hz pair of the 2 200 kW diesel
-#: locomotive, 31,4 / 30,7, by 81,4 / 80,7; the replacement is applied
+#: locomotive, 31.4 / 30.7, by 81.4 / 80.7; the replacement is applied
 #: below at the two marked positions.
 CNOSSOS_RAIL_G5: dict[
     TractionVehicleName, tuple[tuple[float, ...], tuple[float, ...]]

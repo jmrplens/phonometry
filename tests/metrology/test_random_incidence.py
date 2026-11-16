@@ -117,8 +117,8 @@ def _counted_once_index_db(result: ri.DirectivityFactor) -> float:
 
 def test_counting_the_poles_once_leaves_an_omnidirectional_bias_of_0_008_db() -> None:
     """The paragraph under (A.3) says the pole readings are taken into account
-    once. Read as *counted* once, the 72 factors sum to 0,998097 and an
-    omnidirectional instrument's 10 lg gamma comes out 0,0083 dB high; the
+    once. Read as *counted* once, the 72 factors sum to 0.998097 and an
+    omnidirectional instrument's 10 lg gamma comes out 0.0083 dB high; the
     library counts them in both sums and that instrument reads exactly 0 dB.
     """
     factors = metrology.adjustment_factors(10.0)
@@ -133,10 +133,10 @@ def test_counting_the_poles_once_leaves_an_omnidirectional_bias_of_0_008_db() ->
 def test_the_counted_once_bias_grows_with_the_directivity() -> None:
     """Dropping the second plane's poles removes K(0) [p(0) + p(180)] from the
     sum 1/gamma, so 10 lg gamma comes out high by
-    -10 lg(1 - gamma K(0) [p(0) + p(180)]): more than the 0,008 dB of an
+    -10 lg(1 - gamma K(0) [p(0) + p(180)]): more than the 0.008 dB of an
     omnidirectional instrument for a directional one. A cardioid squared twice
     over, with a floor 30 dB down, has 10 lg gamma near 7 dB and a bias near
-    0,02 dB.
+    0.02 dB.
     """
     phi = np.radians(np.arange(36) * 10.0)
     plane = 94.0 + 10.0 * np.log10(((1.0 + np.cos(phi)) / 2.0) ** 4 * 0.999 + 0.001)
@@ -200,7 +200,7 @@ def test_a_step_computed_as_a_fraction_of_the_half_circle_is_accepted() -> None:
 # A.1.6 and A.1.7: the size of the largest element
 # --------------------------------------------------------------------------
 def test_the_largest_of_the_70_elements_of_10_degree_steps_is_2_2_percent() -> None:
-    """A.1.7: 70 sub-areas, the largest approximately 2,2 %."""
+    """A.1.7: 70 sub-areas, the largest approximately 2.2 %."""
     largest = metrology.largest_element_fraction(10.0)
     assert round(100.0 * largest, 1) == pytest.approx(ref.IEC61183_A17_LARGEST_PERCENT)
     assert largest == pytest.approx(metrology.adjustment_factors(10.0)[9], rel=1e-15)
@@ -453,7 +453,7 @@ def test_the_relative_levels_are_the_readings_less_the_reference() -> None:
 # Formula (A.5) and the directions of the note to A.1.8
 # --------------------------------------------------------------------------
 def test_the_equal_area_directions_are_the_printed_ones() -> None:
-    """18 of the 20 printed horizontal angles, to the 0,1° they are printed
+    """18 of the 20 printed horizontal angles, to the 0.1° they are printed
     to, and 16 of the 18 the vertical plane repeats without the poles: 34 of
     the 38 directions. The other four are the two errata, printed in both
     planes.
@@ -483,7 +483,7 @@ def test_the_two_misprinted_angles_are_the_corrected_ones() -> None:
 
 
 def test_the_printed_list_breaks_its_own_symmetry_at_one_ring() -> None:
-    """Every pair about 90° sums to 180,0° except 77,9° + 102,2°."""
+    """Every pair about 90° sums to 180.0° except 77.9° + 102.2°."""
     printed = ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG[1:10]
     sums = [round(a + b, 1) for a, b in zip(printed, printed[::-1], strict=True)]
     assert sums.count(180.1) == 2

@@ -102,7 +102,7 @@ __all__ = [
 #: (ISO 10140-2:2010, Clause 3.3): 10 m² for the laboratory.
 _A0_LAB = 10.0
 
-#: Sabine constant in ``A = 0,16 V / T`` (ISO 10140-4:2010, Formula (5)).
+#: Sabine constant in ``A = 0.16 V / T`` (ISO 10140-4:2010, Formula (5)).
 _SABINE = 0.16
 
 #: Fixed correction (dB) applied when the signal-to-background margin is at
@@ -110,7 +110,7 @@ _SABINE = 0.16
 _BACKGROUND_CAP = 1.3
 
 #: Signal-to-background margins (dB) bounding Formula (4) of ISO 10140-4:2010
-#: Clause 4.3: at or below the lower margin the fixed 1,3 dB cap applies; at
+#: Clause 4.3: at or below the lower margin the fixed 1.3 dB cap applies; at
 #: or above the upper margin no correction is applied.
 _BACKGROUND_LOW = 6.0
 _BACKGROUND_HIGH = 15.0
@@ -543,7 +543,7 @@ def background_correction(
     diff = 10.0 ** (lsb / 10.0) - 10.0 ** (lb / 10.0)
     with np.errstate(invalid="ignore", divide="ignore"):
         formula = 10.0 * np.log10(np.where(diff > 0.0, diff, 1.0))
-    # The margin is judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996
+    # The margin is judged settled: 32.3 - 26.3 dB is 5.999 999 999 999 996
     # in binary and still the 6 dB it is.
     judged = settled(margin)
     corrected = np.where(judged >= _BACKGROUND_HIGH, lsb, formula)
@@ -552,7 +552,7 @@ def background_correction(
     if bool(np.any(limited)):
         warn_caller(
             "Signal-to-background margin at or below 6 dB in one or more "
-            "bands; the fixed 1,3 dB correction was applied and those levels "
+            "bands; the fixed 1.3 dB correction was applied and those levels "
             "are the limit of measurement (ISO 10140-4:2010, Clause 4.3).",
             LaboratoryInsulationWarning,
         )

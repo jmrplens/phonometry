@@ -347,7 +347,7 @@ _MIN_BOX_POSITIONS: dict[str, int] = {"engineering": 9, "survey": 4}
 #: for the same mistake has to work out whether it is the same mistake.
 _REFLECTING_PLANES_MSG = "'n_reflecting_planes' must be 1, 2 or 3."
 #: Typical A-weighted reproducibility standard deviation sigma_R0, in dB.
-#: ISO 3744 Table 2 (1,5); ISO 3746 Table 1 (3,0, tone-free). Table 2 states
+#: ISO 3744 Table 2 (1.5); ISO 3746 Table 1 (3.0, tone-free). Table 2 states
 #: its values "for sound power levels and sound energy levels" alike, and
 #: Eq. (24) sets u(LJ) = u(LW), so the sound energy path reads the same table.
 _SIGMA_R0: dict[str, float] = {"engineering": 1.5, "survey": 3.0}
@@ -363,10 +363,10 @@ _PS0_KPA = 101.325
 #: C2 radiation-impedance reference.
 _THETA0_K = 314.0
 _THETA1_K = 296.0
-#: Celsius to kelvin offset as Annex G prints it, (273,15 + theta).
+#: Celsius to kelvin offset as Annex G prints it, (273.15 + theta).
 _KELVIN_OFFSET = 273.15
 #: Static pressure from the altitude of the test site (Eq. G.2):
-#: p_s = p_s,0 (1 - a H_a)^b, a = 2,256 0 x 10^-5 m^-1, b = 5,255 3.
+#: p_s = p_s,0 (1 - a H_a)^b, a = 2.256 0 x 10^-5 m^-1, b = 5.255 3.
 _ALTITUDE_A_PER_M = 2.2560e-5
 _ALTITUDE_B = 5.2553
 

@@ -19,11 +19,11 @@ time-selective processing of IEC 61094-8 Annex B print no worked example:
 their rows check the phase form of (C.1) to (C.3) and of the monitor ratios,
 the circuits of IEC 61094-2 Formula (3) and of the "Microphone impedance"
 row of Table D.1, with the lumped impedance of IEC 61094-2 E.4 and the
-equivalent volume of IEC 61094-1 6.2.2 (its kappa_r of 1,40) evaluated
+equivalent volume of IEC 61094-1 6.2.2 (its kappa_r of 1.40) evaluated
 independently of the ``ReciprocityMicrophone`` the volumes come from, and
 the data simulated with and without a reflection that 8.6 suggests. Formula
 (B.10), the 120 Hz and 8 ms and the 30 Hz of B.2.2, the order of magnitude
-of B.6.1 and the 0,005 dB semi-range of the impedance row are the printed
+of B.6.1 and the 0.005 dB semi-range of the impedance row are the printed
 numbers they are anchored on.
 
 Two parts of IEC 61094-5 send the reader to the literature, and the rows
@@ -68,8 +68,8 @@ on page 62 (PDF page 74) and its Example 2 on page 63 (PDF page 75).
 
 Six printed defects sit in this oracle and are recorded in
 ``docs/ERRATA.md``. D.3 of IEC 61094-5 states a combined standard uncertainty
-of 0,040 dB and an expanded one of 0,08 dB, where the root-sum-square of the
-eight components Table D.1 prints is 0,0437 dB and twice it 0,087 dB, and the
+of 0.040 dB and an expanded one of 0.08 dB, where the root-sum-square of the
+eight components Table D.1 prints is 0.0437 dB and twice it 0.087 dB, and the
 rows pin the values the page's own components give. B.2.1 of IEC 61094-8, on
 folio 25, refers to "Equation B.2" for a requirement on the frequency range
 that only (B.3), the integral over frequency, carries, and says the frequency
@@ -155,9 +155,9 @@ def _chk_d1_components() -> Outcome:
     "Combined standard uncertainty of the example budget at 2 kHz",
 )
 def _chk_d3_combined() -> Outcome:
-    """The root-sum-square of the printed column, 0,043 67 dB.
+    """The root-sum-square of the printed column, 0.043 67 dB.
 
-    D.3 prints 0,040 dB, which is not the root-sum-square of the eight
+    D.3 prints 0.040 dB, which is not the root-sum-square of the eight
     components Table D.1 prints (docs/ERRATA.md); the row pins the value the
     page's own components give.
     """
@@ -167,7 +167,7 @@ def _chk_d3_combined() -> Outcome:
         0.00005,
         unit="dB",
         places=4,
-        expected_label="0.0437 dB (printed 0,040, an erratum)",
+        expected_label="0.0437 dB (printed 0.040, an erratum)",
     )
 
 
@@ -177,14 +177,14 @@ def _chk_d3_combined() -> Outcome:
     "Expanded uncertainty (k = 2) of the example budget at 2 kHz",
 )
 def _chk_d3_expanded() -> Outcome:
-    """Twice 0,043 67 dB is 0,087 dB; D.3 prints 0,08 dB (docs/ERRATA.md)."""
+    """Twice 0.043 67 dB is 0.087 dB; D.3 prints 0.08 dB (docs/ERRATA.md)."""
     return numeric(
         ref.IEC61094_5_D3_EXPANDED_DB,
         _budget_d1().expanded_uncertainty_db,
         0.0005,
         unit="dB",
         places=3,
-        expected_label="0.087 dB (printed 0,08, an erratum)",
+        expected_label="0.087 dB (printed 0.08, an erratum)",
     )
 
 
@@ -199,7 +199,7 @@ def _chk_d3_linear() -> Outcome:
     values are very small, the result would be essentially the same". The
     page prints no value for it; the printed column, each component taken to
     10**(u/20) - 1, combined in quadrature and taken back by 20 lg(1 + r),
-    gives 0,043 614 dB, 0,000 055 dB below the combination in decibels.
+    gives 0.043 614 dB, 0.000 055 dB below the combination in decibels.
     """
     return numeric(
         ref.IEC61094_5_D3_LINEAR_COMBINED_DB,
@@ -236,7 +236,7 @@ def _chk_table_a1() -> Outcome:
     "Expanded uncertainty of the correction at 20 kHz, a tenth of its value",
 )
 def _chk_table_a1_uncertainty() -> Outcome:
-    """A tenth of 1,443 dB."""
+    """A tenth of 1.443 dB."""
     jig = metrology.jig_diameter_correction([20000.0])
     return numeric(
         ref.IEC61094_5_TABLE_A1_RELATIVE_EXPANDED * 1.443,
@@ -275,7 +275,7 @@ def _chk_diameter_model_table_a1() -> Outcome:
     """6.5 refers microphones of different diameters to "a theoretical model
     [...] given in the literature (for example [1])", from which Table A.1
     was calculated: Table 2 of [1] prints the same column "calculated with
-    input data from table 1". The model with those inputs, at 344,8 m/s
+    input data from table 1". The model with those inputs, at 344.8 m/s
     (the paper prints no speed of sound), to the thousandth of a decibel the
     tables print. It is the model read with the radial sensitivity of
     Formula (4) less 1 and the annulus of Formula (2) from the overall
@@ -305,9 +305,9 @@ def _chk_diameter_model_table_a1() -> Outcome:
     "Largest deviation of the model at the reference air of clause 4 from Table A.1, against a tenth of the 10 % its NOTE allows",
 )
 def _chk_diameter_model_reference_air() -> Outcome:
-    """At 23,0 °C, 101,325 kPa and 50 % the speed of sound of the
-    IEC 61094-2 Annex F air is 345,87 m/s; the model is then within
-    0,0093 dB of every row of Table A.1, at 20 kHz, inside 0,014 dB, a tenth
+    """At 23.0 °C, 101.325 kPa and 50 % the speed of sound of the
+    IEC 61094-2 Annex F air is 345.87 m/s; the model is then within
+    0.0093 dB of every row of Table A.1, at 20 kHz, inside 0.014 dB, a tenth
     of the expanded uncertainty the NOTE gives the largest correction.
     """
     printed = {1000.0 * khz: value for khz, value in ref.IEC61094_5_TABLE_A1_DB.items()}
@@ -337,10 +337,10 @@ def _chk_diameter_doubling() -> Outcome:
     10 % of their value (in dB) which is approximately the change observed
     by doubling the distance between the microphones." The correction the
     result carries at twice the separation has to be the model evaluated at
-    1,0 mm, to the rounding of the arithmetic. The change it gives is
+    1.0 mm, to the rounding of the arithmetic. The change it gives is
     reported beside A.2's figure, not judged against it: A.2's 10 % is a
-    change observed, approximately, and by the model the change is 5,4 % to
-    6,3 % of each correction, of that order and smaller.
+    change observed, approximately, and by the model the change is 5.4 % to
+    6.3 % of each correction, of that order and smaller.
     """
     printed = {1000.0 * khz: value for khz, value in ref.IEC61094_5_TABLE_A1_DB.items()}
     frequencies = list(printed)
@@ -386,8 +386,8 @@ def _chk_diameter_doubling() -> Outcome:
     "Sensitivity level of the test microphone through the interchange, whatever the channel gains, source drift and field asymmetry",
 )
 def _chk_annex_c() -> Outcome:
-    """Readings built by (C.1) and (C.2) with channel gains of +0,7 dB and
-    -1,3 dB, a source 0,3 dB louder after the interchange and a field 0,06 dB
+    """Readings built by (C.1) and (C.2) with channel gains of +0.7 dB and
+    -1.3 dB, a source 0.3 dB louder after the interchange and a field 0.06 dB
     stronger at position A than at B give back the test microphone's level.
     """
     level_1 = 94.0 + 0.2 * np.log10(_F / 1000.0)
@@ -420,7 +420,7 @@ def _chk_annex_c() -> Outcome:
 )
 def _chk_d2() -> Outcome:
     """The sensitivity in mV/Pa from the level model against the product of
-    D.2, with R_V from 3,9 to 4,3 and R_P from 0,999 to 1,01.
+    D.2, with R_V from 3.9 to 4.3 and R_P from 0.999 to 1.01.
     """
     m_ref = 10.0 ** (_L_REF / 20.0)
     r_v = np.array([3.9, 3.95, 4.0, 4.1, 4.3])
@@ -450,7 +450,7 @@ def _chk_d2() -> Outcome:
     "Monitor ratios cancel a source that drifts between the two measurements",
 )
 def _chk_monitor() -> Outcome:
-    """The field changes by up to 0,4 dB between the reference and the test
+    """The field changes by up to 0.4 dB between the reference and the test
     microphone; the quotient of the two ratios to the monitor gives the test
     microphone's level regardless.
     """
@@ -485,8 +485,8 @@ def _chk_monitor() -> Outcome:
     "Typical expanded uncertainty of the 5 reference calibration options at 1 kHz and 10 kHz",
 )
 def _chk_table_1() -> Outcome:
-    """Ten cells, from 0,10 dB for primary free-field reciprocity at 10 kHz to
-    0,6 dB for an electrostatic actuator, each counted only on the row whose
+    """Ten cells, from 0.10 dB for primary free-field reciprocity at 10 kHz to
+    0.6 dB for an electrostatic actuator, each counted only on the row whose
     microphone type, method and references are the printed ones.
     """
     matching = 0
@@ -676,13 +676,13 @@ def _lumped_volume(volume_m3: float, resonance_hz: float, loss: float) -> np.nda
 @register(
     _IEC61094,
     "IEC 61094-5:2016 Table D.1 (Microphone impedance)",
-    "A semi-range of 0,005 dB of the impedance effect as a standard uncertainty",
+    "A semi-range of 0.005 dB of the impedance effect as a standard uncertainty",
 )
 def _chk_impedance_semi_range() -> Outcome:
     """Table D.1: "At 2 kHz, the semi-range of this component is 0,005 dB
     with a rectangular distribution. This is equivalent to a standard
     uncertainty of 0,005/sqrt(3) dB = 0,003 dB": a pressure ratio of
-    0,005 dB, as the library carries it, to the three decimals printed.
+    0.005 dB, as the library carries it, to the three decimals printed.
     """
     stated, divisor = ref.IEC61094_5_TABLE_D1_STATED["impedance"]
     ratio = cc.ImpedancePressureRatio(
@@ -708,13 +708,13 @@ def _chk_impedance_semi_range() -> Outcome:
     "Pressure ratio of a substitution in a closed coupler against the admittance sums of Formula (3), 7 frequencies",
 )
 def _chk_coupler_ratio() -> Outcome:
-    """A WS2F-like microphone of 30 mm³, 16 kHz and loss factor 0,5 takes the
-    place of an LS2P-like one of 10 mm³, 22 kHz and 1,1 in a coupler whose
+    """A WS2F-like microphone of 30 mm³, 16 kHz and loss factor 0.5 takes the
+    place of an LS2P-like one of 10 mm³, 22 kHz and 1.1 in a coupler whose
     gas and monitor load it with 458 mm³: the ratio of the pressures is the
     ratio of the two sums of Formula (3), with each equivalent volume turned
     into an impedance by IEC 61094-1 6.2.2 and the lumped parameters of
     IEC 61094-2 E.4 evaluated here independently. Every frequency lies below
-    1,3 times both resonances, the range E.4 finds the representation "of
+    1.3 times both resonances, the range E.4 finds the representation "of
     sufficient accuracy" in.
     """
     kappa_p = ref.IEC61094_1_KAPPA_REFERENCE * 101325.0
@@ -760,7 +760,7 @@ def _chk_series_ratio() -> Outcome:
     microphones "therefore see slightly different pressures"; read as a
     divider, which the row does not print, each diaphragm takes
     p0 Z_a/(Z_a + Z_x), and the ratio of the two is the library's, for an
-    air mass of 40 kg/m⁴ with 0,2 MPa·s/m³ of loss.
+    air mass of 40 kg/m⁴ with 0.2 MPa·s/m³ of loss.
     """
     kappa_p = ref.IEC61094_1_KAPPA_REFERENCE * 101325.0
     omega = 2.0 * np.pi * _F_HIGH
@@ -796,8 +796,8 @@ def _chk_lumped_volume() -> Outcome:
     """E.4: "The resonance frequency is the frequency at which the imaginary
     part of the acoustic impedance Z_a is zero", and d = r_a 2 pi f0 c_a with
     V_eq = c_a kappa_r p_s,r; the equivalent volume a ReciprocityMicrophone
-    gives at the resonance, turned into Z_a by 6.2.2 with its kappa_r = 1,40,
-    has to show both, for 10 mm³, 22 kHz and d = 1,1.
+    gives at the resonance, turned into Z_a by 6.2.2 with its kappa_r = 1.40,
+    has to show both, for 10 mm³, 22 kHz and d = 1.1.
     """
     kappa_p = ref.IEC61094_1_KAPPA_REFERENCE * 101325.0
     resonance, loss = 22000.0, 1.1
@@ -947,13 +947,13 @@ def _chk_jarvis_volume() -> Outcome:
 )
 def _chk_jarvis_graph() -> Outcome:
     """The two graphs of x = 20 lg|R| and arg R from 100 Hz to 20 kHz: a dip
-    of about -0,0065 dB near 7 kHz, about 0,025 dB at 20 kHz, a phase peak
-    of about 0,16 degrees near 12,5 kHz and about 0,09 degrees at 20 kHz,
+    of about -0.0065 dB near 7 kHz, about 0.025 dB at 20 kHz, a phase peak
+    of about 0.16 degrees near 12.5 kHz and about 0.09 degrees at 20 kHz,
     each within its graph reading (half a thousandth of a decibel, a
     thousandth at 20 kHz, a hundredth of a degree, and a third of an octave
     in frequency). The phase at 20 kHz is what tells the mass term with its
     imaginary unit from the one the scan shows: read without it, the circuit
-    ends at 0,117 degrees.
+    ends at 0.117 degrees.
     """
     ratio = 1.0 / _jarvis_library_ratio(_F_JARVIS)
     level = 20.0 * np.log10(np.abs(ratio))
@@ -987,9 +987,9 @@ def _chk_jarvis_graph() -> Outcome:
 def _chk_validation() -> Outcome:
     """6.7 asks for the validation "by comparison" and prints no criterion;
     the library reads it as |L_cal - L_val| <= sqrt(U_cal^2 + U_val^2). A
-    jig 0,03 dB to 0,15 dB off a reciprocity calibration, with 0,08 dB and
-    0,06 dB of expanded uncertainty (0,1 dB for the difference), agrees at
-    the three frequencies within 0,1 dB, the one exactly on it included, and
+    jig 0.03 dB to 0.15 dB off a reciprocity calibration, with 0.08 dB and
+    0.06 dB of expanded uncertainty (0.1 dB for the difference), agrees at
+    the three frequencies within 0.1 dB, the one exactly on it included, and
     not at the other two, whatever the binary rounding of the difference.
     The reciprocity calibration runs on a grid of its own, with frequencies
     between and beyond the jig's at other levels and uncertainties, so each
@@ -1053,7 +1053,7 @@ def _chk_validation() -> Outcome:
 def _chk_validation_correlation() -> Outcome:
     """Example 2 of F.1.2.3: resistors calibrated against the same standard
     share its uncertainty, u(R_i, R_j) = u^2(R_S), and with u(R_S)/R_S =
-    10^-4 the correlation coefficient is about 0,5, 0,990 and 1,000 for
+    10^-4 the correlation coefficient is about 0.5, 0.990 and 1.000 for
     comparisons of 100, 10 and 1 x 10^-6. In levels each calibration
     carries sqrt(u(alpha)^2 + (u(R_S)/R_S)^2) and the two share u(R_S)/R_S,
     all scaled by the same 20/ln 10 dB per neper; the verification's
@@ -1089,10 +1089,10 @@ def _chk_validation_correlation() -> Outcome:
 )
 def _chk_validation_shared_reference() -> Outcome:
     """Two calibrations against the same reference, each with the eight rows
-    of Table D.1, share its first row, 0,025 dB; it cancels in their
-    difference, which carries 2 sqrt(2 x 0,001 282) = 0,1013 dB from the
+    of Table D.1, share its first row, 0.025 dB; it cancels in their
+    difference, which carries 2 sqrt(2 x 0.001 282) = 0.1013 dB from the
     other seven, where the root-sum-square of the two expanded uncertainties
-    gives 0,1235 dB. The expected value is built from the seven rows alone,
+    gives 0.1235 dB. The expected value is built from the seven rows alone,
     the common quantity taken out as an input of its own (F.1.2.4); the
     library gets the two expanded uncertainties of the budget and the shared
     row, at every frequency of the grid.
@@ -1137,7 +1137,7 @@ def _chk_validation_shared_reference() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-8:2012 B.6.1, Formula (B.10)",
-    "Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed",
+    "Spectrum of a rectangular pulse of a = 10 V and b = 2.5 µs at 6 frequencies, as printed",
 )
 def _chk_pulse_spectrum() -> Outcome:
     """X(f) = 2ab sin(2 pi f b)/(2 pi f b) evaluated as printed, against the
@@ -1162,7 +1162,7 @@ def _chk_pulse_spectrum() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-8:2012 B.6.1",
-    "First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs",
+    "First zero of the pulse spectrum, f = 1/(2b), for b = 2.5 µs",
 )
 def _chk_pulse_first_zero() -> Outcome:
     """B.6.1: "The first zero in the spectrum is at f = 1/(2b)", 200 kHz."""
@@ -1199,7 +1199,7 @@ def _chk_stepped_sine_small_room() -> Outcome:
     """B.2.2: "the length of the impulse response will be the inverse of the
     size of the frequency step", and 120 Hz is enough "because the primary
     reflections all occur before 8 ms": the impulse response of a 120 Hz step
-    lasts 1/120 Hz = 8,333 ms, past them.
+    lasts 1/120 Hz = 8.333 ms, past them.
     """
     step, arrival = ref.IEC61094_8_B22_SMALL_ROOM
     frequencies = np.arange(0.0, 24000.0 + step / 2.0, step)
@@ -1223,7 +1223,7 @@ def _chk_stepped_sine_small_room() -> Outcome:
 )
 def _chk_stepped_sine_large_room() -> Outcome:
     """B.2.2: "a frequency resolution of approximately 30 Hz is appropriate",
-    an impulse response of 33,3 ms.
+    an impulse response of 33.3 ms.
     """
     step = ref.IEC61094_8_B22_LARGE_ROOM_STEP_HZ
     frequencies = np.arange(0.0, 24000.0 + step / 2.0, step)
@@ -1243,10 +1243,10 @@ def _chk_stepped_sine_large_room() -> Outcome:
 def _chk_time_selective() -> Outcome:
     """8.6: "a target response can be simulated with and without the
     influence of reflections and the time selective procedure applied to
-    each". A stepped-sine response of a direct sound at 3,01 ms and a
-    reflection of 0,3 at 6,5 ms, taken to the time domain by (B.3), windowed
-    from 2,5 ms to 6 ms and taken back by (B.2), against the direct sound
-    alone, e^(-j 2 pi f 3,01 ms), whose phase is not a whole number of half
+    each". A stepped-sine response of a direct sound at 3.01 ms and a
+    reflection of 0.3 at 6.5 ms, taken to the time domain by (B.3), windowed
+    from 2.5 ms to 6 ms and taken back by (B.2), against the direct sound
+    alone, e^(-j 2 pi f 3.01 ms), whose phase is not a whole number of half
     turns at any of the frequencies, so a transform of the wrong sign fails.
     """
     step = 50.0
@@ -1281,7 +1281,7 @@ def _chk_time_selective() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-8:2012 Formula (B.1), B.1.3 a)",
-    "The longest window for a reflected path of 2,2 m at 1 m puts that path on the boundary of the region",
+    "The longest window for a reflected path of 2.2 m at 1 m puts that path on the boundary of the region",
 )
 def _chk_reflection_window() -> Outcome:
     """tau = (L - d)/c, and the region of Formula (B.1) for it has the major

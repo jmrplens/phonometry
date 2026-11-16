@@ -198,7 +198,7 @@ def test_annex_c_worked_example() -> None:
     h = np.array(ISO1999_ANNEX_C_H)
     n = np.array(ISO1999_ANNEX_C_N)
     compressed = m.age_and_noise_threshold(h, n) - h
-    # C.5: 19 - 36 x 19 / 120 = 13,3 dB at 4 kHz.
+    # C.5: 19 - 36 x 19 / 120 = 13.3 dB at 4 kHz.
     assert compressed[2] == pytest.approx(ISO1999_ANNEX_C_N_4K_COMPRESSED, abs=1e-9)
 
     noise = np.where(h + n > ISO1999_ANNEX_C_COMPRESSION_FENCE, compressed, n)

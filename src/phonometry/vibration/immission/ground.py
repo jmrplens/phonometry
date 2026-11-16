@@ -31,7 +31,7 @@ speed as :math:`\sqrt{E/\rho}`, which is the speed in a thin rod, and as
 (5) builds on the first and writes :math:`E = \mathrm{v}_\mathrm{p}^2 \rho`. Both contradict
 Formula (3) of the same clause, which is right, and the two expressions of
 Formula (1) only agree with each other at :math:`\nu = (\sqrt{17}-1)/8
-\approx 0{,}39`. This module uses the relations of the continuum, which is
+\approx 0.39`. This module uses the relations of the continuum, which is
 what Formula (3) is derived from, and the defect is registered in
 ``docs/ERRATA.md``.
 """
@@ -68,7 +68,7 @@ GROUND_WAVE_SPEED_RANGES_M_S: Mapping[str, tuple[float, float]] = MappingProxyTy
 )
 
 #: The open interval Poisson's ratio of a stable isotropic continuum lies in:
-#: at -1 the shear modulus would carry no bulk stiffness at all, and at 0,5
+#: at -1 the shear modulus would carry no bulk stiffness at all, and at 0.5
 #: the medium would be incompressible and carry no compression wave.
 _POISSON_LIMITS = (-1.0, 0.5)
 
@@ -128,7 +128,7 @@ def poisson_ratio_from_wave_speeds(
 
     :param compression_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
-    :return: :math:`\nu`, between -1 and 0,5. It is positive when :math:`\mathrm{v}_\mathrm{p}`
+    :return: :math:`\nu`, between -1 and 0.5. It is positive when :math:`\mathrm{v}_\mathrm{p}`
         exceeds :math:`\sqrt{2}\,\mathrm{v}_\mathrm{s}`, as it does in every soil; a pair
         between :math:`2/\sqrt{3}` and :math:`\sqrt{2}` gives the negative
         ratio a continuum allows and a soil does not show.
@@ -153,8 +153,8 @@ def youngs_modulus_from_wave_speeds(
     :math:`E = 2G(1+\nu) = \rho \mathrm{v}_\mathrm{s}^2 (3 \mathrm{v}_\mathrm{p}^2 - 4 \mathrm{v}_\mathrm{s}^2)/(\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2)`,
     which is what Formula (5) means. As printed it reads :math:`E = \mathrm{v}_\mathrm{p}^2
     \rho`, the thin-rod relation, and that overstates the modulus of a soil
-    with :math:`\nu = 0{,}3` by 35 % and of one with :math:`\nu = 0{,}45` by a
-    factor of 3,8.
+    with :math:`\nu = 0.3` by 35 % and of one with :math:`\nu = 0.45` by a
+    factor of 3.8.
 
     :param compression_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
@@ -181,7 +181,7 @@ def compression_wave_speed(
     slow at every Poisson's ratio.
 
     :param shear_modulus_pa: :math:`G`, in pascals.
-    :param poisson_ratio: :math:`\nu`, above -1 and below 0,5.
+    :param poisson_ratio: :math:`\nu`, above -1 and below 0.5.
     :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :raises ValueError: For a non-positive modulus or density, or a ratio

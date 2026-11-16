@@ -161,7 +161,7 @@ def _one_absorption_measure(
     The two are not the same number. The room constant is
     :math:`R = S \bar{\alpha} / (1 - \bar{\alpha})` and the equivalent
     absorption area is :math:`A = S \bar{\alpha}`, so they part company as
-    the room gets deader: at :math:`\bar{\alpha} = 0{,}3`, ``R`` is already
+    the room gets deader: at :math:`\bar{\alpha} = 0.3`, ``R`` is already
     a seventh larger than ``A``. Which one a source says it means is the whole
     reason both are accepted, and why neither is silently substituted for the
     other. VDI 2081 Blatt 1 Equation (36) is written in ``A``; Bies Equation
@@ -283,7 +283,7 @@ def critical_distance(
     ``R``, the two differing by :math:`1 - \bar{\alpha}`).
 
     Written in ``A`` and with the hemispherical :math:`Q = 2` of an outlet in
-    a room surface, the same expression is the ``rH = 0,2 sqrt(A)`` that
+    a room surface, the same expression is the ``rH = 0.2 sqrt(A)`` that
     VDI 2081 Blatt 1 Section 6.7.3 prints for where the reverberant field of a
     ventilation opening begins.
 
@@ -353,7 +353,7 @@ def sabine_absorption_area(
     :param reverberation_time: Reverberation time ``T``, s (scalar or
         per-band).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default 343, giving the
-        familiar 0,161; pass 339 for the 0,163 of VDI 2081).
+        familiar 0.161; pass 339 for the 0.163 of VDI 2081).
     :return: The equivalent absorption area ``A``, m2; a ``float`` for a number; an
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the volume, the time or the speed is not positive

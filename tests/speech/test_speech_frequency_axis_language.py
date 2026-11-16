@@ -7,7 +7,7 @@ fixed strings, so the octave labels are written by ``format_frequency_axis``
 and by nothing else: a renderer that does not pass its ``language`` on draws
 ``31.5`` in a Spanish figure. The band procedures start at 150 Hz, so the
 figure is drawn on axes already opened from 20 Hz, the way a wider curve drawn
-first would leave them: the tick set follows those limits across 31,5 Hz, the
+first would leave them: the tick set follows those limits across 31.5 Hz, the
 lowest octave centre whose label carries a decimal.
 """
 

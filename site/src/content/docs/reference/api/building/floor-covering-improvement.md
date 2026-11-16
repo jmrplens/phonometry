@@ -141,7 +141,7 @@ A measured level corrected for background noise (ISO 16251-1 F. (2)).
 
 At a margin $L' - L_\mathrm{b}$ of 15 dB or more the level is used
 unchanged; between 6 dB and 15 dB the background is subtracted in energy;
-under 6 dB the correction is held at 1,3 dB, the limit of measurement,
+under 6 dB the correction is held at 1.3 dB, the limit of measurement,
 and the band is reported as $> \Delta L$. The margins, the corrected
 levels and the bands at the limit are read from the two readings, so they
 are not fields: a record cannot be built to claim a band clear of the
@@ -167,7 +167,7 @@ The corrected levels `L`, in dB, in the shape of the readings.
 
 Where the margin is under 6 dB, so the band is at the limit of measurement.
 
-Judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996 in binary and
+Judged settled: 32.3 - 26.3 dB is 5.999 999 999 999 996 in binary and
 still the 6 dB it is.
 
 ### BackgroundCorrectedLevel.margins_db
@@ -292,7 +292,7 @@ small-mock-up laboratory method for the reduction of transmitted impact
 sound by soft floor coverings): the standard-basis line, an optional
 metadata header block, a two-panel body with the per-band table
 (frequency and the reduction of impact sound pressure level `ΔL`,
-bands at the 1,3 dB limit of measurement prefixed `>`) beside the
+bands at the 1.3 dB limit of measurement prefixed `>`) beside the
 `ΔL(f)` improvement curve, a boxed single-number weighted improvement
 `ΔLw (CI,Δ)` (ISO 717-2, the Clause 8 e) statement of results; a
 characterisation headline replaces it when the spectrum lacks the 16

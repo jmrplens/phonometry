@@ -34,8 +34,8 @@ have per-band element and junction spectra, or the material properties the
 standard can calculate them from, and the question is *which path to fix in
 which band*. The choice is not about accuracy on the rating: on the standard's
 own worked building the two agree well inside their stated spread, and the
-detailed airborne model carries no bias error and a standard deviation of 1,5 dB
-to 2,5 dB (Clause 5) against about 2 dB for the simplified one. What the
+detailed airborne model carries no bias error and a standard deviation of 1.5 dB
+to 2.5 dB (Clause 5) against about 2 dB for the simplified one. What the
 detailed model buys is the spectrum behind the single number.
 
 [Predicting Panel Sound Insulation](panel-sound-insulation.md)

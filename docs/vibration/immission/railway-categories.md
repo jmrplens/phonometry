@@ -6,7 +6,7 @@
 
 The [1999 edition of DIN 4150-2](people-in-buildings.md)
 treats a railway as a set of classes of train, each occupying the clock
-intervals its trains ran through, and lifts the guide values by 1,5 for an
+intervals its trains ran through, and lifts the guide values by 1.5 for an
 urban line. The draft that is to replace it, published for comment in
 August 2023, rewrites that part from the ground up and touches little else:
 one cell of Table 1, one worked example, two new sources, and the days two
@@ -21,13 +21,13 @@ interval, however long it lasts (6.5.3.2). So the clock maximum r.m.s. of a
 **category** of train, a kind of vehicle on a track in a direction, is the
 r.m.s. of one clock maximum per passage over the passages measured (Formula
 (5)), and, unlike the 1999 edition's (A.1) and the meter's own Formula (1),
-nothing below 0,1 is set to zero on the way, because the next number is
+nothing below 0.1 is set to zero on the way, because the next number is
 built on it: the $KB_\mathrm{Fmax}$ of the category is not the largest clock maximum
-anyone observed but **1,5 times** its r.m.s. (Formula (7)), since a single
+anyone observed but **1.5 times** its r.m.s. (Formula (7)), since a single
 passage with a flat spot on a wheel says nothing about the line. The
 $KB_\mathrm{Fmax}$ of the railway is the largest over the categories (Formula (8)).
 
-Example 8 of Annex B measures 2,5 h in a new residential building next to a
+Example 8 of Annex B measures 2.5 h in a new residential building next to a
 tram and a metro: 14 metro passages each way underground and 9 and 10 tram
 passages each way on the surface.
 
@@ -51,7 +51,7 @@ print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="A section through a railway and the building beside it, a strip of train passages, and the formulae. Top left, a tram runs on the surface and a metro in a tunnel below it, with arrows through the ground to the building. In the upper storey, the room to be protected, a transducer stands at the middle of the floor span with arrows for the vertical z and the horizontals x and y, marked 1. A second transducer sits on the foundation in the basement, marked 3, and a dashed arrow marked 2 rises from it to the floor of the room. Three boxes at the right explain the numbers: the floor point takes z, x and y where the vibration is expected to be strongest, for z mostly the middle of the span; the transfer to the room is a linear factor or a frequency-dependent transfer function, preferably measured, with its uncertainty only as an upper bound; the substitute point, at the foundation for monitoring over weeks or months, is held to DIN 45669-2. A line beneath says that from a substitute point only KB Fmax below A o and KB FTr below A r can be shown. In the middle, a time axis from 0 to 380 seconds carries four passages, a metro running north and one running south with small humps and a tram running east and one running west with large ones, each inside one dashed interval however long it lasts. Under them, per category: 14 passages giving 0.037 and 0.055, 14 giving 0.047 and 0.070, 9 giving 0.406 and 0.609, and 10 giving 0.568 and 0.851, the largest, which is the KB Fmax of the railway. A box at the foot carries Formulae 5, 7, 8 and 6, with notes on the 1920 and 960 intervals of the day and the night, the zero for a category at or below 0.1, and the meter to DIN 45669-1, for which a 4 Hz lower limit is usually enough at a railway" width="100%"></picture>
 
 In Example 8 the vertical, measured at the middle of the floor span, is the
-direction that decides, and the 2,5 h recorded are taken as representative.
+direction that decides, and the 2.5 h recorded are taken as representative.
 Clause 5 of the draft says where that point goes and what the meter has to
 be, and it adds what the 1999 edition did not have: a point at the
 foundation that may stand in for the room during a monitoring.
@@ -89,10 +89,10 @@ category weighted by the number of its trains in the period, out of the
 1920 clock intervals of the day or the 960 of the night, and by a
 **weighting factor** `α_Zug` of Table 2 for the kind of train and whether
 the line runs on the surface or underground. A tram, light rail or metro on
-the surface is 0,7, an S-Bahn 0,8, another passenger train 0,9, a freight
-train up to 600 m 1,0, and a freight train over 600 m 1,3 wherever it runs;
-underground everything but the long freight train is 1,0. A category whose
-r.m.s. is at or below 0,1 enters the sum as zero, which is where the
+the surface is 0.7, an S-Bahn 0.8, another passenger train 0.9, a freight
+train up to 600 m 1.0, and a freight train over 600 m 1.3 wherever it runs;
+underground everything but the long freight train is 1.0. A category whose
+r.m.s. is at or below 0.1 enters the sum as zero, which is where the
 suppression the passages were spared is applied. The rest hours of the day
 are not applied to a railway, as they were not in 1999.
 
@@ -102,11 +102,11 @@ from phonometry import vibration
 print(vibration.train_weighting_factor("freight_long"))  # 1.3
 print(vibration.train_weighting_factor("s_bahn", alignment="underground"))  # 1.0
 
-# Example 8: 144 metros a track a day at 1,0, whose r.m.s. is below 0,1 and
-# counts as zero, and 80 trams a track at 0,7.
+# Example 8: 144 metros a track a day at 1.0, whose r.m.s. is below 0.1 and
+# counts as zero, and 80 trams a track at 0.7.
 kb_ftm = [0.03654, 0.04676, 0.40606, 0.56758]
 day = vibration.train_assessment_severity(kb_ftm, [144, 144, 80, 80], alpha=[1.0, 1.0, 0.7, 0.7])
-print(f"KB_FTr = {day:.4f}")  # 0.0997, printed 0,099 8
+print(f"KB_FTr = {day:.4f}")  # 0.0997, printed 0.099 8
 
 guide = vibration.guide_values("residential", edition="2023")
 verdict = vibration.assess_people_in_buildings(
@@ -117,7 +117,7 @@ print(verdict.passes, verdict.criterion)  # False A_r
 
 Under the draft a railway is compared with $A_\mathrm{o}$ like any other source,
 which the 1999 edition did not do; the trams of Example 8 exceed the night
-$A_\mathrm{o}$ of 0,2 of a new residential building and the requirement is not met
+$A_\mathrm{o}$ of 0.2 of a new residential building and the requirement is not met
 by night before $KB_\mathrm{FTr}$ is even formed.
 
 ```python
@@ -131,8 +131,8 @@ print(verdict.passes, verdict.criterion)  # False A_o
 ## 3. A new line, and an old one made bigger
 
 A line to be built new is held at night to an upper value of its own
-(6.5.3.5): 0,6 on the surface whatever the area, and underground the
-Table 1 value in an industrial or commercial area and 0,3 elsewhere. By day
+(6.5.3.5): 0.6 on the surface whatever the area, and underground the
+Table 1 value in an industrial or commercial area and 0.3 elsewhere. By day
 Table 1 applies as it stands.
 
 ```python
@@ -162,8 +162,8 @@ past a house in a mixed area: 28 regional and 8 freight trains a day become
 ```python
 from phonometry import vibration
 
-# Annex B, Example 9. Existing track: regional 0,24, freight 0,44; new track:
-# 0,22 and 0,40; the long freight trains at 1,3.
+# Annex B, Example 9. Existing track: regional 0.24, freight 0.44; new track:
+# 0.22 and 0.40; the long freight trains at 1.3.
 nullfall_day = vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0])
 nullfall_night = vibration.train_assessment_severity(
     [0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"
@@ -238,12 +238,12 @@ ax.legend()
 </details>
 
 The night of Example 9 is printed over 920 clock intervals, which gives the
-0,066 and 0,096 on the page; 6.5.3.2 fixes the night at 960, which gives
-0,065 and 0,094, and the conclusion is the same. The
+0.066 and 0.096 on the page; 6.5.3.2 fixes the night at 960, which gives
+0.065 and 0.094, and the conclusion is the same. The
 [errata page](../../ERRATA.md) has it, with the one condition
 of 6.5.3.6, a result of Example 8 that its own four-decimal inputs do not
 give, a decision in the construction flowchart drawn the wrong way round,
-ten clock maxima printed on Figure B.2 that do not give the 0,39 the text
+ten clock maxima printed on Figure B.2 that do not give the 0.39 the text
 uses, an example that cites the clause for a new line while applying the one
 for an extension, two cross-references that name the wrong formula and the
 wrong clause, and a rare event met below $A_\mathrm{o}$ in one sentence and at it in
@@ -259,29 +259,29 @@ Everything below is what `edition="2023"` reads differently from the
 numbers not named here are the same in both.
 
 - **Table 1** changes one cell: the night $A_\mathrm{u}$ of a mixed area, now with
-  urban areas in the row, goes from 0,15 to 0,1.
+  urban areas in the row, goes from 0.15 to 0.1.
 - **The 15 %** a measurement of $KB_\mathrm{F}$ is uncertain by no longer excuses a
-  $KB_\mathrm{Fmax}$ above $A_\mathrm{u}$. The 1999 Example 3 read 0,17 against 0,15 as met on
-  that ground; the draft's Example 3 reads 0,114 against 0,10, goes on to
-  $KB_\mathrm{FTr}$, finds 0,075 against an $A_\mathrm{r}$ of 0,07, and fails it.
+  $KB_\mathrm{Fmax}$ above $A_\mathrm{u}$. The 1999 Example 3 read 0.17 against 0.15 as met on
+  that ground; the draft's Example 3 reads 0.114 against 0.10, goes on to
+  $KB_\mathrm{FTr}$, finds 0.075 against an $A_\mathrm{r}$ of 0.07, and fails it.
 - **A road by night** is not judged on $A_\mathrm{o}$: 6.5.2 says a rare exceedance
   of the night-time upper value does not fail the requirement, and puts a
-  single clock maximum above 0,6, in any area, down as a reason to look into
+  single clock maximum above 0.6, in any area, down as a reason to look into
   the cause and put it right, which is what the 1999 edition said of a
   railway. **An existing road** by an existing building: the neighbours must
   put up with $A_\mathrm{u}$ and $A_\mathrm{r}$ exceeded by up to 50 %, by day and by night
-  (6.5.2), which `source="road_existing"` gives as guide values 1,5 times
+  (6.5.2), which `source="road_existing"` gives as guide values 1.5 times
   over.
 - **An induced seismic event**, a few seconds with its energy below 15 Hz,
   years after the intervention that causes it (6.5.1.3): $KB_\mathrm{Fmax}$ is about
-  0,44 times the peak velocity, and it is held by day and by night to the
+  0.44 times the peak velocity, and it is held by day and by night to the
   daytime $A_\mathrm{o}$, with no $KB_\mathrm{FTr}$.
 - **A construction site**: the draft's Table 3 prints the days two to six
   that the 1999 Figure 3 made one read off a curve, cell for cell what the
   interpolation gives, and says that $D$ counts only the days on which
   Table 1 is exceeded.
-- The **urban railway** of 1999, with its factor 1,5 on $A_\mathrm{u}$ and $A_\mathrm{r}$, is
-  gone; its place is the factor 0,7 of Table 2 on the r.m.s.
+- The **urban railway** of 1999, with its factor 1.5 on $A_\mathrm{u}$ and $A_\mathrm{r}$, is
+  gone; its place is the factor 0.7 of Table 2 on the r.m.s.
 
 ```python
 from phonometry import vibration
@@ -304,7 +304,7 @@ print(vibration.guide_values("residential", time_of_day="night", source="induced
 ## What this guide covers
 
 - **Covered.** **The railway of 6.5.3**: the r.m.s. of a category of train over its
-  passages (Formula (5)), 1,5 times it and the largest of those (Formulae (7)
+  passages (Formula (5)), 1.5 times it and the largest of those (Formulae (7)
   and (8)), the assessment vibration severity with the factors of Table 2
   (Formula (6)), the night-time upper value of a new line (6.5.3.5) and the
   25 % rule of an altered one (6.5.3.6).
@@ -316,7 +316,7 @@ print(vibration.guide_values("residential", time_of_day="night", source="induced
 
 - **Not covered.** **No decision the draft leaves open.** An existing line that is not being
   altered (6.5.3.4) has no numeric rule and none is invented; the concession
-  of 6.5.3.7 to a new building, an $A_\mathrm{o}$ of 0,6 for a category with rare
+  of 6.5.3.7 to a new building, an $A_\mathrm{o}$ of 0.6 for a category with rare
   passages, is a judgement and stays one.
 
 - **Not covered.** **No measurement and no monitoring.** Clause 5, the substitute measuring

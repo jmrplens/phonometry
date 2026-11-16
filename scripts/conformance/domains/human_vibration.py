@@ -29,13 +29,13 @@ def _true_centre(n: int) -> float:
     return float(10.0 ** (n / 10.0))
 
 
-@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.8", "Wk design-goal factor at 6,31 Hz")
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.8", "Wk design-goal factor at 6.31 Hz")
 def _chk_iso8041_wk_annex_b() -> Outcome:
     factor = float(ph.vibration.weighting_factors("Wk", _true_centre(8)))
     return numeric(ref.ISO8041_1_WK_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
 
 
-@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1,585 Hz")
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1.585 Hz")
 def _chk_iso8041_wm_annex_b() -> Outcome:
     factor = float(ph.vibration.weighting_factors("Wm", _true_centre(2)))
     return numeric(ref.ISO8041_1_WM_FACTOR_1P585HZ, factor, 1e-3, rel=True, places=4)
@@ -47,7 +47,7 @@ def _chk_iso8041_wh_reference() -> Outcome:
     return numeric(ref.ISO8041_1_WH_REF_FACTOR, factor, 1.5e-3, rel=True, places=4)
 
 
-@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.1", "Wb design-goal factor at 6,31 Hz")
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.1", "Wb design-goal factor at 6.31 Hz")
 def _chk_iso8041_wb_annex_b() -> Outcome:
     factor = float(ph.vibration.weighting_factors("Wb", _true_centre(8)))
     return numeric(ref.ISO8041_1_WB_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
@@ -67,7 +67,7 @@ def _chk_iso8041_wb_annex_b_edges() -> Outcome:
             (20, ref.ISO8041_1_WB_FACTOR_100HZ),
         )
     )
-    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %")
+    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0.1 %")
 
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table 1", "Wc factor at the 100 rad/s reference")
@@ -89,7 +89,7 @@ def _chk_iso8041_wd_reference_and_annex_b() -> Outcome:
             (_true_centre(0), ref.ISO8041_1_WD_FACTOR_1HZ),
         )
     )
-    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %")
+    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0.1 %")
 
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.4", "We design-goal factor at 8 Hz")
@@ -99,7 +99,7 @@ def _chk_iso8041_we_annex_b() -> Outcome:
 
 
 @register(
-    _HUMAN_VIB, "ISO 8041-1:2017 Table B.5", "Wf design-goal factors at 0,1585 / 0,1 Hz"
+    _HUMAN_VIB, "ISO 8041-1:2017 Table B.5", "Wf design-goal factors at 0.1585 / 0.1 Hz"
 )
 def _chk_iso8041_wf_annex_b() -> Outcome:
     worst = max(
@@ -112,11 +112,11 @@ def _chk_iso8041_wf_annex_b() -> Outcome:
             (-10, ref.ISO8041_1_WF_FACTOR_0P1HZ),
         )
     )
-    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %")
+    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0.1 %")
 
 
 @register(
-    _HUMAN_VIB, "ISO 8041-1:2017 Table B.7", "Wj design-goal factors at 6,31 / 8 Hz"
+    _HUMAN_VIB, "ISO 8041-1:2017 Table B.7", "Wj design-goal factors at 6.31 / 8 Hz"
 )
 def _chk_iso8041_wj_annex_b() -> Outcome:
     worst = max(
@@ -129,7 +129,7 @@ def _chk_iso8041_wj_annex_b() -> Outcome:
             (9, ref.ISO8041_1_WJ_FACTOR_8HZ),
         )
     )
-    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %")
+    return numeric(0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0.1 %")
 
 
 @register(
@@ -213,14 +213,14 @@ def _chk_directive_2002_44() -> Outcome:
 # The band-limiting weighting: Annex B's own three columns (5.6.6).
 # ---------------------------------------------------------------------------
 #: Sampled band-limiting factors, one per printed corner shape: the shared
-#: 0,4 Hz / 100 Hz pair (Table B.8), and the three weightings whose corners
+#: 0.4 Hz / 100 Hz pair (Table B.8), and the three weightings whose corners
 #: differ (Tables B.5, B.6 and B.9).
 #: ``(weighting, band number, printed label, printed factor)``.
 _BAND_LIMITING_SAMPLES: tuple[tuple[WeightingName, int, str, float], ...] = (
-    ("Wk", -2, "0,631", 0.9279),
-    ("Wf", -4, "0,3981", 0.9279),
+    ("Wk", -2, "0.631", 0.9279),
+    ("Wf", -4, "0.3981", 0.9279),
     ("Wh", 10, "10", 0.9291),
-    ("Wm", 1, "1,259", 0.9291),
+    ("Wm", 1, "1.259", 0.9291),
 )
 
 
@@ -285,7 +285,7 @@ _register_band_limiting_samples()
 @register(
     _HUMAN_VIB,
     "ISO 8041-1:2017 Table B.5",
-    "Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on",
+    "Wf design-goal factor at 0.3981 Hz, the cell Table 2 row 2 turns on",
 )
 def _chk_iso8041_wf_annex_b_reference_band() -> Outcome:
     factor = float(ph.vibration.weighting_factors("Wf", _true_centre(-4)))

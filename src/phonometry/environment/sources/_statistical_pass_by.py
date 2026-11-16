@@ -3,7 +3,7 @@ r"""What a road surface adds to the noise of the traffic on it (ISO 11819-1:1997
 
 A road surface is not a source, but it changes how loud every tyre on it is,
 and the Statistical Pass-By (SPB) method is how that change is measured. A
-microphone stands 7,5 m from the centre of the lane and 1,2 m above it, and for
+microphone stands 7.5 m from the centre of the lane and 1.2 m above it, and for
 each vehicle that passes on its own, the maximum A-weighted level with time
 weighting F and the speed are written down, together with the vehicle's
 category: cars (1), dual-axle heavy vehicles (2a) or multi-axle heavy vehicles
@@ -49,20 +49,20 @@ precision, each level is rounded once, and the index is rounded once when it is
 reported (the ``reported_`` properties); both roundings are half up, a
 convention of this module, since 9.2 gives no rule for a level on the half.
 "Two decimal places" is read as the least precision of the calculation, not as
-a first rounding: rounded to 0,01 dB and then to 0,1 dB, 79,946 dB would print
-80,0 dB. Temperature-corrected levels and a reference given as levels enter
+a first rounding: rounded to 0.01 dB and then to 0.1 dB, 79.946 dB would print
+80.0 dB. Temperature-corrected levels and a reference given as levels enter
 their indices rounded the same way.
 
-The example of Annex E is reproduced by this chain: its levels 78,5, 81,1 and
-83,8 dB give 79,946 dB, printed 79,9 dB. Carried at full precision from the
-coefficients Annex E prints, the same levels are 78,546, 81,114 and 83,838 dB,
-and their index, 79,985 dB, would print 80,0 dB
+The example of Annex E is reproduced by this chain: its levels 78.5, 81.1 and
+83.8 dB give 79.946 dB, printed 79.9 dB. Carried at full precision from the
+coefficients Annex E prints, the same levels are 78.546, 81.114 and 83.838 dB,
+and their index, 79.985 dB, would print 80.0 dB
 (:attr:`StatisticalPassByResult.full_precision_index`). The printed
 coefficients are rounded too, so the page alone does not prove which chain the
 example was computed with: over every line that agrees with the intercept,
 slope, mean level, mean speed and vehicle sound level Annex E prints, to their
-last printed digit, the full-precision index spans 79,948 dB to 79,996 dB, and
-only the corner below 79,95 dB would also print 79,9 dB.
+last printed digit, the full-precision index spans 79.948 dB to 79.996 dB, and
+only the corner below 79.95 dB would also print 79.9 dB.
 
 **9.3 and 7.3, as warnings.** The regression is only used to normalize to the
 reference speed if that speed lies within one standard deviation of the
@@ -483,7 +483,7 @@ class PassByRegression(OwnsArrays):
         r"""The speeds the reference speed must lie between, 9.3, in km/h.
 
         :math:`10^{\overline{\lg v} \pm k s}` with :math:`s` the standard
-        deviation of :math:`\lg v` and :math:`k` 1,5 for cars and 1 for heavy
+        deviation of :math:`\lg v` and :math:`k` 1.5 for cars and 1 for heavy
         vehicles (:data:`SPB_SPEED_WINDOW_STANDARD_DEVIATIONS`).
         """
         centre = float(np.mean(np.log10(self.speeds_kmh)))
@@ -510,12 +510,12 @@ class PassByRegression(OwnsArrays):
 
         .. math::
 
-           t_{0,975;\,n-2} \, s_e \sqrt{\frac{1}{n}
+           t_{0.975;\,n-2} \, s_e \sqrt{\frac{1}{n}
            + \frac{(\lg v_\mathrm{ref} - \overline{\lg v})^2}{\sum (\lg v_i
            - \overline{\lg v})^2}}
 
         the textbook interval of a least-squares line, in decibels. It is the
-        measured counterpart of the 0,3 dB and 0,7 dB Table 2 expects, and it
+        measured counterpart of the 0.3 dB and 0.7 dB Table 2 expects, and it
         widens as the reference speed moves away from the mean speed.
         """
         from scipy.stats import t
@@ -777,10 +777,10 @@ class StatisticalPassByResult(RichDisplay):
 
         Not the index the standard reports, which adds the levels of 9.2 as
         they are reported, to one decimal (:attr:`index`). The two never
-        differ by more than 0,05 dB, the most a level moves when it is rounded,
+        differ by more than 0.05 dB, the most a level moves when it is rounded,
         but that can be enough to move the reported digit: for the lines Annex
-        E prints, this is 79,985 dB, which would print 80,0 dB, where the annex
-        prints 79,9 dB.
+        E prints, this is 79.985 dB, which would print 80.0 dB, where the annex
+        prints 79.9 dB.
         """
         return statistical_pass_by_index(
             self.vehicle_sound_levels,
@@ -1002,7 +1002,7 @@ def normalized_reference_levels(
     (:data:`SPB_ANNEX_D_SURFACE_LEVELS`) and prints the average of each column,
     which is what this returns: the arithmetic mean, category by category.
 
-    The energetic mean would print the same row there (76,4, 81,0 and 84,0 dB
+    The energetic mean would print the same row there (76.4, 81.0 and 84.0 dB
     either way), so the page does not decide between the two; the arithmetic
     mean is the plain reading of "average" for levels that are already
     averages.

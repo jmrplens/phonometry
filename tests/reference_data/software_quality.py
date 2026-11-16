@@ -17,8 +17,8 @@ Stdlib only, like every module of this package.
 from __future__ import annotations
 
 #: Table C.1, printed folio 20 (PDF page 28): for each number ``N`` of random
-#: sample values, the ranking positions ``R(q0,1)`` and ``R(q0,9)``, as
-#: ``(N, R(q0,1), R(q0,9))``. The table is printed as two blocks side by side,
+#: sample values, the ranking positions ``R(q0.1)`` and ``R(q0.9)``, as
+#: ``(N, R(q0.1), R(q0.9))``. The table is printed as two blocks side by side,
 #: 20 to 35 on the left and 36 to 50 on the right.
 ISO17534_1_TABLE_C1: tuple[tuple[int, int, int], ...] = (
     (20, 2, 19),
@@ -117,8 +117,8 @@ ISO17534_1_TABLE_B2: tuple[tuple[str, float, float, float], ...] = (
 #: TRC-form based on test case 1", the A-weighted limits of the certified
 #: results of T01 and an exemplary software calculation result, in dB, as
 #: ``(row, upper, lower, result)``. Every row answers "yes" to "Result inside
-#: tolerances", including 250 Hz, whose printed 31,0 lies below its lower
-#: limit 31,05 (docs/ERRATA.md).
+#: tolerances", including 250 Hz, whose printed 31.0 lies below its lower
+#: limit 31.05 (docs/ERRATA.md).
 ISO17534_3_TABLE_69: tuple[tuple[str, float, float, float], ...] = (
     ("63 Hz", 13.75, 13.65, 13.7),
     ("125 Hz", 23.81, 23.71, 23.8),
@@ -134,7 +134,7 @@ ISO17534_3_TABLE_69: tuple[tuple[str, float, float, float], ...] = (
 #: VDI 3723 Blatt 1:1993-05, Tabelle 6, Seite 8 (PDF page 8): "Schätzung des
 #: 90-%-Überschreitungspegels L_x;90", the ranking position ``k`` of the 90 %
 #: exceedance level in a sample of ``n`` values sorted in ascending order, as
-#: ``(n, k)`` for n = 20 to 50. DIN 45687 F.4 bases R(q0,1) of Table C.1 on
+#: ``(n, k)`` for n = 20 to 50. DIN 45687 F.4 bases R(q0.1) of Table C.1 on
 #: this column. The table starts at n = 2 (no ``k`` below n = 6) and ends at
 #: n = 50: "Die Werte in den Tabellen 4 bis 6 sind auf n = 50 begrenzt"
 #: (Seite 7).
@@ -175,7 +175,7 @@ VDI3723_1_TABLE_6_K: tuple[tuple[int, int], ...] = (
 #: VDI 3723 Blatt 1:1993-05, Tabelle 5, Seite 7 (n up to 36) and Seite 8 (37
 #: to 50): "Schätzung des 10-%-Überschreitungspegels L_x;10", the ranking
 #: position ``k`` of the 10 % exceedance level, as ``(n, k)`` for n = 20 to
-#: 50. DIN 45687 F.4 bases R(q0,9) of Table C.1 on this column.
+#: 50. DIN 45687 F.4 bases R(q0.9) of Table C.1 on this column.
 VDI3723_1_TABLE_5_K: tuple[tuple[int, int], ...] = (
     (20, 19),
     (21, 20),

@@ -503,7 +503,7 @@ def render_activity_report(
         fiche_paragraph(
             t(
                 "The period level is the duration-weighted energy mean of the "
-                "phase levels, rounded by adding 0,5 dB and taking the integer "
+                "phase levels, rounded by adding 0.5 dB and taking the integer "
                 "part (Annex IV A.3.4.2). The limit values are respected when "
                 "no annual L<sub>K,<i>x</i></sub> exceeds the table value, no daily "
                 "L<sub>Keq,<i>x</i></sub> exceeds it by more than 3 dB and no measured "

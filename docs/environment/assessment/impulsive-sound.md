@@ -255,7 +255,7 @@ tail of the first one scores a smaller $\mathrm{LD}$ than it appears to deserve.
 Because the onset rate and level difference are level *differences*, the
 adjustment is insensitive to the absolute calibration of the meter (clause 8);
 only the reported $L_\mathrm{Aeq}$ and the adjusted $L_\mathrm{Aeq}$ depend on it. The scope of the
-document states that the adjustment typically falls between 0,0 dB and 9,0 dB;
+document states that the adjustment typically falls between 0.0 dB and 9.0 dB;
 the formula itself is not capped, so a very sudden, loud impulse can exceed
 that range. `ImpulsiveSoundResult.plot()` draws the $L_{p\mathrm{AF}}$ history with the
 detected onsets, the least-squares onset lines and the governing level

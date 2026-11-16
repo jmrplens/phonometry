@@ -5,7 +5,7 @@ ISO/TS 12913-3:2019 prints no worked example: no questionnaire answered, no
 coordinate computed, no correlation reported. Every row below is therefore a
 closed form or an independent implementation, and each says which. The printed
 numbers it does have are checked where they are: the scale values of Table A.1,
-the range of the coordinates, 9,66, and the rows of Table D.1.
+the range of the coordinates, 9.66, and the rows of Table D.1.
 
 The edition implemented is the first, of 2019. ISO/TS 12913-3:2025 revises
 Annex A and was not available for this implementation, so these rows say
@@ -111,7 +111,7 @@ def _chk_origin() -> Outcome:
 @register(
     _SOUNDSCAPE,
     "ISO/TS 12913-3:2019 A.3",
-    "Range of the coordinates, 4 + sqrt(32), printed as 9,66",
+    "Range of the coordinates, 4 + sqrt(32), printed as 9.66",
 )
 def _chk_range() -> Outcome:
     """Pleasant, calm and vibrant at 5 and their opposites at 1.

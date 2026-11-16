@@ -2,11 +2,11 @@
 """Sound power radiated into a duct by fans, in-duct method: ISO 5136:2003.
 
 Standard anchors, every one read from the rendered page:
-- Table D.1 (Annex D), C3,4 for d = 0,5 m at U = +/-5, +/-15 and +/-30 m/s
+- Table D.1 (Annex D), C3,4 for d = 0.5 m at U = +/-5, +/-15 and +/-30 m/s
   in all 27 bands: the printed oracle of the Annex A polynomial, Eq. (7),
-  through Table A.4. 162 cells, each to the printed 0,1 dB.
-- Eqs (D.1) to (D.3): the two-coefficient expression (1,85 + 0,038 U) dB and
-  its values 2,42 and 1,28 at +/-15 m/s, printed as 2,4 and 1,3.
+  through Table A.4. 162 cells, each to the printed 0.1 dB.
+- Eqs (D.1) to (D.3): the two-coefficient expression (1.85 + 0.038 U) dB and
+  its values 2.42 and 1.28 at +/-15 m/s, printed as 2.4 and 1.3.
 - Eq. (8), clause 5.3.4.3: the nose-cone and foam-ball correction
   10 lg[1/(1 - U/c)^2] with c = 340 m/s, positive on the outlet side.
 - Eqs (9) to (12), clause 8: the energy average over positions, the combined
@@ -63,9 +63,9 @@ def test_table_d1_reproduces_every_printed_cell(
 ) -> None:
     """Eq. (7) with the Table A.4 coefficients lands on every cell of Table D.1.
 
-    The table prints C3,4 to 0,1 dB, so a cell reproduces when the polynomial
+    The table prints C3,4 to 0.1 dB, so a cell reproduces when the polynomial
     is within half of that of the print. Four cells sit exactly on a decimal
-    half (0,085; -0,185; 0,355; -0,455 dB in the 50 Hz to 250 Hz rows) and
+    half (0.085; -0.185; 0.355; -0.455 dB in the 50 Hz to 250 Hz rows) and
     the print rounds them away from zero, which is why this is a tolerance
     and not a rounding rule.
     """
@@ -94,12 +94,12 @@ def test_table_d1_as_one_spectrum_per_velocity() -> None:
     [ref.ISO5136_ANNEX_D_OUTLET, ref.ISO5136_ANNEX_D_INLET],
 )
 def test_annex_d_worked_example(velocity: float, printed: float) -> None:
-    """Eqs (D.2) and (D.3): (1,85 + 0,038 U) dB at U = +15 and -15 m/s.
+    """Eqs (D.2) and (D.3): (1.85 + 0.038 U) dB at U = +15 and -15 m/s.
 
-    Written out: 1,85 + 0,038 x 15 = 1,85 + 0,57 = 2,42 dB, which the print
-    rounds to 2,4; 1,85 + 0,038 x (-15) = 1,85 - 0,57 = 1,28 dB, printed 1,3.
+    Written out: 1.85 + 0.038 x 15 = 1.85 + 0.57 = 2.42 dB, which the print
+    rounds to 2.4; 1.85 + 0.038 x (-15) = 1.85 - 0.57 = 1.28 dB, printed 1.3.
     The exact products are checked to 1e-9 and the printed figures to their
-    0,1 dB.
+    0.1 dB.
     """
     exact = ref.ISO5136_ANNEX_D_A0 + ref.ISO5136_ANNEX_D_A1 * velocity
     computed = float(
@@ -117,25 +117,25 @@ def test_annex_d_worked_example(velocity: float, printed: float) -> None:
 @pytest.mark.parametrize(
     ("diameter", "band", "velocity", "expected"),
     [
-        # Table A.1 (0,15 <= d < 0,2), "<= 630" row serving 50 Hz and 630 Hz:
-        # -5,00e-02 + 2,70e-02 x 10 = -0,05 + 0,27 = 0,22 dB.
+        # Table A.1 (0.15 <= d < 0.2), "<= 630" row serving 50 Hz and 630 Hz:
+        # -5.00e-02 + 2.70e-02 x 10 = -0.05 + 0.27 = 0.22 dB.
         (0.15, 50.0, 10.0, 0.22),
         (0.15, 630.0, 10.0, 0.22),
         # Table A.1, 800 Hz: the a0 cell is empty in the print and the
-        # footnote makes it zero, so only 2,97e-02 x 10 = 0,297 dB remains.
+        # footnote makes it zero, so only 2.97e-02 x 10 = 0.297 dB remains.
         (0.15, 800.0, 10.0, 0.297),
-        # Table A.2 (0,2 <= d < 0,3), 1 000 Hz at U = -20 m/s:
-        # 1,75e-01 + 4,08e-02 x (-20) = 0,175 - 0,816 = -0,641 dB.
+        # Table A.2 (0.2 <= d < 0.3), 1 000 Hz at U = -20 m/s:
+        # 1.75e-01 + 4.08e-02 x (-20) = 0.175 - 0.816 = -0.641 dB.
         (0.25, 1000.0, -20.0, -0.641),
-        # Table A.3 (0,3 <= d < 0,5), 2 500 Hz at U = 10 m/s:
-        # 2,46 + 7,49e-02 x 10 + 5,64e-04 x 100 - 3,11e-06 x 1000
-        # = 2,46 + 0,749 + 0,0564 - 0,00311 = 3,26229 dB.
+        # Table A.3 (0.3 <= d < 0.5), 2 500 Hz at U = 10 m/s:
+        # 2.46 + 7.49e-02 x 10 + 5.64e-04 x 100 - 3.11e-06 x 1000
+        # = 2.46 + 0.749 + 0.0564 - 0.00311 = 3.26229 dB.
         (0.4, 2500.0, 10.0, 3.26229),
-        # Table A.5 (0,8 <= d < 1,25), 200 Hz at U = 40 m/s:
-        # -1,04 + 2,35e-02 x 40 = -1,04 + 0,94 = -0,10 dB.
+        # Table A.5 (0.8 <= d < 1.25), 200 Hz at U = 40 m/s:
+        # -1.04 + 2.35e-02 x 40 = -1.04 + 0.94 = -0.10 dB.
         (1.0, 200.0, 40.0, -0.10),
-        # Table A.6 (1,25 <= d <= 2), 125 Hz at U = 20 m/s:
-        # -1,24 + 2,05e-02 x 20 = -1,24 + 0,41 = -0,83 dB.
+        # Table A.6 (1.25 <= d <= 2), 125 Hz at U = 20 m/s:
+        # -1.24 + 2.05e-02 x 20 = -1.24 + 0.41 = -0.83 dB.
         (1.5, 125.0, 20.0, -0.83),
     ],
 )
@@ -150,12 +150,12 @@ def test_annex_a_rows_evaluated_by_hand(
 def test_table_a5_5000_hz_reads_the_missing_digit_as_one() -> None:
     """Table A.5 prints the a3 of 5 000 Hz as "- ,24 x 10-05", digit missing.
 
-    The library reads it as -1,24e-05, the value between the -1,17e-05 of
-    Table A.4 and the -1,27e-05 of Table A.6 at the same band; see
+    The library reads it as -1.24e-05, the value between the -1.17e-05 of
+    Table A.4 and the -1.27e-05 of Table A.6 at the same band; see
     docs/ERRATA.md. This pins that reading rather than the print, which
     cannot be pinned: at U = 10 m/s the row multiplies out to
-    6,00 + 1,54e-01 x 10 + 1,74e-03 x 100 - 1,24e-05 x 1000 - 2,32e-07 x 10000
-    = 6,00 + 1,54 + 0,174 - 0,0124 - 0,00232 = 7,69928 dB.
+    6.00 + 1.54e-01 x 10 + 1.74e-03 x 100 - 1.24e-05 x 1000 - 2.32e-07 x 10000
+    = 6.00 + 1.54 + 0.174 - 0.0124 - 0.00232 = 7.69928 dB.
     """
     with pytest.warns(emission.SoundPowerWarning, match="without its leading digit"):
         row = emission.flow_modal_correction([5000.0], 10.0, 1.0)
@@ -186,11 +186,11 @@ def test_table_a2_20_khz_row_reads_the_last_column_as_a9() -> None:
     every table sums a_i U^i from i = 0 to 10. The 20 000 Hz row is the only
     row of A.2 that populates it, and at U = 10 m/s its ten printed
     coefficients multiply out to
-    1,18e+01 + 4,59e-01 x 1e1 + 1,81e-02 x 1e2 - 4,24e-04 x 1e3
-    - 3,60e-05 x 1e4 + 3,70e-07 x 1e5 + 3,06e-08 x 1e6 - 1,94e-10 x 1e7
-    - 8,76e-12 x 1e8 + 4,09e-14 x 1e9
-    = 11,8 + 4,59 + 1,81 - 0,424 - 0,36 + 0,037 + 0,0306 - 0,00194
-      - 0,000876 + 0,0000409 = 17,480 824 9 dB.
+    1.18e+01 + 4.59e-01 x 1e1 + 1.81e-02 x 1e2 - 4.24e-04 x 1e3
+    - 3.60e-05 x 1e4 + 3.70e-07 x 1e5 + 3.06e-08 x 1e6 - 1.94e-10 x 1e7
+    - 8.76e-12 x 1e8 + 4.09e-14 x 1e9
+    = 11.8 + 4.59 + 1.81 - 0.424 - 0.36 + 0.037 + 0.0306 - 0.00194
+      - 0.000876 + 0.0000409 = 17.480 824 9 dB.
     """
     row = dict(_TABLE_A2)[20000]
     assert len(row) == 10
@@ -213,8 +213,8 @@ def test_table_a2_20_khz_row_reads_the_last_column_as_a9() -> None:
 def test_annex_a_diameter_edges(diameter: float, rows: object) -> None:
     """Each table's range is "d_low <= d < d_high", the last one "<= 2 m".
 
-    The printed titles: A.1 for 0,15 <= d < 0,2; A.2 for 0,2 <= d < 0,3;
-    A.3 for 0,3 <= d < 0,5; A.5 for 0,8 <= d < 1,25; A.6 for 1,25 <= d <= 2,
+    The printed titles: A.1 for 0.15 <= d < 0.2; A.2 for 0.2 <= d < 0.3;
+    A.3 for 0.3 <= d < 0.5; A.5 for 0.8 <= d < 1.25; A.6 for 1.25 <= d <= 2,
     so a diameter on a lower edge belongs to the higher table and 2 m
     itself is still served.
     """
@@ -225,7 +225,7 @@ def test_lowest_row_serves_every_band_at_or_below_it() -> None:
     """Table A.6's "<= 100" row: 50 Hz, 63 Hz, 80 Hz and 100 Hz agree."""
     values = emission.flow_modal_correction([50.0, 63.0, 80.0, 100.0], 25.0, 1.6)
     np.testing.assert_allclose(values, values[0])
-    # And the next band up is its own row: -9,02e-01 + 2,28e-02 x 25 = -0,332.
+    # And the next band up is its own row: -9.02e-01 + 2.28e-02 x 25 = -0.332.
     above = float(emission.flow_modal_correction([160.0], 25.0, 1.6)[0])
     assert above == pytest.approx(-0.332, abs=1e-9)
 
@@ -234,8 +234,8 @@ def test_inlet_and_outlet_are_not_mirror_images() -> None:
     """U < 0 on the inlet side, U > 0 on the outlet side (Table 1 NOTE 2).
 
     Eq. (7) is an odd-and-even polynomial, so the same speed reads as a
-    different correction on the two sides: at 1 kHz and d = 0,5 m the outlet
-    figure is 1,14 dB above the inlet one (2,42 - 1,28, Eqs (D.2), (D.3)).
+    different correction on the two sides: at 1 kHz and d = 0.5 m the outlet
+    figure is 1.14 dB above the inlet one (2.42 - 1.28, Eqs (D.2), (D.3)).
     """
     outlet = float(emission.flow_modal_correction([1000.0], 15.0, 0.5)[0])
     inlet = float(emission.flow_modal_correction([1000.0], -15.0, 0.5)[0])
@@ -249,9 +249,9 @@ def test_inlet_and_outlet_are_not_mirror_images() -> None:
 @pytest.mark.parametrize(
     ("velocity", "expected"),
     [
-        # -20 lg(1 - 15/340) = -20 lg(0,955882...) = +0,39186 dB
+        # -20 lg(1 - 15/340) = -20 lg(0.955882...) = +0.39186 dB
         (15.0, -20.0 * math.log10(1.0 - 15.0 / 340.0)),
-        # -20 lg(1 + 15/340) = -20 lg(1,044118...) = -0,37500 dB
+        # -20 lg(1 + 15/340) = -20 lg(1.044118...) = -0.37500 dB
         (-15.0, -20.0 * math.log10(1.0 + 15.0 / 340.0)),
     ],
 )
@@ -275,7 +275,7 @@ def test_eq8_omnidirectional_shields(
 
 
 def test_eq8_nose_cone_at_the_scope_limit() -> None:
-    """U = 20 m/s, the nose cone's limit: -20 lg(1 - 20/340) = 0,52658 dB."""
+    """U = 20 m/s, the nose cone's limit: -20 lg(1 - 20/340) = 0.52658 dB."""
     value = float(
         emission.flow_modal_correction([1000.0], 20.0, 0.5, shield="nose-cone")[0]
     )
@@ -305,11 +305,11 @@ def _flat(level: float, positions: int = 3) -> np.ndarray:
 
 
 def test_eq9_energy_average_over_positions() -> None:
-    """Eq. (9) written out: 10 lg[(1/n) sum 10^(0,1 Lpi)] over the positions.
+    """Eq. (9) written out: 10 lg[(1/n) sum 10^(0.1 Lpi)] over the positions.
 
     Three positions at 80, 83 and 86 dB in every band:
-    (10^8 + 10^8,3 + 10^8,6) / 3 = (1,000 + 1,995 + 3,981) x 10^8 / 3
-    = 2,3254 x 10^8, whose level is 83,665 dB.
+    (10^8 + 10^8.3 + 10^8.6) / 3 = (1.000 + 1.995 + 3.981) x 10^8 / 3
+    = 2.3254 x 10^8, whose level is 83.665 dB.
     """
     levels = np.stack([np.full(_BANDS.size, v) for v in (80.0, 83.0, 86.0)])
     res = emission.sound_power_in_duct(
@@ -360,8 +360,8 @@ def test_eq10_combined_correction_is_the_sum_of_three() -> None:
 def test_eq12_area_and_impedance_terms() -> None:
     """LW - Lp = 10 lg(S/S0) - 10 lg(rho c / 400), S = pi d^2 / 4.
 
-    For d = 0,5 m, S = pi x 0,25 / 4 = 0,196350 m^2 and
-    10 lg(0,196350) = -7,0697 dB; the impedance term is read against the
+    For d = 0.5 m, S = pi x 0.25 / 4 = 0.196350 m^2 and
+    10 lg(0.196350) = -7.0697 dB; the impedance term is read against the
     result's own rho c, whose value is pinned by the next test.
     """
     res = emission.sound_power_in_duct(
@@ -379,13 +379,13 @@ def test_eq12_area_and_impedance_terms() -> None:
 
 
 def test_duct_air_impedance_at_20_degrees() -> None:
-    """rho c of the duct air at 20 degC and 101,325 kPa.
+    """rho c of the duct air at 20 degC and 101.325 kPa.
 
-    c = 20,05 sqrt(273 + 20) = 343,20 m/s (the ISO 3741 form the package
-    uses) and rho = p / (R T) = 101 325 / (287,05 x 293,15) = 1,2041 kg/m^3
-    (the 1,204 kg/m^3 the intensity module documents for 20 degC), so
-    rho c = 413,25 N s/m^3 and the impedance term of Eq. (12) is
-    -10 lg(413,25 / 400) = -0,1416 dB.
+    c = 20.05 sqrt(273 + 20) = 343.20 m/s (the ISO 3741 form the package
+    uses) and rho = p / (R T) = 101 325 / (287.05 x 293.15) = 1.2041 kg/m^3
+    (the 1.204 kg/m^3 the intensity module documents for 20 degC), so
+    rho c = 413.25 N s/m^3 and the impedance term of Eq. (12) is
+    -10 lg(413.25 / 400) = -0.1416 dB.
     """
     res = emission.sound_power_in_duct(
         _flat(80.0),
@@ -402,10 +402,10 @@ def test_duct_air_impedance_at_20_degrees() -> None:
 
 
 def test_rho_c_scales_with_pressure_and_temperature() -> None:
-    """Halving the static pressure halves rho and takes 3,01 dB off the term.
+    """Halving the static pressure halves rho and takes 3.01 dB off the term.
 
     The ideal gas: rho is proportional to p, so -10 lg(rho c / 400) rises by
-    10 lg 2 = 3,0103 dB when p halves; c depends on temperature alone.
+    10 lg 2 = 3.0103 dB when p halves; c depends on temperature alone.
     """
     full = emission.sound_power_in_duct(
         _flat(80.0), frequencies=_BANDS, duct_diameter_m=0.5, flow_velocity=0.0
@@ -429,11 +429,11 @@ def test_rho_c_scales_with_pressure_and_temperature() -> None:
 def test_end_to_end_single_band_by_hand() -> None:
     """One band, one position, the whole chain multiplied out.
 
-    1 kHz, d = 0,5 m, U = +15 m/s, Lp = 80 dB, C1 = 0,2 dB, C2 = -0,4 dB,
-    20 degC and 101,325 kPa:
-    C3,4 = 2,42 dB (Eq. (D.2)); C = 0,2 - 0,4 + 2,42 = 2,22 dB;
-    Lp corrected = 82,22 dB; 10 lg(S) = -7,0697 dB;
-    -10 lg(413,25/400) = -0,1416 dB; LW = 82,22 - 7,0697 - 0,1416 = 75,009 dB.
+    1 kHz, d = 0.5 m, U = +15 m/s, Lp = 80 dB, C1 = 0.2 dB, C2 = -0.4 dB,
+    20 degC and 101.325 kPa:
+    C3,4 = 2.42 dB (Eq. (D.2)); C = 0.2 - 0.4 + 2.42 = 2.22 dB;
+    Lp corrected = 82.22 dB; 10 lg(S) = -7.0697 dB;
+    -10 lg(413.25/400) = -0.1416 dB; LW = 82.22 - 7.0697 - 0.1416 = 75.009 dB.
     The A-weighted level of a lone 1 kHz band is the band level (C_j = 0).
     """
     res = emission.sound_power_in_duct(
@@ -465,10 +465,10 @@ def test_table_c1_every_band(band: int, cj: float) -> None:
 
 
 def test_eq_c1_energy_sum_over_27_bands() -> None:
-    """A flat 80 dB spectrum: LWA = 80 + 10 lg sum 10^(0,1 C_j) over j = 1..27.
+    """A flat 80 dB spectrum: LWA = 80 + 10 lg sum 10^(0.1 C_j) over j = 1..27.
 
-    The sum of 10^(C_j/10) over Table C.1 is 15,61, so the A-weighted total
-    of a flat 80 dB spectrum is 80 + 11,94 = 91,94 dB. The band levels
+    The sum of 10^(C_j/10) over Table C.1 is 15.61, so the A-weighted total
+    of a flat 80 dB spectrum is 80 + 11.94 = 91.94 dB. The band levels
     themselves are equal only if the corrections are, so C3,4 is switched
     off by taking U = 0 with the one Annex A table whose a0 is zero in no
     band; the levels are read back from the result instead of assumed.
@@ -521,7 +521,7 @@ def test_expanded_uncertainty_is_twice_sigma_r() -> None:
     np.testing.assert_allclose(
         res.expanded_uncertainty, ref.ISO5136_COVERAGE_FACTOR * sigma
     )
-    assert float(res.expanded_uncertainty[0]) == 7.0  # 50 Hz: 2 x 3,5
+    assert float(res.expanded_uncertainty[0]) == 7.0  # 50 Hz: 2 x 3.5
 
 
 def test_table_2_is_reported_for_every_shield_and_says_so() -> None:
@@ -610,7 +610,7 @@ def test_refuses_a_non_positive_band() -> None:
 
 @pytest.mark.parametrize("diameter", [0.1, 0.149, 2.01, 7.1])
 def test_refuses_a_duct_outside_the_scope(diameter: float) -> None:
-    """Clause 1.1: 0,15 m to 2 m; Annexes H and I are not implemented."""
+    """Clause 1.1: 0.15 m to 2 m; Annexes H and I are not implemented."""
     with pytest.raises(ValueError, match="'duct_diameter_m' must be between"):
         emission.flow_modal_correction([1000.0], 10.0, diameter)
     with pytest.raises(ValueError, match="'duct_diameter_m' must be between"):
@@ -679,7 +679,7 @@ def test_refuses_a_non_finite_velocity() -> None:
 def test_refuses_above_10_khz_beyond_40_m_s(band: float) -> None:
     """The two informative extensions of the Annex A footnote do not compose.
 
-    The rows for 12,5 kHz to 20 kHz sit under their own "|U| <= 40 m/s" band
+    The rows for 12.5 kHz to 20 kHz sit under their own "|U| <= 40 m/s" band
     header (Tables A.1 to A.6), and the footnote extends only the frequency
     range, not the velocity. Past 40 m/s those polynomials diverge, so the
     combination is refused rather than answered.

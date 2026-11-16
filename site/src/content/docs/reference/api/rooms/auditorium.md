@@ -34,20 +34,20 @@ routes to the same number:
 
 The last two carry printed integers, 37 dB and 31 dB, and both are the
 correctly rounded value of a closed form: $10\lg(1600\pi)$ is
-37,0127 dB and $10\lg(400\pi)$ is 30,9921 dB. Rounded to whole
+37.0127 dB and $10\lg(400\pi)$ is 30.9921 dB. Rounded to whole
 decibels they land 6 dB apart, where the exact offsets are
-$10\lg 4 = 6{,}0206$ dB apart, so the reverberation-room route and
-the sound-power route cannot agree to better than 0,0206 dB. That is
+$10\lg 4 = 6.0206$ dB apart, so the reverberation-room route and
+the sound-power route cannot agree to better than 0.0206 dB. That is
 2 % of the 1 dB just-noticeable difference Table A.1 prints for G, and
 this module reproduces the standard's integers rather than the closed
-forms: a library that quietly used 30,9921 dB would disagree with every
+forms: a library that quietly used 30.9921 dB would disagree with every
 hand calculation done from the printed page.
 
 Both closed forms hold at a characteristic impedance of exactly
 $400~\text{N s/m}^3$, which is the value that makes the three reference
 quantities consistent: $p_0^2 S_0 / \rho c = (20\ \mu\mathrm{Pa})^2 / 400 = 1$ pW, the reference sound power. Neither equation prints that
-caveat. Air at 20 degrees and 101,325 kPa is nearer $413~\text{N s/m}^3$,
-worth 0,14 dB, an order of magnitude more than either rounding: the offsets
+caveat. Air at 20 degrees and 101.325 kPa is nearer $413~\text{N s/m}^3$,
+worth 0.14 dB, an order of magnitude more than either rounding: the offsets
 are a convention of the decibel scales, not a property of the air in the
 hall, and this module does not make them follow the weather.
 
@@ -171,9 +171,9 @@ $$
 An arithmetic mean of the decibel values is a different number, and a
 lower one, for any source that is not omnidirectional.
 
-The note asks for the measurement "at every 12,5 degrees", and 12,5
+The note asks for the measurement "at every 12,5 degrees", and 12.5
 degrees does not divide 360: 28 steps stop at 350 degrees and 29
-overshoot to 362,5. There is no set of bearings that follows the
+overshoot to 362.5. There is no set of bearings that follows the
 printed instruction literally, so what this function checks is what
 the instruction can mean, a uniform sampling of the full turn no
 coarser than the printed step: `N >= 29` bearings, 360/N degrees
@@ -198,7 +198,7 @@ band per row when it is handed a two-dimensional survey.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If fewer than `ceil(360 / 12,5) = 29` bearings lie along `axis`, or the levels are empty or non-finite. |
+| ValueError | If fewer than `ceil(360 / 12.5) = 29` bearings lie along `axis`, or the levels are empty or non-finite. |
 | TypeError | if `levels` holds a text or a value that is not a real number, or `axis` is not a single number. |
 
 ## DIRECTIVITY_STEP_DEG
@@ -245,14 +245,14 @@ ISO 3382-1:2009, Equation (A.14), the share of the first 80 ms that
 arrives from the side:
 
 $$
-J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+J_\mathrm{LF} = \frac{\int_{0.005}^{0.080} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}
 $$
 
 and Equation (A.15), the cosine-weighted variant that A.2.4 calls
 subjectively more accurate:
 
 $$
-J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080} \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t} {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+J_\mathrm{LFC} = \frac{\int_{0.005}^{0.080} \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t} {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}
 $$
 
 The modulus in (A.15) is printed and it matters: the figure-of-eight
@@ -518,7 +518,7 @@ $t + \tau$.
 
 `lag` and `correlation` carry the function itself over the search
 window, one row per band, so it can be drawn rather than summarised.
-B.4 assumes a just-noticeable difference of 0,075.
+B.4 assumes a just-noticeable difference of 0.075.
 
 ### InterauralCorrelationResult.plot()
 
@@ -553,10 +553,10 @@ Frequency-average the late lateral level over its four octave bands.
 ISO 3382-1:2009, Equation (A.17):
 
 $$
-L_{J,\mathrm{avg}} = 10 \lg \left[ 0{,}25 \sum_{i=1}^{4} 10^{L_{J_i}/10} \right] \ \mathrm{dB}
+L_{J,\mathrm{avg}} = 10 \lg \left[ 0.25 \sum_{i=1}^{4} 10^{L_{J_i}/10} \right] \ \mathrm{dB}
 $$
 
-The 0,25 is one quarter, so this is an energy **mean** and four equal
+The 0.25 is one quarter, so this is an energy **mean** and four equal
 band values return that value unchanged. It is the one exception
 footnote a of Table A.1 makes: every other quantity in that table is
 averaged arithmetically over its bands, and only $L_J$ is averaged
@@ -608,7 +608,7 @@ arrives after the early window, against the same free-field reference
 the sound strength uses:
 
 $$
-L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t} \ \mathrm{dB}
+L_J = 10 \lg \frac{\int_{0.080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t} {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t} \ \mathrm{dB}
 $$
 
 Where $J_\mathrm{LF}$ is a fraction and cancels its own
@@ -728,8 +728,8 @@ Per-band early lateral energy fraction (ISO 3382-1:2009, A.2.4).
 $J_\mathrm{LF}$ or $J_\mathrm{LFC}$ depending on
 `weighting`, which is `"squared"` for Equation (A.14) and
 `"cosine"` for Equation (A.15). Both are dimensionless and Table A.1
-gives them a just-noticeable difference of 0,05 and a typical range of
-0,05 to 0,35 over the 125 Hz to 1 kHz octave bands.
+gives them a just-noticeable difference of 0.05 and a typical range of
+0.05 to 0.35 over the 125 Hz to 1 kHz octave bands.
 
 **Attributes**
 
@@ -933,8 +933,8 @@ Whether the two differ by at least the JND, everywhere they are given.
 
 A listener could then be expected to hear it. A relative JND is a
 fraction of the mean of the two, the reading that does not depend on
-which one is called the reference. Judged settled: 1,95 and 2,05 s
-differ by the 0,1 s of a JND in decimal whichever side of it the
+which one is called the reference. Judged settled: 1.95 and 2.05 s
+differ by the 0.1 s of a JND in decimal whichever side of it the
 subtraction lands.
 
 ### PerceptibleDifference.just_noticeable_difference
@@ -996,13 +996,13 @@ reading into the free-field one. `A` follows from the room's
 reverberation time through Sabine's formula, Equation (A.6), which the
 library publishes as
 [`phonometry.room.sabine_absorption_area`](/phonometry/reference/api/rooms/steady-field/#sabine_absorption_area). Watch the constant when
-reproducing a hand calculation: (A.6) prints $A = 0{,}16\,V/T$,
-which is $24 \ln 10 / c_0$ at $c_0 = 345{,}4$ m/s, while
-that function defaults to 343 m/s and so to 0,1611. The difference moves
-$10\lg(A/S_0)$ by 0,030 dB; pass `speed_of_sound=345.39` to get
+reproducing a hand calculation: (A.6) prints $A = 0.16\,V/T$,
+which is $24 \ln 10 / c_0$ at $c_0 = 345.4$ m/s, while
+that function defaults to 343 m/s and so to 0.1611. The difference moves
+$10\lg(A/S_0)$ by 0.030 dB; pass `speed_of_sound=345.39` to get
 the printed constant back.
 
-The printed 37 dB is $10\lg(1600\pi) = 37{,}0127$ dB rounded;
+The printed 37 dB is $10\lg(1600\pi) = 37.0127$ dB rounded;
 see the module docstring for what that rounding costs.
 
 (A.5) also carries no Waterhouse correction, unlike the reverberation-room
@@ -1227,7 +1227,7 @@ $$
 
 The third route to G, and the only one that needs no free-field
 measurement at all: the 31 dB is the spread of a point source over the
-sphere of radius 10 m, $10\lg(4\pi \cdot 100) = 30{,}9921$ dB,
+sphere of radius 10 m, $10\lg(4\pi \cdot 100) = 30.9921$ dB,
 rounded. A.2.1 asks for the source's power level to be measured to
 ISO 3741, which the library implements in
 [`phonometry.emission.sound_power`](/phonometry/reference/api/power/sound-power/).
@@ -1358,10 +1358,10 @@ musician hears from the platform against the direct sound of their own
 instrument:
 
 $$
-\mathrm{ST}_\mathrm{Early} = 10 \lg \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}, \qquad \mathrm{ST}_\mathrm{Late} = 10 \lg \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t} {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
+\mathrm{ST}_\mathrm{Early} = 10 \lg \frac{\int_{0.020}^{0.100} p^2(t)\ \mathrm{d}t} {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}, \qquad \mathrm{ST}_\mathrm{Late} = 10 \lg \frac{\int_{0.100}^{1.000} p^2(t)\ \mathrm{d}t} {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
 $$
 
-Both are measured with the source and the microphone 1,0 m apart on the
+Both are measured with the source and the microphone 1.0 m apart on the
 platform, at the same height, with nothing reflecting within 2 m
 (C.2.1 and C.2.3). Because they share a denominator, their difference is
 a property of the hall alone and does not depend on how loud the direct
@@ -1379,7 +1379,7 @@ than that. The equations govern, and `docs/ERRATA.md` records the rest.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response measured on the platform (1D), 1,0 m from the acoustic centre of an omnidirectional source. |
+| `ir` | Impulse response measured on the platform (1D), 1.0 m from the acoustic centre of an omnidirectional source. |
 | `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default the 250 Hz to 2 kHz octave bands C.2.4 averages over. `None` measures the broadband response. |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). C.2.4 asks for octave bands. |

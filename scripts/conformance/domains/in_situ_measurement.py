@@ -26,7 +26,7 @@ position and the level-shift invariance of the two ISO 11820 losses.
 
 **Three rules for one correction.** The three documents correct for the
 background three different ways, and the rows say so: a stepped table that
-takes off 0,5 dB at a 9 dB margin, a stepped table that takes off 1 dB at the
+takes off 0.5 dB at a 9 dB margin, a stepped table that takes off 1 dB at the
 same margin, and the energy subtraction itself.
 
 **Printed numbers for ISO 11820, from elsewhere.** Annex B of ISO 14163:1998
@@ -101,6 +101,7 @@ is.
 from __future__ import annotations
 
 import math
+import re
 import warnings
 
 import numpy as np
@@ -133,6 +134,11 @@ _SOURCE = np.array([95.0, 96.0, 97.0, 95.0, 92.0, 88.0])
 _RECEIVER = np.array([70.0, 68.0, 65.0, 60.0, 55.0, 51.0])
 
 
+def _english(label: str) -> str:
+    """A label transcribed from a print, with the decimal point of English text."""
+    return re.sub(r"(?<=\d),(?=\d)", ".", label)
+
+
 @register(
     _IN_SITU,
     "ISO 11820:1996 Table 1",
@@ -162,7 +168,7 @@ def _chk_iso11820_table_one() -> Outcome:
     _IN_SITU,
     "ISO 11820:1996 Table 1",
     "The printed table is a rounded version of the logarithmic subtraction "
-    "and departs from it by under 0,35 dB",
+    "and departs from it by under 0.35 dB",
 )
 def _chk_iso11820_table_against_the_formula() -> Outcome:
     margins = np.arange(3, 11, dtype=float)
@@ -174,7 +180,7 @@ def _chk_iso11820_table_against_the_formula() -> Outcome:
         worst,
         0.35,
         unit="dB",
-        expected_label="under 0,35 dB over the eight rows",
+        expected_label="under 0.35 dB over the eight rows",
         computed_label=f"largest departure {worst:.3f} dB",
     )
 
@@ -241,19 +247,19 @@ def _chk_iso11820_sabine_area() -> Outcome:
 @register(
     _IN_SITU,
     "ISO 11820:1996 Eqs. (15) and (16)",
-    "The upstream distance is 1,5 equivalent diameters and the downstream "
+    "The upstream distance is 1.5 equivalent diameters and the downstream "
     "one is 12 sqrt(S_d) less 10 sqrt(S_f)",
 )
 def _chk_iso11820_measurement_distances() -> Outcome:
     printed = {
-        "upstream, S_u = 0,25 m2": 1.5 * math.sqrt(4.0 * 0.25 / math.pi),
-        "downstream, S_d = 0,25 m2 and S_f = 0,09 m2": 12.0 * 0.5 - 10.0 * 0.3,
+        "upstream, S_u = 0.25 m2": 1.5 * math.sqrt(4.0 * 0.25 / math.pi),
+        "downstream, S_d = 0.25 m2 and S_f = 0.09 m2": 12.0 * 0.5 - 10.0 * 0.3,
     }
     computed = {
-        "upstream, S_u = 0,25 m2": ph.noise_control.measurement_distance_upstream_m(
+        "upstream, S_u = 0.25 m2": ph.noise_control.measurement_distance_upstream_m(
             0.25
         ),
-        "downstream, S_d = 0,25 m2 and S_f = 0,09 m2": (
+        "downstream, S_d = 0.25 m2 and S_f = 0.09 m2": (
             ph.noise_control.measurement_distance_downstream_m(0.25, 0.09)
         ),
     }
@@ -344,7 +350,7 @@ _CARRIER_DB = 90.0
 
 #: ISO 11820 3.3 defines S as a quarter of the Sabine equivalent absorption
 #: area A, which is why its Equations (6), (10) and (12) carry 6 ln 10 where
-#: the two books below print 55,26 = 24 ln 10. The books print A, so a
+#: the two books below print 55.26 = 24 ln 10. The books print A, so a
 #: comparison with them is against four times what this library returns.
 _SABINE_QUARTERS = 4.0
 
@@ -393,7 +399,7 @@ _PRINTED_UPSTREAM_DIAMETERS = 1.5
 #: The two worked background subtractions, as (level, background, printed
 #: result) in decibels.
 _WORKED_SUBTRACTIONS = {
-    "Bies 1.4, 92,0 dB over 88,0 dB": oracle.BIES_EXAMPLE_1_4_DB,
+    "Bies 1.4, 92.0 dB over 88.0 dB": oracle.BIES_EXAMPLE_1_4_DB,
     "Barron 3-6, 83 dB over 77 dB": oracle.BARRON_EXAMPLE_3_6_DB,
 }
 
@@ -514,7 +520,7 @@ def _chk_holgado_mean_level() -> Outcome:
         worst,
         0.05,
         unit="dB",
-        expected_label="all 21 bands inside the 0,05 dB the printed tenth allows",
+        expected_label="all 21 bands inside the 0.05 dB the printed tenth allows",
         computed_label=f"worst departure {worst:.3f} dB",
     )
 
@@ -531,10 +537,10 @@ def _chk_holgado_insertion_loss() -> Outcome:
         _holgado_insertion_loss(table)
         for table in oracle.HOLGADO_INSERTION_TESTS.values()
     )
-    # Not the 0,05 dB the printed tenth would suggest. The thesis computed
+    # Not the 0.05 dB the printed tenth would suggest. The thesis computed
     # its insertion loss from unrounded position means and printed the inputs
-    # rounded to 0,1 dB and 0,01 s, and that rounding alone reaches about
-    # 0,13 dB. The three silencers are one campaign in one room, so this is
+    # rounded to 0.1 dB and 0.01 s, and that rounding alone reaches about
+    # 0.13 dB. The three silencers are one campaign in one room, so this is
     # one oracle of sixty-three bands rather than three of twenty-one.
     return numeric(
         0.0,
@@ -563,7 +569,7 @@ def _chk_barron_background_table() -> Outcome:
         worst,
         0.05,
         unit="dB",
-        expected_label="all 22 rows inside the 0,05 dB the printed tenth allows",
+        expected_label="all 22 rows inside the 0.05 dB the printed tenth allows",
         computed_label=f"worst departure {worst:.3f} dB",
     )
 
@@ -595,11 +601,11 @@ def _chk_worked_background_subtractions() -> Outcome:
     "ISO 11820:1996 Eqs. (2) and (5) / Barron (2003) Example 3-4, "
     "PDF pages 77 and 78, folios 65 and 66",
     "The energy mean of nine levels on a measurement surface, and the "
-    "10 lg (S/S0) of the 24,56 m2 that surface encloses",
+    "10 lg (S/S0) of the 24.56 m2 that surface encloses",
 )
 def _chk_barron_mean_and_area_term() -> Outcome:
     mean_label = "mean of nine levels"
-    area_label = "10 lg (S/S0) at 24,56 m2"
+    area_label = "10 lg (S/S0) at 24.56 m2"
     printed = {
         mean_label: oracle.BARRON_EXAMPLE_3_4_MEAN_DB,
         area_label: oracle.BARRON_EXAMPLE_3_4_AREA_TERM_DB,
@@ -636,7 +642,7 @@ def _chk_barron_sound_power() -> Outcome:
     )
     # The third term of the book's Eq. (3-30) is the characteristic impedance
     # of the room air, -10 lg(rho c / 400), which is the K of Equation (5) for
-    # this measurement. Dropping it leaves 90,5 dB and misses the printed
+    # this measurement. Dropping it leaves 90.5 dB and misses the printed
     # answer, so the row does exercise the term and not just the first two.
     correction = -10.0 * math.log10(oracle.BARRON_EXAMPLE_3_3_IMPEDANCE_RAYL / 400.0)
     level = float(
@@ -655,7 +661,7 @@ def _chk_barron_sound_power() -> Outcome:
     _IN_SITU,
     "ISO 11820:1996 Eqs. (6), (10) and (12) / Ver and Beranek (2006) "
     "Example 4.2, PDF pages 95 and 96, folios 90 and 91",
-    "The printed Sabine absorption area of a 200 m3 room at 21,4 C, where "
+    "The printed Sabine absorption area of a 200 m3 room at 21.4 C, where "
     "the speed of sound is 344 m/s",
 )
 def _chk_ver_beranek_absorption_area() -> Outcome:
@@ -715,8 +721,8 @@ def _chk_barron_absorption_area() -> Outcome:
     )
     # The example prints its reverberation times to three figures and its
     # absorption areas to four, so the residual is the rounding of the time
-    # rather than the arithmetic: 40,41 m2 needs T = 0,458 709 s, which is
-    # what the printed 0,459 s rounds from.
+    # rather than the arithmetic: 40.41 m2 needs T = 0.458 709 s, which is
+    # what the printed 0.459 s rounds from.
     return numeric(
         0.0,
         worst,
@@ -757,11 +763,14 @@ def _chk_barron_gas_density() -> Outcome:
     "coefficients a national guide prints for it",
 )
 def _chk_ntp668_flow_velocity() -> Outcome:
+    # The keys transcribe the guide's labels ("Ec. 3, air at 20 C, 1,2 kg/m3");
+    # the row names them with the decimal point of English text.
     printed = {
-        name: values[1] for name, values in oracle.NTP668_VELOCITY_COEFFICIENTS.items()
+        _english(name): values[1]
+        for name, values in oracle.NTP668_VELOCITY_COEFFICIENTS.items()
     }
     computed = {
-        name: round(
+        _english(name): round(
             float(
                 ph.noise_control.flow_velocity_m_s(
                     [oracle.MILLIMETRE_WATER_COLUMN_PA], values[0]
@@ -793,8 +802,8 @@ def _chk_vdi2081_gap_velocity() -> Outcome:
         free_area_m2=oracle.VDI2081_SPLITTER_FREE_AREA_M2,
     )
     # Driven from the volume flow rather than from the printed face velocity
-    # of 4,94 m/s: that figure is itself rounded, and feeding it back gives
-    # 14,82 m/s against the printed 14,81.
+    # of 4.94 m/s: that figure is itself rounded, and feeding it back gives
+    # 14.82 m/s against the printed 14.81.
     return numeric(
         oracle.VDI2081_SPLITTER_GAP_VELOCITY_M_S,
         velocity,
@@ -824,7 +833,7 @@ def _chk_fuchs_airway_velocity() -> Outcome:
                 free_area_m2=free_m2,
             )
             # The table truncates towards zero rather than rounding, which is
-            # visible where 66,67 m/s prints as 66 and 16,67 m/s as 16.
+            # visible where 66.67 m/s prints as 66 and 16.67 m/s as 16.
             matching += int(math.floor(computed) == printed)
     return count(matching, total, subject="printed airway velocities")
 
@@ -833,19 +842,19 @@ def _chk_fuchs_airway_velocity() -> Outcome:
     _IN_SITU,
     "ISO 11820:1996 Eq. (15) / Barron (2003) Example 5-7, PDF page 215, folio 203",
     "The area-equivalent diameter inside the upstream distance, for the "
-    "0,810 m2 cross-section of a 900 mm square duct",
+    "0.810 m2 cross-section of a 900 mm square duct",
 )
 def _chk_barron_equivalent_diameter() -> Outcome:
     distance = ph.noise_control.measurement_distance_upstream_m(
         oracle.BARRON_EXAMPLE_5_7_AREA_M2
     )
     # Half an oracle, and it says so: what Barron prints is the root
-    # sqrt(4 S / pi) = 1,016 m, and the 1,5 diameters in front of it are
+    # sqrt(4 S / pi) = 1.016 m, and the 1.5 diameters in front of it are
     # ISO 11820's own coefficient, read on the printed page of Equation (15)
     # and nowhere on his. The tolerance is what his four printed figures
-    # propagate to: 1,016 m carries half a millimetre of rounding, and the
-    # 1,5 of Equation (15) scales that to 0,75 mm. The printed area is the
-    # exact 0,9 m squared, so it adds nothing.
+    # propagate to: 1.016 m carries half a millimetre of rounding, and the
+    # 1.5 of Equation (15) scales that to 0.75 mm. The printed area is the
+    # exact 0.9 m squared, so it adds nothing.
     expected = (
         _PRINTED_UPSTREAM_DIAMETERS * oracle.BARRON_EXAMPLE_5_7_EQUIVALENT_DIAMETER_M
     )
@@ -877,7 +886,7 @@ def _chk_iso11821_background_window() -> Outcome:
         worst,
         5e-4,
         unit="dB",
-        expected_label="1,2563 dB at 6 dB and 0,4576 dB at 10 dB",
+        expected_label="1.2563 dB at 6 dB and 0.4576 dB at 10 dB",
         computed_label=(
             f"{computed['margin 6 dB']:.4f} dB and {computed['margin 10 dB']:.4f} dB"
         ),
@@ -1011,7 +1020,7 @@ def _chk_iso11821_printed_a_weighted_pair() -> Outcome:
     "1000 Hz octave at the operator position",
 )
 def _chk_iso11821_indoor_screen_pair() -> Outcome:
-    # The barrier stands 1,00 m from the machine and the operator 3,00 m from
+    # The barrier stands 1.00 m from the machine and the operator 3.00 m from
     # it, so the position is 2 m from the screen. Both levels are Barron's own
     # prediction, which is why this anchors the subtraction and not a method.
     unscreened, screened, printed = screen_oracle.BARRON_EXAMPLE_7_10_DB
@@ -1046,7 +1055,7 @@ def _chk_iso11821_printed_rounded_reductions() -> Outcome:
             strict=True,
         )
     }
-    # The raw differences are 9,8 / 15,2 / 19,6 dB; rounded is the integer
+    # The raw differences are 9.8 / 15.2 / 19.6 dB; rounded is the integer
     # report 7.4 c) asks for.
     computed = {
         band: float(value)
@@ -1063,8 +1072,8 @@ def _chk_iso11821_printed_rounded_reductions() -> Outcome:
 )
 def _chk_iso11821_path_level_pair() -> Outcome:
     # The 71 dB is the book's own decibel-addition rule of thumb rather than
-    # the energy sum of the three paths, which is 71,687 dB and would make the
-    # reduction 8,3 dB. The pair is used exactly as printed.
+    # the energy sum of the three paths, which is 71.687 dB and would make the
+    # reduction 8.3 dB. The pair is used exactly as printed.
     printed = {"screen": 9.0, "path 1": 15.0, "path 2": 10.0, "path 3": 18.0}
     paths = screen_oracle.SRL_1991_SCREENED_DB
     result = ph.noise_control.screen_attenuation(
@@ -1165,11 +1174,11 @@ def _chk_iso11821_background_at_the_upper_edge() -> Outcome:
 @register(
     _IN_SITU,
     "ISO 11821:1997 5.7 / ISO 140-3:1995 6.5, PDF page 13, folio 7",
-    "The 1,3 dB that ISO 140-3 and ISO 3744:2010 8.2.3 both print for a 6 dB "
+    "The 1.3 dB that ISO 140-3 and ISO 3744:2010 8.2.3 both print for a 6 dB "
     "margin, which is where the window of 5.7 opens",
 )
 def _chk_iso11821_background_sibling_value() -> Outcome:
-    # Neither sibling reads the margin the way 5.7 does: both apply 1,3 dB as
+    # Neither sibling reads the margin the way 5.7 does: both apply 1.3 dB as
     # a floor below 6 dB, where ISO 11821 refuses the measurement instead. The
     # value is borrowed for the boundary, not the rule around it.
     corrected = ph.noise_control.screen_background_corrected_level([70.0], [64.0])
@@ -1378,8 +1387,8 @@ def _chk_iso10847_wind_classes() -> Outcome:
 @register(
     _IN_SITU,
     "ISO 10847:1997 6.3.1",
-    "The short-distance ratio is strict at 0,1, the after case needs both "
-    "of its two inequalities, and a geometry past 0,1 on every ratio is short",
+    "The short-distance ratio is strict at 0.1, the after case needs both "
+    "of its two inequalities, and a geometry past 0.1 on every ratio is short",
 )
 def _chk_iso10847_short_distance() -> Outcome:
     at_the_ratio = ph.environment.check_short_distance(
@@ -1396,7 +1405,7 @@ def _chk_iso10847_short_distance() -> Outcome:
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=100.0,
     ).after
-    # (2 + 2) / 20 = 0,2 before, (2 + 3) / 10 = 0,5 on each side after.
+    # (2 + 2) / 20 = 0.2 before, (2 + 3) / 10 = 0.5 on each side after.
     short = ph.environment.check_short_distance(
         source_height_m=2.0,
         receiver_height_m=2.0,
@@ -1414,19 +1423,19 @@ def _chk_iso10847_short_distance() -> Outcome:
         int(agrees),
         1,
         subject="readings of 6.3.1",
-        expected_label="0,1 exactly is not short, both halves must hold, "
-        "and 0,2 and 0,5 are short",
+        expected_label="0.1 exactly is not short, both halves must hold, "
+        "and 0.2 and 0.5 are short",
     )
 
 
 @register(
     _IN_SITU,
     "ISO 10847:1997 7.2.2 and 8.1.2 a)",
-    "The reference microphone stands at least 1,5 m above the top edge, and "
+    "The reference microphone stands at least 1.5 m above the top edge, and "
     "higher where the 10 degree rule of the NOTE asks for more",
 )
 def _chk_iso10847_geometry() -> Outcome:
-    # What 7.2.2 and 8.1.2 a) print is a clearance of 1,5 m, an increment of
+    # What 7.2.2 and 8.1.2 a) print is a clearance of 1.5 m, an increment of
     # 10 degrees, a threshold of 15 m and a limit of 30 m or twice the
     # barrier-to-receiver distance. No distance and no resulting height is
     # printed with them, so these five are the printed rules applied at
@@ -1435,7 +1444,7 @@ def _chk_iso10847_geometry() -> Outcome:
     # separate row, because restating the formula here would prove nothing.
     # The clearance is a "shall" and the NOTE only raises the microphone, so
     # a 3 m barrier 5 m from the source, whose 10 degrees are reached at
-    # 4,34 m, keeps the 4,5 m of the clearance.
+    # 4.34 m, keeps the 4.5 m of the clearance.
     close = 10.0 * math.tan(math.atan(4.0 / 10.0) + math.radians(10.0))
     from_the_printed_rules = {
         "clearance": 5.5,
@@ -1479,7 +1488,7 @@ def _chk_iso10847_divergence() -> Outcome:
         worst,
         0.021,
         unit="dB",
-        expected_label="6,02 dB and 3,01 dB, printed rounded to 6 and 3",
+        expected_label="6.02 dB and 3.01 dB, printed rounded to 6 and 3",
         computed_label="6 dB and 3 dB",
     )
 
@@ -1492,7 +1501,7 @@ def _chk_iso10847_divergence() -> Outcome:
 # nothing about the wind classes, the background table or the receiver
 # correction.
 
-#: Half the last digit these campaigns print. They report to 0,1 dB, so a
+#: Half the last digit these campaigns print. They report to 0.1 dB, so a
 #: value that agrees to better than this agrees to everything the page states.
 _PRINTED_TENTH_DB = 0.05
 
@@ -1527,7 +1536,7 @@ def _chk_cordero_reported_insertion_loss() -> Outcome:
 @register(
     _IN_SITU,
     "Cordero et al. (2010) Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6)",
-    "The one value that campaign prints before rounding, 9,5 dBA, for the "
+    "The one value that campaign prints before rounding, 9.5 dBA, for the "
     "case with the background raised at the receiver alone",
 )
 def _chk_cordero_before_rounding() -> Outcome:
@@ -1566,7 +1575,7 @@ def _chk_lindeman_direct() -> Outcome:
     return count(
         matching,
         len(barrier_oracle.LINDEMAN_TABLE_8_DBA),
-        subject="runs within the 0,1 dB the table prints to",
+        subject="runs within the 0.1 dB the table prints to",
         expected_label=f"2/2 (worst departure {worst:.3f} dBA)",
     )
 
@@ -1575,7 +1584,7 @@ def _chk_lindeman_direct() -> Outcome:
     _IN_SITU,
     "Lindeman (1985) Tables 12 and 13, printed folio 41 (PDF page 9)",
     "The same barrier by the indirect method, five runs against an equivalent "
-    "site, and the mean insertion loss of 7,0 dBA the table reports",
+    "site, and the mean insertion loss of 7.0 dBA the table reports",
 )
 def _chk_lindeman_indirect() -> Outcome:
     levels = barrier_oracle.LINDEMAN_TABLE_13_DBA
@@ -1606,8 +1615,8 @@ def _chk_lindeman_indirect() -> Outcome:
 @register(
     _IN_SITU,
     "FHWA-PD-96-046 clause 6.6.3, printed folio 84 (PDF page 101)",
-    "The insertion loss worked through with every level printed, 8,8 dB and "
-    "8,7 dB, once the off-model edge adjustment is applied outside",
+    "The insertion loss worked through with every level printed, 8.8 dB and "
+    "8.7 dB, once the off-model edge adjustment is applied outside",
 )
 def _chk_fhwa_worked_example() -> Outcome:
     worst = 0.0
@@ -1629,7 +1638,7 @@ def _chk_fhwa_worked_example() -> Outcome:
         worst,
         _PRINTED_TENTH_DB,
         unit="dB",
-        expected_label="8,8 dB from the 56,2 dB typed, 8,7 dB from the 56,3 dB listed",
+        expected_label="8.8 dB from the 56.2 dB typed, 8.7 dB from the 56.3 dB listed",
         computed_label=f"largest departure {worst:.3f} dB",
     )
 
@@ -1641,17 +1650,18 @@ def _chk_fhwa_worked_example() -> Outcome:
     "reported as the even whole decibel, the rule Annex B calls preferable",
 )
 def _chk_iso10847_rounding_tie_break() -> Outcome:
-    # Annex B prints its ties at a rounding range of 10, where 1 225,0 becomes
-    # 1 220 and 1 235,0 becomes 1 240. Divided by that range they are the two
-    # exact halves 122,5 and 123,5 at the 1 dB rounding range clause 10 c)
+    # Annex B prints its ties at a rounding range of 10, where 1 225.0 becomes
+    # 1 220 and 1 235.0 becomes 1 240. Divided by that range they are the two
+    # exact halves 122.5 and 123.5 at the 1 dB rounding range clause 10 c)
     # asks for, and both are exact in binary, which the ties of the printed
-    # 0,1 range are not. Rule B, the other convention in use, would print
+    # 0.1 range are not. Rule B, the other convention in use, would print
     # 1 230 for the first of the two, so the pair discriminates.
     ties = {
-        # "B.3 Rule A, 1 225,0 at range 10" is reported as "1 225,0".
-        key.split(", ", 1)[1].split(" at ", 1)[
-            0
-        ]: rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        # "B.3 Rule A, 1 225,0 at range 10" is reported as 1 225.0, the
+        # decimal point of English text.
+        _english(key.split(", ", 1)[1].split(" at ", 1)[0]): (
+            rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        )
         for key in rounding.ISO80000_1_RULE_A_TIES
     }
     result = ph.environment.measured_insertion_loss_direct(
@@ -1831,7 +1841,7 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
 
 #: Geometries for the NOTE to 7.2.2, as (source-to-barrier distance, barrier
 #: height) in metres, all of them inside the 15 m under which the NOTE applies
-#: and all of them where the angle asks for more than the 1,5 m clearance.
+#: and all of them where the angle asks for more than the 1.5 m clearance.
 _TEN_DEGREE_GEOMETRIES_M = ((5.0, 4.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0))
 
 

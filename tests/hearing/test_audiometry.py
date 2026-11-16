@@ -182,7 +182,7 @@ def test_a_partial_measurement_is_judged_but_does_not_pass() -> None:
 
 
 def test_the_noise_floor_margin_is_six_decibels() -> None:
-    """11.1: a reading 6 dB above the floor is clear of it, 5,9 dB is not."""
+    """11.1: a reading 6 dB above the floor is clear of it, 5.9 dB is not."""
     levels = np.asarray(ISO8253_1_TABLE_2[125.0], dtype=float)
     floor = levels - 6.0
     floor[0] = levels[0] - 5.9
@@ -192,9 +192,9 @@ def test_the_noise_floor_margin_is_six_decibels() -> None:
 
 
 def test_a_reading_six_decibels_over_the_floor_through_arithmetic_is_clear() -> None:
-    """11.1 asks for a floor at least 6 dB below; 20,4 - 14,4 dB is 6 dB.
+    """11.1 asks for a floor at least 6 dB below; 20.4 - 14.4 dB is 6 dB.
 
-    In binary floating point the difference is 5,999999999999998 dB, one
+    In binary floating point the difference is 5.999999999999998 dB, one
     last bit short of the margin the clause lets through.
     """
     check = hearing.check_audiometric_ambient_noise(
@@ -382,7 +382,7 @@ def test_the_bracketing_threshold_rounds_the_mean_to_five_decibels() -> None:
 
 
 def test_the_library_sends_a_bracketing_tie_to_the_higher_step() -> None:
-    """6.2.4.3 says "nearest" and no more; 32,5 dB going to 35 dB is the
+    """6.2.4.3 says "nearest" and no more; 32.5 dB going to 35 dB is the
     library's convention for the tie, not a value the standard gives.
     """
     result = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
@@ -432,7 +432,7 @@ def test_the_automatic_threshold_averages_peaks_and_valleys_and_rounds_up() -> N
 
 
 def test_a_fraction_below_a_half_is_rounded_up_too() -> None:
-    """6.3.5 c) rounds up: a mean of 25,25 dB is 26 dB, not the nearest 25 dB."""
+    """6.3.5 c) rounds up: a mean of 25.25 dB is 26 dB, not the nearest 25 dB."""
     result = hearing.automatic_audiometry_threshold(
         [30, 20, 30.5, 20, 30.5, 20, 30.5, 20]
     )
@@ -460,7 +460,7 @@ def test_small_excursions_are_ignored_at_both_ends() -> None:
 
 
 def test_an_excursion_of_three_decibels_is_small_and_one_of_more_is_not() -> None:
-    """6.3.5 a): "3 dB or less" drops a 3 dB excursion and keeps a 3,5 dB one."""
+    """6.3.5 a): "3 dB or less" drops a 3 dB excursion and keeps a 3.5 dB one."""
     three = hearing.automatic_audiometry_threshold(
         [30, 20, 30, 27, 30, 20, 30, 20, 30, 20]
     )
@@ -611,7 +611,7 @@ def test_the_sweep_refuses_a_tracing_it_cannot_read(change: str, match: str) -> 
 
 
 def test_the_budget_reproduces_table_a2() -> None:
-    """Air conduction below 4 kHz, no masking: u = 4,9 dB and U = 10 dB."""
+    """Air conduction below 4 kHz, no masking: u = 4.9 dB and U = 10 dB."""
     budget = hearing.audiometric_uncertainty(1000.0)
     printed = ISO8253_1_TABLE_A2_COMPONENTS_DB
     np.testing.assert_allclose(
@@ -743,7 +743,7 @@ def test_the_vibrotactile_levels_cannot_be_changed() -> None:
 
 
 def test_forty_decibels_by_air_conduction_calls_for_caution() -> None:
-    """6.2.3.2: a hearing level of 40 dB or more, and 39,9 dB is less."""
+    """6.2.3.2: a hearing level of 40 dB or more, and 39.9 dB is less."""
     cautions = hearing.audiogram_cautions(
         [500.0, 1000.0, 2000.0], air_conduction_threshold_levels=[39.9, 40.0, 55.0]
     )

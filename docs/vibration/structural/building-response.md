@@ -76,13 +76,13 @@ $\sqrt{h/(h+b)}$, which is always below 1 and so shortens the period relative
 to the second form. It shortens it *least* for a tall narrow building, where
 the factor approaches 1, and most for a squat wide one.
 
-D.2 prints a **range** for each coefficient rather than a value: 0,014 to 0,03
-for $k_1$, 0,087 to 0,109 for $k_2$, 0,06 to 0,08 for $k_3$. The range is the
+D.2 prints a **range** for each coefficient rather than a value: 0.014 to 0.03
+for $k_1$, 0.087 to 0.109 for $k_2$, 0.06 to 0.08 for $k_3$. The range is the
 spread across the codes it collected them from, and the annex offers no way to
 choose inside it, so `fundamental_period` takes the midpoint unless you name a
 coefficient.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors.svg" alt="Elevation of an eighteen-storey building sixty metres tall and fifteen metres wide, drawn to scale on the ground, with four horizontal force arrows against one facade, the width b dimensioned parallel to them under the building, the height h dimensioned up that same side and clear of the arrows, and the fundamental translation mode drawn as the same outline swayed in the direction of the force; a note gives h over b as 4 and the slenderness factor, the square root of h over h plus b, as 0,89. To the right, four rows show what each predictor reads off that building and what it gives: the storey rule f = 10/n reads n alone and gives 0,56 hertz, a period of 1,8 seconds; Formula D.1, T = k1 h, reads h, with k1 from 0,014 to 0,03, and gives 0,56 to 1,19 hertz; Formula D.2, T = k2 h over the square root of b, reads h and b, with k2 from 0,087 to 0,109, and gives 0,59 to 0,74 hertz; Formula D.3, T = k3 h over the square root of b times the slenderness factor, reads h and b too, with k3 from 0,06 to 0,08, and gives 0,90 to 1,20 hertz, each row with its period beside it. A note says the four span 0,56 to 1,20 hertz on this one building and that D.2 gives no rule for choosing inside a range. Two boxes at the foot carry the fit of Figure D.1, f = 46/h or T = 0,022 h from 163 rectangular-plan buildings, which gives 0,77 hertz here with errors of plus or minus fifty per cent not uncommon, from 0,38 to 1,15 hertz, and the damping of D.4, for which no proven method exists and 0,5 % to 2,1 % of critical can occur, with large differences between orthogonal modes. Two lines under them say the annex is for when a measurement cannot be made or is limited by high damping or subcomponent resonances, and that a computer model correlates with measurement worse than f = 46/h, an unproven one not to be assumed more accurate" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors.svg" alt="Elevation of an eighteen-storey building sixty metres tall and fifteen metres wide, drawn to scale on the ground, with four horizontal force arrows against one facade, the width b dimensioned parallel to them under the building, the height h dimensioned up that same side and clear of the arrows, and the fundamental translation mode drawn as the same outline swayed in the direction of the force; a note gives h over b as 4 and the slenderness factor, the square root of h over h plus b, as 0.89. To the right, four rows show what each predictor reads off that building and what it gives: the storey rule f = 10/n reads n alone and gives 0.56 hertz, a period of 1.8 seconds; Formula D.1, T = k1 h, reads h, with k1 from 0.014 to 0.03, and gives 0.56 to 1.19 hertz; Formula D.2, T = k2 h over the square root of b, reads h and b, with k2 from 0.087 to 0.109, and gives 0.59 to 0.74 hertz; Formula D.3, T = k3 h over the square root of b times the slenderness factor, reads h and b too, with k3 from 0.06 to 0.08, and gives 0.90 to 1.20 hertz, each row with its period beside it. A note says the four span 0.56 to 1.20 hertz on this one building and that D.2 gives no rule for choosing inside a range. Two boxes at the foot carry the fit of Figure D.1, f = 46/h or T = 0.022 h from 163 rectangular-plan buildings, which gives 0.77 hertz here with errors of plus or minus fifty per cent not uncommon, from 0.38 to 1.15 hertz, and the damping of D.4, for which no proven method exists and 0.5 % to 2.1 % of critical can occur, with large differences between orthogonal modes. Two lines under them say the annex is for when a measurement cannot be made or is limited by high damping or subcomponent resonances, and that a computer model correlates with measurement worse than f = 46/h, an unproven one not to be assumed more accurate" width="100%"></picture>
 
 *The building the code below describes twice, and what each predictor takes
 from it. The three code forms give a period and a range for its coefficient,
@@ -112,10 +112,10 @@ for model, kwargs in (
 ## 2. The fit to measurement, and the error it admits
 
 D.2 closes by leaving the codes aside and fitting one curve to data: 163
-rectangular-plan buildings give $f = 46/h$ hertz, equivalently $T = 0{,}022\,h$
+rectangular-plan buildings give $f = 46/h$ hertz, equivalently $T = 0.022\,h$
 seconds. Two things about that line are worth carrying away.
 
-The first is quiet and this library pins it with a test: **0,022 is also the
+The first is quiet and this library pins it with a test: **0.022 is also the
 middle of the $k_1$ range** the codes span. The oldest and crudest of the code
 forms, taken at the centre of its spread, is the measured fit.
 
@@ -126,7 +126,7 @@ correlation between *computed* frequencies, from a standard structural model,
 and measured ones is **worse** than the correlation with $46/h$, because a
 model is only as good as its idea of what the building is made of.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction.svg" alt="Two panels. The left panel plots fundamental frequency against building height on logarithmic axes from six to two hundred and fifty metres: the f = 46/h fit as a solid line inside a shaded plus-or-minus fifty per cent band, with the three code forms drawn over it, the height form lying on the fit, and the height-and-width and slenderness forms each crossing it from below to above as the building grows taller, the slenderness form crossing at about thirty metres and the height-and-width form at about eighty. The right panel gives, for one sixty-metre building fifteen metres wide, the frequency span each coefficient range allows as a horizontal bar: 0,56 to 1,19 hertz for the height form, 0,59 to 0,74 for the height-and-width form and 0,90 to 1,20 for the slenderness form, against a vertical line at the 0,77 hertz the fit gives." width="94%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction.svg" alt="Two panels. The left panel plots fundamental frequency against building height on logarithmic axes from six to two hundred and fifty metres: the f = 46/h fit as a solid line inside a shaded plus-or-minus fifty per cent band, with the three code forms drawn over it, the height form lying on the fit, and the height-and-width and slenderness forms each crossing it from below to above as the building grows taller, the slenderness form crossing at about thirty metres and the height-and-width form at about eighty. The right panel gives, for one sixty-metre building fifteen metres wide, the frequency span each coefficient range allows as a horizontal bar: 0.56 to 1.19 hertz for the height form, 0.59 to 0.74 for the height-and-width form and 0.90 to 1.20 for the slenderness form, against a vertical line at the 0.77 hertz the fit gives." width="94%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -187,8 +187,8 @@ than a formula moves the answer by a factor of two.*
 ## 3. Damping, which nothing predicts
 
 D.4 is short and the shortness is the message. No proven method of predicting
-damping exists. What the annex reports is measurement: between **0,5 % and
-2,1 %** of critical on ten buildings where soil-structure interaction was
+damping exists. What the annex reports is measurement: between **0.5 % and
+2.1 %** of critical on ten buildings where soil-structure interaction was
 negligible, with the two orthogonal translation modes of the same building
 often far apart. Damping is partly a function of construction procedure and
 workmanship, so anticipate large errors.

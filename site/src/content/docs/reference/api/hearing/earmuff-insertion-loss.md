@@ -23,7 +23,7 @@ $$
 
 in bands from at least 63 Hz to 8 kHz (5.3), from at least three fittings
 unless the device's repeatability is known (5.4.3), reported to the nearest
-0,1 dB and drawn with increasing values downwards (Clause 6).
+0.1 dB and drawn with increasing values downwards (Clause 6).
 
 **What it is for, and what it is not (Clause 1).** The method checks
 production spreads for type approval or certification and the change of
@@ -60,8 +60,8 @@ $$
 
 (Formula (B.2)). The standard uncertainty of each level is the standard
 deviation of the mean of the repeated measurements; Table B.1 prints typical
-values, 0,5 dB open, 1,0 dB occluded, 0,3 dB, 0,5 dB and 0,2 dB, which give
-$u$ = 1,3 dB and $U$ = 2,6 dB
+values, 0.5 dB open, 1.0 dB occluded, 0.3 dB, 0.5 dB and 0.2 dB, which give
+$u$ = 1.3 dB and $U$ = 2.6 dB
 ([`EARMUFF_INSERTION_LOSS_UNCERTAINTY`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuff_insertion_loss_uncertainty)).
 
 Clause, table and formula numbers refer to ISO 4869-3:2007(E).
@@ -140,7 +140,7 @@ Is the random-incidence field of the test site good enough? (5.2.2).
 
 With the fixture removed, the level read by an omnidirectional microphone
 kept in one orientation at six positions 150 mm from the reference point,
-on the front-back, right-left and up-down axes, stays within ±2,5 dB of
+on the front-back, right-left and up-down axes, stays within ±2.5 dB of
 the level at the reference point, and the right and left positions within
 3 dB of each other; from the 500 Hz band up, the levels a directional
 microphone reads at the reference point in any two directions, the
@@ -204,9 +204,9 @@ $$
 
 Annex B's uncertainty is evaluated band by band: the standard uncertainty
 of each mean level is the standard deviation of the mean of its repeated
-measurements (B.3), or Table B.1's typical 0,5 dB open and 1,0 dB occluded
+measurements (B.3), or Table B.1's typical 0.5 dB open and 1.0 dB occluded
 when fewer than two were given, and the three $\delta$ terms default
-to Table B.1's 0,3 dB, 0,5 dB and 0,2 dB.
+to Table B.1's 0.3 dB, 0.5 dB and 0.2 dB.
 
 The result is an insertion loss on a fixture. It screens production and
 ageing and is not the real-ear attenuation ISO 4869-2 needs (Clause 1);
@@ -278,8 +278,8 @@ the ISO 4869-2 methods.
 | `repetition_insertion_loss` | The mean open level less each fitting's occluded level, one row per repetition, in dB. |
 | `open_levels` | The levels without the earmuff, one row per measurement, in dB. |
 | `occluded_levels` | The levels with it, one row per fitting, in dB. |
-| `open_uncertainty_db` | The standard uncertainty of the mean open level per band, in dB: the standard deviation of the mean when at least two open measurements were given, else Table B.1's 0,5 dB. |
-| `occluded_uncertainty_db` | That of the mean occluded level, from at least two fittings, else Table B.1's 1,0 dB. |
+| `open_uncertainty_db` | The standard uncertainty of the mean open level per band, in dB: the standard deviation of the mean when at least two open measurements were given, else Table B.1's 0.5 dB. |
+| `occluded_uncertainty_db` | That of the mean occluded level, from at least two fittings, else Table B.1's 1.0 dB. |
 | `fixture_uncertainty_db` | $u(\delta_1)$, in dB. |
 | `sound_field_uncertainty_db` | $u(\delta_2)$, in dB. |
 | `equipment_uncertainty_db` | $u(\delta_3)$, in dB. |
@@ -404,7 +404,7 @@ the tester's judgement.
 
 *property*
 
-The insertion loss as Clause 6 reports it, to the nearest 0,1 dB.
+The insertion loss as Clause 6 reports it, to the nearest 0.1 dB.
 
 **Returns:** One value per band, halves rounded upwards.
 

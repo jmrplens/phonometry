@@ -86,10 +86,10 @@ _CLAUSE_WORD = r"(?:(?:cl\.|clause|apartado|§)\s*)?"
 
 #: A clause number written with a decimal comma straight after a standard's
 #: designation, in each form the save-time pass writes one from an English
-#: citation: ``ISO 7626-5, 6,4``, ``IEC 60268-4 17,2``, ``ISO 7626-5 cl. 6,4``,
-#: ``ECAC Doc 29 4,5`` and, in parentheses, ``ISO 7626-5 (6,4)``. In
+#: citation: “ISO 7626-5, 6,4”, “IEC 60268-4 17,2”, “ISO 7626-5 cl. 6,4”,
+#: “ECAC Doc 29 4,5” and, in parentheses, ``ISO 7626-5 (6,4)``. In
 #: parentheses the number must close them or be followed by a comma or a
-#: semicolon, so that a reading such as ``ISO 9613-2 (2,5 dB)`` is left alone.
+#: semicolon, so that a reading such as “ISO 9613-2 (2,5 dB)” is left alone.
 _CLAUSE_WITH_COMMA = re.compile(
     _DESIGNATION
     + r"(?:,?\s+"

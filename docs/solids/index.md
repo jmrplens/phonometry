@@ -49,7 +49,7 @@ of the three and the one a time-domain elastic solver integrates.
 The [wave speeds guide](wave-speeds.md) draws the three
 cross-sections side by side, with what holds each of them.
 
-For the steel of Hopkins Table A2, with $\rho = 7800$ kg/m³, $\nu = 0{,}28$ and
+For the steel of Hopkins Table A2, with $\rho = 7800$ kg/m³, $\nu = 0.28$ and
 a plate speed of 5 270 m/s, the three are 5 059, 5 270 and 5 720 m/s. Reading
 one into another is a four to thirteen per cent error in whatever it feeds, and it
 is an easy mistake to make, because a table that prints one of them often calls

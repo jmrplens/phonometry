@@ -132,15 +132,15 @@ __all__ = [
 ]
 
 #: Mass ``m`` of one ISO tapping-machine hammer, in kg (ISO 10140-5; Hopkins
-#: 3.6.3: "a free-falling mass of 0,5 kg").
+#: 3.6.3: "a free-falling mass of 0.5 kg").
 TAPPING_HAMMER_MASS_KG: float = 0.5
 
 #: Drop height ``h`` of the hammer, in m (Hopkins 3.6.3: "a drop-height of
-#: 0,04 m").
+#: 0.04 m").
 TAPPING_DROP_HEIGHT_M: float = 0.04
 
 #: Impact repetition rate ``fi`` of the machine, in Hz: five hammers giving
-#: ten impacts per second, so ``Ti = 1/fi = 0,1 s`` (Hopkins 3.6.3).
+#: ten impacts per second, so ``Ti = 1/fi = 0.1 s`` (Hopkins 3.6.3).
 TAPPING_IMPACT_RATE_HZ: float = 10.0
 
 #: Radius ``r`` of the circular contact area assumed for the hammer, in m
@@ -149,12 +149,12 @@ TAPPING_IMPACT_RATE_HZ: float = 10.0
 TAPPING_HAMMER_RADIUS_M: float = 0.015
 
 #: Standard acceleration of free fall ``g``, in m/s²; reproduces the printed
-#: impact velocity ``vo = 0,886 m/s`` of Hopkins 3.6.3.1.
+#: impact velocity ``vo = 0.886 m/s`` of Hopkins 3.6.3.1.
 _GRAVITY: float = 9.81
 
 #: Band-width factors ``B`` of Hopkins (2007) Eq. (3.91), PDF page 305
-#: (printed p. 278): ``B = 0,23 f`` for one-third-octave bands and
-#: ``B = 0,707 f`` for octave bands.
+#: (printed p. 278): ``B = 0.23 f`` for one-third-octave bands and
+#: ``B = 0.707 f`` for octave bands.
 _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 
 #: Half-band ratios ``fupper/fcentre`` of the base-ten band system, used to
@@ -162,8 +162,8 @@ _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 #: set (3 one-third octaves, 1 octaves).
 _HALF_BAND_RATIO: dict[int, float] = {3: 10.0**0.05, 1: 10.0**0.15}
 
-#: Coefficient of the short-duration mean-square force ``F²rms = 3,9 B``
-#: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3,925.
+#: Coefficient of the short-duration mean-square force ``F²rms = 3.9 B``
+#: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3.925.
 _SHORT_PULSE_COEFFICIENT: float = 3.9
 
 #: Reference power of the power-input level, in W: the ``W0 = 10⁻¹² W``
@@ -173,20 +173,20 @@ _SHORT_PULSE_COEFFICIENT: float = 3.9
 _POWER_REFERENCE: float = REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Constant of ISO 12354-2:2017 Formula (C.2), ``fo = 160 √(s'/m')`` with ``s'``
-#: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159,15``; the
+#: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159.15``; the
 #: standard's rounded 160 is kept because its own Annex G example prints
-#: ``fo = 52,8 Hz`` for ``s' = 8 MN/m³`` and ``m' = 73,5 kg/m²``.
+#: ``fo = 52.8 Hz`` for ``s' = 8 MN/m³`` and ``m' = 73.5 kg/m²``.
 _ISO_RESONANCE_CONSTANT: float = 160.0
 
 #: Slopes of the floating-floor improvement laws, in dB per decade.
 _SLOPE_EN12354: float = 30.0
 _SLOPE_CREMER: float = 40.0
 
-#: ISO 12354-2:2017 Formula (C.4), screeds: ``13 lg(m') − 14,2 lg(s') + 20,8``.
+#: ISO 12354-2:2017 Formula (C.4), screeds: ``13 lg(m') − 14.2 lg(s') + 20.8``.
 _DELTA_LW_SCREED = (13.0, -14.2, 20.8)
 
 #: ISO 12354-2:2017 Formula (C.5), asphalt / dry floors:
-#: ``(−0,21 m' − 5,45) lg(s') + 0,46 m' + 23,8``.
+#: ``(−0.21 m' − 5.45) lg(s') + 0.46 m' + 23.8``.
 _DELTA_LW_ASPHALT = (-0.21, -5.45, 0.46, 23.8)
 
 #: How closely a quantity of a result built by hand has to be what its
@@ -220,8 +220,8 @@ def hammer_impact_velocity(
     The ISO tapping machine's nominal 40 mm drop gives
     :math:`v_0 = 0.886` m/s.
 
-    :param drop_height_m: Drop height ``h``, in m (Default: 0,04).
-    :param gravity: Acceleration of free fall ``g``, in m/s² (Default: 9,81).
+    :param drop_height_m: Drop height ``h``, in m (Default: 0.04).
+    :param gravity: Acceleration of free fall ``g``, in m/s² (Default: 9.81).
     :return: The impact velocity ``vo``, in m/s.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``drop_height_m`` or ``gravity`` is not a single number.
@@ -246,9 +246,9 @@ def plate_contact_stiffness(
     top of it.
 
     :param youngs_modulus: Young's modulus ``E`` of the plate, in Pa.
-    :param poisson_ratio: Poisson's ratio ``ν`` of the plate (Default: 0,2,
+    :param poisson_ratio: Poisson's ratio ``ν`` of the plate (Default: 0.2,
         the value Hopkins Table A2 estimates for concrete and masonry).
-    :param radius: Contact radius ``r``, in m (Default: 0,015).
+    :param radius: Contact radius ``r``, in m (Default: 0.015).
     :return: The contact stiffness ``K``, in N/m.
     :raises ValueError: If an input is not positive and finite, or
         :math:`\lvert \nu \rvert \ge 1`.
@@ -280,7 +280,7 @@ def covering_contact_stiffness(
 
     :param youngs_modulus: Young's modulus ``E`` of the covering, in Pa.
     :param thickness_m: Covering thickness ``d``, in m.
-    :param radius: Contact radius ``r``, in m (Default: 0,015).
+    :param radius: Contact radius ``r``, in m (Default: 0.015).
     :return: The contact stiffness ``K``, in N/m.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``radius``, ``thickness_m`` or ``youngs_modulus`` is not a
@@ -336,7 +336,7 @@ def tapping_cut_off_frequency(
     :param impedance: Driving-point impedance ``Zdp`` of the floor, in N.s/m
         (for a homogeneous plate,
         :func:`phonometry.vibration.infinite_plate_impedance`).
-    :param mass: Hammer mass ``m``, in kg (Default: 0,5).
+    :param mass: Hammer mass ``m``, in kg (Default: 0.5).
     :return: The cut-off frequency ``fco``, in Hz.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``contact_stiffness``, ``impedance`` or ``mass`` is not a
@@ -366,7 +366,7 @@ def hammer_limiting_frequency(
     :math:`f_z = 4 \sqrt{m_1 B_1}/(\pi m_\mathrm{h})`.
 
     :param impedance: Driving-point impedance ``Zdp``, in N.s/m.
-    :param mass: Hammer mass ``m``, in kg (Default: 0,5).
+    :param mass: Hammer mass ``m``, in kg (Default: 0.5).
     :return: The limiting frequency ``flimit``, in Hz.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``impedance`` or ``mass`` is not a single number.
@@ -436,14 +436,14 @@ def force_pulse(
     :math:`0 \le t \le \pi/\beta` reproduces that spectrum.
 
     The over-critical pulse has no such cut and decays for all ``t``; it is
-    evaluated in a form that stays finite over the whole 0,1 s between
+    evaluated in a form that stays finite over the whole 0.1 s between
     impacts rather than one that overflows partway through it.
 
     :param time: Time ``t`` since the impact, in s (scalar or array,
         :math:`\ge 0`).
     :param contact_stiffness: Contact stiffness ``K``, in N/m.
     :param impedance: Driving-point impedance ``Zdp``, in N.s/m.
-    :param mass: Hammer mass ``m``, in kg (Default: 0,5).
+    :param mass: Hammer mass ``m``, in kg (Default: 0.5).
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
     :return: The force ``F1(t)``, in N, with the same shape as ``time``; never negative.
@@ -477,7 +477,7 @@ def force_pulse(
         # Both a − γ and a + γ are positive (a² − γ² = ωo² > 0), so neither
         # exponential ever grows, whereas the literal form multiplies an
         # e^(-a t) that underflows to zero by a sinh that overflows to
-        # infinity and returns NaN well inside the machine's own 0,1 s impact
+        # infinity and returns NaN well inside the machine's own 0.1 s impact
         # period. ``expm1`` keeps the near-critical case (γ t ≪ 1, where the
         # two exponentials nearly cancel) accurate to full precision.
         pulse = (
@@ -574,7 +574,7 @@ class TappingForceResult(OwnsArrays):
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
     :ivar fraction: Band set used for ``mean_square_force``, 3 for one-third
         octaves or 1 for octaves. One of ``1`` or ``3``.
-    :ivar mass: Hammer mass ``m`` used, in kg (Default: 0,5).
+    :ivar mass: Hammer mass ``m`` used, in kg (Default: 0.5).
 
     Whether the oscillation is over-critical is read from ``K``, ``Zdp`` and
     ``m`` (:attr:`over_critical`), so it is not a field.
@@ -756,7 +756,7 @@ def tapping_force_spectrum(
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param contact_stiffness: Contact stiffness ``K``, in N/m.
     :param impedance: Driving-point impedance ``Zdp`` of the floor, in N.s/m.
-    :param mass: Hammer mass ``m``, in kg (Default: 0,5).
+    :param mass: Hammer mass ``m``, in kg (Default: 0.5).
     :param impact_rate: Impact repetition rate ``fi``, in Hz (Default: 10).
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
@@ -983,7 +983,7 @@ def covering_improvement(
         (:func:`plate_contact_stiffness`).
     :param impedance: Driving-point impedance ``Zdp`` of the base floor, in
         N.s/m; unchanged by the covering.
-    :param mass: Hammer mass ``m``, in kg (Default: 0,5).
+    :param mass: Hammer mass ``m``, in kg (Default: 0.5).
     :param impact_rate: Impact repetition rate ``fi``, in Hz (Default: 10);
         it sets the spacing of the Fourier lines the bands average over.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves. One of

@@ -246,8 +246,8 @@ def _lab_airborne_example() -> tuple[object, ReportMetadata, str]:
 
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example sound
     reduction index (Rw = 30 (-2; -3) dB): with the free test opening area
-    S = 10 m2 equal to the receiving-room absorption area A = 0,16 V / T (here
-    V = 50 m3, T = 0,8 s give A = 10 m2), the term 10 lg(S/A) vanishes and
+    S = 10 m2 equal to the receiving-room absorption area A = 0.16 V / T (here
+    V = 50 m3, T = 0.8 s give A = 10 m2), the term 10 lg(S/A) vanishes and
     R = L1 - L2 reproduces that published curve exactly.
     """
     r = np.array(
@@ -302,8 +302,8 @@ def _lab_impact_example() -> tuple[object, ReportMetadata, str]:
 
     The reported spectrum is the ISO 717-2:2020 Annex C worked-example
     normalized impact sound pressure level (Ln,w = 79 (-11) dB): with the
-    receiving-room absorption area A = 0,16 V / T equal to the reference
-    A0 = 10 m2 (here V = 50 m3, T = 0,8 s give A = 10 m2), the term
+    receiving-room absorption area A = 0.16 V / T equal to the reference
+    A0 = 10 m2 (here V = 50 m3, T = 0.8 s give A = 10 m2), the term
     10 lg(A/A0) vanishes and Ln = Li reproduces that published curve exactly.
     """
     li = np.array(
@@ -361,7 +361,7 @@ def _intensity_example() -> tuple[object, ReportMetadata, str]:
     levels LIn that make Formula (7) return that curve (with Lp1 = 85 dB, a
     measurement surface Sm = 12 m2 and a specimen S = 10 m2) pins the fiche to
     the published RI,w = 30 (-2; -3) dB. The Annex B adaptation term
-    Kc = 10 lg(1 + 61,4/f) (Formula (B.2)) is annexed so the verbose table
+    Kc = 10 lg(1 + 61.4/f) (Formula (B.2)) is annexed so the verbose table
     shows the Kc-modified index RI,M beside RI.
     """
     ri = np.array(
@@ -480,7 +480,7 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
     The reduction of impact sound pressure level rises with frequency,
      delta-L = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71] dB
     over the 16 one-third-octave bands 100 Hz to 3150 Hz (values read to
-    +/- 0,5 dB from the figure's vector chart).
+    +/- 0.5 dB from the figure's vector chart).
 
     The weighted improvement follows ISO 717-2:2020 Clause 5: applied to the
     heavyweight reference floor L_n,r,0 (Table 4, rated L_n,r,0,w = 78 dB and
@@ -570,11 +570,11 @@ def _floor_covering_form_example() -> tuple[object, ReportMetadata, str]:
 def _joint_form_example() -> tuple[object, ReportMetadata, str]:
     """The form of ISO 10140-1:2021 Figure J.7: a rebate seal per metre.
 
-    An EPDM rebate seal on a door leaf at its nominal gap of 5 mm, 5,4 m of
+    An EPDM rebate seal on a door leaf at its nominal gap of 5 mm, 5.4 m of
     seal in the test opening, measured against the maximum of the arrangement
     with the gap sealed on both sides. Above 3 150 Hz the seal reaches within
     a few decibels of that maximum, so the 4 000 Hz band carries the fixed
-    1,3 dB correction as a minimum value and the 5 000 Hz band is set to the
+    1.3 dB correction as a minimum value and the 5 000 Hz band is set to the
     maximum itself, in brackets (J.1). The same seal is the one the guide's
     figure draws.
     """
@@ -854,7 +854,7 @@ def _field_facade_example() -> tuple[object, ReportMetadata, str]:
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example curve
     (rated 30 (-2; -3) dB): with the outdoor level 2 m in front of the facade
     set to that curve plus 40 dB, a receiving-room level of 40 dB and the
-    reverberation time equal to T0 = 0,5 s in every band (so the
+    reverberation time equal to T0 = 0.5 s in every band (so the
     standardization term vanishes), D2m,nT reproduces that published curve and
     the fiche boxes D2m,nT,w = 30 (-2; -3) dB.
     """

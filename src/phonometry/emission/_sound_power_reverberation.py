@@ -134,7 +134,7 @@ _K1_EDGE_HIGH_HZ = 6300.0
 #: Background margin at or above which the background is negligible and K1 = 0
 #: (ISO 3741:2010, 9.1.2).
 _K1_UPPER_DB = 15.0
-#: The T60 > V/S room-absorptivity criterion covers bands below 6,3 kHz
+#: The T60 > V/S room-absorptivity criterion covers bands below 6.3 kHz
 #: (ISO 3741:2010, 5.3, Eq. 7); distinct from the K1 edge above.
 _ABSORPTION_CRITERION_MAX_HZ = 6300.0
 #: Minimum microphone positions in an unqualified room (ISO 3741:2010, 8.3, 8.4.1).
@@ -147,7 +147,7 @@ _SM_CRITERION_DB = 1.5
 #: the mean-square pressure and the Sabine absorption area into a power against
 #: the two reference quantities (ISO 3741:2010, 9.1.4).
 _DIFFUSE_FIELD_CONSTANT_DB = -6.0
-#: The Sabine constant 55,26 of A = (55,26/c)(V/T60) and the 4,34 = 10 lg e of
+#: The Sabine constant 55.26 of A = (55.26/c)(V/T60) and the 4.34 = 10 lg e of
 #: the first-order Eyring term (ISO 3741:2010, 9.1.4).
 _SABINE_CONSTANT = 55.26
 _EYRING_TERM_DB = 4.34
@@ -432,11 +432,11 @@ def reverberation_background_correction(
 ) -> float | NDArray[np.float64]:
     r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
 
-    :math:`K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})`, the decibels to take off
+    :math:`K_1 = -10 \lg (1 - 10^{-0.1 \Delta L_p})`, the decibels to take off
     a band level measured with the background in it. The qualification of
     clause 9.1.2 is frequency dependent: a margin of 15 dB or more needs no
     correction at all, and below the lower criterion, 6 dB for the bands at or
-    under 200 Hz and at or over 6,3 kHz and 10 dB between them, the correction
+    under 200 Hz and at or over 6.3 kHz and 10 dB between them, the correction
     is held at the criterion value and the corrected level is an upper bound.
 
     Other standards reach for this one by name rather than repeat it:
@@ -631,7 +631,7 @@ def _room_qualification_warnings(
     if np.any(below_6k3 & (settled(t60 - floor) <= 0.0)):
         warn_caller(
             f"Reverberation time falls to or below the V/S floor ({floor:g} s) "
-            "in one or more bands below 6,3 kHz; the room is too absorptive and "
+            "in one or more bands below 6.3 kHz; the room is too absorptive and "
             "must be qualified per Annex C (ISO 3741:2010, 5.3, Eq. 7).",
             SoundPowerWarning,
         )
@@ -644,7 +644,7 @@ def _position_sampling_warnings(
     """Emit the microphone-sampling advisories for a per-position level array.
 
     Flags fewer than 6 positions (ISO 3741:2010, 8.3, 8.4.1) and an
-    inter-position standard deviation above the sM criterion (1,5 dB;
+    inter-position standard deviation above the sM criterion (1.5 dB;
     8.4.2.2, Eq. 10). These sampling criteria need no room geometry, so they
     apply to both the direct and the comparison methods. A 1D (already-averaged)
     spectrum carries no per-position information and is skipped.
@@ -666,7 +666,7 @@ def _position_sampling_warnings(
         if np.any(settled(s_m) > _SM_CRITERION_DB):
             warn_caller(
                 "Inter-position standard deviation exceeds the ISO 3741 sM "
-                "criterion (1,5 dB) in one or more bands; the source may radiate "
+                "criterion (1.5 dB) in one or more bands; the source may radiate "
                 "significant discrete tones, requiring more microphone/source "
                 "positions or room qualification per Annex D (ISO 3741:2010, "
                 "8.4.2.2, Eq. 10).",
@@ -997,7 +997,7 @@ def sound_power_comparison(
         reference_background_levels,
         freqs,
     )
-    # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
+    # Microphone-sampling advisories (<6 positions, sM > 1.5 dB) apply to the
     # per-position measurement of the source under test, exactly as in the
     # direct method; there is no room geometry here, so no V/S check. Emitted
     # only after every refusal, the backgrounds' included, so a malformed
@@ -1527,7 +1527,7 @@ def octave_band_levels(
 
     Every octave the input touches must be supplied whole: Table F.1 numbers
     the one-third-octave bands from :math:`k = 1` at 50 Hz, so the 63 Hz
-    octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
+    octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6.3, 8 and
     10 kHz thirds, and a band whose triplet is incomplete cannot be summed.
 
     :param levels: Band levels in decibels, with the bands on the last axis

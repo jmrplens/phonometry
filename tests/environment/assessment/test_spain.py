@@ -202,7 +202,7 @@ def test_tonal_correction_end_bands_are_not_evaluated() -> None:
     [(56.82, 57), (50.99, 51), (56.19, 56), (56.5, 57), (56.49, 56), (0.0, 0)],
 )
 def test_round_reported_level(value: float, expected: int) -> None:
-    """Annex IV A.3.4.2: add 0,5 dB and take the integer part."""
+    """Annex IV A.3.4.2: add 0.5 dB and take the integer part."""
     assert rd.round_reported_level(value) == expected
 
 
@@ -615,7 +615,7 @@ def test_noise_phase_validation() -> None:
 def test_corrections_are_graded_zero_three_or_six() -> None:
     """Annex IV A.3.3 grades each correction 0, 3 or 6 dB and nothing else.
 
-    An intermediate reading such as 4,5 dB is not a value any of the three
+    An intermediate reading such as 4.5 dB is not a value any of the three
     tables can produce, so it is rejected rather than silently accepted.
     """
     assert rd.RD1367_CORRECTION_VALUES == (0.0, 3.0, 6.0)

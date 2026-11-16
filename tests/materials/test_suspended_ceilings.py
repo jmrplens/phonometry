@@ -76,7 +76,7 @@ def test_a_band_table_one_does_not_print_is_refused() -> None:
 
 
 def test_the_uncertainty_is_a_coverage_factor_over_a_standard_deviation() -> None:
-    """The note under Table 1: ISO 5725-6 with a coverage factor of 2,8."""
+    """The note under Table 1: ISO 5725-6 with a coverage factor of 2.8."""
     sigma = CEILING_UNCERTAINTY[1000.0] / EN16487_COVERAGE_FACTOR
     assert sigma == pytest.approx(0.0357, abs=1e-4)
 
@@ -93,7 +93,7 @@ def test_the_air_correction_is_four_volumes_over_the_area() -> None:
 
 
 def test_a_dry_room_can_pass_the_cap_the_clause_sets() -> None:
-    """A difference of 1e-4 per metre in a 200 m3 room is 0,0074, well under."""
+    """A difference of 1e-4 per metre in a 200 m3 room is 0.0074, well under."""
     got = materials.air_absorption_correction(
         volume=200.0,
         specimen_area_m2=10.8,
@@ -439,9 +439,9 @@ def test_the_weighted_row_of_table_one_is_printed_too() -> None:
 
 
 def test_the_two_coverage_factors_are_not_interchanged() -> None:
-    """2,8 in the NOTE of Table 1, 2,0 in ISO 12999-2:2020 Table 3 at 95 %.
+    """2.8 in the NOTE of Table 1, 2.0 in ISO 12999-2:2020 Table 3 at 95 %.
 
-    EN 16487 prints no reproducibility standard deviation anywhere, so its 2,8
+    EN 16487 prints no reproducibility standard deviation anywhere, so its 2.8
     cannot be checked by dividing Table 1 by it and multiplying back: that is
     an identity and it holds for any pair of numbers. What is checkable is that
     each document's own factor is the one the library uses for that document.
@@ -458,8 +458,8 @@ def test_the_printed_attenuation_of_iso9613_table_one() -> None:
 
     Note 5 of clause 6.4 says the table was evaluated at the exact
     one-third-octave midbands, so the flag that reproduces it is set. At the
-    nominal 4 kHz the same call returns 29,67 dB/km against a printed
-    2,94 x 10, which no rounding of three figures covers.
+    nominal 4 kHz the same call returns 29.67 dB/km against a printed
+    2.94 x 10, which no rounding of three figures covers.
     """
     for (temperature_c, humidity), row in oracle.ISO9613_1_TABLE_1_DB_PER_KM.items():
         bands = list(row)
@@ -485,7 +485,7 @@ def test_the_conversion_factor_between_alpha_and_m_is_the_printed_one() -> None:
     """Vigran, Building Acoustics (2008), Eq. (4.41), printed page 122.
 
     EN ISO 354:2003 8.1.2.1 gives ``m = alpha / (10 lg(e))`` and never works
-    the factor out; Vigran prints it as 4,343.
+    the factor out; Vigran prints it as 4.343.
     """
     assert 1.0 / float(materials.power_attenuation_from_alpha(1.0)) == pytest.approx(
         oracle.VIGRAN_EQ_4_41_TEN_LG_E, abs=5e-4
@@ -495,7 +495,7 @@ def test_the_conversion_factor_between_alpha_and_m_is_the_printed_one() -> None:
 def test_the_air_term_carries_the_factor_of_four_the_example_prints() -> None:
     """Vigran, Building Acoustics (2008), the Example on printed page 123.
 
-    A 100 m3 room with ``m`` = 0,05 1/m at 8 kHz: "The air absorption alone
+    A 100 m3 room with ``m`` = 0.05 1/m at 8 kHz: "The air absorption alone
     then gives an absorption area of 20 m2". EN 16487 4.2.1 spreads that same
     ``4V(m2 - m1)`` over the specimen, so multiplying back by the area returns
     the printed figure. The arrangement is a classroom rather than a
@@ -545,7 +545,7 @@ def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
 def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
     """EN 16487:2014 4.2.1 on the room SRL certificate 13441 prints.
 
-    V = 300 m3 and S = 10,7 m2 from the certificate, the two climates from two
+    V = 300 m3 and S = 10.7 m2 from the certificate, the two climates from two
     printed columns of ISO 9613-1 Table 1(i) at 20 degC. The correction itself
     is printed nowhere, so the expected side is this file's own arithmetic on
     the printed relation of EN ISO 354 8.1.2.1: what the test holds the library
@@ -581,14 +581,14 @@ def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
 def test_a_humid_room_stays_inside_the_cap_at_every_band() -> None:
     """EN 16487:2014 4.2.1 on the room SP report P302808 prints.
 
-    V = 200 m3 and S = 10,8 m2 from the report. Its printed climates are
+    V = 200 m3 and S = 10.8 m2 from the report. Its printed climates are
     20 degC / 90 % empty and 24 degC / 89 % on the object; Table 1 is tabulated
     on a 5 degC grid with humidity columns every ten points, so the 25 degC /
     90 % cell stands in for the second of them. At 90 % the printed attenuation
     rises with temperature from 500 Hz to 4 kHz and falls at 125 Hz and 250 Hz,
     so the substitution overstates the correction in the four bands where it is
     positive, 2 kHz the largest of them, and the overstated figure is still
-    0,033 against a cap of 0,05.
+    0.033 against a cap of 0.05.
     """
     bands = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
     printed_side = (
@@ -626,7 +626,7 @@ def test_an_accredited_certificate_reproduces_from_its_printed_inputs() -> None:
     SRL certificate 13441 prints the room, the specimen, both climates with
     their own barometric pressures, and per band the two reverberation times
     beside the coefficient the laboratory derived from them. Nothing else is
-    given to the library, and the six octave centres come back at the 0,01 the
+    given to the library, and the six octave centres come back at the 0.01 the
     certificate prints.
     """
     empty_temperature_c, empty_humidity, empty_pressure_mbar = oracle.SRL_13441_EMPTY
@@ -655,7 +655,7 @@ def test_an_accredited_certificate_reproduces_from_its_printed_inputs() -> None:
 
 
 def test_the_air_term_is_what_makes_that_certificate_reproduce() -> None:
-    """Dropping ``m`` misses three of the six bands, by 0,016 at 4 kHz.
+    """Dropping ``m`` misses three of the six bands, by 0.016 at 4 kHz.
 
     The reason the test above is a check of the chain 4.2.1 governs rather than
     of Sabine arithmetic: the certificate's own 41 % and 44 % relative humidity
@@ -694,11 +694,11 @@ def test_real_arrangements_against_the_printed_geometry() -> None:
     as prEN 16487, and the reverberation room of G. van Hout, The Acoustic
     Performance of Suspended Ceiling Systems, master of engineering thesis,
     University of Canterbury, 2016, whose E-400 mounting and 3 600 mm by
-    3 000 mm, 10,8 m2 specimen are printed on page 27 (PDF page 45). The area is a target and not a tolerance, so the
-    0,30 m2 the CSTB specimen falls short by is reported and not failed.
+    3 000 mm, 10.8 m2 specimen are printed on page 27 (PDF page 45). The area is a target and not a tolerance, so the
+    0.30 m2 the CSTB specimen falls short by is reported and not failed.
     """
     # Report -> (area in m2, overall depth in mm) and the two printed
-    # consequences: the departure from 10,80 m2, and whether the arrangement
+    # consequences: the departure from 10.80 m2, and whether the arrangement
     # is the one the CE marking data rests on.
     arrangements = {
         "SRL 13441, E-200": (
@@ -803,10 +803,10 @@ def test_the_printed_rating_of_a_real_suspended_ceiling(
     Footnote b qualifies the weighted figure as "calculated without any
     rounding in the calculation chain in EN ISO 11654", so the chain is named
     by this test code. The CSTB case is the discriminating one: both
-    high-frequency bands sit exactly 0,25 above the shifted curve, so a strict
+    high-frequency bands sit exactly 0.25 above the shifted curve, so a strict
     comparison prints M where the page prints MH, and the accepted shift leaves
-    an unfavourable sum of exactly 0,10, so a strict comparison there gives
-    0,65 where the page prints 0,70.
+    an unfavourable sum of exactly 0.10, so a strict comparison there gives
+    0.65 where the page prints 0.70.
     """
     got = materials.weighted_absorption(list(alpha_p))
     assert got.alpha_w == pytest.approx(alpha_w, abs=5e-4), report
@@ -818,7 +818,7 @@ def test_the_one_third_octave_step_of_the_rating_on_a_real_certificate() -> None
     """EN ISO 11654:1997 4.1 and 4.2 on SRL certificate 13441.
 
     The certificate prints the fifteen one-third-octave coefficients, the five
-    octave ones it formed from them, and the rating: alpha_w = 0,95, class A,
+    octave ones it formed from them, and the rating: alpha_w = 0.95, class A,
     with no shape indicator.
     """
     alpha_p = materials.practical_absorption_coefficient(

@@ -26,16 +26,16 @@ which reading reproduces the page:
 
 1. *The continuous row starts at t = 0* and fills the printed duration; it
    does not start at the Table 6 start time. Read from zero, the band-limiting
-   continuous cell of Table 7 comes out 0,564 9 against the 0,565 printed;
-   started at 0,2 s it comes out 0,560 1.
+   continuous cell of Table 7 comes out 0.564 9 against the 0.565 printed;
+   started at 0.2 s it comes out 0.560 1.
 2. *The filtering is zero state.* :func:`~phonometry.vibration.apply_weighting`
    multiplies in the frequency domain without padding, which is a circular
    convolution, and its own docstring says so. In the continuous row that
    wraps the tail of the record onto its front and erases the switch-on
    transient the linear MTVV is built to catch: filtered circularly, four
-   continuous cells of Table 8 sit at Wc -0,81 %, Wm -1,10 %, Wd -3,24 % and
-   We -5,19 %; filtered from rest they sit at -0,17 %, -0,31 %, -0,36 % and
-   -0,52 %. This module therefore pads the record with zeros before applying
+   continuous cells of Table 8 sit at Wc -0.81 %, Wm -1.10 %, Wd -3.24 % and
+   We -5.19 %; filtered from rest they sit at -0.17 %, -0.31 %, -0.36 % and
+   -0.52 %. This module therefore pads the record with zeros before applying
    the response and keeps the first samples back, which is a filter switched
    on at t = 0 with nothing stored in it. The default behaviour of
    :func:`~phonometry.vibration.apply_weighting` is deliberately left alone:
@@ -44,19 +44,19 @@ which reading reproduces the page:
    Annex D of this standard is written around). With any other constant the
    two MTVV columns stop lining up. It is also why the continuous row of the
    linear MTVV repeats the 16-cycle value for whole-body vibration: 16 cycles
-   at 15,915 Hz last 1,005 s, so the burst already fills the window.
+   at 15.915 Hz last 1.005 s, so the burst already fills the window.
 
 **Which band limiting the band-limiting row is.** 5.6.6 (folio 14) makes the
 band-limiting response a graded quantity of its own, and Tables 7 to 9 give it
 18 of their 72 rows. Six of the seven whole-body weightings share the corner
-pair 0,4 Hz and 100 Hz of Table 3 and ``Wm`` does not, so the whole-body row
+pair 0.4 Hz and 100 Hz of Table 3 and ``Wm`` does not, so the whole-body row
 had to be decided by measurement as well: with the shared pair the 24 printed
-cells reproduce to -0,25 % at worst, with the ``Wm`` pair to +0,67 %. The
+cells reproduce to -0.25 % at worst, with the ``Wm`` pair to +0.67 %. The
 hand-arm and low-frequency rows have only one candidate each, ``Wh`` and
 ``Wf``.
 
 **What the reproduction is worth.** At the sampling rates recommended per
-application, all 228 printed cells come out within 2,3 %, against printed
+application, all 228 printed cells come out within 2.3 %, against printed
 tolerances of 10 % and 12 %. The three widest are the 2-cycle row of ``Wf``
 and the 8-cycle row of ``We``, cells the page prints to three significant
 figures and whose weightings attenuate hardest.
@@ -221,8 +221,8 @@ class SawtoothBurstTest(RichDisplay):
     def frequency_hz(self) -> float:
         """The saw-tooth frequency, in hertz.
 
-        Table 6 prints it beside the angular frequency (79,58 Hz, 15,915 Hz
-        and 0,397 9 Hz); this is the division, not the rounded decimal.
+        Table 6 prints it beside the angular frequency (79.58 Hz, 15.915 Hz
+        and 0.397 9 Hz); this is the division, not the rounded decimal.
         """
         return self.angular_frequency_rad_s / (2.0 * math.pi)
 
@@ -448,7 +448,7 @@ def _build_response_table() -> dict[
 #: ISO 8041-1:2017 Tables 7, 8 and 9 (folios 17, 18 and 19) as one lookup:
 #: ``(application, weighting or BAND_LIMITING, cycles)`` to the indications a
 #: conforming meter shows, in the units of the quantity (m/s2 for the r.m.s.
-#: value and the two MTVV columns, m/s^1,75 for the VDV, m/s^1,5 for the
+#: value and the two MTVV columns, m/s^1.75 for the VDV, m/s^1.5 for the
 #: MSDV). ``n_cycles`` is ``None`` for the continuous row. The values are the
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
@@ -544,8 +544,8 @@ def sawtooth_burst(
     unbroken saw-tooth from ``t = 0`` to the end of the printed duration. The
     start time does not apply to it, and the reason is measured rather than
     printed: read from zero, the band-limiting continuous cell of Table 7
-    comes out 0,564 9 against the 0,565 printed, and read from the start time
-    it comes out 0,560 1.
+    comes out 0.564 9 against the 0.565 printed, and read from the start time
+    it comes out 0.560 1.
 
     The fall is vertical, as Figure 3 draws it. 12.13 (folio 36) allows a real
     generator a fall time of up to ``1/(5 f2)``, which is

@@ -17,7 +17,7 @@ import pytest
 from phonometry.materials.absorbers.biot import frame_elastic_coefficient
 from phonometry.vibration import immission as im
 
-#: A medium-dense sand: 1800 kg/m³, G = 80 MPa, nu = 0,3.
+#: A medium-dense sand: 1800 kg/m³, G = 80 MPa, nu = 0.3.
 DENSITY = 1800.0
 SHEAR_MODULUS = 80.0e6
 POISSON = 0.3
@@ -60,7 +60,7 @@ def test_the_elastic_modulus_is_two_g_times_one_plus_nu() -> None:
 
 
 def test_formula_5_as_printed_gives_the_p_wave_modulus_not_e() -> None:
-    """E = v_p² rho overstates E by 35 % at nu = 0,3 and 3,8 times at 0,45."""
+    """E = v_p² rho overstates E by 35 % at nu = 0.3 and 3.8 times at 0.45."""
     v_s = math.sqrt(SHEAR_MODULUS / DENSITY)
     for nu, factor in ((0.3, 1.346), (0.45, 3.79)):
         v_p = im.compression_wave_speed(
@@ -92,7 +92,7 @@ def test_the_two_printed_radicals_agree_only_at_one_ratio() -> None:
 
 
 def test_the_strain_of_rail_traffic_stays_in_the_linear_range() -> None:
-    """Formula (4): 0,1 mm/s in a ground with v_s = 100 m/s is 10⁻⁶."""
+    """Formula (4): 0.1 mm/s in a ground with v_s = 100 m/s is 10⁻⁶."""
     strain = im.shear_strain_amplitude(1.0e-4, shear_wave_speed_m_s=100.0)
     assert strain == pytest.approx(1.0e-6)
     assert strain < im.SHEAR_STRAIN_LINEAR_LIMIT

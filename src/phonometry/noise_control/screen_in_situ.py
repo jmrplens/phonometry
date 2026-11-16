@@ -27,14 +27,14 @@ not a qualification of a screen as a product but a measurement of one
 installation. Indoors the room decides a large part of the answer, so two
 screens may only be compared where the test conditions were the same.
 
-Within its own scope it wants a screen at least 1,5 m high and 1,5 m long, and
+Within its own scope it wants a screen at least 1.5 m high and 1.5 m long, and
 outdoors it stops at 25 m from the screen.
 
 One number or several
 ---------------------
 
 Where the screen protects a defined operator position, 5.5.1 puts three
-microphones on a sphere of 0,3 m radius around the head and the answer is one
+microphones on a sphere of 0.3 m radius around the head and the answer is one
 number. Where it shields an area, 5.5.2 puts them along a line perpendicular
 to the screen at a quarter, a half, once and twice the screen height, never
 closer than 1 m, and the answer is a range: NOTE 2 says the smallest
@@ -263,7 +263,7 @@ def screen_source_directivity_index(levels: NumericArrayLike) -> NDArray[np.floa
 
     :math:`DI_i = L_{360} - L_{30,i}`, where :math:`L_{360}` is the
     logarithmic mean of the levels at twelve positions evenly spaced on a
-    horizontal circle of about 1,5 m radius around the source, and
+    horizontal circle of about 1.5 m radius around the source, and
     :math:`L_{30,i}` the level at one of them.
 
     The sign is the way round to notice. Written as the mean less the

@@ -30,21 +30,21 @@ above 1.00 are set to 1.00. The five rating bands are 250, 500, 1000, 2000 and
 
 **Weighted absorption (Clause 4.2).** The fixed reference curve of Figure 1
 (`{250: 0.80, 500: 1.00, 1000: 1.00, 2000: 1.00, 4000: 0.90}`) is shifted
-downwards, towards the measured `alpha_p`, in steps of 0,05 until the sum
+downwards, towards the measured `alpha_p`, in steps of 0.05 until the sum
 of the unfavourable deviations (taken only where the measured value lies
 below the shifted curve, with magnitude `curve - measured`) is not more
-than 0,10. `alpha_w` is the shifted-curve value read at 500 Hz, i.e.
+than 0.10. `alpha_w` is the shifted-curve value read at 500 Hz, i.e.
 `1.00 - shift`.
 
 **Shape indicators (Clause 4.3).** A shape indicator is appended in
 parentheses whenever a practical coefficient exceeds the shifted reference
-curve by 0,25 or more: `L` at 250 Hz, `M` at 500 Hz or 1000 Hz, `H` at
+curve by 0.25 or more: `L` at 250 Hz, `M` at 500 Hz or 1000 Hz, `H` at
 2000 Hz or 4000 Hz (e.g. `0.60(M)`).
 
 **Absorption class (Table B.1, informative).** `alpha_w` maps to a class:
-A (0,90-1,00), B (0,80-0,85), C (0,60-0,75), D (0,30-0,55), E (0,15-0,25),
-and "Not classified" (0,00-0,10). Because `alpha_w` is always a multiple
-of 0,05 these ranges partition the grid exactly.
+A (0.90-1.00), B (0.80-0.85), C (0.60-0.75), D (0.30-0.55), E (0.15-0.25),
+and "Not classified" (0.00-0.10). Because `alpha_w` is always a multiple
+of 0.05 these ranges partition the grid exactly.
 
 The rating is defined only over the whole reference range 250 Hz to
 4000 Hz (Clause 1); the 125 Hz octave that is customarily plotted is not
@@ -66,7 +66,7 @@ Sound absorption class for `alpha_w` (ISO 11654 Table B.1, Annex B).
 
 | Name | Description |
 | :--- | :--- |
-| `alpha_w` | Weighted sound absorption coefficient (a multiple of 0,05 in `[0, 1]`). |
+| `alpha_w` | Weighted sound absorption coefficient (a multiple of 0.05 in `[0, 1]`). |
 
 **Returns:** `"A"`, `"B"`, `"C"`, `"D"`, `"E"` or `"Not classified"`.
 
@@ -101,13 +101,13 @@ Weighted sound absorption rating (ISO 11654:1997).
 
 | Name | Description |
 | :--- | :--- |
-| `alpha_w` | Weighted sound absorption coefficient `alpha_w`, the shifted reference curve read at 500 Hz (Clause 4.2). A multiple of 0,05 in `[0, 1]`. |
+| `alpha_w` | Weighted sound absorption coefficient `alpha_w`, the shifted reference curve read at 500 Hz (Clause 4.2). A multiple of 0.05 in `[0, 1]`. |
 | `shape_indicator` | Concatenated shape indicators, `L`/`M`/`H` in that order, or an empty string when none applies (Clause 4.3). |
 | `absorption_class` | Sound absorption class `A`-`E` or `"Not classified"` from Table B.1 (Annex B). One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"` or `"Not classified"`. |
 | `shift` | Downward shift applied to the reference curve, in absorption units (Clause 4.2); $\alpha_\mathrm{w} = 1.00 - \text{shift}$. |
 | `unfavorable_sum` | Sum of the unfavourable deviations at the final shift (Clause 4.2): `shifted_reference - measured` over the bands where the measured coefficient falls below the curve, and nothing elsewhere; at most 0.10. |
 | `frequencies` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
-| `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
+| `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0.05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
 | `third_octave_alpha_s` | The fifteen one-third-octave sound absorption coefficients `alpha_s` (200 Hz to 5000 Hz, ISO 354) the rating was built from, as given; `None` when the rating was formed from octave practical coefficients only. Carried so the fiche can show the full one-third-octave table every accredited ISO 354 certificate reports. |
 | `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)); `None` when `third_octave_alpha_s` is. |
@@ -200,9 +200,9 @@ Practical sound absorption coefficients `alpha_p` (ISO 11654 Clause 4.1).
 
 | Name | Description |
 | :--- | :--- |
-| `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1,00 (reverberation-room measurement); the resulting octave coefficient is capped at 1,00. |
+| `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1.00 (reverberation-room measurement); the resulting octave coefficient is capped at 1.00. |
 
-**Returns:** The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz, each the mean of its three one-third octaves rounded in steps of 0,05.
+**Returns:** The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz, each the mean of its three one-third octaves rounded in steps of 0.05.
 
 **Raises**
 
@@ -245,16 +245,16 @@ weighted_absorption(
 
 Weighted sound absorption coefficient `alpha_w` (ISO 11654 Clause 4.2).
 
-The reference curve of Figure 1 is shifted downwards in steps of 0,05,
+The reference curve of Figure 1 is shifted downwards in steps of 0.05,
 towards the measured practical coefficients, until the sum of the
 unfavourable deviations (measured below the shifted curve) is at most
-0,10; `alpha_w` is the shifted curve read at 500 Hz.
+0.10; `alpha_w` is the shifted curve read at 500 Hz.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `alpha_p` | The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz (e.g. from [`practical_absorption_coefficient`](/phonometry/reference/api/materials/rating/#practical_absorption_coefficient)), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Inputs are snapped to the 0,05 grid of Clause 4.1. |
+| `alpha_p` | The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz (e.g. from [`practical_absorption_coefficient`](/phonometry/reference/api/materials/rating/#practical_absorption_coefficient)), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Inputs are snapped to the 0.05 grid of Clause 4.1. |
 
 **Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) with `alpha_w`, the shape indicators, the applied shift, the fitted reference curve and the absorption class.
 
@@ -288,7 +288,7 @@ ISO 354 certificate carries.
 
 | Name | Description |
 | :--- | :--- |
-| `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1,00 (reverberation-room measurement); the octave coefficient is capped at 1,00. |
+| `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1.00 (reverberation-room measurement); the octave coefficient is capped at 1.00. |
 
 **Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/rating/#absorptionratingresult) identical to [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`RATING_THIRD_OCTAVE_BANDS_HZ`](/phonometry/reference/api/materials/rating/#rating_third_octave_bands_hz)).
 

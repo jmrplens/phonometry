@@ -31,7 +31,7 @@ from phonometry import building, filters, io
 
 #: ISO 16283-2:2020 Table A.1 = ISO 10140-5:2021 Table F.1 = JIS A 1418-2:2019
 #: Table A.2 (impact force characteristic 2), rubber ball: (LFE, tolerance) in
-#: dB re 1 N at 31,5 / 63 / 125 / 250 / 500 Hz.
+#: dB re 1 N at 31.5 / 63 / 125 / 250 / 500 Hz.
 RUBBER_BALL_LFE = ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (17.0, 2.0), (12.5, 2.0))
 
 #: JIS A 1418-2:2019 Table A.1 (impact force characteristic 1), bang machine.
@@ -59,14 +59,14 @@ ISO717_2_TABLE_D3_OCTAVE = (-26.2, -16.2, -8.7, -3.2)
 
 #: ISO 717-2:2020 Table D.4: the printed worked example, a field measurement in
 #: octave bands. Columns: Li,Fmax, A, corrected value; the printed result is
-#: LiA,Fmax = 55,350 66... = 55 dB.
+#: LiA,Fmax = 55.350 66... = 55 dB.
 ISO717_2_TABLE_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
 ISO717_2_TABLE_D4_CORRECTED = (39.1, 48.3, 49.3, 52.6)
 ISO717_2_TABLE_D4_RATING = 55
 
 #: Reproduction of ISO 16283-2:2020 Formula (4) over 25 one-third-octave bands,
 #: from Gurtner, "Impact Noise Study using the ISO 16283-2 / ISO 140-5 Rubber
-#: Ball", Edition 3 (2019-10-30), p. 19: a mid-sized room, V = 41,4 m3. This is
+#: Ball", Edition 3 (2019-10-30), p. 19: a mid-sized room, V = 41.4 m3. This is
 #: a reproduction check of the formula from grey literature, not accredited
 #: reference measurement data; the standard prints no worked example of its own.
 GURTNER_VOLUME = 41.4
@@ -169,7 +169,7 @@ def test_bang_machine_force_exposure_table() -> None:
 
 
 def test_octave_bands_of_the_specification() -> None:
-    """Both tables are printed over the five octaves 31,5 Hz to 500 Hz."""
+    """Both tables are printed over the five octaves 31.5 Hz to 500 Hz."""
     assert building.HEAVY_IMPACT_OCTAVE_BANDS_HZ == (
         31.5,
         63.0,
@@ -198,7 +198,7 @@ def test_rubber_ball_construction_example() -> None:
     """ISO 16283-2:2020 A.2.1/A.2.2 and JIS A 1418-2:2019 B.3.
 
     Drop height (100 +/- 1) cm from the bottom of the ball, effective mass
-    (2,5 +/- 0,1) kg, coefficient of restitution 0,8 +/- 0,1, single-peak force
+    (2.5 +/- 0.1) kg, coefficient of restitution 0.8 +/- 0.1, single-peak force
     pulse of 20 +/- 2 ms (JIS A.2 b) 2)).
     """
     spec = building.heavy_impact_source_specification("rubber_ball")
@@ -212,7 +212,7 @@ def test_rubber_ball_construction_example() -> None:
 
 
 def test_bang_machine_construction_example() -> None:
-    """JIS A 1418-2:2019 B.2: tyre dropped from 85 cm, effective mass 7,3 +/- 0,2 kg."""
+    """JIS A 1418-2:2019 B.2: tyre dropped from 85 cm, effective mass 7.3 +/- 0.2 kg."""
     spec = building.heavy_impact_source_specification("bang_machine")
     assert spec.drop_height_m == pytest.approx(0.85)
     assert spec.effective_mass == pytest.approx(7.3)
@@ -228,7 +228,7 @@ def test_check_source_accepts_the_nominal_spectrum() -> None:
 
 
 def test_check_source_rejects_a_band_outside_the_tolerance() -> None:
-    """500 Hz has a +/- 2,0 dB tolerance, so 12,5 + 2,1 dB must fail there only."""
+    """500 Hz has a +/- 2.0 dB tolerance, so 12.5 + 2.1 dB must fail there only."""
     measured = [v for v, _ in RUBBER_BALL_LFE]
     measured[-1] += 2.1
     check = building.check_heavy_impact_source(measured)
@@ -237,7 +237,7 @@ def test_check_source_rejects_a_band_outside_the_tolerance() -> None:
 
 
 def test_check_source_accepts_the_tolerance_edge() -> None:
-    """The printed tolerance is inclusive: 31,0 - 1,5 dB at 63 Hz still conforms."""
+    """The printed tolerance is inclusive: 31.0 - 1.5 dB at 63 Hz still conforms."""
     measured = [v for v, _ in RUBBER_BALL_LFE]
     measured[1] -= 1.5
     assert building.check_heavy_impact_source(measured).passes
@@ -331,7 +331,7 @@ def test_force_exposure_level_of_a_half_sine_pulse() -> None:
 
 
 def test_force_exposure_level_scales_6_db_per_force_doubling() -> None:
-    """LFE is a squared-force integral, so doubling F adds 20 lg 2 = 6,02 dB."""
+    """LFE is a squared-force integral, so doubling F adds 20 lg 2 = 6.02 dB."""
     fs = 100_000.0
     force = np.full(2001, 100.0)
     single = building.impact_force_exposure_level(force, fs)
@@ -344,7 +344,7 @@ def test_a_calibrated_force_record_is_band_filtered_in_newtons_as_an_array() -> 
     pascals, its samples times the factor the Signal carries, which the
     exposure level leaves off: the samples go to the bank as an array, as
     the docstring says, and through the Signal a factor of 2 reads every
-    band 20 lg 2 = 6,02 dB high.
+    band 20 lg 2 = 6.02 dB high.
     """
     fs = 48_000
     t = np.arange(0.0, 1.0, 1.0 / fs)
@@ -385,7 +385,7 @@ def test_reverberation_correction_vanishes_at_the_reference_time() -> None:
 
 
 def test_standardization_at_the_reference_time_is_the_volume_term_only() -> None:
-    """T = T0 = 0,5 s: L' = Li,Fmax + 10 lg(V/V0) with V0 = 50 m3."""
+    """T = T0 = 0.5 s: L' = Li,Fmax + 10 lg(V/V0) with V0 = 50 m3."""
     res = building.standardized_max_impact_level([70.0, 65.0], 100.0, 0.5)
     np.testing.assert_allclose(res.reverberation_correction, 0.0, atol=1e-12)
     assert res.volume_term == pytest.approx(10.0 * np.log10(2.0))
@@ -408,7 +408,7 @@ def test_reverberation_correction_grows_with_reverberation_time() -> None:
 
 
 def test_reverberation_correction_is_smooth_across_the_c_equals_one_pole() -> None:
-    """C = 1 at T = 1,7275 s is a removable singularity of g(C) (limit 1/e).
+    """C = 1 at T = 1.7275 s is a removable singularity of g(C) (limit 1/e).
 
     The correction there must sit between its neighbours, not blow up.
     """
@@ -425,7 +425,7 @@ def test_reverberation_correction_is_accurate_inside_the_pole_guard() -> None:
     """The closed form for g(C) loses its digits within about 1e-6 of C = 1.
 
     Evaluated in double precision against a 60-digit reference, the printed
-    expression is already 3,9e-4 dB out at |C - 1| = 5e-7 and 3,5e-3 dB out at
+    expression is already 3.9e-4 dB out at |C - 1| = 5e-7 and 3.5e-3 dB out at
     1e-7, because the two powers cancel. Inside the guard band the removable
     limit 1/e is used instead, so the correction is flat to the last bit across
     the pole rather than wandering.
@@ -434,7 +434,7 @@ def test_reverberation_correction_is_accurate_inside_the_pole_guard() -> None:
     correction = building.fast_reverberation_correction(times)
     assert float(np.ptp(correction)) < 1e-6
     # The exact value at C = 1: g(1) = 1/e, so the correction is
-    # 10 lg[(1/e) / g(C0)] with C0 = 0,5/1,7275.
+    # 10 lg[(1/e) / g(C0)] with C0 = 0.5/1.7275.
     assert float(correction[2]) == pytest.approx(3.234806783, abs=1e-6)
 
 
@@ -442,10 +442,10 @@ def test_standardization_reproduces_a_published_25_band_example() -> None:
     """Reproduction check of ISO 16283-2:2020 Formula (4) over 25 bands.
 
     Gurtner, "Impact Noise Study using the ISO 16283-2 / ISO 140-5 Rubber
-    Ball", Edition 3 (2019-10-30), p. 19: V = 41,4 m3, per-band T and Li,Fmax
+    Ball", Edition 3 (2019-10-30), p. 19: V = 41.4 m3, per-band T and Li,Fmax
     printed with the resulting L'i,Fmax,V,T. The printed output carries one
-    decimal, and its 50 Hz entry is affected by the author rounding C to 0,24,
-    so the bound is 0,1 dB.
+    decimal, and its 50 Hz entry is affected by the author rounding C to 0.24,
+    so the bound is 0.1 dB.
     """
     res = building.standardized_max_impact_level(
         GURTNER_MEASURED, GURTNER_VOLUME, GURTNER_REVERBERATION_TIME
@@ -496,7 +496,7 @@ def test_octave_conversion_groups_consecutive_thirds() -> None:
     A flat spectrum cannot tell that apart from striding across the array, so
     this uses a falling spectrum: with 50 to 630 Hz in 12 thirds, grouping
     consecutively gives the four octaves below, while striding would put
-    50/125/315 Hz in the first one and land 21,1 dB away.
+    50/125/315 Hz in the first one and land 21.1 dB away.
     """
     thirds = np.array(
         [76.5, 60.8, 51.6, 48.7, 43.6, 42.3, 40.5, 35.9, 29.6, 27.0, 21.5, 19.8]
@@ -509,7 +509,7 @@ def test_octave_conversion_groups_consecutive_thirds() -> None:
     ]
     np.testing.assert_allclose(octaves, expected, atol=1e-12)
     # And explicitly: the top octave is 400 + 500 + 630 Hz. Striding instead
-    # would put 160 + 400 + 630 Hz there and read 48,9 dB, 20,2 dB too high.
+    # would put 160 + 400 + 630 Hz there and read 48.9 dB, 20.2 dB too high.
     np.testing.assert_allclose(octaves, [76.629, 50.570, 42.047, 28.680], atol=0.01)
 
 
@@ -565,9 +565,9 @@ def test_octave_a_weighting_matches_the_third_octave_row() -> None:
 def test_iso717_2_table_d4_worked_example() -> None:
     """ISO 717-2:2020 Table D.4 (printed p. 22), digit for digit.
 
-    A field measurement in octave bands: Li,Fmax = 65,3 / 64,5 / 58,0 / 55,8 dB
-    at 63 / 125 / 250 / 500 Hz gives the corrected values 39,1 / 48,3 / 49,3 /
-    52,6 dB and LiA,Fmax = 55,350 66... = 55 dB.
+    A field measurement in octave bands: Li,Fmax = 65.3 / 64.5 / 58.0 / 55.8 dB
+    at 63 / 125 / 250 / 500 Hz gives the corrected values 39.1 / 48.3 / 49.3 /
+    52.6 dB and LiA,Fmax = 55.350 66... = 55 dB.
     """
     res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     assert res.fraction == 1
@@ -606,7 +606,7 @@ def test_annex_d_rounding_is_half_up(value: float, expected: int) -> None:
     """ISO 717-2:2020 Annex D note a: XX,Y rounds to XX + 1 once Y reaches 5.
 
     That is half-up toward positive infinity. It differs from Python's
-    round-half-to-even at 54,5 and from half-away-from-zero at -0,5, and the
+    round-half-to-even at 54.5 and from half-away-from-zero at -0.5, and the
     formula's own note warns that a rounding slip here costs a whole decibel
     in the reported single number.
     """

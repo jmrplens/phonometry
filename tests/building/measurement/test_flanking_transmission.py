@@ -214,7 +214,7 @@ def test_octave_bands_reject_misaligned_triples() -> None:
 # ISO 10848-4 Clause 9 modal-overlap bracketing
 # ---------------------------------------------------------------------------
 def test_modal_overlap_brackets_and_excludes_bands() -> None:
-    """Bands with M < 0,25 are flagged and left out of the single number."""
+    """Bands with M < 0.25 are flagged and left out of the single number."""
     k = np.arange(len(THIRD_OCTAVE), dtype=float)
     m = np.full(len(THIRD_OCTAVE), 1.0)
     m[3] = 0.1  # 200 Hz: inside the 200-1250 Hz single-number range

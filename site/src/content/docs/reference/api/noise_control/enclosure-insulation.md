@@ -540,7 +540,7 @@ The A-weighted insulation an enclosure would give a stated spectrum.
 Annex C of part 1 and Annex D of part 2, the same formula:
 
 $$
-D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
+D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0.1 (L_i - A_i - D_i)}
 $$
 
 where $L_i$ is the assumed source spectrum, $A_i$ the
@@ -717,7 +717,7 @@ source_position_clearance_m(shortest_inner_dimension_m: float) -> float
 
 How far the artificial source stands from a wall, 7.3 of part 1 and 7.2 of part 2.
 
-$0,2\,d$ with $d$ the shortest interior dimension of the
+$0.2\,d$ with $d$ the shortest interior dimension of the
 enclosure, so that the plate is never against a panel it is meant to
 excite through the air. Both parts print the same sentence, and both add
 that the source is used in two orientations 90 degrees apart where the
@@ -785,7 +785,7 @@ rows; what is done here is the trim to the rating bands.
 
 | Name | Description |
 | :--- | :--- |
-| `insulation` | The insertion loss per band, in decibels, over exactly the 16 one-third-octave rating bands of 100 Hz to 3,15 kHz or the 5 octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather than trimmed, because which bands it holds is the caller's to say. |
+| `insulation` | The insertion loss per band, in decibels, over exactly the 16 one-third-octave rating bands of 100 Hz to 3.15 kHz or the 5 octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather than trimmed, because which bands it holds is the caller's to say. |
 | `quantity` | `"sound_power"` (default) or `"reciprocity"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 

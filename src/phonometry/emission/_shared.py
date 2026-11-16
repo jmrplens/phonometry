@@ -26,8 +26,8 @@ clause 9.1.4 and ISO 3747:2010 Annex C print the same expression,
 .. math::
 
    C_2 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}}
-   + 15 \log_{10}\frac{273{,}15 + \theta}{\theta_1},
-   \qquad p_{\mathrm{s},0} = 101{,}325\ \mathrm{kPa},
+   + 15 \log_{10}\frac{273.15 + \theta}{\theta_1},
+   \qquad p_{\mathrm{s},0} = 101.325\ \mathrm{kPa},
    \quad \theta_1 = 296\ \mathrm{K}
 
 digit for digit, so the guard on the two meteorological inputs and the
@@ -76,7 +76,7 @@ if TYPE_CHECKING:
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
-#: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1,013 25 x 10^5 Pa).
+#: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1.013 25 x 10^5 Pa).
 _PS0 = 101.325
 #: Reference temperature of the C1 reference-quantity correction, in kelvin
 #: (ISO 3741:2010 clause 9.1.4).
@@ -101,7 +101,7 @@ def _validate_event_count(n_events: object, owner: str) -> int | None:
     """A count of events as an ``int``, or ``None``, refused when it is not one.
 
     The entry points already refuse it, but a result can also be built
-    directly or rebuilt with :func:`dataclasses.replace`, and a count of 2,5
+    directly or rebuilt with :func:`dataclasses.replace`, and a count of 2.5
     events describes no measurement the standard defines. The count goes
     through :func:`~phonometry._internal.validation.require_count`, so a bool,
     a text or an array is a :class:`TypeError` and a number that is not a

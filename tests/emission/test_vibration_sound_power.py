@@ -2,7 +2,7 @@
 """Tests for ISO/TS 7849 airborne sound power from surface vibration.
 
 Anchored on the standard's own worked calibration example (Part 1, Eq. 8:
-a_peak = 9,81 m/s^2 at 100 Hz -> L_v = 106,9 dB), on the closed-form velocity
+a_peak = 9.81 m/s^2 at 100 Hz -> L_v = 106.9 dB), on the closed-form velocity
 and sound-power-level relations (Eqs. 3, 12/15) and on the exact round-trip
 between the radiation factor (Eq. 8: eps = P/(Z_c v^2 S)) and the sound power
 level L_W = 10 lg(P/P0). The K1A extraneous-velocity correction reproduces
@@ -31,7 +31,7 @@ def test_velocity_level_reference() -> None:
 
 
 def test_calibration_example_from_standard() -> None:
-    """ISO/TS 7849-1 worked EXAMPLE: 9,81 m/s^2 at 100 Hz -> 106,9 dB."""
+    """ISO/TS 7849-1 worked EXAMPLE: 9.81 m/s^2 at 100 Hz -> 106.9 dB."""
     lv = float(emission.velocity_level_from_acceleration(9.81, frequency=100.0))
     assert lv == pytest.approx(106.9, abs=0.05)
 
@@ -220,8 +220,8 @@ def test_a_stray_single_frequency_is_refused() -> None:
 
     The property picks an A-weighting correction per band and adds it to the
     band levels, so a lone frequency stretches its single correction over the
-    whole spectrum: these bands then report L_WA = 109,7 dB where their own
-    centres give 108,8 dB, and nothing on the way says which one is meant.
+    whole spectrum: these bands then report L_WA = 109.7 dB where their own
+    centres give 108.8 dB, and nothing on the way says which one is meant.
     """
     import dataclasses
 

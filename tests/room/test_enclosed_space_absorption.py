@@ -2,7 +2,7 @@
 """Tests for EN 12354-6:2003 sound absorption in enclosed spaces.
 
 Validated against the three worked cases of the standard's Annex E (a
-4,54 x 2,73 x 2,40 = 29,75 m3 room, 1000 Hz octave band).
+4.54 x 2.73 x 2.40 = 29.75 m3 room, 1000 Hz octave band).
 """
 
 from __future__ import annotations

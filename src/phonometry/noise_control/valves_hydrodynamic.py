@@ -19,7 +19,7 @@ measured property of the valve (IEC 60534-8-2) that Equations (3a) and (3b)
 estimate when no measurement exists, corrected to the working inlet pressure
 by Equation (3c). Everything in the method turns on where the operating ratio
 :math:`x_F` of Equation (1) sits with respect to it, which is why Annex A's
-third example perturbs :math:`x_{Fz}` by 0,1 and watches the answer move
+third example perturbs :math:`x_{Fz}` by 0.1 and watches the answer move
 14 dB.
 
 After the source, the chain is the same shape as the aerodynamic one: an
@@ -34,13 +34,13 @@ frequency-dependent loss with Equations (22a) and (22b).
 recorded in ``docs/ERRATA.md``:
 
 * Equation (12) is printed **twice, differently**: Clause 5.1 gives the
-  Strouhal number a leading 0,02 and no valve style modifier, Annex A's
-  Table A.1 gives it 0,036 and a factor :math:`F_d^{0,75}`. Only the annex
+  Strouhal number a leading 0.02 and no valve style modifier, Annex A's
+  Table A.1 gives it 0.036 and a factor :math:`F_d^{0.75}`. Only the annex
   form reproduces the annex's own printed :math:`N_\mathrm{Str}`, which is why
   :data:`STROUHAL_CONSTANTS` carries both and the default is ``"annex"``.
-* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51,76 dB``,
-  positive, where its own two inputs sum to :math:`-51{,}763` dB.
-* The seat diameter formula of 6.3.2 b), :math:`d_o = 5{,}2\sqrt{N_{34}C_n}`,
+* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51.76 dB``,
+  positive, where its own two inputs sum to :math:`-51.763` dB.
+* The seat diameter formula of 6.3.2 b), :math:`d_o = 5.2\sqrt{N_{34}C_n}`,
   returns millimetres for a symbol Clause 3 declares in metres, which is why
   :func:`last_stage_seat_diameter_mm` carries the unit in its name.
 * Equation (23b) computes each stage's inlet pressure from the **next**
@@ -52,7 +52,7 @@ recorded in ``docs/ERRATA.md``:
   two are equal. Every other regime statement in the document tests the
   corrected ratio, and so does this module.
 * Three intermediates of Table A.1 do not follow from the intermediates
-  printed beside them, by up to 0,08 dB.
+  printed beside them, by up to 0.08 dB.
 
 Clause 6, the multistage trim, is the same method with per-stage inputs:
 :func:`stage_conditions` splits the differential, and either the stages are
@@ -190,9 +190,9 @@ AIR_DENSITY_KG_M3 = 1.293
 REFERENCE_INLET_PRESSURE_PA = 6.0e5
 
 #: The two leading constants Equation (12) is printed with. ``"annex"`` is
-#: Table A.1's :math:`0{,}036\,F_L^2\,C\,F_d^{0,75}` and ``"clause"`` is
-#: Clause 5.1's :math:`0{,}02\,F_L^2\,C`, without the style modifier. They
-#: are not the same function of the valve: for Annex A's :math:`F_d = 0{,}42`
+#: Table A.1's :math:`0.036\,F_L^2\,C\,F_d^{0.75}` and ``"clause"`` is
+#: Clause 5.1's :math:`0.02\,F_L^2\,C`, without the style modifier. They
+#: are not the same function of the valve: for Annex A's :math:`F_d = 0.42`
 #: the annex form is 6 % below the clause form, and for a plain single-port
 #: valve at :math:`F_d = 1` it is 80 % above it.
 STROUHAL_CONSTANTS: Mapping[Form, float] = MappingProxyType(
@@ -389,13 +389,13 @@ def incipient_cavitation_ratio(
 
     .. math::
 
-       x_{Fz} = \frac{0{,}90}
+       x_{Fz} = \frac{0.90}
                      {\sqrt{1 + 3 F_d \sqrt{\dfrac{C}{N_{34} F_L}}}}
 
     4.2 asks for a measured :math:`x_{Fz}` (IEC 60534-8-2) and offers this
     only as an estimate, warning that a prediction built on it "can create
     uncertainties as illustrated in Annex A". Annex A's third example is
-    exactly that illustration: 0,1 on this number moves the answer 14 dB.
+    exactly that illustration: 0.1 on this number moves the answer 14 dB.
 
     The nesting is worth reading twice. The outer radical covers the whole of
     :math:`1 + 3F_d\sqrt{\cdots}`; the inner one covers only the capacity
@@ -433,7 +433,7 @@ def multihole_incipient_cavitation_ratio(
     .. math::
 
        x_{Fz} = \frac{1}
-                     {\sqrt{4{,}5 + 1\,650\,\dfrac{N_o d_H^2}{F_L}}}
+                     {\sqrt{4.5 + 1\,650\,\dfrac{N_o d_H^2}{F_L}}}
 
     A multihole trim is not described by its capacity and style modifier but
     by how many holes it has and how big they are, which is what this form
@@ -467,7 +467,7 @@ def corrected_incipient_ratio(
     .. math::
 
        x_{Fzp1} = x_{Fz}
-                  \left(\frac{6 \times 10^5}{p_1}\right)^{0,125}
+                  \left(\frac{6 \times 10^5}{p_1}\right)^{0.125}
 
     Equation (3a) and the charts of Figures 4 to 9 are drawn at 6 × 10⁵ Pa.
     Raising the inlet pressure lowers the threshold, because the same
@@ -477,7 +477,7 @@ def corrected_incipient_ratio(
     quarter.
 
     Below 6 × 10⁵ Pa the correction works the other way and raises the
-    threshold, and with an :math:`x_{Fz}` near the 0,90 ceiling of Equation
+    threshold, and with an :math:`x_{Fz}` near the 0.90 ceiling of Equation
     (3a) it can carry it to or past 1. That pair is outside the method: a
     threshold of 1 is the flashing point, so it is not a ratio at which
     cavitation could be detected, and Equations (9) and (13) divide by
@@ -618,18 +618,18 @@ def cavitation_efficiency(
 
     .. math::
 
-       \eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb}
+       \eta_\mathrm{cav} = 0.32\, \eta_\mathrm{turb}
          \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
          \mathrm{e}^{5 x_{Fzp1}}
-         \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
+         \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0.5}
          \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
-         \left(x_F - x_{Fzp1}\right)^{1,5}
+         \left(x_F - x_{Fzp1}\right)^{1.5}
 
     Three of those factors are what makes cavitation noise behave the way it
-    does. :math:`(x_F - x_{Fzp1})^{1,5}` starts the term at exactly zero on
+    does. :math:`(x_F - x_{Fzp1})^{1.5}` starts the term at exactly zero on
     the threshold, so the two regimes meet without a step;
     :math:`(x_F/x_{Fzp1})^5` then makes it climb almost vertically once the
-    threshold is passed; and :math:`(1-x_F)^{-0,5}` sends it towards
+    threshold is passed; and :math:`(1-x_F)^{-0.5}` sends it towards
     infinity as the valve approaches flashing, which is where the method
     stops.
 
@@ -689,7 +689,7 @@ def internal_sound_pressure_level(
     .. math::
 
        L_{pi} = 10 \lg\left(
-         \frac{3{,}2 \times 10^9\, W_a\, \rho_L\, c_L}{D_i^2}\right)
+         \frac{3.2 \times 10^9\, W_a\, \rho_L\, c_L}{D_i^2}\right)
 
     The sound power is spread over the pipe cross-section and turned into a
     pressure through the impedance of the liquid, which is why the density
@@ -738,20 +738,20 @@ def jet_strouhal_number(
 
     .. math::
 
-       N_\mathrm{STR} = \frac{0{,}036\, F_L^2\, C\, F_d^{0,75}}
-                      {N_{34}\, x_{Fzp1}^{1,5}\, d\, d_o}
-                 \left(\frac{1}{p_1 - p_v}\right)^{0,57}
+       N_\mathrm{STR} = \frac{0.036\, F_L^2\, C\, F_d^{0.75}}
+                      {N_{34}\, x_{Fzp1}^{1.5}\, d\, d_o}
+                 \left(\frac{1}{p_1 - p_v}\right)^{0.57}
 
     This is the one place where the two printings of the standard disagree
     with each other. The form above is Table A.1's; Clause 5.1 prints the
-    same equation with a leading 0,02 and **no** :math:`F_d^{0,75}`. Only the
-    annex form reproduces the annex's own :math:`N_\mathrm{Str} = 0{,}399`, so it is
+    same equation with a leading 0.02 and **no** :math:`F_d^{0.75}`. Only the
+    annex form reproduces the annex's own :math:`N_\mathrm{Str} = 0.399`, so it is
     the default here; pass ``form="clause"`` for the normative text's version
     and see ``docs/ERRATA.md``.
 
-    Unlike the Strouhal number of a free jet, which is a constant near 0,2,
+    Unlike the Strouhal number of a free jet, which is a constant near 0.2,
     this one is a fitted group that carries the whole geometry of the valve
-    and comes out anywhere between about 0,2 and 0,5.
+    and comes out anywhere between about 0.2 and 0.5.
 
     :param flow_coefficient: :math:`C` at the travel being examined.
     :param style_modifier: :math:`F_d`, used only by the ``"annex"`` form.
@@ -833,7 +833,7 @@ def cavitation_peak_frequency(
 
        f_\mathrm{p,cav} = 6 f_\mathrm{p,turb}
          \left(\frac{1 - x_F}{1 - x_{Fzp1}}\right)^{2}
-         \left(\frac{x_{Fzp1}}{x_F}\right)^{2,5}
+         \left(\frac{x_{Fzp1}}{x_F}\right)^{2.5}
 
     Both brackets are the reciprocals of the ones in Equation (9), and that
     is deliberate rather than a misprint: the same factors that make the
@@ -920,8 +920,8 @@ def reference_transmission_loss(
     area, against the air's, scaled by how much wall there is per unit bore.
     Both terms are negative, and the standard keeps them that way, so this
     quantity is a **negative number that is added** to the internal level all
-    the way to Equation (18). A DN 100 steel pipe with a 3,6 mm wall comes
-    out at −44,7 dB.
+    the way to Equation (18). A DN 100 steel pipe with a 3.6 mm wall comes
+    out at −44.7 dB.
 
     :param internal_diameter_m: :math:`D_i`, in m.
     :param wall_thickness_m: :math:`t_p`, in m.
@@ -974,21 +974,21 @@ def transmission_loss_correction(
 
        \Delta TL(f) = -20 \log\left[
          \left(\frac{f_r}{f}\right)
-         + \left(\frac{f}{f_r}\right)^{1,5}\right]
+         + \left(\frac{f}{f_r}\right)^{1.5}\right]
 
     One expression covers both printed equations: (16b) evaluates it at the
     turbulent peak frequency and (22b) at each band. The bracket is a sum of
     two branches, one falling as :math:`1/f` and one rising as
-    :math:`f^{1,5}`, so the correction is worst far from the ring frequency
+    :math:`f^{1.5}`, so the correction is worst far from the ring frequency
     on either side. It is never zero: where the two branches together are
-    smallest, at :math:`(2/3)^{0,4} f_r = 0{,}85 f_r`, the bracket is still
-    1,96 and the correction still costs 5,85 dB, and at :math:`f_r` itself it
-    costs 6,02.
+    smallest, at :math:`(2/3)^{0.4} f_r = 0.85 f_r`, the bracket is still
+    1.96 and the correction still costs 5.85 dB, and at :math:`f_r` itself it
+    costs 6.02.
 
     :param frequency: :math:`f`, in Hz. A scalar or a 1-D array.
     :param ring: :math:`f_r` from :func:`pipe_ring_frequency`, in Hz.
     :return: :math:`\Delta TL`, in dB, one value per frequency, and always negative: the
-        correction is worth at least 5,85 dB even where it is smallest. A ``float`` for
+        correction is worth at least 5.85 dB even where it is smallest. A ``float`` for
         a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``ring`` is not a single number, or ``frequency`` holds a text
@@ -1016,7 +1016,7 @@ def cavitation_transmission_loss(
     .. math::
 
        TL_{cav} = TL_{turb} + 10 \lg\left(
-         250\, \frac{f_\mathrm{p,cav}^{1,5}}{f_\mathrm{p,turb}^{2}}\,
+         250\, \frac{f_\mathrm{p,cav}^{1.5}}{f_\mathrm{p,turb}^{2}}\,
          \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb} + \eta_\mathrm{cav}}\right)
 
     Cavitation noise peaks higher in frequency than turbulent noise, and the
@@ -1025,8 +1025,8 @@ def cavitation_transmission_loss(
     which is one reason cavitating valves are heard from far away.
 
     The NOTE to the equation floors the efficiency ratio at
-    :math:`f_\mathrm{p,turb}^2/(250 f_\mathrm{p,cav}^{1,5})` while :math:`x_F` is within
-    0,1 of the threshold, which is exactly the value that makes the bracket
+    :math:`f_\mathrm{p,turb}^2/(250 f_\mathrm{p,cav}^{1.5})` while :math:`x_F` is within
+    0.1 of the threshold, which is exactly the value that makes the bracket
     equal 1. Just above incipient cavitation, where the cavitating efficiency
     is still a small fraction of the total, the floor therefore keeps the
     cavitating transmission loss from falling below the turbulent one. Pass
@@ -1109,13 +1109,13 @@ def turbulent_distribution(
 
        F_{turb}(f_i) = -10 \lg\left[
          \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{3}
-         + \left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{-1}\right] - 3{,}1
+         + \left(\frac{f_i}{f_\mathrm{p,turb}}\right)^{-1}\right] - 3.1
 
     A band correction, in dB, that adds to the overall internal level. The
     two terms in the bracket are the two sides of the peak: below it the
     :math:`f^{-1}` term dominates and the level rises at 3 dB per octave;
     above it the :math:`f^{3}` term takes over and the level falls at 9 dB
-    per octave. The trailing 3,1 dB is a printed offset and not a
+    per octave. The trailing 3.1 dB is a printed offset and not a
     normalisation: over the band set of 5.4.1 these corrections do not sum
     back to :math:`L_{pi}`, they sum about 5 dB above it, so the band route
     and the overall route of Equation (18a) are two answers and not one
@@ -1165,12 +1165,12 @@ def cavitation_distribution(
     .. math::
 
        F_{cav}(f_i) = -10 \lg\left[
-         \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{1,5}
-         + \left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{-1,5}\right] - 3{,}5
+         \frac{1}{4}\left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{1.5}
+         + \left(\frac{f_i}{f_\mathrm{p,cav}}\right)^{-1.5}\right] - 3.5
 
     The same shape as Equation (20a) with every numeral changed. Both
-    exponents are :math:`\pm 1,5` instead of 3 and −1, so both flanks fall at
-    the same 4,5 dB per octave and the hump is symmetric, but about
+    exponents are :math:`\pm 1.5` instead of 3 and −1, so both flanks fall at
+    the same 4.5 dB per octave and the hump is symmetric, but about
     :math:`\sqrt[3]{4}\, f_\mathrm{p,cav}`, two thirds of an octave above the
     frequency Equation (13) names, because the quarter in front of the
     rising branch shifts the maximum up. Against Equation (20a)'s 3 dB up and 9 dB down
@@ -1241,8 +1241,8 @@ def band_internal_levels(
     .. math::
 
        L_{pi}(f_i) = L_{pi} + 10 \lg\left(
-         \frac{\eta_\mathrm{turb}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{turb}(f_i)}
-         + \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0,1 F_{cav}(f_i)}
+         \frac{\eta_\mathrm{turb}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0.1 F_{turb}(f_i)}
+         + \frac{\eta_\mathrm{cav}}{\eta_\mathrm{turb}+\eta_\mathrm{cav}} 10^{0.1 F_{cav}(f_i)}
          \right)
 
     The cavitating form is the turbulent and the cavitating spectra added in
@@ -1306,7 +1306,7 @@ def _spreading(internal_diameter_m: float, wall_thickness: float) -> float:
 
     The bare 2 in the numerator is twice the 1 m measuring distance, in
     metres, so both diameters have to be in metres for the bracket to mean
-    anything. For a DN 100 pipe it is 12,7 dB.
+    anything. For a DN 100 pipe it is 12.7 dB.
     """
     outside = internal_diameter_m + 2.0 * wall_thickness
     return float(10.0 * math.log10((outside + 2.0 * _MEASUREMENT_DISTANCE_M) / outside))
@@ -1945,7 +1945,7 @@ def combined_stage_level(levels: NumericArrayLike) -> float:
 
     .. math::
 
-       L_{pAe,1m} = 10 \lg \sum_{i=1}^{n} 10^{0,1 L_{pAe,1m,i}}
+       L_{pAe,1m} = 10 \lg \sum_{i=1}^{n} 10^{0.1 L_{pAe,1m,i}}
 
     6.3.1 calculates each stage as if it were a valve of its own and sums
     them in energy here. That is the branch for a trim whose stages all
@@ -2054,7 +2054,7 @@ def last_stage_seat_diameter_mm(
 
     .. math::
 
-       d_o = 5{,}2 \sqrt{N_{34}\, C_n}
+       d_o = 5.2 \sqrt{N_{34}\, C_n}
 
     The one display formula in the standard that carries no equation number,
     and the one whose unit does not survive its own arithmetic: Clause 3
@@ -2098,7 +2098,7 @@ def _require_recovery(value: float) -> float:
 def _require_threshold(value: float, name: str) -> float:
     """A cavitation threshold, which is a differential pressure ratio below 1.
 
-    Equation (3a) caps :math:`x_{Fz}` at 0,90 and Equation (3b) at 0,47, and
+    Equation (3a) caps :math:`x_{Fz}` at 0.90 and Equation (3b) at 0.47, and
     Equation (3c) only lowers it further at any inlet pressure above
     6 × 10⁵ Pa. A threshold at or above 1 would sit past flashing, where the
     method has stopped, and it would take the bracket

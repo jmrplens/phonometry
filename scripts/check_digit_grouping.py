@@ -77,13 +77,13 @@ NARROW_NO_BREAK_SPACE = " "
 
 #: The two shapes a line break can split. On the left of the marker, groups of
 #: exactly three digits: ``101 325``. On its right, groups of three and a tail
-#: of one to three: ``6,251 5``, ``0,647 829``.
+#: of one to three: “6,251 5”, “0,647 829”.
 #:
 #: The closing conditions are what keep a number apart from two numbers. A
 #: following digit or decimal marker means the space separated two values, as
 #: the printed output of an array does (``0.404 0.512``); a following slash,
 #: caret or letter means the digit belongs to a unit or an exponent, which is
-#: how ``0,005 1/m`` reads. Both were in the tree, and a sweep that took them
+#: how “0,005 1/m” reads. Both were in the tree, and a sweep that took them
 #: for groupings would have published two corrupted numbers.
 _GROUPED_DECIMAL = r"(?<![\d.,])\d+[.,]\d{3}(?:[ ]\d{3})*(?:[ ]\d{1,3})"
 _GROUPED_INTEGER = r"(?<![\d.,])\d{1,3}(?:[ ]\d{3})+"

@@ -30,11 +30,11 @@ corrected by the rules of ISO 10140-2:2021 A.3 ([`laboratory_joint_insulation`](
 
 * a difference of 6 dB up to 10 dB: Formula (J.2),
   $R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$;
-* less than 6 dB: a fixed correction of 1,3 dB, which is what Formula (J.2)
+* less than 6 dB: a fixed correction of 1.3 dB, which is what Formula (J.2)
   gives at 6 dB, and the value is a minimum;
 * $R_\mathrm{s}'$ above $R_\mathrm{s,max} - 3$ dB: the lower limit
   of $R_\mathrm{s}$ may be set to $R_\mathrm{s,max}$ itself,
-  presented in brackets as a minimum value, e.g. $(R_\mathrm{s} \ge 50{,}4$ dB).
+  presented in brackets as a minimum value, e.g. $(R_\mathrm{s} \ge 50.4$ dB).
 
 **Single numbers.** $R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$)
 of ISO 717-1:2020 on the 16 bands 100 Hz to 3 150 Hz, with
@@ -45,9 +45,9 @@ those indicative bands taken as infinitely high; a difference of more than
 1 dB between the two puts the single numbers in brackets too.
 
 **The arrangement.** J.2.1 asks for a joint longer than 1 m and no wider
-than 50 mm, J.2.2 for at least 5,0 m of a gap between the parts of a window or
+than 50 mm, J.2.2 for at least 5.0 m of a gap between the parts of a window or
 door ([`check_joint_test_element`](/phonometry/reference/api/building/joint-insulation/#check_joint_test_element)), whose width is read at four positions
-or more that may not differ by more than 0,3 mm ([`check_gap_width`](/phonometry/reference/api/building/joint-insulation/#check_gap_width)). A
+or more that may not differ by more than 0.3 mm ([`check_gap_width`](/phonometry/reference/api/building/joint-insulation/#check_gap_width)). A
 variable slit is measured at its nominal gap width $b_\mathrm{n}$ (5 mm
 when the manufacturer gives none), at the minimum width under a force of
 normally 100 N/m, and at $b_\mathrm{n} + 3$ mm (J.4,
@@ -107,7 +107,7 @@ than nominal". Each has to be among the widths of the series.
 
 J.4 gives no tolerance on how close a measured width must come. The gap
 width of a result is the average of readings that J.2.2 lets spread over
-0,3 mm, so a measured width within 0,3 mm of a required one counts as
+0.3 mm, so a measured width within 0.3 mm of a required one counts as
 that width. A series that does not name $b_\mathrm{min}$ fails
 J.4 b), because nothing then shows which width it was; pass
 `min_gap_mm` to [`joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#joint_gap_series).
@@ -206,7 +206,7 @@ GapWidthCheck.plot(
 ) -> Axes
 ```
 
-Plot the readings with their average and the 0,3 mm band.
+Plot the readings with their average and the 0.3 mm band.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
@@ -227,7 +227,7 @@ The largest difference between two readings, in mm.
 
 *property*
 
-Whether no two readings differ by more than 0,3 mm.
+Whether no two readings differ by more than 0.3 mm.
 
 ## joint_gap_series
 
@@ -534,7 +534,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 *property*
 
-How far a measured width may lie from a required one, in mm (0,3 mm, J.2.2).
+How far a measured width may lie from a required one, in mm (0.3 mm, J.2.2).
 
 ### JointGapSeriesCheck.working_range_measured
 
@@ -620,15 +620,15 @@ clause fails.
 | :--- | :--- |
 | `joint_length_m` | Length of the joint, in m. |
 | `joint_width_mm` | Width of the joint, in mm. |
-| `window_or_door_gap` | Whether the joint is a gap between the parts of a window or door, which J.2.2 asks to be at least 5,0 m long. |
+| `window_or_door_gap` | Whether the joint is a gap between the parts of a window or door, which J.2.2 asks to be at least 5.0 m long. |
 
 ### JointTestElementCheck.length_ok
 
 *property*
 
-Whether the length is greater than 1 m and, for a window or door gap, at least 5,0 m.
+Whether the length is greater than 1 m and, for a window or door gap, at least 5.0 m.
 
-The 1 m bound is exclusive and the 5,0 m bound inclusive, read with a
+The 1 m bound is exclusive and the 5.0 m bound inclusive, read with a
 relative slack so that a length on it is not failed by rounding.
 
 ### JointTestElementCheck.passes
@@ -689,7 +689,7 @@ $d = R_\mathrm{s,max} - R_\mathrm{s}'$:
 * $d \ge 10$ dB: no correction, $R_\mathrm{s} = R_\mathrm{s}'$;
 * $6 \le d < 10$ dB: Formula (J.2),
   $R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$;
-* $d < 6$ dB: $R_\mathrm{s} = R_\mathrm{s}' + 1{,}3$ dB, the
+* $d < 6$ dB: $R_\mathrm{s} = R_\mathrm{s}' + 1.3$ dB, the
   correction Formula (J.2) gives at 6 dB, a minimum value
   (ISO 10140-2:2021 A.3);
 * $d < 3$ dB, with `limit_at_max` (the default): the lower
@@ -718,7 +718,7 @@ the bracketed lower limit, whichever rule corrected them.
 | `r_s_max` | $R_\mathrm{s,max}$ per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
-| `limit_at_max` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
+| `limit_at_max` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1.3 dB correction like the other bands below 6 dB. |
 
 **Returns:** A [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult).
 
@@ -764,7 +764,7 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 | `ctr_100_5000` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
 | `max_rating` | The ISO 717-1 rating of $R_\mathrm{s,max}$, the maximum sound insulation of the arrangement J.5.2 a) asks the report to state, or `None`. |
 | `open_band_rating` | The single numbers with the indicative bands taken as infinitely high, or `None` when no band is indicative or there is no rating. |
-| `limit_at_max` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1,3 dB correction (Default: `True`). |
+| `limit_at_max` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1.3 dB correction (Default: `True`). |
 
 How each band was corrected (`regime`) is read from the measured
 and the maximum indices and `limit_at_max`, so it is not a field.
@@ -858,7 +858,7 @@ How each band is corrected for the flanking of the arrangement (J.1).
 
 With $d = R_\mathrm{s,max} - R_\mathrm{s}'$: `"uncorrected"`
 when $R_\mathrm{s,max}$ is at least 10 dB above, `"corrected"`
-by Formula (J.2) from 6 dB to 10 dB, `"limit"` (the fixed 1,3 dB)
+by Formula (J.2) from 6 dB to 10 dB, `"limit"` (the fixed 1.3 dB)
 below 6 dB, and `"maximum"` (set to $R_\mathrm{s,max}$) above
 $R_\mathrm{s,max} - 3$ dB when `limit_at_max`.
 

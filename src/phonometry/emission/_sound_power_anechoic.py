@@ -768,7 +768,7 @@ def _precision_a_weighted_total(
     try:
         ck = _a_weighting_corrections(freqs)
     except ValueError:
-        # Bands outside the ISO 3744 Annex E table (e.g. the 12,5 kHz to
+        # Bands outside the ISO 3744 Annex E table (e.g. the 12.5 kHz to
         # 20 kHz one-third octaves that ISO 3745 covers, Tables 2/3): the
         # per-band determination stands, only the A-weighted total is
         # undefined.

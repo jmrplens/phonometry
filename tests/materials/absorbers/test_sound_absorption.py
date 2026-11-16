@@ -2,15 +2,15 @@
 """Tests for BS EN ISO 354:2003 sound absorption in a reverberation room.
 
 Normative anchors (ISO 354:2003):
-- Eq. (5)/(7): A = 55,3*V/(c*T) - 4*V*m  (empty room A1 / with specimen A2).
-- Eq. (6):     c = (331 + 0,6*t/degC) m/s, valid 15..30 degC.
-- Eq. (8):     AT = A2 - A1 = 55,3*V*(1/(c2*T2) - 1/(c1*T1)) - 4*V*(m2 - m1).
-- Eq. (9):     alpha_s = AT / S  (may exceed 1,0; clause 3.7 NOTE 2).
+- Eq. (5)/(7): A = 55.3*V/(c*T) - 4*V*m  (empty room A1 / with specimen A2).
+- Eq. (6):     c = (331 + 0.6*t/degC) m/s, valid 15..30 degC.
+- Eq. (8):     AT = A2 - A1 = 55.3*V*(1/(c2*T2) - 1/(c1*T1)) - 4*V*(m2 - m1).
+- Eq. (9):     alpha_s = AT / S  (may exceed 1.0; clause 3.7 NOTE 2).
 - m from ISO 9613-1 alpha (dB/m): m = alpha / (10*lg e).
 
 Validation strategy: closed-form inversion of the Sabine equation, not
 self-consistency. All tolerances are far below the standard's reporting
-rounding (AT to 0,1 m2; alpha_s to 0,01; clause 8.3).
+rounding (AT to 0.1 m2; alpha_s to 0.01; clause 8.3).
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from phonometry.materials.absorbers.sound_absorption import _speed_of_sound
 
 
 def test_speed_of_sound_reference_20c() -> None:
-    # c = 331 + 0,6*20 = 343 m/s.
+    # c = 331 + 0.6*20 = 343 m/s.
     assert _speed_of_sound(20.0) == pytest.approx(343.0)
 
 
@@ -49,7 +49,7 @@ def test_absorption_area_formula() -> None:
 
 
 def test_exact_inversion_t_to_a_to_t() -> None:
-    # A = 55,3 V/(c T)  =>  T = 55,3 V/(c A), exact round trip (m = 0).
+    # A = 55.3 V/(c T)  =>  T = 55.3 V/(c A), exact round trip (m = 0).
     v, c = 200.0, 343.0
     t60 = np.array([1.5, 2.0, 3.7, 5.0, 8.2])
     a = materials.absorption_area(t60, v, speed_of_sound=c)
@@ -93,7 +93,7 @@ def test_air_correction_per_band_array() -> None:
 
 
 def test_power_attenuation_from_alpha_conversion() -> None:
-    # m = alpha / (10 lg e); 10*lg(e) = 4,342944819...
+    # m = alpha / (10 lg e); 10*lg(e) = 4.342944819...
     alpha = 4.342944819032518
     assert materials.power_attenuation_from_alpha(alpha) == pytest.approx(1.0, rel=1e-9)
     assert materials.power_attenuation_from_alpha(0.0) == 0.0
@@ -274,7 +274,7 @@ def test_warns_sample_area_above_range_no_scaling() -> None:
 
 
 def test_warns_sample_area_above_scaled_range() -> None:
-    # V > 200 m3: upper limit is 12*(V/200)^(2/3). For V = 400, ~19,05 m2;
+    # V > 200 m3: upper limit is 12*(V/200)^(2/3). For V = 400, ~19.05 m2;
     # S = 20 m2 exceeds it and must warn.
     v = 400.0
     upper = 12.0 * (v / 200.0) ** (2.0 / 3.0)
@@ -284,7 +284,7 @@ def test_warns_sample_area_above_scaled_range() -> None:
 
 
 def test_no_sample_area_warning_within_scaled_range() -> None:
-    # V = 400 m3 lifts the upper limit to ~19,05 m2; S = 15 m2 is now in range.
+    # V = 400 m3 lifts the upper limit to ~19.05 m2; S = 15 m2 is now in range.
     v = 400.0
     with warnings.catch_warnings():
         warnings.simplefilter("error")
@@ -352,7 +352,7 @@ def test_temperature_outside_eq6_range_warns() -> None:
 
 
 def test_temperature_below_absolute_zero_raises() -> None:
-    # Below -273,15 degC Eq. (6) would hand back a non-positive speed of
+    # Below -273.15 degC Eq. (6) would hand back a non-positive speed of
     # sound; the refusal is a hard error, not the out-of-range advisory.
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
         materials.absorption_area(3.0, 200.0, temperature_c=-600.0)

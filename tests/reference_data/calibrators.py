@@ -98,19 +98,19 @@ IEC60942_TABLE_A4: list[tuple[str, tuple[float | None, float | None, float | Non
 IEC60942_TABLE_A5 = (0.2, 0.2, 0.2)
 
 #: A.5.5.7 and A.5.5.8 (folios 26 and 27, PDF pages 34 and 35), in the text:
-#: the maximum uncertainty of the supply-voltage difference, 0,02 dB for
-#: class LS and 0,04 dB for classes 1 and 2.
+#: the maximum uncertainty of the supply-voltage difference, 0.02 dB for
+#: class LS and 0.04 dB for classes 1 and 2.
 IEC60942_SUPPLY_VOLTAGE_MAX_U = (0.02, 0.04, 0.04)
 
 #: 5.9.4.2 (folio 21, PDF page 29): level change in a power- or
 #: radio-frequency field, dB (LS, 1, 2); and A.7.4.8 (folio 40, PDF page 48):
-#: 0,05 dB maximum uncertainty for all classes.
+#: 0.05 dB maximum uncertainty for all classes.
 IEC60942_FIELD_IMMUNITY = (0.10, 0.25, 0.45)
 IEC60942_FIELD_IMMUNITY_MAX_U = 0.05
 
 #: A.6.4.7 (folio 34, PDF page 42): the abbreviated test reduces the Table 5
-#: limits by 0,05 dB (LS and 1) and 0,10 dB (class 2), and holds the frequency
-#: to 0,5 %, 0,5 % and 1,3 %.
+#: limits by 0.05 dB (LS and 1) and 0.10 dB (class 2), and holds the frequency
+#: to 0.5 %, 0.5 % and 1.3 %.
 IEC60942_ABBREVIATED_REDUCTIONS = (0.05, 0.05, 0.10)
 IEC60942_ABBREVIATED_FREQUENCY = (0.5, 0.5, 1.3)
 

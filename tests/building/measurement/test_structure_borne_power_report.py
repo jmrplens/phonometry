@@ -50,7 +50,7 @@ def _result() -> building.StructureBornePowerResult:
 
 
 def _oracle_eta() -> np.ndarray:
-    """Closed-form plate loss factor eta = 2,2/(f*Ts) (Formula 13)."""
+    """Closed-form plate loss factor eta = 2.2/(f*Ts) (Formula 13)."""
     return 2.2 / (_FREQS * _TS)
 
 
@@ -120,7 +120,7 @@ def test_verbose_adds_loss_factor_column(tmp_path: Path) -> None:
     res.report(str(out), verbose=True)
     assert_one_page(str(out))
     text = _extract_text(str(out))
-    # The 1 kHz loss factor eta = 2,2/(1000*0,3) = 0,0073 (four decimals).
+    # The 1 kHz loss factor eta = 2.2/(1000*0.3) = 0.0073 (four decimals).
     eta = _oracle_eta()
     assert f"{eta[3]:.4f}" in text
 

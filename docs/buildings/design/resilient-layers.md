@@ -342,8 +342,8 @@ f_0 = \frac{1}{2\pi}\sqrt{\frac{0.111}{d}\left(\frac{1}{m_1'} + \frac{1}{m_2'}\r
 $$
 
 Both stiffnesses are in MN/m³ and both masses per unit area in kg/m², which is
-how the annex prints them: the cavity term of (D.2) is $s' = 0{,}111/d$ MN/m³
-with $d$ in metres, that is $0{,}111\times10^{6}/d$ in SI units. Substituting
+how the annex prints them: the cavity term of (D.2) is $s' = 0.111/d$ MN/m³
+with $d$ in metres, that is $0.111\times10^{6}/d$ in SI units. Substituting
 the SI value without the conversion gives a resonance about a thousand times
 too low.
 
@@ -395,7 +395,7 @@ stiffness per unit area in accordance with EN 29052-1 **measured without any
 pre-load**. A stiffness quoted under service load is a different number, and
 since $f_0 \propto \sqrt{s'}$ a factor of two in the declared stiffness moves the
 resonance by $\sqrt{2}$ and shifts the whole improvement spectrum by
-$30\lg\sqrt{2} = 4{,}5$ dB on the 30 lg law, 6,0 dB on the 40 lg one. The
+$30\lg\sqrt{2} = 4.5$ dB on the 30 lg law, 6.0 dB on the 40 lg one. The
 [dynamic-stiffness guide](../../materials/resilient/dynamic-stiffness.md)
 shows what the load plate does and why it is what it is.
 
@@ -431,8 +431,8 @@ misplaced resonance in a
 
 For linings the same point has a number on it, and it is on this page already:
 the Annex D formula is chosen by the fixing, so a board specified on studs over a
-filled cavity but built with adhesive dabs moves $f_0$ from 70,8 Hz to 542 Hz and
-turns a +13,8 dB gain into a $-9{,}0$ dB loss. Nearly twenty-three decibels, from
+filled cavity but built with adhesive dabs moves $f_0$ from 70.8 Hz to 542 Hz and
+turns a +13.8 dB gain into a $-9.0$ dB loss. Nearly twenty-three decibels, from
 a site decision that never reached a drawing.
 
 ## What is anchored on a published number, and what is not

@@ -4,8 +4,8 @@
 ``localize_axes`` cannot reach tick labels installed as fixed strings, so the
 band-centre labels of a continuous frequency axis are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not hand
-its ``language`` down draws 31.5 on a Spanish figure where 31,5 belongs. Every
-range here reaches down past 31,5 Hz, the lowest octave centre whose label
+its ``language`` down draws 31.5 on a Spanish figure where "31,5" belongs. Every
+range here reaches down past 31.5 Hz, the lowest octave centre whose label
 carries a decimal, because a set of labels without one proves nothing.
 
 The multi-panel renderers format the axis from two places, once for the panel
@@ -51,8 +51,8 @@ class _Plottable(Protocol):
     def plot(self, ax: Axes | None = None, *, language: str = "en") -> Drawn: ...
 
 
-#: A sampling rate low enough that a 1024-sample segment resolves 7,8 Hz, so
-#: every spectrum below starts under the 31,5 Hz octave centre.
+#: A sampling rate low enough that a 1024-sample segment resolves 7.8 Hz, so
+#: every spectrum below starts under the 31.5 Hz octave centre.
 FS = 8000.0
 NPERSEG = 1024
 
@@ -97,7 +97,7 @@ def _phase_decomposition() -> PhaseDecompositionResult:
 
 def _resampled_signal() -> ResampledSignalResult:
     # 4 kHz down to 200 Hz puts the stopband edge at 100 Hz, and the view runs
-    # from an eighth of it (12,5 Hz) to four times it.
+    # from an eighth of it (12.5 Hz) to four times it.
     return ph.signals.resample_signal(
         ph.signals.noise_signal(4000.0, duration_s=1.0, seed=5), 4000.0, fs_new=200.0
     )

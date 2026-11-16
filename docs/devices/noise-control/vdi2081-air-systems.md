@@ -152,7 +152,7 @@ nothing else left to hear. VDI 2081 gives it in closed form.
   through `flow_noise_straight_duct_overall` for the two overall levels and
   `flow_noise_straight_duct` for the octave spectrum, which is the first of
   them with the relative shape of Figure 16 on it. What that figure prints is a
-  level difference, not a share: it tends to $-2{,}5$ dB as $f_\mathrm{m}/v$
+  level difference, not a share: it tends to $-2.5$ dB as $f_\mathrm{m}/v$
   falls, so the bands do not sum back to the overall and the shortfall depends
   on how many octaves are taken. Over the range the figure is drawn for it
   lands within half a decibel of the overall.
@@ -213,7 +213,7 @@ that varies across the bands.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vdi2081_room_step_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vdi2081_room_step.svg" alt="Two panels. On the left, the difference between sound power level and sound pressure level against frequency for the worked example's ceiling diffuser: it falls from 5.6 decibels at 63 hertz to 3.4 at 8 kilohertz as the outlet's directivity factor rises, while a half space with a directivity factor of 2 would give a flat 5.7 decibels in every band. On the right, the same difference against distance from the outlet for the equivalent absorption area of 20 square metres and for the two room constants that a mean absorption coefficient of 0.15 and of 0.4 turn it into, with the listener's 1.5 metres marked." width="100%"></picture>
 
-*Left: the single 5,7 dB the sheet prints beside the row is not any of the
+*Left: the single 5.7 dB the sheet prints beside the row is not any of the
 eight band values, because it is the same room with the directivity of a half
 space. Right: reading the room constant into the absorption-area argument
 costs about a decibel in this room, and more in a livelier one.*
@@ -241,8 +241,8 @@ different model rather than a restatement of the same one.
 1 kHz the level no longer follows the fan at all, because what is heard there
 is the noise the air makes on its way past.*
 
-The A-weighted level in room 102 comes out at 40,0 dB(A) against the 40,0 the
-sheet prints, and the unweighted total at 51,4 against 51,4. Forty-six
+The A-weighted level in room 102 comes out at 40.0 dB(A) against the 40.0 the
+sheet prints, and the unweighted total at 51.4 against 51.4. Forty-six
 conformance rows hold each element of the chain to the tenth of a decibel the
 table is printed to, band by band rather than by the sum: a sum is blind to
 the shape, and any pair of compensating errors passes it.

@@ -49,21 +49,21 @@ def test_table_2_as_printed() -> None:
 
 
 def test_example_8_table_b1_by_formula_5_and_7() -> None:
-    """B.8: the r.m.s. of each category with nothing zeroed, and 1,5 times it."""
+    """B.8: the r.m.s. of each category with nothing zeroed, and 1.5 times it."""
     categories = [METRO_NORTH, METRO_SOUTH, TRAM_EAST, TRAM_WEST]
     assert [len(c) for c in categories] == [14, 14, 9, 10]
     kb_ftm = [im.train_category_rms(c) for c in categories]
     assert [round(v, 3) for v in kb_ftm] == [0.037, 0.047, 0.406, 0.568]
     kb_fmax = im.train_kb_fmax(kb_ftm)
-    # Formed from the unrounded r.m.s.: 1,5 times the printed 0,568 would be 0,852.
+    # Formed from the unrounded r.m.s.: 1.5 times the printed 0.568 would be 0.852.
     assert [round(v, 3) for v in kb_fmax] == [0.055, 0.070, 0.609, 0.851]
     assert im.railway_kb_fmax(kb_ftm) == pytest.approx(kb_fmax[3])
 
 
 def test_example_8_the_metro_is_zeroed_in_formula_6_only() -> None:
-    """B.8.3.4: 144 metros a track at alpha 1 with r.m.s. below 0,1 count as
-    zero, 80 trams a track at alpha 0,7 give 0,099 8 over the 1920 intervals
-    of the day, above A_r = 0,07.
+    """B.8.3.4: 144 metros a track at alpha 1 with r.m.s. below 0.1 count as
+    zero, 80 trams a track at alpha 0.7 give 0.099 8 over the 1920 intervals
+    of the day, above A_r = 0.07.
     """
     kb_ftm = [
         im.train_category_rms(c)
@@ -72,9 +72,9 @@ def test_example_8_the_metro_is_zeroed_in_formula_6_only() -> None:
     kb_ftr = im.train_assessment_severity(
         kb_ftm, [144, 144, 80, 80], alpha=[1.0, 1.0, 0.7, 0.7]
     )
-    # The print says 0,099 8, which only the three-decimal r.m.s. values of
+    # The print says 0.099 8, which only the three-decimal r.m.s. values of
     # Table B.1 give; the four-decimal ones it prints beside the formula, and
-    # the passages themselves, give 0,099 7.
+    # the passages themselves, give 0.099 7.
     assert kb_ftr == pytest.approx(0.0997, abs=0.00005)
     assert im.train_assessment_severity(
         [0.0365, 0.0468, 0.406, 0.568], [144, 144, 80, 80], alpha=[1.0, 1.0, 0.7, 0.7]
@@ -89,7 +89,7 @@ def test_example_8_the_metro_is_zeroed_in_formula_6_only() -> None:
     )
     assert not verdict.passes
     assert verdict.criterion == "A_r"
-    # By night the trams exceed the A_o of 0,2 for a new building (6.5.3.7).
+    # By night the trams exceed the A_o of 0.2 for a new building (6.5.3.7).
     night = im.guide_values("residential", time_of_day="night", edition="2023")
     at_night = im.assess_people_in_buildings(
         im.railway_kb_fmax(kb_ftm), night, source="railway", edition="2023"
@@ -99,10 +99,10 @@ def test_example_8_the_metro_is_zeroed_in_formula_6_only() -> None:
 
 
 def test_example_9_nullfall_and_planfall_by_formula_6() -> None:
-    """B.9: 28 regional at 0,9 and 8 freight at 1,0 by day give 0,039; the
+    """B.9: 28 regional at 0.9 and 8 freight at 1.0 by day give 0.039; the
     planned case with a second track, one third of its freight over 600 m at
-    1,3, gives 0,046 by day and, with the 960 intervals of the night, 0,094.
-    The print divides the night by 920 and gets 0,096; see the errata.
+    1.3, gives 0.046 by day and, with the 960 intervals of the night, 0.094.
+    The print divides the night by 920 and gets 0.096; see the errata.
     """
     nullfall_day = im.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0])
     assert round(nullfall_day, 3) == 0.039
@@ -123,14 +123,14 @@ def test_example_9_nullfall_and_planfall_by_formula_6() -> None:
     )
     assert round(nullfall_night, 3) == 0.065
     assert round(planfall_night, 3) == 0.094
-    # The print's 920 intervals reproduce its 0,066 and 0,096.
+    # The print's 920 intervals reproduce its 0.066 and 0.096.
     assert nullfall_night * math.sqrt(960 / 920) == pytest.approx(0.066, abs=0.0005)
     assert planfall_night * math.sqrt(960 / 920) == pytest.approx(0.096, abs=0.0005)
     assert im.railway_kb_fmax([0.24, 0.44]) == pytest.approx(0.66)
 
 
 def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None:
-    """B.9.4: A_r = 0,07 exceeded by night and KB_FTr up by more than 25 %
+    """B.9.4: A_r = 0.07 exceeded by night and KB_FTr up by more than 25 %
     against the case without the project, so mitigation is to be looked into.
     """
     guide = im.railway_guide_values("mixed", time_of_day="night")
@@ -146,7 +146,7 @@ def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None
         time_of_day="night",
     )
     assert not change.passes
-    assert change.kb_fmax_met  # 0,66 above the 0,6 of a surface line, but no increase
+    assert change.kb_fmax_met  # 0.66 above the 0.6 of a surface line, but no increase
     assert not change.kb_ftr_met
     assert change.kb_fmax_increase_percent == 0.0
     assert change.kb_ftr_increase_percent == pytest.approx(44.6, abs=0.1)
@@ -163,8 +163,8 @@ def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None
 
 
 def test_the_night_upper_value_of_a_new_line() -> None:
-    """6.5.3.5: 0,6 on the surface anywhere, Table 1 underground in rows 1
-    and 2, 0,3 underground in rows 3 to 5, and Table 1 by day.
+    """6.5.3.5: 0.6 on the surface anywhere, Table 1 underground in rows 1
+    and 2, 0.3 underground in rows 3 to 5, and Table 1 by day.
     """
     assert im.railway_guide_values("residential", time_of_day="night").a_o == 0.6
     assert (
@@ -188,7 +188,7 @@ def test_the_night_upper_value_of_a_new_line() -> None:
     assert im.railway_guide_values("residential") == im.guide_values(
         "residential", edition="2023"
     )
-    # The draft's Table 1 cell: a mixed area's night A_u is 0,1.
+    # The draft's Table 1 cell: a mixed area's night A_u is 0.1.
     assert im.railway_guide_values("mixed", time_of_day="night").a_u == 0.1
 
 

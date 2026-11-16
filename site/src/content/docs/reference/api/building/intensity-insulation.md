@@ -491,7 +491,7 @@ Sound reduction index of a limp panel (ISO 15186-3:2002, Annex A).
 
 Annex A is normative and is how a laboratory qualifies itself: measure a
 limp panel of area $S > 1~\text{m}^2$, calculate what it should
-read, and require the two to agree within 4,0 dB from 50 Hz to 160 Hz.
+read, and require the two to agree within 4.0 dB from 50 Hz to 160 Hz.
 This is the calculated half.
 
 A.1 states two different things about the area, and this enforces the
@@ -510,14 +510,14 @@ R_0 = 20 \lg \frac{\pi f m}{\rho c} \tag{A.2}
 $$
 
 $$
-\sigma_\mathrm{d} = \frac{1}{2} \left[ 0{,}20 + \ln\left( 2\pi \frac{f}{c} \sqrt{S} \right) \right] \tag{A.3}
+\sigma_\mathrm{d} = \frac{1}{2} \left[ 0.20 + \ln\left( 2\pi \frac{f}{c} \sqrt{S} \right) \right] \tag{A.3}
 $$
 
 with the characteristic impedance and the speed of sound taken from the
 climate of the test (Formulas (A.4) and (A.5)),
 
 $$
-\rho c = 427 \sqrt{\frac{273}{273 + \theta}} \cdot \frac{B}{B_0}, \qquad c = 331 + 0{,}6\,\theta
+\rho c = 427 \sqrt{\frac{273}{273 + \theta}} \cdot \frac{B}{B_0}, \qquad c = 331 + 0.6\,\theta
 $$
 
 The panel is limp by assumption: $R_0$ is the mass law and

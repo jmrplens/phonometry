@@ -724,9 +724,9 @@ def plenum_flanking_reduction_index(
     :param source_length: Source-side ceiling length ``LS``, in m
         (Default: equal to *ceiling_length*).
     :param split_source: Power split ``sS`` towards the partition, in
-        ``(0, 1]`` (Default: 0,5).
+        ``(0, 1]`` (Default: 0.5).
     :param split_receiving: Power split ``sR`` on the receiving side, in
-        ``(0, 1]`` (Default: 0,5).
+        ``(0, 1]`` (Default: 0.5).
     :return: A :class:`PlenumFlankingResult`.
     :raises ValueError: for mismatched shapes, an unknown sidewall case, or a
         non-positive dimension.

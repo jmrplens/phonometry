@@ -114,22 +114,22 @@ def test_table_i2_combined_uncertainty_and_dof_reproduce() -> None:
 
 
 def test_table_i2_coverage_factor_follows_from_its_own_dof() -> None:
-    """The erratum: 29,98 degrees of freedom give k = 2,04, not 2,11."""
+    """The erratum: 29.98 degrees of freedom give k = 2.04, not 2.11."""
     budget = _budget_i2()
     assert budget.coverage_factor == pytest.approx(
         student.ppf(0.975, ref.IEC62585_TABLE_I2_EFFECTIVE_DOF), abs=2e-4
     )
     assert round(budget.coverage_factor, 2) == pytest.approx(2.04, abs=1e-12)
     assert round(budget.coverage_factor, 2) != ref.IEC62585_TABLE_I2_PRINTED_K
-    # 2,11 is the Student factor for about 17 degrees of freedom.
+    # 2.11 is the Student factor for about 17 degrees of freedom.
     assert round(float(student.ppf(0.975, 17)), 2) == pytest.approx(
         ref.IEC62585_TABLE_I2_PRINTED_K, abs=1e-12
     )
-    # 2,042 times 0,05903 dB is 0,1206 dB: 0,12(1) to the printed guard digit.
+    # 2.042 times 0.05903 dB is 0.1206 dB: 0.12(1) to the printed guard digit.
     assert round(budget.expanded_uncertainty_db, 3) == pytest.approx(
         ref.IEC62585_TABLE_I2_EXPANDED_DB, abs=1e-12
     )
-    # The printed guard digit, 0,12(4), follows from the printed k instead.
+    # The printed guard digit, 0.12(4), follows from the printed k instead.
     printed = ref.IEC62585_TABLE_I2_PRINTED_K * ref.IEC62585_TABLE_I2_COMBINED_DB
     assert round(printed, 3) == pytest.approx(
         ref.IEC62585_TABLE_I2_PRINTED_EXPANDED_DB, abs=1e-12
@@ -332,7 +332,7 @@ def test_maxima_of_clauses_9_to_14(
 
 
 def test_a_frequency_within_two_percent_of_a_boundary_is_read_as_it() -> None:
-    """4,05 kHz is "4 kHz" to 2 %: up to and including 4 kHz, not above."""
+    """4.05 kHz is "4 kHz" to 2 %: up to and including 4 kHz, not above."""
     near = metrology.max_expanded_uncertainty([4050.0, 4100.0], clause=12)
     assert np.allclose(near, [0.25, 0.35], rtol=0.0, atol=1e-12)
 
@@ -377,7 +377,7 @@ def test_verdict_is_inclusive_at_the_maximum() -> None:
 
 
 def test_verdict_forgives_a_maximum_reached_through_arithmetic() -> None:
-    """0,1 + 0,2 is 0,300 000 000 000 000 04 in binary: on 0,30 dB, not above."""
+    """0.1 + 0.2 is 0.300 000 000 000 000 04 in binary: on 0.30 dB, not above."""
     reached = 0.1 + 0.2
     verdict = metrology.verify_correction_uncertainty(
         frequencies=[5000.0], expanded_uncertainty_db=[reached], clause=11
@@ -515,7 +515,7 @@ def test_adjustment_value_is_l1_less_l4() -> None:
         calibrator_indicated_level_before=93.7,
         calibrator_level=94.0,
     )
-    # s = +0,1 dB, so L4 = 93,7 + 0,1 = 93,8 dB and ΔL = 94,0 - 93,8 = +0,2 dB.
+    # s = +0.1 dB, so L4 = 93.7 + 0.1 = 93.8 dB and ΔL = 94.0 - 93.8 = +0.2 dB.
     assert result.sensitivity_adjustment == pytest.approx(0.1, abs=1e-12)
     assert result.calibrator_indicated_level == pytest.approx(93.8, abs=1e-12)
     assert result.adjustment == pytest.approx(0.2, abs=1e-12)
@@ -526,7 +526,7 @@ def test_adjustment_value_is_l1_less_l4() -> None:
 
 
 def test_a_nominal_check_frequency_finds_its_exact_counterpart() -> None:
-    """250 Hz is the exact one-third-octave 251,19 Hz, to within 2 %."""
+    """250 Hz is the exact one-third-octave 251.19 Hz, to within 2 %."""
     result = metrology.adjustment_value(
         frequencies=_THIRDS,
         free_field_indicated_level=94.0,
@@ -758,7 +758,7 @@ def _three_microphones_on_three_calibrators(
     **kwargs: object,
 ) -> metrology.FreeFieldCorrection:
     """Nine determinations of identical microphones on calibrators that load
-    them 0, 0,15 and 0,30 dB apart (D.2 step 6, one row per combination).
+    them 0, 0.15 and 0.30 dB apart (D.2 step 6, one row per combination).
     """
     loading = np.tile([0.0, 0.15, 0.30], 3)[:, None]
     return metrology.sound_calibrator_correction(

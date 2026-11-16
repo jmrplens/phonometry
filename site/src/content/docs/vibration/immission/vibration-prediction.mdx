@@ -45,11 +45,11 @@ v = v₁ · (R / R₁)^-n · exp[-α (R - R₁)]
 by three yes-or-no questions, and material damping with
 `α ≈ 2π D / λ`, the damping ratio of the ground over the wavelength that
 matters. The exponent is 0 for a harmonic line source carried by a surface
-wave and gains 0,5 for each of point instead of line, impulsive instead of
-harmonic, and body wave instead of surface wave, up to 1,5 for an impulsive
+wave and gains 0.5 for each of point instead of line, impulsive instead of
+harmonic, and body wave instead of surface wave, up to 1.5 for an impulsive
 point source in a body wave. A train is a chain of point sources not
-excited in phase and decays with something between 0,3 and 0,5. For loose
-ground a first estimate may take a damping ratio of 0,01 at most; more has
+excited in phase and decays with something between 0.3 and 0.5. For loose
+ground a first estimate may take a damping ratio of 0.01 at most; more has
 to be proven.
 
 ```python
@@ -59,8 +59,8 @@ print(vibration.geometric_exponent(geometry="point", character="impulsive", wave
 print(vibration.geometric_exponent(geometry="line", character="harmonic", wave="surface"))  # 0.0
 print(vibration.reference_distance_m(6.0, rayleigh_wavelength_m=12.5))  # 15.5
 
-# Annex A, Figure A.19: a machine hall measured at 0,44 mm/s 13 m away,
-# with D = 0,01 and a wavelength of 12,5 m.
+# Annex A, Figure A.19: a machine hall measured at 0.44 mm/s 13 m away,
+# with D = 0.01 and a wavelength of 12.5 m.
 alpha = vibration.attenuation_coefficient_per_m(0.01, wavelength_m=12.5)
 print(f"{alpha:.4f} 1/m")  # 0.0050 1/m
 decay = vibration.far_field_velocity_mm_s(
@@ -123,7 +123,7 @@ aluminium, not soil: it is the clip of the
 kinds of wave, not a decay to read numbers from.*
 
 The damping alone is worth drawing, and Figure 2 draws it for a damping
-ratio of 0,01 and a wave speed of 200 m/s: over 100 m the ground takes
+ratio of 0.01 and a wave speed of 200 m/s: over 100 m the ground takes
 27 % of the amplitude at 10 Hz and 79 % at 50 Hz, which is why the low
 frequencies are what arrives at a distance.
 
@@ -147,11 +147,11 @@ predominantly harmonic vibration: about 15 Hz for one or two storeys, 8 Hz
 to 12 Hz for two to six, under 8 Hz above that, on a ground of medium
 stiffness with a shear wave speed of 150 m/s to 200 m/s. At that frequency
 the foundation passes at most `1 / (2 D₀)` of the ground's amplitude, and
-for loose ground `D₀` may be taken as 0,25, so the foundation amplifies by
-2 at most; above it a mean transfer of 0,5 may be assumed, and on rock there
+for loose ground `D₀` may be taken as 0.25, so the foundation amplifies by
+2 at most; above it a mean transfer of 0.5 may be assumed, and on rock there
 is no reduction at all. A floor then amplifies by at most `1 / (2 D₁)` at its
 own resonance, 10 to 25 for a concrete floor with a damping ratio between
-0,05 and 0,02, on the assumption that the building is excited in phase over
+0.05 and 0.02, on the assumption that the building is excited in phase over
 its whole footprint, which is the safe side for a source that is close,
 moving or impulsive. And the lowest horizontal natural frequency of a
 building of five storeys or more is about `10 / n` Hz (Formula (4)), which
@@ -200,8 +200,8 @@ print(impact.round(1))  # [0.5 0.2]
 ## 4. What a track and a hall of machines excite at
 
 A train excites the ground at its speed over the spacing of whatever
-repeats along the track or around the wheel, the sleepers first at 0,6 m to
-0,9 m, and at the multiples of that, while the parts of the vehicle keep
+repeats along the track or around the wheel, the sleepers first at 0.6 m to
+0.9 m, and at the multiples of that, while the parts of the vehicle keep
 their own frequencies whatever the speed: the car body on its secondary
 suspension at 1 Hz to 3 Hz, the bogie on its primary at 6 Hz to 10 Hz.
 Ballasted track passes 40 Hz to 80 Hz on preferentially, a tunnel with
@@ -221,7 +221,7 @@ running, scaled to `N` with a correction `χ` that the standard prints only
 as a nomogram, Figure 3, for measurements made with 3, 5, 10, 30, 60 or 100
 machines. The nomogram is here as its six curves read off the page at a
 five-hundredth, the width of their stroke, and the standard's own check of
-it, Figure A.18, drawn for a hall measured at 0,44 mm/s with three machines
+it, Figure A.18, drawn for a hall measured at 0.44 mm/s with three machines
 running, is reproduced within 6 %: the measurements follow the curve up to
 about sixty machines, the nearest group, and stay flat beyond, because the
 groups added after that are further off.

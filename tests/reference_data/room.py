@@ -54,8 +54,8 @@ ANSIS12_2_NC_TABLE_1 = (
 
 # ---------------------------------------------------------------------------
 # Sound absorption in enclosed spaces - EN 12354-6:2003, Annex E worked
-# example (4,54 x 2,73 x 2,40 = 29,75 m3 room, 1000 Hz octave band). Case 1
-# (bare) A = 2,26 m2, T = 2,1 s; Case 2 (with hard objects) A = 5,03 m2.
+# example (4.54 x 2.73 x 2.40 = 29.75 m3 room, 1000 Hz octave band). Case 1
+# (bare) A = 2.26 m2, T = 2.1 s; Case 2 (with hard objects) A = 5.03 m2.
 # The six bare-room surfaces are (area_m2, alpha at 1000 Hz): floor, ceiling,
 # long wall, side wall, side wall, glass facade.
 # ---------------------------------------------------------------------------

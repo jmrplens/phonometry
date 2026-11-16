@@ -610,7 +610,7 @@ def plot_operating_line(
         )
     ax.set_xscale("log")
     # The duty spans a decade or two of a flow rate in m3/s or a pressure in
-    # Pa, and the default log axis labels that 10^-1 rather than 0,1, which
+    # Pa, and the default log axis labels that 10^-1 rather than 0.1, which
     # reads as an exponent and not as a duty. Ticks at 1, 2 and 5 of each
     # decade, written plainly, give a reader the numbers the test points were
     # actually taken at.

@@ -3,7 +3,7 @@
 
 Table A.1 prints every intermediate of three operating points of one DN 100
 globe valve on water: one turbulent, one cavitating, and a third that repeats
-the second with the characteristic pressure ratio shifted by 0,1 to show what
+the second with the characteristic pressure ratio shifted by 0.1 to show what
 that uncertainty costs. Those printed columns are the oracle here, and each
 test names the equation whose value it pins.
 
@@ -75,7 +75,7 @@ def _chain(
     )
 
 
-#: Equation (3a) for this valve, which the annex prints as 0,2543.
+#: Equation (3a) for this valve, which the annex prints as 0.2543.
 INCIPIENT = hydro.incipient_cavitation_ratio(90.0, 0.42, 0.92)
 
 #: The per-column data of Table A.1. The third column is the second with
@@ -126,7 +126,7 @@ class TestPreliminaryCalculations:
         assert _run(index).cavitation_differential == pytest.approx(expected, abs=1.0)
 
     def test_the_differential_is_capped_at_the_choking_point(self) -> None:
-        # The annex's own second candidate, F_L^2 (p_1 - p_v) = 8,44e5 Pa,
+        # The annex's own second candidate, F_L^2 (p_1 - p_v) = 8.44e5 Pa,
         # is above all three printed differentials, so Equation (2) returns
         # p_1 - p_2 in every column. Push p_2 down and the cap binds.
         choked = hydro.cavitation_differential(
@@ -140,7 +140,7 @@ class TestPreliminaryCalculations:
 
     def test_the_chain_caps_it_too(self) -> None:
         # Annex A never chokes, so the cap has to be exercised on a column of
-        # our own: 9 bar across the same valve, against the 8,444 bar of
+        # our own: 9 bar across the same valve, against the 8.444 bar of
         # F_L^2 (p_1 - p_v). Equation (5) then runs on the cap and not on the
         # differential, which is 3 % less velocity than the full drop would
         # give and 8 % less stream power.
@@ -151,7 +151,7 @@ class TestPreliminaryCalculations:
         uncapped = hydro.vena_contracta_velocity(9.0e5, 997.0, 0.92)
         assert result.velocity < uncapped
         # Equation (9) carries (p_1 - p_2)/Delta p_c, which is 1 in every
-        # printed column and 1,066 here, so this is also the one case that
+        # printed column and 1.066 here, so this is also the one case that
         # pins that factor.
         found = result.cavitation_efficiency
         assert found is not None
@@ -193,12 +193,12 @@ class TestPreliminaryCalculations:
         assert one == pytest.approx(two, rel=1e-12)
 
     def test_the_multihole_form_matches_its_own_arithmetic(self) -> None:
-        # 1/sqrt(4,5 + 1 650 * 120 * 0,004^2 / 0,92): the two printed
-        # constants are 4,5 and 1 650, and neither is free.
+        # 1/sqrt(4.5 + 1 650 * 120 * 0.004^2 / 0.92): the two printed
+        # constants are 4.5 and 1 650, and neither is free.
         assert hydro.multihole_incipient_cavitation_ratio(
             120, 0.004, 0.92
         ) == pytest.approx(0.35481, abs=5e-5)
-        # With no holes at all the offset alone would give 1/sqrt(4,5).
+        # With no holes at all the offset alone would give 1/sqrt(4.5).
         assert hydro.multihole_incipient_cavitation_ratio(
             1, 1e-9, 0.92
         ) == pytest.approx(1.0 / math.sqrt(4.5), abs=1e-6)
@@ -259,7 +259,7 @@ class TestEfficiencies:
         assert found == pytest.approx(expected, rel=1e-3)
 
     def test_the_two_regimes_meet_without_a_step(self) -> None:
-        # (x_F - x_Fzp1)^1,5 puts Equation (9) at exactly zero on the
+        # (x_F - x_Fzp1)^1.5 puts Equation (9) at exactly zero on the
         # threshold, so the cavitating branch starts where the turbulent one
         # ends rather than jumping.
         efficiency = hydro.cavitation_efficiency(
@@ -346,7 +346,7 @@ class TestPeakFrequencies:
     def test_the_two_diameters_of_equation_12_are_not_interchangeable(
         self,
     ) -> None:
-        # Annex A's valve has d = d_o = 0,1 m, which is exactly the case that
+        # Annex A's valve has d = d_o = 0.1 m, which is exactly the case that
         # cannot tell the denominator's two diameters apart. Make them
         # differ: the product d*d_o is what the equation divides by.
         shared: dict[str, Any] = {
@@ -367,9 +367,9 @@ class TestPeakFrequencies:
         assert wide == pytest.approx(2.0 * 0.399, abs=1e-3)
 
     def test_the_clause_form_is_a_different_number(self) -> None:
-        # Clause 5.1 prints 0,02 and no F_d; Table A.1 prints 0,036 and
-        # F_d^0,75. See ``docs/ERRATA.md``: only the annex form reproduces
-        # the annex's own 0,399.
+        # Clause 5.1 prints 0.02 and no F_d; Table A.1 prints 0.036 and
+        # F_d^0.75. See ``docs/ERRATA.md``: only the annex form reproduces
+        # the annex's own 0.399.
         shared: dict[str, Any] = {
             "flow_coefficient": 90.0,
             "style_modifier": 0.42,
@@ -407,7 +407,7 @@ class TestPeakFrequencies:
         assert _run(index).turbulent_peak == pytest.approx(expected, abs=0.05)
 
     def test_the_first_column_prints_a_peak_its_own_chain_misses(self) -> None:
-        # Table A.1 prints 494,5 Hz where the unrounded chain gives 494,64;
+        # Table A.1 prints 494.5 Hz where the unrounded chain gives 494.64;
         # columns 2 and 3 reproduce to the last printed digit. Recorded in
         # ``docs/ERRATA.md``; nothing downstream moves at the printed
         # precision.
@@ -490,9 +490,9 @@ class TestTransmissionLoss:
     def test_the_cavitating_transmission_loss_matches_its_own_equation(
         self, index: int, expected: float
     ) -> None:
-        # Table A.1 prints -62,917 and -75,006. Equation (17) with the
+        # Table A.1 prints -62.917 and -75.006. Equation (17) with the
         # intermediates printed beside them gives these values instead, a
-        # 0,06 to 0,08 dB offset whose origin is not visible on the page.
+        # 0.06 to 0.08 dB offset whose origin is not visible on the page.
         # Recorded in ``docs/ERRATA.md``.
         found = _run(index).cavitation_transmission_loss
         assert found is not None
@@ -511,7 +511,7 @@ class TestTransmissionLoss:
         assert result.cavitation_transmission_loss > result.turbulent_transmission_loss
 
     def test_the_note_floors_the_efficiency_ratio_near_the_threshold(self) -> None:
-        # Inside x_Fzp1 < x_F < x_Fzp1 + 0,1 the NOTE floors the ratio at
+        # Inside x_Fzp1 < x_F < x_Fzp1 + 0.1 the NOTE floors the ratio at
         # the value that makes the bracket exactly 1, so the cavitating loss
         # cannot fall below the turbulent one.
         floored = hydro.cavitation_transmission_loss(
@@ -534,7 +534,7 @@ class TestTransmissionLoss:
         assert bare < -71.84
 
     def test_the_floor_does_not_apply_beyond_its_band(self) -> None:
-        # 0,34 is just past 0,2386 + 0,1, so the NOTE has stopped applying
+        # 0.34 is just past 0.2386 + 0.1, so the NOTE has stopped applying
         # one hundredth of a ratio earlier.
         outside = hydro.cavitation_transmission_loss(
             -71.84,
@@ -556,8 +556,8 @@ class TestTransmissionLoss:
         assert inside == pytest.approx(-71.84, abs=1e-9)
 
     def test_the_third_column_stays_just_inside_the_floor_band(self) -> None:
-        # x_F = 0,3508 against x_Fzp1 + 0,1 = 0,4324, and the ratio 0,00959
-        # is above the floor 0,00722, which is what the annex prints twice.
+        # x_F = 0.3508 against x_Fzp1 + 0.1 = 0.4324, and the ratio 0.00959
+        # is above the floor 0.00722, which is what the annex prints twice.
         result = _run(3)
         assert result.corrected_ratio < result.pressure_ratio
         assert hydro.CAVITATION_FLOOR_WIDTH == pytest.approx(0.1)
@@ -573,8 +573,8 @@ class TestTransmissionLoss:
 
     @pytest.mark.parametrize("index", [1, 2, 3])
     def test_the_band_loss_at_8_kHz_is_negative_51_76(self, index: int) -> None:
-        # Table A.1 prints TL(8 000 Hz) = 51,76 dB with no minus sign in all
-        # three columns, where its own inputs sum to -51,763. Recorded in
+        # Table A.1 prints TL(8 000 Hz) = 51.76 dB with no minus sign in all
+        # three columns, where its own inputs sum to -51.763. Recorded in
         # ``docs/ERRATA.md``; row (21) only closes with the negative value.
         assert _band(_run(index), _run(index).band_transmission_loss) == pytest.approx(
             -51.76, abs=5e-3
@@ -610,8 +610,8 @@ class TestBandRoute:
     def test_the_third_column_prints_a_distribution_its_peak_does_not_give(
         self,
     ) -> None:
-        # -36,24 needs f_p,turb = 396,0 Hz; the column's own printed
-        # 397,93 Hz gives -36,18. Recorded in ``docs/ERRATA.md``.
+        # -36.24 needs f_p,turb = 396.0 Hz; the column's own printed
+        # 397.93 Hz gives -36.18. Recorded in ``docs/ERRATA.md``.
         found = hydro.turbulent_distribution(BAND_HZ, 397.93)
         assert found == pytest.approx(-36.18, abs=5e-3)
         assert hydro.turbulent_distribution(BAND_HZ, 396.0) == pytest.approx(
@@ -642,7 +642,7 @@ class TestBandRoute:
         assert found == pytest.approx(expected, abs=5e-3)
 
     def test_the_cavitation_distribution_is_symmetric_about_its_maximum(self) -> None:
-        # Both exponents are 1,5, so the hump is symmetric — but about
+        # Both exponents are 1.5, so the hump is symmetric — but about
         # cbrt(4) f_p,cav, not about f_p,cav itself, because the quarter in
         # front of the rising branch shifts the maximum half an octave up.
         peak = 1000.0
@@ -678,7 +678,7 @@ class TestBandRoute:
 
     def test_the_cavitating_spectrum_carries_both_humps(self) -> None:
         # Equation (19b) weights the two distributions by their share of the
-        # sound power, so with a fraction of 0,377 the cavitation hump at
+        # sound power, so with a fraction of 0.377 the cavitation hump at
         # 1 089 Hz stands above the turbulent one at 654 Hz.
         bands = np.array([654.35, 1088.94])
         mixed = hydro.band_internal_levels(
@@ -719,7 +719,7 @@ class TestWholeChain:
         assert _run(index).external_level == pytest.approx(expected, abs=0.05)
 
     def test_the_shifted_threshold_costs_the_annexs_own_14_dB(self) -> None:
-        # A.1's closing prose: shifting x_Fz by 0,1 moves the answer by about
+        # A.1's closing prose: shifting x_Fz by 0.1 moves the answer by about
         # 14 dB, which is why 4.2 asks for a measured value.
         assert _run(3).external_level - _run(2).external_level == pytest.approx(
             -14.1, abs=0.1
@@ -1039,7 +1039,7 @@ class TestGuards:
 
     @pytest.mark.parametrize("bad", [25.0, 100.0])
     def test_it_refuses_a_power_ratio_read_as_a_percentage(self, bad: float) -> None:
-        # Table 2 prints 0,25 and 0,5. Read as percentages they would add
+        # Table 2 prints 0.25 and 0.5. Read as percentages they would add
         # 20 dB to the answer without a word.
         stream = hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure_pa=8.0e5)
         valve = hydro.LiquidTrim(
@@ -1060,7 +1060,7 @@ class TestGuards:
 
     def test_it_refuses_a_jet_faster_than_sound_in_the_liquid(self) -> None:
         # The arguments the other way round: 1 400 m/s of jet in a liquid
-        # that carries sound at 28,8.
+        # that carries sound at 28.8.
         with pytest.raises(ValueError, match="speed of sound in the liquid"):
             hydro.turbulent_efficiency(1400.0, 28.801)
 
@@ -1093,7 +1093,7 @@ class TestGuards:
     def test_the_correction_refuses_a_threshold_at_or_above_one(
         self, bad: float
     ) -> None:
-        # Equations (3a) and (3b) cap x_Fz at 0,90 and 0,47, and (3c) only
+        # Equations (3a) and (3b) cap x_Fz at 0.90 and 0.47, and (3c) only
         # lowers it. A value of 1 or more is a percentage that lost its
         # division, and it would take the bracket (1 - x_Fzp1)/(1 - x_F) of
         # Equation (9) negative.
@@ -1102,8 +1102,8 @@ class TestGuards:
 
     def test_a_low_inlet_pressure_can_lift_the_threshold_past_one(self) -> None:
         # Equation (3c) raises x_Fz below 6 x 10^5 Pa. At 1 x 10^5 Pa the
-        # factor is 6^0,125 = 1,25, so the 0,90 ceiling of Equation (3a) is
-        # carried to 1,13, which is at or past flashing and cannot be a ratio
+        # factor is 6^0.125 = 1.25, so the 0.90 ceiling of Equation (3a) is
+        # carried to 1.13, which is at or past flashing and cannot be a ratio
         # at which cavitation is detected.
         with pytest.raises(ValueError, match="past flashing"):
             hydro.corrected_incipient_ratio(0.9, 1.0e5)

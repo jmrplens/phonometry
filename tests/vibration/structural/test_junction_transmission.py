@@ -501,20 +501,20 @@ def test_straight_section_undefined_for_t2_and_l() -> None:
 # for Engineers* (2nd ed., CUP 2003), Eqs. 6.52 to 6.56, with the published
 # answer to problem 6.13 (printed p. 594; answer p. 617).
 #
-# **Problem 6.13.** Two aluminium plates coupled at right angles along a 1,2 m
-# edge: plate 1 is 3 mm thick and 2,5 m x 1,2 m, plate 2 is 5,5 mm thick and
-# 2,0 m x 1,2 m. Printed octave-band eta_12 from 125 Hz to 2 kHz:
+# **Problem 6.13.** Two aluminium plates coupled at right angles along a 1.2 m
+# edge: plate 1 is 3 mm thick and 2.5 m x 1.2 m, plate 2 is 5.5 mm thick and
+# 2.0 m x 1.2 m. Printed octave-band eta_12 from 125 Hz to 2 kHz:
 #
-#   welded  3,15e-3  2,23e-3  1,58e-3  1,12e-3  7,89e-4
-#   bolted  1,44e-2  7,19e-3  3,60e-3  1,80e-3  8,99e-4  (twelve bolts)
+#   welded  3.15e-3  2.23e-3  1.58e-3  1.12e-3  7.89e-4
+#   bolted  1.44e-2  7.19e-3  3.60e-3  1.80e-3  8.99e-4  (twelve bolts)
 #
-# Aluminium from Norton's Appendix 4: rho = 2700 kg/m^3, E = 7,1e10 Pa,
-# nu = 0,33, so the plate wave speed of Eq. (6.25) is 5432,3 m/s.
+# Aluminium from Norton's Appendix 4: rho = 2700 kg/m^3, E = 7.1e10 Pa,
+# nu = 0.33, so the plate wave speed of Eq. (6.25) is 5432.3 m/s.
 #
 # The printed eta_21 column is *not* reproduced here and is not used as an
 # oracle: it equals the eta_12 column times h2/h1 exactly, i.e. it applies the
 # reciprocity relationship with n proportional to 1/h alone and drops the plate
-# area ratio S1/S2 = 1,25 that Eq. (6.25) carries. See docs/ERRATA.md.
+# area ratio S1/S2 = 1.25 that Eq. (6.25) carries. See docs/ERRATA.md.
 # ---------------------------------------------------------------------------
 
 _AL_RHO = 2700.0
@@ -562,8 +562,8 @@ def test_norton_right_angle_normal_incidence_is_symmetric() -> None:
 
 
 def test_norton_right_angle_identical_plates() -> None:
-    # Identical plates give psi = 1, hence tau12(0) = 2/4 = 0,5, and X = 1 so
-    # the random-incidence factor is 2,754/4,24.
+    # Identical plates give psi = 1, hence tau12(0) = 2/4 = 0.5, and X = 1 so
+    # the random-incidence factor is 2.754/4.24.
     same = vibration.right_angle_transmission_coefficient(
         0.004,
         0.004,
@@ -652,8 +652,8 @@ def test_norton_point_junction_scales_with_the_bolt_count() -> None:
 
 def test_norton_reciprocity_needs_the_plate_areas() -> None:
     # The correct consistency relationship n1 eta_12 = n2 eta_21 uses
-    # n = S sqrt(12)/(2 cL h), so eta_21/eta_12 = (S1 h2)/(S2 h1) = 2,29 and
-    # not the 1,83 = h2/h1 that the printed eta_21 column of problem 6.13
+    # n = S sqrt(12)/(2 cL h), so eta_21/eta_12 = (S1 h2)/(S2 h1) = 2.29 and
+    # not the 1.83 = h2/h1 that the printed eta_21 column of problem 6.13
     # implies. This pins the ratio the library uses.
     n_1 = flat_plate_modal_density(_S1, _H1, _AL_CL)
     n_2 = flat_plate_modal_density(_S2, _H2, _AL_CL)

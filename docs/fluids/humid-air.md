@@ -44,8 +44,8 @@ annex's own equations:
 | Condition | Swept over | Moves the density by |
 | :--- | :--- | ---: |
 | Static pressure | 80 to 105 kPa | 25 % |
-| Temperature | 15 to 27 °C | 4,5 % |
-| Relative humidity | 0 to 100 % | 1,05 % |
+| Temperature | 15 to 27 °C | 4.5 % |
+| Relative humidity | 0 to 100 % | 1.05 % |
 
 The pressure dominates, and it is also the one people believe they already
 know. A test site 1000 metres up sits at roughly 90 kPa. That is 11 % below
@@ -97,7 +97,7 @@ The temperature has no default at all. It is the one condition a caller has
 actually measured, and there is no value that would be defensible to invent
 for it.
 
-The carbon dioxide fraction defaults quietly, to 0,000 4. That is not a guess
+The carbon dioxide fraction defaults quietly, to 0.000 4. That is not a guess
 about the caller's air: Clause F.2 names it as the value to use for laboratory
 conditions in the absence of a measurement, so the library is quoting the
 annex rather than filling a hole.
@@ -196,7 +196,7 @@ all. The tolerance is not chosen. A value is stated to within half a unit of
 the last place it was printed to, so that is what reproducing it means, and the
 test derives that bound from the printed string rather than carrying a constant
 somebody picked. It is the last *place* that sets the bound, not a count of
-significant figures: `1,186 084 8` carries eight of them and `2,115 317 x 10^-5`
+significant figures: `1.186 084 8` carries eight of them and `2.115 317 x 10^-5`
 seven, and the same rule reads both:
 
 <details>
@@ -236,8 +236,8 @@ stop reproducing the document it cites.
 
 That is why the simplified air formulas of ISO 10534-2, ASTM E2611 and
 ISO 17497-1 stay in their own modules with their own clauses, and why the
-Johnson-Champoux-Allard Prandtl number of 0,71 stays frozen at 0,71 even
-though the air at that state has 0,728.
+Johnson-Champoux-Allard Prandtl number of 0.71 stays frozen at 0.71 even
+though the air at that state has 0.728.
 
 Two states of that air are published as constants, because a caller has no
 business writing them out twice. `materials.ANNEX_A_AIR` is the reference state
@@ -245,7 +245,7 @@ ISO 9053-2:2020 Annex A.3 fixes for an airflow-resistance measurement, 23 °C
 and 50 % relative humidity at one standard atmosphere, evaluated through the
 same CIPM-2007 model as any other air. `simulation.SIMULATION_AIR` is the
 solver's default medium, and it is deliberately not that: 343 m/s and
-1,2 kg/m³ flat, the round pair a finite-difference grid is set up with, carried
+1.2 kg/m³ flat, the round pair a finite-difference grid is set up with, carried
 as a `Fluid` so that a run says which air it was made in rather than leaving
 two floats standing side by side in a call.
 

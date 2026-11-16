@@ -52,7 +52,7 @@ The scan itself is a path, not a set of points. Its basic element is a straight
 line; the path must cover the segment uniformly at uniform speed, with adjacent
 lines equally spaced, and on the initial measurement surface **the mean line
 spacing shall not exceed the mean distance from the segment to the source**
-(clause 8.1). Sweep speed is 0,1 m/s to 0,5 m/s by hand, 0 m/s to 1 m/s
+(clause 8.1). Sweep speed is 0.1 m/s to 0.5 m/s by hand, 0 m/s to 1 m/s
 mechanically; each segment takes **at least 20 s**, with the time-averaging
 started and stopped at the segment boundaries so that the reported
 $\langle I_{\mathrm{n},i} \rangle$ belongs to that segment and nothing else. The probe
@@ -65,7 +65,7 @@ must be orthogonal**: the second sweep rotated 90° wherever that is possible
 sweep, but the rotated one. Criterion 3 exists precisely to catch a field that
 does not repeat, and repeating an identical path passes it on a determination
 that a rotated path would fail. Note 10 of the same clause adds the practical
-consequence: above $F_{pI} = 10\ \text{dB}$, scan speeds over 0,25 m/s are
+consequence: above $F_{pI} = 10\ \text{dB}$, scan speeds over 0.25 m/s are
 likely to fail criterion 3 whatever the stability of the field.
 
 ### The field indicators and their criteria
@@ -246,7 +246,7 @@ per-band survey limit. That is a deliberate extrapolation, not a normative
 value, and it is looser than any grade-2 limit in the table: a survey-grade
 criterion-3 pass is therefore not evidence of grade-2 repeatability. Table 2
 is also bounded: `_table2_s` raises outside the octave bands 63 Hz to 4 kHz and
-the one-third-octave bands 50 Hz to 6,3 kHz, so an 8 kHz octave is an
+the one-third-octave bands 50 Hz to 6.3 kHz, so an 8 kHz octave is an
 exception, not a wide limit.
 
 ### The instrument and the environment
@@ -283,7 +283,7 @@ instead of one boolean.
 | `normal_intensity_2` | 2D array | W/m² | same shape | Second sweep → criterion 3 and averaging |
 | `pressure_levels` | 2D array | dB | same shape | Segment SPL $L_{pi}$ → $F_{pI}$ |
 | `pressure_residual_index` | float or 1D array | dB | — | $\delta_{pI0}$ → $L_\mathrm{d}$ / criterion 1 |
-| `frequencies` | 1D array | Hz | octave 63 Hz-4 kHz, third 50 Hz-6,3 kHz | $L_{W\mathrm{A}}$ and Table 2 limits; outside the range Table 2 has no $s$ and the call raises |
+| `frequencies` | 1D array | Hz | octave 63 Hz-4 kHz, third 50 Hz-6.3 kHz | $L_{W\mathrm{A}}$ and Table 2 limits; outside the range Table 2 has no $s$ and the call raises |
 | `fraction` | int | — | `3` (one-third octaves, default) / `1` (octaves) | Table 2 lookup |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | Selects $K$ |
 | `repeatability_limit` | float or 1D array | dB | default Table 2 (survey: the A-weighted 4 dB reused per band) | Override criterion-3 $s$ |
@@ -638,7 +638,7 @@ precise.report(
         laboratory="Phonometry reference example",
         report_id="EXAMPLE-9614-3",
         requirement=98.0,
-        notes="Box surface at 0,25 m; five partial surfaces scanned twice.",
+        notes="Box surface at 0.25 m; five partial surfaces scanned twice.",
     ),
     indicators=annex_b, criteria=annex_c, residual_index=15.0,
 )   # 200 Hz fails criterion 2 and is named as omitted from LWA

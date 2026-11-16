@@ -2,8 +2,8 @@
 """The exponential-sweep test of IEC 61260-1:2014 5.14 and its two annexes.
 
 Formula (17) is held to the worked example both IEC 61260-2 and IEC 61260-3
-print in Annex B (L_c = 107,97 dB), and its uncertainty to their Annex A
-example (0,057 dB, 0,115 dB expanded, 0,128 dB with a 0,1 dB display). The
+print in Annex B (L_c = 107.97 dB), and its uncertainty to their Annex A
+example (0.057 dB, 0.115 dB expanded, 0.128 dB with a 0.1 dB display). The
 test run on a bank is held to what Annex G predicts for a time-invariant
 filter: it reads the band's effective bandwidth deviation.
 """
@@ -31,7 +31,7 @@ from phonometry.filters import time_invariance
 def test_the_time_invariance_limits_are_5_14_3(
     worst_db: float, expected: int | None
 ) -> None:
-    """+/-0,4 dB for class 1 and +/-0,6 dB for class 2, inclusive."""
+    """+/-0.4 dB for class 1 and +/-0.6 dB for class 2, inclusive."""
     assert (
         time_invariance._TIME_INVARIANCE_LIMITS_DB
         == ref.IEC61260_1_TIME_INVARIANCE_LIMITS_DB
@@ -64,7 +64,7 @@ def _a35_uncertainty(*, display: bool) -> float:
 # Formula (17): Annex B of IEC 61260-2 and IEC 61260-3
 # --------------------------------------------------------------------------
 def test_formula_17_reproduces_annex_b() -> None:
-    """(B.5): L_c = 127 dB - 19,03 dB = 107,97 dB."""
+    """(B.5): L_c = 127 dB - 19.03 dB = 107.97 dB."""
     example = ref.IEC61260_B5
     level = filters.swept_band_level(
         example["input_level"],
@@ -110,7 +110,7 @@ def test_formula_17_refuses_a_sweep_that_does_not_rise() -> None:
 # Annex A: the uncertainty of the swept level
 # --------------------------------------------------------------------------
 def test_annex_a_reproduces_the_printed_example() -> None:
-    """A.3.5: u ~ 0,057 dB, U = 0,115 dB, and 0,128 dB with the display."""
+    """A.3.5: u ~ 0.057 dB, U = 0.115 dB, and 0.128 dB with the display."""
     printed = ref.IEC61260_A35_PRINTED
     u = _a35_uncertainty(display=False)
     assert round(u, 3) == printed["u_lc_db"]
@@ -122,10 +122,10 @@ def test_annex_a_reproduces_the_printed_example() -> None:
 
 
 def test_formula_a2_as_printed_would_not_reproduce_its_example() -> None:
-    """Without the square on the frequency coefficient (A.2) gives 0,075 dB.
+    """Without the square on the frequency coefficient (A.2) gives 0.075 dB.
 
     The printed Formula (A.2) of both annexes leaves the square off
-    10 / (ln(f_end/f_start) ln 10); the example's 0,057 dB needs it, and the
+    10 / (ln(f_end/f_start) ln 10); the example's 0.057 dB needs it, and the
     derivative of Formula (17) gives it.
     """
     inputs = ref.IEC61260_A35_INPUTS

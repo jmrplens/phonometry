@@ -977,7 +977,7 @@ def generate_vibration_sound_power(output_dir: str) -> None:
 def generate_expansion_chamber_geometry(output_dir: str) -> None:
     """To-scale cross-section of the 4:1 expansion chamber of the TL figure.
 
-    The 0,3 m chamber with 0,04 m2 over a 0,01 m2 pipe, drawn with the
+    The 0.3 m chamber with 0.04 m2 over a 0.01 m2 pipe, drawn with the
     equivalent circular diameters. One concept: the geometry behind the
     expansion-chamber transmission-loss curve.
     """
@@ -1000,7 +1000,7 @@ def generate_helmholtz_branch_geometry(output_dir: str) -> None:
     """To-scale cross-section of the side-branch Helmholtz resonator.
 
     The resonator of the side-branch TL figure (1 cm2 neck of 2 cm on a
-    1 L cavity over a 0,01 m2 duct), cavity drawn as its equal-volume cube.
+    1 L cavity over a 0.01 m2 duct), cavity drawn as its equal-volume cube.
     One concept: the branch geometry that shorts the duct at its tuning.
     """
     print("Generating helmholtz_branch_geometry...")
@@ -1026,8 +1026,8 @@ def generate_helmholtz_branch_geometry(output_dir: str) -> None:
 def generate_quarter_wave_geometry(output_dir: str) -> None:
     """To-scale cross-section of the quarter-wave side branch.
 
-    The 0,3 m closed tube (20 cm2) of the side-branch TL figure on the same
-    0,01 m2 duct. One concept: a quarter-wave stub is just a closed tube of
+    The 0.3 m closed tube (20 cm2) of the side-branch TL figure on the same
+    0.01 m2 duct. One concept: a quarter-wave stub is just a closed tube of
     the right length.
     """
     print("Generating quarter_wave_geometry...")
@@ -1142,7 +1142,7 @@ def generate_piston_baffle_geometry(output_dir: str) -> None:
 def generate_plenum_geometry(output_dir: str) -> None:
     """Plenum chamber section honouring the acoustic geometry exactly.
 
-    A 1,2 m line of sight at 20 degrees off the inlet axis, a 0,09 m2
+    A 1.2 m line of sight at 20 degrees off the inlet axis, a 0.09 m2
     outlet and 6 m2 of lined walls: the two geometric parameters of the
     attenuation formula are drawn exactly and the areas annotated. One
     concept: what the plenum formula actually measures.
@@ -1162,7 +1162,7 @@ def generate_plenum_geometry(output_dir: str) -> None:
 def generate_radiation_plate_geometry(output_dir: str) -> None:
     """The baffled plate of the radiation-efficiency model, to scale.
 
-    The 1,5 x 1,25 m simply supported plate in its rigid baffle, the
+    The 1.5 x 1.25 m simply supported plate in its rigid baffle, the
     geometry the sigma(f) curves describe. One concept: the radiator
     behind the radiation-efficiency plateau and coincidence peak.
     """
@@ -1334,7 +1334,7 @@ def generate_sound_energy_burst(output_dir: str) -> None:
 
     # --- left: the running single event level of two very different sources.
     # A press stroke, an impact whose mean-square pressure decays with a
-    # 0,35 s time constant, is measured through a T = 10 s window beside a
+    # 0.35 s time constant, is measured through a T = 10 s window beside a
     # steady 80 dB source. The burst is sized so that its whole exposure is
     # 90 dB; the steady source reaches the same 90 dB at T because
     # L_E = L_p + 10 lg(T/T0) (ISO 3744 clause 3.4 NOTE 1). Same energy in the
@@ -1357,7 +1357,7 @@ def generate_sound_energy_burst(output_dir: str) -> None:
     # --- right: the same press stroke over an ISO 3744 hemisphere. Ten
     # positions on r = 2 m over one reflecting plane, five strokes measured one
     # at a time (Eq. 19), a 62 dB time-averaged background over the same
-    # 10 s window, and a workshop of V = 900 m3, T = 1,2 s behind K2.
+    # 10 s window, and a workshop of V = 900 m3, T = 1.2 s behind K2.
     freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
     base = np.array([84.0, 88.0, 91.0, 92.0, 90.0, 86.0, 80.0])
     rng = np.random.default_rng(83)
@@ -1465,7 +1465,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
     print("Generating in_duct_flow_correction.svg...")
     from phonometry import emission
 
-    # A 0,5 m test duct, the middle of the method's range, seen from both
+    # A 0.5 m test duct, the middle of the method's range, seen from both
     # sides of the fan: the outlet duct carries the flow away from it
     # (U > 0) and the inlet duct brings the flow in (U < 0). Eq. (7) is a
     # polynomial with both even and odd powers, so the same speed corrects
@@ -1628,7 +1628,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
 def _in_duct_fan_example() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """The ducted-fan measurement the in-duct guide runs, as four arrays.
 
-    A 630 mm axial fan on its outlet test duct at 12 m/s, about 3,7 m3/s,
+    A 630 mm axial fan on its outlet test duct at 12 m/s, about 3.7 m3/s,
     read with a sampling tube at three circumferential positions in the 24
     bands from 50 Hz to 10 kHz: the broadband hump of an axial fan around
     250 Hz to 500 Hz with the blade-passage tone of six blades at
@@ -1785,17 +1785,17 @@ def generate_discrete_point_qualification(output_dir: str) -> None:
     print("Generating discrete_point_qualification.svg...")
     from phonometry import emission
 
-    # A 1,2 m x 0,8 m x 1,0 m machine standing on a reflecting floor, measured
-    # over a box surface at the 0,5 m the standard asks for: 2,2 m x 1,8 m x
-    # 1,5 m, five faces, 15,96 m2, sampled at 16 positions - one per square
+    # A 1.2 m x 0.8 m x 1.0 m machine standing on a reflecting floor, measured
+    # over a box surface at the 0.5 m the standard asks for: 2.2 m x 1.8 m x
+    # 1.5 m, five faces, 15.96 m2, sampled at 16 positions - one per square
     # metre and comfortably over the ten of clause 8.2.
     freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     areas = np.concatenate(
         [
-            np.full(4, 3.96 / 4),  # top, 2,2 m x 1,8 m
-            np.full(3, 3.3 / 3),  # long side, 2,2 m x 1,5 m
+            np.full(4, 3.96 / 4),  # top, 2.2 m x 1.8 m
+            np.full(3, 3.3 / 3),  # long side, 2.2 m x 1.5 m
             np.full(3, 3.3 / 3),  # the other long side
-            np.full(3, 2.7 / 3),  # end, 1,8 m x 1,5 m
+            np.full(3, 2.7 / 3),  # end, 1.8 m x 1.5 m
             np.full(3, 2.7 / 3),  # the other end
         ]
     )
@@ -1807,9 +1807,9 @@ def generate_discrete_point_qualification(output_dir: str) -> None:
     # In_i = In_bar (1 + F4 z_i) with z of zero mean and unit sample standard
     # deviation makes F4 exactly the target, so the bars below are the printed
     # C times a number the reader can check. F2 lands on its target the same
-    # way everywhere except 4 kHz, where an F4 of 0,72 turns a few positions
-    # inward and the mean of magnitudes A.2.2 asks for reads 2,8 dB instead of
-    # 3,0 - which is the indicator behaving as defined, not the field drifting.
+    # way everywhere except 4 kHz, where an F4 of 0.72 turns a few positions
+    # inward and the mean of magnitudes A.2.2 asks for reads 2.8 dB instead of
+    # 3.0 - which is the indicator behaving as defined, not the field drifting.
     surface_pressure = 84.0
     nonuniformity = np.array([0.25, 0.30, 0.38, 0.45, 0.58, 0.72])
     pressure_intensity = np.array([11.5, 8.0, 6.0, 4.5, 3.5, 3.0])
@@ -2906,7 +2906,7 @@ def generate_partial_power_map(output_dir: str) -> None:
 
     from phonometry import emission
 
-    # A 1,2 x 0,8 x 1,0 m machine boxed at d = 0,25 m: five faces, each cut
+    # A 1.2 x 0.8 x 1.0 m machine boxed at d = 0.25 m: five faces, each cut
     # into four segments. The front face dominates; one segment on the shadow
     # side takes net inflow from a louder neighbour.
     faces = ("front", "right", "back", "left", "top")
@@ -3515,7 +3515,7 @@ def generate_intensity_class(output_dir: str) -> None:
     from phonometry import emission
 
     # A complete instrument verified with the common 12 mm spacer, so the
-    # printed 25 mm minima come down by 10 log10(12/25) = -3,2 dB (Table 2,
+    # printed 25 mm minima come down by 10 log10(12/25) = -3.2 dB (Table 2,
     # Note 1). The measured index is modelled from the physics behind the
     # table: a residual channel phase mismatch phi_s turns into
     # delta_pI0 = 10 log10(kd/phi_s), so a mismatch that is constant in degrees
@@ -5420,8 +5420,8 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
 
     from phonometry import emission
 
-    # A floor-standing screw compressor, 2,2 m x 1,4 m x 1,8 m, that cannot
-    # leave the plant: four microphone positions 1,5 m from the reference
+    # A floor-standing screw compressor, 2.2 m x 1.4 m x 1.8 m, that cannot
+    # leave the plant: four microphone positions 1.5 m from the reference
     # box, one reference sound source location alongside it, octave bands
     # from 125 Hz to 8 kHz. The floor is loud at the low end, so at 125 Hz
     # the compressor keeps a margin below 6 dB at one position and the
@@ -5768,10 +5768,10 @@ def generate_high_frequency_air_absorption(output_dir: str) -> None:
     axa.legend(loc="upper left", fontsize=9)
 
     # Right: every cell's departure from Annex A as the tables computed it,
-    # with the temperature converted as theta + 273,16 K (the left panel is
-    # the library's 273,15 K), in units of the fourth decimal. 581 sit on
+    # with the temperature converted as theta + 273.16 K (the left panel is
+    # the library's 273.15 K), in units of the fourth decimal. 581 sit on
     # zero; the 43 do not, and every one of them is a cell whose Annex A value
-    # ends in 0. The title says which conversion, since at 273,15 K 61 of the
+    # ends in 0. The title says which conversion, since at 273.15 K 61 of the
     # 581 would sit one unit off.
     right: list[tuple[float, int]] = []
     wrong: list[tuple[float, int]] = []
@@ -5823,7 +5823,7 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
     # 210 m2 surface at 23 degC and 50 %, measured in the three thirds of the
     # 16 kHz octave at four orientations, its room constant from the air
     # absorption of clause 7; and a power supply whose three tones are read
-    # against a reference source with a 12,5 Hz FFT.
+    # against a reference source with a 12.5 Hz FFT.
     thirds = np.array([12500.0, 16000.0, 20000.0])
     room = emission.room_constant_from_air_absorption(
         thirds,
@@ -6203,7 +6203,7 @@ def generate_vdi2081_chain_cascade(output_dir: str) -> None:
     )
 
     # Element 19: what the two swirl diffusers finally put into the room, and
-    # element 20: what a listener 1,5 m away hears of it.
+    # element 20: what a listener 1.5 m away hears of it.
     entering = np.array([53.4, 51.4, 50.1, 41.2, 29.9, 27.8, 33.0, 32.6])
     room = np.asarray(
         noise_control.room_effect(
@@ -6397,7 +6397,7 @@ def generate_vdi2081_section_change(output_dir: str) -> None:
         label="what the library returns, with the VDI 3733 ceiling",
     )
     ax.axhline(cap, color=COLOR_SECONDARY, ls=":", lw=1.4)
-    # The ceiling bites where the expression reaches it, at a ratio of 10,55
+    # The ceiling bites where the expression reaches it, at a ratio of 10.55
     # and again at its reciprocal.
     for crossing in (0.0947, 10.5544):
         ax.plot(crossing, cap, marker="o", ms=6, color=COLOR_SECONDARY, zorder=5)
@@ -6507,7 +6507,7 @@ def generate_vdi2081_flow_noise(output_dir: str) -> None:
     from phonometry import noise_control
 
     # Element 5 of the worked example: a 500 x 400 mm supply run carrying
-    # 4200 m3/h, which is 5,83 m/s.
+    # 4200 m3/h, which is 5.83 m/s.
     area = 0.5 * 0.4
     duty = (4200.0 / 3600.0) / area
     speeds = np.linspace(1.0, 15.0, 300)
@@ -6563,7 +6563,7 @@ def generate_vdi2081_flow_noise(output_dir: str) -> None:
             },
             zorder=6,
         )
-    # The two forms cross where 32 = 20 lg v, which is 39,8 m/s in any duct:
+    # The two forms cross where 32 = 20 lg v, which is 39.8 m/s in any duct:
     # far outside a ventilation system, so the A-weighted overall stays the
     # lower of the two throughout and closes on the other as the air speeds up.
     ax.annotate(
@@ -6797,7 +6797,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         travel passes what the differential gives it, so the flow follows
         the square root of the differential of Equation (2) and stops
         growing when that one does. The two printed examples are on this
-        curve, 30 kg/s at 2 bar and 40 at 3,5.
+        curve, 30 kg/s at 2 bar and 40 at 3.5.
         """
         outlet = inlet - ratio * (inlet - vapour)
         choked = noise_control.cavitation_differential(
@@ -6820,12 +6820,12 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
 
     # -- Left: Figure A.1 of the annex, which is the whole argument of the
     # standard in one plot: the same valve, the same flow, and a
-    # characteristic pressure ratio 0,1 apart.
+    # characteristic pressure ratio 0.1 apart.
     ax = axes[0]
     ratios = np.linspace(0.03, 0.92, 300)
     for incipient, colour, style, label in (
         (threshold, COLOR_PRIMARY, "-", "Measured $x_{Fz}$"),
-        (threshold + 0.1, COLOR_SECONDARY, "--", "$x_{Fz} + 0{,}1$"),
+        (threshold + 0.1, COLOR_SECONDARY, "--", "$x_{Fz} + 0.1$"),
     ):
         levels = [at(x, incipient=incipient).external_level for x in ratios]
         ax.plot(ratios, levels, color=colour, lw=2.4, ls=style, label=label)
@@ -6855,7 +6855,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
     ax.set_axisbelow(True)
     ax.legend(loc="lower right", fontsize=9)
     ax.annotate(
-        "the same valve at the same flow, with a\nthreshold 0,1 apart: 14 dB between the\n"
+        "the same valve at the same flow, with a\nthreshold 0.1 apart: 14 dB between the\n"
         "two markers, and the standard asks for\na measured value for exactly this reason",
         xy=(0.3508, 74.0),
         xytext=(0.30, 38.0),
@@ -7332,7 +7332,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
         color=COLOR_QUATERNARY,
         lw=1.8,
         ls="-.",
-        label="Long's closed form, exponent 1,88",
+        label="Long's closed form, exponent 1.88",
     )
     ax2.set_xscale("log")
     ax2.set_xlim(50.0, 4000.0)
@@ -7638,7 +7638,7 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
     # Both tables are read by flooring the margin, so a row holds from its own
     # decibel up to the next one and the steps are post-aligned. The silencer
     # needs one sample the grid does not carry: its last row is a point rather
-    # than an interval, since 10 dB takes off 0,5 dB and anything above it
+    # than an interval, since 10 dB takes off 0.5 dB and anything above it
     # nothing, so the sample after 10 sits immediately above 10 and the drop is
     # drawn there rather than a decibel late. Immediately is a millionth of a
     # decibel: the margin is judged to nine decimals, so the next float above
@@ -7713,7 +7713,7 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
     ax.set_ylabel("Decibels removed from the measured level")
     ax.set_title("One correction, three standards, three answers")
     ax.annotate(
-        "at a margin of 9 dB one table takes off 0,5 dB and the\n"
+        "at a margin of 9 dB one table takes off 0.5 dB and the\n"
         "other 1 dB, and under their own thresholds neither\n"
         "corrects at all: the measurement is refused",
         xy=(9.0, 0.75),
@@ -7839,7 +7839,7 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
         lw=1.8,
         ls="--",
         zorder=3,
-        label="1,5 m above the top edge",
+        label="1.5 m above the top edge",
     )
     ax3.axhline(
         barrier_height,
@@ -8147,7 +8147,7 @@ def generate_special_room_sound_power(output_dir: str) -> None:
 
 def generate_special_room_suitability(output_dir: str) -> None:
     """ISO 3743-2 6.7: the reference source in the 72 m3 room against its
-    ISO 6926 calibration, read at 22 degC and 97,5 kPa.
+    ISO 6926 calibration, read at 22 degC and 97.5 kPa.
     """
     print("Generating special_room_suitability.svg...")
     from phonometry import emission
@@ -8415,10 +8415,10 @@ _LOOP_NOISE_ON_DB = (-38.1, -35.6, -39.9, -36.6, -35.0)
 
 
 def _worship_loop_levels() -> NDArray[np.float64]:
-    """The seating of a 10 m by 20 m loop at 1,2 m and 1,7 m, in dB re 400 mA/m.
+    """The seating of a 10 m by 20 m loop at 1.2 m and 1.7 m, in dB re 400 mA/m.
 
     The Biot-Savart field at fifteen points of each height, with the current
-    that gives 400 mA/m above the centre at 1,2 m, then turned down 2 dB so
+    that gives 400 mA/m above the centre at 1.2 m, then turned down 2 dB so
     the spread straddles the reference.
     """
     from phonometry import electroacoustics
@@ -8437,7 +8437,7 @@ def _worship_loop_levels() -> NDArray[np.float64]:
 
 
 def generate_induction_loop_field(output_dir: str) -> None:
-    """The vertical field across a 10 m by 14 m loop at 1,2 m (IEC 60118-4 Annex E)."""
+    """The vertical field across a 10 m by 14 m loop at 1.2 m (IEC 60118-4 Annex E)."""
     print("Generating induction_loop_field...")
     from phonometry import electroacoustics
 
@@ -8980,7 +8980,7 @@ def _headphone_impedance() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
 
 
 def _ear_simulator_bands() -> NDArray[np.float64]:
-    """Band levels of a headphone on an ear simulator at 0,1 V of programme signal.
+    """Band levels of a headphone on an ear simulator at 0.1 V of programme signal.
 
     The programme signal's own spectrum, from 100 Hz to 10 kHz, lifted by the
     ear simulator's rise towards its canal resonance near 3 kHz.

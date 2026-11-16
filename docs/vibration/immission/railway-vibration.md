@@ -66,7 +66,7 @@ passage.plot()
 The record above is synthetic and shaped like a real one: the envelope of a
 train arriving and leaving, a pulse per bogie, a sleeper-passing tone at 40 Hz,
 a floor resonance at 63 Hz and some broadband noise. Its $T_2$ starts where the
-envelope reaches a quarter, 6,75 s, and ends where it falls back, 23,25 s:
+envelope reaches a quarter, 6.75 s, and ends where it falls back, 23.25 s:
 
 ```python
 import numpy as np
@@ -129,7 +129,7 @@ and Clause 4 says why that matters: the averaging has to be running before the
 train arrives. It quotes the cost as 14 % after `2τ` and 2 % after `4τ`, and
 those are the shortfalls of the **mean square**, `e⁻²` and `e⁻⁴`. The running
 r.m.s. the sentence is about, and the one its own Figure 3 draws, is short by
-7 % and 0,9 %. The advice stands; the size of the error is overstated by a
+7 % and 0.9 %. The advice stands; the size of the error is overstated by a
 factor of two, and the [errata page](../../ERRATA.md) has the
 detail.
 
@@ -244,25 +244,25 @@ print(f"sum level {vibration.band_sum_level(passage.band_interval_levels[1]):.1f
 Third octaves are coarse where a floor resonates, so Clause 7.3 also asks for
 the one-sided **power spectral density** of Formula (12), blockwise with a
 Hanning window, at least half a block of overlap and a linear average of the
-blocks. The resolution it recommends is 1,25 Hz, fine enough for the
+blocks. The resolution it recommends is 1.25 Hz, fine enough for the
 resonance of an ordinary floor, which at the 500 Hz and 400 lines of a common
-analyser is a block of 0,8 s. The lines add back to the mean square of the
+analyser is a block of 0.8 s. The lines add back to the mean square of the
 stretch, which is Formula (14).
 
 To compare a narrow-band result with a third-octave one, Formula (23) adds the
 lines of each band back together, and Table 1 says how many lines each band
-takes: 1 at 4 Hz, 6 at 31,5 Hz, 58 at 315 Hz. The standard gives the counts
+takes: 1 at 4 Hz, 6 at 31.5 Hz, 58 at 315 Hz. The standard gives the counts
 "for comparability" and does not derive them. They are what a sixth of an
 octave either side of the nominal centre holds, everywhere but at 10 Hz and
-12,5 Hz, where those edges would give one line and three and the table gives
+12.5 Hz, where those edges would give one line and three and the table gives
 two and two. The table says how many lines and not which, so the library
 states its choice: the $K_n$ lines nearest the nominal centre on a logarithmic
 axis, which are exactly the lines inside the nominal edges wherever the count
-is what the edges hold, and 10 and 11,25 Hz, then 12,5 and 13,75 Hz, where it
+is what the edges hold, and 10 and 11.25 Hz, then 12.5 and 13.75 Hz, where it
 is not. It is a rule of nominal bands and behaves like one: nominal edges do
-not meet, so six lines fall between two bands (71,25 Hz, 141,25 Hz and
-142,5 Hz, and 353,75 Hz to 356,25 Hz) and five are counted in two (178,75 Hz,
-223,75 Hz, and 446,25 Hz to 448,75 Hz). A tone in one of the gaps is in no
+not meet, so six lines fall between two bands (71.25 Hz, 141.25 Hz and
+142.5 Hz, and 353.75 Hz to 356.25 Hz) and five are counted in two (178.75 Hz,
+223.75 Hz, and 446.25 Hz to 448.75 Hz). A tone in one of the gaps is in no
 band at all, which is worth knowing before a spectrum is converted.
 
 ```python

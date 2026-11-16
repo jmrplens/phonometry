@@ -14,7 +14,7 @@ of transmitted impact sound by soft, locally-reacting floor coverings):
   built from the supplied :class:`ReportMetadata`;
 * a two-panel body with the per-band table on the left (frequency and the
   reduction of impact sound pressure level ``delta-L`` to one decimal place,
-  bands at the 1,3 dB limit of measurement prefixed ``>``) and the
+  bands at the 1.3 dB limit of measurement prefixed ``>``) and the
   ``delta-L(f)`` improvement curve on the right, drawn by the result's own
   ``plot(ax=...)`` so the curve is native to the library;
 * a boxed single-number weighted improvement ``delta-Lw (CI,delta)`` (ISO 717-2,
@@ -175,7 +175,7 @@ def _value_table(
 ) -> Table:
     """Build the per-band ``f | delta-L`` table.
 
-    A band at the 1,3 dB limit of measurement is reported as ``> delta-L``
+    A band at the 1.3 dB limit of measurement is reported as ``> delta-L``
     (ISO 16251-1 Formula (2)), so its value carries a ``>`` prefix. When
     ``ln_r`` is given the reference-floor-with-covering ``Ln,r = Ln,r,0 -
     delta-L`` (ISO 717-2:2020 Formula (1)) is added as a derivation column.
@@ -234,7 +234,7 @@ def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> s
 
 
 def _is_background_limited(result: FloorCoveringImprovementResult) -> bool:
-    """``True`` when any band sits at the 1,3 dB limit of measurement."""
+    """``True`` when any band sits at the 1.3 dB limit of measurement."""
     return bool(np.any(np.asarray(result.limited, dtype=bool)))
 
 
@@ -246,7 +246,7 @@ def _box_statement(
     With the 16 rating bands present the box carries the ISO 16251-1 Clause 8 e)
     statement of results ``delta-Lw (CI,delta)``; otherwise (a spectrum missing
     the rating bands) it names the reported quantity and its frequency range.
-    A result with background-limited bands (Formula (2), the 1,3 dB limit of
+    A result with background-limited bands (Formula (2), the 1.3 dB limit of
     measurement) is a lower bound, printed with a ``>=`` qualifier; a manually
     built result without ``ci_delta`` prints the bare ``delta-Lw`` rather than
     fabricating a ``(+0)`` adaptation term.
@@ -417,7 +417,7 @@ def render_iso16251_report(
         flow.append(
             fiche_paragraph(
                 t(
-                    "One or more bands are at the 1,3 dB limit of measurement "
+                    "One or more bands are at the 1.3 dB limit of measurement "
                     "(ISO 16251-1:2014 Formula (2), reported as &gt; &#916;L); "
                     "the reported &#916;L<sub>w</sub> is a lower bound.",
                     language,

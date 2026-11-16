@@ -126,7 +126,7 @@ IFA_LSA_01_234_REVERBERATION_S: tuple[float, ...] = (3.5, 3.8, 3.3, 2.5)
 #: breadth and height of the hall, in metres.
 IFA_LSA_01_234_HALL_M: tuple[float, float, float] = (30.0, 20.0, 10.0)
 
-#: Eq. (4.1) of the same sheet is printed with the 0,163 form of the Sabine
+#: Eq. (4.1) of the same sheet is printed with the 0.163 form of the Sabine
 #: constant, which is 24 ln 10 / c at c = 339 m/s, in metres per second.
 IFA_LSA_01_234_SPEED_M_S: float = 339.0
 
@@ -174,16 +174,16 @@ VER_BERANEK_TREATMENT_BENEFIT_DB: float = 3.7
 # Barron (2003): the room of Example 7-8 and the rooms of Example 7-6
 # ---------------------------------------------------------------------------
 
-#: Eqs. (7-18) and (7-73) carry 10 lg(rho c / 400) as the literal +0,1 dB the
+#: Eqs. (7-18) and (7-73) carry 10 lg(rho c / 400) as the literal +0.1 dB the
 #: book rounds it to, and every worked line adds exactly that, in decibels.
 BARRON_IMPEDANCE_TERM_DB: float = 0.1
 
 #: Example 7-6 on printed folio 298 (PDF page 310): a Jordan refiner in a paper
 #: mill. The refiner room has a total surface area of 900 m2 and an average
-#: absorption coefficient of 0,05; the refiner a sound power level of 105 dB and
-#: a directivity factor of 2,0, 4 m from the wall of the operator's room. The
-#: operator's room has 100 m2 of surface at 0,35; the wall between the two has
-#: a transmission loss of 30 dB and 16 m2 of area; the operator stands 1,5 m
+#: absorption coefficient of 0.05; the refiner a sound power level of 105 dB and
+#: a directivity factor of 2.0, 4 m from the wall of the operator's room. The
+#: operator's room has 100 m2 of surface at 0.35; the wall between the two has
+#: a transmission loss of 30 dB and 16 m2 of area; the operator stands 1.5 m
 #: from it. Areas in square metres, levels and losses in decibels, distances in
 #: metres.
 BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2: float = 900.0
@@ -197,9 +197,9 @@ BARRON_EXAMPLE_7_6_TRANSMISSION_LOSS_DB: float = 30.0
 BARRON_EXAMPLE_7_6_WALL_M2: float = 16.0
 BARRON_EXAMPLE_7_6_OPERATOR_DISTANCE_M: float = 1.5
 
-#: What the same page prints on the way: R_1 = 47,37 m2, L_p1 = 94,8 dB,
-#: R_2 = 53,85 m2, r* = (S_w/2 pi)^1/2 = 1,596 m, the two terms -16,8 dB and
-#: +3,4 dB of the last line, and L_p2 = 61,7 dB, in square metres, decibels and
+#: What the same page prints on the way: R_1 = 47.37 m2, L_p1 = 94.8 dB,
+#: R_2 = 53.85 m2, r* = (S_w/2 pi)^1/2 = 1.596 m, the two terms -16.8 dB and
+#: +3.4 dB of the last line, and L_p2 = 61.7 dB, in square metres, decibels and
 #: metres.
 BARRON_EXAMPLE_7_6_SOURCE_ROOM_CONSTANT_M2: float = 47.37
 BARRON_EXAMPLE_7_6_SOURCE_ROOM_LEVEL_DB: float = 94.8

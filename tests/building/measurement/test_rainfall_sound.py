@@ -8,10 +8,10 @@ Oracles:
 
 - Tables K.1, H.1, H.2 and I.1 cell by cell, typed from the printed pages.
 - Table K.2: the 18 :math:`C_j` are the A-weighting of IEC 61672-1 at the
-  exact base-ten midband frequencies, rounded to 0,1 dB (at the nominal
+  exact base-ten midband frequencies, rounded to 0.1 dB (at the nominal
   centres five of them would round differently). The test recomputes that
-  weighting from the closed form of IEC 61672-1:2013 Annex E (poles 20,6 Hz,
-  107,7 Hz, 737,9 Hz and 12 194 Hz, normalised at 1 kHz), independently of the
+  weighting from the closed form of IEC 61672-1:2013 Annex E (poles 20.6 Hz,
+  107.7 Hz, 737.9 Hz and 12 194 Hz, normalised at 1 kHz), independently of the
   library.
 - Formula (K.1) with a unit room, a 1 s decay and 1 m² excited: the intensity
   level is the pressure level minus 14 dB; and with V, T and Se away from one,
@@ -136,7 +136,7 @@ def test_rain_tables_refuse_writes() -> None:
 
 
 def test_rainfall_rate_is_depth_per_hour() -> None:
-    """4 litres over 0,1 m² in one hour is 40 mm of water, 40 mm/h."""
+    """4 litres over 0.1 m² in one hour is 40 mm of water, 40 mm/h."""
     assert building.rainfall_rate(4.0, 0.1, 3600.0) == pytest.approx(40.0)
     assert building.rainfall_rate(1.0, 0.1, 900.0) == pytest.approx(40.0)
 
@@ -153,7 +153,7 @@ def test_rate_tolerance_is_two_millimetres_per_hour(
 @pytest.mark.parametrize(
     ("litres", "area_m2", "rain_type", "passes"),
     [
-        (3.8, 0.1, "heavy", True),  # 37,99999999999999 mm/h, on the bound
+        (3.8, 0.1, "heavy", True),  # 37.99999999999999 mm/h, on the bound
         (4.2, 0.1, "heavy", True),
         (3.79, 0.1, "heavy", False),
         (4.21, 0.1, "heavy", False),
@@ -167,7 +167,7 @@ def test_collected_rate_on_the_tolerance_bound_passes(
 ) -> None:
     """H.1 "within ±2 mm/h" includes its bound, however the rate was divided out.
 
-    3,8 L on 0,1 m² in one hour is 38 mm/h, but the division leaves it a few
+    3.8 L on 0.1 m² in one hour is 38 mm/h, but the division leaves it a few
     units in the last place below 38, and a bare ``<=`` would fail it.
     """
     rate = building.rainfall_rate(litres, area_m2, 3600.0)
@@ -179,10 +179,10 @@ def test_collected_rate_on_the_tolerance_bound_passes(
 def test_drop_windows_include_their_bounds() -> None:
     """Drops on the edge of the H.1 windows count as inside them.
 
-    A drop timed over 0,6 m in 0,1 s falls at 6 m/s, 1 m/s below the heavy
-    rain's 7 m/s, but the division gives 5,999999999999999; a drop whose
-    shadow is 3,85 mm across at a magnification of 0,7 is 5,5 mm, and the
-    division gives 5,500000000000001. The intense rain's 3 m/s and 1,5 mm come
+    A drop timed over 0.6 m in 0.1 s falls at 6 m/s, 1 m/s below the heavy
+    rain's 7 m/s, but the division gives 5.999999999999999; a drop whose
+    shadow is 3.85 mm across at a magnification of 0.7 is 5.5 mm, and the
+    division gives 5.500000000000001. The intense rain's 3 m/s and 1.5 mm come
     out of the same kind of division a hair outside as well.
     """
     heavy = building.verify_rain_generator(
@@ -331,7 +331,7 @@ def test_formula_k1_in_a_unit_room() -> None:
 
 
 def test_formula_k1_terms() -> None:
-    """V = 100 m³, T = 2 s, Se = 4 m²: -10 lg 2 + 20 - 14 - 10 lg 4 = -3,03 dB."""
+    """V = 100 m³, T = 2 s, Se = 4 m²: -10 lg 2 + 20 - 14 - 10 lg 4 = -3.03 dB."""
     res = building.rainfall_sound(
         np.full(18, 60.0),
         np.full(18, 2.0),

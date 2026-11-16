@@ -35,7 +35,7 @@ running. A single event, one press stroke or one door slam, is described by the
 sound energy level $L_J$ of clause 9.2 instead, which section 4 covers.
 
 The background must lie at least **6 dB** below the source level in the
-one-third-octave bands at and below 200 Hz and at and above 6,3 kHz, and at
+one-third-octave bands at and below 200 Hz and at and above 6.3 kHz, and at
 least **10 dB** below between 250 Hz and 5 kHz (clause 5.4.1.1), a tighter pair
 of criteria than the flat 6 dB of the enveloping-surface methods, which is what
 "the ISO 3741 criterion is frequency-dependent" in the parameter table below
@@ -105,7 +105,7 @@ and not of the room it is measured in.
 
 Everything Eq. 20 does rests on the array being in the reverberant part of the
 field, and the standard fixes that with one distance. The source sits **on the
-floor, at least 1,5 m from any wall**, and in a rectangular room asymmetrically
+floor, at least 1.5 m from any wall**, and in a rectangular room asymmetrically
 (clause 7.3), so that it does not couple preferentially into one mode family.
 The nearest microphone must then stand off by
 
@@ -120,13 +120,13 @@ $d_{\min} = 0.8$ m, or **1.6 m** at the recommended $D_1$, so a microphone
 measuring.
 
 If the room has not been qualified for discrete tones per Annex D, the array is
-**six discrete positions**, each more than 1,0 m from any room surface, more
+**six discrete positions**, each more than 1.0 m from any room surface, more
 than $d_{\min}$ from the source, and separated from one another by at least half
-a wavelength at the lowest band of interest (1,7 m at 100 Hz). A continuous
+a wavelength at the lowest band of interest (1.7 m at 100 Hz). A continuous
 traverse may replace them for the levels themselves, provided every point on it
-keeps $d_{\min}$ from the source and 1,0 m from any room surface, stays 0,5 m
+keeps $d_{\min}$ from the source and 1.0 m from any room surface, stays 0.5 m
 clear of any diffuser, does not lie in a plane within 10° of a room surface,
-and runs for at least $3\lambda$ or 10,3 m, whichever is the smaller. The six
+and runs for at least $3\lambda$ or 10.3 m, whichever is the smaller. The six
 discrete positions are still needed to estimate the standard deviations below.
 
 Each level is time-averaged over at least **30 s** in the bands centred at and
@@ -140,12 +140,12 @@ another day is not it.
 
 The `SoundPowerWarning` at an inter-position spread of 1.5 dB is the entry point
 to the escalation, not a defect in itself. Clause 8.4.2.2 computes the standard
-deviation $s_\mathrm{M}$ of the six initial levels band by band (Eq. 10); above 1,5 dB in
+deviation $s_\mathrm{M}$ of the six initial levels band by band (Eq. 10); above 1.5 dB in
 any band the source is radiating significant discrete components for this room,
 and the answer is *more sampling*, not a different formula: either qualify the
 room per Annex D, or read the required number of positions from Table 4: six
 stays six up to 160 Hz, but 400 Hz to 630 Hz goes to 12 positions for
-$1{,}5 < s_\mathrm{M} \le 3$ dB and 24 above 3 dB, and 800 Hz upwards to 15 and 30, and
+$1.5 < s_\mathrm{M} \le 3$ dB and 24 above 3 dB, and 800 Hz upwards to 15 and 30, and
 add source positions per Eq. 12 and Table 5. Averaging longer at six positions
 buys nothing here, because the scatter is spatial. The number of positions, the
 traverse geometry and the measurement time interval all belong in the test
@@ -318,16 +318,16 @@ measured first, at the six positions or over the traverse of section 1. The RSS
 is then run **in the same room, at the same microphone positions or the same
 traverse**, with the source under test left standing where it was, and with its
 own background reading (that is what `reference_background_levels` is for). The RSS
-stands on the floor more than 1,5 m from the walls; the preferred position is
+stands on the floor more than 1.5 m from the walls; the preferred position is
 the one the source under test occupies, and where the source cannot be moved the
-RSS goes as close to it as practicable but never closer than 1,5 m
+RSS goes as close to it as practicable but never closer than 1.5 m
 (clause 8.6.1). One RSS position suffices even when the source under test needs
 several. Both measurements must be made at the same temperature, pressure and
 humidity (clause 8.6.2).
 
 Because the RSS supplies the room constant, the minimum source-to-microphone
 distance may also be taken from the RSS reading itself (clause 8.3, Eq. 9),
-$d_{\min} = D_2 \cdot 10^{0.05 (L_{W\mathrm{r}} - L_{p\mathrm{r}})}$ with $D_2 = 0.4$ and 0,8
+$d_{\min} = D_2 \cdot 10^{0.05 (L_{W\mathrm{r}} - L_{p\mathrm{r}})}$ with $D_2 = 0.4$ and 0.8
 recommended below 5 kHz. On the example below, $L_{W\mathrm{r}} - L_{p\mathrm{r}} = 7$ dB in the
 100 Hz band, so $d_{\min} = 0.90$ m, or 1.8 m at the recommended $D_2$, close
 enough to the 0.8/1.6 m of Eq. 8 to be a useful cross-check.

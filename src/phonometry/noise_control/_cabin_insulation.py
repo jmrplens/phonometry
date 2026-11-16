@@ -287,7 +287,7 @@ _THIRDS_OF_OCTAVE_HZ: dict[float, tuple[float, float, float]] = {
 #: How far a given frequency may sit from a nominal centre and still be that
 #: band, as a relative tolerance. The slack has to be relative because what it
 #: absorbs is relative: a nominal name is the exact base-ten centre rounded,
-#: and the roundest of them, 160 Hz against 158,49 Hz, is 0,95 % away. Two
+#: and the roundest of them, 160 Hz against 158.49 Hz, is 0.95 % away. Two
 #: adjacent one-third-octave bands are 26 % apart, so 2 % accepts either
 #: spelling of the same band and can never reach the next one.
 _NOMINAL_CENTRE_TOLERANCE = 0.02
@@ -529,7 +529,7 @@ class SourcePositionCheck(RichDisplay):
 
     @property
     def _judged_spread_db(self) -> float:
-        # A spread of 3,0 dB worked from two readings can be 3,000 000 000 000 004 in
+        # A spread of 3.0 dB worked from two readings can be 3.000 000 000 000 004 in
         # binary; settled, it asks for three positions and not four.
         return float(settled(self.max_octave_spread_db))
 
@@ -644,7 +644,7 @@ class BandFlatnessCheck(OwnsArrays):
     def within_limit(self) -> NDArray[np.bool_]:
         """Whether each octave meets its limit.
 
-        Judged settled: three readings 6,0 dB apart in decimal are within the
+        Judged settled: three readings 6.0 dB apart in decimal are within the
         6 dB of 125 Hz whichever way the last bits of their difference fall.
         An octave with no printed limit is reported as within it.
         """
@@ -914,9 +914,9 @@ def estimated_cabin_noise_insulation(
 
     .. math::
 
-       D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
+       D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0.1 (L_i - A_i - D_{pi})}
 
-    with :math:`L_A = 10 \lg \sum_i 10^{0,1 (L_i - A_i)}` the A-weighted total
+    with :math:`L_A = 10 \lg \sum_i 10^{0.1 (L_i - A_i)}` the A-weighted total
     of the assumed spectrum. The sign of :math:`A_i` is the trap: the annex
     prints an attenuation, positive where the weighting takes level away, while
     this library's band corrections are the correction itself, so
@@ -958,7 +958,7 @@ def internal_noise_level(
 ) -> float:
     r"""The noise a cabin makes on its own, :math:`L_{pA}` of 6.7.
 
-    The A-weighted levels measured at the three positions on the 0,3 m sphere,
+    The A-weighted levels measured at the three positions on the 0.3 m sphere,
     or over the inclined circular path, averaged on a mean-square basis with
     the external sources switched off.
 
@@ -968,7 +968,7 @@ def internal_noise_level(
     :data:`INTERNAL_NOISE_CORRECTION_WINDOW_DB`: past the top of that window
     the correction is under a tenth of a decibel and the clause does not ask
     for it. The correction itself is the :math:`K_1` of ISO 3741,
-    :math:`-10 \lg (1 - 10^{-0,1 \Delta L})`, applied to the A-weighted total
+    :math:`-10 \lg (1 - 10^{-0.1 \Delta L})`, applied to the A-weighted total
     rather than band by band, which is what makes it a separate line here from
     :func:`phonometry.emission.reverberation_background_correction`.
 

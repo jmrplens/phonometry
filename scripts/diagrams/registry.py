@@ -615,7 +615,7 @@ DIAGRAMS = {
     ),
     "diagram_infrasound_chain": (
         _d_infrasound_chain,
-        "Measuring infrasound: the chain that must deliver 0,25 Hz",
+        "Measuring infrasound: the chain that must deliver 0.25 Hz",
         580,
     ),
     "diagram_nihl": (

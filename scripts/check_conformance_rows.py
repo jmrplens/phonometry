@@ -19,7 +19,7 @@ seven that matter under ninety-five that do not.
 
 Not every row can run the library, and those that cannot are not defects:
 
-* a row that pins the **geometry of a test case**, like the 194,16 m ground
+* a row that pins the **geometry of a test case**, like the 194.16 m ground
   projection ISO/TR 17534-3 prints for its seven cases, checks that this
   project read the coordinates right. The library does not own the distance
   between two points;
@@ -59,14 +59,14 @@ PACKAGE = ROOT / "scripts" / "conformance"
 #: library: the point of a row is that a defect can fail it.
 ORACLE_ONLY: dict[str, str] = {
     "iso17534._chk_dp": (
-        "the ground projection of the shared test-case geometry, 194,16 m, "
+        "the ground projection of the shared test-case geometry, 194.16 m, "
         "against the coordinates of Table 1: this pins the reading of the "
         "case, not a law the library owns"
     ),
     "iso17534._chk_d3": "the straight-line length of the same geometry, likewise",
     "iso17534._chk_d3_sloped": "the same length once the ground rises, likewise",
     "iso17534._chk_q": (
-        "q = 1 - 30 (hs + hr) / dp against the printed 0,23. The library "
+        "q = 1 - 30 (hs + hr) / dp against the printed 0.23. The library "
         "computes q inside ground_attenuation and does not publish it, and "
         "the rows that do exercise that function are the A_gr ones; this one "
         "pins which of the two footnotes of ISO 9613-2 Table 3 the printed "

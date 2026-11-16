@@ -83,11 +83,11 @@ each reading is of, so neither labelling reaches it, and the defect is in
 `docs/ERRATA.md`.
 
 **The coverage factor of Table I.2.** The budget at 1 kHz reproduces the
-printed combined standard uncertainty, 0,0590 dB, and effective degrees of
-freedom, 29,98, but prints $k = 2{,}11$, the Student factor for about 17
-degrees of freedom. For 29,98 it is 2,042, and the expanded uncertainty
-$2{,}042 \times 0{,}05903 = 0{,}121$ dB rather than the 0,124 dB the
-table prints to its guard digit. The budget here gives 2,042, and the defect
+printed combined standard uncertainty, 0.0590 dB, and effective degrees of
+freedom, 29.98, but prints $k = 2.11$, the Student factor for about 17
+degrees of freedom. For 29.98 it is 2.042, and the expanded uncertainty
+$2.042 \times 0.05903 = 0.121$ dB rather than the 0.124 dB the
+table prints to its guard digit. The budget here gives 2.042, and the defect
 is in `docs/ERRATA.md`.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -378,10 +378,10 @@ degrees of freedom are Welch-Satterthwaite's, with only the repeatability
 finite; and the coverage factor is the Student factor for them at a level
 of confidence of 95 % (clause 5).
 
-Table I.2 at 1 kHz gives $u_\mathrm{c} = 0{,}0590$ dB and
-$\nu_\mathrm{eff} = 29{,}98$, so $k = 2{,}04$ and
-$U = 0{,}12$ dB (the table prints $k = 2{,}11$, an erratum;
-see the module notes); Table I.3 at 8 kHz gives $u_\mathrm{c} = 0{,}140$ dB, $k = 2{,}00$ and $U = 0{,}28$ dB.
+Table I.2 at 1 kHz gives $u_\mathrm{c} = 0.0590$ dB and
+$\nu_\mathrm{eff} = 29.98$, so $k = 2.04$ and
+$U = 0.12$ dB (the table prints $k = 2.11$, an erratum;
+see the module notes); Table I.3 at 8 kHz gives $u_\mathrm{c} = 0.140$ dB, $k = 2.00$ and $U = 0.28$ dB.
 
 Table I.1 is written for the comparison coupler of Annex E. The budget of
 a calibrator (Annex D) has the same 15 components with the readings on the
@@ -396,9 +396,9 @@ adds its own, which `additional_components` carries.
 | `repeatability_dof` | The degrees of freedom of the repeatability (a15), from the number of repeat measurements: 2 in Tables I.2 and I.3. |
 | `frequency_hz` | The frequency, in Hz, which sets the clause 6 component and the maximum the budget is judged against. |
 | `correction` | The correction the budget is for, in dB (Default: 0). |
-| `static_pressure_kpa` | The static pressure the measurements were made at, in kPa (Default: None). Below 97 kPa clause 6 adds a component of expanded uncertainty 0,15 dB up to 3 kHz and 0,25 dB above ($k = 2$); outside 80 kPa to 105 kPa it refuses. |
+| `static_pressure_kpa` | The static pressure the measurements were made at, in kPa (Default: None). Below 97 kPa clause 6 adds a component of expanded uncertainty 0.15 dB up to 3 kHz and 0.25 dB above ($k = 2$); outside 80 kPa to 105 kPa it refuses. |
 | `additional_components` | Further components the laboratory's own method needs, as [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects of estimate 0 and sensitivity 1, named (Default: none). |
-| `coverage` | The level of confidence (Default: 0,95, clause 5). |
+| `coverage` | The level of confidence (Default: 0.95, clause 5). |
 
 **Returns:** The [`CorrectionUncertaintyBudget`](/phonometry/reference/api/metrology/free-field-corrections/#correctionuncertaintybudget).
 
@@ -446,7 +446,7 @@ effective degrees of freedom at the stated level of confidence.
 | `divisors` | the divisor of each component. |
 | `dofs` | the degrees of freedom of each component (`inf` for a Type B estimate). |
 | `uncertainty` | the [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of the components the other columns state. |
-| `coverage` | the level of confidence, 0,95 by clause 5. |
+| `coverage` | the level of confidence, 0.95 by clause 5. |
 
 ### CorrectionUncertaintyBudget.combined_uncertainty_db
 
@@ -920,10 +920,10 @@ The maximum permitted expanded uncertainty of a correction
 
 | Clause | Correction for | Maximum, dB |
 | :--- | :--- | :--- |
-| 9 | reflections from the case, diffraction | 0,25 to 4 kHz; 0,35 above |
-| 10 | the microphone's non-uniform response | 0,25 from 63 Hz to 4 kHz; 0,35 to 8 kHz; 0,45 above |
-| 11 | windscreens and similar accessories | 0,20 to 4 kHz; 0,30 above |
-| 12-14 | a calibrator, a coupler, an actuator | 0,25 to 4 kHz; 0,35 below 10 kHz; 0,50 from 10 kHz |
+| 9 | reflections from the case, diffraction | 0.25 to 4 kHz; 0.35 above |
+| 10 | the microphone's non-uniform response | 0.25 from 63 Hz to 4 kHz; 0.35 to 8 kHz; 0.45 above |
+| 11 | windscreens and similar accessories | 0.20 to 4 kHz; 0.30 above |
+| 12-14 | a calibrator, a coupler, an actuator | 0.25 to 4 kHz; 0.35 below 10 kHz; 0.50 from 10 kHz |
 
 "To 4 kHz" includes 4 kHz; 10 kHz is in the band "at and above 10 kHz".
 Clauses 10 and 11 exclude the reproducibility component of the samples of

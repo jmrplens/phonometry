@@ -16,7 +16,7 @@ references:
     designation: "IEC 61260-1:2014"
     url: "https://webstore.iec.ch/en/publication/5063"
     implemented: false
-    note: "The 33 one-third-octave bands from 12,5 Hz to 20 kHz that Table 5 indexes and every spectrum on this page is carried on."
+    note: "The 33 one-third-octave bands from 12.5 Hz to 20 kHz that Table 5 indexes and every spectrum on this page is carried on."
   - type: article
     authors: ["Reethof, G.", "Ward, W. C."]
     year: 1986
@@ -124,7 +124,7 @@ one for a single large port and small for a cage.
 ```python
 from phonometry import noise_control
 
-# The cage of Annex A: six openings, each 0,00137 m2 with a 0,181 m perimeter.
+# The cage of Annex A: six openings, each 0.00137 m2 with a 0.181 m perimeter.
 fd = noise_control.valve_style_modifier(0.00137, 0.181, 6)
 print(round(fd, 3))                                        # 0.296
 
@@ -137,12 +137,12 @@ $D_j = N_{14} F_d \sqrt{C\,F_{LP}/F_P}$, with $N_{14}$ from Table 1 by
 whichever coefficient the valve is rated in.
 
 **Annex A prints an orifice diameter ten times too small.** Its Table A.1
-gives $d_o = 0{,}010$ m in all six columns where Equation (8c) with the
-annex's own $N_O = 6$ and $A = 0{,}00137$ m² gives $0{,}102$ m. The row below
-settles it: the printed $F_d = 0{,}30$ is $0{,}030/0{,}102$, and it would be
-3,0 with the printed $d_o$. That one is in the errata register too, along with
-a piping geometry factor the annex prints rounded to 0,98 and computed with
-0,984.
+gives $d_o = 0.010$ m in all six columns where Equation (8c) with the
+annex's own $N_O = 6$ and $A = 0.00137$ m² gives $0.102$ m. The row below
+settles it: the printed $F_d = 0.30$ is $0.030/0.102$, and it would be
+3.0 with the printed $d_o$. That one is in the errata register too, along with
+a piping geometry factor the annex prints rounded to 0.98 and computed with
+0.984.
 
 ## 3. The whole of Clause 5, in one call
 
@@ -209,7 +209,7 @@ print(noise_control.VALVE_ACOUSTIC_STYLES["segmented ball 90 deg"])
 ```
 
 $A_\eta$ is $-4$ for a pure dipole, which is what a free jet expanding into a
-large volume is; the printed values run from $-4{,}8$ to $-3{,}0$, so the
+large volume is; the printed values run from $-4.8$ to $-3.0$, so the
 whole table spans a factor of sixty in efficiency, which is 18 dB.
 
 ## 4. Where the sound actually comes out
@@ -273,10 +273,10 @@ is the cheapest and most often forgotten line in a valve noise budget.
 ## 5. When the outlet runs fast: the second source
 
 Clause 5 has limits, and two of them bite. The pipe Mach number $M_2$ of
-Equation (17) is not really a limit but a clamp: NOTE 2 caps it at 0,3 before
+Equation (17) is not really a limit but a clamp: NOTE 2 caps it at 0.3 before
 the velocity correction of Equation (16), however fast the pipe actually runs.
 The valve outlet Mach number $M_o$ of Equation (15) is a limit, and it is the
-one that matters, because past 0,3 the flow leaving the outlet stops being a
+one that matters, because past 0.3 the flow leaving the outlet stops being a
 detail and becomes **a second noise source** in its own right. NOTE 1 sends
 the calculation to Clause 7 for it.
 
@@ -311,16 +311,16 @@ print(round(both.external_level))     # 94  dB(A), trim and outlet together
 That is Annex A's example 6, and 94 dB(A) is what the annex prints for it.
 Without the `expander` the same call gives 93 and warns that a source is
 missing: the level is the trim alone, which is not what a valve running at
-Mach 0,89 sounds like.
+Mach 0.89 sounds like.
 
 Clause 7 is a small chain of its own. The flow is accelerated through the
-narrower outlet, capped at Mach 0,8 in the pipe and at the speed of sound at
+narrower outlet, capped at Mach 0.8 in the pipe and at the speed of sound at
 the outlet, and what it makes is Equations (34) to (41):
 
 $$
 U_R = \frac{U_p D_i^2}{\beta d_i^2}, \qquad
 W_{mR} = \frac{\dot m U_R^2}{2}
-         \left[\left(1 - \frac{d_i^2}{D_i^2}\right)^2 + 0{,}2\right],
+         \left[\left(1 - \frac{d_i^2}{D_i^2}\right)^2 + 0.2\right],
 \qquad
 \eta_R = 10^{A_\eta} M_R^3
 $$
@@ -339,7 +339,7 @@ print(round(outlet.internal_level))            # 151    dB
 
 Every one of those is printed in the sixth column of Table A.1. Note the
 company the outlet keeps: 42 W of sound against the 218 W the trim makes, but
-at 920 Hz instead of 7,9 kHz, which is why it moves the A-weighted answer at
+at 920 Hz instead of 7.9 kHz, which is why it moves the A-weighted answer at
 all.
 
 **The two sources add in energy, not in level.** Equation (43) sums them
@@ -355,10 +355,10 @@ Two other things about Clause 7 are worth knowing before using it. Its 7.1
 limits the transition piece to **30 degrees of total included angle**, because
 a steeper cone makes the flow unstable in ways the standard does not model.
 And the contraction coefficient $\beta$ of Equation (35) is a measurement, not
-a constant: NOTE 1 gives 0,93 for straight pattern globe valves, says some
-rotary valves may be as low as 0,7, and admits there are no data for the rest.
-`Expander` defaults to the 0,93 and to Table 4's own *expander* row, which is
-$A_\eta = -3{,}0$ and not the valve's figure.
+a constant: NOTE 1 gives 0.93 for straight pattern globe valves, says some
+rotary valves may be as low as 0.7, and admits there are no data for the rest.
+`Expander` defaults to the 0.93 and to Table 4's own *expander* row, which is
+$A_\eta = -3.0$ and not the valve's figure.
 
 ## 6. Trims designed to be quiet
 
@@ -377,7 +377,7 @@ computed on their last stage alone.*
 
 **A drilled cage** (6.2) makes many small jets instead of one large one, and
 Equation (26) replaces the pressure recovery factor of Equation (9) with a
-geometry, $[0{,}9 - 0{,}06\,(l/d)]$, where $l$ and $d$ are the length and
+geometry, $[0.9 - 0.06\,(l/d)]$, where $l$ and $d$ are the length and
 diameter of one hole. A long hole recovers less than a short one, and NOTE 1
 caps the ratio at 4 because the bracket would otherwise reach zero at 15.
 
@@ -399,7 +399,7 @@ the flow coefficient of the last stage for the valve's.
 
 $$
 C_n = N_{16} A_n, \qquad
-p_n = \sqrt{\left(\frac{p_1 C}{1{,}155 C_n}\right)^2 + p_2^2}, \qquad
+p_n = \sqrt{\left(\frac{p_1 C}{1.155 C_n}\right)^2 + p_2^2}, \qquad
 \rho_n = \rho_1 \frac{p_n}{p_1}
 $$
 
@@ -425,8 +425,8 @@ print(conditions.equation)                       # 28a
 
 Those three then go into the `GasStream` and the `ValveTrim` in place of the
 valve's own inlet pressure, inlet density and flow coefficient. That is Annex A's example 7, a 432-passage cage on a 70 bar vapour
-line, and it closes at the printed **89 dB(A)** with a jet 2,2 mm across and a
-peak at 14,4 kHz.
+line, and it closes at the printed **89 dB(A)** with a jet 2.2 mm across and a
+peak at 14.4 kHz.
 
 **A multipath, multistage trim** (6.4) is both at once, and it is what example
 7 actually is. It adds nothing new to the substitution: Equations (32) and
@@ -437,7 +437,7 @@ For 6.3 there is one thing more. Clause 5 has been run on the last stage
 alone, so Equation (31) puts the others back:
 
 $$
-L_{pi} = L_{pi,n} + \frac{1}{(n-1)^{0{,}125}}\,10 \lg\frac{p_1}{p_n}
+L_{pi} = L_{pi,n} + \frac{1}{(n-1)^{0.125}}\,10 \lg\frac{p_1}{p_n}
 $$
 
 ```python
@@ -447,7 +447,7 @@ print(round(noise_control.stage_level_correction(150.0, 3, 7.0e6, 2.1e6), 1))
 # 154.8  dB
 ```
 
-The exponent is 0,125, so the number of stages barely enters: two stages and
+The exponent is 0.125, so the number of stages barely enters: two stages and
 eight differ by a quarter of a term that is itself only a few decibels. What
 the correction really tracks is $p_1/p_n$, the pressure the earlier stages
 took out.
@@ -469,7 +469,7 @@ a trim built to be quiet: the drilled cage of 6.2 with Equation (26), the
 multistage substitution of 6.3 with Equations (27) to (29) and its NOTE 3
 branch, the stage correction of Equation (31), and the multipath multistage
 case of 6.4. And Clause 7 for the flow leaving the valve outlet once it passes
-Mach 0,3, with the transition piece, its stream power and efficiency, and
+Mach 0.3, with the transition piece, its stream power and efficiency, and
 Equation (43), which adds it to the trim inside the pipe.
 </ScopeClaim>
 <ScopeClaim status="not-covered" label="Not covered yet">

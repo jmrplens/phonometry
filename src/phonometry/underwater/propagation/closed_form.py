@@ -181,8 +181,8 @@ def _thorp(f_khz: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 #: The Celsius-to-kelvin offset Francois & Garrison print inside their two
-#: relaxation frequencies. It is 273, not 273,15, and it is normative: the pole
-#: of this model therefore sits 0,15 degC above absolute zero.
+#: relaxation frequencies. It is 273, not 273.15, and it is normative: the pole
+#: of this model therefore sits 0.15 degC above absolute zero.
 _FG_KELVIN_OFFSET = 273.0
 
 
@@ -317,9 +317,9 @@ def seawater_absorption(
     if key == "thorp":
         return as_float_or_array(_thorp(f_khz), like=(frequency_hz,))
     if key == "francois-garrison":
-        # This model has a pole of its own, 0,15 degC above absolute zero: its
+        # This model has a pole of its own, 0.15 degC above absolute zero: its
         # relaxation frequencies are written 1245/(273 + t) and 1990/(273 + t)
-        # with the 273 the paper prints, so the whole band (-273,15, -273,0]
+        # with the 273 the paper prints, so the whole band (-273.15, -273.0]
         # clears the check above and then overflows or divides by zero, neither
         # of which names the argument that caused it. The printed 273 is
         # normative and stays; the guard goes in front of it.

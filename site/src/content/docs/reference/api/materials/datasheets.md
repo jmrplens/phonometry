@@ -19,8 +19,8 @@ in two shapes that are not the same quantity:
   reason) and carries every digit the laboratory reported; and
 * the **practical sound absorption coefficient** $\alpha_\mathrm{p}$ of
   ISO 11654 Clause 4.1, one value per octave band from 125 Hz to 4 kHz, the
-  mean of the three one-third octaves in it rounded in steps of 0,05 and
-  capped at 1,00.
+  mean of the three one-third octaves in it rounded in steps of 0.05 and
+  capped at 1.00.
 
 The two are two classes here, [`ThirdOctaveAbsorptionSpectrum`](/phonometry/reference/api/materials/datasheets/#thirdoctaveabsorptionspectrum) and
 [`PracticalAbsorptionSpectrum`](/phonometry/reference/api/materials/datasheets/#practicalabsorptionspectrum), because the band resolution and the
@@ -98,10 +98,10 @@ One specimen of a data sheet, with its practical coefficient per octave.
 The practical sound absorption coefficient $\alpha_\mathrm{p}$ of
 ISO 11654 Clause 4.1 is the mean of the three one-third-octave
 coefficients of ISO 354 inside an octave, worked out to the second
-decimal, rounded in steps of 0,05 and set to 1,00 when it rounds above.
+decimal, rounded in steps of 0.05 and set to 1.00 when it rounds above.
 Six values from 125 Hz to 4 kHz all ending in 0 or 5 look like these,
 though only a sheet that names them says so. A row of this class holds
-them as printed, a value above 1,00 or off the steps included: the
+them as printed, a value above 1.00 or off the steps included: the
 reader of a catalogue file notes such a value, and nothing here corrects
 it.
 
@@ -120,10 +120,10 @@ wool), so a sheet that says it declares them is recorded with
 | `practical_absorption_coefficient_1000` | The same in the 1 kHz band. |
 | `practical_absorption_coefficient_2000` | The same in the 2 kHz band. |
 | `practical_absorption_coefficient_4000` | The same in the 4 kHz band. |
-| `weighted_absorption_coefficient` | The weighted sound absorption coefficient $\alpha_\mathrm{w}$ the sheet prints (ISO 11654 Clause 4.2), dimensionless: the shifted reference curve read at 500 Hz, a multiple of 0,05 from 0 to 1. |
+| `weighted_absorption_coefficient` | The weighted sound absorption coefficient $\alpha_\mathrm{w}$ the sheet prints (ISO 11654 Clause 4.2), dimensionless: the shifted reference curve read at 500 Hz, a multiple of 0.05 from 0 to 1. |
 | `shape_indicator` | The shape indicators printed after it, the letters only: `"MH"` for `0,70(MH)` (ISO 11654 Clause 4.3). Empty when the sheet prints none, which on a sheet that prints the rating is also what a curve without an excess looks like. |
 | `absorption_class` | The sound absorption class of ISO 11654 Annex B, `"A"` to `"E"` or `"Not classified"`, as the sheet prints it. |
-| `noise_reduction_coefficient` | The NRC a sheet prints under ASTM C423, dimensionless: the mean of the Sabine coefficients at 250, 500, 1000 and 2000 Hz rounded to 0,05. Held as printed; no function of this library works it out, so nothing compares it. |
+| `noise_reduction_coefficient` | The NRC a sheet prints under ASTM C423, dimensionless: the mean of the Sabine coefficients at 250, 500, 1000 and 2000 Hz rounded to 0.05. Held as printed; no function of this library works it out, so nothing compares it. |
 | `mounting` | The test mounting as the sheet prints it: `"A"` for a specimen laid against the room surface, `"E-200"` for one over an air space whose suffix is the distance in millimetres from its exposed face to the room surface behind it (ISO 354 Annex B). Empty for a sheet that prints none, which is not the same as mounting A. |
 | `thickness_mm` | The thickness of the specimen, in millimetres. |
 | `construction_depth_mm` | The depth of construction ISO 11654 Clause 5.4 asks a result to state for a product mounted over an air space, in millimetres: from the room surface to the exposed face of the absorber (its Figure 2), which is what some sheets call the total construction height. It is not the air space alone: the absorber's thickness is part of it. |
@@ -369,7 +369,7 @@ The weighted sound absorption coefficient of the row's octaves.
 
 [`weighted_absorption`](/phonometry/reference/api/materials/rating/#weighted_absorption) on the five rating
 bands, 250 Hz to 4 kHz (ISO 11654 Clause 4.2), which snaps each
-value to the 0,05 grid and caps it at 1,00 as Clause 4.1 would have.
+value to the 0.05 grid and caps it at 1.00 as Clause 4.1 would have.
 The 125 Hz band is not read. The rating the sheet prints beside the
 bands is not consulted either: this is the one the bands give, and
 [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) notes when the two differ.
@@ -545,7 +545,7 @@ as the reverberation room measured it: one value per one-third octave
 band, 100 Hz to 5 kHz in the standard's range and from 50 Hz to 10 kHz
 where a laboratory reports more. A value above 1 is common and not an
 error: ISO 354 (3.9, NOTE 2) says a coefficient evaluated from
-reverberation times can exceed 1,0, for example because of diffraction
+reverberation times can exceed 1.0, for example because of diffraction
 effects. Nothing here caps it.
 
 `practical` turns the row into its practical coefficients, and
@@ -584,10 +584,10 @@ refuses it.
 | `absorption_coefficient_6300` | The same in the 6.3 kHz band. |
 | `absorption_coefficient_8000` | The same in the 8 kHz band. |
 | `absorption_coefficient_10000` | The same in the 10 kHz band. |
-| `weighted_absorption_coefficient` | The weighted sound absorption coefficient $\alpha_\mathrm{w}$ the sheet prints (ISO 11654 Clause 4.2), dimensionless: the shifted reference curve read at 500 Hz, a multiple of 0,05 from 0 to 1. |
+| `weighted_absorption_coefficient` | The weighted sound absorption coefficient $\alpha_\mathrm{w}$ the sheet prints (ISO 11654 Clause 4.2), dimensionless: the shifted reference curve read at 500 Hz, a multiple of 0.05 from 0 to 1. |
 | `shape_indicator` | The shape indicators printed after it, the letters only: `"MH"` for `0,70(MH)` (ISO 11654 Clause 4.3). Empty when the sheet prints none, which on a sheet that prints the rating is also what a curve without an excess looks like. |
 | `absorption_class` | The sound absorption class of ISO 11654 Annex B, `"A"` to `"E"` or `"Not classified"`, as the sheet prints it. |
-| `noise_reduction_coefficient` | The NRC a sheet prints under ASTM C423, dimensionless: the mean of the Sabine coefficients at 250, 500, 1000 and 2000 Hz rounded to 0,05. Held as printed; no function of this library works it out, so nothing compares it. |
+| `noise_reduction_coefficient` | The NRC a sheet prints under ASTM C423, dimensionless: the mean of the Sabine coefficients at 250, 500, 1000 and 2000 Hz rounded to 0.05. Held as printed; no function of this library works it out, so nothing compares it. |
 | `mounting` | The test mounting as the sheet prints it: `"A"` for a specimen laid against the room surface, `"E-200"` for one over an air space whose suffix is the distance in millimetres from its exposed face to the room surface behind it (ISO 354 Annex B). Empty for a sheet that prints none, which is not the same as mounting A. |
 | `thickness_mm` | The thickness of the specimen, in millimetres. |
 | `construction_depth_mm` | The depth of construction ISO 11654 Clause 5.4 asks a result to state for a product mounted over an air space, in millimetres: from the room surface to the exposed face of the absorber (its Figure 2), which is what some sheets call the total construction height. It is not the air space alone: the absorber's thickness is part of it. |
@@ -768,7 +768,7 @@ The row's practical coefficients, octave by octave (ISO 11654 4.1).
 
 Each octave from 125 Hz to 4 kHz whose three one-third octaves the
 row prints is the mean of the three, worked out to the second decimal
-and rounded in steps of 0,05, capped at 1,00, and marked in
+and rounded in steps of 0.05, capped at 1.00, and marked in
 [`derived`](/phonometry/reference/api/io/io/#cataloguerow) with the bands it comes
 from; when those bands do not share one
 [`basis`](/phonometry/reference/api/io/io/#cataloguerow), the text names the basis

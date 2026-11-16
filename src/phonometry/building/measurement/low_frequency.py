@@ -34,8 +34,8 @@ only the subscripts of the level symbols changing:
 
 .. math::
 
-    L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0,1 L_\mathrm{Corner}} +
-    (2 \cdot 10^{0,1 L})}{3} \right]
+    L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0.1 L_\mathrm{Corner}} +
+    (2 \cdot 10^{0.1 L})}{3} \right]
 
 **The reverberation time.** Under the same 25 m³ trigger, Part 1 Clause 10.4,
 Part 2 Clause 10.4 and Part 3 Clause 8.4 stop the 50 Hz, 63 Hz and 80 Hz
@@ -168,8 +168,8 @@ LOW_FREQUENCY_VOLUME_LIMIT_M3: Final = 25.0
 _MIN_CORNERS: Final = 4
 
 #: How far a supplied band centre may sit from the nominal 50 / 63 / 80 Hz and
-#: still be that band. The exact one-third-octave centres are 49,6 Hz, 62,5 Hz
-#: and 79,4 Hz, all within 0,9 % of their nominal names, so 3 % separates each
+#: still be that band. The exact one-third-octave centres are 49.6 Hz, 62.5 Hz
+#: and 79.4 Hz, all within 0.9 % of their nominal names, so 3 % separates each
 #: band from its neighbours (the next centres out are 40 Hz and 100 Hz) while
 #: accepting either spelling. Same tolerance the ISO 717 rating range uses to
 #: find its bands in :mod:`~phonometry.building.prediction.detailed_model`.
@@ -470,12 +470,12 @@ def low_frequency_level(
 
     .. math::
 
-        L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0,1 L_\mathrm{Corner}} +
-        (2 \cdot 10^{0,1 L})}{3} \right]
+        L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0.1 L_\mathrm{Corner}} +
+        (2 \cdot 10^{0.1 L})}{3} \right]
 
     The two levels are weighted one third to two thirds, so the result
     degenerates to ``L`` when the corner level equals it, rises with the corner
-    level and can never fall further than :math:`10 \lg(2/3) = -1,76` dB below
+    level and can never fall further than :math:`10 \lg(2/3) = -1.76` dB below
     ``L``, however quiet the corners are.
 
     :param level: Energy-average level ``L`` from the default procedure, in dB,
@@ -665,7 +665,7 @@ def _low_frequency_indices(frequencies: NDArray[np.float64]) -> NDArray[np.intp]
     """Locate the 50 Hz, 63 Hz and 80 Hz bands in a band-centre vector.
 
     Matched by nominal centre within :data:`_BAND_MATCH_RTOL`, so a caller who
-    labels the bands 49,6 / 62,5 / 79,4 Hz is understood as well as one who
+    labels the bands 49.6 / 62.5 / 79.4 Hz is understood as well as one who
     writes 50 / 63 / 80. All three must be present: the procedure is stated for
     the three together and there is no reading of it that treats two.
 

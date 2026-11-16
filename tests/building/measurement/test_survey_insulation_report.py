@@ -3,7 +3,7 @@
 
 ISO 10052 carries no worked numeric example, so the fiches are exercised with
 closed-form syntheses like the sibling report tests: with the reverberation
-index ``k = 0`` (a receiving-room reverberation time equal to ``T0 = 0,5 s`` in
+index ``k = 0`` (a receiving-room reverberation time equal to ``T0 = 0.5 s`` in
 every band) the standardized quantities equal the raw ones exactly
 (``DnT = D``, ``L'nT = Li``, ``D2m,nT = D2m``), so the fiche's rating is the
 already-verified ISO 717 rating of the fed octave-band curve. Rendering

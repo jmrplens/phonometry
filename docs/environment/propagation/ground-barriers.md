@@ -522,19 +522,19 @@ end.
 
 *The weighting on the left decides everything, and there are two of them: a road
 device is judged by what it does around 1 kHz, a railway one by what it does
-between 1,25 and 2,5 kHz.*
+between 1.25 and 2.5 kHz.*
 
 **EN 1793-1** rates absorption as the energy the device does *not* send back:
 
 $$
 DL_\alpha = -10 \lg\left| 1 -
-\frac{\sum_{i=1}^{18} \alpha_{\mathrm{S}i}\, 10^{0,1 L_i}}
-     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+\frac{\sum_{i=1}^{18} \alpha_{\mathrm{S}i}\, 10^{0.1 L_i}}
+     {\sum_{i=1}^{18} 10^{0.1 L_i}} \right|
 $$
 
 A reverberation-room $\alpha_\mathrm{S}$ can pass one band by band, which would
 push the weighted ratio past 1 and leave the logarithm without an argument.
-Clause 5 says so and fixes it: the ratio is limited to 0,99, so no device can
+Clause 5 says so and fixes it: the ratio is limited to 0.99, so no device can
 rate above 20 dB however absorptive it measures. `sound_absorption_rating`
 warns when that limit is what answered instead of the measurement.
 
@@ -543,8 +543,8 @@ transmitted energy instead:
 
 $$
 DL_R = -10 \lg\left|
-\frac{\sum_{i=1}^{18} 10^{0,1 L_i}\, 10^{-0,1 R_i}}
-     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+\frac{\sum_{i=1}^{18} 10^{0.1 L_i}\, 10^{-0.1 R_i}}
+     {\sum_{i=1}^{18} 10^{0.1 L_i}} \right|
 $$
 
 ```python
@@ -583,7 +583,7 @@ A barrier beside a track is rated the same way and against a different noise.
 **EN 16272-3-1:2012** prints the normalised railway noise spectrum over the
 same eighteen bands, and its Clauses 5 and 6 are the two formulas above with
 that table in the weights. Rolling noise sits higher up than a road: the
-railway spectrum is flat within a decibel from 1,25 kHz to 2,5 kHz, where the
+railway spectrum is flat within a decibel from 1.25 kHz to 2.5 kHz, where the
 road one has already begun to fall away, so an absorber that improves with
 frequency is worth more beside a track than beside a road.
 
@@ -677,7 +677,7 @@ meteorological schemes of Nord2000 and CNOSSOS.
 - **European Committee for Standardization. (2012).** *Railway applications — Track — Noise barriers and related devices acting on airborne sound propagation — Test method for determining the acoustic performance — Part 3-1: Normalized railway noise spectrum and single number ratings for diffuse field applications* (EN 16272-3-1:2012).
   Table 1, the normalized railway noise spectrum, and the single-number ratings of Clauses 5 and 6 weighted by it, for a barrier beside a track. Read from the BS EN 16272-3-1:2012 edition.
 - **European Committee for Standardization. (2012).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 1: Intrinsic characteristics of sound absorption under diffuse sound field conditions* (EN 1793-1:2012).
-  Clause 5, the single-number rating DLalpha and its 0,99 ratio limit; Clause 6.1, reporting to the nearest integer; Annex A, the A1 to A5 categories. Read from the BS EN 1793-1:2012 edition.
+  Clause 5, the single-number rating DLalpha and its 0.99 ratio limit; Clause 6.1, reporting to the nearest integer; Annex A, the A1 to A5 categories. Read from the BS EN 1793-1:2012 edition.
 - **European Committee for Standardization. (2012).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 2: Intrinsic characteristics of airborne sound insulation under diffuse sound field conditions* (EN 1793-2:2012).
   Clause 5.2, the single-number rating DLR; Clause 7.1, reporting to the nearest integer; Annex A, the B1 to B4 categories. Read from the BS EN 1793-2:2012 edition.
 - **Hadden, W. J., & Pierce, A. D. (1981).** Sound diffraction around screens and wedges for arbitrary point source locations. *The Journal of the Acoustical Society of America*, *69*(5), 1266-1276. https://doi.org/10.1121/1.385809

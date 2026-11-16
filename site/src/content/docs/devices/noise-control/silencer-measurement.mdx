@@ -44,7 +44,7 @@ supplier publishes does not. It is an **insertion loss measured by
 substitution**: the same rig run twice, once with a plain duct where the
 silencer will go and once with the silencer in it, and the difference between
 the two receiving-side levels, band by band. Reading a catalogue without
-knowing that is how a computed 8,9 dB and a published "25 dB" end up in the
+knowing that is how a computed 8.9 dB and a published "25 dB" end up in the
 same sentence.
 
 Two standards describe the measurement, and they differ in scope as much as
@@ -128,9 +128,9 @@ The second is the receiving side, which decides how much of the sound the
 microphones see at all. ISO 7235 allows three (5.2.4): a reverberation room
 to ISO 3741 qualified at least down to the 125 Hz one-third octave, which is
 preferred; a test duct with an anechoic termination whose reflection
-coefficient is no greater than 0,3; or essentially free-field conditions at
+coefficient is no greater than 0.3; or essentially free-field conditions at
 the open end. ISO 11691 keeps only the reverberation room and the free-field
-alternatives, and asks for 3,5 m of duct on each side of the silencer.
+alternatives, and asks for 3.5 m of duct on each side of the silencer.
 
 None of that is arithmetic, which is why the rest of this page is short. The
 arithmetic that remains is the part a reader can get wrong on paper.
@@ -157,10 +157,10 @@ print(noise_control.octave_insertion_loss(thirds).round(2))
 #                                 # [ 6.57 23.28] dB
 ```
 
-The plain arithmetic means of the same two groups are 7,67 and 24,67 dB, so
+The plain arithmetic means of the same two groups are 7.67 and 24.67 dB, so
 reading the decibels rather than the energy would have overstated both
 octaves by about a decibel. On a steeper silencer the gap is larger: three
-thirds of 30, 30 and 5 dB give **9,7 dB** over the octave, not 21,7. Almost
+thirds of 30, 30 and 5 dB give **9.7 dB** over the octave, not 21.7. Almost
 all the transmitted sound is coming through the one band that does not work,
 and Equation (2) is written out rather than described precisely so that this
 cannot be got wrong.
@@ -203,7 +203,7 @@ Both standards answer, and neither answer is flattering.
 ISO 11691 says outright that exact information on the precision of its method
 cannot be given, that interlaboratory tests would be needed for a real
 reproducibility standard deviation, and that this is what makes it a survey
-standard. Its Table 1 offers an estimate only: 2 dB up to the 1,25 kHz
+standard. Its Table 1 offers an estimate only: 2 dB up to the 1.25 kHz
 one-third octave and 3 dB above it.
 
 ISO 7235 Table 7 has three columns, and the disagreement between them is the
@@ -245,7 +245,7 @@ than implied. The design velocity may not exceed 15 m/s, because the method
 runs the rig with no flow at all and so includes none of the self-generated
 noise. It is written for circular silencers from 80 mm to 2 m in diameter, or
 rectangular ones of comparable area. And the test ducts have to be close in
-cross section to what they feed, between 0,6 and 1,7 times the area of the
+cross section to what they feed, between 0.6 and 1.7 times the area of the
 silencer or the substitution duct (4.5). Outside that, the joints reflect more
 than the method allows for, and the library says so:
 
@@ -269,7 +269,7 @@ $$
 
 The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
 $\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
-holds back 11 dB at 63 Hz and 0,05 dB at 2 kHz, which is nothing:
+holds back 11 dB at 63 Hz and 0.05 dB at 2 kHz, which is nothing:
 
 ```python
 import numpy as np
@@ -324,7 +324,7 @@ reflection coefficient, and the two close exactly on the energy:
 $D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.
 That identity is the conformance anchor for both, because neither is printed
 with a worked value. It also has a use of its own: 5.2.4 qualifies a test
-duct as anechoic only below $r = 0{,}3$, which this bare open end reaches
+duct as anechoic only below $r = 0.3$, which this bare open end reaches
 somewhere between 500 Hz and 1 kHz.
 
 ```python
@@ -335,9 +335,9 @@ print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
 The library carries a second closed form for the same physics, Reynolds' as
 given by Long, in
 [`end_reflection_loss_closed_form`](/phonometry/devices/noise-control/noise-control/).
-It raises the same argument to 1,88 rather than to 2, and for a circular duct
+It raises the same argument to 1.88 rather than to 2, and for a circular duct
 in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
-$10\lg[1 + (c/\pi f d)^{1,88}]$. They agree closely where the argument is
+$10\lg[1 + (c/\pi f d)^{1.88}]$. They agree closely where the argument is
 near 1 and part company at the ends of the range.
 
 Two quantities need it. Equation (6) turns the measured insertion loss of an
@@ -371,13 +371,13 @@ print(round(noise_control.modal_filter_cut_on(diameter_m=0.4), 1))          # 50
 print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
 ```
 
-The rectangular form, $0{,}5\,c/H$, is exact: the first mode of a rigid
+The rectangular form, $0.5\,c/H$, is exact: the first mode of a rigid
 rectangular duct is a half wavelength across the larger dimension. The
-circular one, $0{,}59\,c/d$, is rounded. The exact coefficient is the first
-zero of $J_1'$ over $\pi$, which is 0,58607, so Equation (4) sits 0,67 %
-high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
+circular one, $0.59\,c/d$, is rounded. The exact coefficient is the first
+zero of $J_1'$ over $\pi$, which is 0.58607, so Equation (4) sits 0.67 %
+high: on the 0.4 m duct of the ISO 11691 sound source that is 505.9 Hz where
 [`circular_duct_cut_on`](/phonometry/devices/noise-control/duct-path/) gives
-502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
+502.6 Hz. Three and a half hertz does not matter for choosing a modal filter,
 and it is worth knowing which of the two numbers is the physics.
 
 ## 9. What the object costs to push air through
@@ -402,10 +402,10 @@ print(round(q_v, 4))              # 0.9939 m3/s
 
 ISO 7235 prints $R = 287$ and writes the absolute temperature as
 $\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure. The
-offset alone puts the density 0,051 % high at 20 °C, and the gas constant adds
-0,017 % to that, for 0,069 % in all. It does not cancel: the same density is
+offset alone puts the density 0.051 % high at 20 °C, and the gas constant adds
+0.017 % to that, for 0.069 % in all. It does not cancel: the same density is
 in the dynamic pressure of both test series, so the coefficient is **scaled**
-by that one factor rather than shifted, and comes out 0,069 % low. That is far
+by that one factor rather than shifted, and comes out 0.069 % low. That is far
 under the uncertainty of a pressure-loss test, and using the printed constants
 is what reproduces a result computed to the standard, so the library keeps
 both. It is recorded in the [errata
@@ -414,7 +414,7 @@ a property of the source rather than as a defect.
 
 Equation (9) rather than (8) is used when the flow meter and the test object
 are far enough apart in temperature or pressure that their density ratio
-leaves 0,98 to 1,02: outside that window the meter is not measuring the flow
+leaves 0.98 to 1.02: outside that window the meter is not measuring the flow
 the test object sees.
 
 The velocity head is Equation (13), and the coefficient is the loss divided by

@@ -1306,7 +1306,7 @@ def plot_slm_periodic_requirement(
     As IEC 61672-1:2013 Figure C.1: the limits, the deviation from the
     design goal, its uncertainty and the maximum-permitted band, one result
     per position and named under it. The electrical test of the frequency
-    weightings, whose limits run from 0,7 dB to 16 dB, is drawn as each
+    weightings, whose limits run from 0.7 dB to 16 dB, is drawn as each
     result's margin to its nearer limit instead. A result whose uncertainty
     exceeds its maximum is drawn hollow, as 4.3 forbids using it, unless 4.4
     makes it a result that did not conform. The title names the clause and

@@ -261,7 +261,7 @@ export const glossary = [
         },
         guide: "devices/emission/sound-power-pressure",
         definition: {
-          en: "Background noise correction: what is subtracted from the surface level to remove the background's own contribution, $-10\\log_{10}(1 - 10^{-0,1\\Delta L_p})$ from the source-on minus source-off margin. It is a cliff rather than a slope: above a 15 dB margin it is taken as zero, between 6 and 15 dB it is computed, and below 6 dB the standard caps it at 1,3 dB and warns that the result has lost accuracy.",
+          en: "Background noise correction: what is subtracted from the surface level to remove the background's own contribution, $-10\\log_{10}(1 - 10^{-0.1\\Delta L_p})$ from the source-on minus source-off margin. It is a cliff rather than a slope: above a 15 dB margin it is taken as zero, between 6 and 15 dB it is computed, and below 6 dB the standard caps it at 1.3 dB and warns that the result has lost accuracy.",
           es: "Corrección por ruido de fondo: lo que se resta al nivel de la superficie de medición para eliminar la contribución del propio fondo, $-10\\log_{10}(1 - 10^{-0,1\\Delta L_p})$ a partir del margen entre fuente en marcha y fuente parada. Es un escalón y no una pendiente: por encima de 15 dB de margen se toma como cero, entre 6 y 15 dB se calcula, y por debajo de 6 dB la norma la limita a 1,3 dB y advierte de que el resultado ha perdido exactitud.",
         },
       },
@@ -943,7 +943,7 @@ export const glossary = [
         },
         guide: "devices/electroacoustics/electroacoustics",
         definition: {
-          en: "ITU-R BS.468-4 noise weighting: the broadcast weighting, zero at 1 kHz, peaking at $+12{,}2$ dB at 6,3 kHz and falling to $-29{,}9$ dB at 31,5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter.",
+          en: "ITU-R BS.468-4 noise weighting: the broadcast weighting, zero at 1 kHz, peaking at $+12.2$ dB at 6.3 kHz and falling to $-29.9$ dB at 31.5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter.",
           es: "Ponderación de ruido UIT-R BS.468-4: la ponderación de radiodifusión, cero en 1 kHz, con máximo de $+12{,}2$ dB a 6,3 kHz y caída hasta $-29{,}9$ dB a 31,5 Hz, con la forma de lo audible que resulta un ruido y no de lo sonoro que resulta un tono. La Recomendación la combina con un detector de cuasipico y expresa el resultado en dB(468); la AES17 reutiliza la misma curva con un detector eficaz, lo que da otro número con el mismo filtro.",
         },
       },
@@ -1170,7 +1170,7 @@ export const glossary = [
         },
         guide: "signals/spectra/spectral-analysis",
         definition: {
-          en: "Equivalent noise bandwidth of an analysis window: the width of the ideal rectangular filter that would pass the same broadband noise power. It is exactly 1 bin for a rectangular window and 1,5 for a Hann, and it is the factor that turns a windowed line spectrum into a density (a broadband level read off the lines sits $10\\log_{10}(\\mathrm{ENBW})$ dB high without it).",
+          en: "Equivalent noise bandwidth of an analysis window: the width of the ideal rectangular filter that would pass the same broadband noise power. It is exactly 1 bin for a rectangular window and 1.5 for a Hann, and it is the factor that turns a windowed line spectrum into a density (a broadband level read off the lines sits $10\\log_{10}(\\mathrm{ENBW})$ dB high without it).",
           es: "Ancho de banda equivalente de ruido de una ventana de análisis: el ancho del filtro rectangular ideal que dejaría pasar la misma potencia de ruido de banda ancha. Vale exactamente 1 línea para la ventana rectangular y 1,5 para la de Hann, y es el factor que convierte un espectro de líneas enventanado en una densidad: sin él, un nivel de banda ancha leído sobre las líneas queda $10\\log_{10}(\\mathrm{ENBW})$ dB alto.",
         },
       },
@@ -1532,7 +1532,7 @@ export const glossary = [
         clause: "3.6",
         guide: "buildings/rooms/open-plan-acoustics",
         definition: {
-          en: "Distraction distance: the distance from the talker at which the speech transmission index falls below 0,50, beyond which concentration and privacy start to improve rapidly. It is the single number an open-plan office is usually specified on, and the only rating in the corpus that is a distance rather than a level.",
+          en: "Distraction distance: the distance from the talker at which the speech transmission index falls below 0.50, beyond which concentration and privacy start to improve rapidly. It is the single number an open-plan office is usually specified on, and the only rating in the corpus that is a distance rather than a level.",
           es: "Distancia de distracción: la distancia al hablante a la que el índice de transmisión del habla cae por debajo de 0,50 y a partir de la cual la concentración y la privacidad mejoran rápidamente. Es el número con el que suele especificarse una oficina diáfana y la única valoración de todo el corpus que es una distancia y no un nivel.",
         },
       },
@@ -1548,7 +1548,7 @@ export const glossary = [
         clause: "3.7",
         guide: "buildings/rooms/open-plan-acoustics",
         definition: {
-          en: "Privacy distance: the distance at which the speech transmission index falls below 0,20, beyond which speech is as private as it would be between separate rooms. In offices with small volume or poor privacy it can be out of reach entirely.",
+          en: "Privacy distance: the distance at which the speech transmission index falls below 0.20, beyond which speech is as private as it would be between separate rooms. In offices with small volume or poor privacy it can be out of reach entirely.",
           es: "Distancia de privacidad: la distancia a la que el índice de transmisión del habla cae por debajo de 0,20 y más allá de la cual el habla es tan privada como lo sería entre recintos separados. En oficinas de volumen reducido o con mala privacidad puede resultar inalcanzable.",
         },
       },
@@ -2144,7 +2144,7 @@ export const glossary = [
         clause: "3.15",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\\mathrm{tr},2\\mathrm{m,n}T}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,n}T}$ for a loudspeaker).",
+          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0.5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\\mathrm{tr},2\\mathrm{m,n}T}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,n}T}$ for a loudspeaker).",
           es: "Diferencia de niveles estandarizada en fachada: el nivel a 2 m por delante de la fachada menos el nivel interior, estandarizado a un tiempo de reverberación de referencia de 0,5 s en viviendas. La posición a 2 m está en el campo que la propia fachada refleja, así que no es un nivel de campo libre, y la notación indica la fuente: $D_{\\mathrm{tr},2\\mathrm{m,n}T}$ para tráfico rodado y $D_{\\mathrm{ls},2\\mathrm{m,n}T}$ para altavoz.",
         },
       },
@@ -2175,7 +2175,7 @@ export const glossary = [
         clause: "3.12",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Apparent sound reduction index of a facade element, loudspeaker at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1{,}5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number.",
+          en: "Apparent sound reduction index of a facade element, loudspeaker at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1.5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number.",
           es: "Índice de reducción acústica aparente de un elemento de fachada, altavoz a 45 grados: la diferencia de niveles corregida por el área del elemento frente al área de absorción del recinto receptor, con un término adicional de $-1{,}5$ dB que recoge la geometría de ángulo único. Es aparente, así que las transmisiones por flancos y cualquier otro componente de la fachada quedan dentro del número.",
         },
       },
@@ -2800,7 +2800,7 @@ export const glossary = [
         },
         guide: "buildings/design/detailed-prediction",
         definition: {
-          en: "Internal loss factor of a building element: the fraction of its vibrational energy dissipated per radian inside the material itself, before anything is radiated or leaves through the junctions. It is an input to the prediction, not a measured output: Table B.3 of ISO 12354-1 gives 0,005 for concrete and about 0,01 for most masonry.",
+          en: "Internal loss factor of a building element: the fraction of its vibrational energy dissipated per radian inside the material itself, before anything is radiated or leaves through the junctions. It is an input to the prediction, not a measured output: Table B.3 of ISO 12354-1 gives 0.005 for concrete and about 0.01 for most masonry.",
           es: "Factor de pérdidas interno de un elemento constructivo: la fracción de su energía vibratoria que se disipa por radián dentro del propio material, antes de radiarse o de escapar por las uniones. Es un dato de entrada de la predicción, no un resultado medido: la tabla B.3 de la ISO 12354-1 da 0,005 para el hormigón y en torno a 0,01 para la mayoría de las fábricas.",
         },
       },
@@ -2826,7 +2826,7 @@ export const glossary = [
         },
         guide: "buildings/design/detailed-prediction",
         definition: {
-          en: "Total loss factor of an element as built in: the internal loss factor plus the losses radiated into the air and absorbed at the perimeter junctions. It is what damps the resonant transmission above the critical frequency, and it fixes the structural reverberation time through $T_\\mathrm{s} = 2{,}2/(f\\,\\eta_\\mathrm{tot})$ (so a laboratory value measured in a heavy test frame does not transfer to the building unchanged).",
+          en: "Total loss factor of an element as built in: the internal loss factor plus the losses radiated into the air and absorbed at the perimeter junctions. It is what damps the resonant transmission above the critical frequency, and it fixes the structural reverberation time through $T_\\mathrm{s} = 2.2/(f\\,\\eta_\\mathrm{tot})$ (so a laboratory value measured in a heavy test frame does not transfer to the building unchanged).",
           es: "Factor de pérdidas total de un elemento ya construido: el factor de pérdidas interno más las pérdidas radiadas al aire y absorbidas en las uniones del perímetro. Es lo que amortigua la transmisión resonante por encima de la frecuencia crítica y fija el tiempo de reverberación estructural mediante $T_\\mathrm{s} = 2{,}2/(f\\,\\eta_\\mathrm{tot})$, de modo que un valor de laboratorio medido en un marco de ensayo pesado no se traslada al edificio sin más.",
         },
       },
@@ -3984,7 +3984,7 @@ export const glossary = [
         clause: "3.6.2.1",
         guide: "underwater/underwater-propagation",
         definition: {
-          en: "Detection threshold: ten times the base-10 logarithm of the signal-to-noise ratio at which a signal counts as just detectable, for a stated probability of detection (often 0,5) and probability of false alarm. It is where the processing gain and the operator's tolerance for false alarms enter the sonar equation.",
+          en: "Detection threshold: ten times the base-10 logarithm of the signal-to-noise ratio at which a signal counts as just detectable, for a stated probability of detection (often 0.5) and probability of false alarm. It is where the processing gain and the operator's tolerance for false alarms enter the sonar equation.",
           es: "Umbral de detección: diez veces el logaritmo decimal de la relación señal-ruido a la que una señal se considera apenas detectable, para una probabilidad de detección indicada (a menudo 0,5) y una probabilidad de falsa alarma. Es el punto por el que entran en la ecuación del sonar la ganancia de proceso y la tolerancia del operador a las falsas alarmas.",
         },
       },
@@ -4181,7 +4181,7 @@ export const glossary = [
         },
         guide: "simulation/fdtd-simulation",
         definition: {
-          en: "Courant number: how far a wavefront travels in one time step, measured in grid cells, $c\\,\\Delta t\\sqrt{1/\\Delta x^2 + 1/\\Delta y^2}$. An explicit scheme is stable only up to one and meaningless above it, so it is the number the time step is chosen from rather than the other way round; the library defaults to 0,6.",
+          en: "Courant number: how far a wavefront travels in one time step, measured in grid cells, $c\\,\\Delta t\\sqrt{1/\\Delta x^2 + 1/\\Delta y^2}$. An explicit scheme is stable only up to one and meaningless above it, so it is the number the time step is chosen from rather than the other way round; the library defaults to 0.6.",
           es: "Número de Courant: la distancia que recorre un frente de onda en un paso temporal, medida en celdas de la malla, $c\\,\\Delta t\\sqrt{1/\\Delta x^2 + 1/\\Delta y^2}$. Un esquema explícito solo es estable hasta uno y carece de sentido por encima, así que es el número a partir del cual se elige el paso temporal y no al revés; la biblioteca usa 0,6 por defecto.",
         },
       },
@@ -4306,7 +4306,7 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-field",
         definition: {
-          en: "Reproducibility standard deviation of a sound-insulation quantity: the standard uncertainty ISO 12999-1 assigns to situation A, the widest of the three. The same clause assigns $\\sigma_\\mathrm{situ}$ to situation B and the repeatability $\\sigma_\\mathrm{r}$ to situation C (for $R'_\\mathrm{w}$, 1,2 dB against 0,9 and 0,4), so the situation has to be stated with the number.",
+          en: "Reproducibility standard deviation of a sound-insulation quantity: the standard uncertainty ISO 12999-1 assigns to situation A, the widest of the three. The same clause assigns $\\sigma_\\mathrm{situ}$ to situation B and the repeatability $\\sigma_\\mathrm{r}$ to situation C (for $R'_\\mathrm{w}$, 1.2 dB against 0.9 and 0.4), so the situation has to be stated with the number.",
           es: "Desviación típica de reproducibilidad de una magnitud de aislamiento acústico: la incertidumbre típica que la ISO 12999-1 asigna a la situación A, la más amplia de las tres. El mismo apartado asigna $\\sigma_\\mathrm{situ}$ a la situación B y la repetibilidad $\\sigma_\\mathrm{r}$ a la situación C (para $R'_\\mathrm{w}$, 1,2 dB frente a 0,9 y 0,4), así que hay que indicar la situación junto con el número.",
         },
       },

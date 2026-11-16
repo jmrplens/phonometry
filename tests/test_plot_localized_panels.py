@@ -82,7 +82,7 @@ def test_a_log_distance_axis_reaches_spanish() -> None:
 
     ``0.10 1.00 10.00`` were written by a ``ScalarFormatter`` the plot installed
     on a log axis, so the scale test skipped them while the annotation beside
-    them (``r_c = 1,11 m``) carried the comma: one figure, two separators.
+    them (“r_c = 1,11 m”) carried the comma: one figure, two separators.
     """
     labels = _decimals(_labels(_steady_field("es"), "x"))
     assert labels, "the axis should label at least one decade with a decimal"

@@ -265,9 +265,9 @@ class ContourPhasors(OwnsArrays):
 
 
 #: The air this package works in, as a :class:`~phonometry.fluids.Fluid`: the
-#: same 343 m/s and 1,2 kg/m3 that :data:`~phonometry.simulation.AIR` gives the
+#: same 343 m/s and 1.2 kg/m3 that :data:`~phonometry.simulation.AIR` gives the
 #: FDTD solver, so the transform and the simulation it reads from agree. It is
-#: not the 1,205 of the visco-thermal absorber models; a package keeps the air
+#: not the 1.205 of the visco-thermal absorber models; a package keeps the air
 #: its own solvers run in.
 SIMULATION_AIR = Fluid(
     temperature_c=20.0,

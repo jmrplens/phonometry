@@ -138,9 +138,9 @@ def test_dual_number_verification_uses_separately_rounded_values() -> None:
     """Clause 6.2 verifies the dual-number form against (L + K), the sum of
     the separately rounded declared values (clause 3.16), not round(L + K).
 
-    L_WA = 93,4, K_WA = 2,4: the dual declaration states 93 dB and 2 dB, so
+    L_WA = 93.4, K_WA = 2.4: the dual declaration states 93 dB and 2 dB, so
     the verification limit is 95 dB, while the single-number L_WAd is
-    round(95,8) = 96 dB.
+    round(95.8) = 96 dB.
     """
     verified = emission.OperatingModeDeclaration(
         "m", 93.4, 2.4, verification_level=95.0
@@ -300,7 +300,7 @@ def test_dual_number_report_follows_annex_b2_layout(tmp_path: Path) -> None:
 
 def test_dual_number_verification_row_uses_rounded_sum(tmp_path: Path) -> None:
     """A dual-number fiche verifies against L_WA + K_WA of the separately
-    rounded declared values (93 + 2 = 95 for 93,4/2,4), not round(95,8) = 96.
+    rounded declared values (93 + 2 = 95 for 93.4/2.4), not round(95.8) = 96.
     """
     pytest.importorskip("reportlab")
     mode = emission.OperatingModeDeclaration(

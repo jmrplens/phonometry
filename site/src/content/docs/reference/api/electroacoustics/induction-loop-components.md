@@ -34,8 +34,8 @@ different", $d$ is taken as $\sqrt{d_1 d_2}$
 ([`loop_center_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_center_field)). Everything else about the field is a figure in
 that standard. Here it is computed: [`rectangular_loop_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field) sums the
 Biot-Savart field of the four straight sides exactly, at any point, which is
-how the E.1 formula is checked (it is exact for the square and off by 0,35 dB
-for a rectangle of aspect ratio 1,5). Two of the figures are reproduced: the
+how the E.1 formula is checked (it is exact for the square and off by 0.35 dB
+for a rectangle of aspect ratio 1.5). Two of the figures are reproduced: the
 curves of Figure E.2 b), both components within about half a decibel, taken
 across the 10-unit width of its 15 by 10 loop, as E.1 describes them (the
 figure's panel a) puts the vertical-field line along the length, see
@@ -43,7 +43,7 @@ figure's panel a) puts the vertical-field line along the length, see
 [`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current). Figures E.3 to E.5 and A.1 draw the same kind of
 pattern and are not checked point by point.
 
-IEC 62489-1:2010 5.4.10.2 fixes where an amplifier's field is measured: 1,4 m
+IEC 62489-1:2010 5.4.10.2 fixes where an amplifier's field is measured: 1.4 m
 above the centre of a horizontal square loop whose resistance and inductance
 equal the rated load. [`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current) gives the current that loop needs
 for a field strength, and [`loop_dimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) answers 5.4.11 the other way
@@ -57,7 +57,7 @@ The loop is a resistance in series with an inductance (IEC 62489-1 B.2).
 The resistance is $R = \rho l / a$ for a conductor of length $l$
 and area $a$ ([`loop_resistance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_resistance)), with the resistivity of standard
 annealed copper, 1/58 ohm square millimetre per metre at 20 degrees Celsius
-and a temperature coefficient of 0,00393 per degree (IEC 60028:1925, clause I).
+and a temperature coefficient of 0.00393 per degree (IEC 60028:1925, clause I).
 The inductance of a rectangle of round wire is Grover's Formula (58)
 ([`rectangular_loop_inductance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_inductance)); for $N$ turns it is multiplied by
 $N^2$, the perfect coupling Table B.1 assumes. The impedance
@@ -68,7 +68,7 @@ $U = I |Z|$ ([`LoopImpedance`](/phonometry/reference/api/electroacoustics/induct
 
 Table B.1 of IEC 62489-1 is the oracle. Its six resistances are reproduced by
 the 20 degree resistivity with the perimeter of each loop, which for the
-0,35 m by 0,45 m counter loop is 1,6 m and not the printed 1,5 m (see
+0.35 m by 0.45 m counter loop is 1.6 m and not the printed 1.5 m (see
 `docs/ERRATA.md`). Grover's formula reproduces four of its six inductances
 to the printed microhenry once the term for the flux inside the wire is left
 out: 189, 22, 47 and 109 microhenries. Table B.1 does not say which formula it
@@ -127,10 +127,10 @@ frequencies where it differs from the response at 1 kHz by 3 dB
 ([`neck_loop_characteristics`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_characteristics)). The draft Amendment 2 (prEN
 62489-1:2010/prA2:2017, read in E DIN EN 62489-1/A2:2017-10) replaces Annex D
 with two example specifications: type 1, for audio sources powered by two
-primary 1,5 V cells and higher voltage supplies, by a DC resistance of 32 ohm
+primary 1.5 V cells and higher voltage supplies, by a DC resistance of 32 ohm
 plus or minus 5 %, and type 2, a neck loop with a transformer or an amplifier,
 by an input DC resistance of at least 32 ohm, both reaching 400 mA/m on the
-jig with at most 1,06 V at the input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types),
+jig with at most 1.06 V at the input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types),
 [`verify_neck_loop`](/phonometry/reference/api/electroacoustics/induction-loop-components/#verify_neck_loop)). It is a draft, and
 this module cites it as one. Its Table D.1 (the field a type 1 loop reaches
 from a 3 V and a 9 V battery) rests on a source model the draft does not give
@@ -488,8 +488,8 @@ rectangular loop are not extremely different". For the square it is
 exact; for a rectangle
 it is the approximation E.1 prints, and [`rectangular_loop_field`](/phonometry/reference/api/electroacoustics/induction-loop-components/#rectangular_loop_field)
 gives the exact value, which is larger by
-$\sqrt{(d_1^2 + d_2^2)/(2 d_1 d_2)}$: 0,35 dB at an aspect ratio
-of 1,5 and 3,3 dB at 4.
+$\sqrt{(d_1^2 + d_2^2)/(2 d_1 d_2)}$: 0.35 dB at an aspect ratio
+of 1.5 and 3.3 dB at 4.
 
 **Parameters**
 
@@ -525,11 +525,11 @@ The current a loop needs for a field strength above its centre.
 
 The exact on-axis field of the rectangle (see the module docstring),
 inverted for the current. The defaults are the conditions of IEC
-62489-1:2010 5.4.10.2, 400 mA/m at 1,4 m above the centre of the loop
+62489-1:2010 5.4.10.2, 400 mA/m at 1.4 m above the centre of the loop
 plane, which is also where IEC 60118-4:2014 Figure H.1 plots the current
 required against the loop's size and aspect ratio, and the curves of that
-figure are reproduced: 4,88 A for a 10 m square and 6,41 A for 10 m by
-30 m, read as about 4,89 A and 6,41 A.
+figure are reproduced: 4.88 A for a 10 m square and 6.41 A for 10 m by
+30 m, read as about 4.89 A and 6.41 A.
 
 **Parameters**
 
@@ -578,7 +578,7 @@ specification is read for.
 | :--- | :--- |
 | `current_a` | The amplifier's RMS output current into the loop, in amperes. |
 | `aspect_ratio` | Long side over short side, at least 1 (1 for the square of 5.4.11.1, 3 for its second loop). |
-| `height_m` | Height above the centre of the loop plane, in metres (1,4 m, 5.4.10.2). |
+| `height_m` | Height above the centre of the loop plane, in metres (1.4 m, 5.4.10.2). |
 | `field_strength_a_per_m` | The field strength to reach, in A/m (400 mA/m). |
 | `n_turns` | Number of turns. |
 
@@ -636,10 +636,10 @@ The resistance of a copper loop (IEC 62489-1:2010 B.2).
 
 $R = \rho N l / a$, with the resistivity of standard annealed copper,
 1/58 ohm square millimetre per metre at 20 degrees Celsius, carried to the
-conductor's temperature by the coefficient 0,00393 per degree (IEC
+conductor's temperature by the coefficient 0.00393 per degree (IEC
 60028:1925, clause I). B.2 quotes "approximately 0,017 ohm/m" for 1 mm² at
 25 degrees Celsius; Table B.1 is computed at 20 degrees, where its six
-rounded resistances hold the resistivity between 1,716 and 1,738 times
+rounded resistances hold the resistivity between 1.716 and 1.738 times
 $10^{-8}$ ohm metres, and 1/58 is inside that range.
 
 **Parameters**
@@ -736,7 +736,7 @@ The field strength level of one component, dB re 400 mA/m.
 | :--- | :--- |
 | `component` | `"x"`, `"y"`, `"z"` or `"magnitude"`. |
 
-**Returns:** $20\lg(|H|/0{,}4\ \mathrm{A/m})$; minus infinity where the component vanishes, which is the null line outside a loop.
+**Returns:** $20\lg(|H|/0.4\ \mathrm{A/m})$; minus infinity where the component vanishes, which is the null line outside a loop.
 
 **Raises**
 
@@ -1033,7 +1033,7 @@ The input voltage, input impedance and frequency response of a neck loop.
 The loop is arranged on the non-metallic jig of Annex E and the field
 measured at the telecoil position with a small inductor, about 3 mm by
 10 mm, the size of a behind-the-ear telecoil (9.1.2). The rated input
-voltage is applied from a source of less than 0,4 ohm (9.3.2).
+voltage is applied from a source of less than 0.4 ohm (9.3.2).
 
 A passive loop is linear, so the input voltage for 400 mA/m at 1 kHz
 (9.1) follows from the level measured at any voltage:
@@ -1268,7 +1268,7 @@ deviation $\delta$ from 90 degrees leaves an in-phase component
 $\cos(90^\circ - \delta) = \sin\delta$ of one field against the
 other, which raises the level where the two add and lowers it where they
 subtract, by $20\lg(1 \pm \sin\delta)$ dB (5.4.14.1: at 85 degrees
-the in-phase part is $\cos 85^\circ = 0{,}087$).
+the in-phase part is $\cos 85^\circ = 0.087$).
 
 **Attributes**
 
@@ -1389,7 +1389,7 @@ L = \frac{\mu_0}{\pi}\left[a\ln\frac{2a}{\rho} + b\ln\frac{2b}{\rho} + 2\sqrt{a^
 $$
 
 for sides $a$ and $b$ and a wire of radius $\rho$
-(Grover, *Inductance Calculations*, 1946, p. 60; the factor 0,004
+(Grover, *Inductance Calculations*, 1946, p. 60; the factor 0.004
 microhenry per centimetre there is $\mu_0/\pi$). The last term is the
 flux inside the wire, $\mu = 1$ for copper. For $N$ turns the
 single-turn value is multiplied by $N^2$, the perfect coupling IEC
@@ -1399,7 +1399,7 @@ Table B.1 is reproduced without the internal term
 (`internal_inductance=False`): the counter loop, the home loop, the small
 room and the typical place of worship come out at 189, 22, 47 and 109
 microhenries, as printed. With the term they are about 3 % higher, from
-2,7 % for the place of worship to 4,2 % for the counter loop. At audio
+2.7 % for the place of worship to 4.2 % for the counter loop. At audio
 frequencies the current fills the wire (the skin depth in copper is 2 mm
 at 1 kHz), which is why the term is included by default.
 
@@ -1437,10 +1437,10 @@ Does a neck loop meet one type of the draft Annex D (prA2:2017)?
 
 The draft Amendment 2 to IEC 62489-1 (prEN 62489-1:2010/prA2:2017, read in
 E DIN EN 62489-1/A2:2017-10) specifies a type 1 neck loop, for audio
-sources powered by two primary 1,5 V cells and higher voltage supplies, by
+sources powered by two primary 1.5 V cells and higher voltage supplies, by
 a DC resistance of 32 ohm plus or minus 5 % and a type 2 neck loop with a
 transformer or an amplifier by an input DC resistance of at least 32 ohm,
-both reaching 400 mA/m on the jig of Annex E with at most 1,06 V at the
+both reaching 400 mA/m on the jig of Annex E with at most 1.06 V at the
 input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neck_loop_types)). It is a draft, cited as one.
 
 **Parameters**

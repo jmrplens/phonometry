@@ -84,10 +84,10 @@ def _chk_iso3382_1_sound_strength_ratio() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 3382-1:2009 Annex A (informative) Eq. (A.2)",
-    "Sound pressure exposure level of a 1 Pa burst held for 0,5 s",
+    "Sound pressure exposure level of a 1 Pa burst held for 0.5 s",
 )
 def _chk_iso3382_1_exposure_level() -> Outcome:
-    # E = 0,5 Pa^2 s over T0 = 1 s and p0 = 20 uPa.
+    # E = 0.5 Pa^2 s over T0 = 1 s and p0 = 20 uPa.
     burst = np.ones(round(0.5 * _FS))
     expected = 10.0 * math.log10(0.5 / (1.0 * (2.0e-5) ** 2))
     computed = float(
@@ -140,10 +140,10 @@ def _chk_iso3382_1_free_field_reference() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 3382-1:2009 Annex A (informative) Eq. (A.5)",
-    "Reverberation-room reference level, A = 0,16 V/T = 10 m2",
+    "Reverberation-room reference level, A = 0.16 V/T = 10 m2",
 )
 def _chk_iso3382_1_reverberation_room_reference() -> Outcome:
-    # Equation (A.6) with the printed 0,16: V = 200 m3 and T = 3,2 s give
+    # Equation (A.6) with the printed 0.16: V = 200 m3 and T = 3.2 s give
     # A = 10 m2 exactly, so 10 lg(A/S0) = 10 dB and the printed 37 dB leaves
     # the reference 27 dB below the room level.
     area = 0.16 * 200.0 / 3.2
@@ -156,11 +156,11 @@ def _chk_iso3382_1_reverberation_room_reference() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 3382-1:2009 Annex A (informative) Eqs. (A.5)/(A.9)",
-    "The two printed routes to G span the 0,0206 dB their integers force",
+    "The two printed routes to G span the 0.0206 dB their integers force",
 )
 def _chk_iso3382_1_route_closure() -> Outcome:
-    # 10 lg(1600 pi) = 37,0127 dB and 10 lg(400 pi) = 30,9921 dB differ by
-    # 10 lg 4 = 6,0206 dB; the printed integers differ by 6. Both roundings
+    # 10 lg(1600 pi) = 37.0127 dB and 10 lg(400 pi) = 30.9921 dB differ by
+    # 10 lg 4 = 6.0206 dB; the printed integers differ by 6. Both roundings
     # are correct on their own, so the library's two routes to the same G
     # must disagree by exactly the difference and by nothing else.
     #
@@ -235,7 +235,7 @@ def _lateral_pair(
     "Early lateral energy fraction of one reflection at 45 degrees",
 )
 def _chk_iso3382_1_lateral_fraction() -> Outcome:
-    # Early energy 1 + 0,25; the lateral share is that 0,25 times cos^2(45).
+    # Early energy 1 + 0.25; the lateral share is that 0.25 times cos^2(45).
     omni, lateral = _lateral_pair([45.0], [0.5], [0.020])
     expected = 0.25 * math.cos(math.radians(45.0)) ** 2 / 1.25
     res = ph.room.early_lateral_energy_fraction(omni, lateral, _FS, limits=None)
@@ -266,8 +266,8 @@ def _chk_iso3382_1_lateral_fraction_cosine() -> Outcome:
     "Late lateral sound level of one arrival past the early window",
 )
 def _chk_iso3382_1_late_lateral_level() -> Outcome:
-    # One lateral arrival of amplitude 0,25 at 120 ms against a unit
-    # free-field reference: the level is 20 lg 0,25 with nothing else in it.
+    # One lateral arrival of amplitude 0.25 at 120 ms against a unit
+    # free-field reference: the level is 20 lg 0.25 with nothing else in it.
     omni, lateral = _lateral_pair([90.0], [0.5], [0.020])
     omni = np.concatenate([omni, np.zeros(round(0.2 * _FS))])
     lateral = np.concatenate([lateral, np.zeros(round(0.2 * _FS))])
@@ -286,9 +286,9 @@ def _chk_iso3382_1_late_lateral_level() -> Outcome:
     "Energy average of the four late lateral octave bands",
 )
 def _chk_iso3382_1_late_lateral_average() -> Outcome:
-    # 0, 0, 0 and 6,0206 dB are energies 1, 1, 1 and 4, so a quarter of
-    # their sum is 1,75 and the average is 10 lg 1,75. The arithmetic mean
-    # of the same four values is 1,5051 dB, which the check separates from.
+    # 0, 0, 0 and 6.0206 dB are energies 1, 1, 1 and 4, so a quarter of
+    # their sum is 1.75 and the average is 10 lg 1.75. The arithmetic mean
+    # of the same four values is 1.5051 dB, which the check separates from.
     levels = [0.0, 0.0, 0.0, 20.0 * math.log10(2.0)]
     return numeric(
         10.0 * math.log10(1.75),
@@ -328,8 +328,8 @@ def _chk_iso3382_1_interaural_correlation() -> Outcome:
 )
 def _chk_iso3382_1_stage_support() -> Outcome:
     # Both supports divide by the same unit direct sound, so each is just
-    # 20 lg of the amplitude that landed inside its own window: 0,2 at 50 ms
-    # for the early one, 0,1 at 400 ms for the late one.
+    # 20 lg of the amplitude that landed inside its own window: 0.2 at 50 ms
+    # for the early one, 0.1 at 400 ms for the late one.
     response = np.zeros(round(2.0 * _FS))
     response[100] = 1.0
     response[100 + round(0.050 * _FS)] = 0.2
@@ -354,9 +354,9 @@ def _chk_iso3382_1_stage_support() -> Outcome:
     "The two printed stage-support standard deviations close on 12 readings",
 )
 def _chk_iso3382_1_stage_support_uncertainty() -> Outcome:
-    # C.2.4 estimates 1 dB for one band in one position and 0,3 dB for the
+    # C.2.4 estimates 1 dB for one band in one position and 0.3 dB for the
     # single number, which is that over the root of the four bands times
-    # three positions it averages: 1/sqrt(12) = 0,2887.
+    # three positions it averages: 1/sqrt(12) = 0.2887.
     readings = len(ph.room.STAGE_SUPPORT_BANDS_HZ) * ph.room.STAGE_SUPPORT_POSITIONS
     naive = ph.room.STAGE_SUPPORT_STANDARD_DEVIATION_DB / math.sqrt(readings)
     return numeric(
@@ -393,13 +393,13 @@ def _chk_iso3382_1_decay_uncertainty() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 3382-1:2009 Eqs. (4)/(5)",
-    "The two evaluation ranges differ by the printed 0,88/0,55 and decay terms",
+    "The two evaluation ranges differ by the printed 0.88/0.55 and decay terms",
 )
 def _chk_iso3382_1_decay_uncertainty_ratio() -> Outcome:
-    # 0,88/0,55 is exactly 1,6, so the whole ratio at equal T, B and N is
-    # 1,6 sqrt((1 + 1,90/n)/(1 + 1,52/n)), which is 1,6262 at n = 10. It is
-    # also the ISO 3382-2:2008 Table A.1 pair G = 88 %, H = 1,90 against
-    # G = 55 %, H = 1,52 in its gamma = 5 column.
+    # 0.88/0.55 is exactly 1.6, so the whole ratio at equal T, B and N is
+    # 1.6 sqrt((1 + 1.90/n)/(1 + 1.52/n)), which is 1.6262 at n = 10. It is
+    # also the ISO 3382-2:2008 Table A.1 pair G = 88 %, H = 1.90 against
+    # G = 55 %, H = 1.52 in its gamma = 5 column.
     common = {
         "bandwidth": ph.room.filter_bandwidth(1000.0),
         "decays": 10,
@@ -428,8 +428,8 @@ def _chk_iso3382_1_decay_uncertainty_ratio() -> Outcome:
     "Shortest reliable decay time of a 125 Hz octave forward analysis",
 )
 def _chk_iso3382_1_reliable_limit() -> Outcome:
-    # B = 0,71 * 125 = 88,75 Hz, so Equation (6) puts the limit at
-    # 16/88,75 = 0,1803 s, well above the 2 T_det of a fast detector.
+    # B = 0.71 * 125 = 88.75 Hz, so Equation (6) puts the limit at
+    # 16/88.75 = 0.1803 s, well above the 2 T_det of a fast detector.
     bandwidth = float(np.asarray(ph.room.filter_bandwidth(125.0)))
     computed = float(
         np.asarray(ph.room.min_reliable_reverberation_time(bandwidth, 0.02))
@@ -692,7 +692,7 @@ def _chk_iso717_1_extended() -> Outcome:
     "Weighted impact sound pressure level Ln,w (CI)",
 )
 def _chk_iso717_2_lnw() -> Outcome:
-    # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28,0 dB.
+    # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28.0 dB.
     # CI = -11 is the ISO 717-2:2013 Annex C print; the 2020 reprint of this
     # example is internally inconsistent with its own A.2.1 (it sums the
     # 3 150 Hz band into Ln,sum and prints CI = -10).
@@ -784,7 +784,7 @@ def _chk_open_plan_d2s() -> Outcome:
     "Facade R'45 isolates the -1.5 dB incidence correction (S=A)",
 )
 def _chk_facade_r45() -> Outcome:
-    # With S = A the 10 lg(S/A) coupling term vanishes, so R' = L1,s - L2 - 1,5.
+    # With S = A the 10 lg(S/A) coupling term vanishes, so R' = L1,s - L2 - 1.5.
     n = 3
     res = ph.building.facade_insulation(
         np.full(n, 55.0),
@@ -795,7 +795,7 @@ def _chk_facade_r45() -> Outcome:
         surface_level=np.full(n, ref.ISO16283_3_R45_SURFACE_LEVEL_DB),
     )
     assert res.r_prime is not None
-    # The expected value is rebuilt from its components, so the -1,5 dB
+    # The expected value is rebuilt from its components, so the -1.5 dB
     # oblique-incidence correction constant is exercised explicitly.
     expected = (
         ref.ISO16283_3_R45_SURFACE_LEVEL_DB
@@ -831,8 +831,8 @@ def _printed_formula_13(default: float, corner: float) -> float:
 )
 def _chk_iso16283_low_frequency_trigger() -> Outcome:
     # "smaller than 25 m3 (calculated to the nearest cubic metre)", strictly:
-    # rounding half away from zero, 24,49 m3 is the last volume that triggers
-    # and 24,5 m3 the first that does not, and 25 m3 exactly never does.
+    # rounding half away from zero, 24.49 m3 is the last volume that triggers
+    # and 24.5 m3 the first that does not, and 25 m3 exactly never does.
     agree = sum(
         ph.building.low_frequency_procedure_applies(volume) is required
         for volume, required in ref.ISO16283_LF_TRIGGER_CASES
@@ -942,7 +942,7 @@ def _chk_iso16283_low_frequency_degenerate() -> Outcome:
 )
 def _chk_iso16283_low_frequency_floor() -> Outcome:
     # Two thirds of the default energy survives whatever the corners do, so the
-    # combination is bounded below by 10 lg(2/3) + L = L - 1,76 dB.
+    # combination is bounded below by 10 lg(2/3) + L = L - 1.76 dB.
     default = 50.0
     floor_db = 10.0 * math.log10(2.0 / 3.0) + default
     computed = float(ph.building.low_frequency_level([default], [-200.0])[0])
@@ -964,7 +964,7 @@ def _chk_iso16283_low_frequency_floor() -> Outcome:
 def _chk_iso16283_low_frequency_monotonic() -> Outcome:
     # The third closed form the guide page names, and the one that says a
     # louder corner is never averaged away: sweeping L_Corner from 40 dB below
-    # the default level to 40 dB above it in 0,2 dB steps, every step is a rise.
+    # the default level to 40 dB above it in 0.2 dB steps, every step is a rise.
     # The 1/3 weight makes the rise very small at the quiet end - about 1e-6 dB
     # per step at L_Corner = L - 40 dB - and float64 still resolves it.
     default = 50.0
@@ -1056,7 +1056,7 @@ def _chk_iso16283_low_frequency_shared() -> Outcome:
     "Lab airborne R on the ISO 717-1 reference shape -> Rw = 54",
 )
 def _chk_lab_airborne_rw() -> Outcome:
-    # S = A (A = 0,16*50/0,8 = 10 = area) => R = L1 - L2 = the reference curve.
+    # S = A (A = 0.16*50/0.8 = 10 = area) => R = L1 - L2 = the reference curve.
     ref_r = np.asarray(ref.ISO10140_2_REF_AIRBORNE_R, dtype=float)
     res = ph.building.laboratory_airborne_insulation(
         np.full(16, 90.0), 90.0 - ref_r, np.full(16, 0.8), area=10.0, volume=50.0
@@ -1147,7 +1147,7 @@ def _chk_iso717_2_table_4() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 717-2:2020 Table 4",
-    "Reference floors to one decimal: 77,6 (-10,3), 71,8 (0,0) and 75,0 (-2,8)",
+    "Reference floors to one decimal: 77.6 (-10.3), 71.8 (0.0) and 75.0 (-2.8)",
 )
 def _chk_iso717_2_table_4_one_decimal() -> Outcome:
     matching, total = _table_4_matches(one_decimal=True)
@@ -1331,20 +1331,20 @@ def _chk_iso10140_1_annex_h() -> Outcome:
     "Room & building acoustics",
     "ISO 10140-1:2021 G.4",
     "Curing example: two measurements within 1 d may start 3 d after construction; "
-    "on the same bound, 2,1 d after 6,3 d passes too",
+    "on the same bound, 2.1 d after 6.3 d passes too",
 )
 def _chk_iso10140_1_curing_example() -> Outcome:
-    # 3 x 2,1 is 6,300000000000001 in binary: the decimal pair sits on the
+    # 3 x 2.1 is 6.300000000000001 in binary: the decimal pair sits on the
     # inclusive bound of G.4 as the printed one does.
     on_bound = ph.building.check_lining_curing(3.0, 1.0)
     early = ph.building.check_lining_curing(2.9, 1.0)
     decimal = ph.building.check_lining_curing(6.3, 2.1)
     ok = on_bound.passes and not early.passes and decimal.passes
     return Outcome(
-        expected="3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes",
+        expected="3 d passes, 2.9 d fails, 6.3 d with 2.1 d passes",
         computed=f"3 d {'passes' if on_bound.passes else 'fails'}, "
-        f"2,9 d {'passes' if early.passes else 'fails'}, "
-        f"6,3 d with 2,1 d {'passes' if decimal.passes else 'fails'}",
+        f"2.9 d {'passes' if early.passes else 'fails'}, "
+        f"6.3 d with 2.1 d {'passes' if decimal.passes else 'fails'}",
         delta="exact" if ok else "differs",
         passed=ok,
     )
@@ -1354,14 +1354,14 @@ def _chk_iso10140_1_curing_example() -> Outcome:
     "Room & building acoustics",
     "ISO 10140-1:2021 Table K.2",
     "The 18 C_j are the IEC 61672-1 A-weighting at the exact midband "
-    "frequencies of the nominal bands, to 0,1 dB",
+    "frequencies of the nominal bands, to 0.1 dB",
 )
 def _chk_iso10140_1_table_k2() -> Outcome:
     from phonometry._internal.weighting_tables import _analytic_weighting_db
 
     # The library's IEC 61672-1:2013 Annex E design goal at the exact base-ten
     # midband frequency of each nominal band (100 Hz is band 20), rounded to
-    # 0,1 dB as Table K.2 prints it.
+    # 0.1 dB as Table K.2 prints it.
     exact = 10.0 ** (np.arange(20, 38) / 10.0)
     design = np.round(_analytic_weighting_db("A", exact), 1)
     printed = np.fromiter(ph.building.RAINFALL_A_WEIGHTING.values(), dtype=float)
@@ -1372,7 +1372,7 @@ def _chk_iso10140_1_table_k2() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10140-1:2021 Formula (K.2) with Table K.2",
-    "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j",
+    "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0.1 C_j), printed C_j",
 )
 def _chk_iso10140_1_formula_k2() -> Outcome:
     # The expected value is built from the 18 C_j as the page prints them, the
@@ -1432,7 +1432,7 @@ def _chk_iso10140_1_formula_k4() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10140-1:2021 Formula (J.1)",
-    "A 5,4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5,4 m / (8 m2 x 1 m))",
+    "A 5.4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5.4 m / (8 m2 x 1 m))",
 )
 def _chk_iso10140_1_formula_j1() -> Outcome:
     # Every term away from zero and the joint length away from the reference
@@ -1447,7 +1447,7 @@ def _chk_iso10140_1_formula_j1() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10140-1:2021 Formula (J.2) with ISO 10140-2:2021 A.3",
-    "The fixed 1,3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, "
+    "The fixed 1.3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, "
     "to the printed decimal",
 )
 def _chk_iso10140_1_formula_j2_limit() -> Outcome:
@@ -1476,7 +1476,7 @@ def _chk_iso10140_1_formula_j2_limit() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10140-1:2021 J.1",
-    "R's within 3 dB of Rs,max = 50,4 dB: the lower limit as printed, (Rs >= 50,4 dB)",
+    "R's within 3 dB of Rs,max = 50.4 dB: the lower limit as printed, (Rs >= 50.4 dB)",
 )
 def _chk_iso10140_1_j1_lower_limit() -> Outcome:
     maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
@@ -1510,7 +1510,7 @@ def _chk_iso10140_1_j1_open_bands() -> Outcome:
     # dip infinitely high the twelve other bands sit at 58 dB; +7 dB leaves
     # 4 dB at 1000 Hz and 5 dB at each of the five bands from 1250 Hz, 29 dB,
     # where +8 dB leaves 35 dB, so 59 dB. 4.5 with spectrum No 1 over those
-    # twelve bands: XA = 58 - 10 lg 0,7787 = 59,1 dB, which rounds to 59, so
+    # twelve bands: XA = 58 - 10 lg 0.7787 = 59.1 dB, which rounds to 59, so
     # C = 0 dB. 59 - 51 is more than the 1 dB of J.1.
     maximum = np.full(18, 70.0)
     maximum[6:10] = 44.0
@@ -1562,7 +1562,7 @@ def _chk_iso10140_2_table_a1() -> Outcome:
     "Room & building acoustics",
     "ISO 10140-1:2021 J.2.1, J.2.2",
     "Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window "
-    "or door gap at least 5,0 m (5,0 m passes); four gap readings within 0,3 mm",
+    "or door gap at least 5.0 m (5.0 m passes); four gap readings within 0.3 mm",
 )
 def _chk_iso10140_1_j2_bounds() -> Outcome:
     cases = [
@@ -1703,11 +1703,11 @@ def _chk_iso10140_1_table_k1() -> Outcome:
     "Room & building acoustics",
     "ISO 10140-5:2021 H.1",
     "Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: "
-    "38 and 42 pass, and 38 collected as 3,8 L on 0,1 m² in one hour; "
-    "37,9 and 42,1 fail",
+    "38 and 42 pass, and 38 collected as 3.8 L on 0.1 m² in one hour; "
+    "37.9 and 42.1 fail",
 )
 def _chk_iso10140_5_rain_rate() -> Outcome:
-    # The collected rate divides out to 37,99999999999999 mm/h: still on the
+    # The collected rate divides out to 37.99999999999999 mm/h: still on the
     # inclusive bound.
     collected = ph.building.rainfall_rate(3.8, 0.1, 3600.0)
     verdicts = [
@@ -1764,7 +1764,7 @@ def _chk_intensity_ri_rw() -> Outcome:
 def _chk_intensity_kc_annexb() -> Outcome:
     # The printed Table B.1 (21 one-third-octave rows, one decimal) is the
     # independent oracle; additionally Formula (B.1) with Sb2 = 117 m²,
-    # V2 = 81 m³, c = 340 m/s must reduce to (B.2) Kc = 10 lg(1 + 61,4/f).
+    # V2 = 81 m³, c = 340 m/s must reduce to (B.2) Kc = 10 lg(1 + 61.4/f).
     b2 = ph.building.adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
     b1 = ph.building.adaptation_term_kc(
         ref.ISO15186_1_KC_BANDS, boundary_area=117.0, volume=81.0
@@ -1774,7 +1774,7 @@ def _chk_intensity_kc_annexb() -> Outcome:
     delta = float(np.max(np.abs(b1 - b2)))
     passed = worst <= 0.05 and delta <= 1e-3
     return Outcome(
-        expected="max abs(Kc - Table B.1) <= 0,05 dB (1 dp print)",
+        expected="max abs(Kc - Table B.1) <= 0.05 dB (1 dp print)",
         computed=f"{worst:.3f} dB (B.1 vs B.2: {delta:.2e} dB)",
         delta=f"{worst:.3f} dB",
         passed=passed,
@@ -1802,7 +1802,7 @@ def _chk_low_frequency_limp_panel() -> Outcome:
     printed = np.asarray(ref.ISO15186_3_PLASTER_TABLE_A1, dtype=float)
     worst = float(np.max(np.abs(calculated - printed)))
     return Outcome(
-        expected="max abs(R - Table A.1) <= 0,05 dB (1 dp print)",
+        expected="max abs(R - Table A.1) <= 0.05 dB (1 dp print)",
         computed=f"{worst:.3f} dB over 50 Hz to 160 Hz",
         delta=f"{worst:.3f} dB",
         passed=worst <= 0.05,
@@ -1884,11 +1884,11 @@ def _chk_low_frequency_element() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10052:2021 Clause 3.6",
-    "Survey R' applies the V/7,5 minimum-area rule",
+    "Survey R' applies the V/7.5 minimum-area rule",
 )
 def _chk_survey_rprime_area_rule() -> Outcome:
-    # V/7,5 = 120/7,5 = 16 m^2 > S = 5 m^2, so the larger value replaces S.
-    # With k = 0 (T = T0), R' = D + 10 lg(16 * T0 / (0,16 V)).
+    # V/7.5 = 120/7.5 = 16 m^2 > S = 5 m^2, so the larger value replaces S.
+    # With k = 0 (T = T0), R' = D + 10 lg(16 * T0 / (0.16 V)).
     v, s, d = 120.0, 5.0, 30.0
     res = ph.building.survey_airborne_insulation(
         np.full(5, 70.0), np.full(5, 40.0), np.zeros(5), volume=v, area=s
@@ -1918,7 +1918,7 @@ def _chk_survey_service_equipment() -> Outcome:
     "Reverberation-index estimate (35 <= V < 60, type g)",
 )
 def _chk_survey_reverberation_estimate() -> Outcome:
-    # Table 4 row 'g' for 35 <= V < 60: 4,5 / 5 / 5,5 / 5,5 / 5,5 dB.
+    # Table 4 row 'g' for 35 <= V < 60: 4.5 / 5 / 5.5 / 5.5 / 5.5 dB.
     expected = [4.5, 5.0, 5.5, 5.5, 5.5]
     got = np.asarray(ph.building.estimate_reverberation_index(50.0, "g"), dtype=float)
     ok = bool(np.array_equal(got, expected))
@@ -1978,7 +1978,7 @@ def _chk_iso16251_carpet_foret2011() -> Outcome:
     # the full ISO 16251-1 improvement path (a flat bare-plate level minus the
     # measured Delta-L reconstructs the specimen level), then rated per ISO
     # 717-2 on the 100-3150 Hz sub-range. See tests/reference_data/ for the
-    # provenance and the +/- 0,5 dB digitization tolerance.
+    # provenance and the +/- 0.5 dB digitization tolerance.
     bare = np.full(len(ref.FORET2011_CARPET_FREQ), 100.0)
     delta_l = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L, dtype=float)
     res = ph.building.impact_improvement(
@@ -2032,7 +2032,7 @@ def _chk_iso10848_absorption_length() -> Outcome:
         speed_of_sound=ref.ISO10848_ABS_C0,
     )
     computed = float(a[0])
-    # aj at f = f_ref (sqrt(f_ref/f) = 1): aj = 2,2·π²·S/(Ts·c0).
+    # aj at f = f_ref (sqrt(f_ref/f) = 1): aj = 2.2·π²·S/(Ts·c0).
     expected = (
         2.2
         * math.pi**2
@@ -2050,7 +2050,7 @@ def _chk_iso10848_absorption_length() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10848-1:2006 Clause 7.3.1",
-    "Flanking total loss factor η = 2,2/(f·Ts)",
+    "Flanking total loss factor η = 2.2/(f·Ts)",
 )
 def _chk_iso10848_loss_factor() -> Outcome:
     eta = ph.building.total_loss_factor(
@@ -2069,11 +2069,11 @@ def _chk_iso10848_loss_factor() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 12354-1:2017 Formula (20) vs Hopkins Eq. 2.201 (6 mm glass)",
-    "Flanking critical frequency (c0²/1,8·cL·h) vs plate coincidence "
+    "Flanking critical frequency (c0²/1.8·cL·h) vs plate coincidence "
     "(c0²/2π · sqrt(m''/B'))",
 )
 def _chk_flanking_critical_frequency() -> Outcome:
-    # The 1,8 constant rounds 2π/√12, so for a plate whose bending stiffness
+    # The 1.8 constant rounds 2π/√12, so for a plate whose bending stiffness
     # and mass are mutually consistent the two independent formulas must
     # agree to within that rounding (< 1 %).
     e, rho, nu, h, c0 = 6.2e10, 2500.0, 0.24, 0.006, 343.0
@@ -2102,10 +2102,10 @@ def _chk_en29052_apparent() -> Outcome:
 @register(
     "Room & building acoustics",
     "EN 29052-1:1992 clause 8.2 NOTE",
-    "Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9)",
+    "Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0.1 MPa, ε=0.9)",
 )
 def _chk_en29052_enclosed_gas() -> Outcome:
-    # NOTE: s'a = 111/d MN/m3 for d in mm; the closed form gives 100/0,9 = 111.11.
+    # NOTE: s'a = 111/d MN/m3 for d in mm; the closed form gives 100/0.9 = 111.11.
     sa_mn = float(ph.materials.enclosed_gas_stiffness(0.020, 0.9)) / 1e6  # d = 20 mm
     return numeric(111.111111 / 20.0, sa_mn, 1e-4, unit="MN/m³", places=5)
 
@@ -2165,7 +2165,7 @@ def _chk_iso7626_reciprocity() -> Outcome:
 
 # --- Heavy and soft impact sources (ISO 16283-2 / JIS A 1418-2 / ISO 717-2) ---
 #: ISO 717-2:2020 Table D.4 (printed p. 22): a field measurement in octave
-#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55,350 66... = 55 dB.
+#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55.350 66... = 55 dB.
 _ISO717_2_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
 
 
@@ -2183,11 +2183,11 @@ def _chk_iso717_2_annex_d_rating() -> Outcome:
             1e-4,
             unit="dB",
             places=6,
-            expected_label="55,350 66... dB (rated 55 dB)",
+            expected_label="55.350 66... dB (rated 55 dB)",
         )
         if res.rating == 55
         else Outcome(
-            expected="55,350 66... dB (rated 55 dB)",
+            expected="55.350 66... dB (rated 55 dB)",
             computed=f"{res.unrounded:.6f} dB (rated {res.rating} dB)",
             delta=f"{res.unrounded - 55.350_667:+.3f} dB",
             passed=False,
@@ -2202,16 +2202,16 @@ def _chk_iso717_2_annex_d_rating() -> Outcome:
 )
 def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
     # ISO 16283-2 Table A.1, ISO 10140-5 Table F.1 and JIS A 1418-2 Table A.2
-    # print the same five values; the tolerance band is +/-1,0 / 1,5 / 1,5 /
-    # 2,0 / 2,0 dB, and a source on the nominal must conform in every band.
+    # print the same five values; the tolerance band is +/-1.0 / 1.5 / 1.5 /
+    # 2.0 / 2.0 dB, and a source on the nominal must conform in every band.
     limits = ph.building.heavy_impact_source_limits("rubber_ball")
     freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
     nominal = 0.5 * (lower + upper)
     check = ph.building.check_heavy_impact_source(nominal)
     printed = "39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N"
     return Outcome(
-        expected=f"{printed} at 31,5 to 500 Hz",
-        computed=" / ".join(f"{v:g}".replace(".", ",") for v in nominal) + " dB re 1 N",
+        expected=f"{printed} at 31.5 to 500 Hz",
+        computed=" / ".join(f"{v:g}" for v in nominal) + " dB re 1 N",
         delta=f"max |dev| {float(np.max(np.abs(check.deviation))):.3f} dB",
         passed=bool(
             check.passes
@@ -2227,8 +2227,8 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
     "Standardized maximum impact level reduces to 10 lg(V/V0) at T = T0",
 )
 def _chk_iso16283_2_standardization_identity() -> Outcome:
-    # Li,Fmax = 70 dB in a 100 m3 room at the reference T0 = 0,5 s: the Fast
-    # correction term is identically zero, leaving 10 lg(100/50) = 3,0103 dB.
+    # Li,Fmax = 70 dB in a 100 m3 room at the reference T0 = 0.5 s: the Fast
+    # correction term is identically zero, leaving 10 lg(100/50) = 3.0103 dB.
     res = ph.building.standardized_max_impact_level([70.0], 100.0, 0.5)
     return numeric(
         70.0 + 10.0 * math.log10(2.0),
@@ -2236,7 +2236,7 @@ def _chk_iso16283_2_standardization_identity() -> Outcome:
         1e-9,
         unit="dB",
         places=6,
-        expected_label="73,0103 dB (= 70 + 10 lg(100/50))",
+        expected_label="73.0103 dB (= 70 + 10 lg(100/50))",
     )
 
 
@@ -2307,8 +2307,8 @@ def _chk_iso140_9_normalization() -> Outcome:
     "Plenum model: Eq. (9.18) converges to Eq. (9.20) as the damping vanishes",
 )
 def _chk_vigran_plenum_convergence() -> Outcome:
-    # Vigran prints the geometry of his own example (LS = LR = 4,75 m,
-    # h = 0,43 m, eps = 2) but no numeric output anywhere in Section 9.2.3, so
+    # Vigran prints the geometry of his own example (LS = LR = 4.75 m,
+    # h = 0.43 m, eps = 2) but no numeric output anywhere in Section 9.2.3, so
     # the check is structural rather than a transcribed value: the full
     # attenuated form of Eq. (9.18) has to reproduce its own small-attenuation
     # limit, Eq. (9.20). That fails outright on the printed reading of the
@@ -2341,7 +2341,7 @@ def _chk_vigran_plenum_convergence() -> Outcome:
     "Mass-spring-mass resonance of a masonry cavity wall without and with ties",
 )
 def _chk_hopkins_wall_tie_resonance() -> Outcome:
-    # Fig. 4.35: two 140 kg/m2 leaves, empty 75 mm cavity, then 2,5 ties/m2 of
+    # Fig. 4.35: two 140 kg/m2 leaves, empty 75 mm cavity, then 2.5 ties/m2 of
     # s_75mm = 2e6 N/m. The caption prints fmsm = 26 Hz and fmsm = 50 Hz.
     ties = ph.building.wall_tie_stiffness_per_area(2.5, 2.0e6)
     untied = ph.building.mass_spring_mass_resonance(140.0, 140.0, 0.075)
@@ -2350,7 +2350,7 @@ def _chk_hopkins_wall_tie_resonance() -> Outcome:
     )
     ok = round(untied) == 26 and round(tied) == 50
     return Outcome(
-        expected="26 Hz (no ties) / 50 Hz (2,5 ties/m2, k = 2 MN/m)",
+        expected="26 Hz (no ties) / 50 Hz (2.5 ties/m2, k = 2 MN/m)",
         computed=f"{untied:.2f} Hz / {tied:.2f} Hz",
         delta=f"{untied - 26.0:+.2f} / {tied - 50.0:+.2f} Hz",
         passed=ok,
@@ -2403,7 +2403,7 @@ def _chk_iso10846_level() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-3:2002 Formula (1)",
-    "Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01)",
+    "Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0.01)",
 )
 def _chk_iso10846_indirect() -> Outcome:
     f, m2, t = 500.0, 10.0, 0.01
@@ -2474,7 +2474,7 @@ def _chk_iso7626_2_rigid_mass_mobility() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-2:2015 Annex A",
-    "Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0,8, n=75 → 4,08 % (< 5 %)",
+    "Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0.8, n=75 → 4.08 % (< 5 %)",
 )
 def _chk_iso7626_2_random_error() -> Outcome:
     eps = float(ph.vibration.random_error_percent(0.8, 75))
@@ -2606,7 +2606,7 @@ def _chk_iso7626_5_pole_shift() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 Annex A Formula (A.3)",
-    "Damping of a 0,5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
+    "Damping of a 0.5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
 )
 def _chk_iso7626_5_formula_a3() -> Outcome:
     zeta, rate = 0.005, 5.0
@@ -2618,7 +2618,7 @@ def _chk_iso7626_5_formula_a3() -> Outcome:
     # The window moves the pole from -sigma + j*omega_d to -(sigma + a) +
     # j*omega_d, so the apparent damping ratio is (sigma + a)/|pole|, and
     # (A.3) as printed subtracts a/omega_d from it. That leaves (A.3)'s own
-    # first-order residual, -(zeta_hat**3 - zeta**3)/2 = -7,6e-6, in the
+    # first-order residual, -(zeta_hat**3 - zeta**3)/2 = -7.6e-6, in the
     # expected value; the tolerance holds only the 2e-6 the truncation of a
     # 1 s record adds, so the exact pole shift would fail the row.
     omega_n = 2.0 * math.pi * ref.ISO7626_5_NATURAL_FREQUENCY_HZ
@@ -2632,7 +2632,7 @@ def _chk_iso7626_5_formula_a3() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 Annex A",
-    "Damping back from a 20 1/s window, the pole moved back by a: 0,5 %",
+    "Damping back from a 20 1/s window, the pole moved back by a: 0.5 %",
 )
 def _chk_iso7626_5_exact_damping() -> Outcome:
     force, response = ref.sdof_gaussian_impact(0.005)
@@ -2648,7 +2648,7 @@ def _chk_iso7626_5_exact_damping() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 Annex A",
-    "Corrected mobility peak of a 0,5 % resonator after a 20 1/s window = 1/c",
+    "Corrected mobility peak of a 0.5 % resonator after a 20 1/s window = 1/c",
 )
 def _chk_iso7626_5_corrected_peak() -> Outcome:
     zeta = 0.005
@@ -2669,7 +2669,7 @@ def _chk_iso7626_5_corrected_peak() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 6.4 (Figure 5)",
-    "Two equal impacts 62,5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
+    "Two equal impacts 62.5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
 )
 def _chk_iso7626_5_double_hit_notches() -> Outcome:
     force, _ = ref.sdof_gaussian_impact(0.1)
@@ -2690,7 +2690,7 @@ def _chk_iso7626_5_double_hit_notches() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 6.4",
-    "Second impact 0,6 of the first: ripple 20 lg(1,6/0,4) = 12,04 dB",
+    "Second impact 0.6 of the first: ripple 20 lg(1.6/0.4) = 12.04 dB",
 )
 def _chk_iso7626_5_double_hit_ripple() -> Outcome:
     force, _ = ref.sdof_gaussian_impact(0.1)
@@ -2705,7 +2705,7 @@ def _chk_iso7626_5_double_hit_ripple() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 7.2 (ISO 7626-2:2015 7.5.2)",
-    "Rigid 3 kg block through both windows: accelerance 1/m = 0,3333 1/kg",
+    "Rigid 3 kg block through both windows: accelerance 1/m = 0.3333 1/kg",
 )
 def _chk_iso7626_5_rigid_block() -> Outcome:
     force, _ = ref.sdof_gaussian_impact(0.1)
@@ -2789,7 +2789,7 @@ def _chk_iso7626_5_end_of_record() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 7626-5:2019 3.3, 3.4",
-    "Force ESD of a 0,5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
+    "Force ESD of a 0.5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
 )
 def _chk_iso7626_5_force_spectrum_drop() -> Outcome:
     force, _ = ref.sdof_gaussian_impact(0.1)
@@ -2849,7 +2849,7 @@ def _chk_iso7626_5_printed_limits() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-3:2002 6.1 Inequality (2)",
-    "Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB",
+    "Indirect-method validity limit mag(T) = 0.1 ↔ ΔL1,2 = 20 dB",
 )
 def _chk_iso10846_3_validity_threshold() -> Outcome:
     delta_l = 20.0 * math.log10(1.0 / ph.vibration.TRANSMISSIBILITY_LIMIT)
@@ -2859,10 +2859,10 @@ def _chk_iso10846_3_validity_threshold() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-3:2002 6.1",
-    "Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %)",
+    "Model bias at the validity limit: k_ind/k = 1.1 (0.83 dB ≤ 1 dB, 10 % ≤ 12 %)",
 )
 def _chk_iso10846_3_validity_bias() -> Outcome:
-    # Undamped mass-spring model at omega^2 m = 11 k, i.e. T = -0,1 exactly.
+    # Undamped mass-spring model at omega^2 m = 11 k, i.e. T = -0.1 exactly.
     k, m = 1.0e6, 1.0
     f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)
     t = complex(ph.vibration.base_transmissibility(f, m, k))
@@ -2890,7 +2890,7 @@ def _chk_iso10846_3_validity_bias() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-1:2008 Equation (6)",
-    "Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %)",
+    "Delivered/blocking force F2/F2,b = 1/1.1 at mag(k2,2/kt) = 0.1 (within 10 %)",
 )
 def _chk_iso10846_1_blocking_force() -> Outcome:
     value = abs(complex(ph.vibration.blocking_force_ratio(1.0e5, 1.0e6)))
@@ -2900,7 +2900,7 @@ def _chk_iso10846_1_blocking_force() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-2:2008 7.7 / -3:2002 7.6",
-    "Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0)",
+    "Linearity: ΔLk ≤ 1.5 dB for input spectra 10 dB apart (linear element: 0)",
 )
 def _chk_iso10846_linearity() -> Outcome:
     k, u_a = 1.0e6 + 3.0e4j, 1.0e-6 + 0j
@@ -2921,12 +2921,12 @@ def _chk_iso10846_linearity() -> Outcome:
         ref.ISO10846_LINEARITY_TOL_DB,
         unit="dB",
         places=3,
-        expected_label="ΔLk ≤ 1,5 dB (-2 7.7 c), -3 7.6 c))",
+        expected_label="ΔLk ≤ 1.5 dB (-2 7.7 c), -3 7.6 c))",
     )
 
 
 # --- ISO 10846-4 and -5: no worked example, closed forms (see reference_data) ---
-#: A 1 MN/m element seen by the 0,2 Hz lines of ISO 10846-5 7.5, from 1 Hz up.
+#: A 1 MN/m element seen by the 0.2 Hz lines of ISO 10846-5 7.5, from 1 Hz up.
 _ISO10846_5_SWEEP_HZ = np.arange(1.0, 400.0, 0.2)
 _ISO10846_5_OMEGA = 2.0 * math.pi * _ISO10846_5_SWEEP_HZ
 _ISO10846_K = 1.0e6
@@ -3069,7 +3069,7 @@ def _chk_iso10846_5_formula_7() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-4:2003 Inequality (3)",
-    "Output mass limit 0,06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg",
+    "Output mass limit 0.06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0.6 kg",
 )
 def _chk_iso10846_4_output_mass_limit() -> Outcome:
     check = ph.vibration.check_output_mass(
@@ -3087,13 +3087,13 @@ def _chk_iso10846_4_output_mass_limit() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-4:2003 6.2 NOTE 1",
-    "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0,94 = 0,537 dB, "
-    "the 0,5 dB NOTE 1 prints to one decimal (1 dp print)",
+    "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0.94 = 0.537 dB, "
+    "the 0.5 dB NOTE 1 prints to one decimal (1 dp print)",
 )
 def _chk_iso10846_4_output_mass_bias() -> Outcome:
-    # NOTE 1 states the bias to one decimal, so the printed 0,5 dB is held
+    # NOTE 1 states the bias to one decimal, so the printed 0.5 dB is held
     # with the half unit of that decimal: the exact worst case, with the
-    # inertia force opposing the measured one, is -20 lg(1 - 0,06) = 0,537 dB.
+    # inertia force opposing the measured one, is -20 lg(1 - 0.06) = 0.537 dB.
     limit = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0
     check = ph.vibration.check_output_mass(
         frequencies=[100.0],
@@ -3108,7 +3108,7 @@ def _chk_iso10846_4_output_mass_bias() -> Outcome:
         0.05,
         unit="dB",
         places=3,
-        expected_label="0,5 dB (1 dp print, +/-0,05 dB)",
+        expected_label="0.5 dB (1 dp print, +/-0.05 dB)",
     )
 
 
@@ -3159,7 +3159,7 @@ def _chk_iso10846_4_f3() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Inequalities (1) and (2)",
-    "20 dB and 15 dB hold at equality and fail 0,1 dB below",
+    "20 dB and 15 dB hold at equality and fail 0.1 dB below",
 )
 def _chk_iso10846_5_inequalities() -> Outcome:
     f = [100.0, 200.0]
@@ -3188,7 +3188,7 @@ def _chk_iso10846_5_inequalities() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Formulas (B.2) and (B.3)",
-    "Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread)",
+    "Budget from the B.3 expressions: u = 1.394 dB, U = 2u = 2.789 dB (no repeatability spread)",
 )
 def _chk_iso10846_5_budget() -> Outcome:
     budget = ph.vibration.driving_point_uncertainty(120.0, repeatability_range_db=0.0)
@@ -3206,7 +3206,7 @@ def _chk_iso10846_5_budget() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Table B.1",
-    "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2,12 = 1,456 dB",
+    "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2.12 = 1.456 dB",
 )
 def _chk_iso10846_5_table_b1() -> Outcome:
     signal, ins, rig, dps, lin = ref.ISO10846_5_TABLE_B1_U_DB
@@ -3227,7 +3227,7 @@ def _chk_iso10846_5_table_b1() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO/TS 7849-1:2009 Formula (8)",
-    "Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE)",
+    "Calibration L_v from â = 9.81 m/s² at 100 Hz  (standard's EXAMPLE)",
 )
 def _chk_iso7849_calibration() -> Outcome:
     lv = float(ph.emission.velocity_level_from_acceleration(9.81, frequency=100.0))
@@ -3278,7 +3278,7 @@ def _chk_en15657_power_balance() -> Outcome:
 @register(
     "Room & building acoustics",
     "UNE-EN 15657:2018 Formula (13)",
-    "Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s",
+    "Plate loss factor η = 2.2/(f·Ts) at 1 kHz, Ts = 0.3 s",
 )
 def _chk_en15657_loss_factor() -> Outcome:
     eta = float(
@@ -3293,10 +3293,10 @@ def _chk_en15657_loss_factor() -> Outcome:
     "Source conversion chain reproduces Table I.8 (wall, installed)",
 )
 def _chk_en15657_conversion_chain() -> Outcome:
-    # Measured plate power (Y_plate = 5,34e-6) -> blocked force (15) ->
+    # Measured plate power (Y_plate = 5.34e-6) -> blocked force (15) ->
     # characteristic reception-plate level (17, Y_R,inf,low = 5e-6) ->
-    # Annex I mobility correction to the wall (Y_wall = 24,1e-6). The printed
-    # Table I.8 row is the oracle (one-decimal intermediates, +/-0,15 dB).
+    # Annex I mobility correction to the wall (Y_wall = 24.1e-6). The printed
+    # Table I.8 row is the oracle (one-decimal intermediates, +/-0.15 dB).
     lwsn = ph.building.characteristic_reception_plate_power(
         ph.building.equivalent_blocked_force_level(
             ref.EN12354_5_I8_WALL_LWS, ref.EN12354_5_I8_PLATE_MOBILITY
@@ -3316,7 +3316,7 @@ def _chk_en15657_conversion_chain() -> Outcome:
         ref.EN12354_5_ANNEX_I_TOL,
         unit="dB",
         places=3,
-        expected_label="max abs(L_Ws,inst - Table I.8) <= 0,15 dB",
+        expected_label="max abs(L_Ws,inst - Table I.8) <= 0.15 dB",
     )
 
 
@@ -3413,7 +3413,7 @@ def _chk_iso12354_annex_l1() -> Outcome:
     rating = result.rating.rating if result.rating is not None else None
     ok = worst <= 0.1 and rating == ref.ISO12354_ANNEX_L1_R_PRIME_W
     return Outcome(
-        expected=f"max path/total dev <= 0,1 dB; R'w = "
+        expected=f"max path/total dev <= 0.1 dB; R'w = "
         f"{ref.ISO12354_ANNEX_L1_R_PRIME_W} dB",
         computed=f"{worst:.3f} dB; {rating} dB",
         delta=f"{worst:.3f} dB",
@@ -3478,7 +3478,7 @@ def _chk_iso12354_annex_g1() -> Outcome:
     printed = f"{ref.ISO12354_ANNEX_G1_L_PRIME_N_W} ({ref.ISO12354_ANNEX_G1_CI})"
     got = "n/a" if rating is None else f"{rating.rating} ({rating.ci})"
     return Outcome(
-        expected=f"max path/total dev <= 0,1 dB; L'n,w (CI) = {printed} dB",
+        expected=f"max path/total dev <= 0.1 dB; L'n,w (CI) = {printed} dB",
         computed=f"{worst:.3f} dB; {got} dB",
         delta=f"{worst:.3f} dB",
         passed=ok,
@@ -3561,8 +3561,8 @@ def _chk_hopkins_resilient_layers() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 12354-2:2017 Annex C / Annex G Table G.4",
-    "Floating floor: fo = 160 sqrt(s'/m') = 52,8 Hz, DeltaL = 30 lg(f/fo) over "
-    "21 bands, DeltaLw = 32,2 dB",
+    "Floating floor: fo = 160 sqrt(s'/m') = 52.8 Hz, DeltaL = 30 lg(f/fo) over "
+    "21 bands, DeltaLw = 32.2 dB",
 )
 def _chk_iso12354_2_floating_floor() -> Outcome:
     bands = np.asarray(ref.ISO12354_ANNEX_L_BANDS, dtype=np.float64)
@@ -3574,7 +3574,7 @@ def _chk_iso12354_2_floating_floor() -> Outcome:
     )
     printed = np.asarray(ref.ISO12354_ANNEX_G4_DELTA_L)
     worst = float(np.max(np.abs(spectrum.improvement - printed)))
-    # The printed table is quoted to 0,1 dB, so a residual under 0,05 dB is
+    # The printed table is quoted to 0.1 dB, so a residual under 0.05 dB is
     # the most any correct model can be asked for; requiring the computed
     # values to round *onto* the printed ones is the exact statement, and
     # stops the row passing on a near-miss inside the rounding quantum.
@@ -3729,5 +3729,5 @@ def _chk_en12354_5_annex_i6a() -> Outcome:
         tol,
         unit="dB",
         places=3,
-        expected_label="max abs(dev vs Table I.6a) <= 0,15 dB",
+        expected_label="max abs(dev vs Table I.6a) <= 0.15 dB",
     )

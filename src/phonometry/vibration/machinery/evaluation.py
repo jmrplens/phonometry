@@ -40,14 +40,14 @@ with :math:`f_z = f` below the lower corner :math:`f_x` and :math:`f_x` above
 it, and :math:`f_w = f` above the upper corner :math:`f_y` and :math:`f_y`
 below it, so both bracketed factors are unity between the corners.
 :math:`Z_\mathrm{bound}` moves the one curve onto the three boundaries, and
-Annex C.2 prints the factors it takes: 1 for the limit of zone A, **2,56** for
-zone B and **6,4** for zone C.
+Annex C.2 prints the factors it takes: 1 for the limit of zone A, **2.56** for
+zone B and **6.4** for zone C.
 
 **Criterion II** (6.3.3) judges a *change* from an established baseline, and a
 change is a vector. Annex D makes the point with a machine whose magnitude
-fell from 3 mm/s to 2,5 mm/s while its phase swung from 40° to 180°: the
+fell from 3 mm/s to 2.5 mm/s while its phase swung from 40° to 180°: the
 magnitude moved by half a millimetre per second, and the vibration itself
-moved by **5,2 mm/s**, ten times as much. :func:`vibration_vector_change` is
+moved by **5.2 mm/s**, ten times as much. :func:`vibration_vector_change` is
 that subtraction.
 
 Where no part of the series covers a machine and no experience is available,
@@ -132,7 +132,7 @@ MachineSupport = Literal["rigid", "flexible"]
 
 #: The ladder of preferred magnitudes Table C.1 is drawn on, in millimetres
 #: per second r.m.s. It is an R5 series over most of its length, which is why
-#: consecutive boundaries sit about 1,6 apart.
+#: consecutive boundaries sit about 1.6 apart.
 TYPICAL_BOUNDARY_LADDER_MM_S: tuple[float, ...] = (
     0.28,
     0.45,
@@ -368,7 +368,7 @@ def allowable_velocity(
     :param constant_velocity_mm_s: The constant r.m.s. velocity ``vA`` that
         applies between the corners for zone A, in millimetres per second.
     :param zone_factor: ``Zbound``, the factor that moves the curve onto a
-        zone limit; see :data:`ZONE_LIMIT_FACTORS` for the 1 / 2,56 / 6,4 of
+        zone limit; see :data:`ZONE_LIMIT_FACTORS` for the 1 / 2.56 / 6.4 of
         Annex C.2.
     :param corner_low_hz: The lower corner ``fx``, in hertz.
     :param corner_high_hz: The upper corner ``fy``, in hertz; must exceed
@@ -470,9 +470,9 @@ def vibration_vector_change(
     Criterion II is written on a change from an established baseline, and a
     broad-band magnitude cannot express one: a component that swings in phase
     changes the vibration even as the magnitude it contributes falls. Annex D
-    prints the case, 3 mm/s at 40 degrees becoming 2,5 mm/s at 180 degrees,
+    prints the case, 3 mm/s at 40 degrees becoming 2.5 mm/s at 180 degrees,
     where the magnitude drops by half a millimetre per second and the
-    vibration moves by 5,2.
+    vibration moves by 5.2.
 
     :param initial_magnitude: Magnitude of the reference state, in any unit;
         the result carries the same one.
@@ -765,7 +765,7 @@ def alarm_limit(baseline: float, zone_b_upper: float) -> float:
 
     The recommendation is two rules at once: set the ALARM a quarter of the
     upper limit of zone B above the established baseline, and do not normally
-    let it exceed 1,25 times that limit. A machine with a low baseline
+    let it exceed 1.25 times that limit. A machine with a low baseline
     therefore alarms below zone C, which the clause says in as many words, and
     one with a high baseline is capped rather than allowed to drift up with
     it.
@@ -792,7 +792,7 @@ def trip_limit(zone_c_upper: float) -> float:
     Unlike an ALARM, a TRIP is not set from a baseline: it relates to the
     mechanical integrity of the machine and is the same for every machine of
     a design. The clause declines to give absolute values and gives a ceiling
-    instead, 1,25 times the upper limit of zone C.
+    instead, 1.25 times the upper limit of zone C.
 
     :param zone_c_upper: The upper limit of zone C, which is the C/D boundary.
     :return: The recommended maximum TRIP setting.

@@ -49,11 +49,11 @@ C_{3,4} = \sum_{i=0}^{10} a_i U^i \tag{Eq. 7}
 $$
 
 whose coefficients $a_i$ Annex A tabulates per one-third-octave band
-and per range of test-duct diameter (Tables A.1 to A.6, 0,15 m to 2 m), an
+and per range of test-duct diameter (Tables A.1 to A.6, 0.15 m to 2 m), an
 empty cell being zero. The coefficients are normative for 50 Hz to 10 kHz and
 $|U| \le 40$ m/s. The footnote of every table then adds two informative
 extensions which do not combine: within 50 Hz to 10 kHz the rows also hold for
-$40 < |U| \le 60$ m/s, while the rows for 12,5 kHz to 20 kHz are given
+$40 < |U| \le 60$ m/s, while the rows for 12.5 kHz to 20 kHz are given
 for $|U| \le 40$ m/s only, and carry their own "$|U| \le 40$ m/s"
 band header in the print. A velocity beyond 40 m/s is therefore refused as
 soon as a band above 10 kHz is asked for. For the omni-directional nose cone
@@ -82,7 +82,7 @@ the qualification of the facility and the instrument: the reflection
 coefficient of the anechoic termination (Table 5, Annex F), the directivity
 of the sampling tube (equation (6), Table 6), the signal-to-noise ratio
 against turbulence (Annex B) and the duct geometry (clause 5.2). The
-informative Annexes H and I extend the coefficient tables below 0,15 m and
+informative Annexes H and I extend the coefficient tables below 0.15 m and
 above 2 m; the standard's own scope stops at those diameters and so does this
 module.
 
@@ -141,7 +141,7 @@ the outlet side (Table 1 NOTE 2), so the same speed reads as a different
 correction on the two sides of the fan.
 
 One cell of Annex A is not legible, the $a_3$ of the 5 000 Hz row of
-the table that serves 0,8 m to 1,25 m, and asking for that band and that
+the table that serves 0.8 m to 1.25 m, and asking for that band and that
 diameter emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) saying the coefficient is a
 reading rather than a transcription (see `docs/ERRATA.md`). Every other
 coefficient in the annex is transcribed and none of them warns.
@@ -152,7 +152,7 @@ coefficient in the annex is transcribed and none of them warns.
 | :--- | :--- |
 | `frequencies` | Nominal one-third-octave centre frequencies, in hertz, 50 Hz to 20 kHz. |
 | `flow_velocity` | Mean flow velocity $U$ at the microphone position, in metres per second, negative on the inlet side. |
-| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0,15 m to 2 m; it selects the Annex A table for the sampling tube and is checked against the scope for the other shields. |
+| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0.15 m to 2 m; it selects the Annex A table for the sampling tube and is checked against the scope for the other shields. |
 | `shield` | `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
 
@@ -162,7 +162,7 @@ coefficient in the annex is transcribed and none of them warns.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a band that is not a nominal centre, a diameter outside 0,15 m to 2 m, a velocity beyond the shield's limit (60 m/s for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam ball), a velocity beyond 40 m/s asked for in a band above 10 kHz, where Annex A tabulates no coefficients, or a non-positive speed of sound. |
+| ValueError | for a band that is not a nominal centre, a diameter outside 0.15 m to 2 m, a velocity beyond the shield's limit (60 m/s for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam ball), a velocity beyond 40 m/s asked for in a band above 10 kHz, where Annex A tabulates no coefficients, or a non-positive speed of sound. |
 | TypeError | if `shield` is not a text, `duct_diameter_m`, `flow_velocity` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## in_duct_reproducibility
@@ -185,7 +185,7 @@ Standard deviation of reproducibility $\sigma_R$ per band.
 
 Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
 what clause 9.2 doubles into the expanded uncertainty to be recorded at
-95 % coverage. For 12,5 kHz, 16 kHz and 20 kHz the extrapolated values of
+95 % coverage. For 12.5 kHz, 16 kHz and 20 kHz the extrapolated values of
 Table 3 are returned; clause 4 suggests them while saying that
 measurements above 10 kHz are not part of the standard, so a result that
 carries those bands says so in `information_only_band`.
@@ -344,12 +344,12 @@ Table 2, is carried per band.
 | :--- | :--- |
 | `levels` | Sound pressure levels, in decibels, `(positions, bands)` or an already averaged `(bands,)` spectrum. |
 | `frequencies` | Nominal one-third-octave centre frequencies of the bands, in hertz, 50 Hz to 20 kHz. |
-| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0,15 m to 2 m. |
+| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0.15 m to 2 m. |
 | `flow_velocity` | Mean flow velocity $U$ at the microphone position, in metres per second; negative on the inlet side, positive on the outlet side. |
 | `shield` | Microphone shield, `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `microphone_correction` | $C_1$, the manufacturer's free-field correction of the microphone, in decibels, per band or scalar. |
 | `shield_correction` | $C_2$, the frequency response correction of the shield determined per clause 5.3.3.2 c) or 5.3.4.2, in decibels, per band or scalar. |
-| `temperature_c` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0,08 dB against the 340 m/s [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
+| `temperature_c` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0.08 dB against the 340 m/s [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
 | `static_pressure_kpa` | Static pressure in the duct, in kilopascals; sets $\rho$. |
 
 **Returns:** [`InDuctSoundPowerResult`](/phonometry/reference/api/power/sound-power-in-duct/#inductsoundpowerresult).

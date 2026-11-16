@@ -2695,7 +2695,7 @@ def _mark_upper_limits(
     limited: NDArray[np.bool_],
     language: Language,
 ) -> None:
-    """Mark the bands the background held at 2,2 dB as upper limits."""
+    """Mark the bands the background held at 2.2 dB as upper limits."""
     ax.plot(
         positions[limited],
         np.asarray(levels)[limited],

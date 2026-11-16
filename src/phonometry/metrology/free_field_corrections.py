@@ -80,11 +80,11 @@ each reading is of, so neither labelling reaches it, and the defect is in
 ``docs/ERRATA.md``.
 
 **The coverage factor of Table I.2.** The budget at 1 kHz reproduces the
-printed combined standard uncertainty, 0,0590 dB, and effective degrees of
-freedom, 29,98, but prints :math:`k = 2{,}11`, the Student factor for about 17
-degrees of freedom. For 29,98 it is 2,042, and the expanded uncertainty
-:math:`2{,}042 \times 0{,}05903 = 0{,}121` dB rather than the 0,124 dB the
-table prints to its guard digit. The budget here gives 2,042, and the defect
+printed combined standard uncertainty, 0.0590 dB, and effective degrees of
+freedom, 29.98, but prints :math:`k = 2.11`, the Student factor for about 17
+degrees of freedom. For 29.98 it is 2.042, and the expanded uncertainty
+:math:`2.042 \times 0.05903 = 0.121` dB rather than the 0.124 dB the
+table prints to its guard digit. The budget here gives 2.042, and the defect
 is in ``docs/ERRATA.md``.
 """
 
@@ -181,8 +181,8 @@ _LOW_STATIC_PRESSURE_KPA = 97.0
 _STATIC_PRESSURE_RANGE_KPA = (80.0, 105.0)
 
 #: Clause 6: the expanded uncertainty (k = 2) of that component when no
-#: specific data are available, in dB: 0,15 dB up to and including 3 kHz and
-#: 0,25 dB above, as ``(upper frequency in Hz, value)``.
+#: specific data are available, in dB: 0.15 dB up to and including 3 kHz and
+#: 0.25 dB above, as ``(upper frequency in Hz, value)``.
 _STATIC_PRESSURE_EXPANDED_DB = ((3000.0, 0.15), (math.inf, 0.25))
 
 #: The coverage factor that clause 6 component is stated with.
@@ -1452,7 +1452,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
     :ivar uncertainty: the :class:`~phonometry.metrology.UncertaintyResult`
         of the combination, which has to be the combination of the
         components the other columns state.
-    :ivar coverage: the level of confidence, 0,95 by clause 5.
+    :ivar coverage: the level of confidence, 0.95 by clause 5.
     """
 
     frequency_hz: float
@@ -1702,11 +1702,11 @@ def correction_uncertainty_budget(
     finite; and the coverage factor is the Student factor for them at a level
     of confidence of 95 % (clause 5).
 
-    Table I.2 at 1 kHz gives :math:`u_\mathrm{c} = 0{,}0590` dB and
-    :math:`\nu_\mathrm{eff} = 29{,}98`, so :math:`k = 2{,}04` and
-    :math:`U = 0{,}12` dB (the table prints :math:`k = 2{,}11`, an erratum;
+    Table I.2 at 1 kHz gives :math:`u_\mathrm{c} = 0.0590` dB and
+    :math:`\nu_\mathrm{eff} = 29.98`, so :math:`k = 2.04` and
+    :math:`U = 0.12` dB (the table prints :math:`k = 2.11`, an erratum;
     see the module notes); Table I.3 at 8 kHz gives :math:`u_\mathrm{c} =
-    0{,}140` dB, :math:`k = 2{,}00` and :math:`U = 0{,}28` dB.
+    0.140` dB, :math:`k = 2.00` and :math:`U = 0.28` dB.
 
     Table I.1 is written for the comparison coupler of Annex E. The budget of
     a calibrator (Annex D) has the same 15 components with the readings on the
@@ -1727,12 +1727,12 @@ def correction_uncertainty_budget(
         0).
     :param static_pressure_kpa: The static pressure the measurements were
         made at, in kPa (Default: None). Below 97 kPa clause 6 adds a
-        component of expanded uncertainty 0,15 dB up to 3 kHz and 0,25 dB
+        component of expanded uncertainty 0.15 dB up to 3 kHz and 0.25 dB
         above (:math:`k = 2`); outside 80 kPa to 105 kPa it refuses.
     :param additional_components: Further components the laboratory's own
         method needs, as :class:`~phonometry.metrology.Quantity` objects of
         estimate 0 and sensitivity 1, named (Default: none).
-    :param coverage: The level of confidence (Default: 0,95, clause 5).
+    :param coverage: The level of confidence (Default: 0.95, clause 5).
     :return: The :class:`CorrectionUncertaintyBudget`.
     :raises ValueError: for a set of components that is not the 15 of Table
         I.1, a value that is negative or not finite, degrees of freedom that
@@ -1916,12 +1916,12 @@ def max_expanded_uncertainty(
     ====== ========================================== =========================
     Clause Correction for                             Maximum, dB
     ====== ========================================== =========================
-    9      reflections from the case, diffraction     0,25 to 4 kHz; 0,35 above
-    10     the microphone's non-uniform response      0,25 from 63 Hz to 4 kHz;
-                                                      0,35 to 8 kHz; 0,45 above
-    11     windscreens and similar accessories        0,20 to 4 kHz; 0,30 above
-    12-14  a calibrator, a coupler, an actuator       0,25 to 4 kHz; 0,35 below
-                                                      10 kHz; 0,50 from 10 kHz
+    9      reflections from the case, diffraction     0.25 to 4 kHz; 0.35 above
+    10     the microphone's non-uniform response      0.25 from 63 Hz to 4 kHz;
+                                                      0.35 to 8 kHz; 0.45 above
+    11     windscreens and similar accessories        0.20 to 4 kHz; 0.30 above
+    12-14  a calibrator, a coupler, an actuator       0.25 to 4 kHz; 0.35 below
+                                                      10 kHz; 0.50 from 10 kHz
     ====== ========================================== =========================
 
     "To 4 kHz" includes 4 kHz; 10 kHz is in the band "at and above 10 kHz".

@@ -31,9 +31,9 @@ anywhere else that has been checked. The model is consequently anchored on:
   p. 251 (the same closed form as Eq. (6.90), printed p. 126), evaluated on the
   fully specified glass wool of Table 6.1 (printed p. 124: ``sigma = 40 000``
   N.s/m4, ``phi = 0,94``, ``rho1 = 130`` kg/m3) where pure arithmetic gives
-  43,27 Hz;
+  43.27 Hz;
 * the **printed rule-of-thumb thresholds** of printed pp. 253-254: Beranek's
-  ``|Kc/Kf| < 0,05``, Doutres et al.'s relaxed ``< 0,2``, and the "bulk modulus
+  ``|Kc/Kf| < 0.05``, Doutres et al.'s relaxed ``< 0,2``, and the "bulk modulus
   lower than 20 kPa" that the latter becomes for air.
 
 The material used throughout is the soft fibrous layer of A&A Table 11.2
@@ -76,7 +76,7 @@ def test_decoupling_frequency_allard_table_6_1() -> None:
     """A&A printed p. 251: ``Fd = sigma phi^2/(2 pi rho1)``.
 
     On the glass wool of Table 6.1 (printed p. 124), pure arithmetic on three
-    columns that table prints gives ``40 000 x 0,94^2 / (2 pi x 130) = 43,27``
+    columns that table prints gives ``40 000 x 0.94^2 / (2 pi x 130) = 43.27``
     Hz.
     """
     assert materials.decoupling_frequency(
@@ -278,12 +278,12 @@ def test_limp_frame_rejects_bad_input() -> None:
 
 
 def test_limp_frame_criteria_match_the_printed_thresholds() -> None:
-    """A&A pp. 253-254: 0,05 (Beranek), 0,2 (Doutres), "lower than 20 kPa".
+    """A&A pp. 253-254: 0.05 (Beranek), 0.2 (Doutres), "lower than 20 kPa".
 
     With ``Kf`` approximated by the isothermal bulk modulus of air,
-    ``P0 = 101 325`` Pa, the relaxed criterion admits anything below 20,3 kPa,
+    ``P0 = 101 325`` Pa, the relaxed criterion admits anything below 20.3 kPa,
     which is the book's rounded 20 kPa; Beranek's original anything below
-    5,1 kPa. Both are printed as strict inequalities.
+    5.1 kPa. Both are printed as strict inequalities.
     """
     assert materials.LIMP_FRAME_CRITERIA == {"beranek": 0.05, "doutres": 0.2}
     assert materials.check_limp_frame(20.0e3).passes
@@ -302,8 +302,8 @@ def test_limp_frame_criteria_match_the_printed_thresholds() -> None:
 
 
 def test_limp_frame_check_reads_the_ratio_and_the_threshold() -> None:
-    # Kc = 10 132,5 Pa over Kf = 101 325 Pa is 0,1: inside Doutres' 0,2 and
-    # outside Beranek's 0,05.
+    # Kc = 10 132.5 Pa over Kf = 101 325 Pa is 0.1: inside Doutres' 0.2 and
+    # outside Beranek's 0.05.
     doutres = materials.check_limp_frame(10132.5)
     beranek = materials.check_limp_frame(10132.5, criterion="beranek")
     assert doutres.ratio == pytest.approx(0.1, abs=1e-15)

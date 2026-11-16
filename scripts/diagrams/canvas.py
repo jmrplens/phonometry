@@ -107,7 +107,7 @@ DARK = Theme(
 #: (BB, FB, DF, DB, spelled out under Formula (2) as Boden, Fundament and
 #: Decke, and printed upright there beside an italic v), the KB
 #: indications of DIN 45669-1:2010-09, 3.10.1.2 to 3.10.1.5 (Fmax, FTm,
-#: where F abbreviates "Fast", the standard's own name for τ = 0,125 s, T
+#: where F abbreviates "Fast", the standard's own name for τ = 0.125 s, T
 #: the clock duration and m the averaging duration, so all three letters
 #: describe rather than stand for a quantity), the assessment vibration
 #: severity of DIN 4150-2:1999-06, 6.4.1, Formulae (4a) and (4b) (FTr, whose

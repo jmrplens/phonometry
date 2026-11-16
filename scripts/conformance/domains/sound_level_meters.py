@@ -12,14 +12,14 @@ equations its notes give it by, (7) for a maximum time-weighted level and (8)
 for a sound exposure level, rounded to a tenth as the page rounds them.
 
 The verdict of :func:`phonometry.metrology.verify_sound_level_meter_periodic`
-across the printed limits: a synthetic record whose result lies 0,01 dB
-inside a printed limit or on it conforms, and one 0,01 dB past it does not.
+across the printed limits: a synthetic record whose result lies 0.01 dB
+inside a printed limit or on it conforms, and one 0.01 dB past it does not.
 The rows sample one or two limits of each graded requirement for class 1, and
 for class 2 wherever its column differs (Table 3 at 125 Hz and 8 kHz, Table 4
-at 0,25 ms and 2 ms, Table 5, 5.14.2, 5.6.5 and 5.15.2); the test suite
+at 0.25 ms and 2 ms, Table 5, 5.14.2, 5.6.5 and 5.15.2); the test suite
 sweeps every limit of every requirement for both classes. Every maximum of
 Table B.1 the verdict uses conforms at its value and makes the result
-unusable (4.3) 0,01 dB above it, at one band per requirement here and at
+unusable (4.3) 0.01 dB above it, at one band per requirement here and at
 every band in the test suite. 4.4: a result over its maximum only by the
 manufacturer's correction data is a result that did not conform, until its
 uncertainty without that data passes the maximum too. And the completeness of
@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 _SLM = "Sound level meter periodic tests (IEC 61672-3, IEC 61672-1)"
 
 #: How far past a printed limit or maximum the failing side is taken, dB: a
-#: hundredth of the 0,1 dB a meter displays.
+#: hundredth of the 0.1 dB a meter displays.
 _PAST_DB = 0.01
 
 
@@ -193,7 +193,10 @@ def _chk_table_b1() -> Outcome:
                     (requirement, f"{reference}, {which}", _number(number), "dB/s")
                 )
         else:
-            printed.append((requirement, reference, _number(value), "dB"))
+            # The library names the band with the decimal point of English
+            # text where the page prints a comma: ">8 kHz to 12,5 kHz".
+            english = reference.replace("12,5 kHz", "12.5 kHz")
+            printed.append((requirement, english, _number(value), "dB"))
     built = [
         (row.requirement, row.reference, row.max_uncertainty, row.unit)
         for row in ph.metrology.IEC61672_TABLE_B1
@@ -297,7 +300,7 @@ def _flip(
     limit: float,
     outward: float,
 ) -> Outcome:
-    """The requirement conforms 0,01 dB inside the limit and on it, not past it."""
+    """The requirement conforms 0.01 dB inside the limit and on it, not past it."""
     build = _record if meter_class == 1 else _class_2
     verify = ph.metrology.verify_sound_level_meter_periodic
     states = {"just inside": -_PAST_DB, "at the limit": 0.0, "past it": _PAST_DB}
@@ -863,10 +866,10 @@ def _chk_maxima() -> Outcome:
     "Over the maximum only by the correction data: did not conform, and unusable past it",
 )
 def _chk_correction_data() -> Outcome:
-    """The 8 kHz result of Clause 12, 0,15 dB over its maximum in total.
+    """The 8 kHz result of Clause 12, 0.15 dB over its maximum in total.
 
-    Without the manufacturer's correction data its uncertainty is 0,01 dB
-    inside the maximum, on it or 0,01 dB past it: 4.4 makes the first two a
+    Without the manufacturer's correction data its uncertainty is 0.01 dB
+    inside the maximum, on it or 0.01 dB past it: 4.4 makes the first two a
     result that did not conform, and the last one is unusable (4.3), as the
     first sentence of 4.4 still holds the maximum.
     """

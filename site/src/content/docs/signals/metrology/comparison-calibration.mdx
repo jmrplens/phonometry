@@ -61,7 +61,7 @@ references:
     year: 2000
     title: "Measurement microphones – Part 1: Specifications for laboratory standard microphones"
     designation: "IEC 61094-1:2000"
-    note: "6.2.2 defines the equivalent volume of a microphone from its acoustic impedance, with the ratio of specific heats at the reference conditions taken as 1,40; Table 3 gives the 10 mm³ ± 5 mm³ of an LS2P. Read from BS EN 61094-1:2001, the English text of EN 61094-1:2000."
+    note: "6.2.2 defines the equivalent volume of a microphone from its acoustic impedance, with the ratio of specific heats at the reference conditions taken as 1.40; Table 3 gives the 10 mm³ ± 5 mm³ of an LS2P. Read from BS EN 61094-1:2001, the English text of EN 61094-1:2000."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2006
@@ -135,10 +135,10 @@ the source (5.1.3; IEC 61094-8 5.2, 6.5 and A.2).
 
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
-| Reference conditions | 23,0 °C, 101,325 kPa, 50 % relative humidity | 61094-5 and 61094-8, 4 |
+| Reference conditions | 23.0 °C, 101.325 kPa, 50 % relative humidity | 61094-5 and 61094-8, 4 |
 | Simultaneous, in a coupler or a jig | Diaphragms about 1 mm apart; the microphones interchanged and the measurement repeated, the result from the two | 61094-5, 5.1.2 |
 | Sequential | The exchange does not change the sound pressure significantly, or any change is detected and corrected, for example with a monitor microphone; a monitor, when used, senses the changes at the test position | 61094-5, 5.1.3; 61094-8, 5.2, 6.5 |
-| Analysis bandwidth | 1/6 octave or narrower keeps the error below 0,01 dB; much narrower FFT lines can show standing waves | 61094-5, 5.1.1 NOTE |
+| Analysis bandwidth | 1/6 octave or narrower keeps the error below 0.01 dB; much narrower FFT lines can show standing waves | 61094-5, 5.1.1 NOTE |
 | Output voltage | Open-circuit, by insert voltage or a high-impedance preamplifier; the method is stated on the certificate | 61094-5, 5.2 |
 | Free-field source | 70 dB to 80 dB at the microphone is usually enough; plane progressive waves across the microphone | 61094-8, 6.3 |
 | Free-field mounting | On a semi-infinite rod of the microphone's diameter; LS1P references without their grid | 61094-8, 6.4, 6.7 |
@@ -162,7 +162,7 @@ L_1 - L_2 = \tfrac12\,(L_\mathrm{C12} - L_\mathrm{C21})
 $$
 
 so $20\lg R_V = -\tfrac12(L_\mathrm{C12} - L_\mathrm{C21})$. Here the
-channels differ by 0,55 dB, port A hears up to 0,13 dB more than port B,
+channels differ by 0.55 dB, port A hears up to 0.13 dB more than port B,
 and each reading is repeated three times with a little noise:
 
 ```python
@@ -186,16 +186,16 @@ print(c.n_determinations, c.sensitivity_level[[2, 8, 19]].round(2))   # 3 [-38.6
 print(np.abs(c.sensitivity_level - l_true).max().round(3))           # 0.003
 ```
 
-Neither the gains nor the asymmetry reach the result; what is left, 0,003 dB
+Neither the gains nor the asymmetry reach the result; what is left, 0.003 dB
 at most, is the noise of three repeats. 5.1.2 makes the interchange a
 requirement for a coupler or a jig, so a pressure calibration without
 `interchanged_channel_difference` is refused. The text asks for "the mean
 of the two ratios", and Annex C takes it in decibels: the mean of the two
 level differences, which is the geometric mean of the ratios and the only one
 in which the gains cancel exactly. The two ratios read before and after the
-interchange are 1,1 dB to 1,4 dB apart here, twice the difference of the
-channels and of the ports, and their arithmetic mean would sit 0,018 dB to
-0,027 dB high.
+interchange are 1.1 dB to 1.4 dB apart here, twice the difference of the
+channels and of the ports, and their arithmetic mean would sit 0.018 dB to
+0.027 dB high.
 
 **The environment.** A microphone's sensitivity depends on the static
 pressure, the temperature and, for some microphones, the humidity. When the
@@ -213,8 +213,8 @@ $$
 
 The coefficients are the microphone's own, which is why they are required:
 Annex D of IEC 61094-2 puts the low-frequency static pressure coefficient of
-LS2P microphones between −0,003 dB/kPa and −0,008 dB/kPa and the temperature
-coefficient within ±0,005 dB/K, and both vary with frequency and from one
+LS2P microphones between −0.003 dB/kPa and −0.008 dB/kPa and the temperature
+coefficient within ±0.005 dB/K, and both vary with frequency and from one
 microphone to the next. 6.5.3 of the same part observes no influence of
 humidity on a laboratory standard microphone, so that coefficient defaults
 to 0.
@@ -243,12 +243,12 @@ WS2P against an LS2P in the coupler of Figure A.1 with three repeats, at
 2 kHz. That coupler is for frequencies up to 10 kHz (A.1); above, a WS2 goes
 in the jig of A.2 and Figure A.3, which reaches 20 kHz. Seven of the eight
 rows state a value and how it is read: the reference's certificate quotes
-±0,05 dB with $k = 2$, the capacitance, non-linearity, impedance, drift and
+±0.05 dB with $k = 2$, the capacitance, non-linearity, impedance, drift and
 rounding are semi-ranges of rectangular distributions, and the polarising
-voltage of (200,0 ± 0,2) V gives a semi-range of
-$20\lg(200{,}2/200) = 0{,}008\,68$ dB. The repeatability row states no
+voltage of (200.0 ± 0.2) V gives a semi-range of
+$20\lg(200.2/200) = 0.008\,68$ dB. The repeatability row states no
 value, only that it was found from the standard uncertainties of a large
-number of similar measurements, and prints 0,025 dB as a standard
+number of similar measurements, and prints 0.025 dB as a standard
 uncertainty. `metrology.IEC61094_5_TABLE_D1` holds each row with its stated
 value, its divisor and the standard uncertainty it prints, and the seven that
 state a value reproduce it. `metrology.comparison_uncertainty_budget` combines them on
@@ -266,21 +266,21 @@ print(round(b.combined_uncertainty_db, 4), round(b.expanded_uncertainty_db, 3)) 
 print(round(b.linear_combined_uncertainty_db, 4))                                  # 0.0436
 ```
 
-The root-sum-square of the eight printed values is 0,0437 dB, and the
-expanded uncertainty 0,087 dB. D.3 prints **0,040 dB** and **0,08 dB**,
-which are not the combination of its own components: 0,040 dB is what the
-sum gives with one of the two 0,017 dB rows left out. The case is in the
+The root-sum-square of the eight printed values is 0.0437 dB, and the
+expanded uncertainty 0.087 dB. D.3 prints **0.040 dB** and **0.08 dB**,
+which are not the combination of its own components: 0.040 dB is what the
+sum gives with one of the two 0.017 dB rows left out. The case is in the
 [errata register](/phonometry/reference/errata/). D.3 also notes that a
 strict calculation would convert each component to linear form before
 combining, with essentially the same result, and prints no value for it;
-`linear_combined_uncertainty_db` does it and gives 0,043 614 dB, 0,000 055 dB
+`linear_combined_uncertainty_db` does it and gives 0.043 614 dB, 0.000 055 dB
 below the combination in decibels. The Spanish adoption, UNE-EN
 61094-5:2017, leaves six of the eight values of Table D.1 blank and prints
-0,004 dB in D.3, which is also in the register.
+0.004 dB in D.3, which is also in the register.
 
-At other frequencies the components change. 7.9 estimates about 0,1 dB at
+At other frequencies the components change. 7.9 estimates about 0.1 dB at
 low and middle frequencies for microphones of the same diameter, rising to
-about 0,2 dB at 20 kHz for WS2P, and 7.4 and 7.5 name the difference of the
+about 0.2 dB at 20 kHz for WS2P, and 7.4 and 7.5 name the difference of the
 microphones' acoustic impedances as what grows. Here that component rises
 with frequency, and each budget's expanded uncertainty goes to the
 calibration, which the plot draws as a band:
@@ -309,7 +309,7 @@ c.plot()
 ## 4. A WS3 microphone in the jig
 
 A WS3 microphone is smaller than the LS2 reference, and in the jig of Figure
-A.4 the two diaphragms face each other 0,5 mm apart: the pressure over the
+A.4 the two diaphragms face each other 0.5 mm apart: the pressure over the
 smaller diaphragm is not the mean over the larger one. Table A.1 gives the
 corrections to add to the WS3's sensitivity level, calculated for an LS2aP
 reference and a radially symmetrical field and valid for that separation
@@ -375,9 +375,9 @@ print(round(model.speed_of_sound, 1), model.correction[[0, 9, 13]].round(3))   #
 print(np.abs(model.correction - j.correction).max().round(4))               # 0.0093
 ```
 
-At the reference air of clause 4 the model is within 0,0093 dB of every row
-of Table A.1, inside the 0,144 dB the NOTE gives the largest correction as
-its expanded uncertainty. The paper prints no speed of sound; at 344,8 m/s
+At the reference air of clause 4 the model is within 0.0093 dB of every row
+of Table A.1, inside the 0.144 dB the NOTE gives the largest correction as
+its expanded uncertainty. The paper prints no speed of sound; at 344.8 m/s
 the model gives every row to the thousandth printed. As printed, the paper's
 formulas with its own inputs do not give its own table: the library reads
 the radial sensitivity of its Formula (4) less 1 and the annulus of its
@@ -435,7 +435,7 @@ free-field sensitivity is its pressure sensitivity plus the free-field to
 pressure difference of IEC/TS 61094-7 (Table 1, 8.2). The values below stand
 in for that difference; take yours from the specification or the
 microphone's calibration. Between the two readings the source drifts by
-0,25 dB:
+0.25 dB:
 
 ```python
 ff = metrology.exact_frequencies(500, 20000, fraction=3)
@@ -483,10 +483,10 @@ print(free.expanded_uncertainty_db[[0, 12, 16]].round(2))              # [0.16 0
 ```
 
 The monitor takes the drift out exactly; without it the result would be
-0,25 dB high at every frequency. Table 2 of IEC 61094-8 lists the typical
+0.25 dB high at every frequency. Table 2 of IEC 61094-8 lists the typical
 components with the subclause that discusses each, and prints no values:
 the ones above are illustrative, chosen so that the expanded uncertainty is
-near the 0,2 dB 8.8 estimates at low and middle frequencies and the 0,5 dB
+near the 0.2 dB 8.8 estimates at low and middle frequencies and the 0.5 dB
 it estimates at the upper frequency limit of an LS2 reference.
 `metrology.IEC61094_8_TABLE_2` holds the list, and
 `metrology.IEC61094_8_TABLE_1` the typical expanded uncertainty of each way
@@ -521,8 +521,8 @@ print(round(r.speed_of_sound, 1), round(r.major_axis_m, 2))     # 345.9 2.73
 print(round(r.semi_minor_axis_m, 2), round(r.rod_clearance_m, 2))   # 1.27 0.86
 ```
 
-A 5 ms window at 1 m needs 1,27 m of clearance round the axis mid-way between
-source and microphone, and a rod that runs more than 0,86 m behind the
+A 5 ms window at 1 m needs 1.27 m of clearance round the axis mid-way between
+source and microphone, and a rod that runs more than 0.86 m behind the
 microphone.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_region.svg" alt="The effective free-field region of IEC 61094-8 B.1 in a plane through its axis: an ellipse 2.73 m long and 2.54 m across, the sound source at x = -0.5 m and the microphone at x = +0.5 m on its axis, joined by the dashed direct path of 1.00 m, and the mounting rod running from the microphone out past the right end of the ellipse; the title gives A = d + tau c = 2.73 m, tau = 5.0 ms, c = 345.9 m/s, a clearance of 1.27 m across and 0.86 m behind the microphone" width="88%" />
@@ -556,7 +556,7 @@ the middle with an eighth of it tapered at each edge, a proportion the
 library chose, as no clause prints one.
 
 Here an LS2P reference and a WS2F stand in turn 1 m from the source, and a
-reflection off the rig arrives along a path of 1,48 m. The WS2F hears it off
+reflection off the rig arrives along a path of 1.48 m. The WS2F hears it off
 axis, so it does not cancel in the ratio of the two outputs as the direct
 sound does: "it cannot be assumed that the reference microphone and
 microphone under test will deviate in the same way" (8.5). Each is measured
@@ -622,7 +622,7 @@ ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.fs, *
 print(round(1000 * tau, 2), round(ref.frequency_resolution_hz))   # 1.39 530
 ```
 
-A window of 1,89 ms tells frequencies apart no closer than 530 Hz, the
+A window of 1.89 ms tells frequencies apart no closer than 530 Hz, the
 low-frequency limit 6.2.3 warns time-selective techniques have; lower
 frequencies need another method. The levels and phases through the window
 are the two outputs of a substitution:
@@ -649,8 +649,8 @@ record = 20 * np.log10(np.abs(ws2f.record_response_at(fw) / ref.record_response_
 print(np.abs(record - 20 * np.log10(np.abs(m_ws2f / m_ref))).max().round(2))   # 1.91
 ```
 
-Through the window the WS2F's sensitivity comes back to within 0,0001 dB;
-from the whole record, the reflection included, it would be up to 1,91 dB
+Through the window the WS2F's sensitivity comes back to within 0.0001 dB;
+from the whole record, the reflection included, it would be up to 1.91 dB
 off.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_selective_response.svg" alt="Left, the WS2F's impulse response from a stepped-sine measurement, its direct sound at 2.89 ms and the rig's reflection at 4.28 ms, with a Tukey window 1.89 ms long from 2.39 ms that ends as the reflection arrives. Right, its frequency response from 1 kHz to 40 kHz: through the window it is the smooth response of the direct sound, and from the whole record it ripples round it, from 2.45 dB below to 1.89 dB above up to 16 kHz" width="100%" />
@@ -688,7 +688,7 @@ begins at the start of the record.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rectangular_pulse.svg" alt="The spectrum of a 5 microsecond rectangular pulse relative to its value at 0 Hz, from 0 to 500 kHz: flat to within 0.14 dB up to the 20 kHz upper limit, falling to its first zero at 200 kHz and a second at 400 kHz" width="88%" />
 
-*Formula (B.10) for a 5 µs pulse: 0,14 dB down at 20 kHz, the first zero at
+*Formula (B.10) for a 5 µs pulse: 0.14 dB down at 20 kHz, the first zero at
 200 kHz.*
 
 ## 8. The phase of the sensitivity
@@ -763,7 +763,7 @@ budget when no reference of similar impedance is available.
 `metrology.impedance_pressure_ratio` writes the effect for two circuits with
 each microphone's equivalent volume, which IEC 61094-1 6.2.2
 defines as $V_\mathrm{e} = \kappa_\mathrm{r} p_{s,\mathrm{r}} / (\mathrm{j}\omega
-Z_\mathrm{a})$ with $\kappa_\mathrm{r} = 1{,}40$:
+Z_\mathrm{a})$ with $\kappa_\mathrm{r} = 1.40$:
 
 $$
 R_P = \frac{V_x + V_\mathrm{e,ref}}{V_x + V_\mathrm{e,test}}
@@ -787,8 +787,8 @@ resonance frequency and the loss factor, and its
 `complex_equivalent_volume_m3` gives $V_\mathrm{e}$ from them. Its ratio to
 the low-frequency volume holds no $\kappa_\mathrm{r}$, so with the 10 mm³
 that Table 3 of IEC 61094-1 gives an LS2P, $V_\mathrm{e}$ is the volume of
-6.2.2 with its 1,40. E.4 finds the representation "of sufficient accuracy" up
-to "about 1,3 times the resonance frequency of the microphone": 20,8 kHz for
+6.2.2 with its 1.40. E.4 finds the representation "of sufficient accuracy" up
+to "about 1,3 times the resonance frequency of the microphone": 20.8 kHz for
 the WS2F below, so the example stays within it. The front cavity the
 microphone also holds enters the transfer impedance of a coupler, not
 $V_\mathrm{e}$.
@@ -820,7 +820,7 @@ comparison as `pressure_level_difference` and as the
 `pressure_phase_difference_deg` of its phase inputs. Where the ratio is estimated rather than
 corrected for, `rp.standard_uncertainty_db` is the `"impedance"` component of
 the budget: the level difference read as the semi-range of a rectangular
-distribution, as Table D.1 reads its 0,005 dB at 2 kHz, "equivalent to a
+distribution, as Table D.1 reads its 0.005 dB at 2 kHz, "equivalent to a
 standard uncertainty of 0,005/√3 dB = 0,003 dB". The same row warns about
 exactly this pairing: "When microphones have significantly differing
 impedances (for example WS2F microphone compared against LS2P at frequencies
@@ -863,7 +863,7 @@ above, and the ratio of the two is the one Appendix B prints.
 `metrology.air_gap_series_impedance_pa_s_m3` gives $Z_x$ for a coupler of
 known length and radius, at the air of the conditions given. Appendix B's
 example is an LS2P against a high sensitivity WS2P in a tube 2 mm long and
-12,7 mm across, each microphone a resistance, a mass and a compliance in
+12.7 mm across, each microphone a resistance, a mass and a compliance in
 series:
 
 ```python
@@ -890,10 +890,10 @@ print(gap.level_difference[[69, 199]].round(4))   # [ 0.0064 -0.025 ]
 print(gap.phase_difference_deg[124].round(3))         # -0.158
 ```
 
-The WS2P hears 0,0064 dB more than the LS2P at 7 kHz and 0,025 dB less at
-20 kHz, and lags it by up to 0,158° at 12,5 kHz. Appendix B draws the same
+The WS2P hears 0.0064 dB more than the LS2P at 7 kHz and 0.025 dB less at
+20 kHz, and lags it by up to 0.158° at 12.5 kHz. Appendix B draws the same
 curves for $P_1/P_2$, the LS2P re the WS2P, so the other way up, with its
-1,21 kg/m³ for the density of the air; with that density the conformance
+1.21 kg/m³ for the density of the air; with that density the conformance
 report reproduces them. In the published scan its impedance of the LS2P
 shows no imaginary unit on the mass term, where blank space stands; the
 second microphone's has it, and the graph needs it (an
@@ -952,7 +952,7 @@ share comes out of $U_\Delta$ (below).
 
 Here the jig of A.2 is validated against the coupler of A.1 for the WS2P of
 the first example, the coupler used up to the 10 kHz it is for. Near
-6,3 kHz the jig has a standing wave close to the microphones, the anomaly
+6.3 kHz the jig has a standing wave close to the microphones, the anomaly
 Barham et al. found in a test box at that frequency, and the field moves
 between the reading and the interchange, so (C.3) no longer cancels it:
 
@@ -972,16 +972,16 @@ print(check.unvalidated_frequencies_hz.round())              # [12589. 15849. 19
 print(check.difference[8].round(3), check.expanded_uncertainty_db[8].round(3))   # -0.247 0.128
 ```
 
-The jig agrees with the coupler at every frequency they share but 6,3 kHz,
-where they differ by 0,247 dB against 0,128 dB, and above 10 kHz it is not
+The jig agrees with the coupler at every frequency they share but 6.3 kHz,
+where they differ by 0.247 dB against 0.128 dB, and above 10 kHz it is not
 validated at all, the coupler not reaching there: a second set-up has to
 validate it there, as 6.7 allows. `check.normalized_difference` is the
-difference in units of its expanded uncertainty, -1,93 at 6,3 kHz.
+difference in units of its expanded uncertainty, -1.93 at 6.3 kHz.
 
 ### Calibrations that share a reference
 
 Both calibrations here take the same LS2P as their reference, so the first
-row of Table D.1, the calibration of that reference (0,025 dB, the
+row of Table D.1, the calibration of that reference (0.025 dB, the
 "±0,05 dB with a coverage factor of k = 2" of its certificate), is in both
 budgets. Whatever error that calibration carries moves the two sensitivity
 levels together and cancels in their difference, while the root-sum-square
@@ -1010,16 +1010,16 @@ print(shared.expanded_uncertainty_db[8].round(3), shared.normalized_difference[8
 print(shared.correlation_coefficient[8].round(2))                                           # 0.31
 ```
 
-The band narrows from 0,124 dB to 0,101 dB at the low frequencies and from
-0,128 dB to 0,106 dB at 6,3 kHz, where the two calibrations are correlated
-with a coefficient of 0,31, the reference's variance over the product of
+The band narrows from 0.124 dB to 0.101 dB at the low frequencies and from
+0.128 dB to 0.106 dB at 6.3 kHz, where the two calibrations are correlated
+with a coefficient of 0.31, the reference's variance over the product of
 their standard uncertainties (Formula (14)). The verdict does not change
-here: the jig still fails at 6,3 kHz alone, now by 2,32 times the
+here: the jig still fails at 6.3 kHz alone, now by 2.32 times the
 uncertainty of the difference. A pair that agrees within the root-sum-square
 can fail once the shared part is out of it. Which components the two share
 is the laboratory's to say: the calibration of a reference both use, its
 drift since then (the row "Drift in reference microphone sensitivity since
-last calibration", 0,017 dB) for two calibrations made close together, a
+last calibration", 0.017 dB) for two calibrations made close together, a
 measuring chain they both go through. Only a component that enters both
 levels with the same sign and size belongs here. A reciprocity calibration
 made in the same set of three microphones as the reference's is not such a
@@ -1054,7 +1054,7 @@ no number a criterion could be checked against. The residual differences
 the report says nothing about what the two calibrations share. The shared
 part has printed numbers, in the GUM: two items
 calibrated against the same standard, of relative standard uncertainty
-$10^{-4}$, are correlated with coefficients of about 0,5, 0,990 and 1,000
+$10^{-4}$, are correlated with coefficients of about 0.5, 0.990 and 1.000
 for comparisons of $100 \times 10^{-6}$, $10 \times 10^{-6}$ and
 $1 \times 10^{-6}$ (F.1.2.3, Example 2). The conformance report checks
 `correlation_coefficient` against them, and the difference of two
@@ -1221,9 +1221,9 @@ their own pages; the qualification of the free field by ISO 26101 is on
 values of IEC/TS 61094-7, which are inputs here; the reciprocity calibration
 of the reference (IEC 61094-2, -3) is the subject of
 [Microphone calibration by reciprocity](/phonometry/signals/metrology/reciprocity-calibration/). The second special case of Table
-D.1, a microphone calibrated as a system with its preamplifier (0,002 dB,
+D.1, a microphone calibrated as a system with its preamplifier (0.002 dB,
 and for the polarising voltage and the capacitance "frequency dependent" and
-under 0,02 dB above 200 Hz), is not held as data; a budget that needs it
+under 0.02 dB above 200 Hz), is not held as data; a budget that needs it
 takes it through `additional_components`. A covariance that widens the
 uncertainty of the difference, as between two microphones of the same
 reciprocity set through the pairs with the third (IEC 61094-2:2009

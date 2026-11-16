@@ -177,7 +177,7 @@ plot-style-defaults:
 	$(PYTHON) scripts/check_plot_style_defaults.py
 
 # ISO 80000-1 groups long numbers in threes, and the standards this library
-# reads print them that way, so the corpus writes 6,251 5 and 101 325. Written
+# reads print them that way, so the corpus writes 6.251 5 and 101 325. Written
 # with an ordinary space a line break can fall inside the number and leave half
 # of it on the next line, reading as two numbers. This asks for U+202F, and it
 # knows the two shapes that are not groupings at all: an array's printed output
@@ -195,7 +195,7 @@ digit-grouping:
 subscripts:
 	$(PYTHON) scripts/check_subscript_slope.py
 
-# ISO 80000-2 prints the mathematical constants upright, e = 2,718 281 828 ...
+# ISO 80000-2 prints the mathematical constants upright, e = 2.718 281 828 ...
 # beside pi, and an italic e is a variable. KaTeX and mathtext set a bare letter
 # italic, so the exponential is upright only where the source writes
 # \mathrm{e}, and the corpus had both, a few lines apart on one page. This
@@ -205,15 +205,18 @@ subscripts:
 euler-number:
 	$(PYTHON) scripts/check_euler_number.py
 
-# The blind spot of the Spanish pass, and the reason it needs a check of its
-# own. That pass ends with the decimal comma, guarded by `"$" not in s` because
-# a bare comma inside `$...$` sets with maths spacing -- but the guard tests the
-# WHOLE string, so a label carrying mathematics anywhere keeps an English point
-# everywhere. No other gate can see it: the language gate compares untranslated
-# WORDS, and a number is not a word. This reads the translation tables and fails
-# on a Spanish value that still has a point the pass will never reach.
+# The decimal marker, both ways round. English text writes the point, a value
+# restated from a standard that prints a comma among them, and keeps the comma
+# only where it transcribes the print (quotation marks, a block quote, the print
+# field of an errata entry, the printed column of the conformance report): the
+# English half reads every tracked file by its structure and fails on any other
+# comma between digits (rules P9 and F58). The Spanish half is the blind spot of
+# the save-time comma pass, which is guarded by `"$" not in s` and so leaves an
+# English point in a Spanish label that carries mathematics anywhere: it reads
+# the translation tables and fails on such a value (rule F29). `--labels` and
+# `--english` run one half each.
 decimal-comma:
-	$(PYTHON) scripts/check_decimal_comma.py
+	$(PYTHON) scripts/check_decimal_comma.py --strict
 
 # The words of the Spanish tables, read for the marks a keyboard without the
 # Spanish layout drops. Twenty-nine entries shipped as "Correccion", "medicion"
@@ -545,7 +548,7 @@ published-catalogues:
 
 # The solids catalogue holds the same material from up to four books, and two
 # densities that disagree are a digit somebody typed wrong: every density the
-# script does not already accept agrees across these tables to within 2,6 per
+# script does not already accept agrees across these tables to within 2.6 per
 # cent. It puts the books side by side and fails above 8 per cent, so a real
 # spread passes without a word, while reporting the moduli and speeds, which do
 # disagree by thirty per cent without anybody being wrong. Needs the package
@@ -627,7 +630,7 @@ figures:
 	# cannot parse aborts the generation below, and finding that out from the
 	# traceback of a four-hundred-figure run is the slow way round.
 	$(MAKE) mathtext
-	$(MAKE) decimal-comma
+	$(PYTHON) scripts/check_decimal_comma.py --labels
 	$(MAKE) graphs
 	$(MAKE) figure-contrast
 	$(MAKE) figure-language

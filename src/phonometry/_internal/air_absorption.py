@@ -32,7 +32,7 @@ _PR = 101.325
 _T01 = 273.16
 #: 0 degC in kelvins, for the Celsius -> kelvin conversion.
 _KELVIN = 273.15
-#: Np -> dB factor (20*lg e) ``20 lg e`` printed as 8,686 in Eq. (5).
+#: Np -> dB factor (20*lg e) ``20 lg e`` printed as 8.686 in Eq. (5).
 _EIGHT_686 = 8.686
 #: Full-scale relative humidity (saturation), in percent: hard upper validity
 #: bound of the input (raises on violation), unlike the advisory tabulated
@@ -101,7 +101,7 @@ def _validate(
 
     ``frequency_scope`` is ``(low, high, description)`` of the frequency range
     the caller answers for, when it is wider than the ISO 9613-1 table: ISO
-    9295:2015 Annex A evaluates the same Eq. (5) up to 22,4 kHz, the top of the
+    9295:2015 Annex A evaluates the same Eq. (5) up to 22.4 kHz, the top of the
     16 kHz octave band, so its caller passes that range and its own name.
     """
     if np.any(freqs <= 0.0):
@@ -166,7 +166,7 @@ def _pure_tone_terms(
     r"""The two factors of Eq. (5) that do not carry the decibel.
 
     Returns :math:`f^2` and the braced sum of the classical, rotational and
-    vibrational terms, so that :math:`\alpha = 8{,}686\, f^2\, \{\ldots\}` in
+    vibrational terms, so that :math:`\alpha = 8.686\, f^2\, \{\ldots\}` in
     decibels per metre (ISO 9613-1:1993, Eq. (5)) and :math:`f^2\, \{\ldots\}`
     is the same coefficient in nepers per metre, which is how ISO 9295:2015
     Annex A prints it (Formula (A.5)). The temperature is taken in kelvins,

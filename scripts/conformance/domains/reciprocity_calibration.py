@@ -30,8 +30,8 @@ folios 20 and 21 (PDF pages 22 and 23) and Table B.1 on folio 22 (PDF page
 
 Two printed defects in IEC 61094-3 are recorded in ``docs/ERRATA.md`` and
 reached by these rows: Step 1 of B.2 prints the last coefficient of the
-saturation vapour pressure as 6,3343 184 5e3 where Table F.2 of IEC 61094-2,
-which it refers to, prints 6,343 164 5e3; and Formulas (8) and (9) drop the
+saturation vapour pressure as 6.3343 184 5e3 where Table F.2 of IEC 61094-2,
+which it refers to, prints 6.343 164 5e3; and Formulas (8) and (9) drop the
 factor -j that Formula (7) carries.
 """
 
@@ -97,7 +97,7 @@ def _microphones() -> tuple[metrology.ReciprocityMicrophone, ...]:
 
 
 def _plane_wave() -> metrology.PlaneWaveCoupler:
-    """The LS1P plane-wave coupler of Table C.1, 7,5 mm long, two tubes."""
+    """The LS1P plane-wave coupler of Table C.1, 7.5 mm long, two tubes."""
     diameter = ref.IEC61094_2_TABLE_C1_MM["LS1P"][2] / 1000.0
     return metrology.PlaneWaveCoupler(
         length_m=7.5e-3,
@@ -153,11 +153,11 @@ def _worst_relative(computed: np.ndarray, true: np.ndarray) -> float:
 @register(
     _IEC61094,
     "IEC 61094-2:2009 Table A.1",
-    "Gerber's E_V by the full solution, 96 entries at R = 0,2, 0,5 and 1, X = 1 to 800",
+    "Gerber's E_V by the full solution, 96 entries at R = 0.2, 0.5 and 1, X = 1 to 800",
 )
 def _chk_table_a1() -> Outcome:
     """The real and imaginary parts at 16 values of X and three ratios, to the
-    0,000 01 the annex states for them.
+    0.000 01 the annex states for them.
     """
     worst = 0.0
     for x, row in ref.IEC61094_2_TABLE_A1.items():
@@ -179,7 +179,7 @@ def _chk_table_a1() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-2:2009 Formula (A.2)",
-    "Modulus of the approximation against Table A.1 where A.2 states 0,01 %, X > 5",
+    "Modulus of the approximation against Table A.1 where A.2 states 0.01 %, X > 5",
 )
 def _chk_approximation() -> Outcome:
     """The three-term series, at the 33 entries with X above 5."""
@@ -210,7 +210,7 @@ def _chk_approximation() -> Outcome:
     "Lowest whole frequency at which check_coupler holds Formulas (A.3) and (A.4) valid, LS1P and LS2aP plane-wave couplers of Table C.1",
 )
 def _chk_a3() -> Outcome:
-    """omega rho a**2 > 100 eta holds from 2,83 Hz and 11,34 Hz, which A.3
+    """omega rho a**2 > 100 eta holds from 2.83 Hz and 11.34 Hz, which A.3
     prints as "higher than 3 Hz and 12 Hz": the first whole frequency at which
     the library's check holds the broad-band solution valid.
     """
@@ -273,10 +273,10 @@ def _capillary_deviation(part: str) -> tuple[float, float]:
     "Real part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries",
 )
 def _chk_table_b1() -> Outcome:
-    """Within 0,002 GPa s/m3 everywhere, and the 72 entries from 20 Hz to
-    250 Hz within 0,000 51, a hair over the printed half-unit. The table was
+    """Within 0.002 GPa s/m3 everywhere, and the 72 entries from 20 Hz to
+    250 Hz within 0.000 51, a hair over the printed half-unit. The table was
     not computed with Annex F air to the fifth figure, and near the tube
-    resonances the residue reaches 0,0011 in the real part.
+    resonances the residue reaches 0.0011 in the real part.
     """
     worst, worst_low = _capillary_deviation("real")
     return numeric(
@@ -296,9 +296,9 @@ def _chk_table_b1() -> Outcome:
     "Imaginary part of the input impedance of six open capillary tubes, 20 Hz to 20 kHz, 186 entries",
 )
 def _chk_table_b2() -> Outcome:
-    """Within 0,002 GPa s/m3 everywhere; the residue reaches 0,0018 at the
-    resonances and 0,0007 from 20 Hz to 250 Hz, beyond the printed half-unit:
-    the imaginary part is reproduced to the 0,002 of the real one, not to its
+    """Within 0.002 GPa s/m3 everywhere; the residue reaches 0.0018 at the
+    resonances and 0.0007 from 20 Hz to 250 Hz, beyond the printed half-unit:
+    the imaginary part is reproduced to the 0.002 of the real one, not to its
     last printed figure.
     """
     worst, worst_low = _capillary_deviation("imag")
@@ -348,7 +348,7 @@ def _chk_table_c1() -> Outcome:
     "Nominal dimensions and tolerance of the large-volume couplers of LS1P, LS2aP and LS2bP microphones",
 )
 def _chk_table_c2() -> Outcome:
-    """Eighteen cells, A to F for three types, and the ± 0,03 mm on C, E, F."""
+    """Eighteen cells, A to F for three types, and the ± 0.03 mm on C, E, F."""
     matching = 0
     for kind, (a, b, c, d, e, f) in ref.IEC61094_2_TABLE_C2_MM.items():
         row = metrology.IEC61094_2_TABLE_C2[kind]
@@ -376,7 +376,7 @@ def _chk_table_c2() -> Outcome:
     "Wave-motion corrections of the air-filled large-volume coupler for LS1P microphones",
 )
 def _chk_table_c3() -> Outcome:
-    """The six rows, from 0 dB up to 800 Hz to -0,087 dB at 2,5 kHz."""
+    """The six rows, from 0 dB up to 800 Hz to -0.087 dB at 2.5 kHz."""
     frequencies = sorted(ref.IEC61094_2_TABLE_C3_DB)
     correction = metrology.large_volume_wave_motion_correction(frequencies)
     matching = sum(
@@ -440,7 +440,7 @@ def _pressure_triad(
 def _chk_formula_7() -> Outcome:
     """Electrical transfer impedances built by Formula (2) from known complex
     sensitivities and the corrected acoustic transfer impedance of the
-    plane-wave coupler, 31,5 Hz to 10 kHz.
+    plane-wave coupler, 31.5 Hz to 10 kHz.
     """
     electrical, acoustic, true = _pressure_triad(_plane_wave())
     result = metrology.pressure_reciprocity(
@@ -497,7 +497,7 @@ def _chk_formula_3_4() -> Outcome:
     Z_a,0 = rho c/S_0, the excess volumes of the front cavities (kappa p_s)
     and the two equivalent volumes (kappa_r p_s,r). It is not Formula (3) as
     printed, which holds the gas by kappa p_s: for the air of Annex F rho c0**2
-    and kappa p_s differ by 3,4e-4, 30 times this tolerance.
+    and kappa p_s differ by 3.4e-4, 30 times this tolerance.
     """
     mics = _microphones()
     coupler = metrology.PlaneWaveCoupler(length_m=7.5e-3, diameter_m=18.6e-3)
@@ -534,7 +534,7 @@ def _chk_formula_3_4() -> Outcome:
     "Heat-conduction factor from isothermal (kappa) to adiabatic (1) in the large-volume coupler of Table C.2",
 )
 def _chk_formula_a1() -> Outcome:
-    """At 0,01 Hz the cavity is isothermal and Delta_H = kappa; at 1 MHz it is
+    """At 0.01 Hz the cavity is isothermal and Delta_H = kappa; at 1 MHz it is
     adiabatic and Delta_H = 1.
     """
     coupler = _large_volume()
@@ -562,7 +562,7 @@ def _chk_formula_a1() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-2:2009 Formulas (3) and (A.1) with Table A.1",
-    "Heat-conducting transfer impedance of a large-volume coupler of R = 0,5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa",
+    "Heat-conducting transfer impedance of a large-volume coupler of R = 0.5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa",
 )
 def _chk_large_volume_heat() -> Outcome:
     """Z''_a,12 against Formula (3) with Delta_H = kappa/(1 + (kappa - 1) E_V)
@@ -730,7 +730,7 @@ def _chk_table_b1_part_3() -> Outcome:
 )
 def _chk_b2() -> Outcome:
     """The procedure the calibration uses adjusts ISO 9613-1 to the quantities
-    of IEC 61094-2; over the 162 entries it stays within 1,1 % of the table,
+    of IEC 61094-2; over the 162 entries it stays within 1.1 % of the table,
     whose smallest entries are themselves rounded by up to 1 %.
     """
     frequencies, values = _table_b1_part_3()
@@ -765,11 +765,11 @@ def _chk_b2() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-3:2016 B.2 Step 1 vs IEC 61094-2:2009 Table F.2",
-    "Water vapour mole fraction at 23 °C, 101,325 kPa, 50 % with the saturation pressure of Table F.2",
+    "Water vapour mole fraction at 23 °C, 101.325 kPa, 50 % with the saturation pressure of Table F.2",
 )
 def _chk_step_1() -> Outcome:
     """Step 1 refers to F.2 of IEC 61094-2 and prints its last coefficient as
-    6,3343 184 5e3 where Table F.2 prints 6,343 164 5e3 (docs/ERRATA.md); with
+    6.3343 184 5e3 where Table F.2 prints 6.343 164 5e3 (docs/ERRATA.md); with
     the latter the mole fraction is that of Annex F.
     """
     attenuation = metrology.reciprocity_air_attenuation([1000.0], **_CONDITIONS)
@@ -830,11 +830,11 @@ def _free_field_electrical(true: np.ndarray) -> list[np.ndarray]:
 @register(
     _IEC61094,
     "IEC 61094-3:2016 Formulas (7), (8) and (D.1)",
-    "Three microphones at 0,20 m to 0,30 m give their complex free-field sensitivities back",
+    "Three microphones at 0.20 m to 0.30 m give their complex free-field sensitivities back",
 )
 def _chk_formula_8_free_field() -> Outcome:
     """Electrical transfer impedances written out by Formula (D.1), with the
-    acoustic centres 8,5 mm to 9,5 mm in front of the diaphragms, 1 kHz to
+    acoustic centres 8.5 mm to 9.5 mm in front of the diaphragms, 1 kHz to
     20 kHz. Formula (8) as printed drops the factor -j of Formula (7) and would
     turn every phase by 45 degrees (docs/ERRATA.md).
     """
@@ -893,7 +893,7 @@ def _chk_formula_9_free_field() -> Outcome:
 )
 def _chk_acoustic_centre() -> Outcome:
     """A source whose pressure falls as exp(-alpha r)/(r - 4 mm), measured at
-    150 mm to 500 mm with alpha = 0,05 Np/m.
+    150 mm to 500 mm with alpha = 0.05 Np/m.
     """
     distances = np.array([0.15, 0.2, 0.3, 0.4, 0.5])
     alpha = 0.05

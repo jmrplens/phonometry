@@ -384,7 +384,7 @@ def round_reported_level(value: float) -> int:
     """Round a level the way RD 1367/2007 prescribes (Annex IV A.3.4.2).
 
     "El valor del nivel sonoro resultante se redondeará incrementándolo en
-    0,5 dB(A), tomando la parte entera como valor resultante": add 0,5 dB and
+    0,5 dB(A), tomando la parte entera como valor resultante": add 0.5 dB and
     take the integer part. This is a half-up rounding towards ``+inf``, which
     for a negative level differs from Python's banker's :func:`round`.
 

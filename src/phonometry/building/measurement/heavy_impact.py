@@ -42,11 +42,11 @@ A.1 (bang machine, *impact force characteristic 1*):
 ===========  ====================  =====================
 Octave (Hz)  Rubber ball LFE (dB)  Bang machine LFE (dB)
 ===========  ====================  =====================
-31,5         39,0 +/- 1,0          47,0 +/- 1,0
-63           31,0 +/- 1,5          40,0 +/- 1,5
-125          23,0 +/- 1,5          22,0 +/- 1,5
-250          17,0 +/- 2,0          11,5 +/- 2,0
-500          12,5 +/- 2,0          5,5 +/- 2,0
+31.5         39.0 +/- 1.0          47.0 +/- 1.0
+63           31.0 +/- 1.5          40.0 +/- 1.5
+125          23.0 +/- 1.5          22.0 +/- 1.5
+250          17.0 +/- 2.0          11.5 +/- 2.0
+500          12.5 +/- 2.0          5.5 +/- 2.0
 ===========  ====================  =====================
 
 **Standardized maximum impact sound pressure level (ISO 16283-2 Formulae (4),
@@ -284,7 +284,7 @@ class HeavyImpactSourceSpec(RichDisplay):
 #: The two source specifications, assembled from the printed clauses. The
 #: rubber-ball geometry is ISO 16283-2:2020 A.2.2 (hollow 180 mm ball, 30 mm
 #: wall) = JIS A 1418-2:2019 B.3; the bang-machine geometry is JIS A 1418-2:2019
-#: B.2 (tyre at (2,4 +/- 0,2) x 10^5 Pa, dropped from 85 cm), absent from ISO.
+#: B.2 (tyre at (2.4 +/- 0.2) x 10^5 Pa, dropped from 85 cm), absent from ISO.
 _SPECS: dict[str, HeavyImpactSourceSpec] = {
     "rubber_ball": HeavyImpactSourceSpec(
         name="rubber_ball",
@@ -318,7 +318,7 @@ _SPECS: dict[str, HeavyImpactSourceSpec] = {
         contact_time=0.020,
         contact_time_tolerance=0.002,
         description=(
-            "Car tyre inflated to (2,4 +/- 0,2) x 10^5 Pa, dropped in free "
+            "Car tyre inflated to (2.4 +/- 0.2) x 10^5 Pa, dropped in free "
             "fall from 85 cm (impact force characteristic 1)"
         ),
     ),
@@ -479,7 +479,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
 
     :ivar source: ``"rubber_ball"`` or ``"bang_machine"``.
     :ivar measured: Measured impact force exposure level ``LFE`` in the five
-        octave bands 31,5 Hz to 500 Hz, in dB re 1 N.
+        octave bands 31.5 Hz to 500 Hz, in dB re 1 N.
     """
 
     source: Source
@@ -580,7 +580,7 @@ def check_heavy_impact_source(
     Table A.1 (bang machine).
 
     :param force_exposure_level: Measured ``LFE`` in the five octave bands
-        31,5 Hz to 500 Hz, in dB re 1 N.
+        31.5 Hz to 500 Hz, in dB re 1 N.
     :param source: ``"rubber_ball"`` or ``"bang_machine"``.
     :return: A :class:`HeavyImpactSourceCheck`.
     :raises ValueError: for an unknown source or a wrong number of bands.
@@ -659,7 +659,7 @@ def fast_reverberation_correction(
     :param reverberation_time: Receiving-room reverberation time ``T`` per
         band, in seconds (> 0).
     :param reference_time: Reference reverberation time ``T0``, in seconds
-        (Default: 0,5 s).
+        (Default: 0.5 s).
     :return: The correction per band, in dB. A ``float`` for a number, an array for a
         sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive reverberation time.
@@ -779,7 +779,7 @@ def standardized_max_impact_level(
         band, in seconds (> 0); a scalar is broadcast over the bands.
     :param frequencies: Optional band centre frequencies, in Hz.
     :param reference_time: Reference reverberation time ``T0``, in seconds
-        (Default: 0,5 s).
+        (Default: 0.5 s).
     :param reference_volume: Reference volume ``V0``, in m3 (Default: 50 m3
         for dwellings).
     :return: A :class:`StandardizedMaxImpactResult`.
@@ -927,7 +927,7 @@ def _round_half_up(value: float) -> int:
     The note reads "XX,YZZ Z ... is rounded to XX if Y is less than 5 and to
     XX + 1 if Y is greater than or equal to 5", i.e. half-up toward positive
     infinity rather than half-away-from-zero (they differ only for a negative
-    half, e.g. -0,5 rounds to 0) and never half-to-even, which Python's own
+    half, e.g. -0.5 rounds to 0) and never half-to-even, which Python's own
     ``round`` would apply.
     """
     return int(np.floor(value + 0.5))

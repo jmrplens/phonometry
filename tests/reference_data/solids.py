@@ -337,7 +337,7 @@ MECHEL_3_PRINTED_WALL_IMPEDANCE: tuple[tuple[str, float, float], ...] = (
 #: N s/m3. The equation writes ``Z_0`` and the table is reproduced by the
 #: usual 413; the conclusion of the errata entry does not turn on it, because
 #: 400 and 415 move the one disagreeing row by less than four per cent of
-#: itself while it is out by a factor of 8,4.
+#: itself while it is out by a factor of 8.4.
 MECHEL_REFERENCE_IMPEDANCE_N_S_M3 = 413.0
 
 #: The row whose printed ``Z_m`` does not follow from the book's own Eq. (11),
@@ -451,7 +451,7 @@ LONG_UNQUANTIFIED_LOSS_FACTOR = (
 LONG_DOTTED_SPEED_CELL = "\u2026"
 
 #: Arau prints the critical frequency of a one centimetre plate, in hertz, so
-#: the product this library holds is that frequency times 0,01 m. Key, the
+#: the product this library holds is that frequency times 0.01 m. Key, the
 #: printed frequency, and the product.
 ARAU_4_1_PRODUCTS: tuple[tuple[str, float, float], ...] = (
     ("acero", 1000.0, 10.0),

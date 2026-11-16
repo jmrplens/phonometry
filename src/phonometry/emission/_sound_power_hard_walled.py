@@ -4,7 +4,7 @@ hard-walled test room, by the comparison method: ISO 3743-1:2010 (engineering
 grade 2).
 
 The room is an ordinary one: nearly empty, with smooth hard walls, no
-surface anywhere absorbing more than 0,20 of the incident power (4.3), at
+surface anywhere absorbing more than 0.20 of the incident power (4.3), at
 least 40 m³ and forty times the reference box (4.2). Such a room is not
 diffuse enough to be read on its own the way ISO 3741 reads a qualified
 reverberation room, so the room is not modelled at all: a calibrated
@@ -36,7 +36,7 @@ band from the two *means*, not position by position (8.1.3):
 
 with three rules around it: above 15 dB there is nothing to correct, from
 6 dB to 15 dB Eq. (13) applies, and below 6 dB the correction is fixed at
-1,3 dB, "the value for :math:`\Delta L_p` = 6 dB", and the band becomes an
+1.3 dB, "the value for :math:`\Delta L_p` = 6 dB", and the band becomes an
 upper bound that the report has to flag. The same rule gives
 :math:`K_{1(\mathrm{RSS})}` from the reference source's mean, but a band
 where it is the reference source's margin that falls short is no upper bound:
@@ -65,9 +65,9 @@ background as its exposure over that :math:`T`, :math:`L_{p(\mathrm{B})} +
 required with a background.
 
 Annex A carries either level to the reference meteorological conditions of
-101,325 kPa and 23,0 °C with the radiation-impedance correction
+101.325 kPa and 23.0 °C with the radiation-impedance correction
 :math:`C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}
-[(273{,}15 + \theta)/\theta_1]`, :math:`\theta_1` = 296 K, the expression
+[(273.15 + \theta)/\theta_1]`, :math:`\theta_1` = 296 K, the expression
 ISO 3741:2010 and ISO 3747:2010 print digit for digit; the static pressure
 follows from the altitude by Eq. (A.2), which is ISO 3747:2010 Eq. (C.2)
 (:func:`~phonometry.emission.static_pressure_from_altitude`). The correction
@@ -78,9 +78,9 @@ digit for digit, 63 Hz row included under its footnote.
 Clause 9 estimates the uncertainty as :math:`\sigma_\mathrm{tot} =
 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (Eq. 22) and :math:`U =
 k\,\sigma_\mathrm{tot}` (Eq. 23), with :math:`k` = 2 (9.5), and Table 3 gives
-the typical upper bound of :math:`\sigma_{R0}` per octave band: 3,0 dB at
-125 Hz, 2,0 dB at 250 Hz, 1,5 dB from 500 Hz to 4 kHz, 2,5 dB at 8 kHz and
-1,5 dB for the A-weighted level of a flat spectrum. The middle row of the
+the typical upper bound of :math:`\sigma_{R0}` per octave band: 3.0 dB at
+125 Hz, 2.0 dB at 250 Hz, 1.5 dB from 500 Hz to 4 kHz, 2.5 dB at 8 kHz and
+1.5 dB for the A-weighted level of a flat spectrum. The middle row of the
 printed table reads "400 to 5 000" under an octave heading, which is a
 one-third-octave range; the library reads it as the four octaves it spans
 (see ``docs/ERRATA.md``).
@@ -147,7 +147,7 @@ from ._shared import (
 #: The standard the determinations here implement, as the warnings cite it.
 _STANDARD: Final = "ISO 3743-1:2010"
 #: Background margin at or above which the determination meets 4.5, and below
-#: which K1 is fixed at 1,3 dB; a band where the source under test falls below
+#: which K1 is fixed at 1.3 dB; a band where the source under test falls below
 #: it is an upper bound (8.1.3).
 _K1_VALID_DB = 6.0
 #: Background margin above which K1 is zero (8.1.3).
@@ -172,8 +172,8 @@ _SIGMA_R0_A_DB = 1.5
 #: 4.2: the room is at least 40 m³ and at least 40 times the reference box.
 _MIN_ROOM_VOLUME_M3 = 40.0
 _ROOM_TO_BOX_VOLUME_RATIO = 40.0
-#: 4.2: the largest reference-box dimension is at most 1,0 m in a room of up to
-#: 100 m³ and 2,0 m in a larger one.
+#: 4.2: the largest reference-box dimension is at most 1.0 m in a room of up to
+#: 100 m³ and 2.0 m in a larger one.
 _SMALL_ROOM_LIMIT_M3 = 100.0
 _BOX_LIMIT_SMALL_ROOM_M = 1.0
 _BOX_LIMIT_LARGE_ROOM_M = 2.0
@@ -182,7 +182,7 @@ _MAX_ABSORPTION_COEFFICIENT = 0.20
 #: 4.4: the directional source is turned through four horizontal and four
 #: vertical orientations.
 _ORIENTATIONS = 8
-#: 7.3: the reverberant-field distance d_min = 0,3 V^(1/3) from the source.
+#: 7.3: the reverberant-field distance d_min = 0.3 V^(1/3) from the source.
 _REVERBERANT_DISTANCE_FACTOR = 0.3
 #: Table 2: the standard deviation limits of the three rows, in decibels.
 _TABLE2_ONE_LOCATION_DB = 2.5
@@ -255,7 +255,7 @@ def _k1_eq13(
     r"""``K1`` from the background margin, with the three rules of 8.1.3.
 
     Above 15 dB the correction is zero, from 6 dB to 15 dB it is Eq. (13),
-    and below 6 dB it is the 1,3 dB the clause fixes, "the value for
+    and below 6 dB it is the 1.3 dB the clause fixes, "the value for
     :math:`\Delta L_p` = 6 dB" to one decimal; the second array says where
     the margin met the 6 dB of 4.5.
 
@@ -475,7 +475,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
     def expanded_uncertainty_a(self) -> float:
         """``U = k sigma_tot`` of the A-weighted level (Eq. 23), in decibels.
 
-        With ``sigma_omc_db`` = 2,0 dB and ``k`` = 2 this is the 5 dB of the 9.5
+        With ``sigma_omc_db`` = 2.0 dB and ``k`` = 2 this is the 5 dB of the 9.5
         EXAMPLE.
         """
         return float(self.coverage_factor * self.sigma_tot_a)
@@ -660,14 +660,14 @@ def _background_advisory(
     if not np.all(met):
         warn_caller(
             "The margin of the source under test over the background is below "
-            "6 dB in one or more bands; K1 is 1,3 dB there and those levels are "
+            "6 dB in one or more bands; K1 is 1.3 dB there and those levels are "
             f"upper bounds ({_STANDARD}, 4.5 and 8.1.3).",
             SoundPowerWarning,
         )
     if not np.all(met_ref):
         warn_caller(
             "The margin of the reference sound source over the background is "
-            "below 6 dB in one or more bands; K1(RSS) is 1,3 dB there, which "
+            "below 6 dB in one or more bands; K1(RSS) is 1.3 dB there, which "
             "lowers those levels, so they do not meet 4.5 and are not upper "
             f"bounds ({_STANDARD}, 4.5 and 8.1.4).",
             SoundPowerWarning,
@@ -874,7 +874,7 @@ def sound_power_hard_walled(
         conditions of the source (9.2, Eq. C.1), in decibels; ``None`` leaves
         ``sigma_tot`` and the expanded uncertainty ``NaN``.
     :param coverage_factor: ``k`` of Eq. (23), 2 by default as 9.5
-        prescribes; 1,6 for a one-sided comparison with a limit (9.1).
+        prescribes; 1.6 for a one-sided comparison with a limit (9.1).
     :return: :class:`HardWalledSoundPowerResult` with ``quantity='power'``.
     :raises ValueError: if a level array is not finite or of an admissible
         shape, the reference or background levels do not match the source's
@@ -1147,8 +1147,8 @@ class HardWalledRoomCheck(OwnsArrays):
     :attr:`min_volume_m3` / :attr:`box_dimension_limit_m` what 4.2 asks
     of them. ``max_absorption_coefficient`` is the largest sound absorption
     coefficient of any portion of the boundary surfaces, ``NaN`` when none was
-    supplied, against the 0,20 of 4.3. :attr:`min_microphone_distance_m`
-    is the :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3 that keeps the
+    supplied, against the 0.20 of 4.3. :attr:`min_microphone_distance_m`
+    is the :math:`d_\mathrm{min} = 0.3\,V^{1/3}` of 7.3 that keeps the
     microphones in the reverberant field, stated for the setup rather than
     judged. The limits are the standard's and are read from the bands, the
     room and the box, so a check cannot be built against other ones.
@@ -1219,7 +1219,7 @@ class HardWalledRoomCheck(OwnsArrays):
     def box_dimension_limit_m(self) -> float:
         """The largest reference-box dimension 4.2 allows in this room.
 
-        :return: 1,0 m in a room of up to 100 m³, 2,0 m in a larger one, in
+        :return: 1.0 m in a room of up to 100 m³, 2.0 m in a larger one, in
             metres.
         """
         if self.volume <= _SMALL_ROOM_LIMIT_M3:
@@ -1228,7 +1228,7 @@ class HardWalledRoomCheck(OwnsArrays):
 
     @property
     def min_microphone_distance_m(self) -> float:
-        r"""The :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3, in metres.
+        r"""The :math:`d_\mathrm{min} = 0.3\,V^{1/3}` of 7.3, in metres.
 
         :return: The least distance from the source that keeps a microphone
             in the reverberant field.
@@ -1331,9 +1331,9 @@ def check_hard_walled_room(
     the directional one, which then qualifies the room for that type only.
 
     4.2 adds the size: at least 40 m³ and forty times the reference box, whose
-    largest dimension is at most 1,0 m in a room of up to 100 m³ and 2,0 m in
+    largest dimension is at most 1.0 m in a room of up to 100 m³ and 2.0 m in
     a larger one. 4.3 adds the surfaces: no portion of any boundary absorbing
-    more than 0,20 at any frequency of interest; Table 1 describes the rooms
+    more than 0.20 at any frequency of interest; Table 1 describes the rooms
     that meet it in words, and the coefficients are optional here.
 
     :param orientation_levels: Mean octave-band levels of the directional
@@ -1432,7 +1432,7 @@ class SourceLocationPlan(OwnsArrays):
     ``None`` for Part 1, which draws no such conclusion. The ``a_weighted_...``
     fields are the same for the A-weighted row of Part 2 when A-weighted
     levels were surveyed, ``NaN``, 0 and ``None`` otherwise. The two spectral
-    characters are read from the deviations and the 2,3 dB and 4 dB of 9.5,
+    characters are read from the deviations and the 2.3 dB and 4 dB of 9.5,
     so they are read-only properties and not fields.
     """
 
@@ -1469,7 +1469,7 @@ class SourceLocationPlan(OwnsArrays):
     def spectral_character(self) -> tuple[str, ...] | None:
         r"""Part 2's 9.5 reading of :math:`s_\mathrm{M}` per band, or ``None`` for Part 1.
 
-        ``'broadband'`` below 2,3 dB, ``'narrow-band'`` up to 4 dB and
+        ``'broadband'`` below 2.3 dB, ``'narrow-band'`` up to 4 dB and
         ``'discrete tone'`` above.
         """
         if self.standard != _PART2_STANDARD:
@@ -1543,7 +1543,7 @@ def hard_walled_source_locations(
        \tag{Eq. 7}
 
     about their arithmetic mean (Eq. 8) decides the number of source
-    locations: one up to 2,5 dB, two in the same room up to 4,0 dB, and above
+    locations: one up to 2.5 dB, two in the same room up to 4.0 dB, and above
     that two in the same room plus two more in another room of different
     dimensions that still complies with 4.4.
 

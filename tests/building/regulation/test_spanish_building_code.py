@@ -12,9 +12,9 @@ of 3.1.3.1 point 4.
 
 **Avilés López & Perera Martín, Manual de acústica ambiental y arquitectónica
 (Paraninfo), chapter 7**: Ejemplo 7.2 (printed pages 394-395) publishes a full
-eighteen-band ``R'`` spectrum and its global ``R'A`` = 51,4 dBA; Ejercicio 7.1
+eighteen-band ``R'`` spectrum and its global ``R'A`` = 51.4 dBA; Ejercicio 7.1
 (printed page 395) a full ``D2m,nT`` spectrum and its ``D2m,nT,Atr``
-= 32,8 dBA; Ejemplo 7.4 with Tabla 7.3 (printed page 408) the window-size
+= 32.8 dBA; Ejemplo 7.4 with Tabla 7.3 (printed page 408) the window-size
 correction of the Catálogo de Elementos Constructivos, a 4 m2 window dropping
 from ``RA`` 26 dBA to 24 dBA.
 
@@ -169,7 +169,7 @@ def test_railway_spectrum_equals_the_road_traffic_spectrum() -> None:
 # Global indices - Manual Ejemplo 7.2 and Ejercicio 7.1
 # --------------------------------------------------------------------------- #
 def test_ra_matches_ejemplo_7_2() -> None:
-    """Manual Ejemplo 7.2: R'A = 51,4 dBA from the published R' spectrum."""
+    """Manual Ejemplo 7.2: R'A = 51.4 dBA from the published R' spectrum."""
     index = hr.ra(_R_PRIME)
     assert index.intermediate == pytest.approx(51.4, abs=1e-9)
     assert index.value == pytest.approx(51.44, abs=5e-3)
@@ -180,7 +180,7 @@ def test_ra_matches_ejemplo_7_2() -> None:
 
 
 def test_d2m_nt_atr_matches_ejercicio_7_1() -> None:
-    """Manual Ejercicio 7.1: D2m,nT,Atr = 32,8 dBA from the published spectrum."""
+    """Manual Ejercicio 7.1: D2m,nT,Atr = 32.8 dBA from the published spectrum."""
     index = hr.d2m_nt_atr(_D2M_NT)
     assert index.intermediate == pytest.approx(32.8, abs=1e-9)
     assert index.reported == 33
@@ -216,8 +216,8 @@ def test_direct_route_and_iso717_route_agree_on_both_published_spectra() -> None
     The module implements the direct Annex A formula, which is the normative
     DB-HR route. On both published spectra it agrees to the integer with the
     ISO 717-1 route via the enlarged-range adaptation terms: the wall gives
-    51,4 -> 51 dBA against R'w + C100-5000 = 52 - 1 = 51, and the facade gives
-    32,8 -> 33 dBA against D2m,nT,w + Ctr,100-5000 = 38 - 5 = 33.
+    51.4 -> 51 dBA against R'w + C100-5000 = 52 - 1 = 51, and the facade gives
+    32.8 -> 33 dBA against D2m,nT,w + Ctr,100-5000 = 38 - 5 = 33.
 
     The two halves do not carry the same weight. For the wall, Manual
     Ejemplo 7.1 prints R'w = 52 with C = -1 and Ctr = -5, so reproducing
@@ -344,14 +344,14 @@ def test_rounding_exposes_exact_one_decimal_and_integer_values() -> None:
     the exact value, the one-decimal intermediate and the reported integer.
     """
     index = hr.ra(_R_PRIME)
-    assert index.value > index.intermediate  # 51,443... vs 51,4
+    assert index.value > index.intermediate  # 51.443... vs 51.4
     assert index.intermediate == 51.4
     assert index.reported == 51
     assert isinstance(index.reported, int)
 
 
 def test_rounding_is_half_up_not_bankers() -> None:
-    """A value ending in exactly 0,5 rounds up, unlike Python's round()."""
+    """A value ending in exactly 0.5 rounds up, unlike Python's round()."""
     requirement = hr.db_hr_facade_requirement(62.0, "residential", "bedrooms")
     assert hr.check_db_hr_requirement(31.5, requirement).reported == 32.0
     assert hr.check_db_hr_requirement(32.5, requirement).reported == 33.0
@@ -380,7 +380,7 @@ def test_window_size_correction_table(area: float, expected: int) -> None:
     """Manual Tabla 7.3 (from the CTE Catálogo de Elementos Constructivos).
 
     Every breakpoint of the table is checked on both sides: 0 dB up to
-    2,7 m2, -1 dB over (2,7 - 3,6], -2 dB over (3,6 - 4,6] and -3 dB above.
+    2.7 m2, -1 dB over (2.7 - 3.6], -2 dB over (3.6 - 4.6] and -3 dB above.
     """
     assert hr.window_size_correction(area) == expected
 
@@ -616,7 +616,7 @@ def test_party_wall_requirement_clause_2_1_1_c() -> None:
 def test_reverberation_requirements_clause_2_2(
     room_use: str, *, furnished: bool, quantity: str, limit: float, unit: str
 ) -> None:
-    """DB-HR 2.2: 0,7 s / 0,5 s classrooms, 0,9 s restaurants, A/V >= 0,2 m2/m3."""
+    """DB-HR 2.2: 0.7 s / 0.5 s classrooms, 0.9 s restaurants, A/V >= 0.2 m2/m3."""
     req = hr.db_hr_reverberation_requirement(room_use, furnished=furnished)
     assert (req.quantity, req.limit, req.unit) == (quantity, limit, unit)
     assert req.direction == ("max" if quantity == "T" else "min")
@@ -628,7 +628,7 @@ def test_reverberation_requirements_clause_2_2(
 def test_check_rounds_before_comparing_and_reports_the_margin() -> None:
     """3.1.3.1 point 4: the achieved value is rounded before the comparison.
 
-    The Ejercicio 7.1 facade achieves 32,8 dBA, which reports as 33 dBA and
+    The Ejercicio 7.1 facade achieves 32.8 dBA, which reports as 33 dBA and
     therefore meets a 33 dBA requirement it would miss unrounded.
     """
     req = hr.db_hr_facade_requirement(68.0, "residential", "living")  # 32 dBA
@@ -652,8 +652,8 @@ def test_check_direction_max_inverts_the_margin() -> None:
 
 
 def test_reverberation_check_rounds_to_one_decimal() -> None:
-    """DB-HR rounds reverberation times to the first decimal (1,25 -> 1,3)."""
-    req = hr.db_hr_reverberation_requirement("classroom")  # <= 0,7 s
+    """DB-HR rounds reverberation times to the first decimal (1.25 -> 1.3)."""
+    req = hr.db_hr_reverberation_requirement("classroom")  # <= 0.7 s
     assert hr.check_db_hr_requirement(0.74, req).reported == 0.7
     assert hr.check_db_hr_requirement(0.74, req).passes is True
     assert hr.check_db_hr_requirement(0.75, req).reported == 0.8

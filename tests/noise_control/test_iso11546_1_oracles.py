@@ -279,7 +279,7 @@ def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:
     defines as the interval between the multiples being rounded to, so what is
     left is a rounding to the nearest integer.
 
-    The ties printed at rounding range 0,1 are deliberately absent: 12,35 has
+    The ties printed at rounding range 0.1 are deliberately absent: 12.35 has
     no exact double, so the tie is gone before any code sees it and the
     comparison would test the binary representation rather than the rule. The
     two ties at rounding range 10 are exact and are the pair that decides.
@@ -298,7 +298,7 @@ def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:
         assert got == want, name
 
     # Where the two rules part, the library follows Rule A: Rule B would send
-    # 1 225,0 to 1 230 rather than to 1 220. Where they agree, so does it.
+    # 1 225.0 to 1 230 rather than to 1 220. Where they agree, so does it.
     rule_b = [math.floor(abs(value) + 0.5) for value in given]
     assert rounded.tolist()[-2] != rule_b[-2]
     assert rounded.tolist()[-1] == rule_b[-1]
@@ -347,7 +347,7 @@ def test_schirmer_leak_ratio() -> None:
     Definition 3.16 of part 1 and 3.14 of part 2 are the same definition in
     the same words, and the conformance row for this division is registered
     against the second edition of the same chapter. The numbers here were read
-    on the third edition, and both editions print q = 2,6e-3.
+    on the third edition, and both editions print q = 2.6e-3.
     """
     got = noise_control.leak_ratio(SCHIRMER_OPENING_M2, SCHIRMER_SURFACE_M2)
     assert got == pytest.approx(SCHIRMER_LEAK_RATIO, abs=5e-5)

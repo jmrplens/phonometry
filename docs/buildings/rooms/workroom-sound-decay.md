@@ -91,16 +91,16 @@ print(room.typical_excess_range("middle"))# (2.0, 10.0)
 ```
 
 Those last two ranges are ISO 11690-3, 4.3: what a workroom usually gives. A
-middle-range DL2 of 4,7 dB per doubling and an excess of 7,3 dB put this hall
+middle-range DL2 of 4.7 dB per doubling and an excess of 7.3 dB put this hall
 inside both.
 
 ## 3. Where the numbers come from
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workroom_path_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workroom_path.svg" alt="Section through a factory hall. A test source sits on the floor at least three metres from the wall, and a dashed path runs from it parallel to the floor at one metre fifty-five, with ten measurement points marked at two, three, four, six, eight, twelve, sixteen, twenty-four, thirty-two and forty-eight metres. One microphone on a stand and one standing person are drawn on the path, and the last point keeps one and a half metres of clearance from the far wall. Under the floor, three boxes mark the near, middle and far regions with d1 at five metres and d2 at sixteen. Two boxes at the foot carry the rate of spatial decay and the excess over a free field" width="100%"></picture>
 
-The path is 5.3.1: parallel to the floor, beginning on the source, at 1,55 m
-for a standing workplace or 1,2 m for a seated one, with no obstacle on the
-floor below it and nothing large within 1,5 m of either side. The points are
+The path is 5.3.1: parallel to the floor, beginning on the source, at 1.55 m
+for a standing workplace or 1.2 m for a seated one, with no obstacle on the
+floor below it and nothing large within 1.5 m of either side. The points are
 one of the two distributions 5.3.2 recommends, and the one used here is the
 logarithmic one, which is what makes a least-squares fit against $\lg r$
 sensible in the first place.
@@ -108,14 +108,14 @@ sensible in the first place.
 ### How the measurement goes
 
 Put the source where a machine would stand, with its acoustical centre either
-on the floor or at least 0,5 m above it, and at least 3 m from any wall or
+on the floor or at least 0.5 m above it, and at least 3 m from any wall or
 other reflecting object. Run it and check the margin over the background at
 every position and in every one of the six octave bands from 125 Hz to 4 kHz:
 10 dB or more needs no correction, between 6 dB and 10 dB takes the ISO 3744
 correction, and under 6 dB there is no measurement to make. Walk the path from
 the source outwards, taking a band spectrum at each of the recommended
 distances, measured from the acoustical centre rather than from the cabinet.
-Stop the last point at least 1,5 m short of any wall. Then, if the room allows
+Stop the last point at least 1.5 m short of any wall. Then, if the room allows
 it, walk a second path at right angles to the first: one path describes a
 direction, and two describe a room. Record the path height, the source
 position, and any obstacle you could not avoid, because the report is what
@@ -146,7 +146,7 @@ out of one of them says so.
 The source itself has to qualify first. Annex A asks for more than ISO 6926:
 its directivity index must stay inside ± 2 dB up to 630 Hz, rising to ± 8 dB at
 1 kHz and holding there to 5 kHz, its spectrum may not step more than 8 dB
-between adjacent one-third octaves, and its output must be stable to 0,5 dB
+between adjacent one-third octaves, and its output must be stable to 0.5 dB
 over the measurement.
 
 ```python
@@ -186,13 +186,13 @@ print(round(fixed.decay_rate_db, 2))    # 4.39 dB per doubling
 print(round(fixed.mean_level_excess, 2))   # 6.73 dB
 ```
 
-The correction moves the slope by 0,3 dB per doubling and the level by 0,6 dB,
+The correction moves the slope by 0.3 dB per doubling and the level by 0.6 dB,
 which is the general shape of it: it tilts a curve a little and shifts it a
 lot, because it is largest where the measurement starts.
 
 That difference is also how the library found an error in the annex. Annex C
-prints 4,4 dB per doubling for this band and range, which is the **corrected**
-figure, and 7,3 dB of excess, which is the **uncorrected** one. Applying the
+prints 4.4 dB per doubling for this band and range, which is the **corrected**
+figure, and 7.3 dB of excess, which is the **uncorrected** one. Applying the
 correction to one descriptor and not to the other cannot be right, and 28 of
 the 36 printed results in the annex leave their own rounding if the two are
 swapped. The registry entry is in
@@ -297,7 +297,7 @@ workshop.
   the product test code behind the absorption a workroom ceiling is sold on.
 - [Errata](../../ERRATA.md): the Annex C correction defect
   described above, with the page it was read on, and the two constants of
-  Equations (5) and (8), the printed 0,3 against $\lg 2$: one conversion
+  Equations (5) and (8), the printed 0.3 against $\lg 2$: one conversion
   written twice to different precision.
 - API reference: [`room.spatial_decay`](https://docs.jmrp.io/phonometry/reference/api/rooms/spatial-decay/)
   and [`room.workroom_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/workroom-prediction/).

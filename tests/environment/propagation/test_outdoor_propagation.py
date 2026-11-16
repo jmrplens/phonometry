@@ -8,7 +8,7 @@ Normative anchors (ISO 9613-2:1996):
 - Eq. (8): Aatm = alpha * d (alpha = ISO 9613-1 coefficient).
 - Eq. (9) + Table 3: Agr = As + Ar + Am with the a'/b'/c'/d' functions and the
   overlap factor q of note 2.
-- Eq. (10): Agr = 4,8 - (2 hm/d)[17 + 300/d] >= 0 (alternative method, 7.3.2).
+- Eq. (10): Agr = 4.8 - (2 hm/d)[17 + 300/d] >= 0 (alternative method, 7.3.2).
 - Eq. (11): DOmega solid-angle index.
 - Eq. (12)/(13): Abar = Dz - Agr >= 0 (top edge) / Abar = Dz >= 0 (lateral).
 - Eq. (14): Dz = 10 lg[3 + (C2/lambda) C3 z Kmet], C2 = 20/40, lambda = 340/f.
@@ -123,7 +123,7 @@ class TestAtmosphericAbsorption:
 # --------------------------------------------------------------------------- #
 class TestGroundGeneral:
     def test_hard_ground_no_middle_region(self) -> None:
-        # G = 0 everywhere and dp <= 30(hs+hr) (q=0): As=Ar=-1,5, Am=0 => -3 dB.
+        # G = 0 everywhere and dp <= 30(hs+hr) (q=0): As=Ar=-1.5, Am=0 => -3 dB.
         agr = environment.ground_attenuation(
             50.0,
             1.0,
@@ -136,8 +136,8 @@ class TestGroundGeneral:
         assert np.allclose(agr, -3.0)
 
     def test_hard_ground_far_still_minus_three_low_band(self) -> None:
-        # 63 Hz: As=Ar=-1,5 regardless of G; Am=-3q with Gm irrelevant at 63 Hz.
-        # For hard ground at 2k-8k the term is -1,5(1-0) = -1,5 each => -3.
+        # 63 Hz: As=Ar=-1.5 regardless of G; Am=-3q with Gm irrelevant at 63 Hz.
+        # For hard ground at 2k-8k the term is -1.5(1-0) = -1.5 each => -3.
         agr = environment.ground_attenuation(
             1000.0,
             1.0,
@@ -148,14 +148,14 @@ class TestGroundGeneral:
             ground_receiver=0.0,
             projected_distance=1000.0,
         )
-        # dp=1000 > 30*2=60 => q = 1 - 60/1000 = 0,94; Am(63) = -3*0,94 = -2,82.
+        # dp=1000 > 30*2=60 => q = 1 - 60/1000 = 0.94; Am(63) = -3*0.94 = -2.82.
         q = 1.0 - 60.0 / 1000.0
-        assert agr[0] == pytest.approx(-3.0 - 3.0 * q)  # -1,5-1,5-2,82
+        assert agr[0] == pytest.approx(-3.0 - 3.0 * q)  # -1.5-1.5-2.82
         assert agr[1] == pytest.approx(-3.0 - 3.0 * q * (1.0 - 0.0))
 
     def test_table3_prime_limits_porous(self) -> None:
-        # Large dp => (1 - e^{-dp/50}) -> 1 and (1 - e^{-2,8e-6 dp^2}) -> 1.
-        # Source on ground (h=0): b'(0)=10,1; c'(0)=15,5; d'(0)=6,5.
+        # Large dp => (1 - e^{-dp/50}) -> 1 and (1 - e^{-2.8e-6 dp^2}) -> 1.
+        # Source on ground (h=0): b'(0)=10.1; c'(0)=15.5; d'(0)=6.5.
         big = 1.0e7
         # Isolate one region by putting receiver far above (its prime ~ small)
         # and reading the porous source contribution via symmetry hs=hr=0.
@@ -170,13 +170,13 @@ class TestGroundGeneral:
             projected_distance=big,
         )
         # hs=hr=0 => threshold=0, q=1; Gm=1 => Am(>=125)=0.
-        # As=Ar=-1,5 + G*prime(0). b'(0)=10,1 => As=8,6; Agr=17,2.
+        # As=Ar=-1.5 + G*prime(0). b'(0)=10.1 => As=8.6; Agr=17.2.
         assert agr[0] == pytest.approx(2.0 * (-1.5 + 10.1), abs=1e-6)
         assert agr[1] == pytest.approx(2.0 * (-1.5 + 15.5), abs=1e-6)
         assert agr[2] == pytest.approx(2.0 * (-1.5 + 6.5), abs=1e-6)
 
     def test_a_prime_125_value(self) -> None:
-        # a'(h) at h=5, huge dp: 3,0*e^0 + 5,7*e^{-0,09*25} => 1,5+3,0+5,7*e^-2,25.
+        # a'(h) at h=5, huge dp: 3.0*e^0 + 5.7*e^{-0.09*25} => 1.5+3.0+5.7*e^-2.25.
         big = 1.0e7
         agr = environment.ground_attenuation(
             big,
@@ -265,7 +265,7 @@ class TestGroundGeneral:
 # --------------------------------------------------------------------------- #
 class TestGroundAlternative:
     def test_eq10_closed_form(self) -> None:
-        # 4,8 - (2*2/100)(17 + 300/100) = 4,8 - 0,04*20 = 4,0.
+        # 4.8 - (2*2/100)(17 + 300/100) = 4.8 - 0.04*20 = 4.0.
         assert environment.ground_attenuation_alternative(100.0, 2.0) == pytest.approx(
             4.0
         )
@@ -281,7 +281,7 @@ class TestGroundAlternative:
         assert far < 4.8
 
     def test_directivity_omega_symmetric_upper_bound(self) -> None:
-        # hs=hr, dp >> h: ratio -> 1 => DOmega -> 10 lg 2 ~ 3,01 dB.
+        # hs=hr, dp >> h: ratio -> 1 => DOmega -> 10 lg 2 ~ 3.01 dB.
         assert environment.directivity_omega(1.0, 1.0, 1.0e6) == pytest.approx(
             10.0 * math.log10(2.0), abs=1e-6
         )
@@ -396,7 +396,7 @@ class TestBarrier:
         assert dz_top[0] < dz_lat[0] < 20.0
 
     def test_dz_floor_is_10lg3(self) -> None:
-        # z>0 but tiny lambda-scaled term: Dz -> 10 lg 3 ~ 4,77 dB floor.
+        # z>0 but tiny lambda-scaled term: Dz -> 10 lg 3 ~ 4.77 dB floor.
         b = environment.Barrier(source_to_edge=1.0, edge_to_receiver=1.0)
         dz = environment.barrier_attenuation(b, 1.999, [63.0])
         assert dz[0] >= 10.0 * math.log10(3.0) - 1e-6
@@ -411,7 +411,7 @@ class TestMeteorologicalCorrection:
         assert environment.meteorological_correction(20.0, 1.0, 1.0, 2.0) == 0.0
 
     def test_eq22_closed_form(self) -> None:
-        # dp=200, hs+hr=2 => 2*(1 - 20/200) = 1,8.
+        # dp=200, hs+hr=2 => 2*(1 - 20/200) = 1.8.
         assert environment.meteorological_correction(
             200.0, 1.0, 1.0, 2.0
         ) == pytest.approx(1.8)

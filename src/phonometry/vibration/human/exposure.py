@@ -155,22 +155,22 @@ ACCELERATION_LEVEL_REFERENCE_M_S2 = REFERENCE_VALUES["solid"]["acceleration"].va
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).
 REFERENCE_DURATION_S = 28800.0
 
-#: Daily hand-arm exposure action value ``A(8) = 2,5 m/s2`` (Directive
+#: Daily hand-arm exposure action value ``A(8) = 2.5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(a)).
 HAV_EAV_A8_M_S2 = 2.5
 #: Daily hand-arm exposure limit value ``A(8) = 5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(1)(b)).
 HAV_ELV_A8_M_S2 = 5.0
-#: Daily whole-body exposure action value ``A(8) = 0,5 m/s2`` (Directive
+#: Daily whole-body exposure action value ``A(8) = 0.5 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(a)).
 WBV_EAV_A8_M_S2 = 0.5
-#: Daily whole-body exposure limit value ``A(8) = 1,15 m/s2`` (Directive
+#: Daily whole-body exposure limit value ``A(8) = 1.15 m/s2`` (Directive
 #: 2002/44/EC, Article 3(2)(b)).
 WBV_ELV_A8_M_S2 = 1.15
-#: Whole-body VDV exposure action value ``9,1 m/s^1,75`` (Directive
+#: Whole-body VDV exposure action value ``9.1 m/s^1.75`` (Directive
 #: 2002/44/EC, Article 3(2)(a), alternative dose metric).
 WBV_EAV_VDV = 9.1
-#: Whole-body VDV exposure limit value ``21 m/s^1,75`` (Directive
+#: Whole-body VDV exposure limit value ``21 m/s^1.75`` (Directive
 #: 2002/44/EC, Article 3(2)(b), alternative dose metric).
 WBV_ELV_VDV = 21.0
 
@@ -214,7 +214,7 @@ _INF = math.inf
 #: ``Wh`` uses the exact ISO 8041-1 values (Table 3, NOTE 2), of which the
 #: ISO 5349-1 Table A.1 figures are the five-significant-figure rounding.
 _WEIGHTINGS: dict[str, _WParams] = {
-    # Whole-body, vertical z (ISO 2631-4); K = 1,024.
+    # Whole-body, vertical z (ISO 2631-4); K = 1.024.
     "Wb": _WParams(
         0.4,
         _Q_BUTTERWORTH,
@@ -571,7 +571,7 @@ def band_limiting_response(
     band-limiting frequency weighting first.
 
     Only four corner pairs exist among the nine weightings, as Table 3 prints
-    them: 0,4 Hz and 100 Hz for ``Wb``, ``Wc``, ``Wd``, ``We``, ``Wj`` and
+    them: 0.4 Hz and 100 Hz for ``Wb``, ``Wc``, ``Wd``, ``We``, ``Wj`` and
     ``Wk``; ``10**(8/10)`` Hz and ``10**(31/10)`` Hz for ``Wh``;
     ``10**(-0.1)`` Hz and 100 Hz for ``Wm``; 0.08 Hz and 0.63 Hz for ``Wf``.
     The response is still asked for by weighting name, because that is how
@@ -1347,7 +1347,7 @@ class ExposureAssessment(RichDisplay):
 
     :ivar value: The assessed daily exposure ``A(8)`` (or VDV), in its unit.
     :ivar kind: ``"hav"`` or ``"wbv"``.
-    :ivar metric: ``"a8"`` (m/s2) or ``"vdv"`` (m/s^1,75).
+    :ivar metric: ``"a8"`` (m/s2) or ``"vdv"`` (m/s^1.75).
     """
 
     value: float
@@ -1370,8 +1370,8 @@ class ExposureAssessment(RichDisplay):
         does not define. Assessed alone, that pair used to render a fiche
         headed by the hand-arm ISO standard whose every threshold, zone and
         verdict came from the whole-body VDV values: a hand-arm ``A(8)`` of
-        3,5 m/s2, well into the action zone above the 2,5 m/s2 EAV, printed
-        "below the exposure action value" and passed against 21 m/s^1,75.
+        3.5 m/s2, well into the action zone above the 2.5 m/s2 EAV, printed
+        "below the exposure action value" and passed against 21 m/s^1.75.
 
         :raises ValueError: if ``kind`` is not ``"hav"``/``"wbv"``, ``metric``
             is not ``"a8"``/``"vdv"``, or the pair is ``"hav"``/``"vdv"``.
@@ -1428,7 +1428,7 @@ def exposure_assessment(
     """Assess a daily exposure against Directive 2002/44/EC (Article 3).
 
     :param value: The daily exposure ``A(8)`` in m/s2 (``metric="a8"``) or the
-        vibration dose value in m/s^1,75 (``metric="vdv"``, whole-body only).
+        vibration dose value in m/s^1.75 (``metric="vdv"``, whole-body only).
     :param kind: ``"hav"`` (hand-arm) or ``"wbv"`` (whole-body).
     :param metric: ``"a8"`` (default) or ``"vdv"``.
     :return: An :class:`ExposureAssessment`.

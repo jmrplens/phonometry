@@ -110,12 +110,12 @@ ship a wrong table. Three instruments are in play:
 
 The library implements the consolidated result. Tables F-2 (studded tyres) and
 F-3 (junctions) have never been amended. The 2021 amendment is not cosmetic: the
-current road source is about **2,5 to 3,5 dB(A) louder** than the one published
+current road source is about **2.5 to 3.5 dB(A) louder** than the one published
 in 2015, so any comparison with pre-2021 literature carries that offset.
 
 ## 2. The source and the source line
 
-Each vehicle is one **point source 0,05 m above the road surface**, radiating
+Each vehicle is one **point source 0.05 m above the road surface**, radiating
 uniformly; the first reflection on the pavement is already inside the sound
 power, which is why the method calls it a semi-free-field quantity. A traffic
 flow is an incoherent **source line**, ideally one line per lane at the lane
@@ -184,9 +184,9 @@ plt.show()
 
 **What a road source is worth.** This urban arterial (1 200 light, 90 medium
 heavy, 45 heavy vehicles and 60 motorcycles per hour at 50 km/h) comes out at
-**84,2 dB(A) per metre of line**; the free-flowing motorway link of section 6
+**84.2 dB(A) per metre of line**; the free-flowing motorway link of section 6
 (1 000 light and 120 heavy vehicles per hour at 90 and 80 km/h) reaches
-**88,6 dB(A) per metre**. Those are the two magnitudes to check your own result
+**88.6 dB(A) per metre**. Those are the two magnitudes to check your own result
 against. The arithmetic behind them is worth holding on to: doubling the flow
 adds exactly 3 dB, while halving the speed adds 3 dB to the flow term
 $10\log_{10}(Q/1000v)$ and subtracts from the rolling term, so the two partly
@@ -210,13 +210,13 @@ decibels. This is where each of them is read from.
 | :--- | :--- | :--- | :--- |
 | `RoadTraffic.flow_rate` ($Q_m$) | Vehicles of category $m$ per hour | Yearly average per hour, per time period (day / evening / night), per vehicle class and **per source line**, from traffic counting or a traffic model (2.2.1) | A peak-hour count. $Q$ is an annual average for the period, which is what makes the result an $L_\mathrm{den}$ ingredient |
 | `RoadTraffic.speed_kmh` ($v_m$) | Representative speed of category $m$ | In most cases the **lower** of the legal maximum for the road section and the legal maximum for the vehicle category; where local measurement data is unavailable, the legal maximum for the category (2.2.1) | Assuming a measured average is required. It is not: the standard's default *is* the legal limit, and heavy vehicles usually take a lower one than the section |
-| `temperature_c` ($\tau$) | Air temperature | The **yearly average** air temperature of the period, from long-term meteorological data (2.2.10) | The survey-day value. At $K_1 = 0{,}08$ dB/°C, a 12 °C annual mean against a 20 °C afternoon is 0,6 dB on the light-vehicle rolling term |
+| `temperature_c` ($\tau$) | Air temperature | The **yearly average** air temperature of the period, from long-term meteorological data (2.2.10) | The survey-day value. At $K_1 = 0.08$ dB/°C, a 12 °C annual mean against a 20 °C afternoon is 0.6 dB on the light-vehicle rolling term |
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Fleet share and season | The average ratio of light vehicles per hour fitted with studded tyres **during** the months they are fitted, and the number of those months; the method forms $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ itself (2.2.7) | Passing the year-averaged share, which applies $T_\mathrm{s}/12$ twice |
 | `junction_distance` ($x$) | Distance to the junction | Measured along the road from the point source to the nearest **intersection of this source line with another source line** (2.2.5) | Measuring to the stop line or the kerb. It is the line crossing, and only the last 100 m is affected |
 | `junction_type` ($k$) | 1 crossing with lights, 2 roundabout | The junction control, not its shape | A priority junction is neither: the correction is defined for signals and roundabouts |
 | `road_slope_percent` ($s$) | Signed longitudinal slope, % | The terrain model along the source line, saturating at ±12 % | Applying one sign to a two-way flow. The standard requires splitting the flow in half and correcting one half uphill and the other downhill |
 | `surface` | Pavement type | The road register, matched to a Table F-4 row **and its declared speed range** | Using a row outside its validity range |
-| geometry | Source line and receiver | One line per lane at the lane centre (one line per carriageway, or one for a two-way road, is also acceptable), the point source 0,05 m above the surface; the Directive's receiver points are 4 m above ground | Placing the source at the kerb, or at a vehicle-body height |
+| geometry | Source line and receiver | One line per lane at the lane centre (one line per carriageway, or one for a two-way road, is also acceptable), the point source 0.05 m above the surface; the Directive's receiver points are 4 m above ground | Placing the source at the kerb, or at a vehicle-body height |
 
 Two consequences worth stating outright. First, the temperature has to belong to
 the *same* period as $Q$ and $v$: a night flow paired with an annual mean
@@ -240,8 +240,8 @@ surface, the studded tyres, the junction and the air temperature.
 
 **Air temperature** (2.2.10) is a straight line, applied equally to all eight
 bands: $\Delta L_{W,\mathrm{temp}} = K_m\,(20\ \text{°C} - \tau)$, with
-$K_1 = 0{,}08\ \text{dB/°C}$ for light vehicles and
-$K_2 = K_3 = 0{,}04\ \text{dB/°C}$ for the two heavy categories. Cold air makes tyres
+$K_1 = 0.08\ \text{dB/°C}$ for light vehicles and
+$K_2 = K_3 = 0.04\ \text{dB/°C}$ for the two heavy categories. Cold air makes tyres
 harder and the road louder, so the correction is *positive* below 20 °C.
 
 **Studded tyres** (2.2.6 to 2.2.9) apply to category 1 only. The per-tyre excess
@@ -379,9 +379,9 @@ categories do and use different speed offsets:
 
 | Category | Downhill ($s$ below the breakpoint) | Flat band | Uphill |
 | :--- | :--- | :--- | :--- |
-| 1 | $(\min(12\ \%, -s) - 6\ \%)/1\ \%$ | −6 % to 2 % | $(\min(12\ \%, s) - 2\ \%)/1{,}5\ \% \cdot v/100$ |
-| 2 | $(\min(12\ \%, -s) - 4\ \%)/0{,}7\ \% \cdot (v - 20)/100$ | −4 % to 0 % | $\min(12\ \%, s)/1\ \% \cdot v/100$ |
-| 3 | $(\min(12\ \%, -s) - 4\ \%)/0{,}5\ \% \cdot (v - 10)/100$ | −4 % to 0 % | $\min(12\ \%, s)/0{,}8\ \% \cdot v/100$ |
+| 1 | $(\min(12\ \%, -s) - 6\ \%)/1\ \%$ | −6 % to 2 % | $(\min(12\ \%, s) - 2\ \%)/1.5\ \% \cdot v/100$ |
+| 2 | $(\min(12\ \%, -s) - 4\ \%)/0.7\ \% \cdot (v - 20)/100$ | −4 % to 0 % | $\min(12\ \%, s)/1\ \% \cdot v/100$ |
+| 3 | $(\min(12\ \%, -s) - 4\ \%)/0.5\ \% \cdot (v - 10)/100$ | −4 % to 0 % | $\min(12\ \%, s)/0.8\ \% \cdot v/100$ |
 
 Category 4 takes no gradient correction. The slope saturates at 12 % in both
 directions. Downhill noise comes from engine braking, uphill noise from load, so
@@ -432,8 +432,8 @@ both (2.2.2) and (2.2.3), that for speeds under 20 km/h the sound power takes it
 are not extrapolated into a queue. The flow term keeps the *true* speed, so the
 two halves of (2.2.1) pull in opposite directions and the line power has a
 minimum. For 1 000 light vehicles per hour on the reference surface,
-`road_source_power` returns 81,5 dB(A) per metre at 50 km/h, **76,2 at 20 km/h**,
-79,2 at 10 km/h and 82,2 at 5 km/h; the same road gets *louder* per metre as the
+`road_source_power` returns 81.5 dB(A) per metre at 50 km/h, **76.2 at 20 km/h**,
+79.2 at 10 km/h and 82.2 at 5 km/h; the same road gets *louder* per metre as the
 stream slows below the floor, purely because more vehicles are on each metre of
 it. A reader who does not know the floor cannot tell that from a modelled
 congestion effect.
@@ -476,7 +476,7 @@ row.beta["1"]            # -0.1, the speed coefficient
 
 *The reference surface is the zero line, so every curve reads directly as
 "louder or quieter than the CNOSSOS reference": the two-layer porous asphalt is
-6,3 dB below it at 1 kHz, hard elements not laid in herringbone are 31,4 dB above
+6.3 dB below it at 1 kHz, hard elements not laid in herringbone are 31.4 dB above
 it at 63 Hz. The declared speed range in the legend is part of the row: a porous
 asphalt validated from 80 to 130 km/h is not a coefficient set for a 30 km/h
 street, the reference row alone carries no range, and the method offers no
@@ -626,7 +626,7 @@ That mechanism is also what pins the implementation: the European Commission
 published a test set of 4 875 road emission cases computed with the 2015
 coefficients, and feeding the shipped equations that superseded database (not
 the 2021 tables the library ships by default) reproduces every published band
-level to 0,005 dB, inside the two decimals the test set prints.
+level to 0.005 dB, inside the two decimals the test set prints.
 
 ## What this guide covers
 

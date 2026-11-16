@@ -60,11 +60,11 @@ __all__ = [
 ]
 
 #: Cavity stiffness per unit area of ISO 12354-1:2017 Formula (D.2), in N/m³·m:
-#: ``s' = 0,111/d`` with ``s'`` in MN/m³, i.e. ``0,111e6/d`` in SI.
+#: ``s' = 0.111/d`` with ``s'`` in MN/m³, i.e. ``0.111e6/d`` in SI.
 _CAVITY_STIFFNESS: float = 0.111e6
 
 #: ISO 12354-1:2017 Table D.1, the branch for ``30 ≤ fo ≤ 160``:
-#: ``ΔRw = 74,4 − 20 lg(fo) − Rw/2``, floored at 0 dB by NOTE 1.
+#: ``ΔRw = 74.4 − 20 lg(fo) − Rw/2``, floored at 0 dB by NOTE 1.
 _TABLE_D1_LOW = (74.4, 20.0, 2.0)
 
 #: Highest nominal one-third-octave centre served by the ``_TABLE_D1_LOW``
@@ -124,11 +124,11 @@ _ANNEX_D_SYSTEMS: dict[str, tuple[tuple[float, float, float], ...]] = {
 _ANNEX_D_ANCHORS = ((0.66, -1.2), (0.62, -1.3), (0.54, -1.6))
 
 #: ISO 12354-1:2017 Formula (D.6): correction for a glued area other than the
-#: 40 % reference, ``ΔR − 0,05 %So + 2,0``.
+#: 40 % reference, ``ΔR − 0.05 %So + 2.0``.
 _ANNEX_D_GLUE = (-0.05, 2.0)
 
 #: ISO 12354-1:2017 Formula (D.8): laboratory-to-field transfer of a weighted
-#: improvement, ``a = 1,35 lg(fo) − 3,5 ≤ 0`` and ``X = Rw,situ − 53`` clamped
+#: improvement, ``a = 1.35 lg(fo) − 3.5 ≤ 0`` and ``X = Rw,situ − 53`` clamped
 #: to ``[−10, +7]``.
 _ANNEX_D8_A = (1.35, -3.5)
 _ANNEX_D8_X = (53.0, -10.0, 7.0)
@@ -169,7 +169,7 @@ _THIRD_OCTAVE_CENTRES: tuple[float, ...] = (
 )
 
 #: Base-ten band index ``n`` of the first entry of ``_THIRD_OCTAVE_CENTRES``:
-#: the nominal 12,5 Hz band has the exact midband frequency ``10^(11/10)``.
+#: the nominal 12.5 Hz band has the exact midband frequency ``10^(11/10)``.
 _THIRD_OCTAVE_FIRST_INDEX: int = 11
 
 #: Additional-layer system of ISO 12354-1:2017 Annex D.
@@ -318,7 +318,7 @@ def weighted_lining_improvement(
             f"base_rating = {rw:g} dB lies outside the "
             f"{rw_low:g} dB <= Rw <= {rw_high:g} dB range Clause D.2.2 states "
             "Table D.1 for; the result is an extrapolation of "
-            "74,4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
+            "74.4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
             BuildingPredictionWarning,
         )
     nominal = _round_to_third_octave(f0)

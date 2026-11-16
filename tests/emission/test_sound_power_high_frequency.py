@@ -6,7 +6,7 @@ Normative anchors (UNE-EN ISO 9295:2015, the Spanish adoption):
 - Formula (2), PDF page 11: Delta f = 2 f v / c; Formula (3), PDF page 12: the
   energy sum of the sidebands.
 - Formulae (4) and (5), PDF page 13: R = S alpha_room / (1 - alpha_room),
-  alpha_room = 1 - exp(-0,16 V / (S T)).
+  alpha_room = 1 - exp(-0.16 V / (S T)).
 - Formula (6), PDF page 13: LW = Lp(ST) - 10 lg(4/R) dB.
 - Formula (7), PDF page 14: R = 8 alpha V / (1 - 8 alpha V / S), alpha in Np/m.
 - Tables 1 and 2, PDF pages 15 and 16: alpha in Np/m, 10 000 Hz to 22 400 Hz,
@@ -17,7 +17,7 @@ Normative anchors (UNE-EN ISO 9295:2015, the Spanish adoption):
 - Clause 10.1, PDF page 21: reference meteorological conditions per ISO 3741,
   C1 + C2 for a direct method and C2 for the comparison.
 - Table 3, PDF page 24: the levels to determine for each type of noise.
-- Annex A, PDF pages 25 and 26: ISO 9613-1 in Np/m (8,686 converts to dB/m).
+- Annex A, PDF pages 25 and 26: ISO 9613-1 in Np/m (8.686 converts to dB/m).
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ def test_the_transcription_holds_624_cells_of_which_43_are_misprinted() -> None:
 
 
 def test_annex_a_at_the_tables_conversion_rounds_to_every_correct_cell() -> None:
-    """The tables are Annex A rounded to four decimals, with T = theta + 273,16 K."""
+    """The tables are Annex A rounded to four decimals, with T = theta + 273.16 K."""
     offset = ref.ISO9295_TABLE_KELVIN_OFFSET
     wrong = [
         cell
@@ -96,7 +96,7 @@ def test_annex_a_at_the_tables_conversion_rounds_to_every_correct_cell() -> None
 
 @pytest.mark.parametrize("offset", [273.15, 273.155, 273.165, 273.17])
 def test_no_other_conversion_reproduces_the_correct_cells(offset: float) -> None:
-    """The 0,01 K is what the tables carry: a neighbour of 273,16 leaves cells off."""
+    """The 0.01 K is what the tables carry: a neighbour of 273.16 leaves cells off."""
     wrong = sum(
         1
         for cell in CORRECT
@@ -106,7 +106,7 @@ def test_no_other_conversion_reproduces_the_correct_cells(offset: float) -> None
 
 
 def test_the_library_conversion_is_within_rounding_and_the_offset() -> None:
-    """At theta + 273,15 K each correct cell is within half a unit plus the 0,01 K."""
+    """At theta + 273.15 K each correct cell is within half a unit plus the 0.01 K."""
     offset = ref.ISO9295_TABLE_KELVIN_OFFSET
     worst = 0.0
     for _, frequency, t, rh, printed in CORRECT:
@@ -227,7 +227,7 @@ def test_annex_a_advises_just_past_22_4_khz() -> None:
 
 
 def test_annex_a_follows_the_static_pressure() -> None:
-    """At 90 kPa Annex A is still ISO 9613-1 in nepers, and not the 101,325 kPa value."""
+    """At 90 kPa Annex A is still ISO 9613-1 in nepers, and not the 101.325 kPa value."""
     frequencies = np.array([1000.0, 4000.0, 8000.0])
     nepers = emission.air_absorption_np_per_m(
         frequencies,
@@ -296,7 +296,7 @@ def test_annex_a_refuses_a_humidity_above_saturation() -> None:
 
 
 def test_eyring_coefficient_closes_on_e() -> None:
-    # 0,16 V / (S T) = 1 when V = S and T = 0,16 s.
+    # 0.16 V / (S T) = 1 when V = S and T = 0.16 s.
     alpha = emission.room_absorption_coefficient(0.16, volume=200.0, surface_area=200.0)
     assert alpha == pytest.approx(1.0 - math.exp(-1.0), rel=1e-15)
 
@@ -309,7 +309,7 @@ def test_room_constant_from_reverberation_time_is_formula_4() -> None:
 
 
 def test_formulae_4_and_5_keep_the_volume_and_the_surface_apart() -> None:
-    """V = 200 m3, S = 210 m2, T = 0,70 s: V and S enter where the formulae put them."""
+    """V = 200 m3, S = 210 m2, T = 0.70 s: V and S enter where the formulae put them."""
     alpha_room = 1.0 - math.exp(-0.16 * 200.0 / (210.0 * 0.70))
     alpha = emission.room_absorption_coefficient(0.70, volume=200.0, surface_area=210.0)
     room = emission.room_constant_from_reverberation_time(
@@ -334,8 +334,8 @@ def test_room_constant_of_a_short_decay_is_its_formula_for_a_number_and_an_array
 ):
     """T = 1 ms in 100 m3 behind 130 m2: alpha rounds to 1, R does not.
 
-    Formula (5) puts 1 - alpha = exp(-0,16 V / (S T)) into Formula (4), so
-    R = S (exp(0,16 V / (S T)) - 1), about 4e55 m2 here. Divided as Formula
+    Formula (5) puts 1 - alpha = exp(-0.16 V / (S T)) into Formula (4), so
+    R = S (exp(0.16 V / (S T)) - 1), about 4e55 m2 here. Divided as Formula
     (4) prints it, a number raised ZeroDivisionError and an array gave inf
     under a RuntimeWarning.
     """

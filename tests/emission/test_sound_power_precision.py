@@ -3,9 +3,9 @@
 ISO 9614-3:2002 (sound-intensity scanning, precision).
 
 Physics / standard anchors:
-- ISO 3745 K1 (Eq. 11): dLpi = 6 dB -> 1,256 dB; dLpi = 10 dB -> 0,458 dB.
+- ISO 3745 K1 (Eq. 11): dLpi = 6 dB -> 1.256 dB; dLpi = 10 dB -> 0.458 dB.
 - ISO 3745 areas: sphere S1 = 4*pi*r^2, hemisphere S2 = 2*pi*r^2.
-- ISO 3745 C1/C2 (Eq. 14): at 23 deg C, 101,325 kPa -> C2 = 0, C1 = -0,128 dB.
+- ISO 3745 C1/C2 (Eq. 14): at 23 deg C, 101.325 kPa -> C2 = 0, C1 = -0.128 dB.
 - ISO 3745 uncertainty (Eq. 24/25): U = k*sqrt(sigma_R0^2 + sigma_omc^2).
 - ISO 9614-3 LW = 10*lg(P/P0) (Eq. 9); LW0 = LW at 23 deg C / 101 325 Pa (Eq. 10).
 - ISO 9614-3 Annex B/C field indicators and five acceptance criteria.
@@ -55,7 +55,7 @@ def test_precision_positions_sphere_shape_and_scale() -> None:
     pos = precision_positions("sphere", radius=2.0)
     assert pos.shape == (40, 3)
     assert np.allclose(np.linalg.norm(pos, axis=1), 2.0, atol=2.0 * 2.0e-3)
-    # Position 2 of D.1 is exactly (0,494, -0,856, 0,150)*r.
+    # Position 2 of D.1 is exactly (0.494, -0.856, 0.150)*r.
     assert np.allclose(pos[1], np.array([0.494, -0.856, 0.150]) * 2.0)
 
 
@@ -66,14 +66,14 @@ def test_precision_positions_primary_array_is_20() -> None:
 
 
 def test_precision_positions_hemisphere_general_pos7_z_is_0320() -> None:
-    """Table E.1 pos 7 z/r = 0,320 (not 0,325) - do not regularise it."""
+    """Table E.1 pos 7 z/r = 0.320 (not 0.325) - do not regularise it."""
     pos = precision_positions("hemisphere", radius=1.0, array="general")
     assert pos[6, 2] == pytest.approx(0.320)
     assert np.allclose(pos[6], [0.000, 0.947, 0.320])
 
 
 def test_precision_positions_hemisphere_broadband_pos19_x_is_neg0380() -> None:
-    """Table E.2 pos 19 x/r = -0,380 (a normal negative)."""
+    """Table E.2 pos 19 x/r = -0.380 (a normal negative)."""
     pos = precision_positions("hemisphere", radius=1.0, array="broadband")
     assert pos[18, 0] == pytest.approx(-0.380)
 
@@ -110,7 +110,7 @@ def test_precision_positions_bad_count_raises() -> None:
 # ISO 3745 - per-position background correction K1i (Eq. 11) with floors
 # ==========================================================================
 def test_k1_floor_edge_band_6db() -> None:
-    """dLpi = 6 dB in a <=200 Hz band -> K1 = -10*lg(1-10^-0,6) = 1,256 dB."""
+    """dLpi = 6 dB in a <=200 Hz band -> K1 = -10*lg(1-10^-0.6) = 1.256 dB."""
     k1 = precision_background_correction(
         np.array([[56.0]]), np.array([[50.0]]), frequencies=np.array([200.0])
     )
@@ -118,7 +118,7 @@ def test_k1_floor_edge_band_6db() -> None:
 
 
 def test_k1_floor_mid_band_10db() -> None:
-    """dLpi = 10 dB in a 250-5000 Hz band -> K1 = -10*lg(1-10^-1) = 0,458 dB."""
+    """dLpi = 10 dB in a 250-5000 Hz band -> K1 = -10*lg(1-10^-1) = 0.458 dB."""
     k1 = precision_background_correction(
         np.array([[60.0]]), np.array([[50.0]]), frequencies=np.array([1000.0])
     )
@@ -134,7 +134,7 @@ def test_k1_zero_above_15db() -> None:
 
 
 def test_k1_edge_band_below_6db_clamps_and_warns() -> None:
-    """dLpi < 6 dB in an edge band clamps to the 6 dB value (1,26 dB), warns."""
+    """dLpi < 6 dB in an edge band clamps to the 6 dB value (1.26 dB), warns."""
     with pytest.warns(SoundPowerWarning):
         k1 = precision_background_correction(
             np.array([[53.0]]), np.array([[50.0]]), frequencies=np.array([6300.0])
@@ -143,7 +143,7 @@ def test_k1_edge_band_below_6db_clamps_and_warns() -> None:
 
 
 def test_k1_mid_band_below_10db_clamps_to_0_46() -> None:
-    """dLpi < 10 dB in a mid band clamps to the 10 dB value (0,46 dB), warns."""
+    """dLpi < 10 dB in a mid band clamps to the 10 dB value (0.46 dB), warns."""
     with pytest.warns(SoundPowerWarning):
         k1 = precision_background_correction(
             np.array([[57.0]]), np.array([[50.0]]), frequencies=np.array([1000.0])
@@ -157,7 +157,7 @@ def test_k1_is_per_position() -> None:
     bg = np.array([[60.0, 55.0], [60.0, 55.0]])  # band-1 dLpi = 8/7 dB (>= 6)
     k1 = precision_background_correction(src, bg, frequencies=np.array([1000.0, 200.0]))
     assert k1.shape == (2, 2)
-    # position 0 band 0 dLpi = 20 dB -> 0; position 1 band 0 dLpi = 10 dB -> 0,458
+    # position 0 band 0 dLpi = 20 dB -> 0; position 1 band 0 dLpi = 10 dB -> 0.458
     assert k1[0, 0] == 0.0
     assert k1[1, 0] == pytest.approx(0.45757, abs=1e-4)
 
@@ -176,14 +176,14 @@ def test_k1_frequency_length_mismatch_raises() -> None:
 # ISO 3745 - meteorological corrections C1, C2, C3 (Eq. 14)
 # ==========================================================================
 def test_c2_zero_at_reference() -> None:
-    """At 23 deg C, 101,325 kPa the ratio (273+theta)/theta1 = 1 -> C2 = 0."""
+    """At 23 deg C, 101.325 kPa the ratio (273+theta)/theta1 = 1 -> C2 = 0."""
     mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert isinstance(mc, MeteorologicalCorrection)
     assert mc.c2 == pytest.approx(0.0, abs=1e-12)
 
 
 def test_c1_reference_value_is_minus_0128() -> None:
-    """At 23 deg C, ps = ps0 -> C1 = 5*lg(296/314) = -0,128 dB."""
+    """At 23 deg C, ps = ps0 -> C1 = 5*lg(296/314) = -0.128 dB."""
     mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert mc.c1 == pytest.approx(-0.12819, abs=1e-4)
 
@@ -211,7 +211,7 @@ def test_c3_zero_without_air_absorption() -> None:
 
 
 def test_c3_from_air_absorption() -> None:
-    """C3 = A0*(1,005 3 - 0,001 2*A0)^1,6, A0 = a(f)*r."""
+    """C3 = A0*(1.005 3 - 0.001 2*A0)^1.6, A0 = a(f)*r."""
     a, r = 0.02, 3.0
     mc = meteorological_corrections(
         temperature_c=23.0,
@@ -233,13 +233,13 @@ def test_meteorological_invalid_pressure_raises() -> None:
 # ISO 3745 - uncertainty (Eq. 24/25)
 # ==========================================================================
 def test_uncertainty_worked_example_k2() -> None:
-    """Clause 10.5 EXAMPLE: sigma_omc_db=2,0, sigma_R0=0,5, k=2 -> U = 4,1 dB."""
+    """Clause 10.5 EXAMPLE: sigma_omc_db=2.0, sigma_R0=0.5, k=2 -> U = 4.1 dB."""
     u = precision_uncertainty(0.5, 2.0, 2.0)
     assert u == pytest.approx(4.123, abs=1e-3)
 
 
 def test_uncertainty_one_sided_k_1p6() -> None:
-    """k = 1,6 (one-sided) scales sigma_tot: U = 1,6*sqrt(0,25+4) = 3,299 dB."""
+    """k = 1.6 (one-sided) scales sigma_tot: U = 1.6*sqrt(0.25+4) = 3.299 dB."""
     u = precision_uncertainty(0.5, 2.0, 1.6)
     assert u == pytest.approx(1.6 * np.sqrt(4.25), abs=1e-6)
 
@@ -272,7 +272,7 @@ def test_hemisphere_uniform_field_lw() -> None:
 
 def test_the_air_absorption_rate_reaches_c3_of_each_band() -> None:
     """``air_absorption_db_per_m`` is the a(f) of C3 (Eq. 21), per band: a
-    band with 0.02 dB/m on a 3 m sphere gains A0*(1,005 3 - 0,001 2*A0)^1,6
+    band with 0.02 dB/m on a 3 m sphere gains A0*(1.005 3 - 0.001 2*A0)^1.6
     with A0 = a*r, and a band with none gains nothing.
     """
     r, a = 3.0, 0.02
@@ -314,7 +314,7 @@ def test_area_weighted_equals_equal_area_for_equal_areas() -> None:
 
 
 def test_anechoic_a_weighted_uncertainty_is_half_db_base() -> None:
-    """The A-weighted sigma_R0 is 0,5 dB in both rooms; U = 2*0,5 = 1,0 dB
+    """The A-weighted sigma_R0 is 0.5 dB in both rooms; U = 2*0.5 = 1.0 dB
     with no operating uncertainty (Eq. 24/25).
     """
     res = sound_power_anechoic(np.full((40, 1), 70.0), "sphere", radius=1.0)
@@ -322,7 +322,7 @@ def test_anechoic_a_weighted_uncertainty_is_half_db_base() -> None:
 
 
 def test_anechoic_per_band_uncertainty_uses_table3() -> None:
-    """Sphere -> Table 3 (anechoic): 1000 Hz sigma_R0 = 0,5 -> U = 1,0 dB."""
+    """Sphere -> Table 3 (anechoic): 1000 Hz sigma_R0 = 0.5 -> U = 1.0 dB."""
     res = sound_power_anechoic(
         np.full((40, 1), 70.0), "sphere", radius=1.0, frequencies=np.array([1000.0])
     )
@@ -330,7 +330,7 @@ def test_anechoic_per_band_uncertainty_uses_table3() -> None:
 
 
 def test_hemisphere_per_band_uncertainty_uses_table2() -> None:
-    """Hemisphere -> Table 2 (hemi-anechoic): 1000 Hz sigma_R0 = 1,0 -> U = 2,0."""
+    """Hemisphere -> Table 2 (hemi-anechoic): 1000 Hz sigma_R0 = 1.0 -> U = 2.0."""
     res = sound_power_anechoic(
         np.full((40, 1), 70.0), "hemisphere", radius=1.0, frequencies=np.array([1000.0])
     )
@@ -357,7 +357,7 @@ def test_anechoic_full_chain_with_k1() -> None:
     """End-to-end: LW = Lp_bar(after K1) + 10*lg(S) + C1 + C2."""
     r = 1.0
     src = np.full((40, 1), 80.0)
-    bg = np.full((40, 1), 70.0)  # dLpi = 10 dB (mid band) -> K1 = 0,458
+    bg = np.full((40, 1), 70.0)  # dLpi = 10 dB (mid band) -> K1 = 0.458
     freqs = np.array([1000.0])
     res = sound_power_anechoic(
         src, "hemisphere", radius=r, background_levels=bg, frequencies=freqs
@@ -372,7 +372,7 @@ def test_anechoic_full_chain_with_k1() -> None:
 
 def test_anechoic_bands_above_10khz_survive_without_lwa() -> None:
     """ISO 3745 covers one-third octaves up to 20 kHz (sigma_R0 Tables 2/3),
-    but the ISO 3744 Annex E A-weighting table stops at 10 kHz: a 12,5 kHz
+    but the ISO 3744 Annex E A-weighting table stops at 10 kHz: a 12.5 kHz
     band must not abort the determination -- the per-band LW and uncertainty
     stay defined and only the A-weighted total is NaN.
     """
@@ -543,7 +543,7 @@ def test_lw0_equals_lw_at_reference() -> None:
 
 
 def test_lw0_shift_off_reference() -> None:
-    """B=100 000 Pa, theta=20 deg C -> LW0 = LW + 0,0194 dB (Eq. 10)."""
+    """B=100 000 Pa, theta=20 deg C -> LW0 = LW + 0.0194 dB (Eq. 10)."""
     areas = np.array([1.0, 1.0])
     i_n = np.full((2,), 1.0e-5)
     res = sound_power_intensity_precision(
@@ -580,7 +580,7 @@ def test_intensity_non_finite_area_raises() -> None:
 
 
 def test_intensity_temperature_below_absolute_zero_raises() -> None:
-    """Eq. 10 normalizes with 296,15/(273,15 + theta), an absolute temperature.
+    """Eq. 10 normalizes with 296.15/(273.15 + theta), an absolute temperature.
 
     At absolute zero that denominator vanishes and below it the whole ratio
     turns negative, so the logarithm of Eq. 10 would be handed an infinity or
@@ -689,7 +689,7 @@ def test_criterion_1_repeatability_uses_half_s() -> None:
     i_n = np.full((4, 1), 2.0e-6)
     lp = np.full((4, 1), 60.0)
     ind = precision_field_indicators(i_n, lp)
-    freqs = np.array([1000.0])  # s = 1,0 -> s/2 = 0,5 dB
+    freqs = np.array([1000.0])  # s = 1.0 -> s/2 = 0.5 dB
     crit_pass = precision_qualification(
         ind,
         scan_intensity_level_1=np.array([70.0]),
@@ -709,7 +709,7 @@ def test_criterion_1_repeatability_uses_half_s() -> None:
 
 
 def test_criterion_5_scan_density_ratio() -> None:
-    """Criterion 5: 0,83 <= FS(1)/FS(2) <= 1,2."""
+    """Criterion 5: 0.83 <= FS(1)/FS(2) <= 1.2."""
     i_n = np.full((4, 1), 2.0e-6)
     lp = np.full((4, 1), 60.0)
     ind = precision_field_indicators(i_n, lp)
@@ -723,7 +723,7 @@ def test_criterion_5_scan_density_ratio() -> None:
     crit2 = precision_qualification(
         ind,
         field_nonuniformity_1=np.array([1.0]),
-        field_nonuniformity_2=np.array([2.0]),  # ratio 0,5 < 0,83
+        field_nonuniformity_2=np.array([2.0]),  # ratio 0.5 < 0.83
     )
     assert crit2.criterion_5 is not None
     assert bool(crit2.criterion_5[0]) is False
@@ -761,7 +761,7 @@ def test_criterion_5_qualifies_band_despite_failed_criterion_4() -> None:
         "pressure_residual_index": 14.0,
         "frequencies": np.array([1000.0]),
     }
-    # Doubled scan density converges (ratio 1,0): criterion 5 rescues the band.
+    # Doubled scan density converges (ratio 1.0): criterion 5 rescues the band.
     crit = precision_qualification(
         ind,
         field_nonuniformity_1=ind.fs.copy(),
@@ -777,7 +777,7 @@ def test_criterion_5_qualifies_band_despite_failed_criterion_4() -> None:
     crit_no5 = precision_qualification(ind, **common)
     assert crit_no5.qualified is not None
     assert bool(crit_no5.qualified[0]) is False
-    # A non-converged density (ratio 0,5) does not rescue it either.
+    # A non-converged density (ratio 0.5) does not rescue it either.
     crit_bad5 = precision_qualification(
         ind,
         field_nonuniformity_1=ind.fs.copy(),

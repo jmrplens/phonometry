@@ -9,7 +9,7 @@ only the reader can tell them apart if something separates them first.
 1. **A transcription error**, almost always ours. It is the only one of the
    three this script fails on, and density is where it shows: every density
    this script does not already accept agrees across these books to within
-   2,6 per cent, because a density is the one property a table cannot get very
+   2.6 per cent, because a density is the one property a table cannot get very
    wrong without the material becoming a different material. A density that
    disagrees by more than :data:`DENSITY_TOLERANCE`, which is 8 per cent, is a
    digit somebody typed wrong, and the somebody is usually whoever transcribed
@@ -63,9 +63,9 @@ if TYPE_CHECKING:
 
 #: How far the density of one material may vary between books before it is
 #: read as a typo rather than as a disagreement. The widest spread the script
-#: does not accept is iron at 2,6 per cent, and a mistyped digit moves a
+#: does not accept is iron at 2.6 per cent, and a mistyped digit moves a
 #: density by ten per cent at the very least, so the band is set between the
-#: two. The one accepted disagreement is far above it, at 21,5 per cent, which
+#: two. The one accepted disagreement is far above it, at 21.5 per cent, which
 #: is what a real difference between books looks like beside a rounding.
 DENSITY_TOLERANCE = 0.08
 

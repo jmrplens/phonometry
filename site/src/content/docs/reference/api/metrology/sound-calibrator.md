@@ -56,7 +56,7 @@ rather than grading it against a neighbouring row.
 
 **The /M correction is an input.** A class LS/M or 1/M pistonphone's output
 follows the ambient static pressure, and its manual gives the correction to
-the reference 101,325 kPa (5.1.5, 6.3 i). That correction depends on the
+the reference 101.325 kPa (5.1.5, 6.3 i). That correction depends on the
 barometer reading and on data only the manufacturer has, so this module does
 not compute it: the caller supplies it as
 [`SoundCalibratorMeasurements.static_pressure_correction`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements) and it is
@@ -66,8 +66,8 @@ B.4.3.2). Every other calibrator shall not need any environmental correction
 
 **The abbreviated environmental test.** A.6.4 lets a laboratory replace the
 full temperature and humidity tests (A.6.5 to A.6.7) with a few combined
-conditions judged against tighter limits: Table 5 reduced by 0,05 dB for
-classes LS and 1 and by 0,10 dB for class 2, and 0,5 %, 0,5 % and 1,3 % for the
+conditions judged against tighter limits: Table 5 reduced by 0.05 dB for
+classes LS and 1 and by 0.10 dB for class 2, and 0.5 %, 0.5 % and 1.3 % for the
 frequency (A.6.4.7). A calibrator that meets those is deemed to conform; one
 that does not is **not** thereby non-conforming, it has to be given the full
 tests (A.6.1.2). `environmental_test="abbreviated"` applies the reduced limits
@@ -359,7 +359,7 @@ frequency); an uncertainty given as one number applies to all of them.
 | `fluctuation_uncertainty_db` | Its expanded uncertainty, in decibels. |
 | `frequency_deviation_percent` | Measured minus specified frequency, in per cent of the specified frequency (5.4.2). |
 | `frequency_uncertainty_percent` | Its expanded uncertainty, in per cent of the specified frequency. |
-| `distortion_percent` | The total distortion + noise over 22,4 Hz to 22,4 kHz (5.6), in per cent. |
+| `distortion_percent` | The total distortion + noise over 22.4 Hz to 22.4 kHz (5.6), in per cent. |
 | `distortion_uncertainty_percent` | Its expanded uncertainty, in per cent distortion. |
 | `supply_voltage_deviation_db` | The level at a supply voltage at an end of the permitted range minus the level at the nominal voltage (5.3.4), in decibels, judged against Table 3. The same level minus the specified level has to meet Table 2 as well (5.3.4, A.5.5.7, A.5.5.8), and goes into `level_deviation_db` with the others. |
 | `supply_voltage_uncertainty_db` | Its expanded uncertainty, in decibels. |
@@ -609,7 +609,7 @@ static-pressure correction is added to it (5.3.2, B.4.3.2).
 | :--- | :--- |
 | `calibrator_class` | `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"` (Table 1); `1` and `2` may be given as integers. |
 | `measurements` | What was measured, as [`SoundCalibratorMeasurements`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements). |
-| `nominal_frequency_hz` | The nominal frequency of the setting, in hertz. It has to be one the class has acceptance limits at: 31,5 Hz to 16 kHz for class 1, 160 Hz to 1 250 Hz for classes LS and 2 (5.1.2). |
+| `nominal_frequency_hz` | The nominal frequency of the setting, in hertz. It has to be one the class has acceptance limits at: 31.5 Hz to 16 kHz for class 1, 160 Hz to 1 250 Hz for classes LS and 2 (5.1.2). |
 | `environmental_test` | `"full"` (default) judges the environmental requirements against Tables 5 and 6; `"abbreviated"` against the reduced limits of A.6.4.7, where a failure calls for the full tests rather than a non-conformance (A.6.1.2). |
 
 **Returns:** The [`SoundCalibratorVerification`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratorverification), whose `passes` is the verdict and whose `requirements` carry one verdict each.

@@ -3,29 +3,29 @@
 
 Normative anchors (BS EN ISO 3743-1:2010, read on the printed pages):
 - 4.2: V >= 40 m3 and >= 40 times the reference box; largest box dimension
-  <= 1,0 m for 40 m3 to 100 m3 and <= 2,0 m above 100 m3.
-- 4.3: no boundary absorbs more than 0,20.
+  <= 1.0 m for 40 m3 to 100 m3 and <= 2.0 m above 100 m3.
+- 4.3: no boundary absorbs more than 0.20.
 - 4.4: the largest spread between the eight orientations in each band from
   125 Hz to 8 kHz does not exceed Table 3.
-- 7.4, Eq. (7), (8), Table 2: sM about the arithmetic mean; sM <= 2,5 -> 1
-  location; 2,5 < sM <= 4,0 -> 2; sM > 4,0 -> 2 plus 2 in another room.
+- 7.4, Eq. (7), (8), Table 2: sM about the arithmetic mean; sM <= 2.5 -> 1
+  location; 2.5 < sM <= 4.0 -> 2; sM > 4.0 -> 2 plus 2 in another room.
 - Eq. (9)-(12): energy means over source locations and positions.
-- Eq. (13) and 8.1.3: K1 = -10 lg(1 - 10^(-0,1 dLp)); dLp > 15 -> 0;
-  6 <= dLp <= 15 -> Eq. (13); dLp < 6 -> 1,3 dB, an upper bound. 8.1.3
+- Eq. (13) and 8.1.3: K1 = -10 lg(1 - 10^(-0.1 dLp)); dLp > 15 -> 0;
+  6 <= dLp <= 15 -> Eq. (13); dLp < 6 -> 1.3 dB, an upper bound. 8.1.3
   writes dLp = L'p(ST) - Lp(B) only: K1(RSS) enters Eq. (14) with a plus
   sign, so a capped K1(RSS) lowers LW and makes no upper bound.
 - Eq. (14): LW = LW(RSS) - L'p(RSS) + L'p(ST) + K1(RSS) - K1.
 - Eq. (15)-(20): the sound energy level.
 - Eq. (22), (23), 9.5: sigma_tot = sqrt(sigma_R0^2 + sigma_omc^2), U = k
-  sigma_tot, k = 2; EXAMPLE: U = 2 sqrt(1,5^2 + 2^2) = 5 dB.
+  sigma_tot, k = 2; EXAMPLE: U = 2 sqrt(1.5^2 + 2^2) = 5 dB.
 - Eq. (24): sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2), with sigma_omc
   not above sigma_tot / sqrt(2).
-- Table 3: 3,0 / 2,0 / 1,5 (the "400 to 5 000" row, read as the octaves
-  500 Hz to 4 kHz) / 2,5 dB, and 1,5 dB A-weighted.
-- Table C.1, sigma_R0 = 1,5 dB row: 1,6 / 2,5 / 4,3 dB for sigma_omc = 0,5 /
+- Table 3: 3.0 / 2.0 / 1.5 (the "400 to 5 000" row, read as the octaves
+  500 Hz to 4 kHz) / 2.5 dB, and 1.5 dB A-weighted.
+- Table C.1, sigma_R0 = 1.5 dB row: 1.6 / 2.5 / 4.3 dB for sigma_omc = 0.5 /
   2 / 4 dB.
-- Annex A: C2 = -10 lg(ps/ps0) + 15 lg((273,15 + theta)/296).
-- Table B.1: Ck = -26,2 -16,1 -8,6 -3,2 0,0 1,2 1,0 -1,1 dB.
+- Annex A: C2 = -10 lg(ps/ps0) + 15 lg((273.15 + theta)/296).
+- Table B.1: Ck = -26.2 -16.1 -8.6 -3.2 0.0 1.2 1.0 -1.1 dB.
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ SIGMA_R0_TABLE_3 = np.array([3.0, 2.0, 1.5, 1.5, 1.5, 1.5, 2.5])
 
 
 def _energy_mean(levels: np.ndarray, axis: int) -> np.ndarray:
-    """10 lg[(1/n) sum 10^(0,1 L)] along ``axis`` (Eq. 9 to 12, 15, 17, 18)."""
+    """10 lg[(1/n) sum 10^(0.1 L)] along ``axis`` (Eq. 9 to 12, 15, 17, 18)."""
     return np.asarray(10.0 * np.log10(np.mean(10.0 ** (0.1 * levels), axis=axis)))
 
 
@@ -169,14 +169,14 @@ def test_background_correction_is_eq13_of_the_two_means() -> None:
 @pytest.mark.parametrize(
     ("margin", "expected"),
     [
-        # -10 lg(1 - 10^-0,6): the 6 dB edge is still Eq. (13)
+        # -10 lg(1 - 10^-0.6): the 6 dB edge is still Eq. (13)
         (6.0, 1.2563),
         (10.0, 0.4576),
-        # -10 lg(1 - 10^-1,5): the 15 dB edge is still Eq. (13)
+        # -10 lg(1 - 10^-1.5): the 15 dB edge is still Eq. (13)
         (15.0, 0.1396),
         # above 15 dB: nothing to correct
         (15.01, 0.0),
-        # below 6 dB: 1,3 dB, "the value for dLp = 6 dB" to one decimal
+        # below 6 dB: 1.3 dB, "the value for dLp = 6 dB" to one decimal
         (5.99, 1.3),
         (2.0, 1.3),
     ],
@@ -200,7 +200,7 @@ def test_background_rules_of_8_1_3(margin: float, expected: float) -> None:
 
 
 def test_margin_of_the_source_below_6_db_is_an_upper_bound() -> None:
-    """8.1.3: the source under test's margin below 6 dB fixes K1 at 1,3 dB,
+    """8.1.3: the source under test's margin below 6 dB fixes K1 at 1.3 dB,
     less than Eq. (13) would take, so the band reads high: an upper bound.
     """
     background = BACKGROUND.copy()
@@ -303,7 +303,7 @@ def test_fewer_than_three_positions_warn() -> None:
 # Annex A, Annex B, clause 9
 # --------------------------------------------------------------------------
 def test_annex_a_c2_at_the_reference_conditions_is_theta1_residue() -> None:
-    """theta_1 = 296 K beside a 23,0 degC reference leaves C2 = 15 lg(296,15/296)."""
+    """theta_1 = 296 K beside a 23.0 degC reference leaves C2 = 15 lg(296.15/296)."""
     res = _power()
     assert res.c2 == pytest.approx(15.0 * math.log10(296.15 / 296.0), abs=1e-12)
     np.testing.assert_allclose(
@@ -315,8 +315,8 @@ def test_annex_a_c2_at_the_reference_conditions_is_theta1_residue() -> None:
 
 
 def test_annex_a_c2_at_500_m_is_0_26_db() -> None:
-    """Eq. (A.2) at 500 m and 23 degC: ps = 95,46 kPa, C2 = 0,26 dB, not the
-    0,4 dB C.4.2.5 quotes (see docs/ERRATA.md).
+    """Eq. (A.2) at 500 m and 23 degC: ps = 95.46 kPa, C2 = 0.26 dB, not the
+    0.4 dB C.4.2.5 quotes (see docs/ERRATA.md).
     """
     ps = emission.static_pressure_from_altitude(500.0)
     res = _power(static_pressure_kpa=ps)
@@ -358,7 +358,7 @@ def test_table3_sigma_r0_per_band_and_a_weighted() -> None:
 
 
 def test_9_5_example_expanded_uncertainty_is_5_db() -> None:
-    """9.5 EXAMPLE: sigma_omc = 2,0 dB, k = 2, sigma_R0 = 1,5 dB -> U = 5 dB."""
+    """9.5 EXAMPLE: sigma_omc = 2.0 dB, k = 2, sigma_R0 = 1.5 dB -> U = 5 dB."""
     res = _power(sigma_omc_db=2.0)
     assert res.expanded_uncertainty_a == pytest.approx(5.0, abs=1e-12)
     np.testing.assert_allclose(
@@ -368,7 +368,7 @@ def test_9_5_example_expanded_uncertainty_is_5_db() -> None:
 
 @pytest.mark.parametrize(("omc", "printed"), [(0.5, 1.6), (2.0, 2.5), (4.0, 4.3)])
 def test_table_c1_row_of_the_grade_2_method(omc: float, printed: float) -> None:
-    """Table C.1, sigma_R0 = 1,5 dB: the printed totals to one decimal."""
+    """Table C.1, sigma_R0 = 1.5 dB: the printed totals to one decimal."""
     res = _power(sigma_omc_db=omc)
     assert round(res.sigma_tot_a, 1) == printed
 
@@ -531,12 +531,12 @@ def test_spread_over_the_limit_in_one_band_fails_4_4() -> None:
     [
         (40.0, [1.0, 1.0, 1.0], True, True),  # 40 m3 and 40 boxes of 1 m3
         (39.9, [0.5, 0.5, 0.5], False, True),  # below 40 m3
-        (45.0, [1.2, 1.0, 1.0], False, False),  # 48 m3 needed; 1,2 m > 1,0 m
-        (100.0, [1.1, 0.5, 0.5], True, False),  # 100 m3 still takes 1,0 m
-        (100.1, [1.1, 0.5, 0.5], True, True),  # above 100 m3: 2,0 m
+        (45.0, [1.2, 1.0, 1.0], False, False),  # 48 m3 needed; 1.2 m > 1.0 m
+        (100.0, [1.1, 0.5, 0.5], True, False),  # 100 m3 still takes 1.0 m
+        (100.1, [1.1, 0.5, 0.5], True, True),  # above 100 m3: 2.0 m
         (150.0, [2.1, 0.5, 0.5], True, False),
-        # Exactly 40 boxes of 2,56 m3 as read; 40 times the box is
-        # 102,400 000 000 000 02 m3 in binary, and "at least" is inclusive.
+        # Exactly 40 boxes of 2.56 m3 as read; 40 times the box is
+        # 102.400 000 000 000 02 m3 in binary, and "at least" is inclusive.
         (102.4, [0.8, 1.6, 2.0], True, True),
     ],
 )
@@ -617,8 +617,8 @@ def _survey(s_m: float) -> np.ndarray:
     return 80.0 + scale * pattern[:, None] * np.ones((1, FREQS.size))
 
 
-#: Six deviations whose sums of squares over n - 1 = 5 are exactly 6,25 and
-#: 16, so that Eq. (7) lands on the 2,5 dB and 4,0 dB edges of Table 2 without
+#: Six deviations whose sums of squares over n - 1 = 5 are exactly 6.25 and
+#: 16, so that Eq. (7) lands on the 2.5 dB and 4.0 dB edges of Table 2 without
 #: a rounding error deciding the row.
 _EXACT_2_5 = np.array([3.75, -3.75, 1.25, -1.25, 0.0, 0.0])
 _EXACT_4_0 = np.array([6.0, -6.0, 2.0, -2.0, 0.0, 0.0])
@@ -627,8 +627,8 @@ _EXACT_4_0 = np.array([6.0, -6.0, 2.0, -2.0, 0.0, 0.0])
 @pytest.mark.parametrize(
     ("deviations", "s_m", "locations", "other_room"),
     [
-        (_EXACT_2_5, 2.5, 1, 0),  # sM <= 2,5 -> one location
-        (_EXACT_4_0, 4.0, 2, 0),  # 2,5 < sM <= 4,0 -> two in the same room
+        (_EXACT_2_5, 2.5, 1, 0),  # sM <= 2.5 -> one location
+        (_EXACT_4_0, 4.0, 2, 0),  # 2.5 < sM <= 4.0 -> two in the same room
     ],
 )
 def test_table2_edges_are_inclusive(
@@ -757,8 +757,8 @@ def test_source_location_plot_annotates_the_counts() -> None:
 
 
 def test_round_robin_stays_quiet_up_to_sigma_tot_over_root_2() -> None:
-    """9.3.2: sigma_omc up to sigma_tot/sqrt(2) is expected; 2,5/sqrt(2) is
-    1,77 dB, so 1,6 dB passes silently and 1,8 dB warns.
+    """9.3.2: sigma_omc up to sigma_tot/sqrt(2) is expected; 2.5/sqrt(2) is
+    1.77 dB, so 1.6 dB passes silently and 1.8 dB warns.
     """
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
@@ -790,7 +790,7 @@ def test_room_check_legend_keys_each_colour_by_a_bar_of_it() -> None:
     legend entry: each entry takes the colour of a bar it names.
     """
     spread = SIGMA_R0_TABLE_3.copy()
-    spread[0] = 4.9  # 125 Hz over its 3,0 dB
+    spread[0] = 4.9  # 125 Hz over its 3.0 dB
     check = emission.check_hard_walled_room(
         _orientations(spread),
         frequencies=FREQS,

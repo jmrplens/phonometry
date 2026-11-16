@@ -96,11 +96,11 @@ print(round(noise_control.corrected_incipient_ratio(holes, 1.0e6), 4))
 #                                                       # 0.3698  still above x_F
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/valve_cavitation_noise.svg" alt="Three panels. Left: the level one metre from the pipe against the differential pressure ratio, drawn twice for the same valve with characteristic pressure ratios 0,1 apart, each curve rising smoothly, stepping up sharply at its own threshold and flattening near 90 decibels, with the three worked examples marked. Middle: the sound pressure level in each one-third-octave band from 50 Hz to 20 kHz, showing the turbulent and cavitating shares of the internal spectrum, their sum, and the level one metre outside sixty to a hundred decibels below, with both peak frequencies marked. Right: the two acoustical efficiencies against the differential pressure ratio on a logarithmic axis, the turbulent one almost flat near one part in a million and the cavitating one rising from zero at the threshold to cross it and keep climbing" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/valve_cavitation_noise.svg" alt="Three panels. Left: the level one metre from the pipe against the differential pressure ratio, drawn twice for the same valve with characteristic pressure ratios 0.1 apart, each curve rising smoothly, stepping up sharply at its own threshold and flattening near 90 decibels, with the three worked examples marked. Middle: the sound pressure level in each one-third-octave band from 50 Hz to 20 kHz, showing the turbulent and cavitating shares of the internal spectrum, their sum, and the level one metre outside sixty to a hundred decibels below, with both peak frequencies marked. Right: the two acoustical efficiencies against the differential pressure ratio on a logarithmic axis, the turbulent one almost flat near one part in a million and the cavitating one rising from zero at the threshold to cross it and keep climbing" width="100%" />
 
 *The left panel is Annex A's own Figure A.1: the same valve at the same flow,
-with a characteristic pressure ratio 0,1 apart, and 14 dB between the two
-markers at $x_F = 0{,}35$.*
+with a characteristic pressure ratio 0.1 apart, and 14 dB between the two
+markers at $x_F = 0.35$.*
 
 That 14 dB is the reason 4.2 warns that a prediction built on the estimate
 "can create uncertainties". The estimate is not a small correction to the
@@ -136,18 +136,18 @@ $$
 Equation (9) is the other one, and it is worth reading factor by factor:
 
 $$
-\eta_\mathrm{cav} = 0{,}32\, \eta_\mathrm{turb}
+\eta_\mathrm{cav} = 0.32\, \eta_\mathrm{turb}
   \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
   \mathrm{e}^{5 x_{Fzp1}}
-  \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
+  \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0.5}
   \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
-  \left(x_F - x_{Fzp1}\right)^{1,5}
+  \left(x_F - x_{Fzp1}\right)^{1.5}
 $$
 
-Three of those factors do all the work. $(x_F - x_{Fzp1})^{1,5}$ starts the
+Three of those factors do all the work. $(x_F - x_{Fzp1})^{1.5}$ starts the
 term at **exactly zero** on the threshold, so the two regimes meet without a
 step. $(x_F/x_{Fzp1})^5$ then makes it climb almost vertically. And
-$(1 - x_F)^{-0,5}$ sends it towards infinity as the valve approaches flashing,
+$(1 - x_F)^{-0.5}$ sends it towards infinity as the valve approaches flashing,
 which is where the method stops.
 
 ```python
@@ -204,9 +204,9 @@ print(round(res.external_level, 1), "dB at 1 m")        # 81.0 dB at 1 m
 ```
 
 Every one of those is a printed cell of Annex A's Table A.1. The same call on
-the first column, 30 kg/s into 8 bar, stays turbulent and answers 62,7 dB; the
-third column is the second one again with $x_{Fz}$ shifted by 0,1, and answers
-66,9 dB.
+the first column, 30 kg/s into 8 bar, stays turbulent and answers 62.7 dB; the
+third column is the second one again with $x_{Fz}$ shifted by 0.1, and answers
+66.9 dB.
 
 The two peak frequencies are Equations (11) and (13), and (13) is the
 surprising one: on the threshold the cavitating peak is **six times** the
@@ -247,10 +247,10 @@ print(round(float(res.band_transmission_loss[band]), 2))  # -51.76
 print(round(float(res.band_external_level[band]), 1))     # 77.4
 ```
 
-Those three are printed in Table A.1 as 141,9 dB, **51,76 dB** and 77,4 dB.
+Those three are printed in Table A.1 as 141.9 dB, **51.76 dB** and 77.4 dB.
 The middle one is printed without its minus sign, and it cannot be: its own
-two inputs, $-44{,}71$ and $-7{,}053$ dB, sum to $-51{,}763$, and the row
-below only reproduces its printed 77,4 dB with the negative value.
+two inputs, $-44.71$ and $-7.053$ dB, sum to $-51.763$, and the row
+below only reproduces its printed 77.4 dB with the negative value.
 [The errata register](/phonometry/reference/errata/) records it, along with
 three intermediates of the same table that its own equations do not
 reproduce.
@@ -258,9 +258,9 @@ reproduce.
 ## 5. One equation, printed two ways
 
 Equation (12), the Strouhal number that places the turbulent peak, appears
-twice in the document and not identically. Clause 5.1 prints a leading 0,02
-and no valve style modifier; Table A.1 prints 0,036 and a factor
-$F_d^{0,75}$. Both are on the page, and they are not the same function of the
+twice in the document and not identically. Clause 5.1 prints a leading 0.02
+and no valve style modifier; Table A.1 prints 0.036 and a factor
+$F_d^{0.75}$. Both are on the page, and they are not the same function of the
 valve.
 
 ```python
@@ -278,7 +278,7 @@ print(round(noise_control.jet_strouhal_number(**form, form="annex"), 3))   # 0.3
 print(round(noise_control.jet_strouhal_number(**form, form="clause"), 3))  # 0.425
 ```
 
-Only the annex form reproduces the annex's own printed $N_\mathrm{Str} = 0{,}399$,
+Only the annex form reproduces the annex's own printed $N_\mathrm{Str} = 0.399$,
 so it is the default here and the clause form is one keyword away. For this
 valve the two differ by 6 %; for a single-port valve with $F_d = 1$ the annex
 form is 80 % above the clause one, which is five sixths of an octave in the
@@ -337,8 +337,8 @@ print(round(noise_control.last_stage_seat_diameter_mm(45.0), 1))   # 37.7
 
 The last of those carries its unit in its name for a reason. The formula it
 implements is the one display formula in the standard with no equation number,
-$d_o = 5{,}2\sqrt{N_{34} C_n}$, and Clause 3 declares $d_o$ in metres, which
-for any real last stage it cannot be: 37,7 of anything is millimetres. Divide
+$d_o = 5.2\sqrt{N_{34} C_n}$, and Clause 3 declares $d_o$ in metres, which
+for any real last stage it cannot be: 37.7 of anything is millimetres. Divide
 by a thousand before handing it to Equation (12).
 
 ## What this guide covers

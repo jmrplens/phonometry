@@ -73,7 +73,7 @@ _BILD_1_MIDPOINTS: dict[tuple[BuildingClass, float], float] = {
 }
 
 #: The tables print whole millimetres per second, or one decimal for the
-#: 2,5 of Table 3.
+#: 2.5 of Table 3.
 _TOLERANCE = 0.005
 
 _CLASS_LABELS: dict[BuildingClass, str] = {

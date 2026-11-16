@@ -1,6 +1,6 @@
 {
   "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
-  "about": "Eighteen rows over seventeen materials, the glass twice because the page prints a damping factor for monolithic and another for laminated. The names are the ones the page prints, in Spanish, because a catalogue row says what its own page says; matching a material across books is the agreement work's job and not the name's, since Steel, Steel (mild) and Steel, cast steel do not match each other either. The page prints the critical frequency for a one centimetre plate rather than the h f_c product, so the product held here is that frequency times 0,01 m, which is a change of unit and not a derivation. There is no modulus, no Poisson ratio and no wave speed, so a row gives a density, that product and a damping factor and stops. Against Hopkins the aluminium and the brick agree inside one per cent and the glass inside four, and the steel is nineteen per cent low, which the agreement work has to report rather than smooth over: the page prints nothing that could settle it from the inside.",
+  "about": "Eighteen rows over seventeen materials, the glass twice because the page prints a damping factor for monolithic and another for laminated. The names are the ones the page prints, in Spanish, because a catalogue row says what its own page says; matching a material across books is the agreement work's job and not the name's, since Steel, Steel (mild) and Steel, cast steel do not match each other either. The page prints the critical frequency for a one centimetre plate rather than the h f_c product, so the product held here is that frequency times 0.01 m, which is a change of unit and not a derivation. There is no modulus, no Poisson ratio and no wave speed, so a row gives a density, that product and a damping factor and stops. Against Hopkins the aluminium and the brick agree inside one per cent and the glass inside four, and the steel is nineteen per cent low, which the agreement work has to report rather than smooth over: the page prints nothing that could settle it from the inside.",
   "rows": [
     {
       "key": "ladrillo_macizo",
@@ -54,7 +54,7 @@
       "name": "Plomo",
       "density_kg_m3": 11300.0,
       "thickness_critical_frequency_product_m_hz": 50.0,
-      "note": "the page prints the damping factor as 0,5 to 2 times 10^-3",
+      "note": "the page prints the damping factor as 0.5 to 2 times 10^-3",
       "ranges": {
         "loss_factor": [
           0.0005,

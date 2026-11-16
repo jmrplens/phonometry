@@ -7,7 +7,7 @@ ISO/DIS 16032:2023, read in its German publication E DIN EN ISO 16032:2023-05
 the revision there is; it is cited as a draft throughout.
 
 The draft prints no worked example, so these rows stand on the numbers it does
-print and on closed forms a reader can check by hand. Printed: the 2,2 dB a
+print and on closed forms a reader can check by hand. Printed: the 2.2 dB a
 4 dB background difference gives (Clause 9, folio 10, PDF page 48), Table A.1
 (folio 12, PDF page 50) and Table 2 (folio 10, PDF page 48). Closed forms: a
 reverberation time twice the reference, an equivalent absorption area of
@@ -15,16 +15,16 @@ reverberation time twice the reference, an equivalent absorption area of
 numbers rounded to whole decibels, the thresholds of Clause 9 met by
 decimal levels, of the position
 ladder of 7.4.1, of every distance and height of 7.3 and of the corner height,
-preferred wall distance and 0,2 m from obstacles of 7.2, and the additional
+preferred wall distance and 0.2 m from obstacles of 7.2, and the additional
 position of 7.9. The on-site checks are held to the limits the draft prints,
-each met exactly and missed: the 0,5 dB calibration deviation of Clause 5
+each met exactly and missed: the 0.5 dB calibration deviation of Clause 5
 (folio 5, PDF page 43), the 30 s background of 7.6 (folio 8, PDF page 46),
 the 2 dB of the NOTE to 7.8 (folio 9, PDF page 47), and the 10 min to 15 min,
 10 dB and 5 dB of Clause 9 (folio 10, PDF page 48).
 
 Table A.1 carries a printed defect, registered in ``docs/ERRATA.md``: the
 one-third-octave C-weighting reads -5 dB at 25 Hz and 0 dB from 1 600 Hz to
-10 000 Hz, against the -4,4 dB and -0,1 dB to -4,4 dB of IEC 61672-1, and
+10 000 Hz, against the -4.4 dB and -0.1 dB to -4.4 dB of IEC 61672-1, and
 against the draft's own octave column at 2 000, 4 000 and 8 000 Hz. The row on
 that column says which cells the library takes from the print and which from
 IEC 61672-1:2013 Table 3.
@@ -62,25 +62,25 @@ def _chk_background_four_db() -> Outcome:
     return numeric(printed, float(res.correction[0]), 0.05, unit="dB", places=2)
 
 
-@register(_DOMAIN, f"{_DRAFT} Clause 9", "Correction held at 2,2 dB below 4 dB")
+@register(_DOMAIN, f"{_DRAFT} Clause 9", "Correction held at 2.2 dB below 4 dB")
 def _chk_background_limited() -> Outcome:
     # Below 4 dB the correction "shall be limited to 2,2 dB": a background 1 dB
-    # below, level with and 5 dB above the measured band all take 2,2 dB.
+    # below, level with and 5 dB above the measured band all take 2.2 dB.
     res = building.service_equipment_background_correction(
         [50.0, 50.0, 50.0], [49.0, 50.0, 55.0]
     )
     held = int(np.count_nonzero(np.abs(res.correction - 2.2) <= 1e-12))
-    return count(held, 3, subject="bands held at 2,2 dB")
+    return count(held, 3, subject="bands held at 2.2 dB")
 
 
 @register(
     _DOMAIN, f"{_DRAFT} Clause 9", "Thresholds of 10 dB and 4 dB met by decimal levels"
 )
 def _chk_background_thresholds() -> Outcome:
-    # A band 10,0 dB above its background is not corrected ("10 dB or more
-    # below"), and one 4,0 dB above is corrected, not held ("less than 4 dB").
-    # Read on levels given to 0,1 dB, whose differences are a hair off in
-    # binary: 20,4 - 10,4 and 32,3 - 28,3.
+    # A band 10.0 dB above its background is not corrected ("10 dB or more
+    # below"), and one 4.0 dB above is corrected, not held ("less than 4 dB").
+    # Read on levels given to 0.1 dB, whose differences are a hair off in
+    # binary: 20.4 - 10.4 and 32.3 - 28.3.
     res = building.service_equipment_background_correction([20.4, 32.3], [10.4, 28.3])
     matching = sum(
         got == wanted
@@ -95,7 +95,7 @@ def _chk_background_thresholds() -> Outcome:
     "Correction from 4 dB to 10 dB is the energy subtraction",
 )
 def _chk_background_formula() -> Outcome:
-    # L = L1 - K with K = -10 lg(1 - 10^(-0,1 dL)) is 10 lg(10^(L1/10) -
+    # L = L1 - K with K = -10 lg(1 - 10^(-0.1 dL)) is 10 lg(10^(L1/10) -
     # 10^(L2/10)); at 10 dB or more nothing is corrected.
     l1 = np.array([50.0, 50.0, 50.0, 50.0])
     l2 = np.array([46.0, 43.0, 40.1, 40.0])
@@ -172,7 +172,7 @@ def _chk_table_2() -> Outcome:
 @register(
     _DOMAIN,
     f"{_DRAFT} Formula (1) and 7.5",
-    "Band average of three readings, to 0,1 dB",
+    "Band average of three readings, to 0.1 dB",
 )
 def _chk_average() -> Outcome:
     readings = np.repeat(np.array([[40.0], [43.0], [46.0]]), _THIRD.size, axis=1)
@@ -222,9 +222,9 @@ def _chk_standardization() -> Outcome:
     "Normalization of an equivalent absorption area of 16 m² to A0 = 10 m² at 1 kHz",
 )
 def _chk_normalization() -> Outcome:
-    # T = 0,5 s in V = 50 m³ is A = 0,16 V / T = 16 m², so Formula (6),
-    # L_n = L - 10 lg(A0 T / (0,16 V)), adds 10 lg(16/10) = 2,04 dB to a
-    # 40 dB band: 42,04 dB, worked by hand.
+    # T = 0.5 s in V = 50 m³ is A = 0.16 V / T = 16 m², so Formula (6),
+    # L_n = L - 10 lg(A0 T / (0.16 V)), adds 10 lg(16/10) = 2.04 dB to a
+    # 40 dB band: 42.04 dB, worked by hand.
     res = building.service_equipment_level(
         _flat(40.0),
         frequencies=_THIRD,
@@ -269,8 +269,8 @@ def _chk_c_weighted() -> Outcome:
 @register(_DOMAIN, f"{_DRAFT} 7.8", "Single numbers rounded to whole decibels")
 def _chk_rounding() -> Outcome:
     # "rounded to integer numbers": the flat 40 dB spectrum gives
-    # LA,eq = 51,000 4 dB and LC,eq = 53,550 7 dB, which read 51 and 54 dB;
-    # a lone 1 000 Hz band at 44,5 dB sums to exactly 44,5 dB, and the half
+    # LA,eq = 51.000 4 dB and LC,eq = 53.550 7 dB, which read 51 and 54 dB;
+    # a lone 1 000 Hz band at 44.5 dB sums to exactly 44.5 dB, and the half
     # goes up, to 45 dB.
     flat = building.service_equipment_level(
         _flat(40.0), frequencies=_THIRD, quantity="eq"
@@ -287,9 +287,9 @@ def _chk_rounding() -> Outcome:
 
 @register(_DOMAIN, f"{_DRAFT} 7.4.1", "Position ladder at its thresholds")
 def _chk_ladder() -> Outcome:
-    # Three readings 3,0 dB apart proceed (inclusive); 3,1 dB adds positions 4
-    # and 5; six under 6,0 dB proceed and at 6,0 dB add 6 and 7; nine under
-    # 9,0 dB proceed and at 9,0 dB the session is interrupted. Positions 6 and
+    # Three readings 3.0 dB apart proceed (inclusive); 3.1 dB adds positions 4
+    # and 5; six under 6.0 dB proceed and at 6.0 dB add 6 and 7; nine under
+    # 9.0 dB proceed and at 9.0 dB the session is interrupted. Positions 6 and
     # 7 answer a difference "less than 9,0 dB" only, and a spread can only
     # widen: three or six readings already 10 dB apart interrupt at once.
     cases = (
@@ -315,15 +315,15 @@ def _chk_ladder() -> Outcome:
     "Distances and heights of the positions at each limit",
 )
 def _chk_positions() -> Outcome:
-    # Each limit met exactly and missed by 0,01 m in a 5 m x 4 m x 2,6 m room:
-    # 0,50 m from the walls and from the ceiling (in a room 2,4 m high) and
-    # 0,30 m in a small room, 1,0 m between room positions and from the
-    # corner, the preferred 1,5 m, 1,5 m from a source, room positions 0,5 m
-    # to 2,0 m high (7.3), the corner 0,5 m to 1,5 m high and its preferred
-    # 0,5 m from both walls (7.2). The 0,2 m from obstacles of 7.2 has a row
+    # Each limit met exactly and missed by 0.01 m in a 5 m x 4 m x 2.6 m room:
+    # 0.50 m from the walls and from the ceiling (in a room 2.4 m high) and
+    # 0.30 m in a small room, 1.0 m between room positions and from the
+    # corner, the preferred 1.5 m, 1.5 m from a source, room positions 0.5 m
+    # to 2.0 m high (7.3), the corner 0.5 m to 1.5 m high and its preferred
+    # 0.5 m from both walls (7.2). The 0.2 m from obstacles of 7.2 has a row
     # of its own.
     # Where decimal coordinates put a limit a hair under itself in binary
-    # (4,0 - 3,7 m; 2,3 - 1,3 m; 2,8 - 1,3 m; 2,3 - 0,8 m) the passing case
+    # (4.0 - 3.7 m; 2.3 - 1.3 m; 2.8 - 1.3 m; 2.3 - 0.8 m) the passing case
     # uses them.
     room = (5.0, 4.0, 2.6)
     corner = (0.5, 0.5, 0.5)
@@ -417,12 +417,12 @@ def _chk_additional_position() -> Outcome:
 
 
 @register(
-    _DOMAIN, f"{_DRAFT} 7.2", "Corner microphone at least 0,2 m from any obstacle"
+    _DOMAIN, f"{_DRAFT} 7.2", "Corner microphone at least 0.2 m from any obstacle"
 )
 def _chk_obstacle() -> Outcome:
     # "The microphone position shall be at least 0,2 m away from any obstacle"
-    # (folio 7, PDF page 45): the limit met exactly passes, 0,19 m fails, and
-    # 0,7 - 0,5 m, a hair under 0,2 in binary, is still 0,2 m.
+    # (folio 7, PDF page 45): the limit met exactly passes, 0.19 m fails, and
+    # 0.7 - 0.5 m, a hair under 0.2 in binary, is still 0.2 m.
     limit = ref.ISO16032_OBSTACLE_DISTANCE_M
     cases = ((limit, True), (0.7 - 0.5, True), (limit - 0.01, False))
     matching = sum(
@@ -438,14 +438,14 @@ def _chk_obstacle() -> Outcome:
     return count(matching, len(cases), subject="obstacle distances judged as 7.2 reads")
 
 
-@register(_DOMAIN, f"{_DRAFT} Clause 5", "Calibration deviating by more than 0,5 dB")
+@register(_DOMAIN, f"{_DRAFT} Clause 5", "Calibration deviating by more than 0.5 dB")
 def _chk_calibration() -> Outcome:
     # "If the calibration measurement deviates from previous calibrations by
     # more than 0,5 dB, do not use this equipment" (folio 5, PDF page 43).
-    # 93,8 and 94,3 dB are exactly 0,5 dB apart and pass, and so do 127,8
-    # and 128,3 dB, 0,500 000 000 000 014 2 apart in binary; 94,4 dB is
-    # 0,6 dB from 93,8 dB and fails. An end 0,2 dB from the beginning but
-    # 0,6 dB from an earlier calibration deviates from "previous
+    # 93.8 and 94.3 dB are exactly 0.5 dB apart and pass, and so do 127.8
+    # and 128.3 dB, 0.500 000 000 000 014 2 apart in binary; 94.4 dB is
+    # 0.6 dB from 93.8 dB and fails. An end 0.2 dB from the beginning but
+    # 0.6 dB from an earlier calibration deviates from "previous
     # calibrations" and fails.
     limit = ref.ISO16032_CALIBRATION_DEVIATION_DB
     cases = (
@@ -466,9 +466,9 @@ def _chk_background_duration() -> Outcome:
     # "over a period of approximately 30 s" (folio 8, PDF page 46). The 30 s
     # is printed and "approximately" is not given a number, so the tolerance
     # is the operator's: 29 s and 31 s are reported as 1 s departures either
-    # way, met by a 1 s tolerance and not by none; 28,9 s and 31,1 s miss the
-    # 1 s on each side; and 30,3 s, 0,300 000 000 000 000 7 s over in binary,
-    # meets a 0,3 s tolerance.
+    # way, met by a 1 s tolerance and not by none; 28.9 s and 31.1 s miss the
+    # 1 s on each side; and 30.3 s, 0.300 000 000 000 000 7 s over in binary,
+    # meets a 0.3 s tolerance.
     nominal = ref.ISO16032_BACKGROUND_DURATION_S
 
     def held(durations: list[float], tolerance: float) -> bool:
@@ -505,8 +505,8 @@ def _chk_varying_background() -> Outcome:
     # position. If the maximum level is 10 dB or more below the service
     # equipment sound pressure level the result can be regarded valid without
     # correction" (folio 10, PDF page 48). Both ends of the period are in,
-    # 599 s and 901 s are out; 30,4 dB over 20,4 dB is exactly the 10 dB,
-    # 40,3 dB over 30,3 dB is the 10 dB a hair under it in binary, and 9,9 dB
+    # 599 s and 901 s are out; 30.4 dB over 20.4 dB is exactly the 10 dB,
+    # 40.3 dB over 30.3 dB is the 10 dB a hair under it in binary, and 9.9 dB
     # is not.
     low, high, margin = ref.ISO16032_VARYING_BACKGROUND
 
@@ -536,8 +536,8 @@ def _chk_varying_background() -> Outcome:
 def _chk_disturbance() -> Outcome:
     # "for many stable sources this difference should be less than 5 dB to
     # indicate that the measurement has not been disturbed" (folio 10, PDF
-    # page 48): 4,9 dB is undisturbed; 45,3 - 40,3 dB is exactly 5 dB and
-    # 35,01 - 30,01 dB is 5 dB a hair under it in binary, and neither is less
+    # page 48): 4.9 dB is undisturbed; 45.3 - 40.3 dB is exactly 5 dB and
+    # 35.01 - 30.01 dB is 5 dB a hair under it in binary, and neither is less
     # than 5 dB.
     limit = ref.ISO16032_MAX_TO_EQUIVALENT_DB
     expected = (True, False, False, False)
@@ -559,9 +559,9 @@ def _chk_instrument_agreement() -> Outcome:
     # "If the difference is more than 2 dB, the calculations should be
     # checked" (folio 9, PDF page 47): the flat 40 dB spectrum gives
     # LA,eq = 51 dB and LC,eq = 54 dB. The difference counts either way: an
-    # instrument 2 dB under the calculation (LA 49,0 dB) or 2 dB over it
-    # (LC 56,0 dB) agrees, and one 2,1 dB under it (LA 48,9 dB) or over it
-    # (LC 56,1 dB) does not.
+    # instrument 2 dB under the calculation (LA 49.0 dB) or 2 dB over it
+    # (LC 56.0 dB) agrees, and one 2.1 dB under it (LA 48.9 dB) or over it
+    # (LC 56.1 dB) does not.
     limit = ref.ISO16032_INSTRUMENT_AGREEMENT_DB
     res = building.service_equipment_level(
         _flat(40.0), frequencies=_THIRD, quantity="eq"

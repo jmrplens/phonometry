@@ -646,7 +646,7 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
   "doi-10-1016-s0003-682x-98-00068-1": Object.freeze({
     section: "rooms-and-buildings",
     note: Object.freeze({
-      en: "The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1,7 MN/m, double-triangle 16,1 MN/m and vertical-twist 94,0 MN/m.",
+      en: "The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1.7 MN/m, double-triangle 16.1 MN/m and vertical-twist 94.0 MN/m.",
       es: "La medida que hay detrás de las filas de 50 mm de la Tabla A4 de Hopkins: mariposa 1,7 MN/m, doble triángulo 16,1 MN/m y torsión vertical 94,0 MN/m.",
     }),
   }),

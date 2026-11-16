@@ -21,7 +21,7 @@ spectrum is taken (7.1): the data of joints, welds and rail defects are edited
 out by the operator (Annex A shows what is and is not a defect); narrow upward
 spikes from particles on the rail are removed (7.2,
 [`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)); and every point is raised to where a wheel
-of 0,375 m radius would stand on it, because the probe tip is far smaller than
+of 0.375 m radius would stand on it, because the probe tip is far smaller than
 a wheel and reaches into pits a wheel rolls over (7.3,
 [`curvature_processed_roughness`](/phonometry/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)).
 
@@ -39,7 +39,7 @@ L_r = 10 \lg \frac{r_\mathrm{RMS}^2}{r_0^2}\ \mathrm{dB}, \qquad r_0 = 1\ \mathr
 $$
 
 (3.3, Formula 1). A record of a given length only resolves wavelengths up to
-a quarter of it (7.5), so a 1 m segment reports down to the 0,25 m band.
+a quarter of it (7.5), so a 1 m segment reports down to the 0.25 m band.
 
 Method B of 7.4.3 ([`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum)) runs digital one-third
 octave filters along the record itself and takes the mean square of each
@@ -71,7 +71,7 @@ the height of the peak above the straight line the spike is replaced by. The
 filters of Method B ring for a distance that grows with the wavelength of
 their band, and 7.4.3 allows them 2 m to settle whatever the band: a band is
 reported only when, over the length analysed, its filter has built up to
-within 0,15 dB of its steady output, the class 0 tolerance of EN 61260:1995
+within 0.15 dB of its steady output, the class 0 tolerance of EN 61260:1995
 4.5.3 on the integrated response. That is the reason for order 4, the lowest
 whose bank is class 0: it settles soonest. The bank is not decimated band by
 band, as the library's banks are by default: run at the record's own rate, a
@@ -272,7 +272,7 @@ curvature_processed_roughness(
 ) -> NDArray[np.float64]
 ```
 
-The record as a wheel of radius 0,375 m would ride it (7.3).
+The record as a wheel of radius 0.375 m would ride it (7.3).
 
 At every sample $x_i$ a circle $C_i(x)$ of radius
 $R$ passes through $r(x_i)$ with its centre above the
@@ -294,7 +294,7 @@ of the record can win the maximum, so the search is limited to them.
 | :--- | :--- |
 | `roughness_um` | The roughness record, in micrometres, usually after [`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes). |
 | `sample_spacing_m` | The sampling interval, in metres. |
-| `curve_radius_m` | The radius $R$ of the circle, in metres; the 0,375 m of 7.3 by default. |
+| `curve_radius_m` | The radius $R$ of the circle, in metres; the 0.375 m of 7.3 by default. |
 
 **Returns:** A new array $r'(x)$, in micrometres.
 
@@ -332,11 +332,11 @@ $r_0 = 1\ \mathrm{\mu m}$ (Formula 1).
 
 The bands reported are those whose nominal wavelength is at most a
 quarter of the length analysed (7.5) and whose filter, over that length,
-has built up to within 0,15 dB of its steady output, the class 0
+has built up to within 0.15 dB of its steady output, the class 0
 tolerance of EN 61260:1995 4.5.3; the longest bands ring on past the 2 m
 allowed and are left out until the record is long enough to dilute what
-is left of their transient. A 5 m record reports from the 0,25 m band
-down, a 19 m one from the 0,5 m band, and the shortest band is the one
+is left of their transient. A 5 m record reports from the 0.25 m band
+down, a 19 m one from the 0.5 m band, and the shortest band is the one
 whose upper edge lies below the Nyquist wavenumber.
 
 **Parameters**
@@ -521,7 +521,7 @@ reads is exactly what a record goes through.
 | Name | Description |
 | :--- | :--- |
 | `sample_spacing_m` | The sampling interval of the records, in metres; 5.5 asks for 1 mm or less. |
-| `longest_wavelength_m` | The longest band the bank holds, by its nominal wavelength, in metres; 0,5 m by default, where the Annex B listing stops (`wl_max`). The bank runs from that band to the shortest whose upper edge lies below the Nyquist wavenumber. |
+| `longest_wavelength_m` | The longest band the bank holds, by its nominal wavelength, in metres; 0.5 m by default, where the Annex B listing stops (`wl_max`). The bank runs from that band to the shortest whose upper edge lies below the Nyquist wavenumber. |
 
 **Returns:** The filter bank.
 

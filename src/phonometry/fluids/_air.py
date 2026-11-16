@@ -10,7 +10,7 @@ them.
 
 Table F.1 (printed folio 40) prints five quantities at two condition sets, and
 every one of them reproduces here from the Table F.2 coefficients (printed folio
-41) to better than 1,5e-7 relative, which is inside the rounding of the last
+41) to better than 1.5e-7 relative, which is inside the rounding of the last
 printed figure. Thermal conductivity and specific heat capacity come from the
 two expressions of Clause F.6 (printed folio 39); the annex prints their formulae
 and units but tabulates only the diffusivity they form, so those two are anchored
@@ -236,13 +236,13 @@ def air(
         other two it is a value the annex names, and it reaches the fifth figure
         of the density at most.
     :return: The :class:`~phonometry.fluids.Fluid` at that state.
-    :raises ValueError: if the temperature is at or below -273,15 degC, the
+    :raises ValueError: if the temperature is at or below -273.15 degC, the
         pressure is not positive, the humidity is outside 0 % to 100 %, the
         carbon dioxide mole fraction is outside 0 to 1, any of the four is not
         finite, or the pressure and humidity cannot hold together at that
         temperature. That last one is a combination rather than an argument: at
         20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole
-        fraction of 1,17, and a mole fraction cannot reach 1.
+        fraction of 1.17, and a mole fraction cannot reach 1.
     :raises TypeError: if ``temperature_c`` is not a single number.
         ``co2_mole_fraction``, ``relative_humidity_percent`` or ``static_pressure_pa`` are refused the same way when any is not one real number.
 
@@ -287,7 +287,7 @@ def air(
     water = (humidity / 100.0) * (saturation / pressure) * enhancement
     # Each of the three is a state that exists; the combination need not be. At
     # 20 degC and 1 kPa, 50 % relative humidity asks for more water vapour than
-    # the total pressure can hold, and the mole fraction comes out at 1,17. The
+    # the total pressure can hold, and the mole fraction comes out at 1.17. The
     # equations below carry on regardless and return a density and a speed of
     # sound that look like measurements, so the guard has to be on the fraction
     # rather than on any argument alone.

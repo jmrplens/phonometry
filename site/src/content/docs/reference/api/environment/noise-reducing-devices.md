@@ -18,7 +18,7 @@ spectrum. **EN 16272-3-1:2012** prints the normalised railway noise spectrum
 over the same eighteen bands, and its Clauses 5 and 6 are the two formulas
 below with that table in place of the other one: rolling noise puts its
 weight higher up, so the railway spectrum is flat within one decibel from
-1,25 kHz to 2,5 kHz where the road one has already begun to fall away.
+1.25 kHz to 2.5 kHz where the road one has already begun to fall away.
 The railway parts carry no category ladder; their annexes are guidance
 notes, and a rating there is the number and nothing more.
 
@@ -32,7 +32,7 @@ notes, and a rating there is the number and nothing more.
 
   A measured $\alpha_\mathrm{S}$ can exceed one band by band, which
   can push the weighted ratio past 1 and leave the logarithm without an
-  argument. The clause says so and fixes it: the ratio is limited to 0,99.
+  argument. The clause says so and fixes it: the ratio is limited to 0.99.
 
 * **EN 1793-2:2012** rates airborne insulation with the same weighting
   (Clause 5.2), on the transmitted energy rather than the absorbed:
@@ -51,8 +51,8 @@ notes, and a rating there is the number and nothing more.
   DL_{RI} = -10 \lg\left[ \frac{\sum_{i=m}^{18} RI_i\, 10^{0.1 L_i}} {\sum_{i=m}^{18} 10^{0.1 L_i}} \right]
   $$
 
-  The clause copies the 0,99 limit on the ratio from EN 1793-1, so a device
-  reflecting more than it receives in the weighted sum rates 0,04 dB.
+  The clause copies the 0.99 limit on the ratio from EN 1793-1, so a device
+  reflecting more than it receives in the weighted sum rates 0.04 dB.
 
 All three are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
 EN 1793-2 Clause 7.1, EN 1793-5 Clause 5.11). The first two have a normative
@@ -202,11 +202,11 @@ Requires matplotlib (the `[plot]` extra); returns the
 A noise reducing device rated on a ratio the standard caps.
 
 Emitted when the weighted ratio of a single-number rating is limited to
-0,99, so the rating is that limit rather than the measurement: by
+0.99, so the rating is that limit rather than the measurement: by
 [`sound_absorption_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_absorption_rating) when the absorption ratio of EN 1793-1
-Clause 5 and EN 16272-3-1 Clause 5 reaches 0,99, and by
+Clause 5 and EN 16272-3-1 Clause 5 reaches 0.99, and by
 [`sound_reflection_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_reflection_rating) when the reflection ratio of EN 1793-5
-Clause 5.8 exceeds it (a reflection ratio of 0,99 itself is not limited).
+Clause 5.8 exceeds it (a reflection ratio of 0.99 itself is not limited).
 
 ## sound_absorption_rating
 
@@ -245,7 +245,7 @@ print a category ladder, so a railway rating carries none.
 
 | Warning | When |
 | :--- | :--- |
-| RoadDeviceWarning | If the weighted ratio reaches the 0,99 limit both standards put on it, which means the rating is the limit and not the data. |
+| RoadDeviceWarning | If the weighted ratio reaches the 0.99 limit both standards put on it, which means the rating is the limit and not the data. |
 
 ## sound_reflection_rating
 
@@ -264,9 +264,9 @@ weighted by the normalised traffic noise spectrum of EN 1793-3, summed
 from the lowest reliable band $m$ to 5 kHz. For the qualification
 sample of 4 m by 4 m that band is 200 Hz (5.5.7), the default; a smaller
 device starts higher and the report names the range, for example
-`DL_RI (400 - 5 000 Hz)` for a 3,5 m barrier. Annex B's example rates
-7,68 dB before rounding on the two-decimal averages of Table B.1
-(7,65 dB on its particular values), reported as 8 dB. EN 1793-5 prints no
+`DL_RI (400 - 5 000 Hz)` for a 3.5 m barrier. Annex B's example rates
+7.68 dB before rounding on the two-decimal averages of Table B.1
+(7.65 dB on its particular values), reported as 8 dB. EN 1793-5 prints no
 category ladder.
 
 **Parameters**
@@ -289,7 +289,7 @@ category ladder.
 
 | Warning | When |
 | :--- | :--- |
-| RoadDeviceWarning | If the weighted ratio exceeds the maximum of 0,99 Clause 5.8 limits it to; a ratio of 0,99 itself is not limited. |
+| RoadDeviceWarning | If the weighted ratio exceeds the maximum of 0.99 Clause 5.8 limits it to; a ratio of 0.99 itself is not limited. |
 
 ## SPECTRA
 

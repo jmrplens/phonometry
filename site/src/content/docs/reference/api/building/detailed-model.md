@@ -393,7 +393,7 @@ upwards on its lightweight blockwork.
 | `resonant_only` | Drop the forced-transmission term below `fc`. |
 | `density` | Density `ρ` of the material, in kg/m³; with `longitudinal_velocity` it enables the Formula (B.10) plateau. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
 **Returns:** The sound reduction index `R` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -915,7 +915,7 @@ ISO 12354-2:2017, Annex D indicates.
 | `area` | In-situ area `Si` of the excited floor, in m². |
 | `laboratory_area` | Laboratory area `Si,lab` of the excited floor, in m². |
 | `coupling_length` | In-situ coupling length `lij`, in m. |
-| `laboratory_coupling_length` | Laboratory coupling length `llab`, in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4,5 m for horizontal flanking elements, 2,5 m for vertical ones. |
+| `laboratory_coupling_length` | Laboratory coupling length `llab`, in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4.5 m for horizontal flanking elements, 2.5 m for vertical ones. |
 
 **Returns:** `Ln,ij` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1060,7 +1060,7 @@ $A_o = 10$ m², the
 route used when the flanking construction is characterised as a whole by a
 laboratory measurement of the flanking normalized level difference
 (ISO 10848). ISO 12354-1 Clause 4.4.2 gives the usual laboratory coupling
-lengths: 4,5 m for horizontal flanking elements such as ceilings, 2,5 m
+lengths: 4.5 m for horizontal flanking elements such as ceilings, 2.5 m
 for vertical ones such as facades.
 
 **Parameters**
@@ -1276,7 +1276,7 @@ A Type A homogeneous element of the detailed model.
 | `length2` | The other side length, in m. |
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
-| `internal_loss_factor` | Internal loss factor `ηint` of the material (about 0,01 for common homogeneous building materials; ISO 12354-1 Table B.3 tabulates it per material). |
+| `internal_loss_factor` | Internal loss factor `ηint` of the material (about 0.01 for common homogeneous building materials; ISO 12354-1 Table B.3 tabulates it per material). |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Formula C.1; build it from [`perimeter_absorption_coefficient`](/phonometry/reference/api/building/detailed-model/#perimeter_absorption_coefficient) times the border lengths). |
 | `density` | Density `ρ` of the material, in kg/m³; supplied together with `longitudinal_velocity` it enables the high-frequency plateau of Formula (B.10). `None` (the default) leaves the plateau off. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s (ISO 12354-1 Table B.3). |
@@ -1419,7 +1419,7 @@ data come from a laboratory measurement.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 | `resonant_only` | Drop the forced-transmission term of Formula (B.2) below `fc` (Annex B.1, flanking paths). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
 **Returns:** The [`InSituElementResult`](/phonometry/reference/api/building/detailed-model/#insituelementresult).
 
@@ -1661,13 +1661,13 @@ Formula (C.4) absorption coefficients (see
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies `f`, in Hz. |
-| `internal_loss_factor` | Internal loss factor `ηint` of the material (about 0,01 for common homogeneous building materials). |
+| `internal_loss_factor` | Internal loss factor `ηint` of the material (about 0.01 for common homogeneous building materials). |
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
 | `area` | Element area `S`, in m². |
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `radiation_factor` | Radiation factor `σ` per band. |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (may be zero for a free-edged element). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
 **Returns:** The total loss factor `ηtot,situ` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1834,7 +1834,7 @@ $m' = 800$ kg/m² and `ηint` can normally be taken as 0.01.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies `f`, in Hz. |
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
-| `internal_loss_factor` | Internal loss factor `ηint` (Default: 0,01). |
+| `internal_loss_factor` | Internal loss factor `ηint` (Default: 0.01). |
 
 **Returns:** The laboratory total loss factor per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1863,7 +1863,7 @@ connected to the considered element at border `k` (the standard sums
 over at most three). Multiplied by the border length and summed over the
 perimeter it gives the $\sum l_k \alpha_k$ that
 [`in_situ_total_loss_factor`](/phonometry/reference/api/building/detailed-model/#in_situ_total_loss_factor) takes. Annex C.3 places the in-situ
-coefficients between 0,05 and 0,5.
+coefficients between 0.05 and 0.5.
 
 **Parameters**
 

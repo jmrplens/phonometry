@@ -167,7 +167,7 @@ def _chk_earphone_coupler() -> Outcome:
 @register(
     _HEAR,
     "ISO 389-1:1998 Table 2 (artificial ear, IEC 60318)",
-    "RETSPL of any other supra-aural earphone at 6,3 kHz",
+    "RETSPL of any other supra-aural earphone at 6.3 kHz",
 )
 def _chk_earphone_artificial_ear() -> Outcome:
     value = float(ph.hearing.earphone_reference_level("other supra-aural", [6300.0])[0])
@@ -476,9 +476,9 @@ def _chk_reat_table_a3() -> Outcome:
 
 
 #: Table B.1's difference row against the full-precision m1 and the printed
-#: m2: the m2 behind the printed difference lies within 0,05 dB of the printed
+#: m2: the m2 behind the printed difference lies within 0.05 dB of the printed
 #: one, and the printed difference rounds that again, so a consistent cell is
-#: at most 0,1 dB away.
+#: at most 0.1 dB away.
 _REAT_B1_DIFFERENCE_TOLERANCE_DB = 0.1
 
 
@@ -492,10 +492,10 @@ def _chk_reat_table_b1() -> Outcome:
 
     Test 2 is printed rounded, so its mean and U95 enter as printed; test 1 is
     Table A.3 at full precision. The criterion row reproduces all seven cells
-    to the printed decimal. The difference row can only agree within 0,1 dB:
+    to the printed decimal. The difference row can only agree within 0.1 dB:
     six cells round to the print, and at 8 kHz the full-precision m1 of
-    34,956 dB against the printed m2 of 38,9 dB gives 3,944 dB where the table
-    prints 4,0, 0,056 dB off because m2 is printed rounded.
+    34.956 dB against the printed m2 of 38.9 dB gives 3.944 dB where the table
+    prints 4.0, 0.056 dB off because m2 is printed rounded.
     """
     result = ph.hearing.assess_attenuation_difference(
         ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3),
@@ -542,12 +542,12 @@ def _chk_reat_table_b1() -> Outcome:
     "Minimum significant difference sqrt(2) x U95, 250 Hz to 4 kHz",
 )
 def _chk_reat_minimum_differences() -> Outcome:
-    """3,3 and 2,3 dB within, 9,3 and 6,9 dB between laboratories.
+    """3.3 and 2.3 dB within, 9.3 and 6.9 dB between laboratories.
 
     The text evaluates the rule on the U95 its tables print rounded, and writes
     that input out ("sqrt(2) x 2,3 dB = 3,3 dB"), so the rounded U95 is what
     goes in here. From the unrounded budgets the earplug values would be
-    3,21 dB and 9,37 dB; the earmuff ones round the same either way.
+    3.21 dB and 9.37 dB; the earmuff ones round the same either way.
     """
     computed = {
         f"{table} {protector}": round(
@@ -605,7 +605,7 @@ def _chk_hpd_annex_a() -> Outcome:
     """Formula (1) against the printed distribution of the worked example.
 
     The annex's own ``APV`` row is the difference of the rounded ``m_f`` and
-    ``s_f`` it displays, which is 0,1 dB from Formula (1) applied to the
+    ``s_f`` it displays, which is 0.1 dB from Formula (1) applied to the
     attenuations in three of the eight bands, so what is pinned here is the
     pair the annex computes from, band for band.
     """
@@ -692,7 +692,7 @@ def _chk_hpd_applications() -> Outcome:
 
     Clause 7.2 and Clause 8.2 both round their ratings to the nearest integer
     before the application formulas see them, which is what makes Annex C's
-    PNR84 come out at 22,5 dB rather than at the unrounded fit.
+    PNR84 come out at 22.5 dB rather than at the unrounded fit.
     """
     attenuation = ref.ISO4869_2_ATTENUATION
     hml = ph.hearing.hml_protected_level(
@@ -719,7 +719,7 @@ def _chk_hpd_applications() -> Outcome:
         and by_a.reported_level == ref.ISO4869_2_ANNEX_D_REPORTED
     )
     return Outcome(
-        expected="PNR84 = 22,5 dB; SNR84 = 21 dB; both report 82 dB",
+        expected="PNR84 = 22.5 dB; SNR84 = 21 dB; both report 82 dB",
         computed=(
             f"{pnr:.1f} dB; {snr_rating.reported} dB; "
             f"{hml.reported_level} and {by_c.reported_level} dB"
@@ -736,7 +736,7 @@ def _half_up(values: np.ndarray) -> np.ndarray:
     """Round to one decimal with halves away from zero, as a spreadsheet ROUND does.
 
     Through the shortest decimal that represents each double, so a value such
-    as 12,85 rounds the way it is written and not the way it is stored.
+    as 12.85 rounds the way it is written and not the way it is stored.
     """
 
     def one(value: float) -> float:
@@ -768,7 +768,7 @@ def _anr_workbook_total() -> ph.hearing.ANRTotalAttenuationResult:
     "Within-laboratory budget of the mean active insertion loss",
 )
 def _chk_anr_table_a2() -> Outcome:
-    """u = 0,78 dB and U95 = 1,6 dB, derived from the three components."""
+    """u = 0.78 dB and U95 = 1.6 dB, derived from the three components."""
     budget = ph.hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY
     meth, eq, env, u, u95 = ref.ISO4869_6_TABLE_A2
     matching = sum(
@@ -863,7 +863,7 @@ def _chk_anr_workbook_lower_ear() -> Outcome:
     "REAT interpolated linearly in hertz into 24 one-third octaves",
 )
 def _chk_anr_workbook_interpolation() -> Outcome:
-    """Rows 182-197, once rounded to 0,1 dB the way the workbook rounds them."""
+    """Rows 182-197, once rounded to 0.1 dB the way the workbook rounds them."""
     result = _anr_workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_REAT_THIRDS)
     matching = int(np.sum(_half_up(result.reat_third_octave_attenuation) == workbook))
@@ -871,9 +871,9 @@ def _chk_anr_workbook_interpolation() -> Outcome:
 
 
 #: 5.5 c): the workbook adds its rounded interpolation (rows 182-197) to the
-#: lower ear, so its sums sit within the 0,05 dB of that rounding.
+#: lower ear, so its sums sit within the 0.05 dB of that rounding.
 _ANR_THIRDS_TOLERANCE_DB = 0.05
-#: Formula (1) and 5.5 e): two roundings of up to 0,05 dB each.
+#: Formula (1) and 5.5 e): two roundings of up to 0.05 dB each.
 _ANR_OCTAVE_TOLERANCE_DB = 0.1
 
 
@@ -883,7 +883,7 @@ _ANR_OCTAVE_TOLERANCE_DB = 0.1
     "Total attenuation per one-third octave, 16 x 24 cells",
 )
 def _chk_anr_workbook_thirds() -> Outcome:
-    """Rows 206-221 within the 0,05 dB the workbook's rounding of a) leaves.
+    """Rows 206-221 within the 0.05 dB the workbook's rounding of a) leaves.
 
     The workbook sums its rounded interpolation (rows 182-197) and the lower
     ear (rows 134-149) and does not round the sum; the library interpolates
@@ -906,10 +906,10 @@ def _chk_anr_workbook_thirds() -> Outcome:
     "Octave-band total attenuation of 16 subjects, 8 bands",
 )
 def _chk_anr_workbook_octaves() -> Outcome:
-    """Rows 230-245 within the 0,1 dB the workbook's two roundings leave.
+    """Rows 230-245 within the 0.1 dB the workbook's two roundings leave.
 
     The workbook rounds the interpolated passive value and the octave result,
-    each by up to 0,05 dB; the library rounds neither.
+    each by up to 0.05 dB; the library rounds neither.
     """
     result = _anr_workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
@@ -928,13 +928,13 @@ def _chk_anr_workbook_octaves() -> Outcome:
     "Mean, SD and APV84 of the octave totals",
 )
 def _chk_anr_workbook_statistics() -> Outcome:
-    """Rows 247-248 to 0,1 dB, and the library's own APV84 against row 249.
+    """Rows 247-248 to 0.1 dB, and the library's own APV84 against row 249.
 
     The mean and SD rows round the library's values the way the workbook's
     ROUND does and match cell for cell. Row 249 is the rounded mean less the
     rounded SD (=D247-D248), which carries both roundings; the library's
     APV84 is Formula (1) of ISO 4869-2 at full precision and is held to
-    0,1 dB of it (63 Hz: 31,62 dB against the row's 31,7).
+    0.1 dB of it (63 Hz: 31.62 dB against the row's 31.7).
     """
     apv = _anr_workbook_total().assumed_protection
     matching = int(
@@ -1020,7 +1020,7 @@ def _chk_multiple_shock_female_r() -> Outcome:
 @register(
     _MSV,
     "ISO 2631-5:2018 Formula 1 vs Annex D Table D.1",
-    "Seat-to-spine transfer vs the 256 Hz digital filter (0,5-80 Hz)",
+    "Seat-to-spine transfer vs the 256 Hz digital filter (0.5-80 Hz)",
 )
 def _chk_multiple_shock_annex_d_filter() -> Outcome:
     freqs = np.array([0.5, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
@@ -1036,7 +1036,7 @@ def _chk_multiple_shock_annex_d_filter() -> Outcome:
         worst,
         0.04,
         places=3,
-        expected_label="max abs(Formula 1 - filter) ≤ 0,04",
+        expected_label="max abs(Formula 1 - filter) ≤ 0.04",
     )
 
 

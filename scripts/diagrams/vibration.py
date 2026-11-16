@@ -109,7 +109,7 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
 
     # --- Bottom: dominant axis, daily exposure and the Directive assessment ---
     # The Directive's whole-body A(8) is based on the HIGHEST frequency-
-    # weighted axis value (1,4 a_wx, 1,4 a_wy, a_wz), Annex Part B point 1 -
+    # weighted axis value (1.4 a_wx, 1.4 a_wy, a_wz), Annex Part B point 1 -
     # not on the ISO 2631-1 Eq. (10) vector total a_v.
     s.arrow(cx, 388, cx, 424, th.fg, 2.0)
     s.rect(400, 424, 470, 78, "none", th.secondary, rx=12, sw=2, dash="6,5")
@@ -581,7 +581,7 @@ def _d_multiple_shock(s: SVG, th: Theme) -> None:
     # ISO 2631-5:2018, Formulae (C.3) and (C.4) (PDF pages 23 and 24, folios
     # 17 and 18), print the d, u, stat and age of S_d,i, S_u,i, S_stat,i and
     # S_age upright beside the italic year counter i; the plate writes them
-    # as the guide does, and the Spanish twin carries its own 6,75.
+    # as the guide does, and the Spanish twin carries its own "6,75".
     _step(
         400,
         "Stress variable  $R = [Σ (S_d·N^{1/6} / (S_{u,i} − S_{stat}))^6]^{1/6}$",
@@ -812,7 +812,7 @@ def _d_meter_verification_bench(s: SVG, th: Theme) -> None:
     places every level those clauses name, each of them a band-limited
     indication at the reference frequency, inside the 60 dB linear operating
     range 5.7 asks for, and the box combines the two errors as 12.11.4 does,
-    through Formula (10). The example is a whole-body meter: the 15,915 Hz
+    through Formula (10). The example is a whole-body meter: the 15.915 Hz
     reference frequency of Table 1, the Table 15 ranges, and the 100 Hz
     band-limiting corner of Table 3 behind the 2 ms fall time. Periodic
     verification is clause 14 and a different bench; this plate is the
@@ -2935,21 +2935,21 @@ def _d_vibration_meter_coupling(s: SVG, th: Theme) -> None:
     """Where DIN 45669-2 puts the transducer, how it is coupled, what it feeds.
 
     The section is drawn at 30 px to the metre: two storeys of 3 m on strip
-    footings, a manhole 1 m wide and 1,5 m deep, and a machine on its own
+    footings, a manhole 1 m wide and 1.5 m deep, and a machine on its own
     foundation block as the source. The four points are the positions of
-    5.1: the foundation on the source side no higher than 0,5 m above ground
+    5.1: the foundation on the source side no higher than 0.5 m above ground
     (5.1.2), the floor at mid-span for the vertical (5.1.3), the top floor
     ceiling beside the outer wall for the horizontal pair, the plane
     DIN 4150-3:1999-02, 5.4 asks for and where 5.1.3 puts a horizontal
     transducer too, near the load-bearing walls of an upper storey, and the
     ground near the source at a set distance, clear of a disturbing body by
-    at least 1,5 times its largest dimension, which is where 5.1.4 measures
+    at least 1.5 times its largest dimension, which is where 5.1.4 measures
     what a source itself emits. The arrows are the directions of 5.2, where
     x points at the source by preference. The three insets are the couplings
     of 5.3: the device of Figure 1 b) with its rounded feet, the device of
-    Figure 1 a) with its spikes, both drawn at 0,85 px to the millimetre,
+    Figure 1 a) with its spikes, both drawn at 0.85 px to the millimetre,
     and the ground spike of the note to 5.3.4.2 a), which the standard
-    describes and does not draw, at 0,25 px to the millimetre. The strip at
+    describes and does not draw, at 0.25 px to the millimetre. The strip at
     the foot is the DIN 45669-1:2010-09 chain the cable feeds, and the box is
     Formula (2) with its counting rule.
     """
@@ -2985,7 +2985,7 @@ def _d_vibration_meter_coupling(s: SVG, th: Theme) -> None:
     s.text(mx, 276, "floor mid-span:", 12, th.fg)
     s.text(mx, 294, "vertical, $z$ (5.1.3)", 12, th.fg)
 
-    # The foundation on the source side, its top 0,47 m above ground (5.1.2).
+    # The foundation on the source side, its top 0.47 m above ground (5.1.2).
     fx = 357.0
     _transducer_block(s, fx, gy - 1)
     s.arrow(fx + 7, gy - 7.5, fx + 44, gy - 7.5, th.accent, 2.0)
@@ -3016,7 +3016,7 @@ def _d_vibration_meter_coupling(s: SVG, th: Theme) -> None:
     )
 
     # The ground near the source, on a spike driven fully in: 15 px is the
-    # 0,5 m of the note to 5.3.4.2 a) at the section's own scale.
+    # 0.5 m of the note to 5.3.4.2 a) at the section's own scale.
     gx = 560.0
     s.line(gx, gy, gx, gy + 15, th.fg, 3.0)
     s.rect(gx - 7, gy - 3, 14, 3, th.fg)
@@ -3370,7 +3370,7 @@ def _d_railway_cross_section(s: SVG, th: Theme) -> None:
     s.text(803, gy - 110, "$z′$", 13, th.secondary, "start")
     s.text(781, 120, "floor", 12, th.fg)
     # The foundation point rests on the ground slab: DIN 45669-2, 5.1.2, keeps
-    # it within 0,5 m of the ground surface, on the outer foundation or the
+    # it within 0.5 m of the ground surface, on the outer foundation or the
     # rising wall nearest the source.
     _accel_wall(s, 713, gy - 14, 12)
     s.arrow(732, gy - 14, 762, gy - 14, th.secondary, 1.6)
@@ -3792,7 +3792,7 @@ def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     window recess, and the fourth channel DIN 45669-1, 5.1.2 puts beside the
     source. Right, what the meter does with the record (3.4 to 3.6): band
     limit, KB weighting, running r.m.s., and ten 30 s clocks of a steady
-    source whose maximum is 0,25 and whose clock maximum r.m.s. is 0,23, with
+    source whose maximum is 0.25 and whose clock maximum r.m.s. is 0.23, with
     the day cut into its two assessment periods and the rest hours (3.7.3,
     3.7.4, 5.4). Across the bottom, the order of Figure 2 walked with those
     numbers against the guide values of a residential area (Table 1, row 4),
@@ -3911,7 +3911,7 @@ def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     s.text(x0 - 8, 206, "$KB_F$", 13, th.fg, "end")
     s.line(x0, yv(0.1), x0 + 10 * cw, yv(0.1), th.muted, 1.0, dash="4,4")
     s.text(x0 - 8, yv(0.1) + 4, "0.1", 11, th.muted, "end")
-    # Drawn heights only: their r.m.s. is 0,23 and the tenth is the 0,25.
+    # Drawn heights only: their r.m.s. is 0.23 and the tenth is the 0.25.
     maxima = (0.22, 0.23, 0.22, 0.24, 0.22, 0.23, 0.22, 0.23, 0.22, 0.25)
     pts = []
     for k, m in enumerate(maxima):
@@ -4042,7 +4042,7 @@ def _d_structural_damage_points(s: SVG, th: Theme) -> None:
     Three places on the building and one on a pipe beside it, all from 5.4:
     the three components close together in the lowest storey, on the outside
     wall or its foundation, preferably on the side facing the source and, on
-    a building without a basement, no more than 0,5 m above ground level; the
+    a building without a basement, no more than 0.5 m above ground level; the
     two horizontal components in or close to the outside wall in the topmost
     floor plane; the vertical component at about mid-span on the floors
     expected to move most (5.2); and on a buried pipe the transducers on the
@@ -4164,7 +4164,7 @@ def _d_structural_damage_points(s: SVG, th: Theme) -> None:
     s.rect(wx + 40, ga - 10, 90, 20, th.panel, th.fg, sw=1.8)
     s.text(wx - 8, ay + 50, "outside wall", 12, th.muted, "end")
     s.text(wx - 20, ga + 26, "wall foundation", 12, th.muted, "end")
-    # On the inner face, 0,3 m above the ground outside.
+    # On the inner face, 0.3 m above the ground outside.
     tx, ty = wx + 49, ga - 30
     s.rect(tx - 9, ty - 9, 18, 18, th.secondary, th.fg, rx=2.5, sw=1.4)
     s.arrow(tx, ty - 11, tx, ty - 44, th.secondary, 2.0)
@@ -4173,7 +4173,7 @@ def _d_structural_damage_points(s: SVG, th: Theme) -> None:
     s.text(tx - 54, ty + 5, "$x$", 14, th.secondary, "end")
     s.arrow(tx + 8, ty - 8, tx + 28, ty - 26, th.secondary, 2.0)
     s.text(tx + 32, ty - 24, "$y$", 14, th.secondary, "start")
-    lim = ga - 50  # 0,5 m above the ground outside
+    lim = ga - 50  # 0.5 m above the ground outside
     s.line(60, lim, 430, lim, th.muted, 1.0, dash="4,3")
     s.dim(80, lim, 80, ga, "≤ 0.5 m", size=13, label_side="right")
     s.text(40, ga + 24, "ground level", 12, th.muted, "start")

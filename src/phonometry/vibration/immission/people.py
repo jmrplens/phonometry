@@ -23,17 +23,17 @@ question is over. If it is above the upper guide value :math:`A_\mathrm{o}`, it 
 met. In between, rare and short events are accepted as they are, and
 everything else is decided by :math:`KB_\mathrm{FTr}` against :math:`A_\mathrm{r}`. The guide
 values of Table 1 are not to be applied mechanically, the standard says, and
-Example 3 of its Annex C shows what it means: 0,17 against an :math:`A_\mathrm{u}` of
-0,15 is inside the 15 % a measurement of :math:`KB_\mathrm{F}` is uncertain by, and
+Example 3 of its Annex C shows what it means: 0.17 against an :math:`A_\mathrm{u}` of
+0.15 is inside the 15 % a measurement of :math:`KB_\mathrm{F}` is uncertain by, and
 the requirement "can as a rule still be regarded as met".
 
 **The sources** (Clause 6.5). Up to three short events a day, blasting among
 them, are judged on :math:`A_\mathrm{o}` alone, and quarry blasting by day in a mixed
 or residential area, under the conditions of 6.5.1, on the :math:`A_\mathrm{o}` of an
 industrial one. Road traffic uses the procedure without the rest-time factor.
-A railway is judged on :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` only, with the factor 1,5
+A railway is judged on :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` only, with the factor 1.5
 on both for an urban surface line; :math:`A_\mathrm{o}` is not a verdict for it, and
-6.5.3.5 sets its own night-time thresholds, 0,6 on a surface line and 0,3
+6.5.3.5 sets its own night-time thresholds, 0.6 on a surface line and 0.3
 underground, above which a single clock maximum is a reason to look into the
 cause. A construction site has its own Table 2, by how many working days it
 shakes the neighbours and how far the operator is prepared to go, with the
@@ -59,7 +59,7 @@ and the worked Example 8 all take the root. Registered in ``docs/ERRATA.md``.
 
 **The draft of 2023.** E DIN 4150-2:2023-08 is to replace the 1999 edition,
 and ``edition="2023"`` reads it: Table 1 with one cell changed, the night
-:math:`A_\mathrm{u}` of a mixed area down from 0,15 to 0,1; no shortcut for a
+:math:`A_\mathrm{u}` of a mixed area down from 0.15 to 0.1; no shortcut for a
 :math:`KB_\mathrm{Fmax}` within the 15 % above :math:`A_\mathrm{u}`, which its
 Example 3 sends on to :math:`A_\mathrm{r}` and fails; a railway compared with
 :math:`A_\mathrm{o}` like any other source, its :math:`KB_\mathrm{Fmax}` and
@@ -223,12 +223,12 @@ BLASTING_MAX_PER_WEEK: int = 15
 CONSTRUCTION_BLASTING_A_O: float = 8.0
 
 #: The factor 6.5.3.3 puts on :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` for an urban
-#: surface railway (tram, light rail, S-Bahn): 1,5.
+#: surface railway (tram, light rail, S-Bahn): 1.5.
 URBAN_RAILWAY_FACTOR: float = 1.5
 
 #: The night-time thresholds of 6.5.3.5 for a railway, by kind of line: a
-#: single clock maximum :math:`KB_{\mathrm{FT}i}` above 0,6 on a surface line, in any
-#: area, or above 0,3 on an underground line in the areas of rows 3 to 5, is
+#: single clock maximum :math:`KB_{\mathrm{FT}i}` above 0.6 on a surface line, in any
+#: area, or above 0.3 on an underground line in the areas of rows 3 to 5, is
 #: a reason to look into the cause (flat spots on wheels, for one) and to put
 #: it right, not a verdict. The value still counts in :math:`KB_\mathrm{FTr}`.
 RAILWAY_NIGHT_INVESTIGATION_KB: Mapping[Alignment, float] = MappingProxyType(
@@ -240,18 +240,18 @@ RAILWAY_NIGHT_INVESTIGATION_KB: Mapping[Alignment, float] = MappingProxyType(
 
 #: E DIN 4150-2:2023-08, 6.5.2: by night a road is not judged on :math:`A_\mathrm{o}`,
 #: whose rare exceedance does not fail the requirement; a single clock
-#: maximum :math:`KB_{\mathrm{FT}i}` above 0,6, in any area, is a reason to look into
+#: maximum :math:`KB_{\mathrm{FT}i}` above 0.6, in any area, is a reason to look into
 #: the cause and put it right. The value still counts in :math:`KB_\mathrm{FTr}`.
 ROAD_NIGHT_INVESTIGATION_KB: float = 0.6
 
 #: E DIN 4150-2:2023-08, 6.5.2: what the neighbours of an existing road in an
 #: existing building must put up with, :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` exceeded
-#: by up to 50 %, by day and by night, that is 1,5 times the guide value.
+#: by up to 50 %, by day and by night, that is 1.5 times the guide value.
 ROAD_EXISTING_TOLERANCE_FACTOR: float = 1.5
 
 #: E DIN 4150-2:2023-08, 6.5.1.3: the simplified estimate of the
 #: :math:`KB_\mathrm{Fmax}` of an induced seismic event from the peak
-#: velocity, 0,44 times it.
+#: velocity, 0.44 times it.
 INDUCED_SEISMIC_PEAK_FACTOR: float = 0.44
 
 
@@ -331,7 +331,7 @@ GUIDE_VALUES: Mapping[Area, Mapping[TimeOfDay, GuideValues]] = MappingProxyType(
 
 #: Table 1 of E DIN 4150-2:2023-08 (printed page 14): the same thirty cells
 #: as :data:`GUIDE_VALUES` but one, the night :math:`A_\mathrm{u}` of row 3, the mixed
-#: area, down from 0,15 to 0,1; the row now names urban areas too.
+#: area, down from 0.15 to 0.1; the row now names urban areas too.
 GUIDE_VALUES_2023: Mapping[Area, Mapping[TimeOfDay, GuideValues]] = MappingProxyType(
     {
         area: MappingProxyType(
@@ -428,7 +428,7 @@ _RAISED_SOURCES = {
     "road_existing": ROAD_EXISTING_TOLERANCE_FACTOR,
 }
 #: The sources the draft of 2023 adds (6.5.2 and 6.5.1.3), and the one it
-#: drops: the factor 1,5 on the guide values of an urban railway gives way
+#: drops: the factor 1.5 on the guide values of an urban railway gives way
 #: to the weighting factor of its Table 2.
 _SOURCES_2023: tuple[Source, ...] = (
     "general",
@@ -443,7 +443,7 @@ _EDITIONS = ("1999", "2023")
 #: conditions of 6.5.1 is held to the :math:`A_\mathrm{o}` of row 1.
 _QUARRY_BLASTING_AREAS = ("mixed", "residential")
 _ROW_1: Area = "industrial"
-#: The decimals a raised guide value keeps: 1,5 times a two-decimal value.
+#: The decimals a raised guide value keeps: 1.5 times a two-decimal value.
 _RAISED_DECIMALS = 3
 _CONSTRUCTION_AREAS = ("commercial", "industrial")
 #: The area Table 2 is not applicable to (6.5.4.2): hospitals and the like
@@ -465,15 +465,15 @@ _CONSTRUCTION_A_O_COMMERCIAL = 6.0
 #: The clock intervals in an hour, which is what Figure D.1 counts trains in.
 _TAKTE_PER_HOUR = 3600.0 / TAKT_DURATION_S
 #: The decimals the guide values are printed with, and the ones a quantity is
-#: compared at: Example 4 of Annex C forms a KB_FTr of 0,154, writes it as
-#: 0,15 and finds it at the A_r of 0,15, met.
+#: compared at: Example 4 of Annex C forms a KB_FTr of 0.154, writes it as
+#: 0.15 and finds it at the A_r of 0.15, met.
 _GUIDE_DECIMALS = 2
 
 
 def _printed(value: float, decimals: int) -> float:
     """The value written with that many decimals, half up, as a hand rounds.
 
-    Not :func:`round`, which writes 0,155 as 0,15 because the float is a hair
+    Not :func:`round`, which writes 0.155 as 0.15 because the float is a hair
     under it and ties go to even; the standard reads its numbers as printed.
     """
     quantum = Decimal(1).scaleb(-decimals)
@@ -488,7 +488,7 @@ def _keeps_to(value: float, guide: float) -> bool:
     """Whether the value, written with the decimals of the guide value, is at or below it.
 
     Table 1, Table 2 and the steps of Figure 3 are printed with two decimals
-    and the guide values 6.5.3.3 raises by 1,5 with three, so each is compared
+    and the guide values 6.5.3.3 raises by 1.5 with three, so each is compared
     at its own.
     """
     decimals = _GUIDE_DECIMALS
@@ -513,7 +513,7 @@ def guide_values(
     :param source: ``"general"`` (default), ``"road"`` or ``"railway"``, for
         which Table 1 applies as printed; ``"urban_railway"``, the surface
         line of a public transport system, for which 6.5.3.3 raises
-        :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` by the factor 1,5; or
+        :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` by the factor 1.5; or
         ``"quarry_blasting"``, blasts on working days with the neighbours
         warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day,
         for which 6.5.1 lets a mixed or residential area take the daytime
@@ -525,7 +525,7 @@ def guide_values(
         as well (6.5.1.3).
     :param edition: ``"1999"`` (default), DIN 4150-2:1999-06, or ``"2023"``,
         E DIN 4150-2:2023-08, whose Table 1 has the night :math:`A_\mathrm{u}` of a
-        mixed area at 0,1.
+        mixed area at 0.1.
     :return: The three values, as a :class:`GuideValues`.
     :raises ValueError: For an unknown area, time of day, source or edition,
         or a source the edition does not have.
@@ -541,7 +541,7 @@ def guide_values(
         source, "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
     if kind in _RAISED_SOURCES:
-        # Rounded to the decimals of the table, so 0,05 times 1,5 is 0,075
+        # Rounded to the decimals of the table, so 0.05 times 1.5 is 0.075
         # and not a float with a tail the verdict would then round anyway.
         factor = _RAISED_SOURCES[kind]
         return GuideValues(
@@ -568,7 +568,7 @@ def guide_values(
 def induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float:
     r"""The :math:`KB_\mathrm{Fmax}` of an induced seismic event, E DIN 4150-2:2023-08 6.5.1.3.
 
-    :math:`KB_\mathrm{Fmax} = 0{,}44 \, v_{\max}`, the simplified estimate
+    :math:`KB_\mathrm{Fmax} = 0.44 \, v_{\max}`, the simplified estimate
     the draft gives for an event of a few seconds with its energy below
     15 Hz, which is held by day and by night to the daytime :math:`A_\mathrm{o}`
     alone; :math:`KB_\mathrm{FTr}` is not formed for it.
@@ -587,7 +587,7 @@ def _interpolated(low: float, high: float, days: int) -> float:
     """A Table 2 value between the one-day column and the next, Figure 3.
 
     Written with the two decimals the steps of Figure 3 are printed with, so
-    the sixth day of stage I is the 0,47 the figure shows and not 0,4667.
+    the sixth day of stage I is the 0.47 the figure shows and not 0.4667.
     """
     first, next_column = _INTERPOLATION_DAYS
     return _printed(
@@ -760,7 +760,7 @@ def admissible_trains_per_hour(kb_ftm: float, a_r: float) -> float:
     Formula (A.4) reads :math:`KB_\mathrm{FTr} = KB_\mathrm{FTm}\sqrt{n / 120}` for
     :math:`n` trains an hour, so the most an hour may carry is
     :math:`120 (A_\mathrm{r} / KB_\mathrm{FTm})^2`. Annex D reads the figure at 7 trains for
-    an :math:`A_\mathrm{r}` of 0,05 and 14 for 0,07, both at a :math:`KB_\mathrm{FTm}` of 0,2.
+    an :math:`A_\mathrm{r}` of 0.05 and 14 for 0.07, both at a :math:`KB_\mathrm{FTm}` of 0.2.
 
     :param kb_ftm: :math:`KB_\mathrm{FTm}` of one passage, positive.
     :param a_r: :math:`A_\mathrm{r}`.
@@ -780,7 +780,7 @@ def railway_takt_max_rms(kb_fti: NumericArrayLike) -> float:
     occupied, :math:`Z_j` of them, with nothing counted for the intervals
     between trains: Formula (A.1b), with the root Formula (A.1a) and the
     worked Example 8 carry and the print of (A.1b) lost. The rule of Formula
-    (3) that a maximum at or below 0,1 enters as zero applies here as well.
+    (3) that a maximum at or below 0.1 enters as zero applies here as well.
 
     :param kb_fti: The clock maxima the class occupied, dimensionless.
     :return: :math:`KB_{\mathrm{FTm},j}`.
@@ -805,7 +805,7 @@ def railway_takt_spread(kb_fti: NumericArrayLike) -> float:
     KB^2_{\mathrm{FTm},j})^2}`, on the square because it is the square that Formula
     (A.3) averages, so the spread of :math:`KB_\mathrm{FTr}` follows from it by
     adding and subtracting it there. The maxima enter as they enter
-    :func:`railway_takt_max_rms`, a value at or below 0,1 as zero, so the
+    :func:`railway_takt_max_rms`, a value at or below 0.1 as zero, so the
     spread is about the mean square that function returns.
 
     :param kb_fti: The clock maxima the class occupied, at least two.
@@ -857,7 +857,7 @@ def railway_assessment_severity(
     of the 1920 of a day or the 960 of a night. With one class that is
     Formula (A.4). Given the spread of Formula (A.2) for each class, the same
     sum is formed with each mean square one spread up and one down, which is
-    how Example 8 reports :math:`0{,}325^{+0{,}059}_{-0{,}073}`.
+    how Example 8 reports :math:`0.325^{+0.059}_{-0.073}`.
 
     :param kb_ftm: :math:`KB_{\mathrm{FTm},j}`, one per class, as
         :func:`railway_takt_max_rms` gives them.
@@ -917,7 +917,7 @@ def kb_from_peak_velocity(peak_velocity_mm_s: float, frequency_hz: float) -> flo
     r"""The KB value of a peak velocity at a frequency, Formula (6).
 
     :math:`KB = \frac{1}{\sqrt 2}\, \frac{v_\mathrm{max}}{\sqrt{1 + (f_o/f)^2}}`
-    with :math:`f_o` = 5,6 Hz, the corner of the KB weighting: the value the
+    with :math:`f_o` = 5.6 Hz, the corner of the KB weighting: the value the
     weighted severity settles at for a sine of that peak and frequency, which
     the note under the formula says is the KB of the 1975 edition.
 
@@ -1077,8 +1077,8 @@ def _people_decision(
     year = guide.edition
     if _keeps_to(peak, guide.a_u):
         return True, "A_u", False
-    # Judged settled: 0,46 is 15 % above an A_u of 0,4 in decimal, and the
-    # product 0,4 x 1,15 is 0,459 999 999 999 999 96 in binary.
+    # Judged settled: 0.46 is 15 % above an A_u of 0.4 in decimal, and the
+    # product 0.4 x 1.15 is 0.459 999 999 999 999 96 in binary.
     reach = guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0)
     if year == "1999" and float(settled(peak - reach)) <= 0.0:
         return True, "A_u", True
@@ -1143,9 +1143,9 @@ def assess_people_in_buildings(
     :math:`KB_\mathrm{Fmax}` at or below :math:`A_\mathrm{u}` meets the requirement,
     and so, as a rule, does one above it by up to the 15 % of 5.4 that a
     measurement of :math:`KB_\mathrm{F}` is uncertain by, which is how the standard's
-    own Example 3 concludes on 0,17 against an :math:`A_\mathrm{u}` of 0,15; the
+    own Example 3 concludes on 0.17 against an :math:`A_\mathrm{u}` of 0.15; the
     verdict says so in ``within_uncertainty``. A value exactly 15 % above,
-    0,46 against 0,4, is inside it whichever way the last bits of the product
+    0.46 against 0.4, is inside it whichever way the last bits of the product
     fall. Above :math:`A_\mathrm{o}` it is not
     met, unless the source is a railway, which 6.5.3.1 judges on :math:`A_\mathrm{u}`
     and :math:`A_\mathrm{r}` alone. Between the two, up to three short events a day
@@ -1158,15 +1158,15 @@ def assess_people_in_buildings(
     :math:`A_\mathrm{u}`.
 
     Each comparison is made at the decimals the guide value is printed with,
-    which is how Example 4 reads a :math:`KB_\mathrm{FTr}` of 0,154 as meeting an
-    :math:`A_\mathrm{r}` of 0,15; and the standard says the values are not to be
+    which is how Example 4 reads a :math:`KB_\mathrm{FTr}` of 0.154 as meeting an
+    :math:`A_\mathrm{r}` of 0.15; and the standard says the values are not to be
     applied mechanically in any case.
 
     The draft of 2023 reads the same order (its 6.3 and Figure 2) with three
     differences: a :math:`KB_\mathrm{Fmax}` within the 15 % above
     :math:`A_\mathrm{u}` goes on to :math:`A_\mathrm{r}` like any other, which is how its
-    Example 3 fails 0,114 against 0,10; a railway is compared with
-    :math:`A_\mathrm{o}` as well, its :math:`KB_\mathrm{Fmax}` being the 1,5 times
+    Example 3 fails 0.114 against 0.10; a railway is compared with
+    :math:`A_\mathrm{o}` as well, its :math:`KB_\mathrm{Fmax}` being the 1.5 times
     :math:`KB_\mathrm{FTm,Zug}` of :func:`~phonometry.vibration.railway_kb_fmax` and
     its :math:`KB_\mathrm{FTr}` that of
     :func:`~phonometry.vibration.train_assessment_severity`; and a road is

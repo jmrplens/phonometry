@@ -29,19 +29,19 @@ These are the 2 entries of the [errata registry](/phonometry/reference/errata/) 
   $\rho_\mathrm{w} = 1024{,}2\ \text{kg/m}^3$.
 - **The problem:** two defects, of different kinds.
 
-  (a) The 1024,2 of folio 177 does not follow from Equation (4.6) read with
+  (a) The 1024.2 of folio 177 does not follow from Equation (4.6) read with
   Equation (4.4). At 23 °C, salinity 35 and one atmosphere the equation gives
-  1024,287 9, which prints as 1024,3. The printed 1024,2 is what the equation
+  1024.287 9, which prints as 1024.3. The printed 1024.2 is what the equation
   gives with its pressure term set to zero, that is, reading $P_\mathrm{w}$ as
   a gauge pressure against the definition the same chapter states. The
-  difference is $0{,}043\,9\ \text{kg/m}^3$, or 4,3 parts in a hundred thousand.
+  difference is $0.043\,9\ \text{kg/m}^3$, or 4.3 parts in a hundred thousand.
 
   (b) Equation (4.13), which rearranges (4.6) to estimate salinity from a
-  measured density, prints the pressure coefficient as $4{,}3\times10^{-5}$
-  where (4.6) has $4{,}3\times10^{-7}$. Two orders of magnitude, and not a
+  measured density, prints the pressure coefficient as $4.3\times10^{-5}$
+  where (4.6) has $4.3\times10^{-7}$. Two orders of magnitude, and not a
   restatement of a different quantity: it is the same coefficient in the same
-  role. Carried through at 23 °C it gives $1028{,}63\ \text{kg/m}^3$ against 1024,29, an
-  error of 0,42 %.
+  role. Carried through at 23 °C it gives $1028.63\ \text{kg/m}^3$ against 1024.29, an
+  error of 0.42 %.
 - **Evidence:** Equation (4.6) evaluated at the stated conditions with the
   pressure of Equation (4.11), against the value folio 177 prints; and the two
   printed exponents compared directly. Verified on PDF pages 157, 158, 165 and

@@ -41,7 +41,7 @@ spectrum with it.
 $r$ and at the reference distance $r_0$ is geometric spreading
 times material damping (Formula (5)), $(r/r_0)^{-n} \mathrm{e}^{-\alpha_R (r - r_0)}$ with $\alpha_R = 2\pi f D / c_s$, or a power law with an exponent
 measured per band (Formula (6)); the level difference is 20 lg of it
-(Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
+(Formula (4)). On the surface the exponent is usually 0.2 to 0.4.
 
 **Building** (Clause 5.4, Annex A). Six tables of level differences from
 extensive building measurements: ground to floor for concrete and for timber
@@ -57,11 +57,11 @@ table of third-octave corrections (Table 2, Formula (8)) is added to the
 predicted spectrum, the bands from 4 Hz to 80 Hz are summed, and the sum
 level gives the clock maximum r.m.s. of the category (Formula (9)),
 $KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20}$ with
-$c_{\mathrm{T}1} = 1$ and $v_0 = 5 \cdot 10^{-5}$ mm/s; 1,5 times
+$c_{\mathrm{T}1} = 1$ and $v_0 = 5 \cdot 10^{-5}$ mm/s; 1.5 times
 it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)), three times that the peak
 velocity a DIN 4150-3 comparison wants (Formula (12)), and Formula (11) is the
 sum of Formula (6) of E DIN 4150-2:2023-08, printed without that formula's
-rule that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0,1
+rule that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0.1
 enters as zero; the assessment the draft says it performs is that of DIN 4150-2, so
 [`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity) of
 [`phonometry.vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/), which applies the
@@ -71,7 +71,7 @@ into a velocity spectrum in micrometres per second, for the VC curves.
 **A point source and a train** (Annex B). A train is a line of point sources
 until the distance $R_0 \approx L^2/\lambda$ (Formula (B.1)) and a point
 source beyond it, so a decay measured with a point excitation is made
-shallower by 0,3 or 0,5 in the exponent up to $R_0$ (Formula (B.2)).
+shallower by 0.3 or 0.5 in the exponent up to $R_0$ (Formula (B.2)).
 
 **What is not here.** Clause 6, the phases of a prediction, and Annex D are
 work plans. The worked example of Annex C prints its emission and building
@@ -344,7 +344,7 @@ $\alpha_R$ of [`ground_attenuation_coefficient_per_m`](/phonometry/reference/api
 Formula (4) takes 20 lg of it. With the damping left out and an
 exponent per band it is Formula (6), the power law with the exponent
 measured on site for every band. On the surface the standard usually
-takes $n$ between 0,2 and 0,4, frequency-independent; a train is a
+takes $n$ between 0.2 and 0.4, frequency-independent; a train is a
 line of point sources, and Annex B says what to take off an exponent
 measured with a point excitation.
 
@@ -450,7 +450,7 @@ The correction of a point-source decay to a train, Formula (B.2).
 
 $\Delta L_{v,\mathrm{Korr}} = 20 \, n_\mathrm{Korr} \lg(r / r_0)$,
 added to the level a point excitation predicts, with
-$n_\mathrm{Korr}$ between 0,3 and 0,5: the train spreads less than
+$n_\mathrm{Korr}$ between 0.3 and 0.5: the train spreads less than
 the point did, up to the distance of Formula (B.1).
 
 **Parameters**
@@ -459,7 +459,7 @@ the point did, up to the distance of Formula (B.1).
 | :--- | :--- |
 | `distance_m` | $r$, in metres. |
 | `reference_distance_m` | $r_0$, in metres. |
-| `exponent_correction` | $n_\mathrm{Korr}$, 0,3 to 0,5. |
+| `exponent_correction` | $n_\mathrm{Korr}$, 0.3 to 0.5. |
 
 **Returns:** $\Delta L_{v,\mathrm{Korr}}$, in decibels.
 
@@ -467,7 +467,7 @@ the point did, up to the distance of Formula (B.1).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a non-positive distance or a correction outside 0,3 to 0,5. |
+| ValueError | For a non-positive distance or a correction outside 0.3 to 0.5. |
 | TypeError | if `distance_m`, `exponent_correction` or `reference_distance_m` is not a single number. |
 
 ## LINE_SOURCE_EXPONENT_CORRECTION
@@ -632,7 +632,7 @@ and Formula (12) for the peak velocity. The assessment vibration
 severity over the categories of a timetable is Formula (11), the sum of
 [`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity), which also
 applies the rule of E DIN 4150-2:2023-08 that Formula (11) leaves out, a
-category at or below 0,1 counting as zero.
+category at or below 0.1 counting as zero.
 
 **Parameters**
 
@@ -749,7 +749,7 @@ $KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L_{v,\mathrm{ges}}/20}$ with $L_{
 of the KB-weighted bands from 4 Hz to 80 Hz, $c_{\mathrm{T}1}$ = 1
 for Max Hold spectra with the time weighting Fast and $v_0 = 5 \cdot 10^{-5}$ mm/s, the reference of the velocity level; the value is the KB
 quantity because KB is the velocity in millimetres per second. Annex C
-prints 0,4 for a sum level of 78,1 dB.
+prints 0.4 for a sum level of 78.1 dB.
 
 **Parameters**
 
@@ -778,9 +778,9 @@ train_decay_exponent(
 
 The decay exponent of a train from that of a point excitation, Annex B.
 
-$n_\mathrm{Zug} = n_\mathrm{Punkt} - 0{,}3$ when the point
+$n_\mathrm{Zug} = n_\mathrm{Punkt} - 0.3$ when the point
 measurement was fitted with spreading and damping apart (Formula (5)),
-$n_\mathrm{Punkt} - 0{,}5$ when it was fitted as a power law alone
+$n_\mathrm{Punkt} - 0.5$ when it was fitted as a power law alone
 (Formula (6)); both up to the transition distance of Formula (B.1), beyond
 which the point exponent holds as it is. The annex prints no floor, so a
 point exponent below the correction gives a negative result, as printed.
@@ -848,7 +848,7 @@ form; this is its reading.
 | `reference_distance_m` | $r_0$, in metres. |
 | `transition_distance_m` | $R_0$, in metres. |
 | `point_exponent` | $n_\mathrm{Punkt}$. |
-| `exponent_correction` | $n_\mathrm{Korr}$, 0,3 to 0,5. |
+| `exponent_correction` | $n_\mathrm{Korr}$, 0.3 to 0.5. |
 
 **Returns:** $v(r) / v(r_0)$, one per distance. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 

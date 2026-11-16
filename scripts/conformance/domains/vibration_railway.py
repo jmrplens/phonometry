@@ -51,7 +51,7 @@ _CLAUSE_4 = {2.0: 14.0, 4.0: 2.0}
 #: Half a unit of the last printed place of an integer percentage.
 _PERCENT_TOLERANCE = 0.5
 
-#: A rate whose block at 1,25 Hz is a whole number of samples, so the block
+#: A rate whose block at 1.25 Hz is a whole number of samples, so the block
 #: length Clause 7.3.2 derives comes out exactly rather than rounded.
 _FS_HZ = 2000.0
 
@@ -71,7 +71,7 @@ def _chk_clause_4(multiple: float) -> Outcome:
     )
 
 
-@register(_RAILWAY, f"{_EDITION} 7.3.2", "Block length at 1,25 Hz resolution, s")
+@register(_RAILWAY, f"{_EDITION} 7.3.2", "Block length at 1.25 Hz resolution, s")
 def _chk_block_length() -> Outcome:
     t = np.arange(round(4.0 * _FS_HZ)) / _FS_HZ
     spectrum = ph.vibration.narrowband_psd(np.sin(2.0 * math.pi * 40.0 * t), _FS_HZ)

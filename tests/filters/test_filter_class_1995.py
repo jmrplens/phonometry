@@ -160,7 +160,7 @@ def test_the_1995_limits_are_the_printed_ones() -> None:
 def test_the_integrated_response_limits_grade_every_band(
     monkeypatch: pytest.MonkeyPatch, deviation_db: float, expected: int | None
 ) -> None:
-    """4.5.3: +/-0,15, +/-0,3 and +/-0,5 dB for classes 0, 1 and 2, inclusive."""
+    """4.5.3: +/-0.15, +/-0.3 and +/-0.5 dB for classes 0, 1 and 2, inclusive."""
     monkeypatch.setattr(
         compliance, "_bank_bandwidth_deviation", lambda *_: deviation_db
     )
@@ -196,7 +196,7 @@ def _flat_summation(delta_p_db: float) -> object:
 def test_the_summation_limits_grade_every_band(
     monkeypatch: pytest.MonkeyPatch, delta_p_db: float, expected: int | None
 ) -> None:
-    """4.9: +/-1,0 dB; +1,0/-2,0 dB and +2,0/-4,0 dB for classes 0, 1, 2."""
+    """4.9: +/-1.0 dB; +1.0/-2.0 dB and +2.0/-4.0 dB for classes 0, 1, 2."""
     monkeypatch.setattr(compliance, "_bank_summation", _flat_summation(delta_p_db))
     result = filters.verify_filter_class(_GRADED_BANK, edition="1995")
     assert result.requirement_class("summation") == expected
@@ -207,10 +207,10 @@ def test_the_4_9_limits_bound_equation_19_as_printed(
 ) -> None:
     """5.8.5 applies the 4.9 limits to Delta P of equation (19) as printed.
 
-    Three outputs each 10 lg 3 + 1,5 dB down sum 1,5 dB below the input:
-    equation (19) reads -1,5 dB, inside the -2,0 dB of class 1. Read with the
+    Three outputs each 10 lg 3 + 1.5 dB down sum 1.5 dB below the input:
+    equation (19) reads -1.5 dB, inside the -2.0 dB of class 1. Read with the
     sign the words of 4.9 and 5.8.3 give it (docs/ERRATA.md) the same sum
-    would be +1,5 dB and fail class 1; the verifier follows the equation.
+    would be +1.5 dB and fail class 1; the verifier follows the equation.
     """
     third = 10.0 * math.log10(3.0)
     delta_p = _summation_deviation(np.full((3, 3), third + 1.5))
@@ -263,9 +263,9 @@ def test_s_stays_where_the_integrated_response_has_settled() -> None:
 
 
 def test_s_is_raised_in_steps_of_12_until_the_tenths_settle() -> None:
-    """The octave bank reads +0,0500 dB at S = 24, +0,0497 dB at 36, +0,0496 dB at 48.
+    """The octave bank reads +0.0500 dB at S = 24, +0.0497 dB at 36, +0.0496 dB at 48.
 
-    To the nearest tenth that is 0,1, 0,0 and 0,0: it changes from 24 to 36
+    To the nearest tenth that is 0.1, 0.0 and 0.0: it changes from 24 to 36
     and not from 36 to 48, so the bank is graded at S = 36, the integrated
     response and the summation both.
     """
@@ -348,7 +348,7 @@ def test_a_single_band_has_no_summation_to_grade() -> None:
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("fraction", [1, 3])
 def test_the_default_bank_is_class_0_on_4_5_3_and_4_9(fraction: int) -> None:
-    """The order 6 Butterworth bank: Delta B near +0,05 dB, Delta P within 0 to +0,17 dB."""
+    """The order 6 Butterworth bank: Delta B near +0.05 dB, Delta P within 0 to +0.17 dB."""
     bank = filters.OctaveFilterBank(
         fs=48000, fraction=fraction, order=6, limits=[125, 4000]
     )
@@ -365,7 +365,7 @@ def test_the_default_bank_is_class_0_on_4_5_3_and_4_9(fraction: int) -> None:
 def test_a_shallower_bank_fails_the_class_0_integrated_response(
     order: int, expected: int
 ) -> None:
-    """Shallow Butterworth skirts widen B_e: up to +0,20 dB at order 3, +0,45 dB at order 2."""
+    """Shallow Butterworth skirts widen B_e: up to +0.20 dB at order 3, +0.45 dB at order 2."""
     bank = filters.OctaveFilterBank(
         fs=48000, fraction=1, order=order, limits=[125, 4000]
     )
@@ -378,7 +378,7 @@ def test_a_bank_whose_neighbours_overlap_fails_the_summation(filter_type: str) -
     """Equiripple pass bands that hold to their edges sum 3 dB over the input there.
 
     A Chebyshev or elliptic band is still within its ripple at the band edge,
-    where its neighbour is too, so two whole outputs add: past the +2,0 dB of
+    where its neighbour is too, so two whole outputs add: past the +2.0 dB of
     class 2.
     """
     bank = filters.OctaveFilterBank(

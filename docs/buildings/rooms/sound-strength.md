@@ -149,12 +149,12 @@ $$
 ```python
 from phonometry import room
 
-# A = 0,16 V / T (Equation (A.6)): 200 m3 at 3,2 s gives exactly 10 m2.
+# A = 0.16 V / T (Equation (A.6)): 200 m3 at 3.2 s gives exactly 10 m2.
 print(round(room.reverberation_room_reference_level(80.0, 10.0), 4))   # 53.0
 ```
 
 Watch the constant if you are reproducing a hand calculation. (A.6) prints
-$A = 0{,}16\ V/T$, which is $24 \ln 10 / c_0$ at $c_0 = 345{,}4$ m/s, while
+$A = 0.16\ V/T$, which is $24 \ln 10 / c_0$ at $c_0 = 345.4$ m/s, while
 `room.sabine_absorption_area` defaults to 343 m/s and so to 0.1611. The
 difference moves $10 \lg(A/S_0)$ by 0.030 dB; pass
 `speed_of_sound=345.39` to get the printed constant back.
@@ -202,12 +202,12 @@ the same radius. Both are printed as whole decibels, and both roundings are
 correct:
 
 $$
-10 \lg (4\pi \cdot 10^2) = 30{,}9921\ \text{dB}, \qquad
-10 \lg (16\pi \cdot 10^2) = 37{,}0127\ \text{dB}.
+10 \lg (4\pi \cdot 10^2) = 30.9921\ \text{dB}, \qquad
+10 \lg (16\pi \cdot 10^2) = 37.0127\ \text{dB}.
 $$
 
 The printed integers differ by exactly 6 dB. The closed forms differ by
-$10 \lg 4 = 6{,}0206$ dB. So the reverberation-room route and the
+$10 \lg 4 = 6.0206$ dB. So the reverberation-room route and the
 sound-power route describe the same physical situation and **cannot** agree
 to better than 0.0206 dB, whatever a library does. That is 2 % of the 1 dB
 just-noticeable difference of Table A.1, so it never matters in a hall; it

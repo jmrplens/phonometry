@@ -105,7 +105,7 @@ Complex = NDArray[np.complex128]
 
 #: Default speed of sound in fluid, in m/s (20 degC).
 _SPEED_OF_SOUND = 343.0
-#: Default air density, in kg/m3 (Bies 5e Appendix D: 1,205 at 20 degC).
+#: Default air density, in kg/m3 (Bies 5e Appendix D: 1.205 at 20 degC).
 _AIR_DENSITY = 1.205
 #: Default dynamic viscosity of fluid, in Pa s (Cox & D'Antonio Eq. (7.13)).
 _AIR_VISCOSITY = 1.84e-5
@@ -149,23 +149,23 @@ DELANY_BAZLEY_COEFFICIENTS: Mapping[DelanyBazleyPreset, tuple[float, ...]] = (
 _DELANY_BAZLEY_COEFFICIENT_COUNT = 8
 
 #: Stated validity range of the Delany-Bazley regression in ``X = rho f/sigma``,
-#: printed as ``0,01 < X < 1,0`` by Hopkins (2007) Eq. (1.174), PDF page 112
+#: printed as ``0.01 < X < 1.0`` by Hopkins (2007) Eq. (1.174), PDF page 112
 #: (printed p. 85), and again by Cox & D'Antonio 3e Sect. 6.5.1, PDF page 254
 #: (printed p. 197).
 DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
 #: Fit range of the Miki regression in ``f/sigma``. The lower limit is Miki
 #: (1990) Sect. 4.1, PDF page 4 (printed p. 22), which reads the Delany-Bazley
-#: data below ``f/sigma = 0,01`` as extrapolation; the upper limit is the
+#: data below ``f/sigma = 0.01`` as extrapolation; the upper limit is the
 #: Delany-Bazley one above, since Miki refits their data.
 MIKI_VALIDITY = (0.01, 1.0)
 #: Published upper limits on ``|K_c / K_f|`` (frame-in-vacuum bulk modulus over
 #: pore-fluid bulk modulus) below which the limp-frame equivalent fluid of
 #: :func:`limp_frame` may be used, from Allard & Atalla 2e Sect. 11.3.4, PDF
 #: pages 259-260 (printed pp. 253-254):
-#: ``"beranek"`` is Beranek's (1947) original 0,05 and ``"doutres"`` the 0,2
+#: ``"beranek"`` is Beranek's (1947) original 0.05 and ``"doutres"`` the 0.2
 #: to which Doutres et al. (2007) relaxed it with their frame structural
 #: interaction criterion (which, with ``K_f`` approximated by the isothermal
-#: value of air ``P0 = 101,3 kPa``, is the book's "lower than 20 kPa").
+#: value of air ``P0 = 101.3 kPa``, is the book's "lower than 20 kPa").
 LIMP_FRAME_CRITERIA: Mapping[Criterion, float] = MappingProxyType(
     {"beranek": 0.05, "doutres": 0.2}
 )
@@ -214,23 +214,23 @@ class PorousAbsorberWarning(PhonometryWarning):
 #: held at fixed textbook values rather than computed. It is not the air any one
 #: book prints whole, and each value says where it was read:
 #:
-#: - 343,0 m/s, the speed of sound of air at 20 degC in Bies, Hansen and
+#: - 343.0 m/s, the speed of sound of air at 20 degC in Bies, Hansen and
 #:   Howard 5e Table C.1, PDF page 746 (printed p. 717);
-#: - 1,205 kg/m3 and gamma = 1,40, the air Bies, Hansen and Howard 5e give the
+#: - 1.205 kg/m3 and gamma = 1.40, the air Bies, Hansen and Howard 5e give the
 #:   porous-media models of Appendix D, PDF page 756 (printed p. 727);
-#: - 1,84 x 10^-5 Pa s, the viscosity Allard and Atalla 2e state for standard
+#: - 1.84 x 10^-5 Pa s, the viscosity Allard and Atalla 2e state for standard
 #:   conditions, PDF page 56 (printed p. 46), and Cox and D'Antonio 3e Eq. (7.13);
-#: - the Prandtl number B^2 = 0,71, gamma = 1,4 and the static pressure
-#:   1,0132 x 10^5 Pa (held as 101 325 Pa) that Allard and Atalla 2e take from
+#: - the Prandtl number B^2 = 0.71, gamma = 1.4 and the static pressure
+#:   1.0132 x 10^5 Pa (held as 101 325 Pa) that Allard and Atalla 2e take from
 #:   Gray, PDF page 62 (printed p. 52).
 #:
-#: Allard and Atalla state their own air at 18 degC, 1,213 kg/m3 and 342 m/s
+#: Allard and Atalla state their own air at 18 degC, 1.213 kg/m3 and 342 m/s
 #: (Sect. 2.2.2, PDF page 28, printed p. 16), so the Johnson-Champoux-Allard
 #: model is not tied to these numbers: they are the library's choice, kept fixed
 #: so that every model defaults to the same medium. The Prandtl number is carried
-#: rather than closed from ``eta / (rho alpha_t)``: air at this state has 0,728,
+#: rather than closed from ``eta / (rho alpha_t)``: air at this state has 0.728,
 #: and closing it would move the characteristic impedance and the wavenumber of
-#: every default by 1,5 parts in a thousand.
+#: every default by 1.5 parts in a thousand.
 #:
 #: Frozen, shared by every model rather than rebuilt. Pass a computed
 #: :class:`~phonometry.fluids.Fluid`, such as ``fluids.air(temperature_c=30.0)``,
@@ -246,8 +246,8 @@ ABSORBER_AIR = Fluid(
         "density": _AIR_DENSITY,
         "viscosity": _AIR_VISCOSITY,
         "heat_capacity_ratio": _HEAT_CAPACITY_RATIO,
-        # Carried rather than derived: Allard and Atalla's B^2 = 0,71, which
-        # Fluid.prandtl_number would close from eta/(rho alpha_t) as 0,728.
+        # Carried rather than derived: Allard and Atalla's B^2 = 0.71, which
+        # Fluid.prandtl_number would close from eta/(rho alpha_t) as 0.728.
         "prandtl_number": _PRANDTL_NUMBER,
     },
 )
@@ -624,7 +624,7 @@ class LimpFrameCheck(RichDisplay):
     :ivar frame_bulk_modulus: Bulk modulus of the frame in vacuum ``K_c``, in
         Pa (>= 0; ``abs(K_c)`` for a complex modulus).
     :ivar criterion: Key into :data:`LIMP_FRAME_CRITERIA`, ``"doutres"``
-        (Default, 0,2) or ``"beranek"`` (0,05).
+        (Default, 0.2) or ``"beranek"`` (0.05).
     :ivar fluid_bulk_modulus: Bulk modulus of the pore fluid ``K_f``, in Pa.
     """
 
@@ -693,7 +693,7 @@ def check_limp_frame(
     :param frame_bulk_modulus: Bulk modulus of the frame in vacuum ``K_c``, in
         Pa (>= 0; pass ``abs(K_c)`` for a complex modulus).
     :param criterion: Key into :data:`LIMP_FRAME_CRITERIA`, ``"doutres"``
-        (Default, 0,2) or ``"beranek"`` (0,05).
+        (Default, 0.2) or ``"beranek"`` (0.05).
     :param fluid_bulk_modulus: Bulk modulus of the pore fluid ``K_f``, in Pa
         (Default: 101 325, the isothermal value for fluid).
     :return: The verdict, as a :class:`LimpFrameCheck`; it passes when
@@ -771,7 +771,7 @@ def limp_frame(
     :param medium: A rigid-frame :class:`PorousMediumResult` (its
         ``effective_density`` is ``rho_eq`` and its ``bulk_modulus`` is kept).
     :param frame_density: Bulk density of the frame ``rho1``, in kg/m3 (> 0).
-    :param porosity: Open porosity ``phi`` (0 < phi <= 1, Default: 1,0, the
+    :param porosity: Open porosity ``phi`` (0 < phi <= 1, Default: 1.0, the
         high-porosity assumption of the one-parameter models).
     :return: A :class:`PorousMediumResult` with model
         ``"limp_frame(<base model>)"``.
@@ -873,7 +873,7 @@ class FiberResistivityFit(RichDisplay):
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at
-#: an average fibre diameter of 4,75 um, in the plane of the sheet. Hopkins
+#: an average fibre diameter of 4.75 um, in the plane of the sheet. Hopkins
 #: (2007) Eq. (1.165), PDF page 108 (printed p. 81).
 ROCK_WOOL_LATERAL_FIT = FiberResistivityFit(
     k1=353.0,
@@ -947,7 +947,7 @@ def porosity_from_bulk_density(
 
     It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
     155 kg/m3 bulk-density range Hopkins prints for his rock wool, this returns
-    0,99 and 0,94, which is the porosity range he prints beside them.
+    0.99 and 0.94, which is the porosity range he prints beside them.
 
     :param bulk_density_kg_m3: Bulk density of the material, in kg/m3 (> 0).
     :param fiber_density_kg_m3: Density of the fibre itself, in kg/m3, larger
@@ -988,9 +988,9 @@ def viscous_characteristic_length(
     saying what "close" buys. Against the twenty-three specimens Allard & Atalla
     print with all four columns, ``c = 1`` puts :math:`\Lambda` within a factor
     of two of the printed length for eighteen of them, with the middle of the
-    set near 1,2. The five it misses are the two carpets, the woven screen and
+    set near 1.2. The five it misses are the two carpets, the woven screen and
     two rows whose lengths the book itself took from a different model, and
-    there the same arithmetic wants a ``c`` between 2 and 9,5.
+    there the same arithmetic wants a ``c`` between 2 and 9.5.
 
     So estimating this length rather than measuring it is worth a factor of two
     on a bulk fibrous or open-cell absorber, and nothing at all on a floor
@@ -1064,7 +1064,7 @@ def fiber_characteristic_lengths(
     This is a different model from :func:`viscous_characteristic_length`, not a
     second opinion on the same one, and on Hopkins' own rock wool the two drift
     apart with density: the cylinder model is the lower estimate throughout, by
-    a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
+    a factor of 1.4 at 38 kg/m3 and 1.9 at 155 kg/m3. Which to prefer is a
     question about the material, and neither is a substitute for measuring it.
 
     :param fiber_radius_m: Fibre radius ``R``, in metres (> 0). A table that

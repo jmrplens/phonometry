@@ -22,7 +22,7 @@ from phonometry.fluids import (
     sea_water_density,
 )
 
-#: Eq. (4.11) at the surface: 98 066,5 x 1,04, one atmosphere rather than zero.
+#: Eq. (4.11) at the surface: 98 066.5 x 1.04, one atmosphere rather than zero.
 _SURFACE_ABSOLUTE_PA = 101989.16
 
 
@@ -52,7 +52,7 @@ def test_density_reproduces_the_standard_ocean() -> None:
 
 
 def test_the_pressure_term_is_small_but_present() -> None:
-    """4,3e-7 per pascal: an atmosphere is worth 0,044 kg/m3.
+    """4.3e-7 per pascal: an atmosphere is worth 0.044 kg/m3.
 
     Small enough to be invisible against any tolerance in this library, and the
     reason the book's own folio 177 disagrees with its Equation (4.6) by

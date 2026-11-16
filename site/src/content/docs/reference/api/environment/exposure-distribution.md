@@ -38,7 +38,7 @@ The chain, in the order the standard writes it:
   mean is shifted down by
 
   $$
-  \Delta\mu = 10\lg\left[\frac{1}{\sigma\sqrt{2\pi}} \int_{-\infty}^{\infty} 10^{0{,}1x}\, \mathrm{e}^{-x^{2}/(2\sigma^{2})}\,\mathrm{d}x\right] = \frac{\sigma^{2}\ln 10}{20}~\text{dB} \tag{22}
+  \Delta\mu = 10\lg\left[\frac{1}{\sigma\sqrt{2\pi}} \int_{-\infty}^{\infty} 10^{0.1x}\, \mathrm{e}^{-x^{2}/(2\sigma^{2})}\,\mathrm{d}x\right] = \frac{\sigma^{2}\ln 10}{20}~\text{dB} \tag{22}
   $$
 
   so that the energetic mean of the subclass stays where it was, Equations
@@ -58,7 +58,7 @@ Two readings the text leaves to the implementer
 **Equal levels.** Equation (11) puts a boundary half-way between consecutive
 levels, so two equal levels share a boundary at that level and each keeps a
 class of non-zero width on its own side; Annex A does exactly that with its
-two classes at 30,8 dB and its two at 31,8 dB, and so does this module. The
+two classes at 30.8 dB and its two at 31.8 dB, and so does this module. The
 standard names one case, three consecutive equal levels, whose middle class
 then has no width and no defined density, and for it says "classes with the
 same level shall be combined". A run of two equal levels at either end of the
@@ -71,7 +71,7 @@ every other run is left as the standard writes it.
 **The integrals.** Equations (22), (24) and (A.4) are integrals of Gaussian
 functions and are evaluated here in closed form, not by quadrature: the shift
 is $\sigma^{2}\ln 10/20$, the exceedance is a sum of Gaussian tail
-probabilities, and $\int\rho^{*}(x)\,10^{0{,}1x}\,\mathrm{d}x$ is a sum of
+probabilities, and $\int\rho^{*}(x)\,10^{0.1x}\,\mathrm{d}x$ is a sum of
 lognormal means. There is no integration range to choose and no truncation to
 account for.
 
@@ -89,7 +89,7 @@ frequency_weighted_sel(
 Frequency-weighted sound exposure level from band levels (Equation (5)).
 
 $$
-L_{E,\mathrm{w}} = 10\lg\sum_{j=N_\mathrm{min}}^{N_\mathrm{max}} 10^{0{,}1\left[L_E(j) + \mathrm{w}(j)\right]}~\text{dB}
+L_{E,\mathrm{w}} = 10\lg\sum_{j=N_\mathrm{min}}^{N_\mathrm{max}} 10^{0.1\left[L_E(j) + \mathrm{w}(j)\right]}~\text{dB}
 $$
 
 The standard prefers one-third-octave bands and requires every band from
@@ -128,7 +128,7 @@ long_term_sel(
 Long-term average single-event sound exposure level (Equations (7), (8)).
 
 $$
-\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT} = 10\lg\left[ \sum_{k=1}^{N_\mathrm{atm}}\sum_{l=1}^{N_\mathrm{exc}} \wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\, 10^{0{,}1 L_{E,\mathrm{w},k,l}}\right]~\text{dB} \tag{7}
+\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT} = 10\lg\left[ \sum_{k=1}^{N_\mathrm{atm}}\sum_{l=1}^{N_\mathrm{exc}} \wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\, 10^{0.1 L_{E,\mathrm{w},k,l}}\right]~\text{dB} \tag{7}
 $$
 
 With the rating level adjustment `K` for highly impulsive sound of
@@ -483,7 +483,7 @@ $$
 \Delta\mu = \frac{\sigma^{2}\ln 10}{20}~\text{dB},
 $$
 
-2,878 dB for the 5 dB the standard says is typically used.
+2.878 dB for the 5 dB the standard says is typically used.
 
 **Parameters**
 

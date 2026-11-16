@@ -197,7 +197,7 @@ stand for the joist floors built around the world:
 | Reference floor | Construction (ISO 10140-5:2021 C.2.1, C.3.3) | Reference curve | $L_\mathrm{n,w}$ ($C_\mathrm{I}$) |
 | :--- | :--- | :--- | :--- |
 | Heavyweight | concrete slab, 120 mm | $L_\mathrm{n,r,0}$ | 78 (−11) dB |
-| Lightweight No 1 | 22 mm chipboard on 120 mm × 180 mm joists at 625 mm, mineral wool, battens, 12,5 mm plasterboard | $L_\mathrm{n,t,r,0}$ | 72 (0) dB |
+| Lightweight No 1 | 22 mm chipboard on 120 mm × 180 mm joists at 625 mm, mineral wool, battens, 12.5 mm plasterboard | $L_\mathrm{n,t,r,0}$ | 72 (0) dB |
 | Lightweight No 2 | 20 mm OSB, plywood or chipboard on 42 mm × 225 mm joists at 610 mm, mineral wool, resilient channels, two layers of plasterboard | the same curve as No 1 | 72 (0) dB |
 | Lightweight No 3 | two layers of 15 mm plywood on 45 mm × 60 mm joists at 300 mm over 120 mm × 240 mm beams at 1 m | $L_\mathrm{n,t,r,0}$ | 75 (−3) dB |
 
@@ -256,7 +256,7 @@ specimen and the number of tapping-machine positions (H.2.2 and H.4.6):
   hammer over a joist.
 - **Category II**, rigid or composite coverings, and **category III**,
   stretched coverings wall to wall: the whole floor or at least 10 m² with the
-  shorter side at least 2,3 m; at least four machine positions on the
+  shorter side at least 2.3 m; at least four machine positions on the
   heavyweight floor and six, randomly placed, on a lightweight one. A
   category II covering may be loaded with 20 kg/m² to 25 kg/m².
 
@@ -401,10 +401,10 @@ $d = R_\mathrm{s,max} - R_\mathrm{s}'$:
 | :--- | :--- |
 | 10 dB or more | $R_\mathrm{s}'$, no correction |
 | 6 dB to 10 dB | $-10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$, Formula (J.2) |
-| under 6 dB | $R_\mathrm{s}' + 1{,}3$ dB, a minimum value |
+| under 6 dB | $R_\mathrm{s}' + 1.3$ dB, a minimum value |
 | under 3 dB | $\geq R_\mathrm{s,max}$, in brackets |
 
-The 1,3 dB is what Formula (J.2) gives at 6 dB, which is how A.3 puts it. A.3
+The 1.3 dB is what Formula (J.2) gives at 6 dB, which is how A.3 puts it. A.3
 itself stops correcting a sound reduction index at 15 dB and an
 element-normalized level difference at 10 dB; Annex J writes the 10 dB, which
 fits an index normalized to a reference length rather than to the area of
@@ -414,7 +414,7 @@ the maximum alone, and the power of the joint on top of it when the joint is
 open, so a measured index within 3 dB of the maximum means the joint passes
 less than the element does, and its own index is above $R_\mathrm{s,max}$.
 J.1 allows that lower limit ("may be set"); `limit_at_max=False` gives
-those bands the 1,3 dB instead.
+those bands the 1.3 dB instead.
 
 A rebate seal on a door, measured against its arrangement:
 
@@ -458,7 +458,7 @@ each octave, the octave index Figure J.9 plots.
 ### The test element and the gap width (J.2)
 
 J.2.1 asks for a joint longer than 1 m and no wider than 50 mm, and J.2.2 for
-at least 5,0 m of a gap between the parts of a window or door, which may be
+at least 5.0 m of a gap between the parts of a window or door, which may be
 the sum of several gaps. The gap width $b$ is read at four positions or more,
 evenly spread along the seal, and the readings "shall not deviate by more than
 0,3 mm, otherwise readjust the mounting"; their average is the gap width.
@@ -509,7 +509,7 @@ gives.
 
 `joint_gap_series` collects any set of widths; whether the three of J.4 are
 among them is a verdict of its own. J.4 gives no tolerance, so a width within
-the 0,3 mm that J.2.2 lets the readings of a gap width spread over counts as the
+the 0.3 mm that J.2.2 lets the readings of a gap width spread over counts as the
 width asked for, and a series that does not name $b_\mathrm{min}$ fails J.4 b),
 since nothing then shows which width it was.
 
@@ -608,13 +608,13 @@ fixed height (Tables H.1 and H.2, `building.ARTIFICIAL_RAIN`):
 
 | Artificial rain | Rainfall rate | Volume median drop diameter | Fall velocity | Holes and fall height |
 | :--- | :--- | :--- | :--- | :--- |
-| Intense (optional) | 15 mm/h | 2,0 mm | 4,0 m/s | 0,3 mm to 0,5 mm, about 25 per m², about 1 m |
-| Heavy (mandatory) | 40 mm/h | 5,0 mm | 7,0 m/s | 1 mm, about 60 per m², about 3,5 m |
+| Intense (optional) | 15 mm/h | 2.0 mm | 4.0 m/s | 0.3 mm to 0.5 mm, about 25 per m², about 1 m |
+| Heavy (mandatory) | 40 mm/h | 5.0 mm | 7.0 m/s | 1 mm, about 60 per m², about 3.5 m |
 
 Heavy rain is the one products are compared under (K.4.1). The generator is
 checked by its rate, which "shall be within ±2 mm/h" of the table; for a
 generator that is not the tank of Table H.2, half of the drops should also lie
-within ±0,5 mm of the median diameter and within ±1 m/s of the fall velocity.
+within ±0.5 mm of the median diameter and within ±1 m/s of the fall velocity.
 The rate is measured by collecting the water, one litre per square metre being
 one millimetre:
 
@@ -640,7 +640,7 @@ $$
 diffuse-field sound power of a room with the Sabine area $A = 0.16\,V/T$,
 $10 \log_{10}(0.16/4) \approx -14$ dB, and $S_\mathrm{e}$ is the area the rain
 excites: the whole specimen for a roof window or rooflight of about
-1,25 m × 1,5 m, and three times the perforated area of the tank for a large
+1.25 m × 1.5 m, and three times the perforated area of the tank for a large
 roof of 10 m² to 20 m², which is rained on from three positions whose levels
 are added energetically (K.4.2). The 18 bands from 100 Hz to 5000 Hz combine
 into the A-weighted level,
@@ -648,7 +648,7 @@ $L_{I\mathrm{A}} = 10 \log_{10} \sum_j 10^{0.1(L_{Ij} + C_j)}$
 (Formula (K.2)), whose 18 corrections $C_j$ of Table K.2 are the A-weighting
 of IEC 61672-1:2013, the [frequency weighting](../../signals/levels/weighting.md)
 of the library, at the exact midband frequencies of the bands, rounded to
-0,1 dB (`building.RAINFALL_A_WEIGHTING`).
+0.1 dB (`building.RAINFALL_A_WEIGHTING`).
 K.4.3 allows the intensity to be measured directly with a probe over a surface
 $S_\mathrm{m}$ instead,
 $L_I = L_{I\mathrm{m}} + 10 \log_{10}(S_\mathrm{m}/S_\mathrm{e})$
@@ -658,7 +658,7 @@ $L_I = L_{I\mathrm{m}} + 10 \log_{10}(S_\mathrm{m}/S_\mathrm{e})$
 
 Two laboratories with the same tank still disagree, because their rain and
 their mountings differ. K.6 therefore measures a **reference specimen** first:
-a single 6 mm glass pane of 1,25 m × 1,5 m, mounted as a window pane and
+a single 6 mm glass pane of 1.25 m × 1.5 m, mounted as a window pane and
 centred under heavy rain (ISO 10140-5:2021 Annex I). Its structural
 reverberation time $T_\mathrm{s}$ gives its loss factor,
 $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)); its level is brought to the
@@ -694,7 +694,7 @@ print(rain.octave_bands().frequencies)                # [ 125.  250.  500. 1000.
 ```
 
 K.5 e) asks for $L_I$, $L_{I\mathrm{norm}}$, $L_{I\mathrm{A}}$ and
-$L_{I\mathrm{A,norm}}$ to 0,1 dB with the rainfall rate beside them. The sound
+$L_{I\mathrm{A,norm}}$ to 0.1 dB with the rainfall rate beside them. The sound
 power the whole specimen radiates follows from the NOTE to Formula (K.2),
 $L_W = L_I + 10 \log_{10}(S/S_0)$, as `rain.sound_power_levels(specimen_area_m2)`.
 
@@ -795,7 +795,7 @@ positions, the load, the floor temperature, $\Delta L$ with its weighted value
 and adaptation term, and the two ratings of H.5 i).
 
 **A joint.** Build the joint into an element that insulates far better than
-it does, at least 1 m long and no wider than 50 mm (5,0 m for a gap between
+it does, at least 1 m long and no wider than 50 mm (5.0 m for a gap between
 the parts of a window or door), read the gap width at four positions or more,
 and measure $L_1$, $L_2$ and the reverberation time to ISO 10140-2. Seal the
 joint on both sides and measure the arrangement's maximum the same way. A
@@ -810,7 +810,7 @@ roof window in a heavy filler construction; check the rain rate; rain on it
 steadily for 5 min before measuring; measure $L_\mathrm{pr}$, $T$ and the
 background, from one generator position or three; and normalize with the
 laboratory's own reference pane. Report the rain type and rate, the generator
-and its position, $L_I$ and $L_{I\mathrm{norm}}$ to 0,1 dB, and the A-weighted
+and its position, $L_I$ and $L_{I\mathrm{norm}}$ to 0.1 dB, and the A-weighted
 totals (K.5).
 
 ## Verifying it
@@ -840,7 +840,7 @@ them, are conformance rows:
   the same way, it gives every two of the nine lining terms different numbers
   on at least one element, so no two of them could be swapped unseen.
 - The **18 $C_j$ of Table K.2** against the A-weighting of IEC 61672-1 at the
-  exact midband frequencies, rounded to 0,1 dB: all 18 agree. The same 18
+  exact midband frequencies, rounded to 0.1 dB: all 18 agree. The same 18
   values, as printed, also carry a flat spectrum through Formula (K.2), so a
   mistyped $C_j$ in the published table would show in $L_{I\mathrm{A}}$.
 - The **ISO 717-2 Annex C example**, carried end to end through the Annex H
@@ -848,21 +848,21 @@ them, are conformance rows:
   $C_{\mathrm{I}\Delta} = -9$ dB from the Table 4 floor, where the example's
   own chain gives −8 dB (see the [errata registry](../../ERRATA.md)).
 - The **G.4 example**: measurements within 1 d that start 3 d after
-  construction pass, and 2,9 d fails. The bound is inclusive on any input:
-  2,1 d after 6,3 d passes as well, although 3 × 2,1 comes out a rounding
-  error above 6,3 in binary arithmetic.
+  construction pass, and 2.9 d fails. The bound is inclusive on any input:
+  2.1 d after 6.3 d passes as well, although 3 × 2.1 comes out a rounding
+  error above 6.3 in binary arithmetic.
 - **Tables K.1, H.1, H.2 and I.1** cell by cell as printed, and Formulas
   (I.1) to (I.3) on a pane at twice the reference loss factor of the printed
   Table I.1, which has to come out $10 \log_{10} 2$ dB in all 18 bands.
 - The **H.1 tolerance** at its bounds, which it includes: 38 mm/h passes,
-  also when it comes out of `rainfall_rate` as 3,8 L collected on 0,1 m² in
+  also when it comes out of `rainfall_rate` as 3.8 L collected on 0.1 m² in
   one hour, a rounding error below 38. Then Formula (K.1) with every term away
   from zero, and closed forms of Formulas (D.4) and (K.4).
 
-- **Annex J** at its printed numbers: the fixed 1,3 dB below a 6 dB margin is
+- **Annex J** at its printed numbers: the fixed 1.3 dB below a 6 dB margin is
   Formula (J.2) at 6 dB to the printed decimal, as ISO 10140-2:2021 A.3 says
   it corresponds, and the library applies exactly that just below it; the
-  lower limit J.1 prints as its example, $R_\mathrm{s} \geq 50{,}4$ dB in brackets;
+  lower limit J.1 prints as its example, $R_\mathrm{s} \geq 50.4$ dB in brackets;
   and the typical flanking spectrum of ISO 10140-2:2021 Table A.1 carried
   through the joint front end, rated 59 ($-2$; $-7$) dB as printed. Then
   Formula (J.1) with every term away from zero, the bounds of J.2.1 and J.2.2
@@ -925,7 +925,7 @@ defined for large roofs (ISO 10140-5:2021 I.3).
   improvement of Formula (H.3), and the form of Figure H.4 as a `.report()` PDF.
   Annex J: the sound reduction index of joints per metre of Formula (J.1), the
   correction for the test arrangement of Formula (J.2) with the rules of
-  ISO 10140-2:2021 A.3 (no correction from 10 dB, the fixed 1,3 dB below 6 dB,
+  ISO 10140-2:2021 A.3 (no correction from 10 dB, the fixed 1.3 dB below 6 dB,
   the lower limit at $R_\mathrm{s,max}$ below 3 dB), the ISO 717-1 single
   numbers with $C_{100\text{-}5000}$ and $C_\mathrm{tr,100\text{-}5000}$, the
   rating with infinitely high indicative bands and the 1 dB bracket rule, the

@@ -223,8 +223,8 @@ gives the six closed forms it uses. `typical_element_mobility` is that table:
 | --- | --- | --- |
 | `"mass"` | $M$ [kg] | $[2\pi f M]^{-1}$ |
 | `"bar_end"` | $\rho$ [kg/m3], $c_\mathrm{L}$ [m/s], $S$ [m²] | $[\rho c_\mathrm{L} S]^{-1}$ |
-| `"beam"` | $\rho$, $c_\mathrm{L}$, $t$ [m], $w$ [m] | $[7{,}6\,\rho t w\sqrt{c_\mathrm{L} t f}]^{-1}$ |
-| `"plate"` | $\rho$, $c_\mathrm{L}$, $t$ [m] | $[2{,}3\,c_\mathrm{L}\rho t^2]^{-1}$ |
+| `"beam"` | $\rho$, $c_\mathrm{L}$, $t$ [m], $w$ [m] | $[7.6\,\rho t w\sqrt{c_\mathrm{L} t f}]^{-1}$ |
+| `"plate"` | $\rho$, $c_\mathrm{L}$, $t$ [m] | $[2.3\,c_\mathrm{L}\rho t^2]^{-1}$ |
 | `"pipe"` | $\rho$, $c_\mathrm{L}$, $t$ [m], $r$ [m] | $[63\,\rho t r\sqrt{c_\mathrm{L} r f}]^{-1}$ |
 | `"mass_spring"` | $M$ [kg], $s$ [N/m], $\eta$ [-] | $\left[\left(\frac{2\pi f\eta}{s(1+\eta^2)}\right)^2 + \left(\frac{2\pi f}{s(1+\eta^2)} - \frac{1}{2\pi f M}\right)^2\right]^{1/2}$ |
 
@@ -241,7 +241,7 @@ mass and bending stiffness (the same number as `vibration.infinite_plate_mobilit
 ```python
 from phonometry import building
 
-# A 120 kg pump on four rubber mounts, 1,0e6 N/m each, loss factor 0,1.
+# A 120 kg pump on four rubber mounts, 1.0e6 N/m each, loss factor 0.1.
 y_feet = building.typical_element_mobility(
     "mass_spring", frequency=125.0, mass=120.0, stiffness=4.0e6, loss_factor=0.1
 )
@@ -281,14 +281,14 @@ is isolated or freely suspended instead.
 
 **Calculated, mid-panel.** For excitation in the centre area of a large
 homogeneous element, Formula (F.4) gives the real, frequency-independent
-infinite-plate value $Y_{i,\infty} = 1/(8\sqrt{m'B'}) = (2{,}3\,c_\mathrm{L}\rho t^2)^{-1}$,
+infinite-plate value $Y_{i,\infty} = 1/(8\sqrt{m'B'}) = (2.3\,c_\mathrm{L}\rho t^2)^{-1}$,
 which is `vibration.infinite_plate_mobility(B, m)` in the library.
 It is valid only *above* the element's lowest resonance
 $f_{11} = (c_0^2/4f_\mathrm{c})(1/l_1^2 + 1/l_2^2)$ (Formula F.5); below $f_{11}$ the
 mobility turns complex and is set by the stiffness of the element's supports, not
-by its own mass and bending stiffness. For the 5,00 m × 4,00 m, 220 mm concrete
+by its own mass and bending stiffness. For the 5.00 m × 4.00 m, 220 mm concrete
 floor of the worked building $f_{11}$ is 39 Hz, comfortably below the range, but
-for a 1,20 m × 0,80 m concrete plinth of the same thickness it is 781 Hz, right in
+for a 1.20 m × 0.80 m concrete plinth of the same thickness it is 781 Hz, right in
 the middle of it, so on small stiff elements the closed form is the wrong tool.
 Elements with beams split again (Formula F.3.2): below $f_{11}$ use the effective
 bending stiffness $\sqrt{B'_xB'_y}$; above it, excitation between the beams uses
@@ -298,9 +298,9 @@ the plate field and excitation on a beam uses the beam's own mobility.
 as $\mathrm{Re}\{Y_i\} = \mathrm{Re}\{Y_{i,\infty}\}\,[1 - J_0(2k_\mathrm{B}a)]$ (Formula
 F.6a, with a corner form F.6b), $a$ being the distance to the edge. This makes
 the fixing distance a design variable rather than a detail: on that same concrete
-floor at 63 Hz, bolting the machine 0,20 m from a wall leaves 6,5 % of the
-mid-panel real mobility (11,9 dB less injected power) and 0,50 m leaves 37 %,
-worth 4,3 dB. Move a pump towards a junction and it feeds the building less.
+floor at 63 Hz, bolting the machine 0.20 m from a wall leaves 6.5 % of the
+mid-panel real mobility (11.9 dB less injected power) and 0.50 m leaves 37 %,
+worth 4.3 dB. Move a pump towards a junction and it feeds the building less.
 
 ```python
 import numpy as np
@@ -335,13 +335,13 @@ and substitute the equipment into it afterwards (Formula D.6). The ISO tapping
 machine is the practical choice on low-mobility receiving structures, and
 Table F.1 is its octave-band force level:
 
-| Octave band [Hz] | 31,5 | 63 | 125 | 250 | 500 | 1000 | 2000 | 4000 |
+| Octave band [Hz] | 31.5 | 63 | 125 | 250 | 500 | 1000 | 2000 | 4000 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | $L_\mathrm{F}$ [dB] | 139 | 142 | 145 | 148 | 151 | 154 | 156 | 156 |
 
 Two conditions travel with the table. The closed form the standard prints
-beside it, $L_\mathrm{F} = 10\log_{10}(2{,}5f/10^{-12})$ in octave bands and
-$10\log_{10}(0{,}8f/10^{-12})$ in one-third-octave bands
+beside it, $L_\mathrm{F} = 10\log_{10}(2.5f/10^{-12})$ in octave bands and
+$10\log_{10}(0.8f/10^{-12})$ in one-third-octave bands
 (`tapping_machine_force_level_estimate`), holds only "up till
 about 1000 Hz": it gives 157 dB and 160 dB at 2 kHz and 4 kHz where the table
 flattens at 156 dB, so read the table where the table exists and the closed
@@ -350,7 +350,7 @@ are re $10^{-6}$ N despite the "re 1 pN" the caption prints; see the
 [errata registry](/phonometry/reference/errata/).
 
 Clause D.1.3 then treats the machine as a force source with the mass-like
-mobility of its 0,5 kg hammers, which turns the table into the two inputs this
+mobility of its 0.5 kg hammers, which turns the table into the two inputs this
 page takes: $L_\mathrm{Ws,c} = L_\mathrm{F} - 5 - 10\log_{10}f$ (Formula D.9a) and
 $D_{\mathrm{C},i} = -10\log_{10}(\omega M Y_i) + 10\log_{10}[1 + (\omega M Y_i)^2]$
 (Formula D.9b, which is Formula 19b with $Y_\mathrm{s} = 1/\mathrm{j}\omega M$).
@@ -364,7 +364,7 @@ lf = building.tapping_machine_force_level()            # Table F.1
 lw_c = building.tapping_machine_characteristic_power_level(lf, frequency=bands)
 print(np.round(lw_c, 1))   # [119. 119. 119. 119. 119. 119. 118. 115.]
 
-# Onto the 220 mm concrete floor of the previous section (Y_i = 1,07e-6).
+# Onto the 220 mm concrete floor of the previous section (Y_i = 1.07e-6).
 dc = building.tapping_machine_coupling_term(1.07e-6, frequency=bands)
 print(np.round(lw_c - dc, 1))   # [79.3 82.3 85.3 88.3 91.3 94.3 96.3 96.3]
 ```
@@ -433,7 +433,7 @@ term is what "normalised" means on this page: the result is the level the room
 *would* have if its equivalent absorption area were 10 m². A real room with more
 absorption than that measures lower; ISO 16032 field measurements of service
 equipment are usually *standardised* instead, referred to a reverberation time of
-0,5 s, and the two are not interchangeable.
+0.5 s, and the two are not interchangeable.
 
 The paths then combine energetically, band by band (Formula 17):
 
@@ -443,7 +443,7 @@ $$
 
 `res.total_level` is that per-band combination and `res.overall_level` the sum
 over the spectrum of it. For the flushing cistern of Annex I.3 the four paths
-total 41,4 dB at 63 Hz and the whole spectrum closes at 29 dB(A); see the
+total 41.4 dB at 63 Hz and the whole spectrum closes at 29 dB(A); see the
 weighting note below the snippet.
 
 ### The adjustment term $D_\mathrm{sa}$
@@ -535,7 +535,7 @@ $L_\mathrm{n,s}(A)$. Both of EN 12354-5's worked examples close on one: 26 dB(A)
 Annex I.2 whirlpool bath and 29 dB(A) for the Annex I.3 cistern. The gap is not
 small. Service-equipment spectra are weighted to the low bands, exactly where the
 A-weighting is steepest, so for the Annex I.3 cistern the unweighted sum is
-44,0 dB against the standard's 29 dB(A) (fifteen decibels of headroom that does
+44.0 dB against the standard's 29 dB(A) (fifteen decibels of headroom that does
 not exist). Weight the band levels before summing them:
 
 ```python
@@ -580,7 +580,7 @@ states Formulae 18a/17 and the prediction disclaimer. Rendering needs reportlab 
 
 Two numbers in the snippet below are the standard's, not invented: `16.2` is the
 coupling term of the Annex I.3 cistern at its wall contact, and the `lwc` array is
-that cistern's characteristic power level, the 84,4 dB the
+that cistern's characteristic power level, the 84.4 dB the
 [EN 15657 page](/phonometry/buildings/design/structure-borne-power/) derives at
 63 Hz. `requirement` is compared against `overall_level`, so the 45 dB below is an
 *unweighted* band-sum limit; a regulation stated in dB(A) has to be checked

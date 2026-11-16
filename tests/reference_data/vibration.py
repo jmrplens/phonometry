@@ -35,21 +35,21 @@ if TYPE_CHECKING:
 # factors are from ISO 8041-1:2017 Annex B (Tables B.1-B.9, 4 sig. figs).
 # ---------------------------------------------------------------------------
 # ISO 8041-1 Annex B design-goal weighting factors at the true band centre.
-ISO8041_1_WK_FACTOR_6P31HZ = 1.054  # Table B.8, n = 8 (6,31 Hz) - Wk peak
-ISO8041_1_WM_FACTOR_1P585HZ = 0.9342  # Table B.9, n = 2 (1,585 Hz) - Wm
-ISO8041_1_WB_FACTOR_6P31HZ = 1.054  # Table B.1, n = 8 (6,31 Hz) - Wb peak
+ISO8041_1_WK_FACTOR_6P31HZ = 1.054  # Table B.8, n = 8 (6.31 Hz) - Wk peak
+ISO8041_1_WM_FACTOR_1P585HZ = 0.9342  # Table B.9, n = 2 (1.585 Hz) - Wm
+ISO8041_1_WB_FACTOR_6P31HZ = 1.054  # Table B.1, n = 8 (6.31 Hz) - Wb peak
 ISO8041_1_WB_FACTOR_1HZ = 0.3853  # Table B.1, n = 0 (1 Hz)
 ISO8041_1_WB_FACTOR_100HZ = 0.1154  # Table B.1, n = 20 (100 Hz)
 ISO8041_1_WD_FACTOR_1HZ = 1.011  # Table B.3, n = 0 (1 Hz)
-ISO8041_1_WE_FACTOR_8HZ = 0.1263  # Table B.4, n = 9 (7,943 Hz)
-ISO8041_1_WF_FACTOR_0P1585HZ = 1.004  # Table B.5, n = -8 (0,1585 Hz)
-ISO8041_1_WF_FACTOR_0P1HZ = 0.6951  # Table B.5, n = -10 (0,1 Hz)
-ISO8041_1_WJ_FACTOR_6P31HZ = 0.947  # Table B.7, n = 8 (6,31 Hz)
-ISO8041_1_WJ_FACTOR_8HZ = 1.016  # Table B.7, n = 9 (7,943 Hz)
+ISO8041_1_WE_FACTOR_8HZ = 0.1263  # Table B.4, n = 9 (7.943 Hz)
+ISO8041_1_WF_FACTOR_0P1585HZ = 1.004  # Table B.5, n = -8 (0.1585 Hz)
+ISO8041_1_WF_FACTOR_0P1HZ = 0.6951  # Table B.5, n = -10 (0.1 Hz)
+ISO8041_1_WJ_FACTOR_6P31HZ = 0.947  # Table B.7, n = 8 (6.31 Hz)
+ISO8041_1_WJ_FACTOR_8HZ = 1.016  # Table B.7, n = 9 (7.943 Hz)
 # ISO 8041-1 Table 1 weighting factors at the reference frequencies.
-ISO8041_1_WH_REF_FREQ_HZ = 500.0 / (2.0 * math.pi)  # 79,577 Hz (500 rad/s)
+ISO8041_1_WH_REF_FREQ_HZ = 500.0 / (2.0 * math.pi)  # 79.577 Hz (500 rad/s)
 ISO8041_1_WH_REF_FACTOR = 0.2020  # Table 1, Wh @ 500 rad/s
-ISO8041_1_WBV_REF_FREQ_HZ = 100.0 / (2.0 * math.pi)  # 15,915 Hz (100 rad/s)
+ISO8041_1_WBV_REF_FREQ_HZ = 100.0 / (2.0 * math.pi)  # 15.915 Hz (100 rad/s)
 ISO8041_1_WC_REF_FACTOR = 0.5145  # Table 1, Wc @ 100 rad/s
 ISO8041_1_WD_REF_FACTOR = 0.1261  # Table 1, Wd @ 100 rad/s
 
@@ -57,7 +57,7 @@ ISO8041_1_WD_REF_FACTOR = 0.1261  # Table 1, Wd @ 100 rad/s
 # factor per one-third-octave band (band number n -> true centre 10^(n/10) Hz;
 # factors to 4 significant figures). Transcribed from the standard and
 # cross-validated against the printed dB column (20 lg factor within the
-# 0,01 dB print rounding) row by row.
+# 0.01 dB print rounding) row by row.
 ISO8041_1_ANNEX_B_FACTORS: dict[WeightingName, tuple[tuple[int, float], ...]] = {
     "Wb": (
         (-10, 0.02494),
@@ -773,7 +773,7 @@ ISO8041_1_TABLE5_TOLERANCES: tuple[tuple[float, float], ...] = (
 )
 # ISO 8041-1:2017 Annex B, Tables B.1-B.9, "Band-limiting Factor" column: the
 # printed design-goal factor of the band-limiting weighting alone (Formulae
-# (1) and (2)) per one-third-octave band. Six weightings share the 0,4 Hz and
+# (1) and (2)) per one-third-octave band. Six weightings share the 0.4 Hz and
 # 100 Hz corners of Table 3 and therefore print the same column, verified
 # cell by cell against the page images of Tables B.1 to B.9, so it is
 # transcribed once here; Wf, Wh and Wm have corners of their own.
@@ -821,7 +821,7 @@ ISO8041_1_ANNEX_B_BAND_LIMITING: dict[WeightingName, tuple[tuple[int, float], ..
     "Wc": _SHARED_BAND_LIMITING,
     "Wd": _SHARED_BAND_LIMITING,
     "We": _SHARED_BAND_LIMITING,
-    # Table B.5: 0,08 Hz and 0,63 Hz corners, n = -17 to 3.
+    # Table B.5: 0.08 Hz and 0.63 Hz corners, n = -17 to 3.
     "Wf": (
         (-17, 0.06208),
         (-16, 0.09811),
@@ -845,7 +845,7 @@ ISO8041_1_ANNEX_B_BAND_LIMITING: dict[WeightingName, tuple[tuple[int, float], ..
         (2, 0.1561),
         (3, 0.0992),
     ),
-    # Table B.6: 10^0,8 Hz and 10^3,1 Hz corners, n = -1 to 36.
+    # Table B.6: 10^0.8 Hz and 10^3.1 Hz corners, n = -1 to 36.
     "Wh": (
         (-1, 0.01585),
         (0, 0.02511),
@@ -888,7 +888,7 @@ ISO8041_1_ANNEX_B_BAND_LIMITING: dict[WeightingName, tuple[tuple[int, float], ..
     ),
     "Wj": _SHARED_BAND_LIMITING,
     "Wk": _SHARED_BAND_LIMITING,
-    # Table B.9: 10^-0,1 Hz and 100 Hz corners, n = -10 to 26.
+    # Table B.9: 10^-0.1 Hz and 100 Hz corners, n = -10 to 26.
     "Wm": (
         (-10, 0.01585),
         (-9, 0.02511),
@@ -1120,7 +1120,7 @@ ISO8041_2_TABLE2_WEIGHTING_CONSISTENCY_PERCENT = 3.0
 # 12.10.2 (folio 28, 3 % on the reference range, 4 % on the others), 12.11.2
 # (folio 29), 12.11.3 (folio 30), 12.11.4 and 12.13 (folio 31), 12.14 and
 # 12.18 (folio 32), and 13.9 (folio 41, the same 5 % for linearity and for
-# frequency response). 12.20.2 prints 0,5 degC and 10 % relative humidity,
+# frequency response). 12.20.2 prints 0.5 degC and 10 % relative humidity,
 # uncertainties of an environmental condition rather than of a deviation.
 ISO8041_2_MAX_EXPANDED_UNCERTAINTY_PERCENT: dict[str, float] = {
     "12.7": 2.0,
@@ -1140,9 +1140,9 @@ ISO8041_2_MAX_EXPANDED_UNCERTAINTY_PERCENT: dict[str, float] = {
 ISO8041_2_COVERAGE_FACTOR = 2.0
 
 # ISO 5349-2:2001 Annex E worked-example daily exposures A(8), m/s^2.
-ISO5349_2_E21_A8 = 4.1  # E.2.1 single tool: 7,4*sqrt(2,5/8)
+ISO5349_2_E21_A8 = 4.1  # E.2.1 single tool: 7.4*sqrt(2.5/8)
 ISO5349_2_E3_A8 = 3.6  # E.3 forestry three-task combination
-# ISO 5349-1:2001 Annex C: Dy = 31,8*A(8)^-1,06; Table C.1 A(8)=7 -> Dy=4 yr.
+# ISO 5349-1:2001 Annex C: Dy = 31.8*A(8)^-1.06; Table C.1 A(8)=7 -> Dy=4 yr.
 ISO5349_1_VWF_A8 = 7.0
 ISO5349_1_VWF_DY_YEARS = 4.0
 # Directive 2002/44/EC Article 3 daily exposure action/limit values.
@@ -1160,10 +1160,10 @@ DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)
 ISO2631_5_DZD_MALE = 55.97  # daily acceleration dose, m/s2 (Formula 3)
 ISO2631_5_R_MALE = 1.22  # cumulative stress variable R (Formula C.3)
 ISO2631_5_PI_MALE = 0.37  # probability of lumbar injury (Formula C.5)
-# Annex C NOTE 5: the same exposure for a 64 kg female (mz = 0,025 MPa/(m/s2)).
+# Annex C NOTE 5: the same exposure for a 64 kg female (mz = 0.025 MPa/(m/s2)).
 ISO2631_5_SD_FEMALE = 1.40  # daily compressive stress Sd, MPa (Formula C.1)
 ISO2631_5_R_FEMALE = 0.97  # cumulative stress variable R (Formula C.3).
-# Exact recomputation of NOTE 5 (mz = 0,025, Sage = 0,039, b = 20, n = 20)
+# Exact recomputation of NOTE 5 (mz = 0.025, Sage = 0.039, b = 20, n = 20)
 # gives R = 0.9621, which rounds to 0.96; the printed 0.97 is a last-digit
 # inconsistency of the standard's own note (the male path reproduces the
 # printed 1.22 exactly with the identical code). Tolerance 0.01 covers it.
@@ -1172,7 +1172,7 @@ ISO2631_5_R_FEMALE = 0.97  # cumulative stress variable R (Formula C.3).
 # clause 5.2 seat-to-spine transfer function (Formula 1) at fs = 256 Hz,
 # 12 taps. An independent cross-check of the Formula 1 coefficients: the
 # analog magnitude must match the filter within the clause 5.2 tolerance
-# (+/- 0,04 up to 40 Hz, +/- 0,08 up to 80 Hz).
+# (+/- 0.04 up to 40 Hz, +/- 0.08 up to 80 Hz).
 ISO2631_5_ANNEX_D_FS = 256.0  # sampling frequency of the Table D.1 filter, Hz
 ISO2631_5_ANNEX_D_B: tuple[float, ...] = (
     -0.000005710,
@@ -1206,36 +1206,36 @@ ISO2631_5_ANNEX_D_A: tuple[float, ...] = (
 # ---------------------------------------------------------------------------
 # Mechanical mobility and transfer stiffness - ISO 7626 / ISO 10846 anchors.
 # ISO 7626-2:2015, 7.5.2: the FRF of a freely suspended rigid block of mass
-# m = 10 kg is mag(A) = 1/m = 0,100 1/kg at every frequency, and
-# mag(Y) = 1/(2*pi*f*m) = 1,59155e-4 m/(N.s) at 100 Hz, within +/-5 %.
-# Annex A: coherence 0,8 with n = 75 averages -> normalized random error
-# eps = sqrt((1-g2)/(2*n*g2)) = 4,08 % (< 5 %, the 8.1.3 criterion).
+# m = 10 kg is mag(A) = 1/m = 0.100 1/kg at every frequency, and
+# mag(Y) = 1/(2*pi*f*m) = 1.59155e-4 m/(N.s) at 100 Hz, within +/-5 %.
+# Annex A: coherence 0.8 with n = 75 averages -> normalized random error
+# eps = sqrt((1-g2)/(2*n*g2)) = 4.08 % (< 5 %, the 8.1.3 criterion).
 # The omega = 1000 rad/s decade identity across the FRF family: a rigid 1 kg
 # mass has accelerance 1 1/kg, mobility 1e-3 m/(N.s), compliance 1e-6 m/N.
-# ISO 10846-3:2002, 6.1: valid where DeltaL1,2 >= 20 dB (mag(T) <= 0,1); the
+# ISO 10846-3:2002, 6.1: valid where DeltaL1,2 >= 20 dB (mag(T) <= 0.1); the
 # T << 1 approximation then holds within 1 dB (12 %) - at the limit the
-# undamped mass-spring model gives k_indirect/k = 1,1 (0,83 dB, 10 %).
-# ISO 10846-1:2008, Eq. (6): at mag(k2,2/kt) = 0,1 the delivered force is
-# F2/F2,b = 1/1,1 = 0,9091 - the Eq. (7) "within 10 %" claim.
+# undamped mass-spring model gives k_indirect/k = 1.1 (0.83 dB, 10 %).
+# ISO 10846-1:2008, Eq. (6): at mag(k2,2/kt) = 0.1 the delivered force is
+# F2/F2,b = 1/1.1 = 0.9091 - the Eq. (7) "within 10 %" claim.
 # ISO 10846-2 7.7 and ISO 10846-3 7.6 (the test for linearity is 7.7 in
 # Parts 2, 4 and 5 and 7.6 in Part 3): two input spectra 10 dB apart must
-# give transfer-stiffness levels within 1,5 dB for the data to count as
+# give transfer-stiffness levels within 1.5 dB for the data to count as
 # linear.
 # ---------------------------------------------------------------------------
 ISO7626_2_CAL_MASS_KG = 10.0  # rigid calibration block mass (7.5.2)
 ISO7626_2_CAL_ACCELERANCE = 0.100  # mag(A) = 1/m, 1/kg
 ISO7626_2_CAL_MOBILITY_100HZ = 1.59155e-4  # mag(Y) at 100 Hz, m/(N.s)
-ISO7626_2_RANDOM_ERROR_PCT = 4.08  # Annex A example: g2 = 0,8, n = 75
-ISO7626_1_DECADE_FREQ_HZ = 1000.0 / (2.0 * math.pi)  # 159,155 Hz (1000 rad/s)
+ISO7626_2_RANDOM_ERROR_PCT = 4.08  # Annex A example: g2 = 0.8, n = 75
+ISO7626_1_DECADE_FREQ_HZ = 1000.0 / (2.0 * math.pi)  # 159.155 Hz (1000 rad/s)
 ISO7626_1_DECADE_MOBILITY = 1.0e-3  # mag(Y) of a rigid 1 kg mass, m/(N.s)
 ISO7626_1_DECADE_COMPLIANCE = 1.0e-6  # mag(H) of a rigid 1 kg mass, m/N
 ISO10846_3_LIMIT_DELTA_L_DB = 20.0  # Inequality (2): DeltaL1,2 >= 20 dB
-ISO10846_3_LIMIT_BIAS_RATIO = 1.1  # k_indirect/k of the model at mag(T) = 0,1
+ISO10846_3_LIMIT_BIAS_RATIO = 1.1  # k_indirect/k of the model at mag(T) = 0.1
 ISO10846_3_ACCURACY_DB = 1.0  # 6.1: Formula (1) accurate within 1 dB
 ISO10846_3_ACCURACY_FRACTION = 0.12  # i.e. within 12 %
-ISO10846_1_EQ6_FORCE_RATIO = 1.0 / 1.1  # F2/F2,b at mag(k2,2/kt) = 0,1
+ISO10846_1_EQ6_FORCE_RATIO = 1.0 / 1.1  # F2/F2,b at mag(k2,2/kt) = 0.1
 ISO10846_LINEARITY_STEP_DB = 10.0  # -2 7.7 b), -3 7.6 b): A/B 10 dB apart
-ISO10846_LINEARITY_TOL_DB = 1.5  # -2 7.7 c), -3 7.6 c): within 1,5 dB
+ISO10846_LINEARITY_TOL_DB = 1.5  # -2 7.7 c), -3 7.6 c): within 1.5 dB
 
 # ---------------------------------------------------------------------------
 # ISO 7626-5:2019, mobility by impact excitation. The part prints no worked
@@ -1321,16 +1321,16 @@ def sdof_gaussian_impact(
 # rasterized pages:
 # - -4 Formula (11), PDF p. 38 (folio 28), and -5 Formula (6), PDF p. 25
 #   (folio 17): "a minimum of n = 5 frequencies" per one-third-octave band.
-# - -4 Inequality (3), PDF p. 30 (folio 20): m0 <= 0,06 x 10^(LF2/20) /
-#   10^(La2/20) kg, and its NOTE 1: |LFb - LF2| <= 0,5 dB (printed "05 dB").
+# - -4 Inequality (3), PDF p. 30 (folio 20): m0 <= 0.06 x 10^(LF2/20) /
+#   10^(La2/20) kg, and its NOTE 1: |LFb - LF2| <= 0.5 dB (printed "05 dB").
 # - -4 Inequality (5), PDF p. 31 (folio 21): |20 lg(m2,eff/m2)| <= 1 dB,
 #   deviations below 40 Hz ignored (folio 23).
 # - -5 Inequalities (1) and (2) and 6.2, PDF p. 20 (folio 12): 20 dB, 15 dB,
 #   and f_UL 2 dB below the 1 Hz to 20 Hz value; Formula (7), folio 17:
 #   within 2 dB for f <= f_UL.
-# - -5 Table B.1 and B.3.4 to B.3.6, PDF pp. 32-33 (folios 24-25): 0,3, 0,5,
-#   p/sqrt(3), 0,3, 1,2, 0,5 dB, the last three printed as 1/(2 sqrt 3),
-#   2/sqrt 3 and 1,5/(2 sqrt 3); (B.3) U = 2u.
+# - -5 Table B.1 and B.3.4 to B.3.6, PDF pp. 32-33 (folios 24-25): 0.3, 0.5,
+#   p/sqrt(3), 0.3, 1.2, 0.5 dB, the last three printed as 1/(2 sqrt 3),
+#   2/sqrt 3 and 1.5/(2 sqrt 3); (B.3) U = 2u.
 # ---------------------------------------------------------------------------
 ISO10846_MIN_FREQUENCIES_PER_BAND = 5  # -4 F(11), -5 F(6)
 ISO10846_4_OUTPUT_MASS_FACTOR = 0.06  # -4 Inequality (3)

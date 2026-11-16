@@ -177,7 +177,7 @@ def _reflection_index() -> ph.environment.ReflectionIndexResult:
 
 
 def _reflection_index_uncertainty() -> ph.environment.ReflectionIndexUncertainty:
-    """EN 1793-5 A.2: the high column of Table A.1 at k_p = 1,96, as Annex B.5."""
+    """EN 1793-5 A.2: the high column of Table A.1 at k_p = 1.96, as Annex B.5."""
     return ph.environment.reflection_index_expanded_uncertainty()
 
 
@@ -207,7 +207,7 @@ def _direct_sound_subtraction() -> ph.environment.DirectSoundSubtraction:
 
 
 def _reflection_limit() -> ph.environment.ReflectionFrequencyLimit:
-    """EN 1793-5 5.5.7 for a 3,5 m barrier, the case of 5.8."""
+    """EN 1793-5 5.5.7 for a 3.5 m barrier, the case of 5.8."""
     return ph.environment.reflection_low_frequency_limit(3.5, speed_of_sound=343.0)
 
 
@@ -409,7 +409,7 @@ def _rise_speed() -> ph.environment.RiseSpeedResult:
 
 
 def _adjacent_neutrality() -> ph.environment.AdjacentVehicleNeutrality:
-    """ISO 3095 6.3.4 on levels 1,9 dB apart."""
+    """ISO 3095 6.3.4 on levels 1.9 dB apart."""
     return ph.environment.check_adjacent_vehicle_neutrality(83.0, 81.1)
 
 
@@ -619,7 +619,7 @@ def _service_equipment() -> ph.building.ServiceEquipmentResult:
 
 
 def _service_equipment_background() -> ph.building.ServiceEquipmentBackgroundResult:
-    """Three octave bands, one of them held at 2,2 dB (ISO/DIS 16032 Clause 9)."""
+    """Three octave bands, one of them held at 2.2 dB (ISO/DIS 16032 Clause 9)."""
     return ph.building.service_equipment_background_correction(
         [52.0, 48.0, 41.0], [38.0, 42.0, 39.0], frequencies=[125.0, 250.0, 500.0]
     )
@@ -631,7 +631,7 @@ def _position_spread() -> ph.building.PositionSpreadCheck:
 
 
 def _service_equipment_positions() -> ph.building.ServiceEquipmentPositionCheck:
-    """A 4,2 m by 3,4 m bedroom with a supply outlet near the ceiling."""
+    """A 4.2 m by 3.4 m bedroom with a supply outlet near the ceiling."""
     return ph.building.check_service_equipment_positions(
         (4.2, 3.4, 2.5),
         (0.5, 0.5, 0.5),
@@ -1242,12 +1242,12 @@ def _joint_open_band_rating() -> ph.building.JointOpenBandRating:
 
 
 def _joint_test_element_check() -> ph.building.JointTestElementCheck:
-    """A 5,4 m window gap 5 mm wide (ISO 10140-1 J.2.1, J.2.2)."""
+    """A 5.4 m window gap 5 mm wide (ISO 10140-1 J.2.1, J.2.2)."""
     return ph.building.check_joint_test_element(5.4, 5.0, window_or_door_gap=True)
 
 
 def _gap_width_check() -> ph.building.GapWidthCheck:
-    """Five gap readings within 0,25 mm (ISO 10140-1 J.2.2)."""
+    """Five gap readings within 0.25 mm (ISO 10140-1 J.2.2)."""
     return ph.building.check_gap_width([5.1, 4.9, 5.0, 5.15, 4.95])
 
 
@@ -1895,7 +1895,7 @@ def _source_location_plan() -> ph.emission.SourceLocationPlan:
 
 
 def _special_room_power() -> ph.emission.SpecialRoomSoundPowerResult:
-    """ISO 3743-2 direct method in a 70 m3 room, Tnom = 0,73 s."""
+    """ISO 3743-2 direct method in a 70 m3 room, Tnom = 0.73 s."""
     return ph.emission.sound_power_special_room(
         _ISO3743_ST, frequencies=_ISO3743_FREQS, volume=70.0, nominal_reverberation_time_s=0.73,
         background_levels=np.array([66.0, 67.0, 66.0, 60.0]), sigma_omc_db=1.0,
@@ -1916,7 +1916,7 @@ def _special_room_reverberation() -> ph.emission.SpecialRoomReverberationCheck:
 
 
 def _special_room_surfaces() -> ph.emission.SpecialRoomSurfaceCheck:
-    """ISO 3743-2 6.4, five surfaces around a mean of 0,15."""
+    """ISO 3743-2 6.4, five surfaces around a mean of 0.15."""
     walls = 0.15 * np.array([1.0, 1.2, 0.8, 1.1, 0.9])[:, None] * np.ones((1, 4))
     return ph.emission.check_special_room_surfaces(
         walls, [0.03] * 4, frequencies=_ISO3743_FREQS
@@ -2009,7 +2009,7 @@ def _vibration_meter_verification() -> object:
 
     freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     measured = np.abs(kb_weighting_response(freqs)) * 1.02
-    measured[5] *= 1.15  # 31,5 Hz, outside the 10 % of the central band
+    measured[5] *= 1.15  # 31.5 Hz, outside the 10 % of the central band
     return verify_vibration_meter(frequencies=freqs, measured_response=measured)
 
 
@@ -2068,7 +2068,7 @@ def _sound_calibrator() -> ph.metrology.SoundCalibratorVerification:
 
 
 def _conformance_verification() -> ph.metrology.ConformanceVerification:
-    """IEC 61672-1:2013 Table C.1 example 6: -0,5 dB against +1,0; -1,2 dB."""
+    """IEC 61672-1:2013 Table C.1 example 6: -0.5 dB against +1.0; -1.2 dB."""
     return ph.metrology.verify_conformance(
         -0.5, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
     )
@@ -2118,14 +2118,14 @@ def _time_invariance() -> ph.filters.TimeInvarianceResult:
 
 
 def _loop_field() -> ph.electroacoustics.LoopField:
-    """A 10 m by 15 m loop, its field across the short side at 1,2 m."""
+    """A 10 m by 15 m loop, its field across the short side at 1.2 m."""
     return ph.electroacoustics.rectangular_loop_field(
         4.0, 15.0, 10.0, 0.0, np.linspace(-7.0, 7.0, 57), 1.2
     )
 
 
 def _loop_impedance() -> ph.electroacoustics.LoopImpedance:
-    """IEC 62489-1:2010 Table B.1: the typical place of worship, 0,69 ohm and 109 uH."""
+    """IEC 62489-1:2010 Table B.1: the typical place of worship, 0.69 ohm and 109 uH."""
     return ph.electroacoustics.loop_impedance(0.69, 109e-6)
 
 
@@ -2205,7 +2205,7 @@ def _amplifier_overload() -> ph.electroacoustics.AmplifierOverloadVerification:
 
 
 def _maximum_output_current() -> ph.electroacoustics.MaxOutputCurrent:
-    """IEC 62489-1:2010 5.4.7: five steps of level into 0,5 ohm, rated at 1 % THD."""
+    """IEC 62489-1:2010 5.4.7: five steps of level into 0.5 ohm, rated at 1 % THD."""
     return ph.electroacoustics.max_output_current(
         [1.0, 2.0, 3.0, 4.0, 5.0],
         [0.1, 0.2, 0.5, 1.5, 3.0],
@@ -2232,7 +2232,7 @@ def _programme_signal_check() -> ph.electroacoustics.ProgramSignalCheck:
 
 
 def _limiting_test_signal() -> ph.electroacoustics.LimitingTestSignalCheck:
-    """IEC 60268-7:2010 8.3.2.2 b): five seconds of the programme signal clipped to 2,0."""
+    """IEC 60268-7:2010 8.3.2.2 b): five seconds of the programme signal clipped to 2.0."""
     x = ph.electroacoustics.simulated_program_signal(FS, 5.0, peak_to_rms=2.0, seed=1)
     return ph.electroacoustics.check_limiting_test_signal(x, FS)
 

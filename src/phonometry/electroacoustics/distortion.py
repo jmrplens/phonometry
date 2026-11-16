@@ -591,7 +591,7 @@ def weighting_bs468(frequencies: NumericArrayLike) -> float | NDArray[np.float64
     frequency: about +12.22 dB at the 6.3 kHz peak, where broadcast-chain
     noise is most audible, and -22.2 dB at 20 kHz. Zero frequency (dc) maps
     to ``-inf`` dB, which is the series capacitor of Fig. 1a. AES17-2015
-    5.2.7 tabulates the same curve with an additional gain of -5,63 dB
+    5.2.7 tabulates the same curve with an additional gain of -5.63 dB
     (unity at 2 kHz, the "CCIR-RMS" filter). The comma is AES 17's own: the
     decimal separator here follows the document being quoted, and BS.468-4
     prints a point where AES 17 prints a comma.
@@ -663,7 +663,7 @@ def weighted_thd(
 
     Validity note (14.12.11): because of the shape of the weighting response,
     the weighted measurement is valid only for fundamental frequencies
-    between 31,5 Hz and 400 Hz.
+    between 31.5 Hz and 400 Hz.
 
     :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the

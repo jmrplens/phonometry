@@ -1898,7 +1898,7 @@ def _per_band(
     ``non_negative`` refuses a negative value: the air absorption coefficient
     of Equation (C.1) is one (ISO 9613-1, C.2), and a negative one would turn
     :math:`\Delta L_\mathrm{a}` into a gain. The ground and facade terms may
-    be negative (Table C.3 prints -0,2 dB).
+    be negative (Table C.3 prints -0.2 dB).
     """
     require_scalar(bands, "bands")
     out = require_finite_array(values, name)

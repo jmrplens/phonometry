@@ -48,14 +48,14 @@ sound power out by an unknown amount rather than a correctable one.
 | :--- | :--- | :--- |
 | Measurement chain | IEC 61672 class 1; filters IEC 61260 class 1; 1/3 octaves from 20 Hz to 10 kHz determined simultaneously; narrowband over 20 Hz to 11 200 Hz | 6.1.2, 6.1.3, 6.1.4 |
 | Microphone diaphragm | ≤ 13 mm, in a plane **normal to the board**, axis pointing at the turbine | 6.1.2, 6.1.5 |
-| Board | Circular, diameter ≥ 1,0 m, acoustically hard: plywood or hard chip-board ≥ 12,0 mm, or metal ≥ 2,5 mm | 6.1.5 |
+| Board | Circular, diameter ≥ 1.0 m, acoustically hard: plywood or hard chip-board ≥ 12.0 mm, or metal ≥ 2.5 mm | 6.1.5 |
 | A split board | Pieces level in one plane, gap < 1 mm, split off the centre line and **parallel** to the microphone axis | 6.1.5 |
 | Seating | Flat on the ground, edges and gaps underneath levelled out with soil | 7.1 |
 | Windscreen | Primary: half an open-cell foam sphere ≈ 90 mm across, centred on the diaphragm. Secondary only where a high wind makes the low-frequency signal-to-noise ratio inadequate, and then its frequency response must be documented and **corrected in 1/3-octave bands** | 6.1.5, Annex E |
 | Direction | Within ±15° of the downwind direction at the time of measurement | 7.1 |
 | Distance | $R_0$ to ±20 %, at most ±30 m, measured to ±2 %, and as close to $R_0$ as possible; using the tolerance has to be justified in the report | 7.1 |
 | Inclination | $\varphi$ between 25° and 40°, adjusting the position inside the tolerances above if necessary | 7.1 |
-| Reflections | The calculated influence of any reflecting structure < 0,2 dB | 7.1 |
+| Reflections | The calculated influence of any reflecting structure < 0.2 dB | 7.1 |
 | Calibration | Class 1 IEC 60942 calibrator on the microphone immediately **before and after** every session, and again whenever a microphone is disconnected and reconnected | 6.1.6, 7.2.2 |
 | Traceable verification | Acoustic calibrator 12 months; microphone, sound level meter, recorder, anemometer, power and temperature transducers 24 months; spectrum analyser 36 months | 6.3 |
 
@@ -351,14 +351,14 @@ Wind-turbine tonal-audibility fiche (WindTurbineTonalityResult.report), tonal au
   (Formulae 1 and 2), `apparent_sound_power_level` (Formula 26) and the
   tonal-audibility chain of subclauses 9.5.2 to 9.5.8 through
   `wind_turbine_tonality`, with its `.report()` fiche. The Formula (29) mapping
-  of a 10 m wind speed to hub height over $z_{0\mathrm{ref}} = 0{,}05$ m is
+  of a 10 m wind speed to hub height over $z_{0\mathrm{ref}} = 0.05$ m is
   `environment.logarithmic_wind_speed`, on the
   [receptor page](wind-turbine-receptor.md). The
   instrumentation and position requirements of clauses 6 and 7 are documented
   above as the conditions those formulae assume, and the measurement-position
   tolerances are drawn.
 
-- **Not covered.** The measurement campaign itself: the 10 s averaging, the 0,5 m/s wind-speed
+- **Not covered.** The measurement campaign itself: the 10 s averaging, the 0.5 m/s wind-speed
   binning with its 10 + 10 periods, the background correction, the interpolation
   to bin centres and the uncertainty budget of clause 9.3 all operate on whole
   campaigns and are the user's. The declaration route of IEC TS 61400-14, which turns a batch of

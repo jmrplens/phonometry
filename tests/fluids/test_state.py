@@ -89,11 +89,11 @@ def test_prandtl_number_closes_from_the_three_it_is_made_of(
     """Pr = eta / (rho alpha_t), against the same ratio of the printed figures.
 
     Annex F tabulates the three, so the Prandtl number is theirs and needs no
-    constant of its own here. It comes to 0,728 02 at the reference state.
+    constant of its own here. It comes to 0.728 02 at the reference state.
 
     Worth pinning because a published porous model may carry its own Prandtl
     number as a fitted constant. That constant belongs to the model, not to the
-    air: the Johnson-Champoux-Allard 0,71 differs from this by two and a half
+    air: the Johnson-Champoux-Allard 0.71 differs from this by two and a half
     per cent, and it stays frozen where it is published.
     """
     printed = 1.826566e-5 / (1.1860848 * 2.115317e-5)
@@ -163,9 +163,9 @@ def test_every_diagnostic_is_filterable_as_one(warning: type[Warning]) -> None:
 def test_a_printed_prandtl_number_wins_over_the_identity() -> None:
     """A published fit keeps the constant it was fitted with.
 
-    Johnson-Champoux-Allard carries 0,71. Air at that state has 0,728. Closing
+    Johnson-Champoux-Allard carries 0.71. Air at that state has 0.728. Closing
     the identity from the better air would not correct the model, it would
-    change it, and it moves what the model computes by 1,5 parts in a thousand.
+    change it, and it moves what the model computes by 1.5 parts in a thousand.
     So a carried value wins, and a model that prints none has it closed from
     the three quantities that it did print.
     """

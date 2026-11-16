@@ -252,15 +252,15 @@ def _aw_total(levels: np.ndarray) -> float:
 
 
 def test_annex_i2_whirlpool_floor_component() -> None:
-    """Tables I.6a/I.7: mobility correction and path 11 within +/-0,15 dB."""
+    """Tables I.6a/I.7: mobility correction and path 11 within +/-0.15 dB."""
     import reference_data as ref
 
     tol = ref.EN12354_5_ANNEX_I_TOL
     inst = building.installed_power_from_reception_plate(
         ref.EN12354_5_I6A_LWSN_FLOOR, ref.EN12354_5_I6A_Y_FLOOR
     )
-    # Y_floor = 1.25e-6 vs Y_rec = 5e-6 -> a flat 10 lg(1/4) = -6,02 dB
-    # correction (the example prints -6,0).
+    # Y_floor = 1.25e-6 vs Y_rec = 5e-6 -> a flat 10 lg(1/4) = -6.02 dB
+    # correction (the example prints -6.0).
     np.testing.assert_allclose(
         inst,
         np.asarray(ref.EN12354_5_I6A_LWSN_FLOOR) + 10.0 * np.log10(0.25),
@@ -268,7 +268,7 @@ def test_annex_i2_whirlpool_floor_component() -> None:
     )
     np.testing.assert_allclose(inst, ref.EN12354_5_I6A_LWSN_INST_FLOOR, atol=tol)
     # Path 11 per Formula (18a); the example's -4 dB corresponds to
-    # S_i = S0 = 10 m2 (10 lg(10/4) = 3,98 dB).
+    # S_i = S0 = 10 m2 (10 lg(10/4) = 3.98 dB).
     lns_11 = building.structure_borne_pressure_level_path(
         inst, ref.EN12354_5_I6A_DSA_FLOOR, ref.EN12354_5_I6A_R11, 10.0
     )
@@ -326,7 +326,7 @@ def test_annex_i3_cistern_coupling_terms() -> None:
 
 def test_annex_i3_cistern_full_chain_table_i9() -> None:
     """Table I.9 end-to-end: all four paths, the Formula (17) total and the
-    29 dB(A) receiving-room value, within the +/-0,15 dB table rounding.
+    29 dB(A) receiving-room value, within the +/-0.15 dB table rounding.
     """
     import reference_data as ref
 

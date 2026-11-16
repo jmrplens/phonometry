@@ -30,8 +30,8 @@ IEC60118_4_LONG_TERM_A_PER_M = 0.1
 # ---------------------------------------------------------------------------
 # IEC 60118-4:2014 6.4 (folio 13): pink noise, peak-to-peak over RMS at least
 # 18 dB ("crest factor = 4"), third-order Butterworth filters with -3 dB at
-# 75 Hz and 6,5 kHz. NOTE 2 prints the theoretical responses as -0,8 dB at
-# 100 Hz and -0,7 dB at 5 kHz, which the formula exchanges (see
+# 75 Hz and 6.5 kHz. NOTE 2 prints the theoretical responses as -0.8 dB at
+# 100 Hz and -0.7 dB at 5 kHz, which the formula exchanges (see
 # docs/ERRATA.md). IEC 62489-1:2010 5.4.8.2 b) (folio 11) prints the same
 # note and asks for 18 dB plus or minus 2 dB.
 # ---------------------------------------------------------------------------
@@ -111,8 +111,8 @@ IEC60118_4_A1_SYSTEM_NOISE_RISE_DB = 1.0
 # millimetres. Figure 2 a): inner radius l2 = 300, outer radius l2 + l3 = 500,
 # at 0 and plus or minus 45 degrees. Figure 2 b): l2 = 300, l3 = 200, l4 = 424,
 # l5 = 700. Figure 3 a): l1 = l2 = 300, l4 = l5 = 150; Figure 3 b): l3 = 1 200,
-# l2 = l1 = 250, so the heights are 1,2 m, 1,45 m and 1,7 m. Refuge heights
-# 1,2 m and 1,7 m (9.2, folio 8).
+# l2 = l1 = 250, so the heights are 1.2 m, 1.45 m and 1.7 m. Refuge heights
+# 1.2 m and 1.7 m (9.2, folio 8).
 # ---------------------------------------------------------------------------
 IEC60118_4_A1_FIGURE2A_MM = {"inner_radius": 300.0, "outer_radius": 500.0}
 IEC60118_4_A1_FIGURE2B_MM = {"l2": 300.0, "l3": 200.0, "l4": 424.0, "l5": 700.0}
@@ -122,22 +122,22 @@ IEC60118_4_A1_COUNTER_HEIGHTS_M = (1.2, 1.45, 1.7)
 
 # ---------------------------------------------------------------------------
 # IEC 60118-4:2014 Annex E. E.1 (folio 36): H = 2 sqrt(2) I / (pi d) at the
-# centre of a square loop. E.2 (folio 37): 3 dB down at 45 degrees and 9,3 dB
+# centre of a square loop. E.2 (folio 37): 3 dB down at 45 degrees and 9.3 dB
 # down at 70 degrees. E.3 (folio 43): R = 4 rho d / a, L = 8d microhenries, the
 # impedance "1,4 times the resistance" where 2 pi f L = R. E.6 (folio 44):
-# 1 Oe = 79,58 A/m, "the magnetic induction due to a field strength of 1 A/m
+# 1 Oe = 79.58 A/m, "the magnetic induction due to a field strength of 1 A/m
 # is 1,256 microtesla".
 # ---------------------------------------------------------------------------
 IEC60118_4_TELECOIL_DB = {45.0: -3.0, 70.0: -9.3}
 
 #: IEC 60118-4:2014 Figure E.2 b) (PDF page 40, folio 38), read off the curves:
-#: the level re the field at the centre of the 15 by 10 loop in its plane, 1,2
+#: the level re the field at the centre of the 15 by 10 loop in its plane, 1.2
 #: units above it, against the position in percent of the loop dimension.
 #: (component, position in percent) -> dB. The curves are the traverse across
 #: the 10-unit width, as E.1 describes them; panel a) of the figure draws the
 #: vertical-field line along the 15-unit length (see docs/ERRATA.md). Read to
-#: about 0,1 dB where the curve is flat; the vertical curve sits some 0,2 dB
-#: to 0,3 dB below a filament's field throughout.
+#: about 0.1 dB where the curve is flat; the vertical curve sits some 0.2 dB
+#: to 0.3 dB below a filament's field throughout.
 IEC60118_4_FIGURE_E2B_DB = {
     ("horizontal", 2.5): 4.2,
     ("horizontal", 30.0): -15.0,
@@ -148,8 +148,8 @@ IEC60118_4_FIGURE_E2B_LOOP = (15.0, 10.0, 1.2)
 
 #: IEC 60118-4:2014 Figure H.1 (PDF page 51, folio 49), read off the ends of
 #: the curves at a shorter side of 10 m: the loop current in amperes that gives
-#: 400 mA/m 1,4 m above the centre, against the aspect ratio. One pixel of the
-#: read is 0,007 A; the lines are 3 to 5 pixels wide.
+#: 400 mA/m 1.4 m above the centre, against the aspect ratio. One pixel of the
+#: read is 0.007 A; the lines are 3 to 5 pixels wide.
 IEC60118_4_FIGURE_H1_AT_10_M_A = {1.0: 4.89, 1.5: 5.64, 2.0: 6.04, 3.0: 6.41, 5.0: 6.63}
 IEC60118_4_E3_INDUCTANCE_UH_PER_M_SIDE = 8.0
 IEC60118_4_E3_CORNER_FACTOR = 1.4
@@ -158,7 +158,7 @@ IEC60118_4_E6_MICROTESLA_PER_A_PER_M = 1.256
 
 # ---------------------------------------------------------------------------
 # IEC 62489-1:2010+A1:2014. 5.2.2 (folio 9): standard measuring conditions at
-# -10 dB re the rated output current. 5.4.10.2 (folio 13): the field at 1,4 m
+# -10 dB re the rated output current. 5.4.10.2 (folio 13): the field at 1.4 m
 # above the centre of a horizontal square loop. 5.4.13.4 (folio 14): an AGC
 # input range of at least 32 dB for at most 3 dB of output change, THD+N at
 # most 5 %. 5.4.14.1 (folio 15): "cos 85 degrees = 0,087, so the in-phase
@@ -177,7 +177,7 @@ IEC62489_1_QUADRATURE_EXAMPLE_DB = 0.72
 # name, dimensions in m (a diameter for the neck loop), turns, printed
 # perimeter in m, conductor area in mm2, resistance in ohm, inductance in
 # microhenries, impedance at 2 kHz and at 5 kHz in ohm. The counter loop's
-# perimeter is printed 1,5; its sides make it 1,6 (see docs/ERRATA.md).
+# perimeter is printed 1.5; its sides make it 1.6 (see docs/ERRATA.md).
 # ---------------------------------------------------------------------------
 IEC62489_1_TABLE_B1 = (
     ("neck loop", (0.22,), 10, 0.7, 0.5, 0.24, 85.0, 1.09, 2.67),
@@ -200,7 +200,7 @@ IEC62489_1_TABLE_B1_INDUCTANCE_REPRODUCED = (
 # IEC 62489-1:2010+A1:2014 9.2.3 (folio 17): recommended rated input
 # impedances of a neck loop. prEN 62489-1:2010/prA2:2017 D.1.2 and D.1.3 (a
 # draft; CDV folio 5): type 1, 32 ohm plus or minus 5 %; type 2, at least
-# 32 ohm; both 1,06 V for 400 mA/m on the jig.
+# 32 ohm; both 1.06 V for 400 mA/m on the jig.
 # ---------------------------------------------------------------------------
 IEC62489_1_NECK_LOOP_IMPEDANCES_OHM = (8.0, 16.0, 32.0)
 IEC62489_1_A2_DRAFT_TYPE1_OHM = 32.0
@@ -210,8 +210,8 @@ IEC62489_1_A2_DRAFT_MAX_INPUT_V = 1.06
 
 # ---------------------------------------------------------------------------
 # IEC 60028:1925 (2nd edition), clause I (1) and (4) (PDF page 7, folio 5):
-# standard annealed copper, 1/58 = 0,017241 ohm mm2/m at 20 degrees Celsius,
-# temperature coefficient 0,00393 = 1/254,45 per degree.
+# standard annealed copper, 1/58 = 0.017241 ohm mm2/m at 20 degrees Celsius,
+# temperature coefficient 0.00393 = 1/254.45 per degree.
 # ---------------------------------------------------------------------------
 IEC60028_COPPER_OHM_MM2_PER_M = 1.0 / 58.0
 IEC60028_COPPER_ALPHA_PER_K = 0.00393

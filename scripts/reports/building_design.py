@@ -179,10 +179,10 @@ def _structure_borne_power_example() -> tuple[object, ReportMetadata, str]:
 
     A pump fixed to the low-mobility reception plate EN 15657 clause 7.2.2
     specifies: 100 mm concrete of 2 300 kg/m3, so a mass per area
-    m = 230 kg/m2, over 3,15 m x 2,23 m = 7,0 m2 (above the 5 m2 minimum, sides
-    near sqrt(2):1) with a structural reverberation time Ts = 0,25 s, which
-    gives the plate loss factor eta = 2,2/(f*Ts) (Formula 13) and keeps it at
-    or above the required 0,08 through the 50-100 Hz bands. The spatial-average
+    m = 230 kg/m2, over 3.15 m x 2.23 m = 7.0 m2 (above the 5 m2 minimum, sides
+    near sqrt(2):1) with a structural reverberation time Ts = 0.25 s, which
+    gives the plate loss factor eta = 2.2/(f*Ts) (Formula 13) and keeps it at
+    or above the required 0.08 through the 50-100 Hz bands. The spatial-average
     plate velocity level (Formula 12) per octave band (125 Hz to 4 kHz) is
     Lv = [70, 72, 68, 64, 60, 55] dB re 1e-9 m/s, and the structure-borne sound
     power injected into the plate is
@@ -221,12 +221,12 @@ def _installed_structure_borne_example() -> tuple[object, ReportMetadata, str]:
     A WC flushing cistern fixed to a separating wall, predicting the normalised
     structure-borne sound pressure level L_n,s in the adjacent bedroom over the
     63 Hz to 2 kHz octaves (the standard's Annex I.3 worked example, wall source
-    element). The characteristic source power L_Ws,c = [84,4, 82,5, 69,9, 67,6,
-    61,6, 49,9] dB and the force-source coupling term D_C = 16,2 dB give the
+    element). The characteristic source power L_Ws,c = [84.4, 82.5, 69.9, 67.6,
+    61.6, 49.9] dB and the force-source coupling term D_C = 16.2 dB give the
     installed power L_Ws,inst = L_Ws,c - D_C (Formula 18b). Two flanking paths
     leave the wall (wall to floor, wall to wall), each with the wall
     structure-to-airborne adjustment D_sa and its flanking reduction index
-    R_ij,ref over the element area S = 12,8 m2 (Formula 18a); the paths combine
+    R_ij,ref over the element area S = 12.8 m2 (Formula 18a); the paths combine
     energetically (Formula 17) to a total L_n,s near 41 dB and an overall
     band-summed level near 43 dB. The sheet is a prediction from the source
     characterization and the element data, not a measurement; the declared
@@ -300,7 +300,7 @@ def _detailed_airborne_example() -> tuple[object, ReportMetadata, str]:
     taken corrected rather than as printed, both registered in docs/ERRATA.md:
     the Formula (C.1) perimeter sums, derived from Formula (C.4) with the
     unrounded Annex E junction indices, and the external walls' internal loss
-    factor, 0,012 5 from the element specification rather than the 0,013 of the
+    factor, 0.012 5 from the element specification rather than the 0.013 of the
     input block.
     """
     import iso12354_building as bld

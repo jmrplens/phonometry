@@ -684,8 +684,8 @@ def induction_motor_frequencies(
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
     :param n_poles: Number of magnetic poles ``p`` (even integer >= 2).
     :param n_rotor_bars: Number of rotor bars/slots ``R`` (integer >= 1).
-    :param slip: Unit slip ``s`` (``0 <= s < 1``, Default: 0); typically 0,02
-        to 0,05 under load. Ignored when *supply_frequency* is given.
+    :param slip: Unit slip ``s`` (``0 <= s < 1``, Default: 0); typically 0.02
+        to 0.05 under load. Ignored when *supply_frequency* is given.
     :param supply_frequency: Mains frequency ``fe``, in hertz (> 0), from
         which the slip is derived (Default: ``None``, use *slip*).
     :param n_slot_harmonics: Number of slot-harmonic orders ``n`` (integer >= 1,

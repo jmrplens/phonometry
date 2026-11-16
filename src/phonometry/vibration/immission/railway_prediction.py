@@ -39,7 +39,7 @@ spectrum with it.
 times material damping (Formula (5)), :math:`(r/r_0)^{-n} \mathrm{e}^{-\alpha_R (r -
 r_0)}` with :math:`\alpha_R = 2\pi f D / c_s`, or a power law with an exponent
 measured per band (Formula (6)); the level difference is 20 lg of it
-(Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
+(Formula (4)). On the surface the exponent is usually 0.2 to 0.4.
 
 **Building** (Clause 5.4, Annex A). Six tables of level differences from
 extensive building measurements: ground to floor for concrete and for timber
@@ -55,11 +55,11 @@ table of third-octave corrections (Table 2, Formula (8)) is added to the
 predicted spectrum, the bands from 4 Hz to 80 Hz are summed, and the sum
 level gives the clock maximum r.m.s. of the category (Formula (9)),
 :math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0 10^{L/20}` with
-:math:`c_{\mathrm{T}1} = 1` and :math:`v_0 = 5 \cdot 10^{-5}` mm/s; 1,5 times
+:math:`c_{\mathrm{T}1} = 1` and :math:`v_0 = 5 \cdot 10^{-5}` mm/s; 1.5 times
 it is :math:`KB_\mathrm{Fmax,Zug}` (Formula (10)), three times that the peak
 velocity a DIN 4150-3 comparison wants (Formula (12)), and Formula (11) is the
 sum of Formula (6) of E DIN 4150-2:2023-08, printed without that formula's
-rule that a category whose :math:`KB_\mathrm{FTm,Zug}` is at or below 0,1
+rule that a category whose :math:`KB_\mathrm{FTm,Zug}` is at or below 0.1
 enters as zero; the assessment the draft says it performs is that of DIN 4150-2, so
 :func:`~phonometry.vibration.train_assessment_severity` of
 :mod:`phonometry.vibration.immission.train_categories`, which applies the
@@ -69,7 +69,7 @@ into a velocity spectrum in micrometres per second, for the VC curves.
 **A point source and a train** (Annex B). A train is a line of point sources
 until the distance :math:`R_0 \approx L^2/\lambda` (Formula (B.1)) and a point
 source beyond it, so a decay measured with a point excitation is made
-shallower by 0,3 or 0,5 in the exponent up to :math:`R_0` (Formula (B.2)).
+shallower by 0.3 or 0.5 in the exponent up to :math:`R_0` (Formula (B.2)).
 
 **What is not here.** Clause 6, the phases of a prediction, and Annex D are
 work plans. The worked example of Annex C prints its emission and building
@@ -153,7 +153,7 @@ __all__ = [
 ]
 
 #: The nominal third-octave centres of a prediction, 4 Hz to 250 Hz (Clause
-#: 5.2 and Tables A.1, A.2 and C.1). Annex A prints 6, 12 and 62,5 for three
+#: 5.2 and Tables A.1, A.2 and C.1). Annex A prints 6, 12 and 62.5 for three
 #: of them; the axis here is the nominal one.
 PREDICTION_BAND_CENTERS_HZ: tuple[float, ...] = (
     4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0,
@@ -166,7 +166,7 @@ KB_ASSESSMENT_BANDS_HZ: tuple[float, float] = (4.0, 80.0)
 
 #: Table 2 (printed page 22): the KB weighting of DIN 45669-1 as a
 #: third-octave correction in decibels, by nominal centre. Each value is
-#: :math:`10 \lg (1 / (1 + (5{,}6\ \mathrm{Hz} / f)^2))` rounded to a tenth:
+#: :math:`10 \lg (1 / (1 + (5.6\ \mathrm{Hz} / f)^2))` rounded to a tenth:
 #: the weighting alone, without the band limitation of the meter, whose
 #: place the draft's limit of the sum to the bands from 4 Hz to 80 Hz takes.
 KB_WEIGHTING_CORRECTIONS: Mapping[float, float] = MappingProxyType(
@@ -204,7 +204,7 @@ RECOMMENDED_DISTANCES_M: Mapping[str, Mapping[str, float | None]] = MappingProxy
 )
 
 #: The exponent :math:`n` of Formula (5) that surface rail traffic usually
-#: takes, frequency-independent, 0,2 to 0,4 (Clause 5.3).
+#: takes, frequency-independent, 0.2 to 0.4 (Clause 5.3).
 GEOMETRIC_DECAY_EXPONENT_RANGE: tuple[float, float] = (0.2, 0.4)
 
 #: How far Formula (3) carries an emission spectrum to another speed: a
@@ -222,8 +222,8 @@ PEAK_VELOCITY_FACTOR: float = 3.0
 
 #: Annex B: what to take off the exponent measured with a point excitation
 #: to get the exponent of a train, up to the transition distance of Formula
-#: (B.1): 0,3 when the point fit separated spreading and damping (Formula
-#: (5)), 0,5 when it lumped both into a power law (Formula (6)).
+#: (B.1): 0.3 when the point fit separated spreading and damping (Formula
+#: (5)), 0.5 when it lumped both into a power law (Formula (6)).
 LINE_SOURCE_EXPONENT_CORRECTION: Mapping[DecayFit, float] = MappingProxyType(
     {
         "power_and_damping": 0.3,
@@ -232,7 +232,7 @@ LINE_SOURCE_EXPONENT_CORRECTION: Mapping[DecayFit, float] = MappingProxyType(
 )
 
 #: The natural frequencies of a floor Tables A.1 and A.2 give a column for,
-#: in hertz; the print writes the tenth as 62,5.
+#: in hertz; the print writes the tenth as 62.5.
 FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
     8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0,
 )  # fmt: skip
@@ -341,7 +341,7 @@ GROUND_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[Floor, Mapping[float, tuple[float, ..
 #: :math:`\Delta L_{v,\mathrm{FB}}` from the ground into the foundation, in
 #: decibels, for a basement and for a ground floor, as a mean over the
 #: buildings measured with the deviation either way, along the 14 bands from
-#: 4 Hz to 80 Hz. The print writes the 12,5 Hz row as 12.
+#: 4 Hz to 80 Hz. The print writes the 12.5 Hz row as 12.
 GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES: Mapping[FoundationLevel, Mapping[Statistic, tuple[float, ...]]] = MappingProxyType({
     "basement": MappingProxyType({
         "lower": (
@@ -375,7 +375,7 @@ GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES: Mapping[FoundationLevel, Mapping[Statist
 
 #: The ratios :math:`f_{\mathrm{T}n} / f_\mathrm{e}` of the band to the natural
 #: frequency of the floor that Tables A.5 and A.6 tabulate, on the third-octave
-#: grid from 0,05 to 8; the print writes 0,06, 0,12, 0,31 and 3,10 for four of
+#: grid from 0.05 to 8; the print writes 0.06, 0.12, 0.31 and 3.10 for four of
 #: them.
 FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
     0.05, 0.063, 0.08, 0.1, 0.125, 0.16, 0.2, 0.25, 0.315, 0.4, 0.5, 0.63, 0.8,
@@ -387,8 +387,8 @@ FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
 #: concrete and for timber floors, against :data:`FOUNDATION_TO_FLOOR_RATIOS`,
 #: as a mean with the deviation either way; ``nan`` where the table prints
 #: no value. The concrete table stops at a ratio of 5, the timber one begins
-#: at 0,08 and its mean alone reaches 8. The timber table prints its lower
-#: deviation above its mean at the ratios 0,2, 3,15, 4 and 5, and above its
+#: at 0.08 and its mean alone reaches 8. The timber table prints its lower
+#: deviation above its mean at the ratios 0.2, 3.15, 4 and 5, and above its
 #: upper one at 5, so no order between the three is enforced.
 FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[Floor, Mapping[Statistic, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
@@ -724,7 +724,7 @@ def ground_transmission(
     Formula (4) takes 20 lg of it. With the damping left out and an
     exponent per band it is Formula (6), the power law with the exponent
     measured on site for every band. On the surface the standard usually
-    takes :math:`n` between 0,2 and 0,4, frequency-independent; a train is a
+    takes :math:`n` between 0.2 and 0.4, frequency-independent; a train is a
     line of point sources, and Annex B says what to take off an exponent
     measured with a point excitation.
 
@@ -977,7 +977,7 @@ def takt_max_kb(weighted_levels: NumericArrayLike) -> float:
     for Max Hold spectra with the time weighting Fast and :math:`v_0 = 5 \cdot
     10^{-5}` mm/s, the reference of the velocity level; the value is the KB
     quantity because KB is the velocity in millimetres per second. Annex C
-    prints 0,4 for a sum level of 78,1 dB.
+    prints 0.4 for a sum level of 78.1 dB.
 
     :param weighted_levels: :math:`L_{v,KB}`, as
         :func:`kb_weighted_levels` gives them, one per band.
@@ -1107,7 +1107,7 @@ def predict_train_category(
     severity over the categories of a timetable is Formula (11), the sum of
     :func:`~phonometry.vibration.train_assessment_severity`, which also
     applies the rule of E DIN 4150-2:2023-08 that Formula (11) leaves out, a
-    category at or below 0,1 counting as zero.
+    category at or below 0.1 counting as zero.
 
     :param emission_levels: :math:`L_{v,\mathrm{E}}`, one level per band, in decibels.
     :param frequencies: The band centres, nominal; the 19 bands from 4 Hz
@@ -1187,15 +1187,15 @@ def line_source_correction(
 
     :math:`\Delta L_{v,\mathrm{Korr}} = 20 \, n_\mathrm{Korr} \lg(r / r_0)`,
     added to the level a point excitation predicts, with
-    :math:`n_\mathrm{Korr}` between 0,3 and 0,5: the train spreads less than
+    :math:`n_\mathrm{Korr}` between 0.3 and 0.5: the train spreads less than
     the point did, up to the distance of Formula (B.1).
 
     :param distance_m: :math:`r`, in metres.
     :param reference_distance_m: :math:`r_0`, in metres.
-    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0,3 to 0,5.
+    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0.3 to 0.5.
     :return: :math:`\Delta L_{v,\mathrm{Korr}}`, in decibels.
     :raises ValueError: For a non-positive distance or a correction outside
-        0,3 to 0,5.
+        0.3 to 0.5.
     :raises TypeError: if ``distance_m``, ``exponent_correction`` or
         ``reference_distance_m`` is not a single number.
     """
@@ -1217,9 +1217,9 @@ def train_decay_exponent(
 ) -> float:
     r"""The decay exponent of a train from that of a point excitation, Annex B.
 
-    :math:`n_\mathrm{Zug} = n_\mathrm{Punkt} - 0{,}3` when the point
+    :math:`n_\mathrm{Zug} = n_\mathrm{Punkt} - 0.3` when the point
     measurement was fitted with spreading and damping apart (Formula (5)),
-    :math:`n_\mathrm{Punkt} - 0{,}5` when it was fitted as a power law alone
+    :math:`n_\mathrm{Punkt} - 0.5` when it was fitted as a power law alone
     (Formula (6)); both up to the transition distance of Formula (B.1), beyond
     which the point exponent holds as it is. The annex prints no floor, so a
     point exponent below the correction gives a negative result, as printed.
@@ -1292,7 +1292,7 @@ def train_velocity_ratio(
     :param reference_distance_m: :math:`r_0`, in metres.
     :param transition_distance_m: :math:`R_0`, in metres.
     :param point_exponent: :math:`n_\mathrm{Punkt}`.
-    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0,3 to 0,5.
+    :param exponent_correction: :math:`n_\mathrm{Korr}`, 0.3 to 0.5.
     :return: :math:`v(r) / v(r_0)`, one per distance. A ``float`` for a number, an array
         for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive distance, a reference beyond the

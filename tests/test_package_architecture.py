@@ -3468,7 +3468,7 @@ def test_no_error_message_carries_a_comma_decimal() -> None:
 
     The library writes its own numbers into refusals: a temperature floor at
     absolute zero, the thermodynamic bound on a Poisson ratio. Seven of them
-    had drifted to a comma, four of them the same -273,15, while eleven
+    had drifted to a comma, four of them the same "-273,15", while eleven
     comparable messages used a point and one of the two spellings of the same
     0.5 sat in each camp.
 
@@ -3484,7 +3484,7 @@ def test_no_error_message_carries_a_comma_decimal() -> None:
 
     A comma between digits is a decimal only when a letter does not precede
     it. Subscript pairs are written the same way and are notation rather than
-    numbers, so ``k2,1`` and ``F2,b`` stay as they are while ``31,5 Hz``
+    numbers, so ``k2,1`` and ``F2,b`` stay as they are while “31,5 Hz”
     does not.
     """
     offenders: list[str] = []
@@ -3507,11 +3507,11 @@ def test_no_error_message_carries_a_comma_decimal() -> None:
 def test_clause_poles_are_not_migrated_to_the_physical_bound() -> None:
     """Two different guards wear the same clothes, and only one of them shares.
 
-    ``require_above_absolute_zero`` bounds a temperature at -273,15 degC,
+    ``require_above_absolute_zero`` bounds a temperature at -273.15 degC,
     because below that it is not a temperature. Three clauses guard something
     else: their own formula is printed as ``sqrt(273 + theta)`` or
     ``1245/(273 + t)``, with the 273 the standard prints, so what breaks there
-    sits 0,15 degC higher. Migrating those onto the shared helper would leave a
+    sits 0.15 degC higher. Migrating those onto the shared helper would leave a
     band of a sixth of a degree that clears the check and then overflows.
 
     The three are pinned by name, so a later harmonising sweep has to read this

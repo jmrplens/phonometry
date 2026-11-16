@@ -12,9 +12,9 @@ the velocity of each of its three constructions beside the results, rounded
 to one decimal. Table B.3 prints the same two numbers for concrete and for
 calcium-silicate blocks, and 400 to 800 kg/m³ for autoclaved aerated
 concrete, of which Annex L takes 600. 220 mm of concrete at 2 200 kg/m³ and
-3 800 m/s is 484 kg/m² and 76,8 Hz; 365 mm of autoclaved aerated concrete at
-600 kg/m³ and 1 900 m/s is 219 kg/m² and 92,6 Hz; 200 mm of calcium-silicate
-blocks at 1 800 kg/m³ and 2 500 m/s is 360 kg/m² and 128,4 Hz, all with
+3 800 m/s is 484 kg/m² and 76.8 Hz; 365 mm of autoclaved aerated concrete at
+600 kg/m³ and 1 900 m/s is 219 kg/m² and 92.6 Hz; 200 mm of calcium-silicate
+blocks at 1 800 kg/m³ and 2 500 m/s is 360 kg/m² and 128.4 Hz, all with
 ``co`` = 340 m/s. Its footnote says the calculation used the unrounded
 values, which is what this method gives, so the in-situ indices of
 Table L.3 follow from the rows to the tolerance the detailed model is held to.

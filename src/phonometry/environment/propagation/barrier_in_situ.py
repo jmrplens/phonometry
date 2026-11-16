@@ -312,7 +312,7 @@ def barrier_background_correction(
     measured sound pressure level", so its values are printed negative and are
     **added**; Table 1 of ISO 11820 reads "correction to be **subtracted**"
     and prints the same physical thing positive. The two tables also disagree
-    numerically at a margin of 9 dB, where ISO 11820 takes off 0,5 dB and this
+    numerically at a margin of 9 dB, where ISO 11820 takes off 0.5 dB and this
     one takes off 1. They are two tables and they stay two tables.
 
     :param level_difference: The difference between the level measured with
@@ -326,7 +326,7 @@ def barrier_background_correction(
         real number.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
-    # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
+    # 9.999 999 999 999 996 in binary, which would floor to the 9 dB row.
     margin = settled(require_finite_array(level_difference, "level_difference"))
     if float(np.min(margin)) < ISO10847_MIN_BACKGROUND_MARGIN_DB:
         msg = (
@@ -351,13 +351,13 @@ class ShortDistanceCheck(RichDisplay):
     r"""Whether the geometry counts as a short distance, 6.3.1.
 
     The clause prints one condition for the "before" campaign and two for the
-    "after" one, all against the same ratio of 0,1:
+    "after" one, all against the same ratio of 0.1:
 
     .. math::
 
-       \frac{H_s + H_R}{d_1 + d_2} > 0,1, \qquad
-       \frac{H_s + H}{d_1} > 0,1, \qquad
-       \frac{H + H_R}{d_2} > 0,1
+       \frac{H_s + H_R}{d_1 + d_2} > 0.1, \qquad
+       \frac{H_s + H}{d_1} > 0.1, \qquad
+       \frac{H + H_R}{d_2} > 0.1
 
     The ratios and the two answers are read from the five lengths, so they
     are not fields. There is no verdict to pass: the answer selects the wind
@@ -415,7 +415,7 @@ class ShortDistanceCheck(RichDisplay):
     def before(self) -> bool:
         """Whether the "before" geometry is a short distance.
 
-        The inequality is strict, so a ratio of exactly 0,1 is not one. The
+        The inequality is strict, so a ratio of exactly 0.1 is not one. The
         ratio is judged settled, so lengths whose ratio is the printed one in
         decimal are not taken past it by the last bits.
         """
@@ -423,7 +423,7 @@ class ShortDistanceCheck(RichDisplay):
 
     @property
     def after(self) -> bool:
-        """Whether the "after" geometry is a short distance: both its ratios exceed 0,1."""
+        """Whether the "after" geometry is a short distance: both its ratios exceed 0.1."""
         return bool(
             settled(self.after_source_side_ratio) > SHORT_DISTANCE_RATIO
         ) and bool(settled(self.after_receiver_side_ratio) > SHORT_DISTANCE_RATIO)
@@ -542,14 +542,14 @@ def reference_microphone_height_m(
 
     .. math::
 
-       h = \max\left(H + 1{,}5\ \mathrm{m},\;
+       h = \max\left(H + 1.5\ \mathrm{m},\;
        d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
 
     The NOTE only ever raises the microphone, so the height is the higher of
     the two. Which one governs depends on the geometry: a 4 m barrier 10 m
-    from the source takes the angle, 6,20 m against 5,5 m, while a 3 m barrier
+    from the source takes the angle, 6.20 m against 5.5 m, while a 3 m barrier
     5 m from the source takes the clearance, because its 10 degrees are
-    reached at 4,34 m and the clause asks for 4,5 m. The angle form is the
+    reached at 4.34 m and the clause asks for 4.5 m. The angle form is the
     NOTE's own words; the height it implies is derived here rather than
     printed.
 

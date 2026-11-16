@@ -188,8 +188,8 @@ _STRINGS: dict[str, str] = {
         "Potencia de la línea fuente ferroviaria CNOSSOS-EU"
     ),
     "Both heights": "Ambas alturas",
-    "Source A (0,5 m)": "Fuente A (0,5 m)",
-    "Source B (4,0 m)": "Fuente B (4,0 m)",
+    "Source A (0.5 m)": "Fuente A (0,5 m)",
+    "Source B (4.0 m)": "Fuente B (4,0 m)",
     "Excess attenuation $\\Delta L$": "Atenuación en exceso $\\Delta L$",
     "Free field (0 dB)": "Campo libre (0 dB)",
     "Hard-ground limit (+6 dB)": "Límite de suelo duro (+6 dB)",
@@ -321,6 +321,9 @@ _STRINGS: dict[str, str] = {
     "Sorted level differences": "Diferencias de nivel ordenadas",
     "Central 80 % of the differences": "El 80 % central de las diferencias",
     "{symbol} = {value} dB at $R$ = {rank}": "{symbol} = {value} dB en $R$ = {rank}",
+    # The quantile's own index is a decimal, so it takes the language's mark.
+    "$q_{0.1}$": "$q_{0,1}$",
+    "$q_{0.9}$": "$q_{0,9}$",
     "ISO 17534-1: characteristic values of {n} level differences": (
         "ISO 17534-1: valores característicos de {n} diferencias de nivel"
     ),
@@ -708,7 +711,7 @@ def plot_cnossos_rail_emission(
     """Per-metre railway source-line power of the two equivalent source heights.
 
     Draws the energy-summed line power of the track as bars over the eight
-    CNOSSOS-EU octave bands, with source A (0,5 m) and source B (4,0 m) overlaid
+    CNOSSOS-EU octave bands, with source A (0.5 m) and source B (4.0 m) overlaid
     as marker lines, so the bands where the roof and pantograph sources matter
     are read directly off the chart.
 
@@ -733,8 +736,8 @@ def plot_cnossos_rail_emission(
     ax.bar(positions, np.where(np.isfinite(total), total, np.nan), **kwargs)
 
     styles = (
-        (_C_PRIMARY, "o", "Source A (0,5 m)"),
-        (_C_SECONDARY, "s", "Source B (4,0 m)"),
+        (_C_PRIMARY, "o", "Source A (0.5 m)"),
+        (_C_SECONDARY, "s", "Source B (4.0 m)"),
     )
     for row, (color, marker, label) in zip(
         np.asarray(result.line_power, dtype=np.float64), styles, strict=True
@@ -1578,7 +1581,7 @@ def plot_direct_sound_subtraction(
 #: How much of the record the subtraction plot shows around the direct peak.
 _SUBTRACTION_BEFORE_S = 1.0e-3
 _SUBTRACTION_AFTER_S = 3.0e-3
-#: Formula (6) integrates 0,5 ms either side of the peak.
+#: Formula (6) integrates 0.5 ms either side of the peak.
 _SUBTRACTION_HALF_WIDTH_S = 0.5e-3
 
 #: Colour of each component that can limit the reflected window.
@@ -2044,7 +2047,7 @@ def plot_sel_distribution(
         # drawn in the page's own ink, dimmed, so it reads on both themes and
         # does not compete with the curve for colour. It is the level taken
         # over the spread distribution, which Figure A.3 names LT2 beside the
-        # LT1 of Equation (7); both print 37,0 dB, so the label names which.
+        # LT1 of Equation (7); both print 37.0 dB, so the label names which.
         ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8)
         lt_label = (
             f"LT2 ({_t('long-term level', language)}) "
@@ -2848,7 +2851,7 @@ def plot_level_difference_quantiles(
     r"""The sorted sample of ISO 17534-1 C.4 by rank, with its two quantiles.
 
     Each level difference is a point at its ranking position; the values at
-    :math:`R(q_{0,1})` and :math:`R(q_{0,9})` are marked, and the band between
+    :math:`R(q_{0.1})` and :math:`R(q_{0.9})` are marked, and the band between
     them, which holds the central 80 % of the differences, is shaded.
 
     :param result: A
@@ -2884,8 +2887,18 @@ def plot_level_difference_quantiles(
     )
     template = _t("{symbol} = {value} dB at $R$ = {rank}", language)
     for rank, value, color, symbol in (
-        (result.rank_q01, result.q01_level_difference, _C_SECONDARY, "$q_{0,1}$"),
-        (result.rank_q09, result.q09_level_difference, _C_TERTIARY, "$q_{0,9}$"),
+        (
+            result.rank_q01,
+            result.q01_level_difference,
+            _C_SECONDARY,
+            _t("$q_{0.1}$", language),
+        ),
+        (
+            result.rank_q09,
+            result.q09_level_difference,
+            _C_TERTIARY,
+            _t("$q_{0.9}$", language),
+        ),
     ):
         ax.axvline(rank, color=color, ls=":", lw=1.1, zorder=1)
         ax.plot(
@@ -2935,7 +2948,7 @@ def plot_round_robin_precision(
     r"""The distribution of :math:`|dL_n|_{\max}` of a round robin, as Figure A.3.
 
     A histogram of the largest absolute deviation at each receiver, in
-    classes of a round width, with the 0,9-quantile of C.4 marked.
+    classes of a round width, with the 0.9-quantile of C.4 marked.
 
     :param result: A
         :class:`~phonometry.environment.propagation.software_quality.RoundRobinPrecision`.
@@ -2981,7 +2994,8 @@ def plot_round_robin_precision(
         color=_C_REFERENCE,
         ls="--",
         lw=1.6,
-        label=f"$q_{{0,9}}$ = {format_number(q09, language, decimals=2)} dB",
+        label=f"{_t('$q_{0.9}$', language)} = "
+        f"{format_number(q09, language, decimals=2)} dB",
     )
     ax.set_xlim(0.0, float(edges[-1]))
     ax.set_xlabel(_t(_MAX_DEVIATION_LABEL, language))

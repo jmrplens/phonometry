@@ -159,7 +159,7 @@ Annex A.3 example gives $\kappa' = 1.370$).
 
 Emits [`AirflowResistanceWarning`](/phonometry/reference/api/materials/airflow-resistance/#airflowresistancewarning) when the piston frequency is outside
 1-4 Hz or when the Formula (3)/(4) validity criteria are not met. Clause 6.2
-recommends a specimen flow velocity between 0,5 mm/s and 4 mm/s as well,
+recommends a specimen flow velocity between 0.5 mm/s and 4 mm/s as well,
 and that recommendation is not checked here: the velocity follows from the
 piston area and the specimen area, and this function is handed neither. Compute it
 with [`piston_volume_flow_rate`](/phonometry/reference/api/materials/airflow-resistance/#piston_volume_flow_rate) and [`linear_airflow_velocity`](/phonometry/reference/api/materials/airflow-resistance/#linear_airflow_velocity) if
@@ -452,7 +452,7 @@ computed from IEC 61094-2:2009 Annex F. Note that `c0` cancels: `b` is
 $\sqrt{2 k_\mathrm{a} / (\rho_0 C_\mathrm{P} \omega)}$, so only the pair
 `k_a`/`C_P` and the density move it.
 
-ISO 9053-2:2020 Annex A.3 prints a `k_a`/`C_P` pair 1,0800 times smaller than
+ISO 9053-2:2020 Annex A.3 prints a `k_a`/`C_P` pair 1.0800 times smaller than
 Annex F gives at that state, which it credits to IEC 61094-2:2009 but which cannot
 be found there (see `docs/ERRATA.md`). The defaults here are the Annex F values;
 with the Annex A.3 example ($f = 2$ Hz) both pairs give `1.83e-3 m`, because

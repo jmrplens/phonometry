@@ -20,9 +20,9 @@ implements section 2.2 of Annex II to Directive 2002/49/EC in its consolidated
 text: Directive (EU) 2015/996 as corrected by the OJ L 5 corrigendum of 2018,
 which restores the 63 Hz to 8 kHz octave range the original clause contradicted,
 and amended by Delegated Directive (EU) 2021/1226, which replaces Tables F-1 and
-F-4 outright and makes the current source some 2,5 to 3,5 dB(A) louder than the
+F-4 outright and makes the current source some 2.5 to 3.5 dB(A) louder than the
 2015 one: any comparison with pre-2021 literature carries that offset. Each
-vehicle is a point source 0,05 m above the pavement, with the first pavement
+vehicle is a point source 0.05 m above the pavement, with the first pavement
 reflection already inside its power. Per category (light, medium heavy, heavy,
 mopeds, motorcycles) a rolling and a propulsion term are energy-summed,
 corrected for pavement, air temperature, studded tyres and gradient, adjusted
@@ -30,7 +30,7 @@ near junctions, and turned into a directional power per metre of source line.
 
 [CNOSSOS-EU railway source emission](cnossos-rail-emission.md)
 implements section 2.3 on the same pattern, but with **two** equivalent source
-lines, at 0,5 m and at 4,0 m above the rail head, because the physical sources
+lines, at 0.5 m and at 4.0 m above the rail head, because the physical sources
 radiate from different heights. It starts one step further back than the road
 method: from wheel and rail roughness spectra, passed through the contact filter
 and the vehicle and track transfer functions, with the wavelength-to-frequency
@@ -45,7 +45,7 @@ one vehicle, standing, passing at constant speed, starting and braking, with
 the microphone positions and the averaging ISO 3095:2013 fixes. Its
 constant-speed result is only comparable on a reference track, whose rail
 roughness EN 15610 measures and whose decay rates EN 15461 measures. Its
-roughness limit is, band for band from 0,4 m to 3,15 mm, the rail roughness of
+roughness limit is, band for band from 0.4 m to 3.15 mm, the rail roughness of
 class E on the CNOSSOS page, the class Appendix G names after ISO 3095.
 
 [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md)
@@ -93,8 +93,8 @@ propagation model: its index ranks surfaces.
   sound levels at the Table 1 reference speeds, the index and its difference
   from a reference surface.
 - [CNOSSOS-EU railway source emission](cnossos-rail-emission.md):
-  roughness and transfer functions to the two equivalent source lines at 0,5 m
-  and 4,0 m, with the impact, squeal, traction, aerodynamic and bridge terms.
+  roughness and transfer functions to the two equivalent source lines at 0.5 m
+  and 4.0 m, with the impact, squeal, traction, aerodynamic and bridge terms.
 - [Railway rolling-stock noise: the ISO 3095 type test](rolling-stock-noise.md):
   the four tests of a railway vehicle, the pass-by level and the transit
   exposure level, the reference track by EN 15610 and EN 15461, Annex C and the

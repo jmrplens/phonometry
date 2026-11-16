@@ -520,7 +520,7 @@ ISO 7235 Table 7: the reproducibility standard deviation.
 
 The three columns do not agree with one another, and that is the useful
 part. Insertion loss is measured best in the middle of the range, 1 dB
-from 125 to 500 Hz, and worst at the top, 3 dB above 1,6 kHz. The
+from 125 to 500 Hz, and worst at the top, 3 dB above 1.6 kHz. The
 sound-intensity route runs the other way, 3 dB at the bottom and 1 dB in
 the top two ranges. Transmission loss is a flat 3 dB everywhere, which is
 the mark of an estimate rather than a measurement: 7.9 says only the
@@ -646,7 +646,7 @@ modal_filter_cut_on(
 ISO 7235 Equations (4) and (5): where higher-order modes start.
 
 $$
-f_{Cd} = \frac{0{,}59\,c}{d} \qquad f_{CH} = \frac{0{,}5\,c}{H}
+f_{Cd} = \frac{0.59\,c}{d} \qquad f_{CH} = \frac{0.5\,c}{H}
 $$
 
 NOTE 2 to 5.2.2.3 prints these for the duct the modal filter is connected
@@ -658,8 +658,8 @@ filter exists to suppress can propagate.
 The rectangular form is exact: the first mode of a rigid rectangular duct
 is a half wavelength across the larger dimension, so $c / 2H$. The
 circular constant is rounded: the exact value is the first zero of
-$J_1'$, which puts the coefficient at 0,58607 rather than 0,59, so
-Equation (4) sits 0,67 % high. The exact eigenvalues are in
+$J_1'$, which puts the coefficient at 0.58607 rather than 0.59, so
+Equation (4) sits 0.67 % high. The exact eigenvalues are in
 [`phonometry.noise_control.circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on), which also carries
 the mean-flow correction this equation does not have.
 
@@ -706,12 +706,12 @@ and (21) and (22) for the two series of the computational route of
 6.5.2.2.3. They differ only in which measurement they are given.
 
 Both printed constants are a little off the accurate figures. The offset
-273 rather than 273,15 puts the density 0,051 % high at 20 °C, and
-$R = 287$ rather than 287,05 adds 0,017 % to that, for 0,069 % in
+273 rather than 273.15 puts the density 0.051 % high at 20 °C, and
+$R = 287$ rather than 287.05 adds 0.017 % to that, for 0.069 % in
 all. It does not cancel out of the pressure loss coefficient: the same
 density is in the dynamic pressure of both series, so the whole
 coefficient is scaled by that one factor rather than shifted, which
-leaves it 0,069 % low. That is far under the uncertainty of a
+leaves it 0.069 % low. That is far under the uncertainty of a
 pressure-loss test, and using the printed constants is what reproduces a
 result computed to the standard, which is why
 [`ISO7235_ABSOLUTE_ZERO_OFFSET_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset_k) and [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_air_gas_constant_j_kg_k)
@@ -750,7 +750,7 @@ $$
 
 The average is taken on what the silencer *lets through*, not on the
 decibels, and the two are not the same thing. A silencer that gives 30,
-30 and 5 dB across an octave gives 9,8 dB over the octave, not 21,7: the
+30 and 5 dB across an octave gives 9.8 dB over the octave, not 21.7: the
 band that leaks decides the answer, because it is the one carrying nearly
 all of the transmitted energy. That is the whole reason the standard
 writes the equation out rather than letting a reader average the numbers.
@@ -816,7 +816,7 @@ neither standard prints a worked example of either.
 
 Clause 5.2.4 puts this quantity to work as a requirement rather than as a
 result: a test duct with an anechoic termination qualifies only if its
-reflection coefficient is no greater than 0,3.
+reflection coefficient is no greater than 0.3.
 
 **Parameters**
 
@@ -889,10 +889,10 @@ sound power radiated into the room. The two names are one quantity.
 
 The library also carries a different closed form for the same physics,
 [`phonometry.noise_control.end_reflection_loss_closed_form`](/phonometry/reference/api/noise_control/hvac/#end_reflection_loss_closed_form), which
-is Reynolds' as given by Long and raises the same argument to 1,88
+is Reynolds' as given by Long and raises the same argument to 1.88
 rather than to 2. For a circular duct in free space the two are
 $10\lg[1 + (c/\pi f d)^2]$ against
-$10\lg[1 + (c/\pi f d)^{1,88}]$, so they part company where the
+$10\lg[1 + (c/\pi f d)^{1.88}]$, so they part company where the
 argument is far from 1, which is at the ends of the range rather than in
 the middle.
 
@@ -1088,7 +1088,7 @@ REPORTING_RESOLUTION_DB = 0.5
 A substitution measurement is outside the range its method covers.
 
 Raised when a test arrangement falls outside a limit the standard writes
-down but does not make an error: an area ratio outside the 0,6 to 1,7 of
+down but does not make an error: an area ratio outside the 0.6 to 1.7 of
 ISO 11691 4.5, or a band outside the 50 Hz to 10 kHz both standards
 measure over. The arithmetic still runs, because a laboratory may report
 such a value as long as it says so.
@@ -1102,7 +1102,7 @@ substitution_area_ratio(duct_area: float, element_area: float) -> float
 ISO 11691 4.5: the test duct against the silencer it feeds.
 
 The survey method wants the test ducts to be close in cross section to
-what they connect to. Outside the range of 0,6 to 1,7 the ducts are no
+what they connect to. Outside the range of 0.6 to 1.7 the ducts are no
 longer standing in for the installation the silencer will see, and the
 reflections at the two joints stop being negligible; inside it,
 transition elements may be fitted.
@@ -1127,7 +1127,7 @@ transition elements may be fitted.
 
 | Warning | When |
 | :--- | :--- |
-| SilencerMeasurementWarning | If the ratio is outside 0,6 to 1,7. |
+| SilencerMeasurementWarning | If the ratio is outside 0.6 to 1.7. |
 
 ## substitution_insertion_loss
 
@@ -1241,7 +1241,7 @@ survey_reproducibility(frequency: float) -> float
 
 ISO 11691 Table 1: the survey method's own reproducibility.
 
-Two decibels up to the 1,25 kHz one-third octave and three above it.
+Two decibels up to the 1.25 kHz one-third octave and three above it.
 ISO 11691 makes no claim of its own beyond that: it says outright that
 exact information on the precision cannot be given, that interlaboratory
 tests would be needed for a real `sigma_R`, and that this estimate is
@@ -1357,14 +1357,14 @@ ISO 7235 6.5.2.2.1: how much straight duct the flow needs first.
 
 The upstream test duct is straight for at least $5 d_e$ or 2 m,
 whichever is greater, where $d_e = \sqrt{4S/\pi}$ is the equivalent
-diameter. Below about 0,126 m² the 2 m floor is what binds; above it the
+diameter. Below about 0.126 m² the 2 m floor is what binds; above it the
 five diameters are.
 
 The length is there so the velocity profile has settled by the time it
 reaches the test object: 6.5.2.2.1 wants it uniform to ±10 % of the mean
 over the cross section, excluding the 15 mm nearest the walls, surveyed
 at ten points along each of two perpendicular axes about
-$1{,}5 d_e$ upstream.
+$1.5 d_e$ upstream.
 
 **Parameters**
 
@@ -1413,7 +1413,7 @@ The two printings are one division and differ only in which density goes
 in. Equation (8) uses the density upstream of the test object. Equation
 (9) uses the normalised density of Equation (10), and 6.5.2.1 says when:
 if the flow meter and the test object are far enough apart in temperature
-or static pressure that their density ratio leaves 0,98 to 1,02, the
+or static pressure that their density ratio leaves 0.98 to 1.02, the
 meter is no longer measuring the flow the test object sees.
 [`DENSITY_RATIO_RANGE`](/phonometry/reference/api/noise_control/silencer-measurement/#density_ratio_range) carries that window.
 

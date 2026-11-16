@@ -178,9 +178,9 @@ class RoadVehicleCategory(Enum):
     in Appendix F and is therefore not modelled.
     """
 
-    #: Light motor vehicles: passenger cars, delivery vans <= 3,5 t, SUVs, MPVs.
+    #: Light motor vehicles: passenger cars, delivery vans <= 3.5 t, SUVs, MPVs.
     LIGHT = "1"
-    #: Medium heavy vehicles: delivery vans > 3,5 t, buses, motorhomes, two axles.
+    #: Medium heavy vehicles: delivery vans > 3.5 t, buses, motorhomes, two axles.
     MEDIUM_HEAVY = "2"
     #: Heavy vehicles: heavy duty vehicles, touring cars, buses, three axles or more.
     HEAVY = "3"
@@ -300,7 +300,7 @@ _TABLE_F3: dict[RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]
 }
 
 #: Temperature coefficients ``K_m`` of (2.2.10), in dB per kelvin (per degree):
-#: 0,08 for light vehicles, 0,04 for the two heavy categories, and no
+#: 0.08 for light vehicles, 0.04 for the two heavy categories, and no
 #: temperature dependence for the powered two-wheelers, which have no rolling
 #: noise at all.
 _TEMPERATURE_COEFFICIENTS_DB_PER_K: dict[RoadVehicleCode, float] = {
@@ -1115,7 +1115,7 @@ class RoadEmissionResult(OwnsArrays):
     :ivar total_line_power: The energy sum of ``line_power`` over the
         categories, in dB re 1 pW per metre: the source strength of the line.
     :ivar source_height_m: Height of the equivalent point source above the road
-        surface, in m (0,05 m, fixed by 2.2.1).
+        surface, in m (0.05 m, fixed by 2.2.1).
     """
 
     #: The units the field names do not say, as the docstring gives them.
@@ -1164,8 +1164,8 @@ class RoadEmissionResult(OwnsArrays):
         itself, passes every count above, and is stretched over the eight
         weights just the same. What comes back is the band's own level plus
         the energy sum of the whole weighting, about 7 dB, in place of the
-        band's level plus its own weight: too high by 5,8 dB in the 2 kHz
-        band and by 33,2 dB in the 63 Hz one, and ordinary-looking at either
+        band's level plus its own weight: too high by 5.8 dB in the 2 kHz
+        band and by 33.2 dB in the 63 Hz one, and ordinary-looking at either
         end. So the band count is pinned here to the table it will be read
         against. Unpinned, every other count reaches that read too, and comes
         back from it as ``operands could not be broadcast together with

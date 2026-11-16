@@ -49,7 +49,7 @@ paths is divided on its own, so the stations round the sides and those
 overhead need not stand in the same transverse sections, as the drawings of
 Figure 2 happen to put them; the text asks only for equal distances. The
 overhead positions may be left out when a preliminary investigation shows
-they move the sound power level by no more than 1,0 dB (NOTE of 7.2.2).
+they move the sound power level by no more than 1.0 dB (NOTE of 7.2.2).
 
 **The background correction** (clause 8.1, Table 2, printed folio 8, PDF page
 14) is a stepped table applied at each microphone position, not the
@@ -64,9 +64,9 @@ Equation (12), which is applied to the surface-averaged level:
 | 6 | 1 |
 | 7 | 1 |
 | 8 | 1 |
-| 9 | 0,5 |
-| 10 | 0,5 |
-| > 10 | 0,0 |
+| 9 | 0.5 |
+| 10 | 0.5 |
+| > 10 | 0.0 |
 
 The background shall be at least 3 dB below the level with the source
 operating (4.2); below that no valid measurement can be made, and the result
@@ -79,7 +79,7 @@ $$
 K = 10 \lg\left[1 + \frac{4}{A/S}\right] \tag{Figure A.3}
 $$
 
-with the equivalent absorption area $A = 0{,}16\,V/T$ of the room from
+with the equivalent absorption area $A = 0.16\,V/T$ of the room from
 its reverberation time (A.3.1); A.3.2 obtains $K = L_W - L_{W\mathrm{r}}$ from a
 calibrated reference sound source instead. $K$ shall not exceed 7 dB
 (8.3 and A.3.3), which A.3.3 restates as $A/S \ge 1$.
@@ -106,7 +106,7 @@ uncertainty the survey method tends to stay within.
 The standard prints no worked example. Every function here is anchored in the
 closed forms above and in the numbers the standard fixes: the nine cells of
 Table 2, the two of Table 1, the 1 m of 7.1, the 7 dB of A.3.3, the 6 m/s of
-4.3, the 3 dB of 4.2, the 1,0 dB of 7.2.2 and the 5 dB and 0,7 dB of the NOTE
+4.3, the 3 dB of 4.2, the 1.0 dB of 7.2.2 and the 5 dB and 0.7 dB of the NOTE
 of 8.3.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -127,7 +127,7 @@ Is the test environment good enough for the standard (A.3.3, 4.3)?
 A room qualifies when its environmental correction does not exceed 7 dB,
 "K ≤ 7" (A.3.3), which the clause restates as $A/S \ge 1$; the two
 agree to the whole decibel (the formula of Figure A.3 gives
-$10 \lg 5 = 6{,}99$ dB at $A/S = 1$). Outdoors, and in very
+$10 \lg 5 = 6.99$ dB at $A/S = 1$). Outdoors, and in very
 large or open workspaces, $K$ is taken as zero (A.4), and
 measurements outdoors need a wind speed below 6 m/s, with a windscreen
 above 1 m/s (4.3).
@@ -170,14 +170,14 @@ Correction for background noise of Table 2 (clause 8.1).
 The correction to subtract from the level measured with the source
 operating, read from the stepped Table 2 of IEC 61063 at the difference
 between that level and the background level alone: 3 dB at a difference
-of 3 dB, 2 dB at 4 and 5 dB, 1 dB at 6 to 8 dB, 0,5 dB at 9 and 10 dB and
-0,0 dB above 10 dB.
+of 3 dB, 2 dB at 4 and 5 dB, 1 dB at 6 to 8 dB, 0.5 dB at 9 and 10 dB and
+0.0 dB above 10 dB.
 
 The last row is read first, on the difference as measured: any difference
-above 10 dB is "> 10" and takes no correction, 10,2 dB as much as 11 dB.
+above 10 dB is "> 10" and takes no correction, 10.2 dB as much as 11 dB.
 Between 3 and 10 dB the table is indexed in whole decibels, so the
 difference is rounded to the nearest one (halves upwards) before it is
-read; 9,5 dB up to 10 dB takes the 0,5 dB of the row 10. That is how the
+read; 9.5 dB up to 10 dB takes the 0.5 dB of the row 10. That is how the
 library reads the stepped table of ISO/TS 7849-1, whose open row is also
 judged before the rounding. Table 2 prints nothing below 3 dB, the
 criterion of 4.2, where "a valid measurement of the machine under test
@@ -229,7 +229,7 @@ K = 10 \lg\left[1 + \frac{4}{A/S}\right],
 $$
 
 with $A$ the equivalent sound absorption area of the room, either
-given or from its reverberation time, $A = 0{,}16\,V/T$ (A.3.1),
+given or from its reverberation time, $A = 0.16\,V/T$ (A.3.1),
 and $S$ the area of the measurement surface from Equation (1). It is
 the $K_2$ of ISO 3744 and ISO 3746. The result is not refused above
 the 7 dB the standard allows; [`check_turbine_test_environment`](/phonometry/reference/api/power/turbine-noise/#check_turbine_test_environment) is
@@ -341,7 +341,7 @@ to lie on the sides of every parallelepiped.
 | `microphone_height_m` | Height of the row round the sides, in metres, above the reflecting plane and no higher than the lowest parallelepiped. |
 | `spacing_m` | The largest distance between neighbouring positions along the path, in metres. |
 | `n_turbine_boxes` | How many reference boxes, from the front, enclose the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP casings share one box and the LP turbine has its own). Ignored for a set in a single box. |
-| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1,0 dB (see [`TurbineSoundPowerResult.overhead_level_difference`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_level_difference)). |
+| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1.0 dB (see [`TurbineSoundPowerResult.overhead_level_difference`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_level_difference)). |
 
 **Returns:** The positions, their labels and the overhead mask.
 
@@ -930,8 +930,8 @@ The NOTE of 8.3 allows it in place of Equation (2) when
 `level_range_db` does not exceed 5 dB, and says it "should not
 differ by more than 0,7 dB" from Equation (2). It is never above the
 energy average, and within a 5 dB range it trails it by at most
-0,707 dB (two levels 5 dB apart, the louder at 41 % of the positions),
-the NOTE's 0,7 dB to its one decimal.
+0.707 dB (two levels 5 dB apart, the louder at 41 % of the positions),
+the NOTE's 0.7 dB to its one decimal.
 
 ### TurbineSoundPowerResult.conforms
 
@@ -970,14 +970,14 @@ How much the overhead positions move $L_{W\mathrm{A}}$, in dB.
 
 The sound power level from every position less the one without the
 overhead positions, on the same surface. The NOTE of 7.2.2 lets the
-overhead positions be deleted when this is within 1,0 dB. `None`
+overhead positions be deleted when this is within 1.0 dB. `None`
 without an overhead mask, or when every position or none is overhead.
 
 ### TurbineSoundPowerResult.overhead_may_be_deleted
 
 *property*
 
-Whether the overhead positions move the level by no more than 1,0 dB.
+Whether the overhead positions move the level by no more than 1.0 dB.
 
 ### TurbineSoundPowerResult.plot()
 

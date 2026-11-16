@@ -5,7 +5,7 @@ Oracles:
 
 - Formula (J.1) in closed form, with every term away from zero, and the
   3 dB a doubled joint length is worth.
-- Formula (J.2) in closed form, and the printed 1,3 dB that ISO 10140-2:2021
+- Formula (J.2) in closed form, and the printed 1.3 dB that ISO 10140-2:2021
   A.3 says "corresponds to a difference of 6 dB": the formula at 6 dB rounds
   to it.
 - The four regimes of J.1 at their printed bounds, 10 dB, 6 dB and 3 dB,
@@ -120,7 +120,7 @@ def test_formula_j1_refuses_a_zero_absorption() -> None:
 
 
 def test_printed_limit_correction_is_formula_j2_at_six_decibels() -> None:
-    """ISO 10140-2:2021 A.3: 1,3 dB "corresponds to a difference of 6 dB"."""
+    """ISO 10140-2:2021 A.3: 1.3 dB "corresponds to a difference of 6 dB"."""
     margin = ref.ISO10140_1_J1_LIMIT_MARGIN_DB
     correction = _j2(50.0, 50.0 + margin) - 50.0
     assert round(correction, 1) == pytest.approx(ref.ISO10140_1_J1_LIMIT_CORRECTION_DB)
@@ -159,7 +159,7 @@ def test_each_regime_gives_its_value() -> None:
 
 
 def test_six_decibels_reached_in_decimals_is_still_formula_j2() -> None:
-    """36,3 - 30,3 comes out a hair below 6 in binary; it is a 6 dB margin."""
+    """36.3 - 30.3 comes out a hair below 6 in binary; it is a 6 dB margin."""
     assert 36.3 - 30.3 < 6.0
     res = _one_band(30.3, 36.3)
     assert res.regime == ("corrected",)
@@ -167,7 +167,7 @@ def test_six_decibels_reached_in_decimals_is_still_formula_j2() -> None:
 
 
 def test_the_maximum_rule_is_optional() -> None:
-    """J.1 "may" set the lower limit to Rs,max; without it, 1,3 dB applies."""
+    """J.1 "may" set the lower limit to Rs,max; without it, 1.3 dB applies."""
     res = _one_band(48.0, 50.4, limit_at_max=False)
     assert res.regime == ("limit",)
     assert res.r_s[0] == pytest.approx(49.3)
@@ -247,7 +247,7 @@ def test_a_hand_built_result_reads_its_regime_from_its_columns(
 
 
 def test_a_hand_built_result_refuses_the_correction_of_another_rule() -> None:
-    """Within 3 dB of the maximum, J.1 gives 1,3 dB or the maximum, not both."""
+    """Within 3 dB of the maximum, J.1 gives 1.3 dB or the maximum, not both."""
     columns = _columns(_one_band(45.0, 46.0, limit_at_max=True))
     with pytest.raises(ValueError, match="'r_s' must be the correction"):
         LaboratoryJointInsulationResult(**columns, limit_at_max=False)  # type: ignore[arg-type]
@@ -339,7 +339,7 @@ def test_open_bands_rated_by_hand() -> None:
     leaves 29 dB of unfavourable deviations (4 dB at 1000 Hz and 5 dB at
     each of the five bands from 1250 Hz) where +8 dB would leave 35 dB, so
     Rs,w = 52 + 7 = 59 dB. Clause 4.5 with spectrum No 1 over those twelve
-    bands gives XA = 58 - 10 lg 0,7787 = 59,1 dB, so C = 0 dB.
+    bands gives XA = 58 - 10 lg 0.7787 = 59.1 dB, so C = 0 dB.
     """
     res = _dip_case()
     assert res.rating is not None
@@ -373,9 +373,9 @@ def test_every_band_open_is_unbounded() -> None:
 
 
 def test_indicative_bands_are_read_on_the_measured_index() -> None:
-    """A band 3,5 dB under the maximum is not indicative, whatever its Rs.
+    """A band 3.5 dB under the maximum is not indicative, whatever its Rs.
 
-    With the 1,3 dB correction its corrected index sits 2,2 dB under
+    With the 1.3 dB correction its corrected index sits 2.2 dB under
     Rs,max: read on Rs it would look indicative, read on R's (J.1) it is not,
     and the rating is not formed a second time.
     """
@@ -419,7 +419,7 @@ def test_octave_bands_average_the_transmitted_power() -> None:
 def test_test_element_bounds(
     length_m: float, width_mm: float, *, gap: bool, passes: bool
 ) -> None:
-    """Longer than 1 m, at most 50 mm wide, and 5,0 m for a window or door gap."""
+    """Longer than 1 m, at most 50 mm wide, and 5.0 m for a window or door gap."""
     check = building.check_joint_test_element(
         length_m, width_mm, window_or_door_gap=gap
     )
@@ -440,7 +440,7 @@ def test_test_element_check_refuses_a_negative_width() -> None:
 def test_gap_width_is_the_average_of_four_readings() -> None:
     """J.2.2: "The average value is denoted as gap width, b"; not the median.
 
-    The readings have a mean of 5,075 mm and a median of 5,0 mm.
+    The readings have a mean of 5.075 mm and a median of 5.0 mm.
     """
     check = building.check_gap_width([5.0, 5.0, 5.0, 5.3])
     assert check.gap_width_mm == pytest.approx(5.075)
@@ -449,7 +449,7 @@ def test_gap_width_is_the_average_of_four_readings() -> None:
 
 
 def test_gap_width_spread_bound_is_inclusive_in_decimals() -> None:
-    """4,9 - 4,6 comes out a hair above 0,3 in binary: still 0,3 mm."""
+    """4.9 - 4.6 comes out a hair above 0.3 in binary: still 0.3 mm."""
     assert 4.9 - 4.6 > 0.3
     assert building.check_gap_width([4.6, 4.9, 4.7, 4.8]).uniform is True
 
@@ -573,7 +573,7 @@ def test_series_that_names_no_minimum_width_fails() -> None:
 def test_series_width_within_the_reading_spread_counts(
     nominal: float, *, measured: bool
 ) -> None:
-    """A width within the 0,3 mm of J.2.2 of bn is bn; 0,31 mm away is not."""
+    """A width within the 0.3 mm of J.2.2 of bn is bn; 0.31 mm away is not."""
     series = _series()
     moved = building.joint_gap_series(
         series.gap_widths_mm,

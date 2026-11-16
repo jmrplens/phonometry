@@ -113,8 +113,8 @@ def _metres(value: float, language: Language) -> str:
 #: Literal pairs rather than shades derived from the page the way
 #: ``theme_fill`` derives a wash, and the reason is in the numbers: these
 #: are the two the documentation corpus uses, and their distance from their own
-#: page is not one distance. The fill is dE00 3,1 from the white page and 9,0
-#: from the black one, the edge 6,5 and 24,5 -- the dark outline is
+#: page is not one distance. The fill is dE00 3.1 from the white page and 9.0
+#: from the black one, the edge 6.5 and 24.5 -- the dark outline is
 #: deliberately several times the contrast of the light one, because a hairline
 #: at the light one's distance disappears into a dark drawing. One derived
 #: target cannot produce both, and two targets are the same two magic numbers

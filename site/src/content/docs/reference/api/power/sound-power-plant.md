@@ -16,7 +16,7 @@ plan; microphones stand on it at equal spacing, raised to a height that grows
 with the area the contour encloses, and point horizontally at the plant; the
 octave-band levels they read are averaged, and a few corrections turn the
 average into the sound power the plant radiates towards its neighbours, the
-number a prediction model needs at a distance of at least 1,5 times the
+number a prediction model needs at a distance of at least 1.5 times the
 largest dimension of the plant area (clause 0.2 a).
 
 The contour (clause 9.1.1) has three requirements. The average of the
@@ -27,15 +27,15 @@ $$
 \bar{d} = \frac{1}{N} \sum_{i=1}^{N} d_i ,
 $$
 
-shall exceed $0{,}05\sqrt{S_\mathrm{p}}$ or 5 m, whichever is the
-greater, and shall not exceed $0{,}5\sqrt{S_\mathrm{p}}$ or 35 m,
+shall exceed $0.05\sqrt{S_\mathrm{p}}$ or 5 m, whichever is the
+greater, and shall not exceed $0.5\sqrt{S_\mathrm{p}}$ or 35 m,
 whichever is the lesser, $S_\mathrm{p}$ being the plant area; the plant
 area shall be seen from any point of the contour inside an aspect angle of at
 most 180°; and adjacent positions shall be at most $2\bar{d}$ apart.
 The microphone height (9.3) is
 
 $$
-h = H + 0{,}025\sqrt{S_\mathrm{m}} \quad \text{or 5 m, whichever is the greater,}
+h = H + 0.025\sqrt{S_\mathrm{m}} \quad \text{or 5 m, whichever is the greater,}
 $$
 
 with $S_\mathrm{m}$ the area the contour encloses and $H$ the
@@ -46,7 +46,7 @@ Clause 10 then computes, band by band, the energy average of the levels
 $L_{pi}$ at the $N$ positions (10.1),
 
 $$
-\overline{L_p} = 10 \lg\left[\frac{1}{N} \sum_{i=1}^{N} 10^{0{,}1 L_{pi}} \right] \ \mathrm{dB},
+\overline{L_p} = 10 \lg\left[\frac{1}{N} \sum_{i=1}^{N} 10^{0.1 L_{pi}} \right] \ \mathrm{dB},
 $$
 
 replaces any level more than 5 dB above that average by
@@ -63,7 +63,7 @@ $$
 $$
 
 $$
-\Delta L_\mathrm{M} = 3\left(1 - \frac{\theta}{90}\right) \mathrm{dB}, \qquad \Delta L_\alpha = 0{,}5\,\alpha\sqrt{S_\mathrm{m}}\ \mathrm{dB},
+\Delta L_\mathrm{M} = 3\left(1 - \frac{\theta}{90}\right) \mathrm{dB}, \qquad \Delta L_\alpha = 0.5\,\alpha\sqrt{S_\mathrm{m}}\ \mathrm{dB},
 $$
 
 with $l$ the length of the contour, $S_0 = 1$ m², $\theta$
@@ -73,10 +73,10 @@ $\alpha$ the attenuation coefficient of the air. The area term is the
 measurement surface of ISO 3744: for a circular contour round a point source
 on the ground, $2 S_\mathrm{m}$ is the hemisphere $2\pi r^2$ over
 it and $h l$ the band of wall of height $h$ round it. The
-proximity term has no factor 10: NOTE 11 says it lies between −0,9 dB and
-−1,9 dB when 9.1 is met, and $\lg(0{,}5/4) = -0{,}903$ and
-$\lg(0{,}05/4) = -1{,}903$ are its two ends. The A-weighted level of
-10.9 is $L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0{,}1(L_{Wj} + C_j)}$ dB,
+proximity term has no factor 10: NOTE 11 says it lies between −0.9 dB and
+−1.9 dB when 9.1 is met, and $\lg(0.5/4) = -0.903$ and
+$\lg(0.05/4) = -1.903$ are its two ends. The A-weighted level of
+10.9 is $L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0.1(L_{Wj} + C_j)}$ dB,
 with the octave-band $C_j$ of ISO 3744:2010 Annex E that every other
 sound power method of this library uses.
 
@@ -89,18 +89,18 @@ coefficient of ISO 3891:1978 Annex A (SAE ARP 866A) at the one-third-octave
 band centred on each octave, through the transcription
 [`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a) that
 the ECAC Doc 29 Appendix D implementation reads; there is no second copy of
-it here. ISO 3891 gives no evaluation frequency below 50 Hz, so the 31,5 Hz
+it here. ISO 3891 gives no evaluation frequency below 50 Hz, so the 31.5 Hz
 band keeps the 0 of Table 3 in any weather. At 15 °C and 70 % the formula
 agrees with Table 3 to its printed digit at 63 Hz and from 250 Hz to 2 kHz,
-and not at 125 Hz (0,000 59 dB/m against 0), 4 kHz (0,025 05 against 0,026)
-or 8 kHz (0,061 against 0,046): ISO 3891 Table 9 prints 0,1, 2,5 and
-6,1 dB/100 m in those bands at those conditions, and ISO 8297 does not say
+and not at 125 Hz (0.000 59 dB/m against 0), 4 kHz (0.025 05 against 0.026)
+or 8 kHz (0.061 against 0.046): ISO 3891 Table 9 prints 0.1, 2.5 and
+6.1 dB/100 m in those bands at those conditions, and ISO 8297 does not say
 how it drew its octave values from the one-third-octave data of ISO 3891, so
 Table 3 is kept as printed and the difference is recorded, not corrected.
 The difference reaches the sound power through
-$\Delta L_\alpha = 0{,}5\,\alpha\sqrt{S_\mathrm{m}}$: passing 15 °C
-and 70 % gives $0{,}0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than
-omitting the weather, 1,4 dB for a measurement area of 36 800 m². The
+$\Delta L_\alpha = 0.5\,\alpha\sqrt{S_\mathrm{m}}$: passing 15 °C
+and 70 % gives $0.0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than
+omitting the weather, 1.4 dB for a measurement area of 36 800 m². The
 weather is therefore for the case 10.7 names, a weather that differs
 markedly from 15 °C and 70 %; at or near those conditions Table 3 is the
 reading the standard gives.
@@ -155,7 +155,7 @@ Four rows are advisory: the standard lets them go unmet provided the
 report says so, so they do not decide [`PlantMeasurementCheck.passes`](/phonometry/reference/api/power/sound-power-plant/#plantmeasurementcheckpasses).
 The first is the height of 9.3 itself. 9.3 prescribes a height, not a
 lower bound, so the row holds when the microphones stand at
-$H + 0{,}025\sqrt{S_\mathrm{m}}$ (or 5 m) to within the ±5 % to
+$H + 0.025\sqrt{S_\mathrm{m}}$ (or 5 m) to within the ±5 % to
 which 9.2 reads $H$ and $S_\mathrm{m}$ off the plan, and a
 microphone lower (placed "as high as possible above the minimum height of
 5 m" where the height cannot be reached) or higher than that is listed in
@@ -168,7 +168,7 @@ approximate.
 The background margin, the level above the contour average and the range
 of the integrated reading are settled to nine decimals before they meet
 their limits, so a difference of decimal readings is judged as the
-decimal it is: a background 64,4 - 54,4 dB below, 10,000 000 000 000 007
+decimal it is: a background 64.4 - 54.4 dB below, 10.000 000 000 000 007
 in binary, is the 10 dB that 6 b) does not prefer.
 
 Some printed numbers are left to the measurement team and not judged
@@ -351,15 +351,15 @@ evaluated at the one-third-octave band centred on each octave by
 [`phonometry.aircraft.atmospheric_absorption.attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)
 (the parabolic reading of its Table 1 that reproduces ISO 3891 Table 10)
 and turned from dB/100 m into dB/m. ISO 3891 gives no evaluation frequency
-below 50 Hz, so the 31,5 Hz band keeps the 0 of Table 3.
+below 50 Hz, so the 31.5 Hz band keeps the 0 of Table 3.
 
-The two do not meet at 15 °C and 70 %: the formula gives 0,000 59 dB/m
-at 125 Hz, 0,025 05 dB/m at 4 kHz and 0,061 dB/m at 8 kHz where Table 3
-prints 0, 0,026 and 0,046, and ISO 3891 Table 9 itself prints 0,1, 2,5
-and 6,1 dB/100 m there. The other rows agree to the printed digit. In
+The two do not meet at 15 °C and 70 %: the formula gives 0.000 59 dB/m
+at 125 Hz, 0.025 05 dB/m at 4 kHz and 0.061 dB/m at 8 kHz where Table 3
+prints 0, 0.026 and 0.046, and ISO 3891 Table 9 itself prints 0.1, 2.5
+and 6.1 dB/100 m there. The other rows agree to the printed digit. In
 the sound power the 8 kHz row is a step of
-$0{,}5 \times 0{,}0148\sqrt{S_\mathrm{m}} \approx 0{,}0074\sqrt{S_\mathrm{m}}$ dB between omitting the weather and
-passing 15 °C and 70 %, 1,4 dB over 36 800 m². Pass the weather only
+$0.5 \times 0.0148\sqrt{S_\mathrm{m}} \approx 0.0074\sqrt{S_\mathrm{m}}$ dB between omitting the weather and
+passing 15 °C and 70 %, 1.4 dB over 36 800 m². Pass the weather only
 when it differs markedly from 15 °C and 70 %, as Table 3 asks; the
 standard sets no number for "markedly".
 
@@ -367,7 +367,7 @@ standard sets no number for "markedly".
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Nominal octave-band centres, 31,5 Hz to 8 kHz. |
+| `frequencies` | Nominal octave-band centres, 31.5 Hz to 8 kHz. |
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3. |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent (0 to 100), or `None` for Table 3. |
 
@@ -407,12 +407,12 @@ plant_background_correction(
 The background correction of Table 2, to subtract from the level measured.
 
 The table is printed in whole decibels: 1 dB for a difference of 6, 7 or
-8 dB, 0,5 dB for 9 or 10 dB, 0 above 10 dB, and "Measurement invalid"
+8 dB, 0.5 dB for 9 or 10 dB, 0 above 10 dB, and "Measurement invalid"
 below 6 dB. A difference between two rows is rounded to the nearest whole
-decibel, a half going up; the two ends are compared as printed, so 5,9 dB
-is invalid and 10,2 dB takes no correction. The difference is first
-settled to nine decimals, so 20,4 - 14,4 dB, 5,999 999 999 999 998 in
-binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
+decibel, a half going up; the two ends are compared as printed, so 5.9 dB
+is invalid and 10.2 dB takes no correction. The difference is first
+settled to nine decimals, so 20.4 - 14.4 dB, 5.999 999 999 999 998 in
+binary, is the 6 dB it is, and 64.1 - 55.6 dB the 8.5 dB that rounds up.
 
 **Parameters**
 
@@ -472,9 +472,9 @@ plant_mean_distance_limits_m(plant_area_m2: float) -> tuple[float, float]
 
 The window of 9.1.1 a) for the average measurement distance $\bar{d}$.
 
-$\bar{d}$ shall exceed $0{,}05\sqrt{S_\mathrm{p}}$ or 5 m,
+$\bar{d}$ shall exceed $0.05\sqrt{S_\mathrm{p}}$ or 5 m,
 whichever is the greater, and shall not exceed
-$0{,}5\sqrt{S_\mathrm{p}}$ or 35 m, whichever is the lesser. The
+$0.5\sqrt{S_\mathrm{p}}$ or 35 m, whichever is the lesser. The
 lower bound is strict, so the window is empty at or below
 $S_\mathrm{p} = 100$ m² and at or above $490\,000$ m²,
 where no contour meets the clause.
@@ -552,7 +552,7 @@ Table 1 prints four rows of $\bar{d}/\sqrt{S_\mathrm{p}}$ and says
 nothing of the ratios between them. The interval narrows as the ratio
 grows, so a ratio between two rows takes the row at or below it, the
 wider of the two; nothing narrower than a printed row is claimed. The
-range of the table, 0,05 to 0,5, is the range 9.1.1 a) allows.
+range of the table, 0.05 to 0.5, is the range 9.1.1 a) allows.
 
 NOTE 1 adds that where the background corrections of 9.5.4 cannot be
 applied, the uncertainty may be greater than the table's.
@@ -563,13 +563,13 @@ applied, the uncertainty may be greater than the table's.
 | :--- | :--- |
 | `distance_ratio` | $\bar{d}/\sqrt{S_\mathrm{p}}$. |
 
-**Returns:** `(lower, upper)`, for example `(-3.5, 3.0)` at 0,05.
+**Returns:** `(lower, upper)`, for example `(-3.5, 3.0)` at 0.05.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a ratio outside 0,05 to 0,5. |
+| ValueError | for a ratio outside 0.05 to 0.5. |
 | TypeError | if `distance_ratio` is not a single number. |
 
 ## PLANT_METHOD_UNCERTAINTY_DB
@@ -589,7 +589,7 @@ plant_microphone_height_m(
 ) -> float
 ```
 
-The microphone height of 9.3: $h = H + 0{,}025\sqrt{S_\mathrm{m}}$
+The microphone height of 9.3: $h = H + 0.025\sqrt{S_\mathrm{m}}$
 or 5 m, whichever is the greater.
 
 Where this height cannot be reached for practical reasons, 9.3 asks for
@@ -652,7 +652,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_{pi}$, one row per position and one column per octave band, in dB re 20 µPa. |
-| `frequencies` | Nominal octave-band centres of the columns, 31,5 Hz to 8 kHz. |
+| `frequencies` | Nominal octave-band centres of the columns, 31.5 Hz to 8 kHz. |
 | `measurement_area_m2` | $S_\mathrm{m}$, in square metres. |
 | `contour_length_m` | $l$, in metres. |
 | `microphone_height_m` | $h$, the height the microphones stood at, in metres. |
@@ -660,7 +660,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | `plant_area_m2` | $S_\mathrm{p}$, in square metres. |
 | `background_levels` | The background alone at each position and band, in decibels, or `None` where the plant could not be stopped. |
 | `directional_microphone_angle_deg` | $\theta$, the angle at which a directional microphone has lost 3 dB, in degrees, one value or one per band; `None` (default) for an omnidirectional microphone. |
-| `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3 at 15 °C. Pass it, with the humidity, only when the weather differs markedly from 15 °C and 70 %: the formula does not return Table 3 at those conditions, and passing them gives $0{,}0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than omitting them (see [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1)). |
+| `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3 at 15 °C. Pass it, with the humidity, only when the weather differs markedly from 15 °C and 70 %: the formula does not return Table 3 at those conditions, and passing them gives $0.0074\sqrt{S_\mathrm{m}}$ dB more at 8 kHz than omitting them (see [`plant_air_absorption_db_per_m`](/phonometry/reference/api/power/sound-power-plant/#plant_air_absorption_db_per_m-1)). |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent, or `None` for Table 3 at 70 %. |
 
 **Returns:** A [`PlantSoundPowerResult`](/phonometry/reference/api/power/sound-power-plant/#plantsoundpowerresult).
@@ -701,7 +701,7 @@ judges that one.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a minimum above the maximum, or a swing of 5 dB or more, the swing settled to nine decimals first, so 64,1 - 59,1 dB, 4,999 999 999 999 993 in binary, is the 5 dB it is. |
+| ValueError | for a minimum above the maximum, or a swing of 5 dB or more, the swing settled to nine decimals first, so 64.1 - 59.1 dB, 4.999 999 999 999 993 in binary, is the 5 dB it is. |
 | TypeError | if `min_level` or `max_level` is not a single number. |
 
 ## PlantMeasurementCheck
@@ -867,7 +867,7 @@ included, in square metres (3.4).
 *property*
 
 The distance from the plant centre beyond which 0.2 a) lets the
-result stand for a point source: 1,5 times the largest dimension, in
+result stand for a point source: 1.5 times the largest dimension, in
 metres.
 
 ### PlantMeasurementContour.nearest_perimeter_points_m
@@ -1062,14 +1062,14 @@ result cannot carry a level that disagrees with its own inputs.
 *property*
 
 The bands summed into $L_{W\mathrm{A}}$: those the octave table
-of ISO 3744:2010 Annex E weights, 63 Hz to 8 kHz. A 31,5 Hz band, which
+of ISO 3744:2010 Annex E weights, 63 Hz to 8 kHz. A 31.5 Hz band, which
 NOTE 8 makes optional, is left out.
 
 ### PlantSoundPowerResult.a_weighted_sound_power_level
 
 *property*
 
-$L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0{,}1(L_{Wj} + C_j)}$, in
+$L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0.1(L_{Wj} + C_j)}$, in
 dB re 1 pW (10.9).
 
 ### PlantSoundPowerResult.air_absorption_db_per_m
@@ -1082,7 +1082,7 @@ $\alpha$ per band, in dB/m (10.7, Table 3).
 
 *property*
 
-$\Delta L_\alpha = 0{,}5\,\alpha\sqrt{S_\mathrm{m}}$ per
+$\Delta L_\alpha = 0.5\,\alpha\sqrt{S_\mathrm{m}}$ per
 band, in decibels (10.7).
 
 ### PlantSoundPowerResult.area_term_db

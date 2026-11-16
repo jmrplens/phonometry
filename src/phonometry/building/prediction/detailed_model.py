@@ -144,10 +144,10 @@ _SPEED_OF_SOUND: float = 340.0
 _AIR_DENSITY: float = 1.29
 
 #: The air EN/ISO 12354 works in, as a :class:`~phonometry.fluids.Fluid`: the
-#: 340 m/s its Annex A uses throughout and the 1,29 kg/m3 of the Annex B
+#: 340 m/s its Annex A uses throughout and the 1.29 kg/m3 of the Annex B
 #: transmission model, transcribed rather than recomputed. It is not the air the
-#: visco-thermal absorber models default to, which is 343,0 m/s and
-#: 1,205 kg/m3: a standard's own constants stay with the clause that prints them.
+#: visco-thermal absorber models default to, which is 343.0 m/s and
+#: 1.205 kg/m3: a standard's own constants stay with the clause that prints them.
 EN12354_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=101_325.0,
@@ -166,7 +166,7 @@ _REFERENCE_LENGTH: float = 1.0
 #: Upper bound on every radiation factor ("In all cases σ ≤ 2,0", Annex B).
 _MAX_RADIATION_FACTOR: float = 2.0
 
-#: Constant ``2,2`` of the structural reverberation time ``Ts = 2,2/(f ηtot)``
+#: Constant ``2.2`` of the structural reverberation time ``Ts = 2.2/(f ηtot)``
 #: (Formula C.1) and of the equivalent absorption length (Formula 11).
 _STRUCTURAL_CONSTANT: float = 2.2
 
@@ -180,7 +180,7 @@ _IMPACT_MASS_COEFFICIENT: float = 30.0
 _LAB_LOSS_CONSTANT: float = 485.0
 
 #: Constants of the high-frequency plateau transmission factor (Formula B.10):
-#: ``τplateau = (4 ρo co/(1,1 ρ cL))² · 0,02/ηtot``.
+#: ``τplateau = (4 ρo co/(1.1 ρ cL))² · 0.02/ηtot``.
 _PLATEAU_FACTOR: float = 1.1
 _PLATEAU_CONSTANT: float = 0.02
 
@@ -634,7 +634,7 @@ def calculated_sound_reduction_index(
     :param longitudinal_velocity: Quasi-longitudinal phase velocity ``cL`` of
         the material, in m/s.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3).
     :return: The sound reduction index ``R`` per band, in dB. A ``float`` for a number,
         an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive/finite or the per-band
@@ -782,7 +782,7 @@ def perimeter_absorption_coefficient(
     over at most three). Multiplied by the border length and summed over the
     perimeter it gives the :math:`\sum l_k \alpha_k` that
     :func:`in_situ_total_loss_factor` takes. Annex C.3 places the in-situ
-    coefficients between 0,05 and 0,5.
+    coefficients between 0.05 and 0.5.
 
     :param vibration_reduction_indices: Vibration reduction index ``Kij`` of
         the path to each connected element, in dB.
@@ -878,7 +878,7 @@ def in_situ_total_loss_factor(
 
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param internal_loss_factor: Internal loss factor ``ηint`` of the material
-        (about 0,01 for common homogeneous building materials).
+        (about 0.01 for common homogeneous building materials).
     :param mass_per_area: Mass per unit area ``m'``, in kg/m².
     :param area: Element area ``S``, in m².
     :param critical_frequency: Critical frequency ``fc``, in Hz.
@@ -886,7 +886,7 @@ def in_situ_total_loss_factor(
     :param perimeter_absorption: :math:`\sum l_k \alpha_k` over the element's
         perimeter, in m (may be zero for a free-edged element).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3).
     :return: The total loss factor ``ηtot,situ`` per band (dimensionless). A ``float``
         for a number, an array for a sequence or an array, a zero-dimensional one
         included.
@@ -959,7 +959,7 @@ def laboratory_total_loss_factor(
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param mass_per_area: Mass per unit area ``m'``, in kg/m².
     :param internal_loss_factor: Internal loss factor ``ηint``
-        (Default: 0,01).
+        (Default: 0.01).
     :return: The laboratory total loss factor per band (dimensionless). A ``float`` for
         a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite.
@@ -1601,7 +1601,7 @@ def flanking_reduction_index_from_flanking_level(
     route used when the flanking construction is characterised as a whole by a
     laboratory measurement of the flanking normalized level difference
     (ISO 10848). ISO 12354-1 Clause 4.4.2 gives the usual laboratory coupling
-    lengths: 4,5 m for horizontal flanking elements such as ceilings, 2,5 m
+    lengths: 4.5 m for horizontal flanking elements such as ceilings, 2.5 m
     for vertical ones such as facades.
 
     :param flanking_level_difference: ``Dn,f,ij,situ`` per band, in dB.
@@ -2029,8 +2029,8 @@ def flanking_impact_level_from_flanking_level(
         in m².
     :param coupling_length: In-situ coupling length ``lij``, in m.
     :param laboratory_coupling_length: Laboratory coupling length ``llab``,
-        in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4,5 m for
-        horizontal flanking elements, 2,5 m for vertical ones.
+        in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4.5 m for
+        horizontal flanking elements, 2.5 m for vertical ones.
     :return: ``Ln,ij`` per band, in dB. A ``float`` for a number, an array for a
         sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a geometry value is not positive and finite.
@@ -2129,7 +2129,7 @@ class HomogeneousElement(RichDisplay):
     :ivar mass_per_area: Mass per unit area ``m'``, in kg/m².
     :ivar critical_frequency: Critical frequency ``fc``, in Hz.
     :ivar internal_loss_factor: Internal loss factor ``ηint`` of the material
-        (about 0,01 for common homogeneous building materials; ISO 12354-1
+        (about 0.01 for common homogeneous building materials; ISO 12354-1
         Table B.3 tabulates it per material).
     :ivar perimeter_absorption: :math:`\sum l_k \alpha_k` over the element's
         perimeter, in m (Formula C.1; build it from
@@ -2355,7 +2355,7 @@ def in_situ_element(
     :param resonant_only: Drop the forced-transmission term of Formula (B.2)
         below ``fc`` (Annex B.1, flanking paths).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3).
     :return: The :class:`InSituElementResult`.
     :raises ValueError: If any element property is not positive and finite.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real

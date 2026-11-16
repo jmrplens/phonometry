@@ -83,7 +83,7 @@ def test_equation_13_sets_the_overall_level() -> None:
 
     The factor on the pressure is 20 and not the 5 (gamma - 1) of Equation
     (11), because Section 4.3.2 takes the Mach number exponent as 5 for every
-    ventilation fan. Checked here against the printed 96,0 dB.
+    ventilation fan. Checked here against the printed 96.0 dB.
     """
     overall = (
         34.0
@@ -94,7 +94,7 @@ def test_equation_13_sets_the_overall_level() -> None:
 
     # And the module's own spectrum sums back to it: the shape of Equation (15)
     # is a relative spectrum, so subtracting it from each band returns the one
-    # level, once the 0,1 dB of the best-duty allowance is taken off.
+    # level, once the 0.1 dB of the best-duty allowance is taken off.
     res = _supply_fan()
     shape = np.array(PRINTED_RELATIVE_SPECTRUM_DB)
     recovered = res.values - shape
@@ -105,7 +105,7 @@ def test_the_strouhal_number_carries_no_diameter() -> None:
     """``St = f 60 / (pi n)`` of Equation (15), the eight printed values.
 
     The impeller diameter cancels between the tip speed and the impeller
-    circumference, so the printed 0,6 m of Table 1 is a nomogram result rather
+    circumference, so the printed 0.6 m of Table 1 is a nomogram result rather
     than an input to the spectrum.
     """
     strouhal = hvac._OCTAVE_BANDS * 60.0 / (math.pi * FAN_SPEED_RPM)
@@ -113,7 +113,7 @@ def test_the_strouhal_number_carries_no_diameter() -> None:
 
 
 def test_equation_15_reproduces_the_relative_spectrum() -> None:
-    """``dL = -5 - 5 (lg St + c3)^2`` with c3 = 0,4 for assembly RR."""
+    """``dL = -5 - 5 (lg St + c3)^2`` with c3 = 0.4 for assembly RR."""
     strouhal = np.array(PRINTED_STROUHAL)
     shape = -5.0 - 5.0 * (np.log10(strouhal) + 0.4) ** 2
     assert shape == pytest.approx(
@@ -122,7 +122,7 @@ def test_equation_15_reproduces_the_relative_spectrum() -> None:
 
 
 def test_the_best_duty_point_is_worth_a_tenth_of_a_decibel() -> None:
-    """Figure 13 at ``V/V_opt = 1``, which Table 1 prints as 0,1 dB in every band.
+    """Figure 13 at ``V/V_opt = 1``, which Table 1 prints as 0.1 dB in every band.
 
     The cubic does not pass exactly through nought at the best duty point; the
     guideline prints what it is worth there rather than rounding it away, and
@@ -305,8 +305,8 @@ def test_the_straight_runs_reproduce_table_5() -> None:
     """Elements 5, 13 and 17, which between them cover both duct shapes.
 
     The rectangular row is selected by the **largest** side: 500 mm puts the
-    duct in the 0,40 to 0,80 m band, and reading it by the 400 mm side instead
-    would give 0,45 dB/m at 250 Hz where the table gives 0,3.
+    duct in the 0.40 to 0.80 m band, and reading it by the 400 mm side instead
+    would give 0.45 dB/m at 250 Hz where the table gives 0.3.
     """
     width, height, length = RECTANGULAR_RUN
     rect = hvac.unlined_rectangular_duct_attenuation(
@@ -327,7 +327,7 @@ def test_the_straight_runs_reproduce_table_5() -> None:
 def test_the_bend_shifts_table_7_onto_its_own_limit_frequency() -> None:
     """Element 14: a 160 mm round bend, whose limit frequency is 1245 Hz.
 
-    Equation (34) puts ``f_G = 0,586 c / d`` in the 1 kHz octave, three octaves
+    Equation (34) puts ``f_G = 0.586 c / d`` in the 1 kHz octave, three octaves
     above the 125 Hz the table is printed for, so the whole row moves three
     octaves up. That is what turns the printed 0, 1, 2, 3, 3, ... into the
     0, 0, 0, 1, 2, 3, 3, 3 of the example.
@@ -442,7 +442,7 @@ def test_lining_one_side_of_a_corner_is_its_own_row() -> None:
 # Flow noise: Section 5.2, and the rows of Table 1 that carry it
 # ---------------------------------------------------------------------------
 #: Table 1, element 3: the junction's flow noise, band by band. Its approach
-#: velocity is the whole system's 16 000 m3/h over the 0,90 m2 feeder, not the
+#: velocity is the whole system's 16 000 m3/h over the 0.90 m2 feeder, not the
 #: 4200 m3/h of the branch that carries on.
 JUNCTION_APPROACH_VELOCITY = (16000.0 / 3600.0) / 0.90
 JUNCTION_BRANCH_VELOCITY = (4200.0 / 3600.0) / 0.30
@@ -478,7 +478,7 @@ def test_the_straight_run_flow_noise_is_equations_16_and_17() -> None:
     """Element 5, and element 13 in the round duct, to one decibel as printed.
 
     The table rounds these to whole decibels and prints the velocity rounded
-    too: reading 5,8 m/s off the table instead of the 5,8333 the duty gives
+    too: reading 5.8 m/s off the table instead of the 5.8333 the duty gives
     would move the level by a tenth.
     """
     overall = hvac.flow_noise_straight_duct_overall(STRAIGHT_VELOCITY, STRAIGHT_AREA_M2)
@@ -509,8 +509,8 @@ def test_the_two_overall_forms_are_the_printed_closed_forms() -> None:
     They are not one number weighted: fifty times the logarithm is a fifth
     power of the speed and seventy is a seventh, because raising the speed
     also moves the spectrum into the part of the curve the weighting stops
-    attenuating. Doubling the speed is worth 15,05 dB unweighted and 21,07 dB
-    A-weighted, and the two forms meet where 20 lg v reaches 32, at 39,8 m/s,
+    attenuating. Doubling the speed is worth 15.05 dB unweighted and 21.07 dB
+    A-weighted, and the two forms meet where 20 lg v reaches 32, at 39.8 m/s,
     which is far outside any ventilation duct.
     """
     for velocity, area in ((2.0, 0.1), (5.8333333, 0.2), (12.0, 1.5)):
@@ -624,7 +624,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
     """Element 14: the two velocities equal, and no rounding correction.
 
     Figure 18 is drawn for the rounding of a junction, and all its curves cross
-    zero at ``r / d_a = 0,15``, so leaving it out is not the same as passing
+    zero at ``r / d_a = 0.15``, so leaving it out is not the same as passing
     nought: a sharp-cornered junction earns over 6 dB there.
     """
     bend = hvac.flow_noise_bend(
@@ -646,12 +646,12 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
         branch_diameter_m=0.160,
         rounding_ratio=0.0,
     )
-    # K falls with frequency, from 6,3 dB at 63 Hz to 1,9 dB at 8 kHz, so a
+    # K falls with frequency, from 6.3 dB at 63 Hz to 1.9 dB at 8 kHz, so a
     # sharp corner is louder in every band and most of all in the lowest.
     assert np.all(sharp.values > bend.values)
     assert sharp.values[0] - bend.values[0] > 6.0
 
-    # A junction rounded to 0,15 of its branch diameter is the crossing point,
+    # A junction rounded to 0.15 of its branch diameter is the crossing point,
     # so it lands back on the uncorrected law.
     crossing = hvac.flow_noise_bend(
         hvac._OCTAVE_BANDS,
@@ -742,7 +742,7 @@ def test_the_example_computes_on_twice_the_gap_not_on_the_diameter_it_prints() -
 
     Section 7.2.4.2 sets ``St = f d_h / v_i``, so the printed ``d_h`` and the
     printed Strouhal row determine each other. They disagree: with the printed
-    0,171 m not one of the eight rounds onto the row, and with ``2 s`` all
+    0.171 m not one of the eight rounds onto the row, and with ``2 s`` all
     eight do. Both are defensible diameters for the gap, ``4 A / P`` and the
     parallel-plate limit, and ``docs/ERRATA.md`` records which the example
     used.
@@ -766,8 +766,8 @@ def test_the_nozzle_reflection_reproduces_element_18() -> None:
     """Figure 28 in closed form, and the flat 15 dB ceiling of Section 6.6.
 
     The area comes from the nozzle's own bore, so a 200 mm outlet gives the
-    0,0314 m2 the example prints, and the ceiling is what turns its computed
-    15,8 dB at 63 Hz into the 15,0 it carries forward.
+    0.0314 m2 the example prints, and the ceiling is what turns its computed
+    15.8 dB at 63 Hz into the 15.0 it carries forward.
     """
     uncapped = hvac.end_reflection_loss(
         hvac._OCTAVE_BANDS,

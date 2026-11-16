@@ -36,13 +36,13 @@ references:
     year: 2003
     title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 4: Dynamic stiffness of elements other than resilient supports for translatory motion"
     designation: "ISO 10846-4:2003"
-    note: "Couplings, bellows, hoses, pipe hangers and cables by the direct and the indirect method: the output-mass limit of Inequality (3), the effective blocking mass of Formula (6) with its f₃ (Inequality 5), and the band average of Formula (11). It prints no worked example, so conformance is anchored on closed forms; the 0,5 dB of its 6.2 NOTE 1 is printed as 05 dB (see the errata)."
+    note: "Couplings, bellows, hoses, pipe hangers and cables by the direct and the indirect method: the output-mass limit of Inequality (3), the effective blocking mass of Formula (6) with its f₃ (Inequality 5), and the band average of Formula (11). It prints no worked example, so conformance is anchored on closed forms; the 0.5 dB of its 6.2 NOTE 1 is printed as 05 dB (see the errata)."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2008
     title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 5: Driving point method for determination of the low-frequency transfer stiffness of resilient supports for translatory motion"
     designation: "ISO 10846-5:2008"
-    note: "The driving-point stiffness k₁,₁ of Formula (3), the upper limiting frequency of 6.2, the band averages of Formulas (6) and (7), Inequalities (1) and (2), and the Annex B budget. No worked example either; Table B.1 rounds its three rectangular terms up to one decimal (the linearity term 1,5/(2√3) = 0,433 dB becomes 0,5 dB), and the library keeps the expressions."
+    note: "The driving-point stiffness k₁,₁ of Formula (3), the upper limiting frequency of 6.2, the band averages of Formulas (6) and (7), Inequalities (1) and (2), and the Annex B budget. No worked example either; Table B.1 rounds its three rectangular terms up to one decimal (the linearity term 1.5/(2√3) = 0.433 dB becomes 0.5 dB), and the library keeps the expressions."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -238,7 +238,7 @@ typically a few hundred hertz for large elements.
 **Excitation and averaging** (ISO 10846-2, 7.5). The source may be a discretely
 stepped sine, a swept sine, a periodically swept sine or band-limited noise. It
 shall be applied long enough that doubling the averaging time changes the
-result by no more than **0,1 dB**; and for stepped or periodically swept sine
+result by no more than **0.1 dB**; and for stepped or periodically swept sine
 the source frequencies shall be spaced so that every one-third-octave band for
 which stiffness is reported contains at least **five** of them.
 
@@ -312,26 +312,26 @@ left to the operator.
   blocked output; the condition it means is 6.4, Inequality (3), as the
   companion parts show. See the [errata](/phonometry/reference/errata/).)
 * **Transducers** (6.5, 6.6). Accelerometers and force transducers shall have a
-  sensitivity level that is frequency-independent within **0,5 dB**, be
+  sensitivity level that is frequency-independent within **0.5 dB**, be
   calibrated at the laboratory temperature, and have a cross-axis sensitivity
   below 5 %. Where several transducer signals are summed, the resultant
-  sensitivity function shall meet the same 0,5 dB requirement.
+  sensitivity function shall meet the same 0.5 dB requirement.
 * **Analyser** (6.8). The spectral resolution shall give at least **five
   distinct frequencies** in every one-third-octave band of interest, and the
   frequency-response difference between the input-acceleration and
-  output-force channels shall be under 0,5 dB or else applied as a correction.
+  output-force channels shall be under 0.5 dB or else applied as a correction.
 * **Coherence** between the input and output signals is the recommended running
   indicator (7.6.2): it flags poor signal-to-noise and non-linearity, and it is
   read exactly as the [mobility guide's Annex A.1 list](/phonometry/vibration/structural/mechanical-mobility/)
   reads it.
 
 Annex B of Part 2 says what each of these is worth. Its uncertainty budget
-assigns 0,3 dB to signal processing and background noise, **0,5 dB** to
-instrumentation when only the minimum requirements above are met, **0,5 dB** to
+assigns 0.3 dB to signal processing and background noise, **0.5 dB** to
+instrumentation when only the minimum requirements above are met, **0.5 dB** to
 the test rig (from the residual output motion the two inequalities bound), and
-**0,5 dB** to linearity. The last two are rectangular terms over a 1,5 dB
-range, $1{,}5/(2\sqrt{3}) = 0{,}433$ dB each, which the annex rounds up to
-0,5 dB. The three are comparable, which is the argument for not skipping any
+**0.5 dB** to linearity. The last two are rectangular terms over a 1.5 dB
+range, $1.5/(2\sqrt{3}) = 0.433$ dB each, which the annex rounds up to
+0.5 dB. The three are comparable, which is the argument for not skipping any
 of them: no one of them dominates, so no one of them is optional.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness.svg" alt="Three stacked panels sharing a logarithmic frequency axis for a Kelvin-Voigt isolator on an 8 kilogram blocking mass. The upper panel gives the true transfer-stiffness level and the indirect-method estimate: the estimate runs far above the truth below and around the mass-spring resonance and lies on it above. The middle panel gives the transmissibility magnitude, which peaks above ten at the resonance and crosses the 0.1 limit at 187.5 hertz, with the level error of the estimate on a second axis staying inside a shaded plus-or-minus one decibel band from that crossing onwards. The lower panel gives the loss factor, rising in proportion to frequency as the Kelvin-Voigt model demands. Every panel is shaded up to the 0.1 crossing, the frequencies at which no result exists." width="82%" loading="eager" />
@@ -478,14 +478,14 @@ condition frequency by frequency with an overall `.passes`, draws itself with
   blocking force, and it shall not exceed 6 % of the force,
 
   $$
-  m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg},
+  m_0 \le 0.06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg},
   $$
 
   with $L_{F2}$ re 1 µN and $L_{a2}$ re 1 µm/s², so the bound is
-  $0{,}06\,|F_2|/|a_2|$. At the bound the force levels differ by
-  $20 \lg 1{,}06 = 0{,}51$ dB when the inertia force is in phase with the
-  measured one and by $-20 \lg 0{,}94 = 0{,}54$ dB when it opposes it: the
-  0,5 dB of NOTE 1 (which ISO 10846-4 prints as "05 dB"; see the
+  $0.06\,|F_2|/|a_2|$. At the bound the force levels differ by
+  $20 \lg 1.06 = 0.51$ dB when the inertia force is in phase with the
+  measured one and by $-20 \lg 0.94 = 0.54$ dB when it opposes it: the
+  0.5 dB of NOTE 1 (which ISO 10846-4 prints as "05 dB"; see the
   [errata](/phonometry/reference/errata/)). `check_output_mass` returns the
   limit and that worst-case bias, `bias_bound_db`.
 
@@ -555,7 +555,7 @@ the 2 dB "if $f \le f_\mathrm{UL}$"). For those bands the 2 dB of Formula (7)
 is the standard's own statement, which Annex B assumes again for its budget
 (B.3.5): the criterion of 6.2 only watches $k_{1,1}$ fall below its own
 low-frequency value, so nothing in the average proves the bound line by line.
-Below 20 Hz, 7.5 asks for a 0,2 Hz
+Below 20 Hz, 7.5 asks for a 0.2 Hz
 line spacing rather than five lines per band, which leaves the lowest bands
 short of five; those bands have no value, without a warning, and the note to
 clause 9 m) accepts narrow-band data there instead.
@@ -627,15 +627,15 @@ $f_\mathrm{UL}$ and sits 1.8 dB down.*
 plus five corrections of zero estimate, each with sensitivity coefficient 1
 (Formula (B.1)), combines them by root sum of squares (B.2) and takes $U = 2u$
 for 95 % coverage (B.3). `driving_point_uncertainty` builds it on
-`metrology.uncertainty_propagation`: signal processing 0,3 dB and instrumentation
-0,5 dB (normal), installation repeatability $p/\sqrt{3}$ for a spread $2p$ of
+`metrology.uncertainty_propagation`: signal processing 0.3 dB and instrumentation
+0.5 dB (normal), installation repeatability $p/\sqrt{3}$ for a spread $2p$ of
 repeated installations, and three rectangular terms, the test rig
-$1/(2\sqrt{3}) = 0{,}289$ dB, the driving-point discrepancy
-$2/\sqrt{3} = 1{,}155$ dB for its $\pm 2$ dB, and linearity
-$1{,}5/(2\sqrt{3}) = 0{,}433$ dB. Those three are the expressions the annex
-prints. Table B.1 carries them rounded up to one decimal, 0,3, 1,2 and 0,5 dB,
+$1/(2\sqrt{3}) = 0.289$ dB, the driving-point discrepancy
+$2/\sqrt{3} = 1.155$ dB for its $\pm 2$ dB, and linearity
+$1.5/(2\sqrt{3}) = 0.433$ dB. Those three are the expressions the annex
+prints. Table B.1 carries them rounded up to one decimal, 0.3, 1.2 and 0.5 dB,
 the conservative rounding an uncertainty may take (ISO/IEC Guide 98-3, 7.2.6),
-which puts $u$ at 1,456 dB instead of 1,394 dB with no repeatability spread.
+which puts $u$ at 1.456 dB instead of 1.394 dB with no repeatability spread.
 The library keeps the expressions, and every term can be passed in to
 reproduce the table or to state a reasoned estimate. The discrepancy term
 dominates: it is the price of measuring $k_{1,1}$ for $k_{2,1}$.
@@ -804,8 +804,8 @@ Figure 11 nomograms of $f_3$ for steel cubes and cylinders are not tabulated;
 $f_3$ is found from a measured effective mass. The linearity test (two input
 spectra 10 dB apart within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and
 clause 7.6 of ISO 10846-3) is not checked in code, and neither are the preload,
-creep and temperature conditioning, the background pre-run, the 0,5 dB
-transducer flatness and inter-channel matching or the 0,2 Hz line spacing
+creep and temperature conditioning, the background pre-run, the 0.5 dB
+transducer flatness and inter-channel matching or the 0.2 Hz line spacing
 ISO 10846-5 asks for below 20 Hz: the page describes them and leaves them to
 the operator. Hydraulic mounts are outside the single-spectrum description
 altogether: their stiffness is amplitude-dependent by design, so one $L_k(f)$

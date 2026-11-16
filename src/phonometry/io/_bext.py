@@ -113,8 +113,8 @@ def _encode_loudness(value: float | None) -> int:
         return _LOUDNESS_UNSET
     if not math.isfinite(value):
         return -0x8000 if value < 0 else _LOUDNESS_UNSET - 1
-    # Settled before the half is judged, so -20,455 LUFS, whose hundredfold is
-    # -2 045,499 999 999 999 8 in binary, still encodes as -2 046.
+    # Settled before the half is judged, so -20.455 LUFS, whose hundredfold is
+    # -2 045.499 999 999 999 8 in binary, still encodes as -2 046.
     ties_away = int(round_half_away_from_zero(value * 100.0))
     return max(-0x8000, min(_LOUDNESS_UNSET - 1, ties_away))
 

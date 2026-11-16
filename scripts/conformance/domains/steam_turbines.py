@@ -17,7 +17,7 @@ without modification:
   and 13: the environmental correction, its 7 dB limit and the A/S of 1 the
   clause restates the limit as;
 * the NOTE of **8.3**, printed folio 9 (PDF page 15): an arithmetic average
-  within 0,7 dB of Equation (2) when the levels span no more than 5 dB;
+  within 0.7 dB of Equation (2) when the levels span no more than 5 dB;
 * the limits of **4.2**, **4.3** and the NOTE of **7.2.2**, on folios 5, 6
   and 8.
 
@@ -61,7 +61,7 @@ def _chk_table_two() -> Outcome:
     """Every row of the stepped table, read at the difference it is printed at.
 
     The row "> 10" is read twice: at 11 dB, the first whole decibel above 10,
-    and at 10,2 dB, which is above 10 dB as measured and would round down to
+    and at 10.2 dB, which is above 10 dB as measured and would round down to
     the row 10 if the table were rounded before its open row was judged.
     """
     printed = {
@@ -74,8 +74,8 @@ def _chk_table_two() -> Outcome:
         )
         for d in oracle.IEC61063_TABLE_2_DB
     }
-    printed["> 10 dB, at 10,2 dB"] = oracle.IEC61063_TABLE_2_DB[11]
-    computed["> 10 dB, at 10,2 dB"] = float(
+    printed["> 10 dB, at 10.2 dB"] = oracle.IEC61063_TABLE_2_DB[11]
+    computed["> 10 dB, at 10.2 dB"] = float(
         emission.turbine_background_correction(10.2)
     )
     return record(printed, computed, unit="dB")
@@ -178,8 +178,8 @@ def _chk_equation_one() -> Outcome:
 def _chk_figure_a3() -> Outcome:
     """K from the room absorption against the printed formula, written out here.
 
-    At the A/S values the figure labels on its axis, 0,5 to 300, and at 2 and
-    7,32 (the hall of the guide). A factor other than the printed 4 moves K
+    At the A/S values the figure labels on its axis, 0.5 to 300, and at 2 and
+    7.32 (the hall of the guide). A factor other than the printed 4 moves K
     by tenths of a decibel at every one of them.
     """
     surface = 100.0
@@ -215,8 +215,8 @@ def _chk_ratio_at_limit() -> Outcome:
 
     A.3.3 prints the requirement "K ≤ 7" and restates it as "A/S ≥ 1". The
     two agree to the whole unit the restatement is printed in: the curve of
-    Figure A.3 reaches 7 dB at an A/S of 0,997, and at A/S = 1 it gives
-    10 lg 5 = 6,99 dB. The tolerance is half the last printed digit of the 1.
+    Figure A.3 reaches 7 dB at an A/S of 0.997, and at A/S = 1 it gives
+    10 lg 5 = 6.99 dB. The tolerance is half the last printed digit of the 1.
     """
     surface = 100.0
     low, high = 0.5, 2.0
@@ -244,7 +244,7 @@ def _chk_arithmetic_note() -> Outcome:
     For a fixed range the energy average leads the arithmetic one most when
     every level sits at one end of the range or the other, so the largest gap
     is found over sets of 1000 positions split between the two ends. It comes
-    to 0,707 dB, which the NOTE prints to one decimal; the tolerance is half
+    to 0.707 dB, which the NOTE prints to one decimal; the tolerance is half
     that decimal.
     """
     worst = 0.0
@@ -273,11 +273,11 @@ def _chk_arithmetic_note() -> Outcome:
 def _chk_printed_limits() -> Outcome:
     """Each limit holds at the printed number and fails a hair beyond it.
 
-    4.2: a background exactly 3 dB below is not an upper limit, 2,99 dB is.
-    4.3: 5,99 m/s is within the wind limit, 6 m/s is not. A.3.3: K = 7 dB
+    4.2: a background exactly 3 dB below is not an upper limit, 2.99 dB is.
+    4.3: 5.99 m/s is within the wind limit, 6 m/s is not. A.3.3: K = 7 dB
     qualifies, a little more does not. 7.2.2: overhead positions that move the
-    level by 1,0 dB may be deleted, and by a micro-decibel more may not. The
-    effect is the difference of two energy means near 80 dB, so at 1,0 dB it
+    level by 1.0 dB may be deleted, and by a micro-decibel more may not. The
+    effect is the difference of two energy means near 80 dB, so at 1.0 dB it
     comes out a unit or two of their last place either side of the printed
     value, which side depending on the machine; the row asks that it be judged
     on the limit whichever side it lands.
@@ -328,12 +328,12 @@ def _chk_printed_limits() -> Outcome:
         ).wind_ok,
         "A.3.3 at 7 dB": check(environmental_correction=k).passes,
         "A.3.3 above 7 dB": not check(environmental_correction=k + tiny).passes,
-        "7.2.2 at 1,0 dB": exact.overhead_level_difference is not None
+        "7.2.2 at 1.0 dB": exact.overhead_level_difference is not None
         and math.isclose(
             exact.overhead_level_difference, effect, rel_tol=0.0, abs_tol=1e-12
         )
         and bool(exact.overhead_may_be_deleted),
-        "7.2.2 above 1,0 dB": not beyond.overhead_may_be_deleted,
+        "7.2.2 above 1.0 dB": not beyond.overhead_may_be_deleted,
     }
     printed = dict.fromkeys(judged, 1.0)
     return record(

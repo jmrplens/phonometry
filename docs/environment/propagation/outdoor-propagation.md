@@ -549,7 +549,7 @@ Both figures are cells of the guideline's own worked cases. ISO/TR 17534-3
 prints nineteen of them, each a complete chain with every intermediate
 quantity, so that two implementations can be compared where a single formula
 would not separate them; it also fixes the envelope a result has to stay
-inside, $\pm 0{,}05$ dB per band and on the total. The seven that ISO 9613-2
+inside, $\pm 0.05$ dB per band and on the total. The seven that ISO 9613-2
 answers on its own (T01 to T07) are checked band by band in the
 [conformance report](../../CONFORMANCE.md).
 The other twelve build their ray paths by the additional recommendations of
@@ -656,7 +656,7 @@ ISO 17534-1 asks software that implements an outdoor propagation method to
 declare conformity against a published set of test cases. **ISO/TR 17534-3**
 carries that set for ISO 9613-2: nineteen scenarios, each with its geometry and
 a step-by-step table of every intermediate quantity, and an envelope a result
-has to stay inside to count as correct, which the document puts at 0,05 dB per
+has to stay inside to count as correct, which the document puts at 0.05 dB per
 band and on the total.
 
 Seven of the nineteen are answerable by ISO 9613-2 on its own: "Test cases T01
@@ -696,13 +696,13 @@ print(round(environment.mean_path_height((0.0, d_p), (0.0, 0.0), 1.0, 4.0), 2))
 ```
 
 The first is the length-weighted mean of $G$ over each of the three regions
-ISO 9613-2 divides a path into, which is 0,20, 0,43 and 0,67 for the areas of
-Table 7; the second is $F/d$ of Figure 3, which is 2,50 m over flat ground and
-4,99 m once the ground rises 10 m under the receiver.
+ISO 9613-2 divides a path into, which is 0.20, 0.43 and 0.67 for the areas of
+Table 7; the second is $F/d$ of Figure 3, which is 2.50 m over flat ground and
+4.99 m once the ground rises 10 m under the receiver.
 
 Thirty-four conformance rows hold the seven cases to the document's own
 envelope, band by band and on both totals. The worst deviation over all of them
-is 0,012 dB, a quarter of what the report allows.
+is 0.012 dB, a quarter of what the report allows.
 
 The comparison itself, each result against the limits of its certified result
 as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
@@ -969,7 +969,7 @@ same result against the exact half-plane and coherent-ground models.
 - **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
   Only the clause 8.1.2.1 conversion m = alpha/(10 lg e) behind air_power_attenuation_per_m; the reverberation-room method itself is covered in the Room Acoustics guide.
 - **International Organization for Standardization. (2015).** [*Acoustics — Software for the calculation of sound outdoors — Part 3: Recommendations for quality assured implementation of ISO 9613-2 in software according to ISO 17534-1*](https://www.iso.org/standard/66128.html) (ISO/TR 17534-3:2015).
-  The nineteen worked test cases and the ±0,05 dB envelope they are judged by; the length-weighted region ground factors of 6.2.5 behind region_ground_factors; and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
+  The nineteen worked test cases and the ±0.05 dB envelope they are judged by; the length-weighted region ground factors of 6.2.5 behind region_ground_factors; and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
 - **Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012).** [*Common noise assessment methods in Europe (CNOSSOS-EU)*](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550) (EUR 25379 EN). Publications Office of the European Union. https://doi.org/10.2788/31776
   The common EU framework contrasted with ISO 9613-2 in section 4.
 - **Maekawa, Z. (1968).** Noise reduction by screens. *Applied Acoustics*, *1*(3), 157-173. https://doi.org/10.1016/0003-682X(68)90020-0

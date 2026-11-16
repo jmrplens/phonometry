@@ -172,7 +172,7 @@ def test_impact_traction_aerodynamic_and_bridge_tables() -> None:
 
 
 def test_table_g5_carries_the_2021_correction_at_6300_hz() -> None:
-    """(EU) 2021/1226 point (20)(f) replaced 31,4 / 30,7 by 81,4 / 80,7.
+    """(EU) 2021/1226 point (20)(f) replaced 31.4 / 30.7 by 81.4 / 80.7.
 
     The 2015 values are about 50 dB below both neighbours of the same column,
     which is what makes them a typographical error rather than a measurement.
@@ -186,7 +186,7 @@ def test_table_g5_carries_the_2021_correction_at_6300_hz() -> None:
 
 
 def test_wheel_roughness_keeps_the_non_standard_wavelength_grid() -> None:
-    """Table G-1a still prints 120, 12, 3,2 and 1,2 mm.
+    """Table G-1a still prints 120, 12, 3.2 and 1.2 mm.
 
     (EU) 2021/1226 put the amended tables on the standard 1/3-octave series but
     left Table G-1a alone, so the two grids differ at four steps. Each table is
@@ -308,7 +308,7 @@ def _case_result(case: dict[str, str]) -> RailwayEmissionResult:
 def test_workbook_cases(case: dict[str, str]) -> None:
     """Reproduce the CIRCABC railway emission workbook band by band.
 
-    The workbook prints two decimals, so 0,01 dB is its own resolution; the
+    The workbook prints two decimals, so 0.01 dB is its own resolution; the
     tolerance is that rounding and nothing more.
     """
     result = _case_result(case)
@@ -425,7 +425,7 @@ def test_workbook_exercises_every_physical_source() -> None:
 
 
 def test_horizontal_directivity_cardinal_values() -> None:
-    """(2.3.15) is a dipole: 0 dB broadside and 10 lg 0,01 along the track."""
+    """(2.3.15) is a dipole: 0 dB broadside and 10 lg 0.01 along the track."""
     assert horizontal_directivity(90.0)[0] == pytest.approx(0.0, abs=1e-12)
     assert horizontal_directivity(0.0)[0] == pytest.approx(-20.0, abs=1e-12)
     assert horizontal_directivity(180.0)[0] == pytest.approx(-20.0, abs=1e-12)
@@ -464,7 +464,7 @@ def test_vertical_directivity_2015_edition_differs_over_the_lower_half_space() -
 
     The two editions therefore disagree wherever the bracket is negative: the
     whole of ``psi < 0``, and ``psi`` above the angle where
-    ``(2/3) sin 2psi = sin psi``, that is ``cos psi = 3/4``, about 41,4 deg.
+    ``(2/3) sin 2psi = sin psi``, that is ``cos psi = 3/4``, about 41.4 deg.
     """
     for psi in (-45.0, -20.0, -1.0, 45.0, 60.0, 89.0):
         legacy = vertical_directivity(psi, edition=DirectivityEdition.ORIGINAL_2015)
@@ -483,7 +483,7 @@ def test_vertical_directivity_2015_edition_differs_over_the_lower_half_space() -
 
 
 def test_vertical_directivity_source_b() -> None:
-    """(2.3.17): the aerodynamic source at 4,0 m only, and only below 0."""
+    """(2.3.17): the aerodynamic source at 4.0 m only, and only below 0."""
     assert np.all(vertical_directivity(-40.0, height=2) == 0.0)
     assert np.all(vertical_directivity(40.0, height=2, aerodynamic=True) == 0.0)
     value = vertical_directivity(-60.0, height=2, aerodynamic=True)
@@ -509,7 +509,7 @@ def test_aerodynamic_law_is_exact_at_the_reference_speed() -> None:
 
 
 def test_impact_roughness_joint_density_law() -> None:
-    """(2.3.12): the table verbatim at ``n_l = 0,01`` and ``+10 lg(n_l/0,01)``."""
+    """(2.3.12): the table verbatim at ``n_l = 0.01`` and ``+10 lg(n_l/0.01)``."""
     single = impact_roughness_single().levels
     frequency_grid = np.asarray(single[:24])
     np.testing.assert_allclose(
@@ -540,7 +540,7 @@ def test_total_effective_roughness_and_rolling_addition() -> None:
         10.0 + 10.0 * math.log10(2.0) - 3.0,
         atol=1e-12,
     )
-    # (2.3.8): four axles are exactly +6,0206 dB over one
+    # (2.3.8): four axles are exactly +6.0206 dB over one
     roughness = np.linspace(-5.0, 5.0, 24)
     transfer = np.linspace(80.0, 110.0, 24)
     np.testing.assert_allclose(
@@ -584,7 +584,7 @@ def test_roughness_conversion_invariants() -> None:
                 atol=1e-12,
             )
     # reading the table at f = v/lambda: at 36 km/h (10 m/s) the 100 Hz band
-    # wants lambda = 0,1 m = 100 mm, which is tabulated, so no interpolation
+    # wants lambda = 0.1 m = 100 mm, which is tabulated, so no interpolation
     levels = [0.0, 12.0, -6.0, 3.0]
     got = roughness_to_frequency(
         levels, wavelengths_mm=lam, speed_kmh=36.0, frequencies=[100.0]

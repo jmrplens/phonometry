@@ -18,8 +18,8 @@ folio 9 (PDF page 13), Table A.1 and the note to A.1.8 on folio 10 (PDF page
 14), Table B.1 on folio 14 (PDF page 18).
 
 One printed defect sits in this oracle and is recorded in ``docs/ERRATA.md``:
-the note to A.1.8 lists 77,9° and 282,1° where the symmetry of its own list,
-and the equal-area construction, give 77,8° and 282,2°. The row on that list
+the note to A.1.8 lists 77.9° and 282.1° where the symmetry of its own list,
+and the equal-area construction, give 77.8° and 282.2°. The row on that list
 checks the other 18 and names the two.
 """
 
@@ -53,7 +53,7 @@ def _chk_table_a1() -> Outcome:
 
     Table A.1 prints ten values, one for each group of angles that lie on the
     same ring; the row checks the factor of each of the 36 angles against the
-    value of its group, from 0,00095 at the poles to 0,02179 at 90°.
+    value of its group, from 0.00095 at the poles to 0.02179 at 90°.
     """
     factors = metrology.adjustment_factors(_STEP)
     printed = _printed_factor_by_angle()
@@ -85,10 +85,10 @@ def _chk_four_planes() -> Outcome:
 @register(
     _IEC61183,
     "IEC 61183:1994 A.1.7",
-    "Largest of the 70 elements of 10° steps in two planes, about 2,2 % of the sphere",
+    "Largest of the 70 elements of 10° steps in two planes, about 2.2 % of the sphere",
 )
 def _chk_largest_element() -> Outcome:
-    """The element at 90°, K(90°) = 2,179 %, and below the 3 % of A.1.6."""
+    """The element at 90°, K(90°) = 2.179 %, and below the 3 % of A.1.6."""
     largest = 100.0 * metrology.largest_element_fraction(_STEP)
     return numeric(ref.IEC61183_A17_LARGEST_PERCENT, largest, 0.05, unit="%", places=3)
 
@@ -102,8 +102,8 @@ def _chk_factor_sum() -> Outcome:
     """Each plane's pole factor covers half its cap, so both enter.
 
     Counted once, as a reading of the paragraph under (A.3) would have it,
-    the sum is 0,998097: an omnidirectional instrument's 10 lg gamma comes out
-    0,008 dB high, and a directional one's by more.
+    the sum is 0.998097: an omnidirectional instrument's 10 lg gamma comes out
+    0.008 dB high, and a directional one's by more.
     """
     total = 2.0 * float(np.sum(metrology.adjustment_factors(_STEP)))
     return numeric(1.0, total, 1e-12, places=6)
@@ -123,14 +123,14 @@ def _chk_omnidirectional() -> Outcome:
 @register(
     _IEC61183,
     "IEC 61183:1994 note to A.1.8",
-    "Directions of the 38 equal-area elements, to the 0,1° printed",
+    "Directions of the 38 equal-area elements, to the 0.1° printed",
 )
 def _chk_equal_area_angles() -> Outcome:
     """The 20 printed angles of the horizontal plane, less the two errata.
 
     Each direction halves its element's area in polar angle. The note prints
-    77,9° and 282,1°, which break the list's symmetry about 90°; the
-    construction gives 77,85° and 282,15° (``docs/ERRATA.md``).
+    77.9° and 282.1°, which break the list's symmetry about 90°; the
+    construction gives 77.85° and 282.15° (``docs/ERRATA.md``).
     """
     horizontal = metrology.equal_area_incidence_angles().horizontal_deg
     printed = ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG
@@ -146,14 +146,14 @@ def _chk_equal_area_angles() -> Outcome:
     return count(
         matching,
         len(checked),
-        subject="printed angles other than 77,9° and 282,1°",
+        subject="printed angles other than 77.9° and 282.1°",
     )
 
 
 @register(
     _IEC61183,
     "IEC 61183:1994 note to A.1.8, Formula (A.5)",
-    "Each of the 38 equal-area elements is 2,6 % of the sphere",
+    "Each of the 38 equal-area elements is 2.6 % of the sphere",
 )
 def _chk_equal_area_element() -> Outcome:
     """The weight of every reading of Formula (A.5), 1/38."""

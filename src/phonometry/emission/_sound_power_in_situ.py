@@ -28,7 +28,7 @@ position for background noise (clause 8.1),
 
 with three rules around it: a margin above 15 dB needs no correction, a
 margin between 6 dB and 15 dB takes Eq. (7), and a margin below 6 dB caps
-the correction at 1,3 dB and turns the band into an upper bound that the
+the correction at 1.3 dB and turns the band into an upper bound that the
 report must flag as not meeting the background requirement. The reference
 source takes the same rule for its own ``K1i(RSS)`` (Eq. 9, 10), but a short
 margin there is no upper bound: its capped correction is subtracted from the
@@ -57,11 +57,11 @@ optional ``integration_time`` carries the background to the event's interval
 (:math:`+10 \log_{10}(T/T_0)`, clause 3.4 NOTE 1) before the subtraction.
 
 Annex C carries either level to the reference meteorological conditions of
-101,325 kPa and 23,0 °C with the radiation-impedance correction
+101.325 kPa and 23.0 °C with the radiation-impedance correction
 :math:`C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}((273.15 + \theta)/296)`,
 the same ``C2`` as ISO 3741:2010 clause 9.1.4, reused from that module; the
 whole ISO 3740 family prints :math:`\theta_\mathrm{ref}` = 296 K beside a
-23,0 °C reference, so at the reference conditions ``C2`` is +0,003 3 dB
+23.0 °C reference, so at the reference conditions ``C2`` is +0.003 3 dB
 rather than zero. Eq. (C.2) estimates the static pressure from the altitude
 of the site. Annex D forms the A-weighted totals from the Table D.1 band
 corrections, which are the ISO 3744 Annex E octave values digit for digit.
@@ -69,9 +69,9 @@ corrections, which are the ISO 3744 Annex E octave values digit for digit.
 Clause 9 estimates the uncertainty as :math:`\sigma_\mathrm{tot} =
 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (Eq. 22) and
 :math:`U = k\,\sigma_\mathrm{tot}` (Eq. 23), with the typical upper bound of
-the reproducibility :math:`\sigma_{R0}` read from Table 2 by grade: 1,5 dB
+the reproducibility :math:`\sigma_{R0}` read from Table 2 by grade: 1.5 dB
 for grade 2, which needs :math:`\Delta L_{f\mathrm{A}} \ge 7` dB at every
-microphone position and a source directivity range within ±7 dB, and 4,0 dB
+microphone position and a source directivity range within ±7 dB, and 4.0 dB
 for grade 3 otherwise. Table 1, the zoning of the test environment by lines
 of sight, is normative (7.4.2 divides the environment into zones with a
 *shall*, and 7.4.3 draws the microphone positions from them), but it
@@ -409,10 +409,10 @@ def static_pressure_from_altitude(altitude: float) -> float:
     .. math::
 
        p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^{b},
-       \qquad a = 2{,}2560 \times 10^{-5}\ \mathrm{m}^{-1},
-       \quad b = 5{,}255\,3
+       \qquad a = 2.2560 \times 10^{-5}\ \mathrm{m}^{-1},
+       \quad b = 5.255\,3
 
-    Annex C prints :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5 Pa and states
+    Annex C prints :math:`p_{\mathrm{s},0}` = 1.013 25 x 10^5 Pa and states
     the quantity in pascals. The result here is in kilopascals so that it feeds
     ``static_pressure_kpa`` of :func:`sound_power_in_situ` directly, matching
     ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure
@@ -556,7 +556,7 @@ def _background_correction(
     three rules of ISO 3747:2010 clause 8.1 around Eq. (7).
 
     Above 15 dB the correction is zero; from 6 dB to 15 dB it is Eq. (7);
-    below 6 dB it is the smaller of Eq. (7) and the 1,3 dB cap the clause
+    below 6 dB it is the smaller of Eq. (7) and the 1.3 dB cap the clause
     sets, and the second array returned says where the margin was at least
     6 dB, so the caller can flag the rest (as upper bounds only for the
     source under test). Eq. (7) has no
@@ -1097,7 +1097,7 @@ def sound_power_in_situ(
     :param temperature_c: Air temperature at the test, in degrees Celsius.
     :param static_pressure_kpa: Static pressure at the test, in kilopascals
         (see :func:`static_pressure_from_altitude`). Annex C prints this
-        quantity in pascals, with :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5
+        quantity in pascals, with :math:`p_{\mathrm{s},0}` = 1.013 25 x 10^5
         Pa, and is alone in its family in doing so: ISO 3741:2010,
         ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument
         follows the three, so that one unit serves the whole ISO 3740 family;
@@ -1114,7 +1114,7 @@ def sound_power_in_situ(
         conditions of the source (9.2, E.3), in decibels; ``None`` leaves
         ``sigma_tot`` and the expanded uncertainty ``NaN``.
     :param coverage_factor: ``k`` of Eq. (23): 2 for the two-sided 95 %
-        interval (default), 1,6 for a one-sided comparison with a limit.
+        interval (default), 1.6 for a one-sided comparison with a limit.
     :return: :class:`InSituSoundPowerResult` with ``quantity='power'``.
     :raises ValueError: if ``levels`` is not a finite ``(n, bands)`` array,
         ``reference_levels``, ``reference_sound_power_levels`` or either background does not match it,

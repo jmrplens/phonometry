@@ -113,7 +113,7 @@ def test_an_ideal_band_has_no_effective_bandwidth_deviation(
 
 
 def test_reference_bandwidth_is_the_printed_note_of_5_11_3() -> None:
-    """IEC 61260-1:2014 5.11.3 NOTE: 0,690 776 (octave), 0,230 259 (third)."""
+    """IEC 61260-1:2014 5.11.3 NOTE: 0.690 776 (octave), 0.230 259 (third)."""
     assert _reference_bandwidth(1) == pytest.approx(0.690776, abs=5e-7)
     assert _reference_bandwidth(3) == pytest.approx(0.230259, abs=5e-7)
 
@@ -162,7 +162,7 @@ def test_the_pattern_limits_are_the_printed_ones() -> None:
 def test_the_bandwidth_limits_grade_every_band(
     monkeypatch: pytest.MonkeyPatch, deviation_db: float, expected: int | None
 ) -> None:
-    """5.12.2: +/-0,4 dB for class 1 and +/-0,6 dB for class 2, inclusive."""
+    """5.12.2: +/-0.4 dB for class 1 and +/-0.6 dB for class 2, inclusive."""
     monkeypatch.setattr(
         compliance, "_bank_bandwidth_deviation", lambda *_: deviation_db
     )
@@ -196,7 +196,7 @@ def _flat_summation(delta_p_db: float) -> object:
 def test_the_summation_limits_grade_every_inner_band(
     monkeypatch: pytest.MonkeyPatch, delta_p_db: float, expected: int | None
 ) -> None:
-    """5.16: +0,8/-1,8 dB for class 1 and +1,8/-3,8 dB for class 2, inclusive."""
+    """5.16: +0.8/-1.8 dB for class 1 and +1.8/-3.8 dB for class 2, inclusive."""
     monkeypatch.setattr(compliance, "_bank_summation", _flat_summation(delta_p_db))
     result = filters.verify_filter_class(_GRADED_BANK)
     assert result.requirement_class("summation") == expected
@@ -206,10 +206,10 @@ def test_the_summation_limits_grade_every_inner_band(
 def test_the_5_16_limits_bound_formula_3_as_printed(
     monkeypatch: pytest.MonkeyPatch, offset_db: float, expected: int
 ) -> None:
-    """7.2.4.5 applies +0,8/-1,8 dB to Delta P_j of Formula (3) as printed.
+    """7.2.4.5 applies +0.8/-1.8 dB to Delta P_j of Formula (3) as printed.
 
     Three outputs each 10 lg 3 - 1 dB down sum 1 dB above the input: Formula
-    (3) reads +1 dB, past the +0,8 dB of class 1. Read with the sign the
+    (3) reads +1 dB, past the +0.8 dB of class 1. Read with the sign the
     words of 7.2.4.3 and 5.16 give it (docs/ERRATA.md) the same sum would be
     -1 dB and class 1; the verifier follows the formula.
     """

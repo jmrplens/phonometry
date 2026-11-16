@@ -237,7 +237,7 @@ def _chk_decision_rule_upper() -> Outcome:
     the result of a measurement of a deviation from a design goal, extended
     by the actual expanded uncertainty of measurement of the testing
     laboratory, does not exceed the specified tolerance limits." So a
-    deviation of 11,5 % in the central region, where the limit is +12 %,
+    deviation of 11.5 % in the central region, where the limit is +12 %,
     conforms on its own and does not once a laboratory extends it by an
     expanded uncertainty of 1 %. No figure is printed for this: what is
     checked is that the verdict turns where the sentence turns it.
@@ -257,7 +257,7 @@ def _chk_decision_rule_upper() -> Outcome:
         agree,
         2,
         subject="verdicts",
-        expected_label="11,5 % conforms bare, and not with U = 1 % against +12 %",
+        expected_label="11.5 % conforms bare, and not with U = 1 % against +12 %",
     )
 
 
@@ -270,8 +270,8 @@ def _chk_decision_rule_lower() -> Outcome:
     """And the same sentence read downwards, where the limit is -11 %.
 
     The deviation is extended in the direction that can breach the limit, so
-    below the design goal the laboratory's uncertainty is subtracted: -10,5 %
-    conforms bare and -10,5 % minus 1 % does not.
+    below the design goal the laboratory's uncertainty is subtracted: -10.5 %
+    conforms bare and -10.5 % minus 1 % does not.
     """
     measured = _deviating_measurement("Wk", 16.0, -10.5)
     bare = ph.vibration.verify_weighting(
@@ -288,7 +288,7 @@ def _chk_decision_rule_lower() -> Outcome:
         agree,
         2,
         subject="verdicts",
-        expected_label="-10,5 % conforms bare, and not with U = 1 % against -11 %",
+        expected_label="-10.5 % conforms bare, and not with U = 1 % against -11 %",
     )
 
 
@@ -312,7 +312,7 @@ def _chk_coverage_factor() -> Outcome:
 def _chk_max_expanded_uncertainties() -> Outcome:
     """The figures the frequency-response and signal-burst tests print.
 
-    12.11.2 (folio 34) permits 4,5 % for the mechanical response, 12.11.3
+    12.11.2 (folio 34) permits 4.5 % for the mechanical response, 12.11.3
     (folio 35) 3 % for the electrical one, 12.11.4 (folio 35) 5 % for the
     overall response that combines them, and 12.13 (folio 36) 3 % for the
     signal-burst test. They bound the uncertainty the decision rule of 13.1
@@ -335,7 +335,7 @@ def _chk_nominal_frequency_ranges() -> Outcome:
     """The column of Table 1 that 5.7, 5.10 and 12.11 are written against.
 
     Nominal values, printed as round numbers: the hand-transmitted range
-    opens at "8 Hz", which is the band centred on 10**(9/10) = 7,943 Hz, and
+    opens at "8 Hz", which is the band centred on 10**(9/10) = 7.943 Hz, and
     the range is the printed 8 rather than that centre.
     """
     printed: dict[WeightingName, tuple[float, float]] = {
@@ -398,8 +398,8 @@ def _chk_peak_deviation_at_twelve_degrees() -> Outcome:
 
     Annex H prints, right under Formula (H.4): "For the maximum characteristic
     phase deviations of 12°, the maximum peak value deviation is approximately
-    10 %". The tolerance is the word "approximately": 0,48 sin 12 degrees is
-    9,98 %, which is 10 % to the two significant figures printed.
+    10 %". The tolerance is the word "approximately": 0.48 sin 12 degrees is
+    9.98 %, which is 10 % to the two significant figures printed.
     """
     return numeric(
         10.0,
@@ -434,10 +434,10 @@ _PHASE_ROUNDING_DEG = 0.05
 #: The sampled Annex B phase cells, one per printed table: weighting, band
 #: number, and the phase the table prints in degrees.
 _ANNEX_B_PHASE_CELLS: tuple[tuple[WeightingName, int, float], ...] = (
-    ("Wh", 22, -93.75),  # Table B.6, 158,5 Hz
+    ("Wh", 22, -93.75),  # Table B.6, 158.5 Hz
     ("Wb", 0, 42.42),  # Table B.1, 1 Hz
-    ("Wk", 12, -61.84),  # Table B.8, 15,85 Hz
-    ("Wf", -4, -162.1),  # Table B.5, 0,3981 Hz
+    ("Wk", 12, -61.84),  # Table B.8, 15.85 Hz
+    ("Wf", -4, -162.1),  # Table B.5, 0.3981 Hz
 )
 
 
@@ -512,7 +512,7 @@ def _chk_annex_b_phase_columns_conform() -> Outcome:
     A meter whose phase response is the design goal to the figures the annex
     prints has to pass the criterion the same annex tabulates beside it. The
     slack is real and worth recording: the largest characteristic phase
-    deviation the rounding of the printed columns produces is 0,39 degrees,
+    deviation the rounding of the printed columns produces is 0.39 degrees,
     against the 6 degrees of the central region.
     """
     conforming = 0

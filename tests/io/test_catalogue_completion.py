@@ -139,6 +139,13 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
                     for field, value in row.items()
                     if isinstance(value, dict) and old in value
                 }
+    # The English text the library writes about a row takes the decimal point.
+    listed |= {
+        (name, key, path[0])
+        for name, rows in fp.DECIMAL_POINT_TEXT.items()
+        for key, paths in rows.items()
+        for path in paths
+    }
     assert moved == listed
     assert all(set(before[name]) == set(live[name]) for name in before)
 

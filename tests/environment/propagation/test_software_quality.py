@@ -60,7 +60,7 @@ def test_the_published_table_is_the_printed_one_and_cannot_be_changed() -> None:
 
 
 def test_table_c1_is_symmetric_in_every_row() -> None:
-    """R(q0,9) = N + 1 - R(q0,1): as many values below one as above the other."""
+    """R(q0.9) = N + 1 - R(q0.1): as many values below one as above the other."""
     for n, r01, r09 in ref.ISO17534_1_TABLE_C1:
         assert r09 == n + 1 - r01, n
 
@@ -68,8 +68,8 @@ def test_table_c1_is_symmetric_in_every_row() -> None:
 def test_table_c1_is_the_k_columns_of_vdi_3723_blatt_1() -> None:
     """The source DIN 45687 F.4 names for the table gives the same 31 rows.
 
-    R(q0,1) is the ranking position of L_x;90 in Table 6 of VDI 3723 Blatt 1
-    and R(q0,9) that of L_x;10 in its Table 5, read on the guideline's own
+    R(q0.1) is the ranking position of L_x;90 in Table 6 of VDI 3723 Blatt 1
+    and R(q0.9) that of L_x;10 in its Table 5, read on the guideline's own
     pages rather than on ISO 17534-1's, and the two columns are mirror images
     there too.
     """
@@ -101,7 +101,7 @@ def test_formula_c2_misses_fifteen_rows_of_the_table_by_one_rank() -> None:
     ("n", "expected"),
     [
         # At 51 the formulas take over: (C.2) gives 46, one below the 47 the
-        # table's symmetry would give, and R(q0,9) stands still across 50/51.
+        # table's symmetry would give, and R(q0.9) stands still across 50/51.
         (51, (5, 46)),
         (55, (5, 50)),
         (56, (6, 51)),
@@ -183,7 +183,7 @@ def test_c5_mean_and_estimated_standard_deviation() -> None:
     assert result.standard_deviation_db == pytest.approx(
         statistics.stdev(values), rel=1e-12
     )
-    # 39 dB over 25 values: the example's mean is 1,56 dB.
+    # 39 dB over 25 values: the example's mean is 1.56 dB.
     assert result.mean_level_difference == pytest.approx(1.56, abs=1e-12)
 
 
@@ -242,7 +242,7 @@ def test_an_unsorted_sample_is_refused_by_the_result() -> None:
 
 
 def _ordinals(n: int, m: int) -> list[int]:
-    """IP((i - 0,5) N / M) as C.2 writes it, in exact rational arithmetic."""
+    """IP((i - 0.5) N / M) as C.2 writes it, in exact rational arithmetic."""
     from fractions import Fraction
 
     return [
@@ -284,10 +284,10 @@ def test_the_points_near_a_source_or_obstacle_are_left_out_first() -> None:
 
 
 def test_a_point_exactly_two_metres_away_is_kept() -> None:
-    """C.2 leaves out the points at "less than 2 m", so one at 2,0 m stays.
+    """C.2 leaves out the points at "less than 2 m", so one at 2.0 m stays.
 
     Twenty points and a sample of twenty: the sample takes every point, which
-    it can only do if the point at 2,0 m is still among them.
+    it can only do if the point at 2.0 m is still among them.
     """
     clearances = np.full(20, 5.0)
     clearances[7] = 2.0
@@ -343,14 +343,14 @@ def test_contour_chainages_are_those_of_c3_in_whole_metres() -> None:
 
 
 def _c3_chainages(length: Fraction, size: int) -> list[int]:
-    """IP((i - 0,5) x (L/M)) of C.3, term by term in exact arithmetic."""
+    """IP((i - 0.5) x (L/M)) of C.3, term by term in exact arithmetic."""
     return [
         math.floor((i - Fraction(1, 2)) * (length / size)) for i in range(1, size + 1)
     ]
 
 
 def test_a_whole_metre_chainage_is_not_put_a_metre_short() -> None:
-    """IP(12,5 x 184/20) is IP(115) = 115, which the rounded quotient 9,2 puts at 114."""
+    """IP(12.5 x 184/20) is IP(115) = 115, which the rounded quotient 9.2 puts at 114."""
     chainages = environment.contour_sample_chainages_m(184.0, 20)
     assert chainages[12] == 115.0
     assert chainages.tolist() == _c3_chainages(Fraction(184), 20)
@@ -378,7 +378,7 @@ def test_c3_is_exact_for_every_whole_metre_length() -> None:
 def test_c3_reads_a_decimal_length_as_written(
     length: float, size: int, point: int, chainage: float
 ) -> None:
-    """12,5 x 22,4/20 is 14 exactly; the binary fraction nearest 22,4 is a hair below."""
+    """12.5 x 22.4/20 is 14 exactly; the binary fraction nearest 22.4 is a hair below."""
     chainages = environment.contour_sample_chainages_m(length, size)
     assert chainages[point] == chainage
     assert chainages.tolist() == _c3_chainages(Fraction(str(length)), size)
@@ -453,7 +453,7 @@ def test_round_robin_deviations_are_from_the_arithmetic_mean() -> None:
 
 def test_round_robin_result_is_the_q09_of_the_largest_deviations() -> None:
     result = environment.round_robin_precision(_round_robin_levels())
-    # Table C.1 for 40 receivers: R(q0,9) = 37.
+    # Table C.1 for 40 receivers: R(q0.9) = 37.
     assert result.rank_q09 == 37
     assert result.q09_level_difference == pytest.approx(np.linspace(0.05, 2.0, 40)[36])
 
@@ -586,10 +586,10 @@ def test_a_result_on_a_limit_is_inside() -> None:
 def test_a_result_formed_on_a_printed_limit_is_inside(
     result_db: float, lower_db: float, upper_db: float
 ) -> None:
-    """A certified result plus or minus 0,05 dB lands on the printed limit.
+    """A certified result plus or minus 0.05 dB lands on the printed limit.
 
-    In floating point 13,70 - 0,05 falls a last bit below 13,65, and
-    21,10 + 0,05 a last bit above 21,15; both reach the tolerance and do not
+    In floating point 13.70 - 0.05 falls a last bit below 13.65, and
+    21.10 + 0.05 a last bit above 21.15; both reach the tolerance and do not
     exceed it.
     """
     assert result_db < lower_db or result_db > upper_db
@@ -602,7 +602,7 @@ def test_a_result_formed_on_a_printed_limit_is_inside(
 def test_table_69_of_iso_tr_17534_3_fails_only_at_250_hz() -> None:
     """The worked TRC form of ISO/TR 17534-3 answers "yes" in every row.
 
-    Its 250 Hz result, 31,0 dB, lies 0,05 dB below the lower limit 31,05 dB,
+    Its 250 Hz result, 31.0 dB, lies 0.05 dB below the lower limit 31.05 dB,
     which docs/ERRATA.md records; the 1 000 Hz result sits on its lower limit
     and is inside.
     """
@@ -696,8 +696,8 @@ def test_the_quantiles_plot_marks_both_ranks_and_values() -> None:
     )
     ax = result.plot()
     labels = _legend_texts(ax)
-    assert any("$q_{0,1}$ = −1.00 dB" in label and "= 2" in label for label in labels)
-    assert any("$q_{0,9}$ = 3.00 dB" in label and "= 24" in label for label in labels)
+    assert any("$q_{0.1}$ = −1.00 dB" in label and "= 2" in label for label in labels)
+    assert any("$q_{0.9}$ = 3.00 dB" in label and "= 24" in label for label in labels)
     assert "25 level differences" in ax.get_title()
     plt.close("all")
 
@@ -720,7 +720,7 @@ def test_the_round_robin_plot_counts_every_receiver() -> None:
     heights = [patch.get_height() for patch in ax.patches]
     assert sum(heights) == 40
     assert "4 programs at 40 receivers" in ax.get_title()
-    assert any(label.startswith("$q_{0,9}$") for label in _legend_texts(ax))
+    assert any(label.startswith("$q_{0.9}$") for label in _legend_texts(ax))
     plt.close("all")
 
 

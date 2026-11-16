@@ -163,7 +163,7 @@ _OCTAVE_BANDS: tuple[float, ...] = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4
 
 #: Largest relative deviation accepted between a supplied band centre and a
 #: tabulated nominal one. The exact base-ten centres (IEC 61260-1 Annex A) sit
-#: within 0,8 % of their nominal labels, so 3 % accepts both conventions while
+#: within 0.8 % of their nominal labels, so 3 % accepts both conventions while
 #: still rejecting a frequency that is not a tabulated band at all.
 _BAND_MATCH_TOLERANCE = 0.03
 

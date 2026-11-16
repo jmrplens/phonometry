@@ -15,17 +15,17 @@ source at every determination. Part 2 turns that round: the room is built to
 a specification tight enough that the sound power can be read off the mean
 room level alone. It is at least 70 m³ (and at most 300 m³ when the 4 kHz and
 8 kHz octaves matter, 6.2), its floor reflects (absorption coefficient below
-0,06) and its walls and ceiling absorb alike, each within 0,5 and 1,5 times
+0.06) and its walls and ceiling absorb alike, each within 0.5 and 1.5 times
 their mean (6.4), and above all its reverberation time follows a prescribed
-curve (6.3): within 0,9 and 1,1 times $R\,T_\mathrm{nom}$ (0,8 and 1,2
-above 6,3 kHz), with the reverberation parameter
+curve (6.3): within 0.9 and 1.1 times $R\,T_\mathrm{nom}$ (0.8 and 1.2
+above 6.3 kHz), with the reverberation parameter
 
 $$
 R = 1 + \frac{257}{f V^{1/3}} \tag{Formula 1}
 $$
 
 or, for a room that is not nearly cubical, $R = 1 + cS/(8Vf)$, and a
-nominal reverberation time $T_\mathrm{nom}$ between 0,5 s and 1,0 s.
+nominal reverberation time $T_\mathrm{nom}$ between 0.5 s and 1.0 s.
 The rise of $R$ at low frequencies is the Waterhouse correction built
 into the room: the energy stored near the boundaries of a small room is
 compensated by a longer reverberation time instead of a term in the
@@ -49,18 +49,18 @@ $$
 Both methods take the mean of the measured levels as the energy mean of all
 of them (Formula 8) after correcting each one for background noise by the
 stepped Table 4, 2 dB at a 4 dB or 5 dB margin, 1 dB from 6 dB to 8 dB,
-0,5 dB at 9 dB and 10 dB and nothing above; a margin below 4 dB leaves the
+0.5 dB at 9 dB and 10 dB and nothing above; a margin below 4 dB leaves the
 level unreportable unless the report says the requirement of 6.5 was not met.
 The table gives whole-decibel differences, and the library reads a measured
-difference at the nearest whole decibel (a margin of 5,4 dB takes the 5 dB
-row, one of 5,5 dB the 6 dB row), anything above 10 dB taking the last row.
+difference at the nearest whole decibel (a margin of 5.4 dB takes the 5 dB
+row, one of 5.5 dB the 6 dB row), anything above 10 dB taking the last row.
 
 Annex E carries the level to the reference meteorological conditions with the
 radiation-impedance correction $C_2$ of ISO 3743-1:2010 Annex A, and
 Annex F forms the A-weighted level from octave bands with Table F.1, which is
 ISO 3743-1:2010 Table B.1. Clause 11 prints its own typical upper bounds of
-$\sigma_{R0}$ (Table 5): 5,0 dB at 125 Hz, 3,0 dB at 250 Hz, 2,0 dB from
-500 Hz to 4 kHz, 3,0 dB at 8 kHz and 2,0 dB A-weighted.
+$\sigma_{R0}$ (Table 5): 5.0 dB at 125 Hz, 3.0 dB at 250 Hz, 2.0 dB from
+500 Hz to 4 kHz, 3.0 dB at 8 kHz and 2.0 dB A-weighted.
 
 The room is qualified by [`check_special_room_reverberation`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_reverberation) (6.2, 6.3
 and the climate of 6.6), [`check_special_room_surfaces`](/phonometry/reference/api/power/sound-power-special-room/#check_special_room_surfaces) (6.4) and
@@ -96,10 +96,10 @@ check_special_room_reverberation(
 Is this room's reverberation time the one ISO 3743-2:2018 prescribes?
 6.2, 6.3 and 6.6.
 
-The measured reverberation time shall lie between $0{,}9\,R\, T_\mathrm{nom}$ and $1{,}1\,R\,T_\mathrm{nom}$ in every band (0,8
-and 1,2 above 6,3 kHz), with $R$ from Formula (1) or its NOTE
+The measured reverberation time shall lie between $0.9\,R\, T_\mathrm{nom}$ and $1.1\,R\,T_\mathrm{nom}$ in every band (0.8
+and 1.2 above 6.3 kHz), with $R$ from Formula (1) or its NOTE
 ([`reverberation_parameter`](/phonometry/reference/api/power/sound-power-special-room/#reverberation_parameter)), and $T_\mathrm{nom}$ between
-0,5 s and 1,0 s. Annex B finds $T_\mathrm{nom}$ "by centring the
+0.5 s and 1.0 s. Annex B finds $T_\mathrm{nom}$ "by centring the
 measured values of T (normalized to the reverberation time at 1 000 Hz)
 within the limiting curves" (B.5) and prints no rule for it. The library
 takes the one whose verdict is the requirement of 6.3 itself: the
@@ -111,16 +111,16 @@ gives Formula (B.2),
 $T_\mathrm{nom} = T_{1\,000}/R(1\,000\ \mathrm{Hz})$.
 
 The EXAMPLE of B.5 departs from this rule. On the curve of Figure B.4 it
-reads $T/T_\mathrm{nom}$ = 1,09 at 1 kHz and
-$T_\mathrm{nom}$ = 0,8 s/1,09 = 0,73 s, where the rule gives 1,05
-and 0,76 s, 0,17 dB apart in the $L_W$ of Formula (9). The 1,09 is
-the midpoint of the extreme ratios taken against the 0,9 and 1,1 limits
-alone, the wider limits above 6,3 kHz left out, and it puts the 250 Hz
-band of Figure B.4 at 1,13 R, above the 1,1 R within which the NOTE to
+reads $T/T_\mathrm{nom}$ = 1.09 at 1 kHz and
+$T_\mathrm{nom}$ = 0.8 s/1.09 = 0.73 s, where the rule gives 1.05
+and 0.76 s, 0.17 dB apart in the $L_W$ of Formula (9). The 1.09 is
+the midpoint of the extreme ratios taken against the 0.9 and 1.1 limits
+alone, the wider limits above 6.3 kHz left out, and it puts the 250 Hz
+band of Figure B.4 at 1.13 R, above the 1.1 R within which the NOTE to
 Figure B.3 says the data are centred; Figure B.3 draws that band, and
-those at 100 Hz and 10 kHz, where 1,09 does not put them (see
+those at 100 Hz and 10 kHz, where 1.09 does not put them (see
 `docs/ERRATA.md`). A value supplied in `nominal_reverberation_time_s`,
-the printed 0,73 s among them, is checked as given instead.
+the printed 0.73 s among them, is checked as given instead.
 
 6.2 adds the volume: at least 70 m³, and at most 300 m³ when the 4 kHz
 and 8 kHz octaves are within the frequency range, which the direct method
@@ -128,7 +128,7 @@ needs and the comparison method does not (NOTE). 6.6 adds the climate:
 the product $H(\theta + 5\ ^\circ\mathrm{C})$ during the test shall
 stay within ±10 % of its value while the reverberation time was measured,
 checked when all four climate values are given. Clause 5 recommends a
-noise source of at most 1 % of the room's volume, 0,7 m³ in a room of
+noise source of at most 1 % of the room's volume, 0.7 m³ in a room of
 70 m³; given `source_volume_m3`, the check reads it, and warns above it,
 but keeps it out of the verdict, the clause saying "should".
 
@@ -183,7 +183,7 @@ not exceed Table 1 (step 4): ±5 dB at 125 Hz, ±3 dB from 250 Hz to
 The level Formula 9 gives is, in the words of Annex E, the sound power
 level "under the meteorological conditions which occurred at the time
 and place of the test", and a calibration holds the power under the
-reference conditions, 23,0 °C and 101,325 kPa. The two are compared
+reference conditions, 23.0 °C and 101.325 kPa. The two are compared
 where the room measured: a
 [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926 is
 read at the temperature and static pressure of the test as
@@ -224,10 +224,10 @@ check_special_room_surfaces(
 
 Are the room's surfaces treated as ISO 3743-2:2018, 6.4 asks?
 
-The floor shall be reflective, its absorption coefficient below 0,06, and
+The floor shall be reflective, its absorption coefficient below 0.06, and
 apart from the floor no surface may absorb significantly differently from
 the others: in each octave band the mean absorption coefficient of each
-wall and of the ceiling lies within 0,5 and 1,5 times the mean of the
+wall and of the ceiling lies within 0.5 and 1.5 times the mean of the
 walls and ceiling. The clause does not say how that mean is formed; with
 `surface_areas_m2` it is weighted by area, which is the room's own mean,
 and without them it is the plain mean of the surfaces.
@@ -292,12 +292,12 @@ $$
 
 for any shape, which is the Waterhouse factor of ISO 3741 turned into a
 target for the reverberation time. The two agree for a cube when
-$c = 257 \times 8/6 = 342{,}7$ m/s, which is the speed of sound
+$c = 257 \times 8/6 = 342.7$ m/s, which is the speed of sound
 Formula (1) carries inside its constant. For 70 m³ the value at 1 kHz is
-the 1,06 of Formula (B.2).
+the 1.06 of Formula (B.2).
 
 6.3 sends a 70 m³ room to Figure 1 instead, but the printed curve runs
-0,03 to 0,04 above Formula (1) from 100 Hz to 160 Hz and about 0,01 below
+0.03 to 0.04 above Formula (1) from 100 Hz to 160 Hz and about 0.01 below
 it from 1 600 Hz up (see `docs/ERRATA.md`), so Formula (1) is used for
 that volume too and nothing is read off the figure.
 
@@ -400,7 +400,7 @@ sound_power_special_room_comparison(
 Sound power level in a special reverberation test room, comparison
 method (ISO 3743-2:2018, 10.3).
 
-A reference source meeting Annex A stands on the floor at least 1,5 m from
+A reference source meeting Annex A stands on the floor at least 1.5 m from
 any wall; its mean octave-band level $L_{p\mathrm{r}}$ is determined
 at no fewer than six microphone positions, and that of the source under
 test, $L_{p\mathrm{e}}$, as for the direct method, both after the
@@ -466,7 +466,7 @@ The background correction of ISO 3743-2:2018 Table 4 (9.8).
 The decibels to subtract from a level measured with the source operating
 to leave the level of the source alone, read from the difference between
 that level and the background level alone: 2 dB for a difference of 4 dB
-or 5 dB, 1 dB for 6 dB to 8 dB, 0,5 dB for 9 dB and 10 dB, and nothing
+or 5 dB, 1 dB for 6 dB to 8 dB, 0.5 dB for 9 dB and 10 dB, and nothing
 for a difference above 10 dB.
 
 The table gives whole decibels, and the difference is read at the nearest
@@ -474,7 +474,7 @@ whole decibel. A difference below 4 dB takes the 4 dB row and warns: the
 accuracy is then reduced, and 9.8 allows the level to be reported only
 with the statement that the background requirement was not fulfilled.
 The informative Annex D treats the table as a rounding of
-$-10 \lg (1 - 10^{-0{,}1 \Delta L_p})$; the normative text is the
+$-10 \lg (1 - 10^{-0.1 \Delta L_p})$; the normative text is the
 table, and that is what is applied.
 
 **Parameters**
@@ -520,8 +520,8 @@ about the arithmetic mean when the six levels span no more than 5 dB and
 about their energy mean (Formula 5) when they span more (step 2). Table 3
 then gives the minimum number of source locations for 3, 6 or 12
 microphone positions (step 3), by $s_\mathrm{M}$ class (below
-2,3 dB, 2,3 dB to 4 dB, above 4 dB) and band. The same classes read the
-spectrum (9.5): broad-band below 2,3 dB, narrow-band components possible
+2.3 dB, 2.3 dB to 4 dB, above 4 dB) and band. The same classes read the
+spectrum (9.5): broad-band below 2.3 dB, narrow-band components possible
 up to 4 dB, a discrete tone possible above; their suspected presence
 shall be reported.
 
@@ -568,8 +568,8 @@ reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
 `nominal_reverberation_time_s` is $T_\mathrm{nom}$, supplied or,
 with `centered` `True`, found by centring the measured values within
 the limiting curves. `lower_limit` and `upper_limit` are the
-bounds on $T/(R\,T_\mathrm{nom})$, 0,9 and 1,1, or 0,8 and 1,2 above
-6,3 kHz, read from the bands: the standard's, not fields.
+bounds on $T/(R\,T_\mathrm{nom})$, 0.9 and 1.1, or 0.8 and 1.2 above
+6.3 kHz, read from the bands: the standard's, not fields.
 `volume` is the room and `method` the determination it is being
 qualified for, which decides whether the 300 m³ ceiling applies.
 `climate_product_change` is the relative change of
@@ -606,13 +606,13 @@ when the climates were not given.
 
 The lower bound on $T/(R\,T_\mathrm{nom})$ per band (6.3).
 
-**Returns:** 0,9, or 0,8 above the 6,3 kHz band.
+**Returns:** 0.9, or 0.8 above the 6.3 kHz band.
 
 ### SpecialRoomReverberationCheck.nominal_in_range
 
 *property*
 
-Whether $T_\mathrm{nom}$ is between 0,5 s and 1,0 s (6.3).
+Whether $T_\mathrm{nom}$ is between 0.5 s and 1.0 s (6.3).
 
 ### SpecialRoomReverberationCheck.normalized_ratio
 
@@ -641,8 +641,8 @@ SpecialRoomReverberationCheck.plot(
 
 Plot $T/T_\mathrm{nom}$ within the limiting curves, laid out
 as Figure B.3 of the standard, with the limits widening above the
-6,3 kHz band as the text of 6.3 says (the figure widens them at
-6,3 kHz already; see `docs/ERRATA.md`).
+6.3 kHz band as the text of 6.3 says (the figure widens them at
+6.3 kHz already; see `docs/ERRATA.md`).
 
 Requires matplotlib (the `[plot]` extra).
 
@@ -675,7 +675,7 @@ recommends; `None` when no source volume was given.
 
 The upper bound on $T/(R\,T_\mathrm{nom})$ per band (6.3).
 
-**Returns:** 1,1, or 1,2 above the 6,3 kHz band.
+**Returns:** 1.1, or 1.2 above the 6.3 kHz band.
 
 ### SpecialRoomReverberationCheck.volume_large_enough
 
@@ -792,8 +792,8 @@ Whether every A-weighted margin reached the 4 dB of 6.5.
 
 *property*
 
-`U` of the A-weighted level (Formula 13), in decibels: 5,7 dB for
-`sigma_omc_db` = 2,0 dB and `k` = 2, the 11.5 EXAMPLE.
+`U` of the A-weighted level (Formula 13), in decibels: 5.7 dB for
+`sigma_omc_db` = 2.0 dB and `k` = 2, the 11.5 EXAMPLE.
 
 ### SpecialRoomSoundPowerResult.plot()
 
@@ -987,7 +987,7 @@ when those were given.
 
 *property*
 
-Per band, whether the floor absorbs less than 0,06.
+Per band, whether the floor absorbs less than 0.06.
 
 ### SpecialRoomSurfaceCheck.passes
 
@@ -1006,8 +1006,8 @@ SpecialRoomSurfaceCheck.plot(
 ) -> Axes
 ```
 
-Plot each surface's coefficient within the 0,5 to 1,5 band of the
-mean, and the floor against its 0,06, with every coefficient outside
+Plot each surface's coefficient within the 0.5 to 1.5 band of the
+mean, and the floor against its 0.06, with every coefficient outside
 6.4 ringed and the verdict in the title.
 
 Requires matplotlib (the `[plot]` extra).
@@ -1034,11 +1034,11 @@ Each wall's and the ceiling's coefficient over the mean, per band;
 *property*
 
 Per wall or ceiling and band, `(surfaces, bands)`, whether the
-coefficient lies within 0,5 and 1,5 times the mean.
+coefficient lies within 0.5 and 1.5 times the mean.
 
 ### SpecialRoomSurfaceCheck.surfaces_uniform
 
 *property*
 
-Per band, whether every wall and the ceiling lie within 0,5 and 1,5
+Per band, whether every wall and the ceiling lie within 0.5 and 1.5
 times the mean.

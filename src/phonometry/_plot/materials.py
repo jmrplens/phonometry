@@ -228,7 +228,7 @@ def plot_sound_absorption(
     """Sound absorption coefficient ``alpha_s`` versus frequency (ISO 354:2003).
 
     Draws the one-third-octave ``alpha_s`` on a categorical band axis. Values
-    above 1,0 (edge/diffraction effects, Clause 3.7 NOTE 2) are kept, so the
+    above 1.0 (edge/diffraction effects, Clause 3.7 NOTE 2) are kept, so the
     axis grows to show them.
 
     :param result: A
@@ -247,7 +247,7 @@ def plot_sound_absorption(
     style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(positions, alpha, **kwargs)
     ax.set_ylabel(_t(r"Sound absorption coefficient $\alpha_\mathrm{s}$", language))
-    # alpha_s can exceed 1,0 (Clause 3.7 NOTE 2); grow the top so it stays shown.
+    # alpha_s can exceed 1.0 (Clause 3.7 NOTE 2); grow the top so it stays shown.
     top = max(1.05, float(np.nanmax(alpha)) * 1.05) if alpha.size else 1.05
     ax.set_ylim(0.0, top)
     ax.set_title(_t("ISO 354 reverberation-room sound absorption", language))

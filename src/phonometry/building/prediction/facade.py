@@ -677,7 +677,7 @@ def outdoor_attenuation(width_m: float, height_m: float, distance: float) -> flo
     up to the largest side dimension and the point-source Formula (E.2b) beyond
     it, following the Annex E Note 3 switching rule. The two branches do not
     join continuously at the switch distance: for a square 10 m x 10 m side
-    the step is about -0,7 dB (about -0,3 dB for a 60 m x 10 m side), an
+    the step is about -0.7 dB (about -0.3 dB for a 60 m x 10 m side), an
     artefact of the standard's own simplification. The ``+6 dB`` for radiation
     into the quarter-space over hard ground is built into the formula.
 
@@ -718,7 +718,7 @@ FacadeShape = Literal[
 
 #: EN 12354-3:2000 Annex C, Figure C.2: façade-shape level difference ΔLfs
 #: (dB). Keyed by shape; each value maps the line-of-sight height bin
-#: (0: < 1,5 m; 1: 1,5 m to 2,5 m; 2: > 2,5 m) to the (αw ≤ 0,3; 0,6; ≥ 0,9)
+#: (0: < 1.5 m; 1: 1.5 m to 2.5 m; 2: > 2.5 m) to the (αw ≤ 0.3; 0.6; ≥ 0.9)
 #: triple, or None where the figure prints "does not apply". The 2017 edition
 #: (DIN EN ISO 12354-3, Tabelle C.1) tabulates identical values.
 _DELTA_LFS: dict[FacadeShape, tuple[tuple[float, float, float] | None, ...]] = {
@@ -734,11 +734,11 @@ _DELTA_LFS: dict[FacadeShape, tuple[tuple[float, float, float] | None, ...]] = {
     "terrace_closed": ((3.0, 3.0, 3.0), (5.0, 6.0, 7.0), (6.0, 6.0, 7.0)),
 }
 
-#: αw grid of the Figure C.2 columns (≤ 0,3; 0,6; ≥ 0,9).
+#: αw grid of the Figure C.2 columns (≤ 0.3; 0.6; ≥ 0.9).
 _DLFS_ALPHAS = (0.3, 0.6, 0.9)
 
 #: Line-of-sight height bin edges of the Figure C.2 rows, in m
-#: (below 1,5 m; 1,5 m to 2,5 m; above 2,5 m).
+#: (below 1.5 m; 1.5 m to 2.5 m; above 2.5 m).
 _DLFS_HEIGHT_EDGES = (1.5, 2.5)
 
 
@@ -756,7 +756,7 @@ def facade_shape_level_difference(
     sound absorption coefficient ``αw`` (EN ISO 11654) of the underside of the
     balcony/roof above. The value feeds ``delta_l_fs`` of
     :func:`facade_sound_reduction` (Formula 13). Intermediate ``αw`` values
-    are interpolated linearly between the tabulated 0,3 / 0,6 / 0,9 columns,
+    are interpolated linearly between the tabulated 0.3 / 0.6 / 0.9 columns,
     as the annex allows; outside that range the edge column applies. The
     2017 edition tabulates the same values (Tabelle C.1).
 
@@ -770,9 +770,9 @@ def facade_shape_level_difference(
         ``"balcony_6"``, ``"balcony_7"``, ``"balcony_8"``, ``"terrace_open"`` or
         ``"terrace_closed"``.
     :param line_of_sight: Height of the line of sight from the source at the
-        façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m).
+        façade plane, in m (bins: below 1.5 m; 1.5 m to 2.5 m; above 2.5 m).
     :param absorption: Weighted absorption coefficient ``αw`` of the underside
-        above the façade (default 0,3; reflecting).
+        above the façade (default 0.3; reflecting).
     :return: ``ΔLfs``, in dB.
     :raises ValueError: For an unknown shape, a negative height/absorption, or
         a shape/height combination the figure marks "does not apply".

@@ -207,8 +207,8 @@ class TestPerceptiblyDifferent:
         assert not room.assess_perceptible_difference("G", 4.0, 4.9).different
 
     def test_the_early_decay_time_is_compared_as_a_fraction(self) -> None:
-        # 5 % of a 2 s decay is 0,1 s and 5 % of a 0,5 s decay is 0,025 s,
-        # so the same 0,06 s difference is imperceptible in one hall and
+        # 5 % of a 2 s decay is 0.1 s and 5 % of a 0.5 s decay is 0.025 s,
+        # so the same 0.06 s difference is imperceptible in one hall and
         # plain in the other.
         assert not room.assess_perceptible_difference("EDT", 2.0, 2.06).different
         assert room.assess_perceptible_difference("EDT", 0.5, 0.56).different
@@ -338,7 +338,7 @@ class TestSourceDirectivity:
         )
 
     def test_it_refuses_a_survey_the_arc_does_not_divide(self) -> None:
-        # 50 bearings put 7,2 degrees between them, and a 30 degree arc is
+        # 50 bearings put 7.2 degrees between them, and a 30 degree arc is
         # not a whole number of those.
         with pytest.raises(ValueError, match="whole number"):
             room.gliding_directivity_deviation(np.zeros(50))

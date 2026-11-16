@@ -426,7 +426,7 @@ _E_THRQ_HF = 2.065  # E_THRQ/E0 for fc >= 500 Hz (clause 7.5.2)
 _INH_B = 0.08  # spread parameter B of Formulae 10/11
 _INH_THETA = 1.5978  # exponent theta of Formulae 12/13
 # Formula (10)/(11): the smoothing weight is exp(-(B*Di)^2) with B = 0.08 and
-# Di changed in steps of 0,1 over -18..+18 Cam (clause 8.1).  Taps are index
+# Di changed in steps of 0.1 over -18..+18 Cam (clause 8.1).  Taps are index
 # offsets on the 0.1-Cam grid, so Di in Cam = tap * _I_STEP.
 _INH_TAPS = np.arange(-180, 181)  # 0.1 Cam steps, +/-18 Cam (Formula 10)
 _INH_KERNEL = np.exp(-((_INH_B * (_INH_TAPS * _I_STEP)) ** 2))

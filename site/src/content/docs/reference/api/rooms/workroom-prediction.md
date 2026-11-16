@@ -42,7 +42,7 @@ machine to buy.
 
 **The eighth machine of Table C.2.** Figure C.1 stops at 10 dB, and M8 of the
 worked example needs more than that: its 29 dB between the two emission values
-gives 12,4 dB in a room of 195 m2, so the row that reports 10 dB is reporting
+gives 12.4 dB in a room of 195 m2, so the row that reports 10 dB is reporting
 the top edge of the diagram rather than a reading. The closed form has no such
 ceiling, and the errata registry records the row.
 

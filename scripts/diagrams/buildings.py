@@ -2500,15 +2500,15 @@ def _d_intensity_insulation(s: SVG, th: Theme) -> None:
     (11) energy-averages the subareas, and a subarea whose net flow points
     back at the specimen enters it with a minus sign (6.4.6). The specimen is
     drawn flush with the receiving face of the wall, so the box sides are as
-    deep as d and the 4,0 m by 2,5 m opening gives S_m = 10 + 13 x 0,2 =
-    12,6 m2; the stand-off itself is drawn at 36 px rather than at the
+    deep as d and the 4.0 m by 2.5 m opening gives S_m = 10 + 13 x 0.2 =
+    12.6 m2; the stand-off itself is drawn at 36 px rather than at the
     section's 88 px/m, and the loudspeaker and the five microphone positions
-    keep the ISO 140-3 clearances at that scale (0,7 m from the boundaries,
-    1,0 m from the source and from the specimen).
+    keep the ISO 140-3 clearances at that scale (0.7 m from the boundaries,
+    1.0 m from the source and from the specimen).
 
     The left panel is the pair of scans of 6.4.5 and Figure 1. The right one is
     Part 3: the level read on the specimen (6.3), the absorbing back wall of
-    its 5.1, the 2,0 dB and 1,0 dB agreement of its 6.4.5 and the NOTE under
+    its 5.1, the 2.0 dB and 1.0 dB agreement of its 6.4.5 and the NOTE under
     its Formula (7), which is about an absorbing face of the specimen in the
     source room and not about that back wall. The box carries Formula (7) and
     the 6.4.2 limits of Formula (10); the last note is the plane of
@@ -2516,7 +2516,7 @@ def _d_intensity_insulation(s: SVG, th: Theme) -> None:
     """
     ceil, floor = 100.0, 410.0
     wall_x, wall_w = 330.0, 36.0
-    spec_top, spec_bot = 160.0, 380.0  # 2,5 m at 88 px/m
+    spec_top, spec_bot = 160.0, 380.0  # 2.5 m at 88 px/m
     face = wall_x + wall_w  # receiving face of the specimen, flush with the wall
     surf = 402.0  # front of the measurement box, d drawn at 36 px
 
@@ -3097,7 +3097,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
     top = 74.0
 
     # ===== Panel 1: the low-mobility plate in plan (clause 7.2.2) =====
-    # 3,15 m x 2,23 m = 7,0 m2, drawn at 71,7 px per metre so the 0,5 m
+    # 3.15 m x 2.23 m = 7.0 m2, drawn at 71.7 px per metre so the 0.5 m
     # position spacing of clause 7.1 is the length the dimension states.
     px0, py0, pw, ph = 48.0, top + 52.0, 226.0, 160.0
     cx1 = px0 + pw / 2
@@ -3113,7 +3113,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
     ):
         s.rect(cx - 8, cy - 8, 16, 16, th.accent, th.fg, rx=3, sw=1.4)
 
-    # Source footprint (0,9 m x 0,6 m) near the centre, contacts at its corners.
+    # Source footprint (0.9 m x 0.6 m) near the centre, contacts at its corners.
     fw, fh = 65.0, 43.0
     fx, fy = px0 + (pw - fw) / 2, py0 + (ph - fh) / 2
     s.rect(fx, fy, fw, fh, th.panel, th.primary, rx=5, sw=2.0, dash="7,4")
@@ -3122,7 +3122,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
             s.circle(cx, cy, 4.0, th.primary)
     s.text(fx + fw / 2, fy - 9, "source", 13, th.primary, italic=True)
 
-    # Six velocity positions in two columns, 0,5 m apart within a column.
+    # Six velocity positions in two columns, 0.5 m apart within a column.
     for col in (px0 + 36, px0 + pw - 36):
         for row in (py0 + 30, py0 + 66, py0 + 102):
             s.circle(col, row, 6.0, th.secondary, th.fg, 1.3)
@@ -3131,7 +3131,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
         py0 + 30,
         px0 + 36,
         py0 + 66,
-        "0,5 m",
+        "0.5 m",
         offset=0,
         size=13,
         label_side="right",
@@ -3143,7 +3143,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
         py0 + ph + 28,
         px0 + pw,
         py0 + ph + 28,
-        "3,15 m x 2,23 m",
+        "3.15 m x 2.23 m",
         offset=0,
         size=14,
     )
@@ -3151,10 +3151,10 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
     for i, txt in enumerate(
         (
             "100 mm concrete, 2 300 ± 200 kg/m³",
-            "$S$ = 7,0 m² (≥ 5 m²), sides ≈ $√2$ : 1",
-            "$η ≥ 0,08$ over 50 Hz to 100 Hz",
-            "≥ 6 velocity positions, ≈ 0,5 m apart",
-            "and ≥ 0,1 m from any contact point",
+            "$S$ = 7.0 m² (≥ 5 m²), sides ≈ $√2$ : 1",
+            "$η ≥ 0.08$ over 50 Hz to 100 Hz",
+            "≥ 6 velocity positions, ≈ 0.5 m apart",
+            "and ≥ 0.1 m from any contact point",
             "elastic pads ≤ 100 × 100 mm",
         )
     ):
@@ -3179,7 +3179,7 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
 
     for i, txt in enumerate(
         (
-            "1 mm steel or 1,5 mm aluminium",
+            "1 mm steel or 1.5 mm aluminium",
             "$|Y| ≥ 10^{−2}$ m/(N·s)",
             "≈ 50 % perforated, ⌀ ≈ 6 mm holes,",
             "so the source's own airborne sound",
@@ -3304,7 +3304,7 @@ def _d_iso16251_mockup(s: SVG, th: Theme) -> None:
         s.line(mx + hx, body_y + 30, mx + hx, slab_top - 15, th.fg, 2.4)
         s.circle(mx + hx, slab_top - 15, 4.2, th.fg)
     s.text(mx, body_y - 14, "tapping machine (ISO 10140-5)", 14, th.fg, bold=True)
-    s.text(mx, body_y - 34, "5 hammers, 0,5 kg from 40 mm, 10 s⁻¹", 12, th.muted)
+    s.text(mx, body_y - 34, "5 hammers, 0.5 kg from 40 mm, 10 s⁻¹", 12, th.muted)
 
     # Accelerometer glued under the slab, with its cable route.
     _accel_wall(s, sx0 + 232, slab_top + slab_h + 11)
@@ -3421,7 +3421,7 @@ def _d_iso16251_mockup(s: SVG, th: Theme) -> None:
         450,
         546,
         "≥ 20 s per level; background rule: unchanged ≥ 15 dB, energy "
-        "subtraction 6-15 dB, −1,3 dB below 6 dB",
+        "subtraction 6-15 dB, −1.3 dB below 6 dB",
         13,
         th.fg,
     )
@@ -4015,8 +4015,8 @@ def _d_junction_catalogue(s: SVG, th: Theme) -> None:
     s.text(
         70,
         620,
-        "The functions take the RATIO, not $M$. Floor H.3, ratio 1,61: "
-        "'through' -> $K_{13}$ = 12,5 dB, 'corner' -> $K_{12}$ = 8,9 dB",
+        "The functions take the RATIO, not $M$. Floor H.3, ratio 1.61: "
+        "'through' -> $K_{13}$ = 12.5 dB, 'corner' -> $K_{12}$ = 8.9 dB",
         13,
         th.fg,
         anchor="start",
@@ -4460,7 +4460,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
         ax0 + aw / 2, top + 22, "Section: two stacked dwellings", 16, th.fg, bold=True
     )
     wall_t, floor_t = 24.0, 20.0
-    room_h = 92.0  # 2,75 m storey height
+    room_h = 92.0  # 2.75 m storey height
     y_top = top + 56.0
     y_floor = y_top + room_h
     y_bot = y_floor + floor_t + room_h
@@ -4493,7 +4493,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 34,
-        "T  rigid T (floor to external wall): $K_{ij}$ = 6,4 / 11,2 dB",
+        "T  rigid T (floor to external wall): $K_{ij}$ = 6.4 / 11.2 dB",
         13,
         th.secondary,
         anchor="start",
@@ -4501,7 +4501,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 56,
-        "X  rigid cross (floor to internal wall): $K_{ij}$ = 8,8 / 11,0 dB",
+        "X  rigid cross (floor to internal wall): $K_{ij}$ = 8.8 / 11.0 dB",
         13,
         th.secondary,
         anchor="start",
@@ -4509,7 +4509,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 84,
-        "separating floor  220 mm concrete, 484 kg/m², $f_c$ = 76,8 Hz",
+        "separating floor  220 mm concrete, 484 kg/m², $f_c$ = 76.8 Hz",
         12,
         th.fg,
         anchor="start",
@@ -4517,7 +4517,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 106,
-        "on it  35 mm screed, 73,5 kg/m², on $s′$ = 8 MN/m³",
+        "on it  35 mm screed, 73.5 kg/m², on $s′$ = 8 MN/m³",
         12,
         th.accent,
         anchor="start",
@@ -4525,7 +4525,7 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 128,
-        "external walls  365 mm AAC, 219 kg/m², $f_c$ = 92,6 Hz",
+        "external walls  365 mm AAC, 219 kg/m², $f_c$ = 92.6 Hz",
         12,
         th.muted,
         anchor="start",
@@ -4533,14 +4533,14 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.text(
         ax0 + 6,
         y_bot + 150,
-        "internal walls  200 mm calcium silicate, 360 kg/m², $f_c$ = 128,4 Hz",
+        "internal walls  200 mm calcium silicate, 360 kg/m², $f_c$ = 128.4 Hz",
         12,
         th.muted,
         anchor="start",
     )
 
     # ===== Right: the plan of the separating floor =====
-    bx0, by0, bw, bh = 546.0, top + 76.0, 268.0, 214.0  # 5,00 m x 4,00 m
+    bx0, by0, bw, bh = 546.0, top + 76.0, 268.0, 214.0  # 5.00 m x 4.00 m
     s.text(bx0 + bw / 2, top + 22, "Plan: the separating floor", 16, th.fg, bold=True)
     s.rect(bx0, by0, bw, bh, th.panel, th.fg, sw=2.4)
     # The four junction lines, each shared with one flanking element.
@@ -4552,15 +4552,15 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     ):
         s.rect(x, y, w, h, th.secondary, th.fg, sw=1.0)
     s.text(bx0 + bw / 2, by0 + bh / 2 - 4, "$S$ = 20 m²", 16, th.fg, bold=True)
-    s.text(bx0 + bw / 2, by0 + bh / 2 + 22, "5,00 m × 4,00 m", 13, th.muted)
-    s.dim(bx0, by0 + bh + 26, bx0 + bw, by0 + bh + 26, "5,00 m", offset=0, size=14)
-    s.dim(bx0 - 26, by0, bx0 - 26, by0 + bh, "4,00 m", offset=0, size=14)
+    s.text(bx0 + bw / 2, by0 + bh / 2 + 22, "5.00 m × 4.00 m", 13, th.muted)
+    s.dim(bx0, by0 + bh + 26, bx0 + bw, by0 + bh + 26, "5.00 m", offset=0, size=14)
+    s.dim(bx0 - 26, by0, bx0 - 26, by0 + bh, "4.00 m", offset=0, size=14)
     s.text(bx0 + bw / 2, by0 - 18, "external wall (T)", 12, th.secondary)
     s.text(bx0 + bw / 2, by0 + bh + 62, "internal wall (X)", 12, th.secondary)
     for i, txt in enumerate(
         (
             "two external and two internal walls meet the floor, with",
-            "5,00 m of junction along each long edge and 4,00 m along",
+            "5.00 m of junction along each long edge and 4.00 m along",
             "each short one: perimeter 9 m external + 9 m internal",
         )
     ):
@@ -4613,7 +4613,7 @@ def _d_resilient_buildups(s: SVG, th: Theme) -> None:
     s.text(ax + cw / 2, slab_y + 30, "220 mm structural slab", 12, th.fg)
     s.rect(ax, slab_y - 14, cw, 14, th.accent, th.fg, sw=1.4)
     s.rect(ax + 10, slab_y - 40, cw - 20, 26, th.panel, th.fg, sw=2.0)
-    s.text(ax + cw / 2, slab_y - 22, "35 mm screed, 73,5 kg/m²", 12, th.fg)
+    s.text(ax + cw / 2, slab_y - 22, "35 mm screed, 73.5 kg/m²", 12, th.fg)
     # The edge strip: the resilient layer turned up at the wall.
     for wx in (ax, ax + cw - 12):
         s.rect(wx, slab_y - 92, 12, 78, th.panel, th.fg, sw=2.0)
@@ -4645,7 +4645,7 @@ def _d_resilient_buildups(s: SVG, th: Theme) -> None:
     s.text(
         ax + cw / 2,
         slab_y + 74,
-        "$s′$ = 8 MN/m³  →  $f_0$ = 52,8 Hz",
+        "$s′$ = 8 MN/m³  →  $f_0$ = 52.8 Hz",
         13,
         th.accent,
         bold=True,
@@ -4690,8 +4690,8 @@ def _d_resilient_buildups(s: SVG, th: Theme) -> None:
     s.text(cx + cw / 2, top + 22, "(c) wall lining: two fixings", 15, th.fg, bold=True)
     for k, (label, formula, f_0, rating) in enumerate(
         (
-            ("adhesive dabs", "D.1", "542 Hz", "−9,0 dB"),
-            ("studs + cavity", "D.2", "70,8 Hz", "+13,8 dB"),
+            ("adhesive dabs", "D.1", "542 Hz", "−9.0 dB"),
+            ("studs + cavity", "D.2", "70.8 Hz", "+13.8 dB"),
         )
     ):
         wx = cx + k * 136.0
@@ -4919,7 +4919,7 @@ def _d_workroom_path(s: SVG, th: Theme) -> None:
     floor = 330.0
     ceiling = 168.0
     wall_l, wall_r = 45.0, 872.0
-    path_y = 250.0  # 1,55 m up, which is where a standing person hears
+    path_y = 250.0  # 1.55 m up, which is where a standing person hears
     x_src = 150.0
     x_first, span = 215.0, 597.0
     decade = math.log10(24.0)
@@ -5874,15 +5874,15 @@ def _d_source_qualification(s: SVG, th: Theme) -> None:
 
     Left, the survey of 4.2.1 that qualifies the source: octave bands of pink
     noise in a free field (the caption of Table 1), the microphone at least
-    1,5 m away, and the output averaged over gliding 30 degree arcs. Where no
+    1.5 m away, and the output averaged over gliding 30 degree arcs. Where no
     turntable can be used the clause asks instead for a reading every
     5 degrees and gliding averages of six neighbouring readings, which is the
     ring of 72 bearings drawn here; either way every arc is compared with the
     360 degree energetic average in the measurement plane and held to its
     Table 1 limit. Right, the positions of A.4 in a 1 000-seat hall: three
     source positions on the stage, one on the centre line and two at equal
-    distances either side, at 1,5 m; the eight microphone positions Table A.2
-    asks for as a minimum at that size, at 1,2 m and spread over one side of
+    distances either side, at 1.5 m; the eight microphone positions Table A.2
+    asks for as a minimum at that size, at 1.2 m and spread over one side of
     a symmetrical hall; and more where a balcony splits the seating. The
     boxes at the foot are the deviation of an arc and the line through the
     three rows of Table A.2, held between the 6 and 10 of A.4.
@@ -6017,14 +6017,14 @@ def _d_source_qualification(s: SVG, th: Theme) -> None:
     s.ground(floor, hx0, hx1)
     s.rect(hx0, 470, 132, floor - 470, th.panel, th.fg, sw=1.6)
     sx = 560.0
-    sy = 470.0 - 45.0  # 1,5 m at 30 px per metre
+    sy = 470.0 - 45.0  # 1.5 m at 30 px per metre
     s.line(sx, sy + 9, sx, 470, th.fg, 2.0)
     s.line(sx - 12, 470, sx + 12, 470, th.fg, 2.0)
     s.circle(sx, sy, 9, th.fg)
     s.circle(sx, sy, 3, th.bg)
     s.dim(sx - 30, 470, sx - 30, sy, "1.5 m", size=13, label_side="left")
     mx = 748.0
-    my = floor - 36.0  # 1,2 m at 30 px per metre
+    my = floor - 36.0  # 1.2 m at 30 px per metre
     s.mic(mx, my, floor, scale=0.55)
     s.person(800, floor, h=40.0, seated=True)
     s.dim(mx - 30, floor, mx - 30, my, "1.2 m", size=13, label_side="left")
@@ -6111,16 +6111,16 @@ def _d_lab_application_rules(s: SVG, th: Theme) -> None:
     to 32, pp. 23 to 26): the improvement of H.1, the small specimens of
     category I, at least 650 mm × 350 mm with the hammers 100 mm in from
     their edges (H.4.6.1.1), the large ones of 10 m² or more with the
-    shorter side 2,3 m or more (H.2.2.2), the load of H.4.1, the floor
+    shorter side 2.3 m or more (H.2.2.2), the load of H.4.1, the floor
     temperature of H.4.5 and the four or six tapping positions of
     H.4.6.1.2 and H.4.6.2.2. Annex J (PDF pages 43 and 44, pp. 37 and 38):
     Formula (J.1), the maximum of the sealed arrangement and its 10 dB
-    margin, a joint longer than 1 m and no wider than 50 mm (J.2.1), 5,0 m
+    margin, a joint longer than 1 m and no wider than 50 mm (J.2.1), 5.0 m
     for the gaps of windows and doors (J.2.2), the gap width read at four
-    places at least, within 0,3 mm (J.2.2, PDF page 45, p. 39), and the
+    places at least, within 0.3 mm (J.2.2, PDF page 45, p. 39), and the
     three widths of J.4 (PDF pages 48 and 49, pp. 42 and 43). Annex K (PDF
     pages 54 to 56, pp. 48 to 50): an opening of 10 m² to 20 m² with the
-    shorter edge 2,3 m or more and a slope of at least 5° for roofs and
+    shorter edge 2.3 m or more and a slope of at least 5° for roofs and
     rooflights and 30° for roof windows (K.2.1), heavy rain held steady for
     at least 5 min before any reading, one tank position on a small element and
     three on a larger one of 10 m² to 20 m², the drops landing slightly

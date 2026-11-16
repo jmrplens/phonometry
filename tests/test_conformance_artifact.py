@@ -1786,7 +1786,7 @@ def test_a_missing_artefact_says_how_to_make_one(tmp_path: pathlib.Path) -> None
 # `record` sets precision to zero because its deviation is a count of names
 # that disagreed, not a decimal figure. Two separate places then read that
 # zero as "round these values to integers", and between them the artefact
-# published 1.0 where ISO 9614-1 Table B.1 prints 0,60: the serialiser rounded
+# published 1.0 where ISO 9614-1 Table B.1 prints 0.60: the serialiser rounded
 # it, and the comparison that decides whether to rewrite the file tolerated the
 # 0.4 that made, so no regeneration could dislodge it and no gate objected.
 # The label beside it still read 0.6 and the verdict still read pass.
@@ -1814,7 +1814,7 @@ def test_a_record_value_that_moved_is_not_tolerated_away() -> None:
 
     Without this the artefact could hold a value the harness never produced:
     a zero-decimal tolerance is 1.0 absolute, which swallows the whole
-    difference between a published 0,60 and a stored 1.0.
+    difference between a published 0.60 and a stored 1.0.
     """
     outcome = registry.record({"survey": 0.6}, {"survey": 0.6})
     fresh = {

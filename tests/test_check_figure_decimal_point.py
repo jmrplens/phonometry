@@ -52,7 +52,7 @@ def _figure(images: pathlib.Path, name: str, *labels: str) -> None:
 def test_a_spanish_figure_with_an_english_decimal_fails(
     images: pathlib.Path,
 ) -> None:
-    """The published defect: the axis says 31.5 and the legend says 52,4."""
+    """The published defect: the axis says 31.5 and the legend says "52,4"."""
     _figure(images, "band_levels_es", "31.5", "63", "125", "$L_p$ = 52,4 dB")
     found, stale = gate.check(images)
     assert found == [("band_levels", "31.5")]

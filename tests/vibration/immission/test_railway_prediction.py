@@ -68,13 +68,13 @@ def test_annex_c_formula_1_band_by_band() -> None:
 
 
 def test_annex_c_the_chain_from_the_sum_level() -> None:
-    """C.3: 78,1 dB over the 19 bands gives 0,4, 0,6 and 1,81 mm/s by
+    """C.3: 78.1 dB over the 19 bands gives 0.4, 0.6 and 1.81 mm/s by
     Formulae (9), (10) and (12), the last only from the unrounded chain.
     """
     total = im.band_sum_level(PRINTED)
     assert round(total, 1) == 78.1
     assert im.takt_max_kb(PRINTED) == pytest.approx(0.4008, abs=0.0001)
-    # The print carries the rounded 78,1 dB on: one band at that level.
+    # The print carries the rounded 78.1 dB on: one band at that level.
     kb_ftm = im.takt_max_kb([78.1])
     assert kb_ftm == pytest.approx(0.4018, abs=0.0001)
     kb_fmax = im.TRAIN_KB_FMAX_FACTOR * kb_ftm
@@ -86,7 +86,7 @@ def test_annex_c_the_chain_from_the_sum_level() -> None:
 def test_annex_c_run_as_clause_7_prints_it() -> None:
     """The example feeds Formula (9) the unweighted sum of all 19 bands; the
     chain of Clause 7.1 weights the 14 bands from 4 Hz to 80 Hz first and
-    gets 77,7 dB, 0,39 and 1,73 mm/s. Both are held: the printed chain above,
+    gets 77.7 dB, 0.39 and 1.73 mm/s. Both are held: the printed chain above,
     the standard's own here.
     """
     prediction = im.predict_train_category(
@@ -102,8 +102,8 @@ def test_annex_c_run_as_clause_7_prints_it() -> None:
 
 
 def test_annex_c_formula_11_with_the_printed_inputs() -> None:
-    """C.3: 200 trams by day and 20 by night at alpha 0,7 and KB_FTm 0,4 give
-    0,090 and 0,040; the print says 0,11 and 0,05, which the printed inputs
+    """C.3: 200 trams by day and 20 by night at alpha 0.7 and KB_FTm 0.4 give
+    0.090 and 0.040; the print says 0.11 and 0.05, which the printed inputs
     give only with alpha under the root once instead of squared, and the
     daytime verdict turns on it. See the errata.
     """
@@ -131,7 +131,7 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
     assert [round(float(v), 1) for v in response] == list(
         im.KB_WEIGHTING_CORRECTIONS.values()
     )
-    # Without the band limitation of the meter, which would take 1,5 dB off at 80 Hz.
+    # Without the band limitation of the meter, which would take 1.5 dB off at 80 Hz.
     limited = 20.0 * np.log10(np.abs(im.kb_weighting_response(freqs)))
     assert limited[-1] < response[-1] - 1.0
     weighted = im.kb_weighted_levels(np.zeros(14), frequencies=freqs)
@@ -197,18 +197,18 @@ def test_every_cell_of_the_foundation_tables_is_the_printed_one(
 
     The foundation tables run along the bands from 4 Hz; the floor tables
     along the ratios of the band to the floor's natural frequency, the timber
-    one from 0,08. A cell the page leaves empty is NaN.
+    one from 0.08. A cell the page leaves empty is NaN.
     """
     if mapping == "foundation":
         assert kind == "basement" or kind == "ground_floor"
         statistics = im.GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES[kind]
         axis = im.PREDICTION_BAND_CENTERS_HZ
-        tolerance = 0.5  # the print writes 12,5 Hz as 12
+        tolerance = 0.5  # the print writes 12.5 Hz as 12
     else:
         assert kind == "concrete" or kind == "timber"
         statistics = im.FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES[kind]
         axis = im.FOUNDATION_TO_FLOOR_RATIOS
-        tolerance = 0.051  # the print writes 3,15 as 3,10
+        tolerance = 0.051  # the print writes 3.15 as 3.10
     wrong = []
     for offset, row in enumerate(table):
         index = start + offset
@@ -275,8 +275,8 @@ def test_annex_a_tables_as_printed() -> None:
 
 
 def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
-    """A.5 and A.6 read at f/f_e: the peak of 17,26 dB for concrete and 21,93
-    for timber at the natural frequency, the mean of 1,60 at a ratio of 0,2,
+    """A.5 and A.6 read at f/f_e: the peak of 17.26 dB for concrete and 21.93
+    for timber at the natural frequency, the mean of 1.60 at a ratio of 0.2,
     and nan where the table prints none.
     """
     at_20 = im.foundation_to_floor_level_difference(
@@ -294,12 +294,12 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
     assert timber[0] == pytest.approx(21.93)
     assert timber[1] == pytest.approx(3.35)
     assert timber[2] == pytest.approx(1.85)
-    assert math.isnan(timber[3])  # ratio 0,08: the timber mean starts at 0,125
+    assert math.isnan(timber[3])  # ratio 0.08: the timber mean starts at 0.125
     assert math.isnan(timber[4])
     upper = im.foundation_to_floor_level_difference(
         [4.0, 5.0], floor="timber", floor_natural_frequency_hz=20.0, statistic="upper"
     )
-    assert math.isnan(upper[0])  # ratio 0,2, printed as a dash
+    assert math.isnan(upper[0])  # ratio 0.2, printed as a dash
     assert upper[1] == pytest.approx(8.1)
     # Between two tabulated ratios: linear in decibels over the logarithm.
     between = im.foundation_to_floor_level_difference(

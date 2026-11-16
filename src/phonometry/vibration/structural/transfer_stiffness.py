@@ -188,8 +188,8 @@ _UNWANTED_INPUT_LIMIT_DB = 15.0
 #: The factor of ISO 10846-4:2003 Inequality (3) and ISO 10846-2:2008
 #: Inequality (2): the mass between the element and the output force
 #: transducers may carry at most 6 % of the measured force as its own inertia,
-#: ``m0 |a2| <= 0,06 |F2|``, which NOTE 1 of each states as a force-level bias
-#: of 0,5 dB.
+#: ``m0 |a2| <= 0.06 |F2|``, which NOTE 1 of each states as a force-level bias
+#: of 0.5 dB.
 _OUTPUT_MASS_FACTOR = 0.06
 
 #: ISO 10846-3:2002 Inequality (3) and ISO 10846-4:2003 Inequality (5): the
@@ -216,9 +216,9 @@ _ANNEX_B_COVERAGE_FACTOR = 2.0
 #: Standard uncertainties of ISO 10846-5:2008 Annex B, in dB, as B.3 writes
 #: them. B.3.1 and B.3.2 print the numbers; B.3.4 to B.3.6 print the
 #: expressions, which are kept exact here rather than taken as the one decimal
-#: Table B.1 rounds them up to (0,3, 1,2 and 0,5 dB): a rectangular
+#: Table B.1 rounds them up to (0.3, 1.2 and 0.5 dB): a rectangular
 #: distribution over a range of 1 dB for the test rig, over +/-2 dB for the
-#: driving-point discrepancy and over a range of 1,5 dB for linearity.
+#: driving-point discrepancy and over a range of 1.5 dB for linearity.
 _U_SIGNAL_DB = 0.3
 _U_INSTRUMENTATION_DB = 0.5
 _U_TEST_RIG_DB = 1.0 / (2.0 * math.sqrt(3.0))
@@ -1259,7 +1259,7 @@ def _band_average(
     warning below names the caller's own line from all three.
     ``quiet_up_to_hz`` spares the bands centred at or below it the
     warning: ISO 10846-5 7.5 asks for five lines per band only above 20 Hz,
-    its 0,2 Hz spacing below leaves the lowest bands short of five, and the
+    its 0.2 Hz spacing below leaves the lowest bands short of five, and the
     NOTE to clause 9 m) accepts narrow-band data there instead.
     """
     freq = _frequency_axis(frequencies, owner)
@@ -1612,17 +1612,17 @@ class OutputMassCheck(OwnsArrays):
 
     .. math::
 
-       m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
+       m_0 \le 0.06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
 
     with the levels re 1 µN and 1 µm/s² (ISO 10846-4 3.15 and 3.16), so the
-    bound is :math:`0{,}06\,|F_2|/|a_2|`. Since
+    bound is :math:`0.06\,|F_2|/|a_2|`. Since
     :math:`F_\mathrm{b} = F_2 + m_0 a_2`, the force levels differ by at most
     :math:`-20 \lg(1 - r)` dB with :math:`r = m_0 |a_2| / |F_2|`, which at
-    the bound (:math:`r = 0{,}06`) is 0,54 dB against the 0,51 dB of an
+    the bound (:math:`r = 0.06`) is 0.54 dB against the 0.51 dB of an
     inertia force in phase with the measured one: the "0,5 dB" of NOTE 1.
 
     The measured side of the inequality is a field, the apparent mass
-    :math:`|F_2|/|a_2|` the two output levels give; the 0,06 is the series',
+    :math:`|F_2|/|a_2|` the two output levels give; the 0.06 is the series',
     so :attr:`mass_limit_kg` is read from it and a check cannot be built
     against another factor.
 
@@ -1666,7 +1666,7 @@ class OutputMassCheck(OwnsArrays):
     def mass_limit_kg(self) -> NDArray[np.float64]:
         r"""The right-hand side of the inequality at each frequency, in kg.
 
-        :return: :math:`0{,}06\,|F_2|/|a_2|`, one per frequency.
+        :return: :math:`0.06\,|F_2|/|a_2|`, one per frequency.
         """
         return _OUTPUT_MASS_FACTOR * np.asarray(
             self.output_apparent_mass_kg, dtype=np.float64
@@ -1684,7 +1684,7 @@ class OutputMassCheck(OwnsArrays):
     def inertia_ratio(self) -> NDArray[np.float64]:
         r"""The inertia force over the measured force, :math:`r = m_0 |a_2| / |F_2|`.
 
-        :return: One ratio per frequency; 0,06 where ``m0`` sits on its limit.
+        :return: One ratio per frequency; 0.06 where ``m0`` sits on its limit.
         """
         apparent = np.asarray(self.output_apparent_mass_kg, dtype=np.float64)
         return np.asarray(self.output_mass_kg / apparent)
@@ -1757,7 +1757,7 @@ def check_output_mass(
 
     .. math::
 
-       m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
+       m_0 \le 0.06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
 
     with :math:`L_{F2}` the force level re 1 µN and :math:`L_{a2}` the
     acceleration level re 1 µm/s² of the output side (ISO 10846-4 3.15 and
@@ -2283,7 +2283,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
         own low-frequency value, so the 2 dB is the standard's statement,
         not something the average can prove line by line.
 
-        Up to 20 Hz the 0,2 Hz line spacing of 7.5 leaves the lowest bands
+        Up to 20 Hz the 0.2 Hz line spacing of 7.5 leaves the lowest bands
         with fewer than five lines; the NOTE to clause 9 m) accepts
         narrow-band data there, so those bands are left undetermined without
         a warning.
@@ -2358,7 +2358,7 @@ def driving_point_stiffness(
 
     :param frequencies: Frequencies, in hertz, strictly increasing; the sweep
         needs lines between 1 Hz and 20 Hz for the low-frequency value, and
-        7.5 asks for a 0,2 Hz spacing there.
+        7.5 asks for a 0.2 Hz spacing there.
     :param input_force_n: Input force phasor ``F1``, in N.
     :param input_acceleration_m_s2: Input acceleration phasor ``a1``, in m/s²,
         non-zero.
@@ -2546,9 +2546,9 @@ def driving_point_uncertainty(
     Table B.1, built on :func:`phonometry.metrology.uncertainty_propagation`:
 
     - :math:`\hat{L}_{k,\mathrm{av}}`, signal processing and background
-      noise, normal, 0,3 dB (B.3.1);
-    - :math:`\delta_\mathrm{ins}`, instrumentation, normal, 0,5 dB when only
-      the minimum requirements are met, 0,3 dB "with good choices and
+      noise, normal, 0.3 dB (B.3.1);
+    - :math:`\delta_\mathrm{ins}`, instrumentation, normal, 0.5 dB when only
+      the minimum requirements are met, 0.3 dB "with good choices and
       precautions" (B.3.2);
     - :math:`\delta_\mathrm{rep}`, installation repeatability, rectangular,
       :math:`p/\sqrt{3}` for a spread of :math:`2p` between the highest and
@@ -2559,14 +2559,14 @@ def driving_point_uncertainty(
       the transfer stiffness, rectangular over :math:`\pm 2` dB,
       :math:`2/\sqrt{3}` dB (B.3.5);
     - :math:`\delta_\mathrm{lin}`, linearity, rectangular,
-      :math:`1{,}5/(2\sqrt{3})` dB (B.3.6).
+      :math:`1.5/(2\sqrt{3})` dB (B.3.6).
 
-    The last three are the expressions B.3.4 to B.3.6 print, 0,289, 1,155
-    and 0,433 dB. Table B.1 carries them rounded up to one decimal, 0,3, 1,2
-    and 0,5 dB, the conservative rounding an uncertainty may take
+    The last three are the expressions B.3.4 to B.3.6 print, 0.289, 1.155
+    and 0.433 dB. Table B.1 carries them rounded up to one decimal, 0.3, 1.2
+    and 0.5 dB, the conservative rounding an uncertainty may take
     (ISO/IEC Guide 98-3:2008, 7.2.6); the defaults keep the expressions.
-    With the defaults and no repeatability spread, :math:`u = 1{,}394` dB and
-    :math:`U = 2{,}789` dB, against 1,456 dB and 2,91 dB with the rounded
+    With the defaults and no repeatability spread, :math:`u = 1.394` dB and
+    :math:`U = 2.789` dB, against 1.456 dB and 2.91 dB with the rounded
     table. Every default can be replaced by a reasoned estimate, as the annex
     encourages, and the note to (B.3) allows doing so band by band.
 
@@ -2576,15 +2576,15 @@ def driving_point_uncertainty(
         highest and lowest band level of repeated installations, in dB
         (0 for none observed).
     :param signal_uncertainty_db: Standard uncertainty of
-        :math:`\hat{L}_{k,\mathrm{av}}`, in dB (Default: 0,3).
+        :math:`\hat{L}_{k,\mathrm{av}}`, in dB (Default: 0.3).
     :param instrumentation_uncertainty_db: Standard uncertainty
-        :math:`u_\mathrm{ins}`, in dB (Default: 0,5).
+        :math:`u_\mathrm{ins}`, in dB (Default: 0.5).
     :param test_rig_uncertainty_db: Standard uncertainty
         :math:`u_\mathrm{rig}`, in dB (Default: :math:`1/(2\sqrt{3})`).
     :param discrepancy_uncertainty_db: Standard uncertainty
         :math:`u_\mathrm{dps}`, in dB (Default: :math:`2/\sqrt{3}`).
     :param linearity_uncertainty_db: Standard uncertainty
-        :math:`u_\mathrm{lin}`, in dB (Default: :math:`1{,}5/(2\sqrt{3})`).
+        :math:`u_\mathrm{lin}`, in dB (Default: :math:`1.5/(2\sqrt{3})`).
     :return: The :class:`DrivingPointUncertainty`.
     :raises ValueError: for a non-finite band level, or a negative or
         non-finite spread or standard uncertainty.

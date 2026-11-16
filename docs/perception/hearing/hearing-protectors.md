@@ -277,7 +277,7 @@ the assumed protection value band by band from the A-weighted spectrum and sum
 what is left.
 
 $$
-L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
+L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0.1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)}\ \mathrm{dB}
 $$
 
 ```python
@@ -437,7 +437,7 @@ print(np.round(insertion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.
 From 1 kHz up the circuit adds sound instead of removing it, up to 6 dB at
 1 kHz, and the negative values are kept as they are. The mean and standard deviation rows of
 Table A.3 reproduce exactly, but its $u$ and $U_{95}$ rows are the formula
-applied to the **rounded** row above each ($1{,}4 / 4 = 0{,}35$ prints as 0,4),
+applied to the **rounded** row above each ($1.4 / 4 = 0.35$ prints as 0.4),
 which puts six of its eight $U_{95}$ cells a tenth above the value A.1 and A.2
 define. The library returns the defined value; the discrepancy is registered in
 [ERRATA](../../ERRATA.md). Table A.2's typical budget is
@@ -454,7 +454,7 @@ ISO 4869-2 methods at 84 % (e):
 
 $$
 A_{\mathrm{total,oct},j} = -10 \lg \left[\left(
-\sum_{i=1}^{3} 10^{-0,1 A_{\mathrm{total},f_i,j}}\right) / 3\right] \mathrm{dB}
+\sum_{i=1}^{3} 10^{-0.1 A_{\mathrm{total},f_i,j}}\right) / 3\right] \mathrm{dB}
 $$
 
 The standard sends the reader to a calculation workbook ISO publishes for the
@@ -703,7 +703,7 @@ plt.show()
   differences are reproduced to the printed decimal in the test suite and in the
   conformance report. The difference row of Table B.1 agrees within 0.1 dB,
   because the standard prints the means of its second test rounded: at 8 kHz it
-  comes out 3.94 dB against the printed 4,0.
+  comes out 3.94 dB against the printed 4.0.
 
 - **Covered.** ISO 4869-6:2019's active insertion loss (5.4.1 and 5.4.3, from the MIRE
   levels of both ears or given directly), the choice of the ear with the lower

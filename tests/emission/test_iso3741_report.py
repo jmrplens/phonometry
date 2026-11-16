@@ -7,10 +7,10 @@ is measured by the direct method in a reverberation room of volume ``V`` and
 surface ``S`` with a uniform reverberation time ``T60``; the band sound-power
 level follows ISO 3741:2010 Eq. (20),
 
-    LW = Lp + 10*lg(A/A0) + 4,34*(A/S) + 10*lg(1 + S*c/(8*V*f)) + C1 + C2 - 6,
+    LW = Lp + 10*lg(A/A0) + 4.34*(A/S) + 10*lg(1 + S*c/(8*V*f)) + C1 + C2 - 6,
 
 with the Sabine absorption area ``A = (55,26/c)*(V/T60)``, the speed of sound
-``c = 20,05*sqrt(273 + theta)`` and the meteorological corrections ``C1``/``C2``
+``c = 20.05*sqrt(273 + theta)`` and the meteorological corrections ``C1``/``C2``
 (clause 9.1.4). The A-weighted total is
 ``LWA = 10*lg(sum 10^((LW + Ck)/10))`` with the standard octave A-weighting
 corrections ``Ck`` (Annex F Eq. F.2). The tests recompute LW and LWA from these

@@ -164,7 +164,7 @@ def test_scholte_speed_matches_characteristic_roots() -> None:
     # Roots of B&G Eq. 4.4.20 resolved independently (sign sweep plus
     # bisection on a second transcription of the characteristic, float64):
     # water/steel 1479.6020, water/aluminium 1476.7331 and the van Vossen
-    # pair 1435.9734 m/s. The first two moved by 0,0007 and 0,032 m/s when
+    # pair 1435.9734 m/s. The first two moved by 0.0007 and 0.032 m/s when
     # the two solids were re-sourced from the page that prints their
     # modulus; the same sweep reproduces the earlier pair from the earlier
     # speeds, which is what says the move is the input and not the solver.

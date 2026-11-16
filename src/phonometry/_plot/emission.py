@@ -824,7 +824,7 @@ def plot_field_indicators(
     non-uniformity F4. When the result carries the temporal variability
     indicator F1 (that is, ``temporal_intensity`` was supplied), it is
     drawn on the same twin axis beside F4, together with the Table B.3
-    limit of 0,6 that F1 must stay under.
+    limit of 0.6 that F1 must stay under.
 
     :param result: A :class:`~phonometry.emission.intensity.FieldIndicators`
         with per-band data (2D input to
@@ -1373,9 +1373,9 @@ def plot_source_location_plan(
     r"""The survey standard deviation per band against the class limits of the
     table, with the number of source locations over each bar.
 
-    ISO 3743-1:2010 Table 2 draws its lines at 2,5 dB and 4,0 dB, and a band
+    ISO 3743-1:2010 Table 2 draws its lines at 2.5 dB and 4.0 dB, and a band
     above the second sends two more locations to another room, written
-    ``2+2``; ISO 3743-2:2018 Table 3 draws them at 2,3 dB and 4 dB and adds
+    ``2+2``; ISO 3743-2:2018 Table 3 draws them at 2.3 dB and 4 dB and adds
     the A-weighted row as a bar of its own when it was surveyed.
 
     :param result: A
@@ -1486,9 +1486,9 @@ def plot_special_room_reverberation(
     r"""The measured :math:`T/T_\mathrm{nom}` within the limiting curves of
     ISO 3743-2:2018 6.3, laid out as Figure B.3.
 
-    The shaded band runs from :math:`0{,}9\,R` to :math:`1{,}1\,R` (0,8 and 1,2
-    above the 6,3 kHz band, as the text of 6.3 says; Figure B.3 widens it at
-    6,3 kHz already), the dotted curve is the ideal ratio :math:`R`, and a band
+    The shaded band runs from :math:`0.9\,R` to :math:`1.1\,R` (0.8 and 1.2
+    above the 6.3 kHz band, as the text of 6.3 says; Figure B.3 widens it at
+    6.3 kHz already), the dotted curve is the ideal ratio :math:`R`, and a band
     outside the limits is ringed. The title gives :math:`T_\mathrm{nom}` and
     the verdict of 6.2, 6.3 and 6.6 together.
 
@@ -1573,8 +1573,8 @@ def plot_special_room_surfaces(
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The absorption of each wall and of the ceiling within 0,5 to 1,5 times
-    their mean, and the floor against its 0,06 (ISO 3743-2:2018 6.4).
+    """The absorption of each wall and of the ceiling within 0.5 to 1.5 times
+    their mean, and the floor against its 0.06 (ISO 3743-2:2018 6.4).
 
     A coefficient outside either criterion is ringed, the verdict is in the
     title, and the legend goes where it covers the fewest points, with head
@@ -1726,7 +1726,7 @@ def plot_special_room_suitability(
 
 #: Label of the dashed outline every turbine layout draws.
 _TURBINE_SURFACE_LABEL = "Measurement surface"
-#: The horizontal extent of Figure A.3, in A/S: from 0,5 to 300.
+#: The horizontal extent of Figure A.3, in A/S: from 0.5 to 300.
 _FIGURE_A3_RATIO_RANGE = (0.5, 300.0)
 #: The A/S values Figure A.3 labels on its axis.
 _FIGURE_A3_RATIO_TICKS = (0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 300.0)
@@ -1945,7 +1945,7 @@ def plot_turbine_environmental_correction(
     r"""Figure A.3 of IEC 61063 with one test environment on it.
 
     The curve :math:`K = 10 \lg[1 + 4/(A/S)]` over the range the figure
-    prints, 0,5 to 300, dashed where :math:`A/S < 1` as the figure draws it,
+    prints, 0.5 to 300, dashed where :math:`A/S < 1` as the figure draws it,
     the 7 dB of A.3.3 as a limit line, and the environment as a point, or as
     a horizontal line when its :math:`K` came from a reference source and
     carries no :math:`A/S`.
@@ -2007,7 +2007,7 @@ def plot_turbine_environmental_correction(
         )
     ax.set_xscale("log")
     # The default log axis writes only 10^0, 10^1 and 10^2, and a reader could
-    # not place an A/S of 7 on it. The figure labels 0,5, 1, 5, 10, 50, 100
+    # not place an A/S of 7 on it. The figure labels 0.5, 1, 5, 10, 50, 100
     # and 300, written plainly; the other decades' steps stay as grid lines.
     ax.xaxis.set_major_locator(FixedLocator(_FIGURE_A3_RATIO_TICKS))
     ax.xaxis.set_major_formatter(

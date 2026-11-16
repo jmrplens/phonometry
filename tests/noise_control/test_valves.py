@@ -24,8 +24,8 @@ import pytest
 
 from phonometry.noise_control import valves
 
-#: The annex prints the piping geometry factor as 0,98, but every printed
-#: vena contracta pressure needs 0,984. See ``docs/ERRATA.md``.
+#: The annex prints the piping geometry factor as 0.98, but every printed
+#: vena contracta pressure needs 0.984. See ``docs/ERRATA.md``.
 PRESSURE_RECOVERY = 0.792 / 0.984
 
 #: Table 4, "Globe, ported cage design": the valve the six examples use.
@@ -108,7 +108,7 @@ EXAMPLES = [
 
 
 def _style_modifier() -> float:
-    """A.2's cage: six passages of 0,00137 m² with a 0,181 m wetted perimeter."""
+    """A.2's cage: six passages of 0.00137 m² with a 0.181 m wetted perimeter."""
     return valves.valve_style_modifier(0.00137, 0.181, 6)
 
 
@@ -202,8 +202,8 @@ class TestGeometry:
     """Equations (8a) to (9)."""
 
     def test_the_style_modifier_is_the_printed_three_tenths(self) -> None:
-        # (8b) gives d_H = 0,030 m and (8c) gives d_o = 0,102 m, which the
-        # annex prints as 0,010 m: see docs/ERRATA.md. F_d = 0,30 either way
+        # (8b) gives d_H = 0.030 m and (8c) gives d_o = 0.102 m, which the
+        # annex prints as 0.010 m: see docs/ERRATA.md. F_d = 0.30 either way
         # only if d_o is the larger value.
         assert _style_modifier() == pytest.approx(0.30, abs=5e-3)
 
@@ -228,7 +228,7 @@ class TestGeometry:
     ) -> None:
         # The same valve rated in K_v and in C_v does not give exactly the
         # same jet: Table 1 rounds both constants to two digits, and
-        # 4,9/4,6 = 1,065 against the sqrt(1,156) = 1,075 the conversion
+        # 4.9/4.6 = 1.065 against the sqrt(1.156) = 1.075 the conversion
         # asks for. The gap is 1 %, which is the rounding and not a choice.
         as_cv = valves.jet_diameter_m(90.0, 0.3, 0.8, coefficient="Cv")
         as_kv = valves.jet_diameter_m(90.0 / 1.156, 0.3, 0.8, coefficient="Kv")
@@ -305,14 +305,14 @@ class TestPrintedExamples:
         assert _run(index).internal_level == pytest.approx(expected, abs=0.05)
 
     def test_the_sixth_example_runs_past_the_outlet_limit(self) -> None:
-        # M_o = 0,89 against the 0,3 of NOTE 1 to Equation (15): Clause 5 is
+        # M_o = 0.89 against the 0.3 of NOTE 1 to Equation (15): Clause 5 is
         # outside its own validity and the annex prints the result anyway.
         assert _run(6).outlet_mach == pytest.approx(0.89, abs=5e-3)
         assert _run(6).outlet_mach > valves.MACH_LIMIT_STANDARD_TRIM
 
     def test_the_pipe_mach_number_is_clipped_before_the_correction(self) -> None:
-        # Example 6 computes M_2 = 0,4 and NOTE 2 limits it to 0,3, which is
-        # the value the printed L_g of 2,5 dB comes from.
+        # Example 6 computes M_2 = 0.4 and NOTE 2 limits it to 0.3, which is
+        # the value the printed L_g of 2.5 dB comes from.
         result = _run(6)
         assert result.pipe_mach == pytest.approx(0.4, abs=5e-3)
         clipped = 16.0 * math.log10(1.0 / (1.0 - valves.PIPE_WALL_MACH_LIMIT))
@@ -331,7 +331,7 @@ class TestInternalSpectrum:
         assert loudest == pytest.approx(result.peak_frequency, rel=0.35)
 
     def test_the_spectrum_falls_off_faster_above_the_peak_than_below(self) -> None:
-        # The two exponents are 2,5 above and 1,7 below, so a band an octave
+        # The two exponents are 2.5 above and 1.7 below, so a band an octave
         # above the peak loses more than one an octave below it.
         peak = 1000.0
         bands = np.array([500.0, 2000.0])
@@ -370,7 +370,7 @@ class TestPipeTransmission:
     }
 
     #: Table A.2's printed TL, all 33 bands, in dB. The column turns at band
-    #: 24: the loss is least at -49,4 dB and grows again above it, which is
+    #: 24: the loss is least at -49.4 dB and grows again above it, which is
     #: the ring frequency of this pipe, 7 958 Hz, showing through between
     #: bands 24 and 25.
     PRINTED = (
@@ -417,12 +417,12 @@ class TestPipeTransmission:
         assert wide[0] - narrow[0] == pytest.approx(9.0, abs=1e-9)
 
     def test_the_damping_cubic_meets_its_floor_and_not_its_ceiling(self) -> None:
-        # Equation (20b) is a cubic between 0,05 m and 0,15 m and a constant
+        # Equation (20b) is a cubic between 0.05 m and 0.15 m and a constant
         # on each side. At the bottom the pieces meet, to within the rounding
-        # of the printed coefficients: the cubic gives 8,99 dB against the
-        # 9 dB below it. At the top they do not: the cubic gives 0,95 dB and
-        # the branch above it gives nothing at all, so a 0,15 m outlet and a
-        # 0,151 m one are a decibel apart.
+        # of the printed coefficients: the cubic gives 8.99 dB against the
+        # 9 dB below it. At the top they do not: the cubic gives 0.95 dB and
+        # the branch above it gives nothing at all, so a 0.15 m outlet and a
+        # 0.151 m one are a decibel apart.
         bands = np.array([1000.0])
         base = valves.pipe_transmission_loss(
             bands, **{**self.PIPE, "valve_outlet_diameter_m": 0.2}
@@ -564,7 +564,7 @@ class TestExpander:
     """Clause 7, against the sixth column of Table A.1.
 
     Example 6 is the only one the annex works Clause 7 for, because it is the
-    only one whose outlet Mach number passes the 0,3 of NOTE 1 to
+    only one whose outlet Mach number passes the 0.3 of NOTE 1 to
     Equation (15). Every intermediate of that column is printed.
     """
 
@@ -638,7 +638,7 @@ class TestExpander:
     @pytest.mark.parametrize("bad", [math.nan, math.inf])
     def test_it_refuses_a_correction_that_is_not_a_number(self, bad: float) -> None:
         # The two signed corrections may be negative, and Table 4 prints the
-        # expander's own as -3,0, so they are not caught by a positivity
+        # expander's own as -3.0, so they are not caught by a positivity
         # guard; without a finiteness one a NaN reaches every band.
         with pytest.raises(ValueError, match="signed correction"):
             valves.expander_noise(
@@ -653,7 +653,7 @@ class TestExpander:
 
     def test_the_pipe_velocity_is_capped_at_mach_eight_tenths(self) -> None:
         # Equation (34) is capped, so a pipe that would run supersonic is
-        # computed as if it ran at 0,8.
+        # computed as if it ran at 0.8.
         fast = valves.expander_noise(
             np.array([1000.0]),
             mass_flow=50.0,
@@ -728,13 +728,13 @@ class TestPrintedTables:
 
     def test_every_correction_factor_is_negative(self) -> None:
         # A_eta is the exponent of a small number: -4 is the pure dipole of a
-        # free jet, and every printed valve sits between -4,8 and -3,0.
+        # free jet, and every printed valve sits between -4.8 and -3.0.
         corrections = [pair[0] for pair in valves.VALVE_ACOUSTIC_STYLES.values()]
         assert max(corrections) == pytest.approx(-3.0)
         assert min(corrections) == pytest.approx(-4.8)
 
     def test_the_strouhal_numbers_sit_in_the_printed_range(self) -> None:
-        # The clause puts St_p between 0,1 and 0,3 for free jets.
+        # The clause puts St_p between 0.1 and 0.3 for free jets.
         numbers = [pair[1] for pair in valves.VALVE_ACOUSTIC_STYLES.values()]
         assert min(numbers) >= 0.1
         assert max(numbers) <= 0.3
@@ -761,7 +761,7 @@ EXAMPLE_7 = {
     "wall_thickness_m": 0.008,
     "pipe_density": 8000.0,
     # Table 4's "Globe, multihole drilled plug or cage, to open"; the annex
-    # takes the Strouhal number at the bottom of the 0,1 to 0,3 range 5.4.2
+    # takes the Strouhal number at the bottom of the 0.1 to 0.3 range 5.4.2
     # prints for free jets rather than from the table.
     "efficiency_correction": -4.8,
     "strouhal_number": 0.1,
@@ -832,7 +832,7 @@ class TestMultistageTrim:
 
     def test_the_stagnation_pressure_takes_the_first_branch(self) -> None:
         # NOTE 3: p_1/p_2 is 5, so (28a) is tried first, and its answer is
-        # 1,5 times p_2, which is below the 2 that would send it to (28b).
+        # 1.5 times p_2, which is below the 2 that would send it to (28b).
         found = valves.multistage_trim_conditions(
             inlet_pressure_pa=7.0e6,
             outlet_pressure_pa=1.4e6,
@@ -928,8 +928,8 @@ class TestMultiplePassageTrim:
     def test_the_printed_example_of_a_drilled_cage(self) -> None:
         # 6.2's own EXAMPLE: 48 rectangular passages 10 mm by 2 mm. It prints
         # every step, and it rounds the hydraulic diameter before dividing:
-        # 0,0033/0,035 is the 0,094 it gives, where the unrounded 1/300 m
-        # gives 0,095. Both are recorded here so a reader who reproduces one
+        # 0.0033/0.035 is the 0.094 it gives, where the unrounded 1/300 m
+        # gives 0.095. Both are recorded here so a reader who reproduces one
         # is not left wondering about the other.
         area = 0.010 * 0.002
         perimeter = 2.0 * 0.010 + 2.0 * 0.002
@@ -953,7 +953,7 @@ class TestMultiplePassageTrim:
         assert past_cap == pytest.approx(at_cap, rel=1e-12)
 
     def test_the_bracket_is_what_replaces_the_recovery_factor(self) -> None:
-        # At l/d = 4 the bracket is 0,9 - 0,24 = 0,66, so Equation (26) is
+        # At l/d = 4 the bracket is 0.9 - 0.24 = 0.66, so Equation (26) is
         # Equation (9) with that in place of F_LP/F_p.
         printed = valves.jet_diameter_m(90.0, 0.094, 0.66)
         assert valves.multiple_passage_jet_diameter(
@@ -979,7 +979,7 @@ class TestStageCorrection:
         )
 
     def test_more_stages_barely_change_it(self) -> None:
-        # The exponent is 0,125, so eight stages give 26 % less than two of a
+        # The exponent is 0.125, so eight stages give 26 % less than two of a
         # term that is only a few decibels to begin with.
         two = valves.stage_level_correction(150.0, 2, 7.0e6, 2.1e6) - 150.0
         eight = valves.stage_level_correction(150.0, 8, 7.0e6, 2.1e6) - 150.0

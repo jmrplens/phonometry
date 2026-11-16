@@ -190,7 +190,7 @@ def test_kij_mean_membership_reads_the_band_set_the_result_states() -> None:
 def test_kij_fiche_distinguishes_all_bracketed_from_out_of_range(
     tmp_path: Path,
 ) -> None:
-    """An empty mean states why: every in-range band bracketed (M < 0,25)."""
+    """An empty mean states why: every in-range band bracketed (M < 0.25)."""
     pytest.importorskip("matplotlib")
     result = building.vibration_reduction_index(
         _DV,

@@ -138,7 +138,7 @@ above the limit.
 | Name | Description |
 | :--- | :--- |
 | `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; pass `abs(K_c)` for a complex modulus). |
-| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
 | `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
 
 **Returns:** The verdict, as a [`LimpFrameCheck`](/phonometry/reference/api/materials/porous/#limpframecheck); it passes when $\lvert K_c/K_\mathrm{f} \rvert$ is below the threshold (the book prints both criteria as strict inequalities).
@@ -276,7 +276,7 @@ the definition and not a second model.
 This is a different model from [`viscous_characteristic_length`](/phonometry/reference/api/materials/porous/#viscous_characteristic_length), not a
 second opinion on the same one, and on Hopkins' own rock wool the two drift
 apart with density: the cylinder model is the lower estimate throughout, by
-a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
+a factor of 1.4 at 38 kg/m3 and 1.9 at 155 kg/m3. Which to prefer is a
 question about the material, and neither is a substitute for measuring it.
 
 **Parameters**
@@ -512,7 +512,7 @@ rule of thumb on when the frame may be treated as limp at all.
 | :--- | :--- |
 | `medium` | A rigid-frame [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) (its `effective_density` is `rho_eq` and its `bulk_modulus` is kept). |
 | `frame_density` | Bulk density of the frame `rho1`, in kg/m3 (> 0). |
-| `porosity` | Open porosity `phi` (0 \< phi \<= 1, Default: 1,0, the high-porosity assumption of the one-parameter models). |
+| `porosity` | Open porosity `phi` (0 \< phi \<= 1, Default: 1.0, the high-porosity assumption of the one-parameter models). |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) with model `"limp_frame(<base model>)"`.
 
@@ -558,7 +558,7 @@ not fields: a check cannot be built against another threshold.
 | Name | Description |
 | :--- | :--- |
 | `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; `abs(K_c)` for a complex modulus). |
-| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
+| `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0.2) or `"beranek"` (0.05). |
 | `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa. |
 
 ### LimpFrameCheck.passes
@@ -939,7 +939,7 @@ mass. Hopkins states both conditions.
 
 It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
 155 kg/m3 bulk-density range Hopkins prints for his rock wool, this returns
-0,99 and 0,94, which is the porosity range he prints beside them.
+0.99 and 0.94, which is the porosity range he prints beside them.
 
 **Parameters**
 
@@ -1064,9 +1064,9 @@ How close is the question the shape factor exists for, and it is worth
 saying what "close" buys. Against the twenty-three specimens Allard & Atalla
 print with all four columns, `c = 1` puts $\Lambda$ within a factor
 of two of the printed length for eighteen of them, with the middle of the
-set near 1,2. The five it misses are the two carpets, the woven screen and
+set near 1.2. The five it misses are the two carpets, the woven screen and
 two rows whose lengths the book itself took from a different model, and
-there the same arithmetic wants a `c` between 2 and 9,5.
+there the same arithmetic wants a `c` between 2 and 9.5.
 
 So estimating this length rather than measuring it is worth a factor of two
 on a bulk fibrous or open-cell absorber, and nothing at all on a floor

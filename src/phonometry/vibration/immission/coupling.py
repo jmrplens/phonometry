@@ -14,7 +14,7 @@ loose transducer measures without falsification up to 100 Hz vertically and
 40 Hz horizontally, provided the peak acceleration in every direction stays at
 or below 3 m/s². On a hard surface it may stand on its own or on the device
 with rounded feet of Figure 1 b); on a soft covering it has to stand on the
-device with hardened steel spikes of Figure 1 a), about 2,5 kg together with
+device with hardened steel spikes of Figure 1 a), about 2.5 kg together with
 the transducer, pressed and tapped through the covering. Above those limits
 the transducer is glued, screwed or plastered on, and on a sensitive hard
 surface such as tiles or parquet adhesive wax carries the horizontal
@@ -122,7 +122,7 @@ GROUND_COUPLING_DEVIATION_DB: float = 15.0
 EMISSION_POINT_TRACK_DISTANCE_M: float = 8.0
 
 #: How far a ground measurement point keeps from a body that disturbs the wave
-#: field, as a multiple of the body's largest dimension (5.1.4): at least 1,5.
+#: field, as a multiple of the body's largest dimension (5.1.4): at least 1.5.
 CLEARANCE_TO_DISTURBING_BODY_FACTOR: float = 1.5
 
 _DIRECTIONS: tuple[Direction, ...] = ("vertical", "horizontal")
@@ -134,7 +134,7 @@ _CLASSES = (1, 2)
 _DEVICES = {
     "hard": "the transducer alone, or the device with rounded feet of Figure 1 b)",
     "soft": (
-        "the device with hardened steel spikes of Figure 1 a), about 2,5 kg with "
+        "the device with hardened steel spikes of Figure 1 a), about 2.5 kg with "
         "the transducer, pressed and tapped through the covering"
     ),
 }

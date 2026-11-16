@@ -214,7 +214,7 @@ to B.9. It is also the signal path the type tests are written on: 12.7,
 band-limiting frequency weighting first.
 
 Only four corner pairs exist among the nine weightings, as Table 3 prints
-them: 0,4 Hz and 100 Hz for `Wb`, `Wc`, `Wd`, `We`, `Wj` and
+them: 0.4 Hz and 100 Hz for `Wb`, `Wc`, `Wd`, `We`, `Wj` and
 `Wk`; `10**(8/10)` Hz and `10**(31/10)` Hz for `Wh`;
 `10**(-0.1)` Hz and 100 Hz for `Wm`; 0.08 Hz and 0.63 Hz for `Wf`.
 The response is still asked for by weighting name, because that is how
@@ -505,7 +505,7 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 
 | Name | Description |
 | :--- | :--- |
-| `value` | The daily exposure `A(8)` in m/s2 (`metric="a8"`) or the vibration dose value in m/s^1,75 (`metric="vdv"`, whole-body only). |
+| `value` | The daily exposure `A(8)` in m/s2 (`metric="a8"`) or the vibration dose value in m/s^1.75 (`metric="vdv"`, whole-body only). |
 | `kind` | `"hav"` (hand-arm) or `"wbv"` (whole-body). |
 | `metric` | `"a8"` (default) or `"vdv"`. |
 
@@ -540,7 +540,7 @@ assessment cannot be built against other values.
 | :--- | :--- |
 | `value` | The assessed daily exposure `A(8)` (or VDV), in its unit. |
 | `kind` | `"hav"` or `"wbv"`. |
-| `metric` | `"a8"` (m/s2) or `"vdv"` (m/s^1,75). |
+| `metric` | `"a8"` (m/s2) or `"vdv"` (m/s^1.75). |
 
 ### ExposureAssessment.action_value
 

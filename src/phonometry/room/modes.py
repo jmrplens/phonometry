@@ -515,7 +515,7 @@ def room_modes(
     f_max = require_positive(max_frequency, "max_frequency")
 
     # The highest order along each axis is set by that axis alone:
-    # f(n,0,0) = n c0 / (2 lx) <= f_max.
+    # f(n,0.0) = n c0 / (2 lx) <= f_max.
     n_max = np.floor(2.0 * f_max * dims / c0).astype(int)
     lattice = float(np.prod(n_max + 1, dtype=np.float64))
     if lattice > _MAX_ENUMERATED_LATTICE:

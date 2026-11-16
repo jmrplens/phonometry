@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 # ISO 9612:2009 occupational noise exposure: the three normative worked
 # examples (Annexes D/E/F), reproduced digit-for-digit by the test suite. Each
 # stores the raw measured levels/durations and the standard's reported LEX,8h
-# and expanded uncertainty U (k = 1,65, one-sided 95 %). Annex D is the
+# and expanded uncertainty U (k = 1.65, one-sided 95 %). Annex D is the
 # task-based welder day; its case (a) omits the task-duration uncertainty
-# (U = 2,7 dB), case (b) includes it (U = 3,2 dB). Annexes E (job-based, 18
+# (U = 2.7 dB), case (b) includes it (U = 3.2 dB). Annexes E (job-based, 18
 # workers) and F (full-day forklift drivers) use the Table C.4 sampling budget.
 # Task tuples are (samples, duration_hours, duration_range_hours) so the
 # conformance report can rebuild the Task objects (Task is not importable here,
@@ -91,10 +91,10 @@ ISO1999_N10_3K_100_40 = 60.0  # worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr
 # H = 14, 21 and 36 dB and the Table D.2 shifts N = 0, 9 and 19 dB. The
 # quantities pinned here are the results the annex derives from them:
 #   C.5   the 4 kHz shift after the Formula (1) compression,
-#         19 - 36 x 19 / 120 = 13,3 dB;
-#   C.8   the 1/2/4 kHz mean shift, (0 + 9 + 13,3) / 3 = 7,4 dB;
-#   C.3   the 1/2/4 kHz mean age threshold, (14 + 21 + 36) / 3 = 23,7 dB;
-#   C.11  the combined threshold, 23,7 + 7,4 = 31,1 dB.
+#         19 - 36 x 19 / 120 = 13.3 dB;
+#   C.8   the 1/2/4 kHz mean shift, (0 + 9 + 13.3) / 3 = 7.4 dB;
+#   C.3   the 1/2/4 kHz mean age threshold, (14 + 21 + 36) / 3 = 23.7 dB;
+#   C.11  the combined threshold, 23.7 + 7.4 = 31.1 dB.
 # The annex applies the compression only where it matters: "when (H + N) <
 # 40 dB, the NIPTS can be taken directly from Table D.2", so of these three
 # bands only 4 kHz (36 + 19 dB) is compressed.
@@ -114,13 +114,13 @@ ISO1999_ANNEX_C_HTLAN = 31.1  # C.11, dB
 # reproduces from the printed inputs:
 #   A   m_f and s_f per band, exactly. The annex's own APV row is the
 #       difference of the ROUNDED m_f and s_f it displays, which differs from
-#       Formula (1) applied to the data by 0,1 dB at 250 Hz, 500 Hz and
+#       Formula (1) applied to the data by 0.1 dB at 250 Hz, 500 Hz and
 #       4 kHz; both readings are pinned below.
-#   B   the octave-band method: the per-band net levels and L'p,A84 = 81,4 dB,
+#   B   the octave-band method: the per-band net levels and L'p,A84 = 81.4 dB,
 #       81 dB after rounding.
 #   C   the HML method: all 16 x 8 PNR values, all 16 H/M/L triples, the three
 #       means, the three standard deviations, H84/M84/L84 = 24/18/13 dB, and
-#       the application PNR84 = 22,5 dB -> L'p,A84 = 81,5 dB -> 82 dB.
+#       the application PNR84 = 22.5 dB -> L'p,A84 = 81.5 dB -> 82 dB.
 #   D   the SNR method: all 16 SNRj, SNRm, SNRs, SNR84 = 21 dB and both of its
 #       applications, which land on 82 dB.
 #
@@ -289,12 +289,12 @@ ISO4869_2_TABLE_C1_NOISE6 = [82.0, 89.4, 93.5, 95.6, 93.0, 90.1, 83.0]
 #   B.1       test 2 is printed rounded only, so its U95 and mean are the
 #             printed ones. The root-sum-of-squares row reproduces all seven
 #             cells and the verdict is "significant at 8 kHz only"; the
-#             difference row agrees within 0,1 dB: six cells round to the
-#             print, and 8 kHz is 0,056 dB off (3,944 against the printed
-#             4,0) because m2 is printed rounded.
+#             difference row agrees within 0.1 dB: six cells round to the
+#             print, and 8 kHz is 0.056 dB off (3.944 against the printed
+#             4.0) because m2 is printed rounded.
 #   B.1.1, B.2  the minimum differences are sqrt(2) times the ROUNDED U95 of
 #             the tables, which the text writes out ("sqrt(2) x 2,3 dB =
-#             3,3 dB"): 3,3 and 2,3 dB within, 9,3 and 6,9 dB between.
+#             3,3 dB"): 3.3 and 2.3 dB within, 9.3 and 6.9 dB between.
 # ---------------------------------------------------------------------------
 #: The seven test signals of 4.1, in hertz; 63 Hz is optional and not used by
 #: the worked example.
@@ -581,7 +581,7 @@ ISO4869_6_WORKBOOK_LOWER_EAR = _workbook_rows(
 )
 
 #: Workbook rows 182-197: the REAT in one-third-octave bands, interpolated,
-#: extrapolated and rounded to 0,1 dB, 5.5 a).
+#: extrapolated and rounded to 0.1 dB, 5.5 a).
 ISO4869_6_WORKBOOK_REAT_THIRDS = _workbook_rows(
     """
  10.9  11.7  12.8  14.1  15.7  13.7  11.4   8.6   9.1   9.9  10.7  14.6  19.6  25.6  24.9  23.9  22.7  27.8  34.4  43.0  41.8  40.1  38.0  35.5
@@ -626,7 +626,7 @@ ISO4869_6_WORKBOOK_TOTAL_THIRDS = _workbook_rows(
 )
 
 #: Workbook rows 230-245: the octave-band total of Formula (1), rounded to
-#: 0,1 dB, 5.5 d).
+#: 0.1 dB, 5.5 d).
 ISO4869_6_WORKBOOK_TOTAL_OCTAVES = _workbook_rows(
     """
  30.1  38.4  29.1  16.2  17.5  22.5  34.2  37.1
@@ -688,7 +688,7 @@ ISO4869_6_TABLE_A3_U95 = [1.0, 0.4, 0.8, 1.0, 0.8, 0.8, 0.8, 0.4]
 #: The bands (indices, 63 Hz first) at which the printed u and U95 are NOT
 #: sigma/4 and 2 sigma/4 of the sixteen printed rows at full precision: u at
 #: 250 Hz, U95 at 63, 250, 500, 1 000, 4 000 and 8 000 Hz. Each row is the
-#: formula on the ROUNDED row above it (1,4 / 4 = 0,35 -> 0,4; U95 = 2u as
+#: formula on the ROUNDED row above it (1.4 / 4 = 0.35 -> 0.4; U95 = 2u as
 #: printed); see docs/ERRATA.md.
 ISO4869_6_TABLE_A3_U_ROUNDED_FROM_SIGMA = (2,)
 ISO4869_6_TABLE_A3_U95_ROUNDED_FROM_U = (0, 2, 3, 4, 6, 7)

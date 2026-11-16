@@ -572,7 +572,7 @@ class ExposureResult(RichDisplay):
         per-task contributions, a job-based or full-day result the sampling
         summary (``N``, ``Lp,A,eqTe``, ``T_e`` and the Formula (C.9) budget
         terms). Built bare, the sheet would print the literal string ``None``
-        for ``N`` and a fabricated 0,0 for every budget term: an accredited
+        for ``N`` and a fabricated 0.0 for every budget term: an accredited
         page stating a zero uncertainty budget nobody measured.
 
         :raises ValueError: for an unknown strategy or instrument tag, a
@@ -915,8 +915,8 @@ def _sampled_exposure(
     # Eq C.9 with c2 = c3 = 1.
     u = sqrt(c1u1**2 + u2**2 + u3**2)
 
-    # Judged settled: seven samples whose standard deviation is 4,0 dB in
-    # decimal read the 3,5 dB of Table C.4 itself, which is not above it.
+    # Judged settled: seven samples whose standard deviation is 4.0 dB in
+    # decimal read the 3.5 dB of Table C.4 itself, which is not above it.
     over = float(settled(c1u1)) > _C4_ADVISORY_THRESHOLD
     if warn and over:
         warn_caller(

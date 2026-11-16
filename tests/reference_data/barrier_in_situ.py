@@ -79,11 +79,11 @@ LINDEMAN_TABLE_8_DBA: dict[str, tuple[float, float, float, float]] = {
 LINDEMAN_TABLE_8_INSERTION_LOSS_DBA: dict[str, float] = {"run 2": 7.5, "run 3": 8.7}
 
 #: Run 1 of TABLE 8, in the same order, and the insertion loss its column (7)
-#: prints, in dBA. Its own four levels give 5,8 dB, and TABLES 4 and 5 on
+#: prints, in dBA. Its own four levels give 5.8 dB, and TABLES 4 and 5 on
 #: printed folio 37 (PDF page 5) reach two of those levels a second time
 #: through their own arithmetic, with column (3) printing their difference as
-#: 6,6 dB, so what is defective is the printed insertion loss and not a level.
-#: The note's mean, 7,5 dBA, is the mean of the defective column. Neither is an
+#: 6.6 dB, so what is defective is the printed insertion loss and not a level.
+#: The note's mean, 7.5 dBA, is the mean of the defective column. Neither is an
 #: expected value.
 LINDEMAN_TABLE_8_RUN_1_DBA: tuple[float, float, float, float] = (64.2, 65.4, 57.6, 53.0)
 LINDEMAN_TABLE_8_RUN_1_PRINTED_DBA: float = 6.2
@@ -92,10 +92,10 @@ LINDEMAN_TABLE_8_RUN_1_PRINTED_DBA: float = 6.2
 #: (PDF page 9): five runs, with the equivalent site as the "before" pair
 #: (MIC 3 the reference, MIC 4 the receiver) and the barrier site as the
 #: "after" one (MIC 1 and MIC 2), all in dBA. Run 4 takes its "before"
-#: receiver level from TABLE 12 on the same folio, which prints 61,1 where
-#: column (2) of TABLE 13 repeats run 3's 60,2. The table contradicts itself
-#: there rather than leaving the choice open: its own column (3) prints 7,7 for
-#: that run, and 68,8 - 60,2 is 8,6. Both receivers stand in the open, so C_r
+#: receiver level from TABLE 12 on the same folio, which prints 61.1 where
+#: column (2) of TABLE 13 repeats run 3's 60.2. The table contradicts itself
+#: there rather than leaving the choice open: its own column (3) prints 7.7 for
+#: that run, and 68.8 - 60.2 is 8.6. Both receivers stand in the open, so C_r
 #: and C'_r are zero and the runs exercise the site pairing of 8.2.2 rather
 #: than the facade branch.
 LINDEMAN_TABLE_13_DBA: dict[str, tuple[float, ...]] = {
@@ -130,9 +130,9 @@ FHWA_6_6_3_EDGE_DB: float = -0.5
 
 #: The example contradicts itself, and that is the whole of the difference
 #: between its two published answers: the list gives a receiver level of
-#: 56,3 dB, the expression under it types 56,2 dB, and the FHWA Noise Barrier
-#: Design Handbook prints 8,7 dB for the first (clause 15.1.2.1) where these
-#: two manuals print 8,8 dB for the second. The "after" receiver level and the
+#: 56.3 dB, the expression under it types 56.2 dB, and the FHWA Noise Barrier
+#: Design Handbook prints 8.7 dB for the first (clause 15.1.2.1) where these
+#: two manuals print 8.8 dB for the second. The "after" receiver level and the
 #: insertion loss of each reading, in decibels.
 FHWA_6_6_3_PRINTED_DB: dict[str, tuple[float, float]] = {
     "as the expression types it": (56.2, 8.8),
@@ -181,10 +181,10 @@ CEN_TS_16272_7_PREFERRED_MARGIN_DB: float = 10.0
 #: paper prints, in dBA and with the minus sign the table prints it with, then
 #: the insertion loss it reports. That correction is the "before" difference
 #: of 8.2.1 printed as a single number with its sign reversed,
-#: 76,0 - 56,3 - 9,1 = 10,6 dBA being how the table closes, so the two levels
+#: 76.0 - 56.3 - 9.1 = 10.6 dBA being how the table closes, so the two levels
 #: behind it are free. Site 1 is a 5 m barrier with the receiver 30 m away and
 #: site 2 a separate 6 m barrier at 20 m. The third entry is site 1 read from
-#: its total level instead of the residual one, which is where the 8,0 dBA of
+#: its total level instead of the residual one, which is where the 8.0 dBA of
 #: folio 294 comes from. The residual levels came from an ISO 1996 extraction
 #: of the connected-road traffic, which is not the background treatment of
 #: ISO 10847 6.4.

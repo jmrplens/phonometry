@@ -388,8 +388,8 @@ about 0.24 dB.
 | `attenuation_source_per_m` | Optional plenum power attenuation coefficient `mS` per band, in 1/m (> 0); switches to Eq. (9.18). |
 | `attenuation_receiving_per_m` | Optional `mR` per band, in 1/m (> 0); required together with *attenuation_source_per_m*. |
 | `source_length` | Source-side ceiling length `LS`, in m (Default: equal to *ceiling_length*). |
-| `split_source` | Power split `sS` towards the partition, in `(0, 1]` (Default: 0,5). |
-| `split_receiving` | Power split `sR` on the receiving side, in `(0, 1]` (Default: 0,5). |
+| `split_source` | Power split `sS` towards the partition, in `(0, 1]` (Default: 0.5). |
+| `split_receiving` | Power split `sR` on the receiving side, in `(0, 1]` (Default: 0.5). |
 
 **Returns:** A [`PlenumFlankingResult`](/phonometry/reference/api/building/ceiling-plenum/#plenumflankingresult).
 

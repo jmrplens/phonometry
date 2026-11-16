@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 _PRACTICAL = materials.PracticalAbsorptionSpectrum
 _THIRDS = materials.ThirdOctaveAbsorptionSpectrum
 
-#: Figure A.1: 125 Hz to 4 kHz, rated alpha_w = 0,60 with no indicator.
+#: Figure A.1: 125 Hz to 4 kHz, rated alpha_w = 0.60 with no indicator.
 _FIGURE_A1 = (0.20, 0.35, 0.70, 0.65, 0.60, 0.55)
-#: Figure A.2: the same with 1,00 at 500 Hz, rated 0,60(M).
+#: Figure A.2: the same with 1.00 at 500 Hz, rated 0.60(M).
 _FIGURE_A2 = (0.20, 0.35, 1.00, 0.65, 0.60, 0.55)
 
 #: Annex C: alpha_s from 100 Hz to 5 kHz.
@@ -48,10 +48,10 @@ _ANNEX_C = {
     4000: 0.94,
     5000: 0.81,
 }
-#: Clause 4.1 by hand on Annex C: the means 0,1467, 0,3433, 0,7567, 1,1133,
-#: 1,1167 and 0,9133 to the second decimal are 0,15, 0,34, 0,76, 1,11, 1,12
-#: and 0,91; in steps of 0,05 they are 0,15, 0,35, 0,75, 1,10, 1,10 and
-#: 0,90; the two above 1,00 are set to 1,00.
+#: Clause 4.1 by hand on Annex C: the means 0.1467, 0.3433, 0.7567, 1.1133,
+#: 1.1167 and 0.9133 to the second decimal are 0.15, 0.34, 0.76, 1.11, 1.12
+#: and 0.91; in steps of 0.05 they are 0.15, 0.35, 0.75, 1.10, 1.10 and
+#: 0.90; the two above 1.00 are set to 1.00.
 _ANNEX_C_PRACTICAL = {
     125: 0.15,
     250: 0.35,
@@ -61,8 +61,8 @@ _ANNEX_C_PRACTICAL = {
     4000: 0.90,
 }
 #: Clause 4.2 by hand on those: in twentieths 7, 15, 20, 20, 18 against the
-#: curve 16, 20, 20, 20, 18; shifted by 7 the unfavourable sum is 2 (0,10),
-#: by 6 it is 3, so alpha_w = 0,65; the excess over the shifted curve is 7
+#: curve 16, 20, 20, 20, 18; shifted by 7 the unfavourable sum is 2 (0.10),
+#: by 6 it is 3, so alpha_w = 0.65; the excess over the shifted curve is 7
 #: at 1 kHz, 2 kHz and 4 kHz, so the indicators are M and H; class C.
 _ANNEX_C_RATING = ("0.65(MH)", "C")
 
@@ -245,7 +245,7 @@ def test_the_one_third_octave_row_reads_one_band_and_refuses_another() -> None:
 
 
 def test_notes_name_values_off_the_grid_and_a_rating_that_disagrees() -> None:
-    """ISO 11654 Clause 4.1 steps of 0,05 and cap of 1,00, on printed digits."""
+    """ISO 11654 Clause 4.1 steps of 0.05 and cap of 1.00, on printed digits."""
     row = _PRACTICAL(
         name="Panel 40",
         source="A test",

@@ -6,13 +6,13 @@ Validation strategy: the standards' own numbers, not self-consistency.
 
 - The weighted rating and C / Ctr are checked against the worked example
   of ISO 717-1 Annex C, Table C.1 (measured R gives Rw = 30 with an
-  unfavourable-deviation sum of 31,8 dB, C = -2, Ctr = -3).
-- The unfavourable-deviation bound (Clause 4.4: <= 32,0 dB for 16
-  one-third-octave bands, <= 10,0 dB for 5 octave bands) is exercised
+  unfavourable-deviation sum of 31.8 dB, C = -2, Ctr = -3).
+- The unfavourable-deviation bound (Clause 4.4: <= 32.0 dB for 16
+  one-third-octave bands, <= 10.0 dB for 5 octave bands) is exercised
   with a curve that hits the bound exactly and one that tips over,
   forcing one more decibel of shift.
-- DnT (Formula (2)) reduces to D when T = T0 = 0,5 s; R' (Formula (4)
-  with A = 0,16 V / T, Formula (5)) reduces to D for S T = 0,16 V.
+- DnT (Formula (2)) reduces to D when T = T0 = 0.5 s; R' (Formula (4)
+  with A = 0.16 V / T, Formula (5)) reduces to D for S T = 0.16 V.
 - The energy-average level (Formula (9)) is checked against hand values.
 - The shared shift engine is re-verified against an independent brute-force
   airborne-shift search on 10 000 random curves for both band sets, pinning
@@ -140,19 +140,19 @@ def test_annex_c_worked_example_third_octave() -> None:
     assert res.rating == 30
     assert res.c == -2
     assert res.ctr == -3
-    # Sum of unfavourable deviations at the final shift: 31,8 dB (< 32,0).
+    # Sum of unfavourable deviations at the final shift: 31.8 dB (< 32.0).
     assert res.unfavorable_sum == pytest.approx(31.8, abs=1e-9)
 
 
 def test_reference_curve_rates_itself() -> None:
-    """Measured == reference => shift up by 2 dB (16 * 2 = 32,0), Rw = 54."""
+    """Measured == reference => shift up by 2 dB (16 * 2 = 32.0), Rw = 54."""
     res = building.weighted_rating(_REF_THIRD)
     assert res.rating == 54
     assert res.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
 
 
 def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
-    """Measured = reference - 2 everywhere => sum = 32,0 exactly, Rw = 52."""
+    """Measured = reference - 2 everywhere => sum = 32.0 exactly, Rw = 52."""
     measured = [r - 2.0 for r in _REF_THIRD]
     res = building.weighted_rating(measured)
     assert res.rating == 52
@@ -160,18 +160,18 @@ def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
 
 
 def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
-    """0,1 dB over the 32,0 bound forces one more decibel of shift."""
+    """0.1 dB over the 32.0 bound forces one more decibel of shift."""
     measured = [r - 2.0 for r in _REF_THIRD]
-    measured[0] -= 0.1  # sum would be 32,1 at the previous shift
+    measured[0] -= 0.1  # sum would be 32.1 at the previous shift
     res = building.weighted_rating(measured)
     assert res.rating == 51
-    # At Rw = 51 the 15 untouched bands contribute 1,0 dB each and the
-    # tipped band 1,1 dB => 16,1 dB (<= 32,0).
+    # At Rw = 51 the 15 untouched bands contribute 1.0 dB each and the
+    # tipped band 1.1 dB => 16.1 dB (<= 32.0).
     assert res.unfavorable_sum == pytest.approx(16.1, abs=1e-9)
 
 
 def test_octave_band_rating_bound() -> None:
-    """5 octave bands: bound is 10,0 dB; measured = ref - 2 => Rw = 52."""
+    """5 octave bands: bound is 10.0 dB; measured = ref - 2 => Rw = 52."""
     measured = [r - 2.0 for r in _REF_OCTAVE]
     res = building.weighted_rating(measured)
     assert res.rating == 52
@@ -179,7 +179,7 @@ def test_octave_band_rating_bound() -> None:
 
 
 def test_octave_reference_rates_itself() -> None:
-    """Octave reference == measured => 5 * 2 = 10,0 => Rw = 54."""
+    """Octave reference == measured => 5 * 2 = 10.0 => Rw = 54."""
     res = building.weighted_rating(_REF_OCTAVE)
     assert res.rating == 54
     assert res.unfavorable_sum == pytest.approx(10.0, abs=1e-9)
@@ -192,8 +192,8 @@ def test_explicit_band_set_override() -> None:
 
 
 def test_measured_data_rounded_to_one_decimal() -> None:
-    """Clause 4.4 footnote 1: inputs reduced to 0,1 dB (round half up)."""
-    # 30,04 -> 30,0 and 30,05 -> 30,1 must not change already-tenths data.
+    """Clause 4.4 footnote 1: inputs reduced to 0.1 dB (round half up)."""
+    # 30.04 -> 30.0 and 30.05 -> 30.1 must not change already-tenths data.
     res = building.weighted_rating(_ANNEX_C_R)
     perturbed = [v + 0.049 for v in _ANNEX_C_R]  # rounds back to originals
     assert building.weighted_rating(perturbed).rating == res.rating
@@ -253,7 +253,7 @@ def test_engine_matches_brute_force_octave() -> None:
 
 
 def test_energy_average_level_formula9() -> None:
-    """Formula (9): equal levels average to themselves; 60 & 70 -> 67,4."""
+    """Formula (9): equal levels average to themselves; 60 & 70 -> 67.4."""
     assert building.energy_average_level([60.0, 60.0, 60.0]) == pytest.approx(60.0)
     expected = 10.0 * np.log10((10**6 + 10**7) / 2.0)
     assert building.energy_average_level([60.0, 70.0]) == pytest.approx(expected)
@@ -267,7 +267,7 @@ def test_energy_average_level_takes_its_axis_by_name() -> None:
 
 
 def test_dnt_equals_d_when_t_is_half_second() -> None:
-    """Formula (2): T = T0 = 0,5 s => DnT = D exactly."""
+    """Formula (2): T = T0 = 0.5 s => DnT = D exactly."""
     l1 = np.array([80.0, 82.0, 85.0])
     l2 = np.array([40.0, 45.0, 50.0])
     t2 = np.full(3, 0.5)
@@ -278,7 +278,7 @@ def test_dnt_equals_d_when_t_is_half_second() -> None:
 
 
 def test_dnt_scales_with_reverberation_time() -> None:
-    """T = 5 s, T0 = 0,5 s => 10 lg(10) = 10 dB added to D."""
+    """T = 5 s, T0 = 0.5 s => 10 lg(10) = 10 dB added to D."""
     l1 = np.array([80.0])
     l2 = np.array([40.0])
     res = building.airborne_insulation(l1, l2, np.array([5.0]))
@@ -286,18 +286,18 @@ def test_dnt_scales_with_reverberation_time() -> None:
 
 
 def test_apparent_reduction_index_formula4() -> None:
-    """Formula (4)+(5): S*T = 0,16*V => 10 lg(S/A) = 0 => R' = D."""
+    """Formula (4)+(5): S*T = 0.16*V => 10 lg(S/A) = 0 => R' = D."""
     l1 = np.array([80.0, 82.0])
     l2 = np.array([40.0, 45.0])
     t2 = np.array([1.0, 1.0])
-    # A = 0,16 * V / T = 0,16; S = 0,16 => S/A = 1.
+    # A = 0.16 * V / T = 0.16; S = 0.16 => S/A = 1.
     res = building.airborne_insulation(l1, l2, t2, area=0.16, volume=1.0)
     assert res.r_prime is not None
     np.testing.assert_allclose(res.r_prime, l1 - l2)
 
 
 def test_apparent_reduction_index_ten_db_offset() -> None:
-    """S = 1,6, V = 1, T = 1 => A = 0,16, S/A = 10 => R' = D + 10."""
+    """S = 1.6, V = 1, T = 1 => A = 0.16, S/A = 10 => R' = D + 10."""
     l1 = np.array([80.0])
     l2 = np.array([40.0])
     res = building.airborne_insulation(l1, l2, np.array([1.0]), area=1.6, volume=1.0)
@@ -426,13 +426,13 @@ def test_airborne_rejects_an_infinite_geometry(name: str) -> None:
 
 
 def test_field_rating_pipeline_dnt_w() -> None:
-    """DnT per band (T = 0,5 s) fed to weighted_rating gives DnT,w."""
+    """DnT per band (T = 0.5 s) fed to weighted_rating gives DnT,w."""
     l2 = np.array([float(80 - r) for r in _REF_THIRD])  # D = ref
     l1 = np.full(16, 80.0)
     t2 = np.full(16, 0.5)
     res = building.airborne_insulation(l1, l2, t2)
     rating = building.weighted_rating(res.dnt)
-    # D == reference curve => rating 54 (2 dB up, sum 32,0).
+    # D == reference curve => rating 54 (2 dB up, sum 32.0).
     assert rating.rating == 54
 
 
@@ -566,8 +566,8 @@ def test_extended_mismatched_frequencies_name_the_entry_point() -> None:
 
 
 def test_one_decimal_rating_annex_b() -> None:
-    """ISO 12999-1:2020 Annex B: the 0,1 dB shift yields Rw = 57,4 dB and the
-    one-decimal sums Rw + C50-5000 = 56,4 / Rw + Ctr,50-5000 = 51,1 dB.
+    """ISO 12999-1:2020 Annex B: the 0.1 dB shift yields Rw = 57.4 dB and the
+    one-decimal sums Rw + C50-5000 = 56.4 / Rw + Ctr,50-5000 = 51.1 dB.
     """
     import reference_data as ref
 
@@ -618,8 +618,8 @@ def test_impact_extended_ci_50_2500() -> None:
 
 
 def test_impact_one_decimal_reference_floor() -> None:
-    """The 0,1 dB variant reproduces the printed uncertainty constants of
-    ISO 717-2:2020 A.2.2: Ln,r,0,w = 77,6 dB and CI,r,0 = -10,3 dB.
+    """The 0.1 dB variant reproduces the printed uncertainty constants of
+    ISO 717-2:2020 A.2.2: Ln,r,0,w = 77.6 dB and CI,r,0 = -10.3 dB.
     """
     res = building.weighted_impact_rating_extended(_HEAVY_FLOOR, one_decimal=True)
     assert res.rating == pytest.approx(77.6)
@@ -738,9 +738,9 @@ def test_rating_unfavourable_sum_must_restate_its_own_curves() -> None:
     """The sum is the two curves added up, so it is pinned to them.
 
     ISO 717-1:2020 Table C.1 rates its example at Rw = 30 dB with the
-    unfavourable deviations summing to 31,8 dB. Swapping ``measured`` for a
+    unfavourable deviations summing to 31.8 dB. Swapping ``measured`` for a
     curve lying on the shifted reference leaves no unfavourable deviation at
-    all, and the stale 31,8 dB used to survive the swap: the verbose Annex C
+    all, and the stale 31.8 dB used to survive the swap: the verbose Annex C
     fiche then printed an em dash in every deviation row and closed the
     table with "sum 0,0 dB", beside a plot titled
     ``... = 30 dB (Sigma unfav. = 31.8 dB)``.
@@ -762,7 +762,7 @@ def test_impact_unfavourable_sum_must_restate_its_own_curves() -> None:
 
     ISO 717-2:2020 Table C.1 rates the bare heavy floor at Ln,w = 79 dB with
     the deviations -- here where the measurement *exceeds* the reference --
-    summing to 28,0 dB. A ``measured`` curve laid on the shifted reference
+    summing to 28.0 dB. A ``measured`` curve laid on the shifted reference
     leaves none of them, and the refusal must name the impact sense rather
     than the airborne one.
     """

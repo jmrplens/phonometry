@@ -200,7 +200,7 @@ class BackgroundCorrectedLevel(OwnsArrays):
 
     At a margin :math:`L' - L_\mathrm{b}` of 15 dB or more the level is used
     unchanged; between 6 dB and 15 dB the background is subtracted in energy;
-    under 6 dB the correction is held at 1,3 dB, the limit of measurement,
+    under 6 dB the correction is held at 1.3 dB, the limit of measurement,
     and the band is reported as :math:`> \Delta L`. The margins, the corrected
     levels and the bands at the limit are read from the two readings, so they
     are not fields: a record cannot be built to claim a band clear of the
@@ -258,7 +258,7 @@ class BackgroundCorrectedLevel(OwnsArrays):
     def limited(self) -> NDArray[np.bool_]:
         """Where the margin is under 6 dB, so the band is at the limit of measurement.
 
-        Judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996 in binary and
+        Judged settled: 32.3 - 26.3 dB is 5.999 999 999 999 996 in binary and
         still the 6 dB it is.
         """
         return np.asarray(settled(self.margins_db) < _MARGIN_LIMIT, dtype=np.bool_)
@@ -271,7 +271,7 @@ class BackgroundCorrectedLevel(OwnsArrays):
         diff = 10.0 ** (lp / 10.0) - 10.0 ** (lb / 10.0)
         with np.errstate(invalid="ignore", divide="ignore"):
             subtracted = 10.0 * np.log10(np.where(diff > 0.0, diff, 1.0))
-        # >= 15: unchanged; 6 <= margin < 15: energy subtraction; < 6: 1,3 dB.
+        # >= 15: unchanged; 6 <= margin < 15: energy subtraction; < 6: 1.3 dB.
         judged = settled(self.margins_db)
         corrected = np.where(judged >= _MARGIN_NEGLIGIBLE, lp, subtracted)
         return np.asarray(
@@ -376,7 +376,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
         """Reject an improvement spectrum whose columns cover different bands.
 
         The ISO 16251-1 fiche prints one row per band and prefixes ``>`` to the
-        bands that only reached the 1,3 dB limit of measurement, which is the
+        bands that only reached the 1.3 dB limit of measurement, which is the
         difference between a measured improvement and a lower bound on one.
         That prefix is taken from ``limited`` by position, so a mask of another
         length claims the limit for bands that were never near it and drops it
@@ -490,7 +490,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
         sound by soft floor coverings): the standard-basis line, an optional
         metadata header block, a two-panel body with the per-band table
         (frequency and the reduction of impact sound pressure level ``ΔL``,
-        bands at the 1,3 dB limit of measurement prefixed ``>``) beside the
+        bands at the 1.3 dB limit of measurement prefixed ``>``) beside the
         ``ΔL(f)`` improvement curve, a boxed single-number weighted improvement
         ``ΔLw (CI,Δ)`` (ISO 717-2, the Clause 8 e) statement of results; a
         characterisation headline replaces it when the spectrum lacks the 16

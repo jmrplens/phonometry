@@ -587,7 +587,7 @@ def test_a_control_character_in_a_numeric_cell_is_named_and_never_shown(
 def test_a_figure_grouped_in_thousands_proposes_no_decimal_mark(
     tmp_path: pathlib.Path, cell: str, decimal: str
 ) -> None:
-    """12,500 could be twelve and a half or twelve thousand: it tells no dialect."""
+    """“12,500” could be twelve and a half or twelve thousand: it tells no dialect."""
     header = _header(csv={"delimiter": ";", "decimal": decimal})
     columns = "key;name;absorption_coefficient_500;absorption_coefficient_1000"
     path = _sheet(tmp_path, f"{columns}\na;Tile;{cell};{cell}\n", header)

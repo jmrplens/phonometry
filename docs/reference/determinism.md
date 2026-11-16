@@ -149,7 +149,7 @@ complex products away from the compiler that may or may not fuse them.*
 Every claim above is measured, and most of them are re-measured by tests that
 run in CI:
 
-- **91,658,333 inputs, zero exceptions.** Every distinct value the whole
+- **91 658 333 inputs, zero exceptions.** Every distinct value the whole
   design corpus feeds its logarithm was captured and compared bit for bit
   against glibc's `log`: identical on all of them, plus roughly a hundred
   million adversarial draws over the full exponent range, the near-one band,

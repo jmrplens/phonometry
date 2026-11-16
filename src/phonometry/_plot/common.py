@@ -920,7 +920,7 @@ def format_frequency_axis(
     power-of-ten log formatter (``10^2``, ``10^3``) that reads poorly in
     acoustics.  ``minor="thirds"`` adds unlabelled one-third-octave minor
     ticks; ``minor=None`` clears the minor ticks.  ``language="es"`` draws the
-    off-decade centres with the Spanish decimal comma (``31,5``, ``1,25k``),
+    off-decade centres with the Spanish decimal comma (``31,5``, “1,25k”),
     which the tick-label pass of :func:`~phonometry._i18n.localize_axes` cannot
     reach once the labels are fixed strings.
 
@@ -1838,7 +1838,7 @@ def _plot_two_runs(
         ax.set_xlabel(frequency_label)
         # The language has to be forwarded: the tick labels of a logarithmic
         # axis are written by this formatter, and `localize_axes` below skips
-        # exactly those axes, so a Spanish figure would keep 31.5 for 31,5.
+        # exactly those axes, so a Spanish figure would keep 31.5 for "31,5".
         format_frequency_axis(ax, language=language)
         format_frequency_axis(twin, language=language)
     else:

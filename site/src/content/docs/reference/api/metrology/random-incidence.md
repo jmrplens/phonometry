@@ -34,7 +34,7 @@ as the angle $\phi$ from the reference direction and the angle
 $\alpha$ about it:
 
 $$
-\gamma = \frac{4\pi}{\displaystyle\int_0^{2\pi}\!\!\int_0^{\pi} 10^{-0{,}1[L_\mathrm{rd} - L(\phi,\alpha)]}\, |\sin\phi|\,\mathrm{d}\alpha\,\mathrm{d}\phi}
+\gamma = \frac{4\pi}{\displaystyle\int_0^{2\pi}\!\!\int_0^{\pi} 10^{-0.1[L_\mathrm{rd} - L(\phi,\alpha)]}\, |\sin\phi|\,\mathrm{d}\alpha\,\mathrm{d}\phi}
 $$
 
 and in practice the sum of Formula (4) over `m` angles $\phi_i$ in
@@ -94,27 +94,27 @@ be *measured* once; they are *counted* in both sums. Each plane's pole factor
 of Formula (A.2) covers half of the polar cap, so the 72 factors of Table A.1
 sum to exactly one only with the poles in both sums, and an omnidirectional
 instrument then has $\gamma = 1$. Counted once, the factors sum to
-0,998097: the sum of (A.3) loses the second plane's two pole terms, and
+0.998097: the sum of (A.3) loses the second plane's two pole terms, and
 $10\lg\gamma$ comes out high by
 
 $$
--10\lg\left(1 - \gamma\,K(0)\left[10^{-0{,}1[L_\mathrm{rd} - L(0°)]} + 10^{-0{,}1[L_\mathrm{rd} - L(180°)]}\right]\right)
+-10\lg\left(1 - \gamma\,K(0)\left[10^{-0.1[L_\mathrm{rd} - L(0°)]} + 10^{-0.1[L_\mathrm{rd} - L(180°)]}\right]\right)
 $$
 
-which is 0,008 dB (0,19 % on $\gamma$) for an omnidirectional
-instrument and grows with the directivity: about 0,02 dB at
+which is 0.008 dB (0.19 % on $\gamma$) for an omnidirectional
+instrument and grows with the directivity: about 0.02 dB at
 $10\lg\gamma = 7$ dB when little arrives from behind. This module does
 not make that error.
 
 **The angles of the equal-area elements.** The note to A.1.8 prints the 38
-directions to 0,1° without saying how they were placed. Each is the direction
+directions to 0.1° without saying how they were placed. Each is the direction
 that halves its element's area in polar angle: the cap about each pole takes
 1/38 of the sphere, and the nine rings between them 4/38 each, split into
 four elements by the two planes. That construction reproduces the note's
-list of 20 angles to the 0,1° it is printed to, except two: 77,9° and its
-mirror 282,1° break the list's own symmetry about 90° (77,9° + 102,2° is
-180,1°, where all the other pairs sum to 180,0°), the construction gives 77,85°
-and 282,15°, and the two are recorded in `docs/ERRATA.md`.
+list of 20 angles to the 0.1° it is printed to, except two: 77.9° and its
+mirror 282.1° break the list's own symmetry about 90° (77.9° + 102.2° is
+180.1°, where all the other pairs sum to 180.0°), the construction gives 77.85°
+and 282.15°, and the two are recorded in `docs/ERRATA.md`.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -187,7 +187,7 @@ Directivity factor of an instrument with rotational symmetry, from one
 plane (IEC 61183:1994, Formula (A.4)).
 
 $$
-\gamma = \left(2\sum_{\phi = 0}^{350} K(\phi)\, 10^{-0{,}1[L_\mathrm{rd} - L(\phi,\mathrm{h})]}\right)^{-1}
+\gamma = \left(2\sum_{\phi = 0}^{350} K(\phi)\, 10^{-0.1[L_\mathrm{rd} - L(\phi,\mathrm{h})]}\right)^{-1}
 $$
 
 NOTE 1 of A.4.7: when the instrument is rotationally symmetric about its
@@ -382,7 +382,7 @@ Directivity factor from readings in two or more planes
 (IEC 61183:1994, Formula (A.3)).
 
 $$
-\gamma = \left(\sum_{\phi = 0}^{350} K(\phi)\, 10^{-0{,}1[L_\mathrm{rd} - L(\phi,\mathrm{h})]} + \sum_{\phi = 0}^{350} K(\phi)\, 10^{-0{,}1[L_\mathrm{rd} - L(\phi,\mathrm{v})]}\right)^{-1}
+\gamma = \left(\sum_{\phi = 0}^{350} K(\phi)\, 10^{-0.1[L_\mathrm{rd} - L(\phi,\mathrm{h})]} + \sum_{\phi = 0}^{350} K(\phi)\, 10^{-0.1[L_\mathrm{rd} - L(\phi,\mathrm{v})]}\right)^{-1}
 $$
 
 for the 10° steps and two planes of A.4.5 and A.4.6, with the factors of
@@ -396,7 +396,7 @@ The readings at 0° and 180° are the same in every plane, and A.4.7 says
 they have only to be taken into account once. They are measured once and
 enter every plane's sum here, which is what makes the factors sum to one
 and an omnidirectional instrument read $\gamma = 1$; counted once,
-$10\lg\gamma$ would come out 0,008 dB high for an omnidirectional
+$10\lg\gamma$ would come out 0.008 dB high for an omnidirectional
 instrument and more for a directional one (see the module notes).
 
 **Parameters**
@@ -440,7 +440,7 @@ The directivity factor of a sound level meter at one frequency
 (IEC 61183:1994, Formulas (A.3) to (A.5)).
 
 $$
-\gamma = \left(\sum K\, 10^{-0{,}1[L_\mathrm{rd} - L]}\right)^{-1}
+\gamma = \left(\sum K\, 10^{-0.1[L_\mathrm{rd} - L]}\right)^{-1}
 $$
 
 over every reading, each weighted by the share of the sphere it stands
@@ -528,17 +528,17 @@ Directivity factor from 38 equal-area elements (IEC 61183:1994,
 Formula (A.5)).
 
 $$
-\gamma = \left(\sum_{n = 1}^{38} \frac{1}{38}\, 10^{-0{,}1[L_\mathrm{rd} - L(n)]}\right)^{-1}
+\gamma = \left(\sum_{n = 1}^{38} \frac{1}{38}\, 10^{-0.1[L_\mathrm{rd} - L(n)]}\right)^{-1}
 $$
 
 NOTE 2 of A.4.7: with the directions of the note to A.1.8, every element
-is 1/38 of the sphere (2,6 %) and every reading weighs the same.
+is 1/38 of the sphere (2.6 %) and every reading weighs the same.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `horizontal_levels` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32,6°, ..., 180°, ..., 327,4°). |
+| `horizontal_levels` | $L(n)$ in the horizontal (X-Y) plane, in dB, 20 readings at the directions of [`equal_area_incidence_angles`](/phonometry/reference/api/metrology/random-incidence/#equal_area_incidence_angles), in the order the note prints them (0°, 32.6°, ..., 180°, ..., 327.4°). |
 | `vertical_levels` | $L(n)$ in the vertical (X-Z) plane, in dB, 18 readings at the same directions without 0° and 180°. |
 | `reference_level` | $L_\mathrm{rd}$ in dB (Default: None, the horizontal reading at 0°). |
 
@@ -570,8 +570,8 @@ $$
 \phi_k = \arccos\left(1 - \frac{4k - 1}{19}\right), \qquad k = 1, \ldots, 9
 $$
 
-which is 32,6°, 50,8°, 65,1°, 77,8° and 90° up to grazing incidence. The
-note prints the same angles to 0,1°, except 77,9° and its mirror 282,1°,
+which is 32.6°, 50.8°, 65.1°, 77.8° and 90° up to grazing incidence. The
+note prints the same angles to 0.1°, except 77.9° and its mirror 282.1°,
 which are errata (see the module notes).
 
 **Returns:** The two planes, in degrees, read-only, as an [`IncidenceAngles`](/phonometry/reference/api/metrology/random-incidence/#incidenceangles). The horizontal plane holds both poles and runs 0°, $\phi_1, \ldots, \phi_9$, 180°, $360° - \phi_9, \ldots, 360° - \phi_1$: 20 directions in the order the note prints them. The vertical plane holds the same without the poles: 18.
@@ -619,7 +619,7 @@ The planes cut each ring between the poles into $2n$ elements of
 $K(\phi)$ each, the largest at the direction nearest 90°, and leave
 the cap about each pole whole, $\sin^2(\Delta\phi/4)$ of the sphere.
 A.1.6 asks for the largest to be no more than 3 %; with the two planes of
-Annex A and 10° steps it is the element at 90°, 2,18 %, the
+Annex A and 10° steps it is the element at 90°, 2.18 %, the
 "approximately 2,2 %" of A.1.7. One plane measured under rotational
 symmetry stands for the same two planes and is judged on their division.
 
@@ -758,8 +758,8 @@ One row of IEC 61183:1994 Table B.1.
 The characteristics of a type LS2aP/LS2F laboratory standard microphone
 (IEC 61094-1), one of the two types Annex B recommends for the
 reference of the diffuse-field method, at one preferred frequency. The
-table rounds both to 0,05 dB, determined with pure tones, with a
-measurement uncertainty of ±0,03 dB (B.5).
+table rounds both to 0.05 dB, determined with pure tones, with a
+measurement uncertainty of ±0.03 dB (B.5).
 
 **Attributes**
 

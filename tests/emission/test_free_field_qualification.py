@@ -285,7 +285,7 @@ def test_the_fit_reads_its_tolerance_from_table_a1(
 def test_a_radius_the_levels_do_not_qualify_is_refused() -> None:
     # The reflecting wall ends the run inside the traverse; a result that
     # claimed the whole traverse would judge it against a wider tolerance
-    # than Table A.1's 1,0 dB at 1 kHz.
+    # than Table A.1's 1.0 dB at 1 kHz.
     d = np.arange(0.50, 2.4001, 0.05)
     levels, _ = _incoherent_reflection(1.0, 2.5, d)
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
@@ -305,7 +305,7 @@ def test_a_coherent_reflection_ripples_by_the_known_amount() -> None:
     """A tone and its image: D = 10 lg(1 + a^2 + 2 a cos(k(r' - r))), a = rho r/r'.
 
     The ripple grows with the distance, since a does, and crosses twice the
-    Table A.1 limit of the band (2 x 2,5 dB at 500 Hz, hemi-anechoic) before
+    Table A.1 limit of the band (2 x 2.5 dB at 500 Hz, hemi-anechoic) before
     the traverse ends. The qualified distance is the last point before the
     running spread of D leaves 2t, walked here point by point on D alone, and
     b is L(1 m) plus the midpoint of D over that run.
@@ -394,7 +394,7 @@ def _offset_field(origin: np.ndarray) -> list[emission.MicrophoneTraverse]:
 def test_the_origin_is_found_inside_the_source_volume() -> None:
     """The acoustic centre sits 16 cm from the frame's origin, inside the source.
 
-    From the frame's origin the near points deviate by up to 8,7 (u.o)/r dB and
+    From the frame's origin the near points deviate by up to 8.7 (u.o)/r dB and
     the run breaks early; searched inside the box, the origin moves to where
     every point qualifies.
     """
@@ -495,10 +495,10 @@ def test_a_short_traverse_does_not_pull_the_origin_off_the_centre() -> None:
     """The measurement ends one traverse at 1 m; the room ends another beyond it.
 
     Traverses along +x, -x, +y, -y and +z in an exact field centred on the
-    box. The +x one stops at 1,0 m, so its run reaches its last point from
+    box. The +x one stops at 1.0 m, so its run reaches its last point from
     every origin, at a distance that moves as far as the origin does. The +y
-    one carries an incoherent image in a wall 2,5 m ahead, and the room ends
-    it near 2,2 m. Counted from each origin, the short traverse would
+    one carries an incoherent image in a wall 2.5 m ahead, and the room ends
+    it near 2.2 m. Counted from each origin, the short traverse would
     reward the origin that backs away from its last point; counted, as the
     search counts it, from the centre of the box, it is the same for every
     origin, the flattest curves decide and the origin stays at the centre.
@@ -542,14 +542,14 @@ def test_the_origin_never_leaves_the_box() -> None:
 
 
 def test_a_traverse_starting_beyond_the_radius_is_centred_on_its_own_run() -> None:
-    """One path breaks at 0,7 m; another starts at 0,9 m, beyond that radius.
+    """One path breaks at 0.7 m; another starts at 0.9 m, beyond that radius.
 
     The second path has no point within the radius every path meets, so its
     source strength is the midpoint over its own qualified run and its
     deviations stay defined.
     """
     near = np.arange(0.3, 1.5001, 0.05)
-    step = np.where(near > 0.72, 3.0, 0.0)  # a 3 dB jump beyond 0,7 m
+    step = np.where(near > 0.72, 3.0, 0.0)  # a 3 dB jump beyond 0.7 m
     broken = emission.MicrophoneTraverse.along(
         (1, 0, 0), near, _L1M - 20.0 * np.log10(near) + step
     )
@@ -643,7 +643,7 @@ def test_a_uniform_source_is_suitable() -> None:
 
 def test_a_lobe_beyond_table_b1_is_not_suitable() -> None:
     levels = np.full((32, 1), 80.0)
-    levels[5, 0] = 82.7  # 2,62 dB above the mean at 1 kHz; the limit is 2,5 dB
+    levels[5, 0] = 82.7  # 2.62 dB above the mean at 1 kHz; the limit is 2.5 dB
     result = emission.verify_source_directionality(
         levels, frequencies=[1000.0], room="hemi-anechoic"
     )
@@ -716,14 +716,14 @@ def test_a_reflecting_plane_that_absorbs_too_much_fails() -> None:
 
 
 def test_a_reflecting_plane_that_ends_too_close_fails() -> None:
-    """A.2.5: at least a quarter wavelength at 100 Hz (0,86 m) and 0,75 m."""
+    """A.2.5: at least a quarter wavelength at 100 Hz (0.86 m) and 0.75 m."""
     check = _qualified(_free_field_traverses(_SPACING), reflecting_plane_margin_m=0.8)
     assert check.reflecting_plane_met is False
 
 
 @pytest.mark.parametrize(("margin", "met"), [(0.70, False), (0.80, True)])
 def test_the_plane_extends_at_least_0_75_m(*, margin: float, met: bool) -> None:
-    """A.2.5 with 125 Hz lowest: the quarter wavelength is 0,686 m, so 0,75 m binds."""
+    """A.2.5 with 125 Hz lowest: the quarter wavelength is 0.686 m, so 0.75 m binds."""
     freqs = _GRID[1:]
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, freqs),
@@ -952,8 +952,8 @@ def test_a_grid_point_may_sit_a_tenth_of_the_step_off(
 ) -> None:
     """The library's reading of "equally spaced": a tenth of the step.
 
-    One point of the 20 mm grid moved 1,9 mm stays on the grid, and moved
-    2,1 mm it falls off; every largest spacing of A.4.3 holds either way.
+    One point of the 20 mm grid moved 1.9 mm stays on the grid, and moved
+    2.1 mm it falls off; every largest spacing of A.4.3 holds either way.
     """
     d = _SPACING.copy()
     d[40] += shift_mm / 1000.0
@@ -976,7 +976,7 @@ def test_the_edge_band_is_held_to_the_stricter_spacing() -> None:
 def _counted(points: tuple[int, ...]) -> emission.FreeFieldCheck:
     """Traverses of ``points`` at 20 mm, judged at 1 kHz.
 
-    The longest starts at 0,06 m and every one ends where it does, so that
+    The longest starts at 0.06 m and every one ends where it does, so that
     the radius, set by the traverse that ends first, takes in every point.
     """
     longest = max(points)
@@ -1016,7 +1016,7 @@ def test_a43_asks_for_10_points_a_traverse_and_50_in_all(
 
 
 def test_too_short_a_traverse_fails_5143() -> None:
-    """ISO 26101 5.1.4.3: at least a quarter wavelength at 100 Hz, 0,86 m."""
+    """ISO 26101 5.1.4.3: at least a quarter wavelength at 100 Hz, 0.86 m."""
     d = np.arange(0.30, 0.9, 0.02)
     check = _qualified(_free_field_traverses(d))
     assert not np.any(check.length_met)
@@ -1024,7 +1024,7 @@ def test_too_short_a_traverse_fails_5143() -> None:
 
 
 def test_a_traverse_starting_too_far_out_fails_5143() -> None:
-    """ISO 26101 5.1.4.3: start at most a quarter wavelength (0,86 m at 100 Hz) out."""
+    """ISO 26101 5.1.4.3: start at most a quarter wavelength (0.86 m at 100 Hz) out."""
     d = np.arange(1.0, 3.0001, 0.02)
     check = _qualified(_free_field_traverses(d))
     assert not np.any(check.length_met)

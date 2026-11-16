@@ -122,7 +122,7 @@ show. The head is an inline literal, a role, an interpreted span, a bold span
 or a link, alone or several joined by a slash, a comma, "and" or "or", with
 one parenthesis after them at most; the hyphen has to follow it, so a minus
 inside a role (``:math:`445.2 F - 344.3```) is never read. Elsewhere a spaced
-hyphen is also a minus (``32,3 - 26,3 dB``), and the rule holds there by
+hyphen is also a minus (“32,3 - 26,3 dB”), and the rule holds there by
 review.
 
 Exit status 0 when the prose is clean, 1 otherwise, naming every file and line.

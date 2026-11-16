@@ -3,13 +3,13 @@
 
 ISO 8253-1:2010 prints the maximum permissible ambient levels of an
 audiometric test room (Tables 2 and 4), the earphone attenuations that move
-them (Table 3), and one worked uncertainty budget (Table A.2, u = 4,9 dB and
+them (Table 3), and one worked uncertainty budget (Table A.2, u = 4.9 dB and
 U = 10 dB). ISO 8253-2:2009 prints the ambient limits for sound field
 audiometry (Table 2), the microphone requirements of the diffuse-field test
 (Table 1) and the off-axis increases of Table B.1. ISO 4869-3:2007 prints its
 own microphone table (Table 1), the front-to-random index of the fixture
 (Table A.1), the isolation it asks of the fixture (5.1.4) and a typical
-uncertainty budget (Table B.1, u = 1,3 dB and U = 2,6 dB). The rows below read
+uncertainty budget (Table B.1, u = 1.3 dB and U = 2.6 dB). The rows below read
 each from the library.
 
 The threshold rules of ISO 8253-1 (6.2.4.2, 6.2.4.3, 6.3.5 and 7.5) and the
@@ -101,7 +101,7 @@ def _table[K](
     "Maximum permissible ambient levels for air conduction, three test ranges",
 )
 def _chk_table_2() -> Outcome:
-    """25 bands from 31,5 Hz to 8 kHz for 125 Hz, 250 Hz and 500 Hz."""
+    """25 bands from 31.5 Hz to 8 kHz for 125 Hz, 250 Hz and 500 Hz."""
     return _table(
         dict(hearing.AIR_CONDUCTION_AMBIENT_LIMITS_DB),
         ref.ISO8253_1_TABLE_2,
@@ -127,7 +127,7 @@ def _chk_table_3() -> Outcome:
     "Maximum permissible ambient levels for bone conduction, two test ranges",
 )
 def _chk_table_4() -> Outcome:
-    """25 bands from 31,5 Hz to 8 kHz for 125 Hz and 250 Hz."""
+    """25 bands from 31.5 Hz to 8 kHz for 125 Hz and 250 Hz."""
     return _table(
         dict(hearing.BONE_CONDUCTION_AMBIENT_LIMITS_DB),
         ref.ISO8253_1_TABLE_4,
@@ -166,7 +166,7 @@ def _chk_adjustments() -> Outcome:
     "Audiometer standard uncertainty, air conduction up to 4 kHz, 5 dB steps",
 )
 def _chk_a33() -> Outcome:
-    """sqrt((3/sqrt 3)^2 + (2,5/sqrt 3)^2) dB, which A.3.3 prints as 2,3 dB."""
+    """sqrt((3/sqrt 3)^2 + (2.5/sqrt 3)^2) dB, which A.3.3 prints as 2.3 dB."""
     budget = hearing.audiometric_uncertainty(1000.0)
     return record(
         {"u(delta_eq)": ref.ISO8253_1_A33_EQUIPMENT_DB},
@@ -181,7 +181,7 @@ def _chk_a33() -> Outcome:
     "Transducer standard uncertainty up to and above 4 kHz",
 )
 def _chk_a34() -> Outcome:
-    """sqrt(1,5^2 + 2,5^2) = 2,9 dB and sqrt(2,5^2 + 3^2) = 3,9 dB."""
+    """sqrt(1.5^2 + 2.5^2) = 2.9 dB and sqrt(2.5^2 + 3^2) = 3.9 dB."""
     low, high = ref.ISO8253_1_A34_TRANSDUCER_DB
     return record(
         {"up to 4 kHz": low, "above 4 kHz": high},
@@ -204,7 +204,7 @@ def _chk_a34() -> Outcome:
     "below 4 kHz, no masking",
 )
 def _chk_table_a2() -> Outcome:
-    """2,5, 2,3, 2,9 and 2,0 dB; u = 4,9 dB and U = 10 dB, rounded to the
+    """2.5, 2.3, 2.9 and 2.0 dB; u = 4.9 dB and U = 10 dB, rounded to the
     nearest full decibel (A.6).
     """
     budget = hearing.audiometric_uncertainty(1000.0)
@@ -242,8 +242,8 @@ def _chk_ascending() -> Outcome:
     "Bracketing method: mean of the two averages to the nearest 5 dB step",
 )
 def _chk_bracketing() -> Outcome:
-    """Ascents 30, 30, 35 dB and descents 35, 35, 35 dB: averages 31,67 dB and
-    35 dB, mean 33,33 dB, whose nearest 5 dB step is 35 dB. The mean is clear
+    """Ascents 30, 30, 35 dB and descents 35, 35, 35 dB: averages 31.67 dB and
+    35 dB, mean 33.33 dB, whose nearest 5 dB step is 35 dB. The mean is clear
     of a tie, so the answer needs no rule the clause does not give.
     """
     result = hearing.bracketing_method_threshold([30, 30, 35], [35, 35, 35])
@@ -260,7 +260,7 @@ def _chk_bracketing() -> Outcome:
     "Automatic recording: first reversal and small excursions dropped, rounded up",
 )
 def _chk_automatic() -> Outcome:
-    """Peaks 31, 30,5, 30 dB and valleys 20 dB: 25,25 dB, rounded up to 26 dB.
+    """Peaks 31, 30.5, 30 dB and valleys 20 dB: 25.25 dB, rounded up to 26 dB.
 
     The first reversal is dropped, and so are the three that bound the two
     excursions of 1 dB near the end. A mean a quarter of a decibel above a
@@ -288,7 +288,7 @@ def _chk_automatic() -> Outcome:
     "Sweep-frequency audiometry: three nearest peaks and valleys, rounded",
 )
 def _chk_sweep() -> Outcome:
-    """Peaks at 30,6 dB and valleys at 20 dB about 1 kHz: 25,3 dB, then 25 dB."""
+    """Peaks at 30.6 dB and valleys at 20 dB about 1 kHz: 25.3 dB, then 25 dB."""
     freqs = np.geomspace(250.0, 8000.0, 24)
     levels = np.where(np.arange(24) % 2 == 0, 30.6, 20.0)
     result = hearing.sweep_audiometry_threshold(
@@ -382,10 +382,10 @@ def _chk_vibrotactile() -> Outcome:
 @register(
     _ISO8253,
     "ISO 8253-2:2009 Table 2",
-    "Maximum permissible ambient levels for sound field audiometry, to 12,5 kHz",
+    "Maximum permissible ambient levels for sound field audiometry, to 12.5 kHz",
 )
 def _chk_sound_field_table_2() -> Outcome:
-    """27 bands from 31,5 Hz to 12,5 kHz for 125 Hz and 250 Hz."""
+    """27 bands from 31.5 Hz to 12.5 kHz for 125 Hz and 250 Hz."""
     return _table(
         dict(hearing.SOUND_FIELD_AMBIENT_LIMITS_DB),
         ref.ISO8253_2_TABLE_2,
@@ -400,7 +400,7 @@ def _chk_sound_field_table_2() -> Outcome:
     "less 3 dB, an offset the library reads off the two tables",
 )
 def _chk_binaural_derivation() -> Outcome:
-    """Every shared cell, 31,5 Hz to 8 kHz, is the bone-conduction limit less 3 dB.
+    """Every shared cell, 31.5 Hz to 8 kHz, is the bone-conduction limit less 3 dB.
 
     Footnote a says only that the limits are derived from ISO 8253-1 for
     binaural listening; the 3 dB is what the two printed tables show when laid
@@ -421,7 +421,7 @@ def _chk_binaural_derivation() -> Outcome:
 @register(
     _ISO8253,
     "ISO 8253-2:2009 Table B.1",
-    "Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12,5 kHz",
+    "Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12.5 kHz",
 )
 def _chk_table_b1() -> Outcome:
     """24 rows, the first two below the 200 Hz the text announces (an erratum)."""
@@ -447,7 +447,7 @@ def _chk_table_b1() -> Outcome:
     "Allowable field variation by the microphone's front-to-random index",
 )
 def _chk_diffuse_table_1() -> Outcome:
-    """5 dB and more allow 5 dB, 4,5 dB allows 4,5 dB, 4 dB allows 4 dB."""
+    """5 dB and more allow 5 dB, 4.5 dB allows 4.5 dB, 4 dB allows 4 dB."""
     expected = {
         f"index {index:g} dB": allowed for index, allowed in ref.ISO8253_2_TABLE_1
     }
@@ -476,10 +476,10 @@ def _chk_diffuse_table_1() -> Outcome:
     "form; the standard prints no value)",
 )
 def _chk_inverse_distance() -> Outcome:
-    """20 lg(1,15/0,85) = 2,626 dB at 0,15 m, 20 lg(1,1/0,9) = 1,743 dB at 0,10 m.
+    """20 lg(1.15/0.85) = 2.626 dB at 0.15 m, 20 lg(1.1/0.9) = 1.743 dB at 0.10 m.
 
     5.2 c) and 5.4 c) name the law and print no number, so the expected side
-    is the two values worked out by hand from it, to 0,001 dB.
+    is the two values worked out by hand from it, to 0.001 dB.
     """
     four: dict[LateralPosition, list[float]] = dict.fromkeys(
         ("left", "right", "up", "down"), [0.0]
@@ -511,7 +511,7 @@ def _chk_inverse_distance() -> Outcome:
     "Combined and expanded uncertainty of the typical budget",
 )
 def _chk_4869_3_budget() -> Outcome:
-    """u = sqrt(0,25 + 1 + 0,09 + 0,25 + 0,04) = 1,3 dB, U = 2u = 2,6 dB."""
+    """u = sqrt(0.25 + 1 + 0.09 + 0.25 + 0.04) = 1.3 dB, U = 2u = 2.6 dB."""
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
     return record(
         {"u": ref.ISO4869_3_TABLE_B1_U_DB, "U": ref.ISO4869_3_B4_EXPANDED_DB},
@@ -529,7 +529,7 @@ def _chk_4869_3_budget() -> Outcome:
     "Allowable field variation, read with the text for an index of 5 dB",
 )
 def _chk_4869_3_table_1() -> Outcome:
-    """5 dB allows 5 dB (the text's 'at least 5 dB'), 4,5 dB allows 4 dB."""
+    """5 dB allows 5 dB (the text's 'at least 5 dB'), 4.5 dB allows 4 dB."""
     six: dict[SoundFieldPosition, list[float]] = dict.fromkeys(
         ("front", "back", "left", "right", "up", "down"), [0.0]
     )
@@ -558,7 +558,7 @@ def _chk_4869_3_table_1() -> Outcome:
     "Front-to-random index of the fixture, and the bands it may test itself",
 )
 def _chk_4869_3_table_a1() -> Outcome:
-    """13 cells; at least 4 dB at 1,25 kHz to 3,15 kHz, 6,3 kHz and 8 kHz."""
+    """13 cells; at least 4 dB at 1.25 kHz to 3.15 kHz, 6.3 kHz and 8 kHz."""
     library = hearing.ATF_FRONT_TO_RANDOM_INDEX
     matching = sum(
         1

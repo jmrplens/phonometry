@@ -21,8 +21,8 @@ from phonometry.fluids import Fluid
 # ---------------------------------------------------------------------------
 # ISO 11654:1997 rating of sound absorption — the two normative worked examples
 # of Annex A. Both use the same practical-coefficient spectrum except at 500 Hz;
-# A.1 gives alpha_w = 0,60 with no shape indicator, A.2 (500 Hz raised to 1,00)
-# gives alpha_w = 0,60(M). Bands are 250/500/1000/2000/4000 Hz. Mirrors
+# A.1 gives alpha_w = 0.60 with no shape indicator, A.2 (500 Hz raised to 1.00)
+# gives alpha_w = 0.60(M). Bands are 250/500/1000/2000/4000 Hz. Mirrors
 # tests/materials/absorbers/test_absorption_rating.py.
 # ---------------------------------------------------------------------------
 ISO11654_ANNEX_A1_ALPHA_P: tuple[float, ...] = (0.35, 0.70, 0.65, 0.60, 0.55)
@@ -36,9 +36,9 @@ ISO11654_ANNEX_A2_INDICATOR = "M"
 # ---------------------------------------------------------------------------
 # ISO 9053-2:2020 alternating-method airflow resistance — the Annex A.3 worked
 # example of the effective ratio of specific heats. A closed cylinder 100 mm x
-# 100 mm gives V = 7,854e-4 m3 and S = 0,0471 m2; at f = 2 Hz the standard
-# prints the wavelength 172,9 m, the thermal boundary layer b = 1,83e-3 m and
-# the heat-conduction-corrected kappa' = kappa*0,978 = 1,370. Mirrors
+# 100 mm gives V = 7.854e-4 m3 and S = 0.0471 m2; at f = 2 Hz the standard
+# prints the wavelength 172.9 m, the thermal boundary layer b = 1.83e-3 m and
+# the heat-conduction-corrected kappa' = kappa*0.978 = 1.370. Mirrors
 # tests/materials/absorbers/test_airflow_resistance.py.
 #
 # The five air properties below are the ones Annex A.3 PRINTS, on printed folios
@@ -52,7 +52,7 @@ ISO9053_2_ANNEX_A_VOLUME = 7.854e-4  # V (m3)
 ISO9053_2_ANNEX_A_FREQUENCY = 2.0  # f (Hz)
 ISO9053_2_ANNEX_A_WAVELENGTH = 172.9  # lambda = c0/f (m)
 ISO9053_2_ANNEX_A_BOUNDARY_LAYER = 1.83e-3  # b (m)
-ISO9053_2_ANNEX_A_KAPPA_PRIME = 1.370  # kappa' = kappa*0,978
+ISO9053_2_ANNEX_A_KAPPA_PRIME = 1.370  # kappa' = kappa*0.978
 
 #: The air properties as printed in Annex A.3, folios 13 and 14, as the `Fluid`
 #: the two helpers now take. Transcribed here rather than imported from the
@@ -74,8 +74,8 @@ ISO9053_2_ANNEX_A_PRINTED_AIR = Fluid(
 
 # ---------------------------------------------------------------------------
 # ISO 10534-1:1996 standing-wave-ratio method — closed-form physics oracle from
-# Eqs (13)/(14)/(9): a standing-wave ratio s = 3 gives |r| = (s-1)/(s+1) = 0,5
-# and absorption alpha = 1 - |r|^2 = 0,75.
+# Eqs (13)/(14)/(9): a standing-wave ratio s = 3 gives |r| = (s-1)/(s+1) = 0.5
+# and absorption alpha = 1 - |r|^2 = 0.75.
 # ---------------------------------------------------------------------------
 ISO10534_1_SWR = 3.0
 ISO10534_1_REFLECTION_MAGNITUDE = 0.5
@@ -83,8 +83,8 @@ ISO10534_1_ABSORPTION = 0.75
 
 # ---------------------------------------------------------------------------
 # ISO 17497-1:2004 random-incidence scattering coefficient. Eq (2) fixes the
-# reference speed of sound c = 343,2 m/s at 20 C. The synthetic worked chain
-# (T1..T4 = 8,0/6,0/7,5/5,0 s, V/S from V = 200 m3, S = 10 m2) exercises the
+# reference speed of sound c = 343.2 m/s at 20 C. The synthetic worked chain
+# (T1..T4 = 8.0/6.0/7.5/5.0 s, V/S from V = 200 m3, S = 10 m2) exercises the
 # Sabine absorptions Eq (1)/(4) and the scattering Eq (5). Mirrors
 # tests/materials/diffusers/test_scattering_diffusion.py.
 # ---------------------------------------------------------------------------
@@ -97,8 +97,8 @@ ISO17497_1_CHAIN_ALPHA_S = 0.1342754467754468  # random-incidence absorption
 ISO17497_1_CHAIN_ALPHA_SPEC = 0.21484071484071485  # specular absorption
 ISO17497_1_CHAIN_SCATTERING = 0.09306108711505018  # s = (a_spec-a_s)/(1-a_s)
 # Annex A.5 combined uncertainty of the scattering coefficient. For
-# a_spec = 0,6, a_s = 0,3 with u(a_spec) = 0,02 and u(a_s) = 0,01 the
-# error-propagation form gives u(s) = 0,0297.
+# a_spec = 0.6, a_s = 0.3 with u(a_spec) = 0.02 and u(a_s) = 0.01 the
+# error-propagation form gives u(s) = 0.0297.
 ISO17497_1_A5_ALPHA_SPEC = 0.6
 ISO17497_1_A5_ALPHA_S = 0.3
 ISO17497_1_A5_U_ALPHA_SPEC = 0.02
@@ -255,8 +255,8 @@ ISO17497_2_AREA_FACTOR_ZENITH = 1.571045588794762  # N0, radians convention
 #
 # Geometry: an N = 7 quadratic residue diffuser (Eq. (10.2), s_n = n^2 mod N,
 # so s = {0,1,4,2,2,4,1}) with design frequency f0 = 500 Hz and c = 343 m/s
-# has design wavelength lambda0 = 0,686 m. The deepest well (s_max = 4) has,
-# by Eq. (10.3) d_n = s_n*lambda0/(2N), depth 4*0,686/14 = 0,196 m exactly.
+# has design wavelength lambda0 = 0.686 m. The deepest well (s_max = 4) has,
+# by Eq. (10.3) d_n = s_n*lambda0/(2N), depth 4*0.686/14 = 0.196 m exactly.
 DIFFUSER_QRD7_MAX_DEPTH = 0.196  # m, closed form d_max = s_max*c/(2 N f0)
 # A flat panel (all wells zero depth) normalises against itself, so Formula (7)
 # gives (d - d_ref)/(1 - d_ref) = 0 identically: the exact zero anchor.
@@ -268,9 +268,9 @@ DIFFUSER_QRD7_NORMALIZED_DIFFUSION_2K = 0.20802829817091092
 
 # ---------------------------------------------------------------------------
 # ISO 13472-1:2002 in-situ road-surface absorption. The mandatory geometry
-# ds = 1,25 m, dm = 0,25 m gives the geometrical-spreading factor Kr = 2/3
+# ds = 1.25 m, dm = 0.25 m gives the geometrical-spreading factor Kr = 2/3
 # (Clause 4.2). The Annex A worked example (c = 340 m/s, 5 ms flat window)
-# gives a maximum-sampled-area radius r ~ 1,34 m. Mirrors
+# gives a maximum-sampled-area radius r ~ 1.34 m. Mirrors
 # tests/materials/surfaces/test_road_absorption.py.
 # ---------------------------------------------------------------------------
 ISO13472_1_KR = 2.0 / 3.0  # geometrical-spreading factor
@@ -279,8 +279,8 @@ ISO13472_1_MSA_RADIUS = 1.3425466996067585  # Annex A worked example (m)
 
 # ---------------------------------------------------------------------------
 # ISO 13472-2:2010 spot method. The upper usable (plane-wave) frequency of a
-# circular tube is f_u = 0,58 c0/d (Clause 5.4.1); a 100 mm tube at
-# c0 = 343 m/s gives f_u = 1989,4 Hz.
+# circular tube is f_u = 0.58 c0/d (Clause 5.4.1); a 100 mm tube at
+# c0 = 343 m/s gives f_u = 1989.4 Hz.
 # ---------------------------------------------------------------------------
 ISO13472_2_SPOT_DIAMETER = 0.100  # tube diameter d (m)
 ISO13472_2_SPOT_SPEED = 343.0  # speed of sound c0 (m/s)
@@ -291,8 +291,8 @@ ISO13472_2_SPOT_FU = 1989.4  # upper usable frequency (Hz)
 # The standard's own worked examples are the oracle: Table 4 (sound absorption
 # coefficient alpha_s and expanded uncertainty +/-U at k=2, reproducibility,
 # one-third-octave 63-5000 Hz) and Table 5 (practical coefficient alpha_p,
-# octave 250-4000 Hz). Example 1: alpha_w = 0,70 (MH) +/- 0,07 (k=2);
-# Example 2: DLalpha,NRD = (8,1 +/- 1,6) dB (k=2).
+# octave 250-4000 Hz). Example 1: alpha_w = 0.70 (MH) +/- 0.07 (k=2);
+# Example 2: DLalpha,NRD = (8.1 +/- 1.6) dB (k=2).
 # ---------------------------------------------------------------------------
 ISO12999_2_TABLE4_FREQ = [
     63,
@@ -417,12 +417,12 @@ MAA_FIG5_CAVITY = 0.06
 # shear modulus in N/cm2 and a Poisson coefficient. It prints NEITHER
 # characteristic length. Those two are printed in the prose of Sect. 6.5.4 on
 # the facing folio (PDF page 132, printed p. 123): a fibre diameter of 12e-6 m
-# gives, through Eqs. (5.29) and (5.30), Lambda = 0,56e-4 m and
-# Lambda' = 2 Lambda = 1,1e-4 m, the book rounding 1,12 to two figures in its
+# gives, through Eqs. (5.29) and (5.30), Lambda = 0.56e-4 m and
+# Lambda' = 2 Lambda = 1.1e-4 m, the book rounding 1.12 to two figures in its
 # own print. Table 11.8 (PDF page 281, printed p. 275) prints the same
 # specimen a second time, in micrometres and with E instead of N: its 56 and
 # 110 um corroborate folio 123 (and settle 110 against 112), and its
-# E = 4,4e6 Pa at nu = 0 is the Table 6.1 shear modulus through
+# E = 4.4e6 Pa at nu = 0 is the Table 6.1 shear modulus through
 # N = E/(2(1+nu)). Table 11.2 (PDF page 260, printed p. 254) gives the soft
 # fibrous material in full, seven columns in one row.
 #
@@ -629,7 +629,7 @@ HOPKINS_ROCK_WOOL_POROSITY_RANGE = (0.99, 0.94)
 # The complex shear moduli the book prints as ``N(1 + j eta)`` or ``75 + j15``
 # are split the way the library stores them, into a real modulus and a
 # structural loss factor, and the split is arithmetic on the printed digits:
-# 15/75 is the 0,2 below, not a number read anywhere.
+# 15/75 is the 0.2 below, not a number read anywhere.
 #
 # Cells these pages print that are not porous parameters are not here, and
 # neither are the rows that are not porous materials: each data file's
@@ -646,7 +646,7 @@ ALLARD_POROUS_ROWS: tuple[tuple[str, dict[str, float]], ...] = (
             "viscous_length_um": 0.56e-4 * 1.0e6,
             "thermal_length_um": 1.1e-4 * 1.0e6,
             "frame_density_kg_m3": 130.0,
-            # N = 220(1 + j0,1) N/cm2, and 1 N/cm2 is 1e4 Pa.
+            # N = 220(1 + j0.1) N/cm2, and 1 N/cm2 is 1e4 Pa.
             "shear_modulus_pa": 220.0 * 1.0e4,
             "structural_loss_factor": 0.1,
             "poisson_ratio": 0.0,
@@ -1081,8 +1081,8 @@ ALLARD_POROUS_ROWS: tuple[tuple[str, dict[str, float]], ...] = (
 #: books give. Two transcriptions of two books by two readers, so an interval
 #: that matches here matches the printed digits of both pages.
 #:
-#: Cox's foam row is not here. It reads 0,93 to 0,995 against Mechel's 0,95 to
-#: 0,995, and it credits four studies rather than Mechel alone, so it is a
+#: Cox's foam row is not here. It reads 0.93 to 0.995 against Mechel's 0.95 to
+#: 0.995, and it credits four studies rather than Mechel alone, so it is a
 #: compilation of its own and not a copy.
 COX_MECHEL_SHARED_POROSITY: tuple[tuple[str, str, tuple[float, float]], ...] = (
     ("mineral_wool", "mineral_fibre_materials", (0.92, 0.99)),

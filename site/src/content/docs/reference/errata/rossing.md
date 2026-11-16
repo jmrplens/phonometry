@@ -106,8 +106,8 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
 - **The print:** the caption gives every row at atmospheric pressure, and the
   block prints argon at −183,15 °C, methane at −153,15, −143,15 and −138,15 °C
   and nitrogen at −193,15 and −183,15 °C.
-- **The problem:** at one atmosphere argon boils at −185,85 °C, methane at
-  −161,49 °C and nitrogen at −195,79 °C, so at those six temperatures each is a
+- **The problem:** at one atmosphere argon boils at −185.85 °C, methane at
+  −161.49 °C and nitrogen at −195.79 °C, so at those six temperatures each is a
   gas, and a liquid only under a higher pressure. The rows' own reference,
   [8.74], is titled on PDF page 324 "A study of (B/A) in liquified gases as a
   function of temperature and pressure". The values are not in question; the

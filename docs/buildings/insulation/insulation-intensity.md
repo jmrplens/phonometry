@@ -660,24 +660,24 @@ print(element.n_elements)                 # 4
 
 Annex A is normative, and it is what a laboratory does before it reports
 anything: measure a limp panel of more than 1 m², calculate what it should
-read, and require the two to agree within **4,0 dB** from 50 Hz to 160 Hz. The
+read, and require the two to agree within **4.0 dB** from 50 Hz to 160 Hz. The
 calculated half is forced transmission and nothing else: mass law reduced by
 the radiation efficiency of a plate driven by a diffuse field:
 
 $$
 R = R_0 - 10\lg 2\sigma_\mathrm{d}, \qquad
 R_0 = 20\lg\frac{\pi f m}{\rho c}, \qquad
-\sigma_\mathrm{d} = \tfrac{1}{2}\left[0{,}20 + \ln\left(2\pi\frac{f}{c}\sqrt{S}\right)\right]
+\sigma_\mathrm{d} = \tfrac{1}{2}\left[0.20 + \ln\left(2\pi\frac{f}{c}\sqrt{S}\right)\right]
 $$
 
 with the air taken at the climate of the test,
-$\rho c = 427\sqrt{273/(273+\theta)}\cdot B/B_0$ and $c = 331 + 0{,}6\,\theta$.
+$\rho c = 427\sqrt{273/(273+\theta)}\cdot B/B_0$ and $c = 331 + 0.6\,\theta$.
 The panel is limp *by assumption*. The 160 Hz ceiling is not the annex's own:
 Clause 1.1 applies the whole of this part over 50 Hz to 160 Hz, and says it is
 mainly intended for 50 Hz to 80 Hz.
 
 ```python
-# Annex A, Table A.1: 12,5 mm plaster board, 10 kg/m2, over a 10 m2 opening,
+# Annex A, Table A.1: 12.5 mm plaster board, 10 kg/m2, over a 10 m2 opening,
 # at 1 013 hPa and 23 degC.
 calc = building.limp_panel_reduction_index(
     freqs, surface_mass=10.0, area=10.0,
@@ -749,7 +749,7 @@ cannot feed ISO 717-1.
   implemented either: the formulas here apply unchanged to field data, but
   nothing checks how that data was acquired. The same holds of Part 3's
   procedure: the microphone counts of its Table 1, the 50 mm stand-off, the two
-  90°-rotated scans and their 2,0 dB / 1,0 dB agreement test, the 10 dB
+  90°-rotated scans and their 2.0 dB / 1.0 dB agreement test, the 10 dB
   background margin and the source-room absorption limits under Formula (7) are
   documented above and enforced nowhere. Part 3 results carry no single-number
   rating and no `.report()` fiche, because six bands cannot feed ISO 717-1 and

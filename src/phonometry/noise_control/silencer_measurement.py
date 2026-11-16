@@ -271,13 +271,13 @@ RADIATION_SOLID_ANGLES: Mapping[str, float] = MappingProxyType(
 MODAL_FILTER_ATTENUATION: tuple[float, float] = (3.0, 5.0)
 
 #: ISO 7235:2003, Equation (4). The coefficient of the cut-on frequency of the
-#: first higher-order mode of a circular duct, ``f = 0,59 c / d``. The exact
+#: first higher-order mode of a circular duct, ``f = 0.59 c / d``. The exact
 #: value is the first zero of the derivative of the Bessel function of order
-#: one, 1,8412 / pi = 0,58607, so the printed constant sits 0,67 % high.
+#: one, 1.8412 / pi = 0.58607, so the printed constant sits 0.67 % high.
 CIRCULAR_CUT_ON_COEFFICIENT = 0.59
 
 #: ISO 7235:2003, Equation (5). The same for a rectangular duct of larger
-#: dimension ``H``, ``f = 0,5 c / H``. This one is exact: the first mode is a
+#: dimension ``H``, ``f = 0.5 c / H``. This one is exact: the first mode is a
 #: half wavelength across the duct.
 RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
 
@@ -289,13 +289,13 @@ _SOUND_SPEED_M_S = 343.0
 
 #: ISO 7235:2003, Equation (10). The specific gas constant of air as the
 #: standard prints it, in N·m/(kg·K). The accurate value for dry air is
-#: 287,05; the printed 287 is 0,017 % low, which with the temperature offset
-#: scales a pressure loss coefficient by 0,069 % rather than shifting it.
+#: 287.05; the printed 287 is 0.017 % low, which with the temperature offset
+#: scales a pressure loss coefficient by 0.069 % rather than shifting it.
 ISO7235_AIR_GAS_CONSTANT_J_KG_K = 287.0
 
 #: ISO 7235:2003, Equations (10), (21) and (22). The offset the standard adds
 #: to a Celsius temperature to get an absolute one, in degrees. It prints 273
-#: rather than 273,15, which puts a density 0,051 % high at 20 °C; the value
+#: rather than 273.15, which puts a density 0.051 % high at 20 °C; the value
 #: is kept as printed so that a result can be reproduced as the standard
 #: gives it.
 ISO7235_ABSOLUTE_ZERO_OFFSET_K = 273.0
@@ -349,7 +349,7 @@ class SilencerMeasurementWarning(PhonometryWarning):
     """A substitution measurement is outside the range its method covers.
 
     Raised when a test arrangement falls outside a limit the standard writes
-    down but does not make an error: an area ratio outside the 0,6 to 1,7 of
+    down but does not make an error: an area ratio outside the 0.6 to 1.7 of
     ISO 11691 4.5, or a band outside the 50 Hz to 10 kHz both standards
     measure over. The arithmetic still runs, because a laboratory may report
     such a value as long as it says so.
@@ -523,7 +523,7 @@ def octave_insertion_loss(insertion_loss: NumericArrayLike) -> NDArray[np.float6
 
     The average is taken on what the silencer *lets through*, not on the
     decibels, and the two are not the same thing. A silencer that gives 30,
-    30 and 5 dB across an octave gives 9,8 dB over the octave, not 21,7: the
+    30 and 5 dB across an octave gives 9.8 dB over the octave, not 21.7: the
     band that leaks decides the answer, because it is the one carrying nearly
     all of the transmitted energy. That is the whole reason the standard
     writes the equation out rather than letting a reader average the numbers.
@@ -627,7 +627,7 @@ def microphone_positions_required(levels: NumericArrayLike, frequency: float) ->
 def survey_reproducibility(frequency: float) -> float:
     r"""ISO 11691 Table 1: the survey method's own reproducibility.
 
-    Two decibels up to the 1,25 kHz one-third octave and three above it.
+    Two decibels up to the 1.25 kHz one-third octave and three above it.
     ISO 11691 makes no claim of its own beyond that: it says outright that
     exact information on the precision cannot be given, that interlaboratory
     tests would be needed for a real ``sigma_R``, and that this estimate is
@@ -653,7 +653,7 @@ def measurement_reproducibility(
 
     The three columns do not agree with one another, and that is the useful
     part. Insertion loss is measured best in the middle of the range, 1 dB
-    from 125 to 500 Hz, and worst at the top, 3 dB above 1,6 kHz. The
+    from 125 to 500 Hz, and worst at the top, 3 dB above 1.6 kHz. The
     sound-intensity route runs the other way, 3 dB at the bottom and 1 dB in
     the top two ranges. Transmission loss is a flat 3 dB everywhere, which is
     the mark of an estimate rather than a measurement: 7.9 says only the
@@ -707,7 +707,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
     """ISO 11691 4.5: the test duct against the silencer it feeds.
 
     The survey method wants the test ducts to be close in cross section to
-    what they connect to. Outside the range of 0,6 to 1,7 the ducts are no
+    what they connect to. Outside the range of 0.6 to 1.7 the ducts are no
     longer standing in for the installation the silencer will see, and the
     reflections at the two joints stop being negligible; inside it,
     transition elements may be fitted.
@@ -718,7 +718,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
     :return: The ratio of the two areas, dimensionless.
     :raises ValueError: If an area is not positive and finite.
     :raises TypeError: if ``duct_area`` or ``element_area`` is not a single number.
-    :warns SilencerMeasurementWarning: If the ratio is outside 0,6 to 1,7.
+    :warns SilencerMeasurementWarning: If the ratio is outside 0.6 to 1.7.
     """
     duct = require_positive(duct_area, "duct_area")
     element = require_positive(element_area, "element_area")
@@ -799,10 +799,10 @@ def open_end_transmission_loss(
 
     The library also carries a different closed form for the same physics,
     :func:`phonometry.noise_control.end_reflection_loss_closed_form`, which
-    is Reynolds' as given by Long and raises the same argument to 1,88
+    is Reynolds' as given by Long and raises the same argument to 1.88
     rather than to 2. For a circular duct in free space the two are
     :math:`10\lg[1 + (c/\pi f d)^2]` against
-    :math:`10\lg[1 + (c/\pi f d)^{1,88}]`, so they part company where the
+    :math:`10\lg[1 + (c/\pi f d)^{1.88}]`, so they part company where the
     argument is far from 1, which is at the ends of the range rather than in
     the middle.
 
@@ -880,7 +880,7 @@ def open_end_reflection_coefficient(
 
     Clause 5.2.4 puts this quantity to work as a requirement rather than as a
     result: a test duct with an anechoic termination qualifies only if its
-    reflection coefficient is no greater than 0,3.
+    reflection coefficient is no greater than 0.3.
 
     :param frequency: Band centre frequency :math:`f`, in Hz (scalar or array).
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
@@ -1069,9 +1069,9 @@ def modal_filter_cut_on(
 
     .. math::
 
-       f_{Cd} = \frac{0{,}59\,c}{d}
+       f_{Cd} = \frac{0.59\,c}{d}
        \qquad
-       f_{CH} = \frac{0{,}5\,c}{H}
+       f_{CH} = \frac{0.5\,c}{H}
 
     NOTE 2 to 5.2.2.3 prints these for the duct the modal filter is connected
     to, because the filter's requirement changes there: at least 3 dB of
@@ -1082,8 +1082,8 @@ def modal_filter_cut_on(
     The rectangular form is exact: the first mode of a rigid rectangular duct
     is a half wavelength across the larger dimension, so :math:`c / 2H`. The
     circular constant is rounded: the exact value is the first zero of
-    :math:`J_1'`, which puts the coefficient at 0,58607 rather than 0,59, so
-    Equation (4) sits 0,67 % high. The exact eigenvalues are in
+    :math:`J_1'`, which puts the coefficient at 0.58607 rather than 0.59, so
+    Equation (4) sits 0.67 % high. The exact eigenvalues are in
     :func:`phonometry.noise_control.circular_duct_cut_on`, which also carries
     the mean-flow correction this equation does not have.
 
@@ -1149,12 +1149,12 @@ def normal_air_density(
     6.5.2.2.3. They differ only in which measurement they are given.
 
     Both printed constants are a little off the accurate figures. The offset
-    273 rather than 273,15 puts the density 0,051 % high at 20 °C, and
-    :math:`R = 287` rather than 287,05 adds 0,017 % to that, for 0,069 % in
+    273 rather than 273.15 puts the density 0.051 % high at 20 °C, and
+    :math:`R = 287` rather than 287.05 adds 0.017 % to that, for 0.069 % in
     all. It does not cancel out of the pressure loss coefficient: the same
     density is in the dynamic pressure of both series, so the whole
     coefficient is scaled by that one factor rather than shifted, which
-    leaves it 0,069 % low. That is far under the uncertainty of a
+    leaves it 0.069 % low. That is far under the uncertainty of a
     pressure-loss test, and using the printed constants is what reproduces a
     result computed to the standard, which is why
     :data:`ISO7235_ABSOLUTE_ZERO_OFFSET_K` and :data:`ISO7235_AIR_GAS_CONSTANT_J_KG_K`
@@ -1210,7 +1210,7 @@ def volume_flow_rate(mass_flow: float, density: float) -> float:
     in. Equation (8) uses the density upstream of the test object. Equation
     (9) uses the normalised density of Equation (10), and 6.5.2.1 says when:
     if the flow meter and the test object are far enough apart in temperature
-    or static pressure that their density ratio leaves 0,98 to 1,02, the
+    or static pressure that their density ratio leaves 0.98 to 1.02, the
     meter is no longer measuring the flow the test object sees.
     :data:`DENSITY_RATIO_RANGE` carries that window.
 
@@ -1446,14 +1446,14 @@ def upstream_straight_length(area: float) -> float:
 
     The upstream test duct is straight for at least :math:`5 d_e` or 2 m,
     whichever is greater, where :math:`d_e = \sqrt{4S/\pi}` is the equivalent
-    diameter. Below about 0,126 m² the 2 m floor is what binds; above it the
+    diameter. Below about 0.126 m² the 2 m floor is what binds; above it the
     five diameters are.
 
     The length is there so the velocity profile has settled by the time it
     reaches the test object: 6.5.2.2.1 wants it uniform to ±10 % of the mean
     over the cross section, excluding the 15 mm nearest the walls, surveyed
     at ten points along each of two perpendicular axes about
-    :math:`1{,}5 d_e` upstream.
+    :math:`1.5 d_e` upstream.
 
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :return: The straight length required, in m.

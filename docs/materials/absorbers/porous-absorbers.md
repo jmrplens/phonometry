@@ -308,7 +308,7 @@ print(round(lateral), round(sigma / lateral, 2))
 The two equations are printed on facing pages and they check each other. Put the
 ends of the bulk-density range the resistivity fit was made over through the
 porosity relation, at the fibre density Hopkins states, and the porosity range
-he prints beside them comes back: 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³.
+he prints beside them comes back: 0.99 at 31 kg/m³ and 0.94 at 155 kg/m³.
 
 **The viscous length from the three measured parameters.**
 `viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
@@ -316,7 +316,7 @@ $\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$ with a shape factor $c$
 close to 1. How close is the question, and the book answers it against itself:
 across the twenty-three specimens it prints with all four columns at once, a
 unit shape factor lands within a factor of two on eighteen, with the middle of
-the set near 1,2. The five it misses are the two carpets, the woven screen and
+the set near 1.2. The five it misses are the two carpets, the woven screen and
 two rows whose lengths the book took from a different model. So the relation is
 worth a factor of two on a bulk fibrous or open-cell absorber, and nothing at
 all on a floor covering.
@@ -329,7 +329,7 @@ $\Lambda = R\rho_\mathrm{fibre}/(2\rho_\mathrm{bulk})$.
 
 These last two are different models and not two opinions on one. Give them the
 same rock wool and they drift apart with density: the cylinder bundle is the
-lower estimate throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+lower estimate throughout, by 1.4 at 38 kg/m³ and 1.9 at 155 kg/m³.
 
 ```python
 # Both routes, on the 60 kg/m3 wool above.
@@ -337,7 +337,7 @@ from_parameters = materials.viscous_characteristic_length(
     sigma, porosity=phi, tortuosity=1.0
 )
 from_geometry = materials.fiber_characteristic_lengths(
-    2.375e-6,  # half of Hopkins' 4,75 um fibre diameter
+    2.375e-6,  # half of Hopkins' 4.75 um fibre diameter
     bulk_density_kg_m3=60.0,
     fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3,
 )

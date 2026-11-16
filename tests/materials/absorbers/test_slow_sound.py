@@ -62,7 +62,7 @@ def test_the_absorber_air_is_the_papers_air() -> None:
     assert ABSORBER_AIR.static_pressure_pa == pytest.approx(_P0, abs=0.0)
     # The one the models read that is not closed from the others: this air
     # determines no thermal diffusivity, so eta / (rho alpha_t) has nothing to
-    # close from, and the fitted 0,71 has to be carried rather than derived.
+    # close from, and the fitted 0.71 has to be carried rather than derived.
     assert ABSORBER_AIR.prandtl_number == pytest.approx(_PR, abs=0.0)
     with pytest.raises(FluidPropertyUnavailableError):
         _ = ABSORBER_AIR.thermal_diffusivity

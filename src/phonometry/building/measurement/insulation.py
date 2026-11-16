@@ -159,7 +159,7 @@ _A0_FACADE = 10.0
 _FACADE_LOUDSPEAKER = "loudspeaker"
 
 #: Angle-of-incidence corrections in the apparent sound reduction index:
-#: -1,5 dB for the loudspeaker method at 45° (Clause 3.12) and -3 dB for
+#: -1.5 dB for the loudspeaker method at 45° (Clause 3.12) and -3 dB for
 #: the road-traffic method with all-angle incidence (Clause 3.13).
 _FACADE_CORRECTION = {_FACADE_LOUDSPEAKER: 1.5, "road_traffic": 3.0}
 
@@ -1034,7 +1034,7 @@ def airborne_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (optional; required
         together with ``area`` for ``R'``).
     :param t0: Reference reverberation time ``T0``, in seconds (default
-        0,5 s for dwellings, Clause 3.13).
+        0.5 s for dwellings, Clause 3.13).
     :param frequencies: Band centre frequencies, in Hz; required with either
         low-frequency argument. Without one it still matters: naming any of
         the 50 Hz, 63 Hz and 80 Hz bands beside a small ``volume`` is what
@@ -1192,7 +1192,7 @@ def impact_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (optional; required
         for ``L'n``).
     :param t0: Reference reverberation time ``T0``, in seconds (default
-        0,5 s for dwellings, Clause 3.13).
+        0.5 s for dwellings, Clause 3.13).
     :param frequencies: Band centre frequencies, in Hz; required with
         ``low_frequency``. Without it it still matters: naming any of the
         50 Hz, 63 Hz and 80 Hz bands beside a small ``volume`` is what tells
@@ -1383,11 +1383,11 @@ def facade_insulation(
     :param surface_level: Outdoor surface level ``L1,s`` on the test
         element, in dB (optional; required with ``area`` and ``volume`` for
         ``R'``).
-    :param method: ``"loudspeaker"`` (45° incidence, -1,5 dB) or
+    :param method: ``"loudspeaker"`` (45° incidence, -1.5 dB) or
         ``"road_traffic"`` (all-angle incidence, -3 dB); selects the ``R'``
         correction (Clause 3.12 / 3.13).
     :param t0: Reference reverberation time ``T0``, in seconds (default
-        0,5 s for dwellings, Clause 3.15).
+        0.5 s for dwellings, Clause 3.15).
     :param frequencies: Optional band centre frequencies, in Hz, carried
         on the result for plotting; required with ``low_frequency``.
     :param low_frequency: Receiving-room corner measurements, volume and 63 Hz
@@ -1482,7 +1482,7 @@ def facade_insulation(
     d_2m = l1_bands - l2_bands
     d_2m_nt = d_2m + 10.0 * np.log10(t / t0)
 
-    # Sabine equivalent absorption area A = 0,16 V / T (Clause 3.17).
+    # Sabine equivalent absorption area A = 0.16 V / T (Clause 3.17).
     absorption = 0.16 * volume / t if volume is not None else None
 
     d_2m_n: NDArray[np.float64] | None = None

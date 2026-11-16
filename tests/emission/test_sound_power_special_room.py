@@ -5,20 +5,20 @@ Normative anchors (ISO 3743-2:2018, second edition, read on the printed pages):
 - 6.2: V >= 70 m3; V <= 300 m3 with the 4 kHz and 8 kHz octaves (direct
   method; the NOTE relaxes it for the comparison method).
 - 6.3, Formula (1): R = 1 + 257/(f V^(1/3)); NOTE: R = 1 + cS/(8Vf); limits
-  0,9 R Tnom to 1,1 R Tnom (0,8 and 1,2 above 6,3 kHz); 0,5 s <= Tnom <= 1,0 s.
-- 6.4: floor alpha < 0,06; each wall and the ceiling within 0,5 and 1,5 times
+  0.9 R Tnom to 1.1 R Tnom (0.8 and 1.2 above 6.3 kHz); 0.5 s <= Tnom <= 1.0 s.
+- 6.4: floor alpha < 0.06; each wall and the ceiling within 0.5 and 1.5 times
   the mean of the walls and ceiling.
 - 6.6, Formula (2): H(theta + 5 degC) within +/-10 %.
 - 6.7, Table 1: +/-5 dB at 125 Hz, +/-3 dB from 250 Hz to 4 kHz, +/-4 dB at
   8 kHz.
-- 9.4, Formula (4), (5), Table 3; 9.5 classes at 2,3 dB and 4 dB.
-- 9.8, Table 4: 4, 5 -> 2 dB; 6, 7, 8 -> 1 dB; 9, 10 -> 0,5 dB; > 10 -> 0.
+- 9.4, Formula (4), (5), Table 3; 9.5 classes at 2.3 dB and 4 dB.
+- 9.8, Table 4: 4, 5 -> 2 dB; 6, 7, 8 -> 1 dB; 9, 10 -> 0.5 dB; > 10 -> 0.
 - 10.1, Formula (8); 10.2, Formula (9): LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0)
   - 13 dB; 10.3, Formula (10): LWe = Lpe + (LWr - Lpr).
-- 11, Table 5: 5,0 / 3,0 / 2,0 / 3,0 dB and 2,0 dB A-weighted; 11.5 EXAMPLE:
-  U = 2 sqrt(2^2 + 2^2) = 5,7 dB; Table D.1, sigma_R0 = 2 row: 2,1 / 2,8 /
-  4,5 dB.
-- B.5, Formula (B.2): Tnom = T1000/1,06, R(1 000 Hz) = 1,06 for 70 m3.
+- 11, Table 5: 5.0 / 3.0 / 2.0 / 3.0 dB and 2.0 dB A-weighted; 11.5 EXAMPLE:
+  U = 2 sqrt(2^2 + 2^2) = 5.7 dB; Table D.1, sigma_R0 = 2 row: 2.1 / 2.8 /
+  4.5 dB.
+- B.5, Formula (B.2): Tnom = T1000/1.06, R(1 000 Hz) = 1.06 for 70 m3.
 - Annex E: C2 of ISO 3743-1:2010 Annex A; Table F.1 = Table B.1 of Part 1.
 """
 
@@ -82,7 +82,7 @@ def _direct(**kwargs: object) -> emission.SpecialRoomSoundPowerResult:
 # 6.3, Formula (1) and the centring of Tnom
 # --------------------------------------------------------------------------
 def test_formula1_gives_the_1_06_of_formula_b2_for_70_m3() -> None:
-    """B.5: 1,06 is the value of R at 1 000 Hz for a 70 m3 room."""
+    """B.5: 1.06 is the value of R at 1 000 Hz for a 70 m3 room."""
     r = emission.reverberation_parameter([1000.0], 70.0)
     assert round(float(r[0]), 2) == 1.06
     assert float(r[0]) == pytest.approx(1.0 + 257.0 / (1000.0 * 70.0 ** (1 / 3)))
@@ -132,10 +132,10 @@ def test_centring_balances_the_worst_bands_against_their_tolerances() -> None:
 
 
 def test_centring_weighs_each_band_by_its_own_tolerance() -> None:
-    """Above 6,3 kHz the half-width is 0,2, so a deviation there counts half
+    """Above 6.3 kHz the half-width is 0.2, so a deviation there counts half
     as much as below it. The oracle is an independent brute-force scan of
-    k = 1/Tnom minimising the largest |k T/R - 1| / w; a uniform 0,1 would
-    centre this room near 0,753 s instead.
+    k = 1/Tnom minimising the largest |k T/R - 1| / w; a uniform 0.1 would
+    centre this room near 0.753 s instead.
     """
     r = emission.reverberation_parameter(THIRDS, 70.0)
     shape = np.ones(THIRDS.size)
@@ -225,7 +225,7 @@ def test_the_300_m3_ceiling_needs_the_8_khz_octave_in_range() -> None:
 @pytest.mark.parametrize(
     ("humidity", "temperature", "stable"),
     [
-        # 50 (20 + 5) = 1 250 against 1 250 x 1,10 = 1 375 and x 0,90 = 1 125
+        # 50 (20 + 5) = 1 250 against 1 250 x 1.10 = 1 375 and x 0.90 = 1 125
         (55.0, 20.0, True),  # 1 375: at +10 %
         (56.0, 20.0, False),
         (45.0, 20.0, True),  # 1 125: at -10 %
@@ -284,7 +284,7 @@ def test_suitability_check_has_no_truth_value() -> None:
 # 6.4 and 6.7
 # --------------------------------------------------------------------------
 def test_surfaces_within_half_and_one_and_a_half_times_the_mean() -> None:
-    walls = np.array([[0.2] * 7, [0.1] * 7, [0.3] * 7])  # mean 0,2: ratios 1, 0,5, 1,5
+    walls = np.array([[0.2] * 7, [0.1] * 7, [0.3] * 7])  # mean 0.2: ratios 1, 0.5, 1.5
     check = emission.check_special_room_surfaces(walls, [0.05] * 7, frequencies=FREQS)
     np.testing.assert_allclose(check.mean_absorption, 0.2)
     assert bool(np.all(check.surfaces_uniform))
@@ -293,7 +293,7 @@ def test_surfaces_within_half_and_one_and_a_half_times_the_mean() -> None:
 
 def test_surface_within_names_the_wall_and_the_band() -> None:
     walls = np.full((5, 7), 0.15)
-    walls[1, 0] = 0.40  # mean 0,2 at 125 Hz: 0,4/0,2 = 2 and 0,15/0,2 = 0,75
+    walls[1, 0] = 0.40  # mean 0.2 at 125 Hz: 0.4/0.2 = 2 and 0.15/0.2 = 0.75
     check = emission.check_special_room_surfaces(walls, [0.03] * 7, frequencies=FREQS)
     expected = np.ones((5, 7), dtype=bool)
     expected[1, 0] = False
@@ -316,8 +316,8 @@ def test_area_weighting_moves_the_mean() -> None:
     )
     np.testing.assert_allclose(plain.mean_absorption, 0.25)
     np.testing.assert_allclose(weighted.mean_absorption, 0.175)
-    assert not plain.passes  # 0,1/0,25 = 0,4
-    assert not weighted.passes  # 0,4/0,175 = 2,29
+    assert not plain.passes  # 0.1/0.25 = 0.4
+    assert not weighted.passes  # 0.4/0.175 = 2.29
 
 
 def test_suitability_limits_of_table_1() -> None:
@@ -379,7 +379,7 @@ def test_table3_cells(
     cls, band = key
     survey = _survey(S_M_OF[cls])
     if cls == "discrete tone":
-        # 4,5 dB about the mean needs a range above 5 dB, where Formula (5)
+        # 4.5 dB about the mean needs a range above 5 dB, where Formula (5)
         # takes over; the class is what matters here, not the mean.
         survey = 70.0 + np.array([[-4.6], [4.6], [-4.6], [4.6], [0.0], [0.0]])
     plan = emission.special_room_source_locations(
@@ -417,7 +417,7 @@ def test_table3_a_weighted_row(cls: str, row: tuple[int, int, int]) -> None:
 @pytest.mark.parametrize(("s_m", "cls"), [(2.29, "broadband"), (2.3, "narrow-band")])
 def test_9_5_lower_class_edge(s_m: float, cls: str) -> None:
     """Six alternating levels keep the range under 5 dB, so the deviation is
-    about the arithmetic mean and lands on the 2,3 dB edge as typed.
+    about the arithmetic mean and lands on the 2.3 dB edge as typed.
     """
     pattern = np.array([-1.0, 1.0, -1.0, 1.0, -1.0, 1.0])
     scale = s_m / float(np.std(pattern, ddof=1))
@@ -436,7 +436,7 @@ def test_9_5_lower_class_edge(s_m: float, cls: str) -> None:
     ],
 )
 def test_9_5_class_edges_are_those_of_table_3(s_m: float, cls: str) -> None:
-    """Above 2,74 dB six levels cannot stay within 5 dB of each other, so the
+    """Above 2.74 dB six levels cannot stay within 5 dB of each other, so the
     upper edge is reached only through Formula (5); the classification itself
     is read at the edge directly.
     """
@@ -465,8 +465,8 @@ def test_formula5_takes_over_above_a_5_db_range() -> None:
 
 def test_a_5_db_range_read_in_decimal_keeps_the_arithmetic_mean() -> None:
     """9.4 keeps the arithmetic mean while the range "is not greater than
-    5 dB". 64,4 dB and 59,4 dB span 5,0 dB as read, which in binary is
-    5,000 000 000 000 007 dB; the range is settled before the comparison, so
+    5 dB". 64.4 dB and 59.4 dB span 5.0 dB as read, which in binary is
+    5.000 000 000 000 007 dB; the range is settled before the comparison, so
     Formula (5) does not take over, for the octave bands and the A-weighted
     row alike.
     """
@@ -496,7 +496,7 @@ def test_table3_has_no_column_for_four_microphones() -> None:
     [
         (4.0, 2.0), (5.0, 2.0), (6.0, 1.0), (7.0, 1.0), (8.0, 1.0),
         (9.0, 0.5), (10.0, 0.5), (10.01, 0.0), (25.0, 0.0),
-        # the nearest whole decibel: 5,4 -> 5 and 5,5 -> 6
+        # the nearest whole decibel: 5.4 -> 5 and 5.5 -> 6
         (5.4, 2.0), (5.5, 1.0), (9.6, 0.5),
     ],
 )  # fmt: skip
@@ -682,7 +682,7 @@ def test_comparison_reference_correction_moves_formula10_by_its_table4_row() -> 
 
 
 def test_table5_and_the_11_5_example() -> None:
-    """11.5 EXAMPLE: sigma_R0 = 2,0 dB, sigma_omc = 2,0 dB, k = 2 -> 5,7 dB."""
+    """11.5 EXAMPLE: sigma_R0 = 2.0 dB, sigma_omc = 2.0 dB, k = 2 -> 5.7 dB."""
     res = _direct(sigma_omc_db=2.0)
     np.testing.assert_array_equal(res.sigma_r0, SIGMA_R0_TABLE_5)
     assert res.sigma_r0_a == 2.0
@@ -831,7 +831,7 @@ def test_source_location_plot_adds_the_a_weighted_bar() -> None:
 # --------------------------------------------------------------------------
 #: Figure B.4 (PDF page 29, printed page 23): T/T1000 read off the printed
 #: curve at the one-third-octave centres from 100 Hz to 10 kHz, two readings
-#: made apart agreeing within 0,01.
+#: made apart agreeing within 0.01.
 FIGURE_B4 = np.array(
     [1.398, 1.294, 1.292, 1.335, 1.298, 1.237, 1.176, 1.002, 0.967, 0.990, 1.0,
      1.0, 1.0, 1.0, 1.031, 1.018, 1.006, 0.987, 0.954, 0.919, 0.801]
@@ -839,9 +839,9 @@ FIGURE_B4 = np.array(
 
 
 def test_the_b5_example_centres_the_room_within_its_curves() -> None:
-    """B.5: T1000 = 0,8 s on the curve of Figure B.4. The library's centring
+    """B.5: T1000 = 0.8 s on the curve of Figure B.4. The library's centring
     qualifies the room, as the NOTE to Figure B.3 says it is centred within
-    the limiting curves, at T/Tnom = 1,05 at 1 kHz and Tnom = 0,76 s.
+    the limiting curves, at T/Tnom = 1.05 at 1 kHz and Tnom = 0.76 s.
     """
     check = emission.check_special_room_reverberation(
         0.8 * FIGURE_B4, frequencies=THIRDS, volume=70.0
@@ -852,10 +852,10 @@ def test_the_b5_example_centres_the_room_within_its_curves() -> None:
 
 
 def test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz() -> None:
-    """The printed T/Tnom = 1,09 is the midpoint of the extreme ratios taken
-    against 0,9 and 1,1 alone; with Tnom = 0,8/1,09 = 0,73 s it puts the
-    250 Hz band of Figure B.4 above 1,1 R, so the room would not qualify.
-    The library departs from it by 10 lg(0,760/0,73) = 0,17 dB in L_W.
+    """The printed T/Tnom = 1.09 is the midpoint of the extreme ratios taken
+    against 0.9 and 1.1 alone; with Tnom = 0.8/1.09 = 0.73 s it puts the
+    250 Hz band of Figure B.4 above 1.1 R, so the room would not qualify.
+    The library departs from it by 10 lg(0.760/0.73) = 0.17 dB in L_W.
     """
     t = 0.8 * FIGURE_B4
     q = t / emission.reverberation_parameter(THIRDS, 70.0)
@@ -877,7 +877,7 @@ def test_the_printed_1_09_of_b5_is_the_narrow_midpoint_and_fails_250_hz() -> Non
 # Clause 5: the size of the source
 # --------------------------------------------------------------------------
 def test_source_of_1_percent_of_the_room_is_recommended() -> None:
-    """Clause 5: at most 1 % of the room, 0,7 m3 in the smallest room."""
+    """Clause 5: at most 1 % of the room, 0.7 m3 in the smallest room."""
     r = emission.reverberation_parameter(THIRDS, 70.0)
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
@@ -922,8 +922,8 @@ def test_a_source_volume_must_be_positive() -> None:
 # Edges of 6.4, 6.7, 9.8 and 10.3
 # --------------------------------------------------------------------------
 def test_a_wall_at_1_55_times_the_mean_is_not_uniform() -> None:
-    """6.4: 1,5 times the mean is the last ratio allowed."""
-    other = (4.0 * 0.2 - 0.31) / 3.0  # the mean of the four is 0,2
+    """6.4: 1.5 times the mean is the last ratio allowed."""
+    other = (4.0 * 0.2 - 0.31) / 3.0  # the mean of the four is 0.2
     walls = np.array([[0.31] * 7, [other] * 7, [other] * 7, [other] * 7])
     check = emission.check_special_room_surfaces(walls, [0.03] * 7, frequencies=FREQS)
     np.testing.assert_allclose(check.surface_ratio[0], 1.55)

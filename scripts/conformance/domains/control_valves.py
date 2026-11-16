@@ -16,12 +16,12 @@ below use the values that make it self-consistent:
 
 * The piping geometry factor is printed ``F_p = 0,98``. Every one of the six
   printed vena contracta pressures needs ``0,984``: solving Equation (2) for
-  ``(F_LP/F_P)^2`` from each printed pair gives 0,647 83 to five digits in all
+  ``(F_LP/F_P)^2`` from each printed pair gives 0.647 83 to five digits in all
   six columns, and that is ``F_p = 0,984``.
-* The equivalent orifice diameter is printed ``d_o = 0,010`` m where
-  Equation (8c) with the annex's own ``N_O = 6`` and ``A = 0,00137`` m² gives
-  0,102 m. The ``F_d = 0,30`` printed on the next row is the ratio of the
-  printed ``d_H = 0,030`` m to the larger value.
+* The equivalent orifice diameter is printed ``d_o = 0.010`` m where
+  Equation (8c) with the annex's own ``N_O = 6`` and ``A = 0.00137`` m² gives
+  0.102 m. The ``F_d = 0,30`` printed on the next row is the ratio of the
+  printed ``d_H = 0.030`` m to the larger value.
 
 Both are in ``docs/ERRATA.md``.
 """
@@ -40,7 +40,7 @@ from ..registry import Outcome, numeric, record, register
 _IEC60534 = "Control valve noise (IEC 60534-8-3)"
 
 #: A.2's given data, shared by examples 1 to 6. The pressure recovery is
-#: ``F_LP/F_p`` with the 0,984 the annex computed with rather than the 0,98 it
+#: ``F_LP/F_p`` with the 0.984 the annex computed with rather than the 0.98 it
 #: printed.
 _STREAM: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
@@ -56,7 +56,7 @@ _VALVE: dict[str, Any] = {
 }
 _PIPE: dict[str, Any] = {"wall_thickness_m": 0.008, "density": 8000.0}
 
-#: The cage of A.2: six passages, each 0,00137 m² with a 0,181 m perimeter.
+#: The cage of A.2: six passages, each 0.00137 m² with a 0.181 m perimeter.
 _PASSAGE_AREA = 0.00137
 _WETTED_PERIMETER = 0.181
 _PASSAGES = 6
@@ -101,7 +101,7 @@ _PRINTED_VENA_CONTRACTA = {
 }
 
 #: Table A.2's pipe: DN 200 with 8 mm walls, and the fluid leaving the valve
-#: at 11,1 kg/m3 and 408 m/s.
+#: at 11.1 kg/m3 and 408 m/s.
 _EXAMPLE_7_PIPE: dict[str, Any] = {
     "internal_diameter_m": 0.200,
     "wall_thickness_m": 0.008,
@@ -112,7 +112,7 @@ _EXAMPLE_7_PIPE: dict[str, Any] = {
 }
 
 #: Equation (25), the A-weighted level 1 m from the pipe wall, in dB. The
-#: sixth column is the only one whose outlet Mach number passes the 0,3 of
+#: sixth column is the only one whose outlet Mach number passes the 0.3 of
 #: NOTE 1 to Equation (15), so it is the only one the annex works Clause 7
 #: for, and the only one that needs the expander to close.
 _PRINTED_EXTERNAL_LEVEL = {1: 92.0, 2: 93.0, 3: 98.0, 4: 94.0, 5: 97.0}
@@ -200,10 +200,10 @@ def _chk_regimes() -> Outcome:
     _IEC60534, "IEC 60534-8-3:2010", "Valve style modifier F_d (Eqs. (8a) to (8c))"
 )
 def _chk_style_modifier() -> Outcome:
-    """The cage of A.2 gives the printed 0,30.
+    """The cage of A.2 gives the printed 0.30.
 
-    Only with the 0,102 m of Equation (8c); the annex prints 0,010 m one row
-    above, which would make it 3,0.
+    Only with the 0.102 m of Equation (8c); the annex prints 0.010 m one row
+    above, which would make it 3.0.
     """
     return numeric(0.30, _style_modifier(), 5e-3, places=3)
 
@@ -262,8 +262,8 @@ def _chk_internal_level() -> Outcome:
     """Equation (18) across the six columns.
 
     This is the end of the valve half of the method: everything after it is
-    the pipe. Example 6 exercises the 0,3 limit NOTE 2 puts on the pipe Mach
-    number, which its printed 0,4 would otherwise breach.
+    the pipe. Example 6 exercises the 0.3 limit NOTE 2 puts on the pipe Mach
+    number, which its printed 0.4 would otherwise breach.
     """
     computed = {f"example {i}": round(_example(i).internal_level, 1) for i in _EXAMPLES}
     expected = {f"example {i}": v for i, v in _PRINTED_INTERNAL_LEVEL.items()}
@@ -348,7 +348,7 @@ def _chk_external_level() -> Outcome:
 def _chk_expander() -> Outcome:
     """Every printed intermediate of the one column the annex works it for.
 
-    Example 6 runs its valve outlet at Mach 0,89, far past the 0,3 that
+    Example 6 runs its valve outlet at Mach 0.89, far past the 0.3 that
     NOTE 1 to Equation (15) holds Clause 5 to, so the flow leaving the outlet
     is a second source and the annex computes it.
     """
@@ -396,7 +396,7 @@ def _chk_external_with_expander() -> Outcome:
 #: Annex A.3's example 7: a multipath, multistage cage of 432 passages in a
 #: DN 200 line, with the fluid a vapour at 70 bar. Table 4's "Globe,
 #: multihole drilled plug or cage, to open" gives the efficiency correction;
-#: the annex takes the Strouhal number at the bottom of the 0,1 to 0,3 range
+#: the annex takes the Strouhal number at the bottom of the 0.1 to 0.3 range
 #: 5.4.2 prints for free jets rather than from the table.
 _EXAMPLE_7 = {
     "mass_flow": 23.1,
@@ -494,7 +494,7 @@ def _chk_multistage_conditions() -> Outcome:
     A multistage trim drops most of its pressure before the stage that makes
     the noise, so 6.3 runs Clause 5 on that stage. NOTE 3 to Equation (28)
     picks the branch: with a valve pressure ratio of five it tries (28a)
-    first, and here the answer is 1,5 times the outlet pressure, which is
+    first, and here the answer is 1.5 times the outlet pressure, which is
     below the 2 that would send it to (28b).
     """
     conditions = ph.noise_control.multistage_trim_conditions(
@@ -524,8 +524,8 @@ def _chk_multistage_conditions() -> Outcome:
         expected,
         computed,
         label=(
-            "C_n = 315 from Equation (27); p_n = 2,1 x 1e6 Pa from (28a), "
-            "which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1,5"
+            "C_n = 315 from Equation (27); p_n = 2.1 x 1e6 Pa from (28a), "
+            "which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1.5"
         ),
     )
 
@@ -540,7 +540,7 @@ def _chk_example_seven() -> Outcome:
 
     It is the only one on a low-noise trim, and the only one whose valve is
     not the six-opening cage of A.2: 432 passages of 15 mm² each, a hydraulic
-    diameter of 2,5 mm, and a jet 2,2 mm across.
+    diameter of 2.5 mm, and a jet 2.2 mm across.
     """
     found = _example_seven()
     computed = {

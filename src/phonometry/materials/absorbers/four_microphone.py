@@ -64,13 +64,13 @@ Shape = Literal["circular", "rectangular", "square"]
 
 Complex = NDArray[np.complex128]
 
-#: Leading constant of ASTM E2611-19 Eq. (4), speed of sound (20,047).
+#: Leading constant of ASTM E2611-19 Eq. (4), speed of sound (20.047).
 _ASTM_C_CONST = 20.047
-#: Celsius-to-kelvin offset used by ASTM E2611-19 Eqs. (4)/(5) (273,15).
+#: Celsius-to-kelvin offset used by ASTM E2611-19 Eqs. (4)/(5) (273.15).
 _ASTM_T0 = 273.15
-#: Reference air density of ASTM E2611-19 Eq. (5), in kg/m3 (1,290).
+#: Reference air density of ASTM E2611-19 Eq. (5), in kg/m3 (1.290).
 _ASTM_RHO_REF = 1.290
-#: Reference atmospheric pressure of ASTM E2611-19 Eq. (5), in kPa (101,325).
+#: Reference atmospheric pressure of ASTM E2611-19 Eq. (5), in kPa (101.325).
 _ASTM_P_REF = 101.325
 
 #: Upper-frequency plane-wave factor ``K``, circular tube (ASTM E2611-19,
@@ -80,7 +80,7 @@ _ASTM_KU_CIRCULAR = 0.586
 #: largest section dimension (ASTM E2611-19, 6.2.5).
 _ASTM_KU_RECTANGULAR = 0.500
 #: Microphone-spacing factor for the upper limit: ``s`` no larger than 80 % of
-#: ``c / (2 f_u)``, i.e. ``f_u s < 0,40 c`` (ASTM E2611-19, 6.5.4).
+#: ``c / (2 f_u)``, i.e. ``f_u s < 0.40 c`` (ASTM E2611-19, 6.5.4).
 _ASTM_KU_SPACING = 0.40
 #: Lower-limit factor: spacing shall be greater than 1 % of the wavelength
 #: (ASTM E2611-19, 6.2.3), i.e. ``f_l = c / (100 s)``.

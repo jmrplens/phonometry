@@ -578,7 +578,7 @@ import numpy as np
 
 from phonometry import speech
 
-# The reverberant hall of this section, measured empty: a 0,9 s decay at
+# The reverberant hall of this section, measured empty: a 0.9 s decay at
 # 48 kHz stands in for the measured impulse response.
 fs = 48000
 rng = np.random.default_rng(0)

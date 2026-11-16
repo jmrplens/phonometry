@@ -31,14 +31,14 @@ beside each model or standard that fixes it, and they disagree:
 
 | Key | c (m/s) | rho (kg/m3) | What fixes it |
 | --- | ---: | ---: | --- |
-| `iec-61094-2-annex-f/air` | 345,87 | 1,186 | IEC 61094-2 Annex F at the ISO 9053-2 Annex A.3 reference state |
-| `phonometry-absorbers/air` | 343 | 1,205 | this library's own default for the absorber models, a dry air at 20 °C at textbook values |
-| `en-12354-annex-a/air` | 340 | 1,29 | EN/ISO 12354, the Annex A speed and the Annex B density |
-| `phonometry-solver/air` | 343 | 1,2 | this library's own default for the acoustic solver |
+| `iec-61094-2-annex-f/air` | 345.87 | 1.186 | IEC 61094-2 Annex F at the ISO 9053-2 Annex A.3 reference state |
+| `phonometry-absorbers/air` | 343 | 1.205 | this library's own default for the absorber models, a dry air at 20 °C at textbook values |
+| `en-12354-annex-a/air` | 340 | 1.29 | EN/ISO 12354, the Annex A speed and the Annex B density |
+| `phonometry-solver/air` | 343 | 1.2 | this library's own default for the acoustic solver |
 
 None of them is wrong. Each is the air its own document assumes, and
 substituting one for another would change the number that document prints: the
-1,7 per cent between the metrology annex and the building standard is a real
+1.7 per cent between the metrology annex and the building standard is a real
 disagreement between two committees, not a rounding.
 
 Each one stays where it is, beside the clause that prints it. Gathering them
@@ -84,16 +84,16 @@ gets more accurate, every caller who asked for air should get the more
 accurate answer.
 
 **A standard's own simplified formula** is not that. When ISO 10534-2 prints
-$c_0 = 343{,}2\sqrt{T/293}$, that expression is part of the procedure, and a
+$c_0 = 343.2\sqrt{T/293}$, that expression is part of the procedure, and a
 measurement that claims to follow the standard has to use it. Those stay in
 the module that implements their clause, with the citation beside them, and
 they never move here.
 
 **A constant frozen by a conformance row** is a third thing again. The
-Johnson-Champoux-Allard model carries a Prandtl number of 0,71 as a published
-constant of the model. The air at the reference state has 0,728. Substituting
+Johnson-Champoux-Allard model carries a Prandtl number of 0.71 as a published
+constant of the model. The air at the reference state has 0.728. Substituting
 the physical value into the model would not correct an error, it would change
-the model, and it moves the impedance it computes by 1,5 parts in a thousand.
+the model, and it moves the impedance it computes by 1.5 parts in a thousand.
 That constant stays frozen where it was published.
 
 Keeping the three apart is what lets better physics reach a caller without a

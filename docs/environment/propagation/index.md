@@ -63,7 +63,7 @@ interpolates between grid points, and two programs implementing the same
 method need not agree. ISO 17534-1 checks a program's results against the
 limits of a method's certified test cases (the TRC form, with ISO/TR 17534-3
 supplying the cases for ISO 9613-2), and measures what the faster
-configuration costs by the 0,1- and 0,9-quantiles of a sample of level
+configuration costs by the 0.1- and 0.9-quantiles of a sample of level
 differences. Open it when a map has to carry a statement of its own
 uncertainty.
 

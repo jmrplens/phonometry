@@ -678,7 +678,7 @@ jobs:
   # another published value than alone, and four books print the same material.
   # Two densities that disagree are a digit somebody typed wrong, because every
   # density the script does not already accept agrees across these tables to
-  # within 2,6 per cent, so it fails above 8 per cent and lets anything under
+  # within 2.6 per cent, so it fails above 8 per cent and lets anything under
   # that pass without a word. Moduli and speeds disagree by thirty per cent
   # between books without anybody being wrong, so those it reports and never
   # fails; the ones it reports by default are the few an order of magnitude
@@ -753,8 +753,9 @@ jobs:
     - name: Fail if a Spanish label would keep an English decimal point
       # The one defect the language gate structurally cannot see: it compares
       # untranslated WORDS, and a number is not a word. Static, so it needs no
-      # generation run.
-      run: python scripts/check_decimal_comma.py
+      # generation run. The English half of the same script runs in a job of
+      # its own, "English text writes the decimal point".
+      run: python scripts/check_decimal_comma.py --labels
     - name: Regenerate figures and diagrams
       run: make graphs
     - name: Regenerate the plates again and demand identical bytes
@@ -1135,6 +1136,31 @@ jobs:
     - name: Check that no grouped number can break across a line
       run: python scripts/check_digit_grouping.py
 
+  # English text writes the decimal point, a value restated from a print among
+  # them, and keeps the comma only where it transcribes the print: in quotation
+  # marks, in a block quote, in the print field of an errata entry and in the
+  # printed column of the conformance report. Spanish keeps its comma, and a
+  # thousands group, a list, code and notation are no decimal. Before this ran
+  # nothing read English text for a comma at all, and the convention that a
+  # restated print kept its separator had spread to some thirteen thousand
+  # numbers of the library's own prose. Reads every tracked file by its tokens,
+  # its tree or its Markdown structure, so it needs git and nothing installed.
+  decimal-comma:
+    name: English text writes the decimal point
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Fail on a decimal comma in English text
+      run: python scripts/check_decimal_comma.py --english --strict
+
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is
   # either a leftover or the trace of a check the docstring above it still
@@ -1256,7 +1282,7 @@ jobs:
       run: python scripts/check_reference_values.py
 
   # A standard prints its limits in decimal, and a margin of two readings that
-  # is 6 dB in decimal comes out 5,999 999 999 999 996 or 6,000 000 000 000 004
+  # is 6 dB in decimal comes out 5.999 999 999 999 996 or 6.000 000 000 000 004
   # in binary, so a verdict read straight off the comparison turns on the last
   # bit. The sweep that settled this class fixed more than a hundred sites;
   # this keeps the next one out. It fails on a computed decimal compared with a

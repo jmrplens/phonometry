@@ -351,7 +351,7 @@ _ES_EXACT = {
     "Background-noise correction: two standards, two thresholds": "Corrección por ruido de fondo: dos normas, dos umbrales",
     "ISO 10140-4 laboratory (6 / 15 dB)": "ISO 10140-4 laboratorio (6 / 15 dB)",
     "ISO 16283-1 field (6 / 10 dB)": "ISO 16283-1 in situ (6 / 10 dB)",
-    "limit of measurement\n(fixed 1,3 dB, flag the band)": "límite de medición\n(1,3 dB fijos, señalar la banda)",
+    "limit of measurement\n(fixed 1.3 dB, flag the band)": "límite de medición\n(1,3 dB fijos, señalar la banda)",
     "the field rule stops here": "la regla in situ termina aquí",
     "the laboratory rule stops here": "la regla de laboratorio termina aquí",
     r"Signal-to-background margin $L_\mathrm{sb} - L_\mathrm{b}$ [dB]": r"Margen señal-fondo $L_\mathrm{sb} - L_\mathrm{b}$ [dB]",
@@ -363,8 +363,8 @@ _ES_EXACT = {
     "at $T$ = 5 s the energy average has grown to 10.0 dB\n"
     "while the Fast term has saturated at 5.1 dB": "a $T$ = 5 s el promedio energético ha crecido hasta 10,0 dB\n"
     "mientras el término Fast se ha saturado en 5,1 dB",
-    "$T = T_0$ = 0,5 s\nboth terms vanish": "$T = T_0$ = 0,5 s\nambos términos se anulan",
-    "$T$ = 1,7275 s: $C = 1$, $g = 1/e$": "$T$ = 1,7275 s: $C = 1$, $g = 1/e$",
+    "$T = T_0$ = 0.5 s\nboth terms vanish": "$T = T_0$ = 0,5 s\nambos términos se anulan",
+    "$T$ = 1.7275 s: $C = 1$, $g = 1/e$": "$T$ = 1,7275 s: $C = 1$, $g = 1/e$",
     "Receiving-room reverberation time $T$ [s]": "Tiempo de reverberación del recinto receptor $T$ [s]",
     "Term subtracted from the measured level [dB]": "Término restado al nivel medido [dB]",
     "The same wall, in the laboratory and in two buildings\n"
@@ -2513,7 +2513,7 @@ _ES_EXACT = {
     "Exact −3.01 dB/octave power law": "Ley de potencias exacta de −3,01 dB/octava",
     # Thomson multitaper spectral density (Percival & Walden 1993)
     "Thomson Multitaper Density of a Short Record (Percival & Walden)":
-    # Measured on the drawn figure: "de un registro corto" ran 4,9 px
+    # Measured on the drawn figure: "de un registro corto" ran 4.9 px
     # past the left canvas edge; the shorter apposition fits.
     "Densidad multitaper de Thomson, registro corto (Percival y Walden)",
     "Single Slepian taper ($K$ = 1, $\\nu$ = 2)": "Un solo taper de Slepian ($K$ = 1, $\\nu$ = 2)",
@@ -2985,7 +2985,7 @@ _ES_EXACT = {
     # Gaussian beam tracing: the caustic and the shadow zone behind it.
     # Vocabulary follows the Spanish solvers guide: cáustica, zona de sombra,
     # abanico, haz. The parameter box carries mathtext, which the save-time
-    # comma pass skips, so its Spanish twin bakes the comma of 35,9 m.
+    # comma pass skips, so its Spanish twin bakes the comma of "35,9 m".
     "Where Rays Give Infinity and Nothing, Beams Give a Level": "Donde los rayos dan infinito y nada, los haces dan un nivel",
     "source at 992.5 m": "fuente a 992.5 m",
     "caustic: the ray fan folds on itself here,\n"
@@ -3104,8 +3104,8 @@ _ES_EXACT = {
     "(96 coches/h a 160 km/h)",
     r"Line power $L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]": r"Potencia de la línea $L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]",
     "Both source heights": "Ambas alturas de fuente",
-    "Source A, 0,5 m (rolling, impact, traction)": "Fuente A, 0,5 m (rodadura, impacto, tracción)",
-    "Source B, 4,0 m (traction, aerodynamic)": "Fuente B, 4,0 m (tracción, aerodinámico)",
+    "Source A, 0.5 m (rolling, impact, traction)": "Fuente A, 0,5 m (rodadura, impacto, tracción)",
+    "Source B, 4.0 m (traction, aerodynamic)": "Fuente B, 4,0 m (tracción, aerodinámico)",
     "CNOSSOS-EU Total Effective Roughness against Speed "
     r"($f = v/\lambda$, $\lambda$ in the wavelength domain)": "Rugosidad efectiva total CNOSSOS-EU frente a la velocidad "
     r"($f = v/\lambda$, $\lambda$ en el dominio de longitud de onda)",
@@ -3220,13 +3220,13 @@ _ES_EXACT = {
     "thin layer A (40-130 km/h)": "capa fina A (40-130 km/h)",
     "hard elements not in herringbone (30-60 km/h)": "elementos rígidos no en espiga (30-60 km/h)",
     "Components at 160 km/h, by source height": "Componentes a 160 km/h, por altura de fuente",
-    "rolling @ 0,5 m": "rodadura @ 0,5 m",
-    "traction @ 0,5 m": "tracción @ 0,5 m",
-    "traction @ 4,0 m": "tracción @ 4,0 m",
+    "rolling @ 0.5 m": "rodadura @ 0,5 m",
+    "traction @ 0.5 m": "tracción @ 0,5 m",
+    "traction @ 4.0 m": "tracción @ 4,0 m",
     "Sound power [dB re 1 pW]": "Potencia acústica [dB re 1 pW]",
     "Each source line against speed": "Cada línea fuente frente a la velocidad",
-    "Source A (0,5 m)": "Fuente A (0,5 m)",
-    "Source B (4,0 m)": "Fuente B (4,0 m)",
+    "Source A (0.5 m)": "Fuente A (0,5 m)",
+    "Source B (4.0 m)": "Fuente B (4,0 m)",
     "Aerodynamic threshold (2.3.13)": "Umbral aerodinámico (2.3.13)",
     "Total line power [dB re 1 pW per metre]": "Potencia de línea total [dB re 1 pW por metro]",
     "CNOSSOS-EU Railway Source Directivity": "Directividad de la fuente ferroviaria CNOSSOS-EU",
@@ -3239,8 +3239,8 @@ _ES_EXACT = {
     "4 kHz, 2021/1226": "4 kHz, 2021/1226",
     # Wind-turbine apparent sound power and audibility (IEC 61400-11) (FL3).
     "Apparent Sound Power against Wind Speed (IEC 61400-11)": "Potencia acústica aparente frente al viento (IEC 61400-11)",
-    "Hub-height wind speed [m/s]  (0,5 m/s bins)": "Velocidad del viento a altura de buje [m/s]  (intervalos de 0,5 m/s)",
-    r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0,05 m [m/s]": r"Velocidad del viento a 10 m de la Fórmula (29), "
+    "Hub-height wind speed [m/s]  (0.5 m/s bins)": "Velocidad del viento a altura de buje [m/s]  (intervalos de 0,5 m/s)",
+    r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0.05 m [m/s]": r"Velocidad del viento a 10 m de la Fórmula (29), "
     r"$z_{0\mathrm{ref}}$ = 0,05 m [m/s]",
     "Valid bin (margin $>$ 6 dB)": "Intervalo válido (margen $>$ 6 dB)",
     "3-6 dB margin: reported with an asterisk": "Margen de 3-6 dB: se declara con asterisco",
@@ -3900,7 +3900,7 @@ _ES_EXACT = {
     "One correction, three standards, three answers": (
         "Una corrección, tres normas, tres respuestas"
     ),
-    "at a margin of 9 dB one table takes off 0,5 dB and the\n"
+    "at a margin of 9 dB one table takes off 0.5 dB and the\n"
     "other 1 dB, and under their own thresholds neither\n"
     "corrects at all: the measurement is refused": (
         "con un margen de 9 dB una tabla quita 0,5 dB y la otra 1 dB,\n"
@@ -3924,7 +3924,7 @@ _ES_EXACT = {
     "Reference microphone height of 7.2.2": (
         "Altura del micrófono de referencia, 7.2.2"
     ),
-    "1,5 m above the top edge": "1,5 m por encima del borde superior",
+    "1.5 m above the top edge": "1,5 m por encima del borde superior",
     "Top edge of the barrier, 4 m": "Borde superior de la pantalla, 4 m",
     "Distance from the near end of the source to the barrier [m]": (
         "Distancia del extremo cercano de la fuente a la pantalla [m]"
@@ -4011,8 +4011,8 @@ _ES_EXACT = {
     "Differential pressure ratio $x_F$": "Cociente diferencial de presiones $x_F$",
     "Level 1 m from the pipe [dB]": "Nivel a 1 m de la tubería [dB]",
     "Measured $x_{Fz}$": "$x_{Fz}$ medido",
-    "$x_{Fz} + 0{,}1$": "$x_{Fz} + 0{,}1$",
-    "the same valve at the same flow, with a\nthreshold 0,1 apart: 14 dB between the\n"
+    "$x_{Fz} + 0.1$": "$x_{Fz} + 0{,}1$",
+    "the same valve at the same flow, with a\nthreshold 0.1 apart: 14 dB between the\n"
     "two markers, and the standard asks for\na measured value for exactly this reason": "la misma válvula al mismo caudal, con un\numbral separado 0,1: 14 dB entre los dos\n"
     "marcadores, y por eso mismo la norma pide\nun valor medido",
     "Two humps, weighted by two efficiencies": "Dos jorobas, pesadas por dos eficiencias",
@@ -4050,7 +4050,7 @@ _ES_EXACT = {
     "$\\Omega = \\pi$, wall and floor": "$\\Omega = \\pi$, pared y suelo",
     "$\\Omega = 2\\pi$, flush in a wall": "$\\Omega = 2\\pi$, enrasada en una pared",
     "$\\Omega = 4\\pi$, free in the room": "$\\Omega = 4\\pi$, libre en la sala",
-    "Long's closed form, exponent 1,88": "Forma cerrada de Long, exponente 1,88",
+    "Long's closed form, exponent 1.88": "Forma cerrada de Long, exponente 1,88",
     "the solid angle is in the numerator, so an\nunbaffled mouth keeps more in, not less:\n"
     "a baffle is what makes an opening radiate": "el ángulo sólido está en el numerador, así que una\nboca sin pantalla retiene más, no menos: lo que\n"
     "hace radiar a una abertura es la pantalla",
@@ -6645,7 +6645,7 @@ _ES_PATTERNS = [
     ),
     (
         (
-            r"^\$6 - 10\\,\\mathrm\{lg\}\(10\^\{0\{,\}6\} - 1\)\$"
+            r"^\$6 - 10\\,\\mathrm\{lg\}\(10\^\{0\.6\} - 1\)\$"
             r" = (\d+)\.(\d+) dB$"
         ),
         r"$6 - 10\\,\\mathrm{lg}(10^{0{,}6} - 1)$ = \1,\2 dB",
@@ -7496,7 +7496,7 @@ def _translate_figure(fig: Figure) -> None:
                 # ``f"{v:g}"``. The formatter chooses one decimal precision for
                 # the whole axis from the tick spacing, so English draws
                 # ``0.0 0.2 ... 1.0``; ``%g`` decides per value and drew the
-                # Spanish twin as ``0  0,2 ... 1``, dropping exactly the
+                # Spanish twin as “0  0,2 ... 1”, dropping exactly the
                 # decimals that keep a tick column aligned (and its ASCII
                 # hyphen needed a fix_minus of its own). A subclass INSTALLED
                 # on the axis -- matplotlib then keeps its tick locations in

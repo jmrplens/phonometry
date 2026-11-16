@@ -6,7 +6,7 @@
 fixed strings, so the octave labels of a continuous frequency axis are written
 by ``format_frequency_axis`` and by nothing else: a renderer that does not pass
 its ``language`` on draws ``31.5`` in a Spanish figure. Every figure below
-spans 31,5 Hz, the lowest octave centre whose label carries a decimal, because
+spans 31.5 Hz, the lowest octave centre whose label carries a decimal, because
 a label without one proves nothing.
 """
 
@@ -63,7 +63,7 @@ def _frequency_response_on_given_axes(language: str) -> list[Axes]:
 
 
 def _swept_sine() -> ph.electroacoustics.SweptSineDistortionResult:
-    # The sweep starts at 20 Hz so that both panels reach the 31,5 Hz label.
+    # The sweep starts at 20 Hz so that both panels reach the 31.5 Hz label.
     f1, f2, seconds = 20.0, 8000.0, 1.0
     sweep = ph.electroacoustics.synchronized_sweep_signal(FS, f1, f2, seconds)
     return ph.electroacoustics.swept_sine_distortion(

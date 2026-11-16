@@ -63,16 +63,16 @@ These are the 4 entries of the [errata registry](/phonometry/reference/errata/) 
   $E$ = 0,1 and $\rho$ = 250 with 500 m/s; and $E$ = 8,3 and $\rho$ = 600 with
   4540 m/s.
 - **The problem:** $\sqrt{E/\rho}$ on those cells gives 3464, 632 and 3719 m/s.
-  The printed speeds are 5,4 per cent above, 20,9 per cent below and 22,1 per
+  The printed speeds are 5.4 per cent above, 20.9 per cent below and 22.1 per
   cent above what the two columns beside them give.
 - **Evidence:** the same expression reproduces the rest of the table. Of the
   eighty-seven rows that print both the modulus and the density as single
   values, seventy-nine agree within 1 per cent and eighty-four within 3, with a
-  median offset of 0,03 per cent, across speeds from 190 to 27000 m/s. Only
+  median offset of 0.03 per cent, across speeds from 190 to 27000 m/s. Only
   these three fall outside, which is the signature of a misprinted cell rather
   than of a looser method than the page describes. Which cell is misprinted
-  cannot be told from the page: 4540 m/s would follow from a modulus of 12,4
-  rather than 8,3, and 500 m/s from a density of 400 rather than 250. Verified
+  cannot be told from the page: 4540 m/s would follow from a modulus of 12.4
+  rather than 8.3, and 500 m/s from a density of 400 rather than 250. Verified
   against the page as printed on PDF pages 748 and 749 (printed pp. 719 and
   720) of Bies, Hansen and Howard (2017), *Engineering Noise Control*, fifth
   edition.

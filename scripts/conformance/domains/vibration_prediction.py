@@ -4,11 +4,11 @@
 DIN 4150-1 prints seven formulas and no worked example that ends in a
 number, but two of its figures are drawn from the formulas with every
 parameter printed: Figure A.19 draws Formula (2), the decay with distance,
-for 0,44 mm/s at 13 m with an attenuation of 0,005 1/m and the exponents
-0, 0,5 and 1, and prints the damping ratio and wavelength the attenuation
+for 0.44 mm/s at 13 m with an attenuation of 0.005 1/m and the exponents
+0, 0.5 and 1, and prints the damping ratio and wavelength the attenuation
 comes from; Figure A.18 draws Formula (7), a hall of machines, for
-0,44 mm/s measured with three of them, with the correction of Figure 3;
-and Figure 2 draws the damping alone for a damping ratio of 0,01 and a wave
+0.44 mm/s measured with three of them, with the correction of Figure 3;
+and Figure 2 draws the damping alone for a damping ratio of 0.01 and a wave
 speed of 200 m/s at five frequencies.
 
 The rows compare with what the curves show at the resolution of the page:
@@ -46,7 +46,7 @@ _A18 = {20: 0.78, 60: 1.03, 100: 1.27}
 @register(
     _PREDICTION,
     f"{_EDITION} Annex A, Figure A.19",
-    "alpha from D = 0,01 and lambda = 12,5 m, as printed, 1/m",
+    "alpha from D = 0.01 and lambda = 12.5 m, as printed, 1/m",
 )
 def _chk_alpha() -> Outcome:
     computed = ph.vibration.attenuation_coefficient_per_m(0.01, wavelength_m=12.5)

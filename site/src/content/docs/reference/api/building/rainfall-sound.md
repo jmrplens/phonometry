@@ -49,7 +49,7 @@ level $L_{I\mathrm{A}} = 10 \log_{10} \sum 10^{0.1(L_{Ij} + C_j)}$
 and three bands into an octave by Formula (K.3).
 
 **The reference specimen.** For comparison between laboratories, the levels
-are normalized with the result for a 6 mm glass pane of 1,25 m by 1,5 m under
+are normalized with the result for a 6 mm glass pane of 1.25 m by 1.5 m under
 heavy rain (K.6, ISO 10140-5:2021 Annex I): its measured level is corrected to
 the reference loss factor of Table I.1, $L_{I,\mathrm{m,ref}} = L_{I,\mathrm{ref}} + 10 \log_{10}(\eta/\eta_\mathrm{ref})$ with
 $\eta = 2.2/(f T_\mathrm{s})$ (Formulas (I.1) and (I.2)), and the
@@ -168,8 +168,8 @@ rainfall_reference_correction(
 
 Correction $\Delta L_{I\mathrm{c}}$ of a laboratory (ISO 10140-5 I.2).
 
-The small reference specimen is a single 6 mm glass pane of 1,25 m by
-1,5 m, mounted as a window pane of ISO 10140-1:2021 Annex D and wetted by
+The small reference specimen is a single 6 mm glass pane of 1.25 m by
+1.5 m, mounted as a window pane of ISO 10140-1:2021 Annex D and wetted by
 heavy rain centred on it. Its structural reverberation time gives its
 loss factor, $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), and its
 measured intensity level is brought to the reference loss factor of
@@ -241,7 +241,7 @@ L_I = L_\mathrm{pr} - 10 \log_{10}(T/T_0) + 10 \log_{10}(V/V_0) - 14 - 10 \log_{
 $$
 
 (Formula (K.1)). A small specimen (a roof window or rooflight, about
-1,25 m by 1,5 m) is wetted from one position and $S_\mathrm{e}$ is
+1.25 m by 1.5 m) is wetted from one position and $S_\mathrm{e}$ is
 its area; a large one (10 m² to 20 m²) from three, whose levels are added
 energetically, and $S_\mathrm{e}$ is three times the perforated
 area of the tank. The 18 bands 100 Hz to 5 000 Hz give the A-weighted

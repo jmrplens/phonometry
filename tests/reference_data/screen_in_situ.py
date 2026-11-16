@@ -96,8 +96,8 @@ BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M: float = 20.0
 #: from its operator indoors, the level in the 1000 Hz octave without the
 #: screen and with it, and the reduction, in decibels. Both levels are
 #: Barron's own prediction, which is why the case anchors the subtraction and
-#: not a measurement. The screen stands 1,00 m from the machine and the
-#: operator 3,00 m from it, so the position is 2 m from the screen.
+#: not a measurement. The screen stands 1.00 m from the machine and the
+#: operator 3.00 m from it, so the position is 2 m from the screen.
 BARRON_EXAMPLE_7_10_DB: tuple[float, float, float] = (92.3, 84.0, 8.3)
 BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M: float = 2.0
 
@@ -124,8 +124,8 @@ HANSEN_EXAMPLE_6_23_REDUCTION_DB: tuple[int, int, int] = (10, 15, 20)
 #: without the screen, in decibels, and the level with it by the three paths
 #: together and by each path alone, in that order. The 71 dB for the three
 #: together is the book's decibel-addition rule of thumb rather than the
-#: energy sum of the paths, which is 71,687 dB and would make the reduction
-#: 8,3 dB; the pair is used exactly as printed.
+#: energy sum of the paths, which is 71.687 dB and would make the reduction
+#: 8.3 dB; the pair is used exactly as printed.
 SRL_1991_UNSCREENED_DB: float = 80.0
 SRL_1991_SCREENED_DB: dict[str, float] = {
     "screen": 71.0,
@@ -160,7 +160,7 @@ ISO140_3_SIX_DB_MARGIN_CORRECTION_DB: float = 1.3
 #: Example 3-5, PDF pages 80 and 81, folios 68 and 69: the energy mean printed
 #: over the ten levels of Table 3-2 (PDF page 73, folio 61), which
 #: :data:`reference_data.silencer_in_situ.BARRON_EXAMPLE_3_3_LEVELS_DB`
-#: carries, and over the ring of three at 41,4 degrees from the vertical,
+#: carries, and over the ring of three at 41.4 degrees from the vertical,
 #: positions 2 to 4, in decibels. Ten positions on a hemisphere, where
 #: definition 3.10 reads twelve on a horizontal circle, so what they anchor is
 #: the mean and not the index.

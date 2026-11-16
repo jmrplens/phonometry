@@ -15,7 +15,7 @@ spectrum is taken (7.1): the data of joints, welds and rail defects are edited
 out by the operator (Annex A shows what is and is not a defect); narrow upward
 spikes from particles on the rail are removed (7.2,
 :func:`remove_roughness_spikes`); and every point is raised to where a wheel
-of 0,375 m radius would stand on it, because the probe tip is far smaller than
+of 0.375 m radius would stand on it, because the probe tip is far smaller than
 a wheel and reaches into pits a wheel rolls over (7.3,
 :func:`curvature_processed_roughness`).
 
@@ -33,7 +33,7 @@ portion of their width inside the band (Annex C,
    L_r = 10 \lg \frac{r_\mathrm{RMS}^2}{r_0^2}\ \mathrm{dB}, \qquad r_0 = 1\ \mathrm{\mu m}
 
 (3.3, Formula 1). A record of a given length only resolves wavelengths up to
-a quarter of it (7.5), so a 1 m segment reports down to the 0,25 m band.
+a quarter of it (7.5), so a 1 m segment reports down to the 0.25 m band.
 
 Method B of 7.4.3 (:func:`filtered_roughness_spectrum`) runs digital one-third
 octave filters along the record itself and takes the mean square of each
@@ -65,7 +65,7 @@ the height of the peak above the straight line the spike is replaced by. The
 filters of Method B ring for a distance that grows with the wavelength of
 their band, and 7.4.3 allows them 2 m to settle whatever the band: a band is
 reported only when, over the length analysed, its filter has built up to
-within 0,15 dB of its steady output, the class 0 tolerance of EN 61260:1995
+within 0.15 dB of its steady output, the class 0 tolerance of EN 61260:1995
 4.5.3 on the integrated response. That is the reason for order 4, the lowest
 whose bank is class 0: it settles soonest. The bank is not decimated band by
 band, as the library's banks are by default: run at the record's own rate, a
@@ -197,7 +197,7 @@ def _nominal_wavelength_m(band: int) -> float:
 
     Band ``k`` is centred on the wavenumber :math:`10^{k/10}` per metre; its
     nominal wavelength is the R10 preferred number nearest :math:`10^{-k/10}`,
-    so band 4 is 0,4 m and band 25 is 3,15 mm.
+    so band 4 is 0.4 m and band 25 is 3.15 mm.
     """
     mantissa = (-band) % 10
     exponent = (-band - mantissa) // 10
@@ -340,7 +340,7 @@ def curvature_processed_roughness(
     sample_spacing_m: float,
     curve_radius_m: float = _CURVE_RADIUS_M,
 ) -> NDArray[np.float64]:
-    r"""The record as a wheel of radius 0,375 m would ride it (7.3).
+    r"""The record as a wheel of radius 0.375 m would ride it (7.3).
 
     At every sample :math:`x_i` a circle :math:`C_i(x)` of radius
     :math:`R` passes through :math:`r(x_i)` with its centre above the
@@ -362,7 +362,7 @@ def curvature_processed_roughness(
         :func:`remove_roughness_spikes`.
     :param sample_spacing_m: The sampling interval, in metres.
     :param curve_radius_m: The radius :math:`R` of the circle, in metres; the
-        0,375 m of 7.3 by default.
+        0.375 m of 7.3 by default.
     :return: A new array :math:`r'(x)`, in micrometres.
     :raises ValueError: For an invalid record, spacing or radius.
     :raises TypeError: if ``curve_radius_m`` or ``sample_spacing_m`` is not a single
@@ -785,7 +785,7 @@ def roughness_filter_bank(
     :param sample_spacing_m: The sampling interval of the records, in metres;
         5.5 asks for 1 mm or less.
     :param longest_wavelength_m: The longest band the bank holds, by its
-        nominal wavelength, in metres; 0,5 m by default, where the Annex B
+        nominal wavelength, in metres; 0.5 m by default, where the Annex B
         listing stops (``wl_max``). The bank runs from that band to the
         shortest whose upper edge lies below the Nyquist wavenumber.
     :return: The filter bank.
@@ -874,11 +874,11 @@ def filtered_roughness_spectrum(
 
     The bands reported are those whose nominal wavelength is at most a
     quarter of the length analysed (7.5) and whose filter, over that length,
-    has built up to within 0,15 dB of its steady output, the class 0
+    has built up to within 0.15 dB of its steady output, the class 0
     tolerance of EN 61260:1995 4.5.3; the longest bands ring on past the 2 m
     allowed and are left out until the record is long enough to dilute what
-    is left of their transient. A 5 m record reports from the 0,25 m band
-    down, a 19 m one from the 0,5 m band, and the shortest band is the one
+    is left of their transient. A 5 m record reports from the 0.25 m band
+    down, a 19 m one from the 0.5 m band, and the shortest band is the one
     whose upper edge lies below the Nyquist wavenumber.
 
     :param roughness_um: The roughness record, in micrometres, at equal

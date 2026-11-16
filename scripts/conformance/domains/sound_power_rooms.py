@@ -5,7 +5,7 @@ Rows of the "Intensity & sound power" section. Oracle: BS EN ISO 3743-1:2010
 (the ISO text unchanged, PDF page = printed folio + 9) and ISO 3743-2:2018,
 second edition (PDF page = printed folio + 6), every table and formula read on
 the printed page. The two parts print their tables and a few worked numbers
-(the 9.5 and 11.5 EXAMPLEs, Tables C.1 and D.1, Formula B.2's 1,06, and the
+(the 9.5 and 11.5 EXAMPLEs, Tables C.1 and D.1, Formula B.2's 1.06, and the
 centring of B.5 on the curve of Figure B.4, which the library departs from and
 the row states by how much); the determinations themselves carry no worked
 example, so Eq. (14), (20), Formula (9) and (10) are pinned in closed form and
@@ -85,7 +85,7 @@ def _special_direct(**kwargs: object) -> ph.emission.SpecialRoomSoundPowerResult
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 9.5 EXAMPLE",
-    "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB = 5 dB, sigma_omc = 2,0 dB",
+    "Expanded uncertainty U = 2 sqrt(1.5^2 + 2^2) dB = 5 dB, sigma_omc = 2.0 dB",
 )
 def _chk_iso3743_1_example() -> Outcome:
     res = _hard_walled(sigma_omc_db=2.0)
@@ -109,10 +109,10 @@ def _chk_iso3743_1_table3() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 Table C.1",
-    "Total standard deviation of the grade 2 row, sigma_R0 = 1,5 dB, for sigma_omc = 0,5, 2 and 4 dB",
+    "Total standard deviation of the grade 2 row, sigma_R0 = 1.5 dB, for sigma_omc = 0.5, 2 and 4 dB",
 )
 def _chk_iso3743_1_table_c1() -> Outcome:
-    printed = {"sigma_omc 0,5": 1.6, "sigma_omc 2": 2.5, "sigma_omc 4": 4.3}
+    printed = {"sigma_omc 0.5": 1.6, "sigma_omc 2": 2.5, "sigma_omc 4": 4.3}
     computed = {
         name: round(_hard_walled(sigma_omc_db=omc).sigma_tot_a, 1)
         for name, omc in zip(printed, (0.5, 2.0, 4.0), strict=True)
@@ -123,7 +123,7 @@ def _chk_iso3743_1_table_c1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 Eq. 13 / 8.1.3",
-    "K1 at the 6 dB margin is -10 lg(1 - 10^-0,6) = 1,2563 dB, 1,3 dB below it and 0 above 15 dB",
+    "K1 at the 6 dB margin is -10 lg(1 - 10^-0.6) = 1.2563 dB, 1.3 dB below it and 0 above 15 dB",
 )
 def _chk_iso3743_1_k1_rules() -> Outcome:
     mean_st = _energy_mean(_ST)
@@ -136,11 +136,11 @@ def _chk_iso3743_1_k1_rules() -> Outcome:
         res = _hard_walled(
             background_levels=background, reference_background_levels=_BACKGROUND
         )
-    expected = {"K1(6 dB)": 1.2563, "K1(4 dB)": 1.3, "K1(15,5 dB)": 0.0}
+    expected = {"K1(6 dB)": 1.2563, "K1(4 dB)": 1.3, "K1(15.5 dB)": 0.0}
     computed = {
         "K1(6 dB)": round(float(res.background_correction[1]), 4),
         "K1(4 dB)": float(res.background_correction[2]),
-        "K1(15,5 dB)": float(res.background_correction[3]),
+        "K1(15.5 dB)": float(res.background_correction[3]),
     }
     return record(expected, computed, unit="dB")
 
@@ -213,7 +213,7 @@ def _chk_iso3743_1_event_forms() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 Annex A",
-    "C2 at 500 m and 23,0 degC from Eq. (A.2): 0,26 dB (not the 0,4 dB of C.4.2.5)",
+    "C2 at 500 m and 23.0 degC from Eq. (A.2): 0.26 dB (not the 0.4 dB of C.4.2.5)",
 )
 def _chk_iso3743_1_annex_a() -> Outcome:
     ps = ph.emission.static_pressure_from_altitude(500.0)
@@ -241,7 +241,7 @@ def _chk_iso3743_1_table_b1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 4.2",
-    "Room volume and reference box: 40 m3 and 40 boxes; 1,0 m up to 100 m3, 2,0 m above",
+    "Room volume and reference box: 40 m3 and 40 boxes; 1.0 m up to 100 m3, 2.0 m above",
 )
 def _chk_iso3743_1_room_size() -> Outcome:
     orientations = 80.0 + np.linspace(0.0, 1.0, 8)[:, None] * np.ones((1, 7))
@@ -265,15 +265,15 @@ def _chk_iso3743_1_room_size() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 Table 2",
-    "Source locations from sM: 1 up to 2,5 dB, 2 up to 4,0 dB, 2 plus 2 in another room above",
+    "Source locations from sM: 1 up to 2.5 dB, 2 up to 4.0 dB, 2 plus 2 in another room above",
 )
 def _chk_iso3743_1_table2() -> Outcome:
-    # Deviations whose sums of squares over n - 1 are 6,25 and 16 exactly, so
+    # Deviations whose sums of squares over n - 1 are 6.25 and 16 exactly, so
     # Eq. (7) lands on the edges of the table.
     edges = {
-        "sM 2,5": (np.array([3.75, -3.75, 1.25, -1.25, 0.0, 0.0]), (1, 0)),
-        "sM 4,0": (np.array([6.0, -6.0, 2.0, -2.0, 0.0, 0.0]), (2, 0)),
-        "sM 4,4": (np.array([6.6, -6.6, 2.2, -2.2, 0.0, 0.0]), (2, 2)),
+        "sM 2.5": (np.array([3.75, -3.75, 1.25, -1.25, 0.0, 0.0]), (1, 0)),
+        "sM 4.0": (np.array([6.0, -6.0, 2.0, -2.0, 0.0, 0.0]), (2, 0)),
+        "sM 4.4": (np.array([6.6, -6.6, 2.2, -2.2, 0.0, 0.0]), (2, 2)),
     }
     agree = 0
     for deviations, (locations, other) in edges.values():
@@ -290,7 +290,7 @@ def _chk_iso3743_1_table2() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-1:2010 Eq. 24 / ISO 3743-2:2018 Formula 14",
-    "sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2,0 dB for 2,5 dB and 1,5 dB (the minus of Part 1; Part 2 prints a plus)",
+    "sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2.0 dB for 2.5 dB and 1.5 dB (the minus of Part 1; Part 2 prints a plus)",
 )
 def _chk_iso3743_round_robin() -> Outcome:
     return numeric(
@@ -334,7 +334,7 @@ def _chk_iso3743_1_background_vs_iso11546() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 11.5 EXAMPLE",
-    "Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5,7 dB, sigma_omc = 2,0 dB",
+    "Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5.7 dB, sigma_omc = 2.0 dB",
 )
 def _chk_iso3743_2_example() -> Outcome:
     res = _special_direct(sigma_omc_db=2.0)
@@ -358,10 +358,10 @@ def _chk_iso3743_2_table5() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 Table D.1",
-    "Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0,5, 2,0 and 4,0 dB",
+    "Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0.5, 2.0 and 4.0 dB",
 )
 def _chk_iso3743_2_table_d1() -> Outcome:
-    printed = {"sigma_omc 0,5": 2.1, "sigma_omc 2,0": 2.8, "sigma_omc 4,0": 4.5}
+    printed = {"sigma_omc 0.5": 2.1, "sigma_omc 2.0": 2.8, "sigma_omc 4.0": 4.5}
     computed = {
         name: round(_special_direct(sigma_omc_db=omc).sigma_tot_a, 1)
         for name, omc in zip(printed, (0.5, 2.0, 4.0), strict=True)
@@ -372,7 +372,7 @@ def _chk_iso3743_2_table_d1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 Formula 1 / Formula B.2",
-    "R at 1 000 Hz for a 70 m3 room is the 1,06 of Formula (B.2)",
+    "R at 1 000 Hz for a 70 m3 room is the 1.06 of Formula (B.2)",
 )
 def _chk_iso3743_2_formula1() -> Outcome:
     r = float(ph.emission.reverberation_parameter([1000.0], 70.0)[0])
@@ -401,7 +401,7 @@ def _chk_iso3743_2_centring() -> Outcome:
 
 #: Figure B.4 of ISO 3743-2:2018 (PDF page 29, printed page 23): T/T1000 read
 #: off the printed curve at the one-third-octave centres from 100 Hz to 10 kHz;
-#: two readings made apart agree within 0,01.
+#: two readings made apart agree within 0.01.
 _FIGURE_B4 = np.array(
     [1.398, 1.294, 1.292, 1.335, 1.298, 1.237, 1.176, 1.002, 0.967, 0.990, 1.0,
      1.0, 1.0, 1.0, 1.031, 1.018, 1.006, 0.987, 0.954, 0.919, 0.801]
@@ -411,8 +411,8 @@ _FIGURE_B4 = np.array(
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 B.5 EXAMPLE",
-    "T1000 = 0,8 s on the curve of Figure B.4: the printed T/Tnom = 1,09 is the midpoint of the extreme ratios against 0,9 and 1,1 alone (within 0,015), "
-    "and as Tnom = 0,73 s it puts 250 Hz above 1,1 R; the library's centring qualifies the room at 0,76 s, a departure of 0,17 dB in LW (see the errata)",
+    "T1000 = 0.8 s on the curve of Figure B.4: the printed T/Tnom = 1.09 is the midpoint of the extreme ratios against 0.9 and 1.1 alone (within 0.015), "
+    "and as Tnom = 0.73 s it puts 250 Hz above 1.1 R; the library's centring qualifies the room at 0.76 s, a departure of 0.17 dB in LW (see the errata)",
 )
 def _chk_iso3743_2_b5_example() -> Outcome:
     t = 0.8 * _FIGURE_B4
@@ -437,7 +437,7 @@ def _chk_iso3743_2_b5_example() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 Clause 5",
-    "The noise source should not exceed 1 % of the room: 0,7 m3 in the minimum 70 m3 room is within the recommendation, 0,71 m3 is not, and neither moves the verdict",
+    "The noise source should not exceed 1 % of the room: 0.7 m3 in the minimum 70 m3 room is within the recommendation, 0.71 m3 is not, and neither moves the verdict",
 )
 def _chk_iso3743_2_source_size() -> Outcome:
     r = ph.emission.reverberation_parameter(_THIRDS, 70.0)
@@ -459,7 +459,7 @@ def _chk_iso3743_2_source_size() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 6.3",
-    "Limiting curves 0,9 and 1,1 times R Tnom up to 6,3 kHz, 0,8 and 1,2 above",
+    "Limiting curves 0.9 and 1.1 times R Tnom up to 6.3 kHz, 0.8 and 1.2 above",
 )
 def _chk_iso3743_2_limits() -> Outcome:
     check = ph.emission.check_special_room_reverberation(
@@ -469,10 +469,10 @@ def _chk_iso3743_2_limits() -> Outcome:
         nominal_reverberation_time_s=0.7,
     )
     return record(
-        {"6,3 kHz low": 0.9, "6,3 kHz high": 1.1, "8 kHz low": 0.8, "8 kHz high": 1.2},
+        {"6.3 kHz low": 0.9, "6.3 kHz high": 1.1, "8 kHz low": 0.8, "8 kHz high": 1.2},
         {
-            "6,3 kHz low": float(check.lower_limit[18]),
-            "6,3 kHz high": float(check.upper_limit[18]),
+            "6.3 kHz low": float(check.lower_limit[18]),
+            "6.3 kHz high": float(check.upper_limit[18]),
             "8 kHz low": float(check.lower_limit[19]),
             "8 kHz high": float(check.upper_limit[19]),
         },
@@ -498,7 +498,7 @@ def _chk_iso3743_2_table1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 6.7 / Table 1",
-    "Each band is suitable at its Table 1 difference read high or low, and not 0,1 dB beyond it on either side",
+    "Each band is suitable at its Table 1 difference read high or low, and not 0.1 dB beyond it on either side",
 )
 def _chk_iso3743_2_suitability_verdicts() -> Outcome:
     limits = np.array([5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 4.0])
@@ -521,8 +521,8 @@ def _chk_iso3743_2_suitability_verdicts() -> Outcome:
 # --- ISO 3743 reading an ISO 6926 calibration ---------------------------------
 #: The test both parts read a calibration at: 20 degC and 90 kPa. Annex A of
 #: ISO 6926 gives a source of unknown radiation C2 = -10 lg(ps/ps0) +
-#: 7,5 lg(theta/296 K), 0,483 dB there, and the 15 lg of ISO 3743-1 Annex A
-#: and ISO 3743-2 Annex E gives 0,452 dB.
+#: 7.5 lg(theta/296 K), 0.483 dB there, and the 15 lg of ISO 3743-1 Annex A
+#: and ISO 3743-2 Annex E gives 0.452 dB.
 _TEST_C = 20.0
 _TEST_KPA = 90.0
 _PRESSURE_TERM = -10.0 * math.log10(_TEST_KPA / 101.325)
@@ -530,8 +530,8 @@ _RATIO = math.log10((273.15 + _TEST_C) / 296.0)
 _C2_UNKNOWN = _PRESSURE_TERM + 7.5 * _RATIO
 _C2_3743 = _PRESSURE_TERM + 15.0 * _RATIO
 #: From the level over the 2 m hemisphere to the power calibrated at the
-#: reference conditions: ISO 6926 Formula (2), C1 and C2 at 23,0 degC and
-#: 101,325 kPa, no air absorption.
+#: reference conditions: ISO 6926 Formula (2), C1 and C2 at 23.0 degC and
+#: 101.325 kPa, no air absorption.
 _TO_POWER_AS_CALIBRATED = (
     10.0 * math.log10(2.0 * math.pi * 2.0**2)
     + 5.0 * math.log10(296.15 / 314.0)
@@ -541,9 +541,9 @@ _TO_POWER_AS_CALIBRATED = (
 #: octaves summed.
 _OCTAVE_AS_CALIBRATED = 80.0 + 10.0 * math.log10(3.0) + _TO_POWER_AS_CALIBRATED
 #: One-third octaves of 76, 80 and 83 dB over the hemisphere at 800 Hz, 1 kHz
-#: and 1,25 kHz: the 1 kHz octave is their energy sum, 85,31 dB at the
-#: surface, which neither the middle third plus 10 lg 3 (84,77 dB) nor their
-#: arithmetic mean plus 10 lg 3 (84,44 dB) gives.
+#: and 1.25 kHz: the 1 kHz octave is their energy sum, 85.31 dB at the
+#: surface, which neither the middle third plus 10 lg 3 (84.77 dB) nor their
+#: arithmetic mean plus 10 lg 3 (84.44 dB) gives.
 _UNEQUAL_THIRDS_DB = (76.0, 80.0, 83.0)
 _UNEQUAL_OCTAVE_AS_CALIBRATED = (
     10.0 * math.log10(sum(10.0 ** (0.1 * level) for level in _UNEQUAL_THIRDS_DB))
@@ -572,7 +572,7 @@ def _unequal_calibration() -> ph.emission.ReferenceSourceCalibration:
     "ISO 6926:2016 8.4 / ISO 3743-2:2018 6.7",
     "The calibration as the suitability evaluation reads it at 20 degC and 90 kPa: "
     "one-third octaves of 76, 80 and 83 dB over the 2 m hemisphere, the 1 kHz "
-    "octave their energy sum less the calibration's own C2 of 0,483 dB for a "
+    "octave their energy sum less the calibration's own C2 of 0.483 dB for a "
     "source of unknown radiation, dB (closed form)",
 )
 def _chk_iso3743_2_suitability_calibration() -> Outcome:
@@ -596,8 +596,8 @@ def _chk_iso3743_2_suitability_calibration() -> Outcome:
     _DOMAIN,
     "ISO 3743-2:2018 6.7 / Table 1",
     "With a calibration read at 20 degC and 90 kPa, each band is suitable at its "
-    "Table 1 difference below the calibration and not 0,1 dB beyond it; with the "
-    "calibration read at the default 23,0 degC and 101,325 kPa instead, 0,482 dB "
+    "Table 1 difference below the calibration and not 0.1 dB beyond it; with the "
+    "calibration read at the default 23.0 degC and 101.325 kPa instead, 0.482 dB "
     "higher, the band at its limit is not",
 )
 def _chk_iso3743_2_suitability_calibration_verdicts() -> Outcome:
@@ -634,8 +634,8 @@ def _chk_iso3743_2_suitability_calibration_verdicts() -> Outcome:
     _DOMAIN,
     "ISO 6926:2016 8.4 / ISO 3743-1:2010 Eq. 14 / ISO 3743-2:2018 Formula 10",
     "Both comparisons read a calibration at 20 degC and 90 kPa: the 1 kHz octave "
-    "less its own C2 of 0,483 dB, plus the 4 dB the source under test is louder, "
-    "and carried to the reference conditions by the 0,452 dB C2 of Annex A "
+    "less its own C2 of 0.483 dB, plus the 4 dB the source under test is louder, "
+    "and carried to the reference conditions by the 0.452 dB C2 of Annex A "
     "(Part 1) and Annex E (Part 2), dB (closed form)",
 )
 def _chk_iso3743_comparison_calibration() -> Outcome:
@@ -695,9 +695,9 @@ _TABLE_3_A = {
     "narrow-band": (2, 2, 1),
     "discrete tone": (4, 3, 2),
 }
-#: Six survey levels in each class of 9.5: sM of 1,1 dB and 2,6 dB about the
-#: arithmetic mean (a range within 5 dB), and 4,4 dB about the energy mean of
-#: Formula (5) (a range of 9,2 dB).
+#: Six survey levels in each class of 9.5: sM of 1.1 dB and 2.6 dB about the
+#: arithmetic mean (a range within 5 dB), and 4.4 dB about the energy mean of
+#: Formula (5) (a range of 9.2 dB).
 _SURVEYS = {
     "broadband": np.array([-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]),
     "narrow-band": np.array([-2.4, 2.4, -2.4, 2.4, -2.4, 2.4]),
@@ -737,7 +737,7 @@ def _chk_iso3743_2_table3() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 Table 4",
-    "Background corrections: 2, 2, 1, 1, 1, 0,5, 0,5 dB for 4 dB to 10 dB, 0 above",
+    "Background corrections: 2, 2, 1, 1, 1, 0.5, 0.5 dB for 4 dB to 10 dB, 0 above",
 )
 def _chk_iso3743_2_table4() -> Outcome:
     margins = [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0]
@@ -759,7 +759,7 @@ def _chk_iso3743_2_table4() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 3743-2:2018 Formula 9",
-    "Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0,73 s (closed form)",
+    "Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0.73 s (closed form)",
 )
 def _chk_iso3743_2_formula9() -> Outcome:
     res = _special_direct()

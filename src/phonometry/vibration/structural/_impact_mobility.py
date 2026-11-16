@@ -747,9 +747,9 @@ def check_double_hit(
 
     The threshold is this library's, not the part's, which only says that a
     small second impact shows as a slight ripple and that moderate dips may be
-    tolerated. At the default of 0,1 an undetected second pulse of the same
+    tolerated. At the default of 0.1 an undetected second pulse of the same
     shape as the first ripples the force spectrum by at most
-    :math:`20 \log_{10}(1{,}1/0{,}9) = 1{,}74` dB peak to notch
+    :math:`20 \log_{10}(1.1/0.9) = 1.74` dB peak to notch
     (:attr:`DoubleHitCheck.ripple_db`). A softer, longer rebound, the usual
     hammer bounce, carries more of the low-frequency spectrum than its peak
     says: it can stay under the threshold and still ripple the spectrum by
@@ -2102,8 +2102,8 @@ class ResponseDecayCheck(OwnsArrays):
 
     The verdict compares the level at the end, rounded to a whole per cent
     (the precision both figures are printed in), with the figure: "about 1 %"
-    accepts any level below 1,5 %, which rounds to 1 %, and "25 % or less"
-    any level below 25,5 %.
+    accepts any level below 1.5 %, which rounds to 1 %, and "25 % or less"
+    any level below 25.5 %.
 
     A driving-point acceleration follows the force itself during the impact
     (the mass line of the structure), so its highest peak can be the impact
@@ -2219,7 +2219,7 @@ class ResponseDecayCheck(OwnsArrays):
 
     @property
     def limit_ratio(self) -> float:
-        """The figure the clause prints: 0,01 without a window, 0,25 with one."""
+        """The figure the clause prints: 0.01 without a window, 0.25 with one."""
         return (
             WINDOWED_RESPONSE_END_RATIO
             if self.exponential_window
@@ -2294,7 +2294,7 @@ def check_response_decay(
     highest peak (8.3, 8.5.2); with one, its natural decay should reach 25 % or
     less, the general guideline of 8.5.2. The level at the end is read at the
     last sample and compared with the figure to a whole per cent, so any
-    level below 1,5 % passes "about 1 %" (see :class:`ResponseDecayCheck`).
+    level below 1.5 % passes "about 1 %" (see :class:`ResponseDecayCheck`).
     8.3 calls the 1 % a compromise, and the check is one-sided: it asks
     whether the response has decayed far enough, not whether it decayed too
     far. Pass the response as recorded, before any window.
@@ -2370,7 +2370,7 @@ class CoherenceCheck(OwnsArrays):
 
     The coherence expresses how linearly the response follows the force at
     each frequency; a value below 1 flags possible poor data (9.1). The clause
-    calls a coherence above 0,9 high, and says only a few records, five to
+    calls a coherence above 0.9 high, and says only a few records, five to
     ten, are then needed for high statistical confidence in its estimate.
     NOTE 1 adds that low coherence at an anti-resonance is not generally a
     concern: the response is near the noise floor there. Such frequencies can
@@ -2500,7 +2500,7 @@ def check_coherence(
 ) -> CoherenceCheck:
     """Is the averaged estimate's coherence high over the range of interest? (9.1)
 
-    The check passes when the coherence exceeds ``min_coherence`` (0,9,
+    The check passes when the coherence exceeds ``min_coherence`` (0.9,
     what 9.1 calls high) at every frequency of the range that is not excluded,
     and at least ``min_n_records`` impacts were averaged (five, the lower end
     of the five to ten 9.1 says a high coherence needs). A single impact has a
@@ -2619,7 +2619,7 @@ class ChannelMatchVerification(OwnsArrays):
         """Per frequency, whether the magnitude is within +/- 5 % of unity.
 
         The magnitude is compared with the bounds ``1 - 0,05`` and
-        ``1 + 0,05`` themselves, so a response of exactly 0,95 or 1,05 is
+        ``1 + 0,05`` themselves, so a response of exactly 0.95 or 1.05 is
         within them.
         """
         magnitude = np.abs(np.asarray(self.response))

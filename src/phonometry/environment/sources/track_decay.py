@@ -21,13 +21,13 @@ itself is the direct response :math:`A(x_0)`.
 
 **Clause 7 and Annex A, the rate.** If the response decayed as
 :math:`A(x) = A(0)\,\mathrm{e}^{-\beta x}`, the decay rate would be
-:math:`\mathrm{DR} = 20 \lg \mathrm{e}^{\beta} = 8{,}686\,\beta` dB/m, and the integral of the
+:math:`\mathrm{DR} = 20 \lg \mathrm{e}^{\beta} = 8.686\,\beta` dB/m, and the integral of the
 squared response along the rail would be :math:`|A(0)|^2 / 2\beta` (A.1). The
 standard estimates it from that integral rather than from a fitted slope,
 
 .. math::
 
-   \mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
+   \mathrm{DR} = \frac{4.343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
             \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}\ \mathrm{dB/m}
 
 (Formula 1, A.3), where :math:`\Delta x_n` is the length of rail each
@@ -37,7 +37,7 @@ the last position (A.2) (:func:`track_decay_rate`). The summation is dominated
 by the first 10 dB of decay, which is what radiates.
 
 **Formula 2, the floor.** A grid that stops at :math:`x_\mathrm{max}` cannot
-measure a rate below :math:`\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}`; a
+measure a rate below :math:`\mathrm{DR}_\mathrm{min} = 4.343 / x_\mathrm{max}`; a
 band whose rate is less than twice that is unsuitable, and its value only an
 upper bound on the true one (clause 7). The response at the far end of the
 grid also has to be at least 10 dB below the direct one in every band (6.7).
@@ -85,7 +85,7 @@ __all__ = [
 TRACK_DECAY_DIRECTIONS: tuple[Direction, ...] = ("vertical", "lateral")
 
 #: 6.7 and Figure 2: the positions of the hammer impacts, in sleeper bays from
-#: the accelerometer at the middle of bay 0. Quarter bays out to 2,5, half
+#: the accelerometer at the middle of bay 0. Quarter bays out to 2.5, half
 #: bays to 4, whole bays to 8, then the far field of Figure 2; the 29 points
 #: Figure 2 draws. 6.7 asks for more beyond bay 66 when the decay is very low.
 TRACK_DECAY_EXCITATION_INDICES: tuple[float, ...] = (
@@ -125,7 +125,7 @@ TRACK_DECAY_EXCITATION_INDICES: tuple[float, ...] = (
 _DEFAULT_SLEEPER_SPACING_M = 0.6
 
 #: Formula 1 and Formula 2: :math:`10 \lg e` rounded as the standard prints it,
-#: half the 8,686 of A.2 because the summation is of squared amplitudes.
+#: half the 8.686 of A.2 because the summation is of squared amplitudes.
 _DECAY_CONSTANT_DB = 4.343
 
 #: Clause 7: a rate is suitable only when the floor of Formula 2 is at most
@@ -146,7 +146,7 @@ def track_decay_excitation_positions(
     """The hammer positions of Figure 2, in metres from the accelerometer.
 
     :param sleeper_spacing_m: The distance between sleepers, in metres; the
-        0,6 m 6.7 prescribes for a rail without periodic supports by default.
+        0.6 m 6.7 prescribes for a rail without periodic supports by default.
     :return: The 29 distances of :data:`TRACK_DECAY_EXCITATION_INDICES`
         times the sleeper spacing, read-only.
     :raises ValueError: For a spacing that is not positive.
@@ -324,7 +324,7 @@ class TrackDecayRate(OwnsArrays):
 
     @property
     def min_measurable_db_per_m(self) -> float | None:
-        r"""The floor :math:`4{,}343 / x_\mathrm{max}` of Formula 2, in dB/m; ``None`` without the grid."""
+        r"""The floor :math:`4.343 / x_\mathrm{max}` of Formula 2, in dB/m; ``None`` without the grid."""
         if self.distances is None:
             return None
         return float(_DECAY_CONSTANT_DB / self.distances[-1])
@@ -385,7 +385,7 @@ class TrackDecayRate(OwnsArrays):
     ) -> Axes:
         """Draw the rates as EN 15461 9.2 presents them.
 
-        Decay rate on a logarithmic axis from 0,01 dB/m to 100 dB/m against
+        Decay rate on a logarithmic axis from 0.01 dB/m to 100 dB/m against
         equidistant one-third octave bands, with the bands clause 7 finds
         unsuitable marked and a lower limit drawn when one is given.
 
@@ -419,7 +419,7 @@ def track_decay_rate(
 
     .. math::
 
-       \mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
+       \mathrm{DR} = \frac{4.343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
                 \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}
 
     in each band, with :math:`\Delta x_n` the length of rail each position

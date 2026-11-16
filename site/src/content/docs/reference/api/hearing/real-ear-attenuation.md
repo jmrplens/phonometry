@@ -60,12 +60,12 @@ band by band and [`min_significant_difference`](/phonometry/reference/api/hearin
 B.1.1 and B.2 evaluate it on the **rounded** $U_{95}$ their tables print,
 and say so: "the expanded measurement uncertainty ... is 2,3 dB. The minimum
 difference is thus $\sqrt{2}$ × 2,3 dB = 3,3 dB". From the unrounded
-2,27 dB it is 3,21 dB, and from the unrounded 6,62 dB of Table B.2 it is
-9,37 dB rather than 9,3 dB; both are the same rule, fed a different precision.
+2.27 dB it is 3.21 dB, and from the unrounded 6.62 dB of Table B.2 it is
+9.37 dB rather than 9.3 dB; both are the same rule, fed a different precision.
 
 **The sound field (4.2.2).** The test room is qualified with the subject absent:
 the level 15 cm from the reference point along the three axes stays within
-±2,5 dB of the level at it, the two ear-side positions within 3 dB of each
+±2.5 dB of the level at it, the two ear-side positions within 3 dB of each
 other, and from 500 Hz up a directional microphone rotated through 360° sees a
 variation no larger than Table 1 allows for its free-field rejection.
 [`check_reat_sound_field`](/phonometry/reference/api/hearing/real-ear-attenuation/#check_reat_sound_field) judges those three conditions, and its verdict
@@ -253,7 +253,7 @@ Is the sound field of the test site diffuse enough? (4.2.2).
 Measured with the subject and the chair absent (4.2.1):
 
 - a) the level at each of the six positions 15 cm from the reference point,
-  front and back, left and right, up and down, stays within ±2,5 dB of the
+  front and back, left and right, up and down, stays within ±2.5 dB of the
   level at the reference point, and the right and left positions within
   3 dB of each other;
 - b) from the 500 Hz test signal up, a directional microphone rotated
@@ -310,8 +310,8 @@ $$
 
 and two means that differ by more than that differ significantly at the
 95 % confidence level. B.1.1 and B.2 evaluate it on the uncertainty their
-tables print rounded to one decimal, and say so: with the 2,3 dB of Table
-A.2 it is 3,3 dB, where the unrounded 2,27 dB gives 3,21 dB. Feed this the
+tables print rounded to one decimal, and say so: with the 2.3 dB of Table
+A.2 it is 3.3 dB, where the unrounded 2.27 dB gives 3.21 dB. Feed this the
 value the comparison should rest on.
 
 **Parameters**
@@ -666,6 +666,6 @@ Draw each condition of 4.2.2 against its limit, band by band.
 
 *property*
 
-Per band, whether all six positions stay within ±2,5 dB (4.2.2 a)).
+Per band, whether all six positions stay within ±2.5 dB (4.2.2 a)).
 
 **Returns:** One boolean per band.

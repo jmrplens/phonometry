@@ -283,7 +283,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
 
     bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
     # A point source 200 m away over porous ground (G = 1), screened by a 4 m
-    # barrier midway (source and receiver 1,5 m high; the diffraction geometry
+    # barrier midway (source and receiver 1.5 m high; the diffraction geometry
     # gives dss = dsr ~ 100 m over the raised edge).
     barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
     att = environment.outdoor_propagation_attenuation(
@@ -741,7 +741,7 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
 def generate_barrier_geometry(output_dir: str) -> None:
     """To-scale section of the barrier of the insertion-loss figure.
 
-    The 4 m screen 50 m from a 1 m source with the receiver 1,5 m high at
+    The 4 m screen 50 m from a 1 m source with the receiver 1.5 m high at
     100 m: direct and diffracted paths and the path-length difference that
     drives the Fresnel number. One concept: the geometry the insertion-loss
     methods share.
@@ -1471,8 +1471,8 @@ def generate_cnossos_rail_emission(output_dir: str) -> None:
         (COLOR_PRIMARY, COLOR_SECONDARY),
         ("o", "s"),
         (
-            "Source A, 0,5 m (rolling, impact, traction)",
-            "Source B, 4,0 m (traction, aerodynamic)",
+            "Source A, 0.5 m (rolling, impact, traction)",
+            "Source B, 4.0 m (traction, aerodynamic)",
         ),
         strict=True,
     ):
@@ -2404,7 +2404,7 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
         "bridge": "#9467bd",
     }
     for name, spectrum in result.components.items():
-        for row, height, style in ((0, "0,5 m", "-"), (1, "4,0 m", "--")):
+        for row, height, style in ((0, "0.5 m", "-"), (1, "4.0 m", "--")):
             values = np.asarray(spectrum)[row]
             if not np.any(np.isfinite(values)):
                 continue
@@ -2428,8 +2428,8 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
 
     speeds = np.linspace(60.0, 350.0, 40)
     for row, label, color in (
-        (0, "Source A (0,5 m)", COLOR_PRIMARY),
-        (1, "Source B (4,0 m)", COLOR_SECONDARY),
+        (0, "Source A (0.5 m)", COLOR_PRIMARY),
+        (1, "Source B (4.0 m)", COLOR_SECONDARY),
     ):
         right.plot(
             speeds,
@@ -2602,7 +2602,7 @@ def generate_wind_turbine_apparent_power(output_dir: str) -> None:
         zorder=5,
     )
     ax.set_title("Apparent Sound Power against Wind Speed (IEC 61400-11)", pad=12)
-    ax.set_xlabel("Hub-height wind speed [m/s]  (0,5 m/s bins)")
+    ax.set_xlabel("Hub-height wind speed [m/s]  (0.5 m/s bins)")
     ax.set_ylabel(r"$L_{W\!\mathrm{A}}$ [dB(A) re 1 pW]")
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
@@ -2614,7 +2614,7 @@ def generate_wind_turbine_apparent_power(output_dir: str) -> None:
         "top", functions=(lambda v: v * factor, lambda v: v / factor)
     )
     secondary.set_xlabel(
-        r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0,05 m [m/s]"
+        r"Formula (29) wind speed at 10 m, $z_{0\mathrm{ref}}$ = 0.05 m [m/s]"
     )
     plt.tight_layout()
     save_figure(output_dir, "wind_turbine_apparent_power.svg")
@@ -3631,7 +3631,7 @@ _BARRIER_SPEED_M_S = 343.2
 def _barrier_reflection_records() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The guide's nine in-front and free-field records, 48 kHz, 100 ms.
 
-    A loudspeaker pulse at 2,5 kHz; a reflection of 0,35 of the incident
+    A loudspeaker pulse at 2.5 kHz; a reflection of 0.35 of the incident
     amplitude with its top end smoothed; the free-field records taken with
     the grid 3 microseconds further away, which the subtraction undoes.
     """
@@ -3700,7 +3700,7 @@ def generate_barrier_direct_sound_subtraction(output_dir: str) -> None:
 
 
 def generate_barrier_reflection_limit(output_dir: str) -> None:
-    """EN 1793-5 5.5.7: how far down each microphone reaches on a 3,5 m barrier."""
+    """EN 1793-5 5.5.7: how far down each microphone reaches on a 3.5 m barrier."""
     print("Generating barrier_reflection_limit...")
     from phonometry import environment
 
@@ -3734,7 +3734,7 @@ def _qa_example_differences() -> tuple[float, ...]:
 
 #: ISO/TR 17534-3:2015, Table 6 (T03, porous ground), printed folio 9 (PDF
 #: page 15): the row L_A, the A-weighted level at the receiver in each octave
-#: band from 63 Hz to 8 kHz, dB. Footnote a puts the +/-0,05 dB of the
+#: band from 63 Hz to 8 kHz, dB. Footnote a puts the +/-0.05 dB of the
 #: certified results on this row, and the TRC form of ISO 17534-1 (Tables B.1
 #: and B.2) lists A-weighted results.
 _QA_T03_LA = (13.70, 16.38, 17.73, 23.83, 33.27, 35.69, 32.79, 20.26)
@@ -3782,12 +3782,12 @@ def generate_software_quality_trc(output_dir: str) -> None:
 
     The rows are those of the form: the A-weighted level in each octave band
     and their total, against the row L_A of Table 6, which footnote a
-    certifies to +/-0,05 dB. Left, the library as it is: every band and the
+    certifies to +/-0.05 dB. Left, the library as it is: every band and the
     total of T03 (porous ground) inside. Right, the same calculation with the
     air absorption read at the nominal band centres instead of the exact
     base-10 midbands ISO 9613-2 Table 2 is computed at: 8 kHz is read at
-    8000 Hz instead of 7943 Hz, which alone moves that band 0,20 dB off its
-    certified result, 0,15 dB below the lower limit. The kind of
+    8000 Hz instead of 7943 Hz, which alone moves that band 0.20 dB off its
+    certified result, 0.15 dB below the lower limit. The kind of
     implementation detail the form exists to catch.
     """
     print("Generating software_quality_trc...")
@@ -3888,7 +3888,7 @@ _ROLLING_STOCK_BANDS_HZ = (
 
 
 def _rolling_stock_pass_by() -> PassByMeasurement:
-    """A 100 m unit at 80 km/h past a microphone at 7,5 m, as a line source."""
+    """A 100 m unit at 80 km/h past a microphone at 7.5 m, as a line source."""
     from phonometry import environment
 
     fs = 16000
@@ -4013,7 +4013,7 @@ def generate_rolling_stock_roughness_methods(output_dir: str) -> None:
     from phonometry import environment
 
     limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
-    # Every band 3 dB under the limit, with the 0,5 m and 2,5 mm bands the
+    # Every band 3 dB under the limit, with the 0.5 m and 2.5 mm bands the
     # limit does not cover carried on along its slope.
     levels = {w: v - 3.0 for w, v in limit.items()}
     levels[0.5] = 16.1

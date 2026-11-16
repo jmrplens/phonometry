@@ -7,7 +7,7 @@ produced: the pressure ratios, the jet, the two acoustical efficiencies, the
 sound power, the internal level, both peak frequencies, the transmission
 losses and the level 1 m outside, plus the whole frequency route evaluated at
 8 kHz. The first column is turbulent, the second cavitates, and the third
-repeats the second with the characteristic pressure ratio shifted by 0,1 to
+repeats the second with the characteristic pressure ratio shifted by 0.1 to
 show what that uncertainty costs: 14 dB.
 
 Oracle: Annex A, A.1 and Table A.1 (printed folios 21 to 25, PDF pages 23 to
@@ -17,15 +17,15 @@ modification.
 Four printed defects sit inside this oracle, all recorded in
 ``docs/ERRATA.md``:
 
-* Equation (12) is printed one way in Clause 5.1 (``0,02 F_L^2 C``) and
-  another in Table A.1 (``0,036 F_L^2 C F_d^0,75``). Only the second
+* Equation (12) is printed one way in Clause 5.1 (``0.02 F_L^2 C``) and
+  another in Table A.1 (``0.036 F_L^2 C F_d^0.75``). Only the second
   reproduces the annex's own ``N_Str = 0,399``, and it is the one used here.
-* Row (22a) prints ``TL(8 000 Hz) = 51,76 dB`` without its minus sign.
+* Row (22a) prints ``TL(8 000 Hz) = 51.76 dB`` without its minus sign.
 * Row (17) prints ``TL_cav`` values its own printed intermediates do not
-  give, by 0,06 to 0,08 dB, which is why that row alone carries a tolerance
-  of 0,1 dB.
-* Column 1's ``f_p,turb`` is printed 494,5 Hz where the unrounded chain gives
-  494,64 Hz; columns 2 and 3 reproduce to the last printed digit.
+  give, by 0.06 to 0.08 dB, which is why that row alone carries a tolerance
+  of 0.1 dB.
+* Column 1's ``f_p,turb`` is printed 494.5 Hz where the unrounded chain gives
+  494.64 Hz; columns 2 and 3 reproduce to the last printed digit.
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ _PIPE: dict[str, Any] = {
     "density": 7800.0,
 }
 
-#: Equation (3a) for this valve; the annex prints 0,2543.
+#: Equation (3a) for this valve; the annex prints 0.2543.
 _INCIPIENT = ph.noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
 
 #: The per-column data. The third column is the second with the annex's own
@@ -123,7 +123,7 @@ def _chk_regimes() -> Outcome:
     """Each column lands in the regime the annex prints for it.
 
     The test is on the differential against ``x_Fzp1 (p_1 - p_v)``, printed
-    as 2,38 x 10^5 Pa for the first two columns and 3,32 x 10^5 Pa for the
+    as 2.38 x 10^5 Pa for the first two columns and 3.32 x 10^5 Pa for the
     third, which is what moves column 3 off column 2's answer.
     """
     computed = {}
@@ -144,7 +144,7 @@ def _chk_regimes() -> Outcome:
         expected,
         computed,
         label=(
-            "Delta p = 2,0 / 3,5 / 3,5 x 1e5 Pa against 2,38 / 2,38 / 3,32 "
+            "Delta p = 2.0 / 3.5 / 3.5 x 1e5 Pa against 2.38 / 2.38 / 3.32 "
             "x 1e5 Pa -> turbulent, cavitating, cavitating"
         ),
     )
@@ -235,7 +235,7 @@ def _chk_efficiencies() -> Outcome:
 def _chk_sound_power() -> Outcome:
     """The turbulent branch in column 1 and the cavitating one in 2 and 3.
 
-    Each carries Table 2's acoustic power ratio of 0,25, the share a globe
+    Each carries Table 2's acoustic power ratio of 0.25, the share a globe
     valve radiates into the pipe rather than losing in its body.
     """
     computed = {f"example {i}": round(_example(i).sound_power, 5) for i in _EXAMPLES}
@@ -267,8 +267,8 @@ def _chk_internal_level() -> Outcome:
 def _chk_turbulent_peak() -> Outcome:
     """Equation (12) in the form Table A.1 prints it, then Equation (11).
 
-    Column 1's peak is printed 494,5 Hz where the unrounded chain gives
-    494,64; columns 2 and 3 are exact to the last printed digit, so they are
+    Column 1's peak is printed 494.5 Hz where the unrounded chain gives
+    494.64; columns 2 and 3 are exact to the last printed digit, so they are
     the ones pinned here.
     """
     computed = {
@@ -332,13 +332,13 @@ def _chk_pipe() -> Outcome:
 def _chk_turbulent_loss() -> Outcome:
     """Equation (16b) at each column's peak frequency, added to (15).
 
-    The peak frequencies are all far below the pipe's 14,9 kHz ring, so the
-    correction costs another 27 to 31 dB on top of the 44,7 the mass law
+    The peak frequencies are all far below the pipe's 14.9 kHz ring, so the
+    correction costs another 27 to 31 dB on top of the 44.7 the mass law
     already gives.
 
-    The annex adds its own rounded intermediates here - -44,71 and -29,56
-    make its -74,27 - where the unrounded chain gives -74,263. That is the
-    whole of the 0,008 dB this row is allowed.
+    The annex adds its own rounded intermediates here - -44.71 and -29.56
+    make its -74.27 - where the unrounded chain gives -74.263. That is the
+    whole of the 0.008 dB this row is allowed.
     """
     printed = {1: -74.27, 2: -71.84, 3: -76.16}
     _deviation, index = max(
@@ -364,8 +364,8 @@ def _chk_cavitating_loss() -> Outcome:
     """Equation (17), the one row of Table A.1 whose printed values its own
     printed intermediates do not reproduce.
 
-    The annex prints -62,917 and -75,006; the equation with the numbers
-    printed beside them gives -62,86 and -74,93. The offset is under 0,1 dB
+    The annex prints -62.917 and -75.006; the equation with the numbers
+    printed beside them gives -62.86 and -74.93. The offset is under 0.1 dB
     and does not reach the printed external levels, which round to the same
     figures either way.
     """
@@ -400,7 +400,7 @@ def _chk_external_level() -> Outcome:
     """The end of the method in all three columns.
 
     Columns 2 and 3 are the same valve at the same flow with a threshold
-    0,1 apart, and they answer 81,0 and 66,9 dB: the 14 dB the closing prose
+    0.1 apart, and they answer 81.0 and 66.9 dB: the 14 dB the closing prose
     of Annex A calls a significant prediction error.
     """
     computed = {f"example {i}": round(_example(i).external_level, 1) for i in _EXAMPLES}
@@ -416,8 +416,8 @@ def _chk_external_level() -> Outcome:
 def _chk_band_route() -> Outcome:
     """The whole band route of 5.4, at the one band Table A.1 evaluates.
 
-    The band transmission loss is printed 51,76 dB without a minus sign in
-    all three columns; only -51,76 reproduces the external levels printed
+    The band transmission loss is printed 51.76 dB without a minus sign in
+    all three columns; only -51.76 reproduces the external levels printed
     two rows below it, which is what this row pins.
     """
     computed = {

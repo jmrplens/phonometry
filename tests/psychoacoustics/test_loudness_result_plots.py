@@ -4,8 +4,8 @@
 
 The two standards answer the same question on two different scales, and the
 figure is where that shows: ISO 532-1 puts specific loudness on the Bark scale
-from 0,1 to 24 Bark, ISO 532-2 puts it on the ERB-number (Cam) scale from 1,8 to
-38,9 Cam, and a time-varying ISO 532-1 record adds a second panel with loudness
+from 0.1 to 24 Bark, ISO 532-2 puts it on the ERB-number (Cam) scale from 1.8 to
+38.9 Cam, and a time-varying ISO 532-1 record adds a second panel with loudness
 against time. These tests read the drawn artists back and check they echo the
 fields of the result, axis units included; the generic plot contract (kwargs,
 external axes, the soft matplotlib dependency) lives in

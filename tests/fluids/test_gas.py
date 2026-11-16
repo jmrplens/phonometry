@@ -6,7 +6,7 @@ and the molar mass, which is what :func:`phonometry.fluids.ideal_gas` takes, and
 the phase velocity and density at stated conditions, which is what it returns.
 That makes the table an oracle and a ruler at once, because the two rows it
 fails are the interesting ones: carbon dioxide and sulphur hexafluoride come
-out 0,7 and 2,1 per cent light against their printed density, which is ``1 -
+out 0.7 and 2.1 per cent light against their printed density, which is ``1 -
 Z`` and not an error in the arithmetic. The ideal density is ``Z`` times the
 real one, so the fraction missing is the compressibility factor's distance
 from unity.
@@ -80,7 +80,7 @@ def test_the_light_gases_reproduce_their_printed_density(
 
 @pytest.mark.parametrize("gas", sorted(ref.HOPKINS_A1_COMPRESSIBILITY_GAP))
 def test_the_heavy_molecules_miss_by_the_amount_the_model_states(gas: str) -> None:
-    """The docstring claims 0,7 % and 2 %; this is what holds it to that.
+    """The docstring claims 0.7 % and 2 %; this is what holds it to that.
 
     The sign is the other half of the claim. The ideal gas is ``Z`` times the
     real density and ``Z`` is below 1 for both of these, so the closure is
@@ -146,7 +146,7 @@ def test_a_supplied_pressure_is_silent() -> None:
 def test_a_ratio_of_specific_heats_at_or_below_one_is_refused(bad: float) -> None:
     """No gas has one. ``gamma = c_p/c_v`` and ``c_p - c_v = R > 0``.
 
-    A positive ratio is not enough: 1,0 passes every positivity check and then
+    A positive ratio is not enough: 1.0 passes every positivity check and then
     gives a speed of sound that is the isothermal one, which no gas has either.
     """
     with pytest.raises(ValueError, match="greater than 1"):

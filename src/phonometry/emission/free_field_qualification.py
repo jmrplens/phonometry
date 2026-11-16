@@ -24,10 +24,10 @@ the monitor microphone,
 (Formula (1)). The room is qualified out to the largest distance from the
 origin at which every deviation, on every traverse and at every frequency,
 stays inside the limits of Table A.1 (the same table in ISO 26101 Annex A and
-in the amended ISO 3745 Annex A): :math:`\pm 1{,}5`, :math:`\pm 1{,}0` and
-:math:`\pm 1{,}5` dB in an anechoic room for the one-third octave bands up to
-630 Hz, from 800 Hz to 5 000 Hz and from 6 300 Hz up, and :math:`\pm 2{,}5`,
-:math:`\pm 2{,}0` and :math:`\pm 3{,}0` dB in a hemi-anechoic one.
+in the amended ISO 3745 Annex A): :math:`\pm 1.5`, :math:`\pm 1.0` and
+:math:`\pm 1.5` dB in an anechoic room for the one-third octave bands up to
+630 Hz, from 800 Hz to 5 000 Hz and from 6 300 Hz up, and :math:`\pm 2.5`,
+:math:`\pm 2.0` and :math:`\pm 3.0` dB in a hemi-anechoic one.
 
 **The fit of b.** Formula (2) leaves the source strength :math:`b` free: it
 "is adjusted to optimize the fit of the measured sound pressure levels into
@@ -236,8 +236,8 @@ _WAVELENGTH_FRACTION_LENGTH = 4.0
 #: ISO 26101:2017 5.1.2.2 c): the levels at least 6 dB above the background.
 _MIN_BACKGROUND_MARGIN_DB = 6.0
 #: ISO 3745:2012/Amd.1:2017 A.2.5: absorption coefficient of the reflecting
-#: plane at most 0,06, and the plane extends at least a quarter of a
-#: wavelength and at least 0,75 m beyond the projection of the measurement
+#: plane at most 0.06, and the plane extends at least a quarter of a
+#: wavelength and at least 0.75 m beyond the projection of the measurement
 #: surface.
 _MAX_PLANE_ABSORPTION = 0.06
 _MIN_PLANE_MARGIN_M = 0.75
@@ -251,7 +251,7 @@ _DIRECTIONALITY_POLAR_DEG: dict[str, tuple[float, ...]] = {
 _DIRECTIONALITY_AZIMUTH_DEG: tuple[float, ...] = (
     0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0,
 )  # fmt: skip
-#: B.3.2: r = 1,5 m.
+#: B.3.2: r = 1.5 m.
 _DIRECTIONALITY_RADIUS_M = 1.5
 
 #: Origin search: points per axis of the starting lattice and the step at
@@ -1343,7 +1343,7 @@ def directionality_positions(
     hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
-    :param radius: The radius, in metres; 1,5 m in B.3.2.
+    :param radius: The radius, in metres; 1.5 m in B.3.2.
     :return: ``(32, 3)`` or ``(64, 3)`` coordinates, in metres.
     :raises TypeError: if ``radius`` is not a single number, or ``room`` is not a text.
     """
@@ -1460,7 +1460,7 @@ def verify_source_directionality(
     """May this source qualify an anechoic or hemi-anechoic room? (ISO 26101 Annex B).
 
     The one-third octave band levels are measured at the 32 positions of a
-    hemisphere or the 64 of a sphere of radius 1,5 m
+    hemisphere or the 64 of a sphere of radius 1.5 m
     (:func:`directionality_positions`). Per band, the arithmetic mean of the
     decibel levels and the largest positive and negative deviations from it
     are computed (B.3.2); the source is suitable when every deviation is within

@@ -561,8 +561,8 @@ agree at $r^*$, and the second one vanishes as $r_2$ grows, so Norton's equation
 is the far limit of Barron's pair. `receiver_distance_m` switches the term on.
 Barron's Example 7-6 is a paper mill: a Jordan refiner with a sound power level
 of 105 dB stands in a room of 900 m² of surface at an average absorption
-coefficient of 0,05, and an operator sits 1,5 m from the 16 m² wall, of 30 dB
-transmission loss, in a room of 100 m² at 0,35. The refiner is 4 m from the wall
+coefficient of 0.05, and an operator sits 1.5 m from the 16 m² wall, of 30 dB
+transmission loss, in a room of 100 m² at 0.35. The refiner is 4 m from the wall
 with a directivity factor of 2, which moves the level Barron prints beside it
 and not the reverberant level that drives the wall:
 
@@ -587,15 +587,15 @@ print(np.round(far.received_level, 1))    # [59.]
 print(np.round(near.received_level, 1))   # [61.6]
 ```
 
-Barron prints 61,7 dB, which is this 61,6 dB plus the 0,1 dB he adds to every
+Barron prints 61.7 dB, which is this 61.6 dB plus the 0.1 dB he adds to every
 level for the characteristic impedance of air; the library does not add it, as
 `steady_state_spl` does not. Two readings of his page stand between the two
 numbers. He writes the reverberant term of the receiving room over its room
 constant $R_2 = S_2\alpha_2/(1-\alpha_2)$ where Norton writes $S_2\alpha_2$, so
-his 53,85 m² goes in as the receiving absorption. And his example is one band,
-so the band centre given here only labels it. His $r^*$ is 1,60 m, the operator
-stands inside it and gets the whole quarter: 2,65 dB over the reverberant level.
-At 3 m the excess is 0,9 dB and at 10 m it is 0,1 dB, which is where Equation
+his 53.85 m² goes in as the receiving absorption. And his example is one band,
+so the band centre given here only labels it. His $r^*$ is 1.60 m, the operator
+stands inside it and gets the whole quarter: 2.65 dB over the reverberant level.
+At 3 m the excess is 0.9 dB and at 10 m it is 0.1 dB, which is where Equation
 (4.101) becomes the answer again. `required_transmission_loss` carries the same
 term, so a wall specified with a receiver distance is specified for the desk at
 that distance.
@@ -648,7 +648,7 @@ that distance.
 - **Acoustical Society of America. (2019).** [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
   The NC curves of Table 1 and the RC Mark II family of Annex D that the chain is rated against.
 - **Barron, R. F. (2003).** *Industrial noise control and acoustics*. Marcel Dekker.
-  The direct field of the partition in the receiving room (section 7.5, Eqs. 7-71 and 7-72) and Example 7-6, an operator 1,5 m from the wall, which receiver_distance_m reproduces.
+  The direct field of the partition in the receiving room (section 7.5, Eqs. 7-71 and 7-72) and Example 7-6, an operator 1.5 m from the wall, which receiver_distance_m reproduces.
 - **Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017).** *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
   The steady-state room relations (section 6.4, Eqs. 6.43-6.44) behind steady_state_spl and room_constant, and the enclosure insertion loss of section 7.4.2 (Eqs. 7.103, 7.111) that is the library default enclosure model.
 - **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150

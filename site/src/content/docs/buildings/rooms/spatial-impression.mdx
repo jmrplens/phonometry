@@ -75,8 +75,8 @@ angle each reflection arrives at. Squaring the pressure, as Equation (A.14)
 does, weights that reflection by $\cos^2 \theta$:
 
 $$
-J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
-                     {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
+J_\mathrm{LF} = \frac{\int_{0.005}^{0.080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
+                     {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}.
 $$
 
 Multiplying it by the omnidirectional response instead, as Equation (A.15)
@@ -84,9 +84,9 @@ does, weights it by the cosine itself, which A.2.4 calls subjectively more
 accurate:
 
 $$
-J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080}
+J_\mathrm{LFC} = \frac{\int_{0.005}^{0.080}
                        \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t}
-                      {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}.
+                      {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}.
 $$
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lateral_energy_measures.svg" alt="Three panels. Left: the weight one reflection carries against its angle of incidence from the axis of maximum sensitivity of the figure-of-eight microphone, as the square of the cosine for the lateral fraction and as the cosine itself for the cosine-weighted variant, both peaking at one on that axis and falling to zero on the two nulls at plus and minus ninety degrees, where the source sits. Middle: both fractions band by band for a hall with two seconds of decay, over the shaded 0.05 to 0.35 typical range of Table A.1. Right: the interaural correlation function of the 500 Hz octave band across the plus and minus one millisecond search window, for one signal fed to both ears and for two independent ones, with the maximum of each marked" width="100%" />
@@ -168,16 +168,16 @@ lateral energy after the early window against the free-field reference at
 10 m, the same reference the sound strength uses.
 
 $$
-L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
+L_J = 10 \lg \frac{\int_{0.080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                   {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t}\ \text{dB}.
 $$
 
 Equation (A.17) averages it over the 125 Hz, 250 Hz, 500 Hz and 1 kHz
-octave bands with a factor of 0,25, which is one quarter, so it is an
+octave bands with a factor of 0.25, which is one quarter, so it is an
 energy **mean**:
 
 $$
-L_{J,\mathrm{avg}} = 10 \lg \left[ 0{,}25
+L_{J,\mathrm{avg}} = 10 \lg \left[ 0.25
                      \sum_{i=1}^{4} 10^{L_{J_i}/10} \right]\ \text{dB}.
 $$
 
@@ -251,7 +251,7 @@ B.4 prints three windows: the general one from the direct sound to a time of
 the order of the reverberation time, which is the default; the early one,
 `IACC_EARLY_WINDOW_S`, from 0 to 80 ms; and the reverberant one from
 `IACC_LATE_START_S` onwards. It puts the range at the 125 Hz to 4 kHz
-octave bands and assumes a just-noticeable difference of 0,075.
+octave bands and assumes a just-noticeable difference of 0.075.
 
 A broadband correlation is a spike and says very little. Measure in bands,
 which is what the default does and what the right-hand panel above draws.

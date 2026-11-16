@@ -603,8 +603,8 @@ rounded = np.floor(measured + 0.5)
 
 ```python
 #: Band-width factors ``B`` of Hopkins (2007) Eq. (3.91), PDF page 305
-#: (printed p. 278): ``B = 0,23 f`` for one-third-octave bands and
-#: ``B = 0,707 f`` for octave bands.
+#: (printed p. 278): ``B = 0.23 f`` for one-third-octave bands and
+#: ``B = 0.707 f`` for octave bands.
 _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 ```
 

@@ -25,7 +25,7 @@ from phonometry import vibration
 
 #: Annex D.2: the initial state, 3 mm/s at 40 degrees.
 INITIAL = (3.0, 40.0)
-#: Annex D.2: the later state, 2,5 mm/s at 180 degrees.
+#: Annex D.2: the later state, 2.5 mm/s at 180 degrees.
 FINAL = (2.5, 180.0)
 #: Annex D.2: "the true change of vibration is represented by the vector
 #: A2 - A1, which has an r.m.s. magnitude of 5,2 mm/s".
@@ -48,7 +48,7 @@ def test_a_boundary_belongs_to_the_zone_below_it() -> None:
     """A limit is the top of its own zone, which is how the parts print them.
 
     Table 3 of a machine-specific part reads "zone A/B: 2,8 mm/s", and a
-    machine measured at exactly 2,8 meets zone A rather than falling out of
+    machine measured at exactly 2.8 meets zone A rather than falling out of
     it.
     """
     boundaries = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
@@ -103,7 +103,7 @@ def test_a_magnitude_that_is_not_a_magnitude_is_refused() -> None:
 # Table C.1: the ladder and the three typical ranges
 # --------------------------------------------------------------------------- #
 def test_table_c1_prints_the_ladder_it_draws_its_ranges_from() -> None:
-    """Fourteen rungs from 0,28 to 45 mm/s, rising and each one printed."""
+    """Fourteen rungs from 0.28 to 45 mm/s, rising and each one printed."""
     ladder = vibration.TYPICAL_BOUNDARY_LADDER_MM_S
     assert ladder[0] == pytest.approx(0.28)
     assert ladder[-1] == pytest.approx(45.0)
@@ -112,7 +112,7 @@ def test_table_c1_prints_the_ladder_it_draws_its_ranges_from() -> None:
 
 
 def test_the_three_typical_ranges_overlap_the_way_the_table_draws_them() -> None:
-    """A/B 0,71 to 4,5; B/C 1,8 to 9,3; C/D 4,5 to 14,7.
+    """A/B 0.71 to 4.5; B/C 1.8 to 9.3; C/D 4.5 to 14.7.
 
     The ranges overlap on purpose: a large machine's A/B boundary can sit
     above a small machine's B/C one, which is why a range is not a limit.
@@ -178,12 +178,12 @@ def test_above_the_upper_corner_the_criterion_holds_acceleration_constant() -> N
 
 
 def test_the_printed_zone_factors_move_the_one_curve_onto_the_three_limits() -> None:
-    """Annex C.2 prints 1, 2,56 and 6,4, and they scale the whole curve.
+    """Annex C.2 prints 1, 2.56 and 6.4, and they scale the whole curve.
 
-    The factors are 1,6 squared and 1,6 to the fourth, near enough, and the
-    Table C.1 ladder steps by about 1,6 as well: from a zone A of 1,12 mm/s
-    the B and C limits come out at 2,87 and 7,17, within 3 % of the 2,8 and
-    7,1 rungs. Near, and not the same number, which is why the factors are
+    The factors are 1.6 squared and 1.6 to the fourth, near enough, and the
+    Table C.1 ladder steps by about 1.6 as well: from a zone A of 1.12 mm/s
+    the B and C limits come out at 2.87 and 7.17, within 3 % of the 2.8 and
+    7.1 rungs. Near, and not the same number, which is why the factors are
     kept as the standard prints them rather than snapped to the ladder.
     """
     factors = vibration.ZONE_LIMIT_FACTORS
@@ -255,7 +255,7 @@ def test_a_frequency_that_is_not_a_frequency_is_refused() -> None:
 # Annex D: the change is a vector
 # --------------------------------------------------------------------------- #
 def test_annex_d_reproduces_its_printed_vector_change() -> None:
-    """3 mm/s at 40 deg becoming 2,5 mm/s at 180 deg is a change of 5,2 mm/s."""
+    """3 mm/s at 40 deg becoming 2.5 mm/s at 180 deg is a change of 5.2 mm/s."""
     result = vibration.vibration_vector_change(*INITIAL, *FINAL)
     assert result.magnitude == pytest.approx(
         PRINTED_VECTOR_CHANGE_MM_S, abs=TOLERANCE_MM_S

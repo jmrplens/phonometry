@@ -58,8 +58,8 @@ def test_the_table_is_not_the_logarithmic_subtraction() -> None:
     table = noise_control.silencer_background_correction(margins)
     exact = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * margins))
     # The table is a rounded version of the formula and it departs from it in
-    # both directions: at 5 dB it takes off 2,0 where the formula takes off
-    # 1,65, and at 6 dB it takes off 1,0 where the formula takes off 1,26. The
+    # both directions: at 5 dB it takes off 2.0 where the formula takes off
+    # 1.65, and at 6 dB it takes off 1.0 where the formula takes off 1.26. The
     # largest departure over the printed rows is under four tenths of a
     # decibel.
     assert table[2] > exact[2]
@@ -591,7 +591,7 @@ CARRIER_DB = 90.0
 #: ISO 11820 3.3 reads S as a quarter of the Sabine equivalent absorption area
 #: A. Ver and Beranek and Barron both print A, so their numbers are four times
 #: what ``reverberant_surface_area_m2`` returns; the factor is theirs, printed
-#: as the 55,26 = 24 ln 10 in front of their own expression.
+#: as the 55.26 = 24 ln 10 in front of their own expression.
 SABINE_QUARTERS = 4.0
 
 
@@ -691,8 +691,8 @@ def test_the_thesis_insertion_loss_reproduces_its_three_printed_columns() -> Non
     receiver side, so both areas are a quarter of the room absorption and both
     move band by band with the reverberation time. The whole table goes in at
     once, with the two areas as the band arrays reverberant_surface_area_m2
-    returns. The tolerance is the rounding of the printed inputs, 0,1 dB on
-    the levels and 0,01 s on the times, which together reach about 0,13 dB;
+    returns. The tolerance is the rounding of the printed inputs, 0.1 dB on
+    the levels and 0.01 s on the times, which together reach about 0.13 dB;
     the printed tenth of the D_is column is out of reach from these summary
     columns and the thesis computed it from unrounded position means.
     """
@@ -760,7 +760,7 @@ def test_barron_table_3_4_is_the_energy_subtraction_at_one_point() -> None:
 def test_the_printed_table_of_iso11820_is_not_that_subtraction() -> None:
     """Table 1 is stepped and deliberately not the logarithmic subtraction.
 
-    Barron prints 1,7 dB at a 5 dB margin and 0,7 dB at 8 dB; ISO 11820
+    Barron prints 1.7 dB at a 5 dB margin and 0.7 dB at 8 dB; ISO 11820
     Table 1 takes off 2 dB and 1 dB at the same two margins. The two tables
     are two rules and the library keeps them apart.
     """
@@ -779,10 +779,10 @@ def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
     page 13) prints "< 3" as invalid and "3" as a correction of 3. The energy
     route of 9.1.1, folio 10 (PDF page 18), is offered as an alternative to
     that table under the same "maximum correction is 3 dB". So a 3 dB margin
-    is admitted on both routes, and the 3,0206 dB the energy subtraction
+    is admitted on both routes, and the 3.0206 dB the energy subtraction
     takes off there is the printed 3 dB unrounded, which is how ISO 3746:2010
     8.3.3, folio 15 (PDF page 24), prints the same number: "3 dB (the value
-    for dL_pA = 3 dB)". Barron's own table prints 3,0 dB there, rounded.
+    for dL_pA = 3 dB)". Barron's own table prints 3.0 dB there, rounded.
     """
     assert oracle.BARRON_TABLE_3_4_DB[3.0] == 3.0
     assert float(noise_control.silencer_background_correction([3.0])[0]) == 3.0
@@ -808,11 +808,11 @@ def test_a_margin_under_three_decibels_trips_the_extraneous_cap() -> None:
 
 
 def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
-    """Every level from 40 dB to 130 dB in tenths, 3,0 dB over its extraneous sound.
+    """Every level from 40 dB to 130 dB in tenths, 3.0 dB over its extraneous sound.
 
-    The two energy means of such a pair differ from 3 dB by up to 1,4e-14 dB
+    The two energy means of such a pair differ from 3 dB by up to 1.4e-14 dB
     in floating point, and 111 of the 901 pairs land under it, so a bare
-    comparison with 3 would flip printed 3,0 dB margins into capped ones.
+    comparison with 3 would flip printed 3.0 dB margins into capped ones.
     """
     with warnings.catch_warnings():
         warnings.simplefilter("error", SilencerInSituWarning)
@@ -827,7 +827,7 @@ def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
 def test_the_margin_window_is_the_declared_nanodecibel() -> None:
     """A margin two nanodecibels short of 3 dB is short of it, not equal to it.
 
-    The window that keeps a printed 3,0 dB margin out of the cap is the
+    The window that keeps a printed 3.0 dB margin out of the cap is the
     absolute one the module declares, so a deficit larger than it caps. Only
     a relative tolerance left at its default would widen the window to three
     times the declared figure, the 3 dB of clause 4 being the reference.
@@ -878,9 +878,9 @@ def test_two_worked_background_subtractions() -> None:
 
 
 def test_barron_example_3_6_agrees_with_its_own_tabulated_correction() -> None:
-    """The book reaches 81,7 dB twice, by subtraction and off Table 3-4.
+    """The book reaches 81.7 dB twice, by subtraction and off Table 3-4.
 
-    Its second route takes 1,3 dB off the measured 83 dB at a 6 dB margin,
+    Its second route takes 1.3 dB off the measured 83 dB at a 6 dB margin,
     which is the same row of Table 3-4 the sweep above checks.
     """
     level, _, printed = oracle.BARRON_EXAMPLE_3_6_DB
@@ -897,19 +897,19 @@ def test_barron_example_3_4_mean_and_area_term() -> None:
         [0.0], area=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
     )
     assert round(float(term[0]), 2) == oracle.BARRON_EXAMPLE_3_4_AREA_TERM_DB
-    # The area itself follows from the printed 2,60 m by 2,80 m by 1,60 m high
-    # surface, which the solution writes out as 17,28 + 7,28.
+    # The area itself follows from the printed 2.60 m by 2.80 m by 1.60 m high
+    # surface, which the solution writes out as 17.28 + 7.28.
     assert 2.0 * (2.60 + 2.80) * 1.60 + 2.60 * 2.80 == pytest.approx(
         oracle.BARRON_EXAMPLE_3_4_AREA_M2
     )
 
 
 def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
-    """The three terms of Equation (5) together, on a hemisphere of 9,817 m2.
+    """The three terms of Equation (5) together, on a hemisphere of 9.817 m2.
 
     The book's third term is the characteristic impedance of the room air,
     -10 lg(rho c / 400), which is the K of Equation (5) for this measurement.
-    Left out, the answer reads 90,5 dB and misses the printed 90,4 dB, so the
+    Left out, the answer reads 90.5 dB and misses the printed 90.4 dB, so the
     example does exercise the term.
     """
     mean = noise_control.silencer_mean_sound_pressure_level(
@@ -929,7 +929,7 @@ def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
 
 
 def test_ver_beranek_absorption_area_and_its_decibel_term() -> None:
-    """Ver and Beranek (2006) Example 4.2: a 200 m3 room at 21,4 C."""
+    """Ver and Beranek (2006) Example 4.2: a 200 m3 room at 21.4 C."""
     absorption = sabine_absorption_m2(
         oracle.VER_BERANEK_EXAMPLE_4_2_VOLUME_M3,
         oracle.VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S,
@@ -954,7 +954,7 @@ def test_the_speed_of_sound_has_to_be_the_rooms_and_not_the_default() -> None:
 def test_barron_example_7_2_absorption_area() -> None:
     """A second room, a third speed of sound, and two independent routes to it.
 
-    Barron reaches 40,41 m2 by the Eyring expression and 18,89 m2 by the
+    Barron reaches 40.41 m2 by the Eyring expression and 18.89 m2 by the
     Fitzroy relationship, then turns each into a reverberation time. Feeding
     the printed times back recovers the areas to within the rounding of the
     three figures he prints them to.
@@ -991,10 +991,10 @@ def test_ntp_668_flow_velocity_coefficients() -> None:
 
 
 def test_vdi_2081_splitter_gap_velocity() -> None:
-    """VDI 2081 Blatt 2:2005-05, Tabelle 1, element 2: 14,81 m/s in the gaps.
+    """VDI 2081 Blatt 2:2005-05, Tabelle 1, element 2: 14.81 m/s in the gaps.
 
     Driven from the printed volume flow rather than from the printed face
-    velocity of 4,94 m/s, which is itself rounded and gives 14,82 m/s.
+    velocity of 4.94 m/s, which is itself rounded and gives 14.82 m/s.
     """
     face_velocity = (
         oracle.VDI2081_SPLITTER_VOLUME_FLOW_M3_H
@@ -1014,7 +1014,7 @@ def test_fuchs_table_13_4_airway_velocities() -> None:
     """Twelve printed velocities, two splitter designs, three housing areas.
 
     The table truncates towards zero rather than rounding, which is visible
-    where 66,67 m/s prints as 66 and 16,67 m/s as 16.
+    where 66.67 m/s prints as 66 and 16.67 m/s as 16.
     """
     ratios = tuple(oracle.FUCHS_BLOCKAGE_RATIOS.values())
     for flow_m3_h, housing_m2, *velocities in oracle.FUCHS_TABLE_13_4:
@@ -1032,11 +1032,11 @@ def test_barron_example_5_7_equivalent_diameter() -> None:
     """The root inside Equation (15), for a 900 mm square duct.
 
     Half an oracle, and it says so: what Barron prints is the area-equivalent
-    diameter sqrt(4 S / pi) = 1,016 m. The 1,5 diameters in front of it are
+    diameter sqrt(4 S / pi) = 1.016 m. The 1.5 diameters in front of it are
     ISO 11820's own coefficient, read on the printed page of Equation (15) and
     nowhere on his, so this pins the root and not the factor. The printed
-    1,016 m carries half a millimetre of rounding, which the 1,5 scales to the
-    0,75 mm this is asserted to.
+    1.016 m carries half a millimetre of rounding, which the 1.5 scales to the
+    0.75 mm this is asserted to.
     """
     distance = noise_control.measurement_distance_upstream_m(
         oracle.BARRON_EXAMPLE_5_7_AREA_M2

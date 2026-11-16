@@ -65,7 +65,7 @@ def test_uncertainty_is_the_standard_deviation_of_the_mean() -> None:
         result.expanded_uncertainty_db, 2.0 * result.standard_uncertainty_db
     )
     # The sample standard deviation, over N - 1: the population one over N
-    # would print 3,8 at 125 Hz where the table prints 3,9.
+    # would print 3.8 at 125 Hz where the table prints 3.9.
     np.testing.assert_allclose(result.standard_deviation_db, _A3.std(axis=0, ddof=1))
 
 
@@ -256,12 +256,12 @@ def test_table_b1_difference_row_within_the_rounding_of_test_2() -> None:
     """|m1 - m2| is consistent with every printed cell once m2 is unrounded.
 
     Test 2 prints its means to one decimal, so the m2 behind the difference
-    row lies within 0,05 dB of the printed one, and the printed difference is
+    row lies within 0.05 dB of the printed one, and the printed difference is
     that value rounded again: a cell is consistent when some m2 in that
-    interval rounds to it, which is a distance of at most 0,1 dB. Six cells
+    interval rounds to it, which is a distance of at most 0.1 dB. Six cells
     round to the printed value outright; at 8 kHz the full-precision m1 of
-    34,956 dB against the printed m2 of 38,9 dB gives 3,94 dB where the table
-    prints 4,0, which an m2 of 38,906 dB or more would give.
+    34.956 dB against the printed m2 of 38.9 dB gives 3.94 dB where the table
+    prints 4.0, which an m2 of 38.906 dB or more would give.
     """
     result = _table_b1()
     printed = np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE)
@@ -313,10 +313,10 @@ def test_minimum_differences_as_the_text_computes_them(key: tuple[str, str]) -> 
 
 
 def test_minimum_difference_from_the_unrounded_budget() -> None:
-    """The same rule on the unrounded U95: 3,21 dB and 9,37 dB for the earplug.
+    """The same rule on the unrounded U95: 3.21 dB and 9.37 dB for the earplug.
 
     Only the earplug columns move; the earmuff ones round to the printed
-    2,3 dB and 6,9 dB either way.
+    2.3 dB and 6.9 dB either way.
     """
     middle: FrequencyRange = "250 Hz up to 4 kHz"
     within = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY
@@ -458,7 +458,7 @@ def test_a_qualifying_sound_field() -> None:
     ids=["up above", "down below"],
 )
 def test_a_position_past_2_5_db_fails_the_band(offsets: tuple[float, ...]) -> None:
-    """±2,5 dB either way: a position 2,6 dB below fails as one above does."""
+    """±2.5 dB either way: a position 2.6 dB below fails as one above does."""
     check = hearing.check_reat_sound_field(_positions(offsets), np.zeros(7))
     assert not check.passes
     assert not check.uniform.any()
@@ -470,7 +470,7 @@ def test_a_position_past_2_5_db_fails_the_band(offsets: tuple[float, ...]) -> No
 def test_right_and_left_within_2_5_db_can_still_be_3_db_apart(
     left: float, right: float
 ) -> None:
-    """Both side positions inside ±2,5 dB, yet 3,2 dB apart: a) fails on balance."""
+    """Both side positions inside ±2.5 dB, yet 3.2 dB apart: a) fails on balance."""
     check = hearing.check_reat_sound_field(
         _positions((0.0, 0.0, left, right, 0.0, 0.0)), np.zeros(7)
     )

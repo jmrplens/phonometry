@@ -47,11 +47,11 @@ metres per second, negative on the inlet side and positive on the outlet side
    C_{3,4} = \sum_{i=0}^{10} a_i U^i \tag{Eq. 7}
 
 whose coefficients :math:`a_i` Annex A tabulates per one-third-octave band
-and per range of test-duct diameter (Tables A.1 to A.6, 0,15 m to 2 m), an
+and per range of test-duct diameter (Tables A.1 to A.6, 0.15 m to 2 m), an
 empty cell being zero. The coefficients are normative for 50 Hz to 10 kHz and
 :math:`|U| \le 40` m/s. The footnote of every table then adds two informative
 extensions which do not combine: within 50 Hz to 10 kHz the rows also hold for
-:math:`40 < |U| \le 60` m/s, while the rows for 12,5 kHz to 20 kHz are given
+:math:`40 < |U| \le 60` m/s, while the rows for 12.5 kHz to 20 kHz are given
 for :math:`|U| \le 40` m/s only, and carry their own ":math:`|U| \le 40` m/s"
 band header in the print. A velocity beyond 40 m/s is therefore refused as
 soon as a band above 10 kHz is asked for. For the omni-directional nose cone
@@ -80,7 +80,7 @@ the qualification of the facility and the instrument: the reflection
 coefficient of the anechoic termination (Table 5, Annex F), the directivity
 of the sampling tube (equation (6), Table 6), the signal-to-noise ratio
 against turbulence (Annex B) and the duct geometry (clause 5.2). The
-informative Annexes H and I extend the coefficient tables below 0,15 m and
+informative Annexes H and I extend the coefficient tables below 0.15 m and
 above 2 m; the standard's own scope stops at those diameters and so does this
 module.
 """
@@ -238,8 +238,8 @@ _TABLE_3_SIGMA_R: dict[int, float] = {12500: 4.5, 16000: 5.0, 20000: 5.5}
 # printed, comma decimal read as a point, "x 10-02" read as e-02.
 _Rows = tuple[tuple[int, tuple[float, ...]], ...]
 
-#: Table A.1: 0,15 m <= d < 0,2 m. The 800 Hz row prints no a0 between an
-#: a0 of -5,00e-02 at 630 Hz and -2,09e-02 at 1 kHz; the footnote makes it
+#: Table A.1: 0.15 m <= d < 0.2 m. The 800 Hz row prints no a0 between an
+#: a0 of -5.00e-02 at 630 Hz and -2.09e-02 at 1 kHz; the footnote makes it
 #: zero and that is what is used.
 _TABLE_A1: _Rows = (
     (630, (-5.00e-02, 2.70e-02)),
@@ -301,7 +301,7 @@ _TABLE_A1: _Rows = (
     ),
 )
 
-#: Table A.2: 0,2 m <= d < 0,3 m.
+#: Table A.2: 0.2 m <= d < 0.3 m.
 _TABLE_A2: _Rows = (
     (630, (-5.00e-02, 2.70e-02)),
     (800, (1.36e-01, 3.30e-02)),
@@ -361,7 +361,7 @@ _TABLE_A2: _Rows = (
     ),
 )
 
-#: Table A.3: 0,3 m <= d < 0,5 m.
+#: Table A.3: 0.3 m <= d < 0.5 m.
 _TABLE_A3: _Rows = (
     (400, (-5.00e-02, 2.70e-02)),
     (500, (-3.91e-01, 3.13e-02)),
@@ -408,7 +408,7 @@ _TABLE_A3: _Rows = (
     ),
 )
 
-#: Table A.4: 0,5 m <= d < 0,8 m; the table Annex D exercises.
+#: Table A.4: 0.5 m <= d < 0.8 m; the table Annex D exercises.
 _TABLE_A4: _Rows = (
     (250, (-5.00e-02, 2.70e-02)),
     (315, (-6.50e-01, 2.89e-02)),
@@ -469,9 +469,9 @@ _TABLE_A4: _Rows = (
 _RECONSTRUCTED_BAND_HZ = 5000
 _RECONSTRUCTED_DIAMETER_RANGE_M = (0.8, 1.25)
 
-#: Table A.5: 0,8 m <= d < 1,25 m. The a3 of the 5 000 Hz row is printed with
-#: its leading digit missing, "- ,24 x 10-05"; it is read as -1,24e-05, the
-#: value the neighbouring tables bracket (-1,17e-05 in A.4, -1,27e-05 in
+#: Table A.5: 0.8 m <= d < 1.25 m. The a3 of the 5 000 Hz row is printed with
+#: its leading digit missing, "- ,24 x 10-05"; it is read as -1.24e-05, the
+#: value the neighbouring tables bracket (-1.17e-05 in A.4, -1.27e-05 in
 #: A.6). Asking for that band raises a warning that says so. See
 #: docs/ERRATA.md.
 _TABLE_A5: _Rows = (
@@ -539,7 +539,7 @@ _TABLE_A5: _Rows = (
     ),
 )
 
-#: Table A.6: 1,25 m <= d <= 2 m.
+#: Table A.6: 1.25 m <= d <= 2 m.
 _TABLE_A6: _Rows = (
     (100, (-5.00e-02, 2.70e-02)),
     (125, (-1.24, 2.05e-02)),
@@ -763,7 +763,7 @@ def _nominal_bands(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     reproducibility of Table 2 are all keyed by the nominal one-third-octave
     centre frequency, so a band the standard does not print cannot be served
     at all. Nominal means the printed integer: 1 000 Hz, not the exact
-    1 000,0 Hz or the base-ten 1 000 Hz of IEC 61260-1, which are the same
+    1 000.0 Hz or the base-ten 1 000 Hz of IEC 61260-1, which are the same
     label once rounded.
 
     :param frequencies: The band centres, in hertz.
@@ -808,7 +808,7 @@ def _as_scalar(value: object, name: str) -> float:
 
 
 def _check_duct_diameter(duct_diameter_m: float) -> float:
-    """The test-duct diameter, refused outside the 0,15 m to 2 m of clause 1.1.
+    """The test-duct diameter, refused outside the 0.15 m to 2 m of clause 1.1.
 
     The informative Annexes H and I carry coefficient tables for smaller and
     larger ducts, but the standard says they are not part of itself and this
@@ -865,7 +865,7 @@ def _check_informative_bands(
 
     Tables A.1 to A.6 are split by a band header. Over 50 Hz to 10 kHz the
     rows carry the normative :math:`|U| \le 40` m/s and, for information, the
-    extended :math:`|U| \le 60` m/s; the rows for 12,5 kHz to 20 kHz sit under
+    extended :math:`|U| \le 60` m/s; the rows for 12.5 kHz to 20 kHz sit under
     a second header that reads ":math:`|U| \le 40` m/s", and the footnote
     grants them no velocity extension: "Also for information only, values are
     given for an extended frequency range, 12 500 Hz to 20 000 Hz, for flow
@@ -873,7 +873,7 @@ def _check_informative_bands(
 
     The two extensions therefore do not compose. Evaluated past 40 m/s the
     high-band polynomials do not merely lose accuracy, they diverge: at
-    60 m/s in a 0,5 m duct they return +100 dB at 12,5 kHz, -369 dB at 16 kHz
+    60 m/s in a 0.5 m duct they return +100 dB at 12.5 kHz, -369 dB at 16 kHz
     and +268 dB at 20 kHz. Nothing downstream can tell that apart from a
     correction, so the combination is refused at the door.
 
@@ -913,8 +913,8 @@ def _warn_reconstructed_coefficient(
     Table A.5 is printed without its leading digit. Every other coefficient in
     the annex is transcribed; this one is reconstructed, and the caller is
     entitled to know which of the two it is holding. The reading moves the
-    correction by 0,64 dB per unit of the missing digit at 40 m/s and by
-    0,034 dB at 15 m/s, so it matters at the top of the velocity range and
+    correction by 0.64 dB per unit of the missing digit at 40 m/s and by
+    0.034 dB at 15 m/s, so it matters at the top of the velocity range and
     barely at all at the bottom. No printed value crosses this cell, because
     Table D.1 is tabulated for a diameter served by Table A.4.
     """
@@ -925,8 +925,8 @@ def _warn_reconstructed_coefficient(
         return
     warn_caller(
         f"The {_RECONSTRUCTED_BAND_HZ:g} Hz coefficient a3 of Table A.5 "
-        "(0,8 m <= d < 1,25 m) is printed without its leading digit and is "
-        "read as -1,24e-05, the value Tables A.4 and A.6 bracket; the "
+        "(0.8 m <= d < 1.25 m) is printed without its leading digit and is "
+        "read as -1.24e-05, the value Tables A.4 and A.6 bracket; the "
         "correction returned for that band is that reading, not a "
         "transcription (see docs/ERRATA.md).",
         SoundPowerWarning,
@@ -1004,7 +1004,7 @@ def flow_modal_correction(
     correction on the two sides of the fan.
 
     One cell of Annex A is not legible, the :math:`a_3` of the 5 000 Hz row of
-    the table that serves 0,8 m to 1,25 m, and asking for that band and that
+    the table that serves 0.8 m to 1.25 m, and asking for that band and that
     diameter emits a :class:`SoundPowerWarning` saying the coefficient is a
     reading rather than a transcription (see ``docs/ERRATA.md``). Every other
     coefficient in the annex is transcribed and none of them warns.
@@ -1013,7 +1013,7 @@ def flow_modal_correction(
         hertz, 50 Hz to 20 kHz.
     :param flow_velocity: Mean flow velocity :math:`U` at the microphone
         position, in metres per second, negative on the inlet side.
-    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0,15 m
+    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0.15 m
         to 2 m; it selects the Annex A table for the sampling tube and is
         checked against the scope for the other shields.
     :param shield: ``"sampling-tube"`` (default), ``"nose-cone"`` or
@@ -1025,7 +1025,7 @@ def flow_modal_correction(
     :return: :math:`C_{3,4}` per band, in decibels. A ``float`` for a number, an array
         for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band that is not a nominal centre, a diameter
-        outside 0,15 m to 2 m, a velocity beyond the shield's limit (60 m/s
+        outside 0.15 m to 2 m, a velocity beyond the shield's limit (60 m/s
         for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam
         ball), a velocity beyond 40 m/s asked for in a band above 10 kHz,
         where Annex A tabulates no coefficients, or a non-positive speed of
@@ -1081,7 +1081,7 @@ def in_duct_reproducibility(
 
     Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
     what clause 9.2 doubles into the expanded uncertainty to be recorded at
-    95 % coverage. For 12,5 kHz, 16 kHz and 20 kHz the extrapolated values of
+    95 % coverage. For 12.5 kHz, 16 kHz and 20 kHz the extrapolated values of
     Table 3 are returned; clause 4 suggests them while saying that
     measurements above 10 kHz are not part of the standard, so a result that
     carries those bands says so in ``information_only_band``.
@@ -1108,7 +1108,7 @@ def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float,
     stated for (clause 1.1). The speed of sound is the ISO 3741 form the
     emission package already uses, and the density is the ideal gas at the
     static pressure and temperature of the duct, so that
-    :math:`\rho c` is 413 N s/m^3 at 20 degC and 101,325 kPa against the
+    :math:`\rho c` is 413 N s/m^3 at 20 degC and 101.325 kPa against the
     400 N s/m^3 reference of Eq. (12).
 
     :return: ``(c, rho_c)`` in m/s and N s/m^3.
@@ -1204,7 +1204,7 @@ def sound_power_in_duct(
         or an already averaged ``(bands,)`` spectrum.
     :param frequencies: Nominal one-third-octave centre frequencies of the
         bands, in hertz, 50 Hz to 20 kHz.
-    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0,15 m
+    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0.15 m
         to 2 m.
     :param flow_velocity: Mean flow velocity :math:`U` at the microphone
         position, in metres per second; negative on the inlet side, positive
@@ -1221,7 +1221,7 @@ def sound_power_in_duct(
         it sets is also the one Eq. (8) is evaluated with for the
         omni-directional shields, Table 1 defining :math:`c` as the speed of
         sound in the test duct; over the -50 degC to 70 degC of clause 1.1
-        that moves :math:`C_{3,4}` by up to 0,08 dB against the 340 m/s
+        that moves :math:`C_{3,4}` by up to 0.08 dB against the 340 m/s
         :func:`flow_modal_correction` uses on its own.
     :param static_pressure_kpa: Static pressure in the duct, in kilopascals;
         sets :math:`\rho`.

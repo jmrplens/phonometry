@@ -61,7 +61,7 @@ one-way slab vibrating in one mode, which is the bridge from this guideline
 check to the stress calculation of 4.2:
 
 $$
-\hat{\sigma}_\mathrm{max} = 1{,}73 \left(E_\mathrm{dyn} \, \varrho \, \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5} k_n \, \hat{v}_\mathrm{max} \tag{1}
+\hat{\sigma}_\mathrm{max} = 1.73 \left(E_\mathrm{dyn} \, \varrho \, \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0.5} k_n \, \hat{v}_\mathrm{max} \tag{1}
 $$
 
 The guideline values are not limits in the legal sense and not an acceptance
@@ -144,12 +144,12 @@ stiffness and uniform mass, vibrating in one mode, the peak bending
 stress follows from the peak velocity alone:
 
 $$
-\hat{\sigma}_\mathrm{max} = 1{,}73 \left(E_\mathrm{dyn} \, \varrho \, \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5} k_n \, \hat{v}_\mathrm{max}
+\hat{\sigma}_\mathrm{max} = 1.73 \left(E_\mathrm{dyn} \, \varrho \, \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0.5} k_n \, \hat{v}_\mathrm{max}
 $$
 
 The system dimensions do not enter, which is the point of the formula: a
 velocity measured where the amplitude is largest is enough. The mode
-factor $k_n$ lies between 1 and 1,3 in the technically important
+factor $k_n$ lies between 1 and 1.3 in the technically important
 cases, so it moves the answer by less than a third.
 
 **Parameters**

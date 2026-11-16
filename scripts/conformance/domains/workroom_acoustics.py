@@ -150,13 +150,13 @@ def _chk_table_c6() -> Outcome:
     _WORKROOM,
     "ISO 14257:2001 Annex C, Table C.6 last column",
     "The A-weighted pink-noise normalisation of Eq. (4), with the printed "
-    "6,2 dB, reproduces the eleven printed values to within 0,1 dB",
+    "6.2 dB, reproduces the eleven printed values to within 0.1 dB",
 )
 def _chk_table_c6_normalized() -> Outcome:
-    # 0,1 dB and not the printed 0,05: the 6,2 dB Eq. (4) prints is the
+    # 0.1 dB and not the printed 0.05: the 6.2 dB Eq. (4) prints is the
     # A-weighting curve's energy sum rounded to one decimal, the six weights
-    # Table 1 prints, rounded on their own, sum to 6,2515 dB, and the annex was
-    # normalised exactly, so the printed constant returns every value 0,05 dB
+    # Table 1 prints, rounded on their own, sum to 6.2515 dB, and the annex was
+    # normalised exactly, so the printed constant returns every value 0.05 dB
     # high on top of the rounding. The next row holds the split; the errata
     # records it.
     printed = spatial.ANNEX_C_TABLE_C6_NORMALIZED_DB
@@ -176,7 +176,7 @@ def _chk_table_c6_normalized() -> Outcome:
         0.1,
         unit="dB",
         expected_label=(
-            "every value within 0,1 dB: the printed 6,2 dB is 0,05 dB short of "
+            "every value within 0.1 dB: the printed 6.2 dB is 0.05 dB short of "
             "the sum of the printed Table 1 weights, which is what the annex "
             "normalised with, so a cell can come out one unit high in the last "
             "place and never low"
@@ -188,7 +188,7 @@ def _chk_table_c6_normalized() -> Outcome:
     )
 
 
-#: How many of the fourteen Annex C values the printed 6,2 dB of Eq. (4) puts
+#: How many of the fourteen Annex C values the printed 6.2 dB of Eq. (4) puts
 #: outside their rounding, every one of them a tenth high. Recorded, not derived:
 #: it is the finding the row publishes, so a change in it has to fail the row.
 _PRINTED_OFFSET_CELLS_OUTSIDE = 9
@@ -199,17 +199,17 @@ _PRINTED_OFFSET_CELLS_OUTSIDE = 9
     "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table "
     "C.10 (ISO 14257:2001, PDF page 10, printed folio 4; BS EN ISO 14257:2001, "
     "PDF page 14, printed folio 4)",
-    "The 6,2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, "
-    "the six weights Table 1 prints sum to 6,2515 dB, and the annex was "
+    "The 6.2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, "
+    "the six weights Table 1 prints sum to 6.2515 dB, and the annex was "
     "normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen "
     "printed values inside their rounding where the printed constant lands "
     "nine of them one unit high",
 )
 def _chk_equation_four_offset_against_annex_c() -> Outcome:
     # Eq. (3) with the Table 1 weights as the machine spectrum is Eq. (4) with
-    # the sum of those weights in place of the printed 6,2 dB. Both readings run
+    # the sum of those weights in place of the printed 6.2 dB. Both readings run
     # over the unrounded Annex B chain from the printed Tables C.2 to C.4, and
-    # the count of cells outside +/-0,05 dB is taken for each: the sum must
+    # the count of cells outside +/-0.05 dB is taken for each: the sum must
     # land none outside, and the printed constant must land some, every one of
     # them high.
     weights = [
@@ -266,12 +266,12 @@ def _chk_equation_four_offset_against_annex_c() -> Outcome:
         expected_label=(
             f"0 of {cells} outside the printed rounding with the Table 1 sum, "
             f"against {_PRINTED_OFFSET_CELLS_OUTSIDE} of {cells} with the printed "
-            f"6,2 dB, every one of the {cells} high and none by a second unit"
+            f"6.2 dB, every one of the {cells} high and none by a second unit"
         ),
         computed_label=(
             f"{outside_sum} of {cells} with the sum (worst "
             f"{max(abs(d) for d in dep_sum):.3f} dB, both signs); "
-            f"{outside_print} of {cells} with 6,2 dB (worst "
+            f"{outside_print} of {cells} with 6.2 dB (worst "
             f"{max(abs(d) for d in dep_print):.3f} dB, {low_print} low, "
             f"{past_one_unit} past one unit)"
         ),
@@ -363,7 +363,7 @@ def _chk_annex_c_is_inconsistent() -> Outcome:
 @register(
     _WORKROOM,
     "ISO 14257:2001 Eq. (5) against Eq. (8)",
-    "The factor Eq. (5) prints, 0,3, is the logarithm of two rounded, which "
+    "The factor Eq. (5) prints, 0.3, is the logarithm of two rounded, which "
     "Eq. (8) prints in full one page later",
 )
 def _chk_printed_factor() -> Outcome:
@@ -371,8 +371,8 @@ def _chk_printed_factor() -> Outcome:
         float(np.log10(2.0)),
         DECADE_TO_DOUBLING,
         0.002,
-        expected_label="lg 2 = 0,301 03",
-        computed_label="the printed 0,3, which is 0,34 % smaller",
+        expected_label="lg 2 = 0.301 03",
+        computed_label="the printed 0.3, which is 0.34 % smaller",
     )
 
 
@@ -465,7 +465,7 @@ def _chk_annex_c_source_qualifies() -> Outcome:
         inside,
         len(declared),
         subject="declared characteristics inside their limit",
-        expected_label="2/2, the closer of the two 1,5 dB under the 8 dB cap",
+        expected_label="2/2, the closer of the two 1.5 dB under the 8 dB cap",
     )
 
 
@@ -476,7 +476,7 @@ def _chk_annex_c_source_qualifies() -> Outcome:
     "its six printed octave bands under the Table 1 weights",
 )
 def _chk_table_c2_a_weighted() -> Outcome:
-    # Equation (4) is that energy sum less 6,2 dB, so adding the offset back
+    # Equation (4) is that energy sum less 6.2 dB, so adding the offset back
     # leaves the plain A-weighted total the last column of the table prints.
     # This is the one printed number of Annex C that the Table C.6 chain never
     # touches, so it checks the weights and the summation on their own.
@@ -538,7 +538,7 @@ def _chk_equation_eight_leaves_table_c11() -> Outcome:
         0.0,
         expected_label=(
             "18 of the 21 printed results leave the rounding of their own "
-            "table: 15 of the 18 of Table C.11 over Table C.5, up to 1,55 dB, "
+            "table: 15 of the 18 of Table C.11 over Table C.5, up to 1.55 dB, "
             "and the 3 of Table C.12 over the last column of Table C.6. The "
             "two printings of the standard agree digit for digit, so neither "
             "is a misprint of the other"
@@ -605,7 +605,7 @@ def _chk_suva_decay() -> Outcome:
     return count(
         matching,
         total,
-        subject="printed values of DL2 reproduced within 0,06 dB",
+        subject="printed values of DL2 reproduced within 0.06 dB",
         expected_label=f"21/21 (worst departure {worst:.3f} dB)",
     )
 
@@ -657,7 +657,7 @@ def _chk_suva_reference_offset() -> Outcome:
         implied,
         0.02,
         unit="dB",
-        expected_label="10 lg(4 pi) = 10,992 dB, which Eq. (2) prints as 11 dB",
+        expected_label="10 lg(4 pi) = 10.992 dB, which Eq. (2) prints as 11 dB",
         computed_label=f"{implied:.3f} dB, from the mean of the 21 residuals",
     )
 
@@ -724,12 +724,12 @@ def _chk_ifa_decay() -> Outcome:
     _WORKROOM,
     "IFA-LSA 01-234 (2020) Tab. 4.4 against Tab. 4.5 (PDF pages 17 and 18, "
     "printed folios 17 and 18)",
-    "The 2 kHz level difference the result table prints, 4,7 dB, is not the "
+    "The 2 kHz level difference the result table prints, 4.7 dB, is not the "
     "one its own decay rate was computed from",
 )
 def _chk_ifa_defective_difference() -> Outcome:
-    # Tab. 4.4 prints 75,3 dB and 71,0 dB at the second and third positions, a
-    # difference of 4,3 dB; Tab. 4.5 prints that difference as 4,7 dB. The
+    # Tab. 4.4 prints 75.3 dB and 71.0 dB at the second and third positions, a
+    # difference of 4.3 dB; Tab. 4.5 prints that difference as 4.7 dB. The
     # regression says which of the two cells is right: only the printed level
     # gives the printed decay rate.
     levels = spatial.IFA_LSA_01_234_LEVELS_DB[2000]
@@ -746,8 +746,8 @@ def _chk_ifa_defective_difference() -> Outcome:
         2,
         subject="readings the printed decay rate settles",
         expected_label=(
-            "the printed level gives the printed 4,3 dB and the level the "
-            "printed difference would need gives 4,4 dB"
+            "the printed level gives the printed 4.3 dB and the level the "
+            "printed difference would need gives 4.4 dB"
         ),
     )
 
@@ -824,7 +824,7 @@ def _chk_m8_off_the_chart() -> Outcome:
         got,
         0.1,
         unit="dB",
-        expected_label="12,4 dB, against the 10 dB the table prints and the "
+        expected_label="12.4 dB, against the 10 dB the table prints and the "
         "10 dB the diagram ends at",
     )
 
@@ -875,7 +875,7 @@ def _chk_typical_range() -> Outcome:
         float(inside),
         0.0,
         expected_label=(
-            "five of the six octave bands, the 4 kHz one running 0,4 dB over "
+            "five of the six octave bands, the 4 kHz one running 0.4 dB over "
             "the 5 dB top of the range 4.3 leads one to expect"
         ),
         computed_label=f"{inside} of 6 inside 2 dB to 5 dB",
@@ -904,7 +904,7 @@ _B_M4: _Machine = prediction.ANNEX_B_MACHINES["M4"]
 
 #: The departure of the one cell of Table B.9 the model does not bring inside
 #: the half step of its printed tenth: beside the new machine with the first
-#: choice, 89,337 dB against a printed 89,4 dB. The annex prints no
+#: choice, 89.337 dB against a printed 89.4 dB. The annex prints no
 #: contribution that would locate the difference, so it is recorded here as it
 #: is and not attributed to anything.
 _B_CASE_B_EXCEPTION_DB = -0.063
@@ -979,7 +979,7 @@ def _annex_b_case_a() -> dict[str, float]:
         # label is the half of that table this annex gets right: Figure B.1 puts
         # W1 beside M2, and the levels of Table B.6 come back there. So the
         # background is heard beside M2 and not in the far corner, which is
-        # where the label W2 belongs. It is worth 0,004 dB either way, and both
+        # where the label W2 belongs. It is worth 0.004 dB either way, and both
         # readings round to the printed tenth; this one is the one that agrees
         # with the rest of the row.
         "beside M2": _annex_b_level(
@@ -1051,7 +1051,7 @@ def _chk_annex_b_case_b() -> Outcome:
         total,
         subject="printed levels of Table B.9",
         expected_label=(
-            f"{total}/{total}: all but one within the 0,05 dB half step of "
+            f"{total}/{total}: all but one within the 0.05 dB half step of "
             f"the printed tenth (worst {worst:.3f} dB), and the cell beside the "
             f"new machine with the first choice at its recorded "
             f"{_B_CASE_B_EXCEPTION_DB:+.3f} dB (computed {exception:+.4f} dB)"
@@ -1103,8 +1103,8 @@ def _chk_annex_b_labels() -> Outcome:
             "B.5 and B.8 tabulate"
         ),
         expected_label=(
-            f"{2 * cells}/{2 * cells}: the {cells} cells within 0,1 dB at the "
-            f"positions Figure B.1 draws, and the same {cells} more than 0,1 dB "
+            f"{2 * cells}/{2 * cells}: the {cells} cells within 0.1 dB at the "
+            f"positions Figure B.1 draws, and the same {cells} more than 0.1 dB "
             f"out at the positions Tables B.5 and B.8 tabulate (nearest "
             f"{min(misses):.3f} dB, farthest {max(misses):.3f} dB)"
         ),
@@ -1250,7 +1250,7 @@ def _chk_ifa_mean_absorption() -> Outcome:
 def _chk_energy_addition_at_a_workstation() -> Outcome:
     # I. L. Ver and L. L. Beranek (eds.), Noise and Vibration Control
     # Engineering, 2nd edition, Wiley, 2006. Table 7.4 on printed folio 200
-    # prints the nine contributions and the two totals; the 3,7 dB benefit is
+    # prints the nine contributions and the two totals; the 3.7 dB benefit is
     # printed in the text on folio 199, as the difference of those two totals.
     before = ph.room.total_workstation_level(
         list(prediction.VER_BERANEK_TABLE_7_4_BEFORE_DB)
@@ -1278,7 +1278,7 @@ def _chk_energy_addition_at_a_workstation() -> Outcome:
         expected_label=(
             f"3/3 (worst departure {worst:.2f} dB, on the total before "
             "treatment: the nine contributions are themselves printed to "
-            "0,1 dB, so their sum can only be recovered to half a step)"
+            "0.1 dB, so their sum can only be recovered to half a step)"
         ),
     )
 
@@ -1321,7 +1321,7 @@ def _chk_barron_example_7_8() -> Outcome:
     _WORKROOM,
     "Barron (2003) Table 7-5 against itself (printed folio 308, PDF p. 320)",
     "The room constant printed at 2 kHz is the one a mean absorption of "
-    "0,041 gives, and not the 0,043 the row above it prints",
+    "0.041 gives, and not the 0.043 the row above it prints",
 )
 def _chk_barron_table_7_5_absorption_row() -> Outcome:
     surface = enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2
@@ -1334,10 +1334,10 @@ def _chk_barron_table_7_5_absorption_row() -> Outcome:
         implied,
         0.005,
         unit="m²",
-        expected_label="the 47,88 m2 Table 7-5 prints at 2 kHz",
+        expected_label="the 47.88 m2 Table 7-5 prints at 2 kHz",
         computed_label=(
-            f"{implied:.2f} m2 from a mean absorption of 0,041, against the "
-            f"{printed_absorption:.2f} m2 the printed 0,043 gives"
+            f"{implied:.2f} m2 from a mean absorption of 0.041, against the "
+            f"{printed_absorption:.2f} m2 the printed 0.043 gives"
         ),
     )
 
@@ -1372,9 +1372,9 @@ def _chk_barron_example_7_6() -> Outcome:
         0.06,
         unit="dB",
         places=2,
-        expected_label="the 94,8 dB the example prints, for a room constant of 47,37 m2",
+        expected_label="the 94.8 dB the example prints, for a room constant of 47.37 m2",
         computed_label=(
             f"{level:.2f} dB, from the {room_constant:.2f} m2 the library "
-            "returns for (0,05)(900)/(1 - 0,05)"
+            "returns for (0.05)(900)/(1 - 0.05)"
         ),
     )

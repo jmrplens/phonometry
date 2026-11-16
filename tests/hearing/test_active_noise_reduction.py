@@ -8,7 +8,7 @@ that chain the workbook stores is pinned here: the lower-ear selection (rows
 134-149), the interpolated passive attenuation (182-197), the one-third-octave
 and octave totals (206-221, 230-245), and the mean, standard deviation and APV
 they reduce to (247-249). The workbook rounds the interpolation, Formula (1),
-the mean and the standard deviation to 0,1 dB, and leaves the lower-ear
+the mean and the standard deviation to 0.1 dB, and leaves the lower-ear
 selection and the sums as they come; the library rounds nothing, so each
 comparison states the rounding it allows for. Linear operation (5.4.4) prints
 no example and is held to its clause on constructed data.
@@ -81,8 +81,8 @@ def test_table_a3_mean_and_spread() -> None:
 def test_table_a3_uncertainty_rows_come_from_the_rounded_row_above() -> None:
     """u = sigma/4 and U95 = 2u reproduce the print only from the rounded rows.
 
-    Table A.3 forms its u row from the sigma it displays (1,4 / 4 = 0,35,
-    printed 0,4) and its U95 row from the u it displays. At full precision
+    Table A.3 forms its u row from the sigma it displays (1.4 / 4 = 0.35,
+    printed 0.4) and its U95 row from the u it displays. At full precision
     one u cell and six U95 cells come out a tenth lower. The library returns
     the full-precision values; see docs/ERRATA.md.
     """
@@ -116,7 +116,7 @@ def test_table_a3_negative_values_are_kept_with_their_sign() -> None:
 
 
 def test_table_a2_budget() -> None:
-    """u = 0,78 dB and U95 = 1,6 dB from the three components of Table A.2."""
+    """u = 0.78 dB and U95 = 1.6 dB from the three components of Table A.2."""
     budget = hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY
     meth, eq, env, u, u95 = ref.ISO4869_6_TABLE_A2
     assert (
@@ -248,17 +248,17 @@ def test_interpolation_is_linear_in_hertz() -> None:
 
 
 def test_total_thirds_match_the_workbook() -> None:
-    """Rows 206-221, within the 0,05 dB the workbook's rounding of a) leaves."""
+    """Rows 206-221, within the 0.05 dB the workbook's rounding of a) leaves."""
     result = _workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
     assert np.abs(result.total_third_octave_attenuation - workbook).max() <= 0.05 + 1e-9
 
 
 def test_octave_totals_match_the_workbook() -> None:
-    """Rows 230-245 (Formula (1)), within the 0,1 dB two roundings leave.
+    """Rows 230-245 (Formula (1)), within the 0.1 dB two roundings leave.
 
     The workbook rounds the interpolated passive value and then the octave
-    result, each by up to 0,05 dB; the library rounds neither.
+    result, each by up to 0.05 dB; the library rounds neither.
     """
     result = _workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
@@ -284,7 +284,7 @@ def test_formula_1_on_the_workbook_thirds_gives_every_octave_cell_exactly() -> N
 
 
 def test_mean_sd_and_apv_match_the_workbook() -> None:
-    """Rows 247-249: mean and SD to 0,1 dB, and APV84 as the workbook forms it."""
+    """Rows 247-249: mean and SD to 0.1 dB, and APV84 as the workbook forms it."""
     result = _workbook_total()
     apv = result.assumed_protection
     assert apv.performance == 84
@@ -293,7 +293,7 @@ def test_mean_sd_and_apv_match_the_workbook() -> None:
     assert mean.tolist() == ref.ISO4869_6_WORKBOOK_MEAN
     assert spread.tolist() == ref.ISO4869_6_WORKBOOK_SD
     assert _half_up(mean - spread).tolist() == ref.ISO4869_6_WORKBOOK_APV84
-    # Unrounded, the APV is within 0,1 dB of the workbook's row.
+    # Unrounded, the APV is within 0.1 dB of the workbook's row.
     assert np.abs(apv.apv - np.asarray(ref.ISO4869_6_WORKBOOK_APV84)).max() <= 0.1
 
 
@@ -398,7 +398,7 @@ def test_linear_throughout_but_stopping_below_110_db() -> None:
 
 
 def test_a_short_step_caps_the_linear_level_below_it() -> None:
-    """A 3,9 dB step from 100 dB to 105 dB leaves 100 dB as the highest linear level."""
+    """A 3.9 dB step from 100 dB to 105 dB leaves 100 dB as the highest linear level."""
     levels = _ears([5.0, 5.0, 5.0, 5.0])
     levels[2, 3:] -= 1.1  # one ear falls behind on the step to 105 dB
     result = hearing.assess_anr_linearity(_EXTERNAL, levels)

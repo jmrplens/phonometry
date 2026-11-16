@@ -615,7 +615,7 @@ def test_z_weighting_leaves_the_table_c4_row_out() -> None:
     """``weighting="Z"`` is the unweighted level the Table C.4 footnote allows.
 
     The A-weighting row of Table C.4 (IEC TS 61400-11-2:2024, PDF page 68,
-    printed page 66) prints -26,2 dB at 63 Hz and -13,4 dB at 160 Hz. Leaving
+    printed page 66) prints -26.2 dB at 63 Hz and -13.4 dB at 160 Hz. Leaving
     the row out raises each band by exactly that and changes nothing else.
     """
     conditions = {
@@ -663,7 +663,7 @@ def test_turbines_sum_energetically_per_band() -> None:
 
 
 def test_a_zero_air_attenuation_takes_nothing_off() -> None:
-    """Zero is an absorption coefficient (Table C.2 prints 0,0 to 20 Hz).
+    """Zero is an absorption coefficient (Table C.2 prints 0.0 to 20 Hz).
 
     Only a negative one is refused.
     """
@@ -741,7 +741,7 @@ def test_table_7_rows(row: tuple[float, float, tuple[float, ...]]) -> None:
         found = env.upper_tone_search_frequency(
             distance, temperature_c=temperature, relative_humidity_percent=humidity
         ).upper_frequency_hz
-        # Table 7 prints the nominal 3 150 Hz band as 3,2 kHz.
+        # Table 7 prints the nominal 3 150 Hz band as 3.2 kHz.
         assert found == pytest.approx(
             3150.0 if khz == pytest.approx(3.2) else khz * 1000.0
         )

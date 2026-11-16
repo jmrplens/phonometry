@@ -6,7 +6,7 @@
 fixed strings, so the octave labels of these figures are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not pass
 its ``language`` on draws ``31.5`` in a Spanish figure. The figures below span
-31,5 Hz, the lowest octave centre whose label carries a decimal, because a
+31.5 Hz, the lowest octave centre whose label carries a decimal, because a
 label without one proves nothing.
 
 The ECMA-418-1 tone assessment is the exception: its axis is pinned to the

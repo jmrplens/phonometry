@@ -2,11 +2,11 @@
 """Tests for the ISO 16283 field test report (``.report()`` -> PDF).
 
 The fiche's numbers are verified against the standards' own definitions
-using hand-computable syntheses: with ``T = T0 = 0,5 s`` the reverberation
+using hand-computable syntheses: with ``T = T0 = 0.5 s`` the reverberation
 correction vanishes exactly (``DnT = D``, ``L'nT = Li``), so feeding the
 ISO 717 Annex C worked-example curves as the level difference (or impact
 level) pins the fiche's rating to the published ``30 (-2; -3)`` / ``79
-(-11)`` values; ``R'`` is checked against ``D + 10 lg(S T / (0,16 V))``.
+(-11)`` values; ``R'`` is checked against ``D + 10 lg(S T / (0.16 V))``.
 Rendering assertions are structural (a one-page ``%PDF``) plus pypdf
 text-extraction checks of the boxed rating, the standard-basis line and
 the mandatory field-method statement, like the sibling report tests.
@@ -37,7 +37,7 @@ from phonometry import ReportMetadata, building
 if TYPE_CHECKING:
     from pathlib import Path
 
-#: A receiving-room reverberation time equal to T0 = 0,5 s in every band:
+#: A receiving-room reverberation time equal to T0 = 0.5 s in every band:
 #: the standardized quantities then equal the raw ones exactly
 #: (10 lg(T/T0) = 0), making the fiche's rating hand-computable.
 _T_AT_T0 = np.full(16, 0.5)
@@ -65,7 +65,7 @@ def test_dnt_equals_d_at_reference_time() -> None:
 
 
 def test_dnt_reverberation_correction_hand_computed() -> None:
-    """DnT = D + 10 lg(T/T0) (ISO 16283-1 Formula (2)) for T = 1,0 s."""
+    """DnT = D + 10 lg(T/T0) (ISO 16283-1 Formula (2)) for T = 1.0 s."""
     l1 = np.full(16, 90.0)
     l2 = l1 - np.asarray(_AIRBORNE_R, dtype=np.float64)
     result = building.airborne_insulation(l1, l2, np.full(16, 1.0))
@@ -91,10 +91,10 @@ def test_airborne_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> Non
 
 
 def test_r_prime_fiche_hand_computed(tmp_path: Path) -> None:
-    """R' = D + 10 lg(S T / (0,16 V)) (Formulae (4)/(5)) drives the R' fiche.
+    """R' = D + 10 lg(S T / (0.16 V)) (Formulae (4)/(5)) drives the R' fiche.
 
-    With S = 10 m2, V = 50 m3 and T = 0,5 s the absorption area is
-    A = 0,16 x 50 / 0,5 = 16 m2, so R' = D + 10 lg(10/16) = D - 2,041 dB
+    With S = 10 m2, V = 50 m3 and T = 0.5 s the absorption area is
+    A = 0.16 x 50 / 0.5 = 16 m2, so R' = D + 10 lg(10/16) = D - 2.041 dB
     in every band.
     """
     pytest.importorskip("matplotlib")
@@ -132,9 +132,9 @@ def test_impact_fiche_rating_pinned_to_iso717_2_annex_c(tmp_path: Path) -> None:
 
 
 def test_impact_l_n_fiche_hand_computed(tmp_path: Path) -> None:
-    """L'n = Li + 10 lg(A/A0) with A = 0,16 V/T (Formulae (2)/(6)).
+    """L'n = Li + 10 lg(A/A0) with A = 0.16 V/T (Formulae (2)/(6)).
 
-    V = 31,25 m3 and T = 0,5 s give A = 10 m2 = A0, so L'n = Li and the
+    V = 31.25 m3 and T = 0.5 s give A = 10 m2 = A0, so L'n = Li and the
     normalized fiche prints the same Annex C rating as the standardized one.
     """
     pytest.importorskip("matplotlib")

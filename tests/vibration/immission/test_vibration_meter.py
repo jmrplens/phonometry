@@ -28,7 +28,7 @@ from phonometry.vibration import immission as im
 #: top of the building working range, where the low pass is already 20 dB down.
 FS_HZ = 8192.0
 
-#: Long enough for the running r.m.s. to have settled (4 tau is 0,5 s) with
+#: Long enough for the running r.m.s. to have settled (4 tau is 0.5 s) with
 #: room to spare, and short enough to keep the suite quick.
 RECORD_S = 12.0
 
@@ -92,7 +92,7 @@ def test_reference_indications_of_6_2_3_12() -> None:
 
 
 def test_reference_kbf_fluctuation_stays_inside_the_printed_two_percent() -> None:
-    """6.2.3.12 prints KB_F(t) as 0,667 with a 2 % fluctuation, not a number."""
+    """6.2.3.12 prints KB_F(t) as 0.667 with a 2 % fluctuation, not a number."""
     kbf = _settled(im.kbf_signal(_sine(im.KB_REFERENCE_FREQUENCY_HZ), FS_HZ))
     swing = (kbf.max() - kbf.min()) / kbf.mean()
     assert 0.0 < swing <= 0.04  # a band of +-2 % is a swing of 4 %
@@ -119,7 +119,7 @@ def test_table_8_pulse_response(
         gate = (np.mod(t, 1.0) < duration_ms / 1000.0).astype(float)
         assert round(gate.sum() / 20.0 * 80.0 / FS_HZ) == cycles
         shown = _settled(im.kbf_signal(carrier * gate, FS_HZ)).max()
-    # 0,7 points of allowance, which the two shortest bursts need: one and two
+    # 0.7 points of allowance, which the two shortest bursts need: one and two
     # cycles of an 80 Hz sine are where a digital chain and a printed value
     # part company, and the standard prints no tolerance for this table.
     assert shown / continuous.mean() * 100.0 == pytest.approx(percent, abs=0.7)
@@ -146,7 +146,7 @@ def test_formula_6_is_the_magnitude_of_formula_4() -> None:
 
 
 def test_the_band_limits_sit_where_the_note_of_5_2_3_2_says() -> None:
-    """1 Hz to 80 Hz is made by corners at 0,8 Hz and 100 Hz, 3 dB down."""
+    """1 Hz to 80 Hz is made by corners at 0.8 Hz and 100 Hz, 3 dB down."""
     at_corners = np.abs(im.band_limitation_response([0.8, 100.0]))
     assert at_corners == pytest.approx([1.0 / math.sqrt(2.0)] * 2, rel=1e-7)
     railway = np.abs(
@@ -158,11 +158,11 @@ def test_the_band_limits_sit_where_the_note_of_5_2_3_2_says() -> None:
 @pytest.mark.parametrize(
     ("frequency_hz", "lower", "upper"),
     [
-        (16.0, -10.0, 10.0),  # inside 1,25 f_u to 0,8 f_o
+        (16.0, -10.0, 10.0),  # inside 1.25 f_u to 0.8 f_o
         (1.25, -10.0, 10.0),  # the lower edge of the central band
-        (64.0, -10.0, 10.0),  # 0,8 f_o, still central
-        (1.0, -20.0, 20.0),  # below 1,25 f_u, inside 0,5 f_u to 2 f_o
-        (100.0, -20.0, 20.0),  # above 0,8 f_o, inside 2 f_o
+        (64.0, -10.0, 10.0),  # 0.8 f_o, still central
+        (1.0, -20.0, 20.0),  # below 1.25 f_u, inside 0.5 f_u to 2 f_o
+        (100.0, -20.0, 20.0),  # above 0.8 f_o, inside 2 f_o
         (0.4, -100.0, 20.0),  # outside every band of Table 2
         (200.0, -100.0, 20.0),
     ],
@@ -244,11 +244,11 @@ def test_verification_normalises_at_the_reference_and_needs_it() -> None:
 
 
 def test_a_response_at_or_below_0_01_has_no_upper_limit() -> None:
-    """Table 3 footnote a: the upper limit holds only where H_Ist(f) > 0,01.
+    """Table 3 footnote a: the upper limit holds only where H_Ist(f) > 0.01.
 
     DIN 45669-1:2010-09, PDF page 19, printed folio 19. The same shape 50 %
     high at 200 Hz fails against the 20 % of Table 3 when the response there
-    is 0,36, and is not bound from above when it is 0,000 36.
+    is 0.36, and is not bound from above when it is 0.000 36.
     """
     f = np.array([16.0, 200.0])
     shape = np.abs(im.kb_weighting_response(f)) * np.array([1.0, 1.5])
@@ -287,7 +287,7 @@ def test_a_bad_display_is_reported_under_its_own_name() -> None:
 
 
 def test_formula_2_counts_a_suppressed_interval_in_n() -> None:
-    """A clock maximum at or below 0,1 enters as zero and still counts."""
+    """A clock maximum at or below 0.1 enters as zero and still counts."""
     loud = 0.8
     assert im.takt_max_rms([loud, loud]) == pytest.approx(loud)
     assert im.takt_max_rms([loud, 0.05]) == pytest.approx(loud / math.sqrt(2.0))
@@ -317,7 +317,7 @@ def test_annex_e_weighting_inverts_the_din_4150_3_curve(
 
     The target magnitude is the guideline value of the 1 Hz to 10 Hz band over
     the guideline value at the frequency, so at 50 Hz the commercial class,
-    whose curve has risen from 20 mm/s to 40 mm/s, weighs 0,5.
+    whose curve has risen from 20 mm/s to 40 mm/s, weighs 0.5.
     """
     got = im.assessment_weighting_response(
         [1.0, 10.0, 50.0, 100.0, 200.0], building_class=building_class
@@ -384,7 +384,7 @@ def test_annex_e_verdict_uses_the_frequency_independent_guide_value() -> None:
     assert not result.within_guideline
     assert result.ratio == pytest.approx(6.0 / 5.0, rel=0.02)
     # The same record at 60 Hz, where the guideline curve has risen to
-    # 16,5 mm/s, is weighted down to a third and keeps to the same value.
+    # 16.5 mm/s, is weighted down to a third and keeps to the same value.
     fast = 6.0 * np.sin(2.0 * math.pi * 60.0 * t)
     assert im.assess_short_term_vibration(
         fast, fs, building_class="residential"

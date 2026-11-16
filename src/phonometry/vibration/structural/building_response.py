@@ -22,12 +22,12 @@ each with a coefficient the codes disagree about:
    T = \frac{k_3 h}{\sqrt{b}} \sqrt{\frac{h}{h + b}}
 
 with :math:`h` the height and :math:`b` the width parallel to the force, both
-in metres. The coefficients range over 0,014 to 0,03, over 0,087 to 0,109 and
-over 0,06 to 0,08 respectively, so the choice of code moves the answer by more
+in metres. The coefficients range over 0.014 to 0.03, over 0.087 to 0.109 and
+over 0.06 to 0.08 respectively, so the choice of code moves the answer by more
 than a factor of two in the first form alone.
 
 D.2 closes by fitting one curve to measurements instead of to codes:
-:math:`f = 46/h` hertz (:math:`T = 0{,}022\,h` seconds) from a sample of 163
+:math:`f = 46/h` hertz (:math:`T = 0.022\,h` seconds) from a sample of 163
 rectangular-plan buildings, printed as Figure D.1 with the data around it.
 Errors of **± 50 %** are not uncommon, and D.2 says that is typical of what an
 empirical formula can do. D.3 then says something worth repeating, since it is
@@ -35,8 +35,8 @@ the opposite of what a reader expects: computer models correlate *worse* with
 measured frequencies than :math:`46/h` does, because the model is only as good
 as its idea of what the building is made of.
 
-Damping (D.4) has no predictor at all. Measured values between **0,5 %** and
-**2,1 %** of critical are what the annex reports for buildings where
+Damping (D.4) has no predictor at all. Measured values between **0.5 %** and
+**2.1 %** of critical are what the annex reports for buildings where
 soil-structure interaction was negligible, and the two orthogonal translation
 modes of one building can differ widely. Damping is partly a function of how
 the building was put together, so anticipate large errors.
@@ -116,14 +116,14 @@ PERIOD_COEFFICIENT_RANGES: Mapping[CoefficientModel, tuple[float, float]] = (
     )
 )
 
-#: D.2: the storey rule as a period, ``T = 0,1 n`` seconds, which is the
+#: D.2: the storey rule as a period, ``T = 0.1 n`` seconds, which is the
 #: reciprocal of the ``f = 10/n`` hertz DIN 4150-3 6.4 also prints.
 STORY_PERIOD_COEFFICIENT_S: float = 0.1
 
 #: D.2: the fit to 163 rectangular-plan buildings, ``f = 46/h`` hertz.
 HEIGHT_FREQUENCY_CONSTANT_HZ_M: float = 46.0
 
-#: D.2: the same fit written as a period, ``T = 0,022 h`` seconds. It is the
+#: D.2: the same fit written as a period, ``T = 0.022 h`` seconds. It is the
 #: reciprocal of :data:`HEIGHT_FREQUENCY_CONSTANT_HZ_M` to two figures, which
 #: is the precision the annex prints it to.
 HEIGHT_PERIOD_COEFFICIENT_S_PER_M: float = 0.022
@@ -188,7 +188,7 @@ def fundamental_period(
 
     Four predictors, and which arguments are needed depends on which:
 
-    * ``"stories"`` needs *n_stories*: :math:`T = 0{,}1\,n`.
+    * ``"stories"`` needs *n_stories*: :math:`T = 0.1\,n`.
     * ``"height"`` needs *height_m*: :math:`T = k_1 h`.
     * ``"height_width"`` needs both and *width_m*: :math:`T = k_2 h/\sqrt{b}`.
     * ``"slenderness"`` needs both:

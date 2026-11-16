@@ -113,8 +113,8 @@ the three terms being the internal losses of the material, the radiation into
 the air, and the losses at the perimeter. The perimeter coefficients follow
 from the junctions themselves, $\alpha_k = \sum_j \sqrt{f_{\mathrm{c},j}/f_\mathrm{ref}}
 \, 10^{-K_{ij}/10}$ (Formula C.4). From $\eta_\mathrm{tot}$ come the structural
-reverberation time $T_\mathrm{s} = 2{,}2/(f\,\eta_\mathrm{tot})$ and the equivalent
-absorption length $a_\mathrm{situ} = 2{,}2\pi^2 S \sqrt{f_\mathrm{ref}/f} /
+reverberation time $T_\mathrm{s} = 2.2/(f\,\eta_\mathrm{tot})$ and the equivalent
+absorption length $a_\mathrm{situ} = 2.2\pi^2 S \sqrt{f_\mathrm{ref}/f} /
 (c_\mathrm{o} T_\mathrm{s,situ})$ (Formula 11).
 
 **3. Junctions.** The situation-invariant $K_{ij}$ becomes the level drop the
@@ -169,11 +169,11 @@ element it is exact.
 **$T_\mathrm{s,lab}$ comes from the test report, or from Annex C.** If the
 laboratory printed it, use it. If not, Formula (C.3) estimates the laboratory
 total loss factor as
-$\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485\sqrt{f}) \approx 0{,}01 +
+$\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485\sqrt{f}) \approx 0.01 +
 m'/(485\sqrt{f})$, valid for elements below $m'$ = 800 kg/m², with
-$\eta_\mathrm{int}$ normally taken as 0,01 (Annex B Table B.1 lists it per
+$\eta_\mathrm{int}$ normally taken as 0.01 (Annex B Table B.1 lists it per
 material). `laboratory_total_loss_factor` is that formula and
-`structural_reverberation_time` turns it into $T_\mathrm{s} = 2{,}2/(f\eta_\mathrm{tot})$;
+`structural_reverberation_time` turns it into $T_\mathrm{s} = 2.2/(f\eta_\mathrm{tot})$;
 $T_\mathrm{s,situ}$ comes from the same Formula (C.1) chain the page already runs.
 
 **Flanking paths need one more correction than the direct path.** Below its
@@ -248,7 +248,7 @@ requires the source of every input to be stated, which on a fiche is what the
 ## The worked building of Annex L / Annex G
 
 ISO 12354-1:2017 Annex L and ISO 12354-2:2017 Annex G describe the **same**
-building: two dwellings one above the other, 55 m³ rooms, a 5,00 m × 4,00 m
+building: two dwellings one above the other, 55 m³ rooms, a 5.00 m × 4.00 m
 separating floor of 220 mm concrete carrying a 35 mm floating screed on
 mineral wool, two 365 mm autoclaved aerated concrete external walls and two
 200 mm calcium-silicate internal walls, meeting at rigid T and cross
@@ -262,10 +262,10 @@ corrected readings.
 
 The drawing is what ties the element list to the numbers the snippet multiplies.
 The separating floor's perimeter sum is 9 m of external edge plus 9 m of internal
-edge because the 5,00 m × 4,00 m floor meets an external wall along each 4,00 m
-edge and an internal wall along each 5,00 m edge, and each of those junctions
+edge because the 5.00 m × 4.00 m floor meets an external wall along each 4.00 m
+edge and an internal wall along each 5.00 m edge, and each of those junctions
 carries the floor above and below it. An external wall's own perimeter takes
-8,0 m of horizontal junction (its top and bottom edges, 4,00 m each) and 2,75 m
+8.0 m of horizontal junction (its top and bottom edges, 4.00 m each) and 2.75 m
 of vertical. The floor-to-external-wall junctions are rigid T, the
 floor-to-internal-wall junctions rigid cross. And the thirteen paths are one
 direct path plus three per flanking element, $1 + 4\times3$.
@@ -306,7 +306,7 @@ print(np.round(el.absorption_length[[0, 10]], 1))     # [10.8 11.9]      Table L
 ```
 
 Every printed column of Tables L.2, L.3, L.4, G.3 and G.4 comes back within
-0,06 dB, and the same fixture drives both totals.
+0.06 dB, and the same fixture drives both totals.
 
 The element's $m'$ and $f_\mathrm{c}$ follow from its material and its
 thickness, $m' = \rho t$ and $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$
@@ -342,7 +342,7 @@ print(np.round(from_row.sound_reduction_index[[0, 10]], 1))   # [31.8 54.9]  Tab
 ```
 
 ```python
-# The floating floor: 35 mm screed, m' = 73,5 kg/m2 on s' = 8 MN/m3.
+# The floating floor: 35 mm screed, m' = 73.5 kg/m2 on s' = 8 MN/m3.
 f0 = 160.0 * np.sqrt(8.0 / 73.5)                      # 52.8 Hz (Formula C.2)
 delta = building.floating_floor_improvement(bands, resonance_frequency=f0)  # 30 lg(f/f0)
 
@@ -508,7 +508,7 @@ flanking = [
 ]
 imp = building.detailed_impact_prediction(bands, direct_level=direct, flanking_paths=flanking)
 print(np.round(imp.l_prime_n[[3, 10]], 1))     # [54.  35.9]   Table G.1 total
-print(imp.rating.rating, imp.rating.ci)        # 41 2           printed 41,0 (2)
+print(imp.rating.rating, imp.rating.ci)        # 41 2           printed 41.0 (2)
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/detailed_impact_paths.svg" alt="Stacked per-band shares of the transmitted energy for the five impact paths of the ISO 12354-2 Annex G building with the apparent normalized impact sound pressure level overlaid, the direct path through the excited floor dominating in every band and the floating floor resonance marked on the frequency axis" width="92%" />
@@ -534,7 +534,7 @@ plt.show()
 Read the rating the same way. $L'_\mathrm{n,w} = 41$ dB with $C_\mathrm{I} = +2$ dB means the
 unweighted, walking-relevant level sits above the weighted rating, which is the
 signature of a floor whose improvement is concentrated high up, exactly what a
-floating floor with $f_0 = 52{,}8$ Hz and a 30 lg law does. Three levers move it,
+floating floor with $f_0 = 52.8$ Hz and a 30 lg law does. Three levers move it,
 in the order the model responds to them: a *softer* resilient layer lowers $f_0$
 and lifts the whole improvement curve; a *heavier* base slab lowers the bare
 level directly through Part 2's Formula (B.2); and a better junction does almost
@@ -545,12 +545,12 @@ path alike, because all five start at the same excited floor.
 ## Simplified against detailed
 
 The standard applies its simplified model to the same building (Tables L.10 /
-G.10): $R'_\mathrm{w} = 57{,}0$ dB and $L'_\mathrm{n,w} = 39{,}7$ dB against the detailed
+G.10): $R'_\mathrm{w} = 57.0$ dB and $L'_\mathrm{n,w} = 39.7$ dB against the detailed
 model's $R'_\mathrm{w} = 57$ dB and $L'_\mathrm{n,w} = 41$ dB. The two agree well inside the
 models' own stated spread, and the library's test suite pins that agreement.
 The detailed model's advantage is not accuracy on the single number but the
 spectrum behind it: the airborne prediction of the detailed model carries no
-bias error and a standard deviation of 1,5 dB to 2,5 dB (Clause 5) against
+bias error and a standard deviation of 1.5 dB to 2.5 dB (Clause 5) against
 about 2 dB for the simplified one.
 
 ## Lightweight constructions (Type B)
@@ -625,7 +625,7 @@ this module does, a useful sanity target for a new floor build-up.
 | `frequencies` | array | Hz | > 0 | Band centres |
 | `fraction` | int | — | `3` (one-third octaves, default) / `1` (octaves) | Sets the band that carries the $f \approx f_\mathrm{c}$ branch |
 | `resonant_only` | bool | — | default `False` | Drops the forced-transmission term below $f_\mathrm{c}$ (Annex B.1, flanking paths) |
-| `fluid` | `Fluid` | — | default `EN12354_AIR` | The 340 m/s of Annex A with the 1,29 kg/m³ of Annex B; pass a computed `fluids.air()` to predict in the air of the building |
+| `fluid` | `Fluid` | — | default `EN12354_AIR` | The 340 m/s of Annex A with the 1.29 kg/m³ of Annex B; pass a computed `fluids.air()` to predict in the air of the building |
 
 ## `airborne_flanking_path()` / `impact_flanking_path()` parameters
 
@@ -646,7 +646,7 @@ this module does, a useful sanity target for a new floor build-up.
 per-band counterpart of the simplified prediction fiches: the same one-page
 layout, a basis line naming ISO 12354-1/-2:2017 Clause 4.2, the per-path
 share-of-energy table beside the per-band path-contribution figure, the boxed
-$R'_\mathrm{w}$ / $L'_\mathrm{n,w}$, the detailed model's 1,5 dB to 2,5 dB standard deviation and a
+$R'_\mathrm{w}$ / $L'_\mathrm{n,w}$, the detailed model's 1.5 dB to 2.5 dB standard deviation and a
 PASS/FAIL verdict against a `requirement`. `verbose=True` annexes the band in
 which each path peaks. Both need the ISO 717 rating, so the spectrum must cover
 100 Hz to 3150 Hz (or 125 Hz to 2000 Hz in octaves).
@@ -694,7 +694,7 @@ assembly and ISO 717 rating through `detailed_airborne_prediction` and
 `detailed_impact_prediction`; the Part 2 B.3/B.4 reciprocity identity through
 `reciprocity_impact_level`; and the two fiches through `.report()`. The
 airborne model is stated by Clause 5 to carry no bias error and a standard
-deviation of 1,5 dB to 2,5 dB for buildings of homogeneous elements, assuming
+deviation of 1.5 dB to 2.5 dB for buildings of homogeneous elements, assuming
 good workmanship: the lower figure when every aspect is taken into account,
 the higher for complex situations or when the structural reverberation time is
 neglected.

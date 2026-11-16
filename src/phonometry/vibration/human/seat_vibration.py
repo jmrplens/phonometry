@@ -99,7 +99,7 @@ TEST_RUNS: int = 3
 _MINIMUM_RUNS = 2
 
 #: The band is "within ± 5 %", so a reading placed exactly on it is inside it.
-#: A run written as ``1.05`` against a mean of 1 lands 5,000000000000004 %
+#: A run written as ``1.05`` against a mean of 1 lands 5.000000000000004 %
 #: away once the two are floats, and refusing that would be refusing the
 #: standard's own edge on a representation error rather than on a spread.
 _EDGE_SLACK = 1e-12

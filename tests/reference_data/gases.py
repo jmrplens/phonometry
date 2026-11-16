@@ -105,9 +105,9 @@ SHARED_GASES = (
 #: as a fraction of the larger reading. The molar masses are the same physical
 #: constant read to different precision, so what separates them is the rounding
 #: of the coarser printing: Hopkins gives argon two significant figures, 0.040
-#: against 0.039 95, and that last digit is the widest gap at 0,13 per cent.
-#: The ratios of specific heats are measurements, and carbon dioxide at 1,30
-#: against 1,33 is the only pair further apart than a rounding digit.
+#: against 0.039 95, and that last digit is the widest gap at 0.13 per cent.
+#: The ratios of specific heats are measurements, and carbon dioxide at 1.30
+#: against 1.33 is the only pair further apart than a rounding digit.
 SHARED_GAS_TOLERANCE = {"molar_mass_kg_mol": 0.002, "heat_capacity_ratio": 0.023}
 
 #: The six cells of Table C.2 whose printed value is registered as a defect in
@@ -128,8 +128,8 @@ BIES_C2_MISPRINTED = {
 #: mixtures, air and natural gas, have none and are left out. This is the
 #: independent side of the comparison that makes four cells of the table a
 #: defect: thirty-one of the thirty-five reproduce their formula mass to better
-#: than 0,05 per cent, helium and hydrogen miss by the last printed digit, and
-#: the four exceptions miss by 1,6 to 110 per cent.
+#: than 0.05 per cent, helium and hydrogen miss by the last printed digit, and
+#: the four exceptions miss by 1.6 to 110 per cent.
 FORMULA_MASSES_G_MOL = {
     "Acetylene": 26.038,
     "Ammonia": 17.031,

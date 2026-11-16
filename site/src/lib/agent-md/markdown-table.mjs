@@ -147,7 +147,7 @@ export function titleMarkdown(title) {
 /**
  * Data that is plain text, not Markdown, made safe to print as Markdown: a
  * table cell or a note of a transcribed table, which prints `200 mm CMU*` and
- * `~0,65 to 0,68`; written raw, two asterisks in one cell would italicize the
+ * “~0,65 to 0,68”; written raw, two asterisks in one cell would italicize the
  * words between them, two tildes would strike them through, a `$` would open
  * maths, a backtick code and a `<` before a letter a tag. It is
  * {@link literalText} with the pipe left to {@link cell}, which escapes it in

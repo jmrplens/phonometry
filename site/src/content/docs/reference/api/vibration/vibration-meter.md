@@ -16,14 +16,14 @@ transfer functions and exact time weightings, then grades a real meter against
 them.
 
 **The chain.** A velocity signal is band-limited (5.2.3.2, Formula (3)), which
-is two Butterworth pairs: a two-pole high pass at $0{,}8 f_\mathrm{u}$ and a
-two-pole low pass at $f_\mathrm{o} / 0{,}8$. The working range is
+is two Butterworth pairs: a two-pole high pass at $0.8 f_\mathrm{u}$ and a
+two-pole low pass at $f_\mathrm{o} / 0.8$. The working range is
 $f_\mathrm{u} = 1$ Hz to $f_\mathrm{o} = 80$ Hz for buildings, and 4 Hz to 315 Hz
 next to a railway, which is where DIN 45672-1 works. Frequency weighting
-(Formula (4)) divides that by $1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f$,
+(Formula (4)) divides that by $1 - \mathrm{j}\,5.6\,\mathrm{Hz}/f$,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
 into the dimensionless **KB signal**. Its running r.m.s. with
-$\tau = 0{,}125$ s (Formula (1)) is $KB_\mathrm{F}(t)$, the *weighted
+$\tau = 0.125$ s (Formula (1)) is $KB_\mathrm{F}(t)$, the *weighted
 vibration severity*, and the quantities a meter displays are its maximum
 $KB_\mathrm{Fmax}$, the maximum within each 30 s clock interval
 (*Takt*) and the r.m.s. of those clock maxima $KB_\mathrm{FTm}$ (Formula (2)).
@@ -32,7 +32,7 @@ formulas, figures and diagrams of this documentation set it italic, as
 DIN 4150-2 prints it.
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
-below 0,1 enters the sum as zero but still counts in $N$, so a quiet
+below 0.1 enters the sum as zero but still counts in $N$, so a quiet
 interval lowers the average rather than being dropped from it; and a clock
 interval that the measurement did not fill does not count at all (5.1.6.4), so
 the averaging time is always a whole number of clock intervals.
@@ -53,8 +53,8 @@ Table 9 (folio 35) prints what a meter must display for a 1 mm/s sine at five
 frequencies, and its $KB_\mathrm{F}$, $KB_\mathrm{Fmax}$ and
 $KB_\mathrm{FTm}$ rows are reproduced by this module to the three decimals they
 are printed with, ripple and all. Its $|v|_\mathrm{max}$ row is not, and
-cannot be: at 31,5 Hz it prints 1,000 where Formula (5) gives 0,995, and at
-315 Hz it prints 0,249 where Formula (5) gives 0,100, while the
+cannot be: at 31.5 Hz it prints 1.000 where Formula (5) gives 0.995, and at
+315 Hz it prints 0.249 where Formula (5) gives 0.100, while the
 $KB_\mathrm{F}$ row of the same column follows Formula (5) at both. The table
 contradicts itself rather than the formula, so [`KB_TEST_INDICATIONS`](/phonometry/reference/api/vibration/vibration-meter/#kb_test_indications)
 carries the rows that agree with it and the other row is left to
@@ -578,7 +578,7 @@ why a measurement is started before the event it is about.
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
-| `time_constant_s` | The averaging time constant, in seconds. The standard fixes it at 0,125 s and the parameter exists so a comparison with another time weighting can be written down, not so a meter can use one. |
+| `time_constant_s` | The averaging time constant, in seconds. The standard fixes it at 0.125 s and the parameter exists so a comparison with another time weighting can be written down, not so a meter can use one. |
 
 **Returns:** $KB_\mathrm{F}(t)$, one value per sample.
 
@@ -606,9 +606,9 @@ Run one velocity record through the whole chain of 5.1.6.
 **Start the record before the event.** Every filter here begins at rest,
 so a record that begins with the signal already at full amplitude carries
 the filter's own switch-on transient, and the peak is a max-hold that
-keeps it: a 1 mm/s sine started at a zero crossing reads 1,06 mm/s rather
-than the 1,00 mm/s of 6.2.3.12, and at 315 Hz outside the building range
-it reads 0,25 mm/s where the steady response is 0,10 mm/s. That is an
+keeps it: a 1 mm/s sine started at a zero crossing reads 1.06 mm/s rather
+than the 1.00 mm/s of 6.2.3.12, and at 315 Hz outside the building range
+it reads 0.25 mm/s where the steady response is 0.10 mm/s. That is an
 artefact of the record, not of the chain, and a lead-in of a second or two
 of quiet removes it, which is also how a real measurement is made.
 
@@ -657,7 +657,7 @@ The limits of Tables 2 and 3 at each frequency, in per cent.
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
-**Returns:** `(lower, upper)`, lower first and signed: the deviation allowed below the design response as a negative percentage and above it as a positive one, so that a deviation keeps to them when `lower <= F(f) <= upper`. Table 2 prints the lower limit $G_\mathrm{u}$ as a magnitude, and 5.2.3.3 states the condition as $-G_\mathrm{u} \le F(f) \le G_\mathrm{o}$; `lower` is $-G_\mathrm{u}$. It is `-10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$, `-20.0` from $0{,}5\,f_\mathrm{u}$ to $1{,}25\,f_\mathrm{u}$ and from $0{,}8\,f_\mathrm{o}$ to $2\,f_\mathrm{o}$, and `-100.0` outside $0{,}5\,f_\mathrm{u}$ to $2\,f_\mathrm{o}$, where the standard declines to constrain the response from below: a response of zero deviates by -100 % and still keeps to it. `upper` is the Table 3 limit, `10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$ and `20.0` elsewhere.
+**Returns:** `(lower, upper)`, lower first and signed: the deviation allowed below the design response as a negative percentage and above it as a positive one, so that a deviation keeps to them when `lower <= F(f) <= upper`. Table 2 prints the lower limit $G_\mathrm{u}$ as a magnitude, and 5.2.3.3 states the condition as $-G_\mathrm{u} \le F(f) \le G_\mathrm{o}$; `lower` is $-G_\mathrm{u}$. It is `-10.0` from $1.25\,f_\mathrm{u}$ to $0.8\,f_\mathrm{o}$, `-20.0` from $0.5\,f_\mathrm{u}$ to $1.25\,f_\mathrm{u}$ and from $0.8\,f_\mathrm{o}$ to $2\,f_\mathrm{o}$, and `-100.0` outside $0.5\,f_\mathrm{u}$ to $2\,f_\mathrm{o}$, where the standard declines to constrain the response from below: a response of zero deviates by -100 % and still keeps to it. `upper` is the Table 3 limit, `10.0` from $1.25\,f_\mathrm{u}$ to $0.8\,f_\mathrm{o}$ and `20.0` elsewhere.
 
 **Raises**
 
@@ -904,8 +904,8 @@ built against other limits.
 The Table 2 lower limit at each frequency, in per cent.
 
 Negative, as [`response_tolerance_percent`](/phonometry/reference/api/vibration/vibration-meter/#response_tolerance_percent) returns it: `-10.0`
-from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$,
-`-20.0` on the skirts out to $0{,}5\,f_\mathrm{u}$ and
+from $1.25\,f_\mathrm{u}$ to $0.8\,f_\mathrm{o}$,
+`-20.0` on the skirts out to $0.5\,f_\mathrm{u}$ and
 $2\,f_\mathrm{o}$, and `-100.0` beyond them, where the
 standard sets no lower limit.
 
@@ -945,7 +945,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 The Table 3 limit at each frequency, in per cent.
 
-Infinite where the measured response is at or below 0,01, which
+Infinite where the measured response is at or below 0.01, which
 footnote a of Table 3 leaves unconstrained from above.
 
 ### VibrationMeterVerification.within_tolerance

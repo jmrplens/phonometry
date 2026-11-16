@@ -25,12 +25,12 @@ corrected by the rules of ISO 10140-2:2021 A.3 (:func:`laboratory_joint_insulati
 
 * a difference of 6 dB up to 10 dB: Formula (J.2),
   :math:`R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})`;
-* less than 6 dB: a fixed correction of 1,3 dB, which is what Formula (J.2)
+* less than 6 dB: a fixed correction of 1.3 dB, which is what Formula (J.2)
   gives at 6 dB, and the value is a minimum;
 * :math:`R_\mathrm{s}'` above :math:`R_\mathrm{s,max} - 3` dB: the lower limit
   of :math:`R_\mathrm{s}` may be set to :math:`R_\mathrm{s,max}` itself,
   presented in brackets as a minimum value, e.g. :math:`(R_\mathrm{s} \ge
-  50{,}4` dB).
+  50.4` dB).
 
 **Single numbers.** :math:`R_\mathrm{s,w}` (:math:`C`; :math:`C_\mathrm{tr}`)
 of ISO 717-1:2020 on the 16 bands 100 Hz to 3 150 Hz, with
@@ -41,9 +41,9 @@ those indicative bands taken as infinitely high; a difference of more than
 1 dB between the two puts the single numbers in brackets too.
 
 **The arrangement.** J.2.1 asks for a joint longer than 1 m and no wider
-than 50 mm, J.2.2 for at least 5,0 m of a gap between the parts of a window or
+than 50 mm, J.2.2 for at least 5.0 m of a gap between the parts of a window or
 door (:func:`check_joint_test_element`), whose width is read at four positions
-or more that may not differ by more than 0,3 mm (:func:`check_gap_width`). A
+or more that may not differ by more than 0.3 mm (:func:`check_gap_width`). A
 variable slit is measured at its nominal gap width :math:`b_\mathrm{n}` (5 mm
 when the manufacturer gives none), at the minimum width under a force of
 normally 100 N/m, and at :math:`b_\mathrm{n} + 3` mm (J.4,
@@ -146,8 +146,8 @@ _MAXIMUM_MARGIN_DB = 3.0
 #: (J.1).
 _BRACKET_DB = 1.0
 
-#: Slack on the inclusive margins above. Bands are read to 0,1 dB, and a
-#: difference such as 36,3 - 30,3 is 5,999999999999996 in binary arithmetic:
+#: Slack on the inclusive margins above. Bands are read to 0.1 dB, and a
+#: difference such as 36.3 - 30.3 is 5.999999999999996 in binary arithmetic:
 #: nine orders of magnitude below a decibel is far above that error and far
 #: below any reading.
 _SLACK_DB = 1e-9
@@ -173,7 +173,7 @@ _DEFAULT_NOMINAL_GAP_MM = 5.0
 _WORKING_RANGE_MM = 3.0
 #: How far a measured gap width may lie from a width J.4 asks for and still be
 #: that width, in mm. J.4 gives no tolerance; the gap width ``b`` is itself the
-#: average of readings J.2.2 lets spread over 0,3 mm, so a width within that
+#: average of readings J.2.2 lets spread over 0.3 mm, so a width within that
 #: spread of the target is the target as far as the readings can tell.
 _GAP_MATCH_MM = _MAX_GAP_SPREAD_MM
 
@@ -371,7 +371,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         there is no rating.
     :ivar limit_at_max: Whether the bands within 3 dB of the maximum were
         set to :math:`R_\mathrm{s,max}`, as J.1 allows, rather than given the
-        1,3 dB correction (Default: ``True``).
+        1.3 dB correction (Default: ``True``).
 
     How each band was corrected (:attr:`regime`) is read from the measured
     and the maximum indices and ``limit_at_max``, so it is not a field.
@@ -434,7 +434,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
 
         With :math:`d = R_\mathrm{s,max} - R_\mathrm{s}'`: ``"uncorrected"``
         when :math:`R_\mathrm{s,max}` is at least 10 dB above, ``"corrected"``
-        by Formula (J.2) from 6 dB to 10 dB, ``"limit"`` (the fixed 1,3 dB)
+        by Formula (J.2) from 6 dB to 10 dB, ``"limit"`` (the fixed 1.3 dB)
         below 6 dB, and ``"maximum"`` (set to :math:`R_\mathrm{s,max}`) above
         :math:`R_\mathrm{s,max} - 3` dB when :attr:`limit_at_max`.
         """
@@ -659,7 +659,7 @@ def laboratory_joint_insulation(
     * :math:`d \ge 10` dB: no correction, :math:`R_\mathrm{s} = R_\mathrm{s}'`;
     * :math:`6 \le d < 10` dB: Formula (J.2),
       :math:`R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})`;
-    * :math:`d < 6` dB: :math:`R_\mathrm{s} = R_\mathrm{s}' + 1{,}3` dB, the
+    * :math:`d < 6` dB: :math:`R_\mathrm{s} = R_\mathrm{s}' + 1.3` dB, the
       correction Formula (J.2) gives at 6 dB, a minimum value
       (ISO 10140-2:2021 A.3);
     * :math:`d < 3` dB, with ``limit_at_max`` (the default): the lower
@@ -688,7 +688,7 @@ def laboratory_joint_insulation(
     :param joint_length_m: Length of the joint under test, in m, kept for the
         form of Figure J.7; ``None`` leaves that row empty.
     :param limit_at_max: Set the bands within 3 dB of the maximum to
-        :math:`R_\mathrm{s,max}` (default), or give them the 1,3 dB correction
+        :math:`R_\mathrm{s,max}` (default), or give them the 1.3 dB correction
         like the other bands below 6 dB.
     :return: A :class:`LaboratoryJointInsulationResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
@@ -759,7 +759,7 @@ class JointTestElementCheck(RichDisplay):
     :ivar joint_length_m: Length of the joint, in m.
     :ivar joint_width_mm: Width of the joint, in mm.
     :ivar window_or_door_gap: Whether the joint is a gap between the parts of
-        a window or door, which J.2.2 asks to be at least 5,0 m long.
+        a window or door, which J.2.2 asks to be at least 5.0 m long.
     """
 
     joint_length_m: float
@@ -768,9 +768,9 @@ class JointTestElementCheck(RichDisplay):
 
     @property
     def length_ok(self) -> bool:
-        """Whether the length is greater than 1 m and, for a window or door gap, at least 5,0 m.
+        """Whether the length is greater than 1 m and, for a window or door gap, at least 5.0 m.
 
-        The 1 m bound is exclusive and the 5,0 m bound inclusive, read with a
+        The 1 m bound is exclusive and the 5.0 m bound inclusive, read with a
         relative slack so that a length on it is not failed by rounding.
         """
         length = self.joint_length_m
@@ -893,7 +893,7 @@ class GapWidthCheck(RichDisplay):
 
     @property
     def uniform(self) -> bool:
-        """Whether no two readings differ by more than 0,3 mm."""
+        """Whether no two readings differ by more than 0.3 mm."""
         return self.spread_mm <= _MAX_GAP_SPREAD_MM + _SLACK_DB
 
     @property
@@ -912,7 +912,7 @@ class GapWidthCheck(RichDisplay):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the readings with their average and the 0,3 mm band.
+        """Plot the readings with their average and the 0.3 mm band.
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
@@ -1235,7 +1235,7 @@ class JointGapSeriesCheck(RichDisplay):
 
     @property
     def tolerance_mm(self) -> float:
-        """How far a measured width may lie from a required one, in mm (0,3 mm, J.2.2)."""
+        """How far a measured width may lie from a required one, in mm (0.3 mm, J.2.2)."""
         return _GAP_MATCH_MM
 
     def plot(
@@ -1256,7 +1256,7 @@ class JointGapSeriesCheck(RichDisplay):
 
 
 def _measured_at(widths: tuple[float, ...], target: float) -> bool:
-    """Whether one of *widths* lies within the 0,3 mm of J.2.2 of *target*."""
+    """Whether one of *widths* lies within the 0.3 mm of J.2.2 of *target*."""
     return any(abs(width - target) <= _GAP_MATCH_MM + _SLACK_DB for width in widths)
 
 
@@ -1271,7 +1271,7 @@ def check_joint_gap_series(series: JointGapSeries) -> JointGapSeriesCheck:
 
     J.4 gives no tolerance on how close a measured width must come. The gap
     width of a result is the average of readings that J.2.2 lets spread over
-    0,3 mm, so a measured width within 0,3 mm of a required one counts as
+    0.3 mm, so a measured width within 0.3 mm of a required one counts as
     that width. A series that does not name :math:`b_\mathrm{min}` fails
     J.4 b), because nothing then shows which width it was; pass
     ``min_gap_mm`` to :func:`joint_gap_series`.

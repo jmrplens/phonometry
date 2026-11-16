@@ -1321,8 +1321,8 @@ def generate_qrd_geometry(output_dir: str) -> None:
     """To-scale well profile of the N = 7 QRD of the polar-response figure.
 
     Two periods of the commercial N = 7 quadratic-residue diffuser (42 wells
-    across 3,6 m, so an 85,7 mm pitch split into an 80,7 mm well plus a 5 mm
-    fin; deepest well 0,2 m, design frequency 490 Hz) drawn as the physical
+    across 3.6 m, so an 85.7 mm pitch split into an 80.7 mm well plus a 5 mm
+    fin; deepest well 0.2 m, design frequency 490 Hz) drawn as the physical
     profile the Fraunhofer prediction models. One concept: the
     quadratic-residue depth sequence as a real, buildable surface.
     """
@@ -1817,8 +1817,8 @@ def generate_helmholtz_resonator_geometry(output_dir: str) -> None:
 def generate_insitu_setup_geometry(output_dir: str) -> None:
     """The in-situ road absorption set-up to scale.
 
-    Loudspeaker at 1,25 m, microphone at 0,25 m on the same vertical, and
-    the 1,34 m sampled-area radius of the standard 5 ms window on the
+    Loudspeaker at 1.25 m, microphone at 0.25 m on the same vertical, and
+    the 1.34 m sampled-area radius of the standard 5 ms window on the
     surface. One concept: what the subtraction technique actually samples.
     """
     print("Generating insitu_setup_geometry...")
@@ -2010,7 +2010,7 @@ def generate_base_plate_scattering(output_dir: str) -> None:
     One concept: the turntable is qualified band by band, and a plate a hair
     over the limit in one band is disqualified in that band. The measured
     coefficients climb with frequency, as a slightly asymmetric plate's do,
-    and cross the 0,10 ceiling at 1 kHz, the last band before it steps up.
+    and cross the 0.10 ceiling at 1 kHz, the last band before it steps up.
     """
     print("Generating base_plate_scattering...")
     import warnings
@@ -3779,8 +3779,8 @@ def generate_standing_wave_envelope(output_dir: str) -> None:
         color=COLOR_FG,
     )
     # Clear of the frame on both sides by the size of its own chip: at
-    # (0,005, -19,4) the box hung over the bottom of the panel and took the
-    # x-axis line and the 0,0 tick with it, and over the left spine as well,
+    # (0.005, -19.4) the box hung over the bottom of the panel and took the
+    # x-axis line and the 0.0 tick with it, and over the left spine as well,
     # which is a worse loss than the rigid-wall curve the chip is there to
     # keep out of the words.
     ax.text(

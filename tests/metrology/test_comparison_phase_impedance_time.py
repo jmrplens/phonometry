@@ -40,7 +40,7 @@ _L_TEST = np.array([-26.40, -26.35, -26.30, -26.10, -25.80])
 _PHI_REF = np.array([-0.4, -1.5, -3.1, -6.4, -14.0])
 _PHI_TEST = np.array([-0.9, -2.8, -5.7, -11.9, -25.5])
 
-#: IEC 61094-1:2000 6.2.2, kappa_r p_s,r with kappa_r = 1,40.
+#: IEC 61094-1:2000 6.2.2, kappa_r p_s,r with kappa_r = 1.40.
 _KAPPA_P = 1.40 * 101325.0
 
 
@@ -582,7 +582,7 @@ def test_microphones_of_the_same_impedance_see_the_same_pressure() -> None:
 
 
 def test_uncertainty_is_the_level_over_root_three_as_table_d1_takes_it() -> None:
-    """Table D.1: a semi-range of 0,005 dB "is equivalent to a standard
+    """Table D.1: a semi-range of 0.005 dB "is equivalent to a standard
     uncertainty of 0,005/sqrt(3) dB = 0,003 dB".
     """
     ratio = 10.0 ** (0.005 / 20.0)
@@ -892,7 +892,7 @@ def _rising_cosine(position: np.ndarray, edge: float) -> np.ndarray:
 def test_tukey_window_tapers_half_the_fraction_at_each_edge(
     taper: float | None,
 ) -> None:
-    """The default taper of 0,25 puts an eighth of the window in each edge,
+    """The default taper of 0.25 puts an eighth of the window in each edge,
     each a half cosine from 0 to 1, flat between them.
     """
     options = {} if taper is None else {"taper_fraction": taper}
@@ -917,8 +917,8 @@ def test_tukey_window_tapers_half_the_fraction_at_each_edge(
     [("hann", 0.0), ("hamming", 0.08), ("rectangular", 1.0)],
 )
 def test_window_shapes_are_their_closed_forms(shape: str, edge_value: float) -> None:
-    """Hann, 0,5 - 0,5 cos(2 pi k/(N - 1)); Hamming, 0,54 - 0,46 cos(2 pi
-    k/(N - 1)), 0,08 at its edges; rectangular, 1 throughout.
+    """Hann, 0.5 - 0.5 cos(2 pi k/(N - 1)); Hamming, 0.54 - 0.46 cos(2 pi
+    k/(N - 1)), 0.08 at its edges; rectangular, 1 throughout.
     """
     result = metrology.time_selective_response(
         _direct_and_reflection(),
@@ -1129,7 +1129,7 @@ def _stepped_sine(step: float, top: float) -> tuple[np.ndarray, np.ndarray]:
 def test_formula_b3_and_b2_round_trip_through_the_window() -> None:
     """A stepped-sine measurement of a direct sound and a reflection, taken to
     the time domain by (B.3), windowed and taken back by (B.2), is the direct
-    sound alone. At 3,01 ms its phase is not a whole number of half turns at
+    sound alone. At 3.01 ms its phase is not a whole number of half turns at
     any of the frequencies, so (B.2) or (B.3) of the wrong sign would not
     pass.
     """

@@ -563,8 +563,8 @@ def test_a_maximum_requirement_is_met_beyond_the_uncertainty() -> None:
 
 
 def test_a_conformity_record_carries_its_margin() -> None:
-    # Formula (5): y - U - Yrequired = 54 - 1,5 - 52 = 0,5 dB; Formula (4):
-    # Yrequired - (y + U) = 53 - (52,5 + 1) = -0,5 dB.
+    # Formula (5): y - U - Yrequired = 54 - 1.5 - 52 = 0.5 dB; Formula (4):
+    # Yrequired - (y + U) = 53 - (52.5 + 1) = -0.5 dB.
     lower = assess_requirement_conformity(54.0, 1.5, 52.0, bound="minimum")
     upper = assess_requirement_conformity(52.5, 1.0, 53.0, bound="maximum")
     assert (
@@ -685,8 +685,8 @@ def test_the_bare_names_are_gone() -> None:
 
 
 def test_annex_b_uncorrelated_single_number_uncertainties() -> None:
-    """Formula (B.2) on the Table B.1 spectrum gives u(Rw+C50-5000) = 0,6 dB
-    and u(Rw+Ctr,50-5000) = 0,8 dB.
+    """Formula (B.2) on the Table B.1 spectrum gives u(Rw+C50-5000) = 0.6 dB
+    and u(Rw+Ctr,50-5000) = 0.8 dB.
     """
     import reference_data as ref
 
@@ -710,7 +710,7 @@ def test_annex_b_uncorrelated_single_number_uncertainties() -> None:
 
 
 def test_annex_b_correlated_rw_uncertainty() -> None:
-    """Formula (B.6) with the 0,1 dB shift gives u(Rw) = 1,9 dB."""
+    """Formula (B.6) with the 0.1 dB shift gives u(Rw) = 1.9 dB."""
     import reference_data as ref
 
     from phonometry import building
@@ -727,8 +727,8 @@ def test_annex_b_correlated_rw_uncertainty() -> None:
 
 
 def test_annex_b_correlated_adaptation_sum_uncertainties() -> None:
-    """Formulae (B.3)-(B.5): u(Rw+C50-5000) = 2,1 dB and
-    u(Rw+Ctr,50-5000) = 2,6 dB (unrounded 2,05 / 2,63).
+    """Formulae (B.3)-(B.5): u(Rw+C50-5000) = 2.1 dB and
+    u(Rw+Ctr,50-5000) = 2.6 dB (unrounded 2.05 / 2.63).
     """
     import reference_data as ref
 

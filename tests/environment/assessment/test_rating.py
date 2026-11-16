@@ -1,8 +1,8 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Environmental noise descriptors (ISO 1996-1:2016).
 
-Lden (3.6.4): 10*lg{(1/24)*[t_day*10^(0,1*Lday) + t_evening*10^(0,1*(Levening+5))
-+ t_night*10^(0,1*(Lnight+10))]} with default periods 12/4/8 h.
+Lden (3.6.4): 10*lg{(1/24)*[t_day*10^(0.1*Lday) + t_evening*10^(0.1*(Levening+5))
++ t_night*10^(0.1*(Lnight+10))]} with default periods 12/4/8 h.
 Ldn (3.6.5): the day-night variant with defaults 15/9 h and +10 dB at night.
 Composite whole-day rating levels (6.5, Formulae 5-6) generalize this to any
 set of (level, hours, adjustment) periods.

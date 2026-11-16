@@ -35,7 +35,7 @@ give the interval and maximum third-octave levels of Formulae (6) and (7).
 
 **Narrow band** (Clause 7.3). The one-sided power spectral density of Formula
 (12), blockwise with a Hanning window and at least half a block of overlap, at
-the resolution of 1,25 Hz the standard recommends because it resolves the
+the resolution of 1.25 Hz the standard recommends because it resolves the
 resonance of an ordinary floor. Adding its lines back into third octaves is
 Formula (23), and Table 1 fixes how many lines each band takes: a number
 recommended for comparability rather than derived, which is why it is a
@@ -107,7 +107,7 @@ band_sum_level(levels: NumericArrayLike) -> float
 
 The sum level $\Sigma L$ of a spectrum, Annex B, Formula (B.3).
 
-$10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
+$10 \lg \sum 10^{0.1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 
 **Parameters**
 
@@ -399,7 +399,7 @@ back to the mean square of the stretch, which is Formula (14).
 | :--- | :--- |
 | `velocity_mm_s` | The velocity of the stretch, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `resolution_hz` | The line spacing $\Delta f$, in hertz (default 1,25 Hz). The block holds `round(fs / resolution)` samples, so the spacing actually used is `fs` over that count. |
+| `resolution_hz` | The line spacing $\Delta f$, in hertz (default 1.25 Hz). The block holds `round(fs / resolution)` samples, so the spacing actually used is `fs` over that count. |
 
 **Returns:** The spectrum, as a [`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult).
 
@@ -609,7 +609,7 @@ The exponential average the formula integrates, started from rest. Clause
 has to be running before the train arrives. It puts the cost at 14 % after
 $2\tau$ and 2 % after $4\tau$, which are the shortfalls of the
 mean square, $\mathrm{e}^{-2}$ and $\mathrm{e}^{-4}$; the running r.m.s. itself,
-which is what Figure 3 draws, is 7 % and 0,9 % short.
+which is what Figure 3 draws, is 7 % and 0.9 % short.
 
 **Parameters**
 
@@ -617,7 +617,7 @@ which is what Figure 3 draws, is 7 % and 0,9 % short.
 | :--- | :--- |
 | `velocity_mm_s` | The velocity, in millimetres per second (1-D), as measured or in one third-octave band of it. |
 | `fs` | Sampling frequency, in hertz. |
-| `time_constant_s` | The time constant, in seconds (default 0,125 s, "Fast"). |
+| `time_constant_s` | The time constant, in seconds (default 0.125 s, "Fast"). |
 
 **Returns:** $\tilde v_\mathrm{F}(t)$, one value per sample, in mm/s.
 
@@ -694,13 +694,13 @@ is the square root of their summed power, $\sqrt{\sum G(f_k)\, \Delta f}$. The t
 stated here: the lines nearest the nominal centre on a logarithmic axis.
 Wherever the count is what a sixth of an octave either side of the centre
 holds, which is every band but two, those are exactly the lines inside the
-band's nominal edges; at 10 Hz and 12,5 Hz, where the table departs from
-the edges, they are 10 and 11,25 Hz, then 12,5 and 13,75 Hz.
+band's nominal edges; at 10 Hz and 12.5 Hz, where the table departs from
+the edges, they are 10 and 11.25 Hz, then 12.5 and 13.75 Hz.
 
 It is a rule of nominal bands and it behaves like one. Nominal edges do
-not meet: six lines fall between two bands and are in neither (71,25 Hz,
-141,25 Hz and 142,5 Hz, and 353,75 Hz to 356,25 Hz), and five are in two
-(178,75 Hz, 223,75 Hz, and 446,25 Hz to 448,75 Hz). The bands therefore
+not meet: six lines fall between two bands and are in neither (71.25 Hz,
+141.25 Hz and 142.5 Hz, and 353.75 Hz to 356.25 Hz), and five are in two
+(178.75 Hz, 223.75 Hz, and 446.25 Hz to 448.75 Hz). The bands therefore
 do not add up to the spectrum exactly, and a tone that sits in one of the
 gaps is in no band at all; that is the comparability the table buys.
 
@@ -712,7 +712,7 @@ bands out rather than filling them with the lines of a neighbour.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | The line frequencies of the spectrum, in hertz, evenly spaced at 1,25 Hz. |
+| `frequencies` | The line frequencies of the spectrum, in hertz, evenly spaced at 1.25 Hz. |
 | `psd` | The one-sided power spectral density at those lines, in (mm/s)²/Hz. |
 
 **Returns:** The nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/phonometry/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s, as a [`ThirdOctaveVelocities`](/phonometry/reference/api/vibration/railway/#thirdoctavevelocities).
@@ -879,7 +879,7 @@ square: $G_{vv} = G_{\mathrm{V}} / (\kappa_A^2 \kappa_V^2)$.
 | Name | Description |
 | :--- | :--- |
 | `psd_v2_per_hz` | The density the analyser shows, in V²/Hz. |
-| `sensitivity_v_per_mm_s` | $\kappa_A$, in volts per millimetre per second (Annex A uses 0,030). |
+| `sensitivity_v_per_mm_s` | $\kappa_A$, in volts per millimetre per second (Annex A uses 0.030). |
 | `gain` | $\kappa_V$, the amplifier gain, in volts per volt (Annex A uses 10). |
 
 **Returns:** The density of the velocity, in (mm/s)²/Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.

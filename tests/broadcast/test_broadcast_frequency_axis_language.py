@@ -6,7 +6,7 @@
 fixed strings, so the octave labels are written by ``format_frequency_axis``
 and by nothing else: a renderer that does not pass its ``language`` on draws
 ``31.5`` in a Spanish figure. The default response runs from 10 Hz to the
-Nyquist frequency, across 31,5 Hz, the lowest octave centre whose label carries
+Nyquist frequency, across 31.5 Hz, the lowest octave centre whose label carries
 a decimal.
 """
 

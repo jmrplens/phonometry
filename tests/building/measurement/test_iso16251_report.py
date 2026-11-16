@@ -179,7 +179,7 @@ def test_requirement_fail_verdict(tmp_path: Path) -> None:
 
 
 def test_limited_band_uses_literal_greater_than(tmp_path: Path) -> None:
-    """A band at the 1,3 dB limit renders a literal '>' marker, not '&gt;'."""
+    """A band at the 1.3 dB limit renders a literal '>' marker, not '&gt;'."""
     pytest.importorskip("matplotlib")
     bare = np.full(16, 50.0)
     covering = np.full(16, 49.0)

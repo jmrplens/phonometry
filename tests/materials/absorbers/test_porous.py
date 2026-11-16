@@ -788,10 +788,10 @@ class TestResonantSheets:
         """The ratio of specific heats comes from the fluid, not the constant.
 
         The isothermal branch divides the air-spring stiffness by ``gamma``.
-        Reading the constant 1,4 there instead of the fluid's own would return
+        Reading the constant 1.4 there instead of the fluid's own would return
         the absorber air's resonance under the caller's density and speed of
-        sound, which is neither air: warm humid air carries 1,3806, and the
-        0,7 % it moves the frequency by is invisible in the result.
+        sound, which is neither air: warm humid air carries 1.3806, and the
+        0.7 % it moves the frequency by is invisible in the result.
         """
         from phonometry import fluids
 

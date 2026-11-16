@@ -21,7 +21,7 @@ rating level they feed.
 
 A free-field microphone with a two-stage or oversize wind screen on a tripod or
 a pole is the preferred mounting (8.1.3). A microphone on the facade raises the
-signal-to-noise ratio, if the facade is plane within ±0,05 m over 1 m round it
+signal-to-noise ratio, if the facade is plane within ±0.05 m over 1 m round it
 and the edges are more than 1 m away, but it cannot be used for tonal
 audibility, amplitude modulation or impulsivity (8.1.3); a proxy position
 chosen elsewhere is of limited use for them too (8.1.2). Wind speed and direction come from the
@@ -46,7 +46,7 @@ $$
 Tables K.1 and K.2 evaluate both between 120 m and 10 m. The binning wind speed
 of 9.3.2 is instead a hub height speed brought down to 10 m with the
 logarithmic profile and the reference roughness length $z_{0\mathrm{ref}} =
-0{,}05$ m of 3.31, which assumes neutral air; the power law through two measured
+0.05$ m of 3.31, which assumes neutral air; the power law through two measured
 heights carries the stratification with it.
 
 ```python
@@ -87,7 +87,7 @@ print(round(relevant.binning_wind_speed_m_s([6.1, 6.4, 5.8, 6.6, 5.5, 6.0, 5.7])
 *Left: the logarithmic profile of 9.3.2.1 is the neutral atmosphere; on a stable
 night the measured shear is larger and the hub sees more wind than the 10 m
 speed suggests. Right: leaving out the four quietest turbines drops the total
-by 0,9 dB, the fifth would drop it by more, so three turbines set the binning
+by 0.9 dB, the fifth would drop it by more, so three turbines set the binning
 wind speed; the diamonds are the three loudest together reaching the dashed
 line. The figure numbers the turbines from 1, so the `indices` (1, 3, 0) above
 are turbines 2, 4 and 1 on it.*
@@ -142,8 +142,8 @@ print(corrected.regimes[-1].value)                  # three_db
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_bins_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_bins.svg" alt="Two panels against wind speed from 3 m/s to 11 m/s. Left: 420 ten-minute total levels scattered from 36 dB to 58 dB and the energy average of each 1 m/s bin drawn on them as a square with its combined uncertainty of about half a decibel. Right: per bin, the total level rising from 39 dB to 55 dB, the background measured with the turbines stopped rising faster from 26 dB to 53 dB, and the turbine level after the background correction, which follows the total at low wind and falls below it as the background closes in; the 11 m/s bin, where the background is within 3 dB, is circled" width="96%"></picture>
 
-*Right: from 3 m/s to 10 m/s the total is 3,4 dB or more above the background and
-the background is subtracted; at 11 m/s it is 2,1 dB above, and 11.7 suggests
+*Right: from 3 m/s to 10 m/s the total is 3.4 dB or more above the background and
+the background is subtracted; at 11 m/s it is 2.1 dB above, and 11.7 suggests
 taking 3 dB off the total instead. Its NOTE 1 warns that an excess over a limit
 cannot then be established.*
 
@@ -162,7 +162,7 @@ plt.show()
 A prediction from IEC 61400-11 sound power levels carries its own uncertainty
 (10.3.4): Equation (10) weights each turbine's sound power uncertainty by its
 share of the energy at the dwelling, and Equation (11) adds the 2 dB the TS
-expects of ISO 9613-2 or Nord2000 downwind and 0,5 dB for the modelling.
+expects of ISO 9613-2 or Nord2000 downwind and 0.5 dB for the modelling.
 
 ```python
 prediction = environment.predicted_receptor_level([36.9, 38.2, 33.5], 1.5)
@@ -207,31 +207,31 @@ print(round(10.0 * np.log10(np.sum(10.0 ** (low.indoor_levels[danish] / 10.0))),
 
 Table C.2's caption says 70 % relative humidity and 10 °C, and the text under
 it says the air absorption coefficient is calculated according to ISO 9613-1.
-From 125 Hz to 200 Hz it is: 0,41, 0,59 and 0,80 dB/km are ISO 9613-1 at that
+From 125 Hz to 200 Hz it is: 0.41, 0.59 and 0.80 dB/km are ISO 9613-1 at that
 atmosphere, evaluated at the nominal band centres. ISO 9613-1's own Table 1 is
-computed at the exact mid-band frequencies and prints 0,584 dB/km (0,58) at
-160 Hz, whose exact mid-band is 158,5 Hz; the TS takes nominal centres here,
-while its Table 7 follows the exact mid-bands. From 50 Hz to 100 Hz it is not. ISO 9613-1 at 70 % gives 0,08, 0,12,
-0,19 and 0,28 dB/km at 50 Hz, 63 Hz, 80 Hz and 100 Hz; the table prints 0,07,
-0,11, 0,17 and 0,26, which is 0,01 to 0,02 dB/km less.
+computed at the exact mid-band frequencies and prints 0.584 dB/km (0.58) at
+160 Hz, whose exact mid-band is 158.5 Hz; the TS takes nominal centres here,
+while its Table 7 follows the exact mid-bands. From 50 Hz to 100 Hz it is not. ISO 9613-1 at 70 % gives 0.08, 0.12,
+0.19 and 0.28 dB/km at 50 Hz, 63 Hz, 80 Hz and 100 Hz; the table prints 0.07,
+0.11, 0.17 and 0.26, which is 0.01 to 0.02 dB/km less.
 
 Those lower cells are not a rounding accident. From 10 Hz to 100 Hz the row is,
 cell for cell, the air attenuation of the Danish statutory order on wind turbine
 noise (BEK nr. 135 of 2019, Table 1.4), which is set for **80 %** relative
 humidity and 10 °C, takes the Nord2000 attenuation rates and ignores air
 absorption below 25 Hz, as the DELTA report behind it recommends. Wetter air
-absorbs less at these frequencies, and ISO 9613-1 at 80 % gives 0,07, 0,11, 0,17
-and 0,25 dB/km there, within 0,01 dB/km of the printed cells. The table
+absorbs less at these frequencies, and ISO 9613-1 at 80 % gives 0.07, 0.11, 0.17
+and 0.25 dB/km there, within 0.01 dB/km of the printed cells. The table
 therefore joins two atmospheres at 100 Hz: the Danish 80 % below, the caption's
-70 % above. The order stops at 160 Hz with 0,38 and 0,55 dB/km at 125 Hz and
+70 % above. The order stops at 160 Hz with 0.38 and 0.55 dB/km at 125 Hz and
 160 Hz, which the TS replaced with its own 70 % values.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_low_frequency_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_receptor_low_frequency.svg" alt="Two panels. Left: the A-weighted low frequency band levels of three turbines at a dwelling from 10 Hz to 200 Hz by Equation (C.1), outdoors rising from minus 11 dB at 10 Hz to 29 dB at 200 Hz with a total of 35.1 dB, and indoors behind the Danish brick facade of Table C.3, flattening around 6 dB to 8 dB above 40 Hz with a total of 16.5 dB. Right: each printed air attenuation cell of Table C.2 from 25 Hz to 200 Hz minus ISO 9613-1 at 10 degrees C, one line at 70 % and one at 80 % relative humidity, with a shaded strip of plus or minus 0.005 dB/km for the printed rounding; the 80 % line stays inside the strip or just above it up to 100 Hz and jumps to about 0.035 dB/km from 125 Hz, while the 70 % line dips to minus 0.02 dB/km between 50 Hz and 100 Hz and returns to the strip from 125 Hz" width="96%"></picture>
 
-*Right: a cell and a computed value that differ by less than 0,005 dB/km print as
+*Right: a cell and a computed value that differ by less than 0.005 dB/km print as
 the same number. Up to 100 Hz the cells are the 80 % atmosphere's (the
-0,006 dB/km at 100 Hz is the Nord2000 band rate of the Danish order, 0,26 where
-ISO 9613-1 gives 0,254), and from 125 Hz the caption's 70 % one's.*
+0.006 dB/km at 100 Hz is the Nord2000 band rate of the Danish order, 0.26 where
+ISO 9613-1 gives 0.254), and from 125 Hz the caption's 70 % one's.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -264,7 +264,7 @@ plt.show()
 
 </details>
 
-The difference is at most 0,02 dB/km, a few hundredths of a decibel over the
+The difference is at most 0.02 dB/km, a few hundredths of a decibel over the
 distances Annex C is used for, but a reader who recomputes the row at the
 caption's atmosphere cannot reproduce its lower half, so it is in the
 [errata register](../../ERRATA.md). The library publishes the row as printed,
@@ -326,7 +326,7 @@ print(band_2.shape)   # (1000,)
 ```
 
 **One 10 s block** (13.6.2.3). The 100 values are de-trended with a cubic fit
-and transformed with a rectangular DFT of 0,1 Hz resolution into the power
+and transformed with a rectangular DFT of 0.1 Hz resolution into the power
 spectrum of Equation (12), $S_{xx} = |F\{x\}|^2 / m^2$. The highest local
 maximum inside the range where the blade passage frequency is expected is the
 fundamental. Its prominence, Equation (13), is the line over the mean of the two
@@ -334,7 +334,7 @@ lines beyond each neighbour; a block without a maximum in the range, or with a
 prominence under 4, is "prominence-failed". The second and third harmonics join
 if a maximum sits at, or within one or two lines of, twice and three times the
 fundamental and both the fundamental alone and the harmonic alone swing more
-than 1,5 dB. Three lines about each kept component, with their negative
+than 1.5 dB. Three lines about each kept component, with their negative
 frequency mirrors, are transformed back, and the modulation depth is the $L_5 -
 L_{95}$ of that series.
 
@@ -359,8 +359,8 @@ print(round(block.modulation_depth_db, 2))                  # 4.95
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_block_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_modulation_block.svg" alt="Two panels of one 10 s block. Left: the power spectrum from 0.1 Hz to 4.9 Hz as bars, the range of the fundamental from 0.5 Hz to 1.1 Hz between dotted lines, the fundamental at 0.8 Hz standing far above everything else, the estimated second and third harmonics at 1.6 Hz and 2.4 Hz as dashed lines, and the three lines kept about the fundamental and about each harmonic filled; the title gives the fundamental of 0.8 Hz and a prominence of 79.87. Right: the de-trended 100 ms series over 10 s swinging about 3 dB either way with noise, the reconstructed series drawn over it as a smooth periodic curve, and its L5 and L95 as dashed lines; the title gives L5 minus L95 of 4.95 dB" width="96%"></picture>
 
-*Left: the third harmonic is found at 2,5 Hz, one line above its estimate of
-2,4 Hz, which 13.6.2.3 f) allows within two lines. Right: the reconstruction
+*Left: the third harmonic is found at 2.5 Hz, one line above its estimate of
+2.4 Hz, which 13.6.2.3 f) allows within two lines. Right: the reconstruction
 keeps the blade passage and drops the noise.*
 
 <details>
@@ -475,10 +475,10 @@ agrees with the unmodified code on synthetic blocks and periods, as the
 [conformance report](../../CONFORMANCE.md) shows. Where the two
 diverge the TS decides, and the rows pin it: a period of 29 valid blocks is
 rated 0 dB. One detail belongs to the code alone: it compares the frequencies
-of its spectrum lines, computed as multiples of 0,1 Hz, with the range limits
-as floating-point numbers, so an upper limit of 0,6 Hz, 0,7 Hz, 1,2 Hz or
-1,4 Hz drops its own line (six, seven, twelve and fourteen times 0,1 Hz come
-out a little above the limit; sixteen times 0,1 Hz is exactly 1,6 Hz, and that
+of its spectrum lines, computed as multiples of 0.1 Hz, with the range limits
+as floating-point numbers, so an upper limit of 0.6 Hz, 0.7 Hz, 1.2 Hz or
+1.4 Hz drops its own line (six, seven, twelve and fourteen times 0.1 Hz come
+out a little above the limit; sixteen times 0.1 Hz is exactly 1.6 Hz, and that
 line is kept). The library works in line indices and keeps every limit's line,
 as the TS's "between" reads.
 
@@ -535,8 +535,8 @@ print(search.upper_frequency_hz)   # 4000.0, as Table 7 prints
 
 The row of Table 7 printed for 10 °C and 80 % holds the frequencies the rule
 gives at −10 °C and 80 % (not those of the table's own −10 °C row, which is at
-100 %); at 10 °C and 80 % the function gives 10, 6,3, 5 and 4 kHz where the table prints
-10, 5, 2,5 and 2 kHz. That row, with eight other printed defects of the TS, is
+100 %); at 10 °C and 80 % the function gives 10, 6.3, 5 and 4 kHz where the table prints
+10, 5, 2.5 and 2 kHz. That row, with eight other printed defects of the TS, is
 in the [errata register](../../ERRATA.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tone_search.svg" alt="The ISO 9613-1 attenuation over 600 m at 10 degrees C and 50 % relative humidity for each one-third octave band from 50 Hz to 10 kHz on logarithmic axes, rising from 0.06 dB at 50 Hz to about 130 dB at 10 kHz, the 20 dB line dashed, and the upper search frequency of 4 kHz marked where the attenuation first reaches it" width="84%"></picture>
@@ -573,8 +573,8 @@ plt.show()
   Nor are the impulsivity of clause 14 beyond the ISO/PAS 1996-3 adjustment, the
   infrasound of Annex D, the Swedish and Danish criteria as verdicts, or the
   Nord2000 propagation Annex C builds on. The faster rotors of Annex G.2, whose
-  fundamental modulation frequency lies above 1,6 Hz, are outside it too: the
-  functions refuse a range above the 1,6 Hz of 13.2.
+  fundamental modulation frequency lies above 1.6 Hz, are outside it too: the
+  functions refuse a range above the 1.6 Hz of 13.2.
 
 ## See also
 

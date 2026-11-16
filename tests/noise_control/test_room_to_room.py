@@ -404,10 +404,10 @@ def _near_wall_threshold_m(partition_area: float) -> float:
 def test_barron_example_7_6_operator_near_the_wall() -> None:
     """The printed chain of Example 7-6, input to answer, folios 297 and 298.
 
-    The operator stands 1,5 m from a 16 m2 wall, inside the 1,596 m where the
+    The operator stands 1.5 m from a 16 m2 wall, inside the 1.596 m where the
     wall still looks like a plane source, so Equation (7-71) applies and the
-    direct field of the wall adds 2,65 dB to what the reverberant field alone
-    delivers: the far-field chain gives 59,1 dB where Barron prints 61,7 dB.
+    direct field of the wall adds 2.65 dB to what the reverberant field alone
+    delivers: the far-field chain gives 59.1 dB where Barron prints 61.7 dB.
     Barron writes the reverberant term over the room constant ``R2``, so the
     room constant is what goes in as the receiving absorption.
     """
@@ -426,7 +426,7 @@ def test_barron_example_7_6_operator_near_the_wall() -> None:
         barron.BARRON_EXAMPLE_7_6_NEAR_WALL_DISTANCE_M, abs=5e-4
     )
     assert _BARRON_OPERATOR_DISTANCE_M < r_star
-    # The two printed terms of the last line: -16,8 and +3,4.
+    # The two printed terms of the last line: -16.8 and +3.4.
     assert -10.0 * math.log10(r1) == pytest.approx(
         barron.BARRON_EXAMPLE_7_6_ROOM_TERM_DB, abs=0.05
     )
@@ -464,7 +464,7 @@ def test_barron_example_7_6_operator_near_the_wall() -> None:
 
 #: Receiver distances as fractions of ``r*``, on either side of it and close
 #: enough to it that a threshold placed anywhere else puts one of them on the
-#: wrong branch: the two branches differ by 0,02 dB at 0,99 ``r*`` and more
+#: wrong branch: the two branches differ by 0.02 dB at 0.99 ``r*`` and more
 #: beyond, far above the tolerance of the closed forms below.
 _INSIDE_FRACTIONS = (0.1, 0.5, 0.99)
 _OUTSIDE_FRACTIONS = (1.01, 1.5, 4.0)

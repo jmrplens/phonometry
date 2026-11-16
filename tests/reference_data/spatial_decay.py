@@ -127,7 +127,7 @@ ANNEX_C_TABLE_C6_DB: dict[int, tuple[float, ...]] = {
 
 #: Table C.6, last column: the same curve collapsed onto A-weighted pink noise
 #: by Eq. (4), in decibels. The annex normalised it with the sum of the Table 1
-#: weights and not with the printed 6,2 dB (see the errata registry).
+#: weights and not with the printed 6.2 dB (see the errata registry).
 ANNEX_C_TABLE_C6_NORMALIZED_DB: tuple[float, ...] = (
     -13.4,
     -16.5,
@@ -205,8 +205,8 @@ TABLE_1_PINK_NOISE_WEIGHTS_DB: dict[float, float] = {
 
 #: The seven columns Tableau 2 and the Figure 7 summary are both printed in,
 #: on PDF page 13, printed page 11. The last is the total the instrument
-#: printed and not Equation (4) over the other six, which runs 0,02 dB to
-#: 0,57 dB above it, so it is carried as a seventh measured column.
+#: printed and not Equation (4) over the other six, which runs 0.02 dB to
+#: 0.57 dB above it, so it is carried as a seventh measured column.
 SUVA_COLUMNS: tuple[str, ...] = (
     "125 Hz",
     "250 Hz",
@@ -305,8 +305,8 @@ IFA_LSA_01_234_DIFFERENCES_DB: dict[str, tuple[float, float, float, float]] = {
     "Lp3 - Lp4": (3.1, 3.2, 3.6, 3.9),
 }
 
-#: The one cell of Tab. 4.5 that its own Tab. 4.4 does not support: 75,3 dB
-#: less 71,0 dB is 4,3 dB and the table prints 4,7 dB. The row and the band
+#: The one cell of Tab. 4.5 that its own Tab. 4.4 does not support: 75.3 dB
+#: less 71.0 dB is 4.3 dB and the table prints 4.7 dB. The row and the band
 #: centre in hertz. The regression settles which cell is right: only the
 #: printed level gives the printed decay rate.
 IFA_LSA_01_234_MISPRINT: tuple[str, int] = ("Lp2 - Lp3", 2000)

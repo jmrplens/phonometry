@@ -13,8 +13,8 @@ Sources and page references used as oracles below (printed page / pdf page):
 
 Hopkins Table A2 (printed p. 608 / pdf p. 635) supplies the material data of
 the four walking surfaces used throughout: concrete cast in situ
-(rho 2 200 kg/m3, cL 3 800 m/s, nu 0,2), sand-cement screed (2 000, 3 250,
-0,2), chipboard (760, 2 200, nu 0,3 estimated) and OSB (590, 2 570, 0,3).
+(rho 2 200 kg/m3, cL 3 800 m/s, nu 0.2), sand-cement screed (2 000, 3 250,
+0.2), chipboard (760, 2 200, nu 0.3 estimated) and OSB (590, 2 570, 0.3).
 
 Wall linings, the other resilient layer of the annexes, are a subject of their
 own and live in ``test_wall_linings.py``: everything there hangs on the
@@ -64,23 +64,23 @@ def _plate(name: str, thickness: float) -> tuple[float, float]:
 # The ISO tapping machine as a mass-spring-dashpot (Hopkins 3.6.3)
 # ===========================================================================
 def test_impact_velocity_is_the_printed_0_886() -> None:
-    """H printed p. 276: "the hammer velocity at impact ... will be 0,886 m/s"."""
+    """H printed p. 276: "the hammer velocity at impact ... will be 0.886 m/s"."""
     assert building.hammer_impact_velocity() == pytest.approx(0.886, abs=0.0005)
 
 
 def test_short_pulse_coefficient_reproduces_eq_3_92() -> None:
-    """H Eq. (3.92) prints ``F2rms = 3,9 B``.
+    """H Eq. (3.92) prints ``F2rms = 3.9 B``.
 
     Independent derivation from the two printed equations it is built on:
     ``|Fn| = 2 m vo/Ti`` (Eq. 3.90, printed p. 277) and
     ``F2rms = |Fn|^2 B/(2 fi)`` (Eq. 3.91, printed p. 278) give
-    ``F2rms = 2 m^2 vo^2 fi B = 3,925 B``, printed rounded to 3,9.
+    ``F2rms = 2 m^2 vo^2 fi B = 3,925 B``, printed rounded to 3.9.
     """
     v0 = building.hammer_impact_velocity()
     peak = 2.0 * building.TAPPING_HAMMER_MASS_KG * v0 / 0.1
     derived = peak**2 / (2.0 * 10.0)
     assert derived == pytest.approx(3.925, abs=5e-3)
-    # The library's own 3,9 B must agree with the printed coefficient.
+    # The library's own 3.9 B must agree with the printed coefficient.
     bandwidth = 0.23 * 500.0
     assert building.short_pulse_mean_square_force(500.0) == pytest.approx(
         3.9 * bandwidth, rel=1e-12
@@ -135,7 +135,7 @@ def test_concrete_slab_force_is_within_1_db_of_the_upper_limit() -> None:
     is reasonable to estimate the mean-square force using Eq. 3.92".
 
     Checked on the one-third-octave centres of the building acoustics range
-    below 4 kHz; the statement is tight, the worst deviation being 0,8 dB at
+    below 4 kHz; the statement is tight, the worst deviation being 0.8 dB at
     3 150 Hz and passing 1 dB in the 4 kHz band itself.
     """
     stiffness, impedance = _plate("concrete", 0.14)
@@ -257,11 +257,11 @@ def test_limiting_frequency_matches_the_printed_figure_4_70_panel() -> None:
     rather than a transcription one.
 
     It is worth being explicit about how strong it is. Working back from
-    ``fms = 83 Hz`` gives ``rho_s = 14,71 kg/m2``, i.e. a chipboard density of
-    668,5 kg/m3, and working back from ``flimit = 521 Hz`` gives 668,3 kg/m3:
-    the two agree to 0,03 %, which is why the identity holds. But neither is
+    ``fms = 83 Hz`` gives ``rho_s = 14.71 kg/m2``, i.e. a chipboard density of
+    668.5 kg/m3, and working back from ``flimit = 521 Hz`` gives 668.3 kg/m3:
+    the two agree to 0.03 %, which is why the identity holds. But neither is
     the 760 kg/m3 that Table A2 prints for chipboard and that this file uses
-    everywhere else; with 760 the same construction would give 77,9 Hz and
+    everywhere else; with 760 the same construction would give 77.9 Hz and
     592 Hz, not 83 and 521. Hopkins gives no density for the Fig. 4.70
     specimen anywhere (the "22 mm chipboard (17 kg/m2)" of Figs. 3.31 to 3.33
     is a third value again, 773 kg/m3), so the anchor pins the two formulae
@@ -353,13 +353,13 @@ def test_over_critical_pulse_stays_positive() -> None:
 
 
 def test_over_critical_pulse_is_finite_over_the_whole_impact_period() -> None:
-    """The pulse must survive the machine's own 0,1 s between impacts.
+    """The pulse must survive the machine's own 0.1 s between impacts.
 
     The over-critical solution of Eq. (3.95) is
     ``vo K e^(-a t) sinh(gamma t)/gamma``. Evaluated as printed, the
     exponential underflows to zero while the hyperbolic sine overflows, and
     ``0 * inf`` is NaN. For Hopkins's 22 mm chipboard (over-critical, printed
-    p. 280) that happens at t = 0,0278 s, well inside ``Ti = 1/fi = 0,1 s``,
+    p. 280) that happens at t = 0.0278 s, well inside ``Ti = 1/fi = 0.1 s``,
     so a caller sampling one impact period would get NaN for most of it.
     """
     stiffness, impedance = _plate("chipboard", 0.022)
@@ -382,7 +382,7 @@ def test_over_critical_pulse_is_still_equation_3_95() -> None:
     ``F1 = vo K e^(-a t) sinh(gamma t)/gamma``:
 
     * where the printed form is representable in double precision (up to
-      about 0,025 s for this plate) the two agree to 1e-12 relative;
+      about 0.025 s for this plate) the two agree to 1e-12 relative;
     * beyond that, Eq. (3.95) is analytically a pure exponential of rate
       ``a - gamma``, since the second exponential of
       ``sinh = (e^(gamma t) - e^(-gamma t))/2`` has long since vanished. The
@@ -476,13 +476,13 @@ def test_spectrum_truncation_holds_for_a_heavily_damped_impact() -> None:
     """The same identity where ``pi/beta`` and ``pi/omega_o`` are far apart.
 
     On a concrete slab the hammer impact is barely damped: ``a/omega_o`` is
-    0,029, so ``beta = sqrt(omega_o^2 - a^2)`` is within 0,04 % of
+    0.029, so ``beta = sqrt(omega_o^2 - a^2)`` is within 0.04 % of
     ``omega_o`` and *any* test on that specimen accepts either as the
     truncation time. Just below the critical point they differ by a factor of
     five, which is where the distinction is actually observable.
     """
     stiffness, mass = 1.0e8, building.TAPPING_HAMMER_MASS_KG
-    impedance = 3600.0  # 4 Zdp^2 = 5,18e7 > K m = 5,0e7
+    impedance = 3600.0  # 4 Zdp^2 = 5.18e7 > K m = 5.0e7
     assert stiffness * mass < 4.0 * impedance**2
     decay = stiffness / (2.0 * impedance)
     omega0 = np.sqrt(stiffness / mass)
@@ -622,9 +622,9 @@ def test_two_line_estimate_rises_12_db_per_octave() -> None:
 @pytest.mark.parametrize(
     ("stiffness", "printed_f0"),
     [
-        # V printed p. 320: "using a covering of stiffness s equal to 3,2e5
+        # V printed p. 320: "using a covering of stiffness s equal to 3.2e5
         # N/m, giving a resonance frequency f0 of approximately 130 Hz with a
-        # hammer mass of 0,5 kg"; printed p. 321: "a stiffness of 5,2e6 N/m is
+        # hammer mass of 0.5 kg"; printed p. 321: "a stiffness of 5.2e6 N/m is
         # used, equivalent to a resonance frequency of approximately 510 Hz".
         (3.2e5, 130.0),
         (5.2e6, 510.0),
@@ -654,8 +654,8 @@ def test_covering_improvement_is_a_band_value_not_a_single_fourier_line() -> Non
     troughs ... at frequencies n fco where n = 3, 5, 7"), so a band centre
     that lands on one reads tens of dB high.
 
-    Hopkins's covering No. 2 has ``fco = 100,13 Hz``, which puts 500 Hz within
-    0,2 % of ``5 fco``. Every earlier test of this function used
+    Hopkins's covering No. 2 has ``fco = 100.13 Hz``, which puts 500 Hz within
+    0.2 % of ``5 fco``. Every earlier test of this function used
     200/400/800/1600/3200 Hz, all *even* multiples, so none of them saw it.
     """
     plate_stiffness, impedance = _plate("concrete", 0.14)
@@ -730,8 +730,8 @@ def test_covering_bands_are_the_iec_61260_base_ten_bands(
     IEC 61260-1 base-ten bands use ``G = 10^(3/10)``, so a one-``b``-th octave
     band about ``fc`` runs from ``fc G^(-1/(2b))`` to ``fc G^(1/(2b))``: a
     factor ``10^0,05`` for one-third octaves and ``10^0,15`` for octaves. The
-    base-two convention would give ``2^(1/6)`` and ``sqrt(2)``, 0,04 % and
-    0,12 % wider, which changes which Fourier lines a band contains.
+    base-two convention would give ``2^(1/6)`` and ``sqrt(2)``, 0.04 % and
+    0.12 % wider, which changes which Fourier lines a band contains.
 
     The edges are pinned through their observable consequence: the band value
     must equal the mean-square ratio over exactly the lines the IEC definition
@@ -757,7 +757,7 @@ def test_covering_bands_are_the_iec_61260_base_ten_bands(
         )
         assert result.improvement[i] == pytest.approx(expected, abs=1e-9)
     # The octave band at 1 kHz holds exactly 71 lines of the 10 Hz comb,
-    # 710 Hz to 1410 Hz. Edges 1,5 % wider reach 700 Hz and 1430 Hz and hold
+    # 710 Hz to 1410 Hz. Edges 1.5 % wider reach 700 Hz and 1430 Hz and hold
     # 74, which is what makes the constant observable at all.
     if fraction == 1:
         inside = (result.lines >= 1000.0 / ratio) & (result.lines <= 1000.0 * ratio)
@@ -823,7 +823,7 @@ def test_weighted_improvement_matches_the_printed_32_2_db() -> None:
     """ISO 12354-2:2017 Formula (C.4) with the Annex G floating floor.
 
     ISO 12354-1:2017 Table L.10 / ISO 12354-2:2017 Table G.10 print
-    "DeltaLw = 32,2 dB" for m' = 73,5 kg/m2 on s' = 8 MN/m3.
+    "DeltaLw = 32,2 dB" for m' = 73.5 kg/m2 on s' = 8 MN/m3.
     """
     value = building.weighted_floating_floor_improvement(
         ref.ISO12354_ANNEX_L_FLOATING_MASS,
@@ -881,16 +881,16 @@ def test_double_floating_floor_matches_printed_74_and_195_hz() -> None:
 
     The construction and all three frequencies are printed *inside the plot
     panel*, not in the caption: "Walking surface: 18 mm plywood", "Resilient
-    layer: s' = 7,25 MN/m3 (25 mm reconstituted foam)", "Base floor: 140 mm
+    layer: s' = 7.25 MN/m3 (25 mm reconstituted foam)", "Base floor: 140 mm
     concrete slab", "Single floating floor fms = 118 Hz", "Double floating
     floor fmsms = 74 Hz and 195 Hz". The double floor is the same floor
     doubled, so both layers are identical.
 
     The mass per unit area comes from the Table A2 plywood density
     (710 kg/m3), independently of the printed frequencies. The three printed
-    numbers are mutually consistent only to about 1,6 %, so the tolerance is
-    2 % rather than tighter: ``sqrt(s'/rho_s)/(2 pi)`` gives 119,9 Hz against
-    the printed 118 Hz, and the printed 74 and 195 imply ``fms = 120,1 Hz``
+    numbers are mutually consistent only to about 1.6 %, so the tolerance is
+    2 % rather than tighter: ``sqrt(s'/rho_s)/(2 pi)`` gives 119.9 Hz against
+    the printed 118 Hz, and the printed 74 and 195 imply ``fms = 120.1 Hz``
     through the identity ``fmsms,lower * fmsms,upper = fms^2`` that holds for
     two identical floors. The 118 is the odd one out. Values read off a plot
     panel carry that much slack; the closed-form identity below is the exact
@@ -967,7 +967,7 @@ def test_double_floating_floor_identical_layers_give_the_golden_ratio() -> None:
     [
         # V printed p. 317-318 ("Examples") and printed p. 310: a 50 mm
         # concrete slab (m' about 115 kg/m2) on 25 mm mineral wool of total
-        # dynamic stiffness 8,0 MPa/m gives "a resonance frequency of
+        # dynamic stiffness 8.0 MPa/m gives "a resonance frequency of
         # approximately 40 Hz"; the same layer under 22 mm chipboard plus
         # 13 mm plasterboard (m' about 28 kg/m2) gives "approximately 90 Hz".
         (115.0, 40.0),
@@ -1033,7 +1033,7 @@ def test_ver_model_agrees_between_hopkins_and_vigran() -> None:
     """Two books, one SEA model, two different algebraic statements.
 
     H Eq. (4.118), printed p. 519:
-    ``DeltaL = 10 lg(2,3 rhos1^2 cL1 h1 eta1 S1 omega^3/(N k^2))`` with ``N``
+    ``DeltaL = 10 lg(2.3 rhos1^2 cL1 h1 eta1 S1 omega^3/(N k^2))`` with ``N``
     the total number of mounts over the area ``S1``.
     V Eq. (8.45), printed p. 309, dominant term:
     ``10 lg(Z1 eta1 N f^3/(2 pi m1 fo^4))`` with ``N`` mounts per unit area and
@@ -1081,7 +1081,7 @@ def test_ver_model_agrees_between_hopkins_and_vigran() -> None:
         mount_stiffness=stiffness,
         mount_density=per_area,
     )
-    # 8 sqrt(B' m'') = 2,3094 rho cL h^2 against Hopkins's rounded 2,3.
+    # 8 sqrt(B' m'') = 2.3094 rho cL h^2 against Hopkins's rounded 2.3.
     assert np.allclose(library, hopkins, atol=0.02)
 
 
@@ -1099,7 +1099,7 @@ def test_asphalt_weighted_improvement_exceeds_the_screed_branch() -> None:
     # Both fall as the resilient layer stiffens.
     assert building.weighted_floating_floor_improvement(73.5, 2e7) < screed
     # The transcription itself is pinned by restating the printed formula,
-    # DeltaLw = ((-0,21 m') - 5,45) lg(s') + (0,46 m') + 23,8, with s' in
+    # DeltaLw = ((-0.21 m') - 5.45) lg(s') + (0.46 m') + 23.8, with s' in
     # MN/m3, independently of the implementation.
     for mass, stiffness in ((73.5, 8.0), (120.0, 20.0), (25.0, 3.0)):
         printed = (-0.21 * mass - 5.45) * np.log10(stiffness) + 0.46 * mass + 23.8
@@ -1125,7 +1125,7 @@ def test_spectrum_picks_the_weighted_fit_of_its_own_construction(
     Every other test supplies either no mass and stiffness at all, or supplies
     them only with the default model, so swapping the two fits is invisible.
     Here the mapping is checked on a specimen where the two formulae are
-    9,5 dB apart, well outside any plausible tolerance.
+    9.5 dB apart, well outside any plausible tolerance.
     """
     mass, stiffness = 73.5, 8.0e6
     result = building.floating_floor_improvement_spectrum(
@@ -1235,7 +1235,7 @@ def test_a_power_input_of_another_length_is_refused() -> None:
 
 
 def test_octave_bandwidth_factor() -> None:
-    """H Eq. (3.91): ``B = 0,23 f`` for thirds, ``B = 0,707 f`` for octaves."""
+    """H Eq. (3.91): ``B = 0.23 f`` for thirds, ``B = 0.707 f`` for octaves."""
     third = building.short_pulse_mean_square_force(1000.0, fraction=3)
     octave = building.short_pulse_mean_square_force(1000.0, fraction=1)
     assert octave / third == pytest.approx(0.707 / 0.23, rel=1e-12)

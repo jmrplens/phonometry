@@ -18,7 +18,7 @@ them.
 
 Table F.1 (printed folio 40) prints five quantities at two condition sets, and
 every one of them reproduces here from the Table F.2 coefficients (printed folio
-41) to better than 1,5e-7 relative, which is inside the rounding of the last
+41) to better than 1.5e-7 relative, which is inside the rounding of the last
 printed figure. Thermal conductivity and specific heat capacity come from the
 two expressions of Clause F.6 (printed folio 39); the annex prints their formulae
 and units but tabulates only the diffusivity they form, so those two are anchored
@@ -59,7 +59,7 @@ specific heat capacity Clause F.6 gives expressions for.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the temperature is at or below -273,15 degC, the pressure is not positive, the humidity is outside 0 % to 100 %, the carbon dioxide mole fraction is outside 0 to 1, any of the four is not finite, or the pressure and humidity cannot hold together at that temperature. That last one is a combination rather than an argument: at 20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole fraction of 1,17, and a mole fraction cannot reach 1. |
+| ValueError | if the temperature is at or below -273.15 degC, the pressure is not positive, the humidity is outside 0 % to 100 %, the carbon dioxide mole fraction is outside 0 to 1, any of the four is not finite, or the pressure and humidity cannot hold together at that temperature. That last one is a combination rather than an argument: at 20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole fraction of 1.17, and a mole fraction cannot reach 1. |
 | TypeError | if `temperature_c` is not a single number. `co2_mole_fraction`, `relative_humidity_percent` or `static_pressure_pa` are refused the same way when any is not one real number. |
 
 Nothing else is refused. Annex F states a domain for its equations and this

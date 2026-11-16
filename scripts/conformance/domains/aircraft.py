@@ -171,7 +171,7 @@ def _chk_doc29_event_assembly() -> Outcome:
 # the split. A hair either side of that length picks one branch or the other,
 # and each is then judged against the *other* branch's printed formula, which
 # is what continuity at the split means. At 10 kHz the split falls at a slant
-# range of about 1,5 km, well inside the certification geometry.
+# range of about 1.5 km, well inside the certification geometry.
 _SPLIT_BAND_HZ = 10000.0
 
 
@@ -194,10 +194,10 @@ def _arp5534_at_split(offset: float) -> float:
     "SAE-Method δ_B just below δ_t = 150 dB vs the printed Eq. 8 value there, dB",
 )
 def _chk_arp5534_continuity() -> Outcome:
-    # Printed Eq. 8, 9,2 + 0,765 · 150 = 123,95 dB, against the library on its
+    # Printed Eq. 8, 9.2 + 0.765 · 150 = 123.95 dB, against the library on its
     # Eq. 7 branch. The two printed branches do not meet to the digit: Eq. 7
-    # gives 123,953 dB there, a step of 0,003 dB, which is the tolerance's
-    # reason for being 0,01 dB rather than tighter.
+    # gives 123.953 dB there, a step of 0.003 dB, which is the tolerance's
+    # reason for being 0.01 dB rather than tighter.
     return numeric(
         9.2 + 0.765 * 150.0, _arp5534_at_split(-1e-9), 0.01, unit="dB", places=3
     )

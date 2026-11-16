@@ -10,14 +10,14 @@ transfer functions and exact time weightings, then grades a real meter against
 them.
 
 **The chain.** A velocity signal is band-limited (5.2.3.2, Formula (3)), which
-is two Butterworth pairs: a two-pole high pass at :math:`0{,}8 f_\mathrm{u}` and a
-two-pole low pass at :math:`f_\mathrm{o} / 0{,}8`. The working range is
+is two Butterworth pairs: a two-pole high pass at :math:`0.8 f_\mathrm{u}` and a
+two-pole low pass at :math:`f_\mathrm{o} / 0.8`. The working range is
 :math:`f_\mathrm{u} = 1` Hz to :math:`f_\mathrm{o} = 80` Hz for buildings, and 4 Hz to 315 Hz
 next to a railway, which is where DIN 45672-1 works. Frequency weighting
-(Formula (4)) divides that by :math:`1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f`,
+(Formula (4)) divides that by :math:`1 - \mathrm{j}\,5.6\,\mathrm{Hz}/f`,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
 into the dimensionless **KB signal**. Its running r.m.s. with
-:math:`\tau = 0{,}125` s (Formula (1)) is :math:`KB_\mathrm{F}(t)`, the *weighted
+:math:`\tau = 0.125` s (Formula (1)) is :math:`KB_\mathrm{F}(t)`, the *weighted
 vibration severity*, and the quantities a meter displays are its maximum
 :math:`KB_\mathrm{Fmax}`, the maximum within each 30 s clock interval
 (*Takt*) and the r.m.s. of those clock maxima :math:`KB_\mathrm{FTm}` (Formula (2)).
@@ -26,7 +26,7 @@ formulas, figures and diagrams of this documentation set it italic, as
 DIN 4150-2 prints it.
 
 **Two rules of Formula (2) that are easy to miss.** A clock maximum at or
-below 0,1 enters the sum as zero but still counts in :math:`N`, so a quiet
+below 0.1 enters the sum as zero but still counts in :math:`N`, so a quiet
 interval lowers the average rather than being dropped from it; and a clock
 interval that the measurement did not fill does not count at all (5.1.6.4), so
 the averaging time is always a whole number of clock intervals.
@@ -47,8 +47,8 @@ Table 9 (folio 35) prints what a meter must display for a 1 mm/s sine at five
 frequencies, and its :math:`KB_\mathrm{F}`, :math:`KB_\mathrm{Fmax}` and
 :math:`KB_\mathrm{FTm}` rows are reproduced by this module to the three decimals they
 are printed with, ripple and all. Its :math:`|v|_\mathrm{max}` row is not, and
-cannot be: at 31,5 Hz it prints 1,000 where Formula (5) gives 0,995, and at
-315 Hz it prints 0,249 where Formula (5) gives 0,100, while the
+cannot be: at 31.5 Hz it prints 1.000 where Formula (5) gives 0.995, and at
+315 Hz it prints 0.249 where Formula (5) gives 0.100, while the
 :math:`KB_\mathrm{F}` row of the same column follows Formula (5) at both. The table
 contradicts itself rather than the formula, so :data:`KB_TEST_INDICATIONS`
 carries the rows that agree with it and the other row is left to
@@ -140,7 +140,7 @@ __all__ = [
 ]
 
 #: The corner of the frequency weighting, in hertz: Formula (4) divides the
-#: band-limited response by ``1 - j 5,6 Hz / f``, which is the pole that turns
+#: band-limited response by ``1 - j 5.6 Hz / f``, which is the pole that turns
 #: a velocity signal into the KB signal.
 KB_CORNER_HZ: float = 5.6
 
@@ -160,8 +160,8 @@ TAKT_DURATION_S: float = 30.0
 TAKT_SUPPRESSION_THRESHOLD: float = 0.1
 
 #: The factor between a band limit of the working range and the corner of the
-#: filter that makes it (5.2.3.2): the high pass sits at ``0,8 f_u`` and the
-#: low pass at ``f_o / 0,8``, so 1 Hz to 80 Hz is made by corners at 0,8 Hz
+#: filter that makes it (5.2.3.2): the high pass sits at ``0.8 f_u`` and the
+#: low pass at ``f_o / 0,8``, so 1 Hz to 80 Hz is made by corners at 0.8 Hz
 #: and 100 Hz.
 BAND_LIMIT_CORNER_FACTOR: float = 0.8
 
@@ -221,7 +221,7 @@ RESPONSE_TOLERANCE_LOWER_PERCENT: tuple[tuple[float, float, float], ...] = (
 
 #: Table 3, the upper limit of ``F(f)``, in per cent. The central band is the
 #: same 10 %; outside it the limit is 20 % and applies only where the measured
-#: response is above 0,01.
+#: response is above 0.01.
 RESPONSE_TOLERANCE_UPPER_PERCENT: tuple[tuple[float, float, float], ...] = (
     (1.25, 0.8, 10.0),
     (0.0, math.inf, 20.0),
@@ -234,7 +234,7 @@ _UPPER_TOLERANCE_FLOOR: float = 0.01
 #: repeated once a second, and the :math:`KB_\mathrm{Fmax}` each must show as a percentage
 #: of the display for the continuous signal of the same amplitude. The rows
 #: are ``(burst duration in milliseconds, whole sine cycles per second,
-#: percentage)``; ``math.inf`` is the continuous signal, whose 100,4 % is the
+#: percentage)``; ``math.inf`` is the continuous signal, whose 100.4 % is the
 #: ripple of the running r.m.s. rather than a gain.
 KB_PULSE_RESPONSE_PERCENT: tuple[tuple[float, int, float], ...] = (
     (math.inf, 80, 100.4),
@@ -337,7 +337,7 @@ def _analog_zpk(
     into a Butterworth pair: the first is ``s^2 / (s^2 + sqrt(2) w s + w^2)``
     with ``w`` the high-pass corner, the second the low pass with the same
     damping, and the weighting factor of Formula (4) is one more real pole at
-    5,6 Hz with its zero at the origin.
+    5.6 Hz with its zero at the origin.
     """
     lower_hz, upper_hz = _range_limits(working_range)
     w_high = 2.0 * math.pi * BAND_LIMIT_CORNER_FACTOR * lower_hz
@@ -503,15 +503,15 @@ def response_tolerance_percent(
         :math:`G_\mathrm{u}` as a magnitude, and 5.2.3.3 states the condition
         as :math:`-G_\mathrm{u} \le F(f) \le G_\mathrm{o}`; ``lower`` is
         :math:`-G_\mathrm{u}`. It is ``-10.0`` from
-        :math:`1{,}25\,f_\mathrm{u}` to :math:`0{,}8\,f_\mathrm{o}`,
-        ``-20.0`` from :math:`0{,}5\,f_\mathrm{u}` to
-        :math:`1{,}25\,f_\mathrm{u}` and from :math:`0{,}8\,f_\mathrm{o}` to
+        :math:`1.25\,f_\mathrm{u}` to :math:`0.8\,f_\mathrm{o}`,
+        ``-20.0`` from :math:`0.5\,f_\mathrm{u}` to
+        :math:`1.25\,f_\mathrm{u}` and from :math:`0.8\,f_\mathrm{o}` to
         :math:`2\,f_\mathrm{o}`, and ``-100.0`` outside
-        :math:`0{,}5\,f_\mathrm{u}` to :math:`2\,f_\mathrm{o}`, where the
+        :math:`0.5\,f_\mathrm{u}` to :math:`2\,f_\mathrm{o}`, where the
         standard declines to constrain the response from below: a response
         of zero deviates by -100 % and still keeps to it. ``upper`` is the
-        Table 3 limit, ``10.0`` from :math:`1{,}25\,f_\mathrm{u}` to
-        :math:`0{,}8\,f_\mathrm{o}` and ``20.0`` elsewhere.
+        Table 3 limit, ``10.0`` from :math:`1.25\,f_\mathrm{u}` to
+        :math:`0.8\,f_\mathrm{o}` and ``20.0`` elsewhere.
     :raises ValueError: For a non-positive frequency or an unknown range.
     :raises TypeError: if ``working_range`` is not a text, or ``frequencies`` holds a
         text or a value that is not a real number.
@@ -582,8 +582,8 @@ class VibrationMeterVerification(OwnsArrays):
         r"""The Table 2 lower limit at each frequency, in per cent.
 
         Negative, as :func:`response_tolerance_percent` returns it: ``-10.0``
-        from :math:`1{,}25\,f_\mathrm{u}` to :math:`0{,}8\,f_\mathrm{o}`,
-        ``-20.0`` on the skirts out to :math:`0{,}5\,f_\mathrm{u}` and
+        from :math:`1.25\,f_\mathrm{u}` to :math:`0.8\,f_\mathrm{o}`,
+        ``-20.0`` on the skirts out to :math:`0.5\,f_\mathrm{u}` and
         :math:`2\,f_\mathrm{o}`, and ``-100.0`` beyond them, where the
         standard sets no lower limit.
         """
@@ -595,7 +595,7 @@ class VibrationMeterVerification(OwnsArrays):
     def upper_percent(self) -> NDArray[np.float64]:
         """The Table 3 limit at each frequency, in per cent.
 
-        Infinite where the measured response is at or below 0,01, which
+        Infinite where the measured response is at or below 0.01, which
         footnote a of Table 3 leaves unconstrained from above.
         """
         upper = response_tolerance_percent(
@@ -777,7 +777,7 @@ def kbf_signal(
     :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
         ``"railway"``.
     :param time_constant_s: The averaging time constant, in seconds. The
-        standard fixes it at 0,125 s and the parameter exists so a comparison
+        standard fixes it at 0.125 s and the parameter exists so a comparison
         with another time weighting can be written down, not so a meter can
         use one.
     :return: :math:`KB_\mathrm{F}(t)`, one value per sample.
@@ -808,7 +808,7 @@ def _exponential_running_rms(
     :param values: The signal to average (1-D), in whatever unit it carries;
         the result is in the same unit.
     :param fs: Sampling frequency, in hertz.
-    :param time_constant_s: The time constant, in seconds (default 0,125 s,
+    :param time_constant_s: The time constant, in seconds (default 0.125 s,
         the "Fast" both standards use).
     :param name: The public name of *values*, for the error a bad signal
         raises.
@@ -960,9 +960,9 @@ def measure_vibration_immission(
     **Start the record before the event.** Every filter here begins at rest,
     so a record that begins with the signal already at full amplitude carries
     the filter's own switch-on transient, and the peak is a max-hold that
-    keeps it: a 1 mm/s sine started at a zero crossing reads 1,06 mm/s rather
-    than the 1,00 mm/s of 6.2.3.12, and at 315 Hz outside the building range
-    it reads 0,25 mm/s where the steady response is 0,10 mm/s. That is an
+    keeps it: a 1 mm/s sine started at a zero crossing reads 1.06 mm/s rather
+    than the 1.00 mm/s of 6.2.3.12, and at 315 Hz outside the building range
+    it reads 0.25 mm/s where the steady response is 0.10 mm/s. That is an
     artefact of the record, not of the chain, and a lead-in of a second or two
     of quiet removes it, which is also how a real measurement is made.
 

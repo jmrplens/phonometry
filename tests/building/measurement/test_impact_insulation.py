@@ -6,13 +6,13 @@ Validation strategy: the standards' own numbers, not self-consistency.
 
 - The weighted impact rating, CI and the unfavourable-deviation sum are
   checked against the ISO 717-2 Annex C worked examples: Table C.1
-  (laboratory, one-third octave: Ln,w = 79, CI = -11, sum 28,0) and
-  Table C.3 (in situ, octave: Ln,w = 54, CI = 0, sum 7,8 -- exercising
+  (laboratory, one-third octave: Ln,w = 79, CI = -11, sum 28.0) and
+  Table C.3 (in situ, octave: Ln,w = 54, CI = 0, sum 7.8 -- exercising
   the octave-band -5 dB rule).
-- The 32,0 dB (16 thirds) / 10,0 dB (5 octaves) bound is exercised with a
+- The 32.0 dB (16 thirds) / 10.0 dB (5 octaves) bound is exercised with a
   curve that hits it exactly and one that tips over.
-- L'nT (Formula (1)) reduces to Li when T = T0 = 0,5 s; L'n (Formula (2)
-  with A = 0,16 V / T, A0 = 10 m2) is checked against hand values.
+- L'nT (Formula (1)) reduces to Li when T = T0 = 0.5 s; L'n (Formula (2)
+  with A = 0.16 V / T, A0 = 10 m2) is checked against hand values.
 - The shared shift engine is re-verified against an independent brute-force
   impact-shift search on 10 000 random curves for both band sets.
 """
@@ -103,7 +103,7 @@ def _brute_force_ci(measured: list[float], rating: int, n_bands: int) -> int:
 
 
 def test_annex_c1_worked_example_third_octave() -> None:
-    """ISO 717-2 Annex C Table C.1: Ln,w = 79, CI = -11, sum 28,0."""
+    """ISO 717-2 Annex C Table C.1: Ln,w = 79, CI = -11, sum 28.0."""
     res = building.weighted_impact_rating(_ANNEX_C1_LN)
     assert isinstance(res, building.ImpactRatingResult)
     assert res.rating == 79
@@ -123,7 +123,7 @@ def test_octave_minus_five_rule_vs_third_octave() -> None:
     """The octave -5 dB reduction (4.3.2) is applied only to octave bands.
 
     With measured == reference, the reference must shift down 2 dB so the
-    deviation sum reaches the bound (16 * 2 = 32,0 / 5 * 2 = 10,0).
+    deviation sum reaches the bound (16 * 2 = 32.0 / 5 * 2 = 10.0).
     """
     # One-third octave: shift down 2 dB, read at 500 Hz => 60 - 2 = 58.
     third = building.weighted_impact_rating(_REF_IMPACT_THIRD)
@@ -136,22 +136,22 @@ def test_octave_minus_five_rule_vs_third_octave() -> None:
 
 
 def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
-    """Measured = reference + 2 everywhere => sum = 32,0 exactly at k = 0."""
+    """Measured = reference + 2 everywhere => sum = 32.0 exactly at k = 0."""
     measured = [r + 2.0 for r in _REF_IMPACT_THIRD]
     res = building.weighted_impact_rating(measured)
-    # The unshifted reference already sits 2 dB below measured (sum 32,0),
+    # The unshifted reference already sits 2 dB below measured (sum 32.0),
     # so no shift is needed; the rating is read at 500 Hz unchanged.
     assert res.rating == _REF_IMPACT_THIRD[_INDEX_500_THIRD]  # 60
     assert res.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
 
 
 def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
-    """0,1 dB over the 32,0 bound forces one more decibel of upward shift."""
+    """0.1 dB over the 32.0 bound forces one more decibel of upward shift."""
     measured = [r + 2.0 for r in _REF_IMPACT_THIRD]
-    measured[0] += 0.1  # sum would be 32,1 at k = 0
+    measured[0] += 0.1  # sum would be 32.1 at k = 0
     res = building.weighted_impact_rating(measured)
     assert res.rating == _REF_IMPACT_THIRD[_INDEX_500_THIRD] + 1  # 61
-    # At +1 dB: 15 bands contribute 1,0 dB each and the bumped band 1,1 dB.
+    # At +1 dB: 15 bands contribute 1.0 dB each and the bumped band 1.1 dB.
     assert res.unfavorable_sum == pytest.approx(16.1, abs=1e-9)
 
 
@@ -163,7 +163,7 @@ def test_explicit_band_set_override() -> None:
 
 
 def test_measured_data_rounded_to_one_decimal() -> None:
-    """Clause 4.3.1 footnote 1: inputs reduced to 0,1 dB (round half up)."""
+    """Clause 4.3.1 footnote 1: inputs reduced to 0.1 dB (round half up)."""
     res = building.weighted_impact_rating(_ANNEX_C1_LN)
     perturbed = [v + 0.049 for v in _ANNEX_C1_LN]  # rounds back to originals
     assert building.weighted_impact_rating(perturbed).rating == res.rating
@@ -220,7 +220,7 @@ def test_engine_matches_brute_force_octave() -> None:
 
 
 def test_lnt_equals_li_when_t_is_half_second() -> None:
-    """Formula (1): T = T0 = 0,5 s => L'nT = Li exactly."""
+    """Formula (1): T = T0 = 0.5 s => L'nT = Li exactly."""
     li = np.array([60.0, 62.0, 55.0])
     t2 = np.full(3, 0.5)
     res = building.impact_insulation(li, t2)
@@ -229,7 +229,7 @@ def test_lnt_equals_li_when_t_is_half_second() -> None:
 
 
 def test_lnt_decreases_with_reverberation_time() -> None:
-    """Formula (1) minus sign: T = 5 s, T0 = 0,5 s => L'nT = Li - 10 dB."""
+    """Formula (1) minus sign: T = 5 s, T0 = 0.5 s => L'nT = Li - 10 dB."""
     li = np.array([60.0])
     res = building.impact_insulation(li, np.array([5.0]))
     np.testing.assert_allclose(res.l_n_t, [50.0])
@@ -251,10 +251,10 @@ def test_impact_rejects_an_infinite_volume() -> None:
 
 
 def test_normalized_level_formula2() -> None:
-    """Formula (2): A = 0,16 V / T = A0 = 10 => 10 lg(A/A0) = 0 => L'n = Li."""
+    """Formula (2): A = 0.16 V / T = A0 = 10 => 10 lg(A/A0) = 0 => L'n = Li."""
     li = np.array([60.0, 62.0])
     t2 = np.array([1.0, 1.0])
-    # A = 0,16 * V / T = 10 for V = 62,5, T = 1 => A/A0 = 1.
+    # A = 0.16 * V / T = 10 for V = 62.5, T = 1 => A/A0 = 1.
     res = building.impact_insulation(li, t2, volume=62.5)
     assert res.l_n is not None
     np.testing.assert_allclose(res.l_n, li)
@@ -345,10 +345,10 @@ def test_impact_rejects_bad_reverberation_time() -> None:
 
 
 def test_field_rating_pipeline_lnt_w() -> None:
-    """L'nT per band (T = 0,5 s) fed to weighted_impact_rating gives L'nT,w."""
+    """L'nT per band (T = 0.5 s) fed to weighted_impact_rating gives L'nT,w."""
     li = np.array([float(r) for r in _REF_IMPACT_THIRD])  # Li == reference
     t2 = np.full(16, 0.5)
     res = building.impact_insulation(li, t2)
     rating = building.weighted_impact_rating(res.l_n_t)
-    # Li == reference => shift down 2 dB (sum 32,0), read at 500 => 60 - 2.
+    # Li == reference => shift down 2 dB (sum 32.0), read at 500 => 60 - 2.
     assert rating.rating == 58

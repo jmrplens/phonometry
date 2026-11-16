@@ -426,8 +426,8 @@ def test_the_2010_editions_print_a_different_table() -> None:
     # ISO 3744:2010 Table A.1 (printed folio 36) and ISO 3746:2010 Table A.1
     # (printed folio 24) have eight rows and reword two of these seven. Table
     # C.2 is the source of this constant, so neither of their variants may
-    # reach it: no 0,30 row, "rectangular" rather than "right cuboid", and the
-    # worked example the 0,25 row ends on.
+    # reach it: no 0.30 row, "rectangular" rather than "right cuboid", and the
+    # worked example the 0.25 row ends on.
     assert 0.3 not in ROOM_ABSORPTION_ESTIMATES
     assert "right cuboid" not in ROOM_ABSORPTION_ESTIMATES[0.15].lower()
     assert "on part of ceiling or walls" not in ROOM_ABSORPTION_ESTIMATES[0.25]
@@ -596,7 +596,7 @@ SMITH_ATTENUATION_DB = np.array(oracle.SMITH_EXAMPLE_1_13_ATTENUATION_DB)
 
 def test_the_npl_reverberation_factors_follow_the_environmental_correction() -> None:
     # A tenth of a decibel rather than a twentieth: the study prints its
-    # answers to 0,1 dB and prints the volume and the reverberation time it
+    # answers to 0.1 dB and prints the volume and the reverberation time it
     # fed them rounded as well, so the inputs carry rounding of their own.
     for room, printed in oracle.NPL_REVERBERATION_K2A.items():
         _, volume_m3, time_s, _, _ = oracle.NPL_ROOMS[room]
@@ -611,7 +611,7 @@ def test_the_npl_reverberation_factors_follow_the_environmental_correction() -> 
 
 def test_the_npl_absolute_factors_are_the_measured_power_less_the_source() -> None:
     # The oracle checked against itself before it is trusted: the absolute
-    # rows of Tables 10 to 14 are Table 8 minus the 90,9 dB the reference
+    # rows of Tables 10 to 14 are Table 8 minus the 90.9 dB the reference
     # source was calibrated to, so the two tables are mutually consistent.
     for room, printed in oracle.NPL_MEASURED_K2A.items():
         for surface, want in printed.items():
@@ -635,9 +635,9 @@ def test_annex_c_agrees_with_the_npl_measurement_at_the_survey_ceiling() -> None
 
 
 def test_annex_c_refuses_the_hemi_anechoic_room_at_the_precision_ceiling() -> None:
-    # Room A is hemi-anechoic and its true absorption is above the 0,5 that
+    # Room A is hemi-anechoic and its true absorption is above the 0.5 that
     # Table C.2 stops at, so the annex calls it unfit for ISO 3744 while its
-    # measured correction is 0 dB to 1,1 dB. The report says as much in print
+    # measured correction is 0 dB to 1.1 dB. The report says as much in print
     # on folio 18. That is the table running out of room descriptions, not a
     # defect of the closed form, and it is the only room where the two differ.
     ceiling = TEST_ENVIRONMENT_REQUIREMENTS["ISO 3744"][0]
@@ -684,15 +684,15 @@ def test_the_npl_room_e_area_conflict_decides_two_of_its_three_surfaces() -> Non
 def test_the_npl_estimated_absorption_column_drops_the_factor_four() -> None:
     # The warning this pins: the "estimated room absorption" rows of Tables 10
     # to 14 do not follow the report's own Eq. (3) and Eq. (4). Every one of
-    # the 17 cells sits at least 0,45 dB away from it. What the column follows
+    # the 17 cells sits at least 0.45 dB away from it. What the column follows
     # instead is 10 lg (1 + S/(alpha S_V)), the factor 4 dropped, and how
     # closely is asserted as it is rather than under one loose tolerance: 10
     # cells to the half tenth the column is printed to; rooms C and E within
-    # 0,2 dB; and the lower bound of room D, surface 4, printed on folio 20 as
-    # 0,1 dB where that form gives 0,49 dB, a reading the table's own
-    # difference column of -1,8 dB against the measured 1,9 dB confirms.
+    # 0.2 dB; and the lower bound of room D, surface 4, printed on folio 20 as
+    # 0.1 dB where that form gives 0.49 dB, a reading the table's own
+    # difference column of -1.8 dB against the measured 1.9 dB confirms.
     # Anyone who anchored the absorption route on that column would read this
-    # library as wrong by up to 4,6 dB while it is right.
+    # library as wrong by up to 4.6 dB while it is right.
     departures: dict[str, float] = {}
     for room, printed in oracle.NPL_ESTIMATED_K2A.items():
         room_surface_m2, _, _, alpha_from, alpha_to = oracle.NPL_ROOMS[room]
@@ -743,8 +743,8 @@ def test_the_baua_engineers_reach_the_printed_environmental_corrections() -> Non
 def test_the_baua_absorption_areas_are_alpha_times_the_boundary_surface() -> None:
     # Eq. (7) of the study, A = alpha S_V, which is Eq. (A.7) of ISO 3744.
     # The tolerance is a hair over half the last printed digit because
-    # engineer 2's cell prints 25,9 where 0,15 x 173,0 lands exactly on the
-    # tie at 25,95 and the paper rounds it down. That is why alpha and S_V are
+    # engineer 2's cell prints 25.9 where 0.15 x 173.0 lands exactly on the
+    # tie at 25.95 and the paper rounds it down. That is why alpha and S_V are
     # the inputs the other tests feed, never this rounded area.
     for name, (alpha, room_surface_m2, want, *_) in oracle.BAUA_ENGINEERS.items():
         assert alpha * room_surface_m2 == pytest.approx(want, abs=0.06), name
@@ -752,9 +752,9 @@ def test_the_baua_absorption_areas_are_alpha_times_the_boundary_surface() -> Non
 
 def test_the_baua_engineers_disagree_about_the_same_workroom() -> None:
     # The point of the study. Two engineers put the workroom outside ISO 11202
-    # even at 0,5 m and the third, the most experienced, puts it inside at both
+    # even at 0.5 m and the third, the most experienced, puts it inside at both
     # distances, from assessments of one and the same room. Engineer 1 sits
-    # 0,09 dB over the 7 dB ceiling, so a sign slip would not survive this.
+    # 0.09 dB over the 7 dB ceiling, so a sign slip would not survive this.
     ceiling = TEST_ENVIRONMENT_REQUIREMENTS["ISO 11202"][0]
     assert ceiling == 7.0
     verdicts = {}
@@ -787,10 +787,10 @@ def test_the_baua_direct_method_absorption_areas_give_the_printed_factors() -> N
 
 def test_the_baua_reverberation_room_level_does_not_fit_its_absorption_area() -> None:
     # A defect in the study, recorded so that the cell is not mistaken for an
-    # input later. Eq. (9) of the study, A = 4S / ((S/S0) 10^(0,1 (L_pA - L_W))
-    # - 1), closes on the printed 55,2 m2 for the workroom. For the former
-    # reverberation room the printed 81,08 dB gives 57,1 m2 rather than the
-    # 97,7 m2 beside it; that column would need 79,74 dB. The absorption area
+    # input later. Eq. (9) of the study, A = 4S / ((S/S0) 10^(0.1 (L_pA - L_W))
+    # - 1), closes on the printed 55.2 m2 for the workroom. For the former
+    # reverberation room the printed 81.08 dB gives 57.1 m2 rather than the
+    # 97.7 m2 beside it; that column would need 79.74 dB. The absorption area
     # is the value the study carries downstream, so it is the one to use.
     def absorption_area(level: float) -> float:
         surface_m2 = oracle.BAUA_DIRECT_SURFACE_M2
@@ -810,7 +810,7 @@ def test_the_baua_reverberation_room_level_does_not_fit_its_absorption_area() ->
 def test_the_barron_example_prints_both_a_weighted_totals() -> None:
     # The difference of two A-weighted totals hardly constrains the weighting
     # table at all: a whole decibel of error in any one band moves D_pA by at
-    # most 0,07 dB. The totals themselves do, and the result object does not
+    # most 0.07 dB. The totals themselves do, and the result object does not
     # publish them, so this reaches the helper that forms them.
     from phonometry.noise_control.enclosure_insulation import _a_weighted_total
 
@@ -855,10 +855,10 @@ def test_the_smith_example_gives_one_enclosure_two_a_weighted_values() -> None:
 
 
 def test_definition_3_14_counts_the_opening_in_the_interior_surface() -> None:
-    # The book prints the wall area without the opening, 95,75 m2, and the
+    # The book prints the wall area without the opening, 95.75 m2, and the
     # opening fraction over the two added back together. The leak ratio of
     # definition 3.14 takes the interior surface with the openings counted in,
-    # which is the same 96 m2, and reaches the same printed 2,6e-3.
+    # which is the same 96 m2, and reaches the same printed 2.6e-3.
     ratio = noise_control.leak_ratio(
         oracle.SCHIRMER_OPENING_M2,
         oracle.SCHIRMER_WALLS_M2 + oracle.SCHIRMER_OPENING_M2,

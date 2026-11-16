@@ -37,7 +37,7 @@ with $r_0$ = 1 m. The two derived quantities are a least-squares slope
 over a range of positions,
 
 $$
-\mathrm{DL}_2 = -0,3 \, \frac{z \sum D_i \lg(r_i/r_0) - \sum D_i \sum \lg(r_i/r_0)} {z \sum [\lg(r_i/r_0)]^2 - [\sum \lg(r_i/r_0)]^2} \tag{5}
+\mathrm{DL}_2 = -0.3 \, \frac{z \sum D_i \lg(r_i/r_0) - \sum D_i \sum \lg(r_i/r_0)} {z \sum [\lg(r_i/r_0)]^2 - [\sum \lg(r_i/r_0)]^2} \tag{5}
 $$
 
 with $z = m - n + 1$, and the difference from the reference curve,
@@ -49,30 +49,30 @@ $$
 averaged over a distance range by Equation (7) or read off the regression line
 at one conventional distance by Equation (8).
 
-**The 0,3 of Equation (5).** The slope of a least-squares fit of $D$
+**The 0.3 of Equation (5).** The slope of a least-squares fit of $D$
 against $\lg r$ is a rate per decade; a doubling is $\lg 2$ of a
-decade, which is 0,301 03. The clause prints 0,3, and that is what
+decade, which is 0.301 03. The clause prints 0.3, and that is what
 [`DECADE_TO_DOUBLING`](/phonometry/reference/api/rooms/spatial-decay/#decade_to_doubling) carries, because the printed constant is what
 reproduces the printed results. Equation (8) prints $\lg 2$ in full a page
 later, so the two are not the same number in the same document; the difference
-is 0,3 % of a slope and the errata registry records it.
+is 0.3 % of a slope and the errata registry records it.
 
 **Two spectra.** A curve measured in octave bands can be collapsed onto the
 spectrum of a real machine by Equation (3), or onto the A-weighted pink noise of
 Table 1 by Equation (4), which is what a room gets judged by when nobody knows
 yet what will be installed in it.
 
-**The 6,2 of Equation (4).** The constant is the energy sum of the
-A-weighting curve over the six octaves, 6,23 dB, printed to one decimal, and it
+**The 6.2 of Equation (4).** The constant is the energy sum of the
+A-weighting curve over the six octaves, 6.23 dB, printed to one decimal, and it
 is there so that a flat curve comes back unchanged. Table 1 prints the same
 curve to one decimal weight by weight, and the six printed weights sum to
-6,251 5 dB, so the printed equation returns a flat curve 0,05 dB high.
-[`NORMALIZED_OFFSET_DB`](/phonometry/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6,2 on the same rule as the
-0,3 above: four printings print it and a reader checking against the page will
+6.251 5 dB, so the printed equation returns a flat curve 0.05 dB high.
+[`NORMALIZED_OFFSET_DB`](/phonometry/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6.2 on the same rule as the
+0.3 above: four printings print it and a reader checking against the page will
 use it. Annex C was normalised exactly: its normalized column and its
 Table C.10 land inside the printed rounding under Equation (3) with the Table 1
 weights and one unit high in the last place under the printed constant, so
-every value this module normalizes stands 0,05 dB above the annex. The errata
+every value this module normalizes stands 0.05 dB above the annex. The errata
 registry records it. Equation (3) with the Table 1 weights as the machine
 spectrum is Equation (4) normalised exactly, for whoever needs the annex's
 reading.
@@ -468,7 +468,7 @@ it does not average the measured points, it reads the line, so a single
 outlying position moves it much less.
 
 Note that the clause divides by $\lg 2$ in full here while Equation
-(5) multiplies by the rounded 0,3; the two constants differ by 0,3 % and
+(5) multiplies by the rounded 0.3; the two constants differ by 0.3 % and
 the errata registry records it.
 
 **Parameters**
@@ -560,7 +560,7 @@ normalized_distribution_value(
 The curve collapsed onto A-weighted pink noise, Equation (4).
 
 $$
-D_\mathrm{Norm} = 10 \lg \sum_j 10^{(D_j + P_j)/10} \ \text{dB} - 6,2 \ \text{dB}
+D_\mathrm{Norm} = 10 \lg \sum_j 10^{(D_j + P_j)/10} \ \text{dB} - 6.2 \ \text{dB}
 $$
 
 with $P_j$ from Table 1. It is Equation (3) with one spectrum fixed,
@@ -568,11 +568,11 @@ and 4.2.3 says why that spectrum is a normalisation and not an average
 industrial machine: the spectra met in practice are too varied for any
 average to mean anything.
 
-The 6,2 dB is the energy sum of the A-weighting curve printed to one
-decimal, and the six printed weights of Table 1 sum to 6,251 5 dB, so the
-printed equation returns a flat curve 0,05 dB high. It is used as printed:
+The 6.2 dB is the energy sum of the A-weighting curve printed to one
+decimal, and the six printed weights of Table 1 sum to 6.251 5 dB, so the
+printed equation returns a flat curve 0.05 dB high. It is used as printed:
 the result is what a hand evaluation of the printed equation gives, which
-is 0,05 dB above Annex C, normalised exactly (see the errata registry). For
+is 0.05 dB above Annex C, normalised exactly (see the errata registry). For
 the exact normalisation, which returns a flat curve unchanged, call
 [`spectrum_distribution_value`](/phonometry/reference/api/rooms/spatial-decay/#spectrum_distribution_value) with the values of
 [`PINK_NOISE_WEIGHTS_DB`](/phonometry/reference/api/rooms/spatial-decay/#pink_noise_weights_db) as the machine spectrum.
@@ -687,7 +687,7 @@ D_\mathrm{ref}(r) = 10 \lg \frac{r_0^2}{4 \pi r^2} = 20 \lg \frac{r_0}{r} - 11 \
 $$
 
 The clause prints both forms and they are the same number to within the
-rounding of the 11: $10 \lg 4\pi$ is 10,99. The printed 11 is what is
+rounding of the 11: $10 \lg 4\pi$ is 10.99. The printed 11 is what is
 used here, because it is the curve the standard draws in its own figures.
 
 **Parameters**
@@ -814,11 +814,11 @@ spatial_decay_rate(
 The rate of spatial decay per distance doubling, Equation (5).
 
 $$
-\mathrm{DL}_2 = -0,3 \, \frac{z \sum D_i \lg(r_i/r_0) - \sum D_i \sum \lg(r_i/r_0)} {z \sum [\lg(r_i/r_0)]^2 - [\sum \lg(r_i/r_0)]^2} \ \text{dB}
+\mathrm{DL}_2 = -0.3 \, \frac{z \sum D_i \lg(r_i/r_0) - \sum D_i \sum \lg(r_i/r_0)} {z \sum [\lg(r_i/r_0)]^2 - [\sum \lg(r_i/r_0)]^2} \ \text{dB}
 $$
 
 A free field gives 6 dB, a perfectly diffuse room gives 0, and a real
-workroom sits between them: 4,6 dB in the middle range of the Annex C
+workroom sits between them: 4.6 dB in the middle range of the Annex C
 example, which is a large and moderately fitted shipyard hall.
 
 The sign is the way round a reader expects: the regression slope is

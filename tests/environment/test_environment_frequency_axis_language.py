@@ -5,7 +5,7 @@
 :func:`~phonometry._i18n.localize_axes` cannot reach tick labels installed as
 fixed strings, so the octave labels are written by ``format_frequency_axis``
 and by nothing else: a renderer that does not pass its ``language`` on draws
-``31.5`` in a Spanish figure. The curve below starts at 31,5 Hz, the lowest
+``31.5`` in a Spanish figure. The curve below starts at 31.5 Hz, the lowest
 octave centre whose label carries a decimal, because a label without one proves
 nothing.
 """
@@ -37,7 +37,7 @@ def _close_figures() -> Iterator[None]:
 
 
 def _tick_labels(language: str) -> list[str]:
-    # 31,5 Hz is below the 50 Hz start of Table 1, and the result warns about it.
+    # 31.5 Hz is below the 50 Hz start of Table 1, and the result warns about it.
     with pytest.warns(AtmosphericAbsorptionWarning, match="tabulated range"):
         result = atmospheric_attenuation([31.5, 63.0, 125.0, 250.0, 500.0])
     ax: Axes = result.plot(language=language)

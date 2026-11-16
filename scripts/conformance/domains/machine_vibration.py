@@ -52,7 +52,7 @@ _TOLERANCE = 0.05
 #: typically drawn from, mm/s r.m.s. Read against the rendered page on
 #: 2026-09-05 together with the fourteen rungs of the ladder the table is drawn
 #: on, which live in ``TYPICAL_BOUNDARY_LADDER_MM_S``; nothing differs. Nine of
-#: the ladder's thirteen steps are the factor of about 1,6 that makes it R5,
+#: the ladder's thirteen steps are the factor of about 1.6 that makes it R5,
 #: and the four in the middle of the run are closer together than that.
 _PRINTED_RANGES = {
     "A/B": (0.71, 4.5),
@@ -77,7 +77,7 @@ def _chk_vector_change() -> Outcome:
     """The whole point of Criterion II, in one printed number.
 
     A magnitude that fell by half a millimetre per second while the phase swung
-    140 degrees is a change of 5,2 mm/s, ten times what the magnitudes say.
+    140 degrees is a change of 5.2 mm/s, ten times what the magnitudes say.
     """
     result = ph.vibration.vibration_vector_change(*_INITIAL, *_FINAL)
     return numeric(
@@ -91,7 +91,7 @@ def _chk_vector_change() -> Outcome:
     "Change a magnitude comparison would report, mm/s",
 )
 def _chk_magnitude_change() -> Outcome:
-    """The number the annex prints to argue against: 2,5 minus 3,0."""
+    """The number the annex prints to argue against: 2.5 minus 3.0."""
     result = ph.vibration.vibration_vector_change(*_INITIAL, *_FINAL)
     return numeric(
         _PRINTED_MAGNITUDE_CHANGE,
@@ -253,7 +253,7 @@ _PRINTED_INDUSTRIAL: dict[
     ("group_2", "flexible"): ((37.0, 71.0, 113.0), (2.3, 4.5, 7.1)),
 }
 #: 5.3 and 5.4: a change past a quarter of the upper limit of zone B is
-#: significant, and neither operational limit should exceed 1,25 times the
+#: significant, and neither operational limit should exceed 1.25 times the
 #: limit it is set from.
 _PRINTED_CHANGE_FRACTION = 0.25
 _PRINTED_HEADROOM = 1.25
@@ -326,7 +326,7 @@ def _chk_alarm_offset() -> Outcome:
     "ALARM ceiling, as a multiple of the zone B/C boundary",
 )
 def _chk_alarm_ceiling() -> Outcome:
-    """However high the baseline climbs, 1,25 times the limit is the cap."""
+    """However high the baseline climbs, 1.25 times the limit is the cap."""
     upper = 4.5
     capped = ph.vibration.alarm_limit(1000.0, upper)
     return numeric(_PRINTED_HEADROOM, capped / upper, 0.0005, places=4)

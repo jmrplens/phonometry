@@ -6,7 +6,7 @@
 fixed strings, so the octave labels of these figures are written by
 ``format_frequency_axis`` (or ``_format_freq`` for band categories) and by
 nothing else: a renderer that does not pass its ``language`` on draws ``31.5``
-in a Spanish figure. Every figure below spans 31,5 Hz, the lowest octave centre
+in a Spanish figure. Every figure below spans 31.5 Hz, the lowest octave centre
 whose label carries a decimal, because a label without one proves nothing.
 
 The marker entries (``fco``, ``fo``) are mathtext, which the save-time comma
@@ -113,7 +113,7 @@ def _radiated_power(language: str) -> Axes:
     )
     # EN 12354-4 works in the octaves from 63 Hz, and none of their labels
     # carries a decimal, so the band centres are moved one octave down to reach
-    # 31,5 Hz; the levels drawn over them are left as computed.
+    # 31.5 Hz; the levels drawn over them are left as computed.
     shifted = dataclasses.replace(result, frequencies=np.array(_OCTAVES[:-1]))
     return shifted.plot(language=language)
 

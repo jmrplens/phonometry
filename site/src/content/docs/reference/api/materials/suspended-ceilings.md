@@ -14,16 +14,16 @@ choices move the answer by more than the measurement uncertainty, so a product
 measured in two laboratories could be compared only by accident. This test code
 closes them.
 
-**What it fixes.** A specimen area as close to 10,80 m2 as the product allows,
-test objects of 0,6 m by 0,6 m butted together with no seal in the joints
+**What it fixes.** A specimen area as close to 10.80 m2 as the product allows,
+test objects of 0.6 m by 0.6 m butted together with no seal in the joints
 between them, the exposed face level with the top of the mounting fixture and
 the joint between the specimen and that fixture taped, the edges at an angle to
 the room walls, and a mounting fixture of solid material with a surface density
 of at least 20 kg/m2. For the type E mounting that a suspended ceiling actually
 uses, it fixes the overall depth of construction at 200 mm for the measurement
 that CE marking rests on, the substructure at no more than 30 mm wide and 50 mm
-deep on a pitch of about 0,6 m, the support units under it at no more than
-50 mm by 50 mm in cross-section and at least 1,2 m apart, and the deflection of
+deep on a pitch of about 0.6 m, the support units under it at no more than
+50 mm by 50 mm in cross-section and at least 1.2 m apart, and the deflection of
 the specimen at no more than 5 mm.
 
 **What it costs to ignore the air.** 4.2.1 asks for test conditions under which
@@ -33,7 +33,7 @@ $$
 \Delta\alpha = \frac{4V(m_2 - m_1)}{S}
 $$
 
-of EN ISO 354 Formulae (8) and (9) stays under 0,05 at every frequency, with
+of EN ISO 354 Formulae (8) and (9) stays under 0.05 at every frequency, with
 the relative humidity at 50 % or more. That correction is the difference between
 two measurements of the same room on two different days, and a dry room makes it
 large exactly where a ceiling absorbs most.
@@ -41,7 +41,7 @@ large exactly where a ceiling absorbs most.
 **What it is worth.** Table 1 is the reproducibility between European
 laboratories, from the round robin of Annex A: `+/- 0,23` on the absorption
 coefficient at 125 Hz and 250 Hz, falling to `+/- 0,10` at 1 kHz and 2 kHz,
-and `+/- 0,08` on the weighted rating, with a coverage factor of 2,8 applied
+and `+/- 0,08` on the weighted rating, with a coverage factor of 2.8 applied
 to the reproducibility standard deviation. The figures hold for a plane absorber
 with the type E mounting and for nothing else, which the clause says in as many
 words.
@@ -190,7 +190,7 @@ pass an arrangement the clause fails.
 
 *property*
 
-How far the area sits from the 10,80 m2 the code aims at, reported and not judged.
+How far the area sits from the 10.80 m2 the code aims at, reported and not judged.
 
 ### CeilingSpecimenCheck.ce_marking_depth
 
@@ -249,13 +249,13 @@ Whether the support units stay inside 50 mm by 50 mm in cross-section (4.1.1.2.3
 
 *property*
 
-Whether the support units stand at least 1,2 m apart, when the distance was given (4.1.1.2.3.6).
+Whether the support units stand at least 1.2 m apart, when the distance was given (4.1.1.2.3.6).
 
 ### CeilingSpecimenCheck.supports_ok
 
 *property*
 
-Whether the support units stay inside 50 mm by 50 mm and stand 1,2 m apart.
+Whether the support units stay inside 50 mm by 50 mm and stand 1.2 m apart.
 
 The centre distance is judged only when it was given (4.1.1.2.3.6).
 
@@ -289,7 +289,7 @@ it that a number of the arrangement as built can be held to:
   (4.1.1.2.3.4);
 * a deflection of the specimen of no more than 5 mm (4.1.1.2.3.5);
 * support units no larger than 50 mm by 50 mm in cross-section, at centre
-  distances of at least 1,2 m (4.1.1.2.3.6);
+  distances of at least 1.2 m (4.1.1.2.3.6);
 * when it is given, a relative humidity of at least 50 % in every
   measurement (4.2.2, checked for each measurement by 4.2.3).
 
@@ -308,7 +308,7 @@ which is a target and not a tolerance. And whether a type E depth is the
 compiled from: another depth is said in the warning and passes.
 
 Three printed figures are targets to build to and are not judged at all:
-the 0,6 m by 0,6 m test object of 4.1.1.1.2 ([`TEST_OBJECT_SIZE_M`](/phonometry/reference/api/materials/suspended-ceilings/#test_object_size_m)),
+the 0.6 m by 0.6 m test object of 4.1.1.1.2 ([`TEST_OBJECT_SIZE_M`](/phonometry/reference/api/materials/suspended-ceilings/#test_object_size_m)),
 which "should" be that size and otherwise the closest in the product
 range; the 10 degree edge angle of 4.1.1.1.5
 ([`MIN_ROOM_EDGE_ANGLE_DEG`](/phonometry/reference/api/materials/suspended-ceilings/#min_room_edge_angle_deg)), which "should be aimed at"; and the

@@ -16,9 +16,9 @@ report single cells against the figure on the page, at a tolerance far tighter
 than the printed one, because that is what the reproduction actually achieves.
 
 Two of the sampled cells are there because they decide a convention the tables
-do not print: the continuous row of Table 7 lands on 0,565 only when it is
+do not print: the continuous row of Table 7 lands on 0.565 only when it is
 filled from ``t = 0``, and the linear MTVV of the ``Wk`` continuous row lands
-on 0,364 only when the filtering starts from rest.
+on 0.364 only when the filtering starts from rest.
 
 Oracle: ISO 8041-1:2017, printed folios 17, 18 and 19 (PDF pages 25, 26 and
 27): Table 6 (saw-tooth signal burst test signal characteristics) and Tables 7,
@@ -201,7 +201,7 @@ _register_sampled()
     "Saw-tooth frequency of the whole-body burst, Hz",
 )
 def _chk_whole_body_frequency() -> Outcome:
-    """100 rad/s, printed beside it as 15,915 Hz."""
+    """100 rad/s, printed beside it as 15.915 Hz."""
     return numeric(
         15.915,
         ph.vibration.SAWTOOTH_BURST_TESTS["whole-body"].frequency_hz,
@@ -218,7 +218,7 @@ def _chk_whole_body_frequency() -> Outcome:
     "Saw-tooth frequency of the hand-arm burst, Hz",
 )
 def _chk_hand_arm_frequency() -> Outcome:
-    """500 rad/s, printed beside it as 79,58 Hz."""
+    """500 rad/s, printed beside it as 79.58 Hz."""
     return numeric(
         79.58,
         ph.vibration.SAWTOOTH_BURST_TESTS["hand-arm"].frequency_hz,
@@ -235,7 +235,7 @@ def _chk_hand_arm_frequency() -> Outcome:
     "Saw-tooth frequency of the low-frequency whole-body burst, Hz",
 )
 def _chk_low_frequency_frequency() -> Outcome:
-    """2,5 rad/s, printed beside it as 0,3979 Hz."""
+    """2.5 rad/s, printed beside it as 0.3979 Hz."""
     return numeric(
         0.3979,
         ph.vibration.SAWTOOTH_BURST_TESTS["low-frequency-whole-body"].frequency_hz,

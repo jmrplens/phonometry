@@ -10,7 +10,7 @@ Oracles, with the source reference in each test docstring:
 * **Hopkins Fig. 4.35** (printed p. 468) for the mass-spring-mass resonance of
   a fully specified masonry cavity wall with and without ties: the caption
   prints ``fmsm = 26 Hz`` for the untied wall and ``fmsm = 50 Hz`` once
-  2,5 ties/m2 of ``k = 2 x 10**6 N/m`` are added, and cross-checks the same
+  2.5 ties/m2 of ``k = 2 x 10**6 N/m`` are added, and cross-checks the same
   plate with ``fc = 295 Hz`` and the first cross-cavity mode at 2287 Hz.
 * **Hopkins Eqs. 4.87, 4.88 and 4.89** and **Eq. 2.190** for the closed forms.
 
@@ -44,8 +44,8 @@ HOPKINS_TABLE_A4 = {
 }
 
 #: Hopkins Fig. 4.35 (printed p. 468), SEA model of a masonry cavity wall.
-#: Leaves 4 m x 2,5 m, h = 0,1 m, rho_s = 140 kg/m2, cL = 2200 m/s, nu = 0,2;
-#: empty cavity Lz = 0,075 m; wall ties 2,5 per m2 with k = s_75mm = 2e6 N/m.
+#: Leaves 4 m x 2.5 m, h = 0.1 m, rho_s = 140 kg/m2, cL = 2200 m/s, nu = 0.2;
+#: empty cavity Lz = 0.075 m; wall ties 2.5 per m2 with k = s_75mm = 2e6 N/m.
 FIG_4_35_SURFACE_DENSITY = 140.0
 FIG_4_35_CAVITY_DEPTH = 0.075
 FIG_4_35_TIES_PER_AREA = 2.5
@@ -53,7 +53,7 @@ FIG_4_35_TIE_STIFFNESS = 2.0e6
 FIG_4_35_FMSM_UNTIED = 26.0
 FIG_4_35_FMSM_TIED = 50.0
 
-#: Hopkins uses rho0 c0**2 = 1,42e5 Pa for the cavity air stiffness, quoted as
+#: Hopkins uses rho0 c0**2 = 1.42e5 Pa for the cavity air stiffness, quoted as
 #: such throughout Chapter 4; expressed as the density that goes with
 #: c0 = 343 m/s so it can be handed to the library's air-stiffness term.
 HOPKINS_AIR_DENSITY = 1.42e5 / 343.0**2
@@ -87,7 +87,7 @@ def test_wall_tie_table() -> None:
 def test_wall_tie_stiffness_ordering() -> None:
     """Table A4 spans nearly two decades at the same 50 mm cavity.
 
-    Butterfly 1,7 MN/m, double-triangle 16,1 MN/m and vertical-twist 94,0 MN/m
+    Butterfly 1.7 MN/m, double-triangle 16.1 MN/m and vertical-twist 94.0 MN/m
     are the same three values that Hopkins, Wilson & Craik (1999) Table 1
     prints for a 50 mm spacing, and they order butterfly < double-triangle <
     vertical-twist by a factor of about 55 end to end.
@@ -105,7 +105,7 @@ def test_unknown_tie_is_rejected() -> None:
 
 
 def test_stiffness_per_area_from_a_named_tie() -> None:
-    """Eq. 4.89's N k / S term: 2,5 vertical-twist ties per m2 at 100 mm."""
+    """Eq. 4.89's N k / S term: 2.5 vertical-twist ties per m2 at 100 mm."""
     per_area = building.wall_tie_stiffness_per_area(2.5, "vertical_twist_100mm")
     assert per_area == pytest.approx(2.5 * 43.4e6)
 
@@ -126,7 +126,7 @@ def test_fig_4_35_untied_resonance() -> None:
     """Hopkins Fig. 4.35, scenario A (no ties): the caption prints fmsm = 26 Hz.
 
     Two 140 kg/m2 leaves across an empty 75 mm cavity, air stiffness
-    rho0 c0**2 / d = 1,42e5 / 0,075 = 1,893e6 N/m3 over the equivalent surface
+    rho0 c0**2 / d = 1.42e5 / 0.075 = 1.893e6 N/m3 over the equivalent surface
     density 140 x 140 / 280 = 70 kg/m2.
     """
     f0 = building.mass_spring_mass_resonance(
@@ -140,9 +140,9 @@ def test_fig_4_35_untied_resonance() -> None:
 
 
 def test_fig_4_35_tied_resonance() -> None:
-    """Hopkins Fig. 4.35, scenario B (2,5 ties/m2, k = 2e6 N/m): fmsm = 50 Hz.
+    """Hopkins Fig. 4.35, scenario B (2.5 ties/m2, k = 2e6 N/m): fmsm = 50 Hz.
 
-    The tie array adds N k / S = 5,0e6 N/m3 in parallel with the 1,893e6 N/m3
+    The tie array adds N k / S = 5.0e6 N/m3 in parallel with the 1.893e6 N/m3
     air spring, so the resonance nearly doubles.
     """
     ties = building.wall_tie_stiffness_per_area(
@@ -160,9 +160,9 @@ def test_fig_4_35_tied_resonance() -> None:
 
 
 def test_fig_4_35_resonance_pair_with_the_library_default_air() -> None:
-    """The same pair with the library's default air (1,205 kg/m3, 343 m/s).
+    """The same pair with the library's default air (1.205 kg/m3, 343 m/s).
 
-    The default air stiffness differs from Hopkins' rounded 1,42e5 Pa by 0,2 %,
+    The default air stiffness differs from Hopkins' rounded 1.42e5 Pa by 0.2 %,
     which does not move either printed integer.
     """
     kwargs = {
@@ -254,7 +254,7 @@ def test_double_wall_without_ties_is_bit_identical() -> None:
 
     Swept over a realistic construction space, the default path has to return
     exactly the same floating-point values as before the tie term existed,
-    which is what ``tie_stiffness_per_area = 0`` adding 0,0 to the stiffness
+    which is what ``tie_stiffness_per_area = 0`` adding 0.0 to the stiffness
     guarantees.
     """
     freqs = np.logspace(np.log10(50.0), np.log10(5000.0), 31)
@@ -326,7 +326,7 @@ def test_a_stiff_tie_approaches_the_rigid_limit_at_low_frequency() -> None:
 def test_a_resilient_tie_rolls_off_as_one_over_frequency_cubed() -> None:
     """Once |Yc| >> Yi + Yj, Eq. 4.87 goes as 1/omega x 1/omega**2.
 
-    The butterfly tie at 1,7 MN/m is soft enough to be in that regime well
+    The butterfly tie at 1.7 MN/m is soft enough to be in that regime well
     inside the building acoustics range for masonry leaves.
     """
     freqs = np.array([1000.0, 2000.0, 4000.0])

@@ -7,7 +7,7 @@ Figure A.1, the extremes of the scales at :math:`\pm(4 + \sqrt{32})`, and one
 attribute raised alone along its own axis of the figure; Spearman's
 coefficient without ties is Pearson's of the ranks, and with ties Formula
 (A.4) is checked against :func:`scipy.stats.spearmanr`, Pearson's of (B.1)
-and (B.2) against :func:`scipy.stats.pearsonr`. The printed values (the 9,66
+and (B.2) against :func:`scipy.stats.pearsonr`. The printed values (the 9.66
 of A.3, Tables A.1, B.1) come from ``reference_data``. The derived subset of
 the International Soundscape Database (CC BY 4.0) is a consistency check: real
 ordinal answers with heavy ties, and 26 real sites whose pleasantness falls as
@@ -717,7 +717,7 @@ def _environment(**changes: object) -> sc.SoundscapeAcousticEnvironment:
         "sound_sources": "birdsong, water, distant traffic",
         "weather_and_wind": "dry, light wind",
         "time_of_year_and_day": "June, 14:00 to 16:00",
-        "measurement_points": "three points, artificial head at 1,6 m facing the pond",
+        "measurement_points": "three points, artificial head at 1.6 m facing the pond",
         "measurement_results": _RESULTS,
         "site_description": "urban park, Japanese garden",
     }

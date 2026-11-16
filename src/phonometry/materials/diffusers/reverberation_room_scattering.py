@@ -92,14 +92,14 @@ __all__ = [
 #: re-derived here.
 _SABINE_CONSTANT = 55.3
 
-#: Reference speed of sound of ISO 17497-1 Eq. (2), in m/s (343,2 exactly).
+#: Reference speed of sound of ISO 17497-1 Eq. (2), in m/s (343.2 exactly).
 _C_REF = 343.2
 
 #: Reference absolute temperature of ISO 17497-1 Eq. (2), in kelvin, i.e.
-#: 273,15 + 20 degC = 293,15 K.
+#: 273.15 + 20 degC = 293.15 K.
 _T_REF_K = 293.15
 
-#: Celsius-to-kelvin offset used by ISO 17497-1 Eq. (2) (273,15).
+#: Celsius-to-kelvin offset used by ISO 17497-1 Eq. (2) (273.15).
 _T0 = 273.15
 
 #: Minimum number ``N`` of spatially-averaged reverberation-time measurements
@@ -426,7 +426,7 @@ def scattering_coefficient(
 
     Following the presentation rule of Clause 8.3, negative results are
     truncated to 0 while values greater than 1 (which can occur through edge
-    effects, Clause 6.3.2) are **kept** and reported. Rounding to 0,01 for a
+    effects, Clause 6.3.2) are **kept** and reported. Rounding to 0.01 for a
     results table is left to the caller.
 
     :param alpha_spec: Specular absorption coefficient ``alpha_spec`` (Eq. (4)).

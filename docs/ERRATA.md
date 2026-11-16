@@ -58,16 +58,16 @@ in the same order.
   defines $C_I$ from the energy sum over 100 Hz to 2500 Hz (the first fifteen
   one-third-octave bands); the printed value only reproduces if the 3150 Hz
   band is included, contradicting A.2.1. The correct sum over 100 Hz to 2500
-  Hz is 83,2613 dB, rounded 83, giving $C_I = -11$. (b) Even read as the
+  Hz is 83.2613 dB, rounded 83, giving $C_I = -11$. (b) Even read as the
   sixteen-band sum the printed digits are wrong in the last place: the
-  bare-floor $L_n$ column sums to 83,523 4 dB, not the printed 83,523 **8**
+  bare-floor $L_n$ column sums to 83.523 4 dB, not the printed 83.523 **8**
   dB. The defect is confined to that cell, since the with-covering column of
-  the same table prints $L_{n,\text{sum}} = 76{,}059\,3\ldots$ and recomputes
-  to 76,059 29 dB, reproducing every printed digit. Neither (a) nor (b)
+  the same table prints $L_{n,\text{sum}} = 76.059\,3\ldots$ and recomputes
+  to 76.059 29 dB, reproducing every printed digit. Neither (a) nor (b)
   changes the rounded 84 dB, so only (a) moves $C_I$.
 - **Evidence:** independent recomputation of both sums from the printed
-  per-band levels (16 bands 83,523 38 dB, 15 bands 83,261 27 dB, with-covering
-  16 bands 76,059 29 dB); the 2013 edition of the same example prints
+  per-band levels (16 bands 83.523 38 dB, 15 bands 83.261 27 dB, with-covering
+  16 bands 76.059 29 dB); the 2013 edition of the same example prints
   $C_I = -11$. Verified on PDF page 23 (printed p. 17) and PDF page 17
   (printed p. 11) of ISO 717-2:2020, and of PDF page 22 (printed p. 14) of ISO
   717-2:2013.
@@ -87,28 +87,28 @@ in the same order.
   $C_I = 75 - 15 - 63 = -3\ \text{dB}$, feeding
   $\Delta L_\text{lin} = 78 - 11 - (63 - 3) = 7\ \text{dB}$.
 - **The problem:** two independent defects. (a) The normative Table 4
-  reference floor is 71,5 dB at 800 Hz, and the column itself is a clean +0,5
-  dB per one-third octave ramp from 67,0 dB at 100 Hz to 72,0 dB at 1000 Hz,
-  which the printed 71,0 dB breaks by repeating the 630 Hz cell. The misprint
+  reference floor is 71.5 dB at 800 Hz, and the column itself is a clean +0.5
+  dB per one-third octave ramp from 67.0 dB at 100 Hz to 72.0 dB at 1000 Hz,
+  which the printed 71.0 dB breaks by repeating the 630 Hz cell. The misprint
   propagates along its own row and into the table's total, three further cells
   the table prints and this entry previously did not name: the
-  $L_{n,r,0} - \Delta L$ cell at 800 Hz is printed 64,0 dB
-  ($= 71{,}0 - 7{,}0$) where 71,5 gives 64,5; the unfavourable deviation is
-  printed 3,0 dB ($= 64{,}0 - 61$) where the corrected cell gives 3,5; and the
-  printed `Sum 27,9` is the sum of the thirteen unfavourable deviations
-  including that 3,0, where the corrected chain gives 28,4. None of it moves
-  the rating: 28,4 dB is still below the 32,0 dB shift criterion, so
+  $L_{n,r,0} - \Delta L$ cell at 800 Hz is printed 64.0 dB
+  ($= 71.0 - 7.0$) where 71.5 gives 64.5; the unfavourable deviation is
+  printed 3.0 dB ($= 64.0 - 61$) where the corrected cell gives 3.5; and the
+  printed “Sum 27,9” is the sum of the thirteen unfavourable deviations
+  including that 3.0, where the corrected chain gives 28.4. None of it moves
+  the rating: 28.4 dB is still below the 32.0 dB shift criterion, so
   $L_{n,w,r} = 63\ \text{dB}$ and $\Delta L_w = 15\ \text{dB}$ either way. (b)
-  The printed 75,2527 dB is exactly the energy sum of the *wrong column over
+  The printed 75.2527 dB is exactly the energy sum of the *wrong column over
   the wrong range*: the measured floor "with covering" over all sixteen bands
   100 Hz to 3150 Hz. A.2.1 defines $C_I$ from the reference floor with
   covering (the $L_{n,r,0} - \Delta L$ column) over 100 Hz to 2500 Hz (15
-  bands), which gives 75,674 dB (printed chain) or 75,710 dB (corrected 800 Hz
+  bands), which gives 75.674 dB (printed chain) or 75.710 dB (corrected 800 Hz
   cell), both round to 76 dB, so $C_{I,r} = 76 - 15 - 63 = -2$ either way,
   giving $C_{I,\Delta} = -11 - (-2) = -9$ and
   $\Delta L_\text{lin} = 6\ \text{dB}$, not the printed −3 / −8 / 7 dB chain.
 - **Evidence:** independent recomputation of every candidate sum and of every
-  cell of the 800 Hz row from the printed per-band values; the printed 75,2527
+  cell of the 800 Hz row from the printed per-band values; the printed 75.2527
   reproduces to all printed digits only as the 16-band sum of the
   with-covering column, and every other cell of the $L_{n,r,0} - \Delta L$ and
   deviation columns reproduces exactly from the printed reference floor, so
@@ -133,27 +133,27 @@ in the same order.
   plateau of 27,0 dB from 100 Hz to 500 Hz, then 28,0 dB at 630 Hz rising to
   44,6 dB at 3 150 Hz and 49,4 dB at 5 000 Hz.
 - **The problem:** Figure E.3 does not draw that curve. Read against its own
-  gridlines at the band centres, its plateau lies at 25,9 dB, 1,1 dB under the
+  gridlines at the band centres, its plateau lies at 25.9 dB, 1.1 dB under the
   table, and its rising branch runs one third-octave to the left of the
-  table's: the figure reads 30,5 dB at 630 Hz, 35,3 dB at 1 000 Hz and
-  42,5 dB at 2 000 Hz, where the table prints 30,5, 35,1 and 42,3 dB one band
-  higher, at 800, 1 250 and 2 500 Hz, and 28,0, 32,8 and 40,0 dB at 630,
-  1 000 and 2 000 Hz. The line stops near 2,2 kHz, so the figure has no
+  table's: the figure reads 30.5 dB at 630 Hz, 35.3 dB at 1 000 Hz and
+  42.5 dB at 2 000 Hz, where the table prints 30.5, 35.1 and 42.3 dB one band
+  higher, at 800, 1 250 and 2 500 Hz, and 28.0, 32.8 and 40.0 dB at 630,
+  1 000 and 2 000 Hz. The line stops near 2.2 kHz, so the figure has no
   curve for the table's 2 500 Hz to 5 000 Hz. Only the 50 Hz to 80 Hz start
   of the line agrees with the table. The drawing has been carried unchanged
   from ISO 10140-5, whose 2021 edition dropped both the figure and the table in
   favour of ISO 717-1. Figure E.2, redrawn for the 2020 edition, departs from
   its column as well, by less: its knee sits near 230 Hz instead of 250 Hz, so
-  its rising branch runs up to 1,2 dB above the table from 315 Hz to 630 Hz
-  (45,6 dB at 400 Hz where the table prints 44,4 dB), while Figure B.2 of
-  ISO 10140-5:2010+A1:2014 follows the same column within 0,3 dB. Figure E.1
-  follows its column within 0,3 dB.
+  its rising branch runs up to 1.2 dB above the table from 315 Hz to 630 Hz
+  (45.6 dB at 400 Hz where the table prints 44.4 dB), while Figure B.2 of
+  ISO 10140-5:2010+A1:2014 follows the same column within 0.3 dB. Figure E.1
+  follows its column within 0.3 dB.
 - **Evidence:** the line of each figure read at every band centre of the table
-  it illustrates; Figure E.3 gives 25,9 dB at 125, 160, 250 and 315 Hz, 28,0 dB
-  at 500 Hz, 30,5 dB at 630 Hz, 35,3 dB at 1 000 Hz, 37,7 dB at 1 250 Hz and
-  42,5 dB at 2 000 Hz, and no line at 2 500 Hz and above; Figure E.2 gives
-  40,7, 42,8, 45,6, 48,0 and 50,4 dB at 250, 315, 400, 500 and 630 Hz against
-  the printed 40,0, 41,8, 44,4, 46,8 and 49,3 dB. Verified on PDF pages 28
+  it illustrates; Figure E.3 gives 25.9 dB at 125, 160, 250 and 315 Hz, 28.0 dB
+  at 500 Hz, 30.5 dB at 630 Hz, 35.3 dB at 1 000 Hz, 37.7 dB at 1 250 Hz and
+  42.5 dB at 2 000 Hz, and no line at 2 500 Hz and above; Figure E.2 gives
+  40.7, 42.8, 45.6, 48.0 and 50.4 dB at 250, 315, 400, 500 and 630 Hz against
+  the printed 40.0, 41.8, 44.4, 46.8 and 49.3 dB. Verified on PDF pages 28
   to 31 (printed pp. 22 to 25) of ISO 717-1:2020, and on PDF pages 22 to 24
   (printed pp. 14 to 16) of ISO 10140-5:2010+A1:2014.
 - **Library behaviour:** publishes the table, not the figures.
@@ -243,8 +243,8 @@ in the same order.
 ## ISO 2631-5:2018, Annex C worked examples (male displayed formula, female R)
 
 - **Location:** Annex C: the displayed male worked example (82 kg male,
-  $m_z = 0{,}029\ \text{MPa}/(\text{m/s}^2)$, printed p. 19) and NOTE 5 (64 kg
-  female, $m_z = 0{,}025\ \text{MPa}/(\text{m/s}^2)$, printed p. 20).
+  $m_z = 0.029\ \text{MPa}/(\text{m/s}^2)$, printed p. 19) and NOTE 5 (64 kg
+  female, $m_z = 0.025\ \text{MPa}/(\text{m/s}^2)$, printed p. 20).
 - **The print:** (a) the male example is displayed as
 
   $$
@@ -258,27 +258,27 @@ in the same order.
 - **The problem:** two independent defects. (a) The displayed male formula
   omits the $-S_{\text{stat},i}$ term that normative Formula (C.3) puts in the
   denominator, and that the same annex fixes at
-  $S_\text{stat} = 0{,}029 \cdot 9{,}81 = 0{,}281\ \text{MPa}$ in the sentence
+  $S_\text{stat} = 0.029 \cdot 9.81 = 0.281\ \text{MPa}$ in the sentence
   that follows the where-list of Formula (C.3). Evaluated exactly as displayed
-  the sum gives $R = 1{,}1497$, which prints as 1,15, not the printed 1,22;
-  restoring the missing term gives 1,2168 with the printed
-  $S_\text{stat} = 0{,}281\ \text{MPa}$ and 1,2177 with the exact
-  $m_z \cdot 9{,}81 = 0{,}2845\ \text{MPa}$, i.e. the printed 1,22 either way.
+  the sum gives $R = 1.1497$, which prints as 1.15, not the printed 1.22;
+  restoring the missing term gives 1.2168 with the printed
+  $S_\text{stat} = 0.281\ \text{MPa}$ and 1.2177 with the exact
+  $m_z \cdot 9.81 = 0.2845\ \text{MPa}$, i.e. the printed 1.22 either way.
   The printed *result* is therefore right and the printed *formula* is not.
   (b) Exact recomputation of Formula (C.3) with NOTE 5's own inputs
-  ($m_z = 0{,}025$, age coefficient 0,039, $b = 20$, $n = 20$, $N = 120$)
-  gives $R = 0{,}9621$, which rounds to 0,96; the same code reproduces the
-  male example exactly, and the note's $S_d = 1{,}40\ \text{MPa}$ matches the
-  exact 1,3992, so the discrepancy is confined to the last digit of the
+  ($m_z = 0.025$, age coefficient 0.039, $b = 20$, $n = 20$, $N = 120$)
+  gives $R = 0.9621$, which rounds to 0.96; the same code reproduces the
+  male example exactly, and the note's $S_d = 1.40\ \text{MPa}$ matches the
+  exact 1.3992, so the discrepancy is confined to the last digit of the
   printed female $R$.
 - **Evidence:** term-by-term recomputation of the C.3 sum under both readings
   of the denominator, with the male example as the discriminator: the printed
-  1,22 is reachable only with $-S_\text{stat}$, and 1,15 only without it.
+  1.22 is reachable only with $-S_\text{stat}$, and 1.15 only without it.
   Verified on PDF pages 23 (printed p. 17), 24 (printed p. 18), 25 (printed p.
   19) and 26 (printed p. 20) of ISO 2631-5:2018.
 - **Library behaviour:** implements Formula (C.3) as written, with
-  $-S_\text{stat}$; the male anchor pins 1,22 and the female test anchor keeps
-  the printed 0,97 with a tolerance that documents the recomputed 0,9621.
+  $-S_\text{stat}$; the male anchor pins 1.22 and the female test anchor keeps
+  the printed 0.97 with a tolerance that documents the recomputed 0.9621.
 - **Status:** unreported.
 
 ## Ainslie (2010), Equation (4.6) vs its own folio 177, and the exponent of Equation (4.13)
@@ -300,19 +300,19 @@ in the same order.
   $\rho_\mathrm{w} = 1024{,}2\ \text{kg/m}^3$.
 - **The problem:** two defects, of different kinds.
 
-  (a) The 1024,2 of folio 177 does not follow from Equation (4.6) read with
+  (a) The 1024.2 of folio 177 does not follow from Equation (4.6) read with
   Equation (4.4). At 23 °C, salinity 35 and one atmosphere the equation gives
-  1024,287 9, which prints as 1024,3. The printed 1024,2 is what the equation
+  1024.287 9, which prints as 1024.3. The printed 1024.2 is what the equation
   gives with its pressure term set to zero, that is, reading $P_\mathrm{w}$ as
   a gauge pressure against the definition the same chapter states. The
-  difference is $0{,}043\,9\ \text{kg/m}^3$, or 4,3 parts in a hundred thousand.
+  difference is $0.043\,9\ \text{kg/m}^3$, or 4.3 parts in a hundred thousand.
 
   (b) Equation (4.13), which rearranges (4.6) to estimate salinity from a
-  measured density, prints the pressure coefficient as $4{,}3\times10^{-5}$
-  where (4.6) has $4{,}3\times10^{-7}$. Two orders of magnitude, and not a
+  measured density, prints the pressure coefficient as $4.3\times10^{-5}$
+  where (4.6) has $4.3\times10^{-7}$. Two orders of magnitude, and not a
   restatement of a different quantity: it is the same coefficient in the same
-  role. Carried through at 23 °C it gives $1028{,}63\ \text{kg/m}^3$ against 1024,29, an
-  error of 0,42 %.
+  role. Carried through at 23 °C it gives $1028.63\ \text{kg/m}^3$ against 1024.29, an
+  error of 0.42 %.
 - **Evidence:** Equation (4.6) evaluated at the stated conditions with the
   pressure of Equation (4.11), against the value folio 177 prints; and the two
   printed exponents compared directly. Verified on PDF pages 157, 158, 165 and
@@ -338,42 +338,42 @@ in the same order.
 - **The problem:** two of the five are not IEC 61094-2:2009 values. Table F.1 of
   that standard (printed folio 40) tabulates exactly five quantities at this
   state: $\rho$, $c_0$, $\kappa$, $\eta$ and the thermal **diffusivity**
-  $\alpha_t = 2{,}115\,317 \times 10^{-5}\ \text{m}^2\text{/s}$. It does not tabulate the
+  $\alpha_t = 2.115\,317 \times 10^{-5}\ \text{m}^2\text{/s}$. It does not tabulate the
   thermal conductivity or the specific heat capacity; those appear in Annex F
   only as the two expressions under Clause F.6, which print no values. The three
   Annex A.3 values that do match are precisely the three Table F.1 cells rounded
-  to four figures ($345{,}866\,52 \to 345{,}9$; $1{,}186\,084\,8 \to
-  1{,}186$; $1{,}400\,757\,3 \to 1{,}400\,8$). The two that do not match are
+  to four figures ($345.866\,52 \to 345.9$; $1.186\,084\,8 \to
+  1.186$; $1.400\,757\,3 \to 1.400\,8$). The two that do not match are
   precisely the two quantities Table F.1 does not print: evaluated at the same
-  state, Clause F.6 gives $k_\mathrm{a} = 0{,}025\,434\,1$ J/(s·m·K) and
-  $C_\mathrm{P} = 1013{,}74$ J/(kg·K), each larger than the printed pair by the
-  same factor 1,0800.
+  state, Clause F.6 gives $k_\mathrm{a} = 0.025\,434\,1$ J/(s·m·K) and
+  $C_\mathrm{P} = 1013.74$ J/(kg·K), each larger than the printed pair by the
+  same factor 1.0800.
 
   The common factor is not a coincidence and not a unit difference. The pair is
-  locked to the tabulated diffusivity: $0{,}023\,55 / (1{,}186 \times
-  2{,}115\,317 \times 10^{-5}) = 938{,}708\,5$, which prints as 938,7. So one
+  locked to the tabulated diffusivity: $0.023\,55 / (1.186 \times
+  2.115\,317 \times 10^{-5}) = 938.708\,5$, which prints as 938.7. So one
   of the two came from elsewhere and the other was computed back through
   Formula (F.5) to keep $\alpha_t$ right. Which one is foreign is settled by
-  thermodynamics rather than by preference: $C_\mathrm{P} = 938{,}7$ J/(kg·K) is
-  27,19 J/(mol·K), below the rigid-rotor diatomic floor $(7/2)R = 29{,}10$
+  thermodynamics rather than by preference: $C_\mathrm{P} = 938.7$ J/(kg·K) is
+  27.19 J/(mol·K), below the rigid-rotor diatomic floor $(7/2)R = 29.10$
   J/(mol·K), so it is not air at any temperature, in any unit, per mass or per
   mole, and the Annex F expression for $C_\mathrm{P}$ never falls below about
-  1013 J/(kg·K) anywhere from 200 K to 400 K. The conductivity 0,023 55
+  1013 J/(kg·K) anywhere from 200 K to 400 K. The conductivity 0.023 55
   J/(s·m·K), by contrast, is a real conductivity of air: it is what the Annex F
-  expression gives near −1,4 °C, outside the 15 °C to 27 °C domain Annex F
+  expression gives near −1.4 °C, outside the 15 °C to 27 °C domain Annex F
   prints for itself.
 - **Consequence for the annex's own example:** none. Formula (A.5) uses
   $k_\mathrm{a}$ and $C_\mathrm{P}$ only through the combination
   $k_\mathrm{a}/(\rho_0 c_0 C_\mathrm{P})$, and the common factor cancels
-  there, so both pairs give the printed $b = 1{,}83 \times 10^{-3}$ m and
-  $\kappa' = 1{,}370$. The defect is invisible inside Annex A.3 and appears only
+  there, so both pairs give the printed $b = 1.83 \times 10^{-3}$ m and
+  $\kappa' = 1.370$. The defect is invisible inside Annex A.3 and appears only
   when either constant is read out on its own, as a document credited with
   publishing it.
 - **Evidence:** the two printed pages against IEC 61094-2:2009 Table F.1
   (printed folio 40) and Clause F.6 (printed folio 39); the Clause F.6
   expressions evaluated at 23 °C, 101 325 Pa and 50 % RH, which reproduce the
-  printed $\alpha_t$ to $1{,}0 \times 10^{-7}$ relative; the molar heat
-  capacity implied by 938,7 J/(kg·K) against the diatomic floor. IEC 61094-2:2009
+  printed $\alpha_t$ to $1.0 \times 10^{-7}$ relative; the molar heat
+  capacity implied by 938.7 J/(kg·K) against the diatomic floor. IEC 61094-2:2009
   is not a normative reference of ISO 9053-2:2020; it appears only as
   Bibliography item [4]. Verified on PDF page 17 (printed p. 13) and PDF page 18
   (printed p. 14) of ISO 9053-2:2020, and on PDF page 42 (printed p. 40) and PDF
@@ -421,14 +421,14 @@ in the same order.
   element ($m_2 = m_4$) with the leaf ($m_1$) perpendicular, so the per-path
   $M$ is $\log_{10}(m_1/m_2)$, but the printed $K_{24}$ line only matches its
   own figure's curve when $M$ is read as the x-axis variable
-  $\log_{10}(m_2/m_1)$ (e.g. −2,4 dB at $m_2/m_1 = 3$, −5,4 dB at 10). Read
+  $\log_{10}(m_2/m_1)$ (e.g. −2.4 dB at $m_2/m_1 = 3$, −5.4 dB at 10). Read
   with the annex's declared $M$, the line contradicts the figure by
-  $28{,}2 \cdot |\log_{10}(m_2/m_1)|\ \text{dB}$. The same edition's other
+  $28.2 \cdot |\log_{10}(m_2/m_1)|\ \text{dB}$. The same edition's other
   $K_{24}$ line (Figure E.5, Formula (E.5)) *does* follow the declared
   per-path $M$, so the two $K_{24}$ prints of the 2000 edition silently use
   different conventions. ISO 12354-1:2017 E.3.5 prints the relation
   consistently in the per-path convention of its Formula (E.3),
-  $K_{24} = 3{,}0 + 14{,}1 M + 5{,}7 M^{2}$; the two editions agree
+  $K_{24} = 3.0 + 14.1 M + 5.7 M^{2}$; the two editions agree
   numerically (an earlier revision of this entry read the 2017 print as a sign
   misprint; re-derivation against both editions' figures shows it is a
   convention recast, not a defect of the 2017 text).
@@ -440,7 +440,7 @@ in the same order.
 - **Library behaviour:** implements the per-path convention uniformly
   (`junction_vibration_reduction`, mass_ratio = $m'_{\perp,i}/m'_i$ for every
   branch), so the E.7 double-leaf branch takes leaf-over-homogeneous ratios
-  below 1/3 and evaluates $3{,}0 + 14{,}1 M + 5{,}7 M^2$.
+  below 1/3 and evaluates $3.0 + 14.1 M + 5.7 M^2$.
 - **Status:** unreported.
 
 ## EN 12354-2:2000, Formula (3) vs Annex E.3 (standardized impact level)
@@ -452,11 +452,11 @@ in the same order.
   $31{,}25\ \text{m}^3$. Annex E.3 states "from equation (3):
   $L'_{nT,w} = L'_{n,w} - 10 \lg(V/30)$".
 - **The problem:** the annex's $V/30$ is a rounding of the formula's own
-  constant; the two differ by a constant 0,177 dB.
+  constant; the two differ by a constant 0.177 dB.
 - **Evidence:** direct algebra; both variants recomputed for the E.3 case
-  (42,959 vs 42,782 dB, both rounding to 43 in that example). Verified on PDF
+  (42.959 vs 42.782 dB, both rounding to 43 in that example). Verified on PDF
   page 7 (printed p. 5) and PDF page 34 (printed p. 32) of EN 12354-2:2000.
-- **Library behaviour:** implements the exact $0{,}032 \cdot V$ form and
+- **Library behaviour:** implements the exact $0.032 \cdot V$ form and
   documents the annex's rounding.
 - **Status:** unreported.
 
@@ -471,15 +471,15 @@ in the same order.
   equivalent sound absorption area, in square metres, for dwellings given as
   $10\ \text{m}^2$", and the where-list of clause 3.1.3 on the preceding page defines
   $T_0$ as "the reference reverberation time, in seconds, for dwellings given
-  as 0,5 s". So $0{,}16/(T_0 A_0) = 0{,}16/5 = 0{,}032$, not 0,32. Applied as
+  as 0,5 s". So $0.16/(T_0 A_0) = 0.16/5 = 0.032$, not 0.32. Applied as
   printed, the reduced form shifts every normalized façade level difference by
   exactly $10\log_{10} 10 = 10\ \text{dB}$. The exact analogue in the
   companion part, EN 12354-2:2000 Formula (3), prints the same algebra
   correctly:
-  $L'_{nT} = L'_n - 10 \lg[0{,}16\,V/(A_0 T_0)] = L'_n - 10 \lg 0{,}032\,V\ \text{dB}$.
+  $L'_{nT} = L'_n - 10 \lg[0.16\,V/(A_0 T_0)] = L'_n - 10 \lg 0.032\,V\ \text{dB}$.
   ISO 12354-3:2017 dropped the reduced form altogether: its Formula (5) prints
   only $D_{2m,n} = D_{2m,nT} - 10 \lg[C_\text{sab} V/(A_0 T_0)]$ with
-  $C_\text{sab} = 0{,}16\ \text{s/m}$.
+  $C_\text{sab} = 0.16\ \text{s/m}$.
 - **Evidence:** direct algebra with the standard's own $A_0$ and $T_0$, and
   the side-by-side comparison with the correctly reduced Formula (3) of Part
   2. Verified on PDF page 8 (printed p. 6) and PDF page 7 (printed p. 5) of EN
@@ -490,13 +490,13 @@ in the same order.
   the façade model computes $D_{2m,nT}$ from Formula (13)
   ([`facade.py`](../src/phonometry/building/prediction/facade.py)), and the
   survey method converts with the unreduced
-  $D_{2m,n} = D_{2m} + k + 10\log_{10}[A_0 T_0/(0{,}16 V)]$ of ISO 10052
+  $D_{2m,n} = D_{2m} + k + 10\log_{10}[A_0 T_0/(0.16 V)]$ of ISO 10052
   Clause 3.15
   ([`survey_insulation.py`](../src/phonometry/building/measurement/survey_insulation.py)).
   The two standardization constants that *are* pre-folded elsewhere in the
-  library are both correct: $0{,}032$ for the Part 2 impact form and $0{,}32$
+  library are both correct: $0.032$ for the Part 2 impact form and $0.32$
   for the Part 1 airborne form
-  $D_{nT} = R' + 10\log_{10}(0{,}16 V/(T_0 S_s))$, where the denominator is an
+  $D_{nT} = R' + 10\log_{10}(0.16 V/(T_0 S_s))$, where the denominator is an
   area rather than $A_0$.
 - **Status:** unreported.
 
@@ -513,32 +513,32 @@ in the same order.
 - **The problem:** on this constant the *example* is self-consistent and the
   *formula* is the outlier. (Two cells of the same annex table do not follow
   from its element rows, which is the subject of the next entry; the printed
-  $+1,5$ dB row holds in every band regardless, so the two defects are
+  $+1.5$ dB row holds in every band regardless, so the two defects are
   independent.) With the example's own inputs ($V = 50\ \text{m}^3$,
-  $S = 11{,}3\ \text{m}^2$, $T_0 = 0{,}5\ \text{s}$,
+  $S = 11.3\ \text{m}^2$, $T_0 = 0.5\ \text{s}$,
   $\Delta L_\text{fs} = 0$), the Sabine form gives
-  $10\log_{10}[0{,}16 \cdot 50/(0{,}5 \cdot 11{,}3)] = 1{,}5104\ \text{dB}$,
-  which is the printed +1,5 dB row; Formula (13) as printed gives
-  $10\log_{10}[50/(6 \cdot 0{,}5 \cdot 11{,}3)] = 1{,}6877\ \text{dB}$. The
-  gap is the constant: Formula (13)'s "6" is a rounded $1/0{,}16 = 6{,}25$,
-  and $10\log_{10}(6{,}25/6) = 0{,}177\ \text{dB}$ is exactly the discrepancy.
+  $10\log_{10}[0.16 \cdot 50/(0.5 \cdot 11.3)] = 1.5104\ \text{dB}$,
+  which is the printed +1.5 dB row; Formula (13) as printed gives
+  $10\log_{10}[50/(6 \cdot 0.5 \cdot 11.3)] = 1.6877\ \text{dB}$. The
+  gap is the constant: Formula (13)'s "6" is a rounded $1/0.16 = 6.25$,
+  and $10\log_{10}(6.25/6) = 0.177\ \text{dB}$ is exactly the discrepancy.
   ISO 12354-3:2017 replaced it with an explicit Sabine constant, printing
   Formula (4) as
   $D_{2m,nT} = R' + \Delta L_\text{fs} + [10 \lg(C_\text{sab} V/(T_0 S))]$
-  with $C_\text{sab} = 0{,}16\ \text{s/m}$, which is the constant the 2000
-  example already used. A previous revision of this entry attributed the 1,5
+  with $C_\text{sab} = 0.16\ \text{s/m}$, which is the constant the 2000
+  example already used. A previous revision of this entry attributed the 1.5
   dB row to the example; the attribution is the other way round.
 - **Evidence:** evaluation of both constants against the printed Annex F rows,
-  which agree with 0,16 to the 0,05 dB the table carries and disagree with the
-  rounded 6 by a uniform 0,18 dB; and the 2017 recast, which adopts the
+  which agree with 0.16 to the 0.05 dB the table carries and disagree with the
+  rounded 6 by a uniform 0.18 dB; and the 2017 recast, which adopts the
   example's constant. The example's single-number result
   $D_{2m,nT,w} = 33\ \text{dB}$ is insensitive to the difference and
   reproduces either way. Verified on PDF pages 11 (printed p. 9), 29 (printed
   p. 27) and 30 (printed p. 28) of EN 12354-3:2000, and of PDF page 12
   (printed p. 6) of ISO 12354-3:2017.
 - **Library behaviour:** implements Formula (13) as printed, with the rounded
-  6; the test data records that the Annex F rows follow the exact 0,16
-  constant and sit 0,18 dB below the model.
+  6; the test data records that the Annex F rows follow the exact 0.16
+  constant and sit 0.18 dB below the model.
 - **Status:** unreported.
 
 ## EN 12354-3:2000, Annex F.1.3 (the 1 kHz and 2 kHz R' cells)
@@ -549,13 +549,13 @@ in the same order.
   / 1000 / 2000 Hz.
 - **The problem:** the last two cells do not follow from the table's own
   element rows. Formula (10), $R' = -10\log_{10} \sum \tau_{e,i}$, applied to
-  the four $-10\log_{10} \tau_e$ columns printed immediately above gives 24,41
-  / 21,50 / 24,86 / **35,78** / **37,99** dB. The first three cells reproduce
-  to the 0,05 dB the table carries; the 1 kHz and 2 kHz cells are printed 0,4
-  dB and 0,5 dB low.
+  the four $-10\log_{10} \tau_e$ columns printed immediately above gives 24.41
+  / 21.50 / 24.86 / **35.78** / **37.99** dB. The first three cells reproduce
+  to the 0.05 dB the table carries; the 1 kHz and 2 kHz cells are printed 0.4
+  dB and 0.5 dB low.
 - **Evidence:** energy summation of the printed element rows band by band (1
-  kHz: 60,7 / 40,0 / 46,6 / 38,5 dB; 2 kHz: 66,7 / 41,0 / 43,6 / 44,5 dB). The
-  $D_{2m,nT}$ row below is a uniform $R' + 1{,}5\ \text{dB}$ in every band
+  kHz: 60.7 / 40.0 / 46.6 / 38.5 dB; 2 kHz: 66.7 / 41.0 / 43.6 / 44.5 dB). The
+  $D_{2m,nT}$ row below is a uniform $R' + 1.5\ \text{dB}$ in every band
   including those two, so it inherits the same offset, and the single-number
   result $D_{2m,nT,w} = 33\ \text{dB}$ is insensitive to it and still
   reproduces. Verified on PDF page 30 (printed p. 28) of EN 12354-3:2000.
@@ -580,7 +580,7 @@ in the same order.
   $L_\mathrm{W} = L_\mathrm{F} + 10\lg(F_0^2 Y / W_0)$. Formula (D.5a) prints
   $L_\mathrm{Ws,c} = L_\mathrm{F,eq} + 10\lg Y_\mathrm{s}$ and Formula (D.9a) prints
   $L_\mathrm{Ws,c} = L_\mathrm{F} - 5 - 10\lg f$, which is the same expression evaluated at
-  the mass-like source mobility $Y_\mathrm{s} = (2\pi f M)^{-1}$ of a 0,5 kg tapping
+  the mass-like source mobility $Y_\mathrm{s} = (2\pi f M)^{-1}$ of a 0.5 kg tapping
   hammer. Neither carries a term for $F_0^2/W_0$, so both balance only when
   $F_0^2 / W_0 = 1\ \text{s}^{-1}$, that is $F_0 = 10^{-6}$ N; read re 1 pN
   each would fall 120 dB short of the level it defines. The velocity
@@ -590,12 +590,12 @@ in the same order.
   gives as the velocity-level reference in clause F.4.2. The annex is
   therefore explicit and correct about the velocity reference and silent about
   the force one. **(b) The machine that produces the table.** The ISO tapping
-  machine drops 0,5 kg hammers from 40 mm at ten impacts per second, so each
-  impact transfers a momentum of 0,443 N·s and the force is a 10 Hz impulse
-  train every harmonic of which carries 6,26 N r.m.s. Summing the harmonics
-  that fall inside each octave band gives 139,4 / 142,4 / 145,4 / 148,4 /
-  151,4 / 154,4 dB re $10^{-6}$ N from 31,5 Hz to 1 kHz, reproducing the first
-  six cells of Table F.1 to within 0,5 dB; the 2 kHz and 4 kHz cells sit below
+  machine drops 0.5 kg hammers from 40 mm at ten impacts per second, so each
+  impact transfers a momentum of 0.443 N·s and the force is a 10 Hz impulse
+  train every harmonic of which carries 6.26 N r.m.s. Summing the harmonics
+  that fall inside each octave band gives 139.4 / 142.4 / 145.4 / 148.4 /
+  151.4 / 154.4 dB re $10^{-6}$ N from 31.5 Hz to 1 kHz, reproducing the first
+  six cells of Table F.1 to within 0.5 dB; the 2 kHz and 4 kHz cells sit below
   that line, which is the roll-off the standard itself flags with "up till
   about 1000 Hz". Re 1 pN the same cells would describe forces of tens of
   micronewtons, which no impact machine produces. **(c) The companion
@@ -629,7 +629,7 @@ in the same order.
   level is also indicated". Only the first curve is a characteristic power; the
   other two are installed powers and their A-weighted totals are
   $L_\mathrm{Ws,inst,A}$. The plotted curves settle the assignment: the first
-  is flat at about 114,5 dB re 1 pW, which is the frequency-independent
+  is flat at about 114.5 dB re 1 pW, which is the frequency-independent
   Formula (D.9a) result for the tapping machine, while the other two rise with
   frequency and lie below it, the concrete floor lowest, as
   $L_\mathrm{Ws,c} - D_{\mathrm{C},i}$ requires.
@@ -650,25 +650,25 @@ in the same order.
   internal wall 1,840 m ($S = 13{,}75\ \text{m}^2$).
 - **The problem:** Formula (C.1) needs one sum per *element*, and the example
   has five elements with three different areas. Only two of the three printed
-  values reproduce the columns they are supposed to drive: 2,375 m with
-  $S = 11\ \text{m}^2$ gives external wall 1 exactly, and 1,840 m with
-  $S = 13{,}75\ \text{m}^2$ gives internal wall **2** exactly. The separating
-  floor's printed 2,364 m does not reproduce its own column at any band
-  (0,074 9 against the printed 0,083 1 at 50 Hz, 0,026 4 against 0,029 0 at
-  500 Hz); 2,659 m does, at every band. The two elements with no printed value
-  need 2,548 m (external wall 2, $S = 13{,}75\ \text{m}^2$) and 1,636 m
+  values reproduce the columns they are supposed to drive: 2.375 m with
+  $S = 11\ \text{m}^2$ gives external wall 1 exactly, and 1.840 m with
+  $S = 13.75\ \text{m}^2$ gives internal wall **2** exactly. The separating
+  floor's printed 2.364 m does not reproduce its own column at any band
+  (0.074 9 against the printed 0.083 1 at 50 Hz, 0.026 4 against 0.029 0 at
+  500 Hz); 2.659 m does, at every band. The two elements with no printed value
+  need 2.548 m (external wall 2, $S = 13.75\ \text{m}^2$) and 1.636 m
   (internal wall 1, $S = 11\ \text{m}^2$).
 - **Evidence:** all five sums re-derived from Formula (C.4),
   $\alpha_k = \sum_j \sqrt{f_{c,j}/f_\text{ref}}\ 10^{-K_{ij}/10}$, over the
-  example's own junction geometry with the unrounded Annex E indices: 2,659 /
-  2,375 / 2,548 / 1,636 / 1,839 m. The derivation returns the two printed
-  values that are self-consistent with their own columns (2,375 m, and 1,839 m
-  against the printed 1,840 m) and supplies the three that are missing or
+  example's own junction geometry with the unrounded Annex E indices: 2.659 /
+  2.375 / 2.548 / 1.636 / 1.839 m. The derivation returns the two printed
+  values that are self-consistent with their own columns (2.375 m, and 1.839 m
+  against the printed 1.840 m) and supplies the three that are missing or
   wrong, and every $\eta_\text{tot,situ}$ column of Table L.3 / G.3 then
   reproduces to $5 \cdot 10^{-5}$. The printed values applied to the wrong
-  element of the same type miss by far more than that rounding: 2,375 m on
-  external wall 2 gives 0,108 5 against the printed 0,114 9 at 50 Hz, and
-  1,840 m on internal wall 1 gives 0,085 0 against 0,077 0.
+  element of the same type miss by far more than that rounding: 2.375 m on
+  external wall 2 gives 0.108 5 against the printed 0.114 9 at 50 Hz, and
+  1.840 m on internal wall 1 gives 0.085 0 against 0.077 0.
 - **Library behaviour:** `in_situ_total_loss_factor` takes $\sum l_k \alpha_k$
   as an input and `perimeter_absorption_coefficient` implements Formula (C.4);
   the Annex L fixture derives all five sums that way rather than using the
@@ -682,13 +682,13 @@ in the same order.
 - **The print:** $\eta_\text{int} = 0{,}013$ for the 365 mm autoclaved aerated
   concrete external walls.
 - **The problem:** the example's own element specification, and Annex B Table
-  B.3 for autoclaved aerated concrete, give 0,012 5. Only 0,012 5 reproduces
+  B.3 for autoclaved aerated concrete, give 0.012 5. Only 0.012 5 reproduces
   the tabulated $\eta_\text{tot,situ}$: at 500 Hz Formula (C.1) gives
-  $0{,}012\,5 + 0{,}001\,41 + 0{,}034\,57 = 0{,}048\,5$, the printed value,
-  where 0,013 would give 0,049 0.
+  $0.012\,5 + 0.001\,41 + 0.034\,57 = 0.048\,5$, the printed value,
+  where 0.013 would give 0.049 0.
 - **Evidence:** term-by-term recomputation of Formula (C.1) for both external
   walls at every band with each candidate $\eta_\text{int}$.
-- **Library behaviour:** the Annex L fixture uses 0,012 5.
+- **Library behaviour:** the Annex L fixture uses 0.012 5.
 - **Status:** unreported.
 
 ## ISO 12354-1:2017, Table L.4 (second path block labelled 2d)
@@ -699,23 +699,23 @@ in the same order.
   $D_{\mathrm{v},ij,\text{situ}}$ = 11,0 to 13,6 and $R_{ij}$ = 43,9 to 84,6 dB.
 - **The problem:** those are the numbers of path **4d** (internal wall 2 to
   the separating floor), not of path 2d (external wall 2). Table L.1 of the
-  same annex prints the whole $R_{4d}$ column, 43,9 to 84,6 dB, and the
+  same annex prints the whole $R_{4d}$ column, 43.9 to 84.6 dB, and the
   block's $R_{ij}$ column is that column cell for cell. What settles it band
   by band is the other two columns, which cannot be confused: external wall 2
-  has $\alpha_{i,\text{situ}} = 10{,}3\ \text{m}$ at 50 Hz
-  ($S = 13{,}75\ \text{m}^2$, $\eta_\text{tot} = 0{,}114\,9$) while internal
-  wall 2 has 6,3 m ($\eta_\text{tot} = 0{,}070\,3$), the printed value; and
-  $D_{\mathrm{v},ij,\text{situ}}$ follows the floor-to-internal-wall $K_{ij}$ of 8,8
-  dB, which gives 11,0 to 13,6 dB, not the floor-to-external-wall 6,4 dB,
-  which gives 9,6 to 11,9 dB.
+  has $\alpha_{i,\text{situ}} = 10.3\ \text{m}$ at 50 Hz
+  ($S = 13.75\ \text{m}^2$, $\eta_\text{tot} = 0.114\,9$) while internal
+  wall 2 has 6.3 m ($\eta_\text{tot} = 0.070\,3$), the printed value; and
+  $D_{\mathrm{v},ij,\text{situ}}$ follows the floor-to-internal-wall $K_{ij}$ of 8.8
+  dB, which gives 11.0 to 13.6 dB, not the floor-to-external-wall 6.4 dB,
+  which gives 9.6 to 11.9 dB.
 - **Evidence:** independent recomputation of Formulae (10), (11) and (15) for
   both candidate paths at every band. Path 4d reproduces all three columns of
-  the block, $\alpha_{i,\text{situ}}$ to 0,05 m and $D_{\mathrm{v},ij,\text{situ}}$ and
-  $R_{ij}$ to 0,05 dB, which is the printed resolution. Path 2d departs from
-  the block's $R_{ij}$ column by 0,1 dB to 7,0 dB depending on the band, and
-  comes closest between 100 Hz and 160 Hz (0,5 / 0,5 / 0,1 dB), so $R_{ij}$
+  the block, $\alpha_{i,\text{situ}}$ to 0.05 m and $D_{\mathrm{v},ij,\text{situ}}$ and
+  $R_{ij}$ to 0.05 dB, which is the printed resolution. Path 2d departs from
+  the block's $R_{ij}$ column by 0.1 dB to 7.0 dB depending on the band, and
+  comes closest between 100 Hz and 160 Hz (0.5 / 0.5 / 0.1 dB), so $R_{ij}$
   alone does not identify the path over those bands; $\alpha_{i,\text{situ}}$
-  (10,3 against 6,3 m at 50 Hz) and $D_{\mathrm{v},ij,\text{situ}}$ (1,4 dB to 1,7 dB
+  (10.3 against 6.3 m at 50 Hz) and $D_{\mathrm{v},ij,\text{situ}}$ (1.4 dB to 1.7 dB
   apart in every band) do.
 - **Library behaviour:** the test that asserts the block builds it as path 4d
   and names the mislabelling.
@@ -732,19 +732,19 @@ in the same order.
 - **The problem:** ISO 717-1 rates by shifting the reference curve **in 1 dB
   steps**, so a weighted rating is an integer; the printed one-decimal values
   are the reference curve shifted *continuously* until the sum of unfavourable
-  deviations equals exactly 32,0 dB. The airborne $R_w$ row of Table L.1
+  deviations equals exactly 32.0 dB. The airborne $R_w$ row of Table L.1
   *truncates* that continuous value to one decimal while the sentence below it
-  rounds, which is why the same quantity appears twice as 57,8 and 57,9; the
-  impact $L_{n,w}$ row of Table G.1 rounds instead (29,58 prints as 29,6 and
-  40,98 as 41,0), so the truncation is a property of the airborne row only.
+  rounds, which is why the same quantity appears twice as 57.8 and 57.9; the
+  impact $L_{n,w}$ row of Table G.1 rounds instead (29.58 prints as 29.6 and
+  40.98 as 41.0), so the truncation is a property of the airborne row only.
   The spectrum adaptation terms inherit the offset: with the ISO 717-1 rating
   of 57 dB they are $C = -1$ and $C_\text{tr} = -7$, and the printed (−2 ; −8)
-  is exactly the pair shifted by the same 0,86 dB.
+  is exactly the pair shifted by the same 0.86 dB.
 - **Evidence:** a continuous-shift solve of the ISO 717-1 reference curve
   against the printed per-band spectra reproduces every printed value in both
-  rows ($R_{Dd}$ 75,12 against 75,1; $R_{D1}$ 84,54 against 84,5; $R_{11}$
-  70,66 against 70,6; the total 57,86 against 57,8 / 57,9; on the impact side
-  $L_{n,Df1}$ 29,58 against 29,6 and the total 40,98 against 41,0), whereas
+  rows ($R_{Dd}$ 75.12 against 75.1; $R_{D1}$ 84.54 against 84.5; $R_{11}$
+  70.66 against 70.6; the total 57.86 against 57.8 / 57.9; on the impact side
+  $L_{n,Df1}$ 29.58 against 29.6 and the total 40.98 against 41.0), whereas
   the ISO 717-1 1 dB-step ratings of the same spectra are 75, 84, 70 and 57
   dB. Verified on PDF page 85 (printed p. 79) of ISO 12354-1:2017.
 - **Library behaviour:** `weighted_rating` / `weighted_impact_rating`
@@ -759,19 +759,19 @@ in the same order.
   columns, 50 Hz, 63 Hz and 80 Hz rows.
 - **The print:** $L_{n,Df1}$ = 47,3 / 44,9 / 46,2 dB.
 - **The problem:** Table G.4 of the same annex prints the same path Df for
-  external wall 1, from the same inputs, as 47,8 / 45,9 / 47,0 dB. The two
+  external wall 1, from the same inputs, as 47.8 / 45.9 / 47.0 dB. The two
   tables cannot both be right, and from 100 Hz upwards they agree exactly.
 - **Evidence:** Formula (12) evaluated from the annex's own Table G.3 columns
   ($L_{n,\text{situ}}$, $R_\text{situ}$) and the Table G.4
-  $D_{\mathrm{v},ij,\text{situ}}$ and $\Delta L_\text{situ}$ columns gives 47,80 /
-  45,85 / 46,95 dB, reproducing the printed 47,8 / 45,9 / 47,0 of Table G.4 to
-  0,05 dB and Table G.1 only from 100 Hz upwards. Carrying the same
-  recomputation through the whole chain puts external wall 2 low by 0,5 dB to
-  1,0 dB over the same three bands and the two internal walls low by up to 0,5
+  $D_{\mathrm{v},ij,\text{situ}}$ and $\Delta L_\text{situ}$ columns gives 47.80 /
+  45.85 / 46.95 dB, reproducing the printed 47.8 / 45.9 / 47.0 of Table G.4 to
+  0.05 dB and Table G.1 only from 100 Hz upwards. Carrying the same
+  recomputation through the whole chain puts external wall 2 low by 0.5 dB to
+  1.0 dB over the same three bands and the two internal walls low by up to 0.5
   dB at 50 Hz and 63 Hz (their 80 Hz cells agree). From 100 Hz upwards no
-  flanking column deviates by more than 0,15 dB. Correcting the affected cells
-  raises the printed total $L'_n$ only slightly: 58,6 to 58,7 dB at 50 Hz,
-  57,0 to 57,2 dB at 63 Hz, 55,9 to 56,1 dB at 80 Hz.
+  flanking column deviates by more than 0.15 dB. Correcting the affected cells
+  raises the printed total $L'_n$ only slightly: 58.6 to 58.7 dB at 50 Hz,
+  57.0 to 57.2 dB at 63 Hz, 55.9 to 56.1 dB at 80 Hz.
 - **Library behaviour:** the test asserts Table G.4 in full, the Table G.1
   direct column over the whole range, and the Table G.1 flanking columns from
   100 Hz upwards, naming the disagreement.
@@ -785,17 +785,17 @@ in the same order.
   $K_{ij} = 6{,}6\ \text{dB}$; the row below it, "Ext. wall 1/2 - Ext. wall
   1/2", gives $m'_i = 2{,}19\ \text{kg/m}^2$.
 - **The problem:** two independent misprints. The rigid-T corner branch
-  $K_{12} = 5{,}7 + 5{,}7 M^2$ with $M = \log_{10}(360/219) = 0{,}215\,6$
-  gives 5,97, i.e. **6,0**, and ISO 12354-1:2017 Table L.8 prints 6,0 for the
+  $K_{12} = 5.7 + 5.7 M^2$ with $M = \log_{10}(360/219) = 0.215\,6$
+  gives 5.97, i.e. **6.0**, and ISO 12354-1:2017 Table L.8 prints 6.0 for the
   identical junction of the identical example. And the external wall's mass
-  per unit area is $219{,}0\ \text{kg/m}^2$ throughout the example, not 2,19
+  per unit area is $219.0\ \text{kg/m}^2$ throughout the example, not 2.19
   (a factor 100).
 - **Evidence:** Annex E evaluation of the corner branch; the same table's own
   other rows and the whole of ISO 12354-1 Annex L use
-  $219{,}0\ \text{kg/m}^2$. Verified on PDF page 46 (printed p. 40) of ISO
+  $219.0\ \text{kg/m}^2$. Verified on PDF page 46 (printed p. 40) of ISO
   12354-2:2017, whose Table G.8 mass columns are headed `m'i` and
   `m'orthogonal`, and PDF page 89 (printed p. 83) of ISO 12354-1:2017.
-- **Library behaviour:** uses 6,0 dB and $219{,}0\ \text{kg/m}^2$.
+- **Library behaviour:** uses 6.0 dB and $219.0\ \text{kg/m}^2$.
 - **Status:** unreported.
 
 ## ISO 12354-2:2017, Table G.6 (mislabelled row)
@@ -808,8 +808,8 @@ in the same order.
   cross junction; no external wall meets it. The masses and the value are
   those of the in-line internal-wall path, and ISO 12354-1:2017 Table L.6
   prints the same row correctly as "Int. wall 1/2 - Int. wall 1/2".
-- **Evidence:** the rigid-cross through branch $8{,}7 + 17{,}1 M + 5{,}7 M^2$
-  with $M = \log_{10}(484/360)$ gives 10,99, the printed 11,0, for the
+- **Evidence:** the rigid-cross through branch $8.7 + 17.1 M + 5.7 M^2$
+  with $M = \log_{10}(484/360)$ gives 10.99, the printed 11.0, for the
   internal wall. Verified on PDF page 46 (printed p. 40) of ISO 12354-2:2017
   and PDF page 89 (printed p. 83) of ISO 12354-1:2017.
 - **Library behaviour:** treats the row as the internal-wall in-line path.
@@ -824,10 +824,10 @@ in the same order.
   an earlier revision of this entry quoted the Part 1 form for both.
 - **The problem:** the example has two internal walls; the element indexed
   $F = f = 4$ is internal wall **2**
-  ($5{,}00\ \text{m} \times 2{,}75\ \text{m}$, $S = 13{,}75\ \text{m}^2$), as
+  ($5.00\ \text{m} \times 2.75\ \text{m}$, $S = 13.75\ \text{m}^2$), as
   the detailed-model tables of the same annexes label it.
-- **Evidence:** the row's own $S = 13{,}75\ \text{m}^2$ and
-  $l_{ij} = 5{,}0\ \text{m}$ match internal wall 2 of Table L.1 / G.1.
+- **Evidence:** the row's own $S = 13.75\ \text{m}^2$ and
+  $l_{ij} = 5.0\ \text{m}$ match internal wall 2 of Table L.1 / G.1.
   Verified on PDF page 90 (printed p. 84) of ISO 12354-1:2017 and of PDF page
   47 (printed p. 41) of ISO 12354-2:2017, with the detailed-model column
   labels read on PDF page 85 (printed p. 79) of ISO 12354-1:2017 and of PDF
@@ -847,7 +847,7 @@ in the same order.
   one-third-octave band in which fo falls", so 1 600 Hz is a value the table
   is actually read at rather than an unreachable edge. Because the rounding is
   mandatory, the ambiguity is not a single point: every raw resonance
-  frequency in the 1 600 Hz band, that is from 1 412,5 Hz to 1 778,3 Hz (ISO
+  frequency in the 1 600 Hz band, that is from 1 412.5 Hz to 1 778.3 Hz (ISO
   266 band edges), lands on it. Every other boundary in the table is a
   distinct band centre (200, 250, 315, 400, 500 Hz), and no other pair of rows
   overlaps.
@@ -870,15 +870,15 @@ in the same order.
 - **Status:** unreported.
 
 - **Related, not an erratum:** NOTE 1 of the same table sets a floor of 0 dB
-  on the 30 Hz to 160 Hz branch $74{,}4 - 20\log_{10}(f_0) - R_w/2$. Inside
+  on the 30 Hz to 160 Hz branch $74.4 - 20\log_{10}(f_0) - R_w/2$. Inside
   the validity box Clause D.2.2 states for the table
   ($30\ \text{Hz} \le f_0 \le 160\ \text{Hz}$,
   $20\ \text{dB} \le R_w \le 60\ \text{dB}$) the branch never reaches it: its
-  minimum is $74{,}4 - 20\log_{10}(160) - 60/2 = 0{,}32\ \text{dB}$. The floor
+  minimum is $74.4 - 20\log_{10}(160) - 60/2 = 0.32\ \text{dB}$. The floor
   is therefore inactive for every input the table is stated for, but it was
   not always: the 2000 edition tabulated the low branch as four discrete rows
   ending in "160 -> 28 - Rw/2", whose minimum is $28 - 60/2 = -2\ \text{dB}$,
-  so NOTE 1 was operative there. The 2017 continuous fit sits 2,3 dB above it
+  so NOTE 1 was operative there. The 2017 continuous fit sits 2.3 dB above it
   at that corner and left the note vestigial. The library keeps the floor
   because the note is still printed.
 
@@ -933,35 +933,35 @@ in the same order.
   21,3 / 21,2 / 21,7 / 22,7 / 23,8 / 25,1. A.2 also states that "the
   dimensions of the free part of the panel are 1,162 m × 1,412 m".
 - **The problem:** no reading of the inputs printed beside the steel column
-  reproduces it. With the test opening ($1{,}875\ \text{m}^2$) and the stated mass, the six
-  computed values fall 1,27 dB to 0,72 dB below the printed ones. The 0,55 dB
+  reproduces it. With the test opening ($1.875\ \text{m}^2$) and the stated mass, the six
+  computed values fall 1.27 dB to 0.72 dB below the printed ones. The 0.55 dB
   spread between those two ends rules out any surface mass at that area,
   because a mass error shifts $R_0 = 20 \lg(\pi f m / \rho c)$ by the same amount
-  in every band. With the free part of the panel ($1{,}640744\ \text{m}^2$) the residual is
-  nearly flat, mean 0,562 dB, but it still spreads 0,102 dB end to end, which
+  in every band. With the free part of the panel ($1.640744\ \text{m}^2$) the residual is
+  nearly flat, mean 0.562 dB, but it still spreads 0.102 dB end to end, which
   is the whole width of the printed decimal, so it is not the constant offset a
   wrong mass alone would leave either.
 
-  No single input closes it to the 0,05 dB that one-decimal printing allows.
-  The best surface mass alone, over the free part, is $18{,}13\ \text{kg/m}^2$ and leaves
-  0,051 dB; the best static pressure alone is 950 hPa and leaves 0,051 dB; the
-  best temperature alone, over the test opening, is 63 °C and leaves 0,052 dB.
+  No single input closes it to the 0.05 dB that one-decimal printing allows.
+  The best surface mass alone, over the free part, is $18.13\ \text{kg/m}^2$ and leaves
+  0.051 dB; the best static pressure alone is 950 hPa and leaves 0.051 dB; the
+  best temperature alone, over the test opening, is 63 °C and leaves 0.052 dB.
   The last two contradict the caption, which fixes the climate at 1 013 hPa and
   23 °C, and the plaster-board column reproduces at exactly that climate, so the
   two columns cannot be read at different ones.
 
   The only reading that does reproduce all six values moves two inputs at once:
-  an area of about $1{,}654\ \text{m}^2$, near the free part but not equal to it, together
-  with a surface mass of about $18{,}16\ \text{kg/m}^2$. That mass is not available to the
-  specimen described. Solid steel 2,2 mm thick is $16{,}9\ \text{kg/m}^2$ to $17{,}3\ \text{kg/m}^2$, and
+  an area of about $1.654\ \text{m}^2$, near the free part but not equal to it, together
+  with a surface mass of about $18.16\ \text{kg/m}^2$. That mass is not available to the
+  specimen described. Solid steel 2.2 mm thick is $16.9\ \text{kg/m}^2$ to $17.3\ \text{kg/m}^2$, and
   the leaf is a steel/resin/steel sandwich, so its surface mass is necessarily
   below that. The plaster-board column of the same table, from the same
   formulas at the same climate, reproduces all six of its values to within
-  0,050 dB.
+  0.050 dB.
 - **Evidence:** Formulas (A.1) to (A.5) evaluated at the stated 1 013 hPa and
   23 °C, read on PDF pages 17 and 18 (printed pp. 11 and 12) of BS EN ISO
   15186-3:2010. ISO 140-3:1995, C.2.4, which A.2 cites as the source of the
-  specimen, describes the 2,2 mm steel/resin/steel leaf but states no surface
+  specimen, describes the 2.2 mm steel/resin/steel leaf but states no surface
   mass, so the $17\ \text{kg/m}^2$ is not carried over from there. No corrigendum to
   Annex A was found.
 - **Library behaviour:** `limp_panel_reduction_index` implements Formulas
@@ -975,20 +975,20 @@ in the same order.
 - **Location:** Clause 8.1.1, Formula (20), the thin-plate critical frequency
   used by the test-facility flanking criterion of Formula (19).
 - **The print:** $f_c = c_0^{2} / (1{,}8\ c_L \cdot h \cdot \pi)$.
-- **The problem:** the constant 1,8 is itself the rounded
-  $2\pi/\sqrt{12} \approx 1{,}814$ of the thin-plate dispersion relation, so
+- **The problem:** the constant 1.8 is itself the rounded
+  $2\pi/\sqrt{12} \approx 1.814$ of the thin-plate dispersion relation, so
   the extra $\pi$ double-counts it and would misplace $f_c$ by a factor $\pi$
   (e.g. a 100 mm concrete element with $c_L = 3500\ \text{m/s}$: 187 Hz
   without the $\pi$, 59 Hz with it, far from any measured coincidence dip).
 - **Evidence:** derivation from the thin-plate dispersion relation (Hopkins,
-  *Sound Insulation* (2007), Eq. 2.201, $f_c = c_0^2/(1{,}8 c_L h)$); ISO
+  *Sound Insulation* (2007), Eq. 2.201, $f_c = c_0^2/(1.8 c_L h)$); ISO
   12354-1:2017 prints the same $\pi$-free form in its symbol definitions
-  ($f_c = c_0^2/(1{,}8 c_L t)$).
+  ($f_c = c_0^2/(1.8 c_L t)$).
 - **Library behaviour:** implements the $\pi$-free form
   (`phonometry.building.measurement.flanking_transmission.critical_frequency`),
   with a misprint note in the docstring.
 - **Status:** corrected upstream: ISO 10848-1:2017 (second edition) prints
-  the $\pi$-free form in its Formula (5), $f_c = c_0^2/(1{,}8 h c_L)$,
+  the $\pi$-free form in its Formula (5), $f_c = c_0^2/(1.8 h c_L)$,
   confirming the 2006 print as a misprint. No report is needed. The entry is
   retained because the library cites the 2006 edition, whose print carries the
   defect; the 2017 edition stands as the confirmation.
@@ -1033,12 +1033,12 @@ in the same order.
   method", NOTE 1 to Inequality (3).
 - **The print:** "Inequality (3) is equivalent to the requirement that
   $|L_{F_\mathrm{b}} - L_{F_2}| \leqslant 05$ dB."
-- **The problem:** the decimal comma is missing: the bound is 0,5 dB, not
-  5 dB. Inequality (3) itself, $m_0 \leqslant 0{,}06 \times 10^{L_{F2}/20} /
+- **The problem:** the decimal comma is missing: the bound is 0.5 dB, not
+  5 dB. Inequality (3) itself, $m_0 \leqslant 0.06 \times 10^{L_{F2}/20} /
   10^{L_{a2}/20}$ kg, limits the inertia force $m_0 a_2$ to 6 % of the
   measured force, so the two force levels differ by at most
-  $20\lg 1{,}06 = 0{,}51$ dB with the inertia force in phase and
-  $-20\lg 0{,}94 = 0{,}54$ dB against it: 0,5 dB, a tenth of what the note
+  $20\lg 1.06 = 0.51$ dB with the inertia force in phase and
+  $-20\lg 0.94 = 0.54$ dB against it: 0.5 dB, a tenth of what the note
   reads. ISO 10846-2:2008, which states the same inequality for resilient
   supports (its Inequality (2)), prints the same note with the comma in
   place, "$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB".
@@ -1048,8 +1048,8 @@ in the same order.
   on PDF page 21 (printed p. 13) of BS EN ISO 10846-2:2008.
 - **Library behaviour:** no change required, since the library computes the
   inequality, not the note. `check_output_mass` reports the bias the mass can
-  cause, `bias_bound_db`, which is 0,54 dB on the bound, and the conformance
-  check "ISO 10846-4:2003 6.2 NOTE 1" holds it against the 0,5 dB the note
+  cause, `bias_bound_db`, which is 0.54 dB on the bound, and the conformance
+  check "ISO 10846-4:2003 6.2 NOTE 1" holds it against the 0.5 dB the note
   means.
 - **Status:** unreported.
 
@@ -1343,9 +1343,9 @@ in the same order.
 - **The problem:** every formula and table of the standard works to 11 200 Hz:
   the Table 2 and Table 3 band-edge fits are stated for
   $11\,200 \ge f_t > 1\,600$, and clauses 10, 12.3 and 12.4 permit FFT data
-  with $f_1 < 89{,}1\ \text{Hz}$ and $f_2 > 11\,200\ \text{Hz}$. The two
+  with $f_1 < 89.1\ \text{Hz}$ and $f_2 > 11\,200\ \text{Hz}$. The two
   numbers are the same quantity to different precision rather than a
-  typographical error: $10\,000 \cdot 2^{1/6} = 11\,224{,}6\ \text{Hz}$ is the
+  typographical error: $10\,000 \cdot 2^{1/6} = 11\,224.6\ \text{Hz}$ is the
   upper edge of the 10 kHz one-third-octave band that closes the range of
   interest, which rounds to 11 220 Hz at four significant figures and to
   11 200 Hz at three. An earlier revision of this entry called it a typo and
@@ -1360,7 +1360,7 @@ in the same order.
   axis read side by side with NOTE 2. Verified on PDF page 10 (printed p. 2),
   PDF page 18 (printed p. 10), PDF page 25 (printed p. 17) and PDF page 28
   (printed p. 20) of ECMA-418-1:2024 (3rd edition).
-- **Library behaviour:** uses the internally consistent $89{,}1\ \text{Hz}$ to
+- **Library behaviour:** uses the internally consistent $89.1\ \text{Hz}$ to
   11 200 Hz range (upper end exclusive per the formulas), with a code note in
   [`tonality.py`](../src/phonometry/psychoacoustics/quality/tonality.py).
 - **Status:** unreported.
@@ -1376,9 +1376,9 @@ in the same order.
   column, and the parallel Formula (22) for the upper band edge prints
   $f_{2,U} = C_{U,0} + C_{U,1} f_t + C_{U,2} f_t^{2}$ correctly. The misprint
   is numerically fatal, not cosmetic: over the middle fit range
-  ($171{,}4 \le f_t \le 1\,600$) Table 2 gives $C_{L,0} = -149{,}5$ and
-  $C_{L,1} = 1{,}001$, so the printed form returns
-  $-149{,}5 - 149{,}5 f_t - 6{,}90 \cdot 10^{-5} f_t^2$, negative everywhere,
+  ($171.4 \le f_t \le 1\,600$) Table 2 gives $C_{L,0} = -149.5$ and
+  $C_{L,1} = 1.001$, so the printed form returns
+  $-149.5 - 149.5 f_t - 6.90 \cdot 10^{-5} f_t^2$, negative everywhere,
   instead of a band edge a little below $f_t$.
 - **Evidence:** the formula, its own where-list and Table 2 on one page, with
   Formula (22) as the consistent control. Verified on PDF page 25 (printed p.
@@ -1484,7 +1484,7 @@ in the same order.
 - **Evidence:** direct evaluation of the block start indices against the
   padded length for the clause 7.1.1 block/hop sizes; the flush-to-end reading
   reproduces the Clause 7 roughness calibration ($1\ \text{asper}$) to
-  $0{,}9999$.
+  $0.9999$.
 - **Library behaviour:** implements the flush-to-end reading with a code note
   in
   [`_roughness_ecma.py`](../src/phonometry/psychoacoustics/quality/_roughness_ecma.py).
@@ -1526,9 +1526,9 @@ in the same order.
   index $k$ as mapping to the modulation rate
   $k \cdot \tilde{r}_s/\tilde{s}_b$ with $k$ starting at 0. A symmetric local
   maximum at bin $k$ has centroid $k$, and the printed formula then assigns it
-  the rate $(k - 1) \cdot \Delta f$, one full bin ($0{,}73\ \text{Hz}$) low,
-  which at fluctuation-strength rates is fatal (a true $1{,}46\ \text{Hz}$
-  modulation would be reported as $0{,}73\ \text{Hz}$). The offset is only
+  the rate $(k - 1) \cdot \Delta f$, one full bin ($0.73\ \text{Hz}$) low,
+  which at fluctuation-strength rates is fatal (a true $1.46\ \text{Hz}$
+  modulation would be reported as $0.73\ \text{Hz}$). The offset is only
   consistent with 1-based spectral-line positions, contradicting the
   standard's own definition of $k$.
 - **Evidence:** cross-check of Formula (144) against the $k$-to-rate mapping
@@ -1549,16 +1549,16 @@ in the same order.
 - **The problem:** the constants carry no units. Read in Hz, the damped step
   is capped at $5 \cdot 10^{-5}\ \text{Hz}$ per iteration
   ($2 \cdot 10^{-3}\ \text{Hz}$ over all 40 iterations), so the tuning cannot
-  move appreciably and the $1{,}25 \cdot \Delta f$
-  ($\approx 0{,}92\ \text{Hz}$) failure check is unreachable; the whole clause
+  move appreciably and the $1.25 \cdot \Delta f$
+  ($\approx 0.92\ \text{Hz}$) failure check is unreachable; the whole clause
   would be inert. Read as normalized modulation rates $f/\tilde{r}_s$ (the
   variable in which the Formula (127) kernel frequencies are expressed), the
-  same constants give a $0{,}075\ \text{Hz}$ damped per-iteration cap
-  ($\approx 2{,}9\ \text{Hz}$ over the 39 iterations), a
-  $1{,}5 \cdot 10^{-4}\ \text{Hz}$ stop tolerance and a reachable failure
+  same constants give a $0.075\ \text{Hz}$ damped per-iteration cap
+  ($\approx 2.9\ \text{Hz}$ over the 39 iterations), a
+  $1.5 \cdot 10^{-4}\ \text{Hz}$ stop tolerance and a reachable failure
   check, all consistent with the clause's purpose.
 - **Evidence:** dimensional analysis of the printed constants against the
-  $0{,}7324\ \text{Hz}$ spectral resolution and the failure threshold.
+  $0.7324\ \text{Hz}$ spectral resolution and the failure threshold.
 - **Library behaviour:** applies the constants as normalized modulation rates.
 - **Status:** unreported.
 
@@ -1610,37 +1610,37 @@ in the same order.
 
 - **Location:** Anhang I, Beispiel I.2 (combustion engine, spectrum $j = 1$),
   Tabelle I.6, the combined row "6 FG" for the three tones $k = 6/7/8$
-  ($592{,}2$ / $629{,}8$ / $643{,}3\ \text{Hz}$, tone levels $78{,}31$ /
-  $75{,}00$ / $79{,}75\ \text{dB}$).
+  ($592.2$ / $629.8$ / $643.3\ \text{Hz}$, tone levels $78.31$ /
+  $75.00$ / $79.75\ \text{dB}$).
 - **The print:** $L_T = 81{,}11\ \text{dB}$ together with
   $\Delta L = 9{,}12\ \text{dB}$ (with $L_S = 59{,}53$, $L_G = 76{,}16$,
   $a_v = -2{,}40$ at $592{,}2\ \text{Hz}$).
 - **The problem:** the two cells contradict each other. The printed
-  $\Delta L = 9{,}12\ \text{dB}$ only reproduces from the *plain* Formula (17)
-  energy sum of the three tone levels ($82{,}873\,4\ \text{dB}$):
-  $82{,}87 - 76{,}16 + 2{,}40 = 9{,}11$. The printed
-  $L_T = 81{,}11\ \text{dB}$ is that same sum less exactly
-  $1{,}763\ \text{dB}$, and taken at face value it would give
-  $\Delta L = 7{,}35\ \text{dB}$.
+  $\Delta L = 9.12\ \text{dB}$ only reproduces from the *plain* Formula (17)
+  energy sum of the three tone levels ($82.873\,4\ \text{dB}$):
+  $82.87 - 76.16 + 2.40 = 9.11$. The printed
+  $L_T = 81.11\ \text{dB}$ is that same sum less exactly
+  $1.763\ \text{dB}$, and taken at face value it would give
+  $\Delta L = 7.35\ \text{dB}$.
 - **Evidence:** recomputation from the printed per-tone levels of Tabelle I.6.
   The offset is the discriminator and it is a constant, not a deduplication:
-  $82{,}873\,4 - 81{,}11 = 1{,}763\ \text{dB}$, and $1{,}76\ \text{dB}$ is
-  $10\log_{10} 1{,}5$, the standard's own Hanning effective-bandwidth
+  $82.873\,4 - 81.11 = 1.763\ \text{dB}$, and $1.76\ \text{dB}$ is
+  $10\log_{10} 1.5$, the standard's own Hanning effective-bandwidth
   correction (clause 5.3.2). The same offset appears in the "5 FG" row of
-  Tabelle I.10 (printed p. 46), where the two member tones at $705{,}2$ and
-  $732{,}1\ \text{Hz}$ have $L_T = 55{,}12$ and $54{,}23\ \text{dB}$, sum to
-  $57{,}708\ \text{dB}$, and are printed as $55{,}95\ \text{dB}$,
-  $1{,}758\ \text{dB}$ lower, and there the printed
-  $\Delta L = 3{,}22\ \text{dB}$ follows the printed $L_T$ exactly
-  ($55{,}95 - 55{,}28 + 2{,}55 = 3{,}22$), so the Tabelle I.10 row is
+  Tabelle I.10 (printed p. 46), where the two member tones at $705.2$ and
+  $732.1\ \text{Hz}$ have $L_T = 55.12$ and $54.23\ \text{dB}$, sum to
+  $57.708\ \text{dB}$, and are printed as $55.95\ \text{dB}$,
+  $1.758\ \text{dB}$ lower, and there the printed
+  $\Delta L = 3.22\ \text{dB}$ follows the printed $L_T$ exactly
+  ($55.95 - 55.28 + 2.55 = 3.22$), so the Tabelle I.10 row is
   internally consistent and the Tabelle I.6 row is not. The third combined
   row, "2 FG" of the same Tabelle I.6, carries no offset at all: its three
-  member levels $64{,}56$ / $67{,}96$ / $68{,}63\ \text{dB}$ sum to
-  $72{,}149\ \text{dB}$ against a printed $72{,}15\ \text{dB}$, and its
+  member levels $64.56$ / $67.96$ / $68.63\ \text{dB}$ sum to
+  $72.149\ \text{dB}$ against a printed $72.15\ \text{dB}$, and its
   $\Delta L$ follows. A previous revision of this entry attributed the
-  $81{,}11\ \text{dB}$ cell to the Anmerkung 2 shared-line deduplication; that
+  $81.11\ \text{dB}$ cell to the Anmerkung 2 shared-line deduplication; that
   diagnosis is unsupported, because a deduplication removes an arbitrary
-  amount of energy while all the offsets observed here are the same 1,76 dB.
+  amount of energy while all the offsets observed here are the same 1.76 dB.
   Verified on PDF page 41 (printed p. 41) and PDF page 46 (printed p. 46) of
   DIN 45681:2005-03.
 - **Library behaviour:** `combined_tone_level` follows Anmerkung 2 (shared
@@ -1663,8 +1663,8 @@ in the same order.
   spectrum in one column. Tabelle I.2's own caption reads "des zweiten
   Spektrums (j = 2)" and Tabelle I.10's "des 24. Spektrums (j = 24)", and the
   body values belong to those spectra: the $\Delta L$ column of Tabelle I.2 is
-  the audibility of the $j = 2$ tones ($8{,}53\ \text{dB}$ at
-  $627{,}2\ \text{Hz}$, which the Anmerkung below the table calls "die
+  the audibility of the $j = 2$ tones ($8.53\ \text{dB}$ at
+  $627.2\ \text{Hz}$, which the Anmerkung below the table calls "die
   maßgebliche Differenz ΔL_2"), and the $a_v$ column of Tabelle I.10 is the
   masking index of the $j = 24$ tones. The index 1 is right in exactly one
   table of the annex, Tabelle I.6, which is the $j = 1$ table of Beispiel I.2
@@ -1682,7 +1682,7 @@ in the same order.
 - **Location:** Appendix A, "Noise weighting network and quasi-peak meter",
   Figure A1 "Weighting network" (printed p. 29), drawing 0641/85. The French
   print of the same artwork (printed p. 28) carries the same value as
-  `41,47 nF`.
+  “41,47 nF”.
 - **The print:** the last shunt capacitor of the ladder, the one across the
   600 Ω amplifier input, is labelled **41.47 nF**.
 - **The problem:** it should be **31.47 nF**, which is what ITU-R BS.468-4
@@ -1830,7 +1830,7 @@ in the same order.
   $d_\text{DIM} = (\sum_{i=1}^{9} {U'_i}^{2})^{1/2} / U_2 \times 100\ \%$.
 - **The problem:** the denominator is one of the nine terms of its own
   numerator. Table 2 of the same clause (printed p. 38) defines $U_2$ as the
-  intermodulation component at $f_s - 2f_q = 8{,}70\ \text{kHz}$, and item d)
+  intermodulation component at $f_s - 2f_q = 8.70\ \text{kHz}$, and item d)
   defines $U_1, U_2, \ldots U_i$ as exactly those components, so the sum
   $i = 1\ldots9$ runs over $U_1 \ldots U_9$ and includes $U_2$. Meanwhile the
   defining clause 14.12.9.1 states the ratio of the r.m.s. sum of the Table 2
@@ -1867,19 +1867,19 @@ in the same order.
   \sum_{k=1}^{6} \beta_k \times \sqrt{MTI_k \times MTI_{k+1}}$: the redundancy
   term is the *geometric mean of two adjacent bands*, not the band's own
   $MTI_k$. Read against the table's own MTI row, $\beta_k \times MTI_k$ gives
-  0,062 | 0,051 | 0,044 | 0,008 | 0,036 | 0,076, summing to 0,277, which
+  0.062 | 0.051 | 0.044 | 0.008 | 0.036 | 0.076, summing to 0.277, which
   disagrees with five of the six printed cells and with the printed total.
-  $\beta_k\sqrt{MTI_k MTI_{k+1}}$ reproduces all six cells and the 0,282
+  $\beta_k\sqrt{MTI_k MTI_{k+1}}$ reproduces all six cells and the 0.282
   total. The seventh cell is not part of either reading: the redundancy sum
   stops at $k = 6$ because the 8 kHz band has no band above it to pair with,
-  so its 0,000 is the placeholder of a column with no redundancy partner, not
+  so its 0.000 is the placeholder of a column with no redundancy partner, not
   a term. The alpha row above it, labelled the same way, is
   correct, because there the label and A.5.6 do agree.
 - **Evidence:** both readings recomputed from the table's own step 4c MTI row
   and compared cell by cell with the printed row and with its printed total;
   A.5.6 read against the label. The defect does not move this example's
-  answer, since $1{,}040 - 0{,}277 = 0{,}763$ and $1{,}040 - 0{,}282 =
-  0{,}758$ both print as the STI 0,76 the table ends on, which is how a label
+  answer, since $1.040 - 0.277 = 0.763$ and $1.040 - 0.282 =
+  0.758$ both print as the STI 0.76 the table ends on, which is how a label
   contradicting the normative formula survives a worked example. Verified on
   PDF page 69 (printed p. 67) and PDF page 49 (printed p. 47) of
   IEC 60268-16:2011.
@@ -1899,17 +1899,17 @@ in the same order.
 - **The print:** for the 77,9 dB signal of the 125 Hz band, step 2 prints
   $I_k$ = 61,7, and four rows below it prints $I_{rt,k}$ = 40 000 for the
   46 dB reception threshold of the same band.
-- **The problem:** two defects in one row. The unit is impossible: at 77,9 dB
-  re 20 µPa the squared sound pressure is $0{,}0247\ \text{Pa}^2$, so the cell
-  cannot be 61,7 MPa$^2$ under any reading of the prefix. What the row
+- **The problem:** two defects in one row. The unit is impossible: at 77.9 dB
+  re 20 µPa the squared sound pressure is $0.0247\ \text{Pa}^2$, so the cell
+  cannot be 61.7 MPa$^2$ under any reading of the prefix. What the row
   actually tabulates is the dimensionless intensity ratio
   $10^{L/10} = 61\,722\,596$ divided by $10^{6}$. And that divisor is not
   applied to the two quantities the standard adds to $I_k$ in the very next
   rows: $I_{am,k}$ and $I_{rt,k}$ are tabulated as the plain ratio, 40 000
-  being $10^{4,6} = 39\,811$ rounded, undivided. A reader who forms
+  being $10^{4.6} = 39\,811$ rounded, undivided. A reader who forms
   $I_k + I_{am,k} + I_{rt,k}$ from the cells as printed understates its first
   term by $10^{6}$. The printed "adjustment to remove masking and
-  threshold" row is the check: 1,019 at 500 Hz is
+  threshold" row is the check: 1.019 at 500 Hz is
   $(I_k + I_{am,k} + I_{rt,k})/I_k$ only once $I_k$ is restored to
   26 305 192; formed from the cells as printed the same expression reads
   19 279.
@@ -1935,18 +1935,18 @@ in the same order.
 - **The problem:** the cell does not round from the quantity it names. With
   the operational levels printed two rows above, $I_{am,k}$ at 250 Hz is the
   auditory masking factor of the 125 Hz band times that band's combined
-  intensity, $0{,}01463507 \times 195\,339\,273 = 2\,858\,804$, which at the
+  intensity, $0.01463507 \times 195\,339\,273 = 2\,858\,804$, which at the
   three significant figures the row is printed to reads 2 860 000. The 500 Hz
   cell is correct: its 2 852 252 does print as 2 850 000. The two cells are
-  reproduced together only by carrying the *rounded* $amf \times 1000 = 14{,}6$
+  reproduced together only by carrying the *rounded* $amf \times 1000 = 14.6$
   of the row above instead of the factor itself, and step 2 shows that is not
   what the table does, since its two corresponding cells are printed apart, as
   508 000 and 507 000, which only the unrounded factor gives.
 - **Evidence:** both cells recomputed from the printed operational speech and
   noise levels, and the step 2 pair recomputed the same way as a control. The
   defect changes nothing downstream: the masking and threshold correction of
-  the band is 0,985552 with the correct value against 0,985596 with the
-  printed one, and the row prints 0,986 either way. Verified on PDF page 67
+  the band is 0.985552 with the correct value against 0.985596 with the
+  printed one, and the row prints 0.986 either way. Verified on PDF page 67
   (printed p. 65) and PDF page 66 (printed p. 64) of IEC 60268-16:2011.
 - **Library behaviour:** computes $I_{am,k}$ from the unrounded masking factor.
   The transcription in [`tests/reference_data/`](../tests/reference_data/)
@@ -1972,7 +1972,7 @@ in the same order.
   editorial: it removes one of the two ways clause 6.1 can be satisfied, and a
   reader of the Spanish text alone would conclude that class 2 is *defined*
   over octave bands, so that a one-third-octave chain verified over the 22
-  tabulated bands from 50 Hz to $6{,}3\ \text{kHz}$ could not attest class 2
+  tabulated bands from 50 Hz to $6.3\ \text{kHz}$ could not attest class 2
   over its full range.
 - **Evidence:** side-by-side reading of clause 6.1 in both prints. The class 1
   sentence is word-for-word equivalent in the two documents, so the divergence
@@ -2005,14 +2005,14 @@ in the same order.
   note places a single element on each pole and one at 90°, and 38 equal
   elements with a cap at each pole leave nine rings of four elements each,
   mirror images of one another about 90°. Every pair of the printed list obeys
-  that symmetry except one: $32{,}6 + 147{,}4$, $50{,}8 + 129{,}2$ and
-  $65{,}1 + 114{,}9$ are all $180{,}0°$, while $77{,}9 + 102{,}2 = 180{,}1°$.
-  The same slip appears on the second half of the circle, where $257{,}8°$ is
-  $180° + 77{,}8°$ but $282{,}1°$ is $360° - 77{,}9°$. The direction that
+  that symmetry except one: $32.6 + 147.4$, $50.8 + 129.2$ and
+  $65.1 + 114.9$ are all $180.0°$, while $77.9 + 102.2 = 180.1°$.
+  The same slip appears on the second half of the circle, where $257.8°$ is
+  $180° + 77.8°$ but $282.1°$ is $360° - 77.9°$. The direction that
   halves each element's area in polar angle, $\phi_k = \arccos[1 - (4k -
-  1)/19]$, reproduces all the other printed angles to their 0,1° and gives
-  $77{,}846°$ and $282{,}154°$ for the fourth ring, which read **77,8°** and
-  **282,2°**.
+  1)/19]$, reproduces all the other printed angles to their 0.1° and gives
+  $77.846°$ and $282.154°$ for the fourth ring, which read **77.8°** and
+  **282.2°**.
 - **Evidence:** the construction evaluated for the nine rings and compared
   with the twenty printed angles. Verified on PDF page 14 (printed p. 10) of
   BS EN 61183:1995, the English text of EN 61183:1994, which is IEC 1183:1994
@@ -2040,22 +2040,22 @@ in the same order.
   confidence of 95 %, and Annex I computes the effective degrees of freedom by
   Welch-Satterthwaite "thereby enabling the coverage factor k to be selected to
   provide a level of confidence of 95 %". The table's own components give
-  $u_\mathrm{c} = 0{,}0590$ dB and $\nu_\mathrm{eff} = u_\mathrm{c}^4 /
-  (0{,}03^4/2) = 29{,}98$, both as printed, and the Student factor for 95 % at
-  29,98 degrees of freedom is $t_{0{,}975}(29{,}98) = $ **2,04**, not 2,11;
-  2,11 is the factor for about 17 degrees of freedom. The expanded uncertainty
-  that follows is $t_{0{,}975}(29{,}98) \times u_\mathrm{c} = 2{,}042\,3 \times
-  0{,}059\,031 = 0{,}120\,56$ dB, printed with its guard digit **0,12(1)**;
-  the printed 0,12(4) is $2{,}11 \times 0{,}0590 = 0{,}124\,49$ dB. To the two
-  decimals the correction is quoted to (component a14), both read 0,12 dB.
+  $u_\mathrm{c} = 0.0590$ dB and $\nu_\mathrm{eff} = u_\mathrm{c}^4 /
+  (0.03^4/2) = 29.98$, both as printed, and the Student factor for 95 % at
+  29.98 degrees of freedom is $t_{0.975}(29.98) = $ **2.04**, not 2.11;
+  2.11 is the factor for about 17 degrees of freedom. The expanded uncertainty
+  that follows is $t_{0.975}(29.98) \times u_\mathrm{c} = 2.042\,3 \times
+  0.059\,031 = 0.120\,56$ dB, printed with its guard digit **0.12(1)**;
+  the printed 0.12(4) is $2.11 \times 0.0590 = 0.124\,49$ dB. To the two
+  decimals the correction is quoted to (component a14), both read 0.12 dB.
 - **Evidence:** the budget recomputed from the fifteen printed values and
   divisors, and the Student quantile evaluated at the printed degrees of
   freedom. Verified on PDF page 40 (printed p. 38) of BS EN 62585:2012, the
   English text of EN 62585:2012, which is IEC 62585:2012 unchanged.
 - **Library behaviour:** `metrology.correction_uncertainty_budget` takes the
-  coverage factor from the effective degrees of freedom, 2,042 here, and the
+  coverage factor from the effective degrees of freedom, 2.042 here, and the
   conformance rows on Table I.2 pin that factor and the expanded uncertainty
-  it gives, 0,121 dB, with the printed ones named as the erratum
+  it gives, 0.121 dB, with the printed ones named as the erratum
   ([`tests/metrology/test_free_field_corrections.py`](../tests/metrology/test_free_field_corrections.py)).
 - **Status:** unreported.
 
@@ -2067,8 +2067,8 @@ in the same order.
   calculated" 5,956 621 kHz.
 - **The problem:** every other row prints the exponent $x/40$, which is
   Formula (H.1), $f_x = f_\mathrm{r} \cdot 10^{3x/10b}$ with $b = 12$, and the
-  calculated value beside it is $10^{31/40} = 5{,}956\,621$. $10^{31/80}$ would
-  be 2,441 kHz, outside the decade the table covers. The exponent reads
+  calculated value beside it is $10^{31/40} = 5.956\,621$. $10^{31/80}$ would
+  be 2.441 kHz, outside the decade the table covers. The exponent reads
   **$10^{31/40}$**.
 - **Evidence:** Formula (H.1) evaluated for the 41 indices; all 41 calculated
   values reproduce to the seven significant digits printed. Verified on PDF
@@ -2143,10 +2143,10 @@ in the same order.
 - **The problem:** both clauses specify third-order Butterworth high-pass and
   low-pass filters "giving −3 dB responses at 75 Hz and 6,5 kHz". Their
   combined response is $10\lg\{[1 + (75/f)^6]^{-1}[1 + (f/6\,500)^6]^{-1}\}$
-  dB. At 100 Hz the high-pass term is $(75/100)^6 = 0{,}178$ and the response
-  $-0{,}711$ dB; at 5 kHz the low-pass term is $(5\,000/6\,500)^6 = 0{,}207$
-  and the response $-0{,}818$ dB. To the tenth the note prints they read
-  **−0,7 dB at 100 Hz** and **−0,8 dB at 5 kHz**: the two values are
+  dB. At 100 Hz the high-pass term is $(75/100)^6 = 0.178$ and the response
+  $-0.711$ dB; at 5 kHz the low-pass term is $(5\,000/6\,500)^6 = 0.207$
+  and the response $-0.818$ dB. To the tenth the note prints they read
+  **−0.7 dB at 100 Hz** and **−0.8 dB at 5 kHz**: the two values are
   exchanged. The ±1 dB flatness the note explains holds either way.
 - **Evidence:** the Butterworth magnitude evaluated at the two frequencies.
   Verified on PDF page 15 (printed p. 13) of BS EN 60118-4:2015, the English
@@ -2155,8 +2155,8 @@ in the same order.
   EN 62489-1:2010+A1:2015, which is IEC 62489-1:2010 with its Amendment 1:2014
   unchanged.
 - **Library behaviour:** `electroacoustics.band_limit_response` evaluates the
-  two filters, and the conformance rows on 6.4 NOTE 2 pin $-0{,}711$ dB at
-  100 Hz and $-0{,}818$ dB at 5 kHz with the printed values named as the
+  two filters, and the conformance rows on 6.4 NOTE 2 pin $-0.711$ dB at
+  100 Hz and $-0.818$ dB at 5 kHz with the printed values named as the
   erratum; `electroacoustics.loop_test_noise` filters with the same sections.
 - **Status:** unreported.
 
@@ -2229,7 +2229,7 @@ in the same order.
   conformance row on Figures 2 and 3 checks both radii.
 - **Status:** unreported (corrected by the issuing body in 2017).
 
-## IEC 60118-4:2014, Annex A.4 against 9.5 (+12 dB at 1,45 m for a counter)
+## IEC 60118-4:2014, Annex A.4 against 9.5 (+12 dB at 1.45 m for a counter)
 
 - **Location:** Annex A (informative), A.4 "Specific locations such as help
   and information points, ticket and bank counters", the two paragraphs after
@@ -2244,11 +2244,11 @@ in the same order.
   across both vertical and horizontal ranges", and "The field strength shall
   not be above +8 dB ref. 400 mA/m in the area where people are expected to
   stand".
-- **The problem:** Figure 3 puts the counter's points at 1,2 m, 1,45 m and
-  1,7 m, and 9.5 holds all of them to the ±6 dB of a refuge (9.3), with the
+- **The problem:** Figure 3 puts the counter's points at 1.2 m, 1.45 m and
+  1.7 m, and 9.5 holds all of them to the ±6 dB of a refuge (9.3), with the
   +8 dB ceiling in the standing area, excepting no height. Nothing in the
   normative clause is less stringent for a counter than for a refuge, and the
-  informative annex allows 4 dB more at 1,45 m than 9.5 allows anywhere.
+  informative annex allows 4 dB more at 1.45 m than 9.5 allows anywhere.
   Amendment 1:2017 rewrites clause 9 with the same limits in its 9.5 and does
   not amend Annex A.
 - **Evidence:** the two passages compared. Verified on PDF pages 26 and 31
@@ -2277,16 +2277,16 @@ in the same order.
   percentage of the loop **width**".
 - **The problem:** both curves of panel b) are the traverse across the
   10-unit width, as E.1 says, and neither is the traverse along the length.
-  The field of the loop, 1,2 units above it and in decibels re the field at
-  its centre in its plane, reads for the vertical component at 5 %, 7,5 %,
-  10 % and 12,5 % of the dimension $-0{,}3$, $+1{,}1$, $+1{,}7$ and
-  $+1{,}9$ dB across the width, and $+1{,}8$, $+2{,}4$, $+2{,}4$ and
-  $+2{,}1$ dB along the length; the printed curve reads about $-0{,}8$,
-  $+0{,}8$, $+1{,}5$ and $+1{,}7$ dB, with its peak near 12,5 % where the
-  field across the width peaks, not near 8,5 % where the field along the length
+  The field of the loop, 1.2 units above it and in decibels re the field at
+  its centre in its plane, reads for the vertical component at 5 %, 7.5 %,
+  10 % and 12.5 % of the dimension $-0.3$, $+1.1$, $+1.7$ and
+  $+1.9$ dB across the width, and $+1.8$, $+2.4$, $+2.4$ and
+  $+2.1$ dB along the length; the printed curve reads about $-0.8$,
+  $+0.8$, $+1.5$ and $+1.7$ dB, with its peak near 12.5 % where the
+  field across the width peaks, not near 8.5 % where the field along the length
   does. The horizontal component tells the same: at $-10$ % it is
-  $-0{,}1$ dB across the width and $-4{,}0$ dB along the length, and the
-  curve reads $-0{,}2$ dB. The vertical-field line of panel a) belongs across
+  $-0.1$ dB across the width and $-4.0$ dB along the length, and the
+  curve reads $-0.2$ dB. The vertical-field line of panel a) belongs across
   the width, on the line labelled for the horizontal field.
 - **Evidence:** the Biot-Savart field of the four sides of the 15 by 10 loop
   evaluated along both lines, against the curves read off the page from
@@ -2298,7 +2298,7 @@ in the same order.
   the traverse across the width with points read off both curves.
 - **Status:** unreported.
 
-## IEC 60118-4:2014, E.6 (the flux density of 1 A/m printed as 1,256 µT)
+## IEC 60118-4:2014, E.6 (the flux density of 1 A/m printed as 1.256 µT)
 
 - **Location:** Annex E, E.6 "Magnetic units", the bullet on magnetic
   induction (printed folio 44).
@@ -2306,16 +2306,16 @@ in the same order.
   free space ($4\pi \times 10^{-7}$ H/m) [...] the magnetic induction due to a
   field strength of 1 A/m is **1,256 µT**".
 - **The problem:** $4\pi \times 10^{-7}\ \mathrm{H/m} \times 1\ \mathrm{A/m} =
-  1{,}256\,64\ \mu\mathrm{T}$, which reads **1,257 µT** to the four figures
+  1.256\,64\ \mu\mathrm{T}$, which reads **1.257 µT** to the four figures
   printed; the print drops the last digit instead of rounding it. The field
-  strength of 79,58 A/m that the same bullet gives for one gauss in air,
-  $10^{-4}\ \mathrm{T}/\mu_0 = 79{,}577$ A/m, is rounded correctly.
+  strength of 79.58 A/m that the same bullet gives for one gauss in air,
+  $10^{-4}\ \mathrm{T}/\mu_0 = 79.577$ A/m, is rounded correctly.
 - **Evidence:** $4\pi \times 10^{-7}$ evaluated. Verified on PDF page 46
   (printed p. 44) of BS EN 60118-4:2015, the English text of EN
   60118-4:2015, which is IEC 60118-4:2014 unchanged.
 - **Library behaviour:** `electroacoustics.magnetic_flux_density` multiplies
   by $\mu_0 = 4\pi \times 10^{-7}$ H/m; the conformance row on E.6 compares it
-  with the printed 1,256 µT within 0,001 µT and names the print as the
+  with the printed 1.256 µT within 0.001 µT and names the print as the
   erratum.
 - **Status:** unreported (typographic, no numerical consequence).
 
@@ -2380,15 +2380,15 @@ in the same order.
   folio 22), the row "Counter loop".
 - **The print:** dimensions "0,35 × 0,45" m, 10 turns, perimeter **1,5** m,
   conductor area $0{,}75\ \text{mm}^2$, resistance 0,37 Ω.
-- **The problem:** a rectangle of 0,35 m by 0,45 m has a perimeter of
-  $2(0{,}35 + 0{,}45) = 1{,}6$ m, and every other row prints the perimeter its
-  dimensions give: 0,7 m for the 0,22 m diameter ($\pi \times 0{,}22 =
-  0{,}69$ m) and 14 m, 28 m, 60 m and 110 m for the four rectangles. The
-  row's own resistance needs 1,6 m: with the resistivity of standard annealed
-  copper at 20 °C, $1/58\ \Omega\cdot\text{mm}^2\text{/m}$ (IEC 60028), ten turns of 1,6 m in $0{,}75\ \text{mm}^2$
-  are 0,368 Ω, printed 0,37, where ten turns of 1,5 m would be 0,345 Ω. The
+- **The problem:** a rectangle of 0.35 m by 0.45 m has a perimeter of
+  $2(0.35 + 0.45) = 1.6$ m, and every other row prints the perimeter its
+  dimensions give: 0.7 m for the 0.22 m diameter ($\pi \times 0.22 =
+  0.69$ m) and 14 m, 28 m, 60 m and 110 m for the four rectangles. The
+  row's own resistance needs 1.6 m: with the resistivity of standard annealed
+  copper at 20 °C, $1/58\ \Omega\cdot\text{mm}^2\text{/m}$ (IEC 60028), ten turns of 1.6 m in $0.75\ \text{mm}^2$
+  are 0.368 Ω, printed 0.37, where ten turns of 1.5 m would be 0.345 Ω. The
   same resistivity gives the printed resistance of the other five rows to the
-  hundredth. The perimeter reads **1,6** m.
+  hundredth. The perimeter reads **1.6** m.
 - **Evidence:** $R = \rho N l / a$ evaluated for the six rows. Verified on
   PDF page 24 (printed p. 22) of BS EN 62489-1:2010+A1:2015, the English text
   of EN 62489-1:2010+A1:2015, which is IEC 62489-1:2010 with its Amendment
@@ -2396,7 +2396,7 @@ in the same order.
   60028:1925.
 - **Library behaviour:** `electroacoustics.loop_resistance` takes the
   perimeter, and the conformance row on the counter loop computes it from the
-  sides, 1,6 m, naming the printed 1,5 m as the erratum.
+  sides, 1.6 m, naming the printed 1.5 m as the erratum.
 - **Status:** unreported.
 
 ## IEC 62489-1:2010+A1:2014, 5.4.8.2 a) (the maximum output current cross-referenced to 5.4.5)
@@ -2421,26 +2421,26 @@ in the same order.
   recorded load voltage, not the current, so no change was required.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
 
-## IEC 62489-1:2010+A1:2014, 5.4.14.1 (the fall where the fields subtract printed as 0,72 dB)
+## IEC 62489-1:2010+A1:2014, 5.4.14.1 (the fall where the fields subtract printed as 0.72 dB)
 
 - **Location:** 5.4.14 "Phase error of quadrature networks for phased loop
   arrays", 5.4.14.1 "Explanation", added by Amendment 1 (printed folio 15).
 - **The print:** "cos 85° = 0,087, so the in-phase field is increased or
   decreased by **0,72 dB**, depending on where the measurement is taken; in
   some places the fields add; in others they subtract."
-- **The problem:** an in-phase component of 0,087 of the reference field
-  raises the level by $20\lg(1 + 0{,}087) = 0{,}72$ dB where the two add and
-  lowers it by $20\lg(1 - 0{,}087) = -0{,}79$ dB where they subtract. The two
-  are not equal in decibels, so the single 0,72 dB is the rise only. The fall
-  reads **0,79 dB**.
-- **Evidence:** both levels evaluated from the printed 0,087. Verified on PDF
+- **The problem:** an in-phase component of 0.087 of the reference field
+  raises the level by $20\lg(1 + 0.087) = 0.72$ dB where the two add and
+  lowers it by $20\lg(1 - 0.087) = -0.79$ dB where they subtract. The two
+  are not equal in decibels, so the single 0.72 dB is the rise only. The fall
+  reads **0.79 dB**.
+- **Evidence:** both levels evaluated from the printed 0.087. Verified on PDF
   page 17 (printed p. 15) of BS EN 62489-1:2010+A1:2015, the English text of
   EN 62489-1:2010+A1:2015, which is IEC 62489-1:2010 with its Amendment 1:2014
   unchanged.
 - **Library behaviour:** `electroacoustics.QuadraturePhaseError` states the
   rise and the fall apart, as `level_increase` and `level_decrease`;
-  the conformance rows on 5.4.14.1 pin the rise to the printed 0,72 dB and the
-  fall to $20\lg(1 - \cos 85°) = -0{,}792$ dB, naming the print as the
+  the conformance rows on 5.4.14.1 pin the rise to the printed 0.72 dB and the
+  fall to $20\lg(1 - \cos 85°) = -0.792$ dB, naming the print as the
   erratum.
 - **Status:** unreported.
 
@@ -2479,20 +2479,20 @@ in the same order.
   (rounding) dB, and D.2 says the uncertainty "arises from eight different
   sources".
 - **The problem:** the root-sum-square of the printed column is
-  $\sqrt{2 \times 0{,}025^2 + 2 \times 0{,}017^2 + 0{,}006^2 + 0{,}005^2 + 2
-  \times 0{,}003^2} = \sqrt{0{,}001\,907} = 0{,}043\,67$ dB, which reads
-  **0,044 dB**, not 0,040 dB; from the values each row states before rounding
-  (0,05/2, and 0,01, 0,03, 0,005, $20\lg(200{,}2/200)$, 0,03 and 0,005 over
-  $\sqrt{3}$) it is 0,043 88 dB. With $k = 2$ the expanded uncertainty is
-  0,087 dB, **0,09 dB** to the two decimals the clause quotes, not 0,08 dB.
-  The printed 0,040 dB is the root-sum-square of seven of the eight
-  components, with one of the two 0,017 dB rows left out:
-  $\sqrt{0{,}001\,907 - 0{,}017^2} = 0{,}040\,2$ dB.
+  $\sqrt{2 \times 0.025^2 + 2 \times 0.017^2 + 0.006^2 + 0.005^2 + 2
+  \times 0.003^2} = \sqrt{0.001\,907} = 0.043\,67$ dB, which reads
+  **0.044 dB**, not 0.040 dB; from the values each row states before rounding
+  (0.05/2, and 0.01, 0.03, 0.005, $20\lg(200.2/200)$, 0.03 and 0.005 over
+  $\sqrt{3}$) it is 0.043 88 dB. With $k = 2$ the expanded uncertainty is
+  0.087 dB, **0.09 dB** to the two decimals the clause quotes, not 0.08 dB.
+  The printed 0.040 dB is the root-sum-square of seven of the eight
+  components, with one of the two 0.017 dB rows left out:
+  $\sqrt{0.001\,907 - 0.017^2} = 0.040\,2$ dB.
 - **Evidence:** the eight printed values recombined, and the stated values
   divided by their divisors. Verified on PDF pages 22 and 23 (printed pp. 20
   and 21) of IEC 61094-5:2016, Edition 2.0 (2016-05), English-French.
 - **Library behaviour:** `metrology.comparison_uncertainty_budget` combines
-  the components it is given, 0,0437 dB and 0,087 dB for those of Table D.1,
+  the components it is given, 0.0437 dB and 0.087 dB for those of Table D.1,
   and the conformance rows on D.3 pin those values with the printed ones named
   as the erratum
   ([`tests/metrology/test_comparison_calibration.py`](../tests/metrology/test_comparison_calibration.py)).
@@ -2514,11 +2514,11 @@ in the same order.
   0,025 dB", and the first special case speaks of "un micrófono de tipo
   **WG3**".
 - **The problem:** the English text prints the six values the translation
-  drops, 0,017, 0,003, 0,005, 0,025, 0,017 and 0,003 dB (IEC 61094-5:2016,
+  drops, 0.017, 0.003, 0.005, 0.025, 0.017 and 0.003 dB (IEC 61094-5:2016,
   printed p. 20), and "0,040 dB" in D.3 (printed p. 21), so the Spanish
-  0,004 dB is a tenth of the English value and inconsistent with its own
+  0.004 dB is a tenth of the English value and inconsistent with its own
   "0,08 dB" expanded uncertainty two lines further on. The row text divides
-  0,05 dB, not 0,025 dB, by 2 ("0,05/2 dB = 0,025 dB" in the English), and
+  0.05 dB, not 0.025 dB, by 2 ("0,05/2 dB = 0,025 dB" in the English), and
   the special case is a type **WS3** microphone, as the English, Table A.1 of
   the same translation and the last paragraph of the same special case say. A
   reader of the Spanish text alone cannot rebuild the budget: six of its eight
@@ -2710,7 +2710,7 @@ in the same order.
   formula and the first zero agree with each other; the words "duration $b$"
   disagree with both, and read "half-duration $b$" or "duration $2b$". The
   practical conclusion stands on either reading: a first zero ten times above
-  a 20 kHz upper limit, at 200 kHz, asks for a pulse of 5 µs ($b$ = 2,5 µs by
+  a 20 kHz upper limit, at 200 kHz, asks for a pulse of 5 µs ($b$ = 2.5 µs by
   the formula), "just a few microseconds".
 - **Evidence:** the transform of the rectangular pulse evaluated at zero
   frequency and at its first zero. Verified on PDF page 30 (printed p. 28) of
@@ -2739,24 +2739,24 @@ in the same order.
   entry of both tables has a comma, and Table B.2 prints the entry at 800 Hz
   for the 100 mm tube of 0,1667 mm as "**–3,89**", with two decimals where
   every other entry has three.
-- **The problem:** the two 0,1667 mm columns were computed with a radius of 1/6
-  mm, 0,166 67 mm. The impedance goes as the fourth power of the radius (B.1),
-  so the rounding of the header moves the result by 0,08 %, more than the last
+- **The problem:** the two 0.1667 mm columns were computed with a radius of 1/6
+  mm, 0.166 67 mm. The impedance goes as the fourth power of the radius (B.1),
+  so the rounding of the header moves the result by 0.08 %, more than the last
   printed figure: Formulas (B.1) to (B.3) at the reference conditions give
-  3,013 and $6{,}029\ \text{GPa}\cdot\text{s/m}^3$ at 20 Hz for the 50 mm and 100 mm tubes with 0,1667
-  mm, and the printed 3,015 and 6,034 with 1/6 mm. A program tested against the
+  3.013 and $6.029\ \text{GPa}\cdot\text{s/m}^3$ at 20 Hz for the 50 mm and 100 mm tubes with 0.1667
+  mm, and the printed 3.015 and 6.034 with 1/6 mm. A program tested against the
   table with the radius as printed fails the test by up to five units of the
-  last figure. The other two slips are typographical: "2.021" is 2,021, and
-  "–3,89" is the only entry with two decimals (the formulas give –3,892 with the
+  last figure. The other two slips are typographical: "2.021" should read "2,021", and
+  "–3,89" is the only entry with two decimals (the formulas give –3.892 with the
   1/6 mm of the column).
 - **Evidence:** Formulas (B.1) to (B.3) evaluated with the air of Annex F at 23
-  °C, 101,325 kPa and 50 %, with both radii, against the printed columns.
+  °C, 101.325 kPa and 50 %, with both radii, against the printed columns.
   Verified on PDF pages 26 and 27 (printed pp. 24 and 25) of BS EN
   61094-2:2009, the English text of EN 61094-2:2009, which is IEC 61094-2:2009
   unchanged.
 - **Library behaviour:** `metrology.capillary_tube_impedance` takes the radius
   it is given; the tests and the conformance rows on Tables B.1 and B.2 pass
-  1/6 mm for the columns headed 0,1667 mm and read "2.021" and "–3,89" as the
+  1/6 mm for the columns headed 0.1667 mm and read "2.021" and "–3,89" as the
   numbers they write
   ([`tests/metrology/test_reciprocity_coupler.py`](../tests/metrology/test_reciprocity_coupler.py)).
 - **Status:** unreported.
@@ -2813,12 +2813,12 @@ in the same order.
   \mathbf{6{,}3343\,184\,5}\cdot10^3\cdot T^{-1})$. Table F.2 of IEC
   61094-2:2009 (printed folio 41), which the step refers to, prints the same
   four coefficients with the last as $a_3 = \mathbf{-6{,}343\,164\,5}\times10^3$.
-- **The problem:** the digits are transposed and mis-grouped: 6 334,318 45
-  against 6 343,164 5. The first three coefficients agree with Table F.2 to the
+- **The problem:** the digits are transposed and mis-grouped: 6 334.318 45
+  against 6 343.164 5. The first three coefficients agree with Table F.2 to the
   last digit, and the Table F.2 value is the one of the CIPM-2007 formula that
   IEC 61094-2 F.2 cites. With the printed coefficient the saturation vapour
-  pressure at 23 °C is 2 896,1 Pa instead of 2 810,9 Pa, 3,0 % high, and the
-  attenuation of Step 5 moves by up to 0,028 dB/m (3,2 %) at the nine
+  pressure at 23 °C is 2 896.1 Pa instead of 2 810.9 Pa, 3.0 % high, and the
+  attenuation of Step 5 moves by up to 0.028 dB/m (3.2 %) at the nine
   conditions of Table B.1.
 - **Evidence:** the two prints read side by side, and the saturation vapour
   pressure and the attenuation computed with each. Verified on PDF page 22
@@ -3087,7 +3087,7 @@ in the same order.
   $10 \lg(T/T_0)$ and $K_1$ is under-estimated for every $T > 1$ s: a burst
   whose energy is 6 dB above the background's in a 10 s interval reads as
   16 dB above it and earns no correction, where the criterion of 8.2.3 puts
-  $K_1$ at its largest admissible value, 1,3 dB. The twin chain of 8.2, where
+  $K_1$ at its largest admissible value, 1.3 dB. The twin chain of 8.2, where
   both levels are time-averaged, has no such term, and 8.3.3 requires the
   single event levels to be averaged "in the same way as for the
   time-averaged sound pressure levels described in 8.2.2", so the intended
@@ -3109,7 +3109,7 @@ in the same order.
   `sound_energy_comparison` is steady, so `reference_background_levels` is corrected
   by the time-averaged rule of 9.1.2 instead and takes no window; the criteria and the
   clamp of 8.2.3 (and of 9.1.2 in ISO 3741) are then applied to that margin.
-  `tests/emission/test_sound_energy.py` pins $K_1 = 1{,}2563$ dB for a 78 dB
+  `tests/emission/test_sound_energy.py` pins $K_1 = 1.2563$ dB for a 78 dB
   burst over a 62 dB background in a 10 s window, and
   $L_J = L_W + 10 \lg(T/T_0)$ field by field on both families; the
   conformance report carries the identity as "ISO 3744:2010 Eq. 23 / clause
@@ -3286,15 +3286,15 @@ in the same order.
   docstring.
 - **Status:** unreported.
 
-## ISO 8297:1994, Table 3 (the 31,5 Hz octave printed as 31 Hz)
+## ISO 8297:1994, Table 3 (the 31.5 Hz octave printed as 31 Hz)
 
 - **Location:** Table 3, first row (PDF page 15, printed p. 7) of BS ISO
   8297:1994.
 - **The print:** the first octave-band centre frequency of Table 3 is "31".
 - **The problem:** 7.2 requires the centre frequencies of the bands to
-  "correspond to those of ISO 266", whose octave band is 31,5 Hz, and NOTE 8
+  "correspond to those of ISO 266", whose octave band is 31.5 Hz, and NOTE 8
   (PDF page 14, printed p. 6) names the same band "31,5 Hz". The row is the
-  31,5 Hz octave; its value, 0 dB/m, is unaffected.
+  31.5 Hz octave; its value, 0 dB/m, is unaffected.
 - **Evidence:** Verified on PDF page 15 (printed p. 7) of BS ISO 8297:1994,
   Table 3, against clause 7.2 on PDF page 13 (printed p. 5) and NOTE 8 on PDF
   page 14 (printed p. 6).
@@ -3338,7 +3338,7 @@ in the same order.
   sound exposure level for each excess-attenuation class was determined."
 - **The problem:** Equations (7) and (8) are the long-term average
   single-event sound exposure level and rating level,
-  $10 \lg \left[\sum_{k}\sum_{l} \wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0{,}1 L_{E,\mathrm{w},k,l}}\right]$
+  $10 \lg \left[\sum_{k}\sum_{l} \wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0.1 L_{E,\mathrm{w},k,l}}\right]$
   dB, with $K$ added in the exponent of Equation (8): one number summed over
   every class, from levels already weighted in frequency, with no octave band
   and no class left in it. The paragraph describes a band level for each
@@ -3359,7 +3359,7 @@ in the same order.
   each under the equation its clause gives it. No change was required.
 - **Status:** unreported.
 
-## ISO 13474:2009, Annex A.2 (the shift of Equation (22) printed as 1,04 dB)
+## ISO 13474:2009, Annex A.2 (the shift of Equation (22) printed as 1.04 dB)
 
 - **Location:** Annex A (informative), A.2, the paragraph below Figure A.1 that
   spreads the class density for turbulence.
@@ -3368,15 +3368,15 @@ in the same order.
   value was shifted by an amount, Δμ, equal to 1,04 dB [from Equation (22)]";
   Figure A.3 repeats $\sigma = 5{,}0$ dB.
 - **The problem:** Equation (22) is the mean of a lognormal variable and
-  evaluates to $\Delta\mu = \sigma^2 \ln 10 / 20$, which is $2{,}878$ dB at
-  $\sigma = 5$ dB. $1{,}04$ dB is its value at $\sigma = 3$ dB ($1{,}036$ dB),
+  evaluates to $\Delta\mu = \sigma^2 \ln 10 / 20$, which is $2.878$ dB at
+  $\sigma = 5$ dB. $1.04$ dB is its value at $\sigma = 3$ dB ($1.036$ dB),
   a standard deviation the annex does not use. The rest of the annex was
-  computed with $2{,}878$ dB. The shift keeps the energetic mean of every
-  subclass at its centre, which is why the printed LT2 of 37,0 dB agrees with
-  the printed LT1 of 37,0 dB; with $\Delta\mu = 1{,}04$ dB and $\sigma = 5$ dB
-  every level of the spread distribution moves up by $1{,}84$ dB, LT2 reads
-  38,8 dB, the peak of Figure A.2 moves from about 30,5 dB to 32,3 dB, and
-  $L_{50}$ reads 33,3 dB against the printed 31,5 dB.
+  computed with $2.878$ dB. The shift keeps the energetic mean of every
+  subclass at its centre, which is why the printed LT2 of 37.0 dB agrees with
+  the printed LT1 of 37.0 dB; with $\Delta\mu = 1.04$ dB and $\sigma = 5$ dB
+  every level of the spread distribution moves up by $1.84$ dB, LT2 reads
+  38.8 dB, the peak of Figure A.2 moves from about 30.5 dB to 32.3 dB, and
+  $L_{50}$ reads 33.3 dB against the printed 31.5 dB.
 - **Evidence:** the paragraph read on PDF page 42 (printed p. 34), Equation
   (22) on PDF page 21 (printed p. 13), Figures A.2 and A.3 on PDF pages 43
   and 44 (printed pp. 35 and 36), all of BS ISO 13474:2009, the UK
@@ -3385,10 +3385,10 @@ in the same order.
   document.
 - **Library behaviour:** the shift is Equation (22) in closed form,
   [`turbulence_level_shift`](../src/phonometry/environment/assessment/exposure_distribution.py),
-  $2{,}878$ dB at 5 dB, and it is not a parameter a caller can set. The
+  $2.878$ dB at 5 dB, and it is not a parameter a caller can set. The
   conformance check "ISO 13474:2009 Equation (22)" holds it against the
   printed integral evaluated by quadrature, and "ISO 13474:2009 Equation
-  (A.4), Figure A.3" holds LT2 at the printed 37,0 dB.
+  (A.4), Figure A.3" holds LT2 at the printed 37.0 dB.
 - **Status:** unreported.
 
 ## ISO 13474:2009, Annex A.2, Figure A.3 (exceedance levels that are not the roots of Equation (25))
@@ -3401,22 +3401,22 @@ in the same order.
 - **The problem:** Equation (24) defines the probability that the level
   exceeds $x$ as $\int_x^{\infty} \rho^{*}(x')\,\mathrm{d}x'$ and Equation (25)
   the $n$-percent exceedance level as its root. On the distribution of Table
-  A.4 spread as A.2 describes, they give 21,6; 31,5; 40,5; 43,0 and 47,5 dB:
-  $L_{50}$ agrees and the other four print 0,1 dB to 0,5 dB higher, the more
+  A.4 spread as A.2 describes, they give 21.6; 31.5; 40.5; 43.0 and 47.5 dB:
+  $L_{50}$ agrees and the other four print 0.1 dB to 0.5 dB higher, the more
   so the rarer the level. The annex does not say how it computed them. One
   reading is consistent with the print: a cumulative curve formed from 15 dB,
   where the drawn curves of Figures A.2 and A.3 begin (their axes start at
   10 dB), rather than from minus infinity,
   $1 - \int_{15}^{x} \rho^{*}(x')\,\mathrm{d}x'$; the drawn curve of Figure
   A.3 begins at 15 dB on the line of 1, which is what that reading draws and
-  where Equation (24) gives 0,998. Fed the 07:00 to 19:00
-  column of Table A.3 as printed, which sums to 1,0004, it gives 21,69;
-  31,49; 40,58; 43,16 and 47,97 dB, all five to the printed digit; it then
-  adds about 0,17 % to every exceedance, the 0,21 % of the distribution below
-  15 dB less the 0,04 % by which the printed column exceeds one, which moves
+  where Equation (24) gives 0.998. Fed the 07:00 to 19:00
+  column of Table A.3 as printed, which sums to 1.0004, it gives 21.69;
+  31.49; 40.58; 43.16 and 47.97 dB, all five to the printed digit; it then
+  adds about 0.17 % to every exceedance, the 0.21 % of the distribution below
+  15 dB less the 0.04 % by which the printed column exceeds one, which moves
   the levels at the smallest percentages most. Fed the full-precision
-  probabilities that reproduce Table A.4, the same reading gives 21,69;
-  31,49; 40,59; 43,17 and 48,05 dB, and $L_{1}$ would print 48,1 dB. The
+  probabilities that reproduce Table A.4, the same reading gives 21.69;
+  31.49; 40.59; 43.17 and 48.05 dB, and $L_{1}$ would print 48.1 dB. The
   reading is therefore a hypothesis and not a reconstruction of the figure;
   what is established is that four of the five printed levels are not the
   roots of Equation (25).
@@ -3429,9 +3429,9 @@ in the same order.
   to infinity in closed form and `SELDistribution.exceedance_level` solves
   Equation (25)
   ([`exposure_distribution.py`](../src/phonometry/environment/assessment/exposure_distribution.py)),
-  so the example returns 21,6; 31,5; 40,5; 43,0 and 47,5 dB. The conformance
+  so the example returns 21.6; 31.5; 40.5; 43.0 and 47.5 dB. The conformance
   check "ISO 13474:2009 Equation (25), Figure A.3" holds $L_{50}$ at the
-  printed 31,5 dB; the other four printed levels have no conformance check.
+  printed 31.5 dB; the other four printed levels have no conformance check.
 - **Status:** unreported.
 
 ## ISO/TS 12913-3:2019, Annex A.3 (the perceived affective quality called part 3)
@@ -3554,7 +3554,7 @@ in the same order.
   sone to the ninth. The sentence should read "a subsequent application of
   the exponent 1/3". ISO 532-1:2017, 6.4, NOTE, describes the energy mean of
   the loudness level in the same shape and gets it right: a power of about
-  3,322 and then a power law "with the exponent lg(2)", its inverse.
+  3.322 and then a power law "with the exponent lg(2)", its inverse.
 - **Evidence:** the NOTE and its formula on PDF page 14 (printed p. 8) of
   ISO/TS 12913-2:2018 (first edition, 2018-08); ISO 532-1:2017, 6.4, on PDF
   page 22 (printed p. 16).
@@ -3631,19 +3631,19 @@ in the same order.
   $s_\mathrm{met} = 0{,}6/\sqrt{6} = 0{,}3\ \mathrm{dB}$."
 - **The problem:** two independent defects in one sentence pair.
   (a) Annex G, which is normative and which this paragraph points at, gives
-  $C_1 + C_2 = 0{,}394$ dB at 500 m and 23,0 °C, not 0,6 dB. The reading is
-  self-validating: the same two equations give $-4{,}6 \times 10^{-5}$ dB at
-  120 m and 23,0 °C, which is the "zero" the same sentence prints, so the
+  $C_1 + C_2 = 0.394$ dB at 500 m and 23.0 °C, not 0.6 dB. The reading is
+  self-validating: the same two equations give $-4.6 \times 10^{-5}$ dB at
+  120 m and 23.0 °C, which is the "zero" the same sentence prints, so the
   constants and the temperature terms are being read as the standard intends.
-  0,6 dB is reached at about 697 m at 23,0 °C, or at 500 m only if the air is
-  at 30,1 °C.
-  (b) $0{,}6/\sqrt{6} = 0{,}245$, not 0,3. The quotient does not give the
-  result printed beside it: 0,3 dB is exactly $0{,}6/2$, so either the divisor
+  0.6 dB is reached at about 697 m at 23.0 °C, or at 500 m only if the air is
+  at 30.1 °C.
+  (b) $0.6/\sqrt{6} = 0.245$, not 0.3. The quotient does not give the
+  result printed beside it: 0.3 dB is exactly $0.6/2$, so either the divisor
   or the result is wrong. For a triangular distribution of half-width $a$ the
   standard deviation is $a/\sqrt{6}$, which is the divisor the sentence names.
 - **Evidence:** H.4.2.7 read on PDF page 82 (printed p. 73), against Annex G
-  Equations (G.1) and (G.2) with $a = 2{,}2560 \times 10^{-5}$ m$^{-1}$,
-  $b = 5{,}2553$, $\theta_0 = 314$ K and $\theta_1 = 296$ K on PDF pages 73 and
+  Equations (G.1) and (G.2) with $a = 2.2560 \times 10^{-5}$ m$^{-1}$,
+  $b = 5.2553$, $\theta_0 = 314$ K and $\theta_1 = 296$ K on PDF pages 73 and
   74 (printed pp. 64 and 65), all of BS EN ISO 3744:2010. Both values were
   recomputed from the printed equations alone.
 - **Library behaviour:** the Annex H uncertainty budget is not modelled, so no
@@ -3662,19 +3662,19 @@ in the same order.
 - **The problem:** Table 2 is a rounded extract of ISO 9613-1, to which the
   clause itself defers ("For values of α at atmospheric conditions not covered
   in table 2, see ISO 9613-1"). Evaluating the ISO 9613-1 pure-tone formula at
-  1 kHz, $15\ ^\circ\text{C}$, $80\ \%$ RH and $101{,}325\ \text{kPa}$ gives
-  $4{,}1511\ \text{dB/km}$, which rounds to $4{,}2$, not the printed $4{,}1$.
-  The neighbouring cells of the same row round correctly (2 kHz: $8{,}338$ ->
-  printed $8{,}3$; 4 kHz: $23{,}86$ -> $23{,}7$ at the exact band centre), as
+  1 kHz, $15\ ^\circ\text{C}$, $80\ \%$ RH and $101.325\ \text{kPa}$ gives
+  $4.1511\ \text{dB/km}$, which rounds to $4.2$, not the printed $4.1$.
+  The neighbouring cells of the same row round correctly (2 kHz: $8.338$ ->
+  printed $8.3$; 4 kHz: $23.86$ -> $23.7$ at the exact band centre), as
   do the 1 kHz cells of the other rows ($15\ ^\circ\text{C}$ / $50\ \%$:
-  $4{,}164$ -> printed $4{,}2$), so the defect is confined to this cell.
+  $4.164$ -> printed $4.2$), so the defect is confined to this cell.
 - **Evidence:** independent evaluation of the ISO 9613-1 coefficient at both
-  the nominal and the exact band-centre frequency ($4{,}1511\ \text{dB/km}$
+  the nominal and the exact band-centre frequency ($4.1511\ \text{dB/km}$
   either way, 1 kHz being both).
 - **Library behaviour:** unaffected. The library never reads Table 2: it
   computes $A_\text{atm}$ from the ISO 9613-1 formula directly
   ([`air_absorption.py`](../src/phonometry/environment/propagation/air_absorption.py)),
-  so it yields $4{,}15\ \text{dB/km}$ for this condition.
+  so it yields $4.15\ \text{dB/km}$ for this condition.
 - **Status:** unreported.
 
 ## ISO/TR 17534-3:2015, Table 20 (q credited to the wrong footnote of ISO 9613-2 Table 3)
@@ -3689,7 +3689,7 @@ in the same order.
   sends the reader in the four other places it prints the row: Table 3 (T01),
   Table 8 (T04), Table 14 (T06) and Table 22 (T09) all read "Table 3
   footnote 2". Table 20 is the single occurrence that reads footnote 1, and the
-  value it carries, $q = 0{,}23$, is the one footnote 2 produces.
+  value it carries, $q = 0.23$, is the one footnote 2 produces.
 - **Evidence:** the row was read on PDF page 23 (printed p. 17) of
   ISO/TR 17534-3:2015, and the four consistent occurrences of the same row on
   PDF pages 13, 16, 20 and 41 (printed pp. 7, 10, 14 and 35) of the same
@@ -3698,7 +3698,7 @@ in the same order.
 - **Library behaviour:** unaffected. The typographical slip is in a
   cross-reference, not in a number, and
   [`ground_attenuation`](../src/phonometry/environment/propagation/outdoor_propagation.py)
-  implements $q$ from footnote 2, which is what reproduces the printed 0,23.
+  implements $q$ from footnote 2, which is what reproduces the printed 0.23.
 - **Status:** unreported.
 
 ## ISO/TR 17534-3:2015, Table 69 (the worked TRC form answers "yes" for a result below its lower limit)
@@ -3708,17 +3708,17 @@ in the same order.
 - **The print:** upper limit 31,15, lower limit 31,05, software calculation
   result (exemplary) 31,0, and "yes" in the column "Result inside
   tolerances".
-- **The problem:** 31,0 dB lies 0,05 dB below the lower limit 31,05 dB, so
+- **The problem:** 31.0 dB lies 0.05 dB below the lower limit 31.05 dB, so
   the row answers "yes" for a result outside its interval. The interval itself
   is right: Table 4, the spectral step-by-step results of T01, certifies
-  $L_A = 31{,}10$ dB at 250 Hz, and 31,05 to 31,15 is that result ±0,05 dB.
+  $L_A = 31.10$ dB at 250 Hz, and 31.05 to 31.15 is that result ±0.05 dB.
   Every other row of the form carries its certified result to one decimal,
-  and each of them is inside: seven rounded, among them 13,70 as 13,7,
-  23,76 as 23,8 and the total 44,29 as 44,3, and the 1 000 Hz row cut
-  down, 38,95 printed as 38,9 on its lower limit of 38,90, where rounding
-  gives 39,0. Rounded or cut,
-  31,10 to one decimal is 31,1, and the exemplary result was most likely
-  meant to read 31,1.
+  and each of them is inside: seven rounded, among them 13.70 as 13.7,
+  23.76 as 23.8 and the total 44.29 as 44.3, and the 1 000 Hz row cut
+  down, 38.95 printed as 38.9 on its lower limit of 38.90, where rounding
+  gives 39.0. Rounded or cut,
+  31.10 to one decimal is 31.1, and the exemplary result was most likely
+  meant to read 31.1.
 - **Evidence:** read on PDF page 59 (printed p. 53) of ISO/TR 17534-3:2015,
   first edition, with Table 4 on PDF page 14 (printed p. 8) of the same
   edition.
@@ -3738,7 +3738,7 @@ in the same order.
 - **The problem:** Equation (36) is the level equation the list belongs to,
   $L_P = L_W + 10\lg[Q/(4\pi r^2) + 4/A]$, in which ``A`` is an input. It
   does not define ``A``. The guideline defines it twice further down the same
-  section: Equation (37), $A = 0{,}163\,V/T$, and Equation (39),
+  section: Equation (37), $A = 0.163\,V/T$, and Equation (39),
   $A = \sum \alpha_i S_n + \sum A_n$. The reference is a self-reference, and
   it stands in both language columns, so it is a typesetting slip in the
   original rather than a translation one.
@@ -3764,10 +3764,10 @@ in the same order.
   $r_H = 0.2\sqrt{A}$".
 - **The problem:** *halbkugelförmig* is hemispherical, not spherical, and the
   printed constant sides with the German. The reverberation radius is
-  $r_H = \sqrt{Q A / 16\pi}$, which is $0{,}199\sqrt{A}$ at the $Q = 2$ of a
-  half space and $0{,}141\sqrt{A}$ at the $Q = 1$ of a full one. Only the
-  first rounds to the printed $0{,}2$. A reader following the English column
-  would take $0{,}2\sqrt{A}$ for the spherical radius and place the
+  $r_H = \sqrt{Q A / 16\pi}$, which is $0.199\sqrt{A}$ at the $Q = 2$ of a
+  half space and $0.141\sqrt{A}$ at the $Q = 1$ of a full one. Only the
+  first rounds to the printed $0.2$. A reader following the English column
+  would take $0.2\sqrt{A}$ for the spherical radius and place the
   reverberation field 41 % too far out.
 - **Evidence:** verified on PDF page 44 (printed p. 44) of VDI 2081
   Blatt 1:2001-07, both columns of the same sentence read side by side.
@@ -5043,8 +5043,8 @@ in the same order.
   in km/h**".
 - **The problem:** dimensionally impossible. A frequency in hertz is a speed
   in metres per second divided by a wavelength in metres; reading the speed in
-  km/h into $f = v/\lambda$ multiplies every frequency by 3,6, placing the
-  whole roughness spectrum a factor 3,6 too high in frequency, which is more
+  km/h into $f = v/\lambda$ multiplies every frequency by 3.6, placing the
+  whole roughness spectrum a factor 3.6 too high in frequency, which is more
   than an octave and a half.
 - **Evidence:** verified on PDF page 19 (printed p. L 168/19) and PDF page 21
   (printed p. L 168/21) of Directive (EU) 2015/996. The corrigendum of OJ L 5,
@@ -5088,7 +5088,7 @@ in the same order.
   1.7.2015, p. 138).
 - **The print:** Source A **31,4** dB and Source B **30,7** dB.
 - **The problem:** both are about 50 dB below their own neighbours in the same
-  column: 90,5 / 89,5 dB at 5 000 Hz and 81,2 / 80,6 dB at 8 000 Hz. No
+  column: 90.5 / 89.5 dB at 5 000 Hz and 81.2 / 80.6 dB at 8 000 Hz. No
   physical traction source has a 50 dB notch one third of an octave wide, and
   no other column of the table has anything comparable. The leading digit 8
   was lost.
@@ -5098,10 +5098,10 @@ in the same order.
   Directive (EU) 2021/1226 Annex point (20)(f), verified on PDF page 39
   (printed p. L 269/103) of that Directive, replaces the 4th column, 25th row
   by "81,4" and the 5th column, 25th row by "80,7", restoring the monotone
-  roll-off. The same two values appear as 31,41 and 30,71 in the IMAGINE
+  roll-off. The same two values appear as 31.41 and 30.71 in the IMAGINE
   catalogue file the Commission distributes with its reference source module,
   so the error predates the Directive.
-- **Library behaviour:** ships the corrected 81,4 / 80,7 and pins them,
+- **Library behaviour:** ships the corrected 81.4 / 80.7 and pins them,
   together with the assertion that neither value is more than 10 dB from
   either neighbour, in `test_table_g5_carries_the_2021_correction_at_6300_hz`.
 - **Status:** unreported (corrected by the issuing body in 2021).
@@ -5115,7 +5115,7 @@ in the same order.
   and **1,2 mm**.
 - **The problem:** neither series is the preferred one. The nominal 1/3-octave
   centres of IEC 61260-1 are 315, 3 150 and 6 300 Hz, and the R10 preferred
-  numbers around those wavelengths are 125, 12,5, 3,15 and 1,25 mm. The
+  numbers around those wavelengths are 125, 12.5, 3.15 and 1.25 mm. The
   Commission's own catalogue files, distributed with the reference source
   module, use the preferred wavelength series throughout.
 - **Evidence:** verified on PDF pages 129, 130, 131, 133, 134, 135, 137 and
@@ -5126,7 +5126,7 @@ in the same order.
   (f) and (g) replace the three frequency labels in the remaining sections and
   in Tables G-5 and G-6; the tables it replaces outright carry the preferred
   wavelengths. But point (20)(a) replaces only "the second table" of Table
-  G-1, so the wavelength labels 120, 12, 3,2 and 1,2 mm still stand on the
+  G-1, so the wavelength labels 120, 12, 3.2 and 1.2 mm still stand on the
   **first** table of G-1, the wheel roughness $L_{r,VEH,i}$, which is the one
   table that keeps them.
 - **Library behaviour:** the frequency grid is the IEC 61260-1 one throughout.
@@ -5385,7 +5385,7 @@ in the same order.
   order. Verified on PDF page 281 (printed p. 275) for the table and PDF page
   280 (printed p. 274) for the sentence, in Allard & Atalla, Propagation of
   Sound in Porous Media 2e:2009.
-- **Library behaviour:** the row carries the printed 3,8 mm, and its `note`
+- **Library behaviour:** the row carries the printed 3.8 mm, and its `note`
   records the sentence. Nothing computes with the thickness: the equivalent
   fluid of this specimen does not use it.
 - **Status:** unreported.
@@ -5401,9 +5401,9 @@ in the same order.
 - **The print:** the plate row gives a thickness of 1,6 mm; the prose of
   Sect. 11.7.4 on the facing folio says "The material is a foam of thickness
   h = 2 . 54 cm bonded onto a 0.6 mm aluminium plate".
-- **The problem:** 1,6 against 0,6 mm for the same plate.
-- **Evidence:** the foam agrees between the two, the table's 25,4 mm being the
-  sentence's 2,54 cm, which places the disagreement in the plate row alone.
+- **The problem:** 1.6 against 0.6 mm for the same plate.
+- **Evidence:** the foam agrees between the two, the table's 25.4 mm being the
+  sentence's 2.54 cm, which places the disagreement in the plate row alone.
   Verified on PDF page 282 (printed p. 276) for the table and PDF page 281
   (printed p. 275) for the sentence, in Allard & Atalla, Propagation of Sound
   in Porous Media 2e:2009.
@@ -5418,15 +5418,15 @@ in the same order.
 
 *Textbook, not a standard.*
 
-- **Location:** Table 13.2, PDF page 341, printed p. 337, the 5,75 cm rockwool
+- **Location:** Table 13.2, PDF page 341, printed p. 337, the 5.75 cm rockwool
   with a central perforation of the double-porosity example.
 - **The print:** the column headed E (Pa) carries 4400 for a frame of
   130 kg/m3.
-- **The problem:** a frame modulus of 4,4 kPa at that density gives a frame
-  wave speed of $\sqrt{4400/130} = 5,8$ m/s, so the quarter-wave resonance of
-  a 5,75 cm layer lands near 25 Hz. The text on the next page says the
+- **The problem:** a frame modulus of 4.4 kPa at that density gives a frame
+  wave speed of $\sqrt{4400/130} = 5.8$ m/s, so the quarter-wave resonance of
+  a 5.75 cm layer lands near 25 Hz. The text on the next page says the
   numerical model captures "the skeleton resonance occurring around 1350 Hz",
-  which the printed modulus cannot produce: 1350 Hz would need about 12,7 MPa,
+  which the printed modulus cannot produce: 1350 Hz would need about 12.7 MPa,
   three orders of magnitude above the cell.
 - **Evidence:** arithmetic on the page's own two cells against the page's own
   sentence. Nothing on the page says what the modulus should be, so this entry
@@ -5662,24 +5662,24 @@ in the same order.
   at 1 600 Hz for 25 °C and 2,9 at 5 000 Hz for 25 °C. Table 10 prints 0,1,
   0,1, 0,3, 0,3, 0,6, 0,9 and 2,8 in the same seven cells.
 - **The problem:** in these seven cells the humidity does not enter the
-  coefficient. The factor $\eta(\delta)$ of A.2 is 0,200 from $\delta = 6{,}50$
-  onwards (Table 1), and in each of these cells $\delta$ is past 6,50 at 70 %
-  as well as at 80 %, so the formula gives the one value 0,104, 0,130, 0,349,
-  0,349, 0,642, 0,946 and 2,849 dB/100 m for both tables. Table 10 prints each
+  coefficient. The factor $\eta(\delta)$ of A.2 is 0.200 from $\delta = 6.50$
+  onwards (Table 1), and in each of these cells $\delta$ is past 6.50 at 70 %
+  as well as at 80 %, so the formula gives the one value 0.104, 0.130, 0.349,
+  0.349, 0.642, 0.946 and 2.849 dB/100 m for both tables. Table 10 prints each
   of them rounded; Table 9 prints each one unit of the last digit above it,
   which at 200 Hz and 250 Hz and 20 °C doubles the coefficient, and reads
-  against its own neighbours at 15 °C and 25 °C, both printed 0,1. The same
+  against its own neighbours at 15 °C and 25 °C, both printed 0.1. The same
   formula, with $\eta$ read by the three-point quadratic Table 1 asks for,
   reproduces all 264 cells of Table 10 from 50 Hz to 10 kHz to the printed
   digit. Against Table 9 it misses eight more cells, by one unit, where $\eta$
   does depend on the humidity: 800 Hz at 5 °C, 1 250 Hz at 0 °C and at 5 °C,
   2 000 Hz at 10 °C, 4 000 Hz at 0 °C, 6 300 Hz at 10 °C and at 20 °C, and
-  8 000 Hz at 5 °C. Each of them lies within 0,014 dB/100 m of a rounding
+  8 000 Hz at 5 °C. Each of them lies within 0.014 dB/100 m of a rounding
   boundary, no reading of Table 1 tried (the three-point quadratic, linear,
   monotone cubic, Akima, cubic spline) reproduces them all, and no second
   table contradicts them, so they are not registered here. Five of the seven
-  cells above lie as close to a boundary, within 0,009 dB/100 m; the 200 Hz
-  and 250 Hz cells, at 0,104 and 0,130, do not.
+  cells above lie as close to a boundary, within 0.009 dB/100 m; the 200 Hz
+  and 250 Hz cells, at 0.104 and 0.130, do not.
 - **Evidence:** the two tables compared cell by cell where A.2 makes them
   equal, and recomputation of both. Verified on PDF page 19 (printed p. 16) of
   ISO 3891:1978, which carries Tables 9 and 10, and on PDF pages 14 and 15
@@ -5719,7 +5719,7 @@ in the same order.
   and its `reference_data` twin carry −3 dB as the 20 Hz type 2 lower limit,
   the stricter of the two readings, with the note beside them.
   `test_b_masks_match_reference_data` pins the two transcriptions to each
-  other. No shipped verdict moves: the realized B weighting sits 0,05 dB below
+  other. No shipped verdict moves: the realized B weighting sits 0.05 dB below
   nominal at 20 Hz and clears either reading.
 - **Status:** unreported.
 
@@ -5746,7 +5746,7 @@ in the same order.
   20 \lg(r/r_0)$ dB, gives the printed $L_{p,\mathrm{direct}} + \Delta L_f - 3$
   dB, whereas the plus sign gives
   $L_{p,\mathrm{direct}} + \Delta L_f - 19\ \mathrm{dB} - 40 \lg(r/r_0)$; and
-  the $8{,}7/r$ of the sensitivity coefficient is $20/(r \ln 10)$, the
+  the $8.7/r$ of the sensitivity coefficient is $20/(r \ln 10)$, the
   derivative of $-20 \lg r$, so the printed $c_r$ is the derivative of the
   minus-sign form. A sign misprint in an informative annex.
 - **Evidence:** the three consecutive sentences of E.4.2.6.2 read against each
@@ -5768,24 +5768,24 @@ in the same order.
   Assuming a triangular distribution for this uncertainty, the standard
   deviation is $u_{C_2} = 0{,}6/\sqrt{6} = 0{,}3$ dB."
 - **The problem:** the normative Annex C defines the correction as
-  $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \lg[(273{,}15 +
+  $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \lg[(273.15 +
   \theta)/\theta_\mathrm{ref}]$ with the static pressure of Eq. (C.2),
   $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - aH_\mathrm{a})^b$. At 23 °C that gives
-  0,07 dB at 120 m ($p_\mathrm{s}$ = 99,89 kPa, of which the pressure term
-  $-10 \lg(p_\mathrm{s}/p_{\mathrm{s},0})$ is 0,06 dB) and 0,26 dB at 500 m
-  ($p_\mathrm{s}$ = 95,46 kPa), not the printed 0,6 dB, and the arithmetic
-  printed after it does not close either: $0{,}6/\sqrt{6} = 0{,}245$, printed
-  0,3. No altitude below which "no meteorological correction is required"
+  0.07 dB at 120 m ($p_\mathrm{s}$ = 99.89 kPa, of which the pressure term
+  $-10 \lg(p_\mathrm{s}/p_{\mathrm{s},0})$ is 0.06 dB) and 0.26 dB at 500 m
+  ($p_\mathrm{s}$ = 95.46 kPa), not the printed 0.6 dB, and the arithmetic
+  printed after it does not close either: $0.6/\sqrt{6} = 0.245$, printed
+  0.3. No altitude below which "no meteorological correction is required"
   appears in Annex C. The informative example is inconsistent with the
   normative annex it cites.
 - **Evidence:** recomputation of Eq. (C.2) and $C_2$ from the printed
-  constants ($a = 2{,}2560 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3, $p_{\mathrm{s},0}$ =
-  $1{,}013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
+  constants ($a = 2.2560 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5.255 3, $p_{\mathrm{s},0}$ =
+  $1.013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
   (printed p. 37) and PDF page 36 (printed p. 27) of BS EN ISO 3747:2010.
 - **Library behaviour:** implements Annex C as printed:
   [`static_pressure_from_altitude`](../src/phonometry/emission/_sound_power_in_situ.py)
   evaluates Eq. (C.2) and the result's `c2` the correction, so a site at
-  500 m gets the 0,26 dB the annex gives. The Annex E budget is not
+  500 m gets the 0.26 dB the annex gives. The Annex E budget is not
   modelled. Pinned by `test_static_pressure_from_altitude_eq_c2` in
   [`tests/emission/test_sound_power_in_situ.py`](../tests/emission/test_sound_power_in_situ.py)
   and by the conformance check "ISO 3747:2010 Eq. C.2".
@@ -5801,14 +5801,14 @@ in the same order.
   pressure level over the free field, $\Delta L_f$ of Eq. (A.1), not a level
   $L_f$; no quantity called $L_f$ is defined anywhere in the standard.
   E.4.2.6.2, which derives this very coefficient, prints it as
-  $c_r = 10^{-0{,}1(\Delta L_f - 3\ \mathrm{dB})}\,8{,}7/r$, and its worked
-  extreme ($\Delta L_f$ = 7,1 dB, $r$ = 6 m) reproduces the 0,6 quoted there
-  only with the excess in the exponent ($10^{-0{,}41} \times 8{,}7/6 =
-  0{,}564$). The delta was dropped in the table.
+  $c_r = 10^{-0.1(\Delta L_f - 3\ \mathrm{dB})}\,8.7/r$, and its worked
+  extreme ($\Delta L_f$ = 7.1 dB, $r$ = 6 m) reproduces the 0.6 quoted there
+  only with the excess in the exponent ($10^{-0.41} \times 8.7/6 =
+  0.564$). The delta was dropped in the table.
 - **Evidence:** the table cell read against the text that derives it, verified
   on PDF page 44 (printed p. 35) and PDF page 47 (printed p. 38) of BS EN ISO
   3747:2010. Table E.2 is specific to this part: the corresponding row of
-  ISO 3744:2010 carries the free-field coefficient $c_S = 8{,}7/r$ with no
+  ISO 3744:2010 carries the free-field coefficient $c_S = 8.7/r$ with no
   excess factor at all, so the slip is not inherited from the family.
 - **Library behaviour:** the Annex E uncertainty budget is not modelled, and
   the excess itself is evaluated from Eq. (A.1) by
@@ -5825,14 +5825,14 @@ in the same order.
 - **The problem:** E.4.2.6.3, the clause that derives that very row, prints the
   opposite together with its reason: "Sampling directly affects the total
   uncertainty so $c_\mathrm{mic} = 1$". The budget of E.4.2.12 sides with the
-  clause and not with the table: its sixth term is $0{,}7^2$, which is the
-  0,7 dB contribution E.4.2.6.3 quotes taken at $c_\mathrm{mic} = 1$. The
-  neighbouring row settles that 0,5 is no blanket convention for instrument
-  rows, because E.4.2.7 sets $c_\mathrm{slm} = 0{,}5$ *and earns it*: repeated
+  clause and not with the table: its sixth term is $0.7^2$, which is the
+  0.7 dB contribution E.4.2.6.3 quotes taken at $c_\mathrm{mic} = 1$. The
+  neighbouring row settles that 0.5 is no blanket convention for instrument
+  rows, because E.4.2.7 sets $c_\mathrm{slm} = 0.5$ *and earns it*: repeated
   readings on one meter let the systematic errors cancel, which halves the
   coefficient, and the clause then reproduces the budget's own term
-  ($0{,}5 \times 0{,}5 = 0{,}25$ dB, quoted there as 0,3 dB for each of the two
-  sources, and $\sqrt{0{,}3^2 + 0{,}3^2} = 0{,}42$ dB, the 0,4 that E.4.2.12
+  ($0.5 \times 0.5 = 0.25$ dB, quoted there as 0.3 dB for each of the two
+  sources, and $\sqrt{0.3^2 + 0.3^2} = 0.42$ dB, the 0.4 that E.4.2.12
   sums). The sampling row carries no such derivation, and cannot carry one:
   $\delta_\mathrm{mic}$ is defined on the *difference*
   $\Delta L'_{p(\mathrm{ST-RSS})} = L'_{p(\mathrm{ST})} - L'_{p(\mathrm{RSS})}$,
@@ -5864,7 +5864,7 @@ in the same order.
   $\overline{L'_{p(\mathrm{ST})}}$. The model that carries
   $L_{W\mathrm{ref,atm}}$ is Equation (E.2), printed on the facing page, and
   differentiating it (with $K_1$ substituted from Eq. 7) does give the
-  printed $c_{L'_{p(\mathrm{ST})}} = 1 + 1/(10^{0,1\Delta L_p} - 1)$. A
+  printed $c_{L'_{p(\mathrm{ST})}} = 1 + 1/(10^{0.1\Delta L_p} - 1)$. A
   cross-reference misprint: (E.1) for (E.2).
 - **Evidence:** verified on PDF page 45 (printed p. 36), which carries the
   sentence and the coefficient, against PDF page 41 (printed p. 32) for
@@ -5930,7 +5930,7 @@ in the same order.
   document, Table 2 on PDF page 38 (printed p. 29) of BS EN ISO 3744:2010 and
   Table 5 on PDF page 22 (printed p. 16) of ISO 3743-2:2018.
 - **Library behaviour:** reads the row as the four octaves it spans, 500 Hz to
-  4 kHz, each with 1,5 dB
+  4 kHz, each with 1.5 dB
   ([`_sound_power_hard_walled.py`](../src/phonometry/emission/_sound_power_hard_walled.py)).
   Pinned by `test_table3_sigma_r0_per_band_and_a_weighted` in
   [`tests/emission/test_sound_power_hard_walled.py`](../tests/emission/test_sound_power_hard_walled.py)
@@ -5947,24 +5947,24 @@ in the same order.
   this uncertainty, the standard deviation is
   $s_{C_2} = 0{,}4/\sqrt{6} = 0{,}2\ \mathrm{dB}$."
 - **The problem:** the correction of this part is the $C_2$ of Annex A,
-  $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \lg[(273{,}15 +
+  $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \lg[(273.15 +
   \theta)/\theta_1]$ with $\theta_1$ = 296 K and the static pressure of
-  Equation (A.2). At 23 °C it gives 0,07 dB at 120 m ($p_\mathrm{s}$ =
-  99,89 kPa) and 0,26 dB at 500 m ($p_\mathrm{s}$ = 95,46 kPa), not zero and
-  0,4 dB. The two printed numbers are those of the sum $C_1 + C_2$ of ISO
+  Equation (A.2). At 23 °C it gives 0.07 dB at 120 m ($p_\mathrm{s}$ =
+  99.89 kPa) and 0.26 dB at 500 m ($p_\mathrm{s}$ = 95.46 kPa), not zero and
+  0.4 dB. The two printed numbers are those of the sum $C_1 + C_2$ of ISO
   3741:2010 clause 9.1.4, whose $C_1 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) +
-  5 \lg[(273{,}15 + \theta)/314]$ brings the sum to 0,000 dB at 120 m and
-  0,394 dB at 500 m. A comparison method has no $C_1$: it cancels between the
+  5 \lg[(273.15 + \theta)/314]$ brings the sum to 0.000 dB at 120 m and
+  0.394 dB at 500 m. A comparison method has no $C_1$: it cancels between the
   source under test and the reference sound source, which is why Annex A
-  prints $C_2$ alone. The divisor is right, $0{,}4/\sqrt{6} = 0{,}16$, which
-  rounds to the 0,2 printed.
+  prints $C_2$ alone. The divisor is right, $0.4/\sqrt{6} = 0.16$, which
+  rounds to the 0.2 printed.
 - **Evidence:** recomputation of Equation (A.2) and of $C_2$ from the
-  constants Annex A prints ($a = 2{,}256\,0 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3,
-  $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
+  constants Annex A prints ($a = 2.256\,0 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5.255 3,
+  $p_{\mathrm{s},0}$ = 101.325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
   from ISO 3741:2010 clause 9.1.4. Verified on PDF page 41 (printed p. 32)
   and PDF page 31 (printed p. 22) of BS EN ISO 3743-1:2010.
 - **Library behaviour:** implements Annex A as printed: a site at 500 m and
-  23 °C gets $C_2$ = 0,26 dB in `c2` and in `sound_power_level_at_reference_conditions`
+  23 °C gets $C_2$ = 0.26 dB in `c2` and in `sound_power_level_at_reference_conditions`
   ([`_sound_power_hard_walled.py`](../src/phonometry/emission/_sound_power_hard_walled.py)).
   The Annex C budget is not modelled. Pinned by
   `test_annex_a_c2_at_500_m_is_0_26_db` in
@@ -6006,8 +6006,8 @@ in the same order.
   $s_{C_2} = 0{,}4/\sqrt{6} = 0{,}2$ dB."
 - **The problem:** the same sentence as ISO 3743-1:2010 C.4.2.5, and the same
   defect. The correction of this part is the $C_2$ of Formula (E.2), which at
-  23 °C and the static pressure of Formula (E.3) is 0,07 dB at 120 m and
-  0,26 dB at 500 m; zero and 0,4 dB belong to the sum $C_1 + C_2$ of ISO
+  23 °C and the static pressure of Formula (E.3) is 0.07 dB at 120 m and
+  0.26 dB at 500 m; zero and 0.4 dB belong to the sum $C_1 + C_2$ of ISO
   3741:2010 clause 9.1.4, and neither method of this part applies a $C_1$
   (Formula (9) and Formula (10) carry none, and Formula (D.2) lists $C_2$
   alone).
@@ -6068,15 +6068,15 @@ in the same order.
   1{,}2$ dB.
 - **The problem:** two defects. (a) The contribution is the sensitivity
   coefficient times the standard uncertainty, and the clause gives both: at a
-  4 dB margin $c_{K_1} = 1/(10^{0{,}4} - 1) = 0{,}66$, printed 0,7, and
-  $u_{K_1}$ = 3 dB, so the extreme contribution is 2,0 dB (2,1 dB with the
-  rounded 0,7), not 1,7 dB. 1,7 is the $c_{L'_p} = 1 + c_{K_1}$ that D.4.2.3
+  4 dB margin $c_{K_1} = 1/(10^{0.4} - 1) = 0.66$, printed 0.7, and
+  $u_{K_1}$ = 3 dB, so the extreme contribution is 2.0 dB (2.1 dB with the
+  rounded 0.7), not 1.7 dB. 1.7 is the $c_{L'_p} = 1 + c_{K_1}$ that D.4.2.3
   quotes for the same scenario. ISO 3743-1:2010 C.4.2.4 runs the same
-  arithmetic at its 6 dB margin and closes it: 0,3 × 3 dB = 1,0 dB.
+  arithmetic at its 6 dB margin and closes it: 0.3 × 3 dB = 1.0 dB.
   (b) The third term of the D.4.2.12 sum, which stands in the position of the
-  $K_1$ row of Table D.2, is 0,4 dB, the typical value ISO 3743-1:2010
+  $K_1$ row of Table D.2, is 0.4 dB, the typical value ISO 3743-1:2010
   C.4.2.4 gives for Part 1; the clause of this part puts the typical
-  contribution at 1,0 dB. With 1,0 dB the sum is 1,5 dB rather than the 1,2 dB
+  contribution at 1.0 dB. With 1.0 dB the sum is 1.5 dB rather than the 1.2 dB
   printed.
 - **Evidence:** the clause's own inputs, recomputed, read on PDF page 37
   (printed p. 31) and PDF page 40 (printed p. 34) of ISO 3743-2:2018, against
@@ -6100,20 +6100,20 @@ in the same order.
   $c_T = -4{,}3/T_\mathrm{nom} - 240 \cdot V/(T_\mathrm{nom}^2 \cdot S \cdot c)$.
 - **The problem:** Formula (9) depends on the reverberation time only through
   $-10 \lg(T_\mathrm{nom}/T_0)$, whose derivative is
-  $-10/(T_\mathrm{nom} \ln 10) = -4{,}34/T_\mathrm{nom}$: −8,7 dB/s at 0,5 s,
+  $-10/(T_\mathrm{nom} \ln 10) = -4.34/T_\mathrm{nom}$: −8.7 dB/s at 0.5 s,
   not −5 dB/s. Table D.2 adds a second term Formula (9) does not have: it is
-  the derivative of the $4{,}34\,A/S$ of ISO 3741:2010 Equation (20) with
-  $A = 55{,}26\,V/(c\,T)$ ($4{,}34 \times 55{,}26 = 240$), so the table
+  the derivative of the $4.34\,A/S$ of ISO 3741:2010 Equation (20) with
+  $A = 55.26\,V/(c\,T)$ ($4.34 \times 55.26 = 240$), so the table
   differentiates ISO 3741 rather than the formula the clause names; for a
-  $70\ \text{m}^3$ cube at 343 m/s it takes the coefficient to −10,5 dB/s. And the
+  $70\ \text{m}^3$ cube at 343 m/s it takes the coefficient to −10.5 dB/s. And the
   worst-case contribution does not follow from the table's own $u_T =
-  \sqrt{2{,}42\,T_\mathrm{nom}/f + s_T^2/N_\mathrm{decays}}$ with the 120
-  decays the clause calls typical: $u_T$ = 0,056 s, and 0,056 s × 8,7 dB/s =
-  0,5 dB.
+  \sqrt{2.42\,T_\mathrm{nom}/f + s_T^2/N_\mathrm{decays}}$ with the 120
+  decays the clause calls typical: $u_T$ = 0.056 s, and 0.056 s × 8.7 dB/s =
+  0.5 dB.
 - **Evidence:** Verified on PDF page 40 (printed p. 34) and PDF page 36
   (printed p. 30) of ISO 3743-2:2018, against Formula (9) on PDF page 18
   (printed p. 12); the ratio of the derivative to the printed coefficient,
-  8,69/5 = 1,74, was read against the page, which prints −5 dB/s.
+  8.69/5 = 1.74, was read against the page, which prints −5 dB/s.
 - **Library behaviour:** the Annex D budget is not modelled. No number
   changes.
 - **Status:** unreported.
@@ -6176,14 +6176,14 @@ in the same order.
   1". The curve of the figure, read against its own grid (0,2 per division),
   passes 1,66 at 100 Hz, 1,54 at 125 Hz, 1,43 at 160 Hz, 1,34 at 200 Hz,
   1,06 at 1 000 Hz and 1,02 at 2 000 Hz.
-- **The problem:** Formula (1) for $70\ \text{m}^3$ gives 1,62, 1,50, 1,39, 1,31, 1,06
-  and 1,03 at the same frequencies. The figure agrees with it at 1 000 Hz, the
-  frequency Formula (B.2) uses, but runs 0,03 to 0,04 above it from 100 Hz to
-  160 Hz and about 0,01 below it from 1 600 Hz up, four to five times the
+- **The problem:** Formula (1) for $70\ \text{m}^3$ gives 1.62, 1.50, 1.39, 1.31, 1.06
+  and 1.03 at the same frequencies. The figure agrees with it at 1 000 Hz, the
+  frequency Formula (B.2) uses, but runs 0.03 to 0.04 above it from 100 Hz to
+  160 Hz and about 0.01 below it from 1 600 Hz up, four to five times the
   width of the drawn line at the low end. The figure the clause sends a $70\ \text{m}^3$
   room to is therefore not the formula the same clause states for every
   room, and a room whose reverberation time follows the figure is measured
-  against limits 2,5 % higher at 100 Hz than a room that follows the formula.
+  against limits 2.5 % higher at 100 Hz than a room that follows the formula.
 - **Evidence:** Verified on PDF page 10 (printed p. 4) of ISO 3743-2:2018,
   the curve read at each one-third-octave grid line against the horizontal
   lines at $R$ = 0 and $R$ = 2, against Formula (1) on PDF page 9 (printed
@@ -6198,7 +6198,7 @@ in the same order.
   and by the conformance check "ISO 3743-2:2018 Formula 1 / Formula B.2".
 - **Status:** unreported.
 
-## ISO 3743-2:2018, Figure B.3 (the limiting curves widened at 6,3 kHz, where 6.3 widens them above it)
+## ISO 3743-2:2018, Figure B.3 (the limiting curves widened at 6.3 kHz, where 6.3 widens them above it)
 
 - **Location:** Annex B (informative), B.5, Figure B.3 "Limiting curves for
   the ratio of the reverberation time $T$ to the nominal reverberation time
@@ -6210,18 +6210,18 @@ in the same order.
   (0,2 per division), begin to part above 4 kHz and pass 1,22 and 0,84 at
   the 6,3 kHz band, where they have nearly reached the plateaus of about 1,23
   and 0,82 they keep to 10 kHz.
-- **The problem:** at 6,3 kHz the text still holds the band to 0,9 and 1,1:
-  with $R$ = 1,01 for $70\ \text{m}^3$ the limits are 0,91 and 1,11. The figure draws
-  the wide pair at that band already, 0,1 wider on each side, so a room whose
-  6,3 kHz band reads 1,15 $R$ passes against the figure and fails against the
-  text. The widening belongs to the bands above 6,3 kHz, the first of which is
+- **The problem:** at 6.3 kHz the text still holds the band to 0.9 and 1.1:
+  with $R$ = 1.01 for $70\ \text{m}^3$ the limits are 0.91 and 1.11. The figure draws
+  the wide pair at that band already, 0.1 wider on each side, so a room whose
+  6.3 kHz band reads 1.15 $R$ passes against the figure and fails against the
+  text. The widening belongs to the bands above 6.3 kHz, the first of which is
   8 kHz.
 - **Evidence:** Verified on PDF page 28 (printed p. 22) of ISO 3743-2:2018,
   the curves read at the one-third-octave abscissae against the grid lines at
-  0 and 1,8, against 6.3 on PDF page 9 (printed p. 3) of the same document.
+  0 and 1.8, against 6.3 on PDF page 9 (printed p. 3) of the same document.
 - **Library behaviour:** follows the text. The wider tolerance starts at the
-  upper edge of the 6,3 kHz band, so 8 kHz and 10 kHz take 0,8 and 1,2 and
-  6,3 kHz keeps 0,9 and 1,1, and `SpecialRoomReverberationCheck.plot` draws
+  upper edge of the 6.3 kHz band, so 8 kHz and 10 kHz take 0.8 and 1.2 and
+  6.3 kHz keeps 0.9 and 1.1, and `SpecialRoomReverberationCheck.plot` draws
   the curves that way
   ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   Pinned by `test_bands_above_6_3_khz_take_the_wider_tolerance` in
@@ -6240,19 +6240,19 @@ in the same order.
   $T_\mathrm{nom} = 0{,}8/1{,}09 = 0{,}73$ s; the NOTE to Figure B.3 reads
   "The data of Figure B.4 are centred within the limiting curves."
 - **The problem:** the curve of Figure B.4, read against its grid, gives
-  $T/T_{1\,000}$ = 1,40 at 100 Hz, 1,34 at 200 Hz, 1,30 at 250 Hz, 1,24 at
-  315 Hz, 1,00 from 1 000 Hz to 2 000 Hz and 0,80 at 10 kHz. Scaled by 1,09
+  $T/T_{1\,000}$ = 1.40 at 100 Hz, 1.34 at 200 Hz, 1.30 at 250 Hz, 1.24 at
+  315 Hz, 1.00 from 1 000 Hz to 2 000 Hz and 0.80 at 10 kHz. Scaled by 1.09
   and divided by the $R$ of Formula (1) for $70\ \text{m}^3$, the bands from 200 Hz to
-  400 Hz exceed 1,1, the 250 Hz band reaching 1,13: centred as printed, the
-  example room fails the requirement of 6.3 it illustrates. The 1,09 is the
-  midpoint of the extreme ratios $q = (T/T_{1\,000})/R$ taken as if 0,9 and
-  1,1 held at every band, $2/(q_{\max} + q_{\min})$ with the 0,80 of 10 kHz as
-  the minimum, although 6.3 allows 0,8 there; the centring that uses each
-  band's own limits puts every band inside at $T/T_\mathrm{nom}$ = 1,05,
-  $T_\mathrm{nom}$ = 0,76 s. Figure B.3 does not draw Figure B.4 scaled by
-  1,09 either: its data curve sits at 1,09 from 1 000 Hz to 2 000 Hz but at
-  1,46 at 100 Hz, 1,37 at 250 Hz and 0,95 at 10 kHz, where 1,09 times
-  Figure B.4 gives 1,52, 1,41 and 0,87.
+  400 Hz exceed 1.1, the 250 Hz band reaching 1.13: centred as printed, the
+  example room fails the requirement of 6.3 it illustrates. The 1.09 is the
+  midpoint of the extreme ratios $q = (T/T_{1\,000})/R$ taken as if 0.9 and
+  1.1 held at every band, $2/(q_{\max} + q_{\min})$ with the 0.80 of 10 kHz as
+  the minimum, although 6.3 allows 0.8 there; the centring that uses each
+  band's own limits puts every band inside at $T/T_\mathrm{nom}$ = 1.05,
+  $T_\mathrm{nom}$ = 0.76 s. Figure B.3 does not draw Figure B.4 scaled by
+  1.09 either: its data curve sits at 1.09 from 1 000 Hz to 2 000 Hz but at
+  1.46 at 100 Hz, 1.37 at 250 Hz and 0.95 at 10 kHz, where 1.09 times
+  Figure B.4 gives 1.52, 1.41 and 0.87.
 - **Evidence:** Verified on PDF page 28 (printed p. 22) and PDF page 29
   (printed p. 23) of ISO 3743-2:2018, both curves read at the
   one-third-octave abscissae against their grids, with $R$ from Formula (1)
@@ -6261,9 +6261,9 @@ in the same order.
 - **Library behaviour:** `check_special_room_reverberation` centres
   $T_\mathrm{nom}$ by minimising the largest deviation of any band from the
   ideal curve, each measured against its own tolerance; on the curve of
-  Figure B.4 it returns 0,76 s and qualifies the room, 0,17 dB from the
-  printed 0,73 s in the $L_W$ of Formula (9). A value given in
-  `nominal_reverberation_time_s` is checked as given, and the printed 0,73 s
+  Figure B.4 it returns 0.76 s and qualifies the room, 0.17 dB from the
+  printed 0.73 s in the $L_W$ of Formula (9). A value given in
+  `nominal_reverberation_time_s` is checked as given, and the printed 0.73 s
   fails at 250 Hz
   ([`_sound_power_special_room.py`](../src/phonometry/emission/_sound_power_special_room.py)).
   Pinned by `test_the_b5_example_centres_the_room_within_its_curves` and
@@ -6310,16 +6310,16 @@ in the same order.
 - **The problem:** the coefficient cannot be read from the document, and the
   row is inside the normative range of the standard (5 000 Hz,
   $|U| \le 40$ m/s). The $a_3$ of the same band in the two neighbouring
-  tables is $-1{,}17 \times 10^{-5}$ (Table A.4, 0,5 m to 0,8 m) and
-  $-1{,}27 \times 10^{-5}$ (Table A.6, 1,25 m to 2 m), which brackets
-  $-1{,}24 \times 10^{-5}$; a leading digit of 2 or more would move
-  $C_{3,4}$ at 40 m/s by 0,64 dB per unit of the digit
-  ($a_3 U^3$ with $U^3 = 6{,}4 \times 10^4$), which no neighbouring band or
+  tables is $-1.17 \times 10^{-5}$ (Table A.4, 0.5 m to 0.8 m) and
+  $-1.27 \times 10^{-5}$ (Table A.6, 1.25 m to 2 m), which brackets
+  $-1.24 \times 10^{-5}$; a leading digit of 2 or more would move
+  $C_{3,4}$ at 40 m/s by 0.64 dB per unit of the digit
+  ($a_3 U^3$ with $U^3 = 6.4 \times 10^4$), which no neighbouring band or
   table supports.
 - **Evidence:** the cell as printed. PDF page 39 (printed p. 29) of
   ISO 5136:2003, against the same cell of Table A.4 on PDF page 38 (printed
   p. 28) and of Table A.6 on PDF page 40 (printed p. 30).
-- **Library behaviour:** reads $-1{,}24 \times 10^{-5}$, the value the
+- **Library behaviour:** reads $-1.24 \times 10^{-5}$, the value the
   neighbours bracket, in `_TABLE_A5` of
   [`_sound_power_in_duct.py`](../src/phonometry/emission/_sound_power_in_duct.py).
   The table's comment and
@@ -6340,7 +6340,7 @@ in the same order.
   are given in Tables H.1 to H.3" (Annex H) and "... in Tables I.1 to I.3"
   (Annex I).
 - **The problem:** Equation (3) is the cut-on frequency of the first cross
-  mode, $f_{1,0} = 0{,}586\,(c/D)\sqrt{1 - (U/c)^2}$, in the definition of
+  mode, $f_{1,0} = 0.586\,(c/D)\sqrt{1 - (U/c)^2}$, in the definition of
   3.10. The polynomial in $U$ whose coefficients the tables hold is Equation
   (7) of clause 5.3.3.4. The same wrong number is printed three times.
 - **Evidence:** PDF pages 45, 64 and 68 (printed pp. 35, 54 and 58) of
@@ -6421,7 +6421,7 @@ in the same order.
   column is headed $a_9$ in Tables A.1 and A.3 to A.6, the NOTE under every
   one of them sums $a_i U^i$ from $i = 0$ to $i = 10$ over the eleven columns
   the row has, and the single cell this one holds, the
-  $4{,}09 \times 10^{-14}$ of the 20 000 Hz row, is the coefficient of
+  $4.09 \times 10^{-14}$ of the 20 000 Hz row, is the coefficient of
   $U^9$: an $a_{90}$ would have no place in that sum at all.
 - **Evidence:** PDF page 36 (printed p. 26) of ISO 5136:2003, against the
   header row of Table A.1 on PDF page 35 (printed p. 25).
@@ -6440,12 +6440,12 @@ in the same order.
 - **The print:** $4{,}52 \times\!\times 10^{-01}$, two multiplication signs
   where every other cell prints one.
 - **The problem:** typographic only; the mantissa and the exponent are
-  legible and the value is $4{,}52 \times 10^{-1}$, in line with the
-  $4{,}51 \times 10^{-1}$ of Table A.5 and the $4{,}52 \times 10^{-1}$ of
+  legible and the value is $4.52 \times 10^{-1}$, in line with the
+  $4.51 \times 10^{-1}$ of Table A.5 and the $4.52 \times 10^{-1}$ of
   Table I.1 at the same band. The row is in the informative range above
   10 kHz.
 - **Evidence:** PDF page 40 (printed p. 30) of ISO 5136:2003.
-- **Library behaviour:** $4{,}52 \times 10^{-1}$ in `_TABLE_A6` of
+- **Library behaviour:** $4.52 \times 10^{-1}$ in `_TABLE_A6` of
   [`_sound_power_in_duct.py`](../src/phonometry/emission/_sound_power_in_duct.py).
 - **Status:** unreported (typographic, no numerical consequence).
 
@@ -6456,18 +6456,18 @@ in the same order.
 - **The print:** $a_8 = -5{,}88 \times 10^{-10}$ and
   $a_9 = 2{,}25 \times 10^{-10}$.
 - **The problem:** at $U$ = 40 m/s the printed $a_9$ alone contributes
-  $2{,}25 \times 10^{-10} \times 40^9 \approx 5{,}9 \times 10^4$ dB to
+  $2.25 \times 10^{-10} \times 40^9 \approx 5.9 \times 10^4$ dB to
   $C_{3,4}$, which no correction can be. The same row of the neighbouring
-  tables prints $a_8 = -5{,}90 \times 10^{-12}$ and
-  $a_9 = 2{,}25 \times 10^{-13}$ (Table I.1) and
-  $a_9 = 2{,}25 \times 10^{-13}$ (Table I.3), so the exponents are
+  tables prints $a_8 = -5.90 \times 10^{-12}$ and
+  $a_9 = 2.25 \times 10^{-13}$ (Table I.1) and
+  $a_9 = 2.25 \times 10^{-13}$ (Table I.3), so the exponents are
   $-12$ and $-13$ and the print is short by two and three decades. Annex I
   is informative and the row is in the informative range above 10 kHz.
 - **Evidence:** PDF page 72 (printed p. 62) of ISO 5136:2003, against the
   same row of Table I.1 on PDF page 70 (printed p. 60) and of Table I.3 on
   PDF page 74 (printed p. 64).
 - **Library behaviour:** the informative Annexes H and I are outside the
-  scope the standard states for itself (0,15 m to 2 m) and are not
+  scope the standard states for itself (0.15 m to 2 m) and are not
   implemented; a duct above 2 m is refused. Recorded so that an
   implementation of Annex I does not carry the exponents as printed.
 - **Status:** unreported.
@@ -6487,7 +6487,7 @@ in the same order.
   Table 2, so one of the two is wrong, and the annex's own results say which.
   Formula (15) applied to the sixteen attenuation values of Table A.1 with
   Table 2's row reproduces all sixteen $PNR_{j6}$ of Table C.2 exactly; with
-  Table C.1's row, thirteen of the sixteen fall 0,1 dB short. Table 2 is
+  Table C.1's row, thirteen of the sixteen fall 0.1 dB short. Table 2 is
   therefore the reading the worked example was computed from, and it is also
   the normative one, Table C.1 being an informative reprint. An implementer
   who takes the reference spectra from Annex C, where they sit next to the
@@ -6519,12 +6519,12 @@ in the same order.
   A.1 defines $U_{95}$ as $u$ multiplied by the coverage factor $k = 2$. The
   table carries no note on how it rounds.
 - **The problem:** from the sixteen printed rows, the mean and $\sigma$
-  reproduce in all sixteen cells, but $u$ at 250 Hz is 0,348 dB, which rounds
-  to 0,3 and not 0,4, and $U_{95} = 2\sigma/4$ is 0,935 / 0,355 / 0,697 /
-  0,940 / 0,711 / 0,839 / 0,720 / 0,325 dB, which rounds to 0,9 / 0,4 / 0,7 /
-  0,9 / 0,7 / 0,8 / 0,7 / 0,3: six of the eight printed cells are 0,1 dB high.
+  reproduce in all sixteen cells, but $u$ at 250 Hz is 0.348 dB, which rounds
+  to 0.3 and not 0.4, and $U_{95} = 2\sigma/4$ is 0.935 / 0.355 / 0.697 /
+  0.940 / 0.711 / 0.839 / 0.720 / 0.325 dB, which rounds to 0.9 / 0.4 / 0.7 /
+  0.9 / 0.7 / 0.8 / 0.7 / 0.3: six of the eight printed cells are 0.1 dB high.
   Every printed cell is instead the formula applied to the **rounded** row
-  above it: $1{,}4 / 4 = 0{,}35$ prints as 0,4, and each $U_{95}$ is twice the
+  above it: $1.4 / 4 = 0.35$ prints as 0.4, and each $U_{95}$ is twice the
   $u$ printed over it. The same table in ISO 4869-1:2018 (its Table A.3, same
   layout) computes at full precision and says so in its NOTE 2, "All
   calculations are made with full precision before rounding to one decimal",
@@ -6542,7 +6542,7 @@ in the same order.
   conformance row and `tests/hearing/test_active_noise_reduction.py` pin the
   mean and $\sigma$ rows as printed, reproduce the $u$ and $U_{95}$ rows the
   way the table forms them, and assert that full precision differs in exactly
-  the seven cells named here, each by 0,1 dB.
+  the seven cells named here, each by 0.1 dB.
 - **Status:** unreported.
 
 ## VDI 2081 Blatt 1:2001-07, Section 6.4 (the English column says the opposite of the German)
@@ -6563,7 +6563,7 @@ in the same order.
   contains no frequency; and the worked example of VDI 2081 Blatt 2:2005-05
   prints a junction's level reduction as a single number rather than as an
   octave spectrum, in each of its three junctions (Table 1, elements 3, 7 and
-  16, printed folios 13 and 15: $5{,}6$, $4{,}8$ and $3{,}0$ dB).
+  16, printed folios 13 and 15: $5.6$, $4.8$ and $3.0$ dB).
 - **The likely mechanism:** the negating prefix of "frequenzunabhängig" is
   absent from the translation, which turns "independent of the frequency" into
   its opposite. Nothing else in the sentence differs.
@@ -6596,22 +6596,22 @@ in the same order.
 - **The problem:** the two rows disagree. VDI 2081 Blatt 1 Section 7.2.4.2
   defines $St = f_\mathrm{m} d_\mathrm{h} / v_\mathrm{i}$, so the printed
   $d_\mathrm{h}$ and the printed $St$ determine each other. With the printed
-  $0{,}171$ m the eight numbers would be $0{,}73$, $1{,}45$, $2{,}89$,
-  $5{,}79$, $11{,}57$, $23{,}15$, $46{,}29$ and $92{,}59$: not one of them
-  rounds onto the printed row. With $d_\mathrm{h} = 2s = 0{,}200$ m they come
-  out as $0{,}851$, $1{,}688$, $3{,}376$, $6{,}752$, $13{,}504$, $27{,}009$,
-  $54{,}018$ and $108{,}035$, which round onto all eight.
+  $0.171$ m the eight numbers would be $0.73$, $1.45$, $2.89$,
+  $5.79$, $11.57$, $23.15$, $46.29$ and $92.59$: not one of them
+  rounds onto the printed row. With $d_\mathrm{h} = 2s = 0.200$ m they come
+  out as $0.851$, $1.688$, $3.376$, $6.752$, $13.504$, $27.009$,
+  $54.018$ and $108.035$, which round onto all eight.
 
   Both values are defensible as a hydraulic diameter, which is why this is an
-  internal inconsistency rather than a wrong number: $4A/P$ for a $0{,}100$ m
-  by $0{,}600$ m gap is $0{,}171$ m, while the parallel-plate limit that a long
-  narrow gap tends to is $2s = 0{,}200$ m. The table prints the first and
+  internal inconsistency rather than a wrong number: $4A/P$ for a $0.100$ m
+  by $0.600$ m gap is $0.171$ m, while the parallel-plate limit that a long
+  narrow gap tends to is $2s = 0.200$ m. The table prints the first and
   computes with the second.
 - **Consequence:** following the printed $d_\mathrm{h}$ reproduces neither the
   Strouhal row nor the flow-noise spectrum beneath it. With $2s$ the whole
   element falls out to the last printed decimal: $L_\mathrm{WA} = 52$ dB from
-  Equation (49) and the eight octave levels $62{,}7$ down to $35{,}6$ dB from
-  Equations (46), (50) and (51), the worst of them 0,046 dB from its printed
+  Equation (49) and the eight octave levels $62.7$ down to $35.6$ dB from
+  Equations (46), (50) and (51), the worst of them 0.046 dB from its printed
   cell.
 - **Evidence:** the two rows of the same printed element read against Section
   7.2.4.2 of Blatt 1 (printed folio 53); both candidate diameters evaluated
@@ -6635,29 +6635,29 @@ in the same order.
   $61{,}7$ $55{,}7$ $43{,}4$ $30{,}1$ $28{,}5$ $34{,}0$ $33{,}6$. Seven cells
   agree and the eighth does not.
 - **The problem:** the second row is the first with the element's own flow noise
-  added, so it can never be lower. Element 13 hands 8 kHz over at $37{,}0$ dB,
-  the bend attenuates $3$ dB, and the first row prints the $34{,}0$ dB that
-  leaves. The bend's own noise in that band is $-14{,}4$ dB, which the same
+  added, so it can never be lower. Element 13 hands 8 kHz over at $37.0$ dB,
+  the bend attenuates $3$ dB, and the first row prints the $34.0$ dB that
+  leaves. The bend's own noise in that band is $-14.4$ dB, which the same
   element prints two rows higher, and adding it moves the level by less than
-  $0{,}0001$ dB. The second row should therefore print $34{,}0$ dB and prints
-  $33{,}6$.
+  $0.0001$ dB. The second row should therefore print $34.0$ dB and prints
+  $33.6$.
 
-  Read the other way the cell is equally unreachable: $33{,}6$ dB would need
-  $36{,}6$ dB to arrive from element 13, and element 13 prints $37{,}0$ dB in
+  Read the other way the cell is equally unreachable: $33.6$ dB would need
+  $36.6$ dB to arrive from element 13, and element 13 prints $37.0$ dB in
   its own $\Sigma L_\mathrm{W}$ row on the same page.
-- **Consequence:** $0{,}4$ dB at 8 kHz, carried into element 15 and everything
-  after it. The A-weighted total of the element is printed as $50{,}9$ dB in
-  both rows, which is what hides it: at 8 kHz the A-weighting is $-1{,}1$ dB and
-  the band is $16$ dB under the 4 kHz one, so $0{,}4$ dB there does not reach
+- **Consequence:** $0.4$ dB at 8 kHz, carried into element 15 and everything
+  after it. The A-weighted total of the element is printed as $50.9$ dB in
+  both rows, which is what hides it: at 8 kHz the A-weighting is $-1.1$ dB and
+  the band is $16$ dB under the 4 kHz one, so $0.4$ dB there does not reach
   the first decimal of the total.
 - **Evidence:** the two rows of element 14 and the $\Sigma L_\mathrm{W}$ row of
   element 13, with the sum recomputed at full precision from the printed
   hand-over, attenuation and flow noise. Verified on PDF page 15 (printed
   p. 15) of VDI 2081 Blatt 2:2005-05.
 - **Library behaviour:** the conformance rows for element 14 compare the flow
-  noise the bend makes, $26{,}9$ down to $-14{,}4$ dB, against the row that
-  prints it, and the chain row carries the $34{,}0$ dB the arithmetic gives
-  rather than the printed $33{,}6$.
+  noise the bend makes, $26.9$ down to $-14.4$ dB, against the row that
+  prints it, and the chain row carries the $34.0$ dB the arithmetic gives
+  rather than the printed $33.6$.
 - **Status:** unreported. The print is superseded and the successor is not held.
 
 ## VDI 2081 Blatt 2:2005-05, Table 1, element 2 (a cross-reference to the wrong clause)
@@ -6698,17 +6698,17 @@ in the same order.
   \sum_{j=1}^{N} \left( L'_{p,j} - \overline{L'_p} \right)^2}
   $$
 
-  With $1/(N-1)$ the first triple gives 0,3606 dB, which rounds to **0,4**, not
-  the 0,3 the table prints; the second gives 1,9975 dB, which rounds to the
-  **2,0** the table prints. With $1/N$ the first gives 0,2944 → **0,3**, the
-  printed value, and the second 1,6310 → 1,6, which is not printed. Table B.1
+  With $1/(N-1)$ the first triple gives 0.3606 dB, which rounds to **0.4**, not
+  the 0.3 the table prints; the second gives 1.9975 dB, which rounds to the
+  **2.0** the table prints. With $1/N$ the first gives 0.2944 → **0.3**, the
+  printed value, and the second 1.6310 → 1.6, which is not printed. Table B.1
   therefore divides by $N$ and Table B.3 by $N-1$, in the same annex, under the
   same label, for the same quantity.
 - **Consequence:** it is not cosmetic, because the value propagates. Table B.1
-  goes on to print $\sigma_\mathrm{tot} = 1{,}5$ dB and $U = 2{,}4$ dB from
-  $\sigma_{R0} = 1{,}5$ dB. With the 0,4 dB that Equation (C.1) gives,
-  $\sigma_\mathrm{tot} = \sqrt{1{,}5^2 + 0{,}4^2} = 1{,}552 \to 1{,}6$ dB and
-  $U = 1{,}6 \times 1{,}552 = 2{,}48 \to 2{,}5$ dB, the coverage factor
+  goes on to print $\sigma_\mathrm{tot} = 1.5$ dB and $U = 2.4$ dB from
+  $\sigma_{R0} = 1.5$ dB. With the 0.4 dB that Equation (C.1) gives,
+  $\sigma_\mathrm{tot} = \sqrt{1.5^2 + 0.4^2} = 1.552 \to 1.6$ dB and
+  $U = 1.6 \times 1.552 = 2.48 \to 2.5$ dB, the coverage factor
   applying to the unrounded total rather than to the decibel it is reported
   as. A reader reproducing the example from the equations does not obtain the
   uncertainty the example publishes.
@@ -6724,7 +6724,7 @@ in the same order.
 - **Library behaviour:**
   [`operating_standard_deviation`](../src/phonometry/emission/workstation.py)
   implements Equation (C.1) as printed, with $1/(N-1)$. It reproduces
-  Table B.3 and deliberately does not reproduce Table B.1's 0,3 dB;
+  Table B.3 and deliberately does not reproduce Table B.1's 0.3 dB;
   `tests/emission/test_workstation.py` pins both halves so the choice cannot
   drift.
 - **Status:** unreported.
@@ -6775,9 +6775,9 @@ in the same order.
   necessary to make the measurement at every 12,5° around the sound source and
   to calculate the energy-mean value of the sound pressure exposure levels in
   order to average the directivity of the sound source."
-- **The problem:** $360 / 12{,}5 = 28{,}8$. There is no whole number of
-  12,5° steps that closes a turn: 28 steps reach 350° and leave a 10° gap, 29
-  steps overshoot to 362,5°. The instruction cannot be followed literally.
+- **The problem:** $360 / 12.5 = 28.8$. There is no whole number of
+  12.5° steps that closes a turn: 28 steps reach 350° and leave a 10° gap, 29
+  steps overshoot to 362.5°. The instruction cannot be followed literally.
 - **Consequence:** two laboratories that both "measure every 12,5°" can use
   different bearing sets, and for a source at the Table 1 directivity limit
   (±6 dB at 4 kHz) their energy means differ. The reference level $L_{pE,10}$
@@ -6790,7 +6790,7 @@ in the same order.
   [`directivity_energy_average`](../src/phonometry/room/auditorium.py) takes
   the reading the note can support: a uniform sampling of the full turn no
   coarser than the printed step, so at least
-  $\lceil 360 / 12{,}5 \rceil = 29$ bearings, combined as the energy mean the
+  $\lceil 360 / 12.5 \rceil = 29$ bearings, combined as the energy mean the
   note asks for. Fewer bearings raise `ValueError` rather than averaging a
   turn that was never closed.
 - **Status:** unreported.
@@ -6821,19 +6821,19 @@ in the same order.
   $$
 
 - **The problem:** neither sentence describes the equation beside it.
-  Equation (C.1) starts at 0,020 s, not at the 0,010 s the direct-sound
+  Equation (C.1) starts at 0.020 s, not at the 0.010 s the direct-sound
   window ends at, so the interval between them is counted in neither the
   numerator nor the denominator and the prose never mentions the gap.
-  Equation (C.2) stops at 1,000 s, where the prose puts no upper limit at
+  Equation (C.2) stops at 1.000 s, where the prose puts no upper limit at
   all.
 - **Consequence:** both move a number, and the first moves it further. On an
   exponential decay of $T = 2$ s, a reader who takes "within the first 0,1 s"
   to start where the direct-sound window ends collects the 10 ms to 20 ms
-  interval as well, which is 17 % more energy and **0,68 dB** on
+  interval as well, which is 17 % more energy and **0.68 dB** on
   $\mathrm{ST}_\mathrm{Early}$, against the 1 dB standard deviation C.2.4 estimates
-  for a single reading. The missing ceiling of (C.2) costs 0,01 dB in the
+  for a single reading. The missing ceiling of (C.2) costs 0.01 dB in the
   same hall, because a 2 s decay is already 30 dB down at one second, and
-  reaches 0,2 dB at $T = 4$ s and 1,0 dB at $T = 8$ s: it is the cathedral,
+  reaches 0.2 dB at $T = 4$ s and 1.0 dB at $T = 8$ s: it is the cathedral,
   not the concert hall, that the second omission separates.
 - **Evidence:** Verified on PDF pages 31 and 32 (printed pp. 23 and 24) of
   BS EN ISO 3382-1:2009.
@@ -6928,18 +6928,18 @@ in the same order.
   columns, from
   $p_{vc} = p_1\left[1 - x/(F_{LP}/F_P)^2\right]$ with $F_{LP} = 0{,}792$.
 - **The problem:** those two cannot both be right. Solving Equation (2) for
-  $(F_{LP}/F_P)^2$ from each printed pair gives 0,647 829, 0,647 827,
-  0,647 821, 0,647 829 and 0,647 833 in the five columns that print a value,
-  which is $F_p = 0{,}984$ to four digits in every one of them. The printed
-  0,98 gives 0,653 128 and $p_{vc} = 571\,294$ Pa, 3 507 Pa away from the
+  $(F_{LP}/F_P)^2$ from each printed pair gives 0.647 829, 0.647 827,
+  0.647 821, 0.647 829 and 0.647 833 in the five columns that print a value,
+  which is $F_p = 0.984$ to four digits in every one of them. The printed
+  0.98 gives 0.653 128 and $p_{vc} = 571\,294$ Pa, 3 507 Pa away from the
   printed figure. The value is a computed one, not a datum: the annex says it
   comes from IEC 60534-2-1, and the head loss coefficient it prints,
-  $\Sigma\zeta = 0{,}86$, gives $F_p = 0{,}984$ for the DN 100 case. So the
+  $\Sigma\zeta = 0.86$, gives $F_p = 0.984$ for the DN 100 case. So the
   annex computed with three decimals and printed two.
-- **Consequence:** every downstream quantity moves. With the printed 0,98 the
-  four regime boundaries come out $x_C = 0{,}287$, $\alpha = 0{,}786$,
-  $x_B = 0{,}578$ against the printed 0,285, 0,784 and 0,576, and example 1's
-  sound power comes out 21,9 W against the printed 22,3 W. Nothing is far
+- **Consequence:** every downstream quantity moves. With the printed 0.98 the
+  four regime boundaries come out $x_C = 0.287$, $\alpha = 0.786$,
+  $x_B = 0.578$ against the printed 0.285, 0.784 and 0.576, and example 1's
+  sound power comes out 21.9 W against the printed 22.3 W. Nothing is far
   wrong, and nothing reproduces either: a reader checking their implementation
   against Annex A with the number Annex A prints will not match a single row.
 - **Evidence:** the given data and the six $p_{vc}$ values read from the
@@ -6949,7 +6949,7 @@ in the same order.
   [`valve_aerodynamic_noise`](../src/phonometry/noise_control/valves.py) takes
   the ratio as an argument and does not hold a value of its own; the
   conformance rows and `tests/noise_control/test_valves.py` pass
-  $0{,}792/0{,}984$ and say why in the fixture.
+  $0.792/0.984$ and say why in the fixture.
 - **Status:** unreported.
 
 ## IEC 60534-8-3:2010, Table A.1 (an equivalent orifice diameter ten times too small, contradicted by the row below it)
@@ -6961,22 +6961,22 @@ in the same order.
   given data on folio 31 gives $N_\mathrm{O} = 6$ cage openings and
   $A = 0{,}00137\ \text{m}^2$ for one of them, and Equation (8c) is
   $d_o = \sqrt{4 N_o A/\pi}$.
-- **The problem:** $\sqrt{4 \times 6 \times 0{,}00137/\pi} = 0{,}102$ m, not
-  0,010 m. The two numerals are the same three digits in a different order.
+- **The problem:** $\sqrt{4 \times 6 \times 0.00137/\pi} = 0.102$ m, not
+  0.010 m. The two numerals are the same three digits in a different order.
   The row below settles which is meant: Equation (8a) is $F_d = d_H/d_o$, the
-  (8b) row prints $d_H = 0{,}030$ m, and the (8a) row prints $F_d = 0{,}30$ in
-  all six columns. 0,030/0,102 is 0,30; 0,030/0,010 is 3,0.
+  (8b) row prints $d_H = 0.030$ m, and the (8a) row prints $F_d = 0.30$ in
+  all six columns. 0.030/0.102 is 0.30; 0.030/0.010 is 3.0.
 - **Consequence:** a reader who takes the printed $d_o$ gets a valve style
-  modifier of 3,0, a jet diameter ten times too large from Equation (9), and a
+  modifier of 3.0, a jet diameter ten times too large from Equation (9), and a
   peak frequency ten times too low, which moves the internal spectrum of
   Equation (19) by more than three octaves. The rest of the table is computed
-  with 0,102 m, so the error is confined to the one printed cell.
+  with 0.102 m, so the error is confined to the one printed cell.
 - **Evidence:** the (8b), (8c) and (8a) rows read from the printed page.
   Verified on PDF pages 33 and 35 (printed pp. 31 and 33) of
   BS EN 60534-8-3:2011.
 - **Library behaviour:**
   [`valve_style_modifier`](../src/phonometry/noise_control/valves.py)
-  implements (8b) and (8c) as printed and returns 0,296 for the annex's cage,
+  implements (8b) and (8c) as printed and returns 0.296 for the annex's cage,
   which rounds to the printed $F_d$; the test named after this entry pins both
   readings so the printed $d_o$ cannot come back.
 - **Status:** unreported.
@@ -6992,20 +6992,20 @@ in the same order.
 - **The problem:** below the internal coincidence frequency Table 6 makes
   $G_x$ proportional to $f_i^4$, so the column has to rise monotonically, and
   it does everywhere except at those two bands, where it falls. Recomputing
-  Table 6 for this pipe gives $1{,}4 \times 10^{-8}$ at band 5 and
-  $1{,}4 \times 10^{-6}$ at band 10: the mantissa is right in both and the
+  Table 6 for this pipe gives $1.4 \times 10^{-8}$ at band 5 and
+  $1.4 \times 10^{-6}$ at band 10: the mantissa is right in both and the
   exponent is one too small.
 - **Consequence:** none for the rest of the annex, and that is what settles
-  it. The transmission losses printed two rows further down, $TL_5 = -86{,}1$
-  dB and $TL_{10} = -76{,}2$ dB, are what Equation (20a) gives with the
-  corrected factors; the printed factors would give $-96{,}1$ dB and
-  $-86{,}3$ dB. So Table A.2 computed with the right values and printed the
+  it. The transmission losses printed two rows further down, $TL_5 = -86.1$
+  dB and $TL_{10} = -76.2$ dB, are what Equation (20a) gives with the
+  corrected factors; the printed factors would give $-96.1$ dB and
+  $-86.3$ dB. So Table A.2 computed with the right values and printed the
   wrong ones, and anyone seeding an oracle from the $G_x$ column alone
   inherits a 10 dB error in two bands.
 - **Evidence:** the $G_x$ column read from the printed page. Verified on PDF
   pages 45 and 46 (printed pp. 43 and 44) of BS EN 60534-8-3:2011; the 24
   printed transmission losses on the second of them are what the library
-  reproduces to within 0,07 dB.
+  reproduces to within 0.07 dB.
 - **Library behaviour:**
   [`pipe_transmission_loss`](../src/phonometry/noise_control/valves.py)
   computes $G_x$ from Table 6, and the conformance row "Pipe transmission
@@ -7025,15 +7025,15 @@ in the same order.
   {N_{34}\,x_{Fzp1}^{1,5}\,d\,d_0}
   \left(\dfrac{1}{p_1-p_v}\right)^{0,57}$.
 - **The problem:** they are two different functions of the valve, not two
-  roundings of one. The annex carries a factor $F_d^{0,75}$ the clause does
-  not have, and a leading constant 1,8 times larger. The exponents 0,57 and
-  1,5, the square on $F_L$ and the product $d\,d_o$ are identical in both, so
+  roundings of one. The annex carries a factor $F_d^{0.75}$ the clause does
+  not have, and a leading constant 1.8 times larger. The exponents 0.57 and
+  1.5, the square on $F_L$ and the product $d\,d_o$ are identical in both, so
   the difference is confined to the numerator. The annex's own numbers settle
-  which one it evaluated: with $C_v = 90$, $F_d = 0{,}42$, $F_L = 0{,}92$,
-  $N_{34} = 1{,}17$, $x_{Fzp1} = 0{,}2386$, $d = d_o = 0{,}1$ m and
-  $p_1 - p_v = 997\,680$ Pa, the annex form gives 0,399 and the clause form
-  0,425, and Table A.1 prints $N_{Str} = 0{,}399$ in two of its three columns
-  and 0,243 in the third, both of which are the annex form to three digits.
+  which one it evaluated: with $C_v = 90$, $F_d = 0.42$, $F_L = 0.92$,
+  $N_{34} = 1.17$, $x_{Fzp1} = 0.2386$, $d = d_o = 0.1$ m and
+  $p_1 - p_v = 997\,680$ Pa, the annex form gives 0.399 and the clause form
+  0.425, and Table A.1 prints $N_{Str} = 0.399$ in two of its three columns
+  and 0.243 in the third, both of which are the annex form to three digits.
 - **Consequence:** the peak frequency of Equation (11), and with it the whole
   band spectrum of 5.4 and the transmission loss of Equation (16b), which is
   evaluated at that frequency. For Annex A's valve the two forms are 6 %
@@ -7060,17 +7060,17 @@ in the same order.
   before the 5.
 - **The problem:** Equation (22a) is $TL(f_i) = TL_{fr} + \Delta TL(f_i)$, and
   the table prints both of its inputs one row above and two folios earlier:
-  $\Delta TL(8\,000\ \text{Hz}) = -7{,}053$ dB in the (22b) row on the same
-  page, and $TL_{fr} = -44{,}71$ dB in the (15) row on printed folio 23. Their
-  sum is $-51{,}763$ dB. The row below settles it too: Equation (21) with
-  $L_{pi}(8\,000\ \text{Hz}) = 116{,}3$ dB and the 12,67 dB spreading term
-  gives 51,87 dB against the printed $L_{pe,1m} = 51{,}8$, and the unrounded
-  116,252 dB of the chain gives 51,82; with $+51{,}76$ it would give
-  155,4 dB.
+  $\Delta TL(8\,000\ \text{Hz}) = -7.053$ dB in the (22b) row on the same
+  page, and $TL_{fr} = -44.71$ dB in the (15) row on printed folio 23. Their
+  sum is $-51.763$ dB. The row below settles it too: Equation (21) with
+  $L_{pi}(8\,000\ \text{Hz}) = 116.3$ dB and the 12.67 dB spreading term
+  gives 51.87 dB against the printed $L_{pe,1m} = 51.8$, and the unrounded
+  116.252 dB of the chain gives 51.82; with $+51.76$ it would give
+  155.4 dB.
 - **Consequence:** none for the annex, which computed with the right sign and
   printed the wrong one, and 103 dB for anyone seeding an oracle from that
   cell. Every other transmission loss in this document is printed negative
-  ($-44{,}71$; $-29{,}56$; $-74{,}27$; $-62{,}917$; $-75{,}006$; $-7{,}053$),
+  ($-44.71$; $-29.56$; $-74.27$; $-62.917$; $-75.006$; $-7.053$),
   including the one directly above it.
 - **Evidence:** the three (22a) cells and the (22b) cells above them, read on
   the printed page. Verified on PDF page 27 (printed p. 25) of
@@ -7079,7 +7079,7 @@ in the same order.
 - **Library behaviour:**
   [`transmission_loss_correction`](../src/phonometry/noise_control/valves_hydrodynamic.py)
   and the ``band_transmission_loss`` of ``valve_hydrodynamic_noise`` return
-  $-51{,}76$ dB for this band, which is what the conformance row "Frequency
+  $-51.76$ dB for this band, which is what the conformance row "Frequency
   route at 8 kHz, examples 1 to 3 (Eqs. (19) to (22))" pins together with the
   external levels the negative value reproduces.
 - **Status:** unreported.
@@ -7094,11 +7094,11 @@ in the same order.
   orifice diameter", unit **m**.
 - **The problem:** the two cannot both hold. For the last stage of any real
   multistage trim the formula returns tens: $C_n = 90$ as a $C_v$, with
-  $N_{34} = 1{,}17$, gives 53,4, and a seat 53 m across is not a valve. Read
+  $N_{34} = 1.17$, gives 53.4, and a seat 53 m across is not a valve. Read
   as millimetres it is 53 mm, half the bore of the DN 100 valve of Annex A,
   which is what a last stage looks like. IEC 60534-8-3 gives the same quantity
   a second route, through its own Equation (27) and the total flow area, and
-  for this stage that route gives 48,4 mm.
+  for this stage that route gives 48.4 mm.
 - **Consequence:** the result of this formula is fed to Equation (12), where
   $d_o$ sits in the denominator beside $d$ in metres. Taking the printed
   number as metres makes the Strouhal number a thousand times too small and
@@ -7106,7 +7106,7 @@ in the same order.
 - **Evidence:** the formula and the symbol table row as printed. Verified on PDF page 17 (printed p. 15) and PDF page 8 (printed p. 6)
   of BS EN 60534-8-4:2005. This entry rests on the arithmetic of the printed
   formula as well as on the print itself: nothing on PDF pages 8 to 20 states
-  the unit of the constant 5,2.
+  the unit of the constant 5.2.
 - **Library behaviour:**
   [`last_stage_seat_diameter_mm`](../src/phonometry/noise_control/valves_hydrodynamic.py)
   implements the formula as printed and carries the unit in its name, and its
@@ -7169,10 +7169,10 @@ in the same order.
   boundary itself, which (18a) includes with ≤ and (18b) excludes with <.
 - **Consequence:** it grows with the inlet pressure, because the inlet
   pressure is what separates the two thresholds. At the 10 bar of Annex A the
-  disputed interval is $0{,}2386 < x_\mathrm{F} \le 0{,}2543$ and the two
-  branches differ by at most 0,03 dB inside it, because Equation (9) starts
+  disputed interval is $0.2386 < x_\mathrm{F} \le 0.2543$ and the two
+  branches differ by at most 0.03 dB inside it, because Equation (9) starts
   the cavitation term at exactly zero on the threshold. At 100 bar the
-  interval runs from 0,179 to 0,254 and the two branches differ by up to
+  interval runs from 0.179 to 0.254 and the two branches differ by up to
   8 dB; at 400 bar, by 10 dB. High-pressure liquid service is where this
   method earns its keep.
 - **Evidence:** the two conditions as printed. Verified on PDF page 14
@@ -7247,15 +7247,15 @@ in the same order.
   \text{Hz}) = -36{,}24$; $f_{p,turb} = 494{,}5$ Hz.
 - **The problem:** none of the three follows from the values printed beside
   it. Equation (17) with the annex's own $TL_{turb}$, $f_{p,turb}$,
-  $f_{p,cav}$ and efficiency ratio gives $-62{,}86$ and $-74{,}93$, which is
-  0,06 and 0,08 dB away. Equation (20a) at 8 kHz with the column's own
-  $f_{p,turb} = 397{,}93$ Hz gives $-36{,}18$; the printed $-36{,}24$ needs
-  396,0 Hz. And the unrounded chain through Equations (12) and (11) gives
-  494,64 Hz in the first column, where columns 2 and 3 reproduce their 654,35
-  and 397,93 Hz to the last printed digit.
+  $f_{p,cav}$ and efficiency ratio gives $-62.86$ and $-74.93$, which is
+  0.06 and 0.08 dB away. Equation (20a) at 8 kHz with the column's own
+  $f_{p,turb} = 397.93$ Hz gives $-36.18$; the printed $-36.24$ needs
+  396.0 Hz. And the unrounded chain through Equations (12) and (11) gives
+  494.64 Hz in the first column, where columns 2 and 3 reproduce their 654.35
+  and 397.93 Hz to the last printed digit.
 - **Consequence:** small and confined. None of the three reaches a printed
   result: the external levels of Equations (18a) and (18b) round to the same
-  62,7 / 81,0 / 66,9 dB either way, and so does the band level of Equation
+  62.7 / 81.0 / 66.9 dB either way, and so does the band level of Equation
   (19a). It matters only to an implementer comparing intermediates, who will
   find three rows out of forty that cannot be matched exactly and no
   explanation on the page.
@@ -7264,7 +7264,7 @@ in the same order.
   (printed pp. 23 and 24) of BS EN 60534-8-4:2005. This entry rests on a
   recomputation as well as on the print.
 - **Library behaviour:** the conformance row "Cavitating transmission loss,
-  examples 2 and 3 (Eq. (17))" carries a tolerance of 0,1 dB and names this
+  examples 2 and 3 (Eq. (17))" carries a tolerance of 0.1 dB and names this
   entry as the reason; the tests named after it pin what the equations give
   and record what the annex printed.
 - **Status:** unreported.
@@ -7360,7 +7360,7 @@ in the same order.
   $g^2$. Multiplying by it, as Formula (1) prints, leaves $g^4$ in the index;
   dividing by it removes the change, which is what the list under Formula (1)
   says the factor is for. At the 20 % that 5.5.1 still accepts
-  ($C_{gain,k} = 1{,}2$), the product as printed reports the index 44 % high,
+  ($C_{gain,k} = 1.2$), the product as printed reports the index 44 % high,
   where leaving the change uncorrected would have reported it 20 % high.
   The two other factors of Formula (1) are the right way round:
   $C_{geo,k} = (d_{r,k}/d_{i,k})^2$ puts back the spreading of the longer
@@ -7370,9 +7370,9 @@ in the same order.
   PDF page 17 (printed p. 15), its list on PDF page 18 (printed p. 16), and
   Formula (4) with the paragraph that defines it on PDF page 27 (printed
   p. 25) of BS EN 1793-5:2016. The consequence is a recomputation: synthetic
-  records of a reflection of amplitude 0,5, with the in-front records scaled
-  by 1,08, return 0,25 in every band when the factor divides and
-  $0{,}25 \times 1{,}08^4$ when it multiplies.
+  records of a reflection of amplitude 0.5, with the in-front records scaled
+  by 1.08, return 0.25 in every band when the factor divides and
+  $0.25 \times 1.08^4$ when it multiplies.
 - **Library behaviour:**
   [`reflection_index`](../src/phonometry/environment/propagation/barrier_reflection.py)
   divides by $C_{gain,k}$ and says so in its docstring. The conformance row
@@ -7380,7 +7380,7 @@ in the same order.
   and a test on the scaled records pin it.
 - **Status:** unreported.
 
-## EN 1793-5:2016, Table B.2 (seven expanded uncertainties a hundredth below 1,96 times the printed $s_R$)
+## EN 1793-5:2016, Table B.2 (seven expanded uncertainties a hundredth below 1.96 times the printed $s_R$)
 
 - **Location:** Annex B.5 and Table B.2, printed folios 54 and 55 (PDF
   pages 56 and 57) of BS EN 1793-5:2016; Table A.1 on printed folio 47 (PDF
@@ -7392,16 +7392,16 @@ in the same order.
   0,15 and 0,17 in the bands of 100 Hz, 125 Hz, 500 Hz, 630 Hz, 800 Hz,
   1 250 Hz and 3 150 Hz, an expanded uncertainty $U$ of 0,62, 0,34, 0,23,
   0,26, 0,28, 0,28 and 0,32.
-- **The problem:** 1,96 times the printed $s_R$ gives 0,63, 0,35, 0,24,
-  0,27, 0,29, 0,29 and 0,33 in those seven bands, a hundredth above each
+- **The problem:** 1.96 times the printed $s_R$ gives 0.63, 0.35, 0.24,
+  0.27, 0.29, 0.29 and 0.33 in those seven bands, a hundredth above each
   printed cell. The other eleven bands reproduce to the hundredth, and so does
-  the row of $DL_{RI}$ (1,96 times 0,81 dB is 1,59 dB, and 7,68 dB plus or minus
-  that is the [6,09; 9,27] dB of B.5). No single coverage factor reproduces
-  the seven: the 100 Hz cell needs one between 1,922 and 1,953, the 125 Hz cell
-  one between 1,861 and 1,917.
-- **The likely mechanism:** every one of the seven is consistent with 1,96
-  times an unrounded standard deviation that rounds to the printed one (0,316
-  prints as 0,32, and 1,96 times 0,316 is 0,619). The print does not show
+  the row of $DL_{RI}$ (1.96 times 0.81 dB is 1.59 dB, and 7.68 dB plus or minus
+  that is the [6.09; 9.27] dB of B.5). No single coverage factor reproduces
+  the seven: the 100 Hz cell needs one between 1.922 and 1.953, the 125 Hz cell
+  one between 1.861 and 1.917.
+- **The likely mechanism:** every one of the seven is consistent with 1.96
+  times an unrounded standard deviation that rounds to the printed one (0.316
+  prints as 0.32, and 1.96 times 0.316 is 0.619). The print does not show
   which values the example multiplied; if it was those, they are values the
   reader of Table A.1 does not have.
 - **Consequence:** a hundredth of the index, which is the resolution the
@@ -7437,7 +7437,7 @@ in the same order.
   whose centre, 315 Hz, lies above the limit, 300 Hz. No single rule relating a
   limit to a band gives both: against the centre, the 4 m sample loses its
   200 Hz band; against the lower band edge (178 Hz and 282 Hz), it loses it as
-  well; against the upper band edge (224 Hz and 355 Hz), the 3,5 m barrier
+  well; against the upper band edge (224 Hz and 355 Hz), the 3.5 m barrier
   keeps its 315 Hz band.
 - **Consequence:** the lowest reliable band $m$ of Formula (12) cannot be
   derived from a low frequency limit by the rule the clause illustrates,
@@ -7469,7 +7469,7 @@ in the same order.
   $0 \le t \le T_{W,BH}$.
 - **The problem:** Formula (7) rises from nearly zero to 1 over the first half
   of $T_{W,BH}$ and falls back over the second, so read with the length of the
-  trailing edge in it, it draws a whole bell over those 2,22 ms rather than
+  trailing edge in it, it draws a whole bell over those 2.22 ms rather than
   the fall that 5.5.5 describes. The edges of the Adrienne window are halves
   of Formula (7), each over a full window twice its own length, which is the
   reading NOTE 1 gives and Table 1 does not.
@@ -7523,7 +7523,7 @@ in the same order.
   $d_S$ = 1,50 m".
 - **The problem:** item 1 puts the words of one distance to the symbol of
   another. The distance from the loudspeaker front panel to the reference
-  plane is $d_S$, 1,50 m; $d_M$ is the 0,25 m from the plane to the grid, and
+  plane is $d_S$, 1.50 m; $d_M$ is the 0.25 m from the plane to the grid, and
   that is what the dimension marked 1 spans in Figure 15 (a), from the
   microphones A, B and C to the dashed reference plane, with no loudspeaker
   drawn. The drawing and the symbol agree with Table 1; the words do not.
@@ -7531,15 +7531,15 @@ in the same order.
   Figure 15 (a) calls B the position "midway", between the most protruding
   part (A) and the less protruding one (C).
 - **Consequence:** none numerically, since Table 1 and 3.14 fix $d_M$. A
-  reader who takes the key at its word would read $d_M$ as the 1,50 m of the
-  loudspeaker rather than the 0,25 m of the grid.
+  reader who takes the key at its word would read $d_M$ as the 1.50 m of the
+  loudspeaker rather than the 0.25 m of the grid.
 - **Evidence:** the key, the drawing and Table 1 as printed, read on the page:
   PDF page 40 (printed p. 38) and PDF page 15 (printed p. 13) of
   BS EN 1793-5:2016.
 - **Library behaviour:** none required; no value is read from Figure 15.
   `REFLECTION_SOURCE_DISTANCE_M` and `REFLECTION_MICROPHONE_DISTANCE_M` in
   [`barrier_reflection`](../src/phonometry/environment/propagation/barrier_reflection.py)
-  carry $d_S$ = 1,50 m and $d_M$ = 0,25 m as Table 1 defines them.
+  carry $d_S$ = 1.50 m and $d_M$ = 0.25 m as Table 1 defines them.
 - **Status:** unreported.
 
 ## ISO 8041-1:2017, clause 12.7 ("the appropriate weighting factor (see Table 1)" for `Wf`)
@@ -7563,21 +7563,21 @@ in the same order.
   factor that closes the identity is the
   **ratio** of the two responses at the reference frequency, not the overall
   weighting Table 1 prints. For eight of the nine weightings the distinction is
-  invisible, because their band-limiting weighting sits between 0,999 68 and
-  0,999 97 at their own reference frequency and the two readings agree to
-  0,03 %. `Wf` is the exception: its reference frequency of 2,5 rad/s =
-  0,397 887 Hz falls inside its own band-limiting skirt, whose corners Table 3
-  puts at 0,08 Hz and 0,63 Hz. There the band-limiting weighting is 0,928 078
-  and the overall weighting 0,388 848, which Table B.5 prints as 0,927 9 and
-  0,388 4 at the neighbouring 0,398 1 Hz band centre. Read as the 0,388 8 of
+  invisible, because their band-limiting weighting sits between 0.999 68 and
+  0.999 97 at their own reference frequency and the two readings agree to
+  0.03 %. `Wf` is the exception: its reference frequency of 2.5 rad/s =
+  0.397 887 Hz falls inside its own band-limiting skirt, whose corners Table 3
+  puts at 0.08 Hz and 0.63 Hz. There the band-limiting weighting is 0.928 078
+  and the overall weighting 0.388 848, which Table B.5 prints as 0.927 9 and
+  0.388 4 at the neighbouring 0.398 1 Hz band centre. Read as the 0.388 8 of
   Table 1, the row demands a value that a conforming `Wf` meter's indication
-  exceeds by 7,76 % of that demanded value ($0{,}418\,982 / 0{,}388\,8 - 1$),
+  exceeds by 7.76 % of that demanded value ($0.418\,982 / 0.388\,8 - 1$),
   against the ±5 % Table 2 allows low-frequency whole-body vibration: half
   again over the limit, on an instrument with no defect. Read as the ratio
-  0,418 982, the row is true by construction.
+  0.418 982, the row is true by construction.
 - **Evidence:** the printed clause against Table 1 (printed folio 9), Table 2
   (printed folio 12), Table 3 (printed folios 12 to 13) and Table B.5. The two
-  responses at 2,5 rad/s are evaluated from the Formula (1) to (5) cascade the
+  responses at 2.5 rad/s are evaluated from the Formula (1) to (5) cascade the
   same Table 3 parameters define, and they reproduce the two Table B.5 columns
   at the neighbouring band centre to four figures. Verified on PDF page 38
   (printed p. 30) of ISO 8041-1:2017(E).
@@ -7611,12 +7611,12 @@ in the same order.
   vibration exposure meter. Part 2 keeps `Wf` among the weightings a PVEM may
   provide, with the same reference frequency inside the same band-limiting
   skirt, so the arithmetic of the entry above holds unchanged: read as the
-  0,388 8 of Table 1, the paragraph demands a value that a conforming `Wf`
-  meter's indication exceeds by 7,76 % of that demanded value
-  ($0{,}418\,982 / 0{,}388\,8 - 1$), outside the ±3 % that the second row of
+  0.388 8 of Table 1, the paragraph demands a value that a conforming `Wf`
+  meter's indication exceeds by 7.76 % of that demanded value
+  ($0.418\,982 / 0.388\,8 - 1$), outside the ±3 % that the second row of
   Table 2 allows the difference and outside the ±5 % its first row allows a
   low-frequency whole-body indication. Read as the ratio of the overall
-  weighting to the band-limiting one at the reference frequency, 0,418 982,
+  weighting to the band-limiting one at the reference frequency, 0.418 982,
   the paragraph is true by construction.
 - **Evidence:** the printed clause against Table 1 (printed folio 5) and
   Tables 2 and 3 (printed folio 8), whose `Wf` row carries the parameters
@@ -7713,21 +7713,21 @@ in the same order.
 - **The problem:** the two rows are computed on different band limitations, and
   the peak row does not follow the standard's own Formula (5). With
   $f_u = 1$ Hz and $f_o = 80$ Hz that formula gives $|H_{u\mathrm{Soll}}|$ =
-  0,995 at 31,5 Hz and 0,100 at 315 Hz, against the 1,000 and 0,249 printed. The
+  0.995 at 31.5 Hz and 0.100 at 315 Hz, against the 1.000 and 0.249 printed. The
   $KB_\mathrm{F}$ row settles which of the two is the intended reading: $KB_\mathrm{F}$ is
-  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ for a 1 mm/s sine, and at 31,5 Hz that is
-  0,6928 from 0,995 and 0,6962 from 1,000, so the printed 0,693 is the first;
-  at 315 Hz it is 0,0709 from 0,100 and 0,176 from 0,249, so the printed 0,071
-  is again the first, by a factor of two and a half. The 0,852 at 1 Hz is the
-  same kind of departure at the other end, against the 0,842 of Formula (5).
+  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ for a 1 mm/s sine, and at 31.5 Hz that is
+  0.6928 from 0.995 and 0.6962 from 1.000, so the printed 0.693 is the first;
+  at 315 Hz it is 0.0709 from 0.100 and 0.176 from 0.249, so the printed 0.071
+  is again the first, by a factor of two and a half. The 0.852 at 1 Hz is the
+  same kind of departure at the other end, against the 0.842 of Formula (5).
 - **Evidence:** the printed table against Formulae (5) and (6) on printed folio
-  18 and the note under Formula (3) that puts the two corners at 0,8 Hz and
+  18 and the note under Formula (3) that puts the two corners at 0.8 Hz and
   100 Hz. Verified on PDF page 35 (printed p. 35) of DIN 45669-1:2010-09; the
   two rows are adjacent cells of one column, so no
   offset or transcription question arises. What the two anomalous cells do
   match is the maximum a max-hold display shows when the switch-on transient of
   the band limitation is included: a 1 mm/s sine started at a zero crossing
-  gives 0,852 at 1 Hz and 0,248 at 315 Hz through the same filter. That
+  gives 0.852 at 1 Hz and 0.248 at 315 Hz through the same filter. That
   reading, though, is not what the other three cells of the row show, so the
   row is not consistently one convention or the other.
 - **Consequence for the standard's own tables:** confined to that row.
@@ -7761,10 +7761,10 @@ in the same order.
   the speed of a longitudinal wave in a thin rod: with $E = 2G(1+\nu)$ it gives
   $\mathrm{v}_\mathrm{p}^2/\mathrm{v}_\mathrm{s}^2 = 2(1+\nu)$, against $2(1-\nu)/(1-2\nu)$ in the continuum. The
   two expressions Formula (1) sets equal agree with each other only at
-  $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. Formula (5) is the rod speed solved
+  $\nu = (\sqrt{17}-1)/8 \approx 0.39$. Formula (5) is the rod speed solved
   for $E$, so from a measured $\mathrm{v}_\mathrm{p}$ it returns the P-wave modulus
   $M = 2G(1-\nu)/(1-2\nu)$ rather than $E$, which overstates $E$ by 35 % at
-  $\nu = 0{,}3$ and by a factor of 3,8 at $\nu = 0{,}45$, the range of a
+  $\nu = 0.3$ and by a factor of 3.8 at $\nu = 0.45$, the range of a
   saturated soil.
 - **Evidence:** the three formulas against each other on the same two pages,
   and against the P-wave speed of an isotropic elastic continuum. Verified on
@@ -7795,18 +7795,18 @@ in the same order.
   available after $2\tau$ to within 14 % and after $4\tau$ to within 2 %, taking
   the mean of the running r.m.s. of a harmonic signal.
 - **The problem:** 14 % and 2 % are the shortfalls of the running mean square,
-  $\mathrm{e}^{-2} = 13{,}5$ % and $\mathrm{e}^{-4} = 1{,}8$ %, and not of the running r.m.s. the
+  $\mathrm{e}^{-2} = 13.5$ % and $\mathrm{e}^{-4} = 1.8$ %, and not of the running r.m.s. the
   sentence names. Formula (1) started from rest gives a mean square that grows
   as $(1 - \mathrm{e}^{-t/\tau})$ of its final value once the ripple is averaged out, so
   the r.m.s. grows as the square root of that, and it is short by
-  $1 - \sqrt{1 - \mathrm{e}^{-2}} = 7{,}0$ % after $2\tau$ and by
-  $1 - \sqrt{1 - \mathrm{e}^{-4}} = 0{,}9$ % after $4\tau$: about half the printed
+  $1 - \sqrt{1 - \mathrm{e}^{-2}} = 7.0$ % after $2\tau$ and by
+  $1 - \sqrt{1 - \mathrm{e}^{-4}} = 0.9$ % after $4\tau$: about half the printed
   figures.
 - **Evidence:** Formula (1) on the same page and Figure 3 on the next, which
   draws $\tilde v_\mathrm{F}/\hat v$ of an 8 Hz and a 20 Hz sine against
-  time in units of $\tau$ with the mean marked at 0,707. At $2\tau$ both
-  curves oscillate around 0,66, which is 93 % of 0,707, and at $4\tau$
-  around 0,70. Verified on
+  time in units of $\tau$ with the mean marked at 0.707. At $2\tau$ both
+  curves oscillate around 0.66, which is 93 % of 0.707, and at $4\tau$
+  around 0.70. Verified on
   PDF page 3 (printed p. 3) and PDF page 4 (printed p. 4) of
   DIN 45672-2:1995-07.
 - **Consequence for the standard's own tables:** none. The advice the sentence
@@ -7863,7 +7863,7 @@ in the same order.
   does; Formula (A.2) beneath them takes $KB^2_\mathrm{FTm,j}$ as the mean of the
   squares, which is what the right side of (A.1b) is, and the worked Example
   8 on printed page 17 applies (A.1b) with the root: $KB_\mathrm{FTm,1} =
-  \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 + 0{,}9^2)} = 0{,}82$ "aus Gleichung
+  \sqrt{\tfrac{1}{3}(0.92^2 + 0.6^2 + 0.9^2)} = 0.82$ "aus Gleichung
   (A.1b)". Either the root was lost from (A.1b) or its left side should read
   $KB^2_\mathrm{FTm,j}$.
 - **Evidence:** the two formulas on printed page 11 and the example on
@@ -7874,7 +7874,7 @@ in the same order.
   the formula uses the correct one.
 - **Library behaviour:**
   [`railway_takt_max_rms`](../src/phonometry/vibration/immission/people.py)
-  takes the root, and the tests hold it to the 0,82 and 0,22 of Example 8.
+  takes the root, and the tests hold it to the 0.82 and 0.22 of Example 8.
 - **Status:** unreported.
 
 ## E DIN 4150-2:2023-08, Annex B, Example 9 (the night assessed over 920 clock intervals instead of 960)
@@ -7888,10 +7888,10 @@ in the same order.
   for the planned case; the daytime formulas on the same page divide by 1920.
 - **The problem:** 6.5.3.2 fixes $N_\mathrm{r}$ of Formula (6) at 1920 clock
   intervals by day and 960 by night, which is what 8 h of 30 s intervals
-  are. The two night results reproduce 920 exactly, 0,0663 and 0,0957, and
-  with 960 they are 0,0649 and 0,0937, which print as 0,065 and 0,094. The
-  25 % test that follows, $0{,}096 > 1{,}25 \cdot 0{,}066 = 0{,}082$, becomes
-  $0{,}094 > 1{,}25 \cdot 0{,}065 = 0{,}081$ and reaches the same conclusion.
+  are. The two night results reproduce 920 exactly, 0.0663 and 0.0957, and
+  with 960 they are 0.0649 and 0.0937, which print as 0.065 and 0.094. The
+  25 % test that follows, $0.096 > 1.25 \cdot 0.066 = 0.082$, becomes
+  $0.094 > 1.25 \cdot 0.065 = 0.081$ and reaches the same conclusion.
 - **Evidence:** the divisor 920 in both night formulas on printed page 44
   and the definition of $N_\mathrm{r}$ on printed page 19. Verified on PDF page 44
   (printed p. 44) and PDF page 19 (printed p. 19) of E DIN 4150-2:2023-08.
@@ -7900,23 +7900,23 @@ in the same order.
 - **Library behaviour:**
   [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
   divides the night by the 960 of 6.5.3.2, and the conformance rows of
-  Example 9 compare with 0,065 and 0,094, saying what the print gives.
+  Example 9 compare with 0.065 and 0.094, saying what the print gives.
 - **Status:** not reported; the document is a draft under comment.
 
-## E DIN 4150-2:2023-08, Annex B, Figure B.2 b) (clock maxima printed on the figure that do not give the 0,39 the example uses)
+## E DIN 4150-2:2023-08, Annex B, Figure B.2 b) (clock maxima printed on the figure that do not give the 0.39 the example uses)
 
 - **Location:** Figure B.2 b) on printed page 33 (PDF page 33) and the text
   of B.4.3.3 on printed page 34.
 - **The print:** the figure labels the ten clock intervals of hammer B with
   $KB_\mathrm{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, and
   the text sets the 0,04 to zero and finds "$KB_\mathrm{FTmb}$ = 0,39".
-- **The problem:** the r.m.s. of those ten values with the 0,04 as zero is
-  $\sqrt{1{,}3759 / 10} = 0{,}371$, not 0,39. The labels of hammer A on the
-  same figure do give the 0,16 the text uses. The 1999 edition's Figure C.3
-  carried no labels and the 0,39 was inherited from it; the draft added the
-  labels and they were not fitted to the number. Examples 4 and 5 use 0,39
-  and their verdicts do not change with 0,37: 0,150 and 0,188 in place of
-  0,154 and 0,195.
+- **The problem:** the r.m.s. of those ten values with the 0.04 as zero is
+  $\sqrt{1.3759 / 10} = 0.371$, not 0.39. The labels of hammer A on the
+  same figure do give the 0.16 the text uses. The 1999 edition's Figure C.3
+  carried no labels and the 0.39 was inherited from it; the draft added the
+  labels and they were not fitted to the number. Examples 4 and 5 use 0.39
+  and their verdicts do not change with 0.37: 0.150 and 0.188 in place of
+  0.154 and 0.195.
 - **Evidence:** the ten labels on printed page 33 and, on printed page 34,
   the sentence "Somit ergibt sich aus Bild B.2." with the line
   "$KB_\mathrm{FTma}$ = 0,16 und $KB_\mathrm{FTmb}$ = 0,39" under it. Verified on PDF page 33 (printed p. 33) and PDF page 34
@@ -7925,7 +7925,7 @@ in the same order.
   conclude the same with either value.
 - **Library behaviour:** the conformance rows of Examples 4 and 5 of the
   1999 edition, whose text and numbers the draft's Examples 4 and 5 repeat,
-  take the 0,16 and 0,39 the text prints as inputs; nothing is read off the
+  take the 0.16 and 0.39 the text prints as inputs; nothing is read off the
   figure.
 - **Status:** not reported; the document is a draft under comment.
 
@@ -7989,7 +7989,7 @@ in the same order.
   of two quantities, and the example applies every one that fits the case;
   "eine der" says the opposite.
 - **Evidence:** the sentence and its three letters on printed page 22, and
-  the unchanged 0,66 with the conclusion on printed page 44. Verified on PDF
+  the unchanged 0.66 with the conclusion on printed page 44. Verified on PDF
   page 22 (printed p. 22) and PDF page 44 (printed p. 44) of
   E DIN 4150-2:2023-08.
 - **Consequence for the standard's own tables:** none; the example reaches
@@ -8052,18 +8052,18 @@ in the same order.
 - **The print:** $KB_\mathrm{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
   \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
   80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
-- **The problem:** with the four-decimal 0,406 1 and 0,567 6 the formula
-  gives 0,099 72, which prints as 0,099 7; the 0,099 8 printed is what the
-  three-decimal 0,406 and 0,568 of Table B.1 give, 0,099 76. The passages of
-  Table B.1 themselves give 0,099 72. One unit in the fourth decimal, and
-  the verdict, 0,07 exceeded, does not depend on it.
+- **The problem:** with the four-decimal 0.406 1 and 0.567 6 the formula
+  gives 0.099 72, which prints as 0.099 7; the 0.099 8 printed is what the
+  three-decimal 0.406 and 0.568 of Table B.1 give, 0.099 76. The passages of
+  Table B.1 themselves give 0.099 72. One unit in the fourth decimal, and
+  the verdict, 0.07 exceeded, does not depend on it.
 - **Evidence:** the formula and its result on printed page 39 and the
   r.m.s. values of Table B.1 on printed page 38. Verified on PDF page 39
   (printed p. 39) and PDF page 38 (printed p. 38) of E DIN 4150-2:2023-08.
 - **Consequence for the standard's own tables:** none.
 - **Library behaviour:** the conformance row of Example 8 compares
   [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
-  from the 47 passages with 0,099 7 at half a unit of the fourth decimal,
+  from the 47 passages with 0.099 7 at half a unit of the fourth decimal,
   and says what the print gives.
 - **Status:** not reported; the document is a draft under comment.
 
@@ -8141,14 +8141,14 @@ in the same order.
   gives "$KB_\mathrm{FTr,Zug,Tag}$ = 0,11" and "$KB_\mathrm{FTr,Zug,Nacht}$ = 0,05", and C.4
   finds the day exceeded, "0,11 > $A_\mathrm{r,Tag}$ = 0,1".
 - **The problem:** Formula (11) with those inputs and $N_\mathrm{r}$ = 1920 by day and
-  960 by night is $0{,}7 \cdot 0{,}4 \cdot \sqrt{200/1920} = 0{,}090$ and
-  $0{,}7 \cdot 0{,}4 \cdot \sqrt{20/960} = 0{,}040$. The printed values are
+  960 by night is $0.7 \cdot 0.4 \cdot \sqrt{200/1920} = 0.090$ and
+  $0.7 \cdot 0.4 \cdot \sqrt{20/960} = 0.040$. The printed values are
   what the same inputs give with $\alpha$ under the root once instead of
-  squared, $0{,}4 \sqrt{0{,}7 \cdot 200/1920} = 0{,}108$ and
-  $0{,}4 \sqrt{0{,}7 \cdot 20/960} = 0{,}048$: the example weights the energy
+  squared, $0.4 \sqrt{0.7 \cdot 200/1920} = 0.108$ and
+  $0.4 \sqrt{0.7 \cdot 20/960} = 0.048$: the example weights the energy
   of the category by the factor where Formula (11) weights its amplitude.
-  With the 0,090 of the formula the verdict of C.4 on the day turns round:
-  0,09 is below the $A_\mathrm{r}$ of 0,1 and the requirement is met.
+  With the 0.090 of the formula the verdict of C.4 on the day turns round:
+  0.09 is below the $A_\mathrm{r}$ of 0.1 and the requirement is met.
 - **Evidence:** the inputs on printed page 34, the two results at the top
   of printed page 35 and the assessment below them, the formula and its
   $N_\mathrm{r}$ on printed page 23 and the factors on printed page 37. Verified on PDF page 34 (printed p. 34), PDF
@@ -8160,8 +8160,8 @@ in the same order.
 - **Library behaviour:**
   [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
   squares the factor as Formula (11) prints it, and the conformance rows of
-  C.3 compare with the 0,090 and 0,040 it gives for the printed inputs,
-  saying that the print reads 0,11 and 0,05.
+  C.3 compare with the 0.090 and 0.040 it gives for the printed inputs,
+  saying that the print reads 0.11 and 0.05.
 - **Status:** not reported; the document is a draft under comment.
 
 ## E DIN 45672-3:2023-02, Annex C, Table C.1 (a sum level formed without the weighting Clause 7.1 prescribes)
@@ -8176,10 +8176,10 @@ in the same order.
   "$v_{\max}$ = 1,81 mm/s" by Formula (12).
 - **The problem:** Clause 7.1 a) first adds the KB weighting of Table 2 to
   each band (Formula (8)) and sums the bands from 4 Hz to 80 Hz. The energy
-  sum of the 19 printed $L_v$ without any weighting is 78,08 dB, which is
-  the 78,1 printed; the weighted sum over 4 Hz to 80 Hz is 77,7 dB, and the
-  chain from it is 0,385, 0,577 and 1,73 mm/s. The printed 1,81 mm/s is
-  $3 \cdot 1{,}5 \cdot 5 \cdot 10^{-5} \cdot 10^{78{,}1/20} = 1{,}808$, so the
+  sum of the 19 printed $L_v$ without any weighting is 78.08 dB, which is
+  the 78.1 printed; the weighted sum over 4 Hz to 80 Hz is 77.7 dB, and the
+  chain from it is 0.385, 0.577 and 1.73 mm/s. The printed 1.81 mm/s is
+  $3 \cdot 1.5 \cdot 5 \cdot 10^{-5} \cdot 10^{78.1/20} = 1.808$, so the
   example carried the unweighted sum through.
 - **Evidence:** the sum and the three results on printed page 34 and the
   formulas on printed pages 21 and 22. Verified on PDF page 34 (printed
@@ -8187,11 +8187,11 @@ in the same order.
   E DIN 45672-3:2023-02.
 - **Consequence for the standard's own tables:** the results of C.3 are
   4 % high against the standard's own procedure; the verdicts of C.4 are
-  the same either way, 0,6 rounds both.
+  the same either way, 0.6 rounds both.
 - **Library behaviour:**
   [`predict_train_category`](../src/phonometry/vibration/immission/railway_prediction.py)
   weights the bands as 7.1 a) says before it sums them; the conformance rows
-  hold the printed chain from 78,1 dB and the test holds the weighted one.
+  hold the printed chain from 78.1 dB and the test holds the weighted one.
 - **Status:** not reported; the document is a draft under comment.
 
 ## E DIN 45672-3:2023-02, Annex C, C.2 and Table C.1 (a floor transfer that comes from no table of Annex A, and a figure cited by the wrong number)
@@ -8207,8 +8207,8 @@ in the same order.
 - **The problem:** Figure 3 is the transfer from the ground into a
   foundation at ground level; the foundation-to-floor transfer of a concrete
   floor is Figure 4 and Table A.5. Read at the ratios of the bands to 20 Hz,
-  Table A.5's mean gives 1,60; 2,06; 2,52; 3,26; 4,19; 6,35; 9,94; 17,26;
-  9,85; 4,41; 3,27; 3,25; 1,42; 3,89; 2,83 dB up to 100 Hz and nothing
+  Table A.5's mean gives 1.60; 2.06; 2.52; 3.26; 4.19; 6.35; 9.94; 17.26;
+  9.85; 4.41; 3.27; 3.25; 1.42; 3.89; 2.83 dB up to 100 Hz and nothing
   above a ratio of 5. Only the peak agrees; neither the mean nor either
   deviation of Table A.5, nor the 20 Hz column of Table A.1, gives the
   printed column, and the table has no values for the last four bands the
@@ -8313,16 +8313,16 @@ in the same order.
   nothing else.
 - **The problem:** the sum, its symbols and the factors of Annex E are
   Formula (6) and Table 2 of the draft of DIN 4150-2, which prints under
-  its formula that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0,1 enters
+  its formula that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0.1 enters
   as zero. The sentence is not reproduced, so a predicted category at or
-  below 0,1 counts here and not in the assessment the formula says it
+  below 0.1 counts here and not in the assessment the formula says it
   performs.
 - **Evidence:** the formula and its symbol list on printed page 23, and
   the sentence under Formula (6) on printed page 20 of the other draft.
   Verified on PDF page 23 (printed p. 23) of E DIN 45672-3:2023-02 and PDF
   page 20 (printed p. 20) of E DIN 4150-2:2023-08.
 - **Consequence for the standard's own tables:** none; the category of
-  Annex C is at 0,4.
+  Annex C is at 0.4.
 - **Library behaviour:** the chain of
   [`predict_train_category`](../src/phonometry/vibration/immission/railway_prediction.py)
   ends in
@@ -8381,7 +8381,7 @@ in the same order.
   measurements.
 - **The problem:** in the drawing the dash-dot line is the steepest of the
   three and runs through the ▽ markers, which are the Z values Figure A.1
-  prints on printed page 17, from 6,90 mm/s at 270 m to 0,12 mm/s at
+  prints on printed page 17, from 6.90 mm/s at 270 m to 0.12 mm/s at
   1470 m; the continuous line is the flattest and runs through the ○
   markers of the X component. The dashed line and the □ markers of the Y
   component agree with their legend. The two styles are swapped between
@@ -8587,8 +8587,8 @@ in the same order.
   in the frequency range from 50 Hz to 80 Hz, the distance shall be at least
   2 m."
 - **The problem:** the two sentences do not join. Half a wavelength at 100 Hz
-  is 1,72 m and grows as the frequency falls, so at 80 Hz the first rule
-  would ask for 2,14 m and at 50 Hz for 3,43 m. The sentence that takes over
+  is 1.72 m and grows as the frequency falls, so at 80 Hz the first rule
+  would ask for 2.14 m and at 50 Hz for 3.43 m. The sentence that takes over
   below 100 Hz therefore **lowers** the requirement, to 2 m, exactly where the
   wavelength argument asks for more. NOTE 11 of 6.4 makes 50 Hz to 10 kHz the
   preferred range, so the relaxed branch is the one a preferred measurement
@@ -8707,21 +8707,21 @@ in the same order.
   Equation (20) with its key and the explanatory sentence, and Equations (18)
   and (19), are on PDF page 19 (printed p. 11); Equations (5), (7) and their
   keys are on PDF page 11 (printed p. 3); Equation (22) with its key and
-  Equation (29) with $R$ = 8 314,4 N·m/(kmol·K) are on PDF page 20 (printed
+  Equation (29) with $R$ = 8 314.4 N·m/(kmol·K) are on PDF page 20 (printed
   p. 12). All of BS EN ISO 11820:1997, which prints EN ISO 11820:1996. A second
   ISO document prints the same quantity the other way up: the reference
   quantity correction of ISO 3741:2010, which its key calls "a function of the
   characteristic impedance of the air", is
   $C_1 = -10\lg(p_\mathrm{s}/p_{\mathrm{s},0})$ dB
-  $+\ 5\lg[(273{,}15 + \theta)/\theta_0]$ dB, added to $L_W$ in Equation (20)
+  $+\ 5\lg[(273.15 + \theta)/\theta_0]$ dB, added to $L_W$ in Equation (20)
   on PDF page 31 (printed p. 22) of BS EN ISO 3741:2010, and it rises with
   temperature.
 - **Consequence for the standard's own tables:** ISO 11820 prints no worked
   example, so nothing in the document is wrong on its face. In use the sign
   costs twice the correction: with a receiver at 20 °C and a source at 200 °C
-  the print gives -1,04 dB where the impedance gives +1,04 dB, so both the
+  the print gives -1.04 dB where the impedance gives +1.04 dB, so both the
   transmission loss of Equation (19) and the insertion loss of Equation (21)
-  come out 2,08 dB low.
+  come out 2.08 dB low.
 - **Library behaviour:**
   [`temperature_field_correction`](../src/phonometry/noise_control/silencer_in_situ.py)
   returns the equation as printed, because a reader holding ISO 11820 has to
@@ -8808,16 +8808,16 @@ in the same order.
   of the table they are printed in.
 - **Evidence:** the two curves are printed in full, so both routes can be run.
   Taking Table C.6 as printed, the middle range at 1 kHz gives
-  $\mathrm{DL}_2$ = 4,39 dB against the printed 4,4 and
-  $\mathrm{DL}_\mathrm{f}$ = 6,73 dB against the printed 7,3; taking Table C.5
-  instead gives 4,73 dB and 7,29 dB. The same split holds in all three distance
+  $\mathrm{DL}_2$ = 4.39 dB against the printed 4.4 and
+  $\mathrm{DL}_\mathrm{f}$ = 6.73 dB against the printed 7.3; taking Table C.5
+  instead gives 4.73 dB and 7.29 dB. The same split holds in all three distance
   ranges and all six octave bands, and in the two A-weighted pink-noise tables.
   Verified on PDF pages 27, 31 and 33 (printed pp. 17, 21 and 23) of
   EN ISO 14257:2001 as published in BS EN ISO 14257:2001.
 - **Consequence for the standard's own tables:** none for
   $\mathrm{DL}_2$, which is a slope and is barely moved by a correction that is
   nearly constant with distance. For $\mathrm{DL}_\mathrm{f}$, which is a
-  level, the difference reaches 1,4 dB in the near range.
+  level, the difference reaches 1.4 dB in the near range.
 - **Library behaviour:**
   [`corrected_distribution_value`](../src/phonometry/room/spatial_decay.py)
   applies Annex B when it is asked to and never on its own, so the caller
@@ -8837,17 +8837,17 @@ in the same order.
   $\mathrm{DL}_2(r_n,r_m)$ by $\lg 2$.
 - **The problem:** the two are the same conversion, from a rate per decade to a
   rate per distance doubling, written twice with different precision. $\lg 2$
-  is 0,301 03, so the printed 0,3 is 0,34 % small, and a document that prints
+  is 0.301 03, so the printed 0.3 is 0.34 % small, and a document that prints
   the exact form on one page has no reason to round it on the previous one.
 - **Evidence:** the two equations on facing pages, both reproduced in the
   entry above from the printed tables. Verified on PDF pages 19 and 20 (printed
   pp. 9 and 10) of EN ISO 14257:2001.
 - **Consequence for the standard's own tables:** none that the printed rounding
-  can show: the worked example of Annex C is tabulated to one decimal and 0,34 %
-  of a 4 dB slope is 0,014 dB.
+  can show: the worked example of Annex C is tabulated to one decimal and 0.34 %
+  of a 4 dB slope is 0.014 dB.
 - **Library behaviour:**
   [`DECADE_TO_DOUBLING`](../src/phonometry/room/spatial_decay.py) carries the
-  printed 0,3, because the printed constant is what reproduces the printed
+  printed 0.3, because the printed constant is what reproduces the printed
   results, and
   [`level_excess_at`](../src/phonometry/room/spatial_decay.py) divides by
   $\lg 2$ where Equation (8) prints it. Do not unify them.
@@ -8864,17 +8864,17 @@ in the same order.
   $-\ 6,2$ dB, and Table 1 gives the $P_j$ of the A-weighted pink-noise
   reference spectrum as $-16{,}1$; $-8{,}6$; $-3{,}2$; $0$; $1{,}2$; $1$ dB at
   125 Hz to 4 kHz.
-- **The problem:** the 6,2 dB is the energy sum of the $P_j$, which is what
+- **The problem:** the 6.2 dB is the energy sum of the $P_j$, which is what
   normalizes the weighted spectrum back to unit total so that a flat curve
-  comes back unchanged, and the six printed $P_j$ sum to 6,251 5 dB, which
-  rounds to 6,3 and not to 6,2. The printed constant is 0,051 dB short of the
+  comes back unchanged, and the six printed $P_j$ sum to 6.251 5 dB, which
+  rounds to 6.3 and not to 6.2. The printed constant is 0.051 dB short of the
   printed table. The two are roundings of the same curve made separately:
   the $P_j$ are the A-weighting of IEC 61672-1 at the six octave centres,
-  $-16{,}19$; $-8{,}67$; $-3{,}25$; $0$; $1{,}20$; $0{,}96$ dB, printed to
+  $-16.19$; $-8.67$; $-3.25$; $0$; $1.20$; $0.96$ dB, printed to
   one decimal as that standard tabulates them, and the energy sum of the
-  unrounded curve is 6,23 dB, which prints as the 6,2 of Equation (4). Each
+  unrounded curve is 6.23 dB, which prints as the 6.2 of Equation (4). Each
   rounding is right on its own and the printed equation is not: evaluated as
-  printed, it returns a flat curve 0,05 dB high. It is the same kind of slip
+  printed, it returns a flat curve 0.05 dB high. It is the same kind of slip
   as the rounded $\lg 2$ of the entry above, a constant printed to one decimal
   where the document computes to more, and Equation (3), of which Equation
   (4) is the special case for the Table 1 spectrum, carries the same
@@ -8888,36 +8888,36 @@ in the same order.
   in the German text and does not name this one. The annex settles which
   constant it was computed with. Run from the printed Tables C.2 to C.4
   through Annex B without rounding, the last column of Table C.6 comes back
-  with the six printed $P_j$ and their own sum, 6,251 5 dB, inside the
-  printed rounding at all 11 positions (worst 0,041 dB, departures of both
-  signs), and with the printed 6,2 dB one unit high in the last place at 6 of
-  the 11 (worst 0,092 dB, every departure positive, from +0,011 to
-  +0,092 dB). Table C.10 does the same: +0,040, +0,004 and +0,045 dB with the
-  sum, +0,091, +0,055 and +0,097 dB with 6,2. The unrounded A-weighting with
-  its own sum lands the same 14 cells inside the rounding (worst 0,047 dB),
+  with the six printed $P_j$ and their own sum, 6.251 5 dB, inside the
+  printed rounding at all 11 positions (worst 0.041 dB, departures of both
+  signs), and with the printed 6.2 dB one unit high in the last place at 6 of
+  the 11 (worst 0.092 dB, every departure positive, from +0.011 to
+  +0.092 dB). Table C.10 does the same: +0.040, +0.004 and +0.045 dB with the
+  sum, +0.091, +0.055 and +0.097 dB with 6.2. The unrounded A-weighting with
+  its own sum lands the same 14 cells inside the rounding (worst 0.047 dB),
   so the annex does not say which of the two exact normalizations it used,
-  only that it used one; with the printed 6,2 dB neither weighting does
+  only that it used one; with the printed 6.2 dB neither weighting does
   (8 and 9 of 14 outside). Over the printed, already rounded octave columns
   of Table C.6 the split is 3 of 11 against 7 of 11. Table C.8, a slope,
-  does not see the constant, and the A-weighted 115,7 dB of Table C.2 adds it
+  does not see the constant, and the A-weighted 115.7 dB of Table C.2 adds it
   back. Verified on PDF page 14 (printed p. 4) of EN ISO 14257:2001 for the
   equation and the table, and on PDF pages 31 and 34 (printed pp. 21 and 24)
   of the same document for the two annex tables.
 - **Consequence for the standard's own tables:** none for the annex, which
-  was normalized exactly. What carries the 0,051 dB is every evaluation of the
+  was normalized exactly. What carries the 0.051 dB is every evaluation of the
   printed equation, which stands that much above the annex on each
   frequency-normalized value and can move a printed cell of Tables C.6, C.10
   and C.12 by one in the last place, always upward, and never by more.
 - **Library behaviour:**
   [`NORMALIZED_OFFSET_DB`](../src/phonometry/room/spatial_decay.py) carries the
-  printed 6,2, on the same rule as the entry above and as the 11 of
+  printed 6.2, on the same rule as the entry above and as the 11 of
   Equation (2): the printed constant is what a reader checking against the
   page will use, and four printings print it. The exact normalization is
   Equation (3) with the Table 1 weights as the machine spectrum, which
   [`spectrum_distribution_value`](../src/phonometry/room/spatial_decay.py)
   computes, so the annex's reading is available without a second constant.
   The conformance row "ISO 14257:2001 Annex C, Table C.6 last column" judges
-  the printed constant against the annex at 0,1 dB and says why, the row
+  the printed constant against the annex at 0.1 dB and says why, the row
   "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table
   C.10" records that the exact sum lands all fourteen values inside the
   printed rounding and the printed constant does not, and
@@ -8941,22 +8941,22 @@ in the same order.
   $\text{DL}'_\text{fr}$, and it does not produce these numbers. Evaluated over
   the three distance ranges the same annex uses, 2 m to 5 m, 5 m to 24 m and
   24 m to 48 m, on the printed $D$ of Table C.5, it departs from Table C.11 by
-  up to 1,55 dB, and the printed rows are not an Equation (8) result for any
+  up to 1.55 dB, and the printed rows are not an Equation (8) result for any
   decay rate: solving the equation for the $\text{DL}_2$ the middle row would
-  need gives values from -28,9 dB to +20,7 dB per distance doubling. What the
+  need gives values from -28.9 dB to +20.7 dB per distance doubling. What the
   three rows are is a reading of the printed measurement at a microphone
   position, through Equation (6) rather than Equation (8): the 4 m row is
   Equation (6) at the 4 m position of Table C.5, in all six bands; the 10 m row
   is the mean of Equation (6) at the 8 m and 12 m positions that bracket it, in
   all six bands; and the 30 m row is Equation (6) at the 32 m position with
-  $20\lg 32$ entered as 30 dB rather than 30,103 dB, in five bands of six.
+  $20\lg 32$ entered as 30 dB rather than 30.103 dB, in five bands of six.
 - **Evidence:** Tables C.10, C.11 and C.12 read on PDF page 34 (printed p. 24),
   Tables C.5 and C.6 on PDF page 31 (printed p. 21) and Equations (6), (7) and
   (8) with their keys on PDF page 20 (printed p. 10), all of
   EN ISO 14257:2001. Seventeen of the
   eighteen cells of Table C.11 come back from the printed $D$ of Table C.5 by
   the reading above, to the tenth the table prints; the exception is the
-  125 Hz cell of the 30 m row, which prints 10,6 where that reading gives 10,7.
+  125 Hz cell of the 30 m row, which prints 10.6 where that reading gives 10.7.
   The same digits are printed in the Spanish adoption, UNE-EN ISO 14257:2002,
   Tabla C.11 on printed p. 30, so this is the annex and not one printing of it.
 - **Consequence for the standard's own tables:** Tables C.11 and C.12 only. The
@@ -8980,12 +8980,12 @@ in the same order.
   off, has a vertical axis that ends at 10 dB, and the curve for a 29 dB
   difference leaves the top of it well before 195 m2. The 10 dB in the table is
   the edge of the diagram rather than a reading of it, and the level it carries
-  into the last column is 2,4 dB low.
+  into the last column is 2.4 dB low.
 - **Evidence:** the axis of Figure C.1 runs 0 dB to 10 dB, and the closed form
   the diagram draws, the environmental correction
   $\Delta L_\mathrm{A} = 10 \lg(1 + 4S/A)$ of ISO 3744 with
-  $S/S_0 = 10^{(L_{W\mathrm{A}}-L_{p\mathrm{A}})/10}$, gives 12,4 dB for that row. The same
-  expression reproduces the other seven rows of the table within 0,4 dB, which
+  $S/S_0 = 10^{(L_{W\mathrm{A}}-L_{p\mathrm{A}})/10}$, gives 12.4 dB for that row. The same
+  expression reproduces the other seven rows of the table within 0.4 dB, which
   is the half decibel the diagram is drawn to. Verified on PDF pages 29 and 30
   (printed pp. 19 and 20) of EN ISO 11690-3:1998 as published in
   BS EN ISO 11690-3:1999.
@@ -8993,7 +8993,7 @@ in the same order.
   row. Nothing else in the document computes with it.
 - **Library behaviour:**
   [`workstation_level_increase`](../src/phonometry/room/workroom_prediction.py)
-  evaluates the expression and has no ceiling, so it returns 12,4 dB where the
+  evaluates the expression and has no ceiling, so it returns 12.4 dB where the
   table prints 10. The conformance row "ISO 11690-3:1998 Annex C, Figure C.1
   (the eighth machine)" pins it.
 - **Status:** not reported.
@@ -9013,12 +9013,12 @@ in the same order.
   top left.
 - **The problem:** the results belong to the figure's assignment and not to the
   tables'. Machine M2 stands at 17 m, 3 m, 1 m, so the position Table B.5 calls
-  W2 is 1,2 m from it and the position it calls W1 is 11,4 m from the nearer
+  W2 is 1.2 m from it and the position it calls W1 is 11.4 m from the nearer
   machine. The far position cannot be the louder of the two, and the
   printed levels say it is. Recomputing case A by the category 1 method the
   annex prescribes, in the 20 m by 15 m by 7 m room of Table B.2 at the mean
-  absorption coefficient 0,15 of Table B.3, gives 82,10 dB at 17 m, 4 m, 1,6 m
-  and 80,26 dB at 3 m, 12 m, 1,6 m: the two levels Table B.6 prints, each
+  absorption coefficient 0.15 of Table B.3, gives 82.10 dB at 17 m, 4 m, 1.6 m
+  and 80.26 dB at 3 m, 12 m, 1.6 m: the two levels Table B.6 prints, each
   against the other workstation's label. Table B.8 contradicts itself on its own
   row, since it prints the far position for W1 and 82 dB, the rounded near
   level, beside it.
@@ -9026,9 +9026,9 @@ in the same order.
   p. 16); Table B.4 with the machine positions on PDF page 27 (printed p. 17);
   Tables B.5 to B.9 on PDF page 28 (printed p. 18). All of EN ISO 11690-3:1998
   as published in BS EN ISO 11690-3:1999. Under the figure's assignment the six
-  levels of Table B.9 come back within 0,07 dB, and under the tables', the four
-  at W1 and W2 miss by 0,48 dB to 1,04 dB (W3 stands in the same place in both)
-  while case A misses by 1,8 dB on both rows.
+  levels of Table B.9 come back within 0.07 dB, and under the tables', the four
+  at W1 and W2 miss by 0.48 dB to 1.04 dB (W3 stands in the same place in both)
+  while case A misses by 1.8 dB on both rows.
 - **Consequence for the standard's own tables:** the Position columns of Tables
   B.5 and B.8 against the labels of Tables B.6 and B.9, in both cases of the
   annex. The prose of case A follows the tables, calling W2 "the workstation of
@@ -9040,8 +9040,8 @@ in the same order.
   reproduce at the positions the figure draws and at no other. The 50 dB of
   background Table B.5 prints against W1 goes with that label rather than with
   the coordinates beside it, so it is heard at the position the figure gives
-  W1, next to machine M2. It is worth 0,004 dB: read the other way case A comes
-  back 82,09 dB and 80,27 dB instead of 82,10 dB and 80,26 dB, and both
+  W1, next to machine M2. It is worth 0.004 dB: read the other way case A comes
+  back 82.09 dB and 80.27 dB instead of 82.10 dB and 80.26 dB, and both
   readings round to the tenth Table B.6 prints.
 - **Status:** not reported.
 
@@ -9060,38 +9060,38 @@ in the same order.
 - **The problem:** a least-squares line of level on $\lg v$ obeys
   $b = r\,s_L / s_{\lg v}$ exactly, so the slope, the correlation and the
   level spread printed in one column fix the spread of $\lg v$ of that column:
-  $s_{\lg v} = r\,s_L/b$ = 0,0534 for the cars, 0,0680 for the dual-axle and
-  0,0421 for the multi-axle heavy vehicles (0,0518 to 0,0550, 0,0659 to 0,0700
-  and 0,0408 to 0,0435 across the rounding of the three printed inputs). The
+  $s_{\lg v} = r\,s_L/b$ = 0.0534 for the cars, 0.0680 for the dual-axle and
+  0.0421 for the multi-axle heavy vehicles (0.0518 to 0.0550, 0.0659 to 0.0700
+  and 0.0408 to 0.0435 across the rounding of the three printed inputs). The
   dual-axle vehicles therefore have the widest spread of $\lg v$ of the
   three. The ratio of the standard deviation of the speed to its mean depends
   on that spread alone: to first order it is $\ln 10 \, s_{\lg v}$, which
-  gives 0,123 for the cars, 0,157 for the dual-axle and 0,097 for the
+  gives 0.123 for the cars, 0.157 for the dual-axle and 0.097 for the
   multi-axle vehicles, and for a log-normal speed it is
-  $\sqrt{\exp[(\ln 10 \, s_{\lg v})^2] - 1}$, which gives 0,123, 0,158 and
-  0,097, with the dual-axle vehicles the widest either way. The printed
-  standard deviations divided by the printed means give 0,150, 0,099 and
-  0,087, with the cars the widest, so the two columns cannot come from the
+  $\sqrt{\exp[(\ln 10 \, s_{\lg v})^2] - 1}$, which gives 0.123, 0.158 and
+  0.097, with the dual-axle vehicles the widest either way. The printed
+  standard deviations divided by the printed means give 0.150, 0.099 and
+  0.087, with the cars the widest, so the two columns cannot come from the
   same pass-bys. To first order,
-  $s_v \approx \bar v \ln 10 \, s_{\lg v}$ gives 10,9, 11,9 and 7,2 km/h where
-  13,3, 7,5 and 6,4 km/h are printed.
+  $s_v \approx \bar v \ln 10 \, s_{\lg v}$ gives 10.9, 11.9 and 7.2 km/h where
+  13.3, 7.5 and 6.4 km/h are printed.
 - **Evidence:** the other columns of the same table agree with one another.
   The line through the mean speed gives the mean level printed beside it
-  ($16{,}6 + 32{,}55 \lg 88{,}5 = 79{,}97$, printed 80,0; 81,76 and 84,44,
-  printed 81,8 and 84,4), which also shows the average speed to be
-  $10^{\overline{\lg v}}$; and $s_L\sqrt{1 - r^2}$ gives 1,35, 2,15 and
-  2,00 dB, which agree with the residual standard deviations printed as 1,3,
-  2,1 and 2,0 dB within the rounding of the printed $r$ and $s_L$ (1,30 to
-  1,39, 2,10 to 2,20 and 1,96 to 2,06 dB across it, and 1,31 to 1,40, 2,13 to
-  2,24 and 1,97 to 2,08 dB with the $n - 2$ denominator of a residual). Only
+  ($16.6 + 32.55 \lg 88.5 = 79.97$, printed 80.0; 81.76 and 84.44,
+  printed 81.8 and 84.4), which also shows the average speed to be
+  $10^{\overline{\lg v}}$; and $s_L\sqrt{1 - r^2}$ gives 1.35, 2.15 and
+  2.00 dB, which agree with the residual standard deviations printed as 1.3,
+  2.1 and 2.0 dB within the rounding of the printed $r$ and $s_L$ (1.30 to
+  1.39, 2.10 to 2.20 and 1.96 to 2.06 dB across it, and 1.31 to 1.40, 2.13 to
+  2.24 and 1.97 to 2.08 dB with the $n - 2$ denominator of a residual). Only
   the row of speed spreads is out of step, and it stays out of step across the
   same rounding. Verified on PDF page 34
   (printed p. 26) of BS EN ISO 11819-1:2001.
 - **Consequence for the standard's own example:** none for the vehicle sound
   levels, which need only the intercepts and the slopes. The 9.3 check the
   example passes still passes with the spreads the regression implies: the
-  reference speeds of 80 and 70 km/h fall inside 73,6 to 106,4, 64,8 to 88,6
-  and 66,9 to 81,2 km/h.
+  reference speeds of 80 and 70 km/h fall inside 73.6 to 106.4, 64.8 to 88.6
+  and 66.9 to 81.2 km/h.
 - **Library behaviour:**
   [`PassByRegression`](../src/phonometry/environment/sources/_statistical_pass_by.py)
   reports the spread of $\lg v$ and the 9.3 window in km/h it gives, and the
@@ -9126,7 +9126,7 @@ in the same order.
   (11), on the facing page, reads
   $F := f/f_{cr}\ ;\ Z_m := f_{cr}m/Z_0 = (f_{cr}d/Z_0)\,\rho$.
 - **The problem:** with this row's own density and $f_{cr}d$, that definition
-  gives $1250 \times 48 / 413 = 145$. The printed 1220 is 8,4 times it.
+  gives $1250 \times 48 / 413 = 145$. The printed 1220 is 8.4 times it.
 - **Evidence:** the same expression reproduces the rest of the table over four
   decades of $Z_m$, from 20 to 1438: thirty-six of the other thirty-seven rows
   within 5 per cent and thirty-four within 3 per cent. The one other row
@@ -9135,7 +9135,7 @@ in the same order.
   $f_{cr}d$ is the range 31 to 35, and 85 is the top of the band the equation
   gives rather than its middle. The conclusion does not turn on the value
   taken for $Z_0$, which the equation writes as a symbol: 400 gives 150 and
-  415 gives 144,6, against a printed 1220. Verified against the page as
+  415 gives 144.6, against a printed 1220. Verified against the page as
   printed on PDF pages 544 and 545 (printed pp. 529 and 530) of Mechel
   (2008), *Formulas of Acoustics*, 2nd edition.
 - **Consequence for the book's own tables:** that one cell. Nothing else in
@@ -9164,16 +9164,16 @@ in the same order.
   $E$ = 0,1 and $\rho$ = 250 with 500 m/s; and $E$ = 8,3 and $\rho$ = 600 with
   4540 m/s.
 - **The problem:** $\sqrt{E/\rho}$ on those cells gives 3464, 632 and 3719 m/s.
-  The printed speeds are 5,4 per cent above, 20,9 per cent below and 22,1 per
+  The printed speeds are 5.4 per cent above, 20.9 per cent below and 22.1 per
   cent above what the two columns beside them give.
 - **Evidence:** the same expression reproduces the rest of the table. Of the
   eighty-seven rows that print both the modulus and the density as single
   values, seventy-nine agree within 1 per cent and eighty-four within 3, with a
-  median offset of 0,03 per cent, across speeds from 190 to 27000 m/s. Only
+  median offset of 0.03 per cent, across speeds from 190 to 27000 m/s. Only
   these three fall outside, which is the signature of a misprinted cell rather
   than of a looser method than the page describes. Which cell is misprinted
-  cannot be told from the page: 4540 m/s would follow from a modulus of 12,4
-  rather than 8,3, and 500 m/s from a density of 400 rather than 250. Verified
+  cannot be told from the page: 4540 m/s would follow from a modulus of 12.4
+  rather than 8.3, and 500 m/s from a density of 400 rather than 250. Verified
   against the page as printed on PDF pages 748 and 749 (printed pp. 719 and
   720) of Bies, Hansen and Howard (2017), *Engineering Noise Control*, fifth
   edition.
@@ -9641,9 +9641,9 @@ in the same order.
   "cada 40,6 cm (16 in)", "alfombra de 1,5 kg/m2 (44 oz/yd2)". Three hundred
   and twenty-one such pairs are printed over the eight tables.
 - **The problem:** nineteen of the three hundred and twenty-one pairs are not each
-  other. The inch is 2,54 cm exactly, the pound is 0,45359237 kg exactly and
-  the yard 0,9144 m exactly, so one pound per cubic foot is 16,0185 kg/m3, one
-  pound per square yard 0,54249 kg/m2 and one ounce per square yard 33,906
+  other. The inch is 2.54 cm exactly, the pound is 0.45359237 kg exactly and
+  the yard 0.9144 m exactly, so one pound per cubic foot is 16.0185 kg/m3, one
+  pound per square yard 0.54249 kg/m2 and one ounce per square yard 33.906
   g/m2, and each pair is decided by arithmetic alone. On these pages the US
   customary half is the measurement and the SI half its translation, so a pair
   whose imperial half is a whole number or a fraction is read in that
@@ -9651,52 +9651,52 @@ in the same order.
   decimal is allowed either. A pair counts as sound when the SI half is the
   conversion rounded **or truncated** to the precision it is printed to, which
   forgives the whole of this chapter's loose rounding: "60 cm (24 in)" and
-  "2,5 cm (1 in)" are truncations of 60,96 and 2,54 and no more than that, and
-  row 17 prints "36,9 cm (14,5 in)", where 36,9 cm is 14,53 in and the page
-  would print that as the 14,5 in beside it. The nineteen below survive that
+  "2,5 cm (1 in)" are truncations of 60.96 and 2.54 and no more than that, and
+  row 17 prints "36,9 cm (14,5 in)", where 36.9 cm is 14.53 in and the page
+  would print that as the 14.5 in beside it. The nineteen below survive that
   test. Each one names the row the page numbers, the pair as it is set, and
   the conversion that fails:
   - **Row 9** (PDF page 750, printed folio 32.8): "30,8 cm (16 in)" for the
-    batten spacing. $16 \times 2{,}54 = 40{,}64$ cm, which these eight tables
-    print as 40,6 cm eighteen times over.
+    batten spacing. $16 \times 2.54 = 40.64$ cm, which these eight tables
+    print as 40.6 cm eighteen times over.
   - **Row 11** (PDF page 751, printed folio 32.9): "53,2 cm (21 in)" for the
-    rib spacing. $21 \times 2{,}54 = 53{,}34$ cm, which row 38 prints as
-    53,3 cm.
+    rib spacing. $21 \times 2.54 = 53.34$ cm, which row 38 prints as
+    53.3 cm.
   - **Row 14** (PDF page 752, printed folio 32.10): "15,6 cm (6 in)" for the
-    slab. $6 \times 2{,}54 = 15{,}24$ cm, which these eight tables print as
-    15,2 cm eleven times over.
+    slab. $6 \times 2.54 = 15.24$ cm, which these eight tables print as
+    15.2 cm eleven times over.
   - **Row 18** (PDF page 752, printed folio 32.10): "36,7 cm (14,5 in)" for
-    the beam spacing. $14{,}5 \times 2{,}54 = 36{,}83$ cm, which rows 13 and
-    15 print as 36,8 cm.
+    the beam spacing. $14.5 \times 2.54 = 36.83$ cm, which rows 13 and
+    15 print as 36.8 cm.
   - **Row 22** (PDF page 753, printed folio 32.11): "60,1 cm (24 in)" for the
-    joist spacing. $24 \times 2{,}54 = 60{,}96$ cm, which rows 26, 27, 33 and
+    joist spacing. $24 \times 2.54 = 60.96$ cm, which rows 26, 27, 33 and
     38 print as 61 cm.
   - **Row 23** (PDF page 753, printed folio 32.11): "60,1 cm (24 in)" for the
     joist spacing, the same pair again.
   - **Row 26** (PDF page 754, printed folio 32.12): "32,3 cm (11,75 in)" for
-    the total thickness. $11{,}75 \times 2{,}54 = 29{,}85$ cm, and 32,3 cm is
-    12,72 in, so neither half is the other.
+    the total thickness. $11.75 \times 2.54 = 29.85$ cm, and 32.3 cm is
+    12.72 in, so neither half is the other.
   - **Row 27** (PDF page 754, printed folio 32.12): "1,89 cm (0,78 in)" for
-    the oak strip floor. $0{,}78 \times 2{,}54 = 1{,}98$ cm, which row 26
-    prints as 1,98 cm for the same floor.
+    the oak strip floor. $0.78 \times 2.54 = 1.98$ cm, which row 26
+    prints as 1.98 cm for the same floor.
   - **Row 28** (PDF page 754, printed folio 32.12): "1,89 cm (0,78 in)" for
     the same oak strip floor.
   - **Row 28** (PDF page 754, printed folio 32.12): "31,6 cm (12,5 in)" for
-    the total thickness. $12{,}5 \times 2{,}54 = 31{,}75$ cm, which rows 16
-    and 18 print as 31,8 cm and row 25 as 31,7 cm.
+    the total thickness. $12.5 \times 2.54 = 31.75$ cm, which rows 16
+    and 18 print as 31.8 cm and row 25 as 31.7 cm.
   - **Row 29** (PDF page 754, printed folio 32.12): "60,8 cm (24 in)" for the
-    resilient channels. $24 \times 2{,}54 = 60{,}96$ cm.
+    resilient channels. $24 \times 2.54 = 60.96$ cm.
   - **Row 31** (PDF page 755, printed folio 32.13): "10,1 cm (2 in)" for the
-    batten section. $2 \times 2{,}54 = 5{,}08$ cm, which these eight tables
-    print as 5,1 cm twenty-two times over, the same row included.
+    batten section. $2 \times 2.54 = 5.08$ cm, which these eight tables
+    print as 5.1 cm twenty-two times over, the same row included.
   - **Row 34A** (PDF page 755, printed folio 32.13): "7,5 cm (3 in)" for the
-    furring strips. $3 \times 2{,}54 = 7{,}62$ cm, which these eight tables
-    print as 7,6 cm ten times over.
+    furring strips. $3 \times 2.54 = 7.62$ cm, which these eight tables
+    print as 7.6 cm ten times over.
   - **Row 35A** (PDF page 756, printed folio 32.14): "410 kg/m3 (26,1 lb/ft3)"
-    for the compressed paper-pulp floor board. $26{,}1 \times 16{,}0185 =
-    418{,}1$ kg/m3, and 410 kg/m3 is 25,6 lb/ft3, so neither half is the other.
+    for the compressed paper-pulp floor board. $26.1 \times 16.0185 =
+    418.1$ kg/m3, and 410 kg/m3 is 25.6 lb/ft3, so neither half is the other.
     The page does not say which of the two carries the defect, and no other
-    cell of the eight tables settles it: row 5 prints 35,2 kg/m3 (2,2 lb/ft3)
+    cell of the eight tables settles it: row 5 prints 35.2 kg/m3 (2.2 lb/ft3)
     and row 37A 2370 kg/m3 (148 lb/ft3), and both of those convert correctly,
     which makes this a property of this cell and not of the chapter.
   - **Row 35B** (PDF page 756, printed folio 32.14): "60,1 cm (24 in)" for the
@@ -9704,16 +9704,16 @@ in the same order.
   - **Row 36B** (PDF page 756, printed folio 32.14): "60,1 cm (24 in)" for the
     steel joist spacing.
   - **Row 37A** (PDF page 756, printed folio 32.14): "1,5 kg/m2 (3,4 lb/yd2)"
-    for the diamond mesh and metal lath. $3{,}4 \times 0{,}54249 = 1{,}84$
-    kg/m2, and row 38 converts 4,14 lb/yd2 to 2,25 kg/m2 with that same
+    for the diamond mesh and metal lath. $3.4 \times 0.54249 = 1.84$
+    kg/m2, and row 38 converts 4.14 lb/yd2 to 2.25 kg/m2 with that same
     factor.
   - **Row 38** (PDF page 756, printed folio 32.14): "1,81 kg/m2 (40 oz/yd2)"
-    for the hair underlay. $40 \times 33{,}906 = 1356$ g/m2, which row 28
-    prints as 1,4 kg/m2 for the same cloth.
+    for the hair underlay. $40 \times 33.906 = 1356$ g/m2, which row 28
+    prints as 1.4 kg/m2 for the same cloth.
   - **Row 38** (PDF page 756, printed folio 32.14): "1,99 kg/m2 (44 oz/yd2)"
-    for the wool pile carpet. $44 \times 33{,}906 = 1492$ g/m2, which rows 28
-    and 30 print as 1,5 kg/m2 for the same cloth. The two carpet cells of this
-    row are both 1,334 of their own conversion, so one wrong factor was
+    for the wool pile carpet. $44 \times 33.906 = 1492$ g/m2, which rows 28
+    and 30 print as 1.5 kg/m2 for the same cloth. The two carpet cells of this
+    row are both 1.334 of their own conversion, so one wrong factor was
     applied to the pair rather than two digits slipping.
 - **Evidence:** Verified on PDF pages 750 to 757 (printed pp. 32.8-32.15) of
   Harris (ed.), *Manual de medidas acústicas y control del ruido* 3e (1995),
@@ -9888,8 +9888,8 @@ in the same order.
 - **The print:** the caption gives every row at atmospheric pressure, and the
   block prints argon at −183,15 °C, methane at −153,15, −143,15 and −138,15 °C
   and nitrogen at −193,15 and −183,15 °C.
-- **The problem:** at one atmosphere argon boils at −185,85 °C, methane at
-  −161,49 °C and nitrogen at −195,79 °C, so at those six temperatures each is a
+- **The problem:** at one atmosphere argon boils at −185.85 °C, methane at
+  −161.49 °C and nitrogen at −195.79 °C, so at those six temperatures each is a
   gas, and a liquid only under a higher pressure. The rows' own reference,
   [8.74], is titled on PDF page 324 "A study of (B/A) in liquified gases as a
   function of temperature and pressure". The values are not in question; the
@@ -9912,19 +9912,19 @@ in the same order.
 - **The print:** every pile weight is printed twice, SI first and the US
   customary value in parentheses: "1,2 (35)", "1,5 (43)" and so on, eleven
   pairs in the table.
-- **The problem:** one ounce per square yard is $0{,}033906$ kg/m$^2$ by
+- **The problem:** one ounce per square yard is $0.033906$ kg/m$^2$ by
   definition, and five of the eleven pairs are not each other under the
   criterion the Chapter 32 entry uses (the SI half is the conversion rounded or
   truncated to the precision it is printed to):
-  - "2,3 (66)", "3,1 (88)" and "2,1 (60)": $66 \times 0{,}0339 = 2{,}24$,
-    $88 \times 0{,}0339 = 2{,}98$ and $60 \times 0{,}0339 = 2{,}03$. All three
-    are what $0{,}035$ kg/m$^2$ per oz/yd$^2$ gives, a factor that also
+  - "2,3 (66)", "3,1 (88)" and "2,1 (60)": $66 \times 0.0339 = 2.24$,
+    $88 \times 0.0339 = 2.98$ and $60 \times 0.0339 = 2.03$. All three
+    are what $0.035$ kg/m$^2$ per oz/yd$^2$ gives, a factor that also
     reproduces every pair of Tables 30.2 and 30.3 that does hold, which is how
     these three come out a tenth high: the metric column follows a factor 3 per
     cent above the definition.
-  - "1,3 (32)": $32 \times 0{,}0339 = 1{,}08$, and $0{,}035$ gives $1{,}12$;
-    neither reaches $1{,}3$.
-  - "1,1 (3,2)": $3{,}2$ oz/yd$^2$ is $0{,}11$ kg/m$^2$. The same carpet,
+  - "1,3 (32)": $32 \times 0.0339 = 1.08$, and $0.035$ gives $1.12$;
+    neither reaches $1.3$.
+  - "1,1 (3,2)": $3.2$ oz/yd$^2$ is $0.11$ kg/m$^2$. The same carpet,
     knotted, cut nylon with a pile of 14 mm, is printed "1,1 (32)" in Table
     30.3, so the imperial half has a stray decimal comma.
 - **Evidence:** Verified on PDF page 704 (printed p. 30.22) of Harris (ed.),
@@ -9935,7 +9935,7 @@ in the same order.
 - **What the library does:** in
   [`PUBLISHED_CARPETS`](../src/phonometry/materials/absorbers/carpets.py) the
   four rows whose kilograms are in doubt serve no pile weight and mark the
-  cell `misprinted`, quoting the pair; the fifth serves its 1,1 kg/m$^2$ and
+  cell `misprinted`, quoting the pair; the fifth serves its 1.1 kg/m$^2$ and
   says in its note that the ounces lost a digit.
 - **Status:** unreported.
 
@@ -9962,7 +9962,7 @@ in the same order.
   aire", on printed folios 15 and 16 of UNE-EN ISO 9295:2015 (October 2015),
   which declares itself the Spanish version of EN ISO 9295:2015 and adopts ISO
   9295:2015 without modification. The two tables give the air absorption
-  coefficient $\alpha$ in Np/m at a static pressure of 101,325 kPa, for 26
+  coefficient $\alpha$ in Np/m at a static pressure of 101.325 kPa, for 26
   frequencies from 10 000 Hz to 22 400 Hz, at 18, 20, 21, 22, 23, 24, 25 and
   27 °C and at 40 %, 50 % and 60 % relative humidity: 624 cells. Clause 7.2
   reads $\alpha$ from them into the room constant of Formula (7), and the
@@ -9972,65 +9972,65 @@ in the same order.
 - **The problem:** forty-three cells contradict Annex A, and all forty-three
   in the same way: the value Annex A gives ends in 0, and a 0 is printed as
   another digit. In forty of them it is the fourth decimal, printed as the
-  third repeated ("0,027 7" where Annex A gives 0,027 0). The other three are
+  third repeated ("0,027 7" where Annex A gives 0.027 0). The other three are
   cells whose Annex A value ends in two zeros (two more such cells, both
-  0,020 0 in Table 1, at 10 500 Hz, 20 °C and 50 % and at 11 000 Hz, 18 °C
+  0.020 0 in Table 1, at 10 500 Hz, 20 °C and 50 % and at 11 000 Hz, 18 °C
   and 60 %, are printed correctly), and there it is the third decimal that
   takes the digit before it: "0,033 0" where Annex A gives
-  0,030 0, and "0,04 4" and "0,05 50", with their digit groups set out of place
-  as well, where Annex A gives 0,040 0 and 0,050 0. The defect is confined to
+  0.030 0, and "0,04 4" and "0,05 50", with their digit groups set out of place
+  as well, where Annex A gives 0.040 0 and 0.050 0. The defect is confined to
   zeros and is not a matter of rounding: the other 581 cells are Annex A to
   the last digit (see the evidence below), and of the 60 cells whose Annex A
   value ends in 0, these 43 are misprinted while 17 are printed with their 0.
   The errors run from one unit of the fourth decimal, where the repeated digit
-  is a 1 ("0,051 1" for 0,051 0), to 0,005 0 Np/m, where "0,05 50" stands for
-  0,050 0 at 21 500 Hz, 27 °C and 60 %. The three cells whose Annex A value
+  is a 1 ("0,051 1" for 0.051 0), to 0.005 0 Np/m, where "0,05 50" stands for
+  0.050 0 at 21 500 Hz, 27 °C and 60 %. The three cells whose Annex A value
   ends in two zeros are each printed exactly 10 % high; read into Formula (7),
   any of them makes the air absorption area 10 % too large, and the room
-  constant, and with it the sound power level of Formula (6), at least 0,41 dB
+  constant, and with it the sound power level of Formula (6), at least 0.41 dB
   too high. The cells, by table and frequency:
-  - **Table 1, 13 500 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,027 7" for 0,027 0; 21 °C and 40 %, "0,036 6" for 0,036 0; 21 °C and 60 %, "0,026 6" for 0,026 0; 22 °C and 40 %, "0,035 5" for 0,035 0.
-  - **Table 1, 15 500 Hz** (PDF page 15, printed folio 15): 22 °C and 40 %, "0,044 4" for 0,044 0.
-  - **Table 1, 16 500 Hz** (PDF page 15, printed folio 15): 21 °C and 50 %, "0,043 3" for 0,043 0.
-  - **Table 1, 18 000 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,045 5" for 0,045 0.
-  - **Table 1, 19 000 Hz** (PDF page 15, printed folio 15): 21 °C and 60 %, "0,048 8" for 0,048 0.
-  - **Table 1, 20 000 Hz** (PDF page 15, printed folio 15): 22 °C and 60 %, "0,051 1" for 0,051 0.
-  - **Table 2, 10 000 Hz** (PDF page 16, printed folio 16): 27 °C and 50 %, "0,014 4" for 0,014 0.
-  - **Table 2, 11 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,018 8" for 0,018 0.
-  - **Table 2, 11 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,021 1" for 0,021 0.
-  - **Table 2, 13 000 Hz** (PDF page 16, printed folio 16): 25 °C and 60 %, "0,021 1" for 0,021 0.
-  - **Table 2, 13 500 Hz** (PDF page 16, printed folio 16): 27 °C and 60 %, "0,021 1" for 0,021 0.
-  - **Table 2, 14 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,035 5" for 0,035 0; 24 °C and 60 %, "0,025 5" for 0,025 0.
-  - **Table 2, 14 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,031 1" for 0,031 0; 25 °C and 40 %, "0,036 6" for 0,036 0; 25 °C and 50 %, "0,033 0" for 0,030 0; 27 °C and 50 %, "0,028 8" for 0,028 0; 27 °C and 60 %, "0,024 4" for 0,024 0.
-  - **Table 2, 15 000 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,033 3" for 0,033 0.
-  - **Table 2, 15 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,035 5" for 0,035 0; 27 °C and 40 %, "0,038 8" for 0,038 0.
-  - **Table 2, 16 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,044 4" for 0,044 0; 24 °C and 60 %, "0,032 2" for 0,032 0.
-  - **Table 2, 16 500 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,035 5" for 0,035 0.
-  - **Table 2, 17 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,04 4" for 0,040 0.
-  - **Table 2, 18 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,041 1" for 0,041 0; 27 °C and 60 %, "0,036 6" for 0,036 0.
-  - **Table 2, 18 500 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,056 6" for 0,056 0; 24 °C and 50 %, "0,048 8" for 0,048 0.
-  - **Table 2, 19 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,054 4" for 0,054 0.
-  - **Table 2, 20 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,048 8" for 0,048 0.
-  - **Table 2, 20 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,067 7" for 0,067 0; 24 °C and 40 %, "0,066 6" for 0,066 0.
-  - **Table 2, 21 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,054 4" for 0,054 0.
-  - **Table 2, 21 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,072 2" for 0,072 0; 24 °C and 40 %, "0,071 1" for 0,071 0; 27 °C and 60 %, "0,05 50" for 0,050 0.
-  - **Table 2, 22 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,057 7" for 0,057 0; 25 °C and 50 %, "0,063 3" for 0,063 0.
-  - **Table 2, 22 400 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,065 5" for 0,065 0.
+  - **Table 1, 13 500 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,027 7" for 0.027 0; 21 °C and 40 %, "0,036 6" for 0.036 0; 21 °C and 60 %, "0,026 6" for 0.026 0; 22 °C and 40 %, "0,035 5" for 0.035 0.
+  - **Table 1, 15 500 Hz** (PDF page 15, printed folio 15): 22 °C and 40 %, "0,044 4" for 0.044 0.
+  - **Table 1, 16 500 Hz** (PDF page 15, printed folio 15): 21 °C and 50 %, "0,043 3" for 0.043 0.
+  - **Table 1, 18 000 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,045 5" for 0.045 0.
+  - **Table 1, 19 000 Hz** (PDF page 15, printed folio 15): 21 °C and 60 %, "0,048 8" for 0.048 0.
+  - **Table 1, 20 000 Hz** (PDF page 15, printed folio 15): 22 °C and 60 %, "0,051 1" for 0.051 0.
+  - **Table 2, 10 000 Hz** (PDF page 16, printed folio 16): 27 °C and 50 %, "0,014 4" for 0.014 0.
+  - **Table 2, 11 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,018 8" for 0.018 0.
+  - **Table 2, 11 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,021 1" for 0.021 0.
+  - **Table 2, 13 000 Hz** (PDF page 16, printed folio 16): 25 °C and 60 %, "0,021 1" for 0.021 0.
+  - **Table 2, 13 500 Hz** (PDF page 16, printed folio 16): 27 °C and 60 %, "0,021 1" for 0.021 0.
+  - **Table 2, 14 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,035 5" for 0.035 0; 24 °C and 60 %, "0,025 5" for 0.025 0.
+  - **Table 2, 14 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,031 1" for 0.031 0; 25 °C and 40 %, "0,036 6" for 0.036 0; 25 °C and 50 %, "0,033 0" for 0.030 0; 27 °C and 50 %, "0,028 8" for 0.028 0; 27 °C and 60 %, "0,024 4" for 0.024 0.
+  - **Table 2, 15 000 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,033 3" for 0.033 0.
+  - **Table 2, 15 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,035 5" for 0.035 0; 27 °C and 40 %, "0,038 8" for 0.038 0.
+  - **Table 2, 16 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,044 4" for 0.044 0; 24 °C and 60 %, "0,032 2" for 0.032 0.
+  - **Table 2, 16 500 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,035 5" for 0.035 0.
+  - **Table 2, 17 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,04 4" for 0.040 0.
+  - **Table 2, 18 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,041 1" for 0.041 0; 27 °C and 60 %, "0,036 6" for 0.036 0.
+  - **Table 2, 18 500 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,056 6" for 0.056 0; 24 °C and 50 %, "0,048 8" for 0.048 0.
+  - **Table 2, 19 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,054 4" for 0.054 0.
+  - **Table 2, 20 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,048 8" for 0.048 0.
+  - **Table 2, 20 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,067 7" for 0.067 0; 24 °C and 40 %, "0,066 6" for 0.066 0.
+  - **Table 2, 21 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,054 4" for 0.054 0.
+  - **Table 2, 21 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,072 2" for 0.072 0; 24 °C and 40 %, "0,071 1" for 0.071 0; 27 °C and 60 %, "0,05 50" for 0.050 0.
+  - **Table 2, 22 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,057 7" for 0.057 0; 25 °C and 50 %, "0,063 3" for 0.063 0.
+  - **Table 2, 22 400 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,065 5" for 0.065 0.
 - **Evidence:** Verified on PDF pages 15 and 16 (printed pp. 15 and 16) of
   UNE-EN ISO 9295:2015, where each of the forty-three cells was read on the
   page before being listed. Annex A, on PDF pages 25 and 26 (printed pp. 25
   and 26) of the same edition, was evaluated for all 624 cells: the 581 not
   listed reproduce to the fourth decimal when the temperature is converted as
-  $\theta + 273{,}16$ K, and of the conversions from $\theta + 273{,}15$ K to
-  $\theta + 273{,}18$ K in steps of 0,002 K that is the only one that
-  reproduces all of them, so the tables were computed with the 273,16 K of
-  the triple point where the Celsius scale puts 273,15 K. That offset is a
+  $\theta + 273.16$ K, and of the conversions from $\theta + 273.15$ K to
+  $\theta + 273.18$ K in steps of 0.002 K that is the only one that
+  reproduces all of them, so the tables were computed with the 273.16 K of
+  the triple point where the Celsius scale puts 273.15 K. That offset is a
   property of the tables rather than a misprint, and a small one: at
-  $\theta + 273{,}15$ K, 61 of the 581 move by one unit of the fourth
-  decimal and none by more than 0,000 063 Np/m.
+  $\theta + 273.15$ K, 61 of the 581 move by one unit of the fourth
+  decimal and none by more than 0.000 063 Np/m.
   For one listed cell the two conversions round apart, 19 500 Hz at 23 °C and
-  50 %, which is 0,054 0 at 273,16 K and 0,054 1 at 273,15 K against the
-  0,054 4 printed; the entry gives the table's own conversion throughout. The
+  50 %, which is 0.054 0 at 273.16 K and 0.054 1 at 273.15 K against the
+  0.054 4 printed; the entry gives the table's own conversion throughout. The
   2013 draft, BS EN ISO 9295 (DPC 13/30264708), prints the same 624 cells on
   PDF pages 15 and 16 (printed pp. 7 and 8) of ISO/DIS 9295, so the defect
   came through from the draft to the standard.
@@ -10038,7 +10038,7 @@ in the same order.
   in
   [`sound_power_high_frequency`](../src/phonometry/emission/sound_power_high_frequency.py)
   evaluates Annex A with the library's ISO 9613-1 implementation and
-  $T = \theta + 273{,}15$ K, and `room_constant_from_air_absorption` feeds
+  $T = \theta + 273.15$ K, and `room_constant_from_air_absorption` feeds
   it to Formula (7). The 624 cells are transcribed in
   [`tests/reference_data/emission.py`](../tests/reference_data/emission.py)
   with the forty-three named in `ISO9295_MISPRINTED_CELLS`;
@@ -10102,44 +10102,44 @@ in the same order.
 - **The problem:** the derivative of Formula (17) with respect to
   $f_\mathrm{end}$ is $10/[\ln(f_\mathrm{end}/f_\mathrm{start})\ln(10)\,f_\mathrm{end}]$,
   and (A.1) squares it with every other coefficient. Left unsquared, the
-  coefficient is 0,377 for the example's sweep of five decades, and its
-  frequency term is $0{,}0038\ \text{dB}^2$ instead of $0{,}0014\ \text{dB}^2$. As printed, (A.2) gives
-  $u_{L_\mathrm{c}} = 0{,}075$ dB, an expanded uncertainty of 0,150 dB and
-  0,161 dB with the display; with the square it gives 0,057 dB, 0,115 dB and
-  0,128 dB, the three values both parts print. Both are computed with the
-  $u_{L_\mathrm{in}}$ the example derives, 0,0416 dB from a 0,1 dB display
-  resolution and a 0,03 dB constancy, not with the 0,042 dB it rounds it to,
-  which would give 0,058 dB. The unsquared form is also not in $\text{dB}^2$, so it
+  coefficient is 0.377 for the example's sweep of five decades, and its
+  frequency term is $0.0038\ \text{dB}^2$ instead of $0.0014\ \text{dB}^2$. As printed, (A.2) gives
+  $u_{L_\mathrm{c}} = 0.075$ dB, an expanded uncertainty of 0.150 dB and
+  0.161 dB with the display; with the square it gives 0.057 dB, 0.115 dB and
+  0.128 dB, the three values both parts print. Both are computed with the
+  $u_{L_\mathrm{in}}$ the example derives, 0.0416 dB from a 0.1 dB display
+  resolution and a 0.03 dB constancy, not with the 0.042 dB it rounds it to,
+  which would give 0.058 dB. The unsquared form is also not in $\text{dB}^2$, so it
   changes with the unit of level.
 - **Evidence:** a recomputation of the printed example both ways. Verified on
   PDF page 21 (printed p. 19) and PDF page 23 (printed p. 21) of
   IEC 61260-2:2016, and on PDF page 18 (printed p. 16) and PDF page 20
   (printed p. 18) of IEC 61260-3:2016. The consolidated
   IEC 61260-2:2016+AMD1:2017 (Edition 1.1) prints the same Formula (A.2) on
-  PDF page 23 (printed p. 19) and the same 0,057 dB, 0,115 dB and 0,128 dB on
+  PDF page 23 (printed p. 19) and the same 0.057 dB, 0.115 dB and 0.128 dB on
   PDF page 25 (printed p. 21): the amendment adds only the TEM-waveguide
   option of IEC 61000-4-20 to the field-immunity test, and the defect stands
   in the current edition.
 - **Library behaviour:**
   [`swept_level_uncertainty`](../src/phonometry/filters/time_invariance.py)
-  squares the coefficient, as (A.1) does, and reproduces 0,057 dB, 0,115 dB
-  and 0,128 dB; three rows of the conformance report pin them, and
+  squares the coefficient, as (A.1) does, and reproduces 0.057 dB, 0.115 dB
+  and 0.128 dB; three rows of the conformance report pin them, and
   `test_formula_a2_as_printed_would_not_reproduce_its_example` in
   [`tests/filters/test_time_invariance.py`](../tests/filters/test_time_invariance.py)
-  holds the printed form to the 0,075 dB it gives.
+  holds the printed form to the 0.075 dB it gives.
 - **Status:** unreported.
 
-## IEC 61260-3:2016, B.2.6 (an averaging period that ends 6 s to 7 s after the sweep passes 6,3 Hz)
+## IEC 61260-3:2016, B.2.6 (an averaging period that ends 6 s to 7 s after the sweep passes 6.3 Hz)
 
 - **Location:** Annex B (informative), B.2.6, printed p. 20.
 - **The print:** "The averaging period will end 6 s to 7 s after the sweep
   frequency is equal to the lowest midband frequency, 6,3 Hz."
 - **The problem:** the example's own settings end it 18 s to 19 s later. B.2.2
-  sweeps from 0,01 Hz to 1 MHz, eight decades, in 30 s, which is 3,75 s per
-  decade, and B.2.3 averages for 30 s from a start 0,5 s to 1,5 s before the
-  sweep. The sweep reaches 6,3 Hz
-  $3{,}75 \lg(6{,}3/0{,}01) = 10{,}5$ s after it starts, which is 11,0 s to
-  12,0 s into the averaging, and the averaging ends at 30 s. B.2.3 checks the
+  sweeps from 0.01 Hz to 1 MHz, eight decades, in 30 s, which is 3.75 s per
+  decade, and B.2.3 averages for 30 s from a start 0.5 s to 1.5 s before the
+  sweep. The sweep reaches 6.3 Hz
+  $3.75 \lg(6.3/0.01) = 10.5$ s after it starts, which is 11.0 s to
+  12.0 s into the averaging, and the averaging ends at 30 s. B.2.3 checks the
   same settings at the other end and gets them right: the sweep is at 398 kHz
   to 736 kHz when the averaging ends. IEC 61260-2:2016 prints the same example
   and, in its own B.2.6, "18 s to 20 s".
@@ -10176,8 +10176,8 @@ in the same order.
   outputs minus the input level less the reference attenuation, (b) minus (a).
   The words of both parts name (a) minus (b), the same number with the other
   sign. The limits are not symmetric, so the two are different tests: a set
-  whose adjacent outputs sum 1,0 dB above the input fails class 1 by
-  Formula (3) and passes by the words, and one whose outputs sum 1,0 dB below
+  whose adjacent outputs sum 1.0 dB above the input fails class 1 by
+  Formula (3) and passes by the words, and one whose outputs sum 1.0 dB below
   it passes by Formula (3) and fails by the words.
 - **Evidence:** a comparison of the sentence with the formula it introduces.
   Verified on PDF page 13 (printed p. 11) and PDF page 14 (printed p. 12) of
@@ -10191,10 +10191,10 @@ in the same order.
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) applies the
   limits of 5.16 to Formula (3) as printed, as 7.2.4.5 instructs. The
   verdicts it gives the default Butterworth banks do not depend on the
-  reading: at 48 kHz the octave bank sums from −0,06 dB to +0,69 dB and the
-  one-third-octave bank from −0,25 dB to +0,76 dB, both class 1 either way.
+  reading: at 48 kHz the octave bank sums from −0.06 dB to +0.69 dB and the
+  one-third-octave bank from −0.25 dB to +0.76 dB, both class 1 either way.
   Those it gives a Chebyshev I or elliptic bank do: their neighbouring
-  outputs overlap and sum up to +3,01 dB above the input, which is no class
+  outputs overlap and sum up to +3.01 dB above the input, which is no class
   by Formula (3) and class 2 by the words. Their relative attenuation reads
   no class already, so the overall class of such a bank is none either way.
   `test_the_summation_is_what_tones_through_the_bank_read` in
@@ -10238,19 +10238,19 @@ in the same order.
   $A_\mathrm{ref}$ is the reference attenuation, in decibels; symbol
   $B_\mathrm{e}$".
 - **The problem:** a filter of attenuation $A$ (3.12) passes the ratio
-  $10^{-0,1A}$ of the time-mean-square signals; multiplied by
-  $10^{0,1A_\mathrm{ref}}$ it becomes $10^{-0,1\,\Delta A}$, the integrand of
+  $10^{-0.1A}$ of the time-mean-square signals; multiplied by
+  $10^{0.1A_\mathrm{ref}}$ it becomes $10^{-0.1\,\Delta A}$, the integrand of
   equation (14),
-  $B_\mathrm{e} = \int_0^\infty 10^{-0,1\,\Delta A(f/f_\mathrm{m})}\,\mathrm{d}(f/f_\mathrm{m})$.
+  $B_\mathrm{e} = \int_0^\infty 10^{-0.1\,\Delta A(f/f_\mathrm{m})}\,\mathrm{d}(f/f_\mathrm{m})$.
   The constant as printed carries a second "10" in front of the power, ten
-  times $10^{0,1A_\mathrm{ref}}$, which would make the effective bandwidth of
+  times $10^{0.1A_\mathrm{ref}}$, which would make the effective bandwidth of
   the definition ten times that of equation (14) and the filter integrated
   response of 4.5.1 10 dB above it, outside every class of 4.5.3. The
-  constant should read $10^{0,1A_\mathrm{ref}}$.
+  constant should read $10^{0.1A_\mathrm{ref}}$.
 - **Evidence:** read on PDF page 10 (printed p. 6) of BS EN 61260:1996, which
   is EN 61260:1995 (IEC 61260:1995) incorporating amendment A1, the copy dated
   "© BSI 23 August 2002", against equation (14) on PDF page 15 (printed
-  p. 11) of the same copy, which integrates $10^{-0,1\,\Delta A}$ with no such
+  p. 11) of the same copy, which integrates $10^{-0.1\,\Delta A}$ with no such
   factor. ANSI S1.11-2004, which carries the same definition as its 3.15,
   prints the constant as $10^{0.1A_\mathrm{ref}}$ with no second ten, read on
   PDF page 13 (printed p. 3) of the copy incorporated by reference in
@@ -10289,9 +10289,9 @@ in the same order.
   the reference attenuation, (b) minus (a). The words of 4.9 and 5.8.3 name
   (a) minus (b), the same number with the other sign. The class 0 tolerance
   is symmetric and reads the same either way; those of classes 1 and 2 are
-  not, so there the two are different tests: a set whose outputs sum 1,5 dB
+  not, so there the two are different tests: a set whose outputs sum 1.5 dB
   above the input fails class 1 by equation (19) and passes by the words,
-  and one whose outputs sum 1,5 dB below it passes by equation (19) and fails
+  and one whose outputs sum 1.5 dB below it passes by equation (19) and fails
   by the words. IEC 61260-1:2014 and IEC 61260-2:2016 carry the same
   conflict over (see the entry on IEC 61260-2:2016, 7.2.4.3 and Formula (3)),
   and so does ANSI S1.11-2004: its 4.9 words the difference the same way,
@@ -10311,9 +10311,9 @@ in the same order.
   `edition="1995"` applies the tolerances of 4.9 to equation (19) as
   printed, as 5.8.5 instructs. The verdicts it gives the default Butterworth
   banks do not depend on the reading: at 48 kHz the octave bank sums from
-  −0,62 dB to +0,69 dB and the one-third-octave bank from −0,66 dB to
-  +0,76 dB, both inside class 0. Those it gives a Chebyshev I or elliptic
-  bank do: their neighbouring outputs overlap and sum up to +3,01 dB above
+  −0.62 dB to +0.69 dB and the one-third-octave bank from −0.66 dB to
+  +0.76 dB, both inside class 0. Those it gives a Chebyshev I or elliptic
+  bank do: their neighbouring outputs overlap and sum up to +3.01 dB above
   the input, which is no class by equation (19) and class 2 by the words.
   Their relative attenuation reads no class already, so the overall class of
   such a bank is none either way.
@@ -10332,8 +10332,8 @@ in the same order.
   with a comma, as the IEC does: the class 2 cell of the
   same row reads "±4,5" and the class 1 cell of the next row "+1,5; -2,5".
   The lower limit at 6 300 Hz is the one cell written with a decimal point.
-  The value is not in doubt, -2,0 dB, between the -1,5 dB above it and the
-  -2,5 dB below it.
+  The value is not in doubt, -2.0 dB, between the -1.5 dB above it and the
+  -2.5 dB below it.
 - **Evidence:** Verified on PDF page 24 (printed p. 22) of BS EN
   61672-1:2013, the UK implementation of IEC 61672-1:2013 (second edition);
   the cell is legible and reads "-2.0" beside "+1,5;".
@@ -10467,14 +10467,14 @@ in the same order.
 - **The problem:** 12.5.2.4 puts the top of the tone search at the lowest
   one-third-octave band that ISO 9613-1 attenuates by 20 dB or more over the
   distance to the nearest turbine. At 10 °C and 80 % relative humidity that
-  band is 10, 6,3, 5 and 4 kHz. The printed cells are what the same rule gives
+  band is 10, 6.3, 5 and 4 kHz. The printed cells are what the same rule gives
   at −10 °C and 80 %, cell for cell. The other four rows reproduce at their own
-  atmospheres (the "3,2" of the −10 °C, 100 % row is the 3,15 kHz band), so
+  atmospheres (the "3,2" of the −10 °C, 100 % row is the 3.15 kHz band), so
   either the temperature of the row has lost its minus sign or its cells were
   computed at the wrong temperature. At the 10 °C and 80 % the row prints, it
-  reads **10, 6,3, 5 and 4 kHz**.
+  reads **10, 6.3, 5 and 4 kHz**.
 - **Evidence:** the rule of 12.5.2.4 evaluated with ISO 9613-1 at the exact
-  mid-band frequencies and 101,325 kPa for the twenty cells of the table.
+  mid-band frequencies and 101.325 kPa for the twenty cells of the table.
   Table 7 read on PDF page 47 (printed p. 45) of IEC TS 61400-11-2:2024
   (Edition 1.0, 2024-03).
 - **Library behaviour:** `upper_tone_search_frequency` applies the rule of
@@ -10561,18 +10561,18 @@ in the same order.
   0,26, 0,41, 0,59 and 0,80 dB/km from 10 Hz to 200 Hz, and "The air
   absorption coefficient is calculated according to ISO 9613-1."
 - **The problem:** ISO 9613-1 at the caption's 10 °C and 70 % relative
-  humidity, at 101,325 kPa and the nominal band centres, gives to two decimals
-  0,01, 0,01, 0,02 and 0,02 dB/km more than the table at 50 Hz, 63 Hz, 80 Hz
-  and 100 Hz (0,08, 0,12, 0,19 and 0,28), and 0,01 dB/km where the table
-  prints 0,0 at 12,5 Hz to 20 Hz; from 125 Hz to 200 Hz it gives the printed
+  humidity, at 101.325 kPa and the nominal band centres, gives to two decimals
+  0.01, 0.01, 0.02 and 0.02 dB/km more than the table at 50 Hz, 63 Hz, 80 Hz
+  and 100 Hz (0.08, 0.12, 0.19 and 0.28), and 0.01 dB/km where the table
+  prints 0.0 at 12.5 Hz to 20 Hz; from 125 Hz to 200 Hz it gives the printed
   cells. The cells from 10 Hz to 100 Hz are those of the Danish statutory order
   on wind turbine noise, BEK nr. 135 of 7 February 2019, Table 1.4, which is
   set for **80 %** relative humidity and 10 °C, uses the Nord2000 attenuation
   rates and ignores air absorption below 25 Hz, as Plovsing (DELTA, 2011),
-  Table 5, recommends; at 80 % ISO 9613-1 gives 0,07, 0,11, 0,17 and 0,25
-  dB/km from 50 Hz to 100 Hz, within 0,01 dB/km of them. The row joins two
+  Table 5, recommends; at 80 % ISO 9613-1 gives 0.07, 0.11, 0.17 and 0.25
+  dB/km from 50 Hz to 100 Hz, within 0.01 dB/km of them. The row joins two
   atmospheres at 100 Hz, and a reader who recomputes it at the caption's
-  cannot reproduce its lower half. The difference is at most 0,02 dB/km, a few
+  cannot reproduce its lower half. The difference is at most 0.02 dB/km, a few
   hundredths of a decibel of Equation (C.1) at the distances Annex C is used
   for.
 - **Evidence:** ISO 9613-1 evaluated at both humidities for the fourteen
@@ -10679,14 +10679,14 @@ in the same order.
   8 000 Hz; the first octave band is labelled "31".
 - **The problem:** the one-third-octave column contradicts the octave column
   beside it at 2 000 Hz, 4 000 Hz and 8 000 Hz, and IEC 61672-1, whose
-  weightings 4.1 names, gives −4,4 dB at 25 Hz and −0,1, −0,2, −0,3, −0,5,
-  −0,8, −1,3, −2,0, −3,0 and −4,4 dB from 1 600 Hz to 10 000 Hz. The column
+  weightings 4.1 names, gives −4.4 dB at 25 Hz and −0.1, −0.2, −0.3, −0.5,
+  −0.8, −1.3, −2.0, −3.0 and −4.4 dB from 1 600 Hz to 10 000 Hz. The column
   stops at 1 250 Hz, as though only its low-frequency half had been filled
   in; the A-weighting columns agree with IEC 61672-1 in every cell. Read as
   printed, a C-weighted level from one-third-octave bands overstates a
   spectrum with energy above 1 kHz: a flat spectrum from 25 Hz to 10 000 Hz
-  sums 0,4 dB higher than with the IEC 61672-1 weighting, a third of the
-  1,2 dB reproducibility standard deviation Table 2 gives the C-weighted value.
+  sums 0.4 dB higher than with the IEC 61672-1 weighting, a third of the
+  1.2 dB reproducibility standard deviation Table 2 gives the C-weighted value.
 - **Evidence:** the one-third-octave column against the octave column of the
   same table and against IEC 61672-1:2013 Table 3. Verified on PDF page 50
   (printed p. 12) and PDF page 23 (printed p. 19) of E DIN EN ISO
@@ -10745,7 +10745,7 @@ in the same order.
   implements it.
 - **Status:** unreported (the document is a draft under comment).
 
-## ISO/DIS 16032:2023, 7.4.1 (no rule at a spread of exactly 6,0 dB or 9,0 dB)
+## ISO/DIS 16032:2023, 7.4.1 (no rule at a spread of exactly 6.0 dB or 9.0 dB)
 
 - **Location:** 7.4.1 "Measurement of the equivalent continuous sound
   pressure level", the four paragraphs after the first (printed p. 8 of the
@@ -10760,12 +10760,12 @@ in the same order.
   sound source is stable, then the measurement session shall be interrupted",
   the reasons investigated before a new series, and no data from the
   interrupted series used.
-- **The problem:** the ladder names no step for six readings exactly 6,0 dB
+- **The problem:** the ladder names no step for six readings exactly 6.0 dB
   apart (not "less than 6,0 dB", and not "exceeds 6,0 dB") nor for nine
-  exactly 9,0 dB apart (not "less than", and not "larger than"). Nor does it
-  say what three readings 6,0 dB or more apart lead to, since the next
+  exactly 9.0 dB apart (not "less than", and not "larger than"). Nor does it
+  say what three readings 6.0 dB or more apart lead to, since the next
   paragraph is written for the six, and positions 6 and 7 answer only a
-  difference "less than 9,0 dB", so three or six readings already 9,0 dB or
+  difference "less than 9,0 dB", so three or six readings already 9.0 dB or
   more apart have no step before the interruption paragraph, whose two
   conditions no reading of the levels can settle. The first threshold is
   inclusive and the other two strict, so the gap is not a matter of one
@@ -10779,9 +10779,9 @@ in the same order.
   [`check_position_spread`](../src/phonometry/building/measurement/service_equipment.py)
   reads the ladder as a sequence: a stage that does not pass goes to the next
   one, and a spread at a strict limit does not pass it, so six readings
-  exactly 6,0 dB apart add positions 6 and 7 and nine exactly 9,0 dB apart
+  exactly 6.0 dB apart add positions 6 and 7 and nine exactly 9.0 dB apart
   interrupt the session. A spread can only widen as readings are added, so
-  three or six readings already 9,0 dB or more apart interrupt at once rather
+  three or six readings already 9.0 dB or more apart interrupt at once rather
   than ask for positions that cannot lead to an average. Whether the
   difference comes from unpredictable variations in time while the corner
   readings show a stable source is left to the operator: the check reports
@@ -10833,7 +10833,7 @@ in the same order.
   not exceed 5 dB, a simple arithmetic average may be used."
 - **The problem:** Equation (2) and the sentence that introduces it write
   $L_{p\mathrm{A}i}$, with the lower-case $i$ of the sum
-  $\sum_{i=1}^{N} 10^{0{,}1 L_{p\mathrm{A}i}}$, and the where-list line
+  $\sum_{i=1}^{N} 10^{0.1 L_{p\mathrm{A}i}}$, and the where-list line
   itself speaks of the $i^\mathrm{th}$ position; $L_{p\mathrm{A}I}$ names no
   quantity of the standard.
 - **Evidence:** Equation (2), its where-list and the NOTE on PDF page 29
@@ -10850,7 +10850,7 @@ in the same order.
   change was required.
 - **Status:** unreported.
 
-## ISO 3095:2013, Table G.1 (the standard uncertainty of the 25 m microphone distance printed as 0,004 dB)
+## ISO 3095:2013, Table G.1 (the standard uncertainty of the 25 m microphone distance printed as 0.004 dB)
 
 - **Location:** Annex G (informative), Table G.1, the $\delta_\mathrm{distance}$
   row, printed p. 49.
@@ -10860,26 +10860,26 @@ in the same order.
   prints ±0,23 dB and 0,13 dB.
 - **The problem:** G.3 derives every standard uncertainty of the table from
   its interval as $u(x_i) = a/\sqrt{3}$ (Formula G.2), and so does every other
-  row: ±0,25 dB gives 0,14 dB, ±0,44 dB gives 0,25 dB, and the 7,5 m line of
-  this row gives $0{,}23/\sqrt{3} = 0{,}13$ dB, as printed. For ±0,07 dB the
-  formula gives $0{,}07/\sqrt{3} = 0{,}040$ dB. The printed 0,004 dB is ten
+  row: ±0.25 dB gives 0.14 dB, ±0.44 dB gives 0.25 dB, and the 7.5 m line of
+  this row gives $0.23/\sqrt{3} = 0.13$ dB, as printed. For ±0.07 dB the
+  formula gives $0.07/\sqrt{3} = 0.040$ dB. The printed 0.004 dB is ten
   times smaller, a digit zero too many after the decimal comma; the cell
-  should read 0,04 dB.
+  should read 0.04 dB.
 - **Evidence:** Table G.1 read on PDF page 55 (printed p. 49) and Formula G.2
   on PDF page 54 (printed p. 48) of ISO 3095:2013 (third edition,
   2013-08-01).
 - **Library behaviour:** Table G.1 is not published by the library;
   [`pass_by_uncertainty`](../src/phonometry/environment/sources/rolling_stock_noise.py)
   takes each input as a value and its standard uncertainty, and
-  `metrology.rectangular(0.0, 0.07)` gives the 0,040 dB of Formula G.2. The
+  `metrology.rectangular(0.0, 0.07)` gives the 0.040 dB of Formula G.2. The
   conformance check "ISO 3095:2013 Table G.1" holds the eighteen rectangular
   rows whose print Formula G.2 reproduces and leaves this cell out. No change
   was required.
 - **Status:** unreported.
 
-## ISO 3095:2013, Table G.1 against Table G.2 (the ground-level uncertainty at 7,5 m printed as 0,55 dB in one and 0,30 dB in the other)
+## ISO 3095:2013, Table G.1 against Table G.2 (the ground-level uncertainty at 7.5 m printed as 0.55 dB in one and 0.30 dB in the other)
 
-- **Location:** Annex G (informative), the $\delta_\mathrm{ground\ level,7,5}$
+- **Location:** Annex G (informative), the $\delta_\mathrm{ground\ level,7.5}$
   row of Table G.1, printed p. 49, and the $\delta_\mathrm{ground\ level}$ row
   of Table G.2, printed p. 51.
 - **The print:** Table G.1 gives the interval "[0 dB; 1,03 dB]" and the
@@ -10890,23 +10890,23 @@ in the same order.
   standard uncertainty of 0,30 dB.
 - **The problem:** footnote a of Table G.1 treats an unsymmetrical range
   $[a; b]$ as a symmetric one about its mean, which is where the correction
-  $(0 + 1{,}03)/2 = 0{,}515$ dB comes from, and Formula G.2 then gives the half
-  width over $\sqrt{3}$: $0{,}515/\sqrt{3} = 0{,}297$ dB, the 0,30 dB of Table
+  $(0 + 1.03)/2 = 0.515$ dB comes from, and Formula G.2 then gives the half
+  width over $\sqrt{3}$: $0.515/\sqrt{3} = 0.297$ dB, the 0.30 dB of Table
   G.2. The 25 m line of the same quantity follows that arithmetic,
-  $0{,}165/\sqrt{3} = 0{,}10$ dB as printed. The 0,55 dB of Table G.1 is
-  neither the half width nor the whole width over $\sqrt{3}$ (0,59 dB); the
-  cell should read 0,30 dB. The two tables also differ on the distance at
-  7,5 m, where Table G.1 prints 0,13 dB and Table G.2 carries 0,06 dB without
-  saying where that value comes from; the combined 0,83 dB of Table G.2 needs
-  its 0,06 dB (0,13 dB would give 0,84 dB), so that difference is recorded
+  $0.165/\sqrt{3} = 0.10$ dB as printed. The 0.55 dB of Table G.1 is
+  neither the half width nor the whole width over $\sqrt{3}$ (0.59 dB); the
+  cell should read 0.30 dB. The two tables also differ on the distance at
+  7.5 m, where Table G.1 prints 0.13 dB and Table G.2 carries 0.06 dB without
+  saying where that value comes from; the combined 0.83 dB of Table G.2 needs
+  its 0.06 dB (0.13 dB would give 0.84 dB), so that difference is recorded
   here and not corrected.
 - **Evidence:** Table G.1 read on PDF page 55 (printed p. 49), Formula G.2 and
   footnote a on PDF page 54 (printed p. 48), and Table G.2 on PDF pages 56 and
   57 (printed pp. 50 and 51) of ISO 3095:2013 (third edition, 2013-08-01).
 - **Library behaviour:** the conformance checks "ISO 3095:2013 Table G.2" feed
   [`pass_by_uncertainty`](../src/phonometry/environment/sources/rolling_stock_noise.py)
-  the thirteen rows of Table G.2 as printed, 0,30 dB and 0,06 dB included, and
-  reproduce its 55,68 dB, 0,83 dB and 1,66 dB. No change was required.
+  the thirteen rows of Table G.2 as printed, 0.30 dB and 0.06 dB included, and
+  reproduce its 55.68 dB, 0.83 dB and 1.66 dB. No change was required.
 - **Status:** unreported.
 
 ## ISO 3095:2013, Table G.1 (the wind screen interval printed with its bounds out of order)
@@ -10919,18 +10919,18 @@ in the same order.
   the four other rows that use one write the lower bound first: "[−0,21 dB;
   0 dB]" for the distortion factor of the calibrator, "[−1,5 dB; 1 dB]" for
   impulses, and "[0 dB; 1,03 dB]" and "[0 dB; 0,33 dB]" for the ground level
-  at 7,5 m and at 25 m. Printed as it is, the wind screen interval has its
+  at 7.5 m and at 25 m. Printed as it is, the wind screen interval has its
   lower bound above its upper one, and is empty. It should read either
-  [−0,12 dB; 0 dB], a range that lowers the reading written the way the
+  [−0.12 dB; 0 dB], a range that lowers the reading written the way the
   distortion row writes its own, whose mean value correction footnote a says
-  "increases the average sound level", or [0 dB; 0,12 dB], written the way
-  the ground-level rows write theirs. Both readings give the printed 0,03 dB
-  and 0,06 dB, so the table does not say which one was meant.
+  "increases the average sound level", or [0 dB; 0.12 dB], written the way
+  the ground-level rows write theirs. Both readings give the printed 0.03 dB
+  and 0.06 dB, so the table does not say which one was meant.
 - **Evidence:** Table G.1 and its footnote a read on PDF page 55 (printed
   p. 49) and on PDF page 54 (printed p. 48) of ISO 3095:2013 (third edition,
   2013-08-01).
 - **Library behaviour:** the library reads no interval of Table G.1; the
-  conformance check "ISO 3095:2013 Table G.1" uses the half width 0,06 dB and
+  conformance check "ISO 3095:2013 Table G.1" uses the half width 0.06 dB and
   the Table G.2 checks the correction and uncertainty as printed. No change
   was required.
 - **Status:** unreported.
@@ -10954,7 +10954,7 @@ in the same order.
   falls below $-10^7\ \mathrm{\mu m/m^2}$ with no spike there by 7.2 c), no
   sweep changes the record, and the loop does not terminate. A rail rising
   20 µm per millimetre and then 5 µm per millimetre, sampled every
-  millimetre, is such a bend: $\mathrm{d}^2r/\mathrm{d}x^2 = -1{,}5 \times
+  millimetre, is such a bend: $\mathrm{d}^2r/\mathrm{d}x^2 = -1.5 \times
   10^7\ \mathrm{\mu m/m^2}$ at the bend, and $\mathrm{d}r/\mathrm{d}x$ is
   positive on both sides of it. That is where the listing departs from the
   clause it illustrates. On a peak that 7.2 c) does detect and that the
@@ -10962,7 +10962,7 @@ in the same order.
   the clause read literally: a ridge 200 µm high, sampled every millimetre,
   whose edges the listing's slope rule places 42 mm apart, has
   $\mathrm{d}^2r/\mathrm{d}x^2 = -2 \times 10^7\ \mathrm{\mu m/m^2}$ at its
-  tip and $h = 2 \times 10^{-4}$ m below $w^2/3 = 5{,}9 \times 10^{-4}$ m; it
+  tip and $h = 2 \times 10^{-4}$ m below $w^2/3 = 5.9 \times 10^{-4}$ m; it
   is detected on every pass and kept, so neither the listing nor "until no
   further spike is detected" ever stops on it.
 - **Evidence:** the listing read on PDF pages 25 and 26 (printed pp. 23 and
@@ -10996,24 +10996,24 @@ in the same order.
 - **The problem:** `butter(3,Wn)` designs a band-pass filter 3 dB down at
   `fsmin` and `fsmax`, and `filtfilt` runs it forward and then backward, so
   the filter the record actually goes through has the square of its
-  magnitude response: 6,02 dB down at its own band edges. Taking the
+  magnitude response: 6.02 dB down at its own band edges. Taking the
   listing's `fsc` as the exact midband frequency and the base-two ratio its
   edges are built on, Table 1 of EN 61260:1995 allows a relative attenuation
-  just inside a band edge of at most 4,5 dB, 5,0 dB and 5,5 dB for classes 0,
+  just inside a band edge of at most 4.5 dB, 5.0 dB and 5.5 dB for classes 0,
   1 and 2, and 4.5.3 limits the filter integrated response
   $\Delta B = 10 \lg (B_\mathrm{e}/B_\mathrm{r})$, with $B_\mathrm{e}$ of
   equation (14) and $B_\mathrm{r} = G^{1/(2b)} - G^{-1/(2b)}$ of equation (9),
-  to $\pm 0{,}15$ dB, $\pm 0{,}3$ dB and $\pm 0{,}5$ dB. The squared
-  response gives $\Delta B = -0{,}59$ dB in every band of `wl_d` from 0,5 m
-  to 4 mm at 1 mm sampling, and $-0{,}58$ dB in the 3,15 mm and 2,5 mm bands,
+  to $\pm 0.15$ dB, $\pm 0.3$ dB and $\pm 0.5$ dB. The squared
+  response gives $\Delta B = -0.59$ dB in every band of `wl_d` from 0.5 m
+  to 4 mm at 1 mm sampling, and $-0.58$ dB in the 3.15 mm and 2.5 mm bands,
   where the sampling bends the response. The filters
   of the listing therefore meet no class of EN 61260 in any band, on either
   requirement, which is what 7.4.3 asks of them, and a band whose spectrum is
-  flat across it reads about 0,6 dB low. The same filter run forward once
-  would be 3,01 dB down at the edges, with $\Delta B$ from $+0{,}15$ dB to
-  $+0{,}20$ dB, inside class 1. A comment of the same section, "used later for fsc(q)<50 ie
+  flat across it reads about 0.6 dB low. The same filter run forward once
+  would be 3.01 dB down at the edges, with $\Delta B$ from $+0.15$ dB to
+  $+0.20$ dB, inside class 1. A comment of the same section, "used later for fsc(q)<50 ie
   lambda >0.02", disagrees with the test the code makes, `if fsc(q)>=20` and
-  `elseif fsc(q)<20`, which sends the bands longer than 0,05 m to the
+  `elseif fsc(q)<20`, which sends the bands longer than 0.05 m to the
   decimated record.
 - **Evidence:** the listing read on PDF page 27 (printed p. 25), B.6 on PDF
   page 22 (printed p. 20), clause 7.4.3 on PDF page 17 (printed p. 15) and
@@ -11263,7 +11263,7 @@ in the same order.
   its own share, $E = \sqrt{PR}\,|Z + R_\mathrm{s}|/|Z|$. They agree only
   when $Z$ is the rated impedance or $R_\mathrm{s}$ is zero. A 32 Ω
   headphone of 40 Ω at 500 Hz on the 120 Ω source of IEC 61938 reads
-  $20\lg\{(152/32)/(160/40)\} = 1{,}49$ dB lower by the method than by the
+  $20\lg\{(152/32)/(160/40)\} = 1.49$ dB lower by the method than by the
   definition, and the rated impedance of 8.2.1 b) allows the modulus to sit
   anywhere above 80 % of $R$.
 - **Evidence:** 8.5.2 b) on PDF page 24 (printed p. 22) and 8.5.3 c) and d)
@@ -11273,7 +11273,7 @@ in the same order.
   follows the definition of 8.5.2 b) to d) by default, and the method of
   8.5.3 c) when it is given the headphone's measured impedance at 500 Hz as
   `headphone_impedance_ohm`; the conformance row "IEC 60268-7:2010 8.5.2 b)
-  and 8.5.3 c)" pins the 1,49 dB.
+  and 8.5.3 c)" pins the 1.49 dB.
 - **Status:** unreported.
 
 ## Related source properties that are not errata
@@ -11320,13 +11320,13 @@ published sources:
 - **ISO 7235:2003, Equations (10), (21) and (22):** the ideal gas law is
   printed with $R = 287\ \text{N}\cdot\text{m}/(\text{kg}\cdot\text{K})$
   and the absolute temperature written as $\theta + 273\ ^\circ\text{C}$.
-  Neither is the accurate value (287,05 and 273,15). The offset alone puts a
-  density 0,051 % high at 20 °C and the gas constant adds 0,017 % to that, for
-  0,069 % in all. This is a simplification and not a defect: the density it
+  Neither is the accurate value (287.05 and 273.15). The offset alone puts a
+  density 0.051 % high at 20 °C and the gas constant adds 0.017 % to that, for
+  0.069 % in all. This is a simplification and not a defect: the density it
   produces is used only in the dynamic pressure of Equations (16), (19) and
   (20), and both series of the pressure loss coefficient carry the same
   factor, so Equations (17) and (18) come out **scaled** by it rather than
-  shifted, 0,069 % low, which is far under the uncertainty of a
+  shifted, 0.069 % low, which is far under the uncertainty of a
   pressure-loss test and is what a result computed to the standard shows. The
   library keeps both printed constants, as
   [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](../src/phonometry/noise_control/silencer_measurement.py)
@@ -11336,18 +11336,18 @@ published sources:
 
 - **ISO 12354-1:2017 Table L.8 / ISO 12354-2:2017 Table G.8, first row:** the
   row labelled "Int. wall 1/2 – Ext. wall 1/2" prints
-  $m'_i = 219{,}0\ \text{kg/m}^2$ and $m'_{\perp i}$ (Part 2:
-  $m'_\text{orthogonal}$) $= 360{,}0\ \text{kg/m}^2$, which is the assignment
+  $m'_i = 219.0\ \text{kg/m}^2$ and $m'_{\perp i}$ (Part 2:
+  $m'_\text{orthogonal}$) $= 360.0\ \text{kg/m}^2$, which is the assignment
   for a path *leaving the external wall*, the opposite of the direction the
   row's own label gives. Read in the row's direction the element carrying the
-  path is the internal wall, so $m'_i$ should be 360,0 and the perpendicular
-  mass 219,0. It is a labelling slip and nothing else: the branch is the
-  rigid-T **corner** branch $K_{12} = 5{,}7 + 5{,}7 M^2$, where only $M^2$
-  enters, so both assignments return the same 5,965 → 6,0 dB. The second row
+  path is the internal wall, so $m'_i$ should be 360.0 and the perpendicular
+  mass 219.0. It is a labelling slip and nothing else: the branch is the
+  rigid-T **corner** branch $K_{12} = 5.7 + 5.7 M^2$, where only $M^2$
+  enters, so both assignments return the same 5.965 → 6.0 dB. The second row
   of each table, "Ext. wall 1/2 – Ext. wall 1/2", is the through branch
-  $5{,}7 + 14{,}1 M + 5{,}7 M^2$, where the sign of $M$ does matter, and it is
-  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9,006 →
-  the printed 9,0). Verified on PDF page 89 (printed p. 83) of ISO
+  $5.7 + 14.1 M + 5.7 M^2$, where the sign of $M$ does matter, and it is
+  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9.006 →
+  the printed 9.0). Verified on PDF page 89 (printed p. 83) of ISO
   12354-1:2017 and PDF page 46 (printed p. 40) of ISO 12354-2:2017. Not
   registered as an erratum because no number depends on it; registered here so
   that a future reader does not "correct" the library's per-path convention to
@@ -11411,27 +11411,27 @@ published sources:
   table of worked $\sigma_\mathrm{tot}$ examples labels its three rows
   "0,5 (accuracy grade 1)", "1,5 (accuracy grade 2)" and "3 (accuracy
   grade 3)", while the normative Table 2 of this part gives
-  $\sigma_{R0}$ = 4,0 dB for survey grade 3 and the scope of ISO 3747 covers
+  $\sigma_{R0}$ = 4.0 dB for survey grade 3 and the scope of ISO 3747 covers
   grades 2 and 3 only. It is the ISO 3740 family's shared illustration, not a
   statement about this method: ISO 3744:2010 Table H.1 prints the identical
   table, rows, labels and $\sigma_\mathrm{tot}$ cells alike, and ISO 3744
   covers grade 2 only. Verified on PDF page 42 (printed p. 33) and PDF page
   27 (printed p. 18) of BS EN ISO 3747:2010. The library reads
-  $\sigma_{R0}$ from the normative Table 2 (1,5 dB and 4,0 dB, conformance
+  $\sigma_{R0}$ from the normative Table 2 (1.5 dB and 4.0 dB, conformance
   check "ISO 3747:2010 Table 2 / Eq. 22") and uses Table E.1 only for its
-  $\sigma_\mathrm{tot}$ = 1,6 / 2,5 / 4,3 row against $\sigma_{R0}$ = 1,5 dB,
-  where the two tables agree. Do not "correct" the 3 dB row to 4,0 dB: it
+  $\sigma_\mathrm{tot}$ = 1.6 / 2.5 / 4.3 row against $\sigma_{R0}$ = 1.5 dB,
+  where the two tables agree. Do not "correct" the 3 dB row to 4.0 dB: it
   belongs to the family's illustration, not to this part's Table 2.
 - **ISO 3747:2010 Annex C, $\theta_\mathrm{ref}$ = 296 K:** the annex prints
   the reference temperature of the radiation-impedance correction as 296 K
-  beside a reference condition of 23,0 °C, which is 296,15 K, so at exactly
-  the reference conditions $C_2 = 15 \lg(296{,}15/296) = +0{,}003\,3$ dB
+  beside a reference condition of 23.0 °C, which is 296.15 K, so at exactly
+  the reference conditions $C_2 = 15 \lg(296.15/296) = +0.003\,3$ dB
   rather than zero. ISO 3741:2010 clause 9.1.4 and ISO 3744:2010 print the
   same $\theta_1$ = 296 K, so it is the family's rounding and not a misprint
   of one part; the library keeps 296 K in the shared `C2` of
   [`_sound_power_reverberation.py`](../src/phonometry/emission/_sound_power_reverberation.py)
   and pins the residual (conformance check "ISO 3747:2010 Annex C"). Do not
-  "correct" it to 296,15 K.
+  "correct" it to 296.15 K.
 - **ISO 3747:2010 Eq. (14), the single-event background margin:**
   $\Delta L_{Ei} = L'_{Ei,q(\mathrm{ST})} - L_{pi(\mathrm{B})}$ subtracts a
   time-averaged background level from a time-integrated single event level,
@@ -11450,8 +11450,8 @@ published sources:
   says the corrections of the nose cone and the foam ball "are estimated to
   be negative and of small magnitude", and then prints
   $C_{3,4} = 10 \lg[1/(1 - U/c)^2]$ dB, which is positive whenever $U > 0$:
-  at the 20 m/s the nose cone is allowed, with $c$ = 340 m/s, $+0{,}53$ dB on
-  the outlet side and $-0{,}50$ dB on the inlet side. The equation's sign is
+  at the 20 m/s the nose cone is allowed, with $c$ = 340 m/s, $+0.53$ dB on
+  the outlet side and $-0.50$ dB on the inlet side. The equation's sign is
   the one the convected plane wave gives, the energy flux of a wave
   travelling with the flow being $(1 + M)^2$ times $p^2/\rho c$, so for a
   given pressure the power is higher downstream and lower upstream. It is not
@@ -11472,9 +11472,9 @@ published sources:
   corrections that disagree:** both tables take a margin between the level
   with the source and the level without it and answer with a correction in
   decibels, and they answer differently. ISO 11820 refuses under 3 dB and then
-  takes off 3, 2, 2, 1, 1, 1, 0,5 and 0,5 dB up to a margin of 10 dB; ISO
+  takes off 3, 2, 2, 1, 1, 1, 0.5 and 0.5 dB up to a margin of 10 dB; ISO
   10847 refuses under 4 dB and then takes off 2, 2, 1, 1, 1 and 1 dB up to the
-  same margin. At a margin of 9 dB the first takes off 0,5 dB and the second
+  same margin. At a margin of 9 dB the first takes off 0.5 dB and the second
   1 dB. The signs differ as well, because the ISO 11820 column reads
   "corrections to be subtracted from sound pressure level measured with sound
   source operating" and prints its values positive, while the ISO 10847 column

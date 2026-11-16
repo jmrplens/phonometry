@@ -130,16 +130,16 @@ _LN_EQ_MASS_MIN = 100.0
 _LN_EQ_MASS_MAX = 600.0
 
 #: Standardization constant of Formula (3) (Part 2):
-#: ``L'nT = L'n − 10 lg(0,16·V/(A0·T0)) = L'n − 10 lg(0,032·V)`` with
-#: ``A0 = 10 m²`` and ``T0 = 0,5 s``. The standard's own Annex E.3 rounds the
-#: factor to ``10 lg(V/30)`` (1/0,032 = 31,25 ≈ 30); this module keeps the
+#: ``L'nT = L'n − 10 lg(0.16·V/(A0·T0)) = L'n − 10 lg(0.032·V)`` with
+#: ``A0 = 10 m²`` and ``T0 = 0.5 s``. The standard's own Annex E.3 rounds the
+#: factor to ``10 lg(V/30)`` (1/0.032 = 31.25 ≈ 30); this module keeps the
 #: exact Formula (3) form.
 _IMPACT_STANDARDIZATION = 0.032
 
 #: Standardization constant of Formula (5b) (Part 1):
-#: ``DnT = R' + 10 lg(0,16·V/(T0·Ss)) = R' + 10 lg(0,32·V/Ss)`` with
-#: ``T0 = 0,5 s``. The Annex H.3 worked example rounds the factor to
-#: ``10 lg(V/(3·Ss))`` (1/0,32 = 3,125 ≈ 3); this module keeps the exact
+#: ``DnT = R' + 10 lg(0.16·V/(T0·Ss)) = R' + 10 lg(0.32·V/Ss)`` with
+#: ``T0 = 0.5 s``. The Annex H.3 worked example rounds the factor to
+#: ``10 lg(V/(3·Ss))`` (1/0.32 = 3.125 ≈ 3); this module keeps the exact
 #: Formula (5b) form (both round to the same integer in H.3).
 _AIRBORNE_STANDARDIZATION = 0.32
 
@@ -534,7 +534,7 @@ def _kij_lightweight_double_homogeneous(path: PathKind, t: _KijTerms) -> float:
         )
         raise ValueError(msg)
     # Per-path form (ISO 12354-1:2017 E.3.5); the 2000 print recasts the
-    # same relation as 3,0 - 14,1 M + 5,7 M^2 in the Figure E.9 x-axis
+    # same relation as 3.0 - 14.1 M + 5.7 M^2 in the Figure E.9 x-axis
     # variable lg(m2/m1), against its own Annex E definition of M (see
     # docs/ERRATA.md).
     return 3.0 + 14.1 * t.m + 5.7 * t.m * t.m

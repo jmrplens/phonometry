@@ -101,8 +101,8 @@ ISO8253_1_TABLE_A2_EXPANDED_DB = 10.0
 # ---------------------------------------------------------------------------
 # ISO 8253-2:2009 (folios 7, 9 and 15; PDF pages 13, 15 and 21)
 # ---------------------------------------------------------------------------
-#: Table 2: the ambient limits for sound field audiometry, 31,5 Hz to
-#: 12,5 kHz, in dB, keyed by the lowest test tone frequency.
+#: Table 2: the ambient limits for sound field audiometry, 31.5 Hz to
+#: 12.5 kHz, in dB, keyed by the lowest test tone frequency.
 ISO8253_2_BANDS_HZ: tuple[float, ...] = ISO8253_1_BANDS_HZ + (10000.0, 12500.0)
 ISO8253_2_TABLE_2: dict[float, tuple[float, ...]] = {
     125.0: (52, 44, 38, 32, 27, 22, 17, 14, 12, 10, 8, 6, 5, 5, 4, 4, 4, 5,
@@ -135,7 +135,7 @@ ISO8253_2_TABLE_B1: dict[float, tuple[float, ...]] = {
 
 #: Footnote a to Table 2 says the sound-field limits are derived from ISO
 #: 8253-1 for binaural listening and prints no offset. Laid side by side, from
-#: 31,5 Hz to 8 kHz each is the bone-conduction limit of ISO 8253-1 Table 4
+#: 31.5 Hz to 8 kHz each is the bone-conduction limit of ISO 8253-1 Table 4
 #: less this, in dB: an observation on the two transcribed tables, not a
 #: value the footnote prints.
 ISO8253_2_BINAURAL_OFFSET_DB = 3.0

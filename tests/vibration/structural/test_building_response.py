@@ -26,7 +26,7 @@ def test_the_three_coefficient_ranges_are_the_printed_ones() -> None:
 
 
 def test_the_storey_model_is_the_rule_din_4150_3_also_prints() -> None:
-    """``T = 0,1 n`` and ``f = 10/n`` are the same sentence twice."""
+    """``T = 0.1 n`` and ``f = 10/n`` are the same sentence twice."""
     for n in (5, 8, 10, 20):
         assert br.fundamental_period("stories", n_stories=n) == pytest.approx(0.1 * n)
         assert br.fundamental_frequency("stories", n_stories=n) == pytest.approx(
@@ -56,10 +56,10 @@ def test_the_default_coefficient_is_the_middle_of_the_printed_range() -> None:
 
 
 def test_the_midpoint_of_k1_is_the_coefficient_the_measured_fit_gives() -> None:
-    """A quiet agreement worth pinning: 0,022 twice, from two directions.
+    """A quiet agreement worth pinning: 0.022 twice, from two directions.
 
-    The middle of the ``k1`` range the codes span is 0,022 s/m, and the fit
-    to 163 measured buildings prints ``T = 0,022 h`` s. The default height
+    The middle of the ``k1`` range the codes span is 0.022 s/m, and the fit
+    to 163 measured buildings prints ``T = 0.022 h`` s. The default height
     model therefore lands within a percent and a half of ``f = 46/h``, which
     is a good deal closer than the ± 50 % the annex warns about.
     """
@@ -123,7 +123,7 @@ def test_the_error_band_is_the_fifty_percent_the_annex_prints() -> None:
 
 
 def test_the_damping_range_of_d_4() -> None:
-    """D.4 reports measurements, not a predictor: 0,5 % to 2,1 % of critical."""
+    """D.4 reports measurements, not a predictor: 0.5 % to 2.1 % of critical."""
     assert br.DAMPING_RATIO_RANGE == pytest.approx((0.005, 0.021))
 
 

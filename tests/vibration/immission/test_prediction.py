@@ -18,12 +18,12 @@ import pytest
 from phonometry import vibration
 from phonometry.vibration import immission as im
 
-# Figure A.19 (printed page 34): 0,44 mm/s at 13 m, alpha 0,005, drawn for n = 0, 0,5, 1.
+# Figure A.19 (printed page 34): 0.44 mm/s at 13 m, alpha 0.005, drawn for n = 0, 0.5, 1.
 A19 = {"reference_distance_m": 13.0, "attenuation_per_m": 0.005}
 
 
 def test_figure_1_the_exponents_of_the_eight_codes() -> None:
-    """Printed page 6: 0 for a harmonic line on a surface wave, 0,5 more for
+    """Printed page 6: 0 for a harmonic line on a surface wave, 0.5 more for
     each of point, impulsive and body wave.
     """
     assert (
@@ -63,7 +63,7 @@ def test_figure_1_the_exponents_of_the_eight_codes() -> None:
         )
         assert n == expected
     # A.4 and A.7: an impact pile driver and a truck over a step are PQ/I/O, n = 1;
-    # A.5.1: a vibratory driver is PQ/HS/O, n = 0,5.
+    # A.5.1: a vibratory driver is PQ/HS/O, n = 0.5.
     assert (
         im.geometric_exponent(geometry="point", character="harmonic", wave="surface")
         == 0.5
@@ -73,8 +73,8 @@ def test_figure_1_the_exponents_of_the_eight_codes() -> None:
 
 
 def test_figure_a19_formula_2_with_every_parameter_printed() -> None:
-    """Printed page 34: the three curves at 80 m read 0,32, 0,13 and 0,05 mm/s;
-    the formula gives 0,315, 0,127 and 0,051.
+    """Printed page 34: the three curves at 80 m read 0.32, 0.13 and 0.05 mm/s;
+    the formula gives 0.315, 0.127 and 0.051.
     """
     distances = np.array([15.0, 20.0, 30.0, 40.0, 60.0, 80.0])
     flat = im.far_field_velocity_mm_s(0.44, distances, exponent=0.0, **A19)
@@ -100,9 +100,9 @@ def test_figure_a19_formula_2_with_every_parameter_printed() -> None:
 
 
 def test_the_printed_alpha_of_figure_a19_and_the_curves_of_figure_2() -> None:
-    """Page 34 prints alpha = 0,005 for D = 0,01 and lambda = 12,5 m; Figure 2
-    (page 7) draws the damping alone for D = 0,01 and c_s = 200 m/s, and at
-    100 m its five curves read 0,73, 0,53, 0,39, 0,28 and 0,21.
+    """Page 34 prints alpha = 0.005 for D = 0.01 and lambda = 12.5 m; Figure 2
+    (page 7) draws the damping alone for D = 0.01 and c_s = 200 m/s, and at
+    100 m its five curves read 0.73, 0.53, 0.39, 0.28 and 0.21.
     """
     alpha = im.attenuation_coefficient_per_m(0.01, wavelength_m=12.5)
     assert alpha == pytest.approx(0.005027, abs=1e-6)
@@ -199,7 +199,7 @@ def test_formulae_5_and_6_the_single_events() -> None:
 
 
 def test_clause_5_3_2_what_a_track_excites() -> None:
-    """f_A = v_Z / d and its multiples: 20 m/s over 0,6 m sleepers is 33,3 Hz."""
+    """f_A = v_Z / d and its multiples: 20 m/s over 0.6 m sleepers is 33.3 Hz."""
     freqs = im.track_excitation_frequency(20.0, spacing_m=0.6, n_harmonics=3)
     assert freqs == pytest.approx([33.333, 66.667, 100.0], abs=0.001)
     assert im.RAIL_SUPPORT_SPACING_M == (0.6, 0.9)
@@ -215,8 +215,8 @@ def test_clause_5_3_2_what_a_track_excites() -> None:
 
 
 def test_figure_a18_formula_7_against_the_drawn_curve() -> None:
-    """Printed page 33: the curve for v_B = 0,44 mm/s with N_B = 3 reads 0,68
-    at 10 machines, 0,78 at 20, 0,90 at 40, 1,03 at 60, 1,16 at 80 and 1,27
+    """Printed page 33: the curve for v_B = 0.44 mm/s with N_B = 3 reads 0.68
+    at 10 machines, 0.78 at 20, 0.90 at 40, 1.03 at 60, 1.16 at 80 and 1.27
     at 100; Figure 3 read at a five-hundredth reproduces it within 6 %. The
     formula lies below the drawn curve at every count, by 5 % at 10 machines
     and by 1 % at 100: the standard did not draw A.18 with exactly its own
@@ -229,7 +229,7 @@ def test_figure_a18_formula_7_against_the_drawn_curve() -> None:
     assert np.all(computed < drawn)
     assert im.machine_count_correction([10.0], n_reference_machines=3)[0] == 0.471
     # Figure 3, the left frame at N = 4, and the right one at N = 100: the
-    # N_B = 5 curve starts at 0,455, above 1 over root 5, so the family is
+    # N_B = 5 curve starts at 0.455, above 1 over root 5, so the family is
     # empirical and not a rule.
     assert im.machine_count_correction([4.0], n_reference_machines=5)[0] == 0.455
     assert im.machine_count_correction([100.0], n_reference_machines=100)[0] == 0.099

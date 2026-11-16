@@ -937,7 +937,7 @@ def test_a_record_ending_at_one_per_cent_passes(segment_s: float | None) -> None
 
 
 def test_the_end_level_is_compared_to_a_whole_per_cent() -> None:
-    """The "about 1 %" of 8.3 accepts any level below 1,5 %, which rounds to 1 %."""
+    """The "about 1 %" of 8.3 accepts any level below 1.5 %, which rounds to 1 %."""
     assert vibration.check_response_decay(_decay_to(0.014), FS).passes
     just_below = vibration.check_response_decay(_decay_to(0.0151), FS)
     assert 0.0149 < just_below.end_ratio < 0.015
@@ -1051,7 +1051,7 @@ def test_coherence_check_needs_high_coherence_and_enough_records() -> None:
 
 
 def test_coherence_must_exceed_the_minimum_strictly() -> None:
-    """9.1: high means greater than 0,9."""
+    """9.1: high means greater than 0.9."""
     result = ImpactMobilityResult(
         frequencies=np.array([10.0, 20.0, 30.0]),
         mobility=np.ones(3, dtype=complex),

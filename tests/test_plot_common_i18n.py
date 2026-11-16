@@ -289,7 +289,7 @@ def _two_run_axes(language: str) -> Axes:
     """A continuous two-run figure, which is where the twin axis is built."""
     from phonometry import noise_control
 
-    # The range has to reach down to 31,5 Hz: it is the lowest octave centre
+    # The range has to reach down to 31.5 Hz: it is the lowest octave centre
     # whose label carries a decimal, and a label without one proves nothing.
     freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     result = noise_control.screen_attenuation(
@@ -304,7 +304,7 @@ def test_the_twin_frequency_axis_reaches_spanish() -> None:
     """``localize_axes`` cannot reach a pinned frequency axis, so the formatter must be told.
 
     The frequency ticks are written by ``format_frequency_axis`` and by nothing
-    else, so a Spanish figure keeps 31.5 for 31,5 unless the caller forwards
+    else, so a Spanish figure keeps 31.5 for "31,5" unless the caller forwards
     its language. The twin axis is the one that is easy to forget: it is built
     after the first and resets the shared x-axis.
     """

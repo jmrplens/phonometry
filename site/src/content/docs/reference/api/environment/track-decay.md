@@ -27,12 +27,12 @@ itself is the direct response $A(x_0)$.
 
 **Clause 7 and Annex A, the rate.** If the response decayed as
 $A(x) = A(0)\,\mathrm{e}^{-\beta x}$, the decay rate would be
-$\mathrm{DR} = 20 \lg \mathrm{e}^{\beta} = 8{,}686\,\beta$ dB/m, and the integral of the
+$\mathrm{DR} = 20 \lg \mathrm{e}^{\beta} = 8.686\,\beta$ dB/m, and the integral of the
 squared response along the rail would be $|A(0)|^2 / 2\beta$ (A.1). The
 standard estimates it from that integral rather than from a fitted slope,
 
 $$
-\mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}} \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}\ \mathrm{dB/m}
+\mathrm{DR} = \frac{4.343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}} \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}\ \mathrm{dB/m}
 $$
 
 (Formula 1, A.3), where $\Delta x_n$ is the length of rail each
@@ -42,7 +42,7 @@ the last position (A.2) ([`track_decay_rate`](/phonometry/reference/api/environm
 by the first 10 dB of decay, which is what radiates.
 
 **Formula 2, the floor.** A grid that stops at $x_\mathrm{max}$ cannot
-measure a rate below $\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}$; a
+measure a rate below $\mathrm{DR}_\mathrm{min} = 4.343 / x_\mathrm{max}$; a
 band whose rate is less than twice that is unsuitable, and its value only an
 upper bound on the true one (clause 7). The response at the far end of the
 grid also has to be at least 10 dB below the direct one in every band (6.7).
@@ -83,7 +83,7 @@ The hammer positions of Figure 2, in metres from the accelerometer.
 
 | Name | Description |
 | :--- | :--- |
-| `sleeper_spacing_m` | The distance between sleepers, in metres; the 0,6 m 6.7 prescribes for a rail without periodic supports by default. |
+| `sleeper_spacing_m` | The distance between sleepers, in metres; the 0.6 m 6.7 prescribes for a rail without periodic supports by default. |
 
 **Returns:** The 29 distances of [`TRACK_DECAY_EXCITATION_INDICES`](/phonometry/reference/api/environment/track-decay/#track_decay_excitation_indices) times the sleeper spacing, read-only.
 
@@ -110,7 +110,7 @@ track_decay_rate(
 The decay rate of a rail from its responses along it (clause 7, Formula 1).
 
 $$
-\mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}} \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}
+\mathrm{DR} = \frac{4.343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}} \frac{|A(x_n)|^2}{|A(x_0)|^2} \, \Delta x_n}
 $$
 
 in each band, with $\Delta x_n$ the length of rail each position
@@ -181,7 +181,7 @@ Whether the farthest response is at least 10 dB below the direct one in every ba
 
 *property*
 
-The floor $4{,}343 / x_\mathrm{max}$ of Formula 2, in dB/m; `None` without the grid.
+The floor $4.343 / x_\mathrm{max}$ of Formula 2, in dB/m; `None` without the grid.
 
 ### TrackDecayRate.plot()
 
@@ -197,7 +197,7 @@ TrackDecayRate.plot(
 
 Draw the rates as EN 15461 9.2 presents them.
 
-Decay rate on a logarithmic axis from 0,01 dB/m to 100 dB/m against
+Decay rate on a logarithmic axis from 0.01 dB/m to 100 dB/m against
 equidistant one-third octave bands, with the bands clause 7 finds
 unsuitable marked and a lower limit drawn when one is given.
 

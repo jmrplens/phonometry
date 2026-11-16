@@ -150,7 +150,7 @@ def _qualification(
     ``margin`` is the per-band amount by which the segment pressure levels
     exceed the segment intensity levels, so it is the pressure-intensity
     indicator of the band; a band whose margin exceeds ``Ld`` fails criterion 2.
-    The two scans coincide to 0,1 dB, inside the s/2 of Table 1 everywhere.
+    The two scans coincide to 0.1 dB, inside the s/2 of Table 1 everywhere.
     """
     scan = np.tile(_INTENSITY[: freqs.size], (_N_SEG, 1))
     pressure_levels = 10.0 * np.log10(np.abs(scan) / 1.0e-12) + margin[None, :]
@@ -244,8 +244,8 @@ def test_report_renders_oracle_values(tmp_path: Path) -> None:
 def test_uncertainty_column_follows_table_1(tmp_path: Path) -> None:
     """Every band prints U = 2*sigma_R0 from its ISO 9614-3 Table 1 row."""
     # Six consecutive one-third-octave bands crossing all three Table 1 tiers:
-    # 160 Hz -> 2*2,0 = 4,0 dB; 200 to 315 Hz -> 2*1,5 = 3,0 dB; 400 and
-    # 500 Hz -> 2*1,0 = 2,0 dB.
+    # 160 Hz -> 2*2.0 = 4.0 dB; 200 to 315 Hz -> 2*1.5 = 3.0 dB; 400 and
+    # 500 Hz -> 2*1.0 = 2.0 dB.
     freqs = np.array([160, 200, 250, 315, 400, 500], dtype=float)
     intensity = np.full(freqs.size, 2.0e-5)
     res = _determination(intensity, freqs)

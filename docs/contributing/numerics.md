@@ -98,7 +98,7 @@ limp = bool(settled(abs(ratio)) <= materials.LIMP_FRAME_CRITERIA["beranek"])  # 
 
 ```python
 #: ISO 3745:2012/Amd.1:2017 A.2.5: absorption coefficient of the reflecting
-#: plane at most 0,06.
+#: plane at most 0.06.
 _MAX_PLANE_ABSORPTION = 0.06
 
 absorption_coefficient = 0.04

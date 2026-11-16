@@ -3,10 +3,10 @@ r"""Verdicts at a printed limit that do not hang on the last bits of a float (pr
 
 A standard prints its limits in decimal and says in words which side of them
 the limit itself falls on: a margin "of 6 dB or more", a spread that "does not
-exceed" 1,5 dB, a ratio "limited to 0,99". The quantity judged against such a
+exceed" 1.5 dB, a ratio "limited to 0,99". The quantity judged against such a
 limit is computed, the difference of two readings, the mean of three, the
-ratio of two areas, and in binary a difference that is 6,0 dB in decimal comes
-out 5,999 999 999 999 996 as often as 6,000 000 000 000 004. Which of the two
+ratio of two areas, and in binary a difference that is 6.0 dB in decimal comes
+out 5.999 999 999 999 996 as often as 6.000 000 000 000 004. Which of the two
 depends on the readings, on the order of a sum and on the machine, so a verdict
 read straight off the comparison turns on the last bit, and so does a half
 rounded to the nearest whole number.
@@ -67,9 +67,9 @@ def settled_ratio(
     of its unit: a power of :math:`10^{-6}` W would settle to nothing. Its
     ratio to a whole of the same kind is of order one and can. The whole is
     the sum of the magnitudes when the part is a signed sum, so a sum that is
-    zero in decimal, 0,3 - 0,1 - 0,2 W, and comes out a few units in the last
+    zero in decimal, 0.3 - 0.1 - 0.2 W, and comes out a few units in the last
     place of its terms either side of zero in binary settles to zero, and a
-    sum that is the half of a total in decimal settles to 0,5.
+    sum that is the half of a total in decimal settles to 0.5.
 
     :param part: The quantity judged, any shape.
     :param whole: What it is a share of, broadcastable with ``part``.
@@ -113,10 +113,10 @@ def settled_net_share(
 
 
 def round_half_up(value: NumericArrayLike, decimals: int = 0) -> NDArray[np.float64]:
-    """Round to ``decimals`` places with halves upwards (2,5 to 3, -2,5 to -2).
+    """Round to ``decimals`` places with halves upwards (2.5 to 3, -2.5 to -2).
 
-    The scaled value is settled before the half is judged, so 20,4 - 14,9 dB,
-    5,499 999 999 999 998 in binary, rounds to 6 as the 5,5 dB it is.
+    The scaled value is settled before the half is judged, so 20.4 - 14.9 dB,
+    5.499 999 999 999 998 in binary, rounds to 6 as the 5.5 dB it is.
 
     :param value: The value or values to round.
     :param decimals: The decimal places kept.
@@ -131,7 +131,7 @@ def round_half_up(value: NumericArrayLike, decimals: int = 0) -> NDArray[np.floa
 def round_half_away_from_zero(
     value: NumericArrayLike, decimals: int = 0
 ) -> NDArray[np.float64]:
-    """Round to ``decimals`` places with halves away from zero (-2,5 to -3).
+    """Round to ``decimals`` places with halves away from zero (-2.5 to -3).
 
     :param value: The value or values to round.
     :param decimals: The decimal places kept.
@@ -146,9 +146,9 @@ def round_half_away_from_zero(
 def round_half_even(value: NumericArrayLike, decimals: int = 0) -> NDArray[np.float64]:
     """Round to ``decimals`` places with halves to the even neighbour.
 
-    Rule A of ISO 80000-1:2009 Annex B: 2,5 to 2 and 3,5 to 4. The scaled
-    value is settled before the half is judged, so 32,3 - 20,8 dB,
-    11,499 999 999 999 996 in binary, rounds to 12 as the 11,5 dB it is.
+    Rule A of ISO 80000-1:2009 Annex B: 2.5 to 2 and 3.5 to 4. The scaled
+    value is settled before the half is judged, so 32.3 - 20.8 dB,
+    11.499 999 999 999 996 in binary, rounds to 12 as the 11.5 dB it is.
 
     :param value: The value or values to round.
     :param decimals: The decimal places kept.

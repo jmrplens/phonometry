@@ -32,19 +32,19 @@ is recorded so that a later pass does not pick them up by mistake:
 * the ``S_II`` and ``S_I`` columns of Holgado Palacios, Tablas LXIV to LXVI.
   They are a quarter of the Sabine absorption, the quantity of Equations (6),
   (10) and (12), but the thesis computed them with a Sabine constant of about
-  0,161, that is a speed of sound near 343 m/s, where ISO 11820 prints 340 and
+  0.161, that is a speed of sound near 343 m/s, where ISO 11820 prints 340 and
   this library follows the standard. Recomputing them at 340 m/s misses the
-  printed column by up to 0,10 m2, and no single volume and speed reproduce
+  printed column by up to 0.10 m2, and no single volume and speed reproduce
   all 42 entries of one table, so the columns are inputs to Equation (21) here
   and never expected values. The ratio is what Equation (21) uses, and every
   constant factor cancels in it;
-* Example 2-2 of Barron (2003), folio 17, which prints 1,184 kg/m3 for air at
-  25 C and 101,3 kPa. Barron works there at 298,2 K, a 273,2 offset, where
+* Example 2-2 of Barron (2003), folio 17, which prints 1.184 kg/m3 for air at
+  25 C and 101.3 kPa. Barron works there at 298.2 K, a 273.2 offset, where
   Equation (29) prints 273 + theta. The four figures he prints hide the
   difference, so the example agrees with the module without being evidence for
-  it. Example 8-8, folio 372, is the same trap made visible: 1,292 kg/m3 for
-  air at 10 C and 105 kPa comes out of 283,15 K, and Equation (29) gives
-  1,293.
+  it. Example 8-8, folio 372, is the same trap made visible: 1.292 kg/m3 for
+  air at 10 C and 105 kPa comes out of 283.15 K, and Equation (29) gives
+  1.293.
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ ISO14163_TABLE_B1_OCTAVE_DB: dict[str, tuple[float, float]] = {
 
 #: The octave-band attenuation row of Table B.1, in decibels. It is the
 #: difference of the two printed octave levels above it, which is why the
-#: centrifugal fan reads 5 dB where the unrounded difference is 4,41 dB.
+#: centrifugal fan reads 5 dB where the unrounded difference is 4.41 dB.
 ISO14163_TABLE_B1_OCTAVE_ATTENUATION_DB: dict[str, float] = {
     "laboratory pink noise": 7.0,
     "axial fan": 12.0,
@@ -168,16 +168,16 @@ HOLGADO_TABLE_XL: dict[float, tuple[tuple[float, ...], float]] = {
 # tables print between the levels and D_is are left out for the reason given
 # in the module docstring; the K_II - K_I column is left out because it is
 # zero in every band of all three tables. The two runs were at nearly the same
-# temperature, 21,9 C with the silencer against 23,2 C with the duct per the
-# Anexo II data sheets, and Equation (20) gives -0,010 dB for that pair. So
+# temperature, 21.9 C with the silencer against 23.2 C with the duct per the
+# Anexo II data sheets, and Equation (20) gives -0.010 dB for that pair. So
 # these tables exercise the level difference and the area term of Equation
 # (21) and not the field-correction term.
 #
 # The printed D_is cannot be pinned to the last printed digit from these
 # summary columns: the thesis computed it from unrounded spreadsheet means and
-# printed its inputs rounded to 0,1 dB and 0,01 s. Recomputing from the
+# printed its inputs rounded to 0.1 dB and 0.01 s. Recomputing from the
 # printed inputs stays inside the interval that rounding allows, about
-# 0,13 dB, in every band of all three tables.
+# 0.13 dB, in every band of all three tables.
 
 #: One row of a summary table: reverberation time without the silencer in
 #: seconds, level without it in decibels, reverberation time with it, level
@@ -287,8 +287,8 @@ HOLGADO_INSERTION_TESTS: dict[str, dict[float, HolgadoRow]] = {
 #
 # Note what the table is *not*: an oracle for ISO 11820 Table 1. That table is
 # stepped and integer-indexed and deliberately not the logarithmic
-# subtraction, and it takes off 2,0 dB at a 5 dB margin where Barron prints
-# 1,7 and 1,0 dB at 8 dB where Barron prints 0,7.
+# subtraction, and it takes off 2.0 dB at a 5 dB margin where Barron prints
+# 1.7 and 1.0 dB at 8 dB where Barron prints 0.7.
 
 #: Table 3-4: the correction to subtract, in decibels, by the margin of the
 #: measured level over the background, in decibels.
@@ -318,8 +318,8 @@ BARRON_TABLE_3_4_DB: dict[float, float] = {
 }
 
 #: Example 3-6, PDF page 85, folio 73: a fan measured at 83 dB against a 77 dB
-#: background, corrected to 81,7 dB by Eq. (3-48) and again, to the same
-#: figure, by the 1,3 dB Table 3-4 gives at a 6 dB margin.
+#: background, corrected to 81.7 dB by Eq. (3-48) and again, to the same
+#: figure, by the 1.3 dB Table 3-4 gives at a 6 dB margin.
 BARRON_EXAMPLE_3_6_DB: tuple[float, float, float] = (83.0, 77.0, 81.7)
 
 #: Example 3-4, PDF page 77, folio 65: nine 500 Hz octave levels on a
@@ -339,17 +339,17 @@ BARRON_EXAMPLE_3_4_LEVELS_DB: tuple[float, ...] = (
 )
 BARRON_EXAMPLE_3_4_MEAN_DB: float = 80.4
 
-#: The same example: the measurement surface, 2,60 m by 2,80 m by 1,60 m high,
-#: printed as S_m = 17,28 + 7,28 = 24,56 m2, and the 10 log10 of it that the
+#: The same example: the measurement surface, 2.60 m by 2.80 m by 1.60 m high,
+#: printed as S_m = 17.28 + 7.28 = 24.56 m2, and the 10 log10 of it that the
 #: solution on folio 66 prints as the first term of its sound power.
 BARRON_EXAMPLE_3_4_AREA_M2: float = 24.56
 BARRON_EXAMPLE_3_4_AREA_TERM_DB: float = 13.90
 
 #: Example 3-3, PDF pages 72 to 74, folios 60 to 62: ten levels on a
-#: hemisphere of radius 1,250 m about a motor, in decibels, with the
-#: measurement surface the book prints as 9,817 m2 and the characteristic
-#: impedance of the room air, 411,6 rayl. The book's Eq. (3-30) reaches
-#: L_W = 90,4 dB, which is the mean level plus 10 lg(S/S_0) plus the impedance
+#: hemisphere of radius 1.250 m about a motor, in decibels, with the
+#: measurement surface the book prints as 9.817 m2 and the characteristic
+#: impedance of the room air, 411.6 rayl. The book's Eq. (3-30) reaches
+#: L_W = 90.4 dB, which is the mean level plus 10 lg(S/S_0) plus the impedance
 #: correction -10 lg(rho c / 400).
 BARRON_EXAMPLE_3_3_LEVELS_DB: tuple[float, ...] = (
     86.0,
@@ -381,18 +381,18 @@ BARRON_MUFFLER_GAS_DENSITY: dict[str, tuple[float, float, float]] = {
 }
 
 #: Example 5-7, PDF page 215, folio 203: a 900 mm square main duct, whose
-#: cross-section of 0,810 m2 the book turns into an area-equivalent diameter
-#: of 1,016 m with D = (4 S / pi)^(1/2). That root is the half of ISO 11820
-#: Equation (15) this anchors; the 1,5 diameters the equation puts in front of
+#: cross-section of 0.810 m2 the book turns into an area-equivalent diameter
+#: of 1.016 m with D = (4 S / pi)^(1/2). That root is the half of ISO 11820
+#: Equation (15) this anchors; the 1.5 diameters the equation puts in front of
 #: it are the standard's own and appear nowhere on Barron's page.
 BARRON_EXAMPLE_5_7_AREA_M2: float = 0.810
 BARRON_EXAMPLE_5_7_EQUIVALENT_DIAMETER_M: float = 1.016
 
 #: Example 7-2, PDF pages 297 to 299, folios 285 to 287, section 7.3: a
-#: 6,20 m by 6,00 m by 3,10 m room at 21 C, so c = 343,8 m/s, whose 500 Hz
+#: 6.20 m by 6.00 m by 3.10 m room at 21 C, so c = 343.8 m/s, whose 500 Hz
 #: equivalent absorption area is computed twice by two unrelated routes (the
 #: Eyring expression and the Fitzroy relationship) and then turned into a
-#: reverberation time with T = 55,26 V / (c a). The printed constant 55,26 is
+#: reverberation time with T = 55.26 V / (c a). The printed constant 55.26 is
 #: 4 x 6 ln 10, so the book's absorption area a is four times the S of
 #: Equations (6), (10) and (12).
 BARRON_EXAMPLE_7_2_VOLUME_M3: float = 115.32
@@ -405,22 +405,22 @@ BARRON_EXAMPLE_7_2_ABSORPTION_M2: dict[float, float] = {0.459: 40.41, 0.981: 18.
 
 #: Bies, Hansen and Howard, "Engineering Noise Control", 5th edition, CRC
 #: Press, 2017, Section 1.10.4, Example 1.4 and Solution 1.4, PDF page 65,
-#: printed folio 36: a machine measured at 92,0 dB against an 88,0 dB
-#: background, which the solution subtracts in energy to 89,8 dB. The 3 dB the
+#: printed folio 36: a machine measured at 92.0 dB against an 88.0 dB
+#: background, which the solution subtracts in energy to 89.8 dB. The 3 dB the
 #: text asks for there is a floor on the margin, not the cap on the correction
 #: that ISO 11820 9.1.1 and 9.1.2 state.
 BIES_EXAMPLE_1_4_DB: tuple[float, float, float] = (92.0, 88.0, 89.8)
 
 #: Ver and Beranek (eds.), "Noise and Vibration Control Engineering", 2nd
 #: edition, Wiley, 2006, Section 4.7, Example 4.2, PDF pages 95 and 96,
-#: printed folios 90 and 91: a 200 m3 room at 21,4 C, so c = 344 m/s, whose
+#: printed folios 90 and 91: a 200 m3 room at 21.4 C, so c = 344 m/s, whose
 #: 100 Hz reverberation time of 3 s gives an equivalent absorption area of
-#: 10,7 m2 by A = (55,26/c)(V/T_rev). The first term of the sound power that
-#: follows is printed as 10 log(A/A_0) = 10,3 dB.
+#: 10.7 m2 by A = (55.26/c)(V/T_rev). The first term of the sound power that
+#: follows is printed as 10 log(A/A_0) = 10.3 dB.
 #:
-#: The example's own final answer, 106,4 dB, does not follow from its printed
-#: terms: the bracket 10,3 + 0,22 + 1,62 - 0,3 - 6 sums to 5,84 and the total
-#: should read 105,8 dB. The slip is a sign carried on the impedance term, and
+#: The example's own final answer, 106.4 dB, does not follow from its printed
+#: terms: the bracket 10.3 + 0.22 + 1.62 - 0.3 - 6 sums to 5.84 and the total
+#: should read 105.8 dB. The slip is a sign carried on the impedance term, and
 #: it is why only the area and its decibel term are taken from this page.
 VER_BERANEK_EXAMPLE_4_2_VOLUME_M3: float = 200.0
 VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S: float = 3.0
@@ -431,11 +431,11 @@ VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB: float = 10.3
 #: VDI 2081 Blatt 2:2005-05, "Tabelle 1. Stroemungsgeraeuschberechnung",
 #: element 2 "Kulissenschalldaempfer", PDF page 12, printed folio "- 12 -": a
 #: splitter silencer of five 200 mm splitters and five 100 mm gaps in a
-#: 1,500 m by 0,600 m housing, carrying 16 000 m3/h. The housing and gap
+#: 1.500 m by 0.600 m housing, carrying 16 000 m3/h. The housing and gap
 #: cross-sections are not printed; they follow from the printed geometry,
-#: which closes exactly (5 x 0,200 + 5 x 0,100 = 1,500 m), and are confirmed
-#: twice over by the printed face velocity of 4,94 m/s and the printed
-#: hydraulic diameter of 0,171 m.
+#: which closes exactly (5 x 0.200 + 5 x 0.100 = 1.500 m), and are confirmed
+#: twice over by the printed face velocity of 4.94 m/s and the printed
+#: hydraulic diameter of 0.171 m.
 VDI2081_SPLITTER_VOLUME_FLOW_M3_H: float = 16_000.0
 VDI2081_SPLITTER_HOUSING_AREA_M2: float = 0.9
 VDI2081_SPLITTER_FREE_AREA_M2: float = 0.3
@@ -448,11 +448,11 @@ VDI2081_SPLITTER_GAP_VELOCITY_M_S: float = 14.81
 #: (volume flow in m3/h, housing cross-section in m2, velocity of design a,
 #: velocity of design b) in metres per second. Design (a) is one thick
 #: splitter with a blockage ratio m = 2 and design (b) two thin ones with
-#: m = 0,5, both printed beside Fig. 13.25 on folio 542; Eq. (13.1) on folio
+#: m = 0.5, both printed beside Fig. 13.25 on folio 542; Eq. (13.1) on folio
 #: 510 turns m into the free cross-section, S_s = S / (1 + m).
 #:
 #: Every printed velocity is truncated towards zero rather than rounded, which
-#: is visible where 66,67 prints as 66 and 16,67 as 16.
+#: is visible where 66.67 prints as 66 and 16.67 as 16.
 FUCHS_TABLE_13_4: tuple[tuple[float, float, int, int], ...] = (
     (20_000.0, 0.75, 22, 11),
     (40_000.0, 0.75, 44, 22),
@@ -470,15 +470,15 @@ FUCHS_BLOCKAGE_RATIOS: dict[str, float] = {"a": 2.0, "b": 0.5}
 #: localizada", 2004, Ec. 2 on PDF page 3 and Ec. 3 on the first line of PDF
 #: page 4. The web-published note carries no printed folio. The two equations
 #: are ISO 11820 Equation (28) with the unit conversion folded into the
-#: coefficient: v = 4,43 (P_D/d)^(1/2) with the velocity pressure in
-#: millimetres of water column, and v = 4,04 (P_D)^(1/2) once the density is
-#: fixed at the 1,2 kg/m3 the note states for air at 20 C and 1 atm.
+#: coefficient: v = 4.43 (P_D/d)^(1/2) with the velocity pressure in
+#: millimetres of water column, and v = 4.04 (P_D)^(1/2) once the density is
+#: fixed at the 1.2 kg/m3 the note states for air at 20 C and 1 atm.
 NTP668_VELOCITY_COEFFICIENTS: dict[str, tuple[float, float]] = {
     "Ec. 2, density free, 1 kg/m3": (1.0, 4.43),
     "Ec. 3, air at 20 C, 1,2 kg/m3": (1.2, 4.04),
 }
 
 #: The conventional millimetre of water column, in pascals: water of
-#: 1000 kg/m3 under the standard gravity of 9,806 65 m/s2. It is the
+#: 1000 kg/m3 under the standard gravity of 9.806 65 m/s2. It is the
 #: definition of the unit and not something the note prints.
 MILLIMETRE_WATER_COLUMN_PA: float = 9.806_65

@@ -4,8 +4,8 @@
 ``localize_axes`` cannot reach tick labels installed as fixed strings, so the
 band-centre labels of a continuous frequency axis are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not hand
-its ``language`` down draws 31.5 on a Spanish figure where 31,5 belongs. Every
-range here reaches down to 31,5 Hz, the lowest octave centre whose label
+its ``language`` down draws 31.5 on a Spanish figure where 31.5 belongs. Every
+range here reaches down to 31.5 Hz, the lowest octave centre whose label
 carries a decimal, because a set of labels without one proves nothing.
 """
 
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from phonometry.noise_control.room_to_room import RoomToRoomResult
     from phonometry.noise_control.silencers import ReactiveSilencerResult
 
-#: Octave bands from 31,5 Hz up; eight of them, as every spectrum below.
+#: Octave bands from 31.5 Hz up; eight of them, as every spectrum below.
 _BANDS = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 
 

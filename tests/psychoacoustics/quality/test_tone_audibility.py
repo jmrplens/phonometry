@@ -1266,7 +1266,7 @@ def test_din_tabelle_a1_critical_bandwidths() -> None:
 def test_analyze_spectrum_step3_merges_chained_clusters() -> None:
     # The critical bandwidth grows with frequency, so a chain of tones at
     # 900/950/1000 Hz produces three DIFFERENT own-band candidate sets
-    # ({900,950}, {900,950,1000}, {950,1000}); Step 3 must merge them into
+    # ({900, 950}, {900, 950, 1000}, {950, 1000}); Step 3 must merge them into
     # exactly one FG entry, not three overlapping combinations.
     df = 2.5
     freq = np.arange(200.0, 1600.0, df)

@@ -102,9 +102,9 @@ ISO13474_ANNEX_A_SUBCLASSES: int = 10
 
 #: Folio 34 (PDF page 42): "In this example, the mean value was shifted by an
 #: amount, Δμ, equal to 1,04 dB [from Equation (22)]". Equation (22) gives
-#: σ² ln 10 / 20 = 2,878 dB at the 5 dB of the same paragraph; 1,04 dB is its
+#: σ² ln 10 / 20 = 2.878 dB at the 5 dB of the same paragraph; 1.04 dB is its
 #: value at σ = 3 dB. The long-term level LT2 and the curve of Figure A.2 were
-#: computed with 2,878 dB (see docs/ERRATA.md).
+#: computed with 2.878 dB (see docs/ERRATA.md).
 ISO13474_ANNEX_A_PRINTED_SHIFT_DB: float = 1.04
 
 #: Figure A.3, printed folio 36 (PDF page 44): the exceedance levels printed
@@ -120,7 +120,7 @@ ISO13474_FIGURE_A3_EXCEEDANCE_DB: dict[int, float] = {
 
 #: Figure A.3: "LT1 = 37,0 dB" (Equation (7) with a single atmospheric
 #: absorption class of probability 1) and "LT2 = 37,0 dB" (Equation (A.4)),
-#: which folio 35 says agree when rounded to 0,1 dB.
+#: which folio 35 says agree when rounded to 0.1 dB.
 ISO13474_FIGURE_A3_LT1_DB: float = 37.0
 ISO13474_FIGURE_A3_LT2_DB: float = 37.0
 
@@ -129,7 +129,7 @@ ISO13474_FIGURE_A3_LT2_DB: float = 37.0
 #: 1 - ∫₁₅ˣ ρ*(x') dx', rather than as the integral of Equation (24) to
 #: infinity, is consistent with the printed exceedance levels when it is fed
 #: the 07:00 to 19:00 column of Table A.3 as printed; fed the full-precision
-#: probabilities that reproduce Table A.4, it gives L1 = 48,05 dB, which would
-#: print 48,1. It is a hypothesis, not how the annex says it computed them
+#: probabilities that reproduce Table A.4, it gives L1 = 48.05 dB, which would
+#: print 48.1. It is a hypothesis, not how the annex says it computed them
 #: (see docs/ERRATA.md).
 ISO13474_FIGURE_A3_LOWER_LIMIT_DB: float = 15.0

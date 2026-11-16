@@ -266,7 +266,7 @@ def _table_bounds(text: str) -> dict[str, str]:
     }
 
 
-#: A number in the form a page prints a bound: ``3×10⁻⁶``, ``1,79×10⁻¹⁶``.
+#: A number in the form a page prints a bound: ``3×10⁻⁶``, “1,79×10⁻¹⁶”.
 _PAGE_NUMBER = re.compile(r"\d+(?:[.,]\d+)?×10[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+")
 #: A number in the form a docstring or the changelog prints one: ``9e-16``.
 _TEXT_NUMBER = re.compile(r"(?<![\w.])\d+(?:\.\d+)?e-\d+\b")

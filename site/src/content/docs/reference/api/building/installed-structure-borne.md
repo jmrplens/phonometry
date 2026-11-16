@@ -503,7 +503,7 @@ junctions and 6 dB for three or more, with the resulting `Kij` floored at
 | :--- | :--- |
 | `n_junctions` | Number of junctions the transmission path crosses (>= 1). |
 
-**Returns:** The adjustment `dK`, in dB (0,0 for a single junction).
+**Returns:** The adjustment `dK`, in dB (0.0 for a single junction).
 
 **Raises**
 
@@ -725,7 +725,7 @@ $$
 
 The standard notes the result is about 115 dB re 1 pW per one-third octave
 for the ISO tapping machine, treated in clause D.1.3 as a force source with
-the mass-like source mobility of its 0,5 kg hammers. Pair it with
+the mass-like source mobility of its 0.5 kg hammers. Pair it with
 [`tapping_machine_coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_coupling_term) and hand both to
 [`installed_source_prediction`](/phonometry/reference/api/building/installed-structure-borne/#installed_source_prediction).
 
@@ -788,7 +788,7 @@ D_{\mathrm{C},i} = -10 \log_{10}(\omega M Y_i) + 10 \log_{10}\left[ 1 + (\omega 
 $$
 
 with $\omega = 2 \pi f$ and `M` the hammer mass of clause D.1.3,
-which the standard takes as 0,5 kg. It is the mass-like-source form of
+which the standard takes as 0.5 kg. It is the mass-like-source form of
 Formula (19b), for a machine standing on a plate-like element of real
 mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 
@@ -798,7 +798,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `receiver_mobility` | Real mobility `Y_i` of the supporting element, in m/(N.s) (> 0). |
-| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0,5 kg of clause D.1.3 and ISO 10140-5). |
+| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0.5 kg of clause D.1.3 and ISO 10140-5). |
 
 **Returns:** The coupling term `D_C,i`, in dB. A `float` when `receiver_mobility` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -818,7 +818,7 @@ tapping_machine_force_level() -> NDArray[np.float64]
 Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
 
 The eight octave-band values of Table F.1, in the order of
-[`TABLE_F1_OCTAVE_BANDS_HZ`](/phonometry/reference/api/building/installed-structure-borne/#table_f1_octave_bands_hz) (31,5 Hz to 4 kHz). Clause F.4.2
+[`TABLE_F1_OCTAVE_BANDS_HZ`](/phonometry/reference/api/building/installed-structure-borne/#table_f1_octave_bands_hz) (31.5 Hz to 4 kHz). Clause F.4.2
 offers them for the tapping machine used in place of an electrodynamic
 shaker when measuring `D_Fp,n` (Formula F.9), and clause D.1.2.3
 restricts the source to low-mobility receiving structures.
@@ -853,7 +853,7 @@ tapping_machine_force_level_estimate(
 Closed form printed under Table F.1 for the tapping machine force level.
 
 $$
-L_\mathrm{F} = 10 \log_{10} \frac{2{,}5 f}{10^{-12}} \quad\text{(octave)}, \qquad L_\mathrm{F} = 10 \log_{10} \frac{0{,}8 f}{10^{-12}} \quad\text{(1/3 octave)}
+L_\mathrm{F} = 10 \log_{10} \frac{2.5 f}{10^{-12}} \quad\text{(octave)}, \qquad L_\mathrm{F} = 10 \log_{10} \frac{0.8 f}{10^{-12}} \quad\text{(1/3 octave)}
 $$
 
 The standard qualifies this with "up till about 1000 Hz": it reproduces the
@@ -869,7 +869,7 @@ bands the standard does not tabulate.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `fraction` | The band set, 1 for octaves (default, coefficient 2,5) or 3 for one-third octaves (coefficient 0,8). One of `1` or `3`. |
+| `fraction` | The band set, 1 for octaves (default, coefficient 2.5) or 3 for one-third octaves (coefficient 0.8). One of `1` or `3`. |
 
 **Returns:** The force level `L_F`, in dB re 1e-6 N (the standard prints "re 1 pN"; see `docs/ERRATA.md`). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -969,9 +969,9 @@ prints, in m/(N.s), for the row named by *structure*:
   [m2]: $\lvert Y \rvert = \left[ \rho c_\mathrm{L} S \right]^{-1}$.
 - `"beam"`, described by $\rho$, $c_\mathrm{L}$, `thickness_m`
   $t$ [m] and `width_m` $w$ [m]:
-  $\lvert Y \rvert = \left[ 7{,}6\, \rho t w \sqrt{c_\mathrm{L} t f} \right]^{-1}$.
+  $\lvert Y \rvert = \left[ 7.6\, \rho t w \sqrt{c_\mathrm{L} t f} \right]^{-1}$.
 - `"plate"`, described by $\rho$, $c_\mathrm{L}$ and $t$:
-  $\lvert Y \rvert = \left[ 2{,}3\, c_\mathrm{L} \rho t^2 \right]^{-1}$.
+  $\lvert Y \rvert = \left[ 2.3\, c_\mathrm{L} \rho t^2 \right]^{-1}$.
 - `"pipe"`, described by $\rho$, $c_\mathrm{L}$, $t$ and
   `radius` $r$ [m]:
   $\lvert Y \rvert = \left[ 63\, \rho t r \sqrt{c_\mathrm{L} r f} \right]^{-1}$.

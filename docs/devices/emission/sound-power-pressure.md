@@ -83,12 +83,12 @@ $$
 over one reflecting plane, with $l_1$ un-halved over two planes and both $l_1$
 and $l_2$ un-halved over three. That is the $d_0$ the figure below labels, and
 the standard then bounds the surface with it: the hemisphere radius shall be at
-least $2 d_0$, not less than 1 m and not more than 16 m (clause 7.2.3; 0,5 m is
+least $2 d_0$, not less than 1 m and not more than 16 m (clause 7.2.3; 0.5 m is
 allowed only for small products over a limited frequency range), and the box
-measurement distance shall be at least 0,25 m and preferably 1 m or more
+measurement distance shall be at least 0.25 m and preferably 1 m or more
 (clause 7.2.4, with a note that $d < 0.5$ m limits the low-frequency range).
 
-Worked on a 1,4 × 0,9 × 1,1 m floor-standing machine:
+Worked on a 1.4 × 0.9 × 1.1 m floor-standing machine:
 $d_0 = \sqrt{0.7^2 + 0.45^2 + 1.1^2} = 1.38$ m, so a hemisphere needs
 $r \ge 2.8$ m and $S = 2\pi r^2 = 49.3$ m². The same machine boxed at $d = 1$ m
 gives $a = 1.7$ m, $b = 1.45$ m, $c = 2.1$ m and
@@ -100,7 +100,7 @@ requirements no longer hold, a hemisphere should not be used at all.
 
 Read backwards, this also bounds the examples on this page. The `radius=1.5`
 below is legitimate for a source of $d_0 \le 0.75$ m (a benchtop appliance or a
-small pump), and not for the 1,4 m machine just worked; the `radius=4.0` of the
+small pump), and not for the 1.4 m machine just worked; the `radius=4.0` of the
 report example in section 3 covers $d_0$ up to 2 m.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Measurement surfaces of ISO 3744: a hemisphere of radius r enveloping a compact source on a reflecting plane, with the ten Annex B microphone positions marked, and a right parallelepiped (box) at measurement distance d around a large source" width="88%"></picture>
@@ -130,7 +130,7 @@ fitted) shall meet IEC 61672-1 class 1, and the filters IEC 61260 class 1
 (clause 5.1). A class 1 IEC 60942 sound calibrator is applied to each microphone
 **before and after** each series to check the whole measuring chain, and, with
 no adjustment in between, the two readings shall differ by no more than
-**0,5 dB**; beyond that the series is discarded, not corrected (clause 5.2). The
+**0.5 dB**; beyond that the series is discarded, not corrected (clause 5.2). The
 system's own compliance is verified in a traceable laboratory at intervals not
 exceeding two years, the calibrator's at intervals not exceeding one year. The
 mechanics of that check are on
@@ -590,7 +590,7 @@ source level in every band and at least **10 dB** below from 250 Hz to 5 kHz
 range of interest if its corrected A-weighted band power is at least 15 dB below
 the highest (clause 5.2.1.2). Where the margin falls short anyway, clause 9.4.2
 freezes $K_{1i}$ at the value the criterion produces, 1.26 dB for the bands at
-and below 200 Hz and at and above 6,3 kHz, 0,46 dB from 250 Hz to 5 kHz, and
+and below 200 Hz and at and above 6.3 kHz, 0.46 dB from 250 Hz to 5 kHz, and
 then *requires* the test report, and the tables and graphs in it, to state that
 those bands are upper bounds. `precision_background_correction` applies exactly
 that rule; declaring the omission is the reader's job.

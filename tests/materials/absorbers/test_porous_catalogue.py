@@ -8,7 +8,7 @@ millimetres in one, metres in another, micrometres everywhere else; a complex
 shear modulus in N/cm2 here and a Young's modulus in pascals there; and one
 row that prints the word "model" in three cells because the quantity is
 frequency dependent. All of it has to survive into the library, because a
-caller who reads a 0,12 as micrometres is out by a factor of a thousand and
+caller who reads a 0.12 as micrometres is out by a factor of a thousand and
 nothing downstream will tell them.
 
 The printed digits live once, in ``tests/reference_data``, with every
@@ -208,7 +208,7 @@ def test_the_two_pages_that_print_the_glass_wool_describe_one_specimen() -> None
 def test_the_thermal_length_of_the_glass_wool_is_the_one_both_pages_print() -> None:
     """110 and not 112, which is what ``Lambda' = 2 Lambda`` would give.
 
-    Sect. 6.5.4 rounds 1,12e-4 m to 1,1e-4 in its own print, and Table 11.8
+    Sect. 6.5.4 rounds 1.12e-4 m to 1.1e-4 in its own print, and Table 11.8
     prints 110 um independently. Two pages agreeing on the rounded value is
     what settles it; deriving the length from the viscous one would put a
     number in the catalogue that neither page has.
@@ -335,7 +335,7 @@ def test_nothing_is_derived_without_a_poisson_ratio() -> None:
     """Two constants are three only when the third is printed.
 
     Table 11.5's felt prints neither modulus and no Poisson ratio, and a
-    catalogue that reached for a nominal 0,3 would be publishing a modulus the
+    catalogue that reached for a nominal 0.3 would be publishing a modulus the
     book does not have.
     """
     row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/felt_1"]

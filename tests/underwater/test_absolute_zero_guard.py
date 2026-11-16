@@ -3,7 +3,7 @@
 
 Left unguarded these did not raise, they returned: a negative speed of sound,
 and an absorption that looks like a plausible measurement. The second is the
-dangerous one, because nothing about 0,495 dB/km says it came from air at
+dangerous one, because nothing about 0.495 dB/km says it came from air at
 -300 degC.
 """
 
@@ -36,10 +36,10 @@ def test_seawater_absorption_refuses_absolute_zero() -> None:
 
 @pytest.mark.parametrize("temperature_c", [-273.1, -273.05, -273.0])
 def test_francois_garrison_refuses_its_own_pole(temperature_c: float) -> None:
-    """Its pole sits 0,15 degC above absolute zero, so the physical bound misses it.
+    """Its pole sits 0.15 degC above absolute zero, so the physical bound misses it.
 
     The relaxation frequencies are printed 1245/(273 + t) and 1990/(273 + t)
-    with the 273 the paper prints. The whole band (-273,15, -273,0] therefore
+    with the 273 the paper prints. The whole band (-273.15, -273.0] therefore
     clears the physical check and then overflows or divides by zero. Both
     escaped as OverflowError and ZeroDivisionError, neither of which names the
     argument that caused it.
@@ -51,7 +51,7 @@ def test_francois_garrison_refuses_its_own_pole(temperature_c: float) -> None:
 
 
 def test_just_above_the_pole_still_answers() -> None:
-    """The guard is drawn at the pole, not above it: -272,9 degC is computable."""
+    """The guard is drawn at the pole, not above it: -272.9 degC is computable."""
     value = underwater.seawater_absorption(
         1e3, temperature_c=-272.9, model="francois-garrison"
     )

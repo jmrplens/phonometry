@@ -12,13 +12,13 @@ wagon is measured so that two units measured on two tracks can be compared.
 It has four tests and one condition that makes the constant-speed test
 comparable at all, the track.
 
-**Clause 5, standing still.** Microphones 7,5 m from the track centreline and
-1,2 m high stand opposite the middle of equal areas 3 m to 5 m long along both
-sides of every car, plus two at 30° on a 7,5 m half circle off each end of
+**Clause 5, standing still.** Microphones 7.5 m from the track centreline and
+1.2 m high stand opposite the middle of equal areas 3 m to 5 m long along both
+sides of every car, plus two at 30° on a 7.5 m half circle off each end of
 the unit, only off the ends with a cab for a trailer unit (5.5.1.1). The
 level $L^i_{p\mathrm{Aeq},T}$ of every position, over at least 20 s, is
 energy averaged weighted by the length $l_i$ each position stands for,
-$(\pi/2) \times 7{,}5$ m for the end positions
+$(\pi/2) \times 7.5$ m for the end positions
 ([`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/reference/api/environment/rolling-stock-noise/#stationary_end_position_length_m)):
 
 $$
@@ -32,8 +32,8 @@ integer decibel (5.8.1, [`stationary_test`](/phonometry/reference/api/environmen
 **Clause 6, at constant speed.** The pass-by level
 $L_{p\mathrm{Aeq},T_p}$ is the A-weighted equivalent level over the
 pass-by time $T_p$ of the unit, from its front to its rear for a fixed
-formation (6.6.3, [`pass_by_measurement`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_measurement)), at 7,5 m and 1,2 m, or 25 m
-and 3,5 m at 200 km/h and above. Three runs per speed and side give a mean
+formation (6.6.3, [`pass_by_measurement`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_measurement)), at 7.5 m and 1.2 m, or 25 m
+and 3.5 m at 200 km/h and above. Three runs per speed and side give a mean
 rounded to the integer; the louder side is the result (6.7.1,
 [`rolling_stock_test`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test)). The test speeds are 80 km/h and the maximum
 speed, or the maximum alone up to 80 km/h (6.6.2, [`type_test_speeds`](/phonometry/reference/api/environment/rolling-stock-noise/#type_test_speeds)).
@@ -50,7 +50,7 @@ time of half the unit, for a single trailer at the end of a train
 (Formula B.1).
 
 **Clauses 7 and 8, starting and braking.** Starting is measured two ways:
-the maximum $L_{p\mathrm{AFmax}}$ at 7,5 m at a cross section 10 m ahead
+the maximum $L_{p\mathrm{AFmax}}$ at 7.5 m at a cross section 10 m ahead
 of the unit and at further positions along a long unit
 ([`acceleration_test_positions`](/phonometry/reference/api/environment/rolling-stock-noise/#acceleration_test_positions)), or $L_{p\mathrm{Aeq},T}$ at
 25 m over the passage of the unit. Braking from 30 km/h is measured by
@@ -84,8 +84,8 @@ module ([`pass_by_uncertainty`](/phonometry/reference/api/environment/rolling-st
 **Roundings.** 5.8.1, 6.7.1, 7.5.4, 7.6.4 and 8.7 round to the nearest integer
 decibel and 6.3.4 to one decimal, without a rule for a value on the half; a
 half goes up here, a convention of this module, and so does a mean that binary
-arithmetic lands a hair under it (runs of 70,1 dB, 70,3 dB and 71,1 dB average
-to 70,5 dB and give 71 dB).
+arithmetic lands a hair under it (runs of 70.1 dB, 70.3 dB and 71.1 dB average
+to 70.5 dB and give 71 dB).
 
 Read from ISO 3095:2013 (third edition) and, for the transit exposure level,
 BS EN ISO 3095:2005 (second edition).
@@ -146,7 +146,7 @@ How much the adjacent vehicle adds, from the levels rounded to one decimal, in d
 
 *property*
 
-Whether the adjacent vehicle adds no more than 2,0 dB.
+Whether the adjacent vehicle adds no more than 2.0 dB.
 
 ### AdjacentVehicleNeutrality.plot()
 
@@ -235,7 +235,7 @@ Is the vehicle next to the unit under test acoustically neutral? 6.3.4.
 
 It is when it is of the same class as the unit, or when the pass-by level
 over the units under test and the adjacent vehicle,
-$L_{p\mathrm{Aeq},T_{p1}}$, is no more than 2,0 dB above the level
+$L_{p\mathrm{Aeq},T_{p1}}$, is no more than 2.0 dB above the level
 over the units alone, $L_{p\mathrm{Aeq},T_p}$, both rounded to one
 decimal for the comparison (Figure 5). This is the second test; it is
 made at least once for each tested speed.
@@ -275,8 +275,8 @@ check_reference_track(
 Is this track a reference track for a constant-speed type test? 6.2.
 
 **6.2.5.** The roughness of every rail (every line, when 6.4.3 of EN 15610
-asks for three) must cover at least 0,003 m to 0,10 m up to 190 km/h and
-0,003 m to 0,25 m above, and must not exceed the limit of Figure 2 in any
+asks for three) must cover at least 0.003 m to 0.10 m up to 190 km/h and
+0.003 m to 0.25 m above, and must not exceed the limit of Figure 2 in any
 band (EN 15610 clause 8). A small exceedance is accepted when Annex C
 finds its effect on the pass-by level at most 1 dB: pass the result of
 [`check_small_roughness_deviations`](/phonometry/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations) for the speed. A line analysed
@@ -305,7 +305,7 @@ direct one.
 | `decay_rates` | The decay rates, vertical and lateral, of every set. |
 | `speed_kmh` | The test speed, in km/h. |
 | `curve_radius_m` | The radius of curvature of the track, in metres; not judged when omitted. |
-| `track_gradient_ratio` | The gradient, rise over length (5:1 000 is 0,005); not judged when omitted. |
+| `track_gradient_ratio` | The gradient, rise over length (5:1 000 is 0.005); not judged when omitted. |
 | `small_deviations` | The Annex C verdict of this speed, computed on the quadratic average of `roughness` ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra), C.2.1) against `roughness_limit_db` (Formula C.1), which accepts a roughness exceedance whose effect is small. |
 | `roughness_limit_db` | The roughness limit; Figure 2 by default. |
 | `decay_limits_db_per_m` | The decay-rate limits, a band-to-rate mapping for each of the two directions; Figure 3 by default. Keyed by any of `"vertical"` or `"lateral"`. |
@@ -1264,7 +1264,7 @@ position are valid when they are no more than 3 dB apart (9.3).
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | One row per set, one column per position of the whole mesh of 5.5.1.1 at 1,2 m, in dB; at least three sets. |
+| `levels` | One row per set, one column per position of the whole mesh of 5.5.1.1 at 1.2 m, in dB; at least three sets. |
 | `lengths_m` | The length each position stands for, in metres. |
 
 **Returns:** The test.

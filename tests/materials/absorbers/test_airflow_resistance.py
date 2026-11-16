@@ -410,11 +410,11 @@ def test_annex_a_printed_air_reproduces_the_printed_wavelength() -> None:
 
 
 def test_thermal_boundary_layer_thickness_annex_a_example() -> None:
-    """b rounds to the 1,83e-3 m the annex prints, from the air it prints.
+    """b rounds to the 1.83e-3 m the annex prints, from the air it prints.
 
     The assertion is that our value carries the printed digits, not that it sits
-    inside some chosen tolerance: 1,83e-3 is printed to three significant figures,
-    so reproducing it means rounding to it. Our value is 1,834 8e-3, which is
+    inside some chosen tolerance: 1.83e-3 is printed to three significant figures,
+    so reproducing it means rounding to it. Our value is 1.834 8e-3, which is
     correct and sits near the upper edge of that band; there is no slack to lose
     and none to gain.
     """
@@ -429,7 +429,7 @@ def test_default_air_also_reproduces_the_printed_boundary_layer() -> None:
     """The Annex F defaults reproduce the printed b as well as the printed pair.
 
     b is sqrt(2 k_a / (rho0 C_P omega)), so it moves only with k_a/C_P and the
-    density. The pair Annex A.3 prints is 1,0800 times smaller in both, which
+    density. The pair Annex A.3 prints is 1.0800 times smaller in both, which
     cancels in the ratio, so both air states land on the same printed digits.
     """
     assert float(f"{thermal_boundary_layer_thickness(frequency=2.0):.3g}") == (
@@ -438,7 +438,7 @@ def test_default_air_also_reproduces_the_printed_boundary_layer() -> None:
 
 
 def test_effective_kappa_annex_a_example() -> None:
-    """From the air Annex A.3 prints, kappa' carries the printed 1,370."""
+    """From the air Annex A.3 prints, kappa' carries the printed 1.370."""
     kappa_prime = effective_kappa(
         cavity_surface=ISO9053_2_ANNEX_A_SURFACE,
         cavity_volume=ISO9053_2_ANNEX_A_VOLUME,
@@ -451,7 +451,7 @@ def test_effective_kappa_annex_a_example() -> None:
 
 
 def test_default_air_also_reproduces_the_printed_kappa_prime() -> None:
-    """The Annex F defaults land on the printed 1,370 with more room than the
+    """The Annex F defaults land on the printed 1.370 with more room than the
     printed pair does: 44 % of the rounding band against 52 %.
     """
     kappa_prime = effective_kappa(

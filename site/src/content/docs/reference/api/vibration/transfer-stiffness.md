@@ -401,7 +401,7 @@ ISO 10846-4:2003 Inequality (3), and ISO 10846-2:2008 Inequality (2) for
 resilient supports:
 
 $$
-m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
+m_0 \le 0.06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
 $$
 
 with $L_{F2}$ the force level re 1 µN and $L_{a2}$ the
@@ -517,7 +517,7 @@ valid lines into bands (Formulas (6), (7)).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Frequencies, in hertz, strictly increasing; the sweep needs lines between 1 Hz and 20 Hz for the low-frequency value, and 7.5 asks for a 0,2 Hz spacing there. |
+| `frequencies` | Frequencies, in hertz, strictly increasing; the sweep needs lines between 1 Hz and 20 Hz for the low-frequency value, and 7.5 asks for a 0.2 Hz spacing there. |
 | `input_force_n` | Input force phasor `F1`, in N. |
 | `input_acceleration_m_s2` | Input acceleration phasor `a1`, in m/s², non-zero. |
 | `output_acceleration_m_s2` | Output-flange acceleration phasor `a2`, in m/s² (Default: `None`, Inequality (1) not checked). |
@@ -558,9 +558,9 @@ Uncertainty of a band level measured by the driving-point method (ISO 10846-5 An
 Table B.1, built on [`phonometry.metrology.uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation):
 
 - $\hat{L}_{k,\mathrm{av}}$, signal processing and background
-  noise, normal, 0,3 dB (B.3.1);
-- $\delta_\mathrm{ins}$, instrumentation, normal, 0,5 dB when only
-  the minimum requirements are met, 0,3 dB "with good choices and
+  noise, normal, 0.3 dB (B.3.1);
+- $\delta_\mathrm{ins}$, instrumentation, normal, 0.5 dB when only
+  the minimum requirements are met, 0.3 dB "with good choices and
   precautions" (B.3.2);
 - $\delta_\mathrm{rep}$, installation repeatability, rectangular,
   $p/\sqrt{3}$ for a spread of $2p$ between the highest and
@@ -571,14 +571,14 @@ Table B.1, built on [`phonometry.metrology.uncertainty_propagation`](/phonometry
   the transfer stiffness, rectangular over $\pm 2$ dB,
   $2/\sqrt{3}$ dB (B.3.5);
 - $\delta_\mathrm{lin}$, linearity, rectangular,
-  $1{,}5/(2\sqrt{3})$ dB (B.3.6).
+  $1.5/(2\sqrt{3})$ dB (B.3.6).
 
-The last three are the expressions B.3.4 to B.3.6 print, 0,289, 1,155
-and 0,433 dB. Table B.1 carries them rounded up to one decimal, 0,3, 1,2
-and 0,5 dB, the conservative rounding an uncertainty may take
+The last three are the expressions B.3.4 to B.3.6 print, 0.289, 1.155
+and 0.433 dB. Table B.1 carries them rounded up to one decimal, 0.3, 1.2
+and 0.5 dB, the conservative rounding an uncertainty may take
 (ISO/IEC Guide 98-3:2008, 7.2.6); the defaults keep the expressions.
-With the defaults and no repeatability spread, $u = 1{,}394$ dB and
-$U = 2{,}789$ dB, against 1,456 dB and 2,91 dB with the rounded
+With the defaults and no repeatability spread, $u = 1.394$ dB and
+$U = 2.789$ dB, against 1.456 dB and 2.91 dB with the rounded
 table. Every default can be replaced by a reasoned estimate, as the annex
 encourages, and the note to (B.3) allows doing so band by band.
 
@@ -588,11 +588,11 @@ encourages, and the note to (B.3) allows doing so band by band.
 | :--- | :--- |
 | `band_level` | The measured band level $\hat{L}_{k,\mathrm{av}}$, in dB re 1 N/m. |
 | `repeatability_range_db` | The difference $2p$ between the highest and lowest band level of repeated installations, in dB (0 for none observed). |
-| `signal_uncertainty_db` | Standard uncertainty of $\hat{L}_{k,\mathrm{av}}$, in dB (Default: 0,3). |
-| `instrumentation_uncertainty_db` | Standard uncertainty $u_\mathrm{ins}$, in dB (Default: 0,5). |
+| `signal_uncertainty_db` | Standard uncertainty of $\hat{L}_{k,\mathrm{av}}$, in dB (Default: 0.3). |
+| `instrumentation_uncertainty_db` | Standard uncertainty $u_\mathrm{ins}$, in dB (Default: 0.5). |
 | `test_rig_uncertainty_db` | Standard uncertainty $u_\mathrm{rig}$, in dB (Default: $1/(2\sqrt{3})$). |
 | `discrepancy_uncertainty_db` | Standard uncertainty $u_\mathrm{dps}$, in dB (Default: $2/\sqrt{3}$). |
-| `linearity_uncertainty_db` | Standard uncertainty $u_\mathrm{lin}$, in dB (Default: $1{,}5/(2\sqrt{3})$). |
+| `linearity_uncertainty_db` | Standard uncertainty $u_\mathrm{lin}$, in dB (Default: $1.5/(2\sqrt{3})$). |
 
 **Returns:** The [`DrivingPointUncertainty`](/phonometry/reference/api/vibration/transfer-stiffness/#drivingpointuncertainty).
 
@@ -678,7 +678,7 @@ criterion of 6.2 itself only watches $k_{1,1}$ fall below its
 own low-frequency value, so the 2 dB is the standard's statement,
 not something the average can prove line by line.
 
-Up to 20 Hz the 0,2 Hz line spacing of 7.5 leaves the lowest bands
+Up to 20 Hz the 0.2 Hz line spacing of 7.5 leaves the lowest bands
 with fewer than five lines; the NOTE to clause 9 m) accepts
 narrow-band data there, so those bands are left undetermined without
 a warning.
@@ -1180,18 +1180,18 @@ called `m2` and counts the force distribution plate and half the
 transducers only:
 
 $$
-m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
+m_0 \le 0.06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg}
 $$
 
 with the levels re 1 µN and 1 µm/s² (ISO 10846-4 3.15 and 3.16), so the
-bound is $0{,}06\,|F_2|/|a_2|$. Since
+bound is $0.06\,|F_2|/|a_2|$. Since
 $F_\mathrm{b} = F_2 + m_0 a_2$, the force levels differ by at most
 $-20 \lg(1 - r)$ dB with $r = m_0 |a_2| / |F_2|$, which at
-the bound ($r = 0{,}06$) is 0,54 dB against the 0,51 dB of an
+the bound ($r = 0.06$) is 0.54 dB against the 0.51 dB of an
 inertia force in phase with the measured one: the "0,5 dB" of NOTE 1.
 
 The measured side of the inequality is a field, the apparent mass
-$|F_2|/|a_2|$ the two output levels give; the 0,06 is the series',
+$|F_2|/|a_2|$ the two output levels give; the 0.06 is the series',
 so `mass_limit_kg` is read from it and a check cannot be built
 against another factor.
 
@@ -1229,7 +1229,7 @@ Per frequency, whether `m0` is within its limit.
 
 The inertia force over the measured force, $r = m_0 |a_2| / |F_2|$.
 
-**Returns:** One ratio per frequency; 0,06 where `m0` sits on its limit.
+**Returns:** One ratio per frequency; 0.06 where `m0` sits on its limit.
 
 ### OutputMassCheck.mass_limit_kg
 
@@ -1237,7 +1237,7 @@ The inertia force over the measured force, $r = m_0 |a_2| / |F_2|$.
 
 The right-hand side of the inequality at each frequency, in kg.
 
-**Returns:** $0{,}06\,|F_2|/|a_2|$, one per frequency.
+**Returns:** $0.06\,|F_2|/|a_2|$, one per frequency.
 
 ### OutputMassCheck.passes
 

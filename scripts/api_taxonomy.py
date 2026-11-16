@@ -650,7 +650,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "CAM_C": "phonometry.psychoacoustics.erb_scale",
     # The tapping-machine hammer mass is owned by resilient_layers and imported
     # by installed_structure_borne, where EN 12354-5 clause D.1.3 uses the same
-    # 0,5 kg as the source mass of Formula (D.9b), so a plain scan sees it in
+    # 0.5 kg as the source mass of Formula (D.9b), so a plain scan sees it in
     # both modules.
     "TAPPING_HAMMER_MASS_KG": "phonometry.building.prediction.resilient_layers",
     # The ISO 20816-1 tables and factors are plain containers, so a scan

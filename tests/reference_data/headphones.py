@@ -138,7 +138,7 @@ IEC60268_7_FORMULA3_PRINTED_HZ = 470.0
 #: half the rated input voltage".
 IEC60268_7_DIFFERENCE_FREQUENCY_HZ = 80.0
 
-#: Annex B (folio 42): a) 5 mm2, b) ratio 0,6 and the adult 45 mm2, c)
+#: Annex B (folio 42): a) 5 mm2, b) ratio 0.6 and the adult 45 mm2, c)
 #: 130 mm3, d) 3 dB, e) 15 dB.
 IEC60268_7_ANNEX_B = {
     "entrance_area_mm2": 5.0,

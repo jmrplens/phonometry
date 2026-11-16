@@ -317,7 +317,7 @@ class Aerodrome(RichDisplay):
         dimensionless: the rise over the run between the two runway ends.
 
     The validity envelope Doc 29 claims for the coefficients is "air
-    temperatures up to 43 degrees C, aerodrome altitudes up to 6,000 ft and
+    temperatures up to 43 degrees C, aerodrome altitudes up to 6 000 ft and
     across the range of weights specified in the ANP database" (B1). Nothing
     here enforces it: outside it the equations still evaluate, and the
     coefficients, not the arithmetic, are what stop being adequate.
@@ -413,7 +413,7 @@ class Aerodrome(RichDisplay):
             where raising it to a fractional power leaves the reals; Python
             answers that with a complex number rather than an error, and a
             complex pressure ratio propagates silently into every thrust of the
-            profile. Doc 29 claims the coefficients only up to 6,000 ft anyway.
+            profile. Doc 29 claims the coefficients only up to 6 000 ft anyway.
         :raises TypeError: if ``altitude_ft`` is not one real number.
         """
         altitude = real_number(altitude_ft, "altitude_ft")

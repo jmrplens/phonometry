@@ -847,7 +847,7 @@ def plot_audiometric_uncertainty(
 ) -> Axes:
     """The eight contributions of Table A.1 as bars, the combined value on top.
 
-    The title gives :math:`u` to 0,1 dB and :math:`U` to the nearest full
+    The title gives :math:`u` to 0.1 dB and :math:`U` to the nearest full
     decibel, as A.6 reports it.
 
     Works for :class:`~phonometry.hearing.audiometry.AudiometricUncertaintyBudget`.
@@ -873,7 +873,7 @@ def plot_audiometric_uncertainty(
         r"$\delta_\mathrm{pr}$",
     ]
     # A.6 reports the expanded uncertainty rounded to the nearest full
-    # decibel, as Table A.2 prints it (U = 10 dB for u = 4,9 dB).
+    # decibel, as Table A.2 prints it (U = 10 dB for u = 4.9 dB).
     title = _t(_BUDGET_TITLE, language).format(
         u=_number(result.combined_uncertainty_db, language),
         big_u=_number(result.expanded_uncertainty_db, language, ".0f"),
@@ -943,7 +943,7 @@ def plot_diffuse_sound_field(
     """The two conditions of a diffuse field, each against its limit.
 
     Draws, per band, the largest deviation of the six positions from the
-    reference point against ±2,5 dB, the difference between the right and
+    reference point against ±2.5 dB, the difference between the right and
     left positions against 3 dB and, from 500 Hz up, the variation the
     directional microphone read against the limit Table 1 gives it. Works for
     :class:`~phonometry.hearing.sound_field_audiometry.DiffuseSoundFieldCheck`.

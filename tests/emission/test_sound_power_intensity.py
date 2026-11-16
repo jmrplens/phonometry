@@ -276,7 +276,7 @@ def test_criterion_3_reads_the_column_of_the_band_set(
     """Table 2 has one column per band set (UNE-EN ISO 9614-2:1997, PDF page 12,
     printed page 12): s is 3 dB from 50 Hz to 160 Hz in one-third octaves and
     from 63 Hz to 125 Hz in octaves, 2 dB at 200 Hz to 315 Hz and at the 250 Hz
-    octave, and 2,5 dB at 6 300 Hz, a one-third-octave centre only.
+    octave, and 2.5 dB at 6 300 Hz, a one-third-octave centre only.
     """
     res = emission.sound_power_intensity(
         **_two_scans(difference_db, centre_hz, fraction)
@@ -452,11 +452,11 @@ def test_a_weighted_total_omits_band_failing_criterion_1() -> None:
     from the A-weighted determination.
 
     Hand oracle: four 1 m^2 segments (S = 4 m^2), uniform In = 1e-3 W/m^2 at
-    500 Hz (P = 4e-3 W, LW = 96,0206 dB) and 5e-4 W/m^2 at 1 kHz
-    (LW = 93,0103 dB). With dpI0 = 16 dB (Ld = 6 dB) and surface SPLs of
-    92 dB / 95 dB, FpI = 2,00 dB at 500 Hz (passes) and 8,01 dB at 1 kHz
-    (fails). LWA keeps only 500 Hz: 96,0206 - 3,2 = 92,8206 dB, not the
-    two-band 95,9268 dB.
+    500 Hz (P = 4e-3 W, LW = 96.0206 dB) and 5e-4 W/m^2 at 1 kHz
+    (LW = 93.0103 dB). With dpI0 = 16 dB (Ld = 6 dB) and surface SPLs of
+    92 dB / 95 dB, FpI = 2.00 dB at 500 Hz (passes) and 8.01 dB at 1 kHz
+    (fails). LWA keeps only 500 Hz: 96.0206 - 3.2 = 92.8206 dB, not the
+    two-band 95.9268 dB.
     """
     areas = np.ones(4)
     intensity = np.column_stack([np.full(4, 1.0e-3), np.full(4, 5.0e-4)])
@@ -479,9 +479,9 @@ def test_a_weighted_total_omits_band_failing_criterion_2_engineering() -> None:
     F+/- > 3 dB (criterion 2 fails) is omitted from LWA.
 
     Hand oracle: band 2 partial powers 5/-1/1/-1 mW give P = 4 mW
-    (LW = 96,0206 dB) with F+/- = 10*lg(8/4) = 3,0103 dB > 3 dB; band 1 is
+    (LW = 96.0206 dB) with F+/- = 10*lg(8/4) = 3.0103 dB > 3 dB; band 1 is
     uniform 1 mW per segment (same LW, F+/- = 0). LWA keeps only band 1:
-    96,0206 - 3,2 = 92,8206 dB.
+    96.0206 - 3.2 = 92.8206 dB.
     """
     areas = np.ones(4)
     intensity = np.column_stack(
@@ -507,7 +507,7 @@ def test_a_weighted_total_omits_band_failing_criterion_2_engineering() -> None:
 def test_survey_grade_does_not_omit_on_criterion_2() -> None:
     """Criterion 2 is optional for grade 3 (Note 16), so a survey
     determination keeps a band with F+/- > 3 dB in LWA:
-    10*lg(10^9,28206 + 10^9,60206) = 97,7192 dB.
+    10*lg(10^9.28206 + 10^9.60206) = 97.7192 dB.
     """
     areas = np.ones(4)
     intensity = np.column_stack(

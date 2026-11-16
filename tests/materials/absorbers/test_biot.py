@@ -30,16 +30,16 @@ four kinds of evidence, in decreasing strength:
    Table 6.1 (printed p. 124), the only "computed" numbers the Biot chapter
    publishes: the airborne wave changes branch from ``(delta1, mu1)`` to
    ``(delta2, mu2)`` at **495 Hz**, ``|mu_a| > 40`` above 50 Hz, and
-   ``mu_b`` runs from **1,0 at 50 Hz to 0,82 at 1500 Hz** (all printed
+   ``mu_b`` runs from **1.0 at 50 Hz to 0.82 at 1500 Hz** (all printed
    pp. 124-125). These are genuine independent oracles: they come out of the
    book's own run of the full Biot model on a material whose every parameter
    is printed. The third is matched by ``Re(mu_b)``, not by ``|mu_b|``, even
    though the printed sentence says "modulus"; see ``docs/ERRATA.md``.
 4. **The published resonance frequencies**: the surface-impedance peak that no
    equivalent-fluid model can produce sits "around 470 Hz" for a 10 cm layer
-   and at **860 Hz** for a 5,6 cm layer (printed p. 129), against the closed
-   form Eq. (6.110) which puts the frame ``lambda/4`` resonance at 459,9 Hz and
-   821,3 Hz respectively.
+   and at **860 Hz** for a 5.6 cm layer (printed p. 129), against the closed
+   form Eq. (6.110) which puts the frame ``lambda/4`` resonance at 459.9 Hz and
+   821.3 Hz respectively.
 
 What is **not** anchored on digits: the absolute level of ``Zs(f)`` away from
 those features, the oblique-incidence behaviour (only its rigid-frame limit is
@@ -69,7 +69,7 @@ from phonometry.materials.absorbers.biot import _gamma, _porous_porous_matrix
 # they came off: the glass wool "Domisol Coffrage" of A&A Sect. 6.5.4, whose
 # six tabulated parameters are Table 6.1 on printed p. 124 and whose two
 # characteristic lengths are printed in prose on p. 123 from Eqs. (5.29)-(5.30)
-# (fibre diameter 12 um, Lambda = 0,56e-4 m, Lambda' = 2 Lambda = 1,1e-4 m);
+# (fibre diameter 12 um, Lambda = 0.56e-4 m, Lambda' = 2 Lambda = 1.1e-4 m);
 # and the soft fibrous material of Table 11.2 on printed p. 254, the input set
 # behind Figure 11.2 and the material of the limp-frame tests. Nothing here
 # retypes a printed number.
@@ -145,7 +145,7 @@ def _closed_form_resonance(thickness: float) -> float:
 def _impedance_peak(thickness: float) -> float:
     """Frequency of the ``Im(Zs)`` peak of a hard-backed glass-wool layer.
 
-    Searched in the octave-wide window ``[0,6 fr, 1,5 fr]`` around the closed
+    Searched in the octave-wide window ``[0.6 fr, 1.5 fr]`` around the closed
     form Eq. (6.110), because ``Im(Zs)`` also rises monotonically towards high
     frequency once the layer becomes acoustically thick.
     """
@@ -183,8 +183,8 @@ def test_frame_moduli_match_the_printed_closed_forms() -> None:
 def test_frame_elastic_coefficient_of_the_table_6_1_glass_wool() -> None:
     """With ``nu = 0`` the printed forms collapse to ``Kc = 2 N``.
 
-    A&A Table 6.1 prints ``N = 220 (1 + j 0,1)`` N/cm2 and ``nu = 0``, so
-    ``Re(Kc) = 2 x 2,2e6 = 4,4e6`` Pa: pure arithmetic on the printed values.
+    A&A Table 6.1 prints ``N = 220 (1 + j 0.1)`` N/cm2 and ``nu = 0``, so
+    ``Re(Kc) = 2 x 2.2e6 = 4.4e6`` Pa: pure arithmetic on the printed values.
     """
     k_c = materials.frame_elastic_coefficient(
         TABLE_6_1_SHEAR_MODULUS, TABLE_6_1_POISSON_RATIO
@@ -195,8 +195,8 @@ def test_frame_elastic_coefficient_of_the_table_6_1_glass_wool() -> None:
 def test_frame_quarter_wave_resonance_allard_eq_6_110() -> None:
     """A&A Eq. (6.110), printed p. 129: ``fr = (1/4l) sqrt(Re(Kc)/rho1)``.
 
-    On the Table 6.1 glass wool, ``sqrt(4,4e6/130) = 183,97`` m/s, so a 10 cm
-    layer resonates at **459,9 Hz** and a 5,6 cm layer at 821,3 Hz. The
+    On the Table 6.1 glass wool, ``sqrt(4.4e6/130) = 183.97`` m/s, so a 10 cm
+    layer resonates at **459.9 Hz** and a 5.6 cm layer at 821.3 Hz. The
     arithmetic is pure and the two are the closed-form anchors of this module.
     """
     assert materials.frame_quarter_wave_resonance(
@@ -275,12 +275,12 @@ def test_frame_borne_velocity_ratio_matches_the_two_published_values() -> None:
     """A&A printed p. 125, read as ``Re(mu_b)``, not as ``|mu_b|``.
 
     The printed sentence is "the ratio **modulus** ``|mu_b|`` of the velocities
-    of the frame and the air for the frame-borne wave decreases from 1,0 at
-    50 Hz to 0,82 at 1500 Hz", but the two values it quotes are the real part:
-    the model gives ``mu_b(1500) = 0,811 + 0,473 j``, whose real part is 1,1 %
-    from 0,82 while its modulus, 0,939, is 14,5 % away. ``docs/ERRATA.md``
+    of the frame and the air for the frame-borne wave decreases from 1.0 at
+    50 Hz to 0.82 at 1500 Hz", but the two values it quotes are the real part:
+    the model gives ``mu_b(1500) = 0.811 + 0.473 j``, whose real part is 1.1 %
+    from 0.82 while its modulus, 0.939, is 14.5 % away. ``docs/ERRATA.md``
     records the sentence and the evidence, including the parameter sweep that
-    fails to bring ``|mu_b|`` anywhere near 0,82. The assertions here are
+    fails to bring ``|mu_b|`` anywhere near 0.82. The assertions here are
     therefore written against ``Re(mu_b)`` and the test also states what
     ``|mu_b|`` really does, so a future change cannot quietly reinterpret it.
 
@@ -295,7 +295,7 @@ def test_frame_borne_velocity_ratio_matches_the_two_published_values() -> None:
     assert float(ratio[1].real) == pytest.approx(0.82, rel=0.02)
     assert float(ratio[1].real) < float(ratio[0].real)
     # The modulus reading of the same sentence, pinned so the erratum stays
-    # honest: it is nowhere near 0,82 at 1500 Hz.
+    # honest: it is nowhere near 0.82 at 1500 Hz.
     assert abs(ratio[1]) == pytest.approx(0.939, rel=0.01)
     assert abs(abs(ratio[1]) / 0.82 - 1.0) > 0.1
 
@@ -393,7 +393,7 @@ def test_airborne_wave_follows_the_rigid_frame_wavenumber() -> None:
     ``ka' = w sqrt(rho22/R)``, which for this parameterisation is exactly the
     Johnson-Champoux-Allard wavenumber. Figure 6.6 plots them on top of each
     other for the Table 6.1 glass wool; here the two agree to better than 2 %
-    over the plotted 0 to 1,5 kHz.
+    over the plotted 0 to 1.5 kHz.
     """
     frequency = np.geomspace(50.0, 1500.0, 60)
     waves = _glass_wool_waves(frequency)
@@ -408,8 +408,8 @@ def test_impedance_peak_of_the_ten_centimetre_layer() -> None:
     """A&A printed p. 129: the peak sits "around 470 Hz" for ``l = 10 cm``.
 
     Figure 6.10 shows it as a dip and a peak in ``Re(Z)`` straddling a sharp
-    maximum of ``Im(Z)`` just below 0,5 kHz. The closed form Eq. (6.110) puts
-    the underlying frame ``lambda/4`` resonance at 459,9 Hz, and the book warns
+    maximum of ``Im(Z)`` just below 0.5 kHz. The closed form Eq. (6.110) puts
+    the underlying frame ``lambda/4`` resonance at 459.9 Hz, and the book warns
     that ``delta_b`` is only "very close" to the in-vacuum wavenumber, so the
     computed peak is expected a few per cent above it. Tolerance: 5 % of the
     printed 470 Hz.
@@ -423,10 +423,10 @@ def test_impedance_peak_of_the_thin_layer_resolves_the_printed_thickness() -> No
     """A&A printed p. 129 prints the peak of the second sample at **860 Hz**.
 
     The same paragraph is internally inconsistent about that sample: its first
-    sentence says ``l = 5,4 cm`` and its third says ``l = 5,6 cm``, and the
-    caption of Figure 6.11 says 5,6 cm. Computing the peak from the printed
-    material settles it: 5,6 cm gives 863,5 Hz (0,4 % from the printed 860 Hz)
-    while 5,4 cm gives 896 Hz (4,2 % away). Only the 5,6 cm reading is
+    sentence says ``l = 5.4 cm`` and its third says ``l = 5.6 cm``, and the
+    caption of Figure 6.11 says 5.6 cm. Computing the peak from the printed
+    material settles it: 5.6 cm gives 863.5 Hz (0.4 % from the printed 860 Hz)
+    while 5.4 cm gives 896 Hz (4.2 % away). Only the 5.6 cm reading is
     consistent, so it is the one pinned here, to 2 %.
     """
     thin = _impedance_peak(0.056)
@@ -661,7 +661,7 @@ def test_bonded_interface_satisfies_the_printed_continuity_conditions() -> None:
 def test_two_bonded_materials_reduce_to_the_two_layer_equivalent_fluid() -> None:
     """The ``[Ipp]`` couplings survive a real two-material stack.
 
-    Two *different* bonded poroelastic layers, 0,94 and 0,98 porosity on two
+    Two *different* bonded poroelastic layers, 0.94 and 0.98 porosity on two
     different Johnson-Champoux-Allard media, driven to the rigid-frame limit of
     A&A Sect. 11.3.4. The result must converge on the same two-layer stack
     built from :class:`~phonometry.materials.absorbers.layered.PorousLayer`,
@@ -713,7 +713,7 @@ def test_two_bonded_materials_reduce_to_the_two_layer_equivalent_fluid() -> None
 # Strongly attenuating blocks: the assembly must not lose the stack
 # ---------------------------------------------------------------------------
 #: A dense fibrous material, 500 kPa s/m2, whose in-depth attenuation reaches
-#: 410 nepers per metre at 20 kHz. Any run of it thicker than about 1,7 m
+#: 410 nepers per metre at 20 kHz. Any run of it thicker than about 1.7 m
 #: overflows a raw ``float64`` chain matrix.
 _DENSE_RESISTIVITY = 500.0e3
 
@@ -744,7 +744,7 @@ def test_attenuating_fluid_run_in_front_of_a_biot_layer_gives_the_half_space() -
 
     Two metres of the dense material attenuate by 245 nepers at 2 kHz and by
     821 nepers at 20 kHz, so over the top of the band ``cos(kx d)`` and
-    ``sin(kx d)``, of order ``e^{|Im kx| d}``, are past the ``1,8e308`` of
+    ``sin(kx d)``, of order ``e^{|Im kx| d}``, are past the ``1.8e308`` of
     ``float64``. Nothing behind such a run can be heard, so the oracle is the
     definition of the characteristic impedance: the surface impedance of a
     half-space at normal incidence is ``Zc`` of its medium, to machine
@@ -1032,8 +1032,8 @@ def test_limp_limit_converges_on_the_limp_frame_equivalent_fluid() -> None:
     soft fibrous material of Table 11.2 the limp model was written for.
 
     The residual is first order in ``N`` and the test says so: from
-    ``N = 1e3`` down it falls by a factor between 7,6 and 10 for every decade,
-    not merely "by some". Above that the layer is not limp yet (only 3,2 from
+    ``N = 1e3`` down it falls by a factor between 7.6 and 10 for every decade,
+    not merely "by some". Above that the layer is not limp yet (only 3.2 from
     1e5 to 1e4), and below ``N = 1e-1`` the shear wavenumber
     ``delta3 = omega sqrt(rho_c / N)`` of Eq. (6.87) has diverged so far that
     the assembly refuses the layer outright, which
@@ -1240,7 +1240,7 @@ def test_packing_refuses_more_blocks_than_the_assembly_resolves() -> None:
 
     The pre-check bounds the sum of the per-layer losses, but the greedy
     next-fit grouping needs up to twice the optimal number of bins: items just
-    over half a budget open a block each. Six terms of 10,5 nepers sum to 63,
+    over half a budget open a block each. Six terms of 10.5 nepers sum to 63,
     inside a 20-neper budget over four blocks, and still pack into six.
     """
     from phonometry.materials.absorbers.layered import _split_fluid_run

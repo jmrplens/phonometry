@@ -27,7 +27,7 @@ would be inventing a tortuosity nobody published, so
 
 The same applies to the elastic constants. Table 6.1 prints a complex shear
 modulus, `220(1 + j0.1)` N/cm2, and Table 11.8 prints the same specimen as a
-Young's modulus of 4,4 MPa with a structural loss factor of 0,1; they agree,
+Young's modulus of 4.4 MPa with a structural loss factor of 0.1; they agree,
 because `E / (2(1 + nu))` is the real part of the first. A row therefore
 stores the real modulus and the loss factor separately, which is the form the
 poroelastic models take them in, and [`PorousMaterial.frame_constants`](/phonometry/reference/api/materials/catalogue/#porousmaterialframe_constants)

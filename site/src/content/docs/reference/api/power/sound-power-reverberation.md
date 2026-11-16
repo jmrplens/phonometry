@@ -110,7 +110,7 @@ $$
 
 Every octave the input touches must be supplied whole: Table F.1 numbers
 the one-third-octave bands from $k = 1$ at 50 Hz, so the 63 Hz
-octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
+octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6.3, 8 and
 10 kHz thirds, and a band whose triplet is incomplete cannot be summed.
 
 **Parameters**
@@ -217,11 +217,11 @@ reverberation_background_correction(
 
 Background-noise correction $K_1$, ISO 3741:2010 Equation (14).
 
-$K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})$, the decibels to take off
+$K_1 = -10 \lg (1 - 10^{-0.1 \Delta L_p})$, the decibels to take off
 a band level measured with the background in it. The qualification of
 clause 9.1.2 is frequency dependent: a margin of 15 dB or more needs no
 correction at all, and below the lower criterion, 6 dB for the bands at or
-under 200 Hz and at or over 6,3 kHz and 10 dB between them, the correction
+under 200 Hz and at or over 6.3 kHz and 10 dB between them, the correction
 is held at the criterion value and the corrected level is an upper bound.
 
 Other standards reach for this one by name rather than repeat it:

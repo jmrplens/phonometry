@@ -20,7 +20,7 @@ The reference and the level
 
 Everything is a level in decibels referred to a magnetic field strength of
 400 mA/m (3.1), [`REFERENCE_FIELD_STRENGTH_A_PER_M`](/phonometry/reference/api/electroacoustics/induction-loop/#reference_field_strength_a_per_m):
-$L = 20\lg(H / 0{,}4\ \mathrm{A/m})$ ([`field_strength_level`](/phonometry/reference/api/electroacoustics/induction-loop/#field_strength_level)).
+$L = 20\lg(H / 0.4\ \mathrm{A/m})$ ([`field_strength_level`](/phonometry/reference/api/electroacoustics/induction-loop/#field_strength_level)).
 A long-term average of -12 dB, 100 mA/m, at the telecoil gives the same
 acoustic output from the hearing aid as a sound pressure level of 70 dB at
 its microphone (4.3). The meter is either a true-RMS meter with the 125 ms
@@ -60,7 +60,7 @@ Small systems
 
 For a disabled refuge or call point and for a counter, Amendment 1 rewrites
 clause 9. The field is measured at fixed points (Figures 2 and 3), six at
-heights of 1,2 m and 1,7 m for a refuge and three at 1,2 m, 1,45 m and 1,7 m
+heights of 1.2 m and 1.7 m for a refuge and three at 1.2 m, 1.45 m and 1.7 m
 for a counter ([`small_volume_measurement_points`](/phonometry/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points)), or, by contract, at
 representative points spread through a useful magnetic field volume which, at
 the minimum, meets the requirements at one position at least at each of the
@@ -70,14 +70,14 @@ minus 6 dB of 400 mA/m and meet 8.3.7, at one point at least it shall reach
 (9.5, [`verify_small_volume_system`](/phonometry/reference/api/electroacoustics/induction-loop/#verify_small_volume_system)).
 
 Two informative passages disagree with 9.5 and are not followed: Annex A.4
-allows "up to, but not greater than, +12 dB" at 1,45 m for a counter, and
+allows "up to, but not greater than, +12 dB" at 1.45 m for a counter, and
 calls a counter's requirement "less stringent" than a refuge's, where 9.5
 applies the same limits to both (see `docs/ERRATA.md`).
 
 Commissioning and the amplifier
 -------------------------------
 
-Amendment 1 replaces the 1,6 kHz overload test with one tied to the programme
+Amendment 1 replaces the 1.6 kHz overload test with one tied to the programme
 (10.3, Table 4, [`OVERLOAD_TEST_FREQUENCIES`](/phonometry/reference/api/electroacoustics/induction-loop/#overload_test_frequencies)): with a 1 kHz sine giving a
 field 7 dB below the required one, the frequency is raised at constant input
 until the loop voltage doubles or the frequency of Table 4 is reached,
@@ -97,12 +97,12 @@ Test signals
 ------------
 
 The pink noise of 6.4, band-limited by third-order Butterworth filters at
-75 Hz and 6,5 kHz with a crest factor of 4 ([`loop_test_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#loop_test_noise), also the
+75 Hz and 6.5 kHz with a crest factor of 4 ([`loop_test_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#loop_test_noise), also the
 signal of IEC 62489-1 5.4.8.2 b), and the combi signal of 6.6 and Table 2,
 1 kHz tone bursts of at least 1 s interleaved with at least four times as
 much of that noise 6 dB lower ([`combi_signal`](/phonometry/reference/api/electroacoustics/induction-loop/#combi_signal)). 6.4 NOTE 2 prints the
-theoretical responses of the band-limiting filters as -0,8 dB at 100 Hz and
--0,7 dB at 5 kHz; they are -0,71 dB and -0,82 dB, the other way round
+theoretical responses of the band-limiting filters as -0.8 dB at 100 Hz and
+-0.7 dB at 5 kHz; they are -0.71 dB and -0.82 dB, the other way round
 ([`band_limit_response`](/phonometry/reference/api/electroacoustics/induction-loop/#band_limit_response), `docs/ERRATA.md`).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -203,8 +203,8 @@ How quiet is the site magnetically? (IEC 60118-4:2014 7.2).
 
 The magnetic background noise is measured A-weighted with the loop
 switched off, everything else normally in use on and dimmable lighting
-half-dimmed, at enough points of the intended volume, normally at 1,2 m
-for seated and 1,7 m for standing listeners (7.1). Its difference from the
+half-dimmed, at enough points of the intended volume, normally at 1.2 m
+for seated and 1.7 m for standing listeners (7.1). Its difference from the
 reference level, the reference signal-to-noise ratio, is taken at the
 noisiest point, because that is where a listener hears the most of it.
 
@@ -327,14 +327,14 @@ band_limit_response(
 The theoretical response of the band limiting of the pink noise, in dB.
 
 6.4 band-limits the pink noise with third-order Butterworth high-pass and
-low-pass filters, -3 dB at 75 Hz and 6,5 kHz, whose combined response is
+low-pass filters, -3 dB at 75 Hz and 6.5 kHz, whose combined response is
 
 $$
 |H|^2 = \frac{1}{1 + (75/f)^6}\,\frac{1}{1 + (f/6500)^6}.
 $$
 
-At 100 Hz it is -0,71 dB and at 5 kHz -0,82 dB. 6.4 NOTE 2, and NOTE 3 to
-5.4.8.2 of IEC 62489-1:2010, print -0,8 dB at 100 Hz and -0,7 dB at 5 kHz,
+At 100 Hz it is -0.71 dB and at 5 kHz -0.82 dB. 6.4 NOTE 2, and NOTE 3 to
+5.4.8.2 of IEC 62489-1:2010, print -0.8 dB at 100 Hz and -0.7 dB at 5 kHz,
 the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 6.4 requires from 100 Hz to 5 kHz holds either way.
 
@@ -371,7 +371,7 @@ Bursts of a 1 kHz sine at an RMS of 1, with 5 ms rise and fall times,
 interleaved with the pink noise of 6.4 at an RMS 6 dB lower: the sine's
 peaks sit 3 dB below the maximum peak of noise of crest factor 4, as
 Table 2 notes ($\sqrt{2}$ against $4 \times 10^{-6/20}$,
--3,03 dB). Each burst lasts at least 1 s so that either meter settles,
+-3.03 dB). Each burst lasts at least 1 s so that either meter settles,
 and the noise at least four times as long, so the amplifier runs cooler
 than on a steady sine while the level of the sine can still be read.
 Every transition is at a zero crossing: the bursts start and end on the
@@ -447,7 +447,7 @@ field_strength_level(
 The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
 
 $$
-L = 20\lg\frac{H}{0{,}4\ \mathrm{A/m}}
+L = 20\lg\frac{H}{0.4\ \mathrm{A/m}}
 $$
 
 **Parameters**
@@ -647,16 +647,16 @@ loop_test_noise(
 The pink noise test signal of IEC 60118-4:2014 6.4.
 
 Pink noise band-limited by third-order Butterworth high-pass and low-pass
-filters, -3 dB at 75 Hz and 6,5 kHz, with "a peak-to-peak voltage (as
+filters, -3 dB at 75 Hz and 6.5 kHz, with "a peak-to-peak voltage (as
 measured with an oscilloscope) to true r.m.s. voltage ratio of at least
 18 dB (crest factor = 4)". The same
 signal drives the compliance voltage measurement of IEC 62489-1:2010
 5.4.8.2 b), which asks for 18 dB plus or minus 2 dB.
 
 Gaussian noise has no crest factor of its own: in 60 s at 48 kHz it
-reaches about 5,5 times its RMS, a ratio of 21 dB, which meets 6.4 and
+reaches about 5.5 times its RMS, a ratio of 21 dB, which meets 6.4 and
 fails 5.4.8.2 b). The noise is therefore clipped at 4 times its RMS and
-rescaled, which gives a peak-to-peak ratio of 18,1 dB and meets both, once
+rescaled, which gives a peak-to-peak ratio of 18.1 dB and meets both, once
 the record is long enough to reach 4 times its RMS both ways: some tens of
 seconds make that certain, which is the length both measurements run for.
 The filters are the bilinear transforms of the Butterworth prototypes at
@@ -717,8 +717,8 @@ How far inside its limits each value lies, in dB (negative outside).
 
 Each margin is settled to nine decimal places, a nanodecibel, so that a
 value on a limit reached through floating-point arithmetic is on it: a
-response of -18,6 dB against -15,6 dB at 1 kHz has a margin of 0 dB,
-not -0,000 000 000 000 001 8 dB.
+response of -18.6 dB against -15.6 dB at 1 kHz has a margin of 0 dB,
+not -0.000 000 000 000 001 8 dB.
 
 ### LoopRequirement.passes
 
@@ -778,8 +778,8 @@ magnetic_flux_density(
 The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
 
 $B = \mu_0 \mu_\mathrm{r} H$ with $\mu_\mathrm{r} = 1$ in air,
-so 1 A/m is $1{,}2566\ \mu\mathrm{T}$ and 400 mA/m about
-$0{,}503\ \mu\mathrm{T}$. E.6 prints 1,256; the last digit rounds to
+so 1 A/m is $1.2566\ \mu\mathrm{T}$ and 400 mA/m about
+$0.503\ \mu\mathrm{T}$. E.6 prints 1.256; the last digit rounds to
 7 (see `docs/ERRATA.md`).
 
 **Parameters**
@@ -847,10 +847,10 @@ dimensions: along the perpendicular and plus or minus 45 degrees from it,
 at 300 mm and 500 mm from the reference point. `"refuge_large"` is
 Figure 2 b), for a larger source such as a vertical loop: three points on
 a row 424 mm wide at 300 mm from the reference line and three on a row
-700 mm wide 200 mm further. Both are taken at 1,2 m and 1,7 m (9.2).
+700 mm wide 200 mm further. Both are taken at 1.2 m and 1.7 m (9.2).
 `"counter"` is Figure 3: on the semicircle of 300 mm radius around the
-reference point, at its bottom and 150 mm to either side, at 1,2 m,
-1,45 m and 1,7 m (9.3).
+reference point, at its bottom and 150 mm to either side, at 1.2 m,
+1.45 m and 1.7 m (9.3).
 
 Amendment 1 corrects the key of Figure 2 a): the outer radius is
 $l_2 + l_3$ = 500 mm, where the 2014 key printed "$l_3$ outer
@@ -891,7 +891,7 @@ telecoil_response(
 The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
 
 A telecoil follows a cosine law, $20\lg|\cos\theta|$: 3 dB down at
-45 degrees off its magnetic axis and 9,3 dB down at 70 degrees
+45 degrees off its magnetic axis and 9.3 dB down at 70 degrees
 (Figure E.6). A telecoil at right angles to the field picks up nothing,
 which is why the measurements of 8.1 are made with the coil vertical
 unless the users kneel or lie.
@@ -995,7 +995,7 @@ Does an installed loop meet IEC 60118-4:2014 over its useful volume?
 
 The requirements of clause 8 and of 10.4 as amended, on the measurements an
 installer makes at the selected points of the useful magnetic field volume,
-normally at 1,2 m for seated and 1,7 m for standing listeners (8.4.2):
+normally at 1.2 m for seated and 1.7 m for standing listeners (8.4.2):
 
 * `"field_strength"` (8.4.3): every level within plus or minus 3 dB of
   the level specified according to 8.2.7, which is 400 mA/m, 0 dB, with a
@@ -1079,12 +1079,12 @@ in their place (9.4):
 A useful volume replaces the points of 9.2 (`"refuge_useful_volume"`)
 or of 9.3 (`"counter_useful_volume"`), and 9.4 asks it, as a minimum, to
 meet the requirements at one position at least at each height of the
-clause it replaces: 1,2 m and 1,7 m for a refuge, and 1,2 m, 1,45 m and
-1,7 m for a counter. Every point is held to 9.5 all the same, so the
+clause it replaces: 1.2 m and 1.7 m for a refuge, and 1.2 m, 1.45 m and
+1.7 m for a counter. Every point is held to 9.5 all the same, so the
 minimum comes down to the points including each of those heights, and
 `heights_m` says which height each point was taken at.
 
-The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
+The informative Annex A.4 allows up to +12 dB at 1.45 m for a counter;
 9.5 does not, and 9.5 is what is applied (see `docs/ERRATA.md`).
 
 **Parameters**

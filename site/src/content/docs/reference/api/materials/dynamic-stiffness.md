@@ -99,7 +99,7 @@ $s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2$.
 | Name | Description |
 | :--- | :--- |
 | `resonant_frequency_hz` | Extrapolated resonant frequency `fr`, in hertz (scalar or array). |
-| `total_mass_per_area_kg_m2` | Total mass per unit area used during the test `m't`, in kg/m2 (the load plate plus fittings over the 0,04 m2 specimen; the standard's plate gives $m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200$ kg/m2). |
+| `total_mass_per_area_kg_m2` | Total mass per unit area used during the test `m't`, in kg/m2 (the load plate plus fittings over the 0.04 m2 specimen; the standard's plate gives $m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200$ kg/m2). |
 
 **Returns:** The apparent dynamic stiffness per unit area `s't`, in N/m3 (numerically MN/m3 when divided by 1e6); a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
@@ -189,7 +189,7 @@ no pass/fail verdict.
 Clause 9 requires every dynamic stiffness per unit area to be stated in
 meganewtons per cubic metre to the nearest meganewton per cubic metre,
 so the stiffness values are rounded to the nearest MN/m3; the
-frequencies are shown to 0,1 Hz.
+frequencies are shown to 0.1 Hz.
 
 **Parameters**
 
@@ -250,7 +250,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 | :--- | :--- |
 | `thickness_m` | Thickness `d` of the specimen under the static load, in metres (scalar or array). |
 | `porosity` | Porosity `epsilon` of the specimen (0-1). |
-| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default the standard's 0,1 MPa). |
+| `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default the standard's 0.1 MPa). |
 
 **Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 

@@ -20,7 +20,7 @@ loose transducer measures without falsification up to 100 Hz vertically and
 40 Hz horizontally, provided the peak acceleration in every direction stays at
 or below 3 m/s². On a hard surface it may stand on its own or on the device
 with rounded feet of Figure 1 b); on a soft covering it has to stand on the
-device with hardened steel spikes of Figure 1 a), about 2,5 kg together with
+device with hardened steel spikes of Figure 1 a), about 2.5 kg together with
 the transducer, pressed and tapped through the covering. Above those limits
 the transducer is glued, screwed or plastered on, and on a sensitive hard
 surface such as tiles or parquet adhesive wax carries the horizontal

@@ -26,14 +26,14 @@ A velocity signal enters and four numbers come out. Between them are three
 stages, each printed as an exact transfer function or an exact average.
 
 **Band limitation** (5.2.3.2, Formula (3)) is two Butterworth pairs: a
-two-pole high pass at $0{,}8\,f_\mathrm{u}$ and a two-pole low pass at $f_\mathrm{o}/0{,}8$. The
-working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
+two-pole high pass at $0.8\,f_\mathrm{u}$ and a two-pole low pass at $f_\mathrm{o}/0.8$. The
+working range is 1 Hz to 80 Hz for buildings, so those corners are 0.8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
 [DIN 45672](railway-vibration.md) works, and
 blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
-`1 − j 5,6 Hz / f`, one more pole and one more zero. Normalising the result by
+`1 − j 5.6 Hz / f`, one more pole and one more zero. Normalising the result by
 1 mm/s turns it into the **KB signal**, which is dimensionless and is what
 everything downstream is built on.
 
@@ -84,7 +84,7 @@ print(f"the two band-limit corners: {corners.round(4)}")  # [0.7071 0.7071]
 ## 2. What a meter displays, and the two rules inside Formula (2)
 
 The KB signal is averaged, and the averaging is the one a sound level meter
-calls Fast: a running r.m.s. with `τ = 0,125 s` (Formula (1)). Its value at any
+calls Fast: a running r.m.s. with `τ = 0.125 s` (Formula (1)). Its value at any
 instant is the **weighted vibration severity** $KB_\mathrm{F}(t)$, and 3.10.1.2 says
 why that time constant: DIN 4150-2 judges the effect on people with it, and
 the fluctuating indication it gives below 5 Hz was taken into account when
@@ -98,7 +98,7 @@ interval** (*Takt*) of 30 s, which DIN 4150-2 fixes. And the r.m.s. of those
 clock maxima, $KB_\mathrm{FTm}$, from Formula (2), which carries two rules that are
 easy to read past:
 
-- a clock maximum at or below **0,1** enters the sum as zero, and the interval
+- a clock maximum at or below **0.1** enters the sum as zero, and the interval
   it came from **still counts in N**, so a quiet stretch pulls the average
   down rather than being dropped from it;
 - a clock interval the measurement did not fill is not a clock interval
@@ -167,8 +167,8 @@ print(f"  sqrt(mean of squares over 3) = {np.sqrt(np.mean(counted**2)):.3f}")
 **Start the record before the event.** Every filter here begins at rest, so a
 record that begins with the signal already at full amplitude carries the
 filter's own switch-on transient, and the peak is a max-hold that keeps it. A
-1 mm/s sine started at a zero crossing reads 1,06 mm/s rather than the
-1,00 mm/s of 6.2.3.12. That is a property of the record, not of the chain, and
+1 mm/s sine started at a zero crossing reads 1.06 mm/s rather than the
+1.00 mm/s of 6.2.3.12. That is a property of the record, not of the chain, and
 a second of quiet in front of the event removes it.
 
 ## 3. The numbers the standard prints for a meter to reproduce
@@ -200,8 +200,8 @@ squaring, averaging and maximum together.
 The tolerance is not on the response but on its **shape**. Formula (7) divides
 the measured response by the design response, each normalised at the reference
 frequency of 16 Hz, so a flat gain error is a calibration matter and not a
-conformity one. What is left is graded band by band: 10 % from $1{,}25\,f_\mathrm{u}$ to
-$0{,}8\,f_\mathrm{o}$, 20 % out to $0{,}5\,f_\mathrm{u}$ and $2\,f_\mathrm{o}$, and below that Table 2 stops
+conformity one. What is left is graded band by band: 10 % from $1.25\,f_\mathrm{u}$ to
+$0.8\,f_\mathrm{o}$, 20 % out to $0.5\,f_\mathrm{u}$ and $2\,f_\mathrm{o}$, and below that Table 2 stops
 constraining the response from below altogether.
 
 ```python
@@ -211,7 +211,7 @@ from phonometry import vibration
 
 frequencies = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
 measured = np.abs(vibration.kb_weighting_response(frequencies))
-measured[5] *= 1.15  # a meter 15 % high at 31,5 Hz
+measured[5] *= 1.15  # a meter 15 % high at 31.5 Hz
 
 result = vibration.verify_vibration_meter(measured, frequencies=frequencies)
 print(f"passes: {result.passes}")                       # False
@@ -335,7 +335,7 @@ without falsification up to **100 Hz vertically** and **40 Hz horizontally**,
 provided the peak acceleration in every direction stays at or below
 **3 m/s²**. On a hard surface it may stand on its own or on the device with
 rounded feet; on a carpet it has to stand on the device with hardened steel
-spikes, about 2,5 kg with the transducer, pressed and tapped through the
+spikes, about 2.5 kg with the transducer, pressed and tapped through the
 covering. Above those limits the transducer is glued, screwed or plastered on,
 and on tiles or parquet adhesive wax carries the horizontal component to 80 Hz.
 
@@ -387,10 +387,10 @@ against the reference indications, the last always together with one of the
 other checks; if the electrical check is more than 10 % off, find out why.
 
 Choose the positions by the question: for the building, the foundation nearest
-the source, no higher than 0,5 m above ground, and the top floor ceiling next
+the source, no higher than 0.5 m above ground, and the top floor ceiling next
 to the outer wall; for its occupants, their floors at mid-span; for a building
 still to be built, the ground of the plot it will stand on; to find what the
-source itself emits, the ground near it at a set distance, at least 1,5 times
+source itself emits, the ground near it at a set distance, at least 1.5 times
 the largest dimension of a manhole or other disturbing body away from that
 body. Point `z` up and `x` and `y` along the main axes of the building, `x`
 preferably towards the source. Couple the transducer as the insets show, keep

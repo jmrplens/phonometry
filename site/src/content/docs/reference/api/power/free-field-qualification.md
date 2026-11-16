@@ -29,10 +29,10 @@ $L_{pi} = L'_{pi} - L_{p,\mathrm{ref},i} + L_{p,\mathrm{ref},0}$
 (Formula (1)). The room is qualified out to the largest distance from the
 origin at which every deviation, on every traverse and at every frequency,
 stays inside the limits of Table A.1 (the same table in ISO 26101 Annex A and
-in the amended ISO 3745 Annex A): $\pm 1{,}5$, $\pm 1{,}0$ and
-$\pm 1{,}5$ dB in an anechoic room for the one-third octave bands up to
-630 Hz, from 800 Hz to 5 000 Hz and from 6 300 Hz up, and $\pm 2{,}5$,
-$\pm 2{,}0$ and $\pm 3{,}0$ dB in a hemi-anechoic one.
+in the amended ISO 3745 Annex A): $\pm 1.5$, $\pm 1.0$ and
+$\pm 1.5$ dB in an anechoic room for the one-third octave bands up to
+630 Hz, from 800 Hz to 5 000 Hz and from 6 300 Hz up, and $\pm 2.5$,
+$\pm 2.0$ and $\pm 3.0$ dB in a hemi-anechoic one.
 
 **The fit of b.** Formula (2) leaves the source strength $b$ free: it
 "is adjusted to optimize the fit of the measured sound pressure levels into
@@ -187,7 +187,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 | Name | Description |
 | :--- | :--- |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
-| `radius` | The radius, in metres; 1,5 m in B.3.2. |
+| `radius` | The radius, in metres; 1.5 m in B.3.2. |
 
 **Returns:** `(32, 3)` or `(64, 3)` coordinates, in metres.
 
@@ -855,7 +855,7 @@ verify_source_directionality(
 May this source qualify an anechoic or hemi-anechoic room? (ISO 26101 Annex B).
 
 The one-third octave band levels are measured at the 32 positions of a
-hemisphere or the 64 of a sphere of radius 1,5 m
+hemisphere or the 64 of a sphere of radius 1.5 m
 ([`directionality_positions`](/phonometry/reference/api/power/free-field-qualification/#directionality_positions)). Per band, the arithmetic mean of the
 decibel levels and the largest positive and negative deviations from it
 are computed (B.3.2); the source is suitable when every deviation is within

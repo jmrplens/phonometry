@@ -222,7 +222,7 @@ These are the 8 entries of the [errata registry](/phonometry/reference/errata/) 
   order. Verified on PDF page 281 (printed p. 275) for the table and PDF page
   280 (printed p. 274) for the sentence, in Allard & Atalla, Propagation of
   Sound in Porous Media 2e:2009.
-- **Library behaviour:** the row carries the printed 3,8 mm, and its `note`
+- **Library behaviour:** the row carries the printed 3.8 mm, and its `note`
   records the sentence. Nothing computes with the thickness: the equivalent
   fluid of this specimen does not use it.
 - **Status:** unreported.
@@ -236,9 +236,9 @@ These are the 8 entries of the [errata registry](/phonometry/reference/errata/) 
 - **The print:** the plate row gives a thickness of 1,6 mm; the prose of
   Sect. 11.7.4 on the facing folio says "The material is a foam of thickness
   h = 2 . 54 cm bonded onto a 0.6 mm aluminium plate".
-- **The problem:** 1,6 against 0,6 mm for the same plate.
-- **Evidence:** the foam agrees between the two, the table's 25,4 mm being the
-  sentence's 2,54 cm, which places the disagreement in the plate row alone.
+- **The problem:** 1.6 against 0.6 mm for the same plate.
+- **Evidence:** the foam agrees between the two, the table's 25.4 mm being the
+  sentence's 2.54 cm, which places the disagreement in the plate row alone.
   Verified on PDF page 282 (printed p. 276) for the table and PDF page 281
   (printed p. 275) for the sentence, in Allard & Atalla, Propagation of Sound
   in Porous Media 2e:2009.
@@ -251,15 +251,15 @@ These are the 8 entries of the [errata registry](/phonometry/reference/errata/) 
 
 *Textbook, not a standard.*
 
-- **Location:** Table 13.2, PDF page 341, printed p. 337, the 5,75 cm rockwool
+- **Location:** Table 13.2, PDF page 341, printed p. 337, the 5.75 cm rockwool
   with a central perforation of the double-porosity example.
 - **The print:** the column headed E (Pa) carries 4400 for a frame of
   130 kg/m3.
-- **The problem:** a frame modulus of 4,4 kPa at that density gives a frame
-  wave speed of $\sqrt{4400/130} = 5,8$ m/s, so the quarter-wave resonance of
-  a 5,75 cm layer lands near 25 Hz. The text on the next page says the
+- **The problem:** a frame modulus of 4.4 kPa at that density gives a frame
+  wave speed of $\sqrt{4400/130} = 5.8$ m/s, so the quarter-wave resonance of
+  a 5.75 cm layer lands near 25 Hz. The text on the next page says the
   numerical model captures "the skeleton resonance occurring around 1350 Hz",
-  which the printed modulus cannot produce: 1350 Hz would need about 12,7 MPa,
+  which the printed modulus cannot produce: 1350 Hz would need about 12.7 MPa,
   three orders of magnitude above the cell.
 - **Evidence:** arithmetic on the page's own two cells against the page's own
   sentence. Nothing on the page says what the modulus should be, so this entry

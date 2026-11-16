@@ -52,7 +52,7 @@ measurements do not reach.
 One read-only row per checked quantity, `{"quantity", "limit", "value", "ok", ...}`.
 
 The `limit` is the one the standard prints for the quantity (Table 1
-by frequency and angle, 1,5 dB, 0,4 dB or 0,5 dB, 0,1 dB) and `ok`
+by frequency and angle, 1.5 dB, 0.4 dB or 0.5 dB, 0.1 dB) and `ok`
 whether the measured `value` is within it.
 
 ### AircraftSystemComplianceResult.passes

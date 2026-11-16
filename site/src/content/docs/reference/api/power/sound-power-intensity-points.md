@@ -87,8 +87,8 @@ band and stops there.
 **Grade 3 is an A-weighted determination only.** Table B.2 tabulates the
 criterion-2 factor `C` for grades 1 and 2 band by band and gives grade 3 a
 single A-weighted value (8) and no per-band column at all; Table B.1 does the
-same with the error factor $\Delta$ (0,20 and 0,29 for all bands at
-grades 1 and 2, 0,60 A-weighted at grade 3); and Table 2 does the same with the
+same with the error factor $\Delta$ (0.20 and 0.29 for all bands at
+grades 1 and 2, 0.60 A-weighted at grade 3); and Table 2 does the same with the
 standard deviation `s` of the determination. Three tables agree, so the
 asymmetry is the standard's design and not a gap in it: a per-band
 determination can reach grade 1 or grade 2, and grade 3 is reached, if at all,
@@ -458,8 +458,8 @@ Error factor $\Delta$ of ISO 9614-1:1993 Table B.1.
 
 $\Delta$ is the sampling error the optional procedure of B.1.3 is
 allowed to leave on the determination, and equation (B.4) is its only
-consumer. Table B.1 prints one row for all bands, holding 0,20 at grade 1
-and 0,29 at grade 2, and one A-weighted row holding 0,60 at grade 3; the
+consumer. Table B.1 prints one row for all bands, holding 0.20 at grade 1
+and 0.29 at grade 2, and one A-weighted row holding 0.60 at grade 3; the
 remaining four cells are blank in the print.
 
 **Parameters**
@@ -558,7 +558,7 @@ segments qualifies the surface for far less work than densifying all of it.
 The positive partial powers are ranked in decreasing order and the top
 segments are taken until more than half the total sound power has been
 accounted for. That subset is $N_\alpha$ segments of total area
-$S_\alpha$ carrying the fraction $\alpha > 0,5$, and B.1.3
+$S_\alpha$ carrying the fraction $\alpha > 0.5$, and B.1.3
 requires $N_\alpha$ to be fewer than half of `N`. The field
 non-uniformity is then evaluated separately over the subset and over the
 remainder (equations (A.8) and (A.9)), and:
@@ -582,7 +582,7 @@ budget, and the procedure cannot help.
 | :--- | :--- |
 | `normal_intensity` | Signed normal intensity $I_{\mathrm{n}i}$ at each position of one frequency band, in W/m^2 (1D). |
 | `areas` | Segment areas $S_i$ in m^2, one per position (1D). |
-| `grade` | The grade whose Table B.1 $\Delta$ is spent: `'precision'` (0,20), `'engineering'` (0,29) or `'survey'` (0,60, A-weighted). |
+| `grade` | The grade whose Table B.1 $\Delta$ is spent: `'precision'` (0.20), `'engineering'` (0.29) or `'survey'` (0.60, A-weighted). |
 
 **Returns:** A [`PartialPowerConcentration`](/phonometry/reference/api/power/sound-power-intensity-points/#partialpowerconcentration).
 
@@ -621,7 +621,7 @@ equation (B.4) asks to be spread over them.
 | `n_positions` | `N`, the number of positions on the whole surface. |
 | `n_subset_positions` | $N_\alpha$, the segments in the selected subset. B.1.3 requires this to be fewer than half of `N`. |
 | `subset_area` | $S_\alpha$, the total area of the subset, m^2; the new positions are distributed over it in proportion to segment area. |
-| `power_fraction` | $\alpha$, the fraction of the total sound power passing through the subset, always above 0,5. |
+| `power_fraction` | $\alpha$, the fraction of the total sound power passing through the subset, always above 0.5. |
 | `subset_nonuniformity` | $F_4(\alpha)$, the field non-uniformity of the subset alone (equations (A.8), (A.9)). |
 | `remainder_nonuniformity` | $F_4(1-\alpha)$, that of the remaining segments. |
 | `error_factor` | $\Delta$ for the requested grade (Table B.1). |
@@ -656,7 +656,7 @@ asked for, and asking the wrong half raises.
 | Name | Description |
 | :--- | :--- |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2) or `'survey'` (grade 3). |
-| `frequency` | Nominal mid-band centre in Hz, as a Table B.2 label or the exact base-ten centre behind it. `None` asks for the A-weighted row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz (octave) or 50 Hz to 6,3 kHz (one-third octave). |
+| `frequency` | Nominal mid-band centre in Hz, as a Table B.2 label or the exact base-ten centre behind it. `None` asks for the A-weighted row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz (octave) or 50 Hz to 6.3 kHz (one-third octave). |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the frequency column; ignored when `frequency` is `None`. One of `1` or `3`. |
 
 **Returns:** `C`, dimensionless.

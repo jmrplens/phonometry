@@ -144,7 +144,7 @@ Relative deviation of the magnitude from unity, `|H| - 1`.
 Per frequency, whether the magnitude is within +/- 5 % of unity.
 
 The magnitude is compared with the bounds `1 - 0,05` and
-`1 + 0,05` themselves, so a response of exactly 0,95 or 1,05 is
+`1 + 0,05` themselves, so a response of exactly 0.95 or 1.05 is
 within them.
 
 ### ChannelMatchVerification.passes
@@ -215,7 +215,7 @@ check_coherence(
 
 Is the averaged estimate's coherence high over the range of interest? (9.1)
 
-The check passes when the coherence exceeds `min_coherence` (0,9,
+The check passes when the coherence exceeds `min_coherence` (0.9,
 what 9.1 calls high) at every frequency of the range that is not excluded,
 and at least `min_n_records` impacts were averaged (five, the lower end
 of the five to ten 9.1 says a high coherence needs). A single impact has a
@@ -268,9 +268,9 @@ to remove one.
 
 The threshold is this library's, not the part's, which only says that a
 small second impact shows as a slight ripple and that moderate dips may be
-tolerated. At the default of 0,1 an undetected second pulse of the same
+tolerated. At the default of 0.1 an undetected second pulse of the same
 shape as the first ripples the force spectrum by at most
-$20 \log_{10}(1{,}1/0{,}9) = 1{,}74$ dB peak to notch
+$20 \log_{10}(1.1/0.9) = 1.74$ dB peak to notch
 ([`DoubleHitCheck.ripple_db`](/phonometry/reference/api/vibration/impact-mobility/#doublehitcheckripple_db)). A softer, longer rebound, the usual
 hammer bounce, carries more of the low-frequency spectrum than its peak
 says: it can stay under the threshold and still ripple the spectrum by
@@ -389,7 +389,7 @@ Without an exponential window the response should end at about 1 % of its
 highest peak (8.3, 8.5.2); with one, its natural decay should reach 25 % or
 less, the general guideline of 8.5.2. The level at the end is read at the
 last sample and compared with the figure to a whole per cent, so any
-level below 1,5 % passes "about 1 %" (see [`ResponseDecayCheck`](/phonometry/reference/api/vibration/impact-mobility/#responsedecaycheck)).
+level below 1.5 % passes "about 1 %" (see [`ResponseDecayCheck`](/phonometry/reference/api/vibration/impact-mobility/#responsedecaycheck)).
 8.3 calls the 1 % a compromise, and the check is one-sided: it asks
 whether the response has decayed far enough, not whether it decayed too
 far. Pass the response as recorded, before any window.
@@ -440,7 +440,7 @@ Is the coherence high, over enough impacts to trust it? (9.1)
 
 The coherence expresses how linearly the response follows the force at
 each frequency; a value below 1 flags possible poor data (9.1). The clause
-calls a coherence above 0,9 high, and says only a few records, five to
+calls a coherence above 0.9 high, and says only a few records, five to
 ten, are then needed for high statistical confidence in its estimate.
 NOTE 1 adds that low coherence at an anti-resonance is not generally a
 concern: the response is near the noise floor there. Such frequencies can
@@ -1436,8 +1436,8 @@ read at the peak of its last segment, never higher.
 
 The verdict compares the level at the end, rounded to a whole per cent
 (the precision both figures are printed in), with the figure: "about 1 %"
-accepts any level below 1,5 %, which rounds to 1 %, and "25 % or less"
-any level below 25,5 %.
+accepts any level below 1.5 %, which rounds to 1 %, and "25 % or less"
+any level below 25.5 %.
 
 A driving-point acceleration follows the force itself during the impact
 (the mass line of the structure), so its highest peak can be the impact
@@ -1477,7 +1477,7 @@ segment, above the level at the end of the record.
 
 *property*
 
-The figure the clause prints: 0,01 without a window, 0,25 with one.
+The figure the clause prints: 0.01 without a window, 0.25 with one.
 
 ### ResponseDecayCheck.midpoint_ratio
 

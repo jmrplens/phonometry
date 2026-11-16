@@ -22,10 +22,10 @@ defines a noise that stands in for that programme in a measurement, the
 
 Table II gives the relative level of each one-third-octave band from 20 Hz to
 20 kHz with its tolerance: 0 dB from 250 Hz to 800 Hz, falling to
-$-13{,}5$ dB at 20 Hz and $-21{,}6$ dB at 20 kHz
+$-13.5$ dB at 20 Hz and $-21.6$ dB at 20 kHz
 ([`SIMULATED_PROGRAM_SPECTRUM`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_spectrum)). The Note under the clause adds that the
-power of the whole signal is about 12,5 dB above the 0 dB of one band, which is
-the power sum of the 31 relative levels, 12,56 dB.
+power of the whole signal is about 12.5 dB above the 0 dB of one band, which is
+the power sum of the 31 relative levels, 12.56 dB.
 
 The filter of Figure 2
 ----------------------
@@ -35,23 +35,23 @@ circuit shown in Figure 2." The circuit is a passive ladder of five
 capacitors driven from the e.m.f. of the pink-noise source through 430 ohm,
 which includes the source's own output impedance:
 
-* a series 2,2 µF capacitor into a node shunted by 3,3 kohm and 91 nF;
-* a series 330 ohm and 2,2 µF into a node shunted by 3,3 kohm and 68 nF;
-* a series 0,47 µF into the 10 kohm output resistor, loaded by at least
+* a series 2.2 µF capacitor into a node shunted by 3.3 kohm and 91 nF;
+* a series 330 ohm and 2.2 µF into a node shunted by 3.3 kohm and 68 nF;
+* a series 0.47 µF into the 10 kohm output resistor, loaded by at least
   100 kohm; "the effect of the load impedance may be taken into account by
   adjusting the value of the 10 kohm resistor", so the 10 kohm is the whole
   shunt the network sees.
 
 [`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter) is the exact transfer function of that ladder,
 the voltage across the 10 kohm over the source e.m.f., from its nodal
-equations. The two 2,2 µF capacitors with the resistors behind them make the
+equations. The two 2.2 µF capacitors with the resistors behind them make the
 low-frequency roll-off and the 91 nF and 68 nF shunts the high-frequency one;
 the passband loss is about 4 dB. Pink noise has equal power in every
 one-third-octave band, so the band levels of its output are the power average
 of $|H|^2$ over each band, and in ideal one-third-octave bands they fall
 inside every tolerance of Table II once the level is set: the worst band is
-the 5 kHz one, 1,1 dB below its printed level against a tolerance of 1 dB
-when the 0 dB of the table is put on the 630 Hz band, and 0,18 dB inside it
+the 5 kHz one, 1.1 dB below its printed level against a tolerance of 1 dB
+when the 0 dB of the table is put on the 630 Hz band, and 0.18 dB inside it
 with the level that centres the whole curve in the tolerances. Figure 2 is a
 realisation within tolerance, not the definition: the definition is Table II.
 
@@ -69,16 +69,16 @@ over it in closed form, is the printed level, and which carries on at the
 slope of its end segments below 20 Hz and above 20 kHz. Every band then keeps
 its whole tolerance for the fluctuation of a finite record. The other is the
 circuit of Figure 2, pink noise of slope $f^{-1/2}$ in amplitude
-multiplied by the complex response of the ladder; at 0,18 dB from its nearest
+multiplied by the complex response of the ladder; at 0.18 dB from its nearest
 limit it leaves a short record little room, and a 20 s record at 48 kHz falls
-outside the tolerance of the 31,5 Hz or 40 Hz band for some seeds.
+outside the tolerance of the 31.5 Hz or 40 Hz band for some seeds.
 
 The clause asks for the noise "without amplitude limiting". IEC 60268-7:2010
 8.3.2 asks for the opposite when it rates the long-term maximum source e.m.f.
 of a headphone: the programme signal "with additional clipping", with "a
 peak-to-r.m.s ratio between 1,8 and 2,2". `peak_to_rms` clips the record at
 the level that gives the requested ratio after clipping and rescales it.
-Clipping spreads power into the weak upper bands: at a ratio of 2,0 it lifts
+Clipping spreads power into the weak upper bands: at a ratio of 2.0 it lifts
 the 20 kHz band by about half a decibel against the middle of the spectrum,
 inside its tolerance of 3 dB.
 
@@ -92,7 +92,7 @@ for the level that places every band inside its tolerance. Each band allows a
 window of levels, $[T_i - t_i^- - L_i,\ T_i + t_i^+ - L_i]$, and the
 spectrum conforms when the windows overlap; the level reported is the middle
 of the overlap, where the smallest margin is largest. Bands that are not
-given are not judged, so a record sampled at 44,1 kHz, which cannot hold the
+given are not judged, so a record sampled at 44.1 kHz, which cannot hold the
 20 kHz band, is judged on the other 30.
 
 Neither amendment of 1988 touches Clause 7: Amendment 1 replaces Table AII,
@@ -121,7 +121,7 @@ spectrum conforms when one level places every band inside its tolerance
 
 The band levels can come from any one-third-octave analyser, for instance
 [`phonometry.filters.octave_filter`](/phonometry/reference/api/filters/core/#octave_filter) with `fraction=3`, whose exact
-band centres (19,95 Hz, 25,12 Hz, ...) are read as the nominal ones of the
+band centres (19.95 Hz, 25.12 Hz, ...) are read as the nominal ones of the
 table.
 
 **Parameters**
@@ -334,19 +334,19 @@ and its nodes are set so that each band's power, integrated over the band
 in closed form, is the printed level. Every band then has its whole
 tolerance for the random fluctuation of a finite record. `"figure_2"` is
 pink noise through the filter of Figure 2 ([`program_signal_filter`](/phonometry/reference/api/electroacoustics/program-signal/#program_signal_filter)),
-the circuit the clause offers: inside the tolerances, but only 0,18 dB
+the circuit the clause offers: inside the tolerances, but only 0.18 dB
 inside at its worst band, so a short record can fall outside them.
 
 The clause asks for the noise "without amplitude limiting", and so does
 this by default. `peak_to_rms` clips it instead, for the limiting
 voltages of IEC 60268-7:2010 8.3.2, which drive a headphone with the
 programme signal "with additional clipping" and a peak-to-r.m.s. ratio
-between 1,8 and 2,2: the record is clipped symmetrically at the level that
+between 1.8 and 2.2: the record is clipped symmetrically at the level that
 leaves exactly that ratio after clipping, then rescaled to `rms`.
 
-A one-third-octave band at 20 Hz is 4,6 Hz wide, so its level fluctuates
-by about $4{,}34/\sqrt{4{,}6\,T}$ dB over a record of $T$
-seconds: 0,4 dB in 30 s. Table II allows 3 dB there; the 0,5 dB bands of
+A one-third-octave band at 20 Hz is 4.6 Hz wide, so its level fluctuates
+by about $4.34/\sqrt{4.6\,T}$ dB over a record of $T$
+seconds: 0.4 dB in 30 s. Table II allows 3 dB there; the 0.5 dB bands of
 the middle need a few seconds.
 
 **Parameters**

@@ -111,7 +111,7 @@ heavy/soft impact source (ISO 10140-3:2021 Annex A, the rubber ball of
 ISO 10140-5:2021 Annex F) is measured without and with it; the improvement
 is $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$
 in each band (Formula (H.3)). The source is characterised in octave
-bands from 31,5 Hz to 500 Hz, and the levels are usually taken in the
+bands from 31.5 Hz to 500 Hz, and the levels are usually taken in the
 octaves 63 Hz to 500 Hz or the matching one-third octaves
 ([`heavy_impact_octave_levels`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_octave_levels)).
 
@@ -527,8 +527,8 @@ less than 3 d after the end of construction".
 
 Whether the time lag is at most a third of the curing time, the alternative G.4 allows.
 
-Inclusive, with the same slack: the printed 1 d and 3 d, or 2,1 d and
-6,3 d, are on the bound.
+Inclusive, with the same slack: the printed 1 d and 3 d, or 2.1 d and
+6.3 d, are on the bound.
 
 ### LiningCuringCheck.passes
 

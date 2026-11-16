@@ -45,11 +45,11 @@ A.1 (bang machine, *impact force characteristic 1*):
 
 | Octave (Hz) | Rubber ball LFE (dB) | Bang machine LFE (dB) |
 | :--- | :--- | :--- |
-| 31,5 | 39,0 +/- 1,0 | 47,0 +/- 1,0 |
-| 63 | 31,0 +/- 1,5 | 40,0 +/- 1,5 |
-| 125 | 23,0 +/- 1,5 | 22,0 +/- 1,5 |
-| 250 | 17,0 +/- 2,0 | 11,5 +/- 2,0 |
-| 500 | 12,5 +/- 2,0 | 5,5 +/- 2,0 |
+| 31.5 | 39.0 +/- 1.0 | 47.0 +/- 1.0 |
+| 63 | 31.0 +/- 1.5 | 40.0 +/- 1.5 |
+| 125 | 23.0 +/- 1.5 | 22.0 +/- 1.5 |
+| 250 | 17.0 +/- 2.0 | 11.5 +/- 2.0 |
+| 500 | 12.5 +/- 2.0 | 5.5 +/- 2.0 |
 
 **Standardized maximum impact sound pressure level (ISO 16283-2 Formulae (4),
 (5) and (6)).** Because the rated quantity is a *maximum* of a Fast-weighted
@@ -206,7 +206,7 @@ Table A.1 (bang machine).
 
 | Name | Description |
 | :--- | :--- |
-| `force_exposure_level` | Measured `LFE` in the five octave bands 31,5 Hz to 500 Hz, in dB re 1 N. |
+| `force_exposure_level` | Measured `LFE` in the five octave bands 31.5 Hz to 500 Hz, in dB re 1 N. |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
 
 **Returns:** A [`HeavyImpactSourceCheck`](/phonometry/reference/api/building/heavy-impact/#heavyimpactsourcecheck).
@@ -257,7 +257,7 @@ when $T = T_0$.
 | Name | Description |
 | :--- | :--- |
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds (> 0). |
-| `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
+| `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0.5 s). |
 
 **Returns:** The correction per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -397,7 +397,7 @@ against another tolerance band.
 | Name | Description |
 | :--- | :--- |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
-| `measured` | Measured impact force exposure level `LFE` in the five octave bands 31,5 Hz to 500 Hz, in dB re 1 N. |
+| `measured` | Measured impact force exposure level `LFE` in the five octave bands 31.5 Hz to 500 Hz, in dB re 1 N. |
 
 ### HeavyImpactSourceCheck.deviation
 
@@ -630,7 +630,7 @@ floor excited by the rubber ball. The reverberation term is
 | `volume` | Receiving-room volume `V`, in m3 (> 0). |
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds (> 0); a scalar is broadcast over the bands. |
 | `frequencies` | Optional band centre frequencies, in Hz. |
-| `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
+| `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0.5 s). |
 | `reference_volume` | Reference volume `V0`, in m3 (Default: 50 m3 for dwellings). |
 
 **Returns:** A [`StandardizedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#standardizedmaximpactresult).

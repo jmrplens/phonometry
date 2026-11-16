@@ -69,7 +69,7 @@ is 100 Hz to 5000 Hz (18 bands). The single-number `Kij` is the arithmetic
 mean over 200 Hz to 1250 Hz for one-third-octave bands, or over 125 Hz to
 1000 Hz for octave bands (Annex A); the automatic mean is formed only when
 the corresponding band set is present in the supplied frequencies. For heavy
-junctions (Part 4, Clause 9) bands whose modal overlap factor is below 0,25
+junctions (Part 4, Clause 9) bands whose modal overlap factor is below 0.25
 are bracketed and excluded from the single-number mean when the per-band
 `modal_overlap` is supplied.
 
@@ -938,19 +938,19 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `frequencies` | Band centre frequencies, in Hz, or `None` when they were not supplied. |
 | `k_ij` | Vibration reduction index `Kij` per band, in dB (Formula (13) or the simplified Formula (14)). |
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
-| `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0,25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
+| `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0.25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
 | `modal_overlap` | The modal overlap factor `M` per band the bands are bracketed by, or `None` when none was supplied. An octave band carries the smallest of its three one-third-octave bands, since it is bracketed when any of them is. |
 | `fraction` | The band set the caller states for the Annex A range the single number is averaged over, 3 for one-third octaves or 1 for octaves, as `octave_bands` states it (`fraction=1`); `None` (the default, and what [`vibration_reduction_index`](/phonometry/reference/api/building/flanking-transmission/#vibration_reduction_index) leaves) reads it from the spacing of the frequencies each time. One of `1` or `3`. |
 
 `single_number` and `bracketed` are read from the fields, the
-0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
+0.25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
 fields.
 
 ### VibrationReductionResult.bracketed
 
 *property*
 
-Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
+Per band, whether the modal overlap is below 0.25 (ISO 10848-4 Clause 9).
 
 `None` when no modal overlap was supplied.
 

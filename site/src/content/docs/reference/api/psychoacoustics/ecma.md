@@ -90,20 +90,20 @@ Result of an ECMA-418-2:2025 (Sottek) loudness calculation.
 `loudness` is the single representative loudness N in sone_HMS
 (Formula 117).  `specific_loudness` is the average specific loudness
 N'(z) in sone_HMS/Bark_HMS over the 53 auditory bands (Formula 115),
-with `bark` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
+with `bark` the critical-band-rate scale z (0.5..26.5 Bark_HMS) and
 `frequencies` the band centre frequencies F(z).  `times` and
-`loudness_vs_time` hold the time-dependent loudness N(l) at 187,5 Hz
+`loudness_vs_time` hold the time-dependent loudness N(l) at 187.5 Hz
 (Formula 116).  `field` records the assumed sound field.
 
 `basis_loudness_vs_time` is the total basis loudness N_basis(l) in
 sone_HMS (Formula 26) at the same `times`, the quantity Clause 5.1.9
 compares with its audibility criterion,
-[`AUDIBILITY_THRESHOLD_SONE_HMS`](/phonometry/reference/api/psychoacoustics/ecma/#audibility_threshold_sone_hms) (0,01 sone_HMS). It is the
+[`AUDIBILITY_THRESHOLD_SONE_HMS`](/phonometry/reference/api/psychoacoustics/ecma/#audibility_threshold_sone_hms) (0.01 sone_HMS). It is the
 specific basis loudness N'_basis(l, z) of Formula (25), the front-end's
 output before the tonal and noise split, summed over the 53 bands with
-dz = 0,5. Each band computes it at its own block size, the segmentation
+dz = 0.5. Each band computes it at its own block size, the segmentation
 Clause 5.1.5.1 (Table 4) prescribes for tonality and loudness, and is
-resampled by linear interpolation onto the common 187,5 Hz grid of the
+resampled by linear interpolation onto the common 187.5 Hz grid of the
 1024-sample blocks (Clause 6.2.6, Table 6), the grid the tonal and noise
 loudness are resampled to.
 
@@ -114,7 +114,7 @@ per block of that grid. And Clause 5.1.9 names no segmentation: roughness
 and fluctuation strength segment with the fixed blocks of Clause 5.1.5.2
 and pad by Clause 5.1.2.2, so the N_basis they form differs from this one
 for a sound that changes in time (a 60 ms 1 kHz burst at 3 dB SPL reaches
-0,021 sone_HMS here and 0,0025 with the 16384-sample blocks of
+0.021 sone_HMS here and 0.0025 with the 16384-sample blocks of
 roughness); the library reads it on the Table 4 segmentation that the
 loudness of Clause 8 is built on.
 

@@ -15,7 +15,7 @@ follows.
 
 **The test room (Clause 11).** The ambient noise must not mask the lowest
 test tone. Tables 2 and 4 give the maximum permissible ambient sound pressure
-levels $L_{S,\mathrm{max}}$ in one-third-octave bands from 31,5 Hz to
+levels $L_{S,\mathrm{max}}$ in one-third-octave bands from 31.5 Hz to
 8 kHz, for air conduction with typical supra-aural earphones and for bone
 conduction, each for the lowest test frequency of the audiometry: 125 Hz,
 250 Hz or, for air conduction, 500 Hz. They hold for hearing threshold levels
@@ -82,7 +82,7 @@ A.3 gives typical values for the repeatability, the audiometer, the
 transducer, the ambient noise and the masking;
 [`audiometric_uncertainty`](/phonometry/reference/api/hearing/audiometry/#audiometric_uncertainty) assembles them into an
 [`AudiometricUncertaintyBudget`](/phonometry/reference/api/hearing/audiometry/#audiometricuncertaintybudget), and for air conduction below 4 kHz
-without masking it reproduces the example of Table A.2: $u$ = 4,9 dB and
+without masking it reproduces the example of Table A.2: $u$ = 4.9 dB and
 $U$ = 10 dB.
 
 Clause, table and formula numbers refer to ISO 8253-1:2010(E).
@@ -616,7 +616,7 @@ The typical uncertainty budget of a hearing threshold level (A.3).
 Fills Table A.1 with the values A.3 gives, which differ up to and above
 4 kHz:
 
-- $u_1$ (A.3.2): 2,5 dB and 4 dB for air conduction, 3 dB and 5 dB
+- $u_1$ (A.3.2): 2.5 dB and 4 dB for air conduction, 3 dB and 5 dB
   for bone conduction;
 - $u_2$ (A.3.3): the audiometer's maximum output deviation
   $a$ of IEC 60645-1 (±3 dB and ±5 dB for air, ±4 dB and ±5 dB for
@@ -627,9 +627,9 @@ Fills Table A.1 with the values A.3 gives, which differ up to and above
   u_2 = \sqrt{\left(\frac{a}{\sqrt{3}}\right)^2 + \left(\frac{s}{2\sqrt{3}}\right)^2}
   $$
 
-  which for air conduction up to 4 kHz and 5 dB steps is 2,3 dB;
-- $u_3$ (A.3.4): $\sqrt{1{,}5^2 + 2{,}5^2}$ = 2,9 dB up to
-  4 kHz and $\sqrt{2{,}5^2 + 3^2}$ = 3,9 dB above;
+  which for air conduction up to 4 kHz and 5 dB steps is 2.3 dB;
+- $u_3$ (A.3.4): $\sqrt{1.5^2 + 2.5^2}$ = 2.9 dB up to
+  4 kHz and $\sqrt{2.5^2 + 3^2}$ = 3.9 dB above;
 - $u_4$ (A.3.5): 2 dB when the ambient noise meets Clause 11 and the
   subject's threshold is near 0 dB. It may be negligible for thresholds
   well above 0 dB and is considerably larger in a room that exceeds the
@@ -640,7 +640,7 @@ Fills Table A.1 with the values A.3 gives, which differ up to and above
   exceptional situation calls for them.
 
 For air conduction below 4 kHz without masking this is the example of
-Table A.2: $u$ = 4,9 dB and $U$ = 10 dB.
+Table A.2: $u$ = 4.9 dB and $U$ = 10 dB.
 
 **Parameters**
 
@@ -1208,7 +1208,7 @@ sweep_audiometry_threshold(
 
 Hearing threshold levels from a sweep-frequency tracing (7.5).
 
-The frequency sweeps continuously, normally at 0,5 to 2 octaves per
+The frequency sweeps continuously, normally at 0.5 to 2 octaves per
 minute, while the subject tracks the threshold as in automatic
 audiometry. At a specified frequency, 7.5 averages the three peaks and the
 three valleys of the tracing closest to it and takes the mean of the two

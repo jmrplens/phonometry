@@ -29,17 +29,17 @@ question is over. If it is above the upper guide value $A_\mathrm{o}$, it is not
 met. In between, rare and short events are accepted as they are, and
 everything else is decided by $KB_\mathrm{FTr}$ against $A_\mathrm{r}$. The guide
 values of Table 1 are not to be applied mechanically, the standard says, and
-Example 3 of its Annex C shows what it means: 0,17 against an $A_\mathrm{u}$ of
-0,15 is inside the 15 % a measurement of $KB_\mathrm{F}$ is uncertain by, and
+Example 3 of its Annex C shows what it means: 0.17 against an $A_\mathrm{u}$ of
+0.15 is inside the 15 % a measurement of $KB_\mathrm{F}$ is uncertain by, and
 the requirement "can as a rule still be regarded as met".
 
 **The sources** (Clause 6.5). Up to three short events a day, blasting among
 them, are judged on $A_\mathrm{o}$ alone, and quarry blasting by day in a mixed
 or residential area, under the conditions of 6.5.1, on the $A_\mathrm{o}$ of an
 industrial one. Road traffic uses the procedure without the rest-time factor.
-A railway is judged on $A_\mathrm{u}$ and $A_\mathrm{r}$ only, with the factor 1,5
+A railway is judged on $A_\mathrm{u}$ and $A_\mathrm{r}$ only, with the factor 1.5
 on both for an urban surface line; $A_\mathrm{o}$ is not a verdict for it, and
-6.5.3.5 sets its own night-time thresholds, 0,6 on a surface line and 0,3
+6.5.3.5 sets its own night-time thresholds, 0.6 on a surface line and 0.3
 underground, above which a single clock maximum is a reason to look into the
 cause. A construction site has its own Table 2, by how many working days it
 shakes the neighbours and how far the operator is prepared to go, with the
@@ -65,7 +65,7 @@ and the worked Example 8 all take the root. Registered in `docs/ERRATA.md`.
 
 **The draft of 2023.** E DIN 4150-2:2023-08 is to replace the 1999 edition,
 and `edition="2023"` reads it: Table 1 with one cell changed, the night
-$A_\mathrm{u}$ of a mixed area down from 0,15 to 0,1; no shortcut for a
+$A_\mathrm{u}$ of a mixed area down from 0.15 to 0.1; no shortcut for a
 $KB_\mathrm{Fmax}$ within the 15 % above $A_\mathrm{u}$, which its
 Example 3 sends on to $A_\mathrm{r}$ and fails; a railway compared with
 $A_\mathrm{o}$ like any other source, its $KB_\mathrm{Fmax}$ and
@@ -125,7 +125,7 @@ With one class of train and each train occupying one clock interval,
 Formula (A.4) reads $KB_\mathrm{FTr} = KB_\mathrm{FTm}\sqrt{n / 120}$ for
 $n$ trains an hour, so the most an hour may carry is
 $120 (A_\mathrm{r} / KB_\mathrm{FTm})^2$. Annex D reads the figure at 7 trains for
-an $A_\mathrm{r}$ of 0,05 and 14 for 0,07, both at a $KB_\mathrm{FTm}$ of 0,2.
+an $A_\mathrm{r}$ of 0.05 and 14 for 0.07, both at a $KB_\mathrm{FTm}$ of 0.2.
 
 **Parameters**
 
@@ -162,9 +162,9 @@ Read the guide values in the order of Clause 6.2 (Figure 2).
 $KB_\mathrm{Fmax}$ at or below $A_\mathrm{u}$ meets the requirement,
 and so, as a rule, does one above it by up to the 15 % of 5.4 that a
 measurement of $KB_\mathrm{F}$ is uncertain by, which is how the standard's
-own Example 3 concludes on 0,17 against an $A_\mathrm{u}$ of 0,15; the
+own Example 3 concludes on 0.17 against an $A_\mathrm{u}$ of 0.15; the
 verdict says so in `within_uncertainty`. A value exactly 15 % above,
-0,46 against 0,4, is inside it whichever way the last bits of the product
+0.46 against 0.4, is inside it whichever way the last bits of the product
 fall. Above $A_\mathrm{o}$ it is not
 met, unless the source is a railway, which 6.5.3.1 judges on $A_\mathrm{u}$
 and $A_\mathrm{r}$ alone. Between the two, up to three short events a day
@@ -177,15 +177,15 @@ that is not worth doing: a steady vibration acting for much longer than
 $A_\mathrm{u}$.
 
 Each comparison is made at the decimals the guide value is printed with,
-which is how Example 4 reads a $KB_\mathrm{FTr}$ of 0,154 as meeting an
-$A_\mathrm{r}$ of 0,15; and the standard says the values are not to be
+which is how Example 4 reads a $KB_\mathrm{FTr}$ of 0.154 as meeting an
+$A_\mathrm{r}$ of 0.15; and the standard says the values are not to be
 applied mechanically in any case.
 
 The draft of 2023 reads the same order (its 6.3 and Figure 2) with three
 differences: a $KB_\mathrm{Fmax}$ within the 15 % above
 $A_\mathrm{u}$ goes on to $A_\mathrm{r}$ like any other, which is how its
-Example 3 fails 0,114 against 0,10; a railway is compared with
-$A_\mathrm{o}$ as well, its $KB_\mathrm{Fmax}$ being the 1,5 times
+Example 3 fails 0.114 against 0.10; a railway is compared with
+$A_\mathrm{o}$ as well, its $KB_\mathrm{Fmax}$ being the 1.5 times
 $KB_\mathrm{FTm,Zug}$ of [`railway_kb_fmax`](/phonometry/reference/api/vibration/train-categories/#railway_kb_fmax) and
 its $KB_\mathrm{FTr}$ that of
 [`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity); and a road is
@@ -387,8 +387,8 @@ The guide values of Table 1 for one area, time of day and kind of source.
 | :--- | :--- |
 | `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
-| `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_\mathrm{u}$ and $A_\mathrm{r}$ by the factor 1,5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_\mathrm{o}$ of row 1, which is 6. The draft of 2023 has no `"urban_railway"` and adds `"road_existing"`, an existing road by an existing building, whose $A_\mathrm{u}$ and $A_\mathrm{r}$ its neighbours must put up with exceeded by up to 50 % (6.5.2), and `"induced_seismic"`, which the daytime $A_\mathrm{o}$ bounds by night as well (6.5.1.3). |
-| `edition` | `"1999"` (default), DIN 4150-2:1999-06, or `"2023"`, E DIN 4150-2:2023-08, whose Table 1 has the night $A_\mathrm{u}$ of a mixed area at 0,1. |
+| `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_\mathrm{u}$ and $A_\mathrm{r}$ by the factor 1.5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_\mathrm{o}$ of row 1, which is 6. The draft of 2023 has no `"urban_railway"` and adds `"road_existing"`, an existing road by an existing building, whose $A_\mathrm{u}$ and $A_\mathrm{r}$ its neighbours must put up with exceeded by up to 50 % (6.5.2), and `"induced_seismic"`, which the daytime $A_\mathrm{o}$ bounds by night as well (6.5.1.3). |
+| `edition` | `"1999"` (default), DIN 4150-2:1999-06, or `"2023"`, E DIN 4150-2:2023-08, whose Table 1 has the night $A_\mathrm{u}$ of a mixed area at 0.1. |
 
 **Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
 
@@ -440,7 +440,7 @@ induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float
 
 The $KB_\mathrm{Fmax}$ of an induced seismic event, E DIN 4150-2:2023-08 6.5.1.3.
 
-$KB_\mathrm{Fmax} = 0{,}44 \, v_{\max}$, the simplified estimate
+$KB_\mathrm{Fmax} = 0.44 \, v_{\max}$, the simplified estimate
 the draft gives for an event of a few seconds with its energy below
 15 Hz, which is held by day and by night to the daytime $A_\mathrm{o}$
 alone; $KB_\mathrm{FTr}$ is not formed for it.
@@ -514,7 +514,7 @@ kb_from_peak_velocity(
 The KB value of a peak velocity at a frequency, Formula (6).
 
 $KB = \frac{1}{\sqrt 2}\, \frac{v_\mathrm{max}}{\sqrt{1 + (f_o/f)^2}}$
-with $f_o$ = 5,6 Hz, the corner of the KB weighting: the value the
+with $f_o$ = 5.6 Hz, the corner of the KB weighting: the value the
 weighted severity settles at for a sine of that peak and frequency, which
 the note under the formula says is the KB of the 1975 edition.
 
@@ -652,7 +652,7 @@ of train weighted by the clock intervals it occupies in the period, out
 of the 1920 of a day or the 960 of a night. With one class that is
 Formula (A.4). Given the spread of Formula (A.2) for each class, the same
 sum is formed with each mean square one spread up and one down, which is
-how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
+how Example 8 reports $0.325^{+0.059}_{-0.073}$.
 
 **Parameters**
 
@@ -692,7 +692,7 @@ The root of the mean square of the clock maxima the trains of the class
 occupied, $Z_j$ of them, with nothing counted for the intervals
 between trains: Formula (A.1b), with the root Formula (A.1a) and the
 worked Example 8 carry and the print of (A.1b) lost. The rule of Formula
-(3) that a maximum at or below 0,1 enters as zero applies here as well.
+(3) that a maximum at or below 0.1 enters as zero applies here as well.
 
 **Parameters**
 
@@ -720,7 +720,7 @@ The standard deviation of the square of the clock maxima, Formula (A.2).
 $s(KB^2_{\mathrm{FTm},j}) = \sqrt{\frac{1}{Z_j - 1} \sum_i (KB^2_{\mathrm{FT}i,j} - KB^2_{\mathrm{FTm},j})^2}$, on the square because it is the square that Formula
 (A.3) averages, so the spread of $KB_\mathrm{FTr}$ follows from it by
 adding and subtracting it there. The maxima enter as they enter
-[`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms), a value at or below 0,1 as zero, so the
+[`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms), a value at or below 0.1 as zero, so the
 spread is about the mean square that function returns.
 
 **Parameters**

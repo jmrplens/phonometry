@@ -72,11 +72,11 @@ writes the reverberant term of the receiving room over its room constant
 $R_2 = S_2 \alpha_2 / (1 - \alpha_2)$ where Norton writes
 $S_2 \alpha_2$, so reproducing Barron means passing $R_2$ as
 `receiving_absorption`. And Barron adds
-$10 \log_{10}(\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2) = 0{,}1$ dB to
+$10 \log_{10}(\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2) = 0.1$ dB to
 every level, which is not added here, as it is not in
 [`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl). His Example 7-6, printed folio 298, an
-operator 1,5 m from a 16 m2 wall, reads 61,7 dB with that 0,1 dB; without the
-direct field of the wall the chain would give 2,65 dB less.
+operator 1.5 m from a 16 m2 wall, reads 61.7 dB with that 0.1 dB; without the
+direct field of the wall the chain would give 2.65 dB less.
 
 **The source-room level.** In a plant room the receiver of interest is the
 partition, not a point near the machine, so the level that drives the
@@ -164,7 +164,7 @@ and $g = S_\mathrm{w} / (8 \pi r_2^2)$ from $r^*$ on. Barron
 writes the reverberant term over the room constant
 $R_2 = S_2 \alpha_2 / (1 - \alpha_2)$ where Norton writes
 $S_2 \alpha_2$, so reproducing his Example 7-6 (printed folio 298)
-means passing $R_2$ as `receiving_absorption`; the 0,1 dB he adds
+means passing $R_2$ as `receiving_absorption`; the 0.1 dB he adds
 to every level for $\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2$ is not
 added, as it is not in [`phonometry.room.steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl).
 

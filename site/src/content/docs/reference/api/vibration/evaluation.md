@@ -44,14 +44,14 @@ with $f_z = f$ below the lower corner $f_x$ and $f_x$ above
 it, and $f_w = f$ above the upper corner $f_y$ and $f_y$
 below it, so both bracketed factors are unity between the corners.
 $Z_\mathrm{bound}$ moves the one curve onto the three boundaries, and
-Annex C.2 prints the factors it takes: 1 for the limit of zone A, **2,56** for
-zone B and **6,4** for zone C.
+Annex C.2 prints the factors it takes: 1 for the limit of zone A, **2.56** for
+zone B and **6.4** for zone C.
 
 **Criterion II** (6.3.3) judges a *change* from an established baseline, and a
 change is a vector. Annex D makes the point with a machine whose magnitude
-fell from 3 mm/s to 2,5 mm/s while its phase swung from 40° to 180°: the
+fell from 3 mm/s to 2.5 mm/s while its phase swung from 40° to 180°: the
 magnitude moved by half a millimetre per second, and the vibration itself
-moved by **5,2 mm/s**, ten times as much. [`vibration_vector_change`](/phonometry/reference/api/vibration/evaluation/#vibration_vector_change) is
+moved by **5.2 mm/s**, ten times as much. [`vibration_vector_change`](/phonometry/reference/api/vibration/evaluation/#vibration_vector_change) is
 that subtraction.
 
 Where no part of the series covers a machine and no experience is available,
@@ -72,7 +72,7 @@ The ALARM setting a baseline and a zone B/C boundary imply (5.4.1).
 
 The recommendation is two rules at once: set the ALARM a quarter of the
 upper limit of zone B above the established baseline, and do not normally
-let it exceed 1,25 times that limit. A machine with a low baseline
+let it exceed 1.25 times that limit. A machine with a low baseline
 therefore alarms below zone C, which the clause says in as many words, and
 one with a high baseline is capped rather than allowed to drift up with
 it.
@@ -147,7 +147,7 @@ fastest, and flat in between. A machine-specific part that states its own
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `constant_velocity_mm_s` | The constant r.m.s. velocity `vA` that applies between the corners for zone A, in millimetres per second. |
-| `zone_factor` | `Zbound`, the factor that moves the curve onto a zone limit; see [`ZONE_LIMIT_FACTORS`](/phonometry/reference/api/vibration/evaluation/#zone_limit_factors) for the 1 / 2,56 / 6,4 of Annex C.2. |
+| `zone_factor` | `Zbound`, the factor that moves the curve onto a zone limit; see [`ZONE_LIMIT_FACTORS`](/phonometry/reference/api/vibration/evaluation/#zone_limit_factors) for the 1 / 2.56 / 6.4 of Annex C.2. |
 | `corner_low_hz` | The lower corner `fx`, in hertz. |
 | `corner_high_hz` | The upper corner `fy`, in hertz; must exceed `corner_low_hz`. |
 | `exponent_low` | `k`, the slope below the lower corner. |
@@ -598,7 +598,7 @@ The largest TRIP setting 5.4.2 recommends.
 Unlike an ALARM, a TRIP is not set from a baseline: it relates to the
 mechanical integrity of the machine and is the same for every machine of
 a design. The clause declines to give absolute values and gives a ceiling
-instead, 1,25 times the upper limit of zone C.
+instead, 1.25 times the upper limit of zone C.
 
 **Parameters**
 
@@ -714,9 +714,9 @@ The vector change in vibration between two steady states (Annex D).
 Criterion II is written on a change from an established baseline, and a
 broad-band magnitude cannot express one: a component that swings in phase
 changes the vibration even as the magnitude it contributes falls. Annex D
-prints the case, 3 mm/s at 40 degrees becoming 2,5 mm/s at 180 degrees,
+prints the case, 3 mm/s at 40 degrees becoming 2.5 mm/s at 180 degrees,
 where the magnitude drops by half a millimetre per second and the
-vibration moves by 5,2.
+vibration moves by 5.2.
 
 **Parameters**
 

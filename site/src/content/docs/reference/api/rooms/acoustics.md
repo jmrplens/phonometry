@@ -156,8 +156,8 @@ filter_bandwidth(
 
 Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
-The `B` of Equations (4) to (6), as the clause prints it: 0,71 times
-the mid-band frequency for an octave filter and 0,23 times it for a
+The `B` of Equations (4) to (6), as the clause prints it: 0.71 times
+the mid-band frequency for an octave filter and 0.23 times it for a
 one-third-octave one. See [`FILTER_BANDWIDTH_FRACTION`](/phonometry/reference/api/rooms/acoustics/#filter_bandwidth_fraction) for how
 those two figures sit against the exact IEC 61260 band edges.
 
@@ -285,7 +285,7 @@ Standard deviation of a measured reverberation time (7.1).
 ISO 3382-1:2009, Equations (4) and (5):
 
 $$
-\sigma(T_{20}) = 0{,}88\, T_{20} \sqrt{\frac{1 + 1{,}90/n}{N B T_{20}}}, \qquad \sigma(T_{30}) = 0{,}55\, T_{30} \sqrt{\frac{1 + 1{,}52/n}{N B T_{30}}}
+\sigma(T_{20}) = 0.88\, T_{20} \sqrt{\frac{1 + 1.90/n}{N B T_{20}}}, \qquad \sigma(T_{30}) = 0.55\, T_{30} \sqrt{\frac{1 + 1.52/n}{N B T_{30}}}
 $$
 
 The uncertainty is a property of the *excitation*, not of the room: the

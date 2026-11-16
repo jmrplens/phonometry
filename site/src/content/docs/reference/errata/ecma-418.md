@@ -22,9 +22,9 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
 - **The problem:** every formula and table of the standard works to 11 200 Hz:
   the Table 2 and Table 3 band-edge fits are stated for
   $11\,200 \ge f_t > 1\,600$, and clauses 10, 12.3 and 12.4 permit FFT data
-  with $f_1 < 89{,}1\ \text{Hz}$ and $f_2 > 11\,200\ \text{Hz}$. The two
+  with $f_1 < 89.1\ \text{Hz}$ and $f_2 > 11\,200\ \text{Hz}$. The two
   numbers are the same quantity to different precision rather than a
-  typographical error: $10\,000 \cdot 2^{1/6} = 11\,224{,}6\ \text{Hz}$ is the
+  typographical error: $10\,000 \cdot 2^{1/6} = 11\,224.6\ \text{Hz}$ is the
   upper edge of the 10 kHz one-third-octave band that closes the range of
   interest, which rounds to 11 220 Hz at four significant figures and to
   11 200 Hz at three. An earlier revision of this entry called it a typo and
@@ -39,7 +39,7 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
   axis read side by side with NOTE 2. Verified on PDF page 10 (printed p. 2),
   PDF page 18 (printed p. 10), PDF page 25 (printed p. 17) and PDF page 28
   (printed p. 20) of ECMA-418-1:2024 (3rd edition).
-- **Library behaviour:** uses the internally consistent $89{,}1\ \text{Hz}$ to
+- **Library behaviour:** uses the internally consistent $89.1\ \text{Hz}$ to
   11 200 Hz range (upper end exclusive per the formulas), with a code note in
   [`tonality.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/tonality.py).
 - **Status:** unreported.
@@ -55,9 +55,9 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
   column, and the parallel Formula (22) for the upper band edge prints
   $f_{2,U} = C_{U,0} + C_{U,1} f_t + C_{U,2} f_t^{2}$ correctly. The misprint
   is numerically fatal, not cosmetic: over the middle fit range
-  ($171{,}4 \le f_t \le 1\,600$) Table 2 gives $C_{L,0} = -149{,}5$ and
-  $C_{L,1} = 1{,}001$, so the printed form returns
-  $-149{,}5 - 149{,}5 f_t - 6{,}90 \cdot 10^{-5} f_t^2$, negative everywhere,
+  ($171.4 \le f_t \le 1\,600$) Table 2 gives $C_{L,0} = -149.5$ and
+  $C_{L,1} = 1.001$, so the printed form returns
+  $-149.5 - 149.5 f_t - 6.90 \cdot 10^{-5} f_t^2$, negative everywhere,
   instead of a band edge a little below $f_t$.
 - **Evidence:** the formula, its own where-list and Table 2 on one page, with
   Formula (22) as the consistent control. Verified on PDF page 25 (printed p.
@@ -163,7 +163,7 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
 - **Evidence:** direct evaluation of the block start indices against the
   padded length for the clause 7.1.1 block/hop sizes; the flush-to-end reading
   reproduces the Clause 7 roughness calibration ($1\ \text{asper}$) to
-  $0{,}9999$.
+  $0.9999$.
 - **Library behaviour:** implements the flush-to-end reading with a code note
   in
   [`_roughness_ecma.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/_roughness_ecma.py).
@@ -205,9 +205,9 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
   index $k$ as mapping to the modulation rate
   $k \cdot \tilde{r}_s/\tilde{s}_b$ with $k$ starting at 0. A symmetric local
   maximum at bin $k$ has centroid $k$, and the printed formula then assigns it
-  the rate $(k - 1) \cdot \Delta f$, one full bin ($0{,}73\ \text{Hz}$) low,
-  which at fluctuation-strength rates is fatal (a true $1{,}46\ \text{Hz}$
-  modulation would be reported as $0{,}73\ \text{Hz}$). The offset is only
+  the rate $(k - 1) \cdot \Delta f$, one full bin ($0.73\ \text{Hz}$) low,
+  which at fluctuation-strength rates is fatal (a true $1.46\ \text{Hz}$
+  modulation would be reported as $0.73\ \text{Hz}$). The offset is only
   consistent with 1-based spectral-line positions, contradicting the
   standard's own definition of $k$.
 - **Evidence:** cross-check of Formula (144) against the $k$-to-rate mapping
@@ -228,16 +228,16 @@ These are the 11 entries of the [errata registry](/phonometry/reference/errata/)
 - **The problem:** the constants carry no units. Read in Hz, the damped step
   is capped at $5 \cdot 10^{-5}\ \text{Hz}$ per iteration
   ($2 \cdot 10^{-3}\ \text{Hz}$ over all 40 iterations), so the tuning cannot
-  move appreciably and the $1{,}25 \cdot \Delta f$
-  ($\approx 0{,}92\ \text{Hz}$) failure check is unreachable; the whole clause
+  move appreciably and the $1.25 \cdot \Delta f$
+  ($\approx 0.92\ \text{Hz}$) failure check is unreachable; the whole clause
   would be inert. Read as normalized modulation rates $f/\tilde{r}_s$ (the
   variable in which the Formula (127) kernel frequencies are expressed), the
-  same constants give a $0{,}075\ \text{Hz}$ damped per-iteration cap
-  ($\approx 2{,}9\ \text{Hz}$ over the 39 iterations), a
-  $1{,}5 \cdot 10^{-4}\ \text{Hz}$ stop tolerance and a reachable failure
+  same constants give a $0.075\ \text{Hz}$ damped per-iteration cap
+  ($\approx 2.9\ \text{Hz}$ over the 39 iterations), a
+  $1.5 \cdot 10^{-4}\ \text{Hz}$ stop tolerance and a reachable failure
   check, all consistent with the clause's purpose.
 - **Evidence:** dimensional analysis of the printed constants against the
-  $0{,}7324\ \text{Hz}$ spectral resolution and the failure threshold.
+  $0.7324\ \text{Hz}$ spectral resolution and the failure threshold.
 - **Library behaviour:** applies the constants as normalized modulation rates.
 - **Status:** unreported.
 

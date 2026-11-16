@@ -90,7 +90,7 @@ of the line of sight from the source on the façade plane and the weighted
 sound absorption coefficient `αw` (EN ISO 11654) of the underside of the
 balcony/roof above. The value feeds `delta_l_fs` of
 [`facade_sound_reduction`](/phonometry/reference/api/building/facade/#facade_sound_reduction) (Formula 13). Intermediate `αw` values
-are interpolated linearly between the tabulated 0,3 / 0,6 / 0,9 columns,
+are interpolated linearly between the tabulated 0.3 / 0.6 / 0.9 columns,
 as the annex allows; outside that range the edge column applies. The
 2017 edition tabulates the same values (Tabelle C.1).
 
@@ -104,8 +104,8 @@ open or closed fence).
 | Name | Description |
 | :--- | :--- |
 | `shape` | Façade shape key (see above). One of `"plane_facade"`, `"gallery_2"`, `"gallery_3"`, `"gallery_4"`, `"gallery_5"`, `"balcony_6"`, `"balcony_7"`, `"balcony_8"`, `"terrace_open"` or `"terrace_closed"`. |
-| `line_of_sight` | Height of the line of sight from the source at the façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m). |
-| `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0,3; reflecting). |
+| `line_of_sight` | Height of the line of sight from the source at the façade plane, in m (bins: below 1.5 m; 1.5 m to 2.5 m; above 2.5 m). |
+| `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0.3; reflecting). |
 
 **Returns:** `ΔLfs`, in dB.
 
@@ -353,7 +353,7 @@ $S = \mathrm{width} \cdot \mathrm{height}$ at perpendicular
 up to the largest side dimension and the point-source Formula (E.2b) beyond
 it, following the Annex E Note 3 switching rule. The two branches do not
 join continuously at the switch distance: for a square 10 m x 10 m side
-the step is about -0,7 dB (about -0,3 dB for a 60 m x 10 m side), an
+the step is about -0.7 dB (about -0.3 dB for a 60 m x 10 m side), an
 artefact of the standard's own simplification. The `+6 dB` for radiation
 into the quarter-space over hard ground is built into the formula.
 
@@ -418,7 +418,7 @@ Draw a composite facade elevation with element areas to scale.
 
 Each element of [`facade_sound_reduction`](/phonometry/reference/api/building/facade/#facade_sound_reduction) is a
 tile whose drawn area equals its real area (small-area elements without
-an area, such as airbricks rated by `dn_e`, get a nominal 0,1 m2 tile).
+an area, such as airbricks rated by `dn_e`, get a nominal 0.1 m2 tile).
 
 **Parameters**
 

@@ -129,7 +129,7 @@ quoted there as 7 cm² against the 7.07 cm² of a 15 mm radius.
 | :--- | :--- |
 | `youngs_modulus` | Young's modulus `E` of the covering, in Pa. |
 | `thickness_m` | Covering thickness `d`, in m. |
-| `radius` | Contact radius `r`, in m (Default: 0,015). |
+| `radius` | Contact radius `r`, in m (Default: 0.015). |
 
 **Returns:** The contact stiffness `K`, in N/m.
 
@@ -193,7 +193,7 @@ model identifies the general features rather than replacing a measurement.
 | `covering_stiffness` | Contact stiffness `K` of the covering, in N/m ([`covering_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
 | `plate_stiffness` | Contact stiffness `K` of the bare plate, in N/m ([`plate_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#plate_contact_stiffness)). |
 | `impedance` | Driving-point impedance `Zdp` of the base floor, in N.s/m; unchanged by the covering. |
-| `mass` | Hammer mass `m`, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10); it sets the spacing of the Fourier lines the bands average over. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
@@ -530,7 +530,7 @@ first zero crossing at $t = \pi/\beta$; it is the same truncation
 $0 \le t \le \pi/\beta$ reproduces that spectrum.
 
 The over-critical pulse has no such cut and decays for all `t`; it is
-evaluated in a form that stays finite over the whole 0,1 s between
+evaluated in a form that stays finite over the whole 0.1 s between
 impacts rather than one that overflows partway through it.
 
 **Parameters**
@@ -540,7 +540,7 @@ impacts rather than one that overflows partway through it.
 | `time` | Time `t` since the impact, in s (scalar or array, $\ge 0$). |
 | `contact_stiffness` | Contact stiffness `K`, in N/m. |
 | `impedance` | Driving-point impedance `Zdp`, in N.s/m. |
-| `mass` | Hammer mass `m`, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 | `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
 
 **Returns:** The force `F1(t)`, in N, with the same shape as `time`; never negative. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -572,8 +572,8 @@ $v_0 = 0.886$ m/s.
 
 | Name | Description |
 | :--- | :--- |
-| `drop_height_m` | Drop height `h`, in m (Default: 0,04). |
-| `gravity` | Acceleration of free fall `g`, in m/s² (Default: 9,81). |
+| `drop_height_m` | Drop height `h`, in m (Default: 0.04). |
+| `gravity` | Acceleration of free fall `g`, in m/s² (Default: 9.81). |
 
 **Returns:** The impact velocity `vo`, in m/s.
 
@@ -605,7 +605,7 @@ $f_z = 4 \sqrt{m_1 B_1}/(\pi m_\mathrm{h})$.
 | Name | Description |
 | :--- | :--- |
 | `impedance` | Driving-point impedance `Zdp`, in N.s/m. |
-| `mass` | Hammer mass `m`, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 
 **Returns:** The limiting frequency `flimit`, in Hz.
 
@@ -640,8 +640,8 @@ top of it.
 | Name | Description |
 | :--- | :--- |
 | `youngs_modulus` | Young's modulus `E` of the plate, in Pa. |
-| `poisson_ratio` | Poisson's ratio `ν` of the plate (Default: 0,2, the value Hopkins Table A2 estimates for concrete and masonry). |
-| `radius` | Contact radius `r`, in m (Default: 0,015). |
+| `poisson_ratio` | Poisson's ratio `ν` of the plate (Default: 0.2, the value Hopkins Table A2 estimates for concrete and masonry). |
+| `radius` | Contact radius `r`, in m (Default: 0.015). |
 
 **Returns:** The contact stiffness `K`, in N/m.
 
@@ -826,7 +826,7 @@ $[K/(2 Z_\mathrm{dp}) - \sqrt{(K/(2 Z_\mathrm{dp}))^{2} - K/m}]/(2 \pi)$
 | :--- | :--- |
 | `contact_stiffness` | Contact stiffness `K`, in N/m (see [`plate_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#plate_contact_stiffness) / [`covering_contact_stiffness`](/phonometry/reference/api/building/resilient-layers/#covering_contact_stiffness)). |
 | `impedance` | Driving-point impedance `Zdp` of the floor, in N.s/m (for a homogeneous plate, [`phonometry.vibration.infinite_plate_impedance`](/phonometry/reference/api/vibration/point-mobility/#infinite_plate_impedance)). |
-| `mass` | Hammer mass `m`, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 
 **Returns:** The cut-off frequency `fco`, in Hz.
 
@@ -887,7 +887,7 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | `frequencies` | Band centre frequencies `f`, in Hz. |
 | `contact_stiffness` | Contact stiffness `K`, in N/m. |
 | `impedance` | Driving-point impedance `Zdp` of the floor, in N.s/m. |
-| `mass` | Hammer mass `m`, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m`, in kg (Default: 0.5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10). |
 | `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
 | `fraction` | The band set of Eq. (3.91), 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
@@ -962,7 +962,7 @@ Force spectrum of the ISO tapping machine on one walking surface.
 | `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}$, in N (Eq. 3.99). |
 | `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
 | `fraction` | Band set used for `mean_square_force`, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
-| `mass` | Hammer mass `m` used, in kg (Default: 0,5). |
+| `mass` | Hammer mass `m` used, in kg (Default: 0.5). |
 
 Whether the oscillation is over-critical is read from `K`, `Zdp` and
 `m` (`over_critical`), so it is not a field.

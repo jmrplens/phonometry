@@ -282,7 +282,7 @@ consistent with sensitivity; then, if that is not enough, compensate.
 
 - **When to act.** Electronic compensation shall be considered when the
   magnitude of the structure's driving-point mobility exceeds
-  $0{,}01/(f\,m_\mathrm{t})$ at all frequencies of interest, with $m_\mathrm{t}$ the total
+  $0.01/(f\,m_\mathrm{t})$ at all frequencies of interest, with $m_\mathrm{t}$ the total
   effective mass of the attachment hardware plus the effective end mass of the
   force transducer or impedance head (and of a separate driving-point
   accelerometer, if one is fitted).
@@ -295,15 +295,15 @@ consistent with sensitivity; then, if that is not enough, compensate.
   standard **strongly recommends** reconsidering the transducer selection and
   redesigning the attachment hardware ahead of using it, and confines it to the
   range where the ratio of attachment-and-transducer effective mass to the
-  structure's free effective mass at the driving point is between **0,05 and
-  0,5**.
+  structure's free effective mass at the driving point is between **0.05 and
+  0.5**.
 - Clause 7.2 adds the rule that makes any of this repeatable: transducers
   mounted on studs are tightened to the torque the manufacturer recommends, and
   attachment compliance is checked per ISO 7626-1.
 
 For the resonator of section 2 the trigger is easy to place. Its driving-point
 mobility peaks at $1/c = 0.2$ m/(N·s) at 10.07 Hz; with a 20 g impedance head
-and attachment hardware ($m_\mathrm{t} = 0.02$ kg) the trigger $0{,}01/(f\,m_\mathrm{t})$ is
+and attachment hardware ($m_\mathrm{t} = 0.02$ kg) the trigger $0.01/(f\,m_\mathrm{t})$ is
 0.050 m/(N·s) there, so at its peak the structure is four times above it. Take
 a 2 g head instead and the trigger rises to 0.50 m/(N·s), above the peak. The
 trigger falls as the added mass rises, which is the whole point of it: the same
@@ -342,7 +342,7 @@ depending on *where* it drops.
 - **Low coherence anywhere** can simply be nonlinearity.
 
 Two notes catch beginners. A coherence computed from a *single* record is
-always a fictitious 1,0, so it means nothing until several averages are in. And
+always a fictitious 1.0, so it means nothing until several averages are in. And
 a high coherence does not prove the data valid: it can equally indicate
 cross-talk between the force and response channels.
 

@@ -2991,7 +2991,7 @@
           }
         ]
       },
-      "quantity": "The pressure term the book's own folio 177 drops: 4,3e-7 per pascal times one atmosphere",
+      "quantity": "The pressure term the book's own folio 177 drops: 4.3e-7 per pascal times one atmosphere",
       "kind": "scalar",
       "expected": {
         "value": 0.0438549088
@@ -5794,11 +5794,11 @@
           }
         ]
       },
-      "quantity": "0,22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts",
+      "quantity": "0.22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts",
       "kind": "count",
       "expected": {
         "value": 2.0,
-        "label": "conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB)"
+        "label": "conforms to Table 5 (0.25 dB), not to A.6.4.7 (0.20 dB)"
       },
       "computed": {
         "value": 2.0,
@@ -5828,11 +5828,11 @@
           }
         ]
       },
-      "quantity": "Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, 3 verdicts",
+      "quantity": "Class 1 at 2 kHz: 0.33 dB out of the band and in it, -0.5 % with U 0.25 %, 3 verdicts",
       "kind": "count",
       "expected": {
         "value": 3.0,
-        "label": "No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); No, U over Table A.5 (0,2 %)"
+        "label": "No by Table 5 (0.30 dB); Yes by Table 2 (0.35 dB); No, U over Table A.5 (0.2 %)"
       },
       "computed": {
         "value": 3.0,
@@ -9501,7 +9501,7 @@
           }
         ]
       },
-      "quantity": "Error factor Delta: 0,20 and 0,29 for all bands, 0,60 A-weighted",
+      "quantity": "Error factor Delta: 0.20 and 0.29 for all bands, 0.60 A-weighted",
       "kind": "record",
       "expected": {
         "label": "precision (all bands) = 0.2; engineering (all bands) = 0.29; survey (A-weighted) = 0.6",
@@ -9580,10 +9580,10 @@
       "quantity": "Five action codes, each reached by the case Figure B.1 routes to it",
       "kind": "record",
       "expected": {
-        "label": "F1 > 0,6 -> e; F2 > Ld -> ab; (F3 - F2) > 3 dB -> ab; criterion 2, 1 dB <= (F3 - F2) <= 3 dB -> c; criterion 2, (F3 - F2) <= 1 dB -> d"
+        "label": "F1 > 0.6 -> e; F2 > Ld -> ab; (F3 - F2) > 3 dB -> ab; criterion 2, 1 dB <= (F3 - F2) <= 3 dB -> c; criterion 2, (F3 - F2) <= 1 dB -> d"
       },
       "computed": {
-        "label": "F1 > 0,6 -> e; F2 > Ld -> ab; (F3 - F2) > 3 dB -> ab; criterion 2, 1 dB <= (F3 - F2) <= 3 dB -> c; criterion 2, (F3 - F2) <= 1 dB -> d"
+        "label": "F1 > 0.6 -> e; F2 > Ld -> ab; (F3 - F2) > 3 dB -> ab; criterion 2, 1 dB <= (F3 - F2) <= 3 dB -> c; criterion 2, (F3 - F2) <= 1 dB -> d"
       },
       "deviation": {
         "label": "0 of 5 rows disagree"
@@ -9639,7 +9639,7 @@
           }
         ]
       },
-      "quantity": "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB, grade 2 with sigma_omc = 2,0 dB",
+      "quantity": "Expanded uncertainty U = 2 sqrt(1.5^2 + 2^2) dB, grade 2 with sigma_omc = 2.0 dB",
       "kind": "scalar",
       "expected": {
         "value": 5.0
@@ -9672,22 +9672,22 @@
           }
         ]
       },
-      "quantity": "sigma_R0 by grade: 1,5 dB (grade 2) and 4,0 dB (grade 3), sigma_tot of Table E.1 row 2",
+      "quantity": "sigma_R0 by grade: 1.5 dB (grade 2) and 4.0 dB (grade 3), sigma_tot of Table E.1 row 2",
       "kind": "record",
       "expected": {
-        "label": "sigma_R0 grade 2 = 1.5 dB; sigma_R0 grade 3 = 4 dB; sigma_tot (1,5; 4) = 4.3 dB",
+        "label": "sigma_R0 grade 2 = 1.5 dB; sigma_R0 grade 3 = 4 dB; sigma_tot (1.5; 4) = 4.3 dB",
         "record": {
           "sigma_R0 grade 2": 1.5,
           "sigma_R0 grade 3": 4.0,
-          "sigma_tot (1,5; 4)": 4.3
+          "sigma_tot (1.5; 4)": 4.3
         }
       },
       "computed": {
-        "label": "sigma_R0 grade 2 = 1.5 dB; sigma_R0 grade 3 = 4 dB; sigma_tot (1,5; 4) = 4.3 dB",
+        "label": "sigma_R0 grade 2 = 1.5 dB; sigma_R0 grade 3 = 4 dB; sigma_tot (1.5; 4) = 4.3 dB",
         "record": {
           "sigma_R0 grade 2": 1.5,
           "sigma_R0 grade 3": 4.0,
-          "sigma_tot (1,5; 4)": 4.3
+          "sigma_tot (1.5; 4)": 4.3
         }
       },
       "unit": "dB",
@@ -9715,11 +9715,11 @@
           }
         ]
       },
-      "quantity": "K1 at the 6 dB validity margin, -10 lg(1 - 10^-0,6) = 1,2563 dB, and the 1,3 dB cap below it",
+      "quantity": "K1 at the 6 dB validity margin, -10 lg(1 - 10^-0.6) = 1.2563 dB, and the 1.3 dB cap below it",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "K1(6 dB) = 1,2563 dB, K1(2 dB) = 1,3 dB, 4 kHz flagged"
+        "label": "K1(6 dB) = 1.2563 dB, K1(2 dB) = 1.3 dB, 4 kHz flagged"
       },
       "computed": {
         "value": 0.0
@@ -9859,7 +9859,7 @@
           }
         ]
       },
-      "quantity": "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
+      "quantity": "C2 at 101.325 kPa and 23.0 degC is 15 lg(296.15/296) = 0.003 300 dB (theta_ref = 296 K)",
       "kind": "scalar",
       "expected": {
         "value": 0.003300388770355855
@@ -9892,7 +9892,7 @@
           }
         ]
       },
-      "quantity": "Static pressure at 500 m, 101,325 (1 - 2,2560e-5 x 500)^5,2553 kPa",
+      "quantity": "Static pressure at 500 m, 101.325 (1 - 2.2560e-5 x 500)^5.2553 kPa",
       "kind": "scalar",
       "expected": {
         "value": 95.46087854811667
@@ -10000,7 +10000,7 @@
           }
         ]
       },
-      "quantity": "Air absorption alpha in Np/m, 18 degC to 22 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, in the 303 cells the table prints correctly",
+      "quantity": "Air absorption alpha in Np/m, 18 degC to 22 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273.16 K, to the four decimals printed, in the 303 cells the table prints correctly",
       "kind": "count",
       "expected": {
         "value": 303.0,
@@ -10043,7 +10043,7 @@
           }
         ]
       },
-      "quantity": "Air absorption alpha in Np/m, 23 degC to 27 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, in the 278 cells the table prints correctly",
+      "quantity": "Air absorption alpha in Np/m, 23 degC to 27 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273.16 K, to the four decimals printed, in the 278 cells the table prints correctly",
       "kind": "count",
       "expected": {
         "value": 278.0,
@@ -10086,7 +10086,7 @@
           }
         ]
       },
-      "quantity": "The 9 cells Table 1 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273,16 K with its first trailing 0 set as the digit before it",
+      "quantity": "The 9 cells Table 1 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273.16 K with its first trailing 0 set as the digit before it",
       "kind": "count",
       "expected": {
         "value": 9.0,
@@ -10129,7 +10129,7 @@
           }
         ]
       },
-      "quantity": "The 34 cells Table 2 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273,16 K with its first trailing 0 set as the digit before it",
+      "quantity": "The 34 cells Table 2 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273.16 K with its first trailing 0 set as the digit before it",
       "kind": "count",
       "expected": {
         "value": 34.0,
@@ -10163,7 +10163,7 @@
           }
         ]
       },
-      "quantity": "The published Annex A at theta + 273,15 K against the 581 correctly printed cells: within one unit of the fourth decimal",
+      "quantity": "The published Annex A at theta + 273.15 K against the 581 correctly printed cells: within one unit of the fourth decimal",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -10196,7 +10196,7 @@
           }
         ]
       },
-      "quantity": "Room absorption coefficient and room constant from the reverberation time, V = 200 m3, S = 210 m2, T = 0,70 s: alpha_room = 1 - exp(-0,16 V/(S T)), R = S alpha_room / (1 - alpha_room) (closed form)",
+      "quantity": "Room absorption coefficient and room constant from the reverberation time, V = 200 m3, S = 210 m2, T = 0.70 s: alpha_room = 1 - exp(-0.16 V/(S T)), R = S alpha_room / (1 - alpha_room) (closed form)",
       "kind": "record",
       "expected": {
         "label": "alpha_room = 0.1956; R (m2) = 51.0716",
@@ -10269,19 +10269,19 @@
           }
         ]
       },
-      "quantity": "LW = Lp(ST) - 10 lg(4/R) + C1 + C2: R = 40 m2 raises Lp = 60 dB by 10 dB, plus the C1 and C2 of ISO 3741 at 23 degC and 101,325 kPa and at 30 degC and 90 kPa",
+      "quantity": "LW = Lp(ST) - 10 lg(4/R) + C1 + C2: R = 40 m2 raises Lp = 60 dB by 10 dB, plus the C1 and C2 of ISO 3741 at 23 degC and 101.325 kPa and at 30 degC and 90 kPa",
       "kind": "record",
       "expected": {
-        "label": "23 degC, 101,325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
+        "label": "23 degC, 101.325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
         "record": {
-          "23 degC, 101,325 kPa": 69.876211,
+          "23 degC, 101.325 kPa": 69.876211,
           "30 degC, 90 kPa": 71.10861
         }
       },
       "computed": {
-        "label": "23 degC, 101,325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
+        "label": "23 degC, 101.325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
         "record": {
-          "23 degC, 101,325 kPa": 69.876211,
+          "23 degC, 101.325 kPa": 69.876211,
           "30 degC, 90 kPa": 71.10861
         }
       },
@@ -10351,7 +10351,7 @@
           }
         ]
       },
-      "quantity": "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0,4 m/s, 345 m/s, and three equal sidebands summing to 10 lg 3 above one",
+      "quantity": "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0.4 m/s, 345 m/s, and three equal sidebands summing to 10 lg 3 above one",
       "kind": "record",
       "expected": {
         "label": "Delta f (Hz) = 37.1014; Ltot (dB) = 54.7712",
@@ -10391,7 +10391,7 @@
           }
         ]
       },
-      "quantity": "Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m (8,686 times Annex A), and none at r = 2 m",
+      "quantity": "Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m (8.686 times Annex A), and none at r = 2 m",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -10468,11 +10468,11 @@
           }
         ]
       },
-      "quantity": "C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands",
+      "quantity": "C3,4 of the sampling tube for d = 0.5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "162 tabulated values reproduced to the printed 0,1 dB"
+        "label": "162 tabulated values reproduced to the printed 0.1 dB"
       },
       "computed": {
         "value": 0.049,
@@ -10503,11 +10503,11 @@
           }
         ]
       },
-      "quantity": "Worked example: C3,4 = (1,85 + 0,038 U) dB at 1 kHz, U = +15 and -15 m/s",
+      "quantity": "Worked example: C3,4 = (1.85 + 0.038 U) dB at 1 kHz, U = +15 and -15 m/s",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "2,42 dB at +15 m/s and 1,28 dB at -15 m/s reproduced"
+        "label": "2.42 dB at +15 m/s and 1.28 dB at -15 m/s reproduced"
       },
       "computed": {
         "value": 0.0,
@@ -10571,7 +10571,7 @@
           }
         ]
       },
-      "quantity": "Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0,5 m",
+      "quantity": "Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0.5 m",
       "kind": "scalar",
       "expected": {
         "value": -7.211274684563609
@@ -10604,7 +10604,7 @@
           }
         ]
       },
-      "quantity": "Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12,5 to 20 kHz",
+      "quantity": "Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12.5 to 20 kHz",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -10783,7 +10783,7 @@
           }
         ]
       },
-      "quantity": "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a), to the printed decimal: -0,9 dB and -1,9 dB",
+      "quantity": "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0.5 and 0.05 of 9.1.1 a), to the printed decimal: -0.9 dB and -1.9 dB",
       "kind": "record",
       "expected": {
         "label": "d/sqrt(Sp) = 0.5 = -0.9 dB; d/sqrt(Sp) = 0.05 = -1.9 dB",
@@ -10959,7 +10959,7 @@
           }
         ]
       },
-      "quantity": "Aspect angle of a unit square seen from (0,5; -d): 180 - 2 atan(2 d) degrees at d = 0,1, 0,5 and 2 (closed form)",
+      "quantity": "Aspect angle of a unit square seen from (0.5; -d): 180 - 2 atan(2 d) degrees at d = 0.1, 0.5 and 2 (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -10993,7 +10993,7 @@
           }
         ]
       },
-      "quantity": "K_3A at a work station 1,6 m from the dominating source, dB",
+      "quantity": "K_3A at a work station 1.6 m from the dominating source, dB",
       "kind": "scalar",
       "expected": {
         "value": 3.7
@@ -11059,7 +11059,7 @@
           }
         ]
       },
-      "quantity": "U from sigma_R0 = 1,5 dB and sigma_omc = 1,0 dB at k = 1,6, dB",
+      "quantity": "U from sigma_R0 = 1.5 dB and sigma_omc = 1.0 dB at k = 1.6, dB",
       "kind": "scalar",
       "expected": {
         "value": 2.9
@@ -11261,7 +11261,7 @@
           }
         ]
       },
-      "quantity": "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB = 5 dB, sigma_omc = 2,0 dB",
+      "quantity": "Expanded uncertainty U = 2 sqrt(1.5^2 + 2^2) dB = 5 dB, sigma_omc = 2.0 dB",
       "kind": "scalar",
       "expected": {
         "value": 5.0
@@ -11347,20 +11347,20 @@
           }
         ]
       },
-      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 1,5 dB, for sigma_omc = 0,5, 2 and 4 dB",
+      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 1.5 dB, for sigma_omc = 0.5, 2 and 4 dB",
       "kind": "record",
       "expected": {
-        "label": "sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
+        "label": "sigma_omc 0.5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
         "record": {
-          "sigma_omc 0,5": 1.6,
+          "sigma_omc 0.5": 1.6,
           "sigma_omc 2": 2.5,
           "sigma_omc 4": 4.3
         }
       },
       "computed": {
-        "label": "sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
+        "label": "sigma_omc 0.5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB",
         "record": {
-          "sigma_omc 0,5": 1.6,
+          "sigma_omc 0.5": 1.6,
           "sigma_omc 2": 2.5,
           "sigma_omc 4": 4.3
         }
@@ -11390,22 +11390,22 @@
           }
         ]
       },
-      "quantity": "K1 at the 6 dB margin is -10 lg(1 - 10^-0,6) = 1,2563 dB, 1,3 dB below it and 0 above 15 dB",
+      "quantity": "K1 at the 6 dB margin is -10 lg(1 - 10^-0.6) = 1.2563 dB, 1.3 dB below it and 0 above 15 dB",
       "kind": "record",
       "expected": {
-        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB",
+        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15.5 dB) = 0 dB",
         "record": {
           "K1(6 dB)": 1.2563,
           "K1(4 dB)": 1.3,
-          "K1(15,5 dB)": 0.0
+          "K1(15.5 dB)": 0.0
         }
       },
       "computed": {
-        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15,5 dB) = 0 dB",
+        "label": "K1(6 dB) = 1.2563 dB; K1(4 dB) = 1.3 dB; K1(15.5 dB) = 0 dB",
         "record": {
           "K1(6 dB)": 1.2563,
           "K1(4 dB)": 1.3,
-          "K1(15,5 dB)": 0.0
+          "K1(15.5 dB)": 0.0
         }
       },
       "unit": "dB",
@@ -11543,7 +11543,7 @@
           }
         ]
       },
-      "quantity": "C2 at 500 m and 23,0 degC from Eq. (A.2): 0,26 dB (not the 0,4 dB of C.4.2.5)",
+      "quantity": "C2 at 500 m and 23.0 degC from Eq. (A.2): 0.26 dB (not the 0.4 dB of C.4.2.5)",
       "kind": "scalar",
       "expected": {
         "value": 0.26
@@ -11609,7 +11609,7 @@
           }
         ]
       },
-      "quantity": "Room volume and reference box: 40 m3 and 40 boxes; 1,0 m up to 100 m3, 2,0 m above",
+      "quantity": "Room volume and reference box: 40 m3 and 40 boxes; 1.0 m up to 100 m3, 2.0 m above",
       "kind": "count",
       "expected": {
         "value": 6.0,
@@ -11643,7 +11643,7 @@
           }
         ]
       },
-      "quantity": "Source locations from sM: 1 up to 2,5 dB, 2 up to 4,0 dB, 2 plus 2 in another room above",
+      "quantity": "Source locations from sM: 1 up to 2.5 dB, 2 up to 4.0 dB, 2 plus 2 in another room above",
       "kind": "count",
       "expected": {
         "value": 3.0,
@@ -11685,7 +11685,7 @@
           }
         ]
       },
-      "quantity": "sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2,0 dB for 2,5 dB and 1,5 dB (the minus of Part 1; Part 2 prints a plus)",
+      "quantity": "sigma'_R0 = sqrt(sigma'_tot^2 - sigma'_omc^2) = 2.0 dB for 2.5 dB and 1.5 dB (the minus of Part 1; Part 2 prints a plus)",
       "kind": "scalar",
       "expected": {
         "value": 2.0
@@ -11767,7 +11767,7 @@
           }
         ]
       },
-      "quantity": "Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5,7 dB, sigma_omc = 2,0 dB",
+      "quantity": "Expanded uncertainty U = 2 sqrt(2^2 + 2^2) dB = 5.7 dB, sigma_omc = 2.0 dB",
       "kind": "scalar",
       "expected": {
         "value": 5.7
@@ -11853,22 +11853,22 @@
           }
         ]
       },
-      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0,5, 2,0 and 4,0 dB",
+      "quantity": "Total standard deviation of the grade 2 row, sigma_R0 = 2 dB, for sigma_omc = 0.5, 2.0 and 4.0 dB",
       "kind": "record",
       "expected": {
-        "label": "sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB",
+        "label": "sigma_omc 0.5 = 2.1 dB; sigma_omc 2.0 = 2.8 dB; sigma_omc 4.0 = 4.5 dB",
         "record": {
-          "sigma_omc 0,5": 2.1,
-          "sigma_omc 2,0": 2.8,
-          "sigma_omc 4,0": 4.5
+          "sigma_omc 0.5": 2.1,
+          "sigma_omc 2.0": 2.8,
+          "sigma_omc 4.0": 4.5
         }
       },
       "computed": {
-        "label": "sigma_omc 0,5 = 2.1 dB; sigma_omc 2,0 = 2.8 dB; sigma_omc 4,0 = 4.5 dB",
+        "label": "sigma_omc 0.5 = 2.1 dB; sigma_omc 2.0 = 2.8 dB; sigma_omc 4.0 = 4.5 dB",
         "record": {
-          "sigma_omc 0,5": 2.1,
-          "sigma_omc 2,0": 2.8,
-          "sigma_omc 4,0": 4.5
+          "sigma_omc 0.5": 2.1,
+          "sigma_omc 2.0": 2.8,
+          "sigma_omc 4.0": 4.5
         }
       },
       "unit": "dB",
@@ -11896,7 +11896,7 @@
           }
         ]
       },
-      "quantity": "R at 1 000 Hz for a 70 m3 room is the 1,06 of Formula (B.2)",
+      "quantity": "R at 1 000 Hz for a 70 m3 room is the 1.06 of Formula (B.2)",
       "kind": "scalar",
       "expected": {
         "value": 1.06
@@ -11961,7 +11961,7 @@
           }
         ]
       },
-      "quantity": "T1000 = 0,8 s on the curve of Figure B.4: the printed T/Tnom = 1,09 is the midpoint of the extreme ratios against 0,9 and 1,1 alone (within 0,015), and as Tnom = 0,73 s it puts 250 Hz above 1,1 R; the library's centring qualifies the room at 0,76 s, a departure of 0,17 dB in LW (see the errata)",
+      "quantity": "T1000 = 0.8 s on the curve of Figure B.4: the printed T/Tnom = 1.09 is the midpoint of the extreme ratios against 0.9 and 1.1 alone (within 0.015), and as Tnom = 0.73 s it puts 250 Hz above 1.1 R; the library's centring qualifies the room at 0.76 s, a departure of 0.17 dB in LW (see the errata)",
       "kind": "count",
       "expected": {
         "value": 4.0,
@@ -11995,7 +11995,7 @@
           }
         ]
       },
-      "quantity": "The noise source should not exceed 1 % of the room: 0,7 m3 in the minimum 70 m3 room is within the recommendation, 0,71 m3 is not, and neither moves the verdict",
+      "quantity": "The noise source should not exceed 1 % of the room: 0.7 m3 in the minimum 70 m3 room is within the recommendation, 0.71 m3 is not, and neither moves the verdict",
       "kind": "count",
       "expected": {
         "value": 2.0,
@@ -12029,22 +12029,22 @@
           }
         ]
       },
-      "quantity": "Limiting curves 0,9 and 1,1 times R Tnom up to 6,3 kHz, 0,8 and 1,2 above",
+      "quantity": "Limiting curves 0.9 and 1.1 times R Tnom up to 6.3 kHz, 0.8 and 1.2 above",
       "kind": "record",
       "expected": {
-        "label": "6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
+        "label": "6.3 kHz low = 0.9; 6.3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
         "record": {
-          "6,3 kHz low": 0.9,
-          "6,3 kHz high": 1.1,
+          "6.3 kHz low": 0.9,
+          "6.3 kHz high": 1.1,
           "8 kHz low": 0.8,
           "8 kHz high": 1.2
         }
       },
       "computed": {
-        "label": "6,3 kHz low = 0.9; 6,3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
+        "label": "6.3 kHz low = 0.9; 6.3 kHz high = 1.1; 8 kHz low = 0.8; 8 kHz high = 1.2",
         "record": {
-          "6,3 kHz low": 0.9,
-          "6,3 kHz high": 1.1,
+          "6.3 kHz low": 0.9,
+          "6.3 kHz high": 1.1,
           "8 kHz low": 0.8,
           "8 kHz high": 1.2
         }
@@ -12124,7 +12124,7 @@
           }
         ]
       },
-      "quantity": "Each band is suitable at its Table 1 difference read high or low, and not 0,1 dB beyond it on either side",
+      "quantity": "Each band is suitable at its Table 1 difference read high or low, and not 0.1 dB beyond it on either side",
       "kind": "count",
       "expected": {
         "value": 28.0,
@@ -12166,7 +12166,7 @@
           }
         ]
       },
-      "quantity": "The calibration as the suitability evaluation reads it at 20 degC and 90 kPa: one-third octaves of 76, 80 and 83 dB over the 2 m hemisphere, the 1 kHz octave their energy sum less the calibration's own C2 of 0,483 dB for a source of unknown radiation, dB (closed form)",
+      "quantity": "The calibration as the suitability evaluation reads it at 20 degC and 90 kPa: one-third octaves of 76, 80 and 83 dB over the 2 m hemisphere, the 1 kHz octave their energy sum less the calibration's own C2 of 0.483 dB for a source of unknown radiation, dB (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 98.70004330186313
@@ -12199,7 +12199,7 @@
           }
         ]
       },
-      "quantity": "With a calibration read at 20 degC and 90 kPa, each band is suitable at its Table 1 difference below the calibration and not 0,1 dB beyond it; with the calibration read at the default 23,0 degC and 101,325 kPa instead, 0,482 dB higher, the band at its limit is not",
+      "quantity": "With a calibration read at 20 degC and 90 kPa, each band is suitable at its Table 1 difference below the calibration and not 0.1 dB beyond it; with the calibration read at the default 23.0 degC and 101.325 kPa instead, 0.482 dB higher, the band at its limit is not",
       "kind": "count",
       "expected": {
         "value": 21.0,
@@ -12249,7 +12249,7 @@
           }
         ]
       },
-      "quantity": "Both comparisons read a calibration at 20 degC and 90 kPa: the 1 kHz octave less its own C2 of 0,483 dB, plus the 4 dB the source under test is louder, and carried to the reference conditions by the 0,452 dB C2 of Annex A (Part 1) and Annex E (Part 2), dB (closed form)",
+      "quantity": "Both comparisons read a calibration at 20 degC and 90 kPa: the 1 kHz octave less its own C2 of 0.483 dB, plus the 4 dB the source under test is louder, and carried to the reference conditions by the 0.452 dB C2 of Annex A (Part 1) and Annex E (Part 2), dB (closed form)",
       "kind": "record",
       "expected": {
         "label": "ISO 3743-1 LW = 102.1649 dB; ISO 3743-1 LW ref = 102.6167 dB; ISO 3743-2 LW = 102.1649 dB; ISO 3743-2 LW ref = 102.6167 dB",
@@ -12328,7 +12328,7 @@
           }
         ]
       },
-      "quantity": "Background corrections: 2, 2, 1, 1, 1, 0,5, 0,5 dB for 4 dB to 10 dB, 0 above",
+      "quantity": "Background corrections: 2, 2, 1, 1, 1, 0.5, 0.5 dB for 4 dB to 10 dB, 0 above",
       "kind": "record",
       "expected": {
         "label": "4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 11 dB = 0 dB",
@@ -12381,7 +12381,7 @@
           }
         ]
       },
-      "quantity": "Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0,73 s (closed form)",
+      "quantity": "Direct method LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB in a 70 m3 room, Tnom = 0.73 s (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -12717,7 +12717,7 @@
           }
         ]
       },
-      "quantity": "An exact inverse-square field, six traverses 0,30 m to 3,00 m: the qualified radius is the end of the traverses, m (closed form)",
+      "quantity": "An exact inverse-square field, six traverses 0.30 m to 3.00 m: the qualified radius is the end of the traverses, m (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 3.000000000000002
@@ -12783,7 +12783,7 @@
           }
         ]
       },
-      "quantity": "Starting value of b for L_pi = 85,0 / 80,5 / 76,0 / 73,5 dB at 0,5 / 1,0 / 1,5 / 2,0 m, the mean of 20 lg(r_i/r0) + L_pi, dB",
+      "quantity": "Starting value of b for L_pi = 85.0 / 80.5 / 76.0 / 73.5 dB at 0.5 / 1.0 / 1.5 / 2.0 m, the mean of 20 lg(r_i/r0) + L_pi, dB",
       "kind": "scalar",
       "expected": {
         "value": 79.6304562952784
@@ -12816,7 +12816,7 @@
           }
         ]
       },
-      "quantity": "One incoherent reflection, rho^2 = 1 from a wall 2,5 m ahead, 1 kHz in an anechoic room: the qualified distance is the last point before D(r) - D(r1) = 2 dB, m (closed form)",
+      "quantity": "One incoherent reflection, rho^2 = 1 from a wall 2.5 m ahead, 1 kHz in an anechoic room: the qualified distance is the last point before D(r) - D(r1) = 2 dB, m (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 2.1500000000000012
@@ -12882,7 +12882,7 @@
           }
         ]
       },
-      "quantity": "A source drifting by 0 to 0,8 dB along the traverse, seen by the monitor microphone: the largest deviation left after the correction, dB",
+      "quantity": "A source drifting by 0 to 0.8 dB along the traverse, seen by the monitor microphone: the largest deviation left after the correction, dB",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -12958,7 +12958,7 @@
           }
         ]
       },
-      "quantity": "sigma_r of 80,0 / 80,2 / 79,9 dB about their energy average, dB (closed form)",
+      "quantity": "sigma_r of 80.0 / 80.2 / 79.9 dB about their energy average, dB (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 0.1527683820043215
@@ -13070,7 +13070,7 @@
           }
         ]
       },
-      "quantity": "L_W of a uniform 80 dB over the 2 m hemisphere at the reference conditions, with a(f) = 0,01 dB/m, 1 kHz, dB (closed form)",
+      "quantity": "L_W of a uniform 80 dB over the 2 m hemisphere at the reference conditions, with a(f) = 0.01 dB/m, 1 kHz, dB (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 93.89712833480434
@@ -13103,32 +13103,32 @@
           }
         ]
       },
-      "quantity": "Spectra at the edges of 5.4: a 12,0 dB range and a 3,0 dB step pass, 12,5 dB and 3,1 dB fail; extended to 50 Hz, steps of 4,0 dB pass and one of 4,1 dB fails, and with every step within 4 dB a 16,0 dB range passes and 16,5 dB fails",
+      "quantity": "Spectra at the edges of 5.4: a 12.0 dB range and a 3.0 dB step pass, 12.5 dB and 3.1 dB fail; extended to 50 Hz, steps of 4.0 dB pass and one of 4.1 dB fails, and with every step within 4 dB a 16.0 dB range passes and 16.5 dB fails",
       "kind": "record",
       "expected": {
-        "label": "12,0 dB range = 1; 12,5 dB range = 0; 3,0 dB step = 1; 3,1 dB step = 0; extended, 12 dB and 4 dB steps = 1; extended, a 4,1 dB step = 0; extended, 16,0 dB = 1; extended, 16,5 dB = 0",
+        "label": "12.0 dB range = 1; 12.5 dB range = 0; 3.0 dB step = 1; 3.1 dB step = 0; extended, 12 dB and 4 dB steps = 1; extended, a 4.1 dB step = 0; extended, 16.0 dB = 1; extended, 16.5 dB = 0",
         "record": {
-          "12,0 dB range": 1.0,
-          "12,5 dB range": 0.0,
-          "3,0 dB step": 1.0,
-          "3,1 dB step": 0.0,
+          "12.0 dB range": 1.0,
+          "12.5 dB range": 0.0,
+          "3.0 dB step": 1.0,
+          "3.1 dB step": 0.0,
           "extended, 12 dB and 4 dB steps": 1.0,
-          "extended, a 4,1 dB step": 0.0,
-          "extended, 16,0 dB": 1.0,
-          "extended, 16,5 dB": 0.0
+          "extended, a 4.1 dB step": 0.0,
+          "extended, 16.0 dB": 1.0,
+          "extended, 16.5 dB": 0.0
         }
       },
       "computed": {
-        "label": "12,0 dB range = 1; 12,5 dB range = 0; 3,0 dB step = 1; 3,1 dB step = 0; extended, 12 dB and 4 dB steps = 1; extended, a 4,1 dB step = 0; extended, 16,0 dB = 1; extended, 16,5 dB = 0",
+        "label": "12.0 dB range = 1; 12.5 dB range = 0; 3.0 dB step = 1; 3.1 dB step = 0; extended, 12 dB and 4 dB steps = 1; extended, a 4.1 dB step = 0; extended, 16.0 dB = 1; extended, 16.5 dB = 0",
         "record": {
-          "12,0 dB range": 1.0,
-          "12,5 dB range": 0.0,
-          "3,0 dB step": 1.0,
-          "3,1 dB step": 0.0,
+          "12.0 dB range": 1.0,
+          "12.5 dB range": 0.0,
+          "3.0 dB step": 1.0,
+          "3.1 dB step": 0.0,
           "extended, 12 dB and 4 dB steps": 1.0,
-          "extended, a 4,1 dB step": 0.0,
-          "extended, 16,0 dB": 1.0,
-          "extended, 16,5 dB": 0.0
+          "extended, a 4.1 dB step": 0.0,
+          "extended, 16.0 dB": 1.0,
+          "extended, 16.5 dB": 0.0
         }
       },
       "tolerance": {
@@ -13155,7 +13155,7 @@
           }
         ]
       },
-      "quantity": "Recalibration limit, 2,83 times Table 1, at 80, 125 and 1 000 Hz, dB",
+      "quantity": "Recalibration limit, 2.83 times Table 1, at 80, 125 and 1 000 Hz, dB",
       "kind": "record",
       "expected": {
         "label": "80 Hz = 2.264 dB; 125 Hz = 1.132 dB; 1000 Hz = 0.566 dB",
@@ -13198,28 +13198,28 @@
           }
         ]
       },
-      "quantity": "At the edge of every row: three repetitions whose sigma_r of Formula (1) equals the limit pass and 0,01 dB more fail, at 80 Hz (0,8 dB), 160 Hz (0,4 dB) and 200 Hz (0,2 dB)",
+      "quantity": "At the edge of every row: three repetitions whose sigma_r of Formula (1) equals the limit pass and 0.01 dB more fail, at 80 Hz (0.8 dB), 160 Hz (0.4 dB) and 200 Hz (0.2 dB)",
       "kind": "record",
       "expected": {
-        "label": "80 Hz, 0,80 dB = 1; 80 Hz, 0,81 dB = 0; 160 Hz, 0,40 dB = 1; 160 Hz, 0,41 dB = 0; 200 Hz, 0,20 dB = 1; 200 Hz, 0,21 dB = 0",
+        "label": "80 Hz, 0.80 dB = 1; 80 Hz, 0.81 dB = 0; 160 Hz, 0.40 dB = 1; 160 Hz, 0.41 dB = 0; 200 Hz, 0.20 dB = 1; 200 Hz, 0.21 dB = 0",
         "record": {
-          "80 Hz, 0,80 dB": 1.0,
-          "80 Hz, 0,81 dB": 0.0,
-          "160 Hz, 0,40 dB": 1.0,
-          "160 Hz, 0,41 dB": 0.0,
-          "200 Hz, 0,20 dB": 1.0,
-          "200 Hz, 0,21 dB": 0.0
+          "80 Hz, 0.80 dB": 1.0,
+          "80 Hz, 0.81 dB": 0.0,
+          "160 Hz, 0.40 dB": 1.0,
+          "160 Hz, 0.41 dB": 0.0,
+          "200 Hz, 0.20 dB": 1.0,
+          "200 Hz, 0.21 dB": 0.0
         }
       },
       "computed": {
-        "label": "80 Hz, 0,80 dB = 1; 80 Hz, 0,81 dB = 0; 160 Hz, 0,40 dB = 1; 160 Hz, 0,41 dB = 0; 200 Hz, 0,20 dB = 1; 200 Hz, 0,21 dB = 0",
+        "label": "80 Hz, 0.80 dB = 1; 80 Hz, 0.81 dB = 0; 160 Hz, 0.40 dB = 1; 160 Hz, 0.41 dB = 0; 200 Hz, 0.20 dB = 1; 200 Hz, 0.21 dB = 0",
         "record": {
-          "80 Hz, 0,80 dB": 1.0,
-          "80 Hz, 0,81 dB": 0.0,
-          "160 Hz, 0,40 dB": 1.0,
-          "160 Hz, 0,41 dB": 0.0,
-          "200 Hz, 0,20 dB": 1.0,
-          "200 Hz, 0,21 dB": 0.0
+          "80 Hz, 0.80 dB": 1.0,
+          "80 Hz, 0.81 dB": 0.0,
+          "160 Hz, 0.40 dB": 1.0,
+          "160 Hz, 0.41 dB": 0.0,
+          "200 Hz, 0.20 dB": 1.0,
+          "200 Hz, 0.21 dB": 0.0
         }
       },
       "tolerance": {
@@ -13246,28 +13246,28 @@
           }
         ]
       },
-      "quantity": "At the edge of every row of Table 1: a change of exactly 2,83 times it calls for no recalibration and 0,01 dB more does, at 80 Hz (2,264 dB), 125 Hz (1,132 dB) and 1 000 Hz (0,566 dB)",
+      "quantity": "At the edge of every row of Table 1: a change of exactly 2.83 times it calls for no recalibration and 0.01 dB more does, at 80 Hz (2.264 dB), 125 Hz (1.132 dB) and 1 000 Hz (0.566 dB)",
       "kind": "record",
       "expected": {
-        "label": "80 Hz, 2,264 dB = 1; 80 Hz, 2,274 dB = 0; 125 Hz, 1,132 dB = 1; 125 Hz, 1,142 dB = 0; 1000 Hz, 0,566 dB = 1; 1000 Hz, 0,576 dB = 0",
+        "label": "80 Hz, 2.264 dB = 1; 80 Hz, 2.274 dB = 0; 125 Hz, 1.132 dB = 1; 125 Hz, 1.142 dB = 0; 1000 Hz, 0.566 dB = 1; 1000 Hz, 0.576 dB = 0",
         "record": {
-          "80 Hz, 2,264 dB": 1.0,
-          "80 Hz, 2,274 dB": 0.0,
-          "125 Hz, 1,132 dB": 1.0,
-          "125 Hz, 1,142 dB": 0.0,
-          "1000 Hz, 0,566 dB": 1.0,
-          "1000 Hz, 0,576 dB": 0.0
+          "80 Hz, 2.264 dB": 1.0,
+          "80 Hz, 2.274 dB": 0.0,
+          "125 Hz, 1.132 dB": 1.0,
+          "125 Hz, 1.142 dB": 0.0,
+          "1000 Hz, 0.566 dB": 1.0,
+          "1000 Hz, 0.576 dB": 0.0
         }
       },
       "computed": {
-        "label": "80 Hz, 2,264 dB = 1; 80 Hz, 2,274 dB = 0; 125 Hz, 1,132 dB = 1; 125 Hz, 1,142 dB = 0; 1000 Hz, 0,566 dB = 1; 1000 Hz, 0,576 dB = 0",
+        "label": "80 Hz, 2.264 dB = 1; 80 Hz, 2.274 dB = 0; 125 Hz, 1.132 dB = 1; 125 Hz, 1.142 dB = 0; 1000 Hz, 0.566 dB = 1; 1000 Hz, 0.576 dB = 0",
         "record": {
-          "80 Hz, 2,264 dB": 1.0,
-          "80 Hz, 2,274 dB": 0.0,
-          "125 Hz, 1,132 dB": 1.0,
-          "125 Hz, 1,142 dB": 0.0,
-          "1000 Hz, 0,566 dB": 1.0,
-          "1000 Hz, 0,576 dB": 0.0
+          "80 Hz, 2.264 dB": 1.0,
+          "80 Hz, 2.274 dB": 0.0,
+          "125 Hz, 1.132 dB": 1.0,
+          "125 Hz, 1.142 dB": 0.0,
+          "1000 Hz, 0.566 dB": 1.0,
+          "1000 Hz, 0.576 dB": 0.0
         }
       },
       "tolerance": {
@@ -13294,28 +13294,28 @@
           }
         ]
       },
-      "quantity": "Reflecting plane: an absorption coefficient of 0,06 passes and 0,07 fails; with 125 Hz the lowest band, a plane extending 0,75 m beyond the surface passes and 0,74 m fails, the 0,75 m binding over the 0,686 m quarter wavelength; with 100 Hz the lowest, the quarter wavelength of 0,857 5 m binds, and 0,857 5 m passes and 0,857 4 m fails",
+      "quantity": "Reflecting plane: an absorption coefficient of 0.06 passes and 0.07 fails; with 125 Hz the lowest band, a plane extending 0.75 m beyond the surface passes and 0.74 m fails, the 0.75 m binding over the 0.686 m quarter wavelength; with 100 Hz the lowest, the quarter wavelength of 0.857 5 m binds, and 0.857 5 m passes and 0.857 4 m fails",
       "kind": "record",
       "expected": {
-        "label": "0,06 = 1; 0,07 = 0; 0,75 m = 1; 0,74 m = 0; 0,857 5 m = 1; 0,857 4 m = 0",
+        "label": "0.06 = 1; 0.07 = 0; 0.75 m = 1; 0.74 m = 0; 0.857 5 m = 1; 0.857 4 m = 0",
         "record": {
-          "0,06": 1.0,
-          "0,07": 0.0,
-          "0,75 m": 1.0,
-          "0,74 m": 0.0,
-          "0,857 5 m": 1.0,
-          "0,857 4 m": 0.0
+          "0.06": 1.0,
+          "0.07": 0.0,
+          "0.75 m": 1.0,
+          "0.74 m": 0.0,
+          "0.857 5 m": 1.0,
+          "0.857 4 m": 0.0
         }
       },
       "computed": {
-        "label": "0,06 = 1; 0,07 = 0; 0,75 m = 1; 0,74 m = 0; 0,857 5 m = 1; 0,857 4 m = 0",
+        "label": "0.06 = 1; 0.07 = 0; 0.75 m = 1; 0.74 m = 0; 0.857 5 m = 1; 0.857 4 m = 0",
         "record": {
-          "0,06": 1.0,
-          "0,07": 0.0,
-          "0,75 m": 1.0,
-          "0,74 m": 0.0,
-          "0,857 5 m": 1.0,
-          "0,857 4 m": 0.0
+          "0.06": 1.0,
+          "0.07": 0.0,
+          "0.75 m": 1.0,
+          "0.74 m": 0.0,
+          "0.857 5 m": 1.0,
+          "0.857 4 m": 0.0
         }
       },
       "tolerance": {
@@ -13342,32 +13342,32 @@
           }
         ]
       },
-      "quantity": "Traverse paths: four fail, five and eight pass, nine fail; in a hemi-anechoic room a path 20 deg and 80 deg from the vertical passes, 19,9 deg and 80,1 deg fail",
+      "quantity": "Traverse paths: four fail, five and eight pass, nine fail; in a hemi-anechoic room a path 20 deg and 80 deg from the vertical passes, 19.9 deg and 80.1 deg fail",
       "kind": "record",
       "expected": {
-        "label": "4 traverses = 0; 5 traverses = 1; 8 traverses = 1; 9 traverses = 0; 19,9 deg = 0; 20 deg = 1; 80 deg = 1; 80,1 deg = 0",
+        "label": "4 traverses = 0; 5 traverses = 1; 8 traverses = 1; 9 traverses = 0; 19.9 deg = 0; 20 deg = 1; 80 deg = 1; 80.1 deg = 0",
         "record": {
           "4 traverses": 0.0,
           "5 traverses": 1.0,
           "8 traverses": 1.0,
           "9 traverses": 0.0,
-          "19,9 deg": 0.0,
+          "19.9 deg": 0.0,
           "20 deg": 1.0,
           "80 deg": 1.0,
-          "80,1 deg": 0.0
+          "80.1 deg": 0.0
         }
       },
       "computed": {
-        "label": "4 traverses = 0; 5 traverses = 1; 8 traverses = 1; 9 traverses = 0; 19,9 deg = 0; 20 deg = 1; 80 deg = 1; 80,1 deg = 0",
+        "label": "4 traverses = 0; 5 traverses = 1; 8 traverses = 1; 9 traverses = 0; 19.9 deg = 0; 20 deg = 1; 80 deg = 1; 80.1 deg = 0",
         "record": {
           "4 traverses": 0.0,
           "5 traverses": 1.0,
           "8 traverses": 1.0,
           "9 traverses": 0.0,
-          "19,9 deg": 0.0,
+          "19.9 deg": 0.0,
           "20 deg": 1.0,
           "80 deg": 1.0,
-          "80,1 deg": 0.0
+          "80.1 deg": 0.0
         }
       },
       "tolerance": {
@@ -13394,10 +13394,10 @@
           }
         ]
       },
-      "quantity": "Points within the radius: five traverses of 10 pass, five of 9 (45 in all) fail, and six of 10, 10, 10, 10, 10 and 9 fail; four of 13, 13, 12 and 12 (50 in all) pass and four of 13, 12, 12 and 12 (49 in all) fail; the spacing at 500 Hz, 100 mm passes and 101 mm fails, and at 125 Hz a tenth of a wavelength, 274,4 mm, passes and 274,5 mm fails",
+      "quantity": "Points within the radius: five traverses of 10 pass, five of 9 (45 in all) fail, and six of 10, 10, 10, 10, 10 and 9 fail; four of 13, 13, 12 and 12 (50 in all) pass and four of 13, 12, 12 and 12 (49 in all) fail; the spacing at 500 Hz, 100 mm passes and 101 mm fails, and at 125 Hz a tenth of a wavelength, 274.4 mm, passes and 274.5 mm fails",
       "kind": "record",
       "expected": {
-        "label": "5 x 10 = 1; 5 x 9 = 0; 5 x 10 + 9 = 0; 13, 13, 12, 12 = 1; 13, 12, 12, 12 = 0; 100 mm at 500 Hz = 1; 101 mm at 500 Hz = 0; 274,4 mm at 125 Hz = 1; 274,5 mm at 125 Hz = 0",
+        "label": "5 x 10 = 1; 5 x 9 = 0; 5 x 10 + 9 = 0; 13, 13, 12, 12 = 1; 13, 12, 12, 12 = 0; 100 mm at 500 Hz = 1; 101 mm at 500 Hz = 0; 274.4 mm at 125 Hz = 1; 274.5 mm at 125 Hz = 0",
         "record": {
           "5 x 10": 1.0,
           "5 x 9": 0.0,
@@ -13406,12 +13406,12 @@
           "13, 12, 12, 12": 0.0,
           "100 mm at 500 Hz": 1.0,
           "101 mm at 500 Hz": 0.0,
-          "274,4 mm at 125 Hz": 1.0,
-          "274,5 mm at 125 Hz": 0.0
+          "274.4 mm at 125 Hz": 1.0,
+          "274.5 mm at 125 Hz": 0.0
         }
       },
       "computed": {
-        "label": "5 x 10 = 1; 5 x 9 = 0; 5 x 10 + 9 = 0; 13, 13, 12, 12 = 1; 13, 12, 12, 12 = 0; 100 mm at 500 Hz = 1; 101 mm at 500 Hz = 0; 274,4 mm at 125 Hz = 1; 274,5 mm at 125 Hz = 0",
+        "label": "5 x 10 = 1; 5 x 9 = 0; 5 x 10 + 9 = 0; 13, 13, 12, 12 = 1; 13, 12, 12, 12 = 0; 100 mm at 500 Hz = 1; 101 mm at 500 Hz = 0; 274.4 mm at 125 Hz = 1; 274.5 mm at 125 Hz = 0",
         "record": {
           "5 x 10": 1.0,
           "5 x 9": 0.0,
@@ -13420,8 +13420,8 @@
           "13, 12, 12, 12": 0.0,
           "100 mm at 500 Hz": 1.0,
           "101 mm at 500 Hz": 0.0,
-          "274,4 mm at 125 Hz": 1.0,
-          "274,5 mm at 125 Hz": 0.0
+          "274.4 mm at 125 Hz": 1.0,
+          "274.5 mm at 125 Hz": 0.0
         }
       },
       "tolerance": {
@@ -13448,24 +13448,24 @@
           }
         ]
       },
-      "quantity": "Spatial resolution: at 2 kHz, 25 mm passes and 26 mm fails; at 500 Hz, a tenth of a wavelength, 68,6 mm, passes and 68,7 mm fails",
+      "quantity": "Spatial resolution: at 2 kHz, 25 mm passes and 26 mm fails; at 500 Hz, a tenth of a wavelength, 68.6 mm, passes and 68.7 mm fails",
       "kind": "record",
       "expected": {
-        "label": "25 mm at 2 kHz = 1; 26 mm at 2 kHz = 0; 68,6 mm at 500 Hz = 1; 68,7 mm at 500 Hz = 0",
+        "label": "25 mm at 2 kHz = 1; 26 mm at 2 kHz = 0; 68.6 mm at 500 Hz = 1; 68.7 mm at 500 Hz = 0",
         "record": {
           "25 mm at 2 kHz": 1.0,
           "26 mm at 2 kHz": 0.0,
-          "68,6 mm at 500 Hz": 1.0,
-          "68,7 mm at 500 Hz": 0.0
+          "68.6 mm at 500 Hz": 1.0,
+          "68.7 mm at 500 Hz": 0.0
         }
       },
       "computed": {
-        "label": "25 mm at 2 kHz = 1; 26 mm at 2 kHz = 0; 68,6 mm at 500 Hz = 1; 68,7 mm at 500 Hz = 0",
+        "label": "25 mm at 2 kHz = 1; 26 mm at 2 kHz = 0; 68.6 mm at 500 Hz = 1; 68.7 mm at 500 Hz = 0",
         "record": {
           "25 mm at 2 kHz": 1.0,
           "26 mm at 2 kHz": 0.0,
-          "68,6 mm at 500 Hz": 1.0,
-          "68,7 mm at 500 Hz": 0.0
+          "68.6 mm at 500 Hz": 1.0,
+          "68.7 mm at 500 Hz": 0.0
         }
       },
       "tolerance": {
@@ -13492,24 +13492,24 @@
           }
         ]
       },
-      "quantity": "Traverse length at 100 Hz, a quarter wavelength of 0,857 5 m: a start at 0,857 5 m passes and 0,857 6 m fails; a run of 0,857 5 m passes and 0,857 4 m fails",
+      "quantity": "Traverse length at 100 Hz, a quarter wavelength of 0.857 5 m: a start at 0.857 5 m passes and 0.857 6 m fails; a run of 0.857 5 m passes and 0.857 4 m fails",
       "kind": "record",
       "expected": {
-        "label": "start 0,857 5 m = 1; start 0,857 6 m = 0; run 0,857 5 m = 1; run 0,857 4 m = 0",
+        "label": "start 0.857 5 m = 1; start 0.857 6 m = 0; run 0.857 5 m = 1; run 0.857 4 m = 0",
         "record": {
-          "start 0,857 5 m": 1.0,
-          "start 0,857 6 m": 0.0,
-          "run 0,857 5 m": 1.0,
-          "run 0,857 4 m": 0.0
+          "start 0.857 5 m": 1.0,
+          "start 0.857 6 m": 0.0,
+          "run 0.857 5 m": 1.0,
+          "run 0.857 4 m": 0.0
         }
       },
       "computed": {
-        "label": "start 0,857 5 m = 1; start 0,857 6 m = 0; run 0,857 5 m = 1; run 0,857 4 m = 0",
+        "label": "start 0.857 5 m = 1; start 0.857 6 m = 0; run 0.857 5 m = 1; run 0.857 4 m = 0",
         "record": {
-          "start 0,857 5 m": 1.0,
-          "start 0,857 6 m": 0.0,
-          "run 0,857 5 m": 1.0,
-          "run 0,857 4 m": 0.0
+          "start 0.857 5 m": 1.0,
+          "start 0.857 6 m": 0.0,
+          "run 0.857 5 m": 1.0,
+          "run 0.857 4 m": 0.0
         }
       },
       "tolerance": {
@@ -13536,20 +13536,20 @@
           }
         ]
       },
-      "quantity": "Levels 6,0 dB above the background at every point pass, 5,9 dB fail",
+      "quantity": "Levels 6.0 dB above the background at every point pass, 5.9 dB fail",
       "kind": "record",
       "expected": {
-        "label": "6,0 dB = 1; 5,9 dB = 0",
+        "label": "6.0 dB = 1; 5.9 dB = 0",
         "record": {
-          "6,0 dB": 1.0,
-          "5,9 dB": 0.0
+          "6.0 dB": 1.0,
+          "5.9 dB": 0.0
         }
       },
       "computed": {
-        "label": "6,0 dB = 1; 5,9 dB = 0",
+        "label": "6.0 dB = 1; 5.9 dB = 0",
         "record": {
-          "6,0 dB": 1.0,
-          "5,9 dB": 0.0
+          "6.0 dB": 1.0,
+          "5.9 dB": 0.0
         }
       },
       "tolerance": {
@@ -13584,39 +13584,39 @@
           }
         ]
       },
-      "quantity": "At the edge of every cell: a traverse whose deviations reach the limit either way qualifies to its last point, and 0,005 dB past it ends one point short; anechoic and hemi-anechoic, at 500 Hz, 1 000 Hz and 8 000 Hz",
+      "quantity": "At the edge of every cell: a traverse whose deviations reach the limit either way qualifies to its last point, and 0.005 dB past it ends one point short; anechoic and hemi-anechoic, at 500 Hz, 1 000 Hz and 8 000 Hz",
       "kind": "record",
       "expected": {
-        "label": "anechoic 500 Hz, ±1,5 dB = 1; anechoic 500 Hz, past it = 0; anechoic 1000 Hz, ±1,0 dB = 1; anechoic 1000 Hz, past it = 0; anechoic 8000 Hz, ±1,5 dB = 1; anechoic 8000 Hz, past it = 0; hemi-anechoic 500 Hz, ±2,5 dB = 1; hemi-anechoic 500 Hz, past it = 0; hemi-anechoic 1000 Hz, ±2,0 dB = 1; hemi-anechoic 1000 Hz, past it = 0; hemi-anechoic 8000 Hz, ±3,0 dB = 1; hemi-anechoic 8000 Hz, past it = 0",
+        "label": "anechoic 500 Hz, ±1.5 dB = 1; anechoic 500 Hz, past it = 0; anechoic 1000 Hz, ±1.0 dB = 1; anechoic 1000 Hz, past it = 0; anechoic 8000 Hz, ±1.5 dB = 1; anechoic 8000 Hz, past it = 0; hemi-anechoic 500 Hz, ±2.5 dB = 1; hemi-anechoic 500 Hz, past it = 0; hemi-anechoic 1000 Hz, ±2.0 dB = 1; hemi-anechoic 1000 Hz, past it = 0; hemi-anechoic 8000 Hz, ±3.0 dB = 1; hemi-anechoic 8000 Hz, past it = 0",
         "record": {
-          "anechoic 500 Hz, ±1,5 dB": 1.0,
+          "anechoic 500 Hz, ±1.5 dB": 1.0,
           "anechoic 500 Hz, past it": 0.0,
-          "anechoic 1000 Hz, ±1,0 dB": 1.0,
+          "anechoic 1000 Hz, ±1.0 dB": 1.0,
           "anechoic 1000 Hz, past it": 0.0,
-          "anechoic 8000 Hz, ±1,5 dB": 1.0,
+          "anechoic 8000 Hz, ±1.5 dB": 1.0,
           "anechoic 8000 Hz, past it": 0.0,
-          "hemi-anechoic 500 Hz, ±2,5 dB": 1.0,
+          "hemi-anechoic 500 Hz, ±2.5 dB": 1.0,
           "hemi-anechoic 500 Hz, past it": 0.0,
-          "hemi-anechoic 1000 Hz, ±2,0 dB": 1.0,
+          "hemi-anechoic 1000 Hz, ±2.0 dB": 1.0,
           "hemi-anechoic 1000 Hz, past it": 0.0,
-          "hemi-anechoic 8000 Hz, ±3,0 dB": 1.0,
+          "hemi-anechoic 8000 Hz, ±3.0 dB": 1.0,
           "hemi-anechoic 8000 Hz, past it": 0.0
         }
       },
       "computed": {
-        "label": "anechoic 500 Hz, ±1,5 dB = 1; anechoic 500 Hz, past it = 0; anechoic 1000 Hz, ±1,0 dB = 1; anechoic 1000 Hz, past it = 0; anechoic 8000 Hz, ±1,5 dB = 1; anechoic 8000 Hz, past it = 0; hemi-anechoic 500 Hz, ±2,5 dB = 1; hemi-anechoic 500 Hz, past it = 0; hemi-anechoic 1000 Hz, ±2,0 dB = 1; hemi-anechoic 1000 Hz, past it = 0; hemi-anechoic 8000 Hz, ±3,0 dB = 1; hemi-anechoic 8000 Hz, past it = 0",
+        "label": "anechoic 500 Hz, ±1.5 dB = 1; anechoic 500 Hz, past it = 0; anechoic 1000 Hz, ±1.0 dB = 1; anechoic 1000 Hz, past it = 0; anechoic 8000 Hz, ±1.5 dB = 1; anechoic 8000 Hz, past it = 0; hemi-anechoic 500 Hz, ±2.5 dB = 1; hemi-anechoic 500 Hz, past it = 0; hemi-anechoic 1000 Hz, ±2.0 dB = 1; hemi-anechoic 1000 Hz, past it = 0; hemi-anechoic 8000 Hz, ±3.0 dB = 1; hemi-anechoic 8000 Hz, past it = 0",
         "record": {
-          "anechoic 500 Hz, ±1,5 dB": 1.0,
+          "anechoic 500 Hz, ±1.5 dB": 1.0,
           "anechoic 500 Hz, past it": 0.0,
-          "anechoic 1000 Hz, ±1,0 dB": 1.0,
+          "anechoic 1000 Hz, ±1.0 dB": 1.0,
           "anechoic 1000 Hz, past it": 0.0,
-          "anechoic 8000 Hz, ±1,5 dB": 1.0,
+          "anechoic 8000 Hz, ±1.5 dB": 1.0,
           "anechoic 8000 Hz, past it": 0.0,
-          "hemi-anechoic 500 Hz, ±2,5 dB": 1.0,
+          "hemi-anechoic 500 Hz, ±2.5 dB": 1.0,
           "hemi-anechoic 500 Hz, past it": 0.0,
-          "hemi-anechoic 1000 Hz, ±2,0 dB": 1.0,
+          "hemi-anechoic 1000 Hz, ±2.0 dB": 1.0,
           "hemi-anechoic 1000 Hz, past it": 0.0,
-          "hemi-anechoic 8000 Hz, ±3,0 dB": 1.0,
+          "hemi-anechoic 8000 Hz, ±3.0 dB": 1.0,
           "hemi-anechoic 8000 Hz, past it": 0.0
         }
       },
@@ -13644,47 +13644,47 @@
           }
         ]
       },
-      "quantity": "At the edge of every cell: a test source whose extreme positions lie on the allowable deviation either way is uniform enough, and 0,01 dB past it is not; anechoic and hemi-anechoic, at 630, 800, 6 300 and 12 500 Hz",
+      "quantity": "At the edge of every cell: a test source whose extreme positions lie on the allowable deviation either way is uniform enough, and 0.01 dB past it is not; anechoic and hemi-anechoic, at 630, 800, 6 300 and 12 500 Hz",
       "kind": "record",
       "expected": {
-        "label": "anechoic 630 Hz, ±1,5 dB = 1; anechoic 630 Hz, past it = 0; anechoic 800 Hz, ±2,0 dB = 1; anechoic 800 Hz, past it = 0; anechoic 6300 Hz, ±2,5 dB = 1; anechoic 6300 Hz, past it = 0; anechoic 12500 Hz, ±5,0 dB = 1; anechoic 12500 Hz, past it = 0; hemi-anechoic 630 Hz, ±2,0 dB = 1; hemi-anechoic 630 Hz, past it = 0; hemi-anechoic 800 Hz, ±2,5 dB = 1; hemi-anechoic 800 Hz, past it = 0; hemi-anechoic 6300 Hz, ±3,0 dB = 1; hemi-anechoic 6300 Hz, past it = 0; hemi-anechoic 12500 Hz, ±5,0 dB = 1; hemi-anechoic 12500 Hz, past it = 0",
+        "label": "anechoic 630 Hz, ±1.5 dB = 1; anechoic 630 Hz, past it = 0; anechoic 800 Hz, ±2.0 dB = 1; anechoic 800 Hz, past it = 0; anechoic 6300 Hz, ±2.5 dB = 1; anechoic 6300 Hz, past it = 0; anechoic 12500 Hz, ±5.0 dB = 1; anechoic 12500 Hz, past it = 0; hemi-anechoic 630 Hz, ±2.0 dB = 1; hemi-anechoic 630 Hz, past it = 0; hemi-anechoic 800 Hz, ±2.5 dB = 1; hemi-anechoic 800 Hz, past it = 0; hemi-anechoic 6300 Hz, ±3.0 dB = 1; hemi-anechoic 6300 Hz, past it = 0; hemi-anechoic 12500 Hz, ±5.0 dB = 1; hemi-anechoic 12500 Hz, past it = 0",
         "record": {
-          "anechoic 630 Hz, ±1,5 dB": 1.0,
+          "anechoic 630 Hz, ±1.5 dB": 1.0,
           "anechoic 630 Hz, past it": 0.0,
-          "anechoic 800 Hz, ±2,0 dB": 1.0,
+          "anechoic 800 Hz, ±2.0 dB": 1.0,
           "anechoic 800 Hz, past it": 0.0,
-          "anechoic 6300 Hz, ±2,5 dB": 1.0,
+          "anechoic 6300 Hz, ±2.5 dB": 1.0,
           "anechoic 6300 Hz, past it": 0.0,
-          "anechoic 12500 Hz, ±5,0 dB": 1.0,
+          "anechoic 12500 Hz, ±5.0 dB": 1.0,
           "anechoic 12500 Hz, past it": 0.0,
-          "hemi-anechoic 630 Hz, ±2,0 dB": 1.0,
+          "hemi-anechoic 630 Hz, ±2.0 dB": 1.0,
           "hemi-anechoic 630 Hz, past it": 0.0,
-          "hemi-anechoic 800 Hz, ±2,5 dB": 1.0,
+          "hemi-anechoic 800 Hz, ±2.5 dB": 1.0,
           "hemi-anechoic 800 Hz, past it": 0.0,
-          "hemi-anechoic 6300 Hz, ±3,0 dB": 1.0,
+          "hemi-anechoic 6300 Hz, ±3.0 dB": 1.0,
           "hemi-anechoic 6300 Hz, past it": 0.0,
-          "hemi-anechoic 12500 Hz, ±5,0 dB": 1.0,
+          "hemi-anechoic 12500 Hz, ±5.0 dB": 1.0,
           "hemi-anechoic 12500 Hz, past it": 0.0
         }
       },
       "computed": {
-        "label": "anechoic 630 Hz, ±1,5 dB = 1; anechoic 630 Hz, past it = 0; anechoic 800 Hz, ±2,0 dB = 1; anechoic 800 Hz, past it = 0; anechoic 6300 Hz, ±2,5 dB = 1; anechoic 6300 Hz, past it = 0; anechoic 12500 Hz, ±5,0 dB = 1; anechoic 12500 Hz, past it = 0; hemi-anechoic 630 Hz, ±2,0 dB = 1; hemi-anechoic 630 Hz, past it = 0; hemi-anechoic 800 Hz, ±2,5 dB = 1; hemi-anechoic 800 Hz, past it = 0; hemi-anechoic 6300 Hz, ±3,0 dB = 1; hemi-anechoic 6300 Hz, past it = 0; hemi-anechoic 12500 Hz, ±5,0 dB = 1; hemi-anechoic 12500 Hz, past it = 0",
+        "label": "anechoic 630 Hz, ±1.5 dB = 1; anechoic 630 Hz, past it = 0; anechoic 800 Hz, ±2.0 dB = 1; anechoic 800 Hz, past it = 0; anechoic 6300 Hz, ±2.5 dB = 1; anechoic 6300 Hz, past it = 0; anechoic 12500 Hz, ±5.0 dB = 1; anechoic 12500 Hz, past it = 0; hemi-anechoic 630 Hz, ±2.0 dB = 1; hemi-anechoic 630 Hz, past it = 0; hemi-anechoic 800 Hz, ±2.5 dB = 1; hemi-anechoic 800 Hz, past it = 0; hemi-anechoic 6300 Hz, ±3.0 dB = 1; hemi-anechoic 6300 Hz, past it = 0; hemi-anechoic 12500 Hz, ±5.0 dB = 1; hemi-anechoic 12500 Hz, past it = 0",
         "record": {
-          "anechoic 630 Hz, ±1,5 dB": 1.0,
+          "anechoic 630 Hz, ±1.5 dB": 1.0,
           "anechoic 630 Hz, past it": 0.0,
-          "anechoic 800 Hz, ±2,0 dB": 1.0,
+          "anechoic 800 Hz, ±2.0 dB": 1.0,
           "anechoic 800 Hz, past it": 0.0,
-          "anechoic 6300 Hz, ±2,5 dB": 1.0,
+          "anechoic 6300 Hz, ±2.5 dB": 1.0,
           "anechoic 6300 Hz, past it": 0.0,
-          "anechoic 12500 Hz, ±5,0 dB": 1.0,
+          "anechoic 12500 Hz, ±5.0 dB": 1.0,
           "anechoic 12500 Hz, past it": 0.0,
-          "hemi-anechoic 630 Hz, ±2,0 dB": 1.0,
+          "hemi-anechoic 630 Hz, ±2.0 dB": 1.0,
           "hemi-anechoic 630 Hz, past it": 0.0,
-          "hemi-anechoic 800 Hz, ±2,5 dB": 1.0,
+          "hemi-anechoic 800 Hz, ±2.5 dB": 1.0,
           "hemi-anechoic 800 Hz, past it": 0.0,
-          "hemi-anechoic 6300 Hz, ±3,0 dB": 1.0,
+          "hemi-anechoic 6300 Hz, ±3.0 dB": 1.0,
           "hemi-anechoic 6300 Hz, past it": 0.0,
-          "hemi-anechoic 12500 Hz, ±5,0 dB": 1.0,
+          "hemi-anechoic 12500 Hz, ±5.0 dB": 1.0,
           "hemi-anechoic 12500 Hz, past it": 0.0
         }
       },
@@ -13712,24 +13712,24 @@
           }
         ]
       },
-      "quantity": "Pressure and intensity sound power levels at the edges of the tolerance: 4,0 dB apart at 50 Hz and 1,0 dB at 315 Hz agree, 4,1 dB and 1,1 dB do not",
+      "quantity": "Pressure and intensity sound power levels at the edges of the tolerance: 4.0 dB apart at 50 Hz and 1.0 dB at 315 Hz agree, 4.1 dB and 1.1 dB do not",
       "kind": "record",
       "expected": {
-        "label": "50 Hz, 4,0 dB = 1; 50 Hz, 4,1 dB = 0; 315 Hz, 1,0 dB = 1; 315 Hz, 1,1 dB = 0",
+        "label": "50 Hz, 4.0 dB = 1; 50 Hz, 4.1 dB = 0; 315 Hz, 1.0 dB = 1; 315 Hz, 1.1 dB = 0",
         "record": {
-          "50 Hz, 4,0 dB": 1.0,
-          "50 Hz, 4,1 dB": 0.0,
-          "315 Hz, 1,0 dB": 1.0,
-          "315 Hz, 1,1 dB": 0.0
+          "50 Hz, 4.0 dB": 1.0,
+          "50 Hz, 4.1 dB": 0.0,
+          "315 Hz, 1.0 dB": 1.0,
+          "315 Hz, 1.1 dB": 0.0
         }
       },
       "computed": {
-        "label": "50 Hz, 4,0 dB = 1; 50 Hz, 4,1 dB = 0; 315 Hz, 1,0 dB = 1; 315 Hz, 1,1 dB = 0",
+        "label": "50 Hz, 4.0 dB = 1; 50 Hz, 4.1 dB = 0; 315 Hz, 1.0 dB = 1; 315 Hz, 1.1 dB = 0",
         "record": {
-          "50 Hz, 4,0 dB": 1.0,
-          "50 Hz, 4,1 dB": 0.0,
-          "315 Hz, 1,0 dB": 1.0,
-          "315 Hz, 1,1 dB": 0.0
+          "50 Hz, 4.0 dB": 1.0,
+          "50 Hz, 4.1 dB": 0.0,
+          "315 Hz, 1.0 dB": 1.0,
+          "315 Hz, 1.1 dB": 0.0
         }
       },
       "tolerance": {
@@ -13764,24 +13764,24 @@
           }
         ]
       },
-      "quantity": "A change of 0,30 dB over the declared supply range passes and 0,31 dB fails; a highest directivity index of 6,0 dB passes and 6,1 dB fails",
+      "quantity": "A change of 0.30 dB over the declared supply range passes and 0.31 dB fails; a highest directivity index of 6.0 dB passes and 6.1 dB fails",
       "kind": "record",
       "expected": {
-        "label": "0,30 dB = 1; 0,31 dB = 0; 6,0 dB = 1; 6,1 dB = 0",
+        "label": "0.30 dB = 1; 0.31 dB = 0; 6.0 dB = 1; 6.1 dB = 0",
         "record": {
-          "0,30 dB": 1.0,
-          "0,31 dB": 0.0,
-          "6,0 dB": 1.0,
-          "6,1 dB": 0.0
+          "0.30 dB": 1.0,
+          "0.31 dB": 0.0,
+          "6.0 dB": 1.0,
+          "6.1 dB": 0.0
         }
       },
       "computed": {
-        "label": "0,30 dB = 1; 0,31 dB = 0; 6,0 dB = 1; 6,1 dB = 0",
+        "label": "0.30 dB = 1; 0.31 dB = 0; 6.0 dB = 1; 6.1 dB = 0",
         "record": {
-          "0,30 dB": 1.0,
-          "0,31 dB": 0.0,
-          "6,0 dB": 1.0,
-          "6,1 dB": 0.0
+          "0.30 dB": 1.0,
+          "0.31 dB": 0.0,
+          "6.0 dB": 1.0,
+          "6.1 dB": 0.0
         }
       },
       "tolerance": {
@@ -13849,7 +13849,7 @@
           }
         ]
       },
-      "quantity": "A calibration read by an ISO 3741 comparison at 20 degC and 90 kPa: L_W less its own C2 at the test, 0,483 dB for a source of unknown radiation, plus 4 dB and ISO 3741's C2 of 0,452 dB, 1 kHz, dB (closed form)",
+      "quantity": "A calibration read by an ISO 3741 comparison at 20 degC and 90 kPa: L_W less its own C2 at the test, 0.483 dB for a source of unknown radiation, plus 4 dB and ISO 3741's C2 of 0.452 dB, 1 kHz, dB (closed form)",
       "kind": "scalar",
       "expected": {
         "value": 97.84544564172876
@@ -13948,7 +13948,7 @@
           }
         ]
       },
-      "quantity": "Sound pressure exposure level of a 1 Pa burst held for 0,5 s",
+      "quantity": "Sound pressure exposure level of a 1 Pa burst held for 0.5 s",
       "kind": "scalar",
       "expected": {
         "value": 90.96910013008056
@@ -14049,7 +14049,7 @@
           }
         ]
       },
-      "quantity": "Reverberation-room reference level, A = 0,16 V/T = 10 m2",
+      "quantity": "Reverberation-room reference level, A = 0.16 V/T = 10 m2",
       "kind": "scalar",
       "expected": {
         "value": 53.0
@@ -14082,7 +14082,7 @@
           }
         ]
       },
-      "quantity": "The two printed routes to G span the 0,0206 dB their integers force",
+      "quantity": "The two printed routes to G span the 0.0206 dB their integers force",
       "kind": "scalar",
       "expected": {
         "value": 0.020599913279624182
@@ -14426,7 +14426,7 @@
           }
         ]
       },
-      "quantity": "The two evaluation ranges differ by the printed 0,88/0,55 and decay terms",
+      "quantity": "The two evaluation ranges differ by the printed 0.88/0.55 and decay terms",
       "kind": "scalar",
       "expected": {
         "value": 1.6261747890200624
@@ -15577,7 +15577,7 @@
           }
         ]
       },
-      "quantity": "Reference floors to one decimal: 77,6 (-10,3), 71,8 (0,0) and 75,0 (-2,8)",
+      "quantity": "Reference floors to one decimal: 77.6 (-10.3), 71.8 (0.0) and 75.0 (-2.8)",
       "kind": "count",
       "expected": {
         "value": 6.0,
@@ -15836,13 +15836,13 @@
           }
         ]
       },
-      "quantity": "Curing example: two measurements within 1 d may start 3 d after construction; on the same bound, 2,1 d after 6,3 d passes too",
+      "quantity": "Curing example: two measurements within 1 d may start 3 d after construction; on the same bound, 2.1 d after 6.3 d passes too",
       "kind": "record",
       "expected": {
-        "label": "3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes"
+        "label": "3 d passes, 2.9 d fails, 6.3 d with 2.1 d passes"
       },
       "computed": {
-        "label": "3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes"
+        "label": "3 d passes, 2.9 d fails, 6.3 d with 2.1 d passes"
       },
       "deviation": {
         "label": "exact"
@@ -15864,7 +15864,7 @@
           }
         ]
       },
-      "quantity": "The 18 C_j are the IEC 61672-1 A-weighting at the exact midband frequencies of the nominal bands, to 0,1 dB",
+      "quantity": "The 18 C_j are the IEC 61672-1 A-weighting at the exact midband frequencies of the nominal bands, to 0.1 dB",
       "kind": "count",
       "expected": {
         "value": 18.0,
@@ -15898,7 +15898,7 @@
           }
         ]
       },
-      "quantity": "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j",
+      "quantity": "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0.1 C_j), printed C_j",
       "kind": "scalar",
       "expected": {
         "value": 60.99726716319903
@@ -15997,7 +15997,7 @@
           }
         ]
       },
-      "quantity": "A 5,4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5,4 m / (8 m2 x 1 m))",
+      "quantity": "A 5.4 m joint, L1 - L2 = 37 dB over A = 8 m2: Rs = 37 + 10 lg(1 m2 x 5.4 m / (8 m2 x 1 m))",
       "kind": "scalar",
       "expected": {
         "value": 35.29303772831025
@@ -16038,7 +16038,7 @@
           }
         ]
       },
-      "quantity": "The fixed 1,3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, to the printed decimal",
+      "quantity": "The fixed 1.3 dB below a 6 dB margin over Rs,max is Formula (J.2) at 6 dB, to the printed decimal",
       "kind": "record",
       "expected": {
         "label": "1.3 dB at and below a 6 dB margin"
@@ -16066,7 +16066,7 @@
           }
         ]
       },
-      "quantity": "R's within 3 dB of Rs,max = 50,4 dB: the lower limit as printed, (Rs >= 50,4 dB)",
+      "quantity": "R's within 3 dB of Rs,max = 50.4 dB: the lower limit as printed, (Rs >= 50.4 dB)",
       "kind": "record",
       "expected": {
         "label": "(Rs >= 50.4 dB)"
@@ -16173,7 +16173,7 @@
           }
         ]
       },
-      "quantity": "Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window or door gap at least 5,0 m (5,0 m passes); four gap readings within 0,3 mm",
+      "quantity": "Joint longer than 1 m (1 m fails), at most 50 mm wide (50 mm passes), a window or door gap at least 5.0 m (5.0 m passes); four gap readings within 0.3 mm",
       "kind": "count",
       "expected": {
         "value": 8.0,
@@ -16377,7 +16377,7 @@
           }
         ]
       },
-      "quantity": "Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: 38 and 42 pass, and 38 collected as 3,8 L on 0,1 m² in one hour; 37,9 and 42,1 fail",
+      "quantity": "Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: 38 and 42 pass, and 38 collected as 3.8 L on 0.1 m² in one hour; 37.9 and 42.1 fail",
       "kind": "record",
       "expected": {
         "label": "pass, pass, pass, fail, fail"
@@ -16437,7 +16437,7 @@
       "quantity": "Adaptation term Kc: all 21 printed rows; (B.1) reduces to (B.2)",
       "kind": "scalar",
       "expected": {
-        "label": "max abs(Kc - Table B.1) <= 0,05 dB (1 dp print)"
+        "label": "max abs(Kc - Table B.1) <= 0.05 dB (1 dp print)"
       },
       "computed": {
         "label": "0.047 dB (B.1 vs B.2: 4.33e-04 dB)"
@@ -16466,7 +16466,7 @@
       "quantity": "Limp-panel qualification: the printed plaster-board column",
       "kind": "scalar",
       "expected": {
-        "label": "max abs(R - Table A.1) <= 0,05 dB (1 dp print)"
+        "label": "max abs(R - Table A.1) <= 0.05 dB (1 dp print)"
       },
       "computed": {
         "label": "0.050 dB over 50 Hz to 160 Hz"
@@ -16549,7 +16549,7 @@
           }
         ]
       },
-      "quantity": "Survey R' applies the V/7,5 minimum-area rule",
+      "quantity": "Survey R' applies the V/7.5 minimum-area rule",
       "kind": "scalar",
       "expected": {
         "value": 26.19788758288394
@@ -16803,7 +16803,7 @@
           }
         ]
       },
-      "quantity": "Flanking total loss factor η = 2,2/(f·Ts)",
+      "quantity": "Flanking total loss factor η = 2.2/(f·Ts)",
       "kind": "record",
       "expected": {
         "label": "η = 0.0044"
@@ -16838,7 +16838,7 @@
           }
         ]
       },
-      "quantity": "Flanking critical frequency (c0²/1,8·cL·h) vs plate coincidence (c0²/2π · sqrt(m''/B'))",
+      "quantity": "Flanking critical frequency (c0²/1.8·cL·h) vs plate coincidence (c0²/2π · sqrt(m''/B'))",
       "kind": "scalar",
       "expected": {
         "value": 2107.363931726014
@@ -16904,7 +16904,7 @@
           }
         ]
       },
-      "quantity": "Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9)",
+      "quantity": "Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0.1 MPa, ε=0.9)",
       "kind": "scalar",
       "expected": {
         "value": 5.555555549999999
@@ -17073,7 +17073,7 @@
       "kind": "scalar",
       "expected": {
         "value": 55.350667,
-        "label": "55,350 66... dB (rated 55 dB)"
+        "label": "55.350 66... dB (rated 55 dB)"
       },
       "computed": {
         "value": 55.350668
@@ -17114,10 +17114,10 @@
       "quantity": "Rubber-ball impact force exposure level LFE, five octave bands",
       "kind": "record",
       "expected": {
-        "label": "39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N at 31,5 to 500 Hz"
+        "label": "39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N at 31.5 to 500 Hz"
       },
       "computed": {
-        "label": "39 / 31 / 23 / 17 / 12,5 dB re 1 N"
+        "label": "39 / 31 / 23 / 17 / 12.5 dB re 1 N"
       },
       "deviation": {
         "label": "max |dev| 0.000 dB"
@@ -17143,7 +17143,7 @@
       "kind": "scalar",
       "expected": {
         "value": 73.01029995663981,
-        "label": "73,0103 dB (= 70 + 10 lg(100/50))"
+        "label": "73.0103 dB (= 70 + 10 lg(100/50))"
       },
       "computed": {
         "value": 73.0103
@@ -17278,7 +17278,7 @@
       "quantity": "Mass-spring-mass resonance of a masonry cavity wall without and with ties",
       "kind": "record",
       "expected": {
-        "label": "26 Hz (no ties) / 50 Hz (2,5 ties/m2, k = 2 MN/m)"
+        "label": "26 Hz (no ties) / 50 Hz (2.5 ties/m2, k = 2 MN/m)"
       },
       "computed": {
         "label": "26.15 Hz / 49.93 Hz"
@@ -17364,7 +17364,7 @@
           }
         ]
       },
-      "quantity": "Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01)",
+      "quantity": "Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0.01)",
       "kind": "scalar",
       "expected": {
         "value": -986960.4401089357
@@ -17496,7 +17496,7 @@
           }
         ]
       },
-      "quantity": "Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0,8, n=75 → 4,08 % (< 5 %)",
+      "quantity": "Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0.8, n=75 → 4.08 % (< 5 %)",
       "kind": "scalar",
       "expected": {
         "value": 4.08
@@ -17662,7 +17662,7 @@
           }
         ]
       },
-      "quantity": "Damping of a 0,5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
+      "quantity": "Damping of a 0.5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
       "kind": "scalar",
       "expected": {
         "value": 0.0049923519079238775
@@ -17694,7 +17694,7 @@
           }
         ]
       },
-      "quantity": "Damping back from a 20 1/s window, the pole moved back by a: 0,5 %",
+      "quantity": "Damping back from a 20 1/s window, the pole moved back by a: 0.5 %",
       "kind": "scalar",
       "expected": {
         "value": 0.005
@@ -17726,7 +17726,7 @@
           }
         ]
       },
-      "quantity": "Corrected mobility peak of a 0,5 % resonator after a 20 1/s window = 1/c",
+      "quantity": "Corrected mobility peak of a 0.5 % resonator after a 20 1/s window = 1/c",
       "kind": "scalar",
       "expected": {
         "value": 0.1989436788648692
@@ -17759,7 +17759,7 @@
           }
         ]
       },
-      "quantity": "Two equal impacts 62,5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
+      "quantity": "Two equal impacts 62.5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
       "kind": "scalar",
       "expected": {
         "value": 16.0
@@ -17792,7 +17792,7 @@
           }
         ]
       },
-      "quantity": "Second impact 0,6 of the first: ripple 20 lg(1,6/0,4) = 12,04 dB",
+      "quantity": "Second impact 0.6 of the first: ripple 20 lg(1.6/0.4) = 12.04 dB",
       "kind": "scalar",
       "expected": {
         "value": 12.041199826559248
@@ -17834,7 +17834,7 @@
           }
         ]
       },
-      "quantity": "Rigid 3 kg block through both windows: accelerance 1/m = 0,3333 1/kg",
+      "quantity": "Rigid 3 kg block through both windows: accelerance 1/m = 0.3333 1/kg",
       "kind": "scalar",
       "expected": {
         "value": 0.3333333333333333
@@ -17963,7 +17963,7 @@
           }
         ]
       },
-      "quantity": "Force ESD of a 0,5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
+      "quantity": "Force ESD of a 0.5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
       "kind": "scalar",
       "expected": {
         "value": 10.715743961755592
@@ -18078,7 +18078,7 @@
           }
         ]
       },
-      "quantity": "Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB",
+      "quantity": "Indirect-method validity limit mag(T) = 0.1 ↔ ΔL1,2 = 20 dB",
       "kind": "scalar",
       "expected": {
         "value": 20.0
@@ -18111,7 +18111,7 @@
           }
         ]
       },
-      "quantity": "Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %)",
+      "quantity": "Model bias at the validity limit: k_ind/k = 1.1 (0.83 dB ≤ 1 dB, 10 % ≤ 12 %)",
       "kind": "scalar",
       "expected": {
         "value": 1.1
@@ -18143,7 +18143,7 @@
           }
         ]
       },
-      "quantity": "Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %)",
+      "quantity": "Delivered/blocking force F2/F2,b = 1/1.1 at mag(k2,2/kt) = 0.1 (within 10 %)",
       "kind": "scalar",
       "expected": {
         "value": 0.9090909090909091
@@ -18184,11 +18184,11 @@
           }
         ]
       },
-      "quantity": "Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0)",
+      "quantity": "Linearity: ΔLk ≤ 1.5 dB for input spectra 10 dB apart (linear element: 0)",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "ΔLk ≤ 1,5 dB (-2 7.7 c), -3 7.6 c))"
+        "label": "ΔLk ≤ 1.5 dB (-2 7.7 c), -3 7.6 c))"
       },
       "computed": {
         "value": 0.0
@@ -18435,7 +18435,7 @@
           }
         ]
       },
-      "quantity": "Output mass limit 0,06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg",
+      "quantity": "Output mass limit 0.06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0.6 kg",
       "kind": "scalar",
       "expected": {
         "value": 0.6
@@ -18468,11 +18468,11 @@
           }
         ]
       },
-      "quantity": "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0,94 = 0,537 dB, the 0,5 dB NOTE 1 prints to one decimal (1 dp print)",
+      "quantity": "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0.94 = 0.537 dB, the 0.5 dB NOTE 1 prints to one decimal (1 dp print)",
       "kind": "scalar",
       "expected": {
         "value": 0.5,
-        "label": "0,5 dB (1 dp print, +/-0,05 dB)"
+        "label": "0.5 dB (1 dp print, +/-0.05 dB)"
       },
       "computed": {
         "value": 0.537
@@ -18576,7 +18576,7 @@
           }
         ]
       },
-      "quantity": "20 dB and 15 dB hold at equality and fail 0,1 dB below",
+      "quantity": "20 dB and 15 dB hold at equality and fail 0.1 dB below",
       "kind": "count",
       "expected": {
         "value": 4.0,
@@ -18610,7 +18610,7 @@
           }
         ]
       },
-      "quantity": "Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread)",
+      "quantity": "Budget from the B.3 expressions: u = 1.394 dB, U = 2u = 2.789 dB (no repeatability spread)",
       "kind": "scalar",
       "expected": {
         "value": 2.7886675432303987
@@ -18643,7 +18643,7 @@
           }
         ]
       },
-      "quantity": "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2,12 = 1,456 dB",
+      "quantity": "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2.12 = 1.456 dB",
       "kind": "scalar",
       "expected": {
         "value": 1.4560219778561037
@@ -18676,7 +18676,7 @@
           }
         ]
       },
-      "quantity": "Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE)",
+      "quantity": "Calibration L_v from â = 9.81 m/s² at 100 Hz  (standard's EXAMPLE)",
       "kind": "scalar",
       "expected": {
         "value": 106.9
@@ -18808,7 +18808,7 @@
           }
         ]
       },
-      "quantity": "Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s",
+      "quantity": "Plate loss factor η = 2.2/(f·Ts) at 1 kHz, Ts = 0.3 s",
       "kind": "scalar",
       "expected": {
         "value": 0.007333333333333334
@@ -18851,7 +18851,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max abs(L_Ws,inst - Table I.8) <= 0,15 dB"
+        "label": "max abs(L_Ws,inst - Table I.8) <= 0.15 dB"
       },
       "computed": {
         "value": 0.055
@@ -18950,7 +18950,7 @@
       "quantity": "Detailed airborne model: 13 paths + R' per band, R'w = 57 dB",
       "kind": "scalar",
       "expected": {
-        "label": "max path/total dev <= 0,1 dB; R'w = 57 dB"
+        "label": "max path/total dev <= 0.1 dB; R'w = 57 dB"
       },
       "computed": {
         "label": "0.055 dB; 57 dB"
@@ -18979,7 +18979,7 @@
       "quantity": "Detailed impact model: Ln,situ, Ln,Dd, Ln,Df, L'n per band, L'n,w = 41 dB",
       "kind": "scalar",
       "expected": {
-        "label": "max path/total dev <= 0,1 dB; L'n,w (CI) = 41 (2) dB"
+        "label": "max path/total dev <= 0.1 dB; L'n,w (CI) = 41 (2) dB"
       },
       "computed": {
         "label": "0.077 dB; 41 (2) dB"
@@ -19065,7 +19065,7 @@
           }
         ]
       },
-      "quantity": "Floating floor: fo = 160 sqrt(s'/m') = 52,8 Hz, DeltaL = 30 lg(f/fo) over 21 bands, DeltaLw = 32,2 dB",
+      "quantity": "Floating floor: fo = 160 sqrt(s'/m') = 52.8 Hz, DeltaL = 30 lg(f/fo) over 21 bands, DeltaLw = 32.2 dB",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -19200,7 +19200,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max abs(dev vs Table I.6a) <= 0,15 dB"
+        "label": "max abs(dev vs Table I.6a) <= 0.15 dB"
       },
       "computed": {
         "value": 0.1
@@ -19263,15 +19263,15 @@
           }
         ]
       },
-      "quantity": "Correction held at 2,2 dB below 4 dB",
+      "quantity": "Correction held at 2.2 dB below 4 dB",
       "kind": "count",
       "expected": {
         "value": 3.0,
-        "label": "3/3 bands held at 2,2 dB"
+        "label": "3/3 bands held at 2.2 dB"
       },
       "computed": {
         "value": 3.0,
-        "label": "3/3 bands held at 2,2 dB"
+        "label": "3/3 bands held at 2.2 dB"
       },
       "tolerance": {
         "mode": "absolute",
@@ -19474,7 +19474,7 @@
           }
         ]
       },
-      "quantity": "Band average of three readings, to 0,1 dB",
+      "quantity": "Band average of three readings, to 0.1 dB",
       "kind": "scalar",
       "expected": {
         "value": 43.7
@@ -19775,7 +19775,7 @@
           }
         ]
       },
-      "quantity": "Corner microphone at least 0,2 m from any obstacle",
+      "quantity": "Corner microphone at least 0.2 m from any obstacle",
       "kind": "count",
       "expected": {
         "value": 3.0,
@@ -19809,7 +19809,7 @@
           }
         ]
       },
-      "quantity": "Calibration deviating by more than 0,5 dB",
+      "quantity": "Calibration deviating by more than 0.5 dB",
       "kind": "count",
       "expected": {
         "value": 4.0,
@@ -20012,7 +20012,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max abs(Rij,w - printed) <= 0,05 dB"
+        "label": "max abs(Rij,w - printed) <= 0.05 dB"
       },
       "computed": {
         "value": 0.042
@@ -20045,7 +20045,7 @@
       "quantity": "DnT,w closure from R'w (both H.3 examples -> 54 dB)",
       "kind": "record",
       "expected": {
-        "label": "DnT,w 54 dB (printed 53,8/54,3)"
+        "label": "DnT,w 54 dB (printed 53.8/54.3)"
       },
       "computed": {
         "label": "DnT,w 53.63 / 54.13 dB"
@@ -20099,10 +20099,10 @@
           }
         ]
       },
-      "quantity": "Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB)",
+      "quantity": "Standardized impact level L'nT,w (exact 0.032 V form -> 43 dB)",
       "kind": "scalar",
       "expected": {
-        "label": "L'nT,w 43 dB (exact 42,96; E.3 prints 42,8)"
+        "label": "L'nT,w 43 dB (exact 42.96; E.3 prints 42.8)"
       },
       "computed": {
         "label": "L'nT,w 42.96 dB"
@@ -20189,7 +20189,7 @@
       "quantity": "Exterior level of all four Table G.9 reception cells",
       "kind": "scalar",
       "expected": {
-        "label": "Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05)"
+        "label": "Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0.05)"
       },
       "computed": {
         "label": "Lp 36.6 / 28.5 / 44.6 / 37.3 dB"
@@ -20277,7 +20277,7 @@
           }
         ]
       },
-      "quantity": "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
+      "quantity": "Single-number uncertainties (uncorrelated 0.6/0.8; correlated u(Rw) 1.9)",
       "kind": "scalar",
       "expected": {
         "label": "u_uncorr 0.6 / 0.8 dB; u_corr(Rw) 1.9 dB"
@@ -22724,7 +22724,7 @@
           }
         ]
       },
-      "quantity": "Ranking position R(q0,1) of the 0,1-quantile, N = 20 to 50",
+      "quantity": "Ranking position R(q0.1) of the 0.1-quantile, N = 20 to 50",
       "kind": "count",
       "expected": {
         "value": 31.0,
@@ -22758,7 +22758,7 @@
           }
         ]
       },
-      "quantity": "Ranking position R(q0,9) of the 0,9-quantile, N = 20 to 50",
+      "quantity": "Ranking position R(q0.9) of the 0.9-quantile, N = 20 to 50",
       "kind": "count",
       "expected": {
         "value": 31.0,
@@ -22863,17 +22863,17 @@
       "quantity": "Ranking positions of 25 level differences",
       "kind": "record",
       "expected": {
-        "label": "R(q0,1) = 2; R(q0,9) = 24",
+        "label": "R(q0.1) = 2; R(q0.9) = 24",
         "record": {
-          "R(q0,1)": 2.0,
-          "R(q0,9)": 24.0
+          "R(q0.1)": 2.0,
+          "R(q0.9)": 24.0
         }
       },
       "computed": {
-        "label": "R(q0,1) = 2; R(q0,9) = 24",
+        "label": "R(q0.1) = 2; R(q0.9) = 24",
         "record": {
-          "R(q0,1)": 2.0,
-          "R(q0,9)": 24.0
+          "R(q0.1)": 2.0,
+          "R(q0.9)": 24.0
         }
       },
       "tolerance": {
@@ -22900,20 +22900,20 @@
           }
         ]
       },
-      "quantity": "Quantiles q0,1 and q0,9 of 25 level differences, dB",
+      "quantity": "Quantiles q0.1 and q0.9 of 25 level differences, dB",
       "kind": "record",
       "expected": {
-        "label": "q0,1 = -1 dB; q0,9 = 3 dB",
+        "label": "q0.1 = -1 dB; q0.9 = 3 dB",
         "record": {
-          "q0,1": -1.0,
-          "q0,9": 3.0
+          "q0.1": -1.0,
+          "q0.9": 3.0
         }
       },
       "computed": {
-        "label": "q0,1 = -1 dB; q0,9 = 3 dB",
+        "label": "q0.1 = -1 dB; q0.9 = 3 dB",
         "record": {
-          "q0,1": -1.0,
-          "q0,9": 3.0
+          "q0.1": -1.0,
+          "q0.9": 3.0
         }
       },
       "unit": "dB",
@@ -22975,7 +22975,7 @@
           }
         ]
       },
-      "quantity": "Width of each certified interval, twice the 0,05 dB tolerance",
+      "quantity": "Width of each certified interval, twice the 0.05 dB tolerance",
       "kind": "count",
       "expected": {
         "value": 9.0,
@@ -23009,7 +23009,7 @@
           }
         ]
       },
-      "quantity": "Wk design-goal factor at 6,31 Hz",
+      "quantity": "Wk design-goal factor at 6.31 Hz",
       "kind": "scalar",
       "expected": {
         "value": 1.054
@@ -23041,7 +23041,7 @@
           }
         ]
       },
-      "quantity": "Wm design-goal factor at 1,585 Hz",
+      "quantity": "Wm design-goal factor at 1.585 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.9342
@@ -23105,7 +23105,7 @@
           }
         ]
       },
-      "quantity": "Wb design-goal factor at 6,31 Hz",
+      "quantity": "Wb design-goal factor at 6.31 Hz",
       "kind": "scalar",
       "expected": {
         "value": 1.054
@@ -23141,7 +23141,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max rel dev ≤ 0,1 %"
+        "label": "max rel dev ≤ 0.1 %"
       },
       "computed": {
         "value": 0.000267
@@ -23206,7 +23206,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max rel dev ≤ 0,1 %"
+        "label": "max rel dev ≤ 0.1 %"
       },
       "computed": {
         "value": 0.000162
@@ -23267,11 +23267,11 @@
           }
         ]
       },
-      "quantity": "Wf design-goal factors at 0,1585 / 0,1 Hz",
+      "quantity": "Wf design-goal factors at 0.1585 / 0.1 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max rel dev ≤ 0,1 %"
+        "label": "max rel dev ≤ 0.1 %"
       },
       "computed": {
         "value": 9.8e-05
@@ -23300,11 +23300,11 @@
           }
         ]
       },
-      "quantity": "Wj design-goal factors at 6,31 / 8 Hz",
+      "quantity": "Wj design-goal factors at 6.31 / 8 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max rel dev ≤ 0,1 %"
+        "label": "max rel dev ≤ 0.1 %"
       },
       "computed": {
         "value": 1e-05
@@ -23526,7 +23526,7 @@
           }
         ]
       },
-      "quantity": "Wk band-limiting factor at 0,631 Hz",
+      "quantity": "Wk band-limiting factor at 0.631 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.9279
@@ -23558,7 +23558,7 @@
           }
         ]
       },
-      "quantity": "Wf band-limiting factor at 0,3981 Hz",
+      "quantity": "Wf band-limiting factor at 0.3981 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.9279
@@ -23622,7 +23622,7 @@
           }
         ]
       },
-      "quantity": "Wm band-limiting factor at 1,259 Hz",
+      "quantity": "Wm band-limiting factor at 1.259 Hz",
       "kind": "scalar",
       "expected": {
         "value": 0.9291
@@ -23654,7 +23654,7 @@
           }
         ]
       },
-      "quantity": "Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on",
+      "quantity": "Wf design-goal factor at 0.3981 Hz, the cell Table 2 row 2 turns on",
       "kind": "scalar",
       "expected": {
         "value": 0.3884
@@ -24980,7 +24980,7 @@
       "kind": "count",
       "expected": {
         "value": 2.0,
-        "label": "11,5 % conforms bare, and not with U = 1 % against +12 %"
+        "label": "11.5 % conforms bare, and not with U = 1 % against +12 %"
       },
       "computed": {
         "value": 2.0,
@@ -25014,7 +25014,7 @@
       "kind": "count",
       "expected": {
         "value": 2.0,
-        "label": "-10,5 % conforms bare, and not with U = 1 % against -11 %"
+        "label": "-10.5 % conforms bare, and not with U = 1 % against -11 %"
       },
       "computed": {
         "value": 2.0,
@@ -29817,7 +29817,7 @@
           }
         ]
       },
-      "quantity": "The same fit as a period, T = 0,022 h, s",
+      "quantity": "The same fit as a period, T = 0.022 h, s",
       "kind": "scalar",
       "expected": {
         "value": 1.1
@@ -30213,7 +30213,7 @@
           }
         ]
       },
-      "quantity": "Band limitation at the lower corner 0,8 f_u, magnitude",
+      "quantity": "Band limitation at the lower corner 0.8 f_u, magnitude",
       "kind": "scalar",
       "expected": {
         "value": 0.7071067811865475
@@ -30245,7 +30245,7 @@
           }
         ]
       },
-      "quantity": "Band limitation at the upper corner f_o / 0,8, magnitude",
+      "quantity": "Band limitation at the upper corner f_o / 0.8, magnitude",
       "kind": "scalar",
       "expected": {
         "value": 0.7071067811865475
@@ -30277,7 +30277,7 @@
           }
         ]
       },
-      "quantity": "KB weighting at its own corner 5,6 Hz, relative to the band limitation",
+      "quantity": "KB weighting at its own corner 5.6 Hz, relative to the band limitation",
       "kind": "scalar",
       "expected": {
         "value": 0.7071067811865475
@@ -31347,7 +31347,7 @@
           }
         ]
       },
-      "quantity": "Block length at 1,25 Hz resolution, s",
+      "quantity": "Block length at 1.25 Hz resolution, s",
       "kind": "scalar",
       "expected": {
         "value": 0.8
@@ -32088,7 +32088,7 @@
           }
         ]
       },
-      "quantity": "Trains an hour at KB_FTm = 0,2 for A_r = 0.05",
+      "quantity": "Trains an hour at KB_FTm = 0.2 for A_r = 0.05",
       "kind": "scalar",
       "expected": {
         "value": 7.0
@@ -32120,7 +32120,7 @@
           }
         ]
       },
-      "quantity": "Trains an hour at KB_FTm = 0,2 for A_r = 0.07",
+      "quantity": "Trains an hour at KB_FTm = 0.2 for A_r = 0.07",
       "kind": "scalar",
       "expected": {
         "value": 14.0
@@ -32152,7 +32152,7 @@
           }
         ]
       },
-      "quantity": "alpha from D = 0,01 and lambda = 12,5 m, as printed, 1/m",
+      "quantity": "alpha from D = 0.01 and lambda = 12.5 m, as printed, 1/m",
       "kind": "scalar",
       "expected": {
         "value": 0.005
@@ -32576,7 +32576,7 @@
           }
         ]
       },
-      "quantity": "KB_FTm,Zug from 78,1 dB by Formula (9), c_T1 = 1",
+      "quantity": "KB_FTm,Zug from 78.1 dB by Formula (9), c_T1 = 1",
       "kind": "scalar",
       "expected": {
         "value": 0.4
@@ -32608,7 +32608,7 @@
           }
         ]
       },
-      "quantity": "KB_Fmax,Zug by Formula (10), 1,5 times it",
+      "quantity": "KB_Fmax,Zug by Formula (10), 1.5 times it",
       "kind": "scalar",
       "expected": {
         "value": 0.6
@@ -32673,7 +32673,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the day by Formula (11), 200 trams at 0,7 (the print's 0,11 puts alpha under the root once, not squared)",
+      "quantity": "KB_FTr of the day by Formula (11), 200 trams at 0.7 (the print's 0.11 puts alpha under the root once, not squared)",
       "kind": "scalar",
       "expected": {
         "value": 0.09
@@ -32705,7 +32705,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the night by Formula (11), 20 trams at 0,7 (the print's 0,05 puts alpha under the root once, not squared)",
+      "quantity": "KB_FTr of the night by Formula (11), 20 trams at 0.7 (the print's 0.05 puts alpha under the root once, not squared)",
       "kind": "scalar",
       "expected": {
         "value": 0.04
@@ -33100,7 +33100,7 @@
           }
         ]
       },
-      "quantity": "Table A.3, ground to a basement, the mean at 31,5 Hz",
+      "quantity": "Table A.3, ground to a basement, the mean at 31.5 Hz",
       "kind": "scalar",
       "expected": {
         "value": -9.3
@@ -33133,7 +33133,7 @@
           }
         ]
       },
-      "quantity": "Table A.4, ground to a ground floor, the mean at 12,5 Hz",
+      "quantity": "Table A.4, ground to a ground floor, the mean at 12.5 Hz",
       "kind": "scalar",
       "expected": {
         "value": -1.9
@@ -33232,7 +33232,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track (the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0,099 7)",
+      "quantity": "KB_FTr of the day by Formula (6), 144 metros at 1.0 and 80 trams at 0.7 a track (the print says 0.099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0.099 7)",
       "kind": "scalar",
       "expected": {
         "value": 0.0997
@@ -33584,7 +33584,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the nullfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,066)",
+      "quantity": "KB_FTr of the nullfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0.066)",
       "kind": "scalar",
       "expected": {
         "value": 0.065
@@ -33648,7 +33648,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the planfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,096)",
+      "quantity": "KB_FTr of the planfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0.096)",
       "kind": "scalar",
       "expected": {
         "value": 0.094
@@ -35108,7 +35108,7 @@
           }
         ]
       },
-      "quantity": "RETSPL of any other supra-aural earphone at 6,3 kHz",
+      "quantity": "RETSPL of any other supra-aural earphone at 6.3 kHz",
       "kind": "scalar",
       "expected": {
         "value": 21.0
@@ -35880,7 +35880,7 @@
       "quantity": "HML and SNR applications land on the annexes' 82 dB",
       "kind": "scalar",
       "expected": {
-        "label": "PNR84 = 22,5 dB; SNR84 = 21 dB; both report 82 dB"
+        "label": "PNR84 = 22.5 dB; SNR84 = 21 dB; both report 82 dB"
       },
       "computed": {
         "label": "22.5 dB; 21 dB; 82 and 82 dB"
@@ -36325,11 +36325,11 @@
           }
         ]
       },
-      "quantity": "Seat-to-spine transfer vs the 256 Hz digital filter (0,5-80 Hz)",
+      "quantity": "Seat-to-spine transfer vs the 256 Hz digital filter (0.5-80 Hz)",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max abs(Formula 1 - filter) ≤ 0,04"
+        "label": "max abs(Formula 1 - filter) ≤ 0.04"
       },
       "computed": {
         "value": 0.001
@@ -36983,7 +36983,7 @@
           }
         ]
       },
-      "quantity": "Maximum permissible ambient levels for sound field audiometry, to 12,5 kHz",
+      "quantity": "Maximum permissible ambient levels for sound field audiometry, to 12.5 kHz",
       "kind": "count",
       "expected": {
         "value": 54.0,
@@ -37051,7 +37051,7 @@
           }
         ]
       },
-      "quantity": "Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12,5 kHz",
+      "quantity": "Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12.5 kHz",
       "kind": "count",
       "expected": {
         "value": 48.0,
@@ -37622,7 +37622,7 @@
           }
         ]
       },
-      "quantity": "Range of the coordinates, 4 + sqrt(32), printed as 9,66",
+      "quantity": "Range of the coordinates, 4 + sqrt(32), printed as 9.66",
       "kind": "scalar",
       "expected": {
         "value": 9.66
@@ -43642,7 +43642,7 @@
           }
         ]
       },
-      "quantity": "Difference of the temperature-corrected SPBI from the 77,3 dB of the reference surface, dB",
+      "quantity": "Difference of the temperature-corrected SPBI from the 77.3 dB of the reference surface, dB",
       "kind": "scalar",
       "expected": {
         "value": 2.8
@@ -45474,7 +45474,7 @@
           }
         ]
       },
-      "quantity": "Surface-impedance peak of a 5,6 cm layer, Hz",
+      "quantity": "Surface-impedance peak of a 5.6 cm layer, Hz",
       "kind": "scalar",
       "expected": {
         "value": 860.0
@@ -47304,7 +47304,7 @@
           }
         ]
       },
-      "quantity": "a device absorbing 0,50 in every band rates -10 lg(1 - 0,50)",
+      "quantity": "a device absorbing 0.50 in every band rates -10 lg(1 - 0.50)",
       "kind": "scalar",
       "expected": {
         "value": 3.0103
@@ -47327,17 +47327,17 @@
       "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-1-2012-clause-5-dlalpha-the-0-99-ratio-limit/a-perfect-absorber-is-capped-at-10-lg-1-0-99-20-db",
       "domain": "road-traffic-noise-reducing-devices-en-1793",
       "reference": {
-        "cite": "EN 1793-1:2012 Clause 5 (DLalpha, the 0,99 ratio limit)",
+        "cite": "EN 1793-1:2012 Clause 5 (DLalpha, the 0.99 ratio limit)",
         "documents": [
           {
             "kind": "standard",
             "designation": "EN 1793-1",
             "edition": "2012",
-            "clause": "Clause 5 (DLalpha, the 0,99 ratio limit)"
+            "clause": "Clause 5 (DLalpha, the 0.99 ratio limit)"
           }
         ]
       },
-      "quantity": "a perfect absorber is capped at -10 lg(1 - 0,99) = 20 dB",
+      "quantity": "a perfect absorber is capped at -10 lg(1 - 0.99) = 20 dB",
       "kind": "scalar",
       "expected": {
         "value": 20.0
@@ -47595,7 +47595,7 @@
           }
         ]
       },
-      "quantity": "dS = 1,50 m, dM = 0,25 m and s = 0,40 m give the printed two decimals",
+      "quantity": "dS = 1.50 m, dM = 0.25 m and s = 0.40 m give the printed two decimals",
       "kind": "count",
       "expected": {
         "value": 27.0,
@@ -47663,7 +47663,7 @@
           }
         ]
       },
-      "quantity": "a 4 m by 4 m sample, the 7,9 ms window and 340 m/s give 1,96 m",
+      "quantity": "a 4 m by 4 m sample, the 7.9 ms window and 340 m/s give 1.96 m",
       "kind": "scalar",
       "expected": {
         "value": 1.96
@@ -47696,7 +47696,7 @@
           }
         ]
       },
-      "quantity": "leading edge, flat part and trailing edge of the 7,9 ms, 6,0 ms and 1,3 ms windows",
+      "quantity": "leading edge, flat part and trailing edge of the 7.9 ms, 6.0 ms and 1.3 ms windows",
       "kind": "record",
       "expected": {
         "label": "7.9 ms lead = 0.5 ms; 7.9 ms flat = 5.18 ms; 7.9 ms trail = 2.22 ms; 6.0 ms lead = 0.5 ms; 6.0 ms flat = 3.85 ms; 6.0 ms trail = 1.65 ms; 1.3 ms lead = 0.5 ms; 1.3 ms flat = 0.56 ms; 1.3 ms trail = 0.24 ms",
@@ -47784,11 +47784,11 @@
           }
         ]
       },
-      "quantity": "a reflection of amplitude 0,5 rates RI = 0,25 whatever the gain did",
+      "quantity": "a reflection of amplitude 0.5 rates RI = 0.25 whatever the gain did",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max |RI - 0,25| = 0"
+        "label": "max |RI - 0.25| = 0"
       },
       "computed": {
         "value": 1e-07
@@ -47817,7 +47817,7 @@
           }
         ]
       },
-      "quantity": "two impulses 0,5 ms apart: 0,25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges",
+      "quantity": "two impulses 0.5 ms apart: 0.25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -47854,7 +47854,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "max |RI - 0,25| from 200 Hz = 0"
+        "label": "max |RI - 0.25| from 200 Hz = 0"
       },
       "computed": {
         "value": 0.0
@@ -47883,7 +47883,7 @@
           }
         ]
       },
-      "quantity": "a free-field record 0,36 samples late is found 0,36 samples late",
+      "quantity": "a free-field record 0.36 samples late is found 0.36 samples late",
       "kind": "scalar",
       "expected": {
         "value": -0.36
@@ -47982,7 +47982,7 @@
           }
         ]
       },
-      "quantity": "1,96 times the high reproducibility of Table A.1, 0,81 dB",
+      "quantity": "1.96 times the high reproducibility of Table A.1, 0.81 dB",
       "kind": "scalar",
       "expected": {
         "value": 1.59
@@ -48015,7 +48015,7 @@
           }
         ]
       },
-      "quantity": "the eleven cells 1,96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
+      "quantity": "the eleven cells 1.96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
       "kind": "count",
       "expected": {
         "value": 11.0,
@@ -49276,7 +49276,7 @@
           }
         ]
       },
-      "quantity": "Largest of the 70 elements of 10° steps in two planes, about 2,2 % of the sphere",
+      "quantity": "Largest of the 70 elements of 10° steps in two planes, about 2.2 % of the sphere",
       "kind": "scalar",
       "expected": {
         "value": 2.2
@@ -49374,15 +49374,15 @@
           }
         ]
       },
-      "quantity": "Directions of the 38 equal-area elements, to the 0,1° printed",
+      "quantity": "Directions of the 38 equal-area elements, to the 0.1° printed",
       "kind": "count",
       "expected": {
         "value": 18.0,
-        "label": "18/18 printed angles other than 77,9° and 282,1°"
+        "label": "18/18 printed angles other than 77.9° and 282.1°"
       },
       "computed": {
         "value": 18.0,
-        "label": "18/18 printed angles other than 77,9° and 282,1°"
+        "label": "18/18 printed angles other than 77.9° and 282.1°"
       },
       "tolerance": {
         "mode": "absolute",
@@ -49408,7 +49408,7 @@
           }
         ]
       },
-      "quantity": "Each of the 38 equal-area elements is 2,6 % of the sphere",
+      "quantity": "Each of the 38 equal-area elements is 2.6 % of the sphere",
       "kind": "scalar",
       "expected": {
         "value": 2.6
@@ -49574,11 +49574,11 @@
           }
         ]
       },
-      "quantity": "Coverage factor for 95 % at the 29,98 degrees of freedom the table prints",
+      "quantity": "Coverage factor for 95 % at the 29.98 degrees of freedom the table prints",
       "kind": "scalar",
       "expected": {
         "value": 2.04,
-        "label": "2.04 (printed 2,11, an erratum)"
+        "label": "2.04 (printed 2.11, an erratum)"
       },
       "computed": {
         "value": 2.042
@@ -49611,7 +49611,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.121,
-        "label": "0.121 dB (printed 0,12(4), an erratum)"
+        "label": "0.121 dB (printed 0.12(4), an erratum)"
       },
       "computed": {
         "value": 0.1206
@@ -50046,7 +50046,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0437,
-        "label": "0.0437 dB (printed 0,040, an erratum)"
+        "label": "0.0437 dB (printed 0.040, an erratum)"
       },
       "computed": {
         "value": 0.0437
@@ -50080,7 +50080,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.087,
-        "label": "0.087 dB (printed 0,08, an erratum)"
+        "label": "0.087 dB (printed 0.08, an erratum)"
       },
       "computed": {
         "value": 0.087
@@ -50615,7 +50615,7 @@
           }
         ]
       },
-      "quantity": "A semi-range of 0,005 dB of the impedance effect as a standard uncertainty",
+      "quantity": "A semi-range of 0.005 dB of the impedance effect as a standard uncertainty",
       "kind": "scalar",
       "expected": {
         "value": 0.003,
@@ -50995,7 +50995,7 @@
           }
         ]
       },
-      "quantity": "Spectrum of a rectangular pulse of a = 10 V and b = 2,5 µs at 6 frequencies, as printed",
+      "quantity": "Spectrum of a rectangular pulse of a = 10 V and b = 2.5 µs at 6 frequencies, as printed",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -51029,7 +51029,7 @@
           }
         ]
       },
-      "quantity": "First zero of the pulse spectrum, f = 1/(2b), for b = 2,5 µs",
+      "quantity": "First zero of the pulse spectrum, f = 1/(2b), for b = 2.5 µs",
       "kind": "scalar",
       "expected": {
         "value": 199999.99999999997
@@ -51197,7 +51197,7 @@
           }
         ]
       },
-      "quantity": "The longest window for a reflected path of 2,2 m at 1 m puts that path on the boundary of the region",
+      "quantity": "The longest window for a reflected path of 2.2 m at 1 m puts that path on the boundary of the region",
       "kind": "scalar",
       "expected": {
         "value": 2.2
@@ -51230,7 +51230,7 @@
           }
         ]
       },
-      "quantity": "Gerber's E_V by the full solution, 96 entries at R = 0,2, 0,5 and 1, X = 1 to 800",
+      "quantity": "Gerber's E_V by the full solution, 96 entries at R = 0.2, 0.5 and 1, X = 1 to 800",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -51264,7 +51264,7 @@
           }
         ]
       },
-      "quantity": "Modulus of the approximation against Table A.1 where A.2 states 0,01 %, X > 5",
+      "quantity": "Modulus of the approximation against Table A.1 where A.2 states 0.01 %, X > 5",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -51681,7 +51681,7 @@
           }
         ]
       },
-      "quantity": "Heat-conducting transfer impedance of a large-volume coupler of R = 0,5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa",
+      "quantity": "Heat-conducting transfer impedance of a large-volume coupler of R = 0.5 at the X = 2 and X = 20 of Table A.1, at 23 °C and at 20 °C, 95 kPa",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -51825,7 +51825,7 @@
           }
         ]
       },
-      "quantity": "Water vapour mole fraction at 23 °C, 101,325 kPa, 50 % with the saturation pressure of Table F.2",
+      "quantity": "Water vapour mole fraction at 23 °C, 101.325 kPa, 50 % with the saturation pressure of Table F.2",
       "kind": "scalar",
       "expected": {
         "value": 0.013927575669384445,
@@ -51858,7 +51858,7 @@
           }
         ]
       },
-      "quantity": "Three microphones at 0,20 m to 0,30 m give their complex free-field sensitivities back",
+      "quantity": "Three microphones at 0.20 m to 0.30 m give their complex free-field sensitivities back",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -52059,7 +52059,7 @@
           }
         ]
       },
-      "quantity": "Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6,5 kHz)",
+      "quantity": "Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6.5 kHz)",
       "kind": "scalar",
       "expected": {
         "value": -0.711,
@@ -52093,7 +52093,7 @@
           }
         ]
       },
-      "quantity": "Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6,5 kHz)",
+      "quantity": "Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6.5 kHz)",
       "kind": "scalar",
       "expected": {
         "value": -0.818,
@@ -52319,23 +52319,23 @@
       "quantity": "Field strength at every point within 3 dB of 8.2.7",
       "kind": "record",
       "expected": {
-        "label": "+3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1",
+        "label": "+3 dB = 1; -3 dB = 1; +3.01 dB = 0; -3.01 dB = 0; -2.9 dB on a meter reading 400 mA/m as -5.9 dB = 1",
         "record": {
           "+3 dB": 1.0,
           "-3 dB": 1.0,
-          "+3,01 dB": 0.0,
-          "-3,01 dB": 0.0,
-          "-2,9 dB on a meter reading 400 mA/m as -5,9 dB": 1.0
+          "+3.01 dB": 0.0,
+          "-3.01 dB": 0.0,
+          "-2.9 dB on a meter reading 400 mA/m as -5.9 dB": 1.0
         }
       },
       "computed": {
-        "label": "+3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1",
+        "label": "+3 dB = 1; -3 dB = 1; +3.01 dB = 0; -3.01 dB = 0; -2.9 dB on a meter reading 400 mA/m as -5.9 dB = 1",
         "record": {
           "+3 dB": 1.0,
           "-3 dB": 1.0,
-          "+3,01 dB": 0.0,
-          "-3,01 dB": 0.0,
-          "-2,9 dB on a meter reading 400 mA/m as -5,9 dB": 1.0
+          "+3.01 dB": 0.0,
+          "-3.01 dB": 0.0,
+          "-2.9 dB on a meter reading 400 mA/m as -5.9 dB": 1.0
         }
       },
       "tolerance": {
@@ -52365,21 +52365,21 @@
       "quantity": "Maximum field of 400 mA/m reached at one point at least",
       "kind": "record",
       "expected": {
-        "label": "0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0",
+        "label": "0 dB at one point, -3 dB elsewhere = 1; -0.01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6.01 dB at best = 0",
         "record": {
           "0 dB at one point, -3 dB elsewhere": 1.0,
-          "-0,01 dB at best": 0.0,
+          "-0.01 dB at best": 0.0,
           "pink noise: -6 dB at one point (Table 3)": 1.0,
-          "pink noise: -6,01 dB at best": 0.0
+          "pink noise: -6.01 dB at best": 0.0
         }
       },
       "computed": {
-        "label": "0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0",
+        "label": "0 dB at one point, -3 dB elsewhere = 1; -0.01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6.01 dB at best = 0",
         "record": {
           "0 dB at one point, -3 dB elsewhere": 1.0,
-          "-0,01 dB at best": 0.0,
+          "-0.01 dB at best": 0.0,
           "pink noise: -6 dB at one point (Table 3)": 1.0,
-          "pink noise: -6,01 dB at best": 0.0
+          "pink noise: -6.01 dB at best": 0.0
         }
       },
       "tolerance": {
@@ -52409,25 +52409,25 @@
       "quantity": "Frequency response within 3 dB of 1 kHz from 100 Hz to 5 kHz",
       "kind": "record",
       "expected": {
-        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1",
+        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3.01 dB at 100 Hz = 0; +3.01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18.6 dB at 100 Hz against -15.6 dB at 1 kHz = 1; -31.7 dB at 5 kHz against -34.7 dB at 1 kHz = 1",
         "record": {
           "-3 dB at 100 Hz, +3 dB at 5 kHz": 1.0,
-          "-3,01 dB at 100 Hz": 0.0,
-          "+3,01 dB at 5 kHz": 0.0,
+          "-3.01 dB at 100 Hz": 0.0,
+          "+3.01 dB at 5 kHz": 0.0,
           "-20 dB outside the band": 1.0,
-          "-18,6 dB at 100 Hz against -15,6 dB at 1 kHz": 1.0,
-          "-31,7 dB at 5 kHz against -34,7 dB at 1 kHz": 1.0
+          "-18.6 dB at 100 Hz against -15.6 dB at 1 kHz": 1.0,
+          "-31.7 dB at 5 kHz against -34.7 dB at 1 kHz": 1.0
         }
       },
       "computed": {
-        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1",
+        "label": "-3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3.01 dB at 100 Hz = 0; +3.01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18.6 dB at 100 Hz against -15.6 dB at 1 kHz = 1; -31.7 dB at 5 kHz against -34.7 dB at 1 kHz = 1",
         "record": {
           "-3 dB at 100 Hz, +3 dB at 5 kHz": 1.0,
-          "-3,01 dB at 100 Hz": 0.0,
-          "+3,01 dB at 5 kHz": 0.0,
+          "-3.01 dB at 100 Hz": 0.0,
+          "+3.01 dB at 5 kHz": 0.0,
           "-20 dB outside the band": 1.0,
-          "-18,6 dB at 100 Hz against -15,6 dB at 1 kHz": 1.0,
-          "-31,7 dB at 5 kHz against -34,7 dB at 1 kHz": 1.0
+          "-18.6 dB at 100 Hz against -15.6 dB at 1 kHz": 1.0,
+          "-31.7 dB at 5 kHz against -34.7 dB at 1 kHz": 1.0
         }
       },
       "tolerance": {
@@ -52457,23 +52457,23 @@
       "quantity": "Small-volume limits: 6 dB range, 0 dB reached, +8 dB area",
       "kind": "record",
       "expected": {
-        "label": "+/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0",
+        "label": "+/-6 dB with 0 dB reached = 1; +6.01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8.01 dB in the standing area = 0",
         "record": {
           "+/-6 dB with 0 dB reached": 1.0,
-          "+6,01 dB at one point": 0.0,
+          "+6.01 dB at one point": 0.0,
           "every point below 0 dB": 0.0,
           "+8 dB in the standing area": 1.0,
-          "+8,01 dB in the standing area": 0.0
+          "+8.01 dB in the standing area": 0.0
         }
       },
       "computed": {
-        "label": "+/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0",
+        "label": "+/-6 dB with 0 dB reached = 1; +6.01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8.01 dB in the standing area = 0",
         "record": {
           "+/-6 dB with 0 dB reached": 1.0,
-          "+6,01 dB at one point": 0.0,
+          "+6.01 dB at one point": 0.0,
           "every point below 0 dB": 0.0,
           "+8 dB in the standing area": 1.0,
-          "+8,01 dB in the standing area": 0.0
+          "+8.01 dB in the standing area": 0.0
         }
       },
       "tolerance": {
@@ -52700,7 +52700,7 @@
           }
         ]
       },
-      "quantity": "Sweep end where the voltage of a 0,69 ohm, 109 uH loop doubles, Hz",
+      "quantity": "Sweep end where the voltage of a 0.69 ohm, 109 uH loop doubles, Hz",
       "kind": "scalar",
       "expected": {
         "value": 2654.267520450667,
@@ -52737,17 +52737,17 @@
       "quantity": "No clipping at the Table 4 frequency, judged there when the sweep runs past",
       "kind": "record",
       "expected": {
-        "label": "compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0",
+        "label": "compliance at the 2.5 kHz voltage = 1; compliance 0.1 % below it = 0",
         "record": {
-          "compliance at the 2,5 kHz voltage": 1.0,
-          "compliance 0,1 % below it": 0.0
+          "compliance at the 2.5 kHz voltage": 1.0,
+          "compliance 0.1 % below it": 0.0
         }
       },
       "computed": {
-        "label": "compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0",
+        "label": "compliance at the 2.5 kHz voltage = 1; compliance 0.1 % below it = 0",
         "record": {
-          "compliance at the 2,5 kHz voltage": 1.0,
-          "compliance 0,1 % below it": 0.0
+          "compliance at the 2.5 kHz voltage": 1.0,
+          "compliance 0.1 % below it": 0.0
         }
       },
       "tolerance": {
@@ -52777,23 +52777,23 @@
       "quantity": "System noise: -47 dB ceiling or 1 dB rise",
       "kind": "record",
       "expected": {
-        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1",
+        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46.99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1.01 dB up = 0; SNR 32.7 dB, on at -31.7 dB = 1",
         "record": {
           "SNR 55 dB, on at -47 dB": 1.0,
-          "SNR 55 dB, on at -46,99 dB": 0.0,
+          "SNR 55 dB, on at -46.99 dB": 0.0,
           "SNR 40 dB, on 1 dB up": 1.0,
-          "SNR 40 dB, on 1,01 dB up": 0.0,
-          "SNR 32,7 dB, on at -31,7 dB": 1.0
+          "SNR 40 dB, on 1.01 dB up": 0.0,
+          "SNR 32.7 dB, on at -31.7 dB": 1.0
         }
       },
       "computed": {
-        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1",
+        "label": "SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46.99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1.01 dB up = 0; SNR 32.7 dB, on at -31.7 dB = 1",
         "record": {
           "SNR 55 dB, on at -47 dB": 1.0,
-          "SNR 55 dB, on at -46,99 dB": 0.0,
+          "SNR 55 dB, on at -46.99 dB": 0.0,
           "SNR 40 dB, on 1 dB up": 1.0,
-          "SNR 40 dB, on 1,01 dB up": 0.0,
-          "SNR 32,7 dB, on at -31,7 dB": 1.0
+          "SNR 40 dB, on 1.01 dB up": 0.0,
+          "SNR 32.7 dB, on at -31.7 dB": 1.0
         }
       },
       "tolerance": {
@@ -52886,11 +52886,11 @@
           }
         ]
       },
-      "quantity": "Horizontal component of a 15 by 10 loop at 1,2 units, 2,5 % across its width",
+      "quantity": "Horizontal component of a 15 by 10 loop at 1.2 units, 2.5 % across its width",
       "kind": "scalar",
       "expected": {
         "value": 4.2,
-        "label": "4.2 dB read off the curve (+/-0,5)"
+        "label": "4.2 dB read off the curve (+/-0.5)"
       },
       "computed": {
         "value": 4.21
@@ -52920,11 +52920,11 @@
           }
         ]
       },
-      "quantity": "Horizontal component of a 15 by 10 loop at 1,2 units, 30 % across its width",
+      "quantity": "Horizontal component of a 15 by 10 loop at 1.2 units, 30 % across its width",
       "kind": "scalar",
       "expected": {
         "value": -15.0,
-        "label": "-15.0 dB read off the curve (+/-0,5)"
+        "label": "-15.0 dB read off the curve (+/-0.5)"
       },
       "computed": {
         "value": -14.72
@@ -52954,11 +52954,11 @@
           }
         ]
       },
-      "quantity": "Vertical component of a 15 by 10 loop at 1,2 units, 12,5 % across its width",
+      "quantity": "Vertical component of a 15 by 10 loop at 1.2 units, 12.5 % across its width",
       "kind": "scalar",
       "expected": {
         "value": 1.7,
-        "label": "1.7 dB read off the curve (+/-0,5)"
+        "label": "1.7 dB read off the curve (+/-0.5)"
       },
       "computed": {
         "value": 1.89
@@ -52988,11 +52988,11 @@
           }
         ]
       },
-      "quantity": "Vertical component of a 15 by 10 loop at 1,2 units, 50 % across its width",
+      "quantity": "Vertical component of a 15 by 10 loop at 1.2 units, 50 % across its width",
       "kind": "scalar",
       "expected": {
         "value": -0.8,
-        "label": "-0.8 dB read off the curve (+/-0,5)"
+        "label": "-0.8 dB read off the curve (+/-0.5)"
       },
       "computed": {
         "value": -0.48
@@ -53022,11 +53022,11 @@
           }
         ]
       },
-      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1",
+      "quantity": "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio 1",
       "kind": "scalar",
       "expected": {
         "value": 4.89,
-        "label": "4.89 A read off the curve (+/-0,03)"
+        "label": "4.89 A read off the curve (+/-0.03)"
       },
       "computed": {
         "value": 4.884
@@ -53056,11 +53056,11 @@
           }
         ]
       },
-      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1,5",
+      "quantity": "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio 1.5",
       "kind": "scalar",
       "expected": {
         "value": 5.64,
-        "label": "5.64 A read off the curve (+/-0,03)"
+        "label": "5.64 A read off the curve (+/-0.03)"
       },
       "computed": {
         "value": 5.632
@@ -53090,11 +53090,11 @@
           }
         ]
       },
-      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 2",
+      "quantity": "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio 2",
       "kind": "scalar",
       "expected": {
         "value": 6.04,
-        "label": "6.04 A read off the curve (+/-0,03)"
+        "label": "6.04 A read off the curve (+/-0.03)"
       },
       "computed": {
         "value": 6.038
@@ -53124,11 +53124,11 @@
           }
         ]
       },
-      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 3",
+      "quantity": "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio 3",
       "kind": "scalar",
       "expected": {
         "value": 6.41,
-        "label": "6.41 A read off the curve (+/-0,03)"
+        "label": "6.41 A read off the curve (+/-0.03)"
       },
       "computed": {
         "value": 6.409
@@ -53158,11 +53158,11 @@
           }
         ]
       },
-      "quantity": "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 5",
+      "quantity": "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio 5",
       "kind": "scalar",
       "expected": {
         "value": 6.63,
-        "label": "6.63 A read off the curve (+/-0,03)"
+        "label": "6.63 A read off the curve (+/-0.03)"
       },
       "computed": {
         "value": 6.635
@@ -53192,7 +53192,7 @@
           }
         ]
       },
-      "quantity": "Loop current for 400 mA/m 1,4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart",
+      "quantity": "Loop current for 400 mA/m 1.4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart",
       "kind": "scalar",
       "expected": {
         "value": 0.4
@@ -53360,7 +53360,7 @@
       "kind": "scalar",
       "expected": {
         "value": 1.256,
-        "label": "1,256 µT (+/-0,001: the print truncates 1,2566, see ERRATA)"
+        "label": "1.256 µT (+/-0.001: the print truncates 1.2566, see ERRATA)"
       },
       "computed": {
         "value": 1.2566
@@ -54290,7 +54290,7 @@
       "kind": "scalar",
       "expected": {
         "value": -0.7920662452733371,
-        "label": "-0.792 dB, 20 lg(1 - cos 85) (printed as 0,72 dB, see ERRATA)"
+        "label": "-0.792 dB, 20 lg(1 - cos 85) (printed as 0.72 dB, see ERRATA)"
       },
       "computed": {
         "value": -0.792
@@ -54323,25 +54323,25 @@
       "quantity": "Neck-loop types of the draft: DC resistance and input voltage for 400 mA/m",
       "kind": "record",
       "expected": {
-        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0",
+        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5.1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1.07 V for 400 mA/m = 0",
         "record": {
           "type 1 at -5 %": 1.0,
           "type 1 at +5 %": 1.0,
-          "type 1 at +5,1 %": 0.0,
+          "type 1 at +5.1 %": 0.0,
           "type 2 at 32 ohm": 1.0,
           "type 2 below 32 ohm": 0.0,
-          "1,07 V for 400 mA/m": 0.0
+          "1.07 V for 400 mA/m": 0.0
         }
       },
       "computed": {
-        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0",
+        "label": "type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5.1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1.07 V for 400 mA/m = 0",
         "record": {
           "type 1 at -5 %": 1.0,
           "type 1 at +5 %": 1.0,
-          "type 1 at +5,1 %": 0.0,
+          "type 1 at +5.1 %": 0.0,
           "type 2 at 32 ohm": 1.0,
           "type 2 below 32 ohm": 0.0,
-          "1,07 V for 400 mA/m": 0.0
+          "1.07 V for 400 mA/m": 0.0
         }
       },
       "tolerance": {
@@ -54577,10 +54577,10 @@
           }
         ]
       },
-      "quantity": "Lowest modulus in the rated range at 80 % and at 79,9 % of the rated value",
+      "quantity": "Lowest modulus in the rated range at 80 % and at 79.9 % of the rated value",
       "kind": "record",
       "expected": {
-        "label": "80 % passes, 79,9 % fails",
+        "label": "80 % passes, 79.9 % fails",
         "record": {
           "80 %": 1.0,
           "79.9 %": 0.0
@@ -54617,7 +54617,7 @@
           }
         ]
       },
-      "quantity": "Characteristic voltage from 100 dB at 0,1 V: the e.m.f. for 94 dB",
+      "quantity": "Characteristic voltage from 100 dB at 0.1 V: the e.m.f. for 94 dB",
       "kind": "scalar",
       "expected": {
         "value": 0.05011872336272723
@@ -54792,7 +54792,7 @@
           }
         ]
       },
-      "quantity": "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V",
+      "quantity": "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0.1 V",
       "kind": "scalar",
       "expected": {
         "value": 0.10936802073535674
@@ -54858,10 +54858,10 @@
           }
         ]
       },
-      "quantity": "Clipped programme signal at the two ends of the 1,8 to 2,2 window",
+      "quantity": "Clipped programme signal at the two ends of the 1.8 to 2.2 window",
       "kind": "record",
       "expected": {
-        "label": "1,8 and 2,2 pass with the Table II spectrum; 1,7, 2,3 and unclipped fail",
+        "label": "1.8 and 2.2 pass with the Table II spectrum; 1.7, 2.3 and unclipped fail",
         "record": {
           "1.7": 0.0,
           "1.8": 1.0,
@@ -55122,10 +55122,10 @@
           }
         ]
       },
-      "quantity": "Fittings 2,5 dB apart and a 500 Hz band 3 dB off, inclusive",
+      "quantity": "Fittings 2.5 dB apart and a 500 Hz band 3 dB off, inclusive",
       "kind": "record",
       "expected": {
-        "label": "2,5 dB and 3 dB are inside, 2,6 dB and 3,1 dB not",
+        "label": "2.5 dB and 3 dB are inside, 2.6 dB and 3.1 dB not",
         "record": {
           "2.5 dB apart": 1.0,
           "2.6 dB apart": 0.0,
@@ -56537,7 +56537,7 @@
           }
         ]
       },
-      "quantity": "Cabin clearance: half a wavelength at 100 Hz is 1,715 m at 343 m/s, and the 50 Hz to 80 Hz range takes a flat 2 m",
+      "quantity": "Cabin clearance: half a wavelength at 100 Hz is 1.715 m at 343 m/s, and the 50 Hz to 80 Hz range takes a flat 2 m",
       "kind": "record",
       "expected": {
         "label": "100 Hz = 1.715 m; 80 Hz = 2 m; 63 Hz = 2 m; 50 Hz = 2 m",
@@ -56629,7 +56629,7 @@
       "kind": "scalar",
       "expected": {
         "value": 6.0,
-        "label": "6 positions for a 9,5 dB spread, capped at six"
+        "label": "6 positions for a 9.5 dB spread, capped at six"
       },
       "computed": {
         "value": 6.0,
@@ -56748,7 +56748,7 @@
       },
       "computed": {
         "value": 17.0,
-        "label": "17/17 printed values of K_2A, from 1,1 dB to 8,4 dB"
+        "label": "17/17 printed values of K_2A, from 1.1 dB to 8.4 dB"
       },
       "tolerance": {
         "mode": "absolute",
@@ -56812,7 +56812,7 @@
       "kind": "scalar",
       "expected": {
         "value": 13.0,
-        "label": "13 of 17, the four that differ being room A, which is hemi-anechoic and so more absorbent than the 0,5 the table stops at"
+        "label": "13 of 17, the four that differ being room A, which is hemi-anechoic and so more absorbent than the 0.5 the table stops at"
       },
       "computed": {
         "value": 13.0,
@@ -56876,7 +56876,7 @@
           }
         ]
       },
-      "quantity": "The estimated room absorption column of the study does not follow the study's own Eq. (3): every one of its 17 cells sits more than 0,4 dB away from it, so that column is no oracle for this library",
+      "quantity": "The estimated room absorption column of the study does not follow the study's own Eq. (3): every one of its 17 cells sits more than 0.4 dB away from it, so that column is no oracle for this library",
       "kind": "count",
       "expected": {
         "value": 17.0,
@@ -56948,7 +56948,7 @@
       "kind": "count",
       "expected": {
         "value": 6.0,
-        "label": "6/6, the tightest of them sitting 0,09 dB over the 7 dB ceiling"
+        "label": "6/6, the tightest of them sitting 0.09 dB over the 7 dB ceiling"
       },
       "computed": {
         "value": 6.0,
@@ -57012,7 +57012,7 @@
           }
         ]
       },
-      "quantity": "The two A-weighted totals of that example on their own, 108,4 dBA without the enclosure and 89,8 dBA with it, which is where the weighting table shows and the difference of the two hides it",
+      "quantity": "The two A-weighted totals of that example on their own, 108.4 dBA without the enclosure and 89.8 dBA with it, which is where the weighting table shows and the difference of the two hides it",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -57088,11 +57088,11 @@
           }
         ]
       },
-      "quantity": "ISO 11546-1:1995 3.16 / ISO 11546-2:1995 3.14: the leak ratio of an enclosure with a 0,25 m2 opening in 95,75 m2 of wall, taken over the interior surface with the opening counted in, against the printed q = 2,6e-3",
+      "quantity": "ISO 11546-1:1995 3.16 / ISO 11546-2:1995 3.14: the leak ratio of an enclosure with a 0.25 m2 opening in 95.75 m2 of wall, taken over the interior surface with the opening counted in, against the printed q = 2.6e-3",
       "kind": "scalar",
       "expected": {
         "value": 0.0026,
-        "label": "q = 2,6e-3 (+/-5e-5, half of the last digit printed)"
+        "label": "q = 2.6e-3 (+/-5e-5, half of the last digit printed)"
       },
       "computed": {
         "value": 0.002604,
@@ -57171,11 +57171,11 @@
           }
         ]
       },
-      "quantity": "The background correction 6.4 delegates, at the two clamp points ISO 3741 prints: 1,26 dB for a 6 dB margin and 0,46 dB for a 10 dB one",
+      "quantity": "The background correction 6.4 delegates, at the two clamp points ISO 3741 prints: 1.26 dB for a 6 dB margin and 0.46 dB for a 10 dB one",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "the printed 1,26 dB and 0,46 dB, to the two decimals folio 20 prints them at (+/-0,005 dB, half of that last digit)"
+        "label": "the printed 1.26 dB and 0.46 dB, to the two decimals folio 20 prints them at (+/-0.005 dB, half of that last digit)"
       },
       "computed": {
         "value": 0.0037,
@@ -57218,7 +57218,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "80 - 1,26 and 80 - 0,46 for L_pA, and 31,26 / 30,46 / 31,26 for D_p (+/-0,005 dB, half of the last digit printed)"
+        "label": "80 - 1.26 and 80 - 0.46 for L_pA, and 31.26 / 30.46 / 31.26 for D_p (+/-0.005 dB, half of the last digit printed)"
       },
       "computed": {
         "value": 0.0037,
@@ -57257,7 +57257,7 @@
           }
         ]
       },
-      "quantity": "Clause 8 is ISO 717-1 with D_p written where that standard writes R, so its printed example rates 30 (-2; -3) dB on an unfavourable sum of 31,8 dB",
+      "quantity": "Clause 8 is ISO 717-1 with D_p written where that standard writes R, so its printed example rates 30 (-2; -3) dB on an unfavourable sum of 31.8 dB",
       "kind": "record",
       "expected": {
         "label": "D_p,w = 30 dB; C = -2 dB; Ctr = -3 dB; unfavourable sum = 31.8 dB",
@@ -57310,10 +57310,10 @@
           }
         ]
       },
-      "quantity": "The summation term of the Annex A estimate against the two printed sums, 28,308 dB and 26,859 dB, over sixteen bands each",
+      "quantity": "The summation term of the Annex A estimate against the two printed sums, 28.308 dB and 26.859 dB, over sixteen bands each",
       "kind": "mask",
       "expected": {
-        "label": "the printed -10 lg of the two sums, 28,308 dB and 26,859 dB. The table truncates rather than rounds, which its ellipsis says, so a correct value sits at or above each and within 0,001 dB of it"
+        "label": "the printed -10 lg of the two sums, 28.308 dB and 26.859 dB. The table truncates rather than rounds, which its ellipsis says, so a correct value sits at or above each and within 0.001 dB of it"
       },
       "computed": {
         "label": "departures +0.000551 dB and +0.000986 dB over the two spectra"
@@ -57398,7 +57398,7 @@
           }
         ]
       },
-      "quantity": "An acoustic booth measured in a 180,4 m3 reverberation room and rated by the issuing laboratory at D_p,w = 22 dB",
+      "quantity": "An acoustic booth measured in a 180.4 m3 reverberation room and rated by the issuing laboratory at D_p,w = 22 dB",
       "kind": "scalar",
       "expected": {
         "value": 22.0,
@@ -57852,11 +57852,11 @@
           }
         ]
       },
-      "quantity": "The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0,35 dB",
+      "quantity": "The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0.35 dB",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "under 0,35 dB over the eight rows"
+        "label": "under 0.35 dB over the eight rows"
       },
       "computed": {
         "value": 0.3491,
@@ -57987,7 +57987,7 @@
           }
         ]
       },
-      "quantity": "The upstream distance is 1,5 equivalent diameters and the downstream one is 12 sqrt(S_d) less 10 sqrt(S_f)",
+      "quantity": "The upstream distance is 1.5 equivalent diameters and the downstream one is 12 sqrt(S_d) less 10 sqrt(S_f)",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -58227,7 +58227,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "all 21 bands inside the 0,05 dB the printed tenth allows"
+        "label": "all 21 bands inside the 0.05 dB the printed tenth allows"
       },
       "computed": {
         "value": 0.0487,
@@ -58313,7 +58313,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "all 22 rows inside the 0,05 dB the printed tenth allows"
+        "label": "all 22 rows inside the 0.05 dB the printed tenth allows"
       },
       "computed": {
         "value": 0.0496,
@@ -58363,16 +58363,16 @@
       "quantity": "Two worked background subtractions at a single point, each printed to the tenth of a decibel",
       "kind": "record",
       "expected": {
-        "label": "Bies 1.4, 92,0 dB over 88,0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
+        "label": "Bies 1.4, 92.0 dB over 88.0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
         "record": {
-          "Bies 1.4, 92,0 dB over 88,0 dB": 89.8,
+          "Bies 1.4, 92.0 dB over 88.0 dB": 89.8,
           "Barron 3-6, 83 dB over 77 dB": 81.7
         }
       },
       "computed": {
-        "label": "Bies 1.4, 92,0 dB over 88,0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
+        "label": "Bies 1.4, 92.0 dB over 88.0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
         "record": {
-          "Bies 1.4, 92,0 dB over 88,0 dB": 89.8,
+          "Bies 1.4, 92.0 dB over 88.0 dB": 89.8,
           "Barron 3-6, 83 dB over 77 dB": 81.7
         }
       },
@@ -58409,20 +58409,20 @@
           }
         ]
       },
-      "quantity": "The energy mean of nine levels on a measurement surface, and the 10 lg (S/S0) of the 24,56 m2 that surface encloses",
+      "quantity": "The energy mean of nine levels on a measurement surface, and the 10 lg (S/S0) of the 24.56 m2 that surface encloses",
       "kind": "record",
       "expected": {
-        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24,56 m2 = 13.9 dB",
+        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24.56 m2 = 13.9 dB",
         "record": {
           "mean of nine levels": 80.4,
-          "10 lg (S/S0) at 24,56 m2": 13.9
+          "10 lg (S/S0) at 24.56 m2": 13.9
         }
       },
       "computed": {
-        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24,56 m2 = 13.9 dB",
+        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24.56 m2 = 13.9 dB",
         "record": {
           "mean of nine levels": 80.4,
-          "10 lg (S/S0) at 24,56 m2": 13.9
+          "10 lg (S/S0) at 24.56 m2": 13.9
         }
       },
       "unit": "dB",
@@ -58499,7 +58499,7 @@
           }
         ]
       },
-      "quantity": "The printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
+      "quantity": "The printed Sabine absorption area of a 200 m3 room at 21.4 C, where the speed of sound is 344 m/s",
       "kind": "scalar",
       "expected": {
         "value": 10.7
@@ -58676,17 +58676,17 @@
       "quantity": "The flow velocity a velocity pressure stands for, against the two coefficients a national guide prints for it",
       "kind": "record",
       "expected": {
-        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1,2 kg/m3 = 4.04 m/s",
+        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1.2 kg/m3 = 4.04 m/s",
         "record": {
           "Ec. 2, density free, 1 kg/m3": 4.43,
-          "Ec. 3, air at 20 C, 1,2 kg/m3": 4.04
+          "Ec. 3, air at 20 C, 1.2 kg/m3": 4.04
         }
       },
       "computed": {
-        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1,2 kg/m3 = 4.04 m/s",
+        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1.2 kg/m3 = 4.04 m/s",
         "record": {
           "Ec. 2, density free, 1 kg/m3": 4.43,
-          "Ec. 3, air at 20 C, 1,2 kg/m3": 4.04
+          "Ec. 3, air at 20 C, 1.2 kg/m3": 4.04
         }
       },
       "unit": "m/s",
@@ -58805,7 +58805,7 @@
           }
         ]
       },
-      "quantity": "The area-equivalent diameter inside the upstream distance, for the 0,810 m2 cross-section of a 900 mm square duct",
+      "quantity": "The area-equivalent diameter inside the upstream distance, for the 0.810 m2 cross-section of a 900 mm square duct",
       "kind": "scalar",
       "expected": {
         "value": 1.524
@@ -58842,7 +58842,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "1,2563 dB at 6 dB and 0,4576 dB at 10 dB"
+        "label": "1.2563 dB at 6 dB and 0.4576 dB at 10 dB"
       },
       "computed": {
         "value": 2.51e-05,
@@ -59417,7 +59417,7 @@
           }
         ]
       },
-      "quantity": "The 1,3 dB that ISO 140-3 and ISO 3744:2010 8.2.3 both print for a 6 dB margin, which is where the window of 5.7 opens",
+      "quantity": "The 1.3 dB that ISO 140-3 and ISO 3744:2010 8.2.3 both print for a 6 dB margin, which is where the window of 5.7 opens",
       "kind": "scalar",
       "expected": {
         "value": 1.3
@@ -59728,11 +59728,11 @@
           }
         ]
       },
-      "quantity": "The short-distance ratio is strict at 0,1, the after case needs both of its two inequalities, and a geometry past 0,1 on every ratio is short",
+      "quantity": "The short-distance ratio is strict at 0.1, the after case needs both of its two inequalities, and a geometry past 0.1 on every ratio is short",
       "kind": "count",
       "expected": {
         "value": 1.0,
-        "label": "0,1 exactly is not short, both halves must hold, and 0,2 and 0,5 are short"
+        "label": "0.1 exactly is not short, both halves must hold, and 0.2 and 0.5 are short"
       },
       "computed": {
         "value": 1.0,
@@ -59762,7 +59762,7 @@
           }
         ]
       },
-      "quantity": "The reference microphone stands at least 1,5 m above the top edge, and higher where the 10 degree rule of the NOTE asks for more",
+      "quantity": "The reference microphone stands at least 1.5 m above the top edge, and higher where the 10 degree rule of the NOTE asks for more",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -59799,7 +59799,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "6,02 dB and 3,01 dB, printed rounded to 6 and 3"
+        "label": "6.02 dB and 3.01 dB, printed rounded to 6 and 3"
       },
       "computed": {
         "value": 0.0206,
@@ -59871,7 +59871,7 @@
           }
         ]
       },
-      "quantity": "The one value that campaign prints before rounding, 9,5 dBA, for the case with the background raised at the receiver alone",
+      "quantity": "The one value that campaign prints before rounding, 9.5 dBA, for the case with the background raised at the receiver alone",
       "kind": "scalar",
       "expected": {
         "value": 9.5
@@ -59912,7 +59912,7 @@
       },
       "computed": {
         "value": 2.0,
-        "label": "2/2 runs within the 0,1 dB the table prints to"
+        "label": "2/2 runs within the 0.1 dB the table prints to"
       },
       "tolerance": {
         "mode": "absolute",
@@ -59938,7 +59938,7 @@
           }
         ]
       },
-      "quantity": "The same barrier by the indirect method, five runs against an equivalent site, and the mean insertion loss of 7,0 dBA the table reports",
+      "quantity": "The same barrier by the indirect method, five runs against an equivalent site, and the mean insertion loss of 7.0 dBA the table reports",
       "kind": "count",
       "expected": {
         "value": 6.0,
@@ -59971,11 +59971,11 @@
           }
         ]
       },
-      "quantity": "The insertion loss worked through with every level printed, 8,8 dB and 8,7 dB, once the off-model edge adjustment is applied outside",
+      "quantity": "The insertion loss worked through with every level printed, 8.8 dB and 8.7 dB, once the off-model edge adjustment is applied outside",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "8,8 dB from the 56,2 dB typed, 8,7 dB from the 56,3 dB listed"
+        "label": "8.8 dB from the 56.2 dB typed, 8.7 dB from the 56.3 dB listed"
       },
       "computed": {
         "value": 0.0,
@@ -60009,17 +60009,17 @@
       "quantity": "The tie-break clause 10 c) of ISO 10847 leaves open: an exact half is reported as the even whole decibel, the rule Annex B calls preferable",
       "kind": "record",
       "expected": {
-        "label": "1 225,0 = 1220; 1 235,0 = 1240",
+        "label": "1 225.0 = 1220; 1 235.0 = 1240",
         "record": {
-          "1 225,0": 1220.0,
-          "1 235,0": 1240.0
+          "1 225.0": 1220.0,
+          "1 235.0": 1240.0
         }
       },
       "computed": {
-        "label": "1 225,0 = 1220; 1 235,0 = 1240",
+        "label": "1 225.0 = 1220; 1 235.0 = 1240",
         "record": {
-          "1 225,0": 1220.0,
-          "1 235,0": 1240.0
+          "1 225.0": 1220.0,
+          "1 235.0": 1240.0
         }
       },
       "tolerance": {
@@ -60326,11 +60326,11 @@
           }
         ]
       },
-      "quantity": "The A-weighted pink-noise normalisation of Eq. (4), with the printed 6,2 dB, reproduces the eleven printed values to within 0,1 dB",
+      "quantity": "The A-weighted pink-noise normalisation of Eq. (4), with the printed 6.2 dB, reproduces the eleven printed values to within 0.1 dB",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "every value within 0,1 dB: the printed 6,2 dB is 0,05 dB short of the sum of the printed Table 1 weights, which is what the annex normalised with, so a cell can come out one unit high in the last place and never low"
+        "label": "every value within 0.1 dB: the printed 6.2 dB is 0.05 dB short of the sum of the printed Table 1 weights, which is what the annex normalised with, so a cell can come out one unit high in the last place and never low"
       },
       "computed": {
         "value": 0.092,
@@ -60378,15 +60378,15 @@
           }
         ]
       },
-      "quantity": "The 6,2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, the six weights Table 1 prints sum to 6,2515 dB, and the annex was normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen printed values inside their rounding where the printed constant lands nine of them one unit high",
+      "quantity": "The 6.2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, the six weights Table 1 prints sum to 6.2515 dB, and the annex was normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen printed values inside their rounding where the printed constant lands nine of them one unit high",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6,2 dB, every one of the 14 high and none by a second unit"
+        "label": "0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6.2 dB, every one of the 14 high and none by a second unit"
       },
       "computed": {
         "value": 0.0,
-        "label": "0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6,2 dB (worst 0.097 dB, 0 low, 0 past one unit)"
+        "label": "0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6.2 dB (worst 0.097 dB, 0 low, 0 past one unit)"
       },
       "tolerance": {
         "mode": "absolute",
@@ -60514,15 +60514,15 @@
           }
         ]
       },
-      "quantity": "The factor Eq. (5) prints, 0,3, is the logarithm of two rounded, which Eq. (8) prints in full one page later",
+      "quantity": "The factor Eq. (5) prints, 0.3, is the logarithm of two rounded, which Eq. (8) prints in full one page later",
       "kind": "scalar",
       "expected": {
         "value": 0.3010299956639812,
-        "label": "lg 2 = 0,301 03"
+        "label": "lg 2 = 0.301 03"
       },
       "computed": {
         "value": 0.3,
-        "label": "the printed 0,3, which is 0,34 % smaller"
+        "label": "the printed 0.3, which is 0.34 % smaller"
       },
       "tolerance": {
         "mode": "absolute",
@@ -60687,7 +60687,7 @@
       "kind": "count",
       "expected": {
         "value": 2.0,
-        "label": "2/2, the closer of the two 1,5 dB under the 8 dB cap"
+        "label": "2/2, the closer of the two 1.5 dB under the 8 dB cap"
       },
       "computed": {
         "value": 2.0,
@@ -60771,7 +60771,7 @@
       "kind": "scalar",
       "expected": {
         "value": 18.0,
-        "label": "18 of the 21 printed results leave the rounding of their own table: 15 of the 18 of Table C.11 over Table C.5, up to 1,55 dB, and the 3 of Table C.12 over the last column of Table C.6. The two printings of the standard agree digit for digit, so neither is a misprint of the other"
+        "label": "18 of the 21 printed results leave the rounding of their own table: 15 of the 18 of Table C.11 over Table C.5, up to 1.55 dB, and the 3 of Table C.12 over the last column of Table C.6. The two printings of the standard agree digit for digit, so neither is a misprint of the other"
       },
       "computed": {
         "value": 18.0,
@@ -60809,7 +60809,7 @@
       },
       "computed": {
         "value": 21.0,
-        "label": "21/21 printed values of DL2 reproduced within 0,06 dB"
+        "label": "21/21 printed values of DL2 reproduced within 0.06 dB"
       },
       "tolerance": {
         "mode": "absolute",
@@ -60881,7 +60881,7 @@
       "kind": "scalar",
       "expected": {
         "value": 10.992098640220963,
-        "label": "10 lg(4 pi) = 10,992 dB, which Eq. (2) prints as 11 dB"
+        "label": "10 lg(4 pi) = 10.992 dB, which Eq. (2) prints as 11 dB"
       },
       "computed": {
         "value": 10.9876,
@@ -60988,11 +60988,11 @@
           }
         ]
       },
-      "quantity": "The 2 kHz level difference the result table prints, 4,7 dB, is not the one its own decay rate was computed from",
+      "quantity": "The 2 kHz level difference the result table prints, 4.7 dB, is not the one its own decay rate was computed from",
       "kind": "count",
       "expected": {
         "value": 2.0,
-        "label": "the printed level gives the printed 4,3 dB and the level the printed difference would need gives 4,4 dB"
+        "label": "the printed level gives the printed 4.3 dB and the level the printed difference would need gives 4.4 dB"
       },
       "computed": {
         "value": 2.0,
@@ -61094,7 +61094,7 @@
       "kind": "scalar",
       "expected": {
         "value": 12.4,
-        "label": "12,4 dB, against the 10 dB the table prints and the 10 dB the diagram ends at"
+        "label": "12.4 dB, against the 10 dB the table prints and the 10 dB the diagram ends at"
       },
       "computed": {
         "value": 12.3789
@@ -61169,7 +61169,7 @@
       "kind": "scalar",
       "expected": {
         "value": 5.0,
-        "label": "five of the six octave bands, the 4 kHz one running 0,4 dB over the 5 dB top of the range 4.3 leads one to expect"
+        "label": "five of the six octave bands, the 4 kHz one running 0.4 dB over the 5 dB top of the range 4.3 leads one to expect"
       },
       "computed": {
         "value": 5.0,
@@ -61244,7 +61244,7 @@
       "kind": "count",
       "expected": {
         "value": 6.0,
-        "label": "6/6: all but one within the 0,05 dB half step of the printed tenth (worst 0.037 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
+        "label": "6/6: all but one within the 0.05 dB half step of the printed tenth (worst 0.037 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
       },
       "computed": {
         "value": 6.0,
@@ -61278,7 +61278,7 @@
       "kind": "count",
       "expected": {
         "value": 12.0,
-        "label": "12/12: the 6 cells within 0,1 dB at the positions Figure B.1 draws, and the same 6 more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.478 dB, farthest 1.836 dB)"
+        "label": "12/12: the 6 cells within 0.1 dB at the positions Figure B.1 draws, and the same 6 more than 0.1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.478 dB, farthest 1.836 dB)"
       },
       "computed": {
         "value": 12.0,
@@ -61486,7 +61486,7 @@
       "kind": "count",
       "expected": {
         "value": 3.0,
-        "label": "3/3 (worst departure 0.05 dB, on the total before treatment: the nine contributions are themselves printed to 0,1 dB, so their sum can only be recovered to half a step)"
+        "label": "3/3 (worst departure 0.05 dB, on the total before treatment: the nine contributions are themselves printed to 0.1 dB, so their sum can only be recovered to half a step)"
       },
       "computed": {
         "value": 3.0,
@@ -61565,15 +61565,15 @@
           }
         ]
       },
-      "quantity": "The room constant printed at 2 kHz is the one a mean absorption of 0,041 gives, and not the 0,043 the row above it prints",
+      "quantity": "The room constant printed at 2 kHz is the one a mean absorption of 0.041 gives, and not the 0.043 the row above it prints",
       "kind": "scalar",
       "expected": {
         "value": 47.88,
-        "label": "the 47,88 m2 Table 7-5 prints at 2 kHz"
+        "label": "the 47.88 m2 Table 7-5 prints at 2 kHz"
       },
       "computed": {
         "value": 47.8832,
-        "label": "47.88 m2 from a mean absorption of 0,041, against the 50.32 m2 the printed 0,043 gives"
+        "label": "47.88 m2 from a mean absorption of 0.041, against the 50.32 m2 the printed 0.043 gives"
       },
       "unit": "m²",
       "tolerance": {
@@ -61604,11 +61604,11 @@
       "kind": "scalar",
       "expected": {
         "value": 94.8,
-        "label": "the 94,8 dB the example prints, for a room constant of 47,37 m2"
+        "label": "the 94.8 dB the example prints, for a room constant of 47.37 m2"
       },
       "computed": {
         "value": 94.85,
-        "label": "94.85 dB, from the 47.37 m2 the library returns for (0,05)(900)/(1 - 0,05)"
+        "label": "94.85 dB, from the 47.37 m2 the library returns for (0.05)(900)/(1 - 0.05)"
       },
       "unit": "dB",
       "tolerance": {
@@ -61702,7 +61702,7 @@
           }
         ]
       },
-      "quantity": "The coverage factor is the 2,8 of ISO 5725-6 for this test code and the 2,0 of Table 3 at 95 % for the general method",
+      "quantity": "The coverage factor is the 2.8 of ISO 5725-6 for this test code and the 2.0 of Table 3 at 95 % for the general method",
       "kind": "record",
       "expected": {
         "label": "EN 16487 NOTE = 2.8; ISO 12999-2 Table 3 at 95 % = 2",
@@ -61776,11 +61776,11 @@
           }
         ]
       },
-      "quantity": "The EN ISO 354:2003 8.1.2.1 conversion between alpha and m, printed as 10 lg(e) = 4,343",
+      "quantity": "The EN ISO 354:2003 8.1.2.1 conversion between alpha and m, printed as 10 lg(e) = 4.343",
       "kind": "scalar",
       "expected": {
         "value": 4.343,
-        "label": "4,343, to the four figures the page prints"
+        "label": "4.343, to the four figures the page prints"
       },
       "computed": {
         "value": 4.342945
@@ -61813,7 +61813,7 @@
       "kind": "scalar",
       "expected": {
         "value": 20.0,
-        "label": "20 m2 of air absorption, from V = 100 m3 and m = 0,05 1/m"
+        "label": "20 m2 of air absorption, from V = 100 m3 and m = 0.05 1/m"
       },
       "computed": {
         "value": 20.0
@@ -61896,7 +61896,7 @@
       "quantity": "The air-absorption correction of a 300 m3 room whose humidity moved from 50 % to 60 %, which the clause reports as over its printed cap",
       "kind": "record",
       "expected": {
-        "label": "the printed 0,05, and the room reported as over it",
+        "label": "the printed 0.05, and the room reported as over it",
         "record": {
           "cap of 4.2.1": 0.05,
           "reported as over it": 1.0
@@ -61944,7 +61944,7 @@
       "quantity": "The same correction in a 200 m3 room at 90 % relative humidity, which the clause passes in silence as inside its printed cap",
       "kind": "record",
       "expected": {
-        "label": "the printed 0,05, and the room passed in silence",
+        "label": "the printed 0.05, and the room passed in silence",
         "record": {
           "cap of 4.2.1": 0.05,
           "passed in silence": 1.0
@@ -62023,11 +62023,11 @@
           }
         ]
       },
-      "quantity": "Four real suspended-ceiling arrangements judged against the printed 10,80 m2 and the printed 200 mm",
+      "quantity": "Four real suspended-ceiling arrangements judged against the printed 10.80 m2 and the printed 200 mm",
       "kind": "count",
       "expected": {
         "value": 4.0,
-        "label": "4/4 against the 10,80 m2 of 4.1.1.1.1 and the 200 mm of 4.1.1.2.3.1"
+        "label": "4/4 against the 10.80 m2 of 4.1.1.1.1 and the 200 mm of 4.1.1.2.3.1"
       },
       "computed": {
         "value": 4.0,
@@ -62145,7 +62145,7 @@
       "quantity": "Correction for background noise, the nine printed rows from a difference of 3 dB to one above 10 dB",
       "kind": "record",
       "expected": {
-        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB",
+        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10.2 dB = 0 dB",
         "record": {
           "3 dB": 3.0,
           "4 dB": 2.0,
@@ -62156,11 +62156,11 @@
           "9 dB": 0.5,
           "10 dB": 0.5,
           "> 10 dB, at 11 dB": 0.0,
-          "> 10 dB, at 10,2 dB": 0.0
+          "> 10 dB, at 10.2 dB": 0.0
         }
       },
       "computed": {
-        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB",
+        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10.2 dB = 0 dB",
         "record": {
           "3 dB": 3.0,
           "4 dB": 2.0,
@@ -62171,7 +62171,7 @@
           "9 dB": 0.5,
           "10 dB": 0.5,
           "> 10 dB, at 11 dB": 0.0,
-          "> 10 dB, at 10,2 dB": 0.0
+          "> 10 dB, at 10.2 dB": 0.0
         }
       },
       "unit": "dB",
@@ -62489,12 +62489,12 @@
           "4.3 at 6 m/s": 1.0,
           "A.3.3 at 7 dB": 1.0,
           "A.3.3 above 7 dB": 1.0,
-          "7.2.2 at 1,0 dB": 1.0,
-          "7.2.2 above 1,0 dB": 1.0
+          "7.2.2 at 1.0 dB": 1.0,
+          "7.2.2 above 1.0 dB": 1.0
         }
       },
       "computed": {
-        "label": "4.2 at 3 dB = 1; 4.2 below 3 dB = 1; 4.3 below 6 m/s = 1; 4.3 at 6 m/s = 1; A.3.3 at 7 dB = 1; A.3.3 above 7 dB = 1; 7.2.2 at 1,0 dB = 1; 7.2.2 above 1,0 dB = 1",
+        "label": "4.2 at 3 dB = 1; 4.2 below 3 dB = 1; 4.3 below 6 m/s = 1; 4.3 at 6 m/s = 1; A.3.3 at 7 dB = 1; A.3.3 above 7 dB = 1; 7.2.2 at 1.0 dB = 1; 7.2.2 above 1.0 dB = 1",
         "record": {
           "4.2 at 3 dB": 1.0,
           "4.2 below 3 dB": 1.0,
@@ -62502,8 +62502,8 @@
           "4.3 at 6 m/s": 1.0,
           "A.3.3 at 7 dB": 1.0,
           "A.3.3 above 7 dB": 1.0,
-          "7.2.2 at 1,0 dB": 1.0,
-          "7.2.2 above 1,0 dB": 1.0
+          "7.2.2 at 1.0 dB": 1.0,
+          "7.2.2 above 1.0 dB": 1.0
         }
       },
       "tolerance": {
@@ -62976,7 +62976,7 @@
       "quantity": "Multistage trim substitution, example 7 (Eqs. (27) to (29))",
       "kind": "record",
       "expected": {
-        "label": "C_n = 315 from Equation (27); p_n = 2,1 x 1e6 Pa from (28a), which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1,5",
+        "label": "C_n = 315 from Equation (27); p_n = 2.1 x 1e6 Pa from (28a), which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1.5",
         "record": {
           "C_n": 315.0,
           "p_n (x1e6 Pa)": 2.1,
@@ -63068,7 +63068,7 @@
       "quantity": "Flow conditions, examples 1 to 3 (5.1)",
       "kind": "record",
       "expected": {
-        "label": "Delta p = 2,0 / 3,5 / 3,5 x 1e5 Pa against 2,38 / 2,38 / 3,32 x 1e5 Pa -> turbulent, cavitating, cavitating",
+        "label": "Delta p = 2.0 / 3.5 / 3.5 x 1e5 Pa against 2.38 / 2.38 / 3.32 x 1e5 Pa -> turbulent, cavitating, cavitating",
         "record": {
           "x_Fzp1 (p1-pv) 1": 2.38,
           "cavitating 1": 0.0,
@@ -63687,7 +63687,7 @@
       "kind": "scalar",
       "expected": {
         "value": 3.010299956639812,
-        "label": "10 lg 2 = 3,010300 dB"
+        "label": "10 lg 2 = 3.010300 dB"
       },
       "computed": {
         "value": 3.0103
@@ -63720,7 +63720,7 @@
       "kind": "scalar",
       "expected": {
         "value": 9.743831846831036,
-        "label": "-10 lg[(10^-3 + 10^-3 + 10^-0,5)/3] = 9,744 dB"
+        "label": "-10 lg[(10^-3 + 10^-3 + 10^-0.5)/3] = 9.744 dB"
       },
       "computed": {
         "value": 9.743832
@@ -64143,7 +64143,7 @@
       "kind": "scalar",
       "expected": {
         "value": 343.00000000000006,
-        "label": "343,000000 Hz from the (1, 0) eigenvalue"
+        "label": "343.000000 Hz from the (1, 0) eigenvalue"
       },
       "computed": {
         "value": 343.0
@@ -64176,7 +64176,7 @@
       "kind": "scalar",
       "expected": {
         "value": 1.006701969160318,
-        "label": "0,59 / (1,8412 / pi) = 1,006701"
+        "label": "0.59 / (1.8412 / pi) = 1.006701"
       },
       "computed": {
         "value": 1.006702
@@ -64248,7 +64248,7 @@
       "kind": "scalar",
       "expected": {
         "value": 1.2073230191102495,
-        "label": "(101 325 + 200) / (287 x 293) = 1,207323 kg/m³"
+        "label": "(101 325 + 200) / (287 x 293) = 1.207323 kg/m³"
       },
       "computed": {
         "value": 1.207323
@@ -64356,7 +64356,7 @@
       "kind": "scalar",
       "expected": {
         "value": 2.1,
-        "label": "2,5 - 0,4 = 2,100000"
+        "label": "2.5 - 0.4 = 2.100000"
       },
       "computed": {
         "value": 2.1
@@ -64387,19 +64387,19 @@
       "quantity": "Upstream straight length (6.5.2.2.1)",
       "kind": "record",
       "expected": {
-        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "label": "S = 0.0962 m² (350 mm) = 2 m; S = 0.1257 m² (400 mm) = 2 m; S = 0.5 m² = 3.9894 m",
         "record": {
-          "S = 0,0962 m² (350 mm)": 2.0,
-          "S = 0,1257 m² (400 mm)": 2.0,
-          "S = 0,5 m²": 3.989422804014327
+          "S = 0.0962 m² (350 mm)": 2.0,
+          "S = 0.1257 m² (400 mm)": 2.0,
+          "S = 0.5 m²": 3.989422804014327
         }
       },
       "computed": {
-        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "label": "S = 0.0962 m² (350 mm) = 2 m; S = 0.1257 m² (400 mm) = 2 m; S = 0.5 m² = 3.9894 m",
         "record": {
-          "S = 0,0962 m² (350 mm)": 2.0,
-          "S = 0,1257 m² (400 mm)": 2.0,
-          "S = 0,5 m²": 3.989422804014327
+          "S = 0.0962 m² (350 mm)": 2.0,
+          "S = 0.1257 m² (400 mm)": 2.0,
+          "S = 0.5 m²": 3.989422804014327
         }
       },
       "unit": "m",
@@ -64511,20 +64511,20 @@
       "quantity": "Least-squares operating line (5.5.2)",
       "kind": "record",
       "expected": {
-        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "label": "slope [dB/decade] = 20; level at 0.2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
         "record": {
           "slope [dB/decade]": 20.0,
-          "level at 0,2 m³/s [dB]": 50.0,
+          "level at 0.2 m³/s [dB]": 50.0,
           "worst deviation [dB]": 0.0,
           "lowest readable duty [m³/s]": 0.025,
           "highest readable duty [m³/s]": 1.6
         }
       },
       "computed": {
-        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "label": "slope [dB/decade] = 20; level at 0.2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
         "record": {
           "slope [dB/decade]": 20.0,
-          "level at 0,2 m³/s [dB]": 50.0,
+          "level at 0.2 m³/s [dB]": 50.0,
           "worst deviation [dB]": 0.0,
           "lowest readable duty [m³/s]": 0.025,
           "highest readable duty [m³/s]": 1.6
@@ -66598,7 +66598,7 @@
           }
         ]
       },
-      "quantity": "Horizontal dipole directivity along the track: 10 lg(0,01) at phi = 0",
+      "quantity": "Horizontal dipole directivity along the track: 10 lg(0.01) at phi = 0",
       "kind": "scalar",
       "expected": {
         "value": -20.0
@@ -66663,7 +66663,7 @@
           }
         ]
       },
-      "quantity": "Impact roughness at the tabulated joint density n_l = 0,01 per m",
+      "quantity": "Impact roughness at the tabulated joint density n_l = 0.01 per m",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -66697,7 +66697,7 @@
           }
         ]
       },
-      "quantity": "Default upper limit of the one-third octave band rail roughness, the 22 levels printed beside the points, 40 cm to 0,315 cm, dB re 1 µm",
+      "quantity": "Default upper limit of the one-third octave band rail roughness, the 22 levels printed beside the points, 40 cm to 0.315 cm, dB re 1 µm",
       "kind": "count",
       "expected": {
         "value": 22.0,
@@ -67126,7 +67126,7 @@
           }
         ]
       },
-      "quantity": "Bands of the Method B filter bank at 1 mm sampling within the class 0 limits of Table 1 on relative attenuation, graded up to the Nyquist wavenumber of the record, 0,5 m to 2,5 mm",
+      "quantity": "Bands of the Method B filter bank at 1 mm sampling within the class 0 limits of Table 1 on relative attenuation, graded up to the Nyquist wavenumber of the record, 0.5 m to 2.5 mm",
       "kind": "count",
       "expected": {
         "value": 24.0,
@@ -67168,7 +67168,7 @@
           }
         ]
       },
-      "quantity": "Unit sinusoids run through the Method B bank on a 40 m record sampled every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to (equation 10) about every band and at the two wavenumbers a decimated bank lets through (74,773 and 88,202 per metre): band outputs at and beyond them at least the +75 dB of class 0 below the midband tone",
+      "quantity": "Unit sinusoids run through the Method B bank on a 40 m record sampled every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to (equation 10) about every band and at the two wavenumbers a decimated bank lets through (74.773 and 88.202 per metre): band outputs at and beyond them at least the +75 dB of class 0 below the midband tone",
       "kind": "count",
       "expected": {
         "value": 554.0,
@@ -67202,7 +67202,7 @@
           }
         ]
       },
-      "quantity": "Bands Method B reports on a 19 m record sampled every millimetre, against wl_d, the 24 band centres the listing filters, 0,5 m to 2,5 mm",
+      "quantity": "Bands Method B reports on a 19 m record sampled every millimetre, against wl_d, the 24 band centres the listing filters, 0.5 m to 2.5 mm",
       "kind": "count",
       "expected": {
         "value": 24.0,
@@ -67244,7 +67244,7 @@
           }
         ]
       },
-      "quantity": "Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: 10 lg(A²/2) within the ±0,15 dB of class 0 at the midband, dB re 1 µm",
+      "quantity": "Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: 10 lg(A²/2) within the ±0.15 dB of class 0 at the midband, dB re 1 µm",
       "kind": "scalar",
       "expected": {
         "value": 6.532125137753438
@@ -67344,7 +67344,7 @@
           }
         ]
       },
-      "quantity": "A line analysed by Method B needs 15 m of record once 2 m are discarded at either end of each: a 15 m line holds, a 14,9 m one does not",
+      "quantity": "A line analysed by Method B needs 15 m of record once 2 m are discarded at either end of each: a 15 m line holds, a 14.9 m one does not",
       "kind": "count",
       "expected": {
         "value": 2.0,
@@ -67378,7 +67378,7 @@
           }
         ]
       },
-      "quantity": "Curvature processing of an 11 mm pit 50 µm deep: the 0,375 m circle rests on its rims 6 mm from its middle, µm",
+      "quantity": "Curvature processing of an 11 mm pit 50 µm deep: the 0.375 m circle rests on its rims 6 mm from its middle, µm",
       "kind": "scalar",
       "expected": {
         "value": -48.00307239330141
@@ -67444,7 +67444,7 @@
           }
         ]
       },
-      "quantity": "Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0,3), dB",
+      "quantity": "Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0.3), dB",
       "kind": "scalar",
       "expected": {
         "value": 0.08752879551560966

@@ -117,7 +117,7 @@ $$
 
 after averaging the two fittings of the headphone and the two readings of the
 sound field, with the procedure repeated when the two fittings differ by more
-than 2,5 dB in any band ([`ear_canal_frequency_response`](/phonometry/reference/api/electroacoustics/headphones/#ear_canal_frequency_response)). A headphone
+than 2.5 dB in any band ([`ear_canal_frequency_response`](/phonometry/reference/api/electroacoustics/headphones/#ear_canal_frequency_response)). A headphone
 measured that way on at least 16 persons may replace the sound field of the
 indirect method (8.6.5.3, whose two references to 8.6.4.2 are read as 8.6.5.2,
 see `docs/ERRATA.md`). The microphone in the ear canal is specified by
@@ -484,7 +484,7 @@ e) and twice with the headphone, refitted between the two (c and d). The
 two pairs are averaged and the response is Formula (1),
 $L_\mathrm{f} = L_\mathrm{e} - L_\mathrm{s} - (L_\mathrm{e} - L_\mathrm{s})_{500}$, averaged over at least eight persons (h). The
 result also carries the two checks of the procedure: the fittings within
-2,5 dB in every band (f), and the 500 Hz band of the first fitting within
+2.5 dB in every band (f), and the 500 Hz band of the first fitting within
 3 dB of the sound field's (c).
 
 **Parameters**
@@ -537,7 +537,7 @@ The largest difference between the two fittings of each person, in dB.
 
 *property*
 
-For each person, whether the fittings agree within 2,5 dB in every band.
+For each person, whether the fittings agree within 2.5 dB in every band.
 
 8.6.5.2 f): "if there is a difference exceeding 2,5 dB [...] in any 1/3
 octave band, the whole procedure is repeated."
@@ -940,8 +940,8 @@ The modulation distortion test signal of IEC 60268-7 8.7.3.
 
 "The sum of two sinusoidal signals, at 70 Hz and 600 Hz, with amplitude
 ratio 4:1. The peak voltage of the signal shall be equal to that of the
-rated input voltage": amplitudes $0{,}8\sqrt{2}U$ and
-$0{,}2\sqrt{2}U$ for a rated voltage $U$, which NOTE 1 states
+rated input voltage": amplitudes $0.8\sqrt{2}U$ and
+$0.2\sqrt{2}U$ for a rated voltage $U$, which NOTE 1 states
 as "−1,9 dB at 70 Hz and −14,0 dB at 600 Hz". Both start at their crest
 (cosine phase), so the record reaches that peak at its first sample.
 Read the products with
@@ -1091,7 +1091,7 @@ Whether both the ratio and the spectrum conform.
 
 *property*
 
-Whether the peak-to-RMS ratio is between 1,8 and 2,2.
+Whether the peak-to-RMS ratio is between 1.8 and 2.2.
 
 ### LimitingTestSignalCheck.plot()
 
@@ -1483,7 +1483,7 @@ The lowest modulus within the rated frequency range, in ohms.
 
 *property*
 
-Whether the rated impedance is at most 1,25 times the lowest modulus in range.
+Whether the rated impedance is at most 1.25 times the lowest modulus in range.
 
 ### RatedImpedanceVerification.plot()
 
@@ -1537,7 +1537,7 @@ May this microphone measure inside the ear canal by IEC 60268-7 Annex B?
 
 The five measurable conditions of the normative Annex B: a) a
 cross-sectional area of 5 mm² or less within the concha and the first
-4 mm of the canal; b) in the rest of the canal, an area less than 0,6 of
+4 mm of the canal; b) in the rest of the canal, an area less than 0.6 of
 the canal's ("The average ear canal area of an adult is 45 mm²"); c) a
 volume, mounting parts included, less than 130 mm³; d) responses to
 neighbouring one-third-octave bands of pink noise that "do not differ by
@@ -1634,7 +1634,7 @@ impedance", $\sqrt{P R}$ across the headphone itself, whose
 impedance $Z$ at 500 Hz takes its share of the e.m.f.,
 $E = \sqrt{P R}\,|Z + R_\mathrm{s}|/|Z|$. The two readings agree
 when $Z$ is the rated impedance and part when it is not: a 32 ohm
-headphone of 40 ohm at 500 Hz on a 120 ohm source reads 1,49 dB lower by
+headphone of 40 ohm at 500 Hz on a 120 ohm source reads 1.49 dB lower by
 8.5.3 c). Pass `headphone_impedance_ohm` for the reading of 8.5.3 c)
 (see `docs/ERRATA.md`); it applies to the 500 Hz sine of 8.5.2 b),
 since a noise signal has no single impedance to divide by.

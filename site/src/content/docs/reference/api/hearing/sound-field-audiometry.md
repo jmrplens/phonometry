@@ -14,10 +14,10 @@ as (Clause 5), each measured with the test subject and the chair absent and
 with the same signals the audiometry will use (5.1):
 
 - a **free sound field** (5.2): the loudspeaker at least 1 m from the
-  reference point, the level 0,15 m to the left, right, above and below it
+  reference point, the level 0.15 m to the left, right, above and below it
   within ±1 dB of the level at it up to and including 4 kHz and within ±2 dB
   above, the two ear-side positions within 3 dB of each other above 4 kHz,
-  and the difference between the points 0,15 m in front of and behind it on
+  and the difference between the points 0.15 m in front of and behind it on
   the reference axis within ±1 dB of what the inverse distance law gives,
 
   $$
@@ -25,18 +25,18 @@ with the same signals the audiometry will use (5.1):
   $$
 
   with $r$ the distance from the loudspeaker to the reference point and
-  $d$ = 0,15 m. Its NOTE says only an anechoic room meets it.
+  $d$ = 0.15 m. Its NOTE says only an anechoic room meets it.
 - a **quasi-free sound field** (5.4): the same arrangement with ±2 dB at the
-  four lateral positions and the axial pair at $d$ = 0,10 m. Its usable
+  four lateral positions and the axial pair at $d$ = 0.10 m. Its usable
   frequency range is the range in which the requirements are met.
-- a **diffuse sound field** (5.3): the level at six positions 0,15 m from the
+- a **diffuse sound field** (5.3): the level at six positions 0.15 m from the
   reference point, on the front-back, right-left and up-down axes, within
-  ±2,5 dB of the level at it and the two ear-side positions within 3 dB of
+  ±2.5 dB of the level at it and the two ear-side positions within 3 dB of
   each other; from 500 Hz up, the levels a directional microphone reads at
   the reference point in the directions of the largest and the smallest
   incident energy stay within the variation Table 1 allows for the
   microphone's front-to-random sensitivity index (5 dB for an index of 5 dB
-  or more, 4,5 dB for 4,5 dB, 4 dB for 4 dB, and a microphone below 4 dB is
+  or more, 4.5 dB for 4.5 dB, 4 dB for 4 dB, and a microphone below 4 dB is
   not suitable).
 
 [`check_free_sound_field`](/phonometry/reference/api/hearing/sound-field-audiometry/#check_free_sound_field), [`check_quasi_free_sound_field`](/phonometry/reference/api/hearing/sound-field-audiometry/#check_quasi_free_sound_field) and
@@ -48,10 +48,10 @@ table and returns the same [`DiffuseSoundFieldCheck`](/phonometry/reference/api/
 
 **The ambient noise (Clause 6, Table 2).** The maximum permissible ambient
 sound pressure levels for sound field audiometry, in one-third-octave bands
-from 31,5 Hz to 12,5 kHz, for a lowest test frequency of 125 Hz or 250 Hz,
+from 31.5 Hz to 12.5 kHz, for a lowest test frequency of 125 Hz or 250 Hz,
 are [`SOUND_FIELD_AMBIENT_LIMITS_DB`](/phonometry/reference/api/hearing/sound-field-audiometry/#sound_field_ambient_limits_db). Its footnote a says they are
 derived from ISO 8253-1 for binaural listening, and prints no offset; laid
-side by side, from 31,5 Hz to 8 kHz each cell is the bone-conduction limit of
+side by side, from 31.5 Hz to 8 kHz each cell is the bone-conduction limit of
 ISO 8253-1:2010 Table 4 less 3 dB, an observation the library makes on the
 two printed tables and not a figure the footnote gives. Footnote b asks for
 lower limits, by an amount it does not print, when narrow-band noise is the
@@ -62,7 +62,7 @@ spectrum against them with `presentation="sound field"`.
 **Off-axis loudspeakers (Annex B, informative).** No standardized reference
 threshold exists for a loudspeaker away from 0° incidence (4.8, NOTE 1).
 Table B.1 prints how much higher the sound pressure level is at the ear
-closest to the loudspeaker at 45° and 90°, rounded to the nearest 0,5 dB, which
+closest to the loudspeaker at 45° and 90°, rounded to the nearest 0.5 dB, which
 [`INCIDENCE_CORRECTIONS`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_corrections) carries and [`incidence_correction`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction)
 reads. The paragraph above the table announces it from 200 Hz; its rows start
 at 125 Hz, and the library carries every printed row (see `docs/ERRATA.md`).
@@ -89,10 +89,10 @@ Is the sound field of the test room diffuse? (ISO 8253-2, 5.3).
 Measured with the test subject and the chair absent, with the signals the
 audiometry will use:
 
-- a) the level at each of the six positions 0,15 m from the reference
+- a) the level at each of the six positions 0.15 m from the reference
   point, front and back, left and right, up and down, read with an
   omnidirectional microphone kept in one orientation, stays within
-  ±2,5 dB of the level at the reference point, and the extreme right and
+  ±2.5 dB of the level at the reference point, and the extreme right and
   left positions within 3 dB of each other;
 - b) from 500 Hz up, the levels a directional microphone reads at the
   reference point in the directions of the largest and smallest incident
@@ -144,16 +144,16 @@ the head height of a seated listener with its reference axis through the
 reference point:
 
 - a) the loudspeaker is at least 1 m from the reference point;
-- b) the level 0,15 m from the reference point to the left, right, above
+- b) the level 0.15 m from the reference point to the left, right, above
   and below it stays within ±1 dB of the level at it up to and including
   4 kHz and within ±2 dB above, and above 4 kHz the right and left
   positions differ by 3 dB at most;
-- c) the level at the point 0,15 m in front of the reference point on the
-  reference axis less the level 0,15 m behind it stays within ±1 dB of the
+- c) the level at the point 0.15 m in front of the reference point on the
+  reference axis less the level 0.15 m behind it stays within ±1 dB of the
   inverse distance law,
 
   $$
-  \Delta L_\mathrm{theory} = 20 \lg \frac{r + 0{,}15\ \mathrm{m}} {r - 0{,}15\ \mathrm{m}}\ \mathrm{dB}
+  \Delta L_\mathrm{theory} = 20 \lg \frac{r + 0.15\ \mathrm{m}} {r - 0.15\ \mathrm{m}}\ \mathrm{dB}
   $$
 
   with $r$ the distance from the loudspeaker to the reference
@@ -168,8 +168,8 @@ to 5.2 says only an anechoic room does.
 | :--- | :--- |
 | `lateral_levels` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
 | `reference_levels` | The level at the reference point per test signal, in dB. |
-| `front_levels` | The level on the reference axis 0,15 m in front of the reference point, towards the loudspeaker, in dB. |
-| `back_levels` | The level 0,15 m behind it, in dB. |
+| `front_levels` | The level on the reference axis 0.15 m in front of the reference point, towards the loudspeaker, in dB. |
+| `back_levels` | The level 0.15 m behind it, in dB. |
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
@@ -179,7 +179,7 @@ to 5.2 says only an anechoic room does.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,15 m. |
+| ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0.15 m. |
 | TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text, or `back_levels`, `frequencies`, `front_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## check_quasi_free_sound_field
@@ -203,14 +203,14 @@ test subject and the chair absent and all other working conditions kept:
 
 - a) the loudspeaker's reference point is at least 1 m from the
   reference point;
-- b) the level 0,15 m from the reference point to the left, right, above
+- b) the level 0.15 m from the reference point to the left, right, above
   and below it stays within ±2 dB of the level at it;
-- c) the level 0,10 m in front of the reference point on the reference
-  axis less the level 0,10 m behind it stays within ±1 dB of the inverse
+- c) the level 0.10 m in front of the reference point on the reference
+  axis less the level 0.10 m behind it stays within ±1 dB of the inverse
   distance law,
 
   $$
-  \Delta L_\mathrm{theory} = 20 \lg \frac{r + 0{,}10\ \mathrm{m}} {r - 0{,}10\ \mathrm{m}}\ \mathrm{dB}
+  \Delta L_\mathrm{theory} = 20 \lg \frac{r + 0.10\ \mathrm{m}} {r - 0.10\ \mathrm{m}}\ \mathrm{dB}
   $$
 
 The usable frequency range of the field is the range in which these hold,
@@ -222,8 +222,8 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 | :--- | :--- |
 | `lateral_levels` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
 | `reference_levels` | The level at the reference point per test signal, in dB. |
-| `front_levels` | The level on the reference axis 0,10 m in front of the reference point, towards the loudspeaker, in dB. |
-| `back_levels` | The level 0,10 m behind it, in dB. |
+| `front_levels` | The level on the reference axis 0.10 m in front of the reference point, towards the loudspeaker, in dB. |
+| `back_levels` | The level 0.10 m behind it, in dB. |
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
@@ -233,7 +233,7 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,10 m. |
+| ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0.10 m. |
 | TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text, or `back_levels`, `frequencies`, `front_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## DIFFUSE_FIELD_VARIATION_LIMITS
@@ -270,7 +270,7 @@ into the variation it may read.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The centre frequencies of the test signals, in hertz. |
-| `position_deviation_db` | The level at each of the six positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
+| `position_deviation_db` | The level at each of the six positions 0.15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `left_right_difference` | The difference between the right and left positions per band, as an absolute value, in dB. |
 | `directional_variation_db` | The largest less the smallest level the directional microphone read at the reference point per band, in dB, or NaN where no reading was given or the band is below 500 Hz. |
 | `front_to_random_index` | The directional microphone's front-to-random sensitivity index per band, in dB, or `None` when no directional reading was given. |
@@ -373,7 +373,7 @@ Draw each condition against its limit, band by band.
 
 *property*
 
-Per band, whether all six positions stay within ±2,5 dB.
+Per band, whether all six positions stay within ±2.5 dB.
 
 **Returns:** One boolean per band.
 
@@ -400,7 +400,7 @@ The verdict of ISO 8253-2:2009, 5.2 (free) or 5.4 (quasi-free).
 | :--- | :--- |
 | `field` | `"free"` or `"quasi-free"`. |
 | `frequencies` | The frequencies of the test signals, in hertz. |
-| `lateral_deviation_db` | The level at each of the four positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
+| `lateral_deviation_db` | The level at each of the four positions 0.15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `axis_difference` | The level at the axial point in front of the reference point, towards the loudspeaker, less the level at the one behind it, per band, in dB. |
 | `loudspeaker_distance_m` | $r$, the distance from the loudspeaker to the reference point, in metres. |
 | `positions` | The lateral position names, in row order. Each one of `"left"`, `"right"`, `"up"` or `"down"`. |
@@ -417,7 +417,7 @@ against another offset or another law.
 
 $d$, how far the axial points sit from the reference point.
 
-**Returns:** 0,15 m for a free field (5.2 c)), 0,10 m for a quasi-free one (5.4 c)), in metres.
+**Returns:** 0.15 m for a free field (5.2 c)), 0.10 m for a quasi-free one (5.4 c)), in metres.
 
 ### FreeSoundFieldCheck.balanced
 
@@ -561,7 +561,7 @@ How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
 
 The increase in sound pressure level at the ear closest to the
 loudspeaker at 45° or 90° incidence, relative to 0°, rounded to the
-nearest 0,5 dB as Annex B prints it. The annex is informative and says
+nearest 0.5 dB as Annex B prints it. The annex is informative and says
 no standardized reference threshold exists for these angles (4.8,
 NOTE 1); how a report uses the increase is left to it.
 

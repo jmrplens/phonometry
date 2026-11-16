@@ -22,22 +22,22 @@ $$
 $$
 
 with $\overline{L_X}$ the *energy* average of the $N$
-repetitions, does not exceed Table 1 (0,8 dB from 50 Hz to 80 Hz, 0,4 dB from
-100 Hz to 160 Hz, 0,2 dB from 200 Hz to 20 kHz), and over the declared range
+repetitions, does not exceed Table 1 (0.8 dB from 50 Hz to 80 Hz, 0.4 dB from
+100 Hz to 160 Hz, 0.2 dB from 200 Hz to 20 kHz), and over the declared range
 of its electrical or mechanical supply (the line voltage, say) no one-third
-octave band varies by more than 0,3 dB either way. The spectrum is broadband: from
+octave band varies by more than 0.3 dB either way. The spectrum is broadband: from
 100 Hz to 10 000 Hz every one-third octave band lies within a range of 12 dB
 and within 3 dB of its neighbours, and 16 dB and 4 dB over a range extended
 beyond it (5.4). The directivity index $D_{\mathrm{I}i} = L_{pi} - \overline{L_p}$ (3.9) does not exceed +6 dB in any band from 100 Hz to
 10 000 Hz (5.5), unless the source is labelled for reverberation rooms only.
-Recalibration is due when a band has moved by more than 2,83 times Table 1
+Recalibration is due when a band has moved by more than 2.83 times Table 1
 between two checks (5.6).
 
 **Calibration in a hemi-anechoic room (clause 8).** The room meets the
 broadband qualification of ISO 3745 Annex A (8.1), the source stands on the
 reflecting plane and the levels are measured over a hemisphere of radius 2 m
 (8.2.1). The sound power level under the reference meteorological conditions
-of clause 4 (23,0 degC, 101,325 kPa) is
+of clause 4 (23.0 degC, 101.325 kPa) is
 
 $$
 L_W = \overline{L_p} + 10 \lg\frac{S}{S_0}\ \mathrm{dB} + C_1 + C_2 + C_3 \tag{Formula (2)}
@@ -45,9 +45,9 @@ $$
 
 with $C_1 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 5 \lg(\theta / \theta_0)$, $\theta_0$ = 314 K, the radiation impedance correction
 $C_2$ from the manufacturer or from Annex A, and the air absorption
-$C_3 = A_0 (1{,}005\,3 - 0{,}001\,2 A_0)^{1{,}6}$ with $A_0 = a(f) r$. Annex A gives $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg (\theta/\theta_1)$, $\theta_1$ = 296 K, with $n$ = 15 for a
+$C_3 = A_0 (1.005\,3 - 0.001\,2 A_0)^{1.6}$ with $A_0 = a(f) r$. Annex A gives $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg (\theta/\theta_1)$, $\theta_1$ = 296 K, with $n$ = 15 for a
 monopole below the knee frequency $f_\mathrm{k} = c/(2\pi d_0)$, 5 for a
-monopole at or above it, 25 for an aerodynamic dipole at or above it and 7,5
+monopole at or above it, 25 for an aerodynamic dipole at or above it and 7.5
 when the radiation is unknown. Annex B replaces the 50 Hz, 63 Hz and 80 Hz
 bands by sound intensity levels when those agree with the pressure levels
 within Table B.1 from 50 Hz to 315 Hz. Table 2 gives the reproducibility
@@ -94,7 +94,7 @@ The three travel together because Formula (2) reads them from the same
 air: $C_1$ and the Annex A $C_2$ read its temperature and its
 static pressure, and $C_3$ reads the attenuation coefficient
 $a(f)$ that ISO 9613-1 gives for it. The defaults are the reference
-meteorological conditions of clause 4, 23,0 degC and 101,325 kPa, with no
+meteorological conditions of clause 4, 23.0 degC and 101.325 kPa, with no
 air absorption.
 
 **Parameters**
@@ -178,7 +178,7 @@ radiation_impedance_correction(
 The radiation impedance correction $C_2$ of ISO 6926 Annex A.
 
 $C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg(\theta/ \theta_1)$, $\theta_1$ = 296 K and $\theta$ the air temperature
-in kelvin, with $n$ = 7,5 for a source whose radiation is unknown
+in kelvin, with $n$ = 7.5 for a source whose radiation is unknown
 (A.5), 15 below and 5 at or above the knee frequency for a monopole
 (A.2, A.3), and 25 at or above it for an aerodynamic dipole (A.4). Annex A
 is informative: 8.4 prefers the manufacturer's value, and the formula the
@@ -255,7 +255,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | `c2` | The manufacturer's $C_2$, scalar or per band, which 8.4 prefers to Annex A; overrides `radiation`. A calibration made with it cannot be read at the conditions of a test, since only the manufacturer gives $C_2$ there (see [`ReferenceSourceCalibration.sound_power_level_at`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at)). |
 | `intensity_sound_power_level` | Sound power levels from sound intensity per band (ISO 9614-3, Annex B), `nan` outside 50 Hz to 315 Hz; `None` applies no Annex B. |
 | `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room; 8.1 asks for a hemi-anechoic room qualified over the frequency range of interest, here the bands calibrated from sound pressure at 2 m (the bands Annex B takes from sound intensity are the ones clause 10 lets an unqualified room calibrate, and are left out). |
-| `coverage_factor` | $k$ of the expanded uncertainty (1,96 in 11.2 for 95 %). |
+| `coverage_factor` | $k$ of the expanded uncertainty (1.96 in 11.2 for 95 %). |
 
 **Returns:** [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration).
 
@@ -334,7 +334,7 @@ ReferenceSoundSourceVerdict(
 Whether a source meets the performance requirements of ISO 6926 clause 5.
 
 Only what was measured is a field. The limits of clause 5 (Table 1, the
-0,3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
+0.3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
 the +6 dB of the directivity) are read from the bands as properties, and so
 are the spectrum figures they are compared with, so a verdict cannot be
 built against another limit.
@@ -451,7 +451,7 @@ Draw each requirement as a share of its limit, per band.
 
 The Table 1 limit on $\sigma_r$ per band, in dB (5.2).
 
-**Returns:** 0,8 dB up to 80 Hz, 0,4 dB up to 160 Hz, 0,2 dB above.
+**Returns:** 0.8 dB up to 80 Hz, 0.4 dB up to 160 Hz, 0.2 dB above.
 
 ### ReferenceSoundSourceVerdict.spectrum_met
 
@@ -473,13 +473,13 @@ The Table 1 limit on $\sigma_r$ per band, in dB (5.2).
 
 *property*
 
-The 0,3 dB either way of 5.2, in dB.
+The 0.3 dB either way of 5.2, in dB.
 
 ### ReferenceSoundSourceVerdict.supply_met
 
 *property*
 
-5.2: no band moves by more than 0,3 dB over the declared supply range.
+5.2: no band moves by more than 0.3 dB over the declared supply range.
 
 **Returns:** The verdict, or `None` when not judged.
 
@@ -685,7 +685,7 @@ ReferenceSourceDriftResult(
 
 Whether a reference sound source has drifted enough to be recalibrated.
 
-The limit is the clause's, 2,83 times Table 1, read from the bands as
+The limit is the clause's, 2.83 times Table 1, read from the bands as
 `limit_db`, so a result cannot be built against another one.
 
 **Attributes**
@@ -699,13 +699,13 @@ The limit is the clause's, 2,83 times Table 1, read from the bands as
 
 *property*
 
-2,83 times the Table 1 value of each band (5.6), in dB.
+2.83 times the Table 1 value of each band (5.6), in dB.
 
 ### ReferenceSourceDriftResult.passes
 
 *property*
 
-Whether every band stays within 2,83 times Table 1.
+Whether every band stays within 2.83 times Table 1.
 
 **Returns:** `True` when no recalibration is called for.
 
@@ -736,7 +736,7 @@ Draw the change of each band against its limit.
 
 *property*
 
-5.6.3: a band moved by more than 2,83 times Table 1.
+5.6.3: a band moved by more than 2.83 times Table 1.
 
 **Returns:** The opposite of `passes`.
 
@@ -827,7 +827,7 @@ Has the source drifted beyond what ISO 6926 5.6 allows?
 
 The same check serves 5.6.2 (two calibrations), 5.6.3 (the regular
 one-third octave band levels at fixed reference points) and 5.6.4 (the
-surface levels of a source kept in one place): a change larger than 2,83
+surface levels of a source kept in one place): a change larger than 2.83
 times Table 1 in any band calls for recalibration.
 
 **Parameters**

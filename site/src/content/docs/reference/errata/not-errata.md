@@ -52,13 +52,13 @@ published sources:
 - **ISO 7235:2003, Equations (10), (21) and (22):** the ideal gas law is
   printed with $R = 287\ \text{N}\cdot\text{m}/(\text{kg}\cdot\text{K})$
   and the absolute temperature written as $\theta + 273\ ^\circ\text{C}$.
-  Neither is the accurate value (287,05 and 273,15). The offset alone puts a
-  density 0,051 % high at 20 °C and the gas constant adds 0,017 % to that, for
-  0,069 % in all. This is a simplification and not a defect: the density it
+  Neither is the accurate value (287.05 and 273.15). The offset alone puts a
+  density 0.051 % high at 20 °C and the gas constant adds 0.017 % to that, for
+  0.069 % in all. This is a simplification and not a defect: the density it
   produces is used only in the dynamic pressure of Equations (16), (19) and
   (20), and both series of the pressure loss coefficient carry the same
   factor, so Equations (17) and (18) come out **scaled** by it rather than
-  shifted, 0,069 % low, which is far under the uncertainty of a
+  shifted, 0.069 % low, which is far under the uncertainty of a
   pressure-loss test and is what a result computed to the standard shows. The
   library keeps both printed constants, as
   [`ISO7235_AIR_GAS_CONSTANT_J_KG_K`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
@@ -68,18 +68,18 @@ published sources:
 
 - **ISO 12354-1:2017 Table L.8 / ISO 12354-2:2017 Table G.8, first row:** the
   row labelled "Int. wall 1/2 – Ext. wall 1/2" prints
-  $m'_i = 219{,}0\ \text{kg/m}^2$ and $m'_{\perp i}$ (Part 2:
-  $m'_\text{orthogonal}$) $= 360{,}0\ \text{kg/m}^2$, which is the assignment
+  $m'_i = 219.0\ \text{kg/m}^2$ and $m'_{\perp i}$ (Part 2:
+  $m'_\text{orthogonal}$) $= 360.0\ \text{kg/m}^2$, which is the assignment
   for a path *leaving the external wall*, the opposite of the direction the
   row's own label gives. Read in the row's direction the element carrying the
-  path is the internal wall, so $m'_i$ should be 360,0 and the perpendicular
-  mass 219,0. It is a labelling slip and nothing else: the branch is the
-  rigid-T **corner** branch $K_{12} = 5{,}7 + 5{,}7 M^2$, where only $M^2$
-  enters, so both assignments return the same 5,965 → 6,0 dB. The second row
+  path is the internal wall, so $m'_i$ should be 360.0 and the perpendicular
+  mass 219.0. It is a labelling slip and nothing else: the branch is the
+  rigid-T **corner** branch $K_{12} = 5.7 + 5.7 M^2$, where only $M^2$
+  enters, so both assignments return the same 5.965 → 6.0 dB. The second row
   of each table, "Ext. wall 1/2 – Ext. wall 1/2", is the through branch
-  $5{,}7 + 14{,}1 M + 5{,}7 M^2$, where the sign of $M$ does matter, and it is
-  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9,006 →
-  the printed 9,0). Verified on PDF page 89 (printed p. 83) of ISO
+  $5.7 + 14.1 M + 5.7 M^2$, where the sign of $M$ does matter, and it is
+  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9.006 →
+  the printed 9.0). Verified on PDF page 89 (printed p. 83) of ISO
   12354-1:2017 and PDF page 46 (printed p. 40) of ISO 12354-2:2017. Not
   registered as an erratum because no number depends on it; registered here so
   that a future reader does not "correct" the library's per-path convention to
@@ -143,27 +143,27 @@ published sources:
   table of worked $\sigma_\mathrm{tot}$ examples labels its three rows
   "0,5 (accuracy grade 1)", "1,5 (accuracy grade 2)" and "3 (accuracy
   grade 3)", while the normative Table 2 of this part gives
-  $\sigma_{R0}$ = 4,0 dB for survey grade 3 and the scope of ISO 3747 covers
+  $\sigma_{R0}$ = 4.0 dB for survey grade 3 and the scope of ISO 3747 covers
   grades 2 and 3 only. It is the ISO 3740 family's shared illustration, not a
   statement about this method: ISO 3744:2010 Table H.1 prints the identical
   table, rows, labels and $\sigma_\mathrm{tot}$ cells alike, and ISO 3744
   covers grade 2 only. Verified on PDF page 42 (printed p. 33) and PDF page
   27 (printed p. 18) of BS EN ISO 3747:2010. The library reads
-  $\sigma_{R0}$ from the normative Table 2 (1,5 dB and 4,0 dB, conformance
+  $\sigma_{R0}$ from the normative Table 2 (1.5 dB and 4.0 dB, conformance
   check "ISO 3747:2010 Table 2 / Eq. 22") and uses Table E.1 only for its
-  $\sigma_\mathrm{tot}$ = 1,6 / 2,5 / 4,3 row against $\sigma_{R0}$ = 1,5 dB,
-  where the two tables agree. Do not "correct" the 3 dB row to 4,0 dB: it
+  $\sigma_\mathrm{tot}$ = 1.6 / 2.5 / 4.3 row against $\sigma_{R0}$ = 1.5 dB,
+  where the two tables agree. Do not "correct" the 3 dB row to 4.0 dB: it
   belongs to the family's illustration, not to this part's Table 2.
 - **ISO 3747:2010 Annex C, $\theta_\mathrm{ref}$ = 296 K:** the annex prints
   the reference temperature of the radiation-impedance correction as 296 K
-  beside a reference condition of 23,0 °C, which is 296,15 K, so at exactly
-  the reference conditions $C_2 = 15 \lg(296{,}15/296) = +0{,}003\,3$ dB
+  beside a reference condition of 23.0 °C, which is 296.15 K, so at exactly
+  the reference conditions $C_2 = 15 \lg(296.15/296) = +0.003\,3$ dB
   rather than zero. ISO 3741:2010 clause 9.1.4 and ISO 3744:2010 print the
   same $\theta_1$ = 296 K, so it is the family's rounding and not a misprint
   of one part; the library keeps 296 K in the shared `C2` of
   [`_sound_power_reverberation.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/_sound_power_reverberation.py)
   and pins the residual (conformance check "ISO 3747:2010 Annex C"). Do not
-  "correct" it to 296,15 K.
+  "correct" it to 296.15 K.
 - **ISO 3747:2010 Eq. (14), the single-event background margin:**
   $\Delta L_{Ei} = L'_{Ei,q(\mathrm{ST})} - L_{pi(\mathrm{B})}$ subtracts a
   time-averaged background level from a time-integrated single event level,
@@ -182,8 +182,8 @@ published sources:
   says the corrections of the nose cone and the foam ball "are estimated to
   be negative and of small magnitude", and then prints
   $C_{3,4} = 10 \lg[1/(1 - U/c)^2]$ dB, which is positive whenever $U > 0$:
-  at the 20 m/s the nose cone is allowed, with $c$ = 340 m/s, $+0{,}53$ dB on
-  the outlet side and $-0{,}50$ dB on the inlet side. The equation's sign is
+  at the 20 m/s the nose cone is allowed, with $c$ = 340 m/s, $+0.53$ dB on
+  the outlet side and $-0.50$ dB on the inlet side. The equation's sign is
   the one the convected plane wave gives, the energy flux of a wave
   travelling with the flow being $(1 + M)^2$ times $p^2/\rho c$, so for a
   given pressure the power is higher downstream and lower upstream. It is not
@@ -204,9 +204,9 @@ published sources:
   corrections that disagree:** both tables take a margin between the level
   with the source and the level without it and answer with a correction in
   decibels, and they answer differently. ISO 11820 refuses under 3 dB and then
-  takes off 3, 2, 2, 1, 1, 1, 0,5 and 0,5 dB up to a margin of 10 dB; ISO
+  takes off 3, 2, 2, 1, 1, 1, 0.5 and 0.5 dB up to a margin of 10 dB; ISO
   10847 refuses under 4 dB and then takes off 2, 2, 1, 1, 1 and 1 dB up to the
-  same margin. At a margin of 9 dB the first takes off 0,5 dB and the second
+  same margin. At a margin of 9 dB the first takes off 0.5 dB and the second
   1 dB. The signs differ as well, because the ISO 11820 column reads
   "corrections to be subtracted from sound pressure level measured with sound
   source operating" and prints its values positive, while the ISO 10847 column

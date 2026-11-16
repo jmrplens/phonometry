@@ -36,14 +36,14 @@ quantities of Table 1: the maximum level with time weighting S or F, taken at
 the moment the weighted level peaks, or the equivalent continuous level over
 a stated integration time. It is measured at three microphone positions, one
 in the loudest corner of the room (7.2) and two in the reverberant field
-(7.3). When the three A-weighted readings differ by more than 3,0 dB the
+(7.3). When the three A-weighted readings differ by more than 3.0 dB the
 corner is measured again together with two new room positions, and a third
-time with two more if the spread of the six still reaches 6,0 dB (7.4.1,
+time with two more if the spread of the six still reaches 6.0 dB (7.4.1,
 [`check_position_spread`](/phonometry/reference/api/building/service-equipment/#check_position_spread)). Every reading enters the band average of
 Formula (1), rounded to one decimal (7.5):
 
 $$
-L = 10 \lg \left[ \frac{1}{n} \sum_{i=1}^{n} 10^{0,1 L_i} \right] \ \mathrm{dB}
+L = 10 \lg \left[ \frac{1}{n} \sum_{i=1}^{n} 10^{0.1 L_i} \right] \ \mathrm{dB}
 $$
 
 A sound source in the room itself, a ventilation outlet for example, gets one
@@ -57,21 +57,21 @@ at 10 dB or more nothing is corrected; from 4 dB to 10 dB the band is corrected
 with Formulae (7) to (9),
 
 $$
-L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0,1 \Delta L} \right] \ \mathrm{dB}
+L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0.1 \Delta L} \right] \ \mathrm{dB}
 $$
 
-and below 4 dB the correction is held at the 2,2 dB that a 4 dB difference
+and below 4 dB the correction is held at the 2.2 dB that a 4 dB difference
 gives, the band is reported as influenced by the background and the result is
 an upper limit of the equipment level
 ([`service_equipment_background_correction`](/phonometry/reference/api/building/service-equipment/#service_equipment_background_correction)).
 
 **Standardization and normalization (4.8, 7.7).** If a regulation asks for it,
 the corrected bands are referred to a reference reverberation time
-$T_0$ (0,5 s unless another value is specified) or to a reference
+$T_0$ (0.5 s unless another value is specified) or to a reference
 absorption area $A_0 = 10$ m², Formulae (5) and (6):
 
 $$
-L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0,16\,V}\ \mathrm{dB}
+L_{\mathrm{n}T} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0.16\,V}\ \mathrm{dB}
 $$
 
 Only the one-third-octave bands 50 Hz to 5 000 Hz (octave bands 63 Hz to
@@ -91,8 +91,8 @@ only, and so does the library: a band set that does not cover the chosen
 range is refused.
 
 **Precision (Clause 10).** Table 2 gives the reproducibility standard deviation
-of a room-average band level, 1,9 dB at the lowest bands down to 1,0 dB from
-800 Hz up, and 0,8 dB and 1,2 dB for the A- and C-weighted values of a steady,
+of a room-average band level, 1.9 dB at the lowest bands down to 1.0 dB from
+800 Hz up, and 0.8 dB and 1.2 dB for the A- and C-weighted values of a steady,
 flat sound at least 10 dB above the background. A result carries them as
 [`ServiceEquipmentResult.reproducibility_db`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult) and
 [`ServiceEquipmentResult.weighted_reproducibility_db`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresultweighted_reproducibility_db); the draft states no
@@ -100,9 +100,9 @@ coverage factor, so no expanded uncertainty is formed.
 
 **On-site checks.** The draft also sets numbers the operator meets while
 measuring, and each is a verdict here. The corner microphone keeps at least
-0,2 m from any obstacle (7.2), judged from the distance measured on site by
+0.2 m from any obstacle (7.2), judged from the distance measured on site by
 [`check_service_equipment_positions`](/phonometry/reference/api/building/service-equipment/#check_service_equipment_positions). A calibration that deviates from
-previous calibrations by more than 0,5 dB takes the equipment out of use
+previous calibrations by more than 0.5 dB takes the equipment out of use
 (Clause 5, [`verify_calibration_deviation`](/phonometry/reference/api/building/service-equipment/#verify_calibration_deviation)). The background is measured
 over approximately 30 s (7.6, [`check_background_duration`](/phonometry/reference/api/building/service-equipment/#check_background_duration), which
 reports each departure from 30 s and judges it against the tolerance the
@@ -123,18 +123,18 @@ activity sources of B.10.
 
 **Printed defects.** Table A.1 prints a C-weighting of 0 dB for every
 one-third-octave band from 1 600 Hz to 10 000 Hz and of -5 dB at 25 Hz. Its
-own octave column gives -0,2 dB at 2 000 Hz, -0,8 dB at 4 000 Hz and -3,0 dB
+own octave column gives -0.2 dB at 2 000 Hz, -0.8 dB at 4 000 Hz and -3.0 dB
 at 8 000 Hz, and IEC 61672-1, which Clause 4 cites for the weightings, gives
--0,1 dB to -4,4 dB from 1 600 Hz up and -4,4 dB at 25 Hz. The library uses the
+-0.1 dB to -4.4 dB from 1 600 Hz up and -4.4 dB at 25 Hz. The library uses the
 IEC 61672-1 values in those cells. The cells, and the other defects of the
 draft this module meets (a background correction sent to the reverberation
 clause, the corner procedure sent to Clause 6, and a position ladder with no
-rule at exactly 6,0 dB and 9,0 dB nor for three readings 6,0 dB or more
+rule at exactly 6.0 dB and 9.0 dB nor for three readings 6.0 dB or more
 apart), are registered in `docs/ERRATA.md`.
 
 **No numeric oracle.** The draft prints no worked example. The conformance of
 this module rests on closed forms and on the numbers the draft prints: the
-2,2 dB of a 4 dB background difference, Table A.1, Table 2, and the limits of
+2.2 dB of a 4 dB background difference, Table A.1, Table 2, and the limits of
 the on-site checks met exactly and missed.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -154,7 +154,7 @@ The extra position for a sound source in the room (ISO/DIS 16032:2023 7.9).
 
 A source in the room itself, a ventilation outlet in a wall or in the
 ceiling for example, gets one additional microphone position of its own:
-1 m in front of a wall source at 1,5 m above the floor, or 1,5 m above the
+1 m in front of a wall source at 1.5 m above the floor, or 1.5 m above the
 floor directly below a ceiling source. The reading there is reported
 separately, is neither standardized nor normalized, and is not averaged
 with positions 1, 2 and 3: pass it to [`service_equipment_level`](/phonometry/reference/api/building/service-equipment/#service_equipment_level) on
@@ -303,7 +303,7 @@ The largest deviation of a reading from the calibrations before it.
 
 *property*
 
-The 0,5 dB of Clause 5, fixed by the draft.
+The 0.5 dB of Clause 5, fixed by the draft.
 
 **Returns:** The largest deviation that still lets the equipment be used, in dB.
 
@@ -311,7 +311,7 @@ The 0,5 dB of Clause 5, fixed by the draft.
 
 *property*
 
-Whether no reading deviates from an earlier one by more than 0,5 dB.
+Whether no reading deviates from an earlier one by more than 0.5 dB.
 
 **Returns:** `True` when the equipment may be used; `False` takes it out of use until the reason is clarified and the sensitivity put right (Clause 5).
 
@@ -471,10 +471,10 @@ Are the positions measured so far enough (ISO/DIS 16032:2023 7.4.1)?
 
 The A-weighted levels read directly from the instrument, without any
 correction, decide how many positions are measured. With three readings
-(corner, 2, 3) a spread up to and including 3,0 dB lets the corrections
+(corner, 2, 3) a spread up to and including 3.0 dB lets the corrections
 proceed; otherwise the corner is measured again with two new room
-positions (4 and 5), and the six must differ by less than 6,0 dB, then
-once more (corner, 6 and 7) and the nine by less than 9,0 dB. 7.4.2
+positions (4 and 5), and the six must differ by less than 6.0 dB, then
+once more (corner, 6 and 7) and the nine by less than 9.0 dB. 7.4.2
 applies the same steps to a maximum level, with the sound exposure level
 $L_\mathrm{AE}$ allowed in its place for short events.
 
@@ -485,13 +485,13 @@ reasons are investigated before a new series, and no reading of the
 interrupted one is used. Levels alone cannot say what a difference is
 related to, so the check answers `"interrupt"` whenever no further stage
 can pass and leaves those two conditions to the operator: a spread still
-9,0 dB or more after nine readings, and a spread that already reaches
-9,0 dB after three or six, since more readings can only widen it. The
+9.0 dB or more after nine readings, and a spread that already reaches
+9.0 dB after three or six, since more readings can only widen it. The
 third paragraph of 7.4.1 sends to positions 6 and 7 only a difference
 "less than 9,0 dB".
 
-The draft states no rule at a spread of exactly 6,0 dB after six readings
-or 9,0 dB after nine, nor for three readings 6,0 dB or more apart. The
+The draft states no rule at a spread of exactly 6.0 dB after six readings
+or 9.0 dB after nine, nor for three readings 6.0 dB or more apart. The
 ladder is read as a sequence: a stage that does not pass goes to the next
 while a later one can still pass, and a spread at a limit does not pass it
 (`docs/ERRATA.md`).
@@ -527,28 +527,28 @@ check_service_equipment_positions(
 
 Are the microphone positions far enough apart (ISO/DIS 16032:2023 7.2, 7.3)?
 
-The corner position is preferably 0,5 m from the two walls and the floor,
-raised to 1,0 m or 1,5 m where furniture is in the way, and at least
-0,2 m from any obstacle. The reverberant-field positions keep at least
-1,0 m from each other and from the corner (1,5 m preferred), 1,5 m from
-any sound source in the room, 0,50 m from every room surface (0,30 m in a
-small room where 0,50 m cannot be met) and a height from 0,5 m to 2,0 m.
+The corner position is preferably 0.5 m from the two walls and the floor,
+raised to 1.0 m or 1.5 m where furniture is in the way, and at least
+0.2 m from any obstacle. The reverberant-field positions keep at least
+1.0 m from each other and from the corner (1.5 m preferred), 1.5 m from
+any sound source in the room, 0.50 m from every room surface (0.30 m in a
+small room where 0.50 m cannot be met) and a height from 0.5 m to 2.0 m.
 Pass the positions of one stage of 7.4.1 at a time: positions 4 and 5
 keep the distances of 7.3 like 2 and 3.
 
-The verdict holds the corner position to its height of 0,5 m to 1,5 m and
+The verdict holds the corner position to its height of 0.5 m to 1.5 m and
 the reverberant-field positions to every distance and height of 7.3. The
-two preferences, 0,5 m from the walls of the corner and 1,5 m between
+two preferences, 0.5 m from the walls of the corner and 1.5 m between
 positions, are reported beside it and do not decide it
 ([`preferred_corner_wall_distance`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_corner_wall_distance),
 [`preferred_separation`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_separation)).
 
-A room outline cannot show furniture, so the 0,2 m that 7.2 asks between
+A room outline cannot show furniture, so the 0.2 m that 7.2 asks between
 the corner microphone and any obstacle is judged from the distance
 measured on site, when it is given: "The microphone position shall be at
 least 0,2 m away from any obstacle", inclusive. The draft states it in the
 clause on the corner position and nowhere for the reverberant-field
-positions, whose 0,50 m from the room surfaces 7.3 sets instead.
+positions, whose 0.50 m from the room surfaces 7.3 sets instead.
 
 **Parameters**
 
@@ -558,8 +558,8 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 | `corner_position_m` | Position 1 as `(x, y, z)`, in m. |
 | `room_positions_m` | The reverberant-field positions, one `(x, y, z)` per row, in m. |
 | `source_positions_m` | Sound sources in the room (outlets, radiators), one `(x, y, z)` per row, in m; `None` or an empty list for none. |
-| `small_room` | Whether the room is too small for 0,50 m from the surfaces, so 0,30 m applies. |
-| `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, or one distance per obstacle near it, in m, measured on site; `None` (default) leaves the 0,2 m of 7.2 unjudged. |
+| `small_room` | Whether the room is too small for 0.50 m from the surfaces, so 0.30 m applies. |
+| `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, or one distance per obstacle near it, in m, measured on site; `None` (default) leaves the 0.2 m of 7.2 unjudged. |
 
 **Returns:** [`ServiceEquipmentPositionCheck`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheck).
 
@@ -810,7 +810,7 @@ Requires matplotlib (the `[plot]` extra).
 
 Per period, whether the difference is less than 5 dB.
 
-A difference of exactly 5,0 dB is not "less than 5 dB".
+A difference of exactly 5.0 dB is not "less than 5 dB".
 
 **Returns:** One boolean per measurement period.
 
@@ -875,7 +875,7 @@ an action the readings do not lead to.
 
 What 7.4.1 prescribes for these readings.
 
-**Returns:** `"proceed"` to the corrections of 7.5 to 7.7 when the spread is within `limit_db`, `"add_positions"` for the corner again and two new room positions while a later stage can still pass, or `"interrupt"` when none can: after nine readings, or sooner when the spread already reaches 9,0 dB, since more readings can only widen it.
+**Returns:** `"proceed"` to the corrections of 7.5 to 7.7 when the spread is within `limit_db`, `"add_positions"` for the corner again and two new room positions while a later stage can still pass, or `"interrupt"` when none can: after nine readings, or sooner when the spread already reaches 9.0 dB, since more readings can only widen it.
 
 ### PositionSpreadCheck.corner_standard_deviation_db
 
@@ -894,7 +894,7 @@ statistical value (a 5 % value, the n-th highest) is wanted.
 
 The spread this stage allows, fixed by the draft for the stage.
 
-**Returns:** 3,0 dB after three readings (inclusive), 6,0 dB after six or 9,0 dB after nine (strict), in dB.
+**Returns:** 3.0 dB after three readings (inclusive), 6.0 dB after six or 9.0 dB after nine (strict), in dB.
 
 ### PositionSpreadCheck.next_positions
 
@@ -961,12 +961,12 @@ service_equipment_background_correction(
 Correct band levels for the background (ISO/DIS 16032:2023 Clause 9).
 
 With $\Delta L = L_1 - L_2$ the band is left as it is at 10 dB or
-more, corrected with $K = -10 \lg(1 - 10^{-0,1 \Delta L})$ from 4 dB
+more, corrected with $K = -10 \lg(1 - 10^{-0.1 \Delta L})$ from 4 dB
 to 10 dB (Formulae (7) to (9)), and below 4 dB the correction is held at
-2,2 dB, the value a 4 dB difference gives. Such a band is influenced by the
+2.2 dB, the value a 4 dB difference gives. Such a band is influenced by the
 background, which the report has to state, and for a comparison with a
 limit the result is an upper limit of the equipment level. A background at
-or above the measured level is the same case: held at 2,2 dB rather than
+or above the measured level is the same case: held at 2.2 dB rather than
 left undefined.
 
 The method assumes a background roughly constant in time. Where it is not,
@@ -1029,14 +1029,14 @@ over the integration time of Annex B for an equivalent level.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Band levels of each reading, shape `(readings, bands)` (one-dimensional for a single reading), in dB. |
-| `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `fraction` says. |
+| `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31.5 Hz to 8 000 Hz, as `fraction` says. |
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. 6 asks for the weighted values from one-third-octave bands; octave results are optional. One of `1` or `3`. |
 | `background_levels` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
 | `reverberation_time` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
 | `volume` | Room volume, in m³, for the normalized levels. |
-| `reference_reverberation_time_s` | $T_0$ of Formula (5), in s (0,5 s unless a regulation specifies another value). |
-| `a_weighting_range` | `"restricted"` (default: 50 Hz to 5 000 Hz, octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz, octave 31,5 Hz to 8 000 Hz) for the A-weighted values; the report must say which. The C-weighted values always use the extended range. |
+| `reference_reverberation_time_s` | $T_0$ of Formula (5), in s (0.5 s unless a regulation specifies another value). |
+| `a_weighting_range` | `"restricted"` (default: 50 Hz to 5 000 Hz, octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz, octave 31.5 Hz to 8 000 Hz) for the A-weighted values; the report must say which. The C-weighted values always use the extended range. |
 
 **Returns:** [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult).
 
@@ -1094,9 +1094,9 @@ Band levels corrected for the background by Clause 9.
 | `measured_levels` | The measured band levels $L_1$, background included, in dB. |
 | `background_levels` | The background band levels $L_2$, in dB. |
 | `difference` | $\Delta L = L_1 - L_2$ per band, in dB (Formula (9)). |
-| `correction` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2,2 dB below 4 dB. |
+| `correction` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2.2 dB below 4 dB. |
 | `corrected_levels` | $L = L_1 - K$ per band, in dB (Formula (7)). |
-| `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2,2 dB: the band is an upper limit of the equipment level). |
+| `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2.2 dB: the band is an upper limit of the equipment level). |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |
 
 The difference, the regime, the correction and the corrected level are
@@ -1127,13 +1127,13 @@ $\Delta L = L_1 - L_2$ per band, in dB (Formula (9)).
 
 Whether any band is influenced by the background (Clause 9).
 
-**Returns:** `True` when at least one band was held at 2,2 dB, which the report has to state.
+**Returns:** `True` when at least one band was held at 2.2 dB, which the report has to state.
 
 ### ServiceEquipmentBackgroundResult.limited
 
 *property*
 
-Per band, whether the background held the correction at 2,2 dB.
+Per band, whether the background held the correction at 2.2 dB.
 
 **Returns:** One boolean per band; `True` marks an upper limit.
 
@@ -1150,7 +1150,7 @@ ServiceEquipmentBackgroundResult.plot(
 
 Plot measured, background and corrected band levels.
 
-Bands held at 2,2 dB are marked as upper limits. Requires matplotlib
+Bands held at 2.2 dB are marked as upper limits. Requires matplotlib
 (the `[plot]` extra).
 
 **Parameters**
@@ -1214,13 +1214,13 @@ The height of the corner position, in m.
 
 *property*
 
-The corner position from 0,5 m to 1,5 m high.
+The corner position from 0.5 m to 1.5 m high.
 
 ### ServiceEquipmentPositionCheck.corner_obstacle_ok
 
 *property*
 
-At least 0,2 m from any obstacle (7.2).
+At least 0.2 m from any obstacle (7.2).
 
 `None` when the distance was not given, and then not judged.
 
@@ -1230,13 +1230,13 @@ At least 0,2 m from any obstacle (7.2).
 
 The corner position's distances to the two walls nearest to it, in m.
 
-7.2 prefers 0,5 m (`preferred_corner_wall_distance`, advisory).
+7.2 prefers 0.5 m (`preferred_corner_wall_distance`, advisory).
 
 ### ServiceEquipmentPositionCheck.height_ok
 
 *property*
 
-Every room position from 0,5 m to 2,0 m high.
+Every room position from 0.5 m to 2.0 m high.
 
 ### ServiceEquipmentPositionCheck.heights_m
 
@@ -1251,9 +1251,9 @@ The heights of the room positions, in m.
 Whether the distances and heights of 7.3 and the corner of 7.2 hold.
 
 The corner position enters through its height and, when its distance
-to the nearest obstacle was given, through the 0,2 m that 7.2 asks of
-it. The 0,5 m from its walls is a preference
-(`preferred_corner_wall_distance`), like the 1,5 m between
+to the nearest obstacle was given, through the 0.2 m that 7.2 asks of
+it. The 0.5 m from its walls is a preference
+(`preferred_corner_wall_distance`), like the 1.5 m between
 positions (`preferred_separation`).
 
 **Returns:** `True` when the five requirements hold, and the sixth, the obstacle distance, holds or was not given.
@@ -1287,23 +1287,23 @@ Requires matplotlib (the `[plot]` extra).
 
 *property*
 
-Whether position 1 is 0,5 m from both walls of its corner, as 7.2 prefers.
+Whether position 1 is 0.5 m from both walls of its corner, as 7.2 prefers.
 
-7.2 places the corner microphone "preferably" 0,5 m from the walls and
+7.2 places the corner microphone "preferably" 0.5 m from the walls and
 the floor, and where furniture is in the way raises only its height,
 which `corner_height_ok` judges. The draft gives the wall
 distance no tolerance and no lower or upper bound, so a corner position
 elsewhere is a departure the operator reports rather than a failure.
 
-**Returns:** `True` when both `corner_wall_distances_m` are 0,5 m; advisory, not part of `passes`.
+**Returns:** `True` when both `corner_wall_distances_m` are 0.5 m; advisory, not part of `passes`.
 
 ### ServiceEquipmentPositionCheck.preferred_separation
 
 *property*
 
-Whether the positions are 1,5 m apart, the distance 7.3 prefers.
+Whether the positions are 1.5 m apart, the distance 7.3 prefers.
 
-**Returns:** `True` at 1,5 m or more; advisory, not part of `passes`.
+**Returns:** `True` at 1.5 m or more; advisory, not part of `passes`.
 
 ### ServiceEquipmentPositionCheck.separation_m
 
@@ -1315,7 +1315,7 @@ The shortest distance between any two positions, corner included, in m.
 
 *property*
 
-At least 1,0 m between positions.
+At least 1.0 m between positions.
 
 ### ServiceEquipmentPositionCheck.source_distance_m
 
@@ -1329,13 +1329,13 @@ The shortest distance from a room position to a source, in m, or `None` without 
 
 The distance 7.3 asks between a room position and a source, in m.
 
-**Returns:** 1,5 m.
+**Returns:** 1.5 m.
 
 ### ServiceEquipmentPositionCheck.source_ok
 
 *property*
 
-At least 1,5 m from every source; `True` without sources.
+At least 1.5 m from every source; `True` without sources.
 
 ### ServiceEquipmentPositionCheck.surface_distance_m
 
@@ -1349,13 +1349,13 @@ The shortest distance from a room position to a wall, the floor or the ceiling, 
 
 The surface distance 7.3 asks of this room, in m.
 
-**Returns:** 0,30 m in a small room, 0,50 m otherwise.
+**Returns:** 0.30 m in a small room, 0.50 m otherwise.
 
 ### ServiceEquipmentPositionCheck.surface_ok
 
 *property*
 
-At least 0,50 m (0,30 m in a small room) from every surface.
+At least 0.50 m (0.30 m in a small room) from every surface.
 
 ## ServiceEquipmentResult
 
@@ -1389,7 +1389,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | `frequencies` | Nominal band centres, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `quantity` | The Table 1 quantity: `"Smax"`, `"Fmax"` or `"eq"`. |
-| `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
+| `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31.5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
 | `reading_levels` | The band levels of every reading, shape `(readings, bands)`, in dB. |
 | `average_levels` | Formula (1) over the readings, rounded to one decimal (7.5), in dB. |
 | `background` | The Clause 9 correction, or `None` when no background was given. |
@@ -1451,7 +1451,7 @@ Per band, whether 7.7 lets it be standardized or normalized.
 
 The bands that enter the weighted values without standardization.
 
-7.7 keeps 25, 31,5, 40, 6 300, 8 000 and 10 000 Hz (octaves 31,5 Hz and
+7.7 keeps 25, 31.5, 40, 6 300, 8 000 and 10 000 Hz (octaves 31.5 Hz and
 8 000 Hz) out of the standardization and normalization, and asks the
 report to mention them whenever they contribute to a weighted value.
 
@@ -1465,7 +1465,7 @@ ServiceEquipmentResult.upper_limit(weighting: Literal['A', 'C']) -> bool
 
 Whether a weighted value is an upper limit because of the background.
 
-A band the background held at 2,2 dB (Clause 9) that lies in the range
+A band the background held at 2.2 dB (Clause 9) that lies in the range
 of the weighted sum makes that sum an upper limit, and Clause 9 asks the
 report to say whether the A- and the C-weighted value are influenced.
 
@@ -1475,7 +1475,7 @@ report to say whether the A- and the C-weighted value are influenced.
 | :--- | :--- |
 | `weighting` | `"A"` or `"C"`. |
 
-**Returns:** `True` when a band of the range was held at 2,2 dB.
+**Returns:** `True` when a band of the range was held at 2.2 dB.
 
 **Raises**
 
@@ -1490,7 +1490,7 @@ report to say whether the A- and the C-weighted value are influenced.
 
 The Table 2 standard deviation of each single number, in dB.
 
-0,8 dB for every A-weighted value of `ratings` and 1,2 dB for
+0.8 dB for every A-weighted value of `ratings` and 1.2 dB for
 every C-weighted one. Footnote a of Table 2 limits both to a constant
 sound with a relatively flat spectrum from 25 Hz to 10 000 Hz, at least
 10 dB above the background; a fluctuating source, a maximum level most
@@ -1597,7 +1597,7 @@ verify_calibration_deviation(
 ) -> CalibrationDeviationResult
 ```
 
-Has the sensitivity moved more than 0,5 dB (ISO/DIS 16032:2023 Clause 5)?
+Has the sensitivity moved more than 0.5 dB (ISO/DIS 16032:2023 Clause 5)?
 
 "At the beginning and at the end of the measurements, verify the
 sensitivity of the instrumentation with a sound calibrator class 1
@@ -1607,8 +1607,8 @@ the reason for this deviation has been clarified and appropriate actions
 have been taken." Each reading of this measurement is held to every
 calibration before it: the earlier calibrations given, and for the
 reading at the end, the one at the beginning as well. A deviation of
-exactly 0,5 dB is not "more than" it and passes. The 2004 edition asked
-for the two calibrations without a limit; the 0,5 dB is new in the
+exactly 0.5 dB is not "more than" it and passes. The 2004 edition asked
+for the two calibrations without a limit; the 0.5 dB is new in the
 revision.
 
 The readings are compared as levels, so they must come from the same

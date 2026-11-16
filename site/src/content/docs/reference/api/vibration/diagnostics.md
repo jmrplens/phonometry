@@ -534,7 +534,7 @@ it by the pole count.
 | `speed_rpm` | Shaft speed `N`, in r/min (> 0). |
 | `n_poles` | Number of magnetic poles `p` (even integer >= 2). |
 | `n_rotor_bars` | Number of rotor bars/slots `R` (integer >= 1). |
-| `slip` | Unit slip `s` (`0 <= s < 1`, Default: 0); typically 0,02 to 0,05 under load. Ignored when *supply_frequency* is given. |
+| `slip` | Unit slip `s` (`0 <= s < 1`, Default: 0); typically 0.02 to 0.05 under load. Ignored when *supply_frequency* is given. |
 | `supply_frequency` | Mains frequency `fe`, in hertz (> 0), from which the slip is derived (Default: `None`, use *slip*). |
 | `n_slot_harmonics` | Number of slot-harmonic orders `n` (integer >= 1, Default: 1, the fundamental `R fs` alone). |
 | `n_sidebands` | Sideband order around the fundamental slot harmonic at +/- the shaft rate and +/- the slip frequency (integer >= 0, Default: 0). |

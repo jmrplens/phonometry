@@ -105,7 +105,7 @@ standard normal cumulative distribution at the protection performance
 :::note
 Annex A prints its `APV` row as the difference of the *rounded*
 `m_f` and `s_f` it displays above it, which differs from Formula (1)
-applied to the underlying data by 0,1 dB in three of its eight bands.
+applied to the underlying data by 0.1 dB in three of its eight bands.
 This returns Formula (1) applied to the data; round afterwards if you
 need the annex's table back.
 :::
@@ -230,22 +230,22 @@ Table 2. For each subject and each noise it forms the predicted noise level
 reduction
 
 $$
-PNR_{ji} = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8} 10^{0,1\left(L_{p,\mathrm{A}f(k)i} - a_{jf(k)}\right)} \mathrm{dB} \tag{15}
+PNR_{ji} = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8} 10^{0.1\left(L_{p,\mathrm{A}f(k)i} - a_{jf(k)}\right)} \mathrm{dB} \tag{15}
 $$
 
 and collapses the eight into three, weighted by the empirical constants
 $d_i$ of Table 2:
 
 $$
-H_j = 0{,}25 \sum_{i=1}^{4} PNR_{ji} - 0{,}48 \sum_{i=1}^{4} d_i PNR_{ji} \tag{12}
+H_j = 0.25 \sum_{i=1}^{4} PNR_{ji} - 0.48 \sum_{i=1}^{4} d_i PNR_{ji} \tag{12}
 $$
 
 $$
-M_j = 0{,}25 \sum_{i=5}^{8} PNR_{ji} - 0{,}16 \sum_{i=5}^{8} d_i PNR_{ji} \tag{13}
+M_j = 0.25 \sum_{i=5}^{8} PNR_{ji} - 0.16 \sum_{i=5}^{8} d_i PNR_{ji} \tag{13}
 $$
 
 $$
-L_j = 0{,}25 \sum_{i=5}^{8} PNR_{ji} + 0{,}23 \sum_{i=5}^{8} d_i PNR_{ji} \tag{14}
+L_j = 0.25 \sum_{i=5}^{8} PNR_{ji} + 0.23 \sum_{i=5}^{8} d_i PNR_{ji} \tag{14}
 $$
 
 The four quiet-spectrum noises carry `H` and the four loud-spectrum ones
@@ -375,7 +375,7 @@ The most faithful of the three methods, and the only one that sees the
 shape of the noise:
 
 $$
-L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
+L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8} 10^{0.1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
 $$
 
 The summation runs over the eight octaves from 63 Hz, or over seven from
@@ -559,7 +559,7 @@ The single number rating of a protector (Formulas (19) to (22)).
 One reference noise instead of eight, and one number instead of three:
 
 $$
-SNR_j = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8} 10^{0,1\left(L_{p,\mathrm{A}f(k)} - a_{jf(k)}\right)} \tag{22}
+SNR_j = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8} 10^{0.1\left(L_{p,\mathrm{A}f(k)} - a_{jf(k)}\right)} \tag{22}
 $$
 
 $$

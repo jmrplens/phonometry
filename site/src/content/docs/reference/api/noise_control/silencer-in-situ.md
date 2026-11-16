@@ -55,8 +55,8 @@ The corrections that are not a correction
 
 Clause 4 corrects for background noise from a **printed table**, not from the
 usual logarithmic subtraction, and the two do not agree: at a margin of 5 dB
-the table takes off 2 dB where the formula takes off 1,7, and at 8 dB it takes
-off 1 where the formula takes off 0,7. [`silencer_background_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencer_background_correction)
+the table takes off 2 dB where the formula takes off 1.7, and at 8 dB it takes
+off 1 where the formula takes off 0.7. [`silencer_background_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencer_background_correction)
 implements the table as printed, and says so.
 
 Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
@@ -96,7 +96,7 @@ extraneous_corrected_mean_level(
 The mean level with the extraneous sound taken off, Equations (17) and (18).
 
 $$
-\overline{L_{p1}} = 10 \lg \left[\frac{1}{N} \sum_j \left(10^{0,1 L_{pj}} - 10^{0,1 L_{ej}}\right)\right]
+\overline{L_{p1}} = 10 \lg \left[\frac{1}{N} \sum_j \left(10^{0.1 L_{pj}} - 10^{0.1 L_{ej}}\right)\right]
 $$
 
 printed $\overline{L_{p1}}$ in Equation (17) and
@@ -111,7 +111,7 @@ quantity is not determined, and what may be stated instead is the
 inequality of clause 4. Clause 4.1 (folio 4, PDF page 12) ties that to a
 correction of 3 dB that "is not sufficient", and Table 1 (folio 5, PDF
 page 13) prints where that starts: a margin under 3 dB is invalid, and a
-margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
+margin of 3 dB takes off 3 dB. The subtraction reaches 3.0206 dB at that
 same margin, which is the printed 3 dB unrounded, so the cap is judged on
 the margin of the two energy means, $\overline{L_p}$ of the levels
 as measured (Equation (2)) over that of the extraneous levels:
@@ -121,7 +121,7 @@ $$
 $$
 
 That is the same condition as a correction of at most
-$-10 \lg(1 - 10^{-0,3})$ dB, and it keeps the two routes of the
+$-10 \lg(1 - 10^{-0.3})$ dB, and it keeps the two routes of the
 standard in agreement at their shared boundary.
 
 The result's `capped` says whether the correction went past the cap, a
@@ -174,12 +174,12 @@ Whether the correction went past the 3 dB cap: a margin under 3 dB.
 
 The cap is judged on the margin of the two energy means and not on the
 correction itself: the printed 3 dB is what Table 1 takes off at its
-3 dB row, which the subtraction writes unrounded as 3,0206 dB, so a
+3 dB row, which the subtraction writes unrounded as 3.0206 dB, so a
 margin of exactly 3 dB is not capped. A margin is capped when it is
 more than $10^{-9}$ dB under 3 dB: one closer than that counts
-as 3 dB, on the side Table 1 accepts, since levels written 3,0 dB
+as 3 dB, on the side Table 1 accepts, since levels written 3.0 dB
 apart come out of the two energy means up to
-$1{,}4 \cdot 10^{-14}$ dB either side of it. That is when
+$1.4 \cdot 10^{-14}$ dB either side of it. That is when
 [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) emits a
 [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning).
 
@@ -247,7 +247,7 @@ $$
 \rho = \frac{M \, p_{\text{amb}}}{R \, (273 + \theta)}
 $$
 
-with $R$ the universal gas constant, printed as 8 314,4 N m per
+with $R$ the universal gas constant, printed as 8 314.4 N m per
 kmol K, and $M$ the molar mass. The standard adds that
 $R/M = 287$ N m per kg K for air, and that is what is used when no
 molar mass is given.
@@ -636,7 +636,7 @@ measurement_distance_upstream_m(upstream_area: float) -> float
 
 How far upstream the measurement surface stands, Equation (15).
 
-$d_\mathrm{u} = 1,5 \sqrt{4 S_\mathrm{u} / \pi}$, which is one and a half equivalent
+$d_\mathrm{u} = 1.5 \sqrt{4 S_\mathrm{u} / \pi}$, which is one and a half equivalent
 diameters of the upstream measurement cross-section.
 
 **Parameters**
@@ -777,10 +777,10 @@ silencer_background_correction(
 The background correction of Table 1, in decibels to subtract.
 
 The table is printed stepped and integer-indexed, and it is **not** the
-logarithmic subtraction $-10 \lg(1 - 10^{-0,1 \Delta L})$ that most
+logarithmic subtraction $-10 \lg(1 - 10^{-0.1 \Delta L})$ that most
 emission standards use: at a margin of 5 dB it takes off 2 dB where the
-formula takes off 1,7, and at 8 dB it takes off 1 where the formula takes
-off 0,7. It is implemented as printed.
+formula takes off 1.7, and at 8 dB it takes off 1 where the formula takes
+off 0.7. It is implemented as printed.
 
 The table gives no row between its integers. A difference that falls
 between two rows is read at the lower one, which is the larger correction
@@ -788,7 +788,7 @@ and therefore the lower source level; the standard does not decide this,
 and the choice is stated here rather than smoothed away. Above
 [`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_negligible_background_margin_db) there is no row to read
 at all: 10 dB is the last one the table prints, and anything over it takes
-nothing off, so 10,5 dB is corrected by zero rather than by the 0,5 dB of
+nothing off, so 10.5 dB is corrected by zero rather than by the 0.5 dB of
 the 10 dB row.
 
 **Parameters**
@@ -850,7 +850,7 @@ silencer_mean_sound_pressure_level(levels: NumericArrayLike) -> float
 The mean level over the measuring points, Equation (2).
 
 $$
-\overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0,1 L_{pj}}\right)
+\overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0.1 L_{pj}}\right)
 $$
 
 An energy mean, which is what every clause of the standard means by "mean
@@ -1009,7 +1009,7 @@ Emitted for three conditions:
   where clause 4 leaves only an inequality to state: a margin of the two
   energy means more than $10^{-9}$ dB under 3 dB
   ([`ExtraneousCorrectionResult.capped`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresultcapped)). A margin of exactly 3 dB
-  takes off 3,02 dB, the printed 3 dB unrounded, and emits nothing;
+  takes off 3.02 dB, the printed 3 dB unrounded, and emits nothing;
 - a field correction over the 3 dB in absolute value NOTE 4 of 3.3
   expects;
 - a downstream distance Equation (16) cannot give, which 8.3.1 leaves to
@@ -1094,7 +1094,7 @@ correction it returns is $K_\mathrm{II} - K_\mathrm{I}$. Pass the with-silencer
 temperature as the receiver one and the without-silencer temperature as
 the source one, which is the ordering the two equations share.
 
-The standard writes 273 rather than 273,15, and that is what is used.
+The standard writes 273 rather than 273.15, and that is what is used.
 
 **Parameters**
 

@@ -24,19 +24,19 @@ $$
 $$
 
 (Formula (2)): geometric spreading with an exponent $n$ that Figure 1
-fixes at 0, 0,5, 1 or 1,5 by whether the source is a line or a point,
+fixes at 0, 0.5, 1 or 1.5 by whether the source is a line or a point,
 harmonic or impulsive, and the wave a surface or a body wave; and material
 damping with $\alpha \approx 2\pi D / \lambda$, the damping ratio of the
-ground over the wavelength, which for loose ground may be taken as 0,01 at
+ground over the wavelength, which for loose ground may be taken as 0.01 at
 most in a preliminary estimate. Nearer than $R_1$ the formula does not
 hold. A train is a chain of point sources and decays with an exponent
-between 0,3 and 0,5.
+between 0.3 and 0.5.
 
 **Into the building** (Clause 4.3). A building on the ground is a mass on a
 spring with the natural frequency of Formula (3), about 15 Hz for one or two
 storeys and under 8 Hz above six; the foundation passes at most
 $1 / (2 D_0)$ of the ground's amplitude at that frequency, 2 for the
-0,25 of loose ground, and a mean of 0,5 above it, or all of it on rock; a
+0.25 of loose ground, and a mean of 0.5 above it, or all of it on rock; a
 floor amplifies by at most $1 / (2 D_1)$, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
 storeys or more is about $10 / n$ Hz (Formula (4)), the estimate
@@ -76,14 +76,14 @@ attenuation_coefficient_per_m(
 The material damping of the ground, $\alpha$ of Formula (2).
 
 $\alpha \approx 2\pi D / \lambda$ with $\lambda = c / f$ the
-wavelength that matters. Figure A.19 prints 0,005 for a damping ratio of
-0,01 and a wavelength of 12,5 m.
+wavelength that matters. Figure A.19 prints 0.005 for a damping ratio of
+0.01 and a wavelength of 12.5 m.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `damping_ratio` | $D$, not negative; 0,01 at most for loose ground in a preliminary estimate. |
+| `damping_ratio` | $D$, not negative; 0.01 at most for loose ground in a preliminary estimate. |
 | `wavelength_m` | $\lambda$, in metres. |
 
 **Returns:** $\alpha$, in reciprocal metres.
@@ -224,8 +224,8 @@ The velocity amplitude at a distance in the far field, Formula (2).
 
 $\bar v = \bar v_1 (R / R_1)^{-n} \exp[-\alpha (R - R_1)]$: the
 amplitude at the reference distance, spread with the exponent of Figure
-1 and damped with $\alpha$. Figure A.19 draws it for 0,44 mm/s at
-13 m with $\alpha$ = 0,005 for the three exponents 0, 0,5 and 1.
+1 and damped with $\alpha$. Figure A.19 draws it for 0.44 mm/s at
+13 m with $\alpha$ = 0.005 for the three exponents 0, 0.5 and 1.
 
 **Parameters**
 
@@ -265,7 +265,7 @@ The most a floor amplifies at its resonance, Clause 4.3.
 $V_D = 1 / (2 D_1)$, from the foundation through the walls to the
 floor, for a building excited in phase over its whole footprint by
 predominantly harmonic vibration: 25 for a concrete floor with a damping
-ratio of 0,02 and 10 for one with 0,05. Short spans, partitions and a
+ratio of 0.02 and 10 for one with 0.05. Short spans, partitions and a
 foundation on loose ground raise the damping.
 
 **Parameters**
@@ -300,7 +300,7 @@ foundation_transfer_max(system_damping_ratio: float = 0.25) -> float
 The most a foundation passes at the building's resonance, Clause 4.3.
 
 $V_F = 1 / (2 D_0)$ with the system damping of the building on its
-ground, 0,25 for loose ground, which gives 2. Above the resonance a
+ground, 0.25 for loose ground, which gives 2. Above the resonance a
 mean of [`FOUNDATION_TRANSFER_ABOVE_RESONANCE`](/phonometry/reference/api/vibration/prediction/#foundation_transfer_above_resonance) may be assumed, and
 on rock there is no reduction.
 
@@ -308,7 +308,7 @@ on rock there is no reduction.
 
 | Name | Description |
 | :--- | :--- |
-| `system_damping_ratio` | $D_0$, positive; 0,25 by default. |
+| `system_damping_ratio` | $D_0$, positive; 0.25 by default. |
 
 **Returns:** $V_F$.
 
@@ -340,7 +340,7 @@ The exponent $n$ of Formula (2) for a source and a wave, Figure 1.
 | `character` | `"harmonic"` (stationary) or `"impulsive"`. |
 | `wave` | `"surface"` or `"body"`. |
 
-**Returns:** $n$: 0, 0,5, 1 or 1,5.
+**Returns:** $n$: 0, 0.5, 1 or 1.5.
 
 **Raises**
 
@@ -379,7 +379,7 @@ impact_peak_velocity_mm_s(
 
 The peak velocity of a falling mass, Formula (6).
 
-$v_{\max} = k (E/E_0)^{0{,}5} (R/R_0)^{-m}$ with the fall energy
+$v_{\max} = k (E/E_0)^{0.5} (R/R_0)^{-m}$ with the fall energy
 $E$ against 1 kJ, the distance against 1 m, and $k$ and
 $m$ from comparable cases. The blast that fells a chimney is
 usually the smaller source; the impact is this one.
@@ -516,7 +516,7 @@ The peak velocity outside a hall of similar machines, Formula (7).
 
 $v_N = \chi \, v_B \sqrt{N}$: the velocity measured at the point
 with $N_B$ machines running, scaled to $N$ of them with the
-correction of Figure 3. Figure A.18 draws it for 0,44 mm/s measured with
+correction of Figure 3. Figure A.18 draws it for 0.44 mm/s measured with
 three machines and finds the measurements on the curve up to about
 sixty, the nearest group; beyond that the added groups are further off.
 
@@ -568,7 +568,7 @@ material_damping_factor(
 The share the ground absorbs over a distance, Figure 2.
 
 $\exp[-2\pi D f (R - R_1) / c]$, the damping factor of Formula (2)
-alone, which Figure 2 draws for a damping ratio of 0,01 and a wave speed
+alone, which Figure 2 draws for a damping ratio of 0.01 and a wave speed
 of 200 m/s from 10 Hz to 50 Hz: at 100 m the ground has taken 27 % of
 the amplitude at 10 Hz and 79 % at 50 Hz.
 

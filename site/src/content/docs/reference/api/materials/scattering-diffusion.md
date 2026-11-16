@@ -182,7 +182,7 @@ Writes a one-page accredited free-field diffusion report for a single
 source position (ISO 17497-2:2012, Clause 8.5): the standard-basis line,
 an optional metadata header block, a two-panel body with the corrected
 polar-response table (receiver angle and reflected sound-pressure level
-`L`, rounded to 0,1 dB) beside the semicircular polar plot, a boxed
+`L`, rounded to 0.1 dB) beside the semicircular polar plot, a boxed
 directional diffusion coefficient `d_theta` (Formula (5)/(6)) and a
 footer with the fixed disclaimer. ISO 17497-2 is a characterisation, so
 there is no pass/fail verdict.

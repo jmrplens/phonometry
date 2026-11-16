@@ -969,7 +969,7 @@ single address now, the one the resolver above returns, and none is private:
 ```python
 from phonometry import building, vibration
 
-# ISO 5349-2 E.3: the brush-saw's partial exposure, 4,6 m/s² for 2 h
+# ISO 5349-2 E.3: the brush-saw's partial exposure, 4.6 m/s² for 2 h
 print(round(vibration.daily_exposure(4.6, 2 * 3600.0), 1))
 print(callable(building.weighted_rating), callable(building.lining_improvement))
 print(hasattr(vibration, "partial_exposure"))
@@ -2462,7 +2462,7 @@ all of them and a filter on the topic reaches one. They are still
 
 | Emitted by | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- | --- |
-| `environment.sound_absorption_rating` and `environment.sound_reflection_rating` at the 0,99 cap | `environment.RoadDeviceWarning`, a `UserWarning` outside the hierarchy | `environment.RoadDeviceWarning`, a `PhonometryWarning` |
+| `environment.sound_absorption_rating` and `environment.sound_reflection_rating` at the 0.99 cap | `environment.RoadDeviceWarning`, a `UserWarning` outside the hierarchy | `environment.RoadDeviceWarning`, a `PhonometryWarning` |
 | `building.equivalent_impact_level`, `building.weighted_lining_improvement` and `building.lining_improvement` outside the range their relation is stated for | `UserWarning` | `building.BuildingPredictionWarning` |
 | `building.intensity_element_normalized_difference` with `n > 1` | `UserWarning` | `building.LaboratoryInsulationWarning` |
 | `room.room_criterion` on a spectrum missing a band from 31.5 Hz to 4000 Hz | `UserWarning` | `room.NoiseCriterionWarning` |

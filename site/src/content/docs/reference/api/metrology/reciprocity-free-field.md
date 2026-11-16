@@ -44,9 +44,9 @@ real part of the propagation coefficient, computed by the five steps of B.2
 ([`reciprocity_air_attenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation)): ISO 9613-1 adjusted to the
 quantities of IEC 61094-2, with the speed of sound at the conditions of the
 calibration in the vibrational terms. Step 1 prints the last coefficient of
-the saturation vapour pressure as $6{,}3343\,184\,5\cdot10^3$, where
+the saturation vapour pressure as $6.3343\,184\,5\cdot10^3$, where
 IEC 61094-2 Table F.2, which the step refers to, prints
-$6{,}343\,164\,5\times10^3$; the library uses the latter (an erratum).
+$6.343\,164\,5\times10^3$; the library uses the latter (an erratum).
 Table B.1 tabulates the attenuation by ISO 9613-1 itself, as its text says,
 and [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation)
 reproduces every one of its 162 entries.
@@ -54,7 +54,7 @@ reproduces every one of its 162 entries.
 **The wave number** $k = \omega/c$ takes the speed of sound of IEC
 61094-2 Annex F ([`air`](/phonometry/reference/api/fluids/air/#air)), by default with the
 dispersion of its NOTE to F.3: $c = c_0[1 + \sum_n c\,\alpha_{\mathrm{v}n}/ (2\pi f_{\mathrm{v}n})]$, a few parts in $10^5$ that reach a few tenths of
-a degree of phase at 20 kHz over 0,2 m. Annex B.1 points to it ("including
+a degree of phase at 20 kHz over 0.2 m. Annex B.1 points to it ("including
 dispersion effects").
 
 **Acoustic centres** (6.5 and Annex A). The distance $d_{12}$ is between
@@ -204,7 +204,7 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 | :--- | :--- |
 | `frequencies` | The frequencies of the calibration, in Hz. |
 | `diaphragm_distances_m` | The distance of each pair, in m. |
-| `microphone_diameter_m` | The nominal diameter of the microphones, in m (23,77 mm for LS1, 13,2 mm for LS2a: dimension A of Table C.1 of IEC 61094-2). |
+| `microphone_diameter_m` | The nominal diameter of the microphones, in m (23.77 mm for LS1, 13.2 mm for LS2a: dimension A of Table C.1 of IEC 61094-2). |
 | `temperature_c` | The temperature, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
@@ -587,7 +587,7 @@ Each one left at zero contributes no component.
 | `u_static_pressure_pa` | Of the static pressure, in Pa. |
 | `u_temperature_k` | Of the temperature, in K. |
 | `u_relative_humidity_percent` | Of the relative humidity, in percentage points. |
-| `u_air_attenuation_ratio` | Of the attenuation coefficient, as a fraction of it. B.2 estimates its accuracy at ±10 %, a standard uncertainty of $0{,}1/\sqrt{3}$ for a rectangular distribution. |
+| `u_air_attenuation_ratio` | Of the attenuation coefficient, as a fraction of it. B.2 estimates its accuracy at ±10 %, a standard uncertainty of $0.1/\sqrt{3}$ for a rectangular distribution. |
 
 **Raises**
 
@@ -660,15 +660,15 @@ The air attenuation coefficient of a free-field reciprocity calibration
 (IEC 61094-3:2016 B.2, Steps 1 to 5).
 
 $$
-\alpha = f^2\left[18{,}42\times10^{-12}\left(\frac{p_\mathrm{s}}{p_\mathrm{s,r}}\right)^{-1} \left(\frac{T}{T_{20}}\right)^{1/2} + \left(\frac{T}{T_{20}}\right)^{-2}\left( \frac{4{,}3778}{c}\frac{\mathrm{e}^{-2239{,}1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}} + \frac{36{,}6624}{c}\frac{\mathrm{e}^{-3352{,}0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \right)\right]
+\alpha = f^2\left[18.42\times10^{-12}\left(\frac{p_\mathrm{s}}{p_\mathrm{s,r}}\right)^{-1} \left(\frac{T}{T_{20}}\right)^{1/2} + \left(\frac{T}{T_{20}}\right)^{-2}\left( \frac{4.3778}{c}\frac{\mathrm{e}^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}} + \frac{36.6624}{c}\frac{\mathrm{e}^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}} \right)\right]
 $$
 
 in Np/m, with the relaxation frequencies of Step 3 from the water vapour
 mole fraction of Steps 1 and 2, and $c$ the speed of sound of IEC
 61094-2 Formula (F.2) at the conditions. B.2 estimates the accuracy at
 ±10 % within -20 °C to 50 °C, below 200 kPa, for
-$0{,}5\times10^{-3} \le x_\mathrm{w} \le 50\times10^{-3}$ and a
-frequency-to-pressure ratio of 0,4 Hz/kPa to $10^4$ Hz/kPa
+$0.5\times10^{-3} \le x_\mathrm{w} \le 50\times10^{-3}$ and a
+frequency-to-pressure ratio of 0.4 Hz/kPa to $10^4$ Hz/kPa
 ([`ReciprocityAirAttenuation.within_stated_accuracy`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuationwithin_stated_accuracy)).
 
 Step 1 is computed with the coefficient of IEC 61094-2 Table F.2, which it

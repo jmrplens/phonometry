@@ -35,9 +35,9 @@ import numpy as np
 from phonometry import building
 
 # The same pump-like source measured on a conforming low-mobility plate
-# (100 mm concrete, 2 300 kg/m3 -> m = 230 kg/m2, 3,15 m x 2,23 m = 7,0 m2,
-# Ts = 0,25 s so eta >= 0,08 through 50-100 Hz) and on a conforming
-# high-mobility plate (1 mm perforated steel, m = 7,9 kg/m2, 2,0 m2).
+# (100 mm concrete, 2 300 kg/m3 -> m = 230 kg/m2, 3.15 m x 2.23 m = 7.0 m2,
+# Ts = 0.25 s so eta >= 0.08 through 50-100 Hz) and on a conforming
+# high-mobility plate (1 mm perforated steel, m = 7.9 kg/m2, 2.0 m2).
 bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
 lv_low = np.array([72.0, 74.0, 71.0, 68.0, 64.0, 60.0, 55.0])
 
@@ -114,7 +114,7 @@ lv_i = np.array([88.0, 90.0, 87.0, 89.0, 86.0, 90.0])   # six plate positions @ 
 print(round(building.spatial_mean_velocity_level(lv_i), 2))    # 88.6 dB re 1 nm/s
 
 # Power level injected into the low-mobility reception plate of clause 7.2.2
-# (100 mm concrete, 230 kg/m2 over 7,0 m2, Ts = 0,25 s):
+# (100 mm concrete, 230 kg/m2 over 7.0 m2, Ts = 0.25 s):
 res = building.reception_plate_power(
     velocity_level=np.array([90.0, 87.0, 82.0, 77.0]),
     frequency=bands, mass_per_area=230.0, area=7.0, reverberation_time=0.25,
@@ -133,7 +133,7 @@ specifies both.
 **The low-mobility plate (clause 7.2.2)** is concrete of density
 $(2\,300 \pm 200)$ kg/m³ and thickness $(10 \pm 1)$ cm, so about 230 kg/m²,
 with a minimum area of 5 m² and preferably more than 7 m², a length-to-width
-ratio near $\sqrt{2}$, and a loss factor of at least 0,08 in the low bands
+ratio near $\sqrt{2}$, and a loss factor of at least 0.08 in the low bands
 (50 Hz to 100 Hz). Its minimum dimension shall be at least the largest contact
 spacing of the sample. Every one of those numbers earns its place: the 10 cm
 concrete plate is the same plate whose characteristic mobility
@@ -141,8 +141,8 @@ $Y_{\mathrm{R},\infty,\mathrm{low}} = 5\times10^{-6}$ m/(N·s) anchors Formula (
 thinner or lighter plate would break the conversion; the $\sqrt{2}$ aspect ratio
 spreads the modes so that no band is dominated by a degenerate pair; the
 loss-factor floor keeps the plate reverberant but well damped, which is what
-makes $\eta = 2{,}2/(fT_\mathrm{s})$ and the steady-state power balance hold. At
-$T_\mathrm{s} = 0{,}25$ s the plate gives $\eta = 0{,}176$ at 50 Hz and 0,088 at 100 Hz,
+makes $\eta = 2.2/(fT_\mathrm{s})$ and the steady-state power balance hold. At
+$T_\mathrm{s} = 0.25$ s the plate gives $\eta = 0.176$ at 50 Hz and 0.088 at 100 Hz,
 just inside the requirement; and the minimum dimension keeps a multi-contact
 source from bridging the plate's edges. A bench may carry up to **three**
 mutually isolated low-mobility plates so that a source touching several building
@@ -152,7 +152,7 @@ equipment removed, is more than 10 dB in every band.
 
 **The high-mobility plate (clause 7.3.2)** is a thin metal sheet designed for a
 mean point mobility of at least $10^{-2}$ m/(N·s), about 50 % perforated with
-roughly 6 mm holes; 1 mm steel or 1,5 mm aluminium achieves it, and the sheet is
+roughly 6 mm holes; 1 mm steel or 1.5 mm aluminium achieves it, and the sheet is
 held in a support frame for stability. The perforation is not a weight-saving
 measure: it exists to stop the sheet being driven by the source's own airborne
 sound in a noisy environment, which would be indistinguishable from
@@ -195,8 +195,8 @@ clause 7.1, and none of it is in the formulae.
 **Transducers and positions.** Accelerometers calibrated to ISO 16063-21 and
 mounted to ISO 5348. The spatial mean velocity level and the structural
 reverberation time are measured as EN ISO 10848-1 prescribes. There shall be
-**not fewer than six measurement positions**, about 0,5 m apart and at least
-0,1 m from the equipment's contact points. The clearance is what makes the mean
+**not fewer than six measurement positions**, about 0.5 m apart and at least
+0.1 m from the equipment's contact points. The clearance is what makes the mean
 a plate average instead of a near-field reading of the contact, and the spacing
 is what makes six positions sample different modal patterns rather than one.
 The number and the location of the positions are validated with the Annex C
@@ -211,7 +211,7 @@ long before a microphone does, and the correction is the only thing between that
 and a source spectrum that is really the building's.
 
 **The loss factor.** $T_\mathrm{s}$ is a structural decay measured on the plate itself,
-feeding $\eta = 2{,}2/(f\,T_\mathrm{s})$. Formula (14) is linear in $10\lg\eta$, so an
+feeding $\eta = 2.2/(f\,T_\mathrm{s})$. Formula (14) is linear in $10\lg\eta$, so an
 error in $T_\mathrm{s}$ moves $L_\mathrm{Ws}$ decibel for decibel: it is the single most
 sensitive input on the page. The loading rule follows the plate: on the
 **low-mobility** plate there should be no significant difference whether $T_\mathrm{s}$
@@ -265,7 +265,7 @@ hammer, as EN ISO 10848-1 describes), and its mean-square velocity measured;
 replacing the calibrated source by the sample and measuring again gives
 $P_\text{source} = \langle v_\text{source}^2\rangle\,P_\text{cal}/\langle v_\text{cal}^2\rangle$
 (Formula C.1). The known power is injected at **three** points on a low-mobility
-plate (one central, one 0,5 m from an edge and one 0,5 m from a corner), or at
+plate (one central, one 0.5 m from an edge and one 0.5 m from a corner), or at
 at least two points away from the contacts on a high-mobility plate, each
 averaged over the same six or more receiver positions and combined energetically
 (Formula C.2). The standard notes that the substitution is probably valid only up

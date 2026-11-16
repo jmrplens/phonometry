@@ -298,7 +298,7 @@ downstream. Round bends are treated as unlined with no vanes.
 `model="vdi2081"` reads Table 7 of VDI 2081 Part 1 Section 6.2, which is
 printed once, for a 1250 mm side, and carried along the frequency axis for
 every other size. The duct's limit frequency comes from Equation (33),
-`c / (2 a)`, or Equation (34), `0,586 c / d`; the octave holding it
+`c / (2 a)`, or Equation (34), `0.586 c / d`; the octave holding it
 takes the place of the table's own 125 Hz column, and the whole row moves
 with it. Below the shifted row the loss is nought, which is the guideline's
 statement that a bend reflects nothing while only plane waves run.
@@ -500,7 +500,7 @@ the 6 dB step.
 
 | Name | Description |
 | :--- | :--- |
-| `relative_efficiency_percent` | **ASHRAE only.** Static efficiency as a **percentage** of the peak, in `(0, 100]`. A fraction is not accepted in disguise: the table is tabulated from 50 % up, so 0,8 would fall to its bottom row and return 16 dB where 80 % returns 6, ten decibels with nothing to say it happened. Below 50 % the caller is warned that the value is outside the span Table 13.6 tabulates. |
+| `relative_efficiency_percent` | **ASHRAE only.** Static efficiency as a **percentage** of the peak, in `(0, 100]`. A fraction is not accepted in disguise: the table is tabulated from 50 % up, so 0.8 would fall to its bottom row and return 16 dB where 80 % returns 6, ten decibels with nothing to say it happened. Below 50 % the caller is warned that the value is outside the span Table 13.6 tabulates. |
 
 **Returns:** The correction `C_EFF`, dB.
 
@@ -593,16 +593,16 @@ and the impeller circumference, so the impeller size a nomogram gives is
 not an input here. Section 4.3.3 sets the specific level and the spectral
 parameter for each of the three assemblies of VDI 3731 Part 2, and
 Figures 13 and 14 add a cubic allowance for running away from the best
-duty point, worth 0,1 dB at the optimum itself.
+duty point, worth 0.1 dB at the optimum itself.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `volume_flow` | Volume flow through the fan `Q_\mathrm{F}`, m3/s. |
-| `fan_static_pressure_pa` | **ASHRAE only.** Fan static pressure `P_\mathrm{F}`, in **pascals gauge**. This is the pressure rise the fan produces across itself, not an ambient pressure, and it shares neither the unit nor the datum of the `static_pressure_kpa` the ISO 3740 family takes in kilopascals absolute. No plausibility guard can separate the two: 101,325 Pa is a legitimate duty for a panel or propeller fan, so the name is what keeps them apart. |
+| `fan_static_pressure_pa` | **ASHRAE only.** Fan static pressure `P_\mathrm{F}`, in **pascals gauge**. This is the pressure rise the fan produces across itself, not an ambient pressure, and it shares neither the unit nor the datum of the `static_pressure_kpa` the ISO 3740 family takes in kilopascals absolute. No plausibility guard can separate the two: 101 325 Pa is a legitimate duty for a panel or propeller fan, so the name is what keeps them apart. |
 | `fan_type` | **ASHRAE only.** One of `"airfoil_large"` / `"airfoil_small"` (backward-curved or backward-inclined centrifugal wheels above and below 36 in diameter), `"forward_curved"`, `"radial_low"` / `"radial_medium"` / `"radial_high"` (radial blades by total pressure), `"vaneaxial_hub_low"` / `"vaneaxial_hub_medium"` / `"vaneaxial_hub_high"` (hub ratios 0.3-0.4, 0.4-0.6 and 0.6-0.8), `"tubeaxial_large"` / `"tubeaxial_small"` (above and below 40 in wheel diameter) or `"propeller"`. |
-| `relative_efficiency_percent` | Static efficiency as a **percentage** of the peak (default 80, Long's recommendation when the peak is unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as 0,8 falls through to the table's bottom row and returns its worst-case 16 dB correction instead of the 6 dB that 80 % earns. That is what [`HVACWarning`](/phonometry/reference/api/noise_control/hvac/#hvacwarning) says when it fires below the floor. |
+| `relative_efficiency_percent` | Static efficiency as a **percentage** of the peak (default 80, Long's recommendation when the peak is unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as 0.8 falls through to the table's bottom row and returns its worst-case 16 dB correction instead of the 6 dB that 80 % earns. That is what [`HVACWarning`](/phonometry/reference/api/noise_control/hvac/#hvacwarning) says when it fires below the floor. |
 | `blade_frequency` | **ASHRAE only.** Blade passing frequency `f_bp`, Hz (from [`blade_passing_frequency`](/phonometry/reference/api/noise_control/hvac/#blade_passing_frequency)). `None` (default) places the increment in the octave band Table 13.7 tabulates for the fan type. |
 | `model` | `"ashrae"` (default) or `"vdi2081"`. |
 | `fan_total_pressure_pa` | **VDI 2081 only.** Total pressure rise `\Delta p_\mathrm{t}` across the fan, Pa. Not the static pressure of the ASHRAE law: the total pressure carries the dynamic head as well, and Equation (13) scales it by 20 rather than by 10. |
@@ -702,8 +702,8 @@ L_W = L_W^{*} + 10 \log_{10} \Delta f + 30 \log_{10} d_\mathrm{a} + 50 \log_{10}
 $$
 
 with the normalised level of Figure 17,
-$L_W^{*} = 12 - 21{,}5 (\lg St)^{1{,}268} + (32 + 13 \lg St) \lg (v_\mathrm{h}/v_\mathrm{a})$, the rounding correction of Figure 18,
-$K = 13{,}9 (3{,}43 - \lg St)(0{,}15 - r/d_\mathrm{a})$, and
+$L_W^{*} = 12 - 21.5 (\lg St)^{1.268} + (32 + 13 \lg St) \lg (v_\mathrm{h}/v_\mathrm{a})$, the rounding correction of Figure 18,
+$K = 13.9 (3.43 - \lg St)(0.15 - r/d_\mathrm{a})$, and
 $St = f d_\mathrm{a} / v_\mathrm{a}$. A bend is the same law with
 the two velocities equal, which sends the second term of $L_W^{*}$
 and the velocity ratio to nought.
@@ -725,7 +725,7 @@ $\lg St$ is not real below one.
 | `model` | `"ashrae"` (default, Bies) or `"vdi2081"`. |
 | `branch_diameter_m` | **VDI 2081 only.** Diameter of the branch duct `d_a`, m; for a bend, the duct's own diameter. |
 | `approach_velocity` | **VDI 2081 only.** Flow speed in the main duct ahead of the junction `v_h`, m/s. `None` (default) takes it equal to `flow_velocity`, which is the bend case. |
-| `rounding_ratio` | **VDI 2081 only.** Rounding radius over branch diameter `r / d_a`, which applies the correction of Figure 18. `None` (default) leaves it out altogether, which is how the guideline's own worked example treats a bend: Figure 18 is drawn for the rounding of a **junction**, and its curves all cross zero at `r / d_a = 0,15`, so passing 0 asks for a sharp-cornered junction and is worth over 6 dB rather than nothing. Figure 18 is drawn from 0 to 0,20. |
+| `rounding_ratio` | **VDI 2081 only.** Rounding radius over branch diameter `r / d_a`, which applies the correction of Figure 18. `None` (default) leaves it out altogether, which is how the guideline's own worked example treats a bend: Figure 18 is drawn for the rounding of a **junction**, and its curves all cross zero at `r / d_a = 0.15`, so passing 0 asks for a sharp-cornered junction and is worth over 6 dB rather than nothing. Figure 18 is drawn from 0 to 0.20. |
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
@@ -809,7 +809,7 @@ attenuating. Faster air is worse than the unweighted number says.
 [`flow_noise_straight_duct`](/phonometry/reference/api/noise_control/hvac/#flow_noise_straight_duct) is this level with the relative spectrum
 of Figure 16 on it. The band levels do not sum back here, and not by a
 fixed amount either: the difference the figure prints tends to
-$-2 - 26 \lg 1{,}14 = -2{,}5$ dB as $f_\mathrm{m}/v$ falls, so
+$-2 - 26 \lg 1.14 = -2.5$ dB as $f_\mathrm{m}/v$ falls, so
 the energy sum grows with however many octaves are taken. Over the range
 the figure is drawn for it lands within half a decibel of this number, and
 outside it the sum means nothing.
@@ -1295,7 +1295,7 @@ reduction is negligibly small.
 The reduction is reached only with the duct anechoically terminated at
 both ends, which practice rarely is, so VDI 3733 recommends taking no more
 than 5 dB from it. That is the default `cap`, and it binds from an area
-ratio of about 10,5 upwards, or 0,095 downwards.
+ratio of about 10.5 upwards, or 0.095 downwards.
 
 There is no ASHRAE counterpart to call through `model=`: Long folds the
 reflection from a change of total section into the junction itself, which
@@ -1544,7 +1544,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses the eight octave bands from 63 Hz to 8 kHz. |
 | `length` | Duct run length, m. |
-| `diameter_m` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1,00 m. |
+| `diameter_m` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1.00 m. |
 | `model` | `"ashrae"` (default, Long Table 14.1) or `"vdi2081"`. |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.

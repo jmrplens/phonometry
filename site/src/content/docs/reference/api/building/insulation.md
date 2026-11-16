@@ -164,7 +164,7 @@ volume is an argument here.
 | `t2` | Receiving-room reverberation time per band, in seconds. |
 | `area` | Area `S` of the common partition, in m² (optional; required together with `volume` for `R'`). |
 | `volume` | Receiving-room volume `V`, in m³ (optional; required together with `area` for `R'`). |
-| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.13). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0.5 s for dwellings, Clause 3.13). |
 | `frequencies` | Band centre frequencies, in Hz; required with either low-frequency argument. Without one it still matters: naming any of the 50 Hz, 63 Hz and 80 Hz bands beside a small `volume` is what tells this function the procedure was owed, and what it warns about. The result carries no band axis of its own. |
 | `source_low_frequency` | Source-room corner measurements and volume (Clause 8). Must not carry a 63 Hz octave reverberation time. |
 | `receiver_low_frequency` | Receiving-room corner measurements and volume (Clause 8), which must also carry the 63 Hz octave reverberation time of Clause 10.4. |
@@ -384,8 +384,8 @@ are not the ISO 16283 quantity.
 | `area` | Area `S` of the test element, in m² (optional; required with `volume` and `surface_level` for `R'`). |
 | `volume` | Receiving-room volume `V`, in m³ (optional; required for `D2m,n` and for `R'`). |
 | `surface_level` | Outdoor surface level `L1,s` on the test element, in dB (optional; required with `area` and `volume` for `R'`). |
-| `method` | `"loudspeaker"` (45° incidence, -1,5 dB) or `"road_traffic"` (all-angle incidence, -3 dB); selects the `R'` correction (Clause 3.12 / 3.13). |
-| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.15). |
+| `method` | `"loudspeaker"` (45° incidence, -1.5 dB) or `"road_traffic"` (all-angle incidence, -3 dB); selects the `R'` correction (Clause 3.12 / 3.13). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0.5 s for dwellings, Clause 3.15). |
 | `frequencies` | Optional band centre frequencies, in Hz, carried on the result for plotting; required with `low_frequency`. |
 | `low_frequency` | Receiving-room corner measurements, volume and 63 Hz octave reverberation time (Clause 7.3 and Clause 8.4). Loudspeaker methods only: Clause 6 says that for the element and global road traffic methods "only the default procedure shall be used", so a small room measured against traffic is conforming without corners and is neither refused nor warned about. |
 
@@ -555,7 +555,7 @@ answers from the default procedure alone and raises a
 | `li` | Energy-average impact sound pressure levels, in dB. |
 | `t2` | Receiving-room reverberation time per band, in seconds. |
 | `volume` | Receiving-room volume `V`, in m³ (optional; required for `L'n`). |
-| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.13). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0.5 s for dwellings, Clause 3.13). |
 | `frequencies` | Band centre frequencies, in Hz; required with `low_frequency`. Without it it still matters: naming any of the 50 Hz, 63 Hz and 80 Hz bands beside a small `volume` is what tells this function the procedure was owed, and what it warns about. The result carries no band axis of its own. |
 | `low_frequency` | Receiving-room corner measurements, volume and 63 Hz octave reverberation time (Clause 8 and Clause 10.4). |
 

@@ -30,13 +30,13 @@ standard measures as the excess of sound pressure level over the free field,
 $\Delta L_f \ge 7$ dB (clause 4.1, Annex A): the level the reference source
 produces at a microphone must be at least 7 dB above what it would produce
 in a free field at that distance. Three or four positions are used, at
-least 2 m apart, none closer than 0,5 m to any boundary, distributed as
+least 2 m apart, none closer than 0.5 m to any boundary, distributed as
 evenly as possible round the machine, each of them either in sight of every
 sound-emitting area or screened from all of them (clause 7.4.1); the
 reference source goes as close to the acoustic centre as it can, for a
 directional machine where it simulates the emission pattern, on top of it
 where that is impractical and alongside only failing that, where positions
-closer than 0,5 m to the reference box are to be avoided. One location is
+closer than 0.5 m to the reference box are to be avoided. One location is
 normally enough; where the largest dimension of the reference box exceeds
 the measurement distance the source is run at several, along the sides one
 measurement distance apart when the machine is omnidirectional and one per
@@ -61,8 +61,8 @@ $$
 
 with three rules round it. A margin above 15 dB needs no correction at that
 position. A margin between 6 dB and 15 dB takes Eq. 7, which runs from
-1,26 dB at 6 dB to 0,14 dB at 15 dB. A margin **below 6 dB** caps the
-correction at **1,3 dB** and reduces the accuracy of the result: the level
+1.26 dB at 6 dB to 0.14 dB at 15 dB. A margin **below 6 dB** caps the
+correction at **1.3 dB** and reduces the accuracy of the result: the level
 may still be reported, but as an upper bound, and the report must say that
 the background requirement was not met. `sound_power_in_situ` applies all
 three, returns the per-position $K_{1i}$ it used, and flags every band where
@@ -163,14 +163,14 @@ print(res.grade, res.sigma_r0, round(res.expanded_uncertainty, 1))  # engineerin
 The 125 Hz band is the one to read twice. At one of the four positions the
 margin over the floor is below 6 dB for the machine, and it is below 6 dB at
 every position for the quieter reference source, so both corrections take
-their 1,3 dB cap there. The band fails the background requirement, which is
-what the `False` says, but the 88,8 dB it reports is **no upper bound**: the
+their 1.3 dB cap there. The band fails the background requirement, which is
+what the `False` says, but the 88.8 dB it reports is **no upper bound**: the
 machine's capped $K_1$ reads high, the reference source's capped $K_{1i}$
 reads low, and nothing says which wins, so `upper_bound` stays `False`. Every other band clears 6 dB everywhere, 250 Hz with
 corrections of half a decibel that Eq. 7 evaluates rather than ignores, and
 from 1 kHz up the margin passes 15 dB at two or three of the four positions,
 where the correction is zero; the correction the others still take stays
-below 0,25 dB.
+below 0.25 dB.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_sound_power.svg" alt="Two panels over the seven octave bands from 125 Hz to 8 kHz. The upper panel plots the sound pressure levels at the four microphone positions: the corrected levels of the source under test as filled blue circles with their energy mean as a blue line, the corrected levels of the reference source as green squares with their mean as a green line, the measured levels before the background correction as hollow circles joined to the corrected ones wherever the correction moved them, and the background at each position as grey crosses. A boxed note at 125 Hz says the margin is below 6 dB at that position and at every position for the reference source, both K1 are capped at 1.3 dB, and the band fails clause 8.1 and is no upper bound. The lower panel draws the resulting sound power level of the source under test as blue bars, the 125 Hz bar cross-hatched as failing the background requirement, with the calibrated sound power level of the reference source as a red dashed line with diamonds, and states in its title an A-weighted level of 96.1 dB(A), grade 2, and an expanded uncertainty of 3.2 dB with k = 2 and a 0.5 dB operating-condition deviation" width="96%"></picture>
 
@@ -244,18 +244,18 @@ print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 
 Use class 1 instruments and filters, and a class 1 calibrator on every
 microphone before and after each series, discarding the series if the two
-readings differ by more than 0,5 dB. Listen to the machine first: where the
+readings differ by more than 0.5 dB. Listen to the machine first: where the
 sound of one component predominates, the geometric centre of that component
 is the acoustic centre and the reference box is drawn just round that
 component, down to the floor it stands on; where no component sounds more
 than any other, leave out every component that clearly emits nothing and take
 the geometric centre and the box of what is left. Then survey the
-directivity 1 m from the reference box, normally 1,5 m up and at 2 m
+directivity 1 m from the reference box, normally 1.5 m up and at 2 m
 intervals or less along a side: within ±2 dB the machine counts as
 omnidirectional, and beyond ±7 dB the result stays at survey grade. Put the
 reference source as close to the acoustic centre as you can: for a
 directional machine, where it simulates the emission pattern, otherwise on
-top, and only failing that alongside, avoiding positions closer than 0,5 m to
+top, and only failing that alongside, avoiding positions closer than 0.5 m to
 the reference box. One location normally does. Where the largest dimension of
 the reference box is greater than the measurement distance, use several:
 along the sides, one measurement distance apart, for an omnidirectional
@@ -263,7 +263,7 @@ machine, and one per area for a machine with clearly definable emission
 areas. Where that dimension does not exceed the measurement distance and an
 omnidirectional machine cannot take the source on top, use four locations,
 one adjacent to each vertical side of the box. Place three or four
-microphones round the machine, at least 2 m apart and 0,5 m from every
+microphones round the machine, at least 2 m apart and 0.5 m from every
 boundary, where Annex A gives $\Delta L_f \ge 7$ dB, seeking positions as far
 from the source as from the box, within 10 %; where they cannot all be there,
 take one nearer the box, one equally far and one or two nearer the source. At
@@ -271,11 +271,11 @@ each position, with the same orientation, read the machine, the reference
 source for about 30 s and the background just before or after, in octave
 bands from 125 Hz to 8 kHz; an impulsive machine takes at least five events.
 Correct each position for background: above 15 dB nothing, 6 dB to 15 dB by
-Eq. 7, below 6 dB 1,3 dB at most, and that band fails the requirement, which
+Eq. 7, below 6 dB 1.3 dB at most, and that band fails the requirement, which
 the report must flag, and is an upper bound where only the machine's margin
 fell short. Record what the aural examination found, the dimensions of the
 reference box, the measurement distance, the positions, the source locations
-and $\Delta L_f$, and report band and A-weighted levels to 0,1 dB with the
+and $\Delta L_f$, and report band and A-weighted levels to 0.1 dB with the
 grade, $U$, its coverage factor and probability.
 
 ### `sound_power_in_situ()` parameters
@@ -292,7 +292,7 @@ grade, $U$, its coverage factor and probability.
 | `static_pressure_kpa` | float | kPa | default `101.325` | Static pressure at the test, for $C_2$; see `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | The two conditions Table 2 reads together: `excess_levels`, the $\Delta L_{f\mathrm{A}}$ at each position `(n,)` in decibels (Annex A), and `directivity_range`, the half-width of the A-weighted directivity survey in decibels (7.2). Either one left out leaves the determination at survey grade |
 | `sigma_omc_db` | float | dB | $\ge 0$ | Standard deviation of the operating and mounting conditions (9.2); `None` leaves the uncertainty `NaN` |
-| `coverage_factor` | float | | default `2.0` | $k$ of Eq. 23; 1,6 for a one-sided comparison with a limit |
+| `coverage_factor` | float | | default `2.0` | $k$ of Eq. 23; 1.6 for a one-sided comparison with a limit |
 
 The function returns an `InSituSoundPowerResult`: `sound_power_level` (Eq. 11
 or 12, at the conditions of the test), `mean_source_level` and
@@ -366,9 +366,9 @@ print(round(energy.expanded_uncertainty, 1))      # 5.0 dB: grade 2 with sigma_o
 The 125 Hz band fails the background requirement here too, and for the
 reason the steady determination gave: the reference source's own margin over
 the floor is below 6 dB there, and the flag follows both sources, so it is no
-upper bound either. The 5,0 dB is the standard's
+upper bound either. The 5.0 dB is the standard's
 own example in clause 9.5, reproduced because the inputs are the same:
-grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
+grade 2, $\sigma_\mathrm{omc}$ = 2.0 dB, $k$ = 2.
 
 ### `sound_energy_in_situ()` parameters
 
@@ -386,8 +386,8 @@ $\Delta L_{f\mathrm{A}} \ge 7$ dB at every microphone position and a source
 directivity range within ±7 dB from the survey of clause 7.2, taken 1 m from
 the reference box at intervals of 2 m or less; either indicator failing, or
 not determined at all, gives survey grade 3. The table pairs each grade with
-a typical upper bound of the reproducibility of the method, **1,5 dB** for
-grade 2 and **4,0 dB** for grade 3, valid for a relatively flat spectrum in
+a typical upper bound of the reproducibility of the method, **1.5 dB** for
+grade 2 and **4.0 dB** for grade 3, valid for a relatively flat spectrum in
 which the 250 Hz to 4 kHz octaves carry the A-weighted level; a source
 dominated by bands below 500 Hz reproduces worse than that. The excess itself
 is Annex A (Eq. A.1),
@@ -411,24 +411,24 @@ $$
 \qquad U = k\,\sigma_\mathrm{tot},
 $$
 
-with $k$ = 2 for the two-sided 95 % interval the standard assumes, or 1,6
+with $k$ = 2 for the two-sided 95 % interval the standard assumes, or 1.6
 for a one-sided comparison with a limit value. $\sigma_\mathrm{omc}$ is the
 user's number, from repeated determinations under the conditions of clause
-9.2 and E.3; the NOTE of 9.2 puts it near 0,5 dB for a steady source, 2 dB
+9.2 and E.3; the NOTE of 9.2 puts it near 0.5 dB for a steady source, 2 dB
 for one with material flow and 4 dB for stone breaking, metal cutting or a
 press under load. The standard's own example (clause 9.5), grade 2 with
-$\sigma_\mathrm{omc}$ = 2,0 dB and $k$ = 2, gives
-$U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB, which the energy example above
+$\sigma_\mathrm{omc}$ = 2.0 dB and $k$ = 2, gives
+$U = 2\sqrt{1.5^2 + 2^2}$ dB = 5 dB, which the energy example above
 reproduces. Without a `sigma_omc_db` the result carries `sigma_r0` and leaves
 `sigma_tot` and `expanded_uncertainty` `NaN` rather than reporting a method
 uncertainty as if it were the whole.
 
 **Reference conditions (Annex C).** Eq. 11 gives the level at the
-meteorological conditions of the test. Annex C carries it to 101,325 kPa and
-23,0 °C with the radiation-impedance correction
+meteorological conditions of the test. Annex C carries it to 101.325 kPa and
+23.0 °C with the radiation-impedance correction
 
 $$
-C_2 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}} + 15 \log_{10}\frac{273{,}15 + \theta}{\theta_\mathrm{ref}},
+C_2 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s},0}} + 15 \log_{10}\frac{273.15 + \theta}{\theta_\mathrm{ref}},
 \qquad \theta_\mathrm{ref} = 296\ \mathrm{K},
 $$
 
@@ -436,13 +436,13 @@ the same $C_2$ as ISO 3741 clause 9.1.4 (the library evaluates it through
 that module), valid for a monopole and a mean value for other sources, and
 estimates the static pressure from the altitude of the site when no barometer
 was read (Eq. C.2): $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$
-with $a$ = 2,2560 × 10⁻⁵ m⁻¹ and $b$ = 5,2553. The result exposes `c2` and
+with $a$ = 2.2560 × 10⁻⁵ m⁻¹ and $b$ = 5.2553. The result exposes `c2` and
 the properties `sound_power_level_at_reference_conditions` and `sound_energy_level_at_reference_conditions`
 (Eq. C.1, C.3); the A-weighted total under reference conditions is
 `sound_power_level_a + c2`, since the shift is the same in every band. One
 detail of the annex is worth knowing: $\theta_\mathrm{ref}$ is printed as
-296 K beside a reference temperature of 23,0 °C, which is 296,15 K, so at
-exactly the reference conditions $C_2$ is +0,003 3 dB and not zero. ISO 3741
+296 K beside a reference temperature of 23.0 °C, which is 296.15 K, so at
+exactly the reference conditions $C_2$ is +0.003 3 dB and not zero. ISO 3741
 and ISO 3744 print the same 296 K, so it is the family's rounding and the
 library keeps it.
 
@@ -465,7 +465,7 @@ print(np.round(emission.excess_sound_pressure_level([81.0, 76.5, 73.8], 92.5, [1
 
 **A-weighted totals (Annex D).** $L_{W\mathrm{A}}$ and $L_{J\mathrm{A}}$ are the
 energy sums of the band levels plus the Table D.1 corrections $C_k$, which
-are −26,2, −16,1, −8,6, −3,2, 0,0, 1,2, 1,0 and −1,1 dB from 63 Hz to 8 kHz,
+are −26.2, −16.1, −8.6, −3.2, 0.0, 1.2, 1.0 and −1.1 dB from 63 Hz to 8 kHz,
 the ISO 3744 Annex E octave values digit for digit; the library reads them
 from the shared table and requires every entry of `frequencies` to be one of
 those eight nominal centres, distinct and in ascending order; the 63 Hz row
@@ -476,7 +476,7 @@ satisfactory there (Table D.1, footnote a).
 
 - **Covered.** The ISO 3747 comparison in situ (`sound_power_in_situ`): the per-position
   background correction of clause 8.1 with its 6 dB and 15 dB rules and the
-  1,3 dB cap, the mean corrected levels of clause 8.2, the sound power level
+  1.3 dB cap, the mean corrected levels of clause 8.2, the sound power level
   for one (Eq. 11) or several (Eq. 12) reference-source locations, the
   single-event levels of clause 8.4 in both forms and the sound energy level
   of clause 8.5 (`sound_energy_in_situ`), the Table 2 grade with its

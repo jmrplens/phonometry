@@ -90,7 +90,7 @@ The sign is the trap. This column reads "correction to be **made to** the
 measured sound pressure level", so its values are printed negative and are
 **added**; Table 1 of ISO 11820 reads "correction to be **subtracted**"
 and prints the same physical thing positive. The two tables also disagree
-numerically at a margin of 9 dB, where ISO 11820 takes off 0,5 dB and this
+numerically at a margin of 9 dB, where ISO 11820 takes off 0.5 dB and this
 one takes off 1. They are two tables and they stay two tables.
 
 **Parameters**
@@ -568,14 +568,14 @@ elevation angle from that end exceeds the angle to the barrier top by
 [`REFERENCE_ELEVATION_INCREMENT_DEG`](/phonometry/reference/api/environment/barrier-in-situ/#reference_elevation_increment_deg):
 
 $$
-h = \max\left(H + 1{,}5\ \mathrm{m},\; d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
+h = \max\left(H + 1.5\ \mathrm{m},\; d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
 $$
 
 The NOTE only ever raises the microphone, so the height is the higher of
 the two. Which one governs depends on the geometry: a 4 m barrier 10 m
-from the source takes the angle, 6,20 m against 5,5 m, while a 3 m barrier
+from the source takes the angle, 6.20 m against 5.5 m, while a 3 m barrier
 5 m from the source takes the clearance, because its 10 degrees are
-reached at 4,34 m and the clause asks for 4,5 m. The angle form is the
+reached at 4.34 m and the clause asks for 4.5 m. The angle form is the
 NOTE's own words; the height it implies is derived here rather than
 printed.
 
@@ -627,10 +627,10 @@ ShortDistanceCheck(
 Whether the geometry counts as a short distance, 6.3.1.
 
 The clause prints one condition for the "before" campaign and two for the
-"after" one, all against the same ratio of 0,1:
+"after" one, all against the same ratio of 0.1:
 
 $$
-\frac{H_s + H_R}{d_1 + d_2} > 0,1, \qquad \frac{H_s + H}{d_1} > 0,1, \qquad \frac{H + H_R}{d_2} > 0,1
+\frac{H_s + H_R}{d_1 + d_2} > 0.1, \qquad \frac{H_s + H}{d_1} > 0.1, \qquad \frac{H + H_R}{d_2} > 0.1
 $$
 
 The ratios and the two answers are read from the five lengths, so they
@@ -652,7 +652,7 @@ classes of Table 1 that each campaign may be made in, so it is read as
 
 *property*
 
-Whether the "after" geometry is a short distance: both its ratios exceed 0,1.
+Whether the "after" geometry is a short distance: both its ratios exceed 0.1.
 
 ### ShortDistanceCheck.after_receiver_side_ratio
 
@@ -672,7 +672,7 @@ $(H_s + H) / d_1$, the first ratio of the "after" campaign.
 
 Whether the "before" geometry is a short distance.
 
-The inequality is strict, so a ratio of exactly 0,1 is not one. The
+The inequality is strict, so a ratio of exactly 0.1 is not one. The
 ratio is judged settled, so lengths whose ratio is the printed one in
 decimal are not taken past it by the last bits.
 

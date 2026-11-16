@@ -141,7 +141,7 @@ absorption area $A = S \bar{\alpha}$ instead of the room constant
 `R`, the two differing by $1 - \bar{\alpha}$).
 
 Written in `A` and with the hemispherical $Q = 2$ of an outlet in
-a room surface, the same expression is the `rH = 0,2 sqrt(A)` that
+a room surface, the same expression is the `rH = 0.2 sqrt(A)` that
 VDI 2081 Blatt 1 Section 6.7.3 prints for where the reverberant field of a
 ventilation opening begins.
 
@@ -244,7 +244,7 @@ is the same expression at 339 m/s.
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
 | `reverberation_time` | Reverberation time `T`, s (scalar or per-band). |
-| `speed_of_sound` | Speed of sound `c0`, m/s (default 343, giving the familiar 0,161; pass 339 for the 0,163 of VDI 2081). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default 343, giving the familiar 0.161; pass 339 for the 0.163 of VDI 2081). |
 
 **Returns:** The equivalent absorption area `A`, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 

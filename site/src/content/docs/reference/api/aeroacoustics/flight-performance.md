@@ -74,7 +74,7 @@ one of them.
 | `runway_gradient_ratio` | Runway gradient `GR`, positive uphill, dimensionless: the rise over the run between the two runway ends. |
 
 The validity envelope Doc 29 claims for the coefficients is "air
-temperatures up to 43 degrees C, aerodrome altitudes up to 6,000 ft and
+temperatures up to 43 degrees C, aerodrome altitudes up to 6 000 ft and
 across the range of weights specified in the ANP database" (B1). Nothing
 here enforces it: outside it the equations still evaluate, and the
 coefficients, not the arithmetic, are what stop being adequate.
@@ -131,7 +131,7 @@ equations' *corrected* thrust has to lift.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | above the tropopause the lapsed temperature Eq. B-4 divides by reaches absolute zero and the bracket turns negative, where raising it to a fractional power leaves the reals; Python answers that with a complex number rather than an error, and a complex pressure ratio propagates silently into every thrust of the profile. Doc 29 claims the coefficients only up to 6,000 ft anyway. |
+| ValueError | above the tropopause the lapsed temperature Eq. B-4 divides by reaches absolute zero and the bracket turns negative, where raising it to a fractional power leaves the reals; Python answers that with a complex number rather than an error, and a complex pressure ratio propagates silently into every thrust of the profile. Doc 29 claims the coefficients only up to 6 000 ft anyway. |
 | TypeError | if `altitude_ft` is not one real number. |
 
 ### Aerodrome.temperature_c_at()

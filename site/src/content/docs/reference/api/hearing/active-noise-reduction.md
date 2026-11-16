@@ -38,7 +38,7 @@ d) each octave band is the energetic average of its three one-third-octave
    bands (Formula (1)):
 
    $$
-   A_{\mathrm{total,oct},j} = -10 \lg \left[\left( 10^{-0,1 A_{\mathrm{total},f_1,j}} + 10^{-0,1 A_{\mathrm{total},f_2,j}} + 10^{-0,1 A_{\mathrm{total},f_3,j}}\right) / 3\right] \mathrm{dB} \tag{1}
+   A_{\mathrm{total,oct},j} = -10 \lg \left[\left( 10^{-0.1 A_{\mathrm{total},f_1,j}} + 10^{-0.1 A_{\mathrm{total},f_2,j}} + 10^{-0.1 A_{\mathrm{total},f_3,j}}\right) / 3\right] \mathrm{dB} \tag{1}
    $$
 
 e) the sixteen octave-band data sets go into ISO 4869-2 at a protection
@@ -51,9 +51,9 @@ the standard, and that workbook interpolates **linearly in frequency, in
 hertz**, between the nominal centre frequencies, not on a logarithmic axis:
 80 Hz sits 27 % of the way from 63 Hz to 125 Hz, not a third of it. This
 follows the workbook. The workbook also rounds each interpolated value and
-each octave result to 0,1 dB, and the mean and standard deviation before it
+each octave result to 0.1 dB, and the mean and standard deviation before it
 forms the APV; this computes at full precision throughout, which moves an
-octave-band total by less than 0,1 dB.
+octave-band total by less than 0.1 dB.
 
 **The uncertainty (Annex A).** Formula (A.1) is the model of ISO 4869-1
 applied to the active insertion loss, and within one laboratory the combined
@@ -196,7 +196,7 @@ the lower-ear active insertion loss is added to it; each octave band is
 the energetic average of its three one-third-octave bands,
 
 $$
-A_{\mathrm{total,oct},j} = -10 \lg \left[\left( \sum_{i=1}^{3} 10^{-0,1 A_{\mathrm{total},f_i,j}}\right) / 3\right] \mathrm{dB} \tag{1}
+A_{\mathrm{total,oct},j} = -10 \lg \left[\left( \sum_{i=1}^{3} 10^{-0.1 A_{\mathrm{total},f_i,j}}\right) / 3\right] \mathrm{dB} \tag{1}
 $$
 
 and the octave-band totals of all subjects go into ISO 4869-2 at 84 %. The

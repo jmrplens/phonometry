@@ -20,16 +20,16 @@ the source, and everything else reflecting has to be further than two.*
 A musician a metre from their own instrument hears the direct sound and,
 some milliseconds later, whatever the platform and the enclosure send back.
 Annex C makes that a ratio, measured with the source and the microphone
-1,0 m apart at the same height, with nothing reflecting within 2 m:
+1.0 m apart at the same height, with nothing reflecting within 2 m:
 
 $$
 \mathrm{ST}_\mathrm{Early} = 10 \lg \left[
-    \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
-         {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB},
+    \frac{\int_{0.020}^{0.100} p^2(t)\ \mathrm{d}t}
+         {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t} \right] \text{dB},
 \qquad
 \mathrm{ST}_\mathrm{Late} = 10 \lg \left[
-    \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
-         {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t} \right] \text{dB}.
+    \frac{\int_{0.100}^{1.000} p^2(t)\ \mathrm{d}t}
+         {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t} \right] \text{dB}.
 $$
 
 Early support relates to ensemble, the ease of hearing the other players;
@@ -65,8 +65,8 @@ and −24 dB to −10 dB for the late one, and prints "Not known" for both
 just-noticeable differences, so this module has none. C.2.4 asks for the
 250 Hz to 2 kHz octave bands, which is what `limits` defaults to, and puts
 the standard deviation of one band in one position at 1 dB and of the
-frequency- and position-averaged single number at 0,3 dB. That pair closes:
-1 dB over the root of four bands in three positions is 0,2887 dB, which
+frequency- and position-averaged single number at 0.3 dB. That pair closes:
+1 dB over the root of four bands in three positions is 0.2887 dB, which
 rounds to the printed figure, and it holds for exactly those twelve readings.
 
 ## 2. Two integration limits that are in the equations and not in the prose
@@ -77,13 +77,13 @@ sentence beside the equation that makes it.
 C.2.1 calls the early support "the reflected energy within the first 0,1 s",
 but Equation (C.1) starts at 20 ms, not at the 10 ms where the direct window
 ends. The interval between them counts for nothing, and taking the prose at
-its word instead adds 17 % more energy in a 2 s hall, worth 0,68 dB against
+its word instead adds 17 % more energy in a 2 s hall, worth 0.68 dB against
 the 1 dB standard deviation C.2.4 estimates for a single reading.
 
 C.2.2 calls the late support "the reflected energy after the first 0,1 s"
 with no upper bound at all, but Equation (C.2) stops at one second. That one
-costs 0,01 dB at $T = 2$ s, where the decay is already 30 dB down by then,
-and grows to 1,0 dB at $T = 8$ s: it separates cathedrals, not concert
+costs 0.01 dB at $T = 2$ s, where the decay is already 30 dB down by then,
+and grows to 1.0 dB at $T = 8$ s: it separates cathedrals, not concert
 halls.
 
 The equations govern, and
@@ -117,11 +117,11 @@ random process, and Clause 7.1 says how much of the answer that randomness
 owns:
 
 $$
-\sigma(T_{20}) = 0{,}88\, T_{20}
-    \sqrt{\frac{1 + 1{,}90/n}{N B T_{20}}},
+\sigma(T_{20}) = 0.88\, T_{20}
+    \sqrt{\frac{1 + 1.90/n}{N B T_{20}}},
 \qquad
-\sigma(T_{30}) = 0{,}55\, T_{30}
-    \sqrt{\frac{1 + 1{,}52/n}{N B T_{30}}},
+\sigma(T_{30}) = 0.55\, T_{30}
+    \sqrt{\frac{1 + 1.52/n}{N B T_{30}}},
 $$
 
 with $B$ the filter bandwidth, $n$ the decays measured in each position and
@@ -131,7 +131,7 @@ rather than receivers alone.
 ```python
 from phonometry import room
 
-# The 1 kHz octave: the clause puts B at 0,71 times the mid-band frequency.
+# The 1 kHz octave: the clause puts B at 0.71 times the mid-band frequency.
 print(room.filter_bandwidth(1000.0))                       # 710.0  Hz
 print(room.filter_bandwidth(1000.0, 3))                    # 230.0  Hz
 
@@ -166,8 +166,8 @@ print(round(float(ten) / float(many), 4))                  # 1.0733
 The two coefficient pairs are not arbitrary. ISO 3382-2:2008 prints the same
 result in general form, $\sigma(T)/T = G \sqrt{(1 + H/n)/(N B T)}$, with a
 table of $G$ and $H$ against the evaluation range and against
-$\gamma = T/T_\mathrm{det}$. The 88 % with $H = 1{,}90$ and the 55 % with
-$H = 1{,}52$ are its 20 dB and 30 dB rows in the $\gamma = 5$ column, an
+$\gamma = T/T_\mathrm{det}$. The 88 % with $H = 1.90$ and the 55 % with
+$H = 1.52$ are its 20 dB and 30 dB rows in the $\gamma = 5$ column, an
 assumption ISO 3382-1 does not print.
 
 ## 4. Where a short decay stops being measurable
@@ -193,7 +193,7 @@ print(room.min_reliable_reverberation_time(710.0, 0.05))              # 0.1  s
 ```
 
 The 125 Hz octave binds hardest, because it is the narrowest: 16 over
-88,75 Hz is 180 ms, and that is a bound the decay has to clear rather than
+88.75 Hz is 180 ms, and that is a bound the decay has to clear rather than
 one it may equal, so a room at or below 180 ms cannot have its 125 Hz
 reverberation time measured by forward analysis at all. ISO 3382-2:2008,
 7.3 NOTE relaxes the product to `B T > 4` when the filtering is

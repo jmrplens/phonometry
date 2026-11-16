@@ -19,9 +19,9 @@ inharmonic with the programme:
   sidebands at $f_2 \pm (n-1) f_1$.
 * **Difference-frequency distortion** `d_d,2`/`d_d,3` (14.12.8) from two
   equal-amplitude tones, and the **total difference-frequency distortion**
-  (14.12.10) of the standard 8 kHz / 11,95 kHz pair.
+  (14.12.10) of the standard 8 kHz / 11.95 kHz pair.
 * **Dynamic intermodulation distortion** `DIM` (14.12.9) from the 15 kHz
-  sine / 3,15 kHz square-wave test signal.
+  sine / 3.15 kHz square-wave test signal.
 
 The per-order definitions are the IEC ones (arithmetic sums of the product
 amplitudes, referenced as each clause prescribes), with the SMPTE

@@ -35,6 +35,6 @@ This is the entry of the [errata registry](/phonometry/reference/errata/) on ANS
   and its `reference_data` twin carry −3 dB as the 20 Hz type 2 lower limit,
   the stricter of the two readings, with the note beside them.
   `test_b_masks_match_reference_data` pins the two transcriptions to each
-  other. No shipped verdict moves: the realized B weighting sits 0,05 dB below
+  other. No shipped verdict moves: the realized B weighting sits 0.05 dB below
   nominal at 20 Hz and clears either reading.
 - **Status:** unreported.

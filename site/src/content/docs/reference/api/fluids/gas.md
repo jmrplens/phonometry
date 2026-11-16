@@ -20,9 +20,9 @@ so a caller who has a gas that is not air or water can still have a
 How far the closure goes
 ------------------------
 Hopkins (2007) Table A1, PDF page 634 (printed p. 607), prints both columns
-for six gases at 20 degC and 1,013 x 10^5 Pa, as its own footnote states.
-Against it, the speeds land within 0,5 m/s for all six and the densities within
-0,002 kg/m3 for the four light ones. Carbon dioxide comes out 0,7 % light and
+for six gases at 20 degC and 1.013 x 10^5 Pa, as its own footnote states.
+Against it, the speeds land within 0.5 m/s for all six and the densities within
+0.002 kg/m3 for the four light ones. Carbon dioxide comes out 0.7 % light and
 sulphur hexafluoride 2 % light.
 
 That shortfall is not an error in the arithmetic, it is the compressibility
@@ -66,8 +66,8 @@ out.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Temperature `t`, in degrees Celsius (above absolute zero). |
-| `heat_capacity_ratio` | Ratio of specific heats `gamma` (> 1). It is 1,67 for a monatomic gas, about 1,4 for a diatomic one and lower for a polyatomic one, and it is above 1 for every gas, because `gamma` is `c_p/c_v` and `c_p - c_v` is the gas constant. |
-| `molar_mass_kg_mol` | Molar mass `M`, in kg/mol (> 0). The tables print kg/mol, so 0,028 95 for dry air and not 28,95. |
+| `heat_capacity_ratio` | Ratio of specific heats `gamma` (> 1). It is 1.67 for a monatomic gas, about 1.4 for a diatomic one and lower for a polyatomic one, and it is above 1 for every gas, because `gamma` is `c_p/c_v` and `c_p - c_v` is the gas constant. |
+| `molar_mass_kg_mol` | Molar mass `M`, in kg/mol (> 0). The tables print kg/mol, so 0.028 95 for dry air and not 28.95. |
 | `static_pressure_pa` | Static pressure `p`, in pascals (> 0). When omitted, one standard atmosphere is assumed and a [`FluidAssumptionWarning`](/phonometry/reference/api/fluids/fluids/#fluidassumptionwarning) says so, because the density is proportional to it. |
 
 **Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that state, carrying a density, a speed of sound and the ratio of specific heats it was given.
@@ -84,7 +84,7 @@ out.
 *Constant* (`str`).
 
 ```python
-IDEAL_GAS_VALIDITY = "ideal gas: exact for a dilute gas and within about 1 % of a printed table for the light gases at room conditions. The density comes out light by 1 - Z, the compressibility factor's distance from unity, and that grows with the molecule: carbon dioxide is 0,7 % light and sulphur hexafluoride 2 % against Hopkins Table A1, where the speeds still land within 0,5 m/s."
+IDEAL_GAS_VALIDITY = "ideal gas: exact for a dilute gas and within about 1 % of a printed table for the light gases at room conditions. The density comes out light by 1 - Z, the compressibility factor's distance from unity, and that grows with the molecule: carbon dioxide is 0.7 % light and sulphur hexafluoride 2 % against Hopkins Table A1, where the speeds still land within 0.5 m/s."
 ```
 
 ## MOLAR_GAS_CONSTANT_J_MOL_K

@@ -36,7 +36,7 @@ speed as $\sqrt{E/\rho}$, which is the speed in a thin rod, and as
 $\sqrt{G(1-\nu)/(\rho(1-2\nu))}$, which is short of a factor 2; Formula
 (5) builds on the first and writes $E = \mathrm{v}_\mathrm{p}^2 \rho$. Both contradict
 Formula (3) of the same clause, which is right, and the two expressions of
-Formula (1) only agree with each other at $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. This module uses the relations of the continuum, which is
+Formula (1) only agree with each other at $\nu = (\sqrt{17}-1)/8 \approx 0.39$. This module uses the relations of the continuum, which is
 what Formula (3) is derived from, and the defect is registered in
 `docs/ERRATA.md`.
 
@@ -65,7 +65,7 @@ slow at every Poisson's ratio.
 | Name | Description |
 | :--- | :--- |
 | `shear_modulus_pa` | $G$, in pascals. |
-| `poisson_ratio` | $\nu$, above -1 and below 0,5. |
+| `poisson_ratio` | $\nu$, above -1 and below 0.5. |
 | `density` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $\mathrm{v}_\mathrm{p}$, in metres per second.
@@ -107,7 +107,7 @@ right.
 | `compression_wave_speed_m_s` | $\mathrm{v}_\mathrm{p}$, in metres per second. |
 | `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
 
-**Returns:** $\nu$, between -1 and 0,5. It is positive when $\mathrm{v}_\mathrm{p}$ exceeds $\sqrt{2}\,\mathrm{v}_\mathrm{s}$, as it does in every soil; a pair between $2/\sqrt{3}$ and $\sqrt{2}$ gives the negative ratio a continuum allows and a soil does not show.
+**Returns:** $\nu$, between -1 and 0.5. It is positive when $\mathrm{v}_\mathrm{p}$ exceeds $\sqrt{2}\,\mathrm{v}_\mathrm{s}$, as it does in every soil; a pair between $2/\sqrt{3}$ and $\sqrt{2}$ gives the negative ratio a continuum allows and a soil does not show.
 
 **Raises**
 
@@ -198,8 +198,8 @@ The elastic modulus from the two wave speeds, in pascals.
 
 $E = 2G(1+\nu) = \rho \mathrm{v}_\mathrm{s}^2 (3 \mathrm{v}_\mathrm{p}^2 - 4 \mathrm{v}_\mathrm{s}^2)/(\mathrm{v}_\mathrm{p}^2 - \mathrm{v}_\mathrm{s}^2)$,
 which is what Formula (5) means. As printed it reads $E = \mathrm{v}_\mathrm{p}^2 \rho$, the thin-rod relation, and that overstates the modulus of a soil
-with $\nu = 0{,}3$ by 35 % and of one with $\nu = 0{,}45$ by a
-factor of 3,8.
+with $\nu = 0.3$ by 35 % and of one with $\nu = 0.45$ by a
+factor of 3.8.
 
 **Parameters**
 

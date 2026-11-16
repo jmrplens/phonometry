@@ -372,7 +372,7 @@ is therefore not produced here; pass `alpha_s` to
 | `air_attenuation_per_m` | Power attenuation coefficient of air `m`, per band, in 1/m (`0` when no air correction was applied). |
 | `absorption_area_empty` | Equivalent sound absorption area of the empty room `A1` (Eq. (5)), per band, in square metres. |
 | `absorption_area_with_specimen` | Equivalent sound absorption area of the room containing the specimen `A2` (Eq. (7)), per band, in square metres. |
-| `alpha_s` | Sound absorption coefficient `alpha_s` (Eq. (8)/(9)), per band. It may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped. |
+| `alpha_s` | Sound absorption coefficient `alpha_s` (Eq. (8)/(9)), per band. It may exceed 1.0 (Clause 3.7 NOTE 2) and is never clamped. |
 
 ### SoundAbsorptionMeasurement.equivalent_absorption_area
 
@@ -397,7 +397,7 @@ SoundAbsorptionMeasurement.plot(
 Plot the sound absorption coefficient `alpha_s` versus frequency.
 
 Draws `alpha_s` over the one-third-octave band axis (ISO 354). Values
-above 1,0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
+above 1.0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 

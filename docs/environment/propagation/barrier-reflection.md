@@ -18,10 +18,10 @@ $DL_{RI}$ and the limits the size of the sample puts on both.
 ## 1. The set-up
 
 The loudspeaker faces the device at half its height, its front panel
-$d_S$ = 1,50 m from the **reference plane**, the plane that touches the most
+$d_S$ = 1.50 m from the **reference plane**, the plane that touches the most
 protruding parts of the device. Between them stands a vertical grid of nine
-microphones, 3 by 3 and 0,40 m apart, its centre (microphone 5) 0,25 m from the
-plane and so 1,25 m from the loudspeaker. The microphones are numbered as the
+microphones, 3 by 3 and 0.40 m apart, its centre (microphone 5) 0.25 m from the
+plane and so 1.25 m from the loudspeaker. The microphones are numbered as the
 loudspeaker sees them: 1 to 3 along the top row, 7 to 9 along the bottom.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_reflection_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_reflection_setup.svg" alt="Three views of the EN 1793-5 set-up and a list of what it records. First, a side view to scale of a 4 m device: the loudspeaker on a stand at half the height of the device, its front panel 1.50 m from the reference plane, the measurement grid 0.25 m from the plane with one microphone of each row drawn, the direct sound running 1.25 m to microphone 5, the reflection running 1.75 m, and two dashed unwanted arrivals, one diffracted over the top edge down to the top row and one reflected by the ground up to the bottom row. Second, the 4 m by 4 m sample as the loudspeaker sees it: nine microphones 0.40 m apart, numbered 1 to 3 on the top row and 7 to 9 on the bottom, microphones 1 to 6 marked as used in every band and 7 to 9 only from the 200 Hz band up, all inside the dashed circle of the sampled area of microphone 5, 1.96 m in radius. Third, the free-field record: the same loudspeaker and grid, still 1.25 m apart, turned away from every object and from the ground. The list names five records with their clauses: the directivity of the loudspeaker, nine impulse responses in front of the device for each grid position, nine more in the free field, the check with a reflecting plate and the gain check." width="100%"></picture>
@@ -32,7 +32,7 @@ back to: they are why the bottom row is left out below 200 Hz (section 4) and
 why a lower device cannot be measured as far down (section 5).*
 
 Each microphone hears the direct sound and, a little over a millisecond later,
-the reflection. The reflection has travelled further, 1,75 m against 1,25 m at
+the reflection. The reflection has travelled further, 1.75 m against 1.25 m at
 microphone 5, and has spread over a larger sphere; Formula (2) puts that back
 with $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, which Table 2 prints for every
 microphone:
@@ -49,7 +49,7 @@ print(environment.geometric_divergence_corrections().round(2))
 Whether the grid really stands where it should is checked with a reflecting
 plate on the reference plane (5.6.2.6): the delay between the direct and the
 reflected sound at each microphone, times the speed of sound, has to be within
-25 mm of the path difference of Table 3. The same check against a plate 0,25 m
+25 mm of the path difference of Table 3. The same check against a plate 0.25 m
 behind microphone 5 (`check="relative"`, 5.6.2.5) compares the direct arrivals
 at the eight outer microphones with the one at the centre.
 
@@ -127,13 +127,13 @@ samples either way, by a phase ramp over its own transform; the shift that
 best fits the 50 samples around the main peak is kept; the record is scaled so
 the two peaks are equal and subtracted. What is left is the reflection, and the
 **reduction factor** $R_\mathrm{sub}$ of Formula (6) measures how much of the direct
-sound went with it: the energy within 0,5 ms of the peak before, over the
+sound went with it: the energy within 0.5 ms of the peak before, over the
 energy there after. Below 10 dB the standard reads the subtraction as
 imperfect, and so does `subtract_direct_sound`, with a
 `BarrierReflectionWarning`.
 
 The records below stand in for a measurement at 48 kHz: a loudspeaker pulse at
-2,5 kHz, a reflection of 0,35 of the incident amplitude with its top end
+2.5 kHz, a reflection of 0.35 of the incident amplitude with its top end
 smoothed, and free-field records taken with the grid 3 µs further away, which
 is what moving the equipment does.
 
@@ -161,7 +161,7 @@ print(round(sub.shift_samples, 2), round(sub.reduction))   # -0.14 57
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_direct_sound_subtraction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_direct_sound_subtraction.svg" alt="The impulse response at microphone 5 from one millisecond before to three milliseconds after the direct sound: the record in front of the device as a wide grey line with the direct peak at zero and the reflection at about 1.45 ms, the free-field record aligned onto it and scaled as a dashed orange line lying on the direct peak, and what is left after the subtraction as a blue line, flat around zero where the direct sound was and carrying the whole reflection. A green band marks the interval from minus 0.5 to plus 0.5 ms where the reduction factor is measured, and the title gives R sub of 56.6 dB." width="92%"></picture>
 
 *The direct sound goes and the reflection stays: the subtraction found the
-0,14 sample shift and left 57 dB less of the direct sound behind.*
+0.14 sample shift and left 57 dB less of the direct sound behind.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -182,13 +182,13 @@ which the result keeps apart as `aligned_free_field` only so it can be drawn.
 ## 3. The Adrienne window
 
 Each component is cut out with the **Adrienne temporal window** of 5.5.5: a
-0,5 ms left half of a four-term Blackman-Harris window, a flat part, and a right
-half whose length is 3/7 of the flat part. The standard window is 7,9 ms long
-(0,5 + 5,18 + 2,22 ms); the one that processes all nine microphones from
-200 Hz upward is 6,0 ms (0,5 + 3,85 + 1,65 ms); the gain check of 5.5.1 uses
-1,3 ms (0,5 + 0,56 + 0,24 ms), short enough to end before the reflection
+0.5 ms left half of a four-term Blackman-Harris window, a flat part, and a right
+half whose length is 3/7 of the flat part. The standard window is 7.9 ms long
+(0.5 + 5.18 + 2.22 ms); the one that processes all nine microphones from
+200 Hz upward is 6.0 ms (0.5 + 3.85 + 1.65 ms); the gain check of 5.5.1 uses
+1.3 ms (0.5 + 0.56 + 0.24 ms), short enough to end before the reflection
 reaches the corner microphones. The **marker point** where the flat part
-begins sits 0,2 ms before the peak of the component (5.5.6); for the reflection
+begins sits 0.2 ms before the peak of the component (5.5.6); for the reflection
 the peak is placed by geometry, the direct peak plus $(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$,
 which is what makes the reference plane the conventional reflection plane of a
 device that is not flat.
@@ -229,7 +229,7 @@ $$
   and so does leaving it out.
 - $C_{\mathrm{gain},k}$ takes out a **change of gain** between the free-field and the
   in-front configurations. Formula (4) measures it as the in-front incident
-  energy over the free-field one, with the 1,3 ms window over the bands of
+  energy over the free-field one, with the 1.3 ms window over the bands of
   500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
   multiplier, and since Formula (4) makes it the gain change itself, a
   multiplier would square the change instead of removing it; the [errata
@@ -238,8 +238,8 @@ $$
   warns.
 
 In the bands of 100 Hz, 125 Hz and 160 Hz the average is over microphones 1 to
-6 with the 7,9 ms window, because the bottom row meets the ground reflection
-first; from 200 Hz it is over all nine with the 6,0 ms window.
+6 with the 7.9 ms window, because the bottom row meets the ground reflection
+first; from 200 Hz it is over all nine with the 6.0 ms window.
 
 ```python
 result = environment.reflection_index(front, free, fs, speed_of_sound=c)
@@ -254,7 +254,7 @@ directivity = environment.source_directivity_corrections(on_axis, specular, fs)
 print(directivity[4, 10].round(3))             # 1.108 at 1 kHz
 ```
 
-A reflection of 0,35 of the amplitude comes back as 0,12, its square, and
+A reflection of 0.35 of the amplitude comes back as 0.12, its square, and
 falls where the smoothing took the top end off. The result keeps
 every microphone's index (`microphone_values`, `nan` where 5.5.5 leaves a
 microphone out), every gain factor and every reduction factor, so a report can
@@ -278,7 +278,7 @@ three curves of Figure 14, without the formula behind them.
 method's authors (Garai and Guidorzi, 2000): the window's flat part and
 trailing edge last exactly the delay between the reflection and the first
 unwanted component, and its limit is the first notch in the spectrum of that
-window, 162,5 Hz for the 7,9 ms one, which the paper gives as about 160 Hz.
+window, 162.5 Hz for the 7.9 ms one, which the paper gives as about 160 Hz.
 
 The whole chain can be watched. Below, a vertical section through the
 loudspeaker and microphone 5, in front of a 4 m sample and of a 2.5 m one: the
@@ -343,25 +343,25 @@ the grid and not at its top and bottom rows:
 | Microphone 8 | about 220 Hz | 220 Hz | 201 Hz (ground) |
 
 The Figure 14 column is read off the printed curves, to about 1 %.
-Microphone 5 follows its curve within 5 % from 2,75 m up, and is 5,5 % below it
-at 2,5 m. At microphone 2 the top edge, which 5.5.7 names as a component to
+Microphone 5 follows its curve within 5 % from 2.75 m up, and is 5.5 % below it
+at 2.5 m. At microphone 2 the top edge, which 5.5.7 names as a component to
 keep out, arrives before the ground reflection and puts the limit about 3 % to
 10 % above the curve at every height; at microphone 8 the limit is a third
-below the curve at 2,5 m, 6 % below at 4,5 m and 3 % or less from 6 m up,
+below the curve at 2.5 m, 6 % below at 4.5 m and 3 % or less from 6 m up,
 below it throughout. Neither outer curve comes out of the ground reflection, the top
 edge or any mix of them at the heights of the grid, so the figure could not be
-rebuilt. For the 3,5 m barrier of 5.8 the highest limit comes out at 265 Hz
+rebuilt. For the 3.5 m barrier of 5.8 the highest limit comes out at 265 Hz
 where the standard states 300 Hz. The limit is therefore reported, not
 used to pick a band: **the lowest reliable band** $m$ of the single number
 is the caller's, and the two examples the standard gives for choosing it read
 a limit against the bands in opposite directions (the 4 m sample keeps its
-200 Hz band with a limit of 220 Hz, the 3,5 m barrier loses its 315 Hz band
+200 Hz band with a limit of 220 Hz, the 3.5 m barrier loses its 315 Hz band
 with a limit of 300 Hz), which the errata registry also records.
 
 The side edges come in with `device_length_m`, for a sample narrower than it
 is high. `reflection_sampled_area_radius_m` gives the other size that matters,
 the radius around the point of incidence that must stay free of reflecting
-objects (Formula (8)): 1,96 m for the 7,9 ms window at 340 m/s, the value of
+objects (Formula (8)): 1.96 m for the 7.9 ms window at 340 m/s, the value of
 NOTE 1 of 5.6.1.
 
 ## 6. The single number, and Annex B
@@ -371,14 +371,14 @@ from the lowest reliable band $m$ up (Formula (12)):
 
 $$
 DL_{RI} = -10 \lg\left[
-\frac{\sum_{i=m}^{18} RI_i\, 10^{0,1 L_i}}
-     {\sum_{i=m}^{18} 10^{0,1 L_i}} \right]
+\frac{\sum_{i=m}^{18} RI_i\, 10^{0.1 L_i}}
+     {\sum_{i=m}^{18} 10^{0.1 L_i}} \right]
 $$
 
 It is reported to the nearest integer and carries no category ladder. For the
 qualification sample of 4 m by 4 m the lowest band is 200 Hz, the default; a
 smaller device reports its range with the number, `DL_RI (400 - 5 000 Hz)` for
-the 3,5 m barrier of 5.8. The clause copies the 0,99 limit on the ratio from EN
+the 3.5 m barrier of 5.8. The clause copies the 0.99 limit on the ratio from EN
 1793-1, where it keeps a logarithm defined; here a device reflecting more than
 it receives would simply rate below zero, but the limit is applied as printed,
 with a warning.
@@ -420,7 +420,7 @@ print(round(u.rating_expanded_uncertainty_db, 2))                             # 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>
 
 *Twelve positions along an absorptive barrier: little comes back between
-500 Hz and 1,25 kHz, where the traffic spectrum weighs most, and the posts and
+500 Hz and 1.25 kHz, where the traffic spectrum weighs most, and the posts and
 the perforated face show above.*
 
 <details>
@@ -434,25 +434,25 @@ plt.show()
 </details>
 
 Every one of the eighteen averages of Table B.1 comes out of its twelve
-particular values: sixteen to the hundredth, and two, at 200 Hz and 2,5 kHz,
+particular values: sixteen to the hundredth, and two, at 200 Hz and 2.5 kHz,
 fall exactly on a half and are printed one down and one up, which is what
 averages of unrounded particular values would give. Formula (12) on the
-printed averages gives the 7,68 dB of Table B.2 before rounding. On the
+printed averages gives the 7.68 dB of Table B.2 before rounding. On the
 particular values themselves, which is what `annex_b.rating.rating` holds, it
-gives 7,65 dB: the 7,68 dB is Formula (12) on averages rounded to two
+gives 7.65 dB: the 7.68 dB is Formula (12) on averages rounded to two
 decimals, the resolution 5.11 reports the index to. Both round to the 8 dB
 printed. The expanded uncertainty is the reproducibility of the
-inter-laboratory test in Table A.1 times the coverage factor, 1,59 dB for the
-single number; in seven bands Table B.2 prints a hundredth less than 1,96
+inter-laboratory test in Table A.1 times the coverage factor, 1.59 dB for the
+single number; in seven bands Table B.2 prints a hundredth less than 1.96
 times the $s_\mathrm{R}$ of Table A.1, as unrounded standard deviations would give. The
 print does not say which values the example multiplied, and the library
 multiplies the printed ones.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_uncertainty.svg" alt="Bars of the expanded uncertainty U j of the sound reflection index in each of the eighteen one-third octave bands from 100 Hz to 5 kHz, from the high column of Table A.1 with a coverage factor of 1.96: 0.63 at 100 Hz, 0.35 at 125 Hz, between 0.24 and 0.31 from 160 Hz to 2.5 kHz, then 0.33, 0.39 and 0.45 at 3.15, 4 and 5 kHz. The legend states the expanded uncertainty of DL RI, 1.59 dB." width="92%"></picture>
 
-*The high column of Table A.1 times 1,96, band by band: the inter-laboratory
+*The high column of Table A.1 times 1.96, band by band: the inter-laboratory
 test agreed least at 100 Hz. The $U_j$ are in units of the index, which is a
-ratio, and the 1,59 dB of $DL_{RI}$ is a level, so the legend states it rather
+ratio, and the 1.59 dB of $DL_{RI}$ is a level, so the legend states it rather
 than the axis.*
 
 <details>
@@ -516,6 +516,6 @@ says which it is.
 - **European Committee for Standardization. (2016).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 5: Intrinsic characteristics — In situ values of sound reflection under direct sound field conditions* (EN 1793-5:2016).
   The implemented edition: the grid and its geometry (3.10 to 3.15, Tables 2 and 3), Formula (1) with the corrections of Formulas (2) to (4), the subtraction and Formula (6) of 5.5.4, the Adrienne window of 5.5.5 and Formula (7), its placement (5.5.6), the low frequency limit (5.5.7), the sampled area of Formula (8), the position checks of 5.6.2.5 and 5.6.2.6, DL_RI (5.8), Table A.1 and the example of Annex B. Read from BS EN 1793-5:2016.
 - **Garai, M., & Guidorzi, P. (2000).** European methodology for testing the airborne sound insulation characteristics of noise barriers in situ: experimental verification and comparison with laboratory data. *The Journal of the Acoustical Society of America*, *108*(3), 1054-1067. https://doi.org/10.1121/1.1286811
-  Section III.D: the window that ends where the first unwanted component arrives, and the first notch of its spectrum as the low frequency limit, about 160 Hz for the 7,9 ms window. The construction behind the low frequency limit here.
+  Section III.D: the window that ends where the first unwanted component arrives, and the first notch of its spectrum as the low frequency limit, about 160 Hz for the 7.9 ms window. The construction behind the low frequency limit here.
 - **Guidorzi, P., & Garai, M. (2013).** Advancements in sound reflection and airborne sound insulation measurement on noise barriers. *Open Journal of Acoustics*, *3*(2A), 25-38. https://doi.org/10.4236/oja.2013.32A004
   The QUIESST revision the 2016 standard adopted: the nine-microphone grid, the sub-sample alignment and the directivity correction.

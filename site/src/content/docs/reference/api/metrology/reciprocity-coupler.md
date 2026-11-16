@@ -57,7 +57,7 @@ cylinder: [`temperature_transfer_function`](/phonometry/reference/api/metrology/
 approximation (A.2) or by the full solution of the reference [A.1], which
 A.2 requires below 20 Hz unless the uncertainty component is increased
 instead, and which reproduces every entry of Table A.1 to its
-stated 0,000 01. In the plane-wave coupler the propagation coefficient and the
+stated 0.000 01. In the plane-wave coupler the propagation coefficient and the
 wave impedance of Formulas (A.3) and (A.4) carry the losses at the cylindrical
 wall, and the admittance of Formula (A.5) those at the two diaphragms.
 
@@ -124,8 +124,8 @@ tube blocked along its length by a wire has $\Delta_\mathrm{C} = 1$
 instead (B.1), which a coupler without a `capillary` stands for.
 
 Tables B.1 and B.2 tabulate $Z_{\mathrm{a,C}}$ at the reference
-conditions for tubes 50 mm and 100 mm long and 0,1667 mm, 0,20 mm and
-0,25 mm in radius; the first radius is 1/6 mm, which is what the printed
+conditions for tubes 50 mm and 100 mm long and 0.1667 mm, 0.20 mm and
+0.25 mm in radius; the first radius is 1/6 mm, which is what the printed
 values were computed with.
 
 **Parameters**
@@ -245,9 +245,9 @@ Do the coupler formulas of IEC 61094-2:2009 hold for this calibration?
 For a plane-wave coupler, Formulas (A.3) and (A.4) "are valid for the
 frequency range given by $\omega\rho a^2 > 100\eta$" (A.3), which is
 required at the lowest frequency; C.2 recommends a ratio of the distance
-between the diaphragms to the diameter of 0,5 to 0,75, reported but not
+between the diaphragms to the diameter of 0.5 to 0.75, reported but not
 required. For a large-volume coupler with the approximation (A.2), A.2
-states its accuracy for $0{,}125 < R < 8$ and $X > 5$, which
+states its accuracy for $0.125 < R < 8$ and $X > 5$, which
 is required; below 20 Hz A.2 asks for the full solution or a larger
 uncertainty component, which is reported but not required. In air, the
 conditions are checked against the domain Annex F states for its
@@ -445,7 +445,7 @@ prints, so they are not fields.
 
 For a large-volume coupler computed with Formula (A.2), whether A.2 states its accuracy.
 
-$0{,}125 < R < 8$ and $X > 5$; `None` with the full
+$0.125 < R < 8$ and $X > 5$; `None` with the full
 solution or for a plane-wave coupler.
 
 ### CouplerCheck.broadband_valid
@@ -508,7 +508,7 @@ Plot each condition as its margin to the limit it is held to.
 
 *property*
 
-For a plane-wave coupler, whether $R$ is within the 0,5 to 0,75 C.2 recommends.
+For a plane-wave coupler, whether $R$ is within the 0.5 to 0.75 C.2 recommends.
 
 `None` for a large-volume one. Advisory: it does not enter
 `passes`.
@@ -869,7 +869,7 @@ microphones (IEC 61094-2:2009 C.3, Table C.3).
 The correction is to be added to the pressure sensitivity level determined
 in the air-filled coupler of Table C.2, when it is not practical to
 determine it for the individual coupler and microphones. It is nil up to
-800 Hz and printed at five frequencies from 1 kHz to 2,5 kHz, where C.3
+800 Hz and printed at five frequencies from 1 kHz to 2.5 kHz, where C.3
 sets the upper limit of the coupler for LS1P microphones. A frequency
 within 2 % of a printed one takes its value; one between two rows is
 interpolated linearly in lg f, and flagged.
@@ -918,8 +918,8 @@ wall of the coupler as a bore of length F to the cavity. Each bore adds
 $\pi B^2 F/4$ to the volume of Formula (3) and $\pi B F$ to the
 surface the heat conduction sees, with B the front-cavity diameter of the
 microphone in it ([`coupler_transfer_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance)). For the coupler of
-Table C.2 the two bores of LS1P microphones are 2,4 % of the cavity, about
-0,1 dB on each sensitivity.
+Table C.2 the two bores of LS1P microphones are 2.4 % of the cavity, about
+0.1 dB on each sensitivity.
 
 **Attributes**
 
@@ -927,7 +927,7 @@ Table C.2 the two bores of LS1P microphones are 2,4 % of the cavity, about
 | :--- | :--- |
 | `length_m` | The length of the cavity, in m (dimension E). |
 | `diameter_m` | Its diameter, in m (dimension C). |
-| `port_length_m` | The length of the bore between each microphone face and the cavity, in m (dimension F of Table C.2: 0,80 mm for LS1P, 0,40 mm for LS2P); zero for microphones whose faces close the cavity. |
+| `port_length_m` | The length of the bore between each microphone face and the cavity, in m (dimension F of Table C.2: 0.80 mm for LS1P, 0.40 mm for LS2P); zero for microphones whose faces close the cavity. |
 | `capillary` | The capillary tubes, or `None`. |
 | `volume_m3` | The measured volume of the cavity of length E, without the bores and the front cavities, in m³, or `None` for the cylinder of `length_m` and `diameter_m`. A volume measured between the two microphone faces includes the bores: pass it with `port_length_m=0`. |
 | `surface_area_m2` | Its measured surface, in m², or `None` for that of the closed cylinder; measured between the faces, with `port_length_m=0` as well. |
@@ -1204,7 +1204,7 @@ $$
 (2\pi f_0)^2 = (m_\mathrm{a} c_\mathrm{a})^{-1},\qquad V_\mathrm{eq} = c_\mathrm{a}\kappa_\mathrm{r} p_\mathrm{s,r},\qquad d = r_\mathrm{a}\,2\pi f_0\,c_\mathrm{a}
 $$
 
-E.4 states this representation is generally sufficient up to about 1,3
+E.4 states this representation is generally sufficient up to about 1.3
 times the resonance frequency.
 
 **Attributes**
@@ -1351,9 +1351,9 @@ diffusivity of the gas.
 `method="exact"` (default) sums the full solution of the annex's
 reference [A.1], which A.2 requires below 20 Hz unless the uncertainty
 component is increased instead, and which reproduces all 96
-entries of Table A.1 to the 0,000 01 the annex states for them.
+entries of Table A.1 to the 0.000 01 the annex states for them.
 `method="approximation"` is Formula (A.2), whose modulus the annex
-states accurate to 0,01 % for $0{,}125 < R < 8$ and $X > 5$;
+states accurate to 0.01 % for $0.125 < R < 8$ and $X > 5$;
 its first two terms are the approximation the annex allows for a coupler
 that is not a right circular cylinder.
 

@@ -275,7 +275,7 @@ the day you read it in `consulted`; the row's source cites both.
 
 ## Decimal commas and a corrupt text layer
 
-A sheet printed in Spanish, German or French writes 0,85, and a JSON number
+A sheet printed in Spanish, German or French writes "0,85", and a JSON number
 never does: in JSON write 0.85, and a text "0,85" is refused rather than
 guessed. A CSV file declares its decimal mark in the header; with a comma,
 its delimiter is a semicolon or a tab.

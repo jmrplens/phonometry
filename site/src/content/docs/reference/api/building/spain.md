@@ -73,7 +73,7 @@ sound pressure level, and reverberation time in classrooms, conference halls,
 dining rooms and restaurants.
 
 **Window size (Catálogo de Elementos Constructivos).** Windows are tested on
-about 1,8 m2 specimens; larger windows insulate less, and the CEC corrects
+about 1.8 m2 specimens; larger windows insulate less, and the CEC corrects
 `RA` and `RA,tr` by 0 to -3 dB by total window area.
 
 :::note
@@ -436,18 +436,18 @@ db_hr_reverberation_requirement(
 
 Reverberation or absorption requirement (DB-HR 2.2).
 
-Classrooms and conference halls under 350 m3 must not exceed 0,7 s empty
-(0,5 s with the seating installed); restaurants and dining rooms 0,9 s.
+Classrooms and conference halls under 350 m3 must not exceed 0.7 s empty
+(0.5 s with the seating installed); restaurants and dining rooms 0.9 s.
 Common areas of residential-public, educational and hospital buildings
 that share doors with protected rooms must provide an equivalent absorption
-area of at least 0,2 m2 per cubic metre of room volume.
+area of at least 0.2 m2 per cubic metre of room volume.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `room_use` | `"classroom"` (or `"conference_hall"`), `"restaurant"` (or `"dining_room"`) or `"common_area"`. |
-| `furnished` | For a classroom or conference hall, include the seating (the 0,5 s limit). |
+| `furnished` | For a classroom or conference hall, include the seating (the 0.5 s limit). |
 
 **Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement).
 
@@ -718,10 +718,10 @@ window_size_correction(area: float) -> int
 
 Window-size correction of `RA` / `RA,tr`, in dB (CTE CEC).
 
-Windows are tested on specimens of about 1,8 m2; a larger window insulates
+Windows are tested on specimens of about 1.8 m2; a larger window insulates
 less. The Catálogo de Elementos Constructivos of the CTE corrects the
-catalogue value by 0 dB up to 2,7 m2, -1 dB over 2,7 to 3,6 m2, -2 dB over
-3,6 to 4,6 m2 and -3 dB above 4,6 m2.
+catalogue value by 0 dB up to 2.7 m2, -1 dB over 2.7 to 3.6 m2, -2 dB over
+3.6 to 4.6 m2 and -3 dB above 4.6 m2.
 
 **Parameters**
 

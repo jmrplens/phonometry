@@ -297,8 +297,8 @@ Field non-uniformity $F_\mathrm{S} \le 2$ (Eq. C.4).
 
 Scan-density convergence $0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2$ (Eq. C.5).
 
-Judged settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
-in binary, and the criterion includes 1,2.
+Judged settled: 2.46 / 2.05 is 1.2 in decimal and a last bit over it
+in binary, and the criterion includes 1.2.
 
 ### PrecisionCriteria.qualified
 

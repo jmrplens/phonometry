@@ -42,39 +42,39 @@ and [`SoundLevelMeterPeriodicVerification.failed`](/phonometry/reference/api/met
 of IEC 61672-3 points to and the maximum of its Table B.1:
 
 * `acoustic_weighting` (12): the relative frequency weighting at 125 Hz and
-  8 kHz, relative to 1 kHz (12.7, 12.15), against Table 3, with 0,60 dB and
-  0,70 dB;
+  8 kHz, relative to 1 kHz (12.7, 12.15), against Table 3, with 0.60 dB and
+  0.70 dB;
 * `electrical_weighting` (13): every frequency weighting the meter provides
   at the octave frequencies of 13.4 (63 Hz to 16 kHz for class 1, to 8 kHz for
-  class 2), against Table 3, with 0,60 dB up to 4 kHz, 0,70 dB above it and
-  1,00 dB above 10 kHz;
-* `weighting_at_1khz` (14.2): C and Z against A at 1 kHz, 5.5.9, +/-0,2 dB,
-  with 0,20 dB;
+  class 2), against Table 3, with 0.60 dB up to 4 kHz, 0.70 dB above it and
+  1.00 dB above 10 kHz;
+* `weighting_at_1khz` (14.2): C and Z against A at 1 kHz, 5.5.9, +/-0.2 dB,
+  with 0.20 dB;
 * `time_weighting_at_1khz` (14.3): S and time-averaged against F at 1 kHz,
-  5.8.3, +/-0,1 dB, with 0,20 dB (the maximum uncertainty is larger than the
+  5.8.3, +/-0.1 dB, with 0.20 dB (the maximum uncertainty is larger than the
   acceptance limit, as the page prints them);
 * `long_term_stability` (15): the final minus the initial indication over
-  25 min to 35 min, 5.14.2, +/-0,1 dB (class 1) or +/-0,3 dB (class 2), with
-  0,10 dB;
+  25 min to 35 min, 5.14.2, +/-0.1 dB (class 1) or +/-0.3 dB (class 2), with
+  0.10 dB;
 * `level_linearity` (16): the level linearity deviations at 8 kHz on the
-  reference level range, 5.6.5, +/-0,8 dB or +/-1,1 dB, with 0,30 dB; and
+  reference level range, 5.6.5, +/-0.8 dB or +/-1.1 dB, with 0.30 dB; and
   the absence of an overload or under-range indication within the linear
   operating range the instruction manual states (16.4; IEC 61672-1 5.6.10);
 * `range_linearity` (17): the level linearity deviations including the
   level range control, the same limits;
 * `toneburst` (18): the 4 kHz toneburst responses of 18.5 to 18.7 less the
-  reference responses of Table 4, against its limits, with 0,30 dB;
+  reference responses of Table 4, against its limits, with 0.30 dB;
 * `c_peak` (19): $L_\mathrm{Cpeak} - L_\mathrm{C}$ for one cycle at
   8 kHz and the two half cycles at 500 Hz, less the reference differences of
-  Table 5, against its limits, with 0,35 dB; and the absence of an overload
+  Table 5, against its limits, with 0.35 dB; and the absence of an overload
   indication while those signals are applied (19.3, 19.5);
 * `overload` (20): the difference between the positive and the negative
   one-half-cycle input levels that first cause an overload indication,
-  5.11.3, 1,5 dB either way, with 0,25 dB; and the latching of the indicator
+  5.11.3, 1.5 dB either way, with 0.25 dB; and the latching of the indicator
   (20.5);
 * `high_level_stability` (21): the final minus the initial indication over
-  5 min near the top of the least-sensitive range, 5.15.2, +/-0,1 dB or
-  +/-0,3 dB, with 0,10 dB.
+  5 min near the top of the least-sensitive range, 5.15.2, +/-0.1 dB or
+  +/-0.3 dB, with 0.10 dB.
 
 **What is recorded, not graded.** The indications at the calibration check
 frequency before and after adjustment (Clause 10) and the self-generated
@@ -211,7 +211,7 @@ One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 | Name | Description |
 | :--- | :--- |
 | `requirement` | The requirement, as the "Requirement" column prints it. |
-| `reference` | The "Table or subclause" column, as printed (decimal commas included). |
+| `reference` | The "Table or subclause" column as printed, but for its one decimal, which takes the point of English text where the page prints a comma: the last directional band reads >8 kHz to 12.5 kHz. |
 | `max_uncertainty` | The maximum-permitted expanded uncertainty for a coverage probability of 95 %, in `unit`. |
 | `unit` | `"dB"`, or `"dB/s"` for the two decay rates of 5.8.2, which the page prints in one cell ("3,50 dB/s for F; 0,40 dB/s for S") and this table in two rows. |
 | `lower_hz` | The lower end of the frequency range the row covers, in hertz, or `None` for a row that is not banded by frequency. |
@@ -542,7 +542,7 @@ As IEC 61672-1:2013 Figure C.1 draws its examples: the acceptance
 limits, the deviation from the design goal, the actual uncertainty as
 its error bar and the maximum permitted as the band behind it. The
 electrical test of the frequency weightings, whose limits run from
-0,7 dB to 16 dB, is drawn as each result's margin to its nearer limit
+0.7 dB to 16 dB, is drawn as each result's margin to its nearer limit
 instead. A result whose uncertainty exceeds its maximum is drawn
 hollow, as 4.3 forbids using it, and a result of
 `over_max_by_correction_data` as one that did not conform

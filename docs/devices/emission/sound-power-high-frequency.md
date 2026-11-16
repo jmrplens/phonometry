@@ -178,10 +178,10 @@ plt.show()
 Do not read $\alpha$ from Tables 1 and 2. Forty-three of their cells are
 misprinted, and in the same way: a 0 that Annex A gives is printed as
 another digit, most often the fourth decimal as the third repeated ("0,027 7"
-where Annex A gives 0,027 0). Three cells whose Annex A value ends in two
-zeros are printed 10 % high: "0,033 0" for 0,030 0, "0,04 4" for 0,040 0
-and "0,05 50" for 0,050 0. The last of them, at 21 500 Hz, 27 °C and 60 %,
-is the largest error in the tables, 0,005 0 Np/m, and read into Formula (7)
+where Annex A gives 0.027 0). Three cells whose Annex A value ends in two
+zeros are printed 10 % high: "0,033 0" for 0.030 0, "0,04 4" for 0.040 0
+and "0,05 50" for 0.050 0. The last of them, at 21 500 Hz, 27 °C and 60 %,
+is the largest error in the tables, 0.005 0 Np/m, and read into Formula (7)
 any of the three raises the level by at least 0.41 dB. The whole list, cell by cell, is in the
 [errata registry](../../ERRATA.md). The 581 correct cells hold a
 smaller surprise: they reproduce digit for digit only with the temperature

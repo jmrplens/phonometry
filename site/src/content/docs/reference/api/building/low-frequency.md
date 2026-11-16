@@ -38,7 +38,7 @@ Formula (13), Part 2 Formula (16) and Part 3 Formula (5) print it identically,
 only the subscripts of the level symbols changing:
 
 $$
-L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0,1 L_\mathrm{Corner}} + (2 \cdot 10^{0,1 L})}{3} \right]
+L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0.1 L_\mathrm{Corner}} + (2 \cdot 10^{0.1 L})}{3} \right]
 $$
 
 **The reverberation time.** Under the same 25 m³ trigger, Part 1 Clause 10.4,
@@ -220,12 +220,12 @@ Part 1 Formula (13), Part 2 Formula (16) and Part 3 Formula (5), which are
 the same expression under three sets of subscripts:
 
 $$
-L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0,1 L_\mathrm{Corner}} + (2 \cdot 10^{0,1 L})}{3} \right]
+L_\mathrm{LF} = 10 \lg \left[ \frac{10^{0.1 L_\mathrm{Corner}} + (2 \cdot 10^{0.1 L})}{3} \right]
 $$
 
 The two levels are weighted one third to two thirds, so the result
 degenerates to `L` when the corner level equals it, rises with the corner
-level and can never fall further than $10 \lg(2/3) = -1,76$ dB below
+level and can never fall further than $10 \lg(2/3) = -1.76$ dB below
 `L`, however quiet the corners are.
 
 **Parameters**

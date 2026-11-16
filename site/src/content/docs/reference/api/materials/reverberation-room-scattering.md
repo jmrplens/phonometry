@@ -378,7 +378,7 @@ $$
 
 Following the presentation rule of Clause 8.3, negative results are
 truncated to 0 while values greater than 1 (which can occur through edge
-effects, Clause 6.3.2) are **kept** and reported. Rounding to 0,01 for a
+effects, Clause 6.3.2) are **kept** and reported. Rounding to 0.01 for a
 results table is left to the caller.
 
 **Parameters**

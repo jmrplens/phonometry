@@ -56,8 +56,8 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
   in km/h**".
 - **The problem:** dimensionally impossible. A frequency in hertz is a speed
   in metres per second divided by a wavelength in metres; reading the speed in
-  km/h into $f = v/\lambda$ multiplies every frequency by 3,6, placing the
-  whole roughness spectrum a factor 3,6 too high in frequency, which is more
+  km/h into $f = v/\lambda$ multiplies every frequency by 3.6, placing the
+  whole roughness spectrum a factor 3.6 too high in frequency, which is more
   than an octave and a half.
 - **Evidence:** verified on PDF page 19 (printed p. L 168/19) and PDF page 21
   (printed p. L 168/21) of Directive (EU) 2015/996. The corrigendum of OJ L 5,
@@ -101,7 +101,7 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
   1.7.2015, p. 138).
 - **The print:** Source A **31,4** dB and Source B **30,7** dB.
 - **The problem:** both are about 50 dB below their own neighbours in the same
-  column: 90,5 / 89,5 dB at 5 000 Hz and 81,2 / 80,6 dB at 8 000 Hz. No
+  column: 90.5 / 89.5 dB at 5 000 Hz and 81.2 / 80.6 dB at 8 000 Hz. No
   physical traction source has a 50 dB notch one third of an octave wide, and
   no other column of the table has anything comparable. The leading digit 8
   was lost.
@@ -111,10 +111,10 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
   Directive (EU) 2021/1226 Annex point (20)(f), verified on PDF page 39
   (printed p. L 269/103) of that Directive, replaces the 4th column, 25th row
   by "81,4" and the 5th column, 25th row by "80,7", restoring the monotone
-  roll-off. The same two values appear as 31,41 and 30,71 in the IMAGINE
+  roll-off. The same two values appear as 31.41 and 30.71 in the IMAGINE
   catalogue file the Commission distributes with its reference source module,
   so the error predates the Directive.
-- **Library behaviour:** ships the corrected 81,4 / 80,7 and pins them,
+- **Library behaviour:** ships the corrected 81.4 / 80.7 and pins them,
   together with the assertion that neither value is more than 10 dB from
   either neighbour, in `test_table_g5_carries_the_2021_correction_at_6300_hz`.
 - **Status:** unreported (corrected by the issuing body in 2021).
@@ -128,7 +128,7 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
   and **1,2 mm**.
 - **The problem:** neither series is the preferred one. The nominal 1/3-octave
   centres of IEC 61260-1 are 315, 3 150 and 6 300 Hz, and the R10 preferred
-  numbers around those wavelengths are 125, 12,5, 3,15 and 1,25 mm. The
+  numbers around those wavelengths are 125, 12.5, 3.15 and 1.25 mm. The
   Commission's own catalogue files, distributed with the reference source
   module, use the preferred wavelength series throughout.
 - **Evidence:** verified on PDF pages 129, 130, 131, 133, 134, 135, 137 and
@@ -139,7 +139,7 @@ These are the 6 entries of the [errata registry](/phonometry/reference/errata/) 
   (f) and (g) replace the three frequency labels in the remaining sections and
   in Tables G-5 and G-6; the tables it replaces outright carry the preferred
   wavelengths. But point (20)(a) replaces only "the second table" of Table
-  G-1, so the wavelength labels 120, 12, 3,2 and 1,2 mm still stand on the
+  G-1, so the wavelength labels 120, 12, 3.2 and 1.2 mm still stand on the
   **first** table of G-1, the wheel roughness $L_{r,VEH,i}$, which is the one
   table that keeps them.
 - **Library behaviour:** the frequency grid is the IEC 61260-1 one throughout.

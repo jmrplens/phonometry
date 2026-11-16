@@ -122,7 +122,7 @@ The verdict: every octave with a printed limit meets it.
 
 Whether each octave meets its limit.
 
-Judged settled: three readings 6,0 dB apart in decimal are within the
+Judged settled: three readings 6.0 dB apart in decimal are within the
 6 dB of 125 Hz whichever way the last bits of their difference fall.
 An octave with no printed limit is reported as within it.
 
@@ -423,10 +423,10 @@ Both formulas of the annex, which differ only in whether $D_p$ or
 $D'_p$ is substituted:
 
 $$
-D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_{pi})}
+D_{p\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0.1 (L_i - A_i - D_{pi})}
 $$
 
-with $L_A = 10 \lg \sum_i 10^{0,1 (L_i - A_i)}$ the A-weighted total
+with $L_A = 10 \lg \sum_i 10^{0.1 (L_i - A_i)}$ the A-weighted total
 of the assumed spectrum. The sign of $A_i$ is the trap: the annex
 prints an attenuation, positive where the weighting takes level away, while
 this library's band corrections are the correction itself, so
@@ -506,7 +506,7 @@ internal_noise_level(
 
 The noise a cabin makes on its own, $L_{pA}$ of 6.7.
 
-The A-weighted levels measured at the three positions on the 0,3 m sphere,
+The A-weighted levels measured at the three positions on the 0.3 m sphere,
 or over the inclined circular path, averaged on a mean-square basis with
 the external sources switched off.
 
@@ -516,7 +516,7 @@ correction is made **only** while the margin stays inside
 [`INTERNAL_NOISE_CORRECTION_WINDOW_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#internal_noise_correction_window_db): past the top of that window
 the correction is under a tenth of a decibel and the clause does not ask
 for it. The correction itself is the $K_1$ of ISO 3741,
-$-10 \lg (1 - 10^{-0,1 \Delta L})$, applied to the A-weighted total
+$-10 \lg (1 - 10^{-0.1 \Delta L})$, applied to the A-weighted total
 rather than band by band, which is what makes it a separate line here from
 [`phonometry.emission.reverberation_background_correction`](/phonometry/reference/api/power/sound-power-reverberation/#reverberation_background_correction).
 

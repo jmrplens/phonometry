@@ -20,7 +20,7 @@ This is the entry of the [errata registry](/phonometry/reference/errata/) on Mec
   (11), on the facing page, reads
   $F := f/f_{cr}\ ;\ Z_m := f_{cr}m/Z_0 = (f_{cr}d/Z_0)\,\rho$.
 - **The problem:** with this row's own density and $f_{cr}d$, that definition
-  gives $1250 \times 48 / 413 = 145$. The printed 1220 is 8,4 times it.
+  gives $1250 \times 48 / 413 = 145$. The printed 1220 is 8.4 times it.
 - **Evidence:** the same expression reproduces the rest of the table over four
   decades of $Z_m$, from 20 to 1438: thirty-six of the other thirty-seven rows
   within 5 per cent and thirty-four within 3 per cent. The one other row
@@ -29,7 +29,7 @@ This is the entry of the [errata registry](/phonometry/reference/errata/) on Mec
   $f_{cr}d$ is the range 31 to 35, and 85 is the top of the band the equation
   gives rather than its middle. The conclusion does not turn on the value
   taken for $Z_0$, which the equation writes as a symbol: 400 gives 150 and
-  415 gives 144,6, against a printed 1220. Verified against the page as
+  415 gives 144.6, against a printed 1220. Verified against the page as
   printed on PDF pages 544 and 545 (printed pp. 529 and 530) of Mechel
   (2008), *Formulas of Acoustics*, 2nd edition.
 - **Consequence for the book's own tables:** that one cell. Nothing else in

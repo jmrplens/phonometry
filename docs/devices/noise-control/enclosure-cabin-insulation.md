@@ -133,17 +133,17 @@ print(verdict.passes)                     # False
 ```
 
 That room cannot carry a precision determination. It can carry a survey one,
-which asks 6,6 rather than 45,6, and the answer that comes back from it is an
+which asks 6.6 rather than 45.6, and the answer that comes back from it is an
 A-weighted value with no spectrum behind it. The two facts belong together, and
 reading Table 1 after Annex C is how they stay together.
 
 Where nobody measured the absorption, Table C.2 gives seven room descriptions
-and their coefficients, from 0,05 for an empty room with smooth hard walls to
-0,5 for a room with large amounts of sound-absorbing material on ceiling and
+and their coefficients, from 0.05 for an empty room with smooth hard walls to
+0.5 for a room with large amounts of sound-absorbing material on ceiling and
 walls. They are `ROOM_ABSORPTION_ESTIMATES`, transcribed from that table and
 from no other. The 2010 editions of the sound power standards print a longer
 table under the same title: Table A.1 of ISO 3744:2010 and of ISO 3746:2010 has
-eight rows, adding 0,30 for a room with an absorbing ceiling and bare walls,
+eight rows, adding 0.30 for a room with an absorbing ceiling and bare walls,
 and words two of the seven differently.
 
 ### How the measurement goes
@@ -264,7 +264,7 @@ worth depends on the spectrum it stands in. The annexes answer that objection
 directly. Given a spectrum, the estimated insulation is
 
 $$
-D_{p\mathrm{A},\mathrm{e}} = L_\mathrm{A} - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
+D_{p\mathrm{A},\mathrm{e}} = L_\mathrm{A} - 10 \lg \sum_i 10^{0.1\left(L_i - A_i - D_{pi}\right)}
 $$
 
 with $L_\mathrm{A}$ the A-weighted total of the same spectrum. The sign of $A_i$ is the
@@ -280,7 +280,7 @@ print(round(noise_control.estimated_cabin_noise_insulation(
 ), 1))                                             # 25.6 dB
 ```
 
-Against that spectrum the cabin is worth 25,6 dB(A), where its rating is 28. The
+Against that spectrum the cabin is worth 25.6 dB(A), where its rating is 28. The
 two numbers answer different questions, and the rating is not the one to put in
 a hearing-conservation calculation.
 

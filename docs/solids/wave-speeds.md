@@ -16,7 +16,7 @@
 You have a table. It gives you a wave speed of 5 270 m/s for steel, a density
 and a Poisson ratio, and no Young's modulus. Your function wants the modulus.
 Another table gives you 200 GPa and no speed, and the function you are feeding
-next wants the speed. A third gives you 12,3 m Hz and neither.
+next wants the speed. A third gives you 12.3 m Hz and neither.
 
 All three describe the same steel. Getting from one to another takes one line
 of algebra, which is one line of algebra too many to be doing from memory,
@@ -118,7 +118,7 @@ from phonometry import solids
 print(f"{solids.thickness_critical_frequency_product(5270.0):.2f}")  # 12.31
 ```
 
-Hopkins Table A2 prints 12,3 m Hz for that steel and states in its heading that
+Hopkins Table A2 prints 12.3 m Hz for that steel and states in its heading that
 the column assumes $c_0 = 343$ m/s.
 
 $$
@@ -126,12 +126,12 @@ h f_\mathrm{c} = \frac{c_0^2 \sqrt{12}}{2 \pi\, c_{\mathrm{L,p}}}
 $$
 
 The constant matters. ISO 12354-1 writes the critical frequency with a rounded
-1,8 in the denominator, which is $2\pi/\sqrt{12} = 1{,}8138$ to two figures. The
+1.8 in the denominator, which is $2\pi/\sqrt{12} = 1.8138$ to two figures. The
 rounded form is the standard's own arithmetic and
 `phonometry.building.critical_frequency` keeps it, because a measurement that
 claims to follow the standard has to. Here the exact constant is the right one:
 it reproduces all twenty-five rows of Table A2, and the rounded one misses the
-steel row by 0,8 per cent.
+steel row by 0.8 per cent.
 
 ## The table, and what it does not say
 
@@ -190,8 +190,8 @@ as though a page had printed it.
 ### The key names the book on purpose
 
 Seven of the nine tables print a row named Steel, and they are not the same
-steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
-Cremer a modulus of 210 GPa and 0,31, Bies 207 GPa for mild steel and 210 for
+steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0.28,
+Cremer a modulus of 210 GPa and 0.31, Bies 207 GPa for mild steel and 210 for
 one per cent carbon, Long a speed and a density and no modulus at all, Norton &
 Karczub 195 GPa in their appendix and nothing but a loss factor in their Table
 6.1, and Vigran a modulus printed as a range.
@@ -229,13 +229,13 @@ Cremer's own column is the bar speed, which his Eq. (3.32) defines as
 the cross-sectional contraction is unconstrained, so `II` is a rod and not a
 plate. Against the pure longitudinal speed of an unbounded solid he puts the
 gap at 16 per cent for `nu = 0,3`, which is what the three functions above
-reproduce; the plate speed sits between them, 4,8 per cent above the bar.
+reproduce; the plate speed sits between them, 4.8 per cent above the bar.
 
 ### A page gets as far as its own columns allow
 
 Mechel prints a modulus and no Poisson ratio, so a row of his gets as far as
 the bar speed and stops. The plate and the bulk speed would need a ratio he
-does not print, and a 0,3 would reproduce his table nicely and would be a
+does not print, and a 0.3 would reproduce his table nicely and would be a
 number he did not give. Fourteen of his thirty-eight rows do not even get that
 far, because the page prints their density or their modulus as a range and
 nothing follows from a cell the book declined to collapse.
@@ -252,7 +252,7 @@ What crosses between Hopkins and Mechel with no assumption at all is `h f_c`,
 the product of a plate's thickness and its critical frequency, which Hopkins
 prints as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed
 of sound and no conversion, which makes it the cheapest cross-check there is
-between books that share no other column: for steel, both print 12,3 m Hz.
+between books that share no other column: for steel, both print 12.3 m Hz.
 Cremer prints no such column, so his rows carry a derived one and join that
 comparison only through the heading assumption Hopkins states. Arau prints the
 critical frequency of a one centimetre plate instead of the product, which is
@@ -279,8 +279,8 @@ for hopkins_key, arau_key in [("aluminium", "aluminio"), ("brick", "ladrillo_mac
 Bies prints one column headed "Internal-*in situ* Loss factor", and every cell
 in it holds two numbers rather than an interval. His footnote says which is
 which: use the upper limit for panels used in building construction and the
-lower for panels welded together in an enclosure. For steel they are 0,0001 and
-0,01, so reading them as a range of the internal loss factor would be a factor
+lower for panels welded together in an enclosure. For steel they are 0.0001 and
+0.01, so reading them as a range of the internal loss factor would be a factor
 of a hundred.
 
 ```python
@@ -290,7 +290,7 @@ print(steel.loss_factor, steel.in_situ_loss_factor)
 ```
 
 His internal end is where the other books put the same number: Cremer measures
-steel's flexural loss factor between 0,2 and 3 times 10⁻⁴, and Mechel prints
+steel's flexural loss factor between 0.2 and 3 times 10⁻⁴, and Mechel prints
 1 times 10⁻⁴.
 
 ### When the page does not say which
@@ -330,7 +330,7 @@ A materials table is not a list of measurements, and this one says so. Most of
 Hopkins' Poisson ratios and most of his loss factors carry a footnote whose
 whole text is "Estimate": of the twenty-five rows, only aluminium, glass,
 mortar and steel print a Poisson ratio the book stands behind. The catalogue
-keeps that distinction, because a 0,2 read as a measurement will be trusted
+keeps that distinction, because a 0.2 read as a measurement will be trusted
 further than Hopkins trusts it. What a source claims for a cell is its
 `basis`, and `basis_of` reads it: `"estimated"` for a footnoted cell, and an
 empty string where the page says nothing about how the number was obtained.
@@ -418,15 +418,15 @@ for row in solids.solids_named("Tin"):
 # norton 45.0 7300.0
 ```
 
-The densities agree to 0,3 per cent, so nobody has confused the material, and
-each book is consistent with itself: Cremer's 4,4 GPa reproduces his own
+The densities agree to 0.3 per cent, so nobody has confused the material, and
+each book is consistent with itself: Cremer's 4.4 GPa reproduces his own
 printed 780 m/s, his shear modulus and his transverse speed; Bies' 54
 reproduces his printed 2 720 m/s exactly; Norton & Karczub's 45 reproduces
 their printed 2 500 m/s to within one per cent; and Mechel's `h f_c` of 81 m Hz
-follows from 4,4 and not from 54. No page contradicts itself, so this is not an
+follows from 4.4 and not from 54. No page contradicts itself, so this is not an
 errata to register and the catalogue keeps all four readings.
 
-The rest of the catalogue does say which way to look. A tin of 4,4 GPa carries
+The rest of the catalogue does say which way to look. A tin of 4.4 GPa carries
 sound at 780 m/s, which lands it among the soft plastics, below high-density
 polyethylene at 1 030 and below every lead row here, and those run from 1 180
 to 1 257 m/s although lead is the softer metal and half again as dense. So the two books that agree are the two the
@@ -443,7 +443,7 @@ sanity-checking a measurement or getting an order of magnitude.
 
 ## What the functions refuse
 
-A Poisson ratio of 0,5 describes an incompressible material, and an
+A Poisson ratio of 0.5 describes an incompressible material, and an
 incompressible material has no pure longitudinal wave to have a speed, so
 `bulk_longitudinal_speed` raises rather than dividing by zero. The plate form
 is looser, since it only needs $1-\nu^2$ to stay positive, but it refuses a

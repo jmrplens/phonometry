@@ -157,7 +157,7 @@ Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
 | Name | Description |
 | :--- | :--- |
 | `t` | Receiving-room reverberation time per band, in seconds. |
-| `t0` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
+| `t0` | Reference reverberation time `T0`, in seconds (Default: 0.5 s). |
 
 **Returns:** The reverberation index `k` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 

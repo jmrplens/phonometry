@@ -18,9 +18,9 @@ reflects in each one-third octave band, as a fraction of what arrives.
 The measurement
 ---------------
 
-A loudspeaker stands $d_S$ = 1,50 m in front of the reference plane of
-the device, at half its height. A vertical 3 x 3 grid of microphones, 0,40 m
-apart, stands between them with its centre 0,25 m from the plane, so 1,25 m
+A loudspeaker stands $d_S$ = 1.50 m in front of the reference plane of
+the device, at half its height. A vertical 3 x 3 grid of microphones, 0.40 m
+apart, stands between them with its centre 0.25 m from the plane, so 1.25 m
 from the loudspeaker. Each microphone records two impulse responses: one in
 front of the device, and one in free field with the loudspeaker and the grid
 turned away from everything, the ground included.
@@ -33,10 +33,10 @@ reflection, and what cannot be removed is measured by the reduction factor
 $R_\mathrm{sub}$ of Formula (6).
 
 The two components are then cut out with the **Adrienne temporal window**
-(5.5.5, [`adrienne_reflection_window`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_reflection_window)): a 0,5 ms left half of a
+(5.5.5, [`adrienne_reflection_window`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_reflection_window)): a 0.5 ms left half of a
 four-term Blackman-Harris window, a flat part, and a right half whose length is
 3/7 of the flat part. The marker point where the flat part begins is placed
-0,2 ms before the peak of each component (5.5.6).
+0.2 ms before the peak of each component (5.5.6).
 
 The index
 ---------
@@ -63,7 +63,7 @@ the free-field one, which is the gain change itself; multiplying by it would
 square the change rather than remove it. docs/ERRATA.md records the case.
 
 In the bands of 100 Hz, 125 Hz and 160 Hz the average is over microphones 1 to
-6 with the 7,9 ms window; from 200 Hz over all nine with the 6,0 ms window
+6 with the 7.9 ms window; from 200 Hz over all nine with the 6.0 ms window
 (5.5.5). A device measured at several grid positions averages every
 microphone of every position (5.6.2.3); Annex B reports the positions one by
 one and their mean, which [`reflection_index_from_positions`](/phonometry/reference/api/environment/barrier-reflection/#reflection_index_from_positions) recomputes.
@@ -87,12 +87,12 @@ the limit as three curves (Figure 14) without the formula behind them.
 method's authors (Garai and Guidorzi, J. Acoust. Soc. Am. 108 (2000) 1054,
 section III.D): the window ends where the first unwanted component arrives,
 and its low frequency limit is the first notch of its spectrum
-([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit), 162,5 Hz for 7,9 ms, which the
+([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit), 162.5 Hz for 7.9 ms, which the
 paper gives as about 160 Hz). Against the curves read off Figure 14 it
-follows microphone 5 within 5 % from 2,75 m up (5,5 % below at 2,5 m). At
+follows microphone 5 within 5 % from 2.75 m up (5.5 % below at 2.5 m). At
 microphone 2 it comes out about 3 % to 10 % above the printed curve, set by
-the top edge; at microphone 8 it is a third below the curve at 2,5 m, 6 %
-below at 4,5 m and 3 % or less from 6 m up. The two outer curves
+the top edge; at microphone 8 it is a third below the curve at 2.5 m, 6 %
+below at 4.5 m and 3 % or less from 6 m up. The two outer curves
 imply microphone heights the grid does not have, and could not be rebuilt.
 The guide shows the comparison, and the lowest reliable band is left to the
 caller.
@@ -118,7 +118,7 @@ The first notch in the spectrum of an Adrienne window, in hertz.
 Garai and Guidorzi (J. Acoust. Soc. Am. 108 (2000) 1054, section III.D.4)
 take the first notch of the window's magnitude spectrum, the end of its
 main lobe, as the low frequency limit of a measurement made through it,
-and give about 160 Hz for the 7,9 ms window. EN 1793-5 states the limit
+and give about 160 Hz for the 7.9 ms window. EN 1793-5 states the limit
 only as the curves of Figure 14, without saying how they were drawn; this
 is the indicator of the method's authors. The transform of the continuous
 window is evaluated in closed form and the notch is located to a
@@ -130,13 +130,13 @@ millihertz.
 | :--- | :--- |
 | `window_length_s` | Total length $T_\mathrm{W,ADR}$, in seconds. |
 
-**Returns:** The frequency of the first minimum of the magnitude spectrum, in hertz: 162,5 Hz for 7,9 ms and 216,5 Hz for 6,0 ms.
+**Returns:** The frequency of the first minimum of the magnitude spectrum, in hertz: 162.5 Hz for 7.9 ms and 216.5 Hz for 6.0 ms.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the length does not exceed the 0,5 ms leading edge. |
+| ValueError | If the length does not exceed the 0.5 ms leading edge. |
 | TypeError | if `window_length_s` is not a single number. |
 
 ## adrienne_reflection_window
@@ -151,11 +151,11 @@ adrienne_reflection_window(
 
 The Adrienne temporal window of EN 1793-5, 5.5.5.
 
-A left half of a four-term Blackman-Harris window 0,5 ms long, a flat part,
+A left half of a four-term Blackman-Harris window 0.5 ms long, a flat part,
 and a right half of a Blackman-Harris window; the flat part and the
-trailing edge share the rest of the length 7 to 3. The 7,9 ms standard
-window has a 5,18 ms flat part and a 2,22 ms trailing edge; the 6,0 ms one
-3,85 ms and 1,65 ms.
+trailing edge share the rest of the length 7 to 3. The 7.9 ms standard
+window has a 5.18 ms flat part and a 2.22 ms trailing edge; the 6.0 ms one
+3.85 ms and 1.65 ms.
 
 The edges are Formula (7) sampled as printed: the leading edge is the
 first half of a Blackman-Harris window twice its length, taken at
@@ -180,7 +180,7 @@ the formula EN 1793-5 prints.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `fs` is not positive, the length does not exceed the 0,5 ms leading edge, or the flat part is shorter than a sample. |
+| ValueError | If `fs` is not positive, the length does not exceed the 0.5 ms leading edge, or the flat part is shorter than a sample. |
 | TypeError | if `fs` or `window_length_s` is not a single number. |
 
 ## ADRIENNE_SHORT_LENGTH_S
@@ -220,7 +220,7 @@ check_reflection_grid_position(
 
 Check the loudspeaker and grid positions with a reflecting plate.
 
-5.6.2.5 (`check="relative"`): with a plate 0,25 m behind microphone 5,
+5.6.2.5 (`check="relative"`): with a plate 0.25 m behind microphone 5,
 the delays $\Delta t_{k5}$ between the direct sound at microphone
 $k$ and at microphone 5 give $\Delta d_{k5} = c\,\Delta t_{k5}$ (Formula (10)); microphone 5 does not take part. 5.6.2.6
 (`check="grid"`): with the plate on the reference plane, the delays
@@ -274,7 +274,7 @@ The direct sound taken out of an impulse response, 5.5.4.
 | `peak_index` | The sample of the first and main peak of the in-front record, the direct sound. |
 | `shift_samples` | The shift applied to the free-field record, in samples, positive for a delay: a whole number of the 1/50 sample moving steps, within the +/- 2 samples 5.5.4 allows. |
 | `amplitude_factor` | The factor that made the two main peaks equal. |
-| `reduction` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0,5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
+| `reduction` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0.5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
 
 The three records come back in the type they arrived as: a
 [`Signal`](/phonometry/reference/api/io/io/#signal) when the record was one (in pascals and
@@ -321,7 +321,7 @@ $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, Formula (2).
 
 The reflection travels further than the direct sound and spreads over a
 larger sphere; this puts that energy back. At microphone 5 it is
-$(1{,}75/1{,}25)^2 = 1{,}96$; Table 2 prints all nine to two
+$(1.75/1.25)^2 = 1.96$; Table 2 prints all nine to two
 decimals ([`REFLECTION_GRID_DISTANCES`](/phonometry/reference/api/environment/barrier-reflection/#reflection_grid_distances)).
 
 **Parameters**
@@ -366,7 +366,7 @@ microphone $k$; $d_{\mathrm{r},k}$ runs from the same point to the
 reference plane and back to the microphone by specular reflection, which
 is the distance from the image of the loudspeaker in the plane. With the
 geometry of the standard these are the values Table 2 prints to two
-decimals (1,25 m and 1,75 m at microphone 5).
+decimals (1.25 m and 1.75 m at microphone 5).
 
 **Parameters**
 
@@ -415,7 +415,7 @@ The sound reflection index $RI_j$, Formula (1).
 For every microphone of every grid position: the direct sound is
 subtracted ([`subtract_direct_sound`](/phonometry/reference/api/environment/barrier-reflection/#subtract_direct_sound)); the free-field record is
 windowed on its own peak and the residual on the specular arrival of the
-reflection, both with the marker point 0,2 ms before the peak (5.5.6);
+reflection, both with the marker point 0.2 ms before the peak (5.5.6);
 the band energies of the two are divided and corrected by
 $C_{\mathrm{geo},k}$, $C_{\mathrm{dir},k}$ and $C_{\mathrm{gain},k}$. The
 reflection's peak is placed by geometry, the direct peak plus
@@ -423,7 +423,7 @@ $(d_{\mathrm{r},k} - d_{\mathrm{i},k})/c$, which is what 5.5.6 prefers and what 
 the reference plane the conventional reflection plane of a non-flat
 device.
 
-The gain factor is Formula (4), with the 1,3 ms window over the bands of
+The gain factor is Formula (4), with the 1.3 ms window over the bands of
 500 Hz to 2 kHz, and it **divides**: Formula (1) prints it as a
 multiplier, which with Formula (4) would square a gain change instead of
 removing it (docs/ERRATA.md). 5.5.1 allows setting it to 1 when it is
@@ -437,8 +437,8 @@ within 5 % of 1; the value computed is always used here.
 | `free_field_irs` | The free-field impulse responses of the same microphones, in the same form and shape. |
 | `fs` | Sample rate, in hertz. Required when every record is a bare array; a Signal supplies it, and a Signal that disagrees with it or with another Signal is refused rather than arbitrated. |
 | `speed_of_sound` | Speed of sound at the air temperature of the test (5.5.6, 5.7.3), in metres per second; it places the reflected window, and the standard asks for its temperature-dependent value. |
-| `window_length_s` | $T_\mathrm{W,ADR}$ from the 200 Hz band upward, one length or nine (one per microphone); 6,0 ms by 5.5.5. |
-| `low_band_window_length_s` | $T_\mathrm{W,ADR}$ of the 100 Hz to 160 Hz bands; 7,9 ms by 5.5.5. |
+| `window_length_s` | $T_\mathrm{W,ADR}$ from the 200 Hz band upward, one length or nine (one per microphone); 6.0 ms by 5.5.5. |
+| `low_band_window_length_s` | $T_\mathrm{W,ADR}$ of the 100 Hz to 160 Hz bands; 7.9 ms by 5.5.5. |
 | `low_band_microphones` | The microphones averaged below 200 Hz; 1 to 6 by 5.5.5. |
 | `directivity_corrections` | $C_{\mathrm{dir},k}(\Delta f_j)$ as a `(9, 18)` array ([`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)), or `None` for none, which is what a report states as "none". |
 | `lowest_band_hz` | The lowest reliable band, where $DL_{RI}$ starts; 200 Hz for the qualification sample of 5.3. |
@@ -472,7 +472,7 @@ Expanded uncertainty of a sound reflection index from Table A.1 (A.2).
 
 $U_j = k_p\, s_{\mathrm{R},j}$, with $s_\mathrm{R}$ taken as
 the combined standard uncertainty. Annex B.5 takes the high column and
-$k_p$ = 1,96 for 95 % coverage, which is the default. The
+$k_p$ = 1.96 for 95 % coverage, which is the default. The
 reproducibility is the standard's, not the measurement's, so the answer
 depends on the column and the factor alone: one call serves every
 [`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult).
@@ -559,8 +559,8 @@ the microphone. With the loudspeaker at $h_S$ (half the height by
 default, 3.11) the ground reflection comes from the image of the
 loudspeaker below the ground; the edge diffraction takes the shortest path
 over the top edge, and over each side edge of a sample of the given
-length centred on the grid. The window's marker is 0,2 ms before the
-reflection and its tail is taken to end 0,2 ms before the unwanted
+length centred on the grid. The window's marker is 0.2 ms before the
+reflection and its tail is taken to end 0.2 ms before the unwanted
 component, as its own marker would sit, so the flat part and the trailing
 edge together last exactly the delay between the two; the limit is the
 first notch of that window's spectrum.
@@ -586,7 +586,7 @@ curves.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, the grid does not fit between the ground and the top edge, the sample is narrower than the grid, or at some microphone the ground reflection or an edge arrives no later than the reflection itself (a device below about 1,7 m). |
+| ValueError | If a dimension is not positive, the grid does not fit between the ground and the top edge, the sample is narrower than the grid, or at some microphone the ground reflection or an edge arrives no later than the reflection itself (a device below about 1.7 m). |
 | TypeError | if `device_height_m`, `device_length_m`, `source_height_m` or `speed_of_sound` is not a single number. |
 
 ## REFLECTION_MICROPHONE_DISTANCE_M
@@ -635,10 +635,10 @@ The radius $r$ of the maximum sampled area, Formula (8).
 
 The circle on the reference plane, centred at the point of incidence,
 within which a reflecting object would still fall inside the reflected
-window. It is the ISO 13472-1 construction with the loudspeaker 1,50 m and
-the microphone 0,25 m from the plane, and it reuses
+window. It is the ISO 13472-1 construction with the loudspeaker 1.50 m and
+the microphone 0.25 m from the plane, and it reuses
 [`max_sampled_area_radius`](/phonometry/reference/api/materials/road-absorption/#max_sampled_area_radius).
-NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
+NOTE 1 of 5.6.1 gives 1.96 m for the 7.9 ms window at 340 m/s.
 
 **Parameters**
 
@@ -686,7 +686,7 @@ How far down a device of a given size can be measured, 5.5.7.
 | `device_height_m` | $h_B$, the height of the device. |
 | `device_length_m` | The length of the sample, or `None` when its side edges were not considered. |
 | `source_height_m` | $h_S$, the height of the loudspeaker and of microphone 5. |
-| `window_length_s` | Per microphone, the longest Adrienne window whose tail ends before the first unwanted component: the flat part and the trailing edge last as long as the delay between the reflection and that component, plus the 0,5 ms leading edge. |
+| `window_length_s` | Per microphone, the longest Adrienne window whose tail ends before the first unwanted component: the flat part and the trailing edge last as long as the delay between the reflection and that component, plus the 0.5 ms leading edge. |
 | `low_frequency_limit_hz` | Per microphone, the first notch of that window's spectrum ([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit)). |
 | `limiting_component` | Per microphone, `"ground"` for the ground reflection on the source side, `"top edge"` or `"side edge"` for a diffraction by an edge of the device. |
 
@@ -872,7 +872,7 @@ deviation of Table A.1 taken as the combined standard uncertainty.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The eighteen band centres, 100 Hz to 5 kHz, the bands of [`ReflectionIndexResult.frequencies`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult). |
-| `expanded_uncertainty` | $U_j$ per band, aligned with `frequencies`, in units of the index itself: $RI$ is a ratio, and Table B.2 prints its $U_j$ beside it as one (0,62 at 100 Hz against an $RI$ of 0,58). |
+| `expanded_uncertainty` | $U_j$ per band, aligned with `frequencies`, in units of the index itself: $RI$ is a ratio, and Table B.2 prints its $U_j$ beside it as one (0.62 at 100 Hz against an $RI$ of 0.58). |
 | `rating_expanded_uncertainty_db` | $U$ of the single-number rating $DL_{RI}$, in decibels, the one row of Table A.1 that is a level. |
 | `estimate` | The column of Table A.1 read: `"median"`, `"low"` or `"high"`. |
 | `coverage_factor` | $k_p$. |

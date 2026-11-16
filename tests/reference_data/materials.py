@@ -36,9 +36,9 @@ ISO11654_ANNEX_A2_INDICATOR = "M"
 # ---------------------------------------------------------------------------
 # ISO 9053-2:2020 alternating-method airflow resistance — the Annex A.3 worked
 # example of the effective ratio of specific heats. A closed cylinder 100 mm x
-# 100 mm gives V = 7,854e-4 m3 and S = 0.0471 m2; at f = 2 Hz the standard
+# 100 mm gives V = 7.854e-4 m3 and S = 0.0471 m2; at f = 2 Hz the standard
 # prints the wavelength 172.9 m, the thermal boundary layer b = 1.83e-3 m and
-# the heat-conduction-corrected kappa' = kappa*0.978 = 1,370. Mirrors
+# the heat-conduction-corrected kappa' = kappa*0.978 = 1.370. Mirrors
 # tests/materials/absorbers/test_airflow_resistance.py.
 #
 # The five air properties below are the ones Annex A.3 PRINTS, on printed folios

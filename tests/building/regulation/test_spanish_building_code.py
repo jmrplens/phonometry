@@ -344,7 +344,7 @@ def test_rounding_exposes_exact_one_decimal_and_integer_values() -> None:
     the exact value, the one-decimal intermediate and the reported integer.
     """
     index = hr.ra(_R_PRIME)
-    assert index.value > index.intermediate  # 51,443... vs 51.4
+    assert index.value > index.intermediate  # 51.443... vs 51.4
     assert index.intermediate == 51.4
     assert index.reported == 51
     assert isinstance(index.reported, int)

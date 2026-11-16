@@ -34,7 +34,7 @@ between two checks (5.6).
 broadband qualification of ISO 3745 Annex A (8.1), the source stands on the
 reflecting plane and the levels are measured over a hemisphere of radius 2 m
 (8.2.1). The sound power level under the reference meteorological conditions
-of clause 4 (23.0 degC, 101,325 kPa) is
+of clause 4 (23.0 degC, 101.325 kPa) is
 
 .. math::
 
@@ -475,7 +475,7 @@ class CalibrationConditions(OwnsArrays):
     air: :math:`C_1` and the Annex A :math:`C_2` read its temperature and its
     static pressure, and :math:`C_3` reads the attenuation coefficient
     :math:`a(f)` that ISO 9613-1 gives for it. The defaults are the reference
-    meteorological conditions of clause 4, 23.0 degC and 101,325 kPa, with no
+    meteorological conditions of clause 4, 23.0 degC and 101.325 kPa, with no
     air absorption.
 
     :param temperature_c: Air temperature during the calibration, in degrees

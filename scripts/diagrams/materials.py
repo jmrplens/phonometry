@@ -158,7 +158,7 @@ def _d_astm_tube(s: SVG, th: Theme) -> None:
         bold=True,
     )
 
-    # Four microphones flush in the top wall (1,2 upstream; 3,4 downstream).
+    # Four microphones flush in the top wall (1 and 2 upstream; 3 and 4 downstream).
     # Each name beside its microphone: above them, the witness lines of l1
     # and l2 ran through the names of microphones 2 and 3.
     for mx, lab in ((m1x, "Mic 1"), (m2x, "Mic 2"), (m3x, "Mic 3"), (m4x, "Mic 4")):

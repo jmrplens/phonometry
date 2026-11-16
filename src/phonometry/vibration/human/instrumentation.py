@@ -1254,7 +1254,7 @@ def band_limited_weighting_factor(name: WeightingName) -> float:
     ``We``      0.062 891           0.062 87
     ``Wf``      0.418 982           0.388 8
     ``Wh``      0.202 025           0.202 0
-    ``Wj``      1.018 841           1,019
+    ``Wj``      1.018 841           1.019
     ``Wk``      0.772 066           0.771 8
     ``Wm``      0.336 336           0.336 2
     ==========  ==================  ===================
@@ -1316,7 +1316,7 @@ RUNNING_RMS_DECAY_TIME_S: Mapping[Method, tuple[tuple[float, float, float], ...]
 #:
 #: The rate band is not the reciprocal of the time band. The closed-form rate
 #: is ``20 lg(e) / (2 tau) = 4,3429 / tau`` dB/s, and the printed limits sit
-#: at 0.875 to 0.892 and 1,128 to 1,151 times it, while the printed times map
+#: at 0.875 to 0.892 and 1.128 to 1.151 times it, while the printed times map
 #: to narrower intervals around ``2 tau ln 10``. The time column is the one
 #: that binds; the rate column is the looser statement of the same decay.
 RUNNING_RMS_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (

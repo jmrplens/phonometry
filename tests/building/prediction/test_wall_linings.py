@@ -52,9 +52,9 @@ def _ratings(result: building.LiningImprovementResult) -> tuple[float, float, fl
 def test_formula_d1_reproduces_the_printed_hopkins_lining_resonance() -> None:
     """H Fig. 4.48(c) caption, printed p. 486.
 
-    "100 mm aircrete block wall (rhos = 51 kg/m2) ... Lining: 9,5 mm
-    plasterboard (6,3 kg/m2) laminated with 32 mm expanded polystyrene
-    (0,4 kg/m2, s = 65 MN/m3) attached with gypsum based adhesive dabs ...
+    "100 mm aircrete block wall (rhos = 51 kg/m2) ... Lining: 9.5 mm
+    plasterboard (6.3 kg/m2) laminated with 32 mm expanded polystyrene
+    (0.4 kg/m2, s = 65 MN/m3) attached with gypsum based adhesive dabs ...
     Mass-resilient material-mass: fmsm = 542 Hz."
     This is ISO 12354-1:2017 Formula (D.1) with the resilient layer bonded
     directly to the wall.
@@ -181,8 +181,8 @@ def test_table_d1_reads_the_band_containing_fo_not_the_nearest_label(
 
     Band *containment*, not proximity to a label. The edge between two
     one-third-octave bands ``n`` and ``n + 1`` is ``10^((n + 0,5)/10)``, which
-    for 250|315 is 281,838 Hz while the geometric mean of the labels is
-    280,624 Hz: a resonance at 281 Hz belongs to the 250 Hz band and reads
+    for 250|315 is 281.838 Hz while the geometric mean of the labels is
+    280.624 Hz: a resonance at 281 Hz belongs to the 250 Hz band and reads
     -3 dB, and a nearest-label rounding would answer -5 dB.
     """
     index = int(np.round(10.0 * np.log10(lower_band)))

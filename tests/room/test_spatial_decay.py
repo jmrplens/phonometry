@@ -613,7 +613,7 @@ def test_the_ifa_decay_rates_reproduce(band: int) -> None:
 
     The sheet's own Equation (4.4) is not Equation (5) verbatim: it is that
     regression specialised to these four fixed distances, with the sum of the
-    logarithms rounded to 1,306 and 20 lg 2 rounded to 6. It therefore runs
+    logarithms rounded to 1.306 and 20 lg 2 rounded to 6. It therefore runs
     0.34 % high, which is far under the tenth of a decibel the sheet prints, so
     this example cannot tell the printed 0.3 of Equation (5) from lg 2.
     """

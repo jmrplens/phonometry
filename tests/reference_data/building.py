@@ -57,7 +57,7 @@ ISO717_1_ANNEX_C_EXPECTED = {
 # ISO 717-1:2020 Annex C, Table C.2 - the same element measured over the
 # enlarged range 50-5000 Hz (21 bands). The worked example states
 # Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30 (-2; -3; -2; -4) dB, with the printed
-# intermediate sums -10 lg = 28,212 (spectrum No. 1) / 26,355 (No. 2).
+# intermediate sums -10 lg = 28.212 (spectrum No. 1) / 26.355 (No. 2).
 ISO717_1_ANNEX_C2_R_50_5000: list[float] = [
     18.7,
     19.2,
@@ -317,7 +317,7 @@ EN12354_3_ANNEX_C_DLFS: list[tuple[FacadeShape, float, float, float]] = [
 # airborne one-third-octave standard uncertainty; situation A at 1000 Hz is
 # 1.8 dB (digit-exact oracle). Table 8 (Clause 8) gives the two-sided 95 %
 # coverage factor k = 1.96, so the expanded uncertainty is U = k u = 1.96 u
-# exactly; for Rw in situation A (u = 1.2 dB, Table 3) this is U = 2,352 dB.
+# exactly; for Rw in situation A (u = 1.2 dB, Table 3) this is U = 2.352 dB.
 # ---------------------------------------------------------------------------
 ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
 ISO12999_1_COVERAGE_K_95 = 1.96

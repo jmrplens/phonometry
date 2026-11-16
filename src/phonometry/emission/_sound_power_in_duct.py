@@ -1108,7 +1108,7 @@ def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float,
     stated for (clause 1.1). The speed of sound is the ISO 3741 form the
     emission package already uses, and the density is the ideal gas at the
     static pressure and temperature of the duct, so that
-    :math:`\rho c` is 413 N s/m^3 at 20 degC and 101,325 kPa against the
+    :math:`\rho c` is 413 N s/m^3 at 20 degC and 101.325 kPa against the
     400 N s/m^3 reference of Eq. (12).
 
     :return: ``(c, rho_c)`` in m/s and N s/m^3.

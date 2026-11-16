@@ -41,7 +41,7 @@ Both closed forms hold at a characteristic impedance of exactly
 :math:`400~\text{N s/m}^3`, which is the value that makes the three reference
 quantities consistent: :math:`p_0^2 S_0 / \rho c = (20\ \mu\mathrm{Pa})^2
 / 400 = 1` pW, the reference sound power. Neither equation prints that
-caveat. Air at 20 degrees and 101,325 kPa is nearer :math:`413~\text{N s/m}^3`,
+caveat. Air at 20 degrees and 101.325 kPa is nearer :math:`413~\text{N s/m}^3`,
 worth 0.14 dB, an order of magnitude more than either rounding: the offsets
 are a convention of the decibel scales, not a property of the air in the
 hall, and this module does not make them follow the weather.
@@ -1561,7 +1561,7 @@ def stage_support(
                 {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB},
        \qquad
        \mathrm{ST}_\mathrm{Late} = 10 \lg
-           \frac{\int_{0.100}^{1,000} p^2(t)\ \mathrm{d}t}
+           \frac{\int_{0.100}^{1.000} p^2(t)\ \mathrm{d}t}
                 {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
 
     Both are measured with the source and the microphone 1.0 m apart on the

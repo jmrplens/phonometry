@@ -20,8 +20,8 @@ fixture therefore
 * builds every ``Σ lk αk`` from Formula (C.4), ``αk = Σj √(fc,j/fref)
   10^(−Kij/10)``, using the *unrounded* Annex E junction indices. That
   derivation reproduces the two printed values that are self-consistent
-  (external wall 1: 2,375 m; internal wall 2: 1,839 m against the printed
-  1,840 m) and supplies the three that are not, and
+  (external wall 1: 2.375 m; internal wall 2: 1.839 m against the printed
+  1.840 m) and supplies the three that are not, and
 * uses ``ηint = 0,012 5``.
 
 Both discrepancies are recorded in ``docs/ERRATA.md``. The printed tables are
@@ -82,7 +82,7 @@ def test_junction_indices_match_tables_l5_to_l9() -> None:
 def test_perimeter_sums_reproduce_the_two_consistent_printed_values() -> None:
     """Table L.3 / G.3 input block, via Formula (C.4).
 
-    Only external wall 1 (2,375 m) and internal wall 2 (1,840 m) are printed
+    Only external wall 1 (2.375 m) and internal wall 2 (1.840 m) are printed
     consistently with their columns; see docs/ERRATA.md.
     """
     sums = iso12354_building.perimeter_sums()
@@ -90,7 +90,7 @@ def test_perimeter_sums_reproduce_the_two_consistent_printed_values() -> None:
     assert sums["ext1"] == pytest.approx(printed["ext1"], abs=0.005)
     assert sums["int2"] == pytest.approx(printed["int"], abs=0.005)
     # The printed floor value does not reproduce its column; Formula (C.4)
-    # gives 2,659 m instead of the printed 2,364 m.
+    # gives 2.659 m instead of the printed 2.364 m.
     assert sums["floor"] == pytest.approx(2.659, abs=0.005)
     assert sums["floor"] != pytest.approx(printed["floor"], abs=0.05)
 

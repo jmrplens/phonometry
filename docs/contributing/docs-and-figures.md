@@ -652,7 +652,7 @@ def _label_band_axis(ax, *, language="en"):
 <a id="f28"></a>
 ### F28. Write every number of a Spanish figure with a decimal comma
 
-**Why.** Three machines put the comma there (`localize_axes`, `format_frequency_axis` given the language, and the save-time pass of `scripts/figures/i18n.py`), and a panel none reached shipped 31.5 next to 52,4 with every gate green: a frequency axis that did not get the language, a log distance axis, the z of a 3-D array, a zoom inset, a colorbar.
+**Why.** Three machines put the comma there (`localize_axes`, `format_frequency_axis` given the language, and the save-time pass of `scripts/figures/i18n.py`), and a panel none reached shipped 31.5 next to "52,4" with every gate green: a frequency axis that did not get the language, a log distance axis, the z of a 3-D array, a zoom inset, a colorbar.
 
 **Do**
 

@@ -146,7 +146,7 @@ def test_comparison_method_exact_by_construction() -> None:
 
 
 def test_comparison_reference_conditions_c2_near_zero() -> None:
-    """At theta=23 C, ps=101,325 kPa the C2 correction is ~0 (theta1=296 K)."""
+    """At theta=23 C, ps=101.325 kPa the C2 correction is ~0 (theta1=296 K)."""
     reference_sound_power_levels = np.array([90.0])
     lp_rss = np.array([70.0])
     lp_st = np.array([80.0])

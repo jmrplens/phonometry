@@ -697,7 +697,7 @@ def test_low_frequency_element_result_rejects_arrays_that_disagree() -> None:
 
 
 def test_low_frequency_accepts_the_exact_band_series() -> None:
-    """The same band is written 63 Hz on a filter and 63,096 Hz exactly."""
+    """The same band is written 63 Hz on a filter and 63.096 Hz exactly."""
     from phonometry.filters import nominal_frequencies
 
     exact = nominal_frequencies(fraction=3, limits=[50, 160]).frequencies

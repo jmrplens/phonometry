@@ -116,7 +116,7 @@ _STANDARD_STATIC_PRESSURE = 101325.0
 #: ``kappa'`` when no cavity/air data are supplied. NOT the Annex A output: Annex A
 #: applies a heat-conduction correction that lowers it (worked example ``kappa' = 1.370``).
 _ADIABATIC_KAPPA = 1.4
-#: Air at the reference state of the Annex A.3 example (23 C, 101,325 kPa, 50 % RH),
+#: Air at the reference state of the Annex A.3 example (23 C, 101.325 kPa, 50 % RH),
 #: computed from IEC 61094-2:2009 Annex F. Defaults of
 #: :func:`thermal_boundary_layer_thickness` and :func:`effective_kappa`.
 #:

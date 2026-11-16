@@ -132,11 +132,11 @@ __all__ = [
 ]
 
 #: Mass ``m`` of one ISO tapping-machine hammer, in kg (ISO 10140-5; Hopkins
-#: 3.6.3: "a free-falling mass of 0,5 kg").
+#: 3.6.3: "a free-falling mass of 0.5 kg").
 TAPPING_HAMMER_MASS_KG: float = 0.5
 
 #: Drop height ``h`` of the hammer, in m (Hopkins 3.6.3: "a drop-height of
-#: 0,04 m").
+#: 0.04 m").
 TAPPING_DROP_HEIGHT_M: float = 0.04
 
 #: Impact repetition rate ``fi`` of the machine, in Hz: five hammers giving
@@ -163,7 +163,7 @@ _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 _HALF_BAND_RATIO: dict[int, float] = {3: 10.0**0.05, 1: 10.0**0.15}
 
 #: Coefficient of the short-duration mean-square force ``F²rms = 3,9 B``
-#: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3,925.
+#: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3.925.
 _SHORT_PULSE_COEFFICIENT: float = 3.9
 
 #: Reference power of the power-input level, in W: the ``W0 = 10⁻¹² W``

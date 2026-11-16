@@ -415,7 +415,7 @@ def test_the_nominal_frequency_ranges_are_table_1() -> None:
 
 
 def test_the_nominal_range_is_nominal_and_not_a_band_centre() -> None:
-    """The printed 8 Hz is not the 7,943 Hz band it names.
+    """The printed 8 Hz is not the 7.943 Hz band it names.
 
     Table 1 prints round numbers and Annex B tabulates the response at the
     exact centres ``10**(n/10)``, so the lower bound of the hand-transmitted
@@ -510,7 +510,7 @@ def test_the_characteristic_deviation_belongs_to_the_lower_frequency() -> None:
 
     Which decides how a pair straddling a transition frequency is graded: by
     the region of ``f_n``. For Wh the second transition is 10 Hz, so the pair
-    (7,943, 10) is graded in the skirt at 12 degrees and the pair (10, 12.59)
+    (7.943, 10) is graded in the skirt at 12 degrees and the pair (10, 12.59)
     in the central region at 6.
     """
     frequencies = np.array([10.0 ** (n / 10.0) for n in (9, 10, 11)])
@@ -826,7 +826,7 @@ def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> No
     """Table 11 prints a dB/s band that contains 4.3429 / tau every time.
 
     It is not the reciprocal of the time column: its limits sit at 0.875 to
-    0.892 and 1,128 to 1,151 times the closed-form rate, wider than the
+    0.892 and 1.128 to 1.151 times the closed-form rate, wider than the
     printed times map to, which is why the time column is the one the
     verdict is taken on.
     """

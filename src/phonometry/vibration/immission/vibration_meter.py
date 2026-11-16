@@ -47,7 +47,7 @@ Table 9 (folio 35) prints what a meter must display for a 1 mm/s sine at five
 frequencies, and its :math:`KB_\mathrm{F}`, :math:`KB_\mathrm{Fmax}` and
 :math:`KB_\mathrm{FTm}` rows are reproduced by this module to the three decimals they
 are printed with, ripple and all. Its :math:`|v|_\mathrm{max}` row is not, and
-cannot be: at 31.5 Hz it prints 1,000 where Formula (5) gives 0.995, and at
+cannot be: at 31.5 Hz it prints 1.000 where Formula (5) gives 0.995, and at
 315 Hz it prints 0.249 where Formula (5) gives 0.100, while the
 :math:`KB_\mathrm{F}` row of the same column follows Formula (5) at both. The table
 contradicts itself rather than the formula, so :data:`KB_TEST_INDICATIONS`

@@ -247,7 +247,7 @@ def test_an_entry_with_no_multiplicative_claim_is_not_flagged() -> None:
         ("0,693 times too small", "ln 2"),
         ("a factor of 10", "10"),
         # A dB figure is tested as both an amplitude and a power ratio, so
-        # 3,01 dB names sqrt(2) on one reading and 2 on the other.
+        # "3,01 dB" names sqrt(2) on one reading and 2 on the other.
         ("3,01 dB offset", "sqrt(2)"),
         ("6,02 dB offset", "2"),
         ("10 dB offset", "10"),

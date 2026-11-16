@@ -94,7 +94,7 @@ def test_r_prime_fiche_hand_computed(tmp_path: Path) -> None:
     """R' = D + 10 lg(S T / (0.16 V)) (Formulae (4)/(5)) drives the R' fiche.
 
     With S = 10 m2, V = 50 m3 and T = 0.5 s the absorption area is
-    A = 0.16 x 50 / 0.5 = 16 m2, so R' = D + 10 lg(10/16) = D - 2,041 dB
+    A = 0.16 x 50 / 0.5 = 16 m2, so R' = D + 10 lg(10/16) = D - 2.041 dB
     in every band.
     """
     pytest.importorskip("matplotlib")

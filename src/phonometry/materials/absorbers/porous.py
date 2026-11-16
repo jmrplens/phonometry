@@ -105,7 +105,7 @@ Complex = NDArray[np.complex128]
 
 #: Default speed of sound in fluid, in m/s (20 degC).
 _SPEED_OF_SOUND = 343.0
-#: Default air density, in kg/m3 (Bies 5e Appendix D: 1,205 at 20 degC).
+#: Default air density, in kg/m3 (Bies 5e Appendix D: 1.205 at 20 degC).
 _AIR_DENSITY = 1.205
 #: Default dynamic viscosity of fluid, in Pa s (Cox & D'Antonio Eq. (7.13)).
 _AIR_VISCOSITY = 1.84e-5
@@ -216,7 +216,7 @@ class PorousAbsorberWarning(PhonometryWarning):
 #:
 #: - 343.0 m/s, the speed of sound of air at 20 degC in Bies, Hansen and
 #:   Howard 5e Table C.1, PDF page 746 (printed p. 717);
-#: - 1,205 kg/m3 and gamma = 1.40, the air Bies, Hansen and Howard 5e give the
+#: - 1.205 kg/m3 and gamma = 1.40, the air Bies, Hansen and Howard 5e give the
 #:   porous-media models of Appendix D, PDF page 756 (printed p. 727);
 #: - 1.84 x 10^-5 Pa s, the viscosity Allard and Atalla 2e state for standard
 #:   conditions, PDF page 56 (printed p. 46), and Cox and D'Antonio 3e Eq. (7.13);
@@ -224,7 +224,7 @@ class PorousAbsorberWarning(PhonometryWarning):
 #:   1.0132 x 10^5 Pa (held as 101 325 Pa) that Allard and Atalla 2e take from
 #:   Gray, PDF page 62 (printed p. 52).
 #:
-#: Allard and Atalla state their own air at 18 degC, 1,213 kg/m3 and 342 m/s
+#: Allard and Atalla state their own air at 18 degC, 1.213 kg/m3 and 342 m/s
 #: (Sect. 2.2.2, PDF page 28, printed p. 16), so the Johnson-Champoux-Allard
 #: model is not tied to these numbers: they are the library's choice, kept fixed
 #: so that every model defaults to the same medium. The Prandtl number is carried

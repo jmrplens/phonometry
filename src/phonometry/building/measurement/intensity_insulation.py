@@ -1151,7 +1151,7 @@ def _check_low_frequency_bands(
     """Clause 1.1: this part applies from 50 Hz to 160 Hz and nowhere else.
 
     The six one-third octaves are matched by proximity rather than equality,
-    because the same band is written 63 Hz on a filter and 63,096 Hz by the
+    because the same band is written 63 Hz on a filter and 63.096 Hz by the
     exact series; neighbouring bands sit 26 % apart, so nothing is ambiguous
     at this tolerance.
     """

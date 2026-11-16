@@ -413,7 +413,7 @@ class TestDirectivityEnergyAverage:
         )
 
     def test_it_refuses_a_turn_sampled_coarser_than_the_printed_step(self) -> None:
-        # 28 bearings 12,857 degrees apart is coarser than the 12.5 the note
+        # 28 bearings 12.857 degrees apart is coarser than the 12.5 the note
         # prints; 29 is the first count that is not.
         with pytest.raises(ValueError, match="at least 29"):
             room.directivity_energy_average(np.zeros(28))

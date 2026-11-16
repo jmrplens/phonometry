@@ -485,7 +485,7 @@ def test_the_conversion_factor_between_alpha_and_m_is_the_printed_one() -> None:
     """Vigran, Building Acoustics (2008), Eq. (4.41), printed page 122.
 
     EN ISO 354:2003 8.1.2.1 gives ``m = alpha / (10 lg(e))`` and never works
-    the factor out; Vigran prints it as 4,343.
+    the factor out; Vigran prints it as 4.343.
     """
     assert 1.0 / float(materials.power_attenuation_from_alpha(1.0)) == pytest.approx(
         oracle.VIGRAN_EQ_4_41_TEN_LG_E, abs=5e-4

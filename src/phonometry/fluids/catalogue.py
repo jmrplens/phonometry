@@ -21,7 +21,7 @@ Not every named air in this library is here
 -------------------------------------------
 Four more sit elsewhere in the tree, each beside the model or the standard
 that fixes it, and they disagree: the absorber models propagate through
-343 m/s at 1,205 kg/m3, the airflow-resistance annex through 345.87 at 1,186,
+343 m/s at 1.205 kg/m3, the airflow-resistance annex through 345.87 at 1.186,
 EN/ISO 12354 through 340 at 1.29, and the acoustic solver defaults to 343 at
 1.2. None of them is wrong. Each is the air its own document assumes, and
 substituting one for another would change a number that document prints, which

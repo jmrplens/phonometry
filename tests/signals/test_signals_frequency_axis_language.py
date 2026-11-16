@@ -4,7 +4,7 @@
 ``localize_axes`` cannot reach tick labels installed as fixed strings, so the
 band-centre labels of a continuous frequency axis are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not hand
-its ``language`` down draws 31.5 on a Spanish figure where 31,5 belongs. Every
+its ``language`` down draws 31.5 on a Spanish figure where "31,5" belongs. Every
 range here reaches down past 31.5 Hz, the lowest octave centre whose label
 carries a decimal, because a set of labels without one proves nothing.
 

@@ -147,7 +147,7 @@ _AIR_DENSITY: float = 1.29
 #: 340 m/s its Annex A uses throughout and the 1.29 kg/m3 of the Annex B
 #: transmission model, transcribed rather than recomputed. It is not the air the
 #: visco-thermal absorber models default to, which is 343.0 m/s and
-#: 1,205 kg/m3: a standard's own constants stay with the clause that prints them.
+#: 1.205 kg/m3: a standard's own constants stay with the clause that prints them.
 EN12354_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=101_325.0,

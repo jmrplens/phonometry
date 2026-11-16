@@ -143,9 +143,9 @@ __all__ = [
 #: flow coefficient the valve is rated in. The two figures are the same
 #: constant expressed for the two coefficients, but they are rounded to two
 #: digits each, so a valve rated both ways comes out with jet diameters about
-#: 1 % apart rather than identical: 4.9/4.6 is 1,065 where the exact
+#: 1 % apart rather than identical: 4.9/4.6 is 1.065 where the exact
 #: :math:`K_v` to :math:`C_v` conversion asks for :math:`\sqrt{1.156}`,
-#: which is 1,075.
+#: which is 1.075.
 FLOW_COEFFICIENT_CONSTANTS: Mapping[Coefficient, float] = MappingProxyType(
     {"Cv": 4.6e-3, "Kv": 4.9e-3}
 )

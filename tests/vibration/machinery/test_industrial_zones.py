@@ -189,7 +189,7 @@ def test_a_change_is_significant_past_a_quarter_of_zone_b() -> None:
 
 
 def test_the_significant_change_threshold_is_a_quarter_of_zone_b() -> None:
-    """5.3: a quarter of the 4.5 mm/s B/C boundary is 1,125 mm/s."""
+    """5.3: a quarter of the 4.5 mm/s B/C boundary is 1.125 mm/s."""
     change = vibration.assess_operational_change(1.2, 4.5)
     assert change.threshold == pytest.approx(1.125, abs=1e-12)
     assert change.change == 1.2

@@ -581,7 +581,7 @@ def _d_multiple_shock(s: SVG, th: Theme) -> None:
     # ISO 2631-5:2018, Formulae (C.3) and (C.4) (PDF pages 23 and 24, folios
     # 17 and 18), print the d, u, stat and age of S_d,i, S_u,i, S_stat,i and
     # S_age upright beside the italic year counter i; the plate writes them
-    # as the guide does, and the Spanish twin carries its own 6,75.
+    # as the guide does, and the Spanish twin carries its own "6,75".
     _step(
         400,
         "Stress variable  $R = [Σ (S_d·N^{1/6} / (S_{u,i} − S_{stat}))^6]^{1/6}$",

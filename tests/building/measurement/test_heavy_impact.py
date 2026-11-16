@@ -59,7 +59,7 @@ ISO717_2_TABLE_D3_OCTAVE = (-26.2, -16.2, -8.7, -3.2)
 
 #: ISO 717-2:2020 Table D.4: the printed worked example, a field measurement in
 #: octave bands. Columns: Li,Fmax, A, corrected value; the printed result is
-#: LiA,Fmax = 55,350 66... = 55 dB.
+#: LiA,Fmax = 55.350 66... = 55 dB.
 ISO717_2_TABLE_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
 ISO717_2_TABLE_D4_CORRECTED = (39.1, 48.3, 49.3, 52.6)
 ISO717_2_TABLE_D4_RATING = 55
@@ -567,7 +567,7 @@ def test_iso717_2_table_d4_worked_example() -> None:
 
     A field measurement in octave bands: Li,Fmax = 65.3 / 64.5 / 58.0 / 55.8 dB
     at 63 / 125 / 250 / 500 Hz gives the corrected values 39.1 / 48.3 / 49.3 /
-    52.6 dB and LiA,Fmax = 55,350 66... = 55 dB.
+    52.6 dB and LiA,Fmax = 55.350 66... = 55 dB.
     """
     res = building.a_weighted_max_impact_level(ISO717_2_TABLE_D4_LEVELS)
     assert res.fraction == 1

@@ -124,7 +124,7 @@ HANSEN_EXAMPLE_6_23_REDUCTION_DB: tuple[int, int, int] = (10, 15, 20)
 #: without the screen, in decibels, and the level with it by the three paths
 #: together and by each path alone, in that order. The 71 dB for the three
 #: together is the book's decibel-addition rule of thumb rather than the
-#: energy sum of the paths, which is 71,687 dB and would make the reduction
+#: energy sum of the paths, which is 71.687 dB and would make the reduction
 #: 8.3 dB; the pair is used exactly as printed.
 SRL_1991_UNSCREENED_DB: float = 80.0
 SRL_1991_SCREENED_DB: dict[str, float] = {

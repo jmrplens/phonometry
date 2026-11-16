@@ -494,7 +494,7 @@ def _chk_reat_table_b1() -> Outcome:
     Table A.3 at full precision. The criterion row reproduces all seven cells
     to the printed decimal. The difference row can only agree within 0.1 dB:
     six cells round to the print, and at 8 kHz the full-precision m1 of
-    34,956 dB against the printed m2 of 38.9 dB gives 3,944 dB where the table
+    34.956 dB against the printed m2 of 38.9 dB gives 3.944 dB where the table
     prints 4.0, 0.056 dB off because m2 is printed rounded.
     """
     result = ph.hearing.assess_attenuation_difference(

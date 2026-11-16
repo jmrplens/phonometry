@@ -38,13 +38,13 @@ is recorded so that a later pass does not pick them up by mistake:
   all 42 entries of one table, so the columns are inputs to Equation (21) here
   and never expected values. The ratio is what Equation (21) uses, and every
   constant factor cancels in it;
-* Example 2-2 of Barron (2003), folio 17, which prints 1,184 kg/m3 for air at
+* Example 2-2 of Barron (2003), folio 17, which prints 1.184 kg/m3 for air at
   25 C and 101.3 kPa. Barron works there at 298.2 K, a 273.2 offset, where
   Equation (29) prints 273 + theta. The four figures he prints hide the
   difference, so the example agrees with the module without being evidence for
-  it. Example 8-8, folio 372, is the same trap made visible: 1,292 kg/m3 for
+  it. Example 8-8, folio 372, is the same trap made visible: 1.292 kg/m3 for
   air at 10 C and 105 kPa comes out of 283.15 K, and Equation (29) gives
-  1,293.
+  1.293.
 """
 
 from __future__ import annotations
@@ -346,8 +346,8 @@ BARRON_EXAMPLE_3_4_AREA_M2: float = 24.56
 BARRON_EXAMPLE_3_4_AREA_TERM_DB: float = 13.90
 
 #: Example 3-3, PDF pages 72 to 74, folios 60 to 62: ten levels on a
-#: hemisphere of radius 1,250 m about a motor, in decibels, with the
-#: measurement surface the book prints as 9,817 m2 and the characteristic
+#: hemisphere of radius 1.250 m about a motor, in decibels, with the
+#: measurement surface the book prints as 9.817 m2 and the characteristic
 #: impedance of the room air, 411.6 rayl. The book's Eq. (3-30) reaches
 #: L_W = 90.4 dB, which is the mean level plus 10 lg(S/S_0) plus the impedance
 #: correction -10 lg(rho c / 400).
@@ -382,7 +382,7 @@ BARRON_MUFFLER_GAS_DENSITY: dict[str, tuple[float, float, float]] = {
 
 #: Example 5-7, PDF page 215, folio 203: a 900 mm square main duct, whose
 #: cross-section of 0.810 m2 the book turns into an area-equivalent diameter
-#: of 1,016 m with D = (4 S / pi)^(1/2). That root is the half of ISO 11820
+#: of 1.016 m with D = (4 S / pi)^(1/2). That root is the half of ISO 11820
 #: Equation (15) this anchors; the 1.5 diameters the equation puts in front of
 #: it are the standard's own and appear nowhere on Barron's page.
 BARRON_EXAMPLE_5_7_AREA_M2: float = 0.810
@@ -431,9 +431,9 @@ VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB: float = 10.3
 #: VDI 2081 Blatt 2:2005-05, "Tabelle 1. Stroemungsgeraeuschberechnung",
 #: element 2 "Kulissenschalldaempfer", PDF page 12, printed folio "- 12 -": a
 #: splitter silencer of five 200 mm splitters and five 100 mm gaps in a
-#: 1,500 m by 0.600 m housing, carrying 16 000 m3/h. The housing and gap
+#: 1.500 m by 0.600 m housing, carrying 16 000 m3/h. The housing and gap
 #: cross-sections are not printed; they follow from the printed geometry,
-#: which closes exactly (5 x 0.200 + 5 x 0.100 = 1,500 m), and are confirmed
+#: which closes exactly (5 x 0.200 + 5 x 0.100 = 1.500 m), and are confirmed
 #: twice over by the printed face velocity of 4.94 m/s and the printed
 #: hydraulic diameter of 0.171 m.
 VDI2081_SPLITTER_VOLUME_FLOW_M3_H: float = 16_000.0

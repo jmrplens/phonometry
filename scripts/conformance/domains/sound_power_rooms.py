@@ -531,7 +531,7 @@ _C2_UNKNOWN = _PRESSURE_TERM + 7.5 * _RATIO
 _C2_3743 = _PRESSURE_TERM + 15.0 * _RATIO
 #: From the level over the 2 m hemisphere to the power calibrated at the
 #: reference conditions: ISO 6926 Formula (2), C1 and C2 at 23.0 degC and
-#: 101,325 kPa, no air absorption.
+#: 101.325 kPa, no air absorption.
 _TO_POWER_AS_CALIBRATED = (
     10.0 * math.log10(2.0 * math.pi * 2.0**2)
     + 5.0 * math.log10(296.15 / 314.0)
@@ -597,7 +597,7 @@ def _chk_iso3743_2_suitability_calibration() -> Outcome:
     "ISO 3743-2:2018 6.7 / Table 1",
     "With a calibration read at 20 degC and 90 kPa, each band is suitable at its "
     "Table 1 difference below the calibration and not 0.1 dB beyond it; with the "
-    "calibration read at the default 23.0 degC and 101,325 kPa instead, 0.482 dB "
+    "calibration read at the default 23.0 degC and 101.325 kPa instead, 0.482 dB "
     "higher, the band at its limit is not",
 )
 def _chk_iso3743_2_suitability_calibration_verdicts() -> Outcome:

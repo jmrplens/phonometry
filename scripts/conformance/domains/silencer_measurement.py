@@ -105,7 +105,7 @@ def _chk_octave_insertion_loss() -> Outcome:
         1e-12,
         unit="dB",
         places=6,
-        expected_label="-10 lg[(10^-3 + 10^-3 + 10^-0.5)/3] = 9,744 dB",
+        expected_label="-10 lg[(10^-3 + 10^-3 + 10^-0.5)/3] = 9.744 dB",
     )
 
 
@@ -114,10 +114,10 @@ def _chk_octave_bounds() -> Outcome:
     """Equation (2) cannot leave the band it is bracketed by.
 
     Whatever the three one-third octaves are, the octave lies between the
-    smallest of them and that value plus 10 lg 3 = 4,771 dB: the mean of the
+    smallest of them and that value plus 10 lg 3 = 4.771 dB: the mean of the
     three transmitted energies is at least a third of the largest and at most
     the largest itself. The example is the same 30, 30 and 5 dB triple, whose
-    9,744 dB sits 4,744 dB above its worst band with 0.027 dB of headroom to
+    9.744 dB sits 4.744 dB above its worst band with 0.027 dB of headroom to
     the upper edge.
     """
     thirds = (30.0, 30.0, 5.0)

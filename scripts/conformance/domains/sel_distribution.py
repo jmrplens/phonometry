@@ -16,8 +16,8 @@ Figure A.3 on folio 36 (PDF page 44).
 
 Two printed defects sit in this oracle and both are recorded in
 ``docs/ERRATA.md``. The running text gives the shift of Equation (22) as
-1.04 dB with a standard deviation of 5 dB, where the equation gives 2,878 dB;
-LT2 and the curve of Figure A.2 were computed with 2,878 dB, so the rows use
+1.04 dB with a standard deviation of 5 dB, where the equation gives 2.878 dB;
+LT2 and the curve of Figure A.2 were computed with 2.878 dB, so the rows use
 the equation. And four of the five exceedance levels of Figure A.3 are not
 the roots of Equation (25): solved on this distribution it gives 21.6 / 40.5 /
 43.0 / 47.5 dB where the figure prints 21.7 / 40.6 / 43.2 / 48.0 dB. How the

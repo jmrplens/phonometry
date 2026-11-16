@@ -57,7 +57,7 @@ optional ``integration_time`` carries the background to the event's interval
 (:math:`+10 \log_{10}(T/T_0)`, clause 3.4 NOTE 1) before the subtraction.
 
 Annex C carries either level to the reference meteorological conditions of
-101,325 kPa and 23.0 °C with the radiation-impedance correction
+101.325 kPa and 23.0 °C with the radiation-impedance correction
 :math:`C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}((273.15 + \theta)/296)`,
 the same ``C2`` as ISO 3741:2010 clause 9.1.4, reused from that module; the
 whole ISO 3740 family prints :math:`\theta_\mathrm{ref}` = 296 K beside a

@@ -44,7 +44,7 @@ which reading reproduces the page:
    Annex D of this standard is written around). With any other constant the
    two MTVV columns stop lining up. It is also why the continuous row of the
    linear MTVV repeats the 16-cycle value for whole-body vibration: 16 cycles
-   at 15,915 Hz last 1,005 s, so the burst already fills the window.
+   at 15.915 Hz last 1.005 s, so the burst already fills the window.
 
 **Which band limiting the band-limiting row is.** 5.6.6 (folio 14) makes the
 band-limiting response a graded quantity of its own, and Tables 7 to 9 give it
@@ -221,7 +221,7 @@ class SawtoothBurstTest(RichDisplay):
     def frequency_hz(self) -> float:
         """The saw-tooth frequency, in hertz.
 
-        Table 6 prints it beside the angular frequency (79.58 Hz, 15,915 Hz
+        Table 6 prints it beside the angular frequency (79.58 Hz, 15.915 Hz
         and 0.397 9 Hz); this is the division, not the rounded decimal.
         """
         return self.angular_frequency_rad_s / (2.0 * math.pi)

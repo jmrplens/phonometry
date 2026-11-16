@@ -308,8 +308,8 @@ def test_eq9_energy_average_over_positions() -> None:
     """Eq. (9) written out: 10 lg[(1/n) sum 10^(0.1 Lpi)] over the positions.
 
     Three positions at 80, 83 and 86 dB in every band:
-    (10^8 + 10^8.3 + 10^8.6) / 3 = (1,000 + 1,995 + 3,981) x 10^8 / 3
-    = 2.3254 x 10^8, whose level is 83,665 dB.
+    (10^8 + 10^8.3 + 10^8.6) / 3 = (1.000 + 1.995 + 3.981) x 10^8 / 3
+    = 2.3254 x 10^8, whose level is 83.665 dB.
     """
     levels = np.stack([np.full(_BANDS.size, v) for v in (80.0, 83.0, 86.0)])
     res = emission.sound_power_in_duct(
@@ -379,11 +379,11 @@ def test_eq12_area_and_impedance_terms() -> None:
 
 
 def test_duct_air_impedance_at_20_degrees() -> None:
-    """rho c of the duct air at 20 degC and 101,325 kPa.
+    """rho c of the duct air at 20 degC and 101.325 kPa.
 
     c = 20.05 sqrt(273 + 20) = 343.20 m/s (the ISO 3741 form the package
     uses) and rho = p / (R T) = 101 325 / (287.05 x 293.15) = 1.2041 kg/m^3
-    (the 1,204 kg/m^3 the intensity module documents for 20 degC), so
+    (the 1.204 kg/m^3 the intensity module documents for 20 degC), so
     rho c = 413.25 N s/m^3 and the impedance term of Eq. (12) is
     -10 lg(413.25 / 400) = -0.1416 dB.
     """
@@ -430,10 +430,10 @@ def test_end_to_end_single_band_by_hand() -> None:
     """One band, one position, the whole chain multiplied out.
 
     1 kHz, d = 0.5 m, U = +15 m/s, Lp = 80 dB, C1 = 0.2 dB, C2 = -0.4 dB,
-    20 degC and 101,325 kPa:
+    20 degC and 101.325 kPa:
     C3,4 = 2.42 dB (Eq. (D.2)); C = 0.2 - 0.4 + 2.42 = 2.22 dB;
     Lp corrected = 82.22 dB; 10 lg(S) = -7.0697 dB;
-    -10 lg(413.25/400) = -0.1416 dB; LW = 82.22 - 7.0697 - 0.1416 = 75,009 dB.
+    -10 lg(413.25/400) = -0.1416 dB; LW = 82.22 - 7.0697 - 0.1416 = 75.009 dB.
     The A-weighted level of a lone 1 kHz band is the band level (C_j = 0).
     """
     res = emission.sound_power_in_duct(

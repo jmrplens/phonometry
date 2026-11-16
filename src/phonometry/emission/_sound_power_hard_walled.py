@@ -65,7 +65,7 @@ background as its exposure over that :math:`T`, :math:`L_{p(\mathrm{B})} +
 required with a background.
 
 Annex A carries either level to the reference meteorological conditions of
-101,325 kPa and 23.0 °C with the radiation-impedance correction
+101.325 kPa and 23.0 °C with the radiation-impedance correction
 :math:`C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}
 [(273.15 + \theta)/\theta_1]`, :math:`\theta_1` = 296 K, the expression
 ISO 3741:2010 and ISO 3747:2010 print digit for digit; the static pressure

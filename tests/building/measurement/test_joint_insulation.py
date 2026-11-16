@@ -440,7 +440,7 @@ def test_test_element_check_refuses_a_negative_width() -> None:
 def test_gap_width_is_the_average_of_four_readings() -> None:
     """J.2.2: "The average value is denoted as gap width, b"; not the median.
 
-    The readings have a mean of 5,075 mm and a median of 5.0 mm.
+    The readings have a mean of 5.075 mm and a median of 5.0 mm.
     """
     check = building.check_gap_width([5.0, 5.0, 5.0, 5.3])
     assert check.gap_width_mm == pytest.approx(5.075)

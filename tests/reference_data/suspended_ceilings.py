@@ -67,7 +67,7 @@ ISO12999_2_TABLE_3_COVERAGE_FACTOR_95: float = 2.0
 
 #: ISO 9613-1:1993, Table 1, printed folio 9 (PDF page 12), in decibels per
 #: kilometre: the caption on printed folio 5 gives the unit and the standard
-#: atmosphere of 101,325 kPa. Keyed by (air temperature in degrees Celsius,
+#: atmosphere of 101.325 kPa. Keyed by (air temperature in degrees Celsius,
 #: relative humidity in percent), which are the sub-table and the column:
 #: (i) at 20 degC and (j) at 25 degC. Only the cells the air-correction cases
 #: consume are transcribed. Note 5 of 6.4 says the table was evaluated at the

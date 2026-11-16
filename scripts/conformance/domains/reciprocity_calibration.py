@@ -765,7 +765,7 @@ def _chk_b2() -> Outcome:
 @register(
     _IEC61094,
     "IEC 61094-3:2016 B.2 Step 1 vs IEC 61094-2:2009 Table F.2",
-    "Water vapour mole fraction at 23 °C, 101,325 kPa, 50 % with the saturation pressure of Table F.2",
+    "Water vapour mole fraction at 23 °C, 101.325 kPa, 50 % with the saturation pressure of Table F.2",
 )
 def _chk_step_1() -> Outcome:
     """Step 1 refers to F.2 of IEC 61094-2 and prints its last coefficient as

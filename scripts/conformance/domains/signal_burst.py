@@ -201,7 +201,7 @@ _register_sampled()
     "Saw-tooth frequency of the whole-body burst, Hz",
 )
 def _chk_whole_body_frequency() -> Outcome:
-    """100 rad/s, printed beside it as 15,915 Hz."""
+    """100 rad/s, printed beside it as 15.915 Hz."""
     return numeric(
         15.915,
         ph.vibration.SAWTOOTH_BURST_TESTS["whole-body"].frequency_hz,

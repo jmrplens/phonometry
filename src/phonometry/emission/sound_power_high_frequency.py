@@ -96,7 +96,7 @@ Formula (10), with :math:`\alpha` in decibels per metre:
    K_\alpha = r \cdot \alpha \tag{10}
 
 **Reference meteorological conditions.** Clause 10.1 carries the levels of
-the reverberation-room methods to 101,325 kPa and 23.0 °C "de acuerdo con la
+the reverberation-room methods to 101.325 kPa and 23.0 °C "de acuerdo con la
 Norma ISO 3741", which is the reference-quantity correction :math:`C_1` and
 the radiation-impedance correction :math:`C_2` of ISO 3741:2010 clause 9.1.4
 for a direct method and :math:`C_2` alone for the comparison with a reference
@@ -240,7 +240,7 @@ def air_absorption_np_per_m(
     Formulae (A.1) to (A.5) of ISO 9295:2015 are the ISO 9613-1:1993
     pure-tone attenuation written for the amplitude in nepers per metre, the
     unit Formula (7) takes, so this is the library's ISO 9613-1 evaluation
-    without its factor 8,686 (Annex A: "multiplicando el valor de
+    without its factor 8.686 (Annex A: "multiplicando el valor de
     :math:`\alpha` en Np/m por 8,686 para obtener el valor de :math:`\alpha`
     en dB/m"). The difference from
     :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`
@@ -254,7 +254,7 @@ def air_absorption_np_per_m(
         :class:`~phonometry.environment.propagation.air_absorption.AtmosphericAbsorptionWarning`.
     :param relative_humidity_percent: Relative humidity ``h_r``, in percent.
     :param static_pressure_kpa: Static pressure ``p_s``, in kilopascals
-        (default 101,325 kPa, the pressure Tables 1 and 2 are printed at).
+        (default 101.325 kPa, the pressure Tables 1 and 2 are printed at).
     :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``. A ``float`` for
         a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, a temperature at or
@@ -475,7 +475,7 @@ def room_constant_from_air_absorption(
     :param temperature_c: Air temperature in the room, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity in the room, in percent.
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
-        (default 101,325 kPa).
+        (default 101.325 kPa).
     :return: ``R`` per frequency, in square metres. A ``float`` for a number, an array
         for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite volume or surface,
@@ -644,7 +644,7 @@ def free_field_absorption_correction(
     r"""Air absorption correction of the free-field method (ISO 9295 Formula (10)).
 
     :math:`K_\alpha = r \cdot \alpha`, with :math:`\alpha` the air absorption in
-    decibels per metre (Annex A times 8,686). Clause 9.8 adds it to the
+    decibels per metre (Annex A times 8.686). Clause 9.8 adds it to the
     surface sound pressure level of ISO 3744 before the sound power is
     determined, and only when the measurement radius exceeds 2 m; at 2 m
     or less the clause asks for no correction and this returns zero. The
@@ -658,7 +658,7 @@ def free_field_absorption_correction(
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Static pressure, in kilopascals (default
-        101,325 kPa).
+        101.325 kPa).
     :return: :math:`K_\alpha` per frequency, in decibels. A ``float`` for a number, an
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive radius or the atmospheric inputs
@@ -870,7 +870,7 @@ def high_frequency_sound_power(
     :param temperature_c: Air temperature in the room, in degrees Celsius
         (default 23.0 °C, the reference temperature).
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
-        (default 101,325 kPa, the reference pressure).
+        (default 101.325 kPa, the reference pressure).
     :param tonal: ``True`` when the bands are the narrow bands of discrete
         tones (clause 6.5), which changes how the result is drawn and read.
     :return: A :class:`HighFrequencySoundPowerResult` with ``method='direct'``.
@@ -954,7 +954,7 @@ def high_frequency_sound_power_comparison(
     :param temperature_c: Air temperature in the room, in degrees Celsius
         (default 23.0 °C).
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
-        (default 101,325 kPa).
+        (default 101.325 kPa).
     :return: A :class:`HighFrequencySoundPowerResult` with
         ``method='comparison'``, ``tonal`` set when ``noise_bandwidth_hz`` is
         given.

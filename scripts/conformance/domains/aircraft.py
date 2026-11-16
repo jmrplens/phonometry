@@ -196,7 +196,7 @@ def _arp5534_at_split(offset: float) -> float:
 def _chk_arp5534_continuity() -> Outcome:
     # Printed Eq. 8, 9.2 + 0.765 · 150 = 123.95 dB, against the library on its
     # Eq. 7 branch. The two printed branches do not meet to the digit: Eq. 7
-    # gives 123,953 dB there, a step of 0.003 dB, which is the tolerance's
+    # gives 123.953 dB there, a step of 0.003 dB, which is the tolerance's
     # reason for being 0.01 dB rather than tighter.
     return numeric(
         9.2 + 0.765 * 150.0, _arp5534_at_split(-1e-9), 0.01, unit="dB", places=3

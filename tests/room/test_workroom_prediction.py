@@ -328,7 +328,7 @@ def test_case_b_reproduces_table_b9(choice: str, where: str) -> None:
 
     Held to the half step of the tenth the table prints, with one exception
     named rather than absorbed into a wider tolerance for all six: the cell
-    beside the new machine with the louder choice comes back 89,337 dB against
+    beside the new machine with the louder choice comes back 89.337 dB against
     a printed 89.4 dB, 0.063 dB under it. The annex prints no contribution that
     would locate that last hundredth, so the departure is pinned as it is.
     """

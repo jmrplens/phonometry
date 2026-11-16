@@ -371,7 +371,7 @@ def test_result_rejects_inconsistent_fields() -> None:
 # ISO 3744 Annex G: reference meteorological conditions
 # --------------------------------------------------------------------------
 def test_annex_g_corrections_at_the_reference_atmosphere() -> None:
-    """At 23 C and 101,325 kPa: C1 = 5 lg(296.15/314) = -0.1271 dB and
+    """At 23 C and 101.325 kPa: C1 = 5 lg(296.15/314) = -0.1271 dB and
     C2 = 15 lg(296.15/296) = +0.0033 dB, both by hand.
     """
     corr = emission.reference_atmosphere_correction(23.0, static_pressure_kpa=101.325)

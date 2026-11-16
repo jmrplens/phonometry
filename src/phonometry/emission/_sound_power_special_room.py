@@ -1170,7 +1170,7 @@ def check_special_room_suitability(
     The level Formula 9 gives is, in the words of Annex E, the sound power
     level "under the meteorological conditions which occurred at the time
     and place of the test", and a calibration holds the power under the
-    reference conditions, 23.0 °C and 101,325 kPa. The two are compared
+    reference conditions, 23.0 °C and 101.325 kPa. The two are compared
     where the room measured: a
     :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926 is
     read at the temperature and static pressure of the test as

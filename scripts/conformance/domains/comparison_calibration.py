@@ -236,7 +236,7 @@ def _chk_table_a1() -> Outcome:
     "Expanded uncertainty of the correction at 20 kHz, a tenth of its value",
 )
 def _chk_table_a1_uncertainty() -> Outcome:
-    """A tenth of 1,443 dB."""
+    """A tenth of 1.443 dB."""
     jig = metrology.jig_diameter_correction([20000.0])
     return numeric(
         ref.IEC61094_5_TABLE_A1_RELATIVE_EXPANDED * 1.443,
@@ -305,7 +305,7 @@ def _chk_diameter_model_table_a1() -> Outcome:
     "Largest deviation of the model at the reference air of clause 4 from Table A.1, against a tenth of the 10 % its NOTE allows",
 )
 def _chk_diameter_model_reference_air() -> Outcome:
-    """At 23.0 °C, 101,325 kPa and 50 % the speed of sound of the
+    """At 23.0 °C, 101.325 kPa and 50 % the speed of sound of the
     IEC 61094-2 Annex F air is 345.87 m/s; the model is then within
     0.0093 dB of every row of Table A.1, at 20 kHz, inside 0.014 dB, a tenth
     of the expanded uncertainty the NOTE gives the largest correction.
@@ -1053,7 +1053,7 @@ def _chk_validation() -> Outcome:
 def _chk_validation_correlation() -> Outcome:
     """Example 2 of F.1.2.3: resistors calibrated against the same standard
     share its uncertainty, u(R_i, R_j) = u^2(R_S), and with u(R_S)/R_S =
-    10^-4 the correlation coefficient is about 0.5, 0.990 and 1,000 for
+    10^-4 the correlation coefficient is about 0.5, 0.990 and 1.000 for
     comparisons of 100, 10 and 1 x 10^-6. In levels each calibration
     carries sqrt(u(alpha)^2 + (u(R_S)/R_S)^2) and the two share u(R_S)/R_S,
     all scaled by the same 20/ln 10 dB per neper; the verification's
@@ -1199,7 +1199,7 @@ def _chk_stepped_sine_small_room() -> Outcome:
     """B.2.2: "the length of the impulse response will be the inverse of the
     size of the frequency step", and 120 Hz is enough "because the primary
     reflections all occur before 8 ms": the impulse response of a 120 Hz step
-    lasts 1/120 Hz = 8,333 ms, past them.
+    lasts 1/120 Hz = 8.333 ms, past them.
     """
     step, arrival = ref.IEC61094_8_B22_SMALL_ROOM
     frequencies = np.arange(0.0, 24000.0 + step / 2.0, step)

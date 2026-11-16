@@ -64,7 +64,7 @@ def _plate(name: str, thickness: float) -> tuple[float, float]:
 # The ISO tapping machine as a mass-spring-dashpot (Hopkins 3.6.3)
 # ===========================================================================
 def test_impact_velocity_is_the_printed_0_886() -> None:
-    """H printed p. 276: "the hammer velocity at impact ... will be 0,886 m/s"."""
+    """H printed p. 276: "the hammer velocity at impact ... will be 0.886 m/s"."""
     assert building.hammer_impact_velocity() == pytest.approx(0.886, abs=0.0005)
 
 
@@ -622,9 +622,9 @@ def test_two_line_estimate_rises_12_db_per_octave() -> None:
 @pytest.mark.parametrize(
     ("stiffness", "printed_f0"),
     [
-        # V printed p. 320: "using a covering of stiffness s equal to 3,2e5
+        # V printed p. 320: "using a covering of stiffness s equal to 3.2e5
         # N/m, giving a resonance frequency f0 of approximately 130 Hz with a
-        # hammer mass of 0,5 kg"; printed p. 321: "a stiffness of 5,2e6 N/m is
+        # hammer mass of 0.5 kg"; printed p. 321: "a stiffness of 5.2e6 N/m is
         # used, equivalent to a resonance frequency of approximately 510 Hz".
         (3.2e5, 130.0),
         (5.2e6, 510.0),
@@ -881,7 +881,7 @@ def test_double_floating_floor_matches_printed_74_and_195_hz() -> None:
 
     The construction and all three frequencies are printed *inside the plot
     panel*, not in the caption: "Walking surface: 18 mm plywood", "Resilient
-    layer: s' = 7,25 MN/m3 (25 mm reconstituted foam)", "Base floor: 140 mm
+    layer: s' = 7.25 MN/m3 (25 mm reconstituted foam)", "Base floor: 140 mm
     concrete slab", "Single floating floor fms = 118 Hz", "Double floating
     floor fmsms = 74 Hz and 195 Hz". The double floor is the same floor
     doubled, so both layers are identical.

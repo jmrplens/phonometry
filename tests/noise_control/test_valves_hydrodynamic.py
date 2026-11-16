@@ -140,7 +140,7 @@ class TestPreliminaryCalculations:
 
     def test_the_chain_caps_it_too(self) -> None:
         # Annex A never chokes, so the cap has to be exercised on a column of
-        # our own: 9 bar across the same valve, against the 8,444 bar of
+        # our own: 9 bar across the same valve, against the 8.444 bar of
         # F_L^2 (p_1 - p_v). Equation (5) then runs on the cap and not on the
         # differential, which is 3 % less velocity than the full drop would
         # give and 8 % less stream power.
@@ -151,7 +151,7 @@ class TestPreliminaryCalculations:
         uncapped = hydro.vena_contracta_velocity(9.0e5, 997.0, 0.92)
         assert result.velocity < uncapped
         # Equation (9) carries (p_1 - p_2)/Delta p_c, which is 1 in every
-        # printed column and 1,066 here, so this is also the one case that
+        # printed column and 1.066 here, so this is also the one case that
         # pins that factor.
         found = result.cavitation_efficiency
         assert found is not None
@@ -490,7 +490,7 @@ class TestTransmissionLoss:
     def test_the_cavitating_transmission_loss_matches_its_own_equation(
         self, index: int, expected: float
     ) -> None:
-        # Table A.1 prints -62,917 and -75,006. Equation (17) with the
+        # Table A.1 prints -62.917 and -75.006. Equation (17) with the
         # intermediates printed beside them gives these values instead, a
         # 0.06 to 0.08 dB offset whose origin is not visible on the page.
         # Recorded in ``docs/ERRATA.md``.
@@ -574,7 +574,7 @@ class TestTransmissionLoss:
     @pytest.mark.parametrize("index", [1, 2, 3])
     def test_the_band_loss_at_8_kHz_is_negative_51_76(self, index: int) -> None:
         # Table A.1 prints TL(8 000 Hz) = 51.76 dB with no minus sign in all
-        # three columns, where its own inputs sum to -51,763. Recorded in
+        # three columns, where its own inputs sum to -51.763. Recorded in
         # ``docs/ERRATA.md``; row (21) only closes with the negative value.
         assert _band(_run(index), _run(index).band_transmission_loss) == pytest.approx(
             -51.76, abs=5e-3

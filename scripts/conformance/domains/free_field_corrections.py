@@ -165,7 +165,7 @@ def _chk_i2_coverage() -> Outcome:
     "Expanded uncertainty of the correction at 1 kHz, to the printed guard digit",
 )
 def _chk_i2_expanded() -> Outcome:
-    """2,042 times 0.05903 dB is 0.1206 dB, that is 0.12(1).
+    """2.042 times 0.05903 dB is 0.1206 dB, that is 0.12(1).
 
     The table prints 0.12(4), which follows from its misprinted k = 2.11
     (docs/ERRATA.md). The row pins the value the page's own numbers give to
@@ -231,7 +231,7 @@ def _chk_i3_combined() -> Outcome:
     "Coverage factor at 8 kHz, more than 30 effective degrees of freedom",
 )
 def _chk_i3_coverage() -> Outcome:
-    """Printed k = 2; 59 degrees of freedom give 2,001."""
+    """Printed k = 2; 59 degrees of freedom give 2.001."""
     return numeric(
         ref.IEC62585_TABLE_I3_K, _budget_i3().coverage_factor, 0.005, places=3
     )

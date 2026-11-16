@@ -404,7 +404,7 @@ def _near_wall_threshold_m(partition_area: float) -> float:
 def test_barron_example_7_6_operator_near_the_wall() -> None:
     """The printed chain of Example 7-6, input to answer, folios 297 and 298.
 
-    The operator stands 1.5 m from a 16 m2 wall, inside the 1,596 m where the
+    The operator stands 1.5 m from a 16 m2 wall, inside the 1.596 m where the
     wall still looks like a plane source, so Equation (7-71) applies and the
     direct field of the wall adds 2.65 dB to what the reverberant field alone
     delivers: the far-field chain gives 59.1 dB where Barron prints 61.7 dB.

@@ -905,7 +905,7 @@ def test_barron_example_3_4_mean_and_area_term() -> None:
 
 
 def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
-    """The three terms of Equation (5) together, on a hemisphere of 9,817 m2.
+    """The three terms of Equation (5) together, on a hemisphere of 9.817 m2.
 
     The book's third term is the characteristic impedance of the room air,
     -10 lg(rho c / 400), which is the K of Equation (5) for this measurement.
@@ -1032,10 +1032,10 @@ def test_barron_example_5_7_equivalent_diameter() -> None:
     """The root inside Equation (15), for a 900 mm square duct.
 
     Half an oracle, and it says so: what Barron prints is the area-equivalent
-    diameter sqrt(4 S / pi) = 1,016 m. The 1.5 diameters in front of it are
+    diameter sqrt(4 S / pi) = 1.016 m. The 1.5 diameters in front of it are
     ISO 11820's own coefficient, read on the printed page of Equation (15) and
     nowhere on his, so this pins the root and not the factor. The printed
-    1,016 m carries half a millimetre of rounding, which the 1.5 scales to the
+    1.016 m carries half a millimetre of rounding, which the 1.5 scales to the
     0.75 mm this is asserted to.
     """
     distance = noise_control.measurement_distance_upstream_m(

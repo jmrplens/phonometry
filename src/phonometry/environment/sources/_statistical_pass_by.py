@@ -510,7 +510,7 @@ class PassByRegression(OwnsArrays):
 
         .. math::
 
-           t_{0,975;\,n-2} \, s_e \sqrt{\frac{1}{n}
+           t_{0.975;\,n-2} \, s_e \sqrt{\frac{1}{n}
            + \frac{(\lg v_\mathrm{ref} - \overline{\lg v})^2}{\sum (\lg v_i
            - \overline{\lg v})^2}}
 

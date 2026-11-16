@@ -702,7 +702,7 @@ _SIGNAL_MEAN_SQUARE = [("cuadrado medio", "valor cuadrático medio")]
             _SIGNAL_MEAN_SQUARE,
         ),
         # The ECMA-418-2 loudness guide recalculates its bands «entre grupos»
-        # (the advanced loudness guide, at its 0,9845 sone_HMS anchor), and a
+        # (the advanced loudness guide, at its "0,9845" sone_HMS anchor), and a
         # guide splits machines or bands into groups: groups that do not
         # qualify the term are a signal's.
         (

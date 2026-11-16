@@ -1903,7 +1903,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   read-only tables, and both results draw themselves with `.plot()`. Run from
   pass-bys placed on the regression lines Annex E prints, the method gives
   its 78.5, 81.1 and 83.8 dB and its index of 79.9 dB; the unrounded levels
-  would give 79,985 dB, and the guide explains why the printed lines alone
+  would give 79.985 dB, and the guide explains why the printed lines alone
   cannot tell the two apart and why the clauses can. Seven conformance rows
   run Annex E from pass-bys to its 2.8 dB difference and Annex D to its
   average, and two defects of the printed page are in the errata registry. A
@@ -1927,7 +1927,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the standard comes out digit for digit from Table A.3, and the long-term
   levels and the median of Figure A.3 are conformance rows. Two things in
   Annex A do not follow from its own equations and are in the errata register:
-  the shift is printed as 1.04 dB where Equation (22) gives 2,878 dB at the
+  the shift is printed as 1.04 dB where Equation (22) gives 2.878 dB at the
   5 dB the annex uses, and four of the five exceedance levels of Figure A.3
   are 0.1 dB to 0.5 dB above the roots of Equation (25). Those four are
   consistent with a curve accumulated from 15 dB, where the drawn curve
@@ -3842,7 +3842,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `PeopleAssessment.plot()` and `HMLRating.plot()` draw. The docs edition of
   the diffusers guide now writes the normalised coefficient $d_\mathrm{norm}$
   with the note on symbols its site twin carries, and the four Spanish
-  diagrams that printed 1.8 or 94.0 now print 1,8 and 94,0. `make subscripts` now
+  diagrams that printed 1.8 or 94.0 now print "1,8" and "94,0". `make subscripts` now
   reads the diagrams each page embeds beside the page itself, so a diagram
   that sets a symbol one way on a page that sets it the other fails the
   check, and it reads an upright run that follows an index inside one
@@ -4434,7 +4434,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   to 0.75 with the front cavities counted, was not recommended at 0.5 for a
   5.4 mm coupler of 18.6 mm closed by microphones with 1.95 mm cavities. And
   `within_stated_accuracy` of `metrology.reciprocity_air_attenuation` put
-  36.01 Hz at 90,025 kPa, 0.4 Hz/kPa, outside the domain IEC 61094-3 B.2 gives
+  36.01 Hz at 90.025 kPa, 0.4 Hz/kPa, outside the domain IEC 61094-3 B.2 gives
   for its accuracy. Each is now settled before it meets its limit.
   `scripts/check_boundary_comparisons.py` (`make boundary-comparisons`, and a
   job of its own in CI) found them: it follows a value through assignments,
@@ -6884,7 +6884,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   rows. It sits now beside `ANNEX_A_AIR` and `EN12354_AIR`, named for the
   standards that print them, and `SIMULATION_AIR`, the solver's own, and it no
   longer says it is the air the Johnson-Champoux-Allard model was published
-  with: Allard and Atalla state theirs at 18 degC, 1,213 kg/m3 and 342 m/s, and
+  with: Allard and Atalla state theirs at 18 degC, 1.213 kg/m3 and 342 m/s, and
   this one is a dry air at 20 degC whose values each cite the page they were
   read on (Bies, Hansen and Howard 5e for the speed, density and ratio of
   specific heats, Allard and Atalla 2e for the viscosity, Prandtl number and
@@ -8475,8 +8475,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   word a page prints where a number would go is that word.
 
   **The four airs of this library are on it, and they disagree.** The absorber
-  models propagate through 343 m/s at 1,205 kg/m3, the airflow-resistance
-  annex through 345.87 at 1,186, EN/ISO 12354 through 340 at 1.29 and the
+  models propagate through 343 m/s at 1.205 kg/m3, the airflow-resistance
+  annex through 345.87 at 1.186, EN/ISO 12354 through 340 at 1.29 and the
   acoustic solver defaults to 343 at 1.2. None of them is wrong: each is the
   air its own document assumes. They stay where they are, beside the clause
   that prints each one, and the comparison is made by the page rather than by
@@ -8781,7 +8781,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   How far the closure goes is measured rather than asserted. Hopkins (2007)
   Table A1, PDF page 634 (printed p. 607), prints both the inputs and the
-  outputs for six gases at the 20 degC and 1,013 x 10^5 Pa its own footnote
+  outputs for six gases at the 20 degC and 1.013 x 10^5 Pa its own footnote
   states: the speeds land within 0.5 m/s for all six, and the densities within two
   parts in a thousand for air, argon, nitrogen and oxygen. Carbon dioxide is
   0.7 per cent light and sulphur hexafluoride 2.1 per cent, which is the
@@ -10099,7 +10099,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   The Table 1 reference conditions come with it, and they are the check that
   the nine weightings were right in the first place:
-  `vibration.reference_indication` reproduces the printed 2,020 m/s2 for Wh
+  `vibration.reference_indication` reproduces the printed 2.020 m/s2 for Wh
   and 0.7718 for Wk. Thirty conformance rows pin Tables 1, 2, 4 and 5 against
   the printed page, including each transition frequency built from the
   `10**(k/10)` exponent and checked against the rounded decimal beside it.
@@ -11635,7 +11635,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the per-position $K_{1i}$ of Eq. 25, and `octave_band_levels` is the
   Annex F sum of thirds into octaves (Eq. F.1/F.4). `mean_single_event_level`
   is the Eq. 19/20 reduction on its own, and `reference_atmosphere_correction`
-  the Annex G correction of either level to 101,325 kPa and 23.0 °C, from a
+  the Annex G correction of either level to 101.325 kPa and 23.0 °C, from a
   measured static pressure or from the altitude through Eq. G.2.
 
   Neither standard prints a worked example with $L_J$, so the oracle is the
@@ -12075,7 +12075,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `DEFAULT_AIR` are withdrawn; the air those models default to is
   `ABSORBER_AIR`, and the keyword is `fluid=` rather than `air=`. Nothing
   about the numbers changed: `ABSORBER_AIR` carries the same
-  343.0 m/s, 1,205 kg/m3, 1.84 x 10^-5 Pa s, Pr = 0.71, gamma = 1.4 and
+  343.0 m/s, 1.205 kg/m3, 1.84 x 10^-5 Pa s, Pr = 0.71, gamma = 1.4 and
   101 325 Pa those models always defaulted to.
 
   What changes is what a caller can pass instead. `AirProperties` held six
@@ -12168,7 +12168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   capacity of 938.7 J/(kg·K), which is 27.19 J/(mol·K), below the rigid-rotor
   diatomic floor of 29.10, so it is not air at any temperature in any unit.
 
-  The defaults are now the Annex F values at 23 °C, 101,325 kPa and 50 %
+  The defaults are now the Annex F values at 23 °C, 101.325 kPa and 50 %
   relative humidity. The two conformance rows that reproduce the Annex A.3
   worked example pass the five values the annex prints, so they reproduce the
   standard rather than merely agree with it, and the citation is visible at the
@@ -12177,7 +12177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Nothing moves in the printed example either way, because Formula (A.5) uses
   the two constants only through `k_a/(rho0 c0 C_P)` and the common factor
   cancels there: both air states give the printed b = 1.83 mm and kappa' =
-  1,370. What changes is the number a caller gets when they do not supply air of
+  1.370. What changes is the number a caller gets when they do not supply air of
   their own. Anyone reproducing Annex A.3 exactly should now pass its printed
   values explicitly. The defect is registered against ISO 9053-2:2020 in
   `docs/ERRATA.md`.
@@ -12210,7 +12210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   did not distinguish it from the ISO 17497-1 one.
 
   Eqs. (5) and (7) of ISO 10534-2 are still evaluated in kelvin and the printed
-  293 K, 343.2 m/s and 1,186 kg/m3 are still literal in the source; the
+  293 K, 343.2 m/s and 1.186 kg/m3 are still literal in the source; the
   conversion happens inside the helper. Both reference states reproduce to the
   bit, because 19.85 degC is 293 K exactly in binary floating point.
 
@@ -13321,7 +13321,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `a_weighted_maximum_impact_level` is the normative single number of
   ISO 717-2 Annex D, an A-weighted energy sum rather than a shifted reference
   curve, and reproduces the Table D.4 worked example to every printed digit
-  including its deliberately unrounded 55,350 66... intermediate. The
+  including its deliberately unrounded 55.350 66... intermediate. The
   rubber-ball spectrum is pinned against three independent printings
   (ISO 16283-2 Table A.1, ISO 10140-5 Table F.1, JIS A 1418-2 Table A.2) and
   the bang machine against JIS A 1418-2 Table A.1; the standardization is
@@ -17773,7 +17773,7 @@ the whole of the migration.
   noise-plus-hearing-loss case and the independent R package Example C.2;
   the IEC 60268-16 Ed.5 C.3.2 STIPA direct-method staircase (m = 0 to 1
   through the full audio path, tolerance 0.05); the clipped-sine THD
-  Fourier constants; a full-signal DIM regression (1,536 MHz synthesis of
+  Fourier constants; a full-signal DIM regression (1.536 MHz synthesis of
   the standard test signal through a weak polynomial nonlinearity,
   FIR-decimated to 192 kHz, checked against an exact-bin FFT oracle); the
   H1 input-noise bias SNR/(1+SNR); the printed ITU-R 468 response values
@@ -17791,7 +17791,7 @@ the whole of the migration.
 - ISO/PAS 20065:2016 extended uncertainty of the audibility (Clauses 5.4/6):
   `audibility_uncertainty` propagates the uniform 3 dB narrow-band level
   uncertainty through the audibility chain to the extended uncertainty U
-  (90 % bilateral coverage, k = 1,645) and `mean_audibility_uncertainty`
+  (90 % bilateral coverage, k = 1.645) and `mean_audibility_uncertainty`
   combines the per-spectrum values through the Formula (20) mean;
   `analyze_spectrum` reports the per-tone U on its result. Verified against
   the printed Table E.2 U column (decisive tone to 0.006 dB), the 2 FG row
@@ -18188,7 +18188,7 @@ the whole of the migration.
   side keeps the Part A vector total `a_hv`.
 - The boxed exposure zone of the daily vibration exposure fiche is now derived
   from the same displayed-rounded comparisons as the assessment rows and the
-  verdict, so an `A(8)` that prints exactly at a threshold (for example 4,997
+  verdict, so an `A(8)` that prints exactly at a threshold (for example 4.997
   displaying as 5.00) can no longer show a boxed zone one step below its own
   Exceeded row.
 - The ISO 10848 `Kij` fiche distinguishes an empty single-number mean caused

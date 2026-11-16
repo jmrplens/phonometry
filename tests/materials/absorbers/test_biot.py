@@ -275,8 +275,8 @@ def test_frame_borne_velocity_ratio_matches_the_two_published_values() -> None:
     """A&A printed p. 125, read as ``Re(mu_b)``, not as ``|mu_b|``.
 
     The printed sentence is "the ratio **modulus** ``|mu_b|`` of the velocities
-    of the frame and the air for the frame-borne wave decreases from 1,0 at
-    50 Hz to 0,82 at 1500 Hz", but the two values it quotes are the real part:
+    of the frame and the air for the frame-borne wave decreases from 1.0 at
+    50 Hz to 0.82 at 1500 Hz", but the two values it quotes are the real part:
     the model gives ``mu_b(1500) = 0,811 + 0,473 j``, whose real part is 1.1 %
     from 0.82 while its modulus, 0.939, is 14.5 % away. ``docs/ERRATA.md``
     records the sentence and the evidence, including the parameter sweep that

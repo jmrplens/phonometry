@@ -316,7 +316,7 @@ def test_the_overhead_line_climbs_the_front_end_and_crosses_the_top() -> None:
     the first position stands on the front end, 2 m above key position 1, as
     the elevations of Figure 2 draw one. The run from 3 to 5 (1.5 m down the
     step, 7 m along, 0.8 m down, 4 m along and 1.7 m down the rear end) is
-    15 m, eight intervals of 1,875 m.
+    15 m, eight intervals of 1.875 m.
     """
     array = _large_array()
     top = np.asarray(array.positions_m)[np.asarray(array.overhead_mask)]

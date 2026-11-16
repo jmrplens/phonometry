@@ -6,7 +6,7 @@ Physics anchors:
 - Monopole over a rigid plane radiates into a hemisphere (Q = 2); on a
   radius-r hemisphere the field is uniform: Lp = LW - 10*lg(2*pi*r^2),
   so LW = Lp + 10*lg(S) is recovered exactly (ISO 3744 Eq. 18, S = 2*pi*r^2).
-- K1 = -10*lg(1 - 10^(-0.1*dL)) (ISO 3744 Eq. 16). dL = 6 dB -> 1,256 dB.
+- K1 = -10*lg(1 - 10^(-0.1*dL)) (ISO 3744 Eq. 16). dL = 6 dB -> 1.256 dB.
 - K2 = 10*lg(1 + 4*S/A) (ISO 3744 Eq. A.2).
 """
 

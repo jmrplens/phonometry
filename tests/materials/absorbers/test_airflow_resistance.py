@@ -438,7 +438,7 @@ def test_default_air_also_reproduces_the_printed_boundary_layer() -> None:
 
 
 def test_effective_kappa_annex_a_example() -> None:
-    """From the air Annex A.3 prints, kappa' carries the printed 1,370."""
+    """From the air Annex A.3 prints, kappa' carries the printed 1.370."""
     kappa_prime = effective_kappa(
         cavity_surface=ISO9053_2_ANNEX_A_SURFACE,
         cavity_volume=ISO9053_2_ANNEX_A_VOLUME,
@@ -451,7 +451,7 @@ def test_effective_kappa_annex_a_example() -> None:
 
 
 def test_default_air_also_reproduces_the_printed_kappa_prime() -> None:
-    """The Annex F defaults land on the printed 1,370 with more room than the
+    """The Annex F defaults land on the printed 1.370 with more room than the
     printed pair does: 44 % of the rounding band against 52 %.
     """
     kappa_prime = effective_kappa(

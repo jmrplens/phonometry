@@ -396,7 +396,7 @@ power of a broadband reference source calibrated by ISO 3741, or by ISO 6926
 and ISO 3745, in the room by this standard and compares it with the
 calibration: within ±5 dB at 125 Hz, ±3 dB from 250 Hz to 4 kHz and ±4 dB at
 8 kHz (Table 1). A certificate holds its levels under the reference
-conditions, 23.0 °C and 101,325 kPa, and passed as levels they stand for the
+conditions, 23.0 °C and 101.325 kPa, and passed as levels they stand for the
 levels at the test: this first comparison takes the reference source's run
 in the room at those conditions.
 
@@ -437,7 +437,7 @@ print(suitability.passes)                       # True
 **The calibration itself, read at the test.** Formula 9 gives the power the
 source radiated under the meteorological conditions of the test (Annex E),
 and an ISO 6926 calibration holds it under the reference conditions,
-23.0 °C and 101,325 kPa. `check_special_room_suitability` takes the
+23.0 °C and 101.325 kPa. `check_special_room_suitability` takes the
 `ReferenceSourceCalibration` in place of the levels, with the temperature and
 the static pressure in the room during step 2, and reads it there, as the
 comparison method of 10.3 does: each octave is the energy sum of its three
@@ -665,7 +665,7 @@ library takes the difference for both (see the
 [errata](/phonometry/reference/errata/)).
 
 **Reference conditions (Annex A of Part 1, Annex E of Part 2).** Above
-500 m the levels are carried to 101,325 kPa and 23.0 °C by
+500 m the levels are carried to 101.325 kPa and 23.0 °C by
 $C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}[(273.15 + \theta)/296]$,
 the $C_2$ of ISO 3741 and ISO 3747, with the static pressure from the
 altitude by $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$. Both

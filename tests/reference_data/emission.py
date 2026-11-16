@@ -274,7 +274,7 @@ ISO5136_TABLE_D1: tuple[tuple[float, ...], ...] = (
 #: polynomial lands within it of the printed value. The comparison has to be a
 #: tolerance rather than a rounding rule, because the table rounds to 0.1 dB
 #: and the polynomial lands wherever it lands: the widest gap over the 162
-#: cells is the 4 000 Hz row at U = +5 m/s, where 6,151 dB is printed as 6.2,
+#: cells is the 4 000 Hz row at U = +5 m/s, where 6.151 dB is printed as 6.2,
 #: which is 0.049 dB away and only just inside the budget.
 ISO5136_TABLE_D1_TOLERANCE_DB = 0.05
 #: Clause 1.1 (PDF page 11, printed p. 1): the maximum mean flow velocity at
@@ -347,7 +347,7 @@ ISO8297_NOTE_11_RATIOS: tuple[float, float] = (0.5, 0.05)
 
 # ---------------------------------------------------------------------------
 # ISO 9295:2015 Tables 1 and 2: the air absorption coefficient alpha, in Np/m,
-# at a static pressure of 101,325 kPa, transcribed from the Spanish adoption
+# at a static pressure of 101.325 kPa, transcribed from the Spanish adoption
 # UNE-EN ISO 9295:2015 (October 2015), PDF pages 15 and 16, printed folios 15
 # and 16. Rows are the 26 frequencies from 10 000 Hz to 22 400 Hz; each row
 # holds 12 cells, temperature by temperature and 40 %, 50 %, 60 % relative

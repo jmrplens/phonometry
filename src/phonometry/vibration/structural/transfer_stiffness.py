@@ -2561,12 +2561,12 @@ def driving_point_uncertainty(
     - :math:`\delta_\mathrm{lin}`, linearity, rectangular,
       :math:`1.5/(2\sqrt{3})` dB (B.3.6).
 
-    The last three are the expressions B.3.4 to B.3.6 print, 0.289, 1,155
+    The last three are the expressions B.3.4 to B.3.6 print, 0.289, 1.155
     and 0.433 dB. Table B.1 carries them rounded up to one decimal, 0.3, 1.2
     and 0.5 dB, the conservative rounding an uncertainty may take
     (ISO/IEC Guide 98-3:2008, 7.2.6); the defaults keep the expressions.
     With the defaults and no repeatability spread, :math:`u = 1.394` dB and
-    :math:`U = 2.789` dB, against 1,456 dB and 2.91 dB with the rounded
+    :math:`U = 2.789` dB, against 1.456 dB and 2.91 dB with the rounded
     table. Every default can be replaced by a reasoned estimate, as the annex
     encourages, and the note to (B.3) allows doing so band by band.
 

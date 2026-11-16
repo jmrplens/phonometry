@@ -15,7 +15,7 @@ row that restated a constant would check nothing, and a row that runs the
 chain checks the whole of it.
 
 **The row that is not here.** Table 9 also prints a ``|v|max`` row, and two of
-its five cells cannot be reproduced: at 31.5 Hz it prints 1,000 where Formula
+its five cells cannot be reproduced: at 31.5 Hz it prints 1.000 where Formula
 (5) gives 0.995 and at 315 Hz it prints 0.249 where Formula (5) gives 0.100,
 while the ``KB_F`` row of the same two columns follows Formula (5). It is
 registered in ``docs/ERRATA.md`` instead.

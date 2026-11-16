@@ -543,7 +543,7 @@ class TestFlowQuantities:
         assert sm.DENSITY_RATIO_RANGE == (0.98, 1.02)
 
     def test_the_dynamic_pressure_is_half_rho_v_squared(self) -> None:
-        # 1 m3/s through 0.0962 m2 is 10,395 m/s, and 1.2 kg/m3 makes that
+        # 1 m3/s through 0.0962 m2 is 10.395 m/s, and 1.2 kg/m3 makes that
         # 64.83 Pa.
         found = sm.dynamic_pressure(1.0, 0.0962, 1.2)
         assert found == pytest.approx(0.5 * 1.2 * (1.0 / 0.0962) ** 2)

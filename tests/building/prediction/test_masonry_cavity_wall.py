@@ -126,7 +126,7 @@ def test_fig_4_35_untied_resonance() -> None:
     """Hopkins Fig. 4.35, scenario A (no ties): the caption prints fmsm = 26 Hz.
 
     Two 140 kg/m2 leaves across an empty 75 mm cavity, air stiffness
-    rho0 c0**2 / d = 1.42e5 / 0.075 = 1,893e6 N/m3 over the equivalent surface
+    rho0 c0**2 / d = 1.42e5 / 0.075 = 1.893e6 N/m3 over the equivalent surface
     density 140 x 140 / 280 = 70 kg/m2.
     """
     f0 = building.mass_spring_mass_resonance(
@@ -142,7 +142,7 @@ def test_fig_4_35_untied_resonance() -> None:
 def test_fig_4_35_tied_resonance() -> None:
     """Hopkins Fig. 4.35, scenario B (2.5 ties/m2, k = 2e6 N/m): fmsm = 50 Hz.
 
-    The tie array adds N k / S = 5.0e6 N/m3 in parallel with the 1,893e6 N/m3
+    The tie array adds N k / S = 5.0e6 N/m3 in parallel with the 1.893e6 N/m3
     air spring, so the resonance nearly doubles.
     """
     ties = building.wall_tie_stiffness_per_area(
@@ -160,7 +160,7 @@ def test_fig_4_35_tied_resonance() -> None:
 
 
 def test_fig_4_35_resonance_pair_with_the_library_default_air() -> None:
-    """The same pair with the library's default air (1,205 kg/m3, 343 m/s).
+    """The same pair with the library's default air (1.205 kg/m3, 343 m/s).
 
     The default air stiffness differs from Hopkins' rounded 1.42e5 Pa by 0.2 %,
     which does not move either printed integer.

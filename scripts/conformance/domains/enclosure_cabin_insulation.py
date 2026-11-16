@@ -315,7 +315,7 @@ def _chk_cabin_estimate_identity() -> Outcome:
 @register(
     _ENCLOSURES,
     "ISO 11957:1996 6.2",
-    "Cabin clearance: half a wavelength at 100 Hz is 1,715 m at 343 m/s, "
+    "Cabin clearance: half a wavelength at 100 Hz is 1.715 m at 343 m/s, "
     "and the 50 Hz to 80 Hz range takes a flat 2 m",
 )
 def _chk_cabin_clearance() -> Outcome:
@@ -1025,7 +1025,7 @@ def _chk_clause_eight_on_the_iso717_example() -> Outcome:
     "ISO 11957:1996 Annex A with ISO 717-1:2013 Annex C, Table C.1 "
     "(PDF p. 24, printed folio 16)",
     "The summation term of the Annex A estimate against the two printed "
-    "sums, 28,308 dB and 26,859 dB, over sixteen bands each",
+    "sums, 28.308 dB and 26.859 dB, over sixteen bands each",
 )
 def _chk_annex_a_on_the_printed_sums() -> Outcome:
     # The table truncates, so the acceptance band is one-sided: a correct

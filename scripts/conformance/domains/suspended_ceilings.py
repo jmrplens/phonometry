@@ -25,7 +25,7 @@ anchored on a printed page rather than on our own arithmetic:
   printed folio 9 (PDF page 12), sub-table (i) at 20 degC and sub-table (j) at
   25 degC;
 * the conversion ``m = alpha / (10 lg(e))`` of **EN ISO 354:2003 8.1.2.1**,
-  printed folio 10 (PDF page 20), is anchored on the 4,343 that T. E. Vigran,
+  printed folio 10 (PDF page 20), is anchored on the 4.343 that T. E. Vigran,
   Building Acoustics, Taylor & Francis, 2008, prints for it in Equation (4.41)
   on printed page 122, and its factor of four on the 20 m2 of air absorption
   the worked example on the next page arrives at;
@@ -238,7 +238,7 @@ def _chk_iso9613_table1_climates() -> Outcome:
     _CEILINGS,
     "Vigran (2008) Eq. (4.41), printed page 122, PDF page 143",
     "The EN ISO 354:2003 8.1.2.1 conversion between alpha and m, printed as "
-    "10 lg(e) = 4,343",
+    "10 lg(e) = 4.343",
 )
 def _chk_ten_lg_e() -> Outcome:
     """The factor EN ISO 354 prints only as a formula, printed as a number.
@@ -255,7 +255,7 @@ def _chk_ten_lg_e() -> Outcome:
         1.0 / unity,
         0.0005,
         places=6,
-        expected_label="4,343, to the four figures the page prints",
+        expected_label="4.343, to the four figures the page prints",
     )
 
 

@@ -168,7 +168,7 @@ def test_the_spanish_labels_are_spanish() -> None:
 def test_the_spanish_nominal_labels_carry_the_decimal_comma() -> None:
     """``set_xticklabels`` installs fixed strings that no localiser reaches.
 
-    Every other figure in the corpus writes 31,5 in Spanish, and a gate holds
+    Every other figure in the corpus writes "31,5" in Spanish, and a gate holds
     the whole corpus to it. A nominal spectrum sets its tick labels by hand,
     which is the one way round that gate, so the labels are localised here.
     """

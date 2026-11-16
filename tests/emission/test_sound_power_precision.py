@@ -3,9 +3,9 @@
 ISO 9614-3:2002 (sound-intensity scanning, precision).
 
 Physics / standard anchors:
-- ISO 3745 K1 (Eq. 11): dLpi = 6 dB -> 1,256 dB; dLpi = 10 dB -> 0.458 dB.
+- ISO 3745 K1 (Eq. 11): dLpi = 6 dB -> 1.256 dB; dLpi = 10 dB -> 0.458 dB.
 - ISO 3745 areas: sphere S1 = 4*pi*r^2, hemisphere S2 = 2*pi*r^2.
-- ISO 3745 C1/C2 (Eq. 14): at 23 deg C, 101,325 kPa -> C2 = 0, C1 = -0.128 dB.
+- ISO 3745 C1/C2 (Eq. 14): at 23 deg C, 101.325 kPa -> C2 = 0, C1 = -0.128 dB.
 - ISO 3745 uncertainty (Eq. 24/25): U = k*sqrt(sigma_R0^2 + sigma_omc^2).
 - ISO 9614-3 LW = 10*lg(P/P0) (Eq. 9); LW0 = LW at 23 deg C / 101 325 Pa (Eq. 10).
 - ISO 9614-3 Annex B/C field indicators and five acceptance criteria.
@@ -110,7 +110,7 @@ def test_precision_positions_bad_count_raises() -> None:
 # ISO 3745 - per-position background correction K1i (Eq. 11) with floors
 # ==========================================================================
 def test_k1_floor_edge_band_6db() -> None:
-    """dLpi = 6 dB in a <=200 Hz band -> K1 = -10*lg(1-10^-0.6) = 1,256 dB."""
+    """dLpi = 6 dB in a <=200 Hz band -> K1 = -10*lg(1-10^-0.6) = 1.256 dB."""
     k1 = precision_background_correction(
         np.array([[56.0]]), np.array([[50.0]]), frequencies=np.array([200.0])
     )
@@ -176,7 +176,7 @@ def test_k1_frequency_length_mismatch_raises() -> None:
 # ISO 3745 - meteorological corrections C1, C2, C3 (Eq. 14)
 # ==========================================================================
 def test_c2_zero_at_reference() -> None:
-    """At 23 deg C, 101,325 kPa the ratio (273+theta)/theta1 = 1 -> C2 = 0."""
+    """At 23 deg C, 101.325 kPa the ratio (273+theta)/theta1 = 1 -> C2 = 0."""
     mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert isinstance(mc, MeteorologicalCorrection)
     assert mc.c2 == pytest.approx(0.0, abs=1e-12)
@@ -239,7 +239,7 @@ def test_uncertainty_worked_example_k2() -> None:
 
 
 def test_uncertainty_one_sided_k_1p6() -> None:
-    """k = 1.6 (one-sided) scales sigma_tot: U = 1.6*sqrt(0.25+4) = 3,299 dB."""
+    """k = 1.6 (one-sided) scales sigma_tot: U = 1.6*sqrt(0.25+4) = 3.299 dB."""
     u = precision_uncertainty(0.5, 2.0, 1.6)
     assert u == pytest.approx(1.6 * np.sqrt(4.25), abs=1e-6)
 

@@ -228,7 +228,7 @@ class TestGeometry:
     ) -> None:
         # The same valve rated in K_v and in C_v does not give exactly the
         # same jet: Table 1 rounds both constants to two digits, and
-        # 4.9/4.6 = 1,065 against the sqrt(1,156) = 1,075 the conversion
+        # 4.9/4.6 = 1.065 against the sqrt(1.156) = 1.075 the conversion
         # asks for. The gap is 1 %, which is the rounding and not a choice.
         as_cv = valves.jet_diameter_m(90.0, 0.3, 0.8, coefficient="Cv")
         as_kv = valves.jet_diameter_m(90.0 / 1.156, 0.3, 0.8, coefficient="Kv")

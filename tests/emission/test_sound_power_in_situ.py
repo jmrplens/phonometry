@@ -121,7 +121,7 @@ def test_background_margin_above_15_db_needs_no_correction() -> None:
 def test_background_margin_below_6_db_is_capped_and_flagged() -> None:
     """8.1: dL < 6 dB -> the correction is at most 1.3 dB and the band is an
     upper bound; a margin of 5.9 dB is still below the cap (Eq. 7 gives
-    1,290 dB there) and a margin of 3 dB, or none at all, takes the cap.
+    1.290 dB there) and a margin of 3 dB, or none at all, takes the cap.
     """
     background = np.full_like(ST, 40.0)
     background[0, 1] = ST[0, 1] - 5.9
@@ -521,7 +521,7 @@ def test_excess_level_is_zero_in_a_free_field_and_the_reverberant_surplus() -> N
 
 def test_c2_at_reference_conditions_is_the_296_k_residual() -> None:
     """Annex C prints theta_ref = 296 K beside a 23.0 °C reference: at exactly
-    101,325 kPa and 23.0 °C, C2 = 15 lg(296.15/296) = 15 x 0.000 220 03
+    101.325 kPa and 23.0 °C, C2 = 15 lg(296.15/296) = 15 x 0.000 220 03
     = 0.003 300 4 dB, not zero; the pressure term vanishes.
     """
     res = _power()
@@ -533,7 +533,7 @@ def test_c2_at_reference_conditions_is_the_296_k_residual() -> None:
 
 def test_static_pressure_from_altitude_eq_c2() -> None:
     """Eq. (C.2) at 500 m: 1 - 2.2560e-5 x 500 = 0.988 72; ln = -0.011 344 1;
-    x 5.2553 = -0.059 617; exp = 0.942 126; ps = 95,461 kPa, and the Annex C
+    x 5.2553 = -0.059 617; exp = 0.942 126; ps = 95.461 kPa, and the Annex C
     pressure term -10 lg(ps/ps0) is then 0.258 9 dB. At sea level ps = ps0.
     """
     assert emission.static_pressure_from_altitude(0.0) == pytest.approx(101.325)

@@ -2746,7 +2746,7 @@ in the same order.
   3.013 and $6.029\ \text{GPa}\cdot\text{s/m}^3$ at 20 Hz for the 50 mm and 100 mm tubes with 0.1667
   mm, and the printed 3.015 and 6.034 with 1/6 mm. A program tested against the
   table with the radius as printed fails the test by up to five units of the
-  last figure. The other two slips are typographical: "2.021" is 2,021, and
+  last figure. The other two slips are typographical: "2.021" should read "2,021", and
   "–3,89" is the only entry with two decimals (the formulas give –3.892 with the
   1/6 mm of the column).
 - **Evidence:** Formulas (B.1) to (B.3) evaluated with the air of Annex F at 23
@@ -10879,7 +10879,7 @@ in the same order.
 
 ## ISO 3095:2013, Table G.1 against Table G.2 (the ground-level uncertainty at 7.5 m printed as 0.55 dB in one and 0.30 dB in the other)
 
-- **Location:** Annex G (informative), the $\delta_\mathrm{ground\ level,7,5}$
+- **Location:** Annex G (informative), the $\delta_\mathrm{ground\ level,7.5}$
   row of Table G.1, printed p. 49, and the $\delta_\mathrm{ground\ level}$ row
   of Table G.2, printed p. 51.
 - **The print:** Table G.1 gives the interval "[0 dB; 1,03 dB]" and the

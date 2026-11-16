@@ -17,7 +17,7 @@ Normative anchors (UNE-EN ISO 9295:2015, the Spanish adoption):
 - Clause 10.1, PDF page 21: reference meteorological conditions per ISO 3741,
   C1 + C2 for a direct method and C2 for the comparison.
 - Table 3, PDF page 24: the levels to determine for each type of noise.
-- Annex A, PDF pages 25 and 26: ISO 9613-1 in Np/m (8,686 converts to dB/m).
+- Annex A, PDF pages 25 and 26: ISO 9613-1 in Np/m (8.686 converts to dB/m).
 """
 
 from __future__ import annotations
@@ -227,7 +227,7 @@ def test_annex_a_advises_just_past_22_4_khz() -> None:
 
 
 def test_annex_a_follows_the_static_pressure() -> None:
-    """At 90 kPa Annex A is still ISO 9613-1 in nepers, and not the 101,325 kPa value."""
+    """At 90 kPa Annex A is still ISO 9613-1 in nepers, and not the 101.325 kPa value."""
     frequencies = np.array([1000.0, 4000.0, 8000.0])
     nepers = emission.air_absorption_np_per_m(
         frequencies,

@@ -476,7 +476,7 @@ def _chk_diffuse_table_1() -> Outcome:
     "form; the standard prints no value)",
 )
 def _chk_inverse_distance() -> Outcome:
-    """20 lg(1.15/0.85) = 2,626 dB at 0.15 m, 20 lg(1.1/0.9) = 1,743 dB at 0.10 m.
+    """20 lg(1.15/0.85) = 2.626 dB at 0.15 m, 20 lg(1.1/0.9) = 1.743 dB at 0.10 m.
 
     5.2 c) and 5.4 c) name the law and print no number, so the expected side
     is the two values worked out by hand from it, to 0.001 dB.

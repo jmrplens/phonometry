@@ -335,7 +335,7 @@ def _chk_nominal_frequency_ranges() -> Outcome:
     """The column of Table 1 that 5.7, 5.10 and 12.11 are written against.
 
     Nominal values, printed as round numbers: the hand-transmitted range
-    opens at "8 Hz", which is the band centred on 10**(9/10) = 7,943 Hz, and
+    opens at "8 Hz", which is the band centred on 10**(9/10) = 7.943 Hz, and
     the range is the printed 8 rather than that centre.
     """
     printed: dict[WeightingName, tuple[float, float]] = {

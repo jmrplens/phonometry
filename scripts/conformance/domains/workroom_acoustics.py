@@ -657,7 +657,7 @@ def _chk_suva_reference_offset() -> Outcome:
         implied,
         0.02,
         unit="dB",
-        expected_label="10 lg(4 pi) = 10,992 dB, which Eq. (2) prints as 11 dB",
+        expected_label="10 lg(4 pi) = 10.992 dB, which Eq. (2) prints as 11 dB",
         computed_label=f"{implied:.3f} dB, from the mean of the 21 residuals",
     )
 
@@ -904,7 +904,7 @@ _B_M4: _Machine = prediction.ANNEX_B_MACHINES["M4"]
 
 #: The departure of the one cell of Table B.9 the model does not bring inside
 #: the half step of its printed tenth: beside the new machine with the first
-#: choice, 89,337 dB against a printed 89.4 dB. The annex prints no
+#: choice, 89.337 dB against a printed 89.4 dB. The annex prints no
 #: contribution that would locate the difference, so it is recorded here as it
 #: is and not attributed to anything.
 _B_CASE_B_EXCEPTION_DB = -0.063

@@ -78,7 +78,7 @@ def _chk_background_limited() -> Outcome:
 )
 def _chk_background_thresholds() -> Outcome:
     # A band 10.0 dB above its background is not corrected ("10 dB or more
-    # below"), and one 4,0 dB above is corrected, not held ("less than 4 dB").
+    # below"), and one 4.0 dB above is corrected, not held ("less than 4 dB").
     # Read on levels given to 0.1 dB, whose differences are a hair off in
     # binary: 20.4 - 10.4 and 32.3 - 28.3.
     res = building.service_equipment_background_correction([20.4, 32.3], [10.4, 28.3])

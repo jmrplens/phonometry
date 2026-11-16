@@ -214,7 +214,7 @@ _INF = math.inf
 #: ``Wh`` uses the exact ISO 8041-1 values (Table 3, NOTE 2), of which the
 #: ISO 5349-1 Table A.1 figures are the five-significant-figure rounding.
 _WEIGHTINGS: dict[str, _WParams] = {
-    # Whole-body, vertical z (ISO 2631-4); K = 1,024.
+    # Whole-body, vertical z (ISO 2631-4); K = 1.024.
     "Wb": _WParams(
         0.4,
         _Q_BUTTERWORTH,

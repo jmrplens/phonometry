@@ -337,7 +337,7 @@ def _chk_turbulent_loss() -> Outcome:
     already gives.
 
     The annex adds its own rounded intermediates here - -44.71 and -29.56
-    make its -74.27 - where the unrounded chain gives -74,263. That is the
+    make its -74.27 - where the unrounded chain gives -74.263. That is the
     whole of the 0.008 dB this row is allowed.
     """
     printed = {1: -74.27, 2: -71.84, 3: -76.16}
@@ -364,7 +364,7 @@ def _chk_cavitating_loss() -> Outcome:
     """Equation (17), the one row of Table A.1 whose printed values its own
     printed intermediates do not reproduce.
 
-    The annex prints -62,917 and -75,006; the equation with the numbers
+    The annex prints -62.917 and -75.006; the equation with the numbers
     printed beside them gives -62.86 and -74.93. The offset is under 0.1 dB
     and does not reach the printed external levels, which round to the same
     figures either way.

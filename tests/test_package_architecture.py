@@ -3468,7 +3468,7 @@ def test_no_error_message_carries_a_comma_decimal() -> None:
 
     The library writes its own numbers into refusals: a temperature floor at
     absolute zero, the thermodynamic bound on a Poisson ratio. Seven of them
-    had drifted to a comma, four of them the same -273,15, while eleven
+    had drifted to a comma, four of them the same "-273,15", while eleven
     comparable messages used a point and one of the two spellings of the same
     0.5 sat in each camp.
 

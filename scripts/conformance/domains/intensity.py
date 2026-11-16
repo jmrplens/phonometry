@@ -874,7 +874,7 @@ def _chk_iso3747_event_forms() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Annex C",
-    "C2 at 101,325 kPa and 23.0 degC is 15 lg(296.15/296) = 0.003 300 dB (theta_ref = 296 K)",
+    "C2 at 101.325 kPa and 23.0 degC is 15 lg(296.15/296) = 0.003 300 dB (theta_ref = 296 K)",
 )
 def _chk_iso3747_c2_reference_conditions() -> Outcome:
     with _no_background_levels():
@@ -888,7 +888,7 @@ def _chk_iso3747_c2_reference_conditions() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Eq. C.2",
-    "Static pressure at 500 m, 101,325 (1 - 2.2560e-5 x 500)^5.2553 kPa",
+    "Static pressure at 500 m, 101.325 (1 - 2.2560e-5 x 500)^5.2553 kPa",
 )
 def _chk_iso3747_altitude_pressure() -> Outcome:
     expected = 101.325 * (1.0 - 2.2560e-5 * 500.0) ** 5.2553
@@ -957,7 +957,7 @@ def _iso9295_cells(table: int) -> list[tuple[float, float, float, float]]:
 
 
 def _iso9295_at_table_conversion(frequency: float, t: float, rh: float) -> float:
-    """Annex A as the tables were computed: T = theta + 273.16 K, 101,325 kPa."""
+    """Annex A as the tables were computed: T = theta + 273.16 K, 101.325 kPa."""
     f2, bracket = _pure_tone_terms(
         np.asarray([frequency]), t + ref.ISO9295_TABLE_KELVIN_OFFSET, rh, 101.325
     )
@@ -1145,7 +1145,7 @@ def _chk_iso9295_air_room_constant() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Formula (6) / 10.1",
     "LW = Lp(ST) - 10 lg(4/R) + C1 + C2: R = 40 m2 raises Lp = 60 dB by 10 dB, "
-    "plus the C1 and C2 of ISO 3741 at 23 degC and 101,325 kPa and at 30 degC and "
+    "plus the C1 and C2 of ISO 3741 at 23 degC and 101.325 kPa and at 30 degC and "
     "90 kPa",
 )
 def _chk_iso9295_direct_level() -> Outcome:
@@ -1156,7 +1156,7 @@ def _chk_iso9295_direct_level() -> Outcome:
         c2 = pressure + 15.0 * math.log10(kelvin / 296.0)
         return c1 + c2
 
-    cases = {"23 degC, 101,325 kPa": (23.0, 101.325), "30 degC, 90 kPa": (30.0, 90.0)}
+    cases = {"23 degC, 101.325 kPa": (23.0, 101.325), "30 degC, 90 kPa": (30.0, 90.0)}
     expected = {
         name: round(70.0 + corrections(*state), 6) for name, state in cases.items()
     }
@@ -1232,7 +1232,7 @@ def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Formula (10)",
     "Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m "
-    "(8,686 times Annex A), and none at r = 2 m",
+    "(8.686 times Annex A), and none at r = 2 m",
 )
 def _chk_iso9295_free_field_correction() -> Outcome:
     alpha = ph.emission.air_absorption_np_per_m(
@@ -1320,7 +1320,7 @@ def _chk_iso5136_table_d1() -> Outcome:
     """All 162 printed cells against Eq. (7) with the Table A.4 coefficients.
 
     The table prints to 0.1 dB, so the budget is half of that. The widest
-    gap is the 4 000 Hz row at U = +5 m/s, where the polynomial gives 6,151 dB
+    gap is the 4 000 Hz row at U = +5 m/s, where the polynomial gives 6.151 dB
     against a printed 6.2, which is 0.049 dB and only just inside the budget.
     """
     worst = 0.0
@@ -1400,7 +1400,7 @@ def _chk_iso5136_eq12() -> Outcome:
     """The two terms of Eq. (12) written out against the result's own rho c.
 
     S = pi x 0.5^2 / 4 = 0.196350 m^2, 10 lg S = -7.0697 dB; the duct air at
-    20 degC and 101,325 kPa has rho c = 413.25 N s/m^3 (1.2041 kg/m^3 times
+    20 degC and 101.325 kPa has rho c = 413.25 N s/m^3 (1.2041 kg/m^3 times
     343.20 m/s), so the impedance term is -0.1416 dB and the whole bracket
     -7.2113 dB.
 

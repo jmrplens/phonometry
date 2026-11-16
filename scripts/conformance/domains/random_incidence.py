@@ -88,7 +88,7 @@ def _chk_four_planes() -> Outcome:
     "Largest of the 70 elements of 10° steps in two planes, about 2.2 % of the sphere",
 )
 def _chk_largest_element() -> Outcome:
-    """The element at 90°, K(90°) = 2,179 %, and below the 3 % of A.1.6."""
+    """The element at 90°, K(90°) = 2.179 %, and below the 3 % of A.1.6."""
     largest = 100.0 * metrology.largest_element_fraction(_STEP)
     return numeric(ref.IEC61183_A17_LARGEST_PERCENT, largest, 0.05, unit="%", places=3)
 

@@ -1838,7 +1838,7 @@ def _plot_two_runs(
         ax.set_xlabel(frequency_label)
         # The language has to be forwarded: the tick labels of a logarithmic
         # axis are written by this formatter, and `localize_axes` below skips
-        # exactly those axes, so a Spanish figure would keep 31.5 for 31,5.
+        # exactly those axes, so a Spanish figure would keep 31.5 for "31,5".
         format_frequency_axis(ax, language=language)
         format_frequency_axis(twin, language=language)
     else:

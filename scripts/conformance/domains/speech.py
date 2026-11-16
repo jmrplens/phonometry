@@ -160,8 +160,8 @@ class _PrintedRow(NamedTuple):
 #: combined-level row above them, which is printed to two decimals, and the
 #: A.5.3 masking slope at these levels is 0.5 dB per dB, so up to
 #: 0.5 x 0.005 = 0.0025 dB of hidden rounding rides into them: measured at
-#: 250 Hz of step 2, the annex's 77.90 gives 8,222 where the unrounded
-#: 77.90444 gives 8,227, and only the former prints the tabulated 8.22.
+#: 250 Hz of step 2, the annex's 77.90 gives 8.222 where the unrounded
+#: 77.90444 gives 8.227, and only the former prints the tabulated 8.22.
 _ANNEX_M_AMF_CARRY = 10.0 ** (0.5 * 0.005 / 10.0) - 1.0
 
 

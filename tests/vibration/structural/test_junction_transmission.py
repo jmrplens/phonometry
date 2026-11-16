@@ -563,7 +563,7 @@ def test_norton_right_angle_normal_incidence_is_symmetric() -> None:
 
 def test_norton_right_angle_identical_plates() -> None:
     # Identical plates give psi = 1, hence tau12(0) = 2/4 = 0.5, and X = 1 so
-    # the random-incidence factor is 2,754/4.24.
+    # the random-incidence factor is 2.754/4.24.
     same = vibration.right_angle_transmission_coefficient(
         0.004,
         0.004,

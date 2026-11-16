@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-#: 20 Hz to 2 kHz: seven octave labels, the first of them 31,5.
+#: 20 Hz to 2 kHz: seven octave labels, the first of them "31,5".
 _FREQUENCIES = np.geomspace(20.0, 2000.0, 30)
 
 

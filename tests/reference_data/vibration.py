@@ -36,20 +36,20 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 # ISO 8041-1 Annex B design-goal weighting factors at the true band centre.
 ISO8041_1_WK_FACTOR_6P31HZ = 1.054  # Table B.8, n = 8 (6.31 Hz) - Wk peak
-ISO8041_1_WM_FACTOR_1P585HZ = 0.9342  # Table B.9, n = 2 (1,585 Hz) - Wm
+ISO8041_1_WM_FACTOR_1P585HZ = 0.9342  # Table B.9, n = 2 (1.585 Hz) - Wm
 ISO8041_1_WB_FACTOR_6P31HZ = 1.054  # Table B.1, n = 8 (6.31 Hz) - Wb peak
 ISO8041_1_WB_FACTOR_1HZ = 0.3853  # Table B.1, n = 0 (1 Hz)
 ISO8041_1_WB_FACTOR_100HZ = 0.1154  # Table B.1, n = 20 (100 Hz)
 ISO8041_1_WD_FACTOR_1HZ = 1.011  # Table B.3, n = 0 (1 Hz)
-ISO8041_1_WE_FACTOR_8HZ = 0.1263  # Table B.4, n = 9 (7,943 Hz)
+ISO8041_1_WE_FACTOR_8HZ = 0.1263  # Table B.4, n = 9 (7.943 Hz)
 ISO8041_1_WF_FACTOR_0P1585HZ = 1.004  # Table B.5, n = -8 (0.1585 Hz)
 ISO8041_1_WF_FACTOR_0P1HZ = 0.6951  # Table B.5, n = -10 (0.1 Hz)
 ISO8041_1_WJ_FACTOR_6P31HZ = 0.947  # Table B.7, n = 8 (6.31 Hz)
-ISO8041_1_WJ_FACTOR_8HZ = 1.016  # Table B.7, n = 9 (7,943 Hz)
+ISO8041_1_WJ_FACTOR_8HZ = 1.016  # Table B.7, n = 9 (7.943 Hz)
 # ISO 8041-1 Table 1 weighting factors at the reference frequencies.
-ISO8041_1_WH_REF_FREQ_HZ = 500.0 / (2.0 * math.pi)  # 79,577 Hz (500 rad/s)
+ISO8041_1_WH_REF_FREQ_HZ = 500.0 / (2.0 * math.pi)  # 79.577 Hz (500 rad/s)
 ISO8041_1_WH_REF_FACTOR = 0.2020  # Table 1, Wh @ 500 rad/s
-ISO8041_1_WBV_REF_FREQ_HZ = 100.0 / (2.0 * math.pi)  # 15,915 Hz (100 rad/s)
+ISO8041_1_WBV_REF_FREQ_HZ = 100.0 / (2.0 * math.pi)  # 15.915 Hz (100 rad/s)
 ISO8041_1_WC_REF_FACTOR = 0.5145  # Table 1, Wc @ 100 rad/s
 ISO8041_1_WD_REF_FACTOR = 0.1261  # Table 1, Wd @ 100 rad/s
 
@@ -1226,7 +1226,7 @@ ISO7626_2_CAL_MASS_KG = 10.0  # rigid calibration block mass (7.5.2)
 ISO7626_2_CAL_ACCELERANCE = 0.100  # mag(A) = 1/m, 1/kg
 ISO7626_2_CAL_MOBILITY_100HZ = 1.59155e-4  # mag(Y) at 100 Hz, m/(N.s)
 ISO7626_2_RANDOM_ERROR_PCT = 4.08  # Annex A example: g2 = 0.8, n = 75
-ISO7626_1_DECADE_FREQ_HZ = 1000.0 / (2.0 * math.pi)  # 159,155 Hz (1000 rad/s)
+ISO7626_1_DECADE_FREQ_HZ = 1000.0 / (2.0 * math.pi)  # 159.155 Hz (1000 rad/s)
 ISO7626_1_DECADE_MOBILITY = 1.0e-3  # mag(Y) of a rigid 1 kg mass, m/(N.s)
 ISO7626_1_DECADE_COMPLIANCE = 1.0e-6  # mag(H) of a rigid 1 kg mass, m/N
 ISO10846_3_LIMIT_DELTA_L_DB = 20.0  # Inequality (2): DeltaL1,2 >= 20 dB

@@ -285,7 +285,7 @@ NORTON_AIR_DENSITY = 1.21
 
 #: Norton's air as the `Fluid` the models now take, built here from the two
 #: constants the book prints, so the oracle stays independent of the library's
-#: own air, which is 1,205 rather than 1.21.
+#: own air, which is 1.205 rather than 1.21.
 NORTON_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=101_325.0,

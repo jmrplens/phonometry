@@ -609,7 +609,7 @@ class TestApparentStiffnessRow:
             _FLOOR, airflow_resistivity_pa_s_m2=150_000.0
         )
         assert f0 == pytest.approx(_formula_2(_S_T, _FLOOR), rel=1e-12)
-        # sqrt(6e6 / 120) / (2 pi) = sqrt(50 000) / (2 pi) = 35,588 Hz.
+        # sqrt(6e6 / 120) / (2 pi) = sqrt(50 000) / (2 pi) = 35.588 Hz.
         assert f0 == pytest.approx(35.588, abs=5e-4)
 
     def test_intermediate_resistivity_is_formula_6(self) -> None:

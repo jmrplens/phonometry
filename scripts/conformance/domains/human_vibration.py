@@ -35,7 +35,7 @@ def _chk_iso8041_wk_annex_b() -> Outcome:
     return numeric(ref.ISO8041_1_WK_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
 
 
-@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1,585 Hz")
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1.585 Hz")
 def _chk_iso8041_wm_annex_b() -> Outcome:
     factor = float(ph.vibration.weighting_factors("Wm", _true_centre(2)))
     return numeric(ref.ISO8041_1_WM_FACTOR_1P585HZ, factor, 1e-3, rel=True, places=4)
@@ -220,7 +220,7 @@ _BAND_LIMITING_SAMPLES: tuple[tuple[WeightingName, int, str, float], ...] = (
     ("Wk", -2, "0.631", 0.9279),
     ("Wf", -4, "0.3981", 0.9279),
     ("Wh", 10, "10", 0.9291),
-    ("Wm", 1, "1,259", 0.9291),
+    ("Wm", 1, "1.259", 0.9291),
 )
 
 

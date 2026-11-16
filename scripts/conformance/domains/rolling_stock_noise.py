@@ -304,7 +304,7 @@ def _chk_method_b_filter_class() -> Outcome:
     "Unit sinusoids run through the Method B bank on a 40 m record sampled "
     "every millimetre, at the normalized frequencies G⁴ and G⁻⁴ map to "
     "(equation 10) about every band and at the two wavenumbers a decimated "
-    "bank lets through (74,773 and 88,202 per metre): band outputs at and "
+    "bank lets through (74.773 and 88.202 per metre): band outputs at and "
     "beyond them at least the +75 dB of class 0 below the midband tone",
 )
 def _chk_method_b_alias_rejection() -> Outcome:

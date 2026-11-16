@@ -198,7 +198,7 @@ BARRON_EXAMPLE_7_6_WALL_M2: float = 16.0
 BARRON_EXAMPLE_7_6_OPERATOR_DISTANCE_M: float = 1.5
 
 #: What the same page prints on the way: R_1 = 47.37 m2, L_p1 = 94.8 dB,
-#: R_2 = 53.85 m2, r* = (S_w/2 pi)^1/2 = 1,596 m, the two terms -16.8 dB and
+#: R_2 = 53.85 m2, r* = (S_w/2 pi)^1/2 = 1.596 m, the two terms -16.8 dB and
 #: +3.4 dB of the last line, and L_p2 = 61.7 dB, in square metres, decibels and
 #: metres.
 BARRON_EXAMPLE_7_6_SOURCE_ROOM_CONSTANT_M2: float = 47.37

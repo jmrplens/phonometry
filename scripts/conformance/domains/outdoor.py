@@ -78,7 +78,7 @@ def _chk_iso9613_2_table2_grid() -> Outcome:
 
     Worst residual in units of the per-cell tolerance; the documented
     15 degC / 80 % / 1 kHz print quirk carries a 0.06 dB/km tolerance
-    (printed 4.1 vs exact-midband 4,151).
+    (printed 4.1 vs exact-midband 4.151).
     """
     worst = 0.0
     for (temp, rh), row in ref.ISO9613_2_TABLE2.items():
@@ -324,7 +324,7 @@ def _chk_iso11654_a2() -> Outcome:
 # state computed from IEC 61094-2:2009 Annex F. The two differ in the thermal
 # conductivity and the specific heat capacity, which Annex A.3 credits to
 # IEC 61094-2:2009 and which are not found there (see docs/ERRATA.md). Both give
-# b = 1.83e-3 m and kappa' = 1,370, because the printed pair preserves the
+# b = 1.83e-3 m and kappa' = 1.370, because the printed pair preserves the
 # tabulated diffusivity; passing the printed pair is what makes these rows
 # reproduce the standard rather than merely agree with it.
 _AIR = ref.ISO9053_2_ANNEX_A_PRINTED_AIR

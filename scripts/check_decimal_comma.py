@@ -12,44 +12,68 @@ in a literal transcription of the print and nowhere else:
 - text between quotation marks (``"..."``, ``“...”``,
   ``‘...’``, ``«...»``, and ``'1,5'`` written as a value);
 - a block quote that reproduces the print (a quote that opens on a label,
-  ``> **Note.**`` or ``> [!NOTE]``, is a note of ours and is read);
+  ``> **Note.**``, ``> *Tip.*``, ``> Note:`` or ``> [!NOTE]``, is a note of
+  ours and is read);
 - the ``**The print:**`` field of an entry of ``docs/ERRATA.md``, every line
-  of it, its maths and its tables included;
-- the printed column of the conformance report: the ``expected`` and
-  ``printed`` values of ``scripts/conformance/`` and the ``expected`` record
-  of ``docs/conformance.json``, and the ``Expected`` column of
-  ``docs/CONFORMANCE.md``.
+  of it, its maths and its tables included, and of an entry a Markdown fence
+  shows;
+- the printed column of the conformance report, where a cell gives the
+  printed values as the page prints them: the ``expected`` and ``printed``
+  values of ``scripts/conformance/``, the ``expected`` record of
+  ``docs/conformance.json`` and the ``Expected`` column of
+  ``docs/CONFORMANCE.md``. A sentence of ours in that column takes the point
+  (rule P9); this check cannot tell the two apart there, so the column is a
+  person's to read.
+
+Straight double quotes pair by where they stand: a quote opens after a blank,
+an opening bracket or the start of the text, and closes after a character that
+is no blank, so the inch mark of ``a 2" pipe`` quotes nothing.
 
 Spanish keeps the comma everywhere, and is never read: a Spanish file
-(``es/``, ``*.es.md``, ``catalogue-es.json``), the Spanish value of a
-translation table, a branch taken when the language is ``"es"``, a value
-held under an ``es`` key, a catalogue row transcribed from a Spanish edition,
-and any string or paragraph that reads as Spanish.
+(``es/``, ``*.es.md``, ``catalogue-es.json``, a ``*_es.svg`` figure), the
+Spanish value of a translation table, a branch taken when the language is
+``"es"``, a value held under an ``es`` key, a catalogue row transcribed from
+a Spanish edition, and any string or paragraph that reads as Spanish once its
+quotations are set aside: an English sentence that quotes a Spanish clause is
+English.
 
 A comma between digits that is no decimal marker is left alone wherever it
 stands: a thousands group (``91,658,333``; the digit-grouping rule, P8, holds
 those), a list (``1,2,3``), a pair of indices in brackets or braces
 (``a[1,2]``, ``(2,1)``, ``{2,4}``, ``k_{1,2}``) or after a letter (``k2,1``),
 a list of clauses (``5.2,5.3``), a chemical locant (``1,2-DHCP``), a list of
-coordinates (``(0,90), (45,135)``), and everything that is code: an
-inline code span or a fence (its ``#`` comments are prose and are read),
-a doctest, a reStructuredText literal, a regular expression, a string of the
-test suite (test data), an SVG path or a list of coordinates, CSV and the
-data files. An index has one or two digits and no leading zero, so
-``q_{0,1}``, ``(0,05)`` and ``R(q0,9)`` are decimals. A number such as ``1,500``, which may be a decimal or a
-thousands group, is not refused: it is listed for a person to decide, and
-``--strict`` refuses it too.
+coordinates (``(0,90), (45,135)``), the unit interval in each of its forms
+(``[0,1]``, ``(0,1]``, ``[0,1)``, ``(0,1)``), and everything that is code:
+an inline code span, the code of a fence, a doctest, a reStructuredText
+literal, a regular expression, a string of the test suite (test data), an SVG
+path, a dash pattern or a list of coordinates, CSV (a file, or the rows of one
+a string holds) and the data files. An index has one or two digits and no
+leading zero, so ``q_{0,1}``, ``(0,05)`` and ``R(q0,9)`` are decimals; a
+mode, whose orders start at 0, is the exception: ``(0,2)`` beside the word
+"mode" is notation, alone it is listed for a person, and after a value
+(``71,8 (0,0)``) it is a decimal. A number such as ``1,500``, which may be a
+decimal or a thousands group, is not refused: it is listed for a person to
+decide, and ``--strict`` refuses it too.
 
 How each file is read. Python through :mod:`tokenize` and :mod:`ast`: every
-string literal with its role in the tree (a docstring, a value of a Spanish
-table, an argument of a regular expression, a conformance column), and every
-comment. Markdown and MDX by their structure, through the shared readers of
+string and bytes literal with its role in the tree (a docstring, a value of a
+Spanish table, an argument of a regular expression, a conformance column),
+the pieces an implicit concatenation joins read as one, and every comment.
+Markdown and MDX by their structure, through the shared readers of
 ``scripts/markdown_fences.py`` and ``scripts/markdown_spans.py``: the
-frontmatter, the paragraphs, the table cells by column, the block quotes, the
-fences, the inline code and maths, the tags and their prose attributes
-(``alt``, ``title``, ``caption``, ``label``). JavaScript, TypeScript and JSON
-by their string literals, their comments and the keys that hold them. The
-configuration files by their ``#`` comments. A generated file that copies the
+frontmatter, the paragraphs, the table cells by column, the header row
+among them, the block quotes, the inline code and maths, the tags and every
+attribute a reader sees (all but the ones that hold code, ``class``, ``href``,
+``src`` and their kind), quoted or as a string expression, and the strings of
+an expression. A fence by its language: Python as a module, a script language
+by its strings and comments, Markdown and plain text as a page, any other by
+its ``#`` comments; the Don't example of a rule is not read. JavaScript,
+TypeScript and JSON by their string literals, their comments and the keys that
+hold them. The configuration files by their ``#`` comments and the values a
+reader sees (a ``name``, ``title``, ``description`` or ``abstract``, a line
+a recipe prints), and a BibTeX file by its prose fields. An English figure or
+plate by the text it draws, which its committed SVG keeps in a comment beside
+the outlines (a ``_es`` figure is Spanish). A generated file that copies the
 text of another one (the GitHub edition under ``docs/``, ``llms.txt``, the API
 reference written from the docstrings, the errata pages written from the
 registry, ``README_PYPI.md``) is left to its source, which is read instead;
@@ -87,6 +111,7 @@ from __future__ import annotations
 import argparse
 import ast
 import bisect
+import html
 import io
 import json
 import pathlib
@@ -285,6 +310,16 @@ DECIMAL, AMBIGUOUS, THOUSANDS, LIST, NOTATION = (
 _BRACKETED_PAIR = re.compile(r"\(\s*[-+]?\d+,\s*[-+]?\d+\s*\)")
 
 
+#: A value written right before a bracket: ``71,8 (0,0)``.
+_VALUE_BEFORE = re.compile(r"[0-9][ \u202f\u00a0]*$")
+#: A word that says the bracketed pairs of its text are modes.
+_MODE = re.compile(r"\bmodes?\b|\bmodo|\bmode\b", re.IGNORECASE)
+
+#: What opens a subscript, right before its first index: ``_{``,
+#: ``_\mathrm{``, ``_\text{``, ``_\rm{`` or the ``<sub>`` of HTML.
+_SUBSCRIPT_OPEN = re.compile(r"(?:_(?:\\(?:mathrm|text|rm))?\{|<sub>)$")
+
+
 def _index_pair(whole: str, fraction: str) -> bool:
     """Whether ``whole,fraction`` reads as a pair of indices, ``2,1`` or ``1,0``.
 
@@ -326,6 +361,8 @@ def number_shape(text: str, start: int, end: int) -> str:
     pair = not latex and _index_pair(whole, fraction)
     if pair and (before.isalpha() or before == "_"):
         return NOTATION
+    if pair and _SUBSCRIPT_OPEN.search(text, 0, start):
+        return NOTATION  # the indices of a subscript: L_{1,2m}, L_\mathrm{1,2m}
     if pair and before and before in "[({" and after and after in "])}":
         return LIST
     if pair and before == "-" and start >= 2 and text[start - 2].isalpha():
@@ -334,6 +371,20 @@ def number_shape(text: str, start: int, end: int) -> str:
         return LIST  # a chemical locant: 1,2-DHCP
     if before == "(" and after == ")" and len(_BRACKETED_PAIR.findall(text)) > 1:
         return LIST  # one of a list of coordinates: (0,90), (45,135)
+    if (
+        whole == "0"
+        and len(fraction) == 1
+        and before == "("
+        and after == ")"
+        and _VALUE_BEFORE.search(text, 0, start - 1)
+    ):
+        return DECIMAL  # a value in brackets after a value: ``71,8 (0,0)``
+    if whole == "0" and fraction == "1" and before in "([" and after in ")]":
+        return LIST  # the unit interval: [0,1], (0,1], [0,1), (0,1)
+    if whole == "0" and len(fraction) == 1 and before == "(" and after == ")":
+        # The pair (0,2) is a mode, the modes start at 0; with nothing to say
+        # so it is listed for a person, never refused and never rewritten.
+        return NOTATION if _MODE.search(text) else AMBIGUOUS
     if latex or len(fraction) != _GROUP or _GROUP_AFTER.match(text, end):
         return DECIMAL
     if len(whole) > _GROUP or whole.startswith("0"):
@@ -369,12 +420,37 @@ def quoted_spans(text: str) -> list[tuple[int, int]]:
                     spans.append((opened[depth][1], index + 1))
                     del opened[depth:]
                     break
-    straight = [index for index, char in enumerate(text) if char == '"']
-    spans.extend(
-        (first, last + 1)
-        for first, last in zip(straight[::2], straight[1::2], strict=False)
-    )
+    spans.extend(_straight_quotations(text))
     spans.extend((m.start(), m.end()) for m in _SINGLE_QUOTED.finditer(text))
+    return spans
+
+
+#: What may stand right before a straight quote that opens a quotation.
+_OPENS_AFTER = frozenset(" \t\n([{=:-/\u2014\u2013")
+
+
+def _straight_quotations(text: str) -> list[tuple[int, int]]:
+    """The quotations between straight double quotes, read by where each stands.
+
+    A quote opens after a blank, an opening bracket or the start of the text,
+    before a character that is no blank; it closes after one that is no blank.
+    So the inch mark of ``a 2" pipe``, which follows a digit, opens nothing.
+    A quotation of a print may run over several sentences, so a stray opening
+    quote still quotes the text up to the next closing one.
+    """
+    spans: list[tuple[int, int]] = []
+    opened: int | None = None
+    for index, char in enumerate(text):
+        if char != '"':
+            continue
+        before = text[index - 1] if index else " "
+        after = text[index + 1] if index + 1 < len(text) else " "
+        if opened is None:
+            if before in _OPENS_AFTER and not after.isspace():
+                opened = index
+        elif not before.isspace():
+            spans.append((opened, index + 1))
+            opened = None
     return spans
 
 
@@ -569,11 +645,11 @@ def _scan(
     marks is a transcription; a list, a group of thousands and notation are
     no decimal.
     """
-    if not TOKEN.search(text) or reads_as_spanish(text):
-        return
-    if _COORDINATES.match(text.strip()):
+    if not TOKEN.search(text) or _COORDINATES.match(text.strip()):
         return
     quotes = quoted_spans(text)
+    if _unit_reads_as_spanish(text, quotes):
+        return
     for match in TOKEN.finditer(text):
         shape = number_shape(text, match.start(), match.end())
         if shape not in (DECIMAL, AMBIGUOUS):
@@ -591,6 +667,24 @@ def _scan(
                 re.sub(r"\s+", " ", context.replace(MARK, "")).strip(),
             )
         )
+
+
+def _unit_reads_as_spanish(text: str, quotes: Sequence[tuple[int, int]]) -> bool:
+    """Whether a unit reads as Spanish, its quotations aside.
+
+    An English sentence that quotes a long Spanish clause is English: what it
+    writes outside the quotation decides. Only a unit whose own words are none
+    of either language is read whole.
+    """
+    outside = list(text)
+    for start, end in quotes:
+        outside[start:end] = " " * (end - start)
+    own = "".join(outside)
+    if reads_as_spanish(own):
+        return True
+    words = _WORD.findall(own.lower())
+    english = any(word in _ENGLISH_WORDS for word in words)
+    return not english and reads_as_spanish(text)
 
 
 def _blank(text: str) -> str:
@@ -645,15 +739,30 @@ def _blank_code_spans(text: str, *, roles: bool = False) -> str:
 # Markdown and MDX.
 # ---------------------------------------------------------------------------
 
-#: The attributes of a tag whose value a reader sees as text.
-_PROSE_ATTRIBUTES = frozenset(
-    {"alt", "title", "caption", "label", "aria-label", "description", "summary"}
+_ATTRIBUTE = re.compile(
+    r"""([A-Za-z_:][\w.:-]*)\s*=\s*("[^"]*"|'[^']*'|\{\s*(?:"[^"]*"|'[^']*')\s*\})"""
 )
-_ATTRIBUTE = re.compile(r"""([A-Za-z_:][\w.:-]*)\s*=\s*("[^"]*"|'[^']*')""")
+#: The attributes of a tag whose value is code, never text: every other
+#: attribute a reader may see (``legend``, ``label``, ``note``) is read.
+_CODE_ATTRIBUTES = frozenset(
+    {"class", "classname", "style", "href", "src", "srcset", "sizes", "id", "slug"}
+    | {"d", "points", "viewbox", "transform", "lang", "type", "name", "key", "ref"}
+    | {"width", "height", "loading", "decoding", "target", "rel", "for", "role"}
+    | {"fill", "stroke", "stroke-dasharray", "x", "y", "cx", "cy", "r", "media"}
+    | {"catalogue", "file", "path", "url", "icon", "variant", "lazy", "poster"}
+)
 #: The languages of a fence whose ``#`` comments are prose.
 _HASH_COMMENT_FENCES = frozenset(
     {"python", "py", "pycon", "bash", "sh", "shell", "console", "toml", "yaml", "ini"}
 )
+#: The languages of a fence read as a Python module, its strings among it.
+_PYTHON_FENCES = frozenset({"python", "py"})
+#: The languages of a fence read as a script, its strings and comments.
+_SCRIPT_FENCES = frozenset(
+    {"js", "javascript", "mjs", "ts", "typescript", "jsx", "tsx", "json", "jsonc"}
+)
+#: The languages of a fence read as a page.
+_MARKDOWN_FENCES = frozenset({"markdown", "md", "mdx", "text", "txt", "plaintext"})
 #: A field of an errata entry, ``- **The print:**``, and what it is named.
 _ERRATA_FIELD = re.compile(r"^(\s*)[-*+]\s+\*\*([^*]+?)\*\*")
 #: The fields of an errata entry that transcribe the print.
@@ -662,17 +771,55 @@ _PRINT_FIELD = re.compile(r"^(?:The print|As printed|Printed)\b", re.IGNORECASE)
 _ITEM = re.compile(r"^\s*(?:[-*+]|\d{1,9}[.)])(?:\s|$)")
 #: A header of the conformance report's column that transcribes the print.
 _PRINTED_COLUMN = re.compile(r"\b(?:expected|printed)\b", re.IGNORECASE)
+#: How a block quote of ours opens: on an admonition (``[!NOTE]``), a bold
+#: label (``**Note.**``), an emphasised one (``*Tip.*``) or a label word
+#: (``Note:``). A print's own note opens on ``NOTE 1``, in capitals, and stays
+#: a transcription.
+_NOTE_OF_OURS = re.compile(
+    r"\[!|\*\*|__"
+    r"|[*_][A-Z][\w ]{0,30}[.:][*_](?:\s|$)"
+    r"|(?:Note|Notes|Tip|Hint|Warning|Caution|Important|Example|Remark|Aside)"
+    r"[.:](?:\s|$)"
+)
 #: The kinds of line that hold no prose.
 _CODE_ROLES = frozenset({"open", "body", "close", "indented"})
 
 
 def _tag_text(tag: str) -> str:
-    """*tag* blanked but for the values of its prose attributes."""
+    """*tag* blanked but for the values of the attributes a reader sees.
+
+    A value is read whether it is quoted or a string expression
+    (``caption={"..."}``); only the attributes that hold code are not.
+    """
     shown = list(_blank(tag))
     for match in _ATTRIBUTE.finditer(tag):
-        if match.group(1).lower() in _PROSE_ATTRIBUTES:
-            start, end = match.start(2) + 1, match.end(2) - 1
-            shown[start:end] = tag[start:end]
+        name = match.group(1).lower()
+        if name in _CODE_ATTRIBUTES or name.startswith(("data-", "on", "client:")):
+            continue
+        value = match.group(2)
+        start = match.start(2) + 1
+        end = match.end(2) - 1
+        if value.startswith("{"):
+            inner = re.search(r"([\"'])(.*)\1", value, re.DOTALL)
+            if inner is None:
+                continue
+            start, end = match.start(2) + inner.start(2), match.start(2) + inner.end(2)
+        shown[start:end] = tag[start:end]
+    return "".join(shown)
+
+
+#: A string literal inside an expression of a page; a template literal builds
+#: its text from code, a class name or a path, and is code.
+_EXPRESSION_STRING = re.compile(r"\"((?:[^\"\\\n]|\\.)*)\"|'((?:[^'\\\n]|\\.)*)'")
+
+
+def _expression_text(span: str) -> str:
+    """An expression of a page blanked but for the text of its string literals."""
+    shown = list(_blank(span))
+    for match in _EXPRESSION_STRING.finditer(span):
+        group = 1 if match.group(1) is not None else 2
+        start, end = match.start(group), match.end(group)
+        shown[start:end] = span[start:end]
     return "".join(shown)
 
 
@@ -684,7 +831,7 @@ def _shown(span: str) -> str:
         return span  # maths and comments are text
     if span.startswith("<"):
         return _tag_text(span)
-    return _blank(span)  # an MDX expression is code
+    return _expression_text(span)  # an MDX expression: its strings are text
 
 
 def _frontmatter_end(lines: Sequence[str]) -> int:
@@ -731,20 +878,55 @@ def _hash_comment(line: str) -> int | None:
 def _fence_comments(
     out: list[Finding], rel: str, lines: Sequence[str], walked: Sequence[PageLine]
 ) -> None:
-    """Read the ``#`` comments of the fences whose language writes them."""
+    """Read the text a fence writes, as its language writes it.
+
+    A Python fence is read as a module, its strings and comments with their
+    roles; a fence of a script language by its comments and strings; a
+    Markdown fence and a fence of plain text as a page, since the text a
+    program of this library prints writes the point too and an example of the
+    contributor guide is prose; the other languages by their ``#`` comments.
+    The Don't example of a rule is a mistake on purpose, and is not read.
+    """
     language = ""
     skip = False
+    body: list[tuple[int, str]] = []
     for index, read in enumerate(walked):
         if read.role == "open":
             words = read.info.split(maxsplit=1)
             language = words[0].lower() if words else ""
             skip = _dont_example(lines, index)
-        elif read.role == "body" and language in _HASH_COMMENT_FENCES and not skip:
-            text = lines[index]
-            at = _hash_comment(text)
-            if at is not None:
-                comment = _blank(text[: at + 1]) + _blank_code_spans(text[at + 1 :])
-                _scan(out, rel, comment, "fence comment", _on_line(index + 1))
+            body = []
+        elif read.role == "body":
+            body.append(
+                (index, read.inner.rstrip("\n") if read.inner else lines[index])
+            )
+        elif read.role == "close" and body and not skip:
+            _fence_body(out, rel, language, body)
+            body = []
+
+
+def _fence_body(
+    out: list[Finding], rel: str, language: str, body: Sequence[tuple[int, str]]
+) -> None:
+    """Read the body of one fence, each line at its line of the page."""
+    first = body[0][0]
+    padded = "\n" * first + "\n".join(text for _, text in body)
+    if language in _PYTHON_FENCES and _python(out, rel, padded, fence=True):
+        return
+    if language in _SCRIPT_FENCES:
+        _ScriptReader(rel, padded, out, strings=True, printed_file=False).read()
+        return
+    if language in _MARKDOWN_FENCES:
+        kind = "md" if language in ("markdown", "md") else "mdx"
+        _markdown(out, rel, padded, kind, errata=True)
+        return
+    if language not in _HASH_COMMENT_FENCES:
+        return
+    for index, text in body:
+        at = _hash_comment(text)
+        if at is not None:
+            comment = _blank(text[: at + 1]) + _blank_code_spans(text[at + 1 :])
+            _scan(out, rel, comment, "fence comment", _on_line(index + 1))
 
 
 def _table_cells(
@@ -768,8 +950,15 @@ def _table_cells(
         _scan(out, rel, cell, "table cell", _on_line(number))
 
 
-def _markdown(out: list[Finding], rel: str, text: str, kind: str) -> None:
-    """Read a Markdown or MDX page by its structure."""
+def _markdown(
+    out: list[Finding], rel: str, text: str, kind: str, *, errata: bool = False
+) -> None:
+    """Read a Markdown or MDX page by its structure.
+
+    :param errata: Whether the page may hold entries of the errata registry,
+        whose print field is a transcription: the registry and its pages, and
+        a Markdown fence that shows one.
+    """
     lines = text.split("\n")
     front = _frontmatter_end(lines)
     for index in range(1, max(front - 1, 1)):
@@ -792,7 +981,7 @@ def _markdown(out: list[Finding], rel: str, text: str, kind: str) -> None:
         walked=walked,
         constructs=constructs,
     ).split("\n")
-    errata = rel == "docs/ERRATA.md" or "/reference/errata/" in rel
+    errata = errata or rel == "docs/ERRATA.md" or "/reference/errata/" in rel
     field_name, field_indent = "", -1
     header: list[str] = []
     callout = False
@@ -823,7 +1012,7 @@ def _markdown(out: list[Finding], rel: str, text: str, kind: str) -> None:
         if depth == 0:
             callout = False
         elif index == front or quotation_marks(body[index - 1], kind=kind)[0] == 0:
-            callout = inner.lstrip().startswith(("[!", "**"))
+            callout = _NOTE_OF_OURS.match(inner.lstrip()) is not None
         quoted = depth > 0 and not callout
         if read.role in _CODE_ROLES or read.role == "blank" or not line.strip():
             flush()
@@ -839,6 +1028,9 @@ def _markdown(out: list[Finding], rel: str, text: str, kind: str) -> None:
                 ]
                 if header and not header[0]:
                     header = header[1:]
+                _table_cells(
+                    out, rel, line, index + 1, [], transcription=in_print or quoted
+                )
                 continue
             if re.fullmatch(r"[\s|:\-]+", raw):
                 continue
@@ -892,6 +1084,13 @@ _CODE_DIRECTIVES = frozenset(
     {"code", "code-block", "sourcecode", "doctest", "testcode", "testoutput"}
     | {"literalinclude", "highlight", "plot"}
 )
+#: The calls of the figure and plate code that draw the text handed to them.
+_TEXT_CALLS = frozenset(
+    {"text", "tspan", "label", "title", "caption", "annotate", "set_text", "note"}
+    | {"chip", "set_title", "set_xlabel", "set_ylabel", "suptitle", "heading"}
+)
+#: The keywords that hand a call the text it draws.
+_TEXT_KEYWORDS = frozenset({"text", "label", "title", "caption", "s"})
 #: How many pairs a dictionary holds before its values make a table.
 _TABLE_PAIRS = 3
 
@@ -935,6 +1134,24 @@ def _target_names(node: ast.Assign | ast.AnnAssign) -> list[str]:
             elif isinstance(part, ast.Attribute):
                 names.append(part.attr)
     return names
+
+
+def _dash_default(arguments: ast.arguments, default: ast.AST) -> bool:
+    """Whether *default* is the default value of a parameter named for a dash pattern."""
+    positional = [*arguments.posonlyargs, *arguments.args]
+    pairs = list(
+        zip(
+            positional[len(positional) - len(arguments.defaults) :],
+            arguments.defaults,
+            strict=True,
+        )
+    )
+    pairs += [
+        (arg, value)
+        for arg, value in zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True)
+        if value is not None
+    ]
+    return any(value is default and "dash" in arg.arg for arg, value in pairs)
 
 
 def _call_name(func: ast.expr) -> tuple[str, str]:
@@ -1006,10 +1223,12 @@ class _Roles:
         if isinstance(parent, ast.keyword) and parent.arg:
             if _spanish_key(parent.arg):
                 return "spanish"
-            if parent.arg in _PATTERN_KEYWORDS:
+            if parent.arg in _PATTERN_KEYWORDS or "dash" in parent.arg:
                 return "code"
             if self.conformance and parent.arg in _PRINTED_NAMES:
                 return "printed"
+        if isinstance(parent, ast.arguments) and _dash_default(parent, child):
+            return "code"
         if isinstance(parent, ast.Call) and any(arg is child for arg in parent.args):
             owner, name = _call_name(parent.func)
             if owner in ("re", "regex") and name in _REGEX_FUNCTIONS:
@@ -1037,6 +1256,16 @@ class _Roles:
         if isinstance(parent, ast.Compare):
             return "code"
         return None
+
+    def drawn(self, node: ast.AST) -> bool:
+        """Whether *node* is handed straight to a call that draws text."""
+        parent = self.parents.get(id(node))
+        if isinstance(parent, ast.keyword):
+            return parent.arg in _TEXT_KEYWORDS
+        if not isinstance(parent, ast.Call):
+            return False
+        _, name = _call_name(parent.func)
+        return name in _TEXT_CALLS and any(arg is node for arg in parent.args)
 
     def _in_dict(self, parent: ast.Dict, child: ast.AST) -> str | None:
         """What a dictionary makes of the value it holds under *child*."""
@@ -1109,6 +1338,8 @@ def _decoded(source: str) -> str | None:
     except SyntaxError:
         return None
     if isinstance(node, ast.Constant):
+        if isinstance(node.value, bytes):
+            return node.value.decode("utf-8", "replace")
         return node.value if isinstance(node.value, str) else None
     if isinstance(node, ast.JoinedStr):
         return "".join(
@@ -1183,7 +1414,7 @@ def _module_literals(
     while pending:
         node = pending.pop()
         if isinstance(node, ast.JoinedStr) or (
-            isinstance(node, ast.Constant) and isinstance(node.value, str)
+            isinstance(node, ast.Constant) and isinstance(node.value, (str, bytes))
         ):
             nodes.append(node)
             continue  # what an f-string holds is no literal of its own
@@ -1267,14 +1498,34 @@ def _comment_groups(
         yield group[0].start[0], "\n".join(t.string[1:] for t in group)
 
 
-def _python(out: list[Finding], rel: str, text: str) -> None:
-    """Read a Python module by its tokens and its tree."""
+#: A string that is nothing but whole numbers and the commas between them,
+#: which the plates' SVG writer takes as a dash pattern: ``"6,4"``, ``"9,4,2,4"``.
+_DASH_PATTERN = re.compile(r"[1-9][0-9]*(?:,[1-9][0-9]*)+")
+
+
+#: A row of a delimited file: three separators or more, ``;`` or a tab.
+_DELIMITED_ROW = re.compile(r"^[^;\t\n]*(?:[;\t][^;\t\n]*){3,}$")
+
+
+def _csv_rows(text: str) -> bool:
+    """Whether every line of *text* is a row of a delimited file."""
+    rows = [line for line in text.split("\n") if line.strip()]
+    return bool(rows) and all(_DELIMITED_ROW.match(line) for line in rows)
+
+
+def _python(out: list[Finding], rel: str, text: str, *, fence: bool = False) -> bool:
+    """Read a Python module by its tokens and its tree; whether it parses.
+
+    :param fence: Whether *text* is a fence of a page, whose strings are text
+        however the page is named.
+    """
     try:
         tree = ast.parse(text)
         literals, comments = _module_literals(text, tree)
     except (SyntaxError, tokenize.TokenError, ValueError):
-        return
-    test_file = rel.startswith("tests/") or "/tests/" in rel
+        return False
+    test_file = not fence and (rel.startswith("tests/") or "/tests/" in rel)
+    svg_writer = rel.startswith("scripts/diagrams/")
     roles = _Roles(tree, conformance=rel.startswith("scripts/conformance/"))
     for literal in literals:
         role = roles.role(literal.node)
@@ -1289,6 +1540,14 @@ def _python(out: list[Finding], rel: str, text: str) -> None:
                     _shifted(literal.line_of, offset),
                 )
         elif role == "text" and not test_file:
+            if (
+                svg_writer
+                and _DASH_PATTERN.fullmatch(literal.text)
+                and not roles.drawn(literal.node)
+            ):
+                continue  # a dash pattern of the plates' SVG: "6,4"
+            if _csv_rows(literal.text):
+                continue  # the rows of a CSV file the code writes: data
             _scan(out, rel, _blank_code_spans(literal.text), "string", literal.line_of)
     for first, comment in _comment_groups(comments):
         _scan(
@@ -1298,6 +1557,7 @@ def _python(out: list[Finding], rel: str, text: str) -> None:
             "comment",
             _line_counter(first, comment),
         )
+    return True
 
 
 def _shifted(line_of: Callable[[int], int], offset: int) -> Callable[[int], int]:
@@ -1607,6 +1867,45 @@ def _hash_comments(out: list[Finding], rel: str, text: str) -> None:
     flush()
 
 
+#: A value a reader sees in a configuration file: the name, title or
+#: description of a workflow, a step, a package or a citation, and a line a
+#: Makefile recipe or a shell script prints.
+_CONFIG_VALUE = re.compile(
+    r"""^\s*(?:-\s+)?(?:name|description|summary|title|abstract|message|help)\s*[:=]\s*(.+)$"""
+)
+_PRINTED_LINE = re.compile(r"^\s*@?(?:echo|printf)\b(.*)$")
+#: A field of a BibTeX entry whose value is prose.
+_BIB_FIELD = re.compile(
+    r"^\s*(?:title|note|abstract|annote|howpublished|booktitle)\s*=\s*[{\"](.*)[}\"],?\s*$"
+)
+#: A quoted stretch of a printed line.
+_QUOTED_ARGUMENT = re.compile(r"\"((?:[^\"\\]|\\.)*)\"|'([^']*)'")
+
+
+def _config_values(out: list[Finding], rel: str, text: str) -> None:
+    """Read the values of a configuration file that a reader sees as text."""
+    bib = rel.endswith(".bib")
+    for number, line in enumerate(text.split("\n"), start=1):
+        if bib:
+            field = _BIB_FIELD.match(line)
+            if field:
+                _scan(out, rel, field.group(1), "value", _on_line(number))
+            continue
+        printed = _PRINTED_LINE.match(line)
+        if printed:
+            for match in _QUOTED_ARGUMENT.finditer(printed.group(1)):
+                said = match.group(1) if match.group(1) is not None else match.group(2)
+                _scan(out, rel, said, "printed line", _on_line(number))
+            continue
+        value = _CONFIG_VALUE.match(line)
+        if value:
+            said = value.group(1)
+            at = _hash_comment(said)
+            said = said[:at] if at is not None else said
+            said = said.strip().strip("\"'")
+            _scan(out, rel, said, "value", _on_line(number))
+
+
 def _notebook(out: list[Finding], rel: str, text: str) -> None:
     """Read a notebook: its Markdown cells as Markdown, its code cells as Python."""
     try:
@@ -1641,9 +1940,38 @@ _COPIES = re.compile(
 _ERRATA_COPY = "<!-- Generated from docs/ERRATA.md"
 #: The configuration files, whose ``#`` comments are read.
 _HASH_FILE = re.compile(
-    r"\.(?:ya?ml|toml|sh|cfg|in|properties|txt|gitignore|gitattributes|editorconfig)$"
+    r"\.(?:ya?ml|toml|cff|sh|cfg|in|properties|txt|gitignore|gitattributes|editorconfig)$"
     r"|(?:^|/)(?:Makefile|Dockerfile|pre-commit|\.git-blame-ignore-revs)$"
 )
+
+
+#: A number whose comma an implicit concatenation splits between two string
+#: literals: ``"the floor is 0," "5 m"``.
+_SPLIT_NUMBER = re.compile(r"[0-9],?[\"']\s*[rRbBuUfF]{0,2}[\"'],?[0-9]")
+#: The committed figures and plates, whose drawn text is what a reader sees,
+#: and their Spanish editions, which keep the comma.
+_DRAWING = re.compile(r"^\.github/images/[^/]+\.svg$")
+_SPANISH_DRAWING = re.compile(r"_es(?:_dark)?\.svg$")
+#: The string a figure or a plate drew, which its SVG keeps in a comment.
+_DRAWN = re.compile(r"<!--(.*?)-->", re.DOTALL)
+
+
+def _drawing(rel: str, text: str) -> list[Finding]:
+    """Every decimal comma an English figure or plate draws.
+
+    Matplotlib and the plates' writer draw text as outlines and keep the string
+    in a comment beside them, so the committed SVG says what the figure says.
+    Its dash patterns and coordinates are attributes, never comments, and are
+    not read. This is where the figure code's own text is seen whole: a label
+    the source builds at run time, or one the source reader takes for a dash
+    pattern, is drawn here as the reader sees it.
+    """
+    out: list[Finding] = []
+    for match in _DRAWN.finditer(text):
+        drawn = html.unescape(match.group(1)).strip()
+        line = text.count("\n", 0, match.start()) + 1
+        _scan(out, rel, drawn, "drawn text", _on_line(line))
+    return out
 
 
 def is_copy(path: pathlib.Path, rel: str) -> bool:
@@ -1662,13 +1990,18 @@ def is_copy(path: pathlib.Path, rel: str) -> bool:
 
 def findings_in(text: str, rel: str) -> list[Finding]:
     """Every decimal comma the English text of a file writes, read as *rel*."""
-    if _SPANISH_FILE.search(rel) or _DATA_FILE.search(rel) or not TOKEN.search(text):
+    if _SPANISH_FILE.search(rel) or _SPANISH_DRAWING.search(rel):
         return []
-    out: list[Finding] = []
-    name = rel.rsplit("/", 1)[-1]
+    if _DRAWING.match(rel):
+        return _drawing(rel, text)
     python = rel.endswith((".py", ".pyi")) or (
         rel.startswith("hooks/") and text.startswith("#!/usr/bin/env python")
     )
+    split = python and _SPLIT_NUMBER.search(text) is not None
+    if _DATA_FILE.search(rel) or not (TOKEN.search(text) or split):
+        return []
+    out: list[Finding] = []
+    name = rel.rsplit("/", 1)[-1]
     if python:
         _python(out, rel, text)
     elif rel.endswith((".md", ".mdx")):
@@ -1681,6 +2014,9 @@ def findings_in(text: str, rel: str) -> list[Finding]:
         _notebook(out, rel, text)
     elif _HASH_FILE.search(rel):
         _hash_comments(out, rel, text)
+        _config_values(out, rel, text)
+    elif rel.endswith(".bib"):
+        _config_values(out, rel, text)
     return sorted(out, key=lambda f: (f.path, f.line))
 
 
@@ -1695,7 +2031,9 @@ def english_files(root: pathlib.Path = ROOT) -> list[tuple[pathlib.Path, str]]:
     files: list[tuple[pathlib.Path, str]] = []
     for rel in listed:
         path = root / rel
-        if not rel or _SPANISH_FILE.search(rel) or _DATA_FILE.search(rel):
+        if not rel or _SPANISH_FILE.search(rel) or _SPANISH_DRAWING.search(rel):
+            continue
+        if _DATA_FILE.search(rel) and not _DRAWING.match(rel):
             continue
         if path.is_file() and not path.is_symlink() and not is_copy(path, rel):
             files.append((path, rel))

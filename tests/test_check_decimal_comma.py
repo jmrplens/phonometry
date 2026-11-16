@@ -320,6 +320,10 @@ def test_an_ambiguous_number_is_reported_and_does_not_fail() -> None:
         "the mode (2,1) of the room",
         "the solvent 1,2-DHCP of the table",
         "the corners (0,90), (0,135) and (45,90) of the grid",
+        "the level $L_{1,2m}$ in front of the facade",
+        "the level $L_{1,2\\mathrm{m}}$ in front of the facade",
+        r"the label $D_\mathrm{2m} = L_\mathrm{1,2m} - L_2$ of the axis",
+        "a coefficient G ∈ [0,1] of the ground",
     ],
 )
 def test_lists_and_notation_are_kept(notation: str) -> None:
@@ -334,6 +338,7 @@ def test_lists_and_notation_are_kept(notation: str) -> None:
         ("the rank R(q0,9) of the sample", "0,9"),
         ("the product (0,05)(900) of the two", "0,05"),
         ("the floor 71,8 (0,0) of the table", "0,0"),
+        ("the bound [0,5] of the range", "0,5"),
     ],
 )
 def test_a_decimal_that_looks_like_an_index_is_refused(text: str, token: str) -> None:
@@ -344,7 +349,7 @@ def test_a_decimal_that_looks_like_an_index_is_refused(text: str, token: str) ->
 def test_code_is_kept() -> None:
     text = (
         "The span `Sum 27,9` is code.\n\n"
-        "```text\n6,251 5   0,647 829\n```\n\n"
+        "```text\nbands 1,2,3 and a[1,2]\n```\n\n"
         "```python\nx = f(1,5)\n```\n"
     )
     assert _decimals(text) == []
@@ -366,6 +371,29 @@ def test_python_code_is_kept() -> None:
         '    """\n'
     )
     assert _decimals(source, "src/phonometry/x.py") == []
+
+
+def test_an_html_subscript_index_pair_is_kept() -> None:
+    """``k<sub>2,1</sub>``, the transfer stiffness of a fiche, is two indices."""
+    source = 'TITLE = "the dynamic transfer stiffness k<sub>2,1</sub> [MN/m]"\n'
+    assert _decimals(source, "src/phonometry/_report/fiche.py") == []
+
+
+def test_a_dash_pattern_of_the_plates_is_kept() -> None:
+    """An SVG dash pattern is two lengths, written as one string the writer reads."""
+    source = (
+        'def box(dash: str = "7,5") -> None: ...\n'
+        's.line(0, 0, 1, 1, "red", 1.4, dash="9,6")\n'
+        'styles = {"f6": ("red", "6,4", 2.0)}\n'
+    )
+    assert _decimals(source, "scripts/diagrams/plate.py") == []
+
+
+def test_a_dash_keyword_anywhere_is_kept_and_a_label_is_not() -> None:
+    """A ``dash`` keyword is code in any module; the bare string is not, off the plates."""
+    assert _decimals('ax.plot(x, y, dash="3,3")\n', "scripts/figures/a.py") == []
+    assert _decimals('LABEL = "1,5"\n', "scripts/figures/a.py") == ["1,5"]
+    assert _decimals('s.text(0, 0, "0,5 m")\n', "scripts/diagrams/plate.py") == ["0,5"]
 
 
 def test_a_string_of_a_test_is_test_data() -> None:
@@ -397,6 +425,170 @@ def test_a_generated_copy_is_left_to_its_source(tmp_path: pathlib.Path) -> None:
     )
     assert gate.is_copy(page, "docs/guide.md")
     assert not gate.is_copy(tmp_path / "docs" / "other.md", "docs/other.md")
+
+
+# ---------------------------------------------------------------------------
+# The holes a review found, each planted where the gate used to miss it or
+# used to refuse correct text.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "rel"),
+    [
+        (
+            "The standard \u00abAc\u00fastica de la edificaci\u00f3n y del ruido "
+            "en la vivienda\u00bb sets 0,5 dB for the step.\n",
+            "docs/a.md",
+        ),
+        (
+            'def f():\n    """Round.\n\n    "El valor del nivel sonoro resultante '
+            "se redondear\u00e1 increment\u00e1ndolo en 0,5 dB(A), tomando la parte "
+            'entera como valor resultante": add 0,5 dB and take the integer part.\n'
+            '    """\n',
+            "src/phonometry/x.py",
+        ),
+    ],
+)
+def test_a_spanish_quotation_does_not_make_an_english_unit_spanish(
+    text: str, rel: str
+) -> None:
+    """The words inside a quotation do not decide the language of the sentence."""
+    assert _decimals(text, rel) == ["0,5"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "The (0,1) mode is the first vertical one.",
+        "The (0,2) mode sits at 98 Hz.",
+        "The coefficient lies in (0,1] and the factor in [0,1).",
+        "Any value in (0,1) is accepted.",
+    ],
+)
+def test_a_mode_from_zero_and_the_unit_interval_are_not_decimals(text: str) -> None:
+    """A mode order starts at 0; refusing it would turn (0,1) into (0.1)."""
+    assert _decimals(text + "\n") == []
+
+
+def test_a_lone_pair_from_zero_is_listed_for_a_person() -> None:
+    assert _decimals("The pair (0,2) is drawn.\n") == []
+    assert _ambiguous("The pair (0,2) is drawn.\n") == ["0,2"]
+
+
+def test_a_table_header_cell_is_read() -> None:
+    text = "| Level at 0,5 m | dB |\n| --- | --- |\n| a | 1 |\n"
+    assert _decimals(text) == ["0,5"]
+    assert _decimals("| $k_{2,1}$ | dB |\n| --- | --- |\n| a | 1 |\n") == []
+
+
+@pytest.mark.parametrize(
+    ("text", "rel"),
+    [
+        ('A 2" pipe carries 0,5 m/s and a 3" pipe carries more.\n', "docs/a.md"),
+        ('# A 2" pipe at 0,5 m/s and a 3" pipe.\nx = 1\n', "src/phonometry/x.py"),
+    ],
+)
+def test_an_inch_mark_opens_no_quotation(text: str, rel: str) -> None:
+    assert _decimals(text, rel) == ["0,5"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "> Note: the floor is 0,5 m from the wall in our setup.\n",
+        "> *Tip.* Keep the floor 0,5 m from the wall.\n",
+    ],
+)
+def test_a_block_quote_that_opens_on_a_label_is_ours(text: str) -> None:
+    assert _decimals(text) == ["0,5"]
+
+
+def test_a_label_the_plates_draw_is_no_dash_pattern() -> None:
+    assert _decimals('s.text(0, 0, "12,5")\n', "scripts/diagrams/x.py") == ["12,5"]
+    assert _decimals('s.text(0, 0, label="31,5")\n', "scripts/diagrams/x.py") == [
+        "31,5"
+    ]
+    assert (
+        _decimals('s.line(0, 0, 1, 1, "red", 1.4, "6,4")\n', "scripts/diagrams/x.py")
+        == []
+    )
+
+
+def test_the_text_an_english_figure_draws_is_read() -> None:
+    svg = (
+        '<svg><path stroke-dasharray="6,4" d="M0,5 L1,2"/>\n'
+        "<!-- Level at 0,5 m -->\n<!-- 91,658,333 --></svg>\n"
+    )
+    assert _decimals(svg, ".github/images/fig.svg") == ["0,5"]
+    assert _decimals(svg, ".github/images/fig_dark.svg") == ["0,5"]
+    assert _decimals(svg, ".github/images/fig_es.svg") == []
+    assert _decimals(svg, ".github/images/fig_es_dark.svg") == []
+
+
+def test_a_python_fence_is_read_with_its_strings() -> None:
+    text = (
+        "```python\n"
+        'fig = plot(notes="Box surface at 0,25 m; scanned twice.")\n'
+        'rows = "key;name;a;b\\ne400;Tile;0,45;0,62\\n"\n'
+        "```\n"
+    )
+    assert _decimals(text) == ["0,25"]
+
+
+def test_a_script_markdown_and_plain_text_fence_are_read() -> None:
+    assert _decimals("```js\n// the floor at 0,5 m\nx = 1;\n```\n") == ["0,5"]
+    assert _decimals("```markdown\nThe floor is 0,5 m.\n```\n") == ["0,5"]
+    assert _decimals("```text\n6,251 5   0,647 829\n```\n") == ["6,251", "0,647"]
+    entry = "```markdown\n- **The print:** $83{,}523\\,8$.\n```\n"
+    assert _decimals(entry, "docs/contributing/docs-and-figures.md") == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        'Text {"the floor at 0,5 m"} end.\n',
+        '<Figure legend="The floor at 0,5 m" />\n',
+        '<Figure caption={"The floor at 0,5 m"} />\n',
+    ],
+)
+def test_an_expression_and_every_prose_attribute_of_a_page_are_read(text: str) -> None:
+    assert _decimals(text, "site/src/content/docs/a.mdx") == ["0,5"]
+
+
+def test_the_attributes_that_hold_code_are_not_read() -> None:
+    text = '<svg viewBox="0,0 10,10"><path d="M0,5 L1,2" class="a 0,5" /></svg>\n'
+    assert _decimals(text, "site/src/content/docs/a.mdx") == []
+
+
+def test_an_astro_template_expression_is_read() -> None:
+    text = '---\nconst a = 1;\n---\n<p>{"The floor is 0,5 m"}</p>\n'
+    assert _decimals(text, "site/src/components/A.astro") == ["0,5"]
+
+
+@pytest.mark.parametrize(
+    ("text", "rel"),
+    [
+        ('name: "Check the floor is 0,5 m"\n', ".github/workflows/a.yml"),
+        ('description = "The floor is 0,5 m"\n', "pyproject.toml"),
+        ("abstract: The floor is 0,5 m\n", "CITATION.cff"),
+        ('all:\n\t@echo "The floor is 0,5 m"\n', "Makefile"),
+        ("@article{a,\n  title = {The floor at 0,5 m},\n}\n", "paper/paper.bib"),
+    ],
+)
+def test_a_value_a_configuration_file_shows_is_read(text: str, rel: str) -> None:
+    assert _decimals(text, rel) == ["0,5"]
+
+
+def test_a_configuration_value_that_is_code_is_not_read() -> None:
+    text = "run: python -c 'f(0,5)'\nwith:\n  args: 0,5\n"
+    assert _decimals(text, ".github/workflows/a.yml") == []
+
+
+def test_a_decimal_split_over_two_literals_or_in_bytes_is_read() -> None:
+    split = 'raise ValueError(\n    "the floor is 0,"\n    "5 m"\n)\n'
+    assert _decimals(split, "src/phonometry/x.py") == ["0,5"]
+    assert _decimals('x = b"the floor is 0,5 m"\n', "src/phonometry/x.py") == ["0,5"]
 
 
 # ---------------------------------------------------------------------------

@@ -364,7 +364,10 @@ describe('Catalogues', () => {
     // Only the kinds the table holds: the solids carry no converted cell.
     assert.doesNotMatch(markdown, /\*\*converted\*\*/u);
     const damping = write('<Catalogues catalogue="damping" lang="en" />\n').markdown;
-    assert.match(damping, /\| -3,889 \(converted from 25 °F\) \|/u);
+    assert.match(damping, /\| -3\.889 \(converted from 25 °F\) \|/u);
+    // The Spanish page writes the same number with its decimal comma.
+    const dampingEs = write('<Catalogues catalogue="damping" lang="es" />\n').markdown;
+    assert.match(dampingEs, /\| -3,889 /u);
     assert.match(damping, /^- \*\*converted\*\*: converted from the page's figure$/mu);
   });
 

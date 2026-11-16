@@ -299,8 +299,9 @@ class MaxUncertaintyRow(RichDisplay):
     """One row of IEC 61672-1:2013 Table B.1, a maximum-permitted uncertainty.
 
     :ivar requirement: The requirement, as the "Requirement" column prints it.
-    :ivar reference: The "Table or subclause" column, as printed (decimal
-        commas included).
+    :ivar reference: The "Table or subclause" column as printed, but for its
+        one decimal, which takes the point of English text where the page
+        prints a comma: the last directional band reads >8 kHz to 12.5 kHz.
     :ivar max_uncertainty: The maximum-permitted expanded uncertainty for a
         coverage probability of 95 %, in :attr:`unit`.
     :ivar unit: ``"dB"``, or ``"dB/s"`` for the two decay rates of 5.8.2,
@@ -453,13 +454,17 @@ IEC61672_TABLE_5: tuple[PeakReference, ...] = (
 
 
 def _directional(angle: str, cells: tuple[float, ...]) -> tuple[MaxUncertaintyRow, ...]:
-    """The five frequency bands of a directional-response row of Table B.1."""
+    """The five frequency bands of a directional-response row of Table B.1.
+
+    The page prints the last band ">8 kHz to 12,5 kHz"; the reference names it
+    with the decimal point of English text.
+    """
     bands = (
         (250.0, 1000.0, True, "250 Hz to 1 kHz"),
         (1000.0, 2000.0, False, ">1 kHz to 2 kHz"),
         (2000.0, 4000.0, False, ">2 kHz to 4 kHz"),
         (4000.0, 8000.0, False, ">4 kHz to 8 kHz"),
-        (8000.0, 12500.0, False, ">8 kHz to 12,5 kHz"),
+        (8000.0, 12500.0, False, ">8 kHz to 12.5 kHz"),
     )
     return tuple(
         MaxUncertaintyRow(

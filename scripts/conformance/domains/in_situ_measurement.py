@@ -101,6 +101,7 @@ is.
 from __future__ import annotations
 
 import math
+import re
 import warnings
 
 import numpy as np
@@ -131,6 +132,11 @@ _IN_SITU = "In-situ measurement of silencers, screens and barriers"
 _BANDS = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 _SOURCE = np.array([95.0, 96.0, 97.0, 95.0, 92.0, 88.0])
 _RECEIVER = np.array([70.0, 68.0, 65.0, 60.0, 55.0, 51.0])
+
+
+def _english(label: str) -> str:
+    """A label transcribed from a print, with the decimal point of English text."""
+    return re.sub(r"(?<=\d),(?=\d)", ".", label)
 
 
 @register(
@@ -757,11 +763,14 @@ def _chk_barron_gas_density() -> Outcome:
     "coefficients a national guide prints for it",
 )
 def _chk_ntp668_flow_velocity() -> Outcome:
+    # The keys transcribe the guide's labels ("Ec. 3, air at 20 C, 1,2 kg/m3");
+    # the row names them with the decimal point of English text.
     printed = {
-        name: values[1] for name, values in oracle.NTP668_VELOCITY_COEFFICIENTS.items()
+        _english(name): values[1]
+        for name, values in oracle.NTP668_VELOCITY_COEFFICIENTS.items()
     }
     computed = {
-        name: round(
+        _english(name): round(
             float(
                 ph.noise_control.flow_velocity_m_s(
                     [oracle.MILLIMETRE_WATER_COLUMN_PA], values[0]
@@ -840,10 +849,10 @@ def _chk_barron_equivalent_diameter() -> Outcome:
         oracle.BARRON_EXAMPLE_5_7_AREA_M2
     )
     # Half an oracle, and it says so: what Barron prints is the root
-    # sqrt(4 S / pi) = 1,016 m, and the 1.5 diameters in front of it are
+    # sqrt(4 S / pi) = 1.016 m, and the 1.5 diameters in front of it are
     # ISO 11820's own coefficient, read on the printed page of Equation (15)
     # and nowhere on his. The tolerance is what his four printed figures
-    # propagate to: 1,016 m carries half a millimetre of rounding, and the
+    # propagate to: 1.016 m carries half a millimetre of rounding, and the
     # 1.5 of Equation (15) scales that to 0.75 mm. The printed area is the
     # exact 0.9 m squared, so it adds nothing.
     expected = (
@@ -1063,7 +1072,7 @@ def _chk_iso11821_printed_rounded_reductions() -> Outcome:
 )
 def _chk_iso11821_path_level_pair() -> Outcome:
     # The 71 dB is the book's own decibel-addition rule of thumb rather than
-    # the energy sum of the three paths, which is 71,687 dB and would make the
+    # the energy sum of the three paths, which is 71.687 dB and would make the
     # reduction 8.3 dB. The pair is used exactly as printed.
     printed = {"screen": 9.0, "path 1": 15.0, "path 2": 10.0, "path 3": 18.0}
     paths = screen_oracle.SRL_1991_SCREENED_DB
@@ -1648,10 +1657,11 @@ def _chk_iso10847_rounding_tie_break() -> Outcome:
     # 0.1 range are not. Rule B, the other convention in use, would print
     # 1 230 for the first of the two, so the pair discriminates.
     ties = {
-        # "B.3 Rule A, 1 225,0 at range 10" is reported as "1 225,0".
-        key.split(", ", 1)[1].split(" at ", 1)[
-            0
-        ]: rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        # "B.3 Rule A, 1 225,0 at range 10" is reported as 1 225.0, the
+        # decimal point of English text.
+        _english(key.split(", ", 1)[1].split(" at ", 1)[0]): (
+            rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        )
         for key in rounding.ISO80000_1_RULE_A_TIES
     }
     result = ph.environment.measured_insertion_loss_direct(

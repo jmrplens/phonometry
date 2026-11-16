@@ -288,6 +288,11 @@ def test_table_3_is_read_as_printed_at_the_test_frequencies(meter_class: int) ->
         assert published[_number(printed[0])] == _limits(printed[meter_class])
 
 
+def _english(cell: str) -> str:
+    """A printed cell as the library names it: the decimal comma becomes the point."""
+    return re.sub(r"(?<=\d),(?=\d)", ".", cell)
+
+
 def test_table_b1_matches_the_page() -> None:
     """Every printed row, the decay-rate cell split in its F and S halves."""
     rows = iter(metrology.IEC61672_TABLE_B1)
@@ -303,7 +308,7 @@ def test_table_b1_matches_the_page() -> None:
                 assert (row.max_uncertainty, row.unit) == (_number(value), "dB/s")
             continue
         row = next(rows)
-        assert (row.requirement, row.reference) == (requirement, reference)
+        assert (row.requirement, row.reference) == (requirement, _english(reference))
         assert (row.max_uncertainty, row.unit) == (_number(printed), "dB")
     assert next(rows, None) is None
 

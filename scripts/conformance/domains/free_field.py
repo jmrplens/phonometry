@@ -521,8 +521,8 @@ def _chk_6926_table_1_edges() -> Outcome:
     expected: dict[str, float] = {}
     computed: dict[str, float] = {}
     for bands, band, limit in cases:
-        on = f"{band:g} Hz, {limit:.2f} dB".replace(".", ",")
-        past = f"{band:g} Hz, {limit + 0.01:.2f} dB".replace(".", ",")
+        on = f"{band:g} Hz, {limit:.2f} dB"
+        past = f"{band:g} Hz, {limit + 0.01:.2f} dB"
         expected[on], expected[past] = 1.0, 0.0
         computed[on] = _steady_enough(bands, band, limit)
         computed[past] = _steady_enough(bands, band, limit + 0.01)
@@ -533,8 +533,8 @@ def _chk_6926_table_1_edges() -> Outcome:
     _DOMAIN,
     "ISO 6926:2016 5.6.3",
     "At the edge of every row of Table 1: a change of exactly 2.83 times it "
-    "calls for no recalibration and 0.01 dB more does, at 80 Hz (2,264 dB), "
-    "125 Hz (1,132 dB) and 1\u202f000 Hz (0.566 dB)",
+    "calls for no recalibration and 0.01 dB more does, at 80 Hz (2.264 dB), "
+    "125 Hz (1.132 dB) and 1\u202f000 Hz (0.566 dB)",
 )
 def _chk_6926_drift_edges() -> Outcome:
     freqs = (80.0, 125.0, 1000.0)
@@ -543,7 +543,7 @@ def _chk_6926_drift_edges() -> Outcome:
     for index, (band, limit) in enumerate(zip(freqs, (2.264, 1.132, 0.566),
                                               strict=True)):  # fmt: skip
         for change, verdict in ((limit, 1.0), (limit + 0.01, 0.0)):
-            name = f"{band:g} Hz, {change:.3f} dB".replace(".", ",")
+            name = f"{band:g} Hz, {change:.3f} dB"
             latest = np.zeros(len(freqs))
             latest[index] = change
             result = emission.verify_reference_source_drift(
@@ -832,10 +832,10 @@ def _chk_table_a1_edges() -> Outcome:
                          ("hemi-anechoic", (2.5, 2.0, 3.0))):  # fmt: skip
         for frequency, limit in zip((500.0, 1000.0, 8000.0), limits, strict=True):
             name = f"{room} {frequency:g} Hz"
-            expected[f"{name}, \u00b1{limit:.1f} dB".replace(".", ",")] = 1.0
+            expected[f"{name}, \u00b1{limit:.1f} dB"] = 1.0
             expected[f"{name}, past it"] = 0.0
-            computed[f"{name}, \u00b1{limit:.1f} dB".replace(".", ",")] = (
-                _qualifies_to_the_end(frequency, room, 2.0 * limit)
+            computed[f"{name}, \u00b1{limit:.1f} dB"] = _qualifies_to_the_end(
+                frequency, room, 2.0 * limit
             )
             computed[f"{name}, past it"] = _qualifies_to_the_end(
                 frequency, room, 2.0 * limit + 0.01
@@ -874,7 +874,7 @@ def _chk_table_b1_edges() -> Outcome:
             (630.0, 800.0, 6300.0, 12500.0), limits, strict=True
         ):
             name = f"{room} {frequency:g} Hz"
-            on = f"{name}, \u00b1{limit:.1f} dB".replace(".", ",")
+            on = f"{name}, \u00b1{limit:.1f} dB"
             expected[on] = 1.0
             expected[f"{name}, past it"] = 0.0
             computed[on] = _uniform_within(room, frequency, limit)

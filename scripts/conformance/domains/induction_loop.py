@@ -27,8 +27,8 @@ Three rows pin the value the page's own definitions give where the page prints
 another: the band-limit responses of 6.4 NOTE 2 (printed exchanged), the fall
 of 5.4.14.1 (printed as the rise) and the counter loop of Table B.1, whose
 resistance needs the 1.6 m perimeter its sides give, not the printed 1.5 m. A
-fourth compares the flux density of 1 A/m with the 1,256 µT E.6 prints, where
-4 pi 10^-7 rounds to 1,257, within the last printed digit. All four are in
+fourth compares the flux density of 1 A/m with the 1.256 µT E.6 prints, where
+4 pi 10^-7 rounds to 1.257, within the last printed digit. All four are in
 ``docs/ERRATA.md``.
 
 Oracle: IEC 60118-4:2014 read in BS EN 60118-4:2015 (PDF page = folio + 2):
@@ -588,7 +588,7 @@ def _register_figure_e2() -> None:
             _AFILS,
             f"{_60118} Figure E.2 b)",
             f"{component.capitalize()} component of a 15 by 10 loop at 1.2 units, "
-            f"{position:g} % across its width".replace(".", ","),
+            f"{position:g} % across its width",
         )(functools.partial(_figure_e2_row, component, position))
 
 
@@ -615,7 +615,7 @@ def _register_figure_h1() -> None:
             _AFILS,
             f"{_60118} Figure H.1",
             "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio "
-            + f"{aspect:g}".replace(".", ","),
+            + f"{aspect:g}",
         )(functools.partial(_figure_h1_row, aspect))
 
 
@@ -686,7 +686,7 @@ def _chk_flux_density() -> Outcome:
         0.001,
         unit="µT",
         places=4,
-        expected_label="1,256 µT (+/-0.001: the print truncates 1.2566, see ERRATA)",
+        expected_label="1.256 µT (+/-0.001: the print truncates 1.2566, see ERRATA)",
     )
 
 

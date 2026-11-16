@@ -2165,7 +2165,7 @@ def _chk_iso7626_reciprocity() -> Outcome:
 
 # --- Heavy and soft impact sources (ISO 16283-2 / JIS A 1418-2 / ISO 717-2) ---
 #: ISO 717-2:2020 Table D.4 (printed p. 22): a field measurement in octave
-#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55,350 66... = 55 dB.
+#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55.350 66... = 55 dB.
 _ISO717_2_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
 
 
@@ -2183,7 +2183,7 @@ def _chk_iso717_2_annex_d_rating() -> Outcome:
             1e-4,
             unit="dB",
             places=6,
-            expected_label="55,350 66... dB (rated 55 dB)",
+            expected_label="55.350 66... dB (rated 55 dB)",
         )
         if res.rating == 55
         else Outcome(
@@ -2211,7 +2211,7 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
     printed = "39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N"
     return Outcome(
         expected=f"{printed} at 31.5 to 500 Hz",
-        computed=" / ".join(f"{v:g}".replace(".", ",") for v in nominal) + " dB re 1 N",
+        computed=" / ".join(f"{v:g}" for v in nominal) + " dB re 1 N",
         delta=f"max |dev| {float(np.max(np.abs(check.deviation))):.3f} dB",
         passed=bool(
             check.passes
@@ -3188,7 +3188,7 @@ def _chk_iso10846_5_inequalities() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Formulas (B.2) and (B.3)",
-    "Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread)",
+    "Budget from the B.3 expressions: u = 1.394 dB, U = 2u = 2.789 dB (no repeatability spread)",
 )
 def _chk_iso10846_5_budget() -> Outcome:
     budget = ph.vibration.driving_point_uncertainty(120.0, repeatability_range_db=0.0)
@@ -3206,7 +3206,7 @@ def _chk_iso10846_5_budget() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Table B.1",
-    "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2.12 = 1,456 dB",
+    "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2.12 = 1.456 dB",
 )
 def _chk_iso10846_5_table_b1() -> Outcome:
     signal, ins, rig, dps, lin = ref.ISO10846_5_TABLE_B1_U_DB

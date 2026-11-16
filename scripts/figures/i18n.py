@@ -2985,7 +2985,7 @@ _ES_EXACT = {
     # Gaussian beam tracing: the caustic and the shadow zone behind it.
     # Vocabulary follows the Spanish solvers guide: cáustica, zona de sombra,
     # abanico, haz. The parameter box carries mathtext, which the save-time
-    # comma pass skips, so its Spanish twin bakes the comma of 35,9 m.
+    # comma pass skips, so its Spanish twin bakes the comma of "35,9 m".
     "Where Rays Give Infinity and Nothing, Beams Give a Level": "Donde los rayos dan infinito y nada, los haces dan un nivel",
     "source at 992.5 m": "fuente a 992.5 m",
     "caustic: the ray fan folds on itself here,\n"
@@ -6645,7 +6645,7 @@ _ES_PATTERNS = [
     ),
     (
         (
-            r"^\$6 - 10\\,\\mathrm\{lg\}\(10\^\{0\{,\}6\} - 1\)\$"
+            r"^\$6 - 10\\,\\mathrm\{lg\}\(10\^\{0\.6\} - 1\)\$"
             r" = (\d+)\.(\d+) dB$"
         ),
         r"$6 - 10\\,\\mathrm{lg}(10^{0{,}6} - 1)$ = \1,\2 dB",

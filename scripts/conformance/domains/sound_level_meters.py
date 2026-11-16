@@ -193,7 +193,10 @@ def _chk_table_b1() -> Outcome:
                     (requirement, f"{reference}, {which}", _number(number), "dB/s")
                 )
         else:
-            printed.append((requirement, reference, _number(value), "dB"))
+            # The library names the band with the decimal point of English
+            # text where the page prints a comma: ">8 kHz to 12,5 kHz".
+            english = reference.replace("12,5 kHz", "12.5 kHz")
+            printed.append((requirement, english, _number(value), "dB"))
     built = [
         (row.requirement, row.reference, row.max_uncertainty, row.unit)
         for row in ph.metrology.IEC61672_TABLE_B1

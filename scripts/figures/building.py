@@ -2559,7 +2559,7 @@ def generate_background_correction_regimes(output_dir: str) -> None:
         color=COLOR_FG,
     )
     ax.annotate(
-        rf"$6 - 10\,\mathrm{{lg}}(10^{{0{{,}}6}} - 1)$"
+        rf"$6 - 10\,\mathrm{{lg}}(10^{{0.6}} - 1)$"
         rf" = {formula[margin.searchsorted(6.0)]:.2f} dB",
         xy=(6.0, cap),
         # Between the 10 and 15 dB lines: from 7.4 the 10 dB one ran through

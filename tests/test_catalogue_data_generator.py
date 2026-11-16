@@ -3,7 +3,7 @@
 
 The script decides how every published number reads on the page, and nothing
 downstream can tell a good decision from a bad one: a modulus written as
-``62 110 000 000`` and one written as ``6,211 × 10¹⁰`` are the same value and
+``62 110 000 000`` and one written as ``6.211 × 10¹⁰`` are the same value and
 only one of them is a table a reader can compare down. So the decisions are
 pinned here, with the cases that made them: a column is written in powers of
 ten when the middle of the column asks for it and not when one outlier does,
@@ -81,24 +81,24 @@ def _catalogue(*rows: _Specimen) -> dict[str, _Specimen]:
         (343.0, "343"),
         (1206.0, f"1{_GROUP}206"),
         (1100000.0, f"1{_GROUP}100{_GROUP}000"),
-        (0.0125, "0,0125"),
+        (0.0125, "0.0125"),
         (-2700.0, f"-2{_GROUP}700"),
     ],
 )
-def test_a_number_is_written_with_a_comma_and_grouped_thousands(
+def test_a_number_is_written_with_a_point_and_grouped_thousands(
     value: float, expected: str
 ) -> None:
-    """The separators of every figure and table in this documentation."""
+    """The separators of every English figure and table in this documentation."""
     assert gcd.number(value) == expected
 
 
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
-        (62110000000.0, "6,211 × 10¹⁰"),
+        (62110000000.0, "6.211 × 10¹⁰"),
         (1e12, "1 × 10¹²"),
-        (3.3e-9, "3,3 × 10⁻⁹"),
-        (1.84e-5, "1,84 × 10⁻⁵"),
+        (3.3e-9, "3.3 × 10⁻⁹"),
+        (1.84e-5, "1.84 × 10⁻⁵"),
     ],
 )
 def test_a_power_of_ten_sets_as_a_power_of_ten(value: float, expected: str) -> None:
@@ -108,7 +108,7 @@ def test_a_power_of_ten_sets_as_a_power_of_ten(value: float, expected: str) -> N
 
 def test_a_printed_number_keeps_every_digit_it_carries() -> None:
     """The metrology annex prints 345.866 52 m/s, and that is the number."""
-    assert gcd.number(345.86652) == "345,86652"
+    assert gcd.number(345.86652) == "345.86652"
 
 
 def test_a_derived_number_is_rounded_to_what_its_inputs_could_support() -> None:
@@ -120,13 +120,13 @@ def test_a_derived_number_is_rounded_to_what_its_inputs_could_support() -> None:
 # How a column is written: the prefix moves into the heading
 # ---------------------------------------------------------------------------
 def test_a_column_of_moduli_is_a_column_of_gigapascals() -> None:
-    """62.11 under GPa beats 6,211 × 10¹⁰ under Pa in every cell of a table."""
+    """62.11 under GPa beats 6.211 × 10¹⁰ under Pa in every cell of a table."""
     style = gcd.column_style("Pa", [6.211e10, 4.717e11, 1.2e9])
 
     assert style.unit == "GPa"
     assert style.exponent == 9
     assert not style.scientific
-    assert gcd.number(6.211e10, exponent=style.exponent) == "62,11"
+    assert gcd.number(6.211e10, exponent=style.exponent) == "62.11"
 
 
 def test_the_prefix_is_the_one_that_writes_the_column_shortest() -> None:
@@ -483,7 +483,7 @@ def test_an_interval_the_page_prints_with_a_tilde_keeps_it() -> None:
 
     cell = gcd.cell(row, "porosity")
 
-    assert cell["text"] == "~0,65 to 0,68"
+    assert cell["text"] == "~0.65 to 0.68"
     assert cell["kind"] == "range"
 
 
@@ -514,7 +514,7 @@ def test_a_lower_bound_stays_a_bound_and_reads_as_one() -> None:
 
     cell = gcd.cell(row, "porosity")
 
-    assert cell["text"] == "> 0,75"
+    assert cell["text"] == "> 0.75"
     assert cell["kind"] == "bound"
 
 
@@ -526,7 +526,7 @@ def test_a_bound_whose_open_end_is_empty_prints_the_end_the_page_gave() -> None:
 
     cell = gcd.cell(open_ended, "porosity")
 
-    assert cell["text"] == "> 0,75"
+    assert cell["text"] == "> 0.75"
     assert cell["kind"] == "bound"
     assert list(gcd.values({"x": open_ended}, "porosity")) == [0.75]
 
@@ -638,7 +638,7 @@ def test_a_range_reads_a_in_spanish() -> None:
     """A reader of the Spanish page was shown "0,4 to 0,8"."""
     document = _one_row(
         cells=[
-            {"text": "0,4 to 0,8", "kind": "range", "note": ""},
+            {"text": "0.4 to 0.8", "kind": "range", "note": ""},
             {"text": "1 to 2, 5", "kind": "reported", "note": ""},
             {"text": "7 850", "kind": "printed", "note": ""},
         ]
@@ -648,7 +648,30 @@ def test_a_range_reads_a_in_spanish() -> None:
 
     cells = document["solids"]["rows"][0]["cells"]
     assert [cell.get("textEs") for cell in cells] == ["0,4 a 0,8", "1 a 2, 5", None]
-    assert cells[0]["text"] == "0,4 to 0,8"
+    assert cells[0]["text"] == "0.4 to 0.8"
+
+
+def test_a_decimal_reads_with_a_comma_in_spanish() -> None:
+    """The English page writes 0.3 where the Spanish page writes "0,3"."""
+    document = _one_row(
+        cells=[
+            {"text": "0.3", "kind": "printed", "note": ""},
+            {"text": "6.211 × 10¹⁰", "kind": "derived", "note": ""},
+            {"text": "> 0.75", "kind": "bound", "note": ""},
+            {"text": "343", "kind": "printed", "note": ""},
+        ]
+    )
+
+    gcd.in_spanish(document, {"Lead": "Plomo"})
+
+    cells = document["solids"]["rows"][0]["cells"]
+    assert [cell.get("textEs") for cell in cells] == [
+        "0,3",
+        "6,211 × 10¹⁰",
+        "> 0,75",
+        None,
+    ]
+    assert [cell["text"] for cell in cells] == ["0.3", "6.211 × 10¹⁰", "> 0.75", "343"]
 
 
 def test_a_row_carries_its_spanish_beside_its_english() -> None:

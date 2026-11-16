@@ -732,11 +732,11 @@ def _plain(value: float, exponent: int = 0) -> str:
 
     The scaling is a decimal shift and not a division, because dividing
     143 000 000 by a thousand in binary floating point gives
-    143 000,000 000 000 01 and the page would print it.
+    143 000.000 000 000 01 and the page would print it.
 
     :param value: The number.
     :param exponent: Powers of ten to take out of it, which is how a column
-        moves its prefix into the heading: 3 writes 4 400 Pa as 4,4 in a
+        moves its prefix into the heading: 3 writes 4 400 Pa as 4.4 in a
         column of kPa.
     :return: Its positional form, trailing zeros trimmed.
     """
@@ -753,9 +753,10 @@ def number(
 ) -> str:
     """One number, written the way this corpus writes numbers.
 
-    The decimal separator is the comma, as in every figure and every table of
-    this documentation, and the thousands are separated by the narrow no-break
-    space.
+    The decimal separator is the point, as in every English figure and table
+    of this documentation, and the thousands are separated by the narrow
+    no-break space. The Spanish page writes the same number with a comma,
+    which :func:`in_spanish` gives a cell beside its English text.
 
     :param value: The number.
     :param exact: Whether a page printed it, in which case every digit it
@@ -763,7 +764,7 @@ def number(
         :data:`_DERIVED_FIGURES` significant figures first, because its inputs
         were printed to no more than that.
     :param exponent: Powers of ten this column moved into its heading, as a
-        prefix: 3 writes 4 400 Pa as 4,4 under a heading of kPa.
+        prefix: 3 writes 4 400 Pa as 4.4 under a heading of kPa.
     :param scientific: Whether this number's column is written as a mantissa
         and a power of ten, which is what a unit that takes no prefix falls
         back on. Decided once for the column by :func:`column_style`.
@@ -776,12 +777,12 @@ def number(
     if scientific:
         mantissa, _, power = f"{value:e}".partition("e")
         written = str(int(power)).translate(_SUPERSCRIPT)
-        return f"{_plain(float(mantissa)).replace('.', ',')} \u00d7 10{written}"
+        return f"{_plain(float(mantissa))} \u00d7 10{written}"
     whole, _, fraction = _plain(value, exponent).partition(".")
     grouped = f"{int(whole.lstrip('-')):,}".replace(",", _GROUP)
     if whole.startswith("-"):
         grouped = f"-{grouped}"
-    return f"{grouped},{fraction}" if fraction else grouped
+    return f"{grouped}.{fraction}" if fraction else grouped
 
 
 def values(catalogue: Mapping[str, CatalogueRow], field: str) -> Iterator[float]:
@@ -848,8 +849,8 @@ def column_style(unit: str, numbers: Iterable[float]) -> Style:
     """How to write a column of *numbers* whose quantity is in *unit*.
 
     A prefix in the heading beats a power of ten in every cell: a column of
-    GPa reads as 62,11 and 23,17, where the same column in pascals reads as
-    6,211 x 10^10 and 2,317 x 10^10, and a reader comparing two materials is
+    GPa reads as 62.11 and 23.17, where the same column in pascals reads as
+    6.211 x 10^10 and 2.317 x 10^10, and a reader comparing two materials is
     comparing mantissas and exponents instead of numbers. So a unit that takes
     a prefix gets one, and only a unit that cannot (a squared metre, a unit
     that already carries a prefix, two quantities multiplied together) falls
@@ -1469,13 +1470,34 @@ class MissingSpanishError(Exception):
         super().__init__("\n".join(lines))
 
 
+#: A decimal point between two digits, which the Spanish page writes as a comma.
+_DECIMAL_POINT = re.compile(r"(?<=\d)\.(?=\d)")
+
+
+def spanish_cell_text(text: str, kind: str) -> str:
+    """A cell's English *text* as the Spanish page prints it.
+
+    The decimal point between two digits becomes the comma, and a range or a
+    reported cell joins its two ends with "a" where English writes "to".
+
+    :param text: The cell's English text.
+    :param kind: The cell's kind.
+    :return: The Spanish text, the same string when nothing changes.
+    """
+    spanish = _DECIMAL_POINT.sub(",", text)
+    if kind in {"range", "reported"}:
+        spanish = spanish.replace(" to ", " a ")
+    return spanish
+
+
 def in_spanish(document: dict[str, Any], spanish: Mapping[str, str]) -> None:
     """Give every row and every cell of *document* the words of the Spanish page.
 
     A row gains ``es``, holding the Spanish of each word field that differs
     from what the row carries (a row whose book already prints Spanish gains
     nothing), and a cell gains ``noteEs`` beside its note and ``textEs`` where
-    its text joins the two ends of a range with "to", which Spanish writes "a".
+    its text reads differently in Spanish: a decimal takes the comma there, and
+    a range joins its two ends with "a" where English writes "to".
     The English stays where it is: it is what the library's lookups take and
     what the search on the Spanish page matches as well.
 
@@ -1519,8 +1541,9 @@ def in_spanish(document: dict[str, Any], spanish: Mapping[str, str]) -> None:
                 note = translated(cell["note"])
                 if note is not None:
                     cell["noteEs"] = note
-                if cell["kind"] in {"range", "reported"} and " to " in cell["text"]:
-                    cell["textEs"] = cell["text"].replace(" to ", " a ")
+                text_es = spanish_cell_text(cell["text"], cell["kind"])
+                if text_es != cell["text"]:
+                    cell["textEs"] = text_es
     unused = set(spanish) - used
     if missing or unused:
         raise MissingSpanishError(missing, unused)

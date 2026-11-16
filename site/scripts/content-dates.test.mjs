@@ -2051,6 +2051,27 @@ test('the bibliography moves with a commit that changes the works a page cites, 
 		repo.commit(2, 'a page rewords its note on a work the bibliography describes itself');
 		assert.equal(day(await repo.dates(), path), '2026-01-01', `${path}: a note the bibliography replaces`);
 	}
+	// A Spanish page that translates the title cites the work under an id of
+	// its own; the Spanish bibliography files it under the English work's, by
+	// the reference at its place on the English twin, and shows that work's
+	// note: rewording the page's moves nothing.
+	const entry = raw.entries.find((candidate) => candidate.pages.includes('site/src/content/docs/es/reference/bibliography.md'));
+	const translated = (note) =>
+		page({
+			title: 'Una guía',
+			body: 'El texto.\n',
+			extra: ['references:', '  - type: book', '    authors: ["Kinsler, L. E."]', '    title: "Fundamentos de Acústica"', '    year: 2000', '    publisher: Wiley', `    note: "${note}"`],
+		});
+	const repo = repository(t);
+	repo.write('es/reference/bibliography.md', page({ title: 'Bibliografía' }));
+	for (const spec of entry.sources.filter((spec) => !spec.endsWith('/'))) repo.writeFile(spec, 'one\n');
+	repo.write('signals/guide.mdx', described('Why the guide cites it.'));
+	repo.write('es/signals/guide.mdx', translated('Por qué la guía la cita.'));
+	writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+	repo.commit(1);
+	repo.write('es/signals/guide.mdx', translated('Por qué la guía la cita, con otras palabras.'));
+	repo.commit(2, 'a Spanish page rewords its note on a work whose title it translates');
+	assert.equal(day(await repo.dates(), 'es/reference/bibliography.md'), '2026-01-01', 'a note on a translated work the bibliography replaces');
 });
 
 test('every catalogue page moves with a commit that moves a table from one catalogue page to another', async (t) => {

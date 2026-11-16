@@ -475,4 +475,8 @@ test('a note keeps a code span and an escaped dollar as written, and writes out 
   assert.equal(noteText('Use `$L_{p}$` for literal TeX.'), 'Use $L_{p}$ for literal TeX.');
   assert.equal(noteText('Priced at \\$5 and \\$10.'), 'Priced at $5 and $10.');
   assert.equal(noteText('The level $L_{p}$ and `code`.'), `The level ${mathsText('$L_{p}$')} and code.`);
+  // A command inside maths is maths: read by the maths reader, not held back
+  // as an escaped character (`\mathrm` is no escape of `m`).
+  assert.equal(noteText('Uses $L_{p\\mathrm{AF}}$ levels.'), 'Uses LpAF levels.');
+  assert.equal(noteText('$a\\,b$ costs \\$5.'), `${mathsText('$a\\,b$')} costs $5.`);
 });

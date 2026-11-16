@@ -284,13 +284,16 @@ export function bibliographySections(
 export function noteText(note) {
   // A code span and an escaped character are text, not maths: they are set
   // aside before the `$...$` runs are read, so `$L_{p}$` between backticks and
-  // an escaped `\$` reach the reader of the page as they are written.
+  // an escaped `\$` reach the reader of the page as they are written. A maths
+  // run is left whole for the maths reader: inside it a backslash opens a
+  // command (`\mathrm`), not an escape.
   const kept = [];
   const hold = (piece) => `\uE000${kept.push(piece) - 1}\uE001`;
   let masked = '';
   let at = 0;
-  for (const [start, end] of inlineSpans(note)) {
-    masked += note.slice(at, start).replace(/\\[\s\S]/g, hold) + hold(note.slice(start, end));
+  for (const [start, end] of inlineSpans(note, '`$')) {
+    const span = note.slice(start, end);
+    masked += note.slice(at, start).replace(/\\[\s\S]/g, hold) + (span.startsWith('$') ? span : hold(span));
     at = end;
   }
   masked += note.slice(at).replace(/\\[\s\S]/g, hold);

@@ -159,6 +159,21 @@ _SCRIPT_COMMENTS = ("//", "/*", "*", "<!--")
 #: Readers that keep their own fence logic, and why, keyed by the file relative
 #: to the repository and the name of the function that holds the reading.
 EXEMPT: dict[tuple[str, str], str] = {
+    ("site/scripts/check-structured-data.test.mjs", "<script>"): (
+        "fixtures: the guide this test hands the word count carries a fenced block, "
+        "because what it checks is that code is left out of the words a page shows; "
+        "nothing in it reads a fence"
+    ),
+    ("site/scripts/mirror-bibliography.test.mjs", "<script>"): (
+        "fixtures: the page this test hands the mirror writer shows a marker inside "
+        "a fenced example, because what it checks is that the copy leaves it as "
+        "code; nothing in it reads a fence"
+    ),
+    ("site/scripts/bibliography-entries.test.mjs", "<script>"): (
+        "fixtures: the guides these tests hand the bibliography writer show a "
+        "marker inside a fenced example, because what they check is that a marker "
+        "in code is never filled; nothing in them reads a fence"
+    ),
     ("site/scripts/citation-quote.test.mjs", "<script>"): (
         "a test of the citation check hands it a quotation that holds a fenced "
         "block, and a link to the record left in one, written out as a page "

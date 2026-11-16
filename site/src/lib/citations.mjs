@@ -138,6 +138,9 @@ export function designationBase(ref) {
  * carpets alone and contradicted what the bibliography page says of it. A
  * work only catalogue pages cite takes every one of their notes, in page
  * order, so its description names each table it is the source of.
+ * The bibliography page itself gives a work the note its own entry carries,
+ * when src/data/bibliography.mjs writes one (`describedWorks` in
+ * src/lib/bibliography-entries.mjs).
  *
  * @param {Iterable<{id: string, references?: object[]}>} pages The content
  *   entries of one language.

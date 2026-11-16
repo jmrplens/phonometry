@@ -162,9 +162,13 @@ export function readIgnoreRevs(file) {
 /**
  * The text a page shows of other files: every match of a pattern in the
  * files some pathspecs name, as the title and the sentence each guide gives
- * a fiche in its `<ReportPreview>`, which the index of fiches prints.
+ * a fiche in its `<ReportPreview>`, which the index of fiches prints; or the
+ * works the frontmatter of those pages cites, with the title of each page
+ * that cites any (`frontmatter: 'references'`), which the bibliography lists,
+ * or without the titles (`frontmatter: 'works'`), for pages a bibliography
+ * reads only for the works they cite.
  *
- * @typedef {{ files: string[], pattern: string }} MatchedText
+ * @typedef {{ files: string[], pattern?: string, frontmatter?: 'references' | 'works' }} MatchedText
  */
 
 /**
@@ -188,7 +192,11 @@ export function readIgnoreRevs(file) {
  * draws from that conformance report, which is each page's own, since the
  * component `drawnBy` was added. A text is `{ "files": pathspecs,
  * "pattern": pattern }`: every match of the regular expression, read with
- * the `m` flag, in each file the pathspecs match. Paths
+ * the `m` flag, in each file the pathspecs match; or `{ "files": pathspecs,
+ * "frontmatter": "references" }`: the works the frontmatter of each of those
+ * pages cites and, of a page that cites any, its title, read with the parser
+ * the content collection reads them with (src/lib/page-references.mjs), or
+ * `"frontmatter": "works"`, the same without the titles. Paths
  * are from the repository root, as git names them, and one ending in `/` is
  * a directory. A pathspec of a count that holds `{topic}` stands for one
  * per topic, so a count over the topic directories follows the navigation
@@ -301,12 +309,20 @@ export function readDateSources(file, { topics = domainIds } = {}) {
         if (typeof set !== 'object' || Array.isArray(set) || set === null) {
           throw new Error(`${where}: texts.${name} is { "files": pathspecs, "pattern": pattern }.`);
         }
-        const unknownKeys = Object.keys(set).filter((key) => !['files', 'pattern'].includes(key));
+        const unknownKeys = Object.keys(set).filter((key) => !['files', 'pattern', 'frontmatter'].includes(key));
         if (unknownKeys.length > 0) {
           throw new Error(`${where}: unknown key(s) ${unknownKeys.join(', ')} in texts.${name}.`);
         }
         const files = paths(set.files, `texts.${name}.files`, { magic: true });
         if (files.length === 0) throw new Error(`${where}: no pathspec for the text ${name}.`);
+        if (Object.hasOwn(set, 'frontmatter')) {
+          if (Object.hasOwn(set, 'pattern') || !['references', 'works'].includes(set.frontmatter)) {
+            throw new Error(
+              `${where}: texts.${name} reads either a pattern or "frontmatter": "references" (the works its pages cite and their titles) or "works" (the works alone).`,
+            );
+          }
+          return [name, { files, frontmatter: set.frontmatter }];
+        }
         return [name, { files, pattern: pattern(set.pattern, `texts.${name}.pattern`, 'the text it shows') }];
       }),
     );

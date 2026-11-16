@@ -1658,7 +1658,8 @@ consistency check the reader makes, not one the library automates.
   Springer.
   [doi:10.1007/978-3-662-10118-6](https://doi.org/10.1007/978-3-662-10118-6).
 - Craik, R. J. M. (1996). *Sound transmission through buildings using
-  statistical energy analysis*. Gower.
+  statistical energy analysis*. Gower. ISBN 978-0-566-07572-8.
+  [Open Library record](https://openlibrary.org/isbn/9780566075728).
 - Hopkins, C. (2007). *Sound insulation* (Section 5.2.1.3).
   Butterworth-Heinemann.
 - Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration

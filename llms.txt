@@ -419,7 +419,7 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 
 - [Overview](https://docs.jmrp.io/phonometry/reference/): Theory, evidence and vocabulary: derivations behind the modules, the conformance report, defects found in the sources, the bibliography and the glossary.
 - [API Reference](https://docs.jmrp.io/phonometry/reference/api/): Every public function, class and constant in phonometry, generated from the source docstrings.
-- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): Every source the guides cite, by area: standards with their catalogue records, books and papers with a verified DOI or publisher link, each with a note.
+- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): Every work the guides cite, by area, with every page that cites it and, where there is one, its DOI, catalogue record or publisher link.
 - [Same bits on every machine](https://docs.jmrp.io/phonometry/reference/determinism/): Determinism: why floating point drifts, how a designed filter stays byte-identical on any CPU, BLAS or thread count, what still differs, and the evidence.
 - [Glossary](https://docs.jmrp.io/phonometry/reference/glossary/): Acoustic quantities the guides compute most, each with symbol, one-sentence definition, unit, defining standard and clause, and the guide computing it.
 - [Theoretical Background](https://docs.jmrp.io/phonometry/reference/theory/): Derivations by domain: six pages tracing each shared method to its clause, equation and table, and the areas whose theory stays in its guide.
@@ -636,6 +636,8 @@ One file per area, each small enough to fetch whole. A page too long for one fet
 - [Control valve noise (IEC 60534-8)](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control-valves.txt)
 - [Wave simulation](https://docs.jmrp.io/phonometry/llms/llms-simulation.txt)
 - [Reference](https://docs.jmrp.io/phonometry/llms/llms-reference.txt)
+- [Bibliography, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-bibliography-1.txt)
+- [Bibliography, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-bibliography-2.txt)
 - [Glossary](https://docs.jmrp.io/phonometry/llms/llms-glossary.txt)
 - [Everything](https://docs.jmrp.io/phonometry/llms-full.txt)
 

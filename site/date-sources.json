@@ -44,6 +44,7 @@
         "site/src/lib/page-evidence.ts": "verifiedBy",
         "site/src/data/conformance-stats.mjs": "verifiedBy",
         "site/src/lib/bibliography-works.ts": "the works the bibliography page's structured data defines in full, read from every page's references, and the works an errata page's structured data says it corrects: data for machines, which no reader of a page reads",
+        "site/src/data/bibliography.mjs": "the notes and areas of the bibliography's lists, which the head writes into the bibliography page's source to count its words for the structured data's wordCount, and whose notes describe the works the structured data defines (describedWorks): data for machines, which no reader of a page reads",
         "site/src/data/repo-stats.mjs": "`version` and `targetPlatform`, the release and the Python an API page's structured data names, data for machines, and `version` again in the BibTeX entry citation.mjs builds, which the page actions hold in an attribute to copy, the same on every page and no part of any one: no reader of a page reads either as its text",
         "site/src/lib/catalogue-pages.ts": "`cataloguePages` and `catalogueOverview`, the catalogue pages the structured data of a catalogue page and of the catalogue overview names: data for machines, which no reader of a page reads",
         "site/src/generated/catalogues.mjs": "the columns the Dataset of a catalogue page says it measures: data for machines, which no reader of a page reads",
@@ -204,6 +205,44 @@
       "pages": ["site/src/content/docs/es/reference/errata/index.mdx"],
       "sources": ["site/src/content/docs/es/reference/errata/", "site/src/components/ErrataFamily.astro"],
       "_via": { "site/src/components/ErrataFamily.astro": "site/src/content/docs/es/reference/errata/" }
+    },
+    {
+      "_why": "The bibliography lists every work the pages cite, each entry closed by the pages that cite it, named by their titles. src/lib/remark-bibliography.mjs writes the lists at build time from the references of every English page, with the note and the section src/data/bibliography.mjs keeps of each work, so the page's own file holds none of them. A commit that changes the works a page cites, or the title of a page that cites one, moves the bibliography; one that changes the rest of a page moves it not, and neither does the title of a page that cites nothing. Here a title is the list's own text, unlike the link of a glossary term, which moves no page. How each citation is typeset (scripts/shared/page-twin.mjs) moves no page, as the References section of a guide moves none, and a Cited by list follows the navigation, which moves none either.",
+      "pages": ["site/src/content/docs/reference/bibliography.md"],
+      "sources": ["site/src/data/bibliography.mjs", "site/src/lib/remark-bibliography.mjs", "site/src/lib/bibliography-entries.mjs"],
+      "texts": {
+        "siteBibliography": {
+          "files": [":(glob)site/src/content/docs/**/*.md", ":(glob)site/src/content/docs/**/*.mdx", ":(exclude,glob)site/src/content/docs/es/**"],
+          "frontmatter": "references"
+        }
+      },
+      "_via": {
+        "site/src/lib/remark-bibliography.mjs": "siteBibliography",
+        "site/src/lib/page-references.mjs": "siteBibliography",
+        "site/src/data/topics.mjs": "the order of each Cited by list, which follows the navigation the sidebar draws: navigation moves no page's date, as a page's sidebar entry does not",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the navigation from, which moves no page's date"
+      }
+    },
+    {
+      "_why": "The Spanish bibliography is written the same way from the references of every Spanish page, its Cited by lists naming Spanish pages by their titles, each work read by the English one it is, through the reference at its place on the English twin. So a commit that changes the works an English page cites moves it as well, and one that changes only an English page's title moves it not, since no English title shows on it.",
+      "pages": ["site/src/content/docs/es/reference/bibliography.md"],
+      "sources": ["site/src/data/bibliography.mjs", "site/src/lib/remark-bibliography.mjs", "site/src/lib/bibliography-entries.mjs"],
+      "texts": {
+        "siteBibliography": {
+          "files": [":(glob)site/src/content/docs/es/**/*.md", ":(glob)site/src/content/docs/es/**/*.mdx"],
+          "frontmatter": "references"
+        },
+        "englishWorkIds": {
+          "files": [":(glob)site/src/content/docs/**/*.md", ":(glob)site/src/content/docs/**/*.mdx", ":(exclude,glob)site/src/content/docs/es/**"],
+          "frontmatter": "works"
+        }
+      },
+      "_via": {
+        "site/src/lib/remark-bibliography.mjs": "siteBibliography",
+        "site/src/lib/page-references.mjs": "siteBibliography",
+        "site/src/data/topics.mjs": "the order of each Cited by list, which follows the navigation the sidebar draws: navigation moves no page's date, as a page's sidebar entry does not",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the navigation from, which moves no page's date"
+      }
     }
   ]
 }

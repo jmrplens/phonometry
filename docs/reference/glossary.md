@@ -69,8 +69,8 @@ Where two meanings meet inside one navigation section, the guide says so at
 first use; this table is the site-wide list.
 
 For the source of each definition rather than the definition itself, the
-[bibliography](bibliography.md) lists every cited work with
-a DOI or publisher link, and the
+[bibliography](bibliography.md) lists every cited work, with
+its DOI or publisher link where it has one, and the
 [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/) shows the numerical
 check that pins each quantity to its standard's own expected value.
 

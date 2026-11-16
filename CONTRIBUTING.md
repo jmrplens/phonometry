@@ -534,6 +534,13 @@ make api-docs   # site/src/content/docs/reference/api/ and site/src/generated/ap
 make llms       # llms.txt, llms-full.txt, site/public/llms/, and the section indexes and glossary under docs/
 ```
 
+A change to a page's frontmatter `references` changes the bibliography, which
+the site build writes from them. Its GitHub copy, `docs/reference/bibliography.md`,
+is written by `make bibliography-mirror` (it needs the site's dependencies,
+`pnpm install` in `site/`); run it before `make llms`, which cuts the
+bibliography's shards from that copy, and commit both. The docs workflow fails
+while the copy is not what the references write.
+
 `make api-docs` reads every public module's `__all__` and docstrings, so run it
 after changing a public name, a signature or a docstring; `make llms` reads the
 guides, so run it after changing one. Commit whatever each changes: the

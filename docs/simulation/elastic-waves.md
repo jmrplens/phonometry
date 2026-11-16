@@ -586,7 +586,9 @@ waves probe the sediment shear stiffness.
 - Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).
   The finite-difference and finite-element modeling of seismic wave
   propagation and earthquake motion. *Acta Physica Slovaca*, 57(2),
-  177-406. The heterogeneous effective parameters of section 2 (harmonic
+  177-406.
+  [doi:10.2478/v10155-010-0084-x](https://doi.org/10.2478/v10155-010-0084-x).
+  The heterogeneous effective parameters of section 2 (harmonic
   shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging
   free surface of section 3 (Eq. 9.9).
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne

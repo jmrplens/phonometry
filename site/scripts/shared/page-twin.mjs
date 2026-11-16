@@ -391,11 +391,25 @@ function partMarkdown(part) {
 export function referencesMarkdown(references, lang, heading) {
   if (!references?.length) return '';
   const entries = sortedReferences(references, lang).map(([, ref]) => {
-    const citation = citationParts(ref).map(partMarkdown).join('');
     const note = ref.note ? `\n  ${lineStart(noteParts(ref.note).map(partMarkdown).join('').trim())}` : '';
-    return `- **${fragmentText(opening(ref, lang))}**${citation.trimEnd()}${note}`;
+    return `- ${citationMarkdown(ref, lang)}${note}`;
   });
   return `## ${heading}\n\n${entries.join('\n')}`;
+}
+
+/**
+ * One work's citation as Markdown, as a References section prints it: its
+ * author and year in bold, then the rest of the citation, without the page's
+ * note. The bibliography page prints its entries with it too
+ * (src/lib/bibliography-entries.mjs), so a work reads the same there as at the
+ * foot of every page that cites it.
+ *
+ * @param {import('../../src/lib/references-format.mjs').Reference} ref
+ * @param {'en' | 'es'} lang
+ * @returns {string}
+ */
+export function citationMarkdown(ref, lang) {
+  return `**${fragmentText(opening(ref, lang))}**${citationParts(ref).map(partMarkdown).join('').trimEnd()}`;
 }
 
 /**

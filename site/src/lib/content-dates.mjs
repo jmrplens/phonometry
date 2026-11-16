@@ -65,7 +65,7 @@ import {
   readDateSources,
   readIgnoreRevs,
 } from './date-rules.mjs';
-import { readPageReferences } from './page-references.mjs';
+import { citationReader, readPageReferences } from './page-references.mjs';
 import { basePath, siteUrl } from '../data/site.mjs';
 
 /**
@@ -676,20 +676,29 @@ async function lineCountDate(repo, { file, lines }) {
  * moved to another folder, which moves its line to another heading of the
  * index, moves the page. The versions are read newest first, in the same
  * doubling rounds as a count of lines, so the usual case costs one request.
+ * A text of `"frontmatter": "references"` reads each version as the
+ * bibliography reads a page (`citationReader`): the works it cites and, when
+ * it cites any, its title, so a commit moves the page only when it changed
+ * what some page gives the bibliography; one of `"frontmatter": "works"`
+ * reads the works alone.
  *
  * @param {string} repo
- * @param {{ files: string[], pattern: string }} text
+ * @param {{ files: string[], pattern?: string, frontmatter?: 'references' | 'works' }} text
  * @returns {Promise<Date | undefined>}
  */
-async function textDate(repo, { files, pattern }) {
+async function textDate(repo, { files, pattern, frontmatter }) {
   const history = await readHistory(repo, files);
   if (history.head === null) return undefined;
-  const regex = new RegExp(pattern, 'gm');
+  const regex = frontmatter === undefined ? new RegExp(pattern, 'gm') : null;
+  const textOf =
+    regex === null
+      ? await citationReader({ titles: frontmatter === 'references' })
+      : (text) => (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n');
   const matched = new Map();
   const matches = (oid) => (NO_BLOB.test(oid) ? '' : matched.get(oid));
   const read = async (oids) => {
     for (const [oid, text] of await readBlobs(repo, oids)) {
-      matched.set(oid, (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n'));
+      matched.set(oid, textOf(text));
     }
   };
   const made = await followLine(history.head, valueStep(history, matches), read, { size: 1 });

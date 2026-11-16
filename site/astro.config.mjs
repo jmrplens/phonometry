@@ -21,6 +21,7 @@ import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
+import { remarkBibliography } from './src/lib/remark-bibliography.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
 import { softwareRequirements, version } from './src/data/repo-stats.mjs';
 import {
@@ -576,7 +577,10 @@ export default defineConfig({
   // every type check. The plugins an integration adds still run after these.
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath],
+      // remarkBibliography writes the bibliography page's lists from every
+      // page's references (src/lib/remark-bibliography.mjs); after remarkMath,
+      // so the maths of a note is read as maths.
+      remarkPlugins: [remarkMath, remarkBibliography],
       // rehypeSingleTextMath must run after rehypeKatex: it rewrites the
       // elements KaTeX has just produced.
       rehypePlugins: [

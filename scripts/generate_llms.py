@@ -233,6 +233,9 @@ UPGRADING_TITLE = "Upgrading from 3.3 to 4.0"
 #: The glossary page, which has a shard of its own (see :func:`build_shards`).
 GLOSSARY_ROUTE = "reference/glossary"
 
+#: The bibliography, which has a shard of its own (see :func:`build_shards`).
+BIBLIOGRAPHY_ROUTE = "reference/bibliography"
+
 #: Markdown files under docs/ that are not documentation pages.
 NOT_PAGES = frozenset({"README", "CONFORMANCE", "ERRATA", "ERRATA.es"})
 
@@ -1979,15 +1982,22 @@ def build_shards() -> dict[str, tuple[str, ...]]:
     # reference shard reached the fetch budget, and the two answer different
     # questions: a client after the definition of a quantity has no use for the
     # list of sources, nor the other way round.
+    # The bibliography travels on its own too, for the same reason: once it
+    # listed every work the pages cite, each with every page that cites it,
+    # it alone outgrew the budget, and a shard of one page is cut at its own
+    # headings (its areas) into numbered parts, where a shard of several
+    # pages over the budget is refused.
     reference = sorted(
         route
         for route in pages.values()
         if route.startswith("reference/")
         and not route.startswith(("reference/theory", "reference/api"))
-        and route != GLOSSARY_ROUTE
+        and route not in (GLOSSARY_ROUTE, BIBLIOGRAPHY_ROUTE)
     )
     if reference:
         emit("reference", "Reference", reference)
+    if BIBLIOGRAPHY_ROUTE in route_to_file:
+        emit("bibliography", "Bibliography", [BIBLIOGRAPHY_ROUTE])
     if GLOSSARY_ROUTE in route_to_file:
         emit("glossary", "Glossary of quantities", [GLOSSARY_ROUTE])
 

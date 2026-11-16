@@ -498,7 +498,7 @@ the normative PDF fiche.
 - [Why phonometry](https://docs.jmrp.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
 - [Conformance report](https://docs.jmrp.io/phonometry/reference/conformance/): the expected and computed value of all 1897 checks
 - [API Reference](https://docs.jmrp.io/phonometry/reference/api/): every parameter of every function
-- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
+- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): every work the guides cite, with the pages that cite it and its link where it has one
 
 ---
 
@@ -1681,8 +1681,8 @@ Where the standard also fixes how the result is to be reported, the result
 object renders that one-page fiche itself with `.report()`, in English or
 Spanish, so the document you hand over carries the same numbers the check does.
 The sources behind all of it are collected in the
-[Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/), every entry with a verified DOI or official
-publisher link.
+[Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/), every entry with the pages that cite it and
+its DOI or official publisher link where it has one.
 
 ---
 

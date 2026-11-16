@@ -32,6 +32,7 @@ import { glob } from "node:fs/promises";
 import { parse as parseYaml } from "yaml";
 import * as conformanceStats from "../src/data/conformance-stats.mjs";
 import { TRANSPLANTED, hasMarkdownCopy, mirrorOf, routeOf } from "../src/lib/page-markdown.mjs";
+import { bibliographyOf, withBibliographyLists } from "../src/lib/remark-bibliography.mjs";
 import { basePath, siteUrl } from "../src/data/site.mjs";
 import { readCommittedText } from "../src/lib/line-ends.mjs";
 import { catalogueSlugs } from "../src/data/topics.mjs";
@@ -78,6 +79,25 @@ function catalogueIndex(lang) {
     })
     .join("\n");
 }
+
+/**
+ * The bibliography page marks where each section's list goes with a comment
+ * the site build fills in (src/lib/remark-bibliography.mjs), and stripping the
+ * Markdown takes the comment out with it. So each list is written here, from
+ * the same pages by the same functions, into the comment's place, its links to
+ * the pages that cite each work made absolute like every other link of a copy.
+ */
+const BIBLIOGRAPHY = {
+  en: await bibliographyOf(contentDir, "en"),
+  es: await bibliographyOf(contentDir, "es"),
+};
+
+/**
+ * `source` with each bibliography marker replaced by its section's list when
+ * `file` is one of the two bibliography pages, the only pages the plugin fills,
+ * and as written otherwise.
+ */
+const withBibliography = (source, file) => withBibliographyLists(source, file, (lang) => BIBLIOGRAPHY[lang]);
 
 /**
  * Route for a content file: `guides/levels.mdx` -> `guides/levels`. The rule
@@ -147,9 +167,10 @@ function sourceCopy(file, route) {
   const kind = file.endsWith(".mdx") ? "mdx" : "md";
   const page = readCommittedText(file);
   const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
-  const source = stripFrontmatter(page);
+  const asWritten = stripFrontmatter(page);
   // The page's line the source opens on, so that a message names the line of the file.
-  const firstLine = page.slice(0, page.length - source.length).split("\n").length;
+  const firstLine = page.slice(0, page.length - asWritten.length).split("\n").length;
+  const source = withBibliography(asWritten, file);
   let body;
   try {
     body = stripMdx(source, {

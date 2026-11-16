@@ -4873,6 +4873,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **English text writes the decimal point, a value restated from a standard
+  that prints a comma included; only a literal transcription of the print
+  keeps the comma, and Spanish keeps it everywhere.** Rules P9 and F58 of the
+  contributor guide say so, and `scripts/check_decimal_comma.py --english`
+  holds every English text of the tree to it (docstrings, comments, messages,
+  test docstrings, the CHANGELOG, the English pages, figures, plates, fiches
+  and the generated English pages), in a CI job of its own. What a caller
+  reads changes where it was English text with a comma: the warnings and
+  messages that quoted a number, the catalogue rows the library writes in
+  English, the `reference` of the directional-response row of IEC 61672-1
+  Table B.1 above 8 kHz (`">8 kHz to 12.5 kHz"`), and the quantile symbols
+  of ISO 17534-1, `q_{0.1}` and `q_{0.9}`, which the Spanish figures still
+  draw with their comma. The English catalogue page prints `0.3` where it
+  printed `0,3`; every cell the Spanish page reads differently carries its
+  Spanish text beside the English. No value changes.
+
 - **`vibration.blade_pass_frequencies` returns the lobe patterns of a ducted
   fan apart from its lines, as speeds of rotation with their sign.** With
   `n_vanes` it returned each interaction pattern of Norton Eqs. (8.16) and

@@ -24,6 +24,13 @@ microphones, 3 by 3 and 0,40 m apart, its centre (microphone 5) 0,25 m from the
 plane and so 1,25 m from the loudspeaker. The microphones are numbered as the
 loudspeaker sees them: 1 to 3 along the top row, 7 to 9 along the bottom.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_reflection_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_reflection_setup.svg" alt="Three views of the EN 1793-5 set-up and a list of what it records. First, a side view to scale of a 4 m device: the loudspeaker on a stand at half the height of the device, its front panel 1.50 m from the reference plane, the measurement grid 0.25 m from the plane with one microphone of each row drawn, the direct sound running 1.25 m to microphone 5, the reflection running 1.75 m, and two dashed unwanted arrivals, one diffracted over the top edge down to the top row and one reflected by the ground up to the bottom row. Second, the 4 m by 4 m sample as the loudspeaker sees it: nine microphones 0.40 m apart, numbered 1 to 3 on the top row and 7 to 9 on the bottom, microphones 1 to 6 marked as used in every band and 7 to 9 only from the 200 Hz band up, all inside the dashed circle of the sampled area of microphone 5, 1.96 m in radius. Third, the free-field record: the same loudspeaker and grid, still 1.25 m apart, turned away from every object and from the ground. The list names five records with their clauses: the directivity of the loudspeaker, nine impulse responses in front of the device for each grid position, nine more in the free field, the check with a reflecting plate and the gain check." width="100%"></picture>
+
+*Half the height puts the loudspeaker as far from the ground as from the top
+edge, and the two dashed arrivals are what the rest of the page keeps coming
+back to: they are why the bottom row is left out below 200 Hz (section 4) and
+why a lower device cannot be measured as far down (section 5).*
+
 Each microphone hears the direct sound and, a little over a millisecond later,
 the reflection. The reflection has travelled further, 1,75 m against 1,25 m at
 microphone 5, and has spread over a larger sphere; Formula (2) puts that back
@@ -61,11 +68,58 @@ print((check.deviations_m * 1e3).round())         # microphone 7 is 27 mm short
 The verdict is `passes`; the object refuses to stand in for it in an `if`, so a
 check is never read as a pass by accident.
 
+### The order of the work (5.10)
+
+The standard lists the measurement step by step, and its steps a to j are the
+ones made in the field. In the same order:
+
+1. **The conditions (5.7).** The surface of the sample is dry, and its pores
+   are verified dry if it has a significant void content; its temperature is
+   between 0 °C and 70 °C, the air between 0 °C and 40 °C, and the wind at the
+   microphones does not exceed 5 m/s. Outside them the measurement is not
+   made.
+2. **The equipment in place (5.6).** The loudspeaker has a single driver, no
+   port and no crossover (5.4.2), and the microphones are at least type 2 of
+   EN 61672-1 and no larger than half an inch (5.4.1). Loudspeaker and grid
+   take the reference positions of the diagram, with microphone 5 at the same
+   distance from the posts on either side (5.6.2.2). A device that is not flat
+   is measured at three positions, A, B and C, with microphone 5 in front of
+   its most protruding part, midway, and in front of its least protruding
+   part; one that is flat but not homogeneous at two positions or more, with
+   microphone 5 in front of a different material at each; either way within
+   one period of its pattern (5.6.2.3), and at four positions or more when the
+   pattern runs in two directions (5.6.2.4). The loudspeaker and the grid move
+   together.
+3. **The positions checked (5.6.2.5, 5.6.2.6).** These are the two checks of
+   the snippet above, with a flat reflecting plate of at least 1.60 m by
+   1.60 m. The second one takes time on site, and 5.6.2.6 lets a rig built to
+   guarantee the positions do without it; the report shows pictures of the
+   set-up.
+4. **The sampled area clear (5.6.1, 5.6.3).** The radius of Formula (8) is
+   computed, and nothing else that reflects stands inside it or nearer the
+   microphone than that radius: safety rails, fences, rocks, parked cars. If
+   something does, the measurement is not made.
+5. **The test signal (5.4.3, 5.5.2).** It is deterministic and exactly
+   repeatable, and the microphones are sampled at 44 kHz or more.
+6. **The records in front of the device.** Nine impulse responses for each
+   grid position, averaged further or taken again while the background noise
+   leaves the effective signal-to-noise ratio at 10 dB or less (5.5.3).
+7. **The free-field records.** One for each microphone position, with the rig
+   turned towards free space and its geometry kept (3.16, 5.6.2.2).
+
+Steps k to r are the processing of sections 2 to 6. Two records stand outside
+the list: the directivity of the loudspeaker, measured once per loudspeaker
+(5.2), and the gain check of section 4, made at least once for each grid
+position (5.5.1). NOTE 2 of 5.6.2.3 gives the reason to be quick: with
+multichannel equipment the nine records of a grid and their free-field
+counterparts are typically taken within 20 minutes, so the temperature, and
+with it the time of flight, has no time to drift between the two.
+
 ## 2. Taking the direct sound out
 
 In front of the device the direct sound and the reflection overlap: a
 loudspeaker's impulse response lasts up to 3 ms (5.4.2) and the reflection
-arrives about 1,4 ms after the direct sound. The free-field record, taken with
+arrives about 1.5 ms after the direct sound. The free-field record, taken with
 the loudspeaker and the grid turned away from everything, the ground included,
 *is* the direct sound. **Signal subtraction** (5.5.4) removes it: the
 free-field record is shifted in steps of a fiftieth of a sample, within two
@@ -204,8 +258,8 @@ A reflection of 0,35 of the amplitude comes back as 0,12, its square, and
 falls where the smoothing took the top end off. The result keeps
 every microphone's index (`microphone_values`, `nan` where 5.5.5 leaves a
 microphone out), every gain factor and every reduction factor, so a report can
-state them. Several grid positions, the A, B and C of a device that is not flat
-or not homogeneous (5.6.2.3), go in as a `(positions, 9, N)` array and are
+state them. Several grid positions, those of 5.6.2.3 and 5.6.2.4 for a device
+that is not flat or not homogeneous, go in as a `(positions, 9, N)` array and are
 averaged over every microphone of every position. The records can also
 arrive as the nine-channel `Signal` objects the reader returns, one per grid
 position: the rate and the calibration come with them, and `fs` is left out.
@@ -225,6 +279,36 @@ method's authors (Garai and Guidorzi, 2000): the window's flat part and
 trailing edge last exactly the delay between the reflection and the first
 unwanted component, and its limit is the first notch in the spectrum of that
 window, 162,5 Hz for the 7,9 ms one, which the paper gives as about 160 Hz.
+
+The whole chain can be watched. Below, a vertical section through the
+loudspeaker and microphone 5, in front of a 4 m sample and of a 2.5 m one: the
+pulse leaves the loudspeaker, comes back from the face of the sample and is
+followed by what the window has to shut out. Beside each section the record at
+the microphone fills in as the field advances, with the free-field record
+subtracted from it and the window `reflection_low_frequency_limit` gives that
+sample laid over what is left.
+
+**Video:** [The EN 1793-5 pulse in front of a 4 m and a 2.5 m sample (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_barrier_reflection.webm): A 2D FDTD simulation of the EN 1793-5 measurement in a vertical section through the loudspeaker and microphone 5, in front of a rigid sample 4 metres high and of one 2.5 metres high, both on rigid ground. A short pulse leaves the loudspeaker, passes the microphone, comes back from the face of the sample and is followed by the reflection from the ground and the diffraction by the top edge. Beside each section, the record at the microphone fills in, the free-field record is subtracted from it, and the Adrienne window is drawn over the reflection. In front of the 4 metre sample the window is 7.7 milliseconds long and closes before the ground reflection, which arrives 12.3 milliseconds after the pulse left; its low frequency limit is 167 hertz. In front of the 2.5 metre sample the ground reflection arrives at 8.2 milliseconds, the window is 3.6 milliseconds long and the limit is 376 hertz.
+
+*What the window keeps and what it shuts out. Each record holds the direct
+sound, the reflection 1.5 ms behind it and then, after a silence that only the
+height of the sample sets, the unwanted arrivals: the reflection from the
+ground, the same path bounced once more off the sample, and the diffraction by
+the top edge, which reaches microphone 5 at about a twentieth of the direct
+peak. With the free-field record subtracted (5.5.4) nothing is left ahead of
+the reflection; the window opens with its marker point 0.2 ms before the
+geometric peak (5.5.6) and closes before the ground reflection arrives. It is
+7.7 ms long in front of the 4 m sample and 3.6 ms in front of the 2.5 m one,
+and that takes the low frequency limit of microphone 5 from 167 Hz to 376 Hz
+(at 340 m/s). Three limits of the picture: it is a section, so it has the
+ground and the top edge but no side edges, which only arrive first at a sample
+narrower than it is high (`device_length_m`), and its fronts spread as
+cylinders, so the arrival times are those of the set-up but the amplitudes are
+not; the ground and the sample are rigid, so the face sends back everything,
+where a real device sends back the fraction the index measures; and the pulse
+lasts under a millisecond, so the arrivals stand apart, where a loudspeaker's
+3 ms would overlap. The subtraction is exact here because the two runs are the
+same pulse on the same grid; in the field it takes the alignment of section 2.*
 
 ```python
 limit = environment.reflection_low_frequency_limit(3.5, speed_of_sound=c)
@@ -412,8 +496,9 @@ says which it is.
   which is the [room impulse response](../../buildings/rooms/room-impulse-response.md)
   machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
   5.5.3, which a laboratory states rather than computes; the meteorological and
-  surface conditions of 5.7; and the far-field indicators of Annex C, which the
-  standard leaves to the QUIESST reports. The low frequency limit follows Figure
+  surface conditions of 5.7 and the order of the work of 5.10, which section 1
+  lists and no function checks; and the far-field indicators of Annex C, which
+  the standard leaves to the QUIESST reports. The low frequency limit follows Figure
   14 at microphone 5 and not at microphones 2 and 8, so it does not choose the
   lowest reliable band: that stays with the report.
 

@@ -189,6 +189,19 @@ print(change.passes, change.kb_fmax_met, change.kb_ftr_met)  # False True False
 print(f"{change.kb_ftr_increase_percent:.0f} %")  # 44 %
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_change_rule_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_change_rule.svg" alt="A decision diagram for the planned case of an altered or extended railway line. At the top one question: is KB Fmax at or below A u? Yes leads straight down the right edge to the box at the bottom, requirements count as met. No splits into two lanes. Left lane, clause 6.5.3.6 a) by day and b) by night: is KB Fmax at or below A o? Yes goes to a box, KB Fmax condition holds; no goes to a second question, does KB Fmax grow by less than 25 per cent, whose yes reaches the same box and whose no leads to a red box in the middle, look into mitigation. Right lane, clause 6.5.3.6 c): is KB FTr at or below A r, and if not does KB FTr grow by less than 25 per cent, with the same two exits. A line joins the two condition boxes under the words both have to hold and leads to the box requirements count as met; under the red box, either one is enough. Notes at the foot say that growth is the planned case against the case without the project, that by night A o is 0.6 on the surface in any area and underground that of Table 1 in rows 1 and 2 and 0.3 in rows 3 to 5, that the clause as printed asks for one condition while its Example 9 goes to mitigation with KB Fmax unchanged, and that 6.5.3.6 asks for a value below A o, where at A o itself the plate follows 6.3, in which only a value above A o fails" width="96%"></picture>
+
+*The same paragraph as a path. A planned $KB_\mathrm{Fmax}$ at or below $A_\mathrm{u}$ ends
+it at once, as in Figure 2 of the draft. Past that, each quantity has a
+condition of its own, met by keeping to its guide value or by growing less than
+25 % against the case without the project, and the library asks for both. The
+clause prints "below $A_\mathrm{o}$" by day and by night; at $A_\mathrm{o}$ itself the
+plate follows 6.3, where only a value above $A_\mathrm{o}$ fails. The
+night of Example 9 goes down both lanes: its $KB_\mathrm{Fmax}$ of 0.66 is above the
+0.6 that 6.5.3.6 b) sets on the surface and does not grow, so that condition
+holds; its $KB_\mathrm{FTr}$ is above $A_\mathrm{r}$ and grows by 44 %, so that one fails, and
+the project goes to mitigation, which is what `change.passes` printed.*
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example.svg" alt="A bar chart of the assessment vibration severity by day and by night, on an axis from 0 to 0.13. In each group a green bar is the case without the project and a blue bar the case with the second track: 0.039 and 0.046 by day, 0.065 and 0.094 by night. A red line marks A r, 0.1 by day and 0.07 by night, and a grey dashed line 25 percent above the green bar, at 0.048 by day and 0.081 by night. By day both bars stay under both lines; by night the blue bar rises above the 25 percent line and above A r, and a note says mitigation" width="96%"></picture>
 
 <details>

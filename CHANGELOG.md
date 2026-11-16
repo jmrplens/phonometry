@@ -93,6 +93,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`emission.grade_from_local_correction` grades a method A.2 correction by
+  Condition (A.6) of ISO 11202:2010.** It applied the 4 dB of A.1.3 to every
+  local environmental correction, and Condition (A.6) adds to that bound the
+  margin A.2.5 sets by the largest dimension of the source, 0.5 dB up to 1 m,
+  1 dB up to 3 m and 1.5 dB beyond, because the method A.2 directivity index is
+  only approximate: a method A.2 correction above 3.34 dB, 2.82 dB or 2.41 dB
+  (by the largest dimension of the source) and up to 4 dB came out grade 2
+  where the standard makes it grade 3. The keyword-only `largest_dimension_m`
+  takes that dimension and reads the margin from it; substituted into (A.6),
+  Equations (A.4) and (A.5) leave a bound on `K_3` alone, 3.34 dB, 2.82 dB or
+  2.41 dB, which the function applies. Without it the function applies the
+  4 dB of A.1.3, as before.
+
 - **The FDTD engines step on an NVIDIA GPU through CuPy, or on PyTorch, from
   the same code, and every result records where it ran.**
   `simulation.Compute(device=, device_index=, dtype=, fallback=)` names where
@@ -2373,6 +2386,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   already goes through raises the install hint of the `[plot]` extra in its
   place, with the missing module as its cause, and the two fiches make their
   panels through the hint the other fiches give.
+
+- **A half-octave band is labelled with three significant digits, and a band
+  finer than 1/24 octave with as many as keep its labels apart, as IEC
+  61260-1 Annex E asks.** `filters.nominal_frequencies(2, ...)` and every
+  bank built with `fraction=2` labelled their bands by the rule of Annex E.3,
+  which drops to two digits from a leading 5 and applies from 1/4 octave down:
+  the bands centred on 595.7 Hz and 841.4 Hz read `600` and `840`. Annex E.2
+  gives the half octave a rule of its own, "rounding to the first three
+  significant digits", so they now read `596` and `841`. Above 1/24 octave,
+  where E.3.1 stops, the two-digit rounding repeated labels: a 1/48-octave
+  bank between 500 Hz and 1 kHz read `530`, `570` and `640` twice each. E.3.5
+  asks for more significant digits there until no decade repeats a label, so
+  every fraction above 24 now takes the fewest digits that do it: none up to
+  1/36, one more at 1/48 (`497.6`, `505`, `512`, ...). The centres, the edges
+  and the levels are untouched, and so are the labels of 1/1, 1/3 and 1/4 to
+  1/24.
 
 - **The documentation site's type check fails on a hint, and the site has
   none.** `pnpm run check:types` passed with 132 hints: 127 uses in
@@ -4843,6 +4872,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   honest rewrite satisfies.
 
 ### Changed
+
+- **`vibration.blade_pass_frequencies` returns the lobe patterns of a ducted
+  fan apart from its lines, as speeds of rotation with their sign.** With
+  `n_vanes` it returned each interaction pattern of Norton Eqs. (8.16) and
+  (8.17) as a `FaultLine` of family `"blade"` named `lobe n=1 m=2`, with the
+  pattern's speed as the line's frequency, so `.plot()` marked a line at 175 Hz
+  and 35 Hz for the six-blade, four-vane fan and `combine_fault_lines` carried
+  them into every merged family. Norton puts the noise of a pattern "also at
+  the blade passing frequency and its associated harmonics" (printed p. 525):
+  `m_L` lobes turning `M_L` times a minute pass a point `m_L M_L` times a
+  minute, the blade rate, and no line sits at the pattern's speed. The lobe
+  count was also taken as its magnitude, which dropped the sense of rotation of
+  a pattern with a negative `m_L` and merged it with the pattern of `+m_L`. The
+  function now returns a `BladePassResult`, a `FaultFrequencyResult` whose lines
+  are the shaft and blade tones alone, with the patterns in `lobe_patterns`: one
+  `LobePattern` per blade harmonic and signed vane order, holding `harmonic`,
+  `vane_order`, `n_lobes` and `speed_rpm`, the speed of Eq. (8.17) in r/min as
+  Norton prints it, negative for a pattern turning against the rotor. `within`
+  keeps the patterns and `combine_fault_lines` merges the lines only. The
+  migration guide maps the old keys to the new fields.
 
 - **The ± 50 % of ISO 4866 D.2 is `vibration.EMPIRICAL_FREQUENCY_ERROR`.**
   4.0.0rc1 published it as `EMPIRICAL_FREQUENCY_TOLERANCE`, although every

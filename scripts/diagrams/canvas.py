@@ -489,10 +489,16 @@ _MIXED_SCRIPTS: dict[str, str] = {
 #: ISO 9614 and ISO 15186 keeps both letters italic, two quantities. ISO 11820
 #: prints its level differences ``D_tps`` and ``D_ips`` (3.1, 3.2, PDF page 8,
 #: folio 8) with an upright t, i and s (transmission, insertion, silencer)
-#: around the italic p of the pressure.
+#: around the italic p of the pressure. ISO 7235:2003, 6.5.2.2.2, Equations
+#: (15) to (17) (BS EN ISO 7235:2009, PDF page 38, folio 28), print
+#: ``Δp_sn`` and ``p_dn`` with every letter upright, the running index n of
+#: the flow rate ``q_Vn`` included; ISO 80000-2 decides the n, an index and
+#: italic, beside the upright s (static) and d (dynamic) the print sets.
 _MIXED_SCRIPTS_OF: dict[str, dict[str, str]] = {
     "D": {"ips": "uvu", "tps": "uvu"},
     "L": {"pI": "vu", "pII": "vuu"},
+    "Δp": {"sn": "uv"},
+    "p": {"dn": "uv"},
 }
 
 #: No base-qualified runs: what a script that hangs from no listed symbol gets.
@@ -1369,6 +1375,7 @@ class SVG:
         *,
         upright: Iterable[str] = (),
         sloped: Iterable[str] = (),
+        aligned: bool = False,
     ) -> None:
         """Dimension between two measured points, drafting style.
 
@@ -1376,11 +1383,24 @@ class SVG:
         dashed witness lines connect it to the measured points. With
         ``offset=0`` the caller is responsible for any witness lines.
         ``upright`` and ``sloped`` are the key sets of :meth:`text`.
+
+        By default the line is horizontal or vertical, whichever projection
+        of the two points is the longer, which is what a span between two
+        walls or two heights measures. ``aligned=True`` draws the distance
+        itself instead, parallel to the segment between the points, for a
+        spacing that runs at a slant; the label stays level and clears the
+        line on the side ``offset`` moves it to (``label_side`` does not
+        apply).
         """
         if label_side not in ("left", "right"):
             msg = f"'label_side' must be one of ('left', 'right'); got {label_side!r}."
             raise ValueError(msg)
         th = self.th
+        if aligned:
+            self._aligned_dim(
+                x1, y1, x2, y2, label, offset, size, upright=upright, sloped=sloped
+            )
+            return
         horizontal = abs(y2 - y1) < abs(x2 - x1)
         if horizontal:
             y = y1 + offset
@@ -1425,6 +1445,50 @@ class SVG:
                     upright=upright,
                     sloped=sloped,
                 )
+
+    def _aligned_dim(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        label: str,
+        offset: float,
+        size: int,
+        *,
+        upright: Iterable[str],
+        sloped: Iterable[str],
+    ) -> None:
+        """The ``aligned=True`` branch of :meth:`dim`."""
+        import math
+
+        th = self.th
+        length = math.hypot(x2 - x1, y2 - y1)
+        if length <= 0.0:
+            msg = "An aligned dimension needs two distinct points."
+            raise ValueError(msg)
+        ux, uy = (x2 - x1) / length, (y2 - y1) / length
+        # The normal (-uy, ux) carries the offset, so a positive offset turns
+        # the line a quarter turn clockwise of the segment on the y-down sheet.
+        nx, ny = -uy, ux
+        ax, ay = x1 + offset * nx, y1 + offset * ny
+        bx, by = x2 + offset * nx, y2 + offset * ny
+        if offset:
+            self.line(x1, y1, ax, ay, th.muted, 0.9, dash="3,3")
+            self.line(x2, y2, bx, by, th.muted, 0.9, dash="3,3")
+        mx, my = (ax + bx) / 2, (ay + by) / 2
+        self.arrow(mx - 4 * ux, my - 4 * uy, ax, ay, th.muted, 1.2)
+        self.arrow(mx + 4 * ux, my + 4 * uy, bx, by, th.muted, 1.2)
+        # A level label beside a sloped line: the corner of its box nearest
+        # the line comes closer by half its width times the slope, so the
+        # baseline steps away by that much on top of the usual 7 px gap.
+        width = self.text_width(label, size, upright=upright, sloped=sloped)
+        rise = width / 2 * abs(uy / ux) if abs(ux) > 1e-9 else 0.0
+        above = (offset * ny) <= 0.0
+        baseline = my - 7 - rise if above else my + 7 + rise + size * 0.75
+        self.text(
+            mx, baseline, label, size, th.fg, "middle", upright=upright, sloped=sloped
+        )
 
     def mic(
         self, x: float, capsule_top: float, ground: float, scale: float = 1.0

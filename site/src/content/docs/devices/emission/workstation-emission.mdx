@@ -64,14 +64,113 @@ intensity, a route this library does not implement.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone.svg"
-  alt="Five panels, one for each case of Clause 9. 9.1, operator present: the head seen from above with its centre plane dashed and the line of vision arrowed forward, and a microphone 0.20 m plus or minus 0.02 m to the side, on a line with the eyes and on the louder side. 9.2, a seat with nobody in it: a microphone 0.80 m plus or minus 0.05 m above the middle of the seat plane. 9.3, a standing position with nobody there: a microphone on a stand 1.55 m plus or minus 0.075 m above a reference point marked on the floor, the point below the centre of the operator's head. 9.4, an operator on a path: four microphones on stands above a dashed path on the floor, no more than 2 m apart, at that same height, with the levels averaged over the path. 9.5, no work station at all: a plan view of the reference box drawn around the machine with four microphone positions 1 m out from each side, at 1.55 m above the floor, of which the highest is the answer. Underneath, a note that the level at one of these positions is an emission level and not a sound power level, that the background correction K1 and the environmental correction K2 or K3 come off it, and that a peak level takes neither."
+  alt="Five panels, one for each case of Clause 9. 9.1, operator present: the head seen from above with its centre plane dashed and the line of vision arrowed forward, and a microphone 0.20 m plus or minus 0.02 m to the side, on a line with the eyes and on the louder side. 9.2, a seat with nobody in it: a microphone 0.80 m plus or minus 0.05 m above the middle of the seat plane. 9.3, a standing position with nobody there: a microphone on a stand 1.55 m plus or minus 0.075 m above a reference point marked on the floor, the point below the centre of the operator's head. 9.4, an operator on a path: four microphones on stands above a dashed path on the floor, no more than 2 m apart, at that same height, with the levels averaged over the path. 9.5, no work station at all: a plan view of the reference box drawn around the machine with four microphone positions 1 m out from each side, at 1.55 m above the floor, of which the highest is the answer. Underneath, a note that the level at one of these positions is an emission level and not a sound power level, that the background correction K1 and the environmental correction K2 or K3 come off it, and that a peak level takes neither. At the foot, two boxes: the background at the position, with the source off at least 10 dB down for grade 1 and 6 dB for grade 2, K1 taken as zero more than 15 dB down and computed by Equation 5 when closer (5.4); and a repeated measurement, with the source turned off and on, the microphone taken away and set again, the same conditions, and the number of repetitions left to the noise test code (10.2.2)."
   width="100%"
 />
 
 *The clause is short and those five cases are all of it: what changes is where
 the microphone stands, never what is taken off what it reads.*
 
-## 1. One law, printed three times
+## 1. How the measurement goes
+
+ISO 11201, ISO 11202 and ISO 11204 print one procedure, almost word for word,
+and part company only over the room; ISO 11203 measures nothing at the work
+station and has no procedure of this kind. The clause numbers below are those
+of ISO 11201 and ISO 11204. ISO 11202 has one clause more ahead of the test
+environment, so from clause 5 on its numbers are one higher.
+
+1. **Test the repeatability, then choose the part.** ISO 11200:2014 puts this
+   first (Figure 2): read $L'_{p\mathrm{A}}$ several times at one of the
+   positions and form the standard deviation $\sigma_\mathrm{omc}$ of
+   Equation (C.1). Against it stands the $\sigma_{R0}$ of the method, 0.5 dB
+   at grade 1, 1.5 dB at grade 2 and 3 dB at grade 3 (Table 1 of each part): a
+   machine whose own emission wanders by more than that gains nothing from the
+   more exact part. Figure 3 then chooses. With only a class 2 meter,
+   ISO 11202; where the machine can be measured outdoors, in a hemi-anechoic
+   room or in a large hall, ISO 11201; in a very reverberant room and with
+   intensity equipment, ISO 11205; where the sound power level has to be
+   determined anyway, ISO 11204; where one dominating source radiates towards
+   the work station, method A.1 of ISO 11202, which needs no other microphone
+   position; and otherwise method A.2 or ISO 11204.
+2. **Check the instruments (clause 4).** The meter with its microphone, cable
+   and windscreen is class 1 to IEC 61672-1, and any filters are class 1 to
+   IEC 61260. ISO 11201 accepts nothing else; ISO 11202 and ISO 11204 let a
+   class 2 meter in and make the result grade 3 for it (4.1). A class 1
+   calibrator goes on each microphone before and after each series of
+   measurements: with nothing adjusted in between, the two readings may differ
+   by 0.5 dB at most, and a series that fails that is discarded (4.2).
+3. **Mount and run the machine (clause 8).** As its noise test code says, and
+   exactly as for the sound power determination. Where no code exists the
+   clause lists the modes to choose from (a specified load, full load, idling,
+   maximum speed, the noisiest condition representative of normal use, a
+   simulated load, a characteristic work cycle) and asks for the machine to be
+   stabilized, at a steady temperature, before the first reading (8.5). A
+   machine whose noise follows the ambient temperature, one with a
+   speed-controlled cooling fan for instance, is held at 23 °C ± 2 °C (8.1).
+   What was chosen is recorded in numbers, with the operational periods and
+   the cycle (12.3).
+4. **Place the microphone (clause 9).** One of the five cases of the figure
+   above. The reference direction of the microphone points at the dominant
+   source, and whenever it is practical nobody attends the machine (9.1).
+   Where the level changes strongly from point to point, 9.1 recommends the
+   average over a small surface centred on the work station, 0.5 m by 0.5 m
+   for example.
+5. **Measure with the machine running (clause 10).** $L'_{p\mathrm{A}}$, and
+   $L_{p\mathrm{C,peak}}$ if it is required, for at least 10 s when the noise
+   is steady and over a whole number of cycles when the machine has one; in
+   frequency bands, 30 s for the bands centred on 160 Hz and below and 10 s
+   from 200 Hz up (10.1). The intervals are the ones used for the sound power
+   level of the same machine. A cycle of unlike periods is measured period by
+   period and summed as in *A cycle of operating periods* below. For a peak
+   level the interval takes in at least ten impulsive events and the highest
+   peak is the one kept (10.2.3).
+6. **Measure the background (5.4).** The same position and the same meter,
+   with the machine switched off. The difference between the two readings
+   gives $K_1$, and decides between a determination and an upper bound, by the
+   margins of *The background, and where a determination stops being one*. It
+   is determined for each work station.
+7. **Take the room out, the way the part allows.** These are the inputs of
+   *The room, and the one ratio it comes down to*.
+   - ISO 11201 allows no correction, so the room is qualified instead: indoors
+     at grade 2, the environmental correction $K_{2\mathrm{A}}$ of the
+     reference measurement surface through the work station is 2 dB at most,
+     and the machine does not radiate mainly upwards or away from the work
+     station (5.2.2.1).
+   - Method A.1 of ISO 11202 measures nothing more:
+     $K_3 = 10 \lg (1 + 4S/A)$ with $S = 2 \pi d^2$, where $d$ is the distance
+     from the work station to the dominant source and $A = \alpha S_V$ comes
+     from the mean absorption coefficient and the total surface of the room
+     (A.1.2). Amendment 1:2020 makes $d$ the mean of the shortest and the
+     longest distance to the radiating surface, and never less than 0.5 m.
+   - Method A.2 of ISO 11202 adds a path round the machine on the reference
+     measurement surface, at half the height of the source, with equally
+     spaced positions, often one on each side. Their energy average, taken
+     from the level at the work station, is the approximate directivity index
+     of Equation (A.2), and $K_2$ of that same surface comes from ISO 3744 or
+     ISO 3746 (A.2.2 and A.2.3).
+   - ISO 11204 averages over the positions of an enveloping surface, and
+     recommends the very positions of the ISO 3744 or ISO 3746 sound power
+     determination (A.1.1), then takes $K_2$ of that surface or the ratio
+     $A/S_M$ (A.2 and A.3).
+
+   With a correction, a room whose $K_{2\mathrm{A}}$ exceeds 7 dB is out of
+   reach of both parts (5.2).
+8. **Repeat, for $\sigma_\mathrm{omc}$.** A repetition is the whole act again
+   (10.2.2): the machine switched off and on if that is feasible, the
+   microphone taken away and set up again, then the same interval under the
+   same conditions. For $\sigma_\mathrm{omc}$ the mounting and the operating
+   conditions are readjusted each time as well, and the readings enter
+   Equation (C.1) as measured, with no correction (11.2). No part prints how
+   many repetitions: a noise test code may, and the case studies of ISO 11200
+   Annex B use three and five.
+9. **Correct, grade and report.** $L_p = L'_p - K_1 - K_3$ for the levels and
+   nothing for the peak; the grade from the three gates of *What decides the
+   grade*; and $U = k \sigma_\mathrm{tot}$. A value is rounded to one decimal
+   place only after the last step of the calculation (12.1), and the report
+   states the grade reached beside the level and its expanded uncertainty
+   (clause 13).
+
+## 2. One law, printed three times
 
 Every measuring part of the group prints the same subtraction:
 
@@ -100,7 +199,7 @@ $L_{p\mathrm{C,peak}}$ is reported exactly as measured, because both
 corrections are derived from mean-square pressures and neither has a meaning
 for a single largest excursion.
 
-## 2. The background, and where a determination stops being one
+## 3. The background, and where a determination stops being one
 
 The background correction is the same closed form the sound-power side uses,
 
@@ -124,7 +223,7 @@ print(round(background.correction, 1), background.upper_bound)
 # 0.6 False
 ```
 
-## 3. The room, and the one ratio it comes down to
+## 4. The room, and the one ratio it comes down to
 
 Both ISO 11202 method A.2 and ISO 11204 print the same three lines, a function
 of one dimensionless ratio $z$:
@@ -170,25 +269,42 @@ surface needed. Only up to the cap, though. At $K_2 = 7$ dB the ratio reaches
 0.2 and the correction stops following: a room with $K_2 = 10$ dB still gets
 $K_3 = 7$ dB, because the cap is on $K_3$ and not on the room.
 
-## 4. What decides the grade
+## 5. What decides the grade
 
 Three gates decide it and the worst one wins. A class 2 sound level meter makes
 the result grade 3 whatever else is true. The background must clear 6 dB for
 grade 2 and 3 dB for grade 3. And the local environmental correction must not
-exceed 4 dB: ISO 11202 A.1.3 puts the boundary there directly, and method A.2
-reaches the same 4 dB through its Condition (A.6), which is the same inequality
-once (A.4) and (A.5) are substituted into it.
+exceed 4 dB: ISO 11202 A.1.3 puts the boundary there directly, on the
+correction worked out for the farthest point of the radiating area, and
+ISO 11204 5.6 puts it there too. Method A.2 is stricter. Its Condition (A.6) is
+that same inequality once (A.4) and (A.5) are substituted into it, with a
+margin $\Delta D^*_I$ added to the directivity index because the index is only
+approximate: 0.5 dB for a source up to 1 m in its largest dimension, 1 dB up to
+3 m and 1.5 dB beyond (A.2.5). Written for $K_3$, that moves the boundary down
+to 3.3 dB, 2.8 dB and 2.4 dB. `grade_from_local_correction` applies the 4 dB
+boundary of A.1.3 by default; give it `largest_dimension_m`, the largest
+dimension of the source, and it reads the margin from that length and applies
+Condition (A.6) instead.
 
 ```python
 from phonometry import emission
 
 print(emission.grade_from_local_correction(3.7))
 print(emission.grade_from_local_correction(5.2))
+print(emission.grade_from_local_correction(3.7, largest_dimension_m=0.8))
+print(emission.grade_from_local_correction(3.2, largest_dimension_m=0.8))
 # engineering
 # survey
+# survey
+# engineering
 ```
 
-## 5. The worked example, end to end
+The same 3.7 dB is grade 2 by A.1.3 and grade 3 by method A.2 for a source
+0.8 m across, whose margin of 0.5 dB stops grade 2 at 3.3 dB. The 4.7 dB of
+the method A.2 example in ISO 11200:2014 Annex B, for a machine 3 m high, is
+past both, and its table prints grade 3.
+
+## 6. The worked example, end to end
 
 ISO 11200:2014 Annex B prints four case studies with every intermediate value.
 This is the second: a machine with a clearly identifiable dominating source in
@@ -221,7 +337,7 @@ print(round(sigma, 1), round(emission.emission_expanded_uncertainty(sigma), 1))
 Every one of those five numbers is printed in Table B.2, and six conformance
 rows hold the library to them.
 
-## 6. A cycle of operating periods
+## 7. A cycle of operating periods
 
 A machine that idles, cuts and returns spends a different length of time in
 each state, and the level of the whole cycle is the energy average weighted by
@@ -242,7 +358,7 @@ print(round(emission.subinterval_level([80.0, 90.0], [10.0, 1.0]), 1))
 Ten seconds at 80 dB carry the same energy as one second at 90, so the cycle
 lands at 82.6 dB. Counting the two states equally instead would give 87.4.
 
-## 7. Where the standard argues with itself
+## 8. Where the standard argues with itself
 
 The two case studies of Annex B compute the same standard deviation two
 different ways. Equation (C.1), printed identically in ISO 11201, ISO 11202 and
@@ -262,15 +378,19 @@ The quantities the ISO 11200 group shares: the emission sound pressure level
 ISO 11204 Equation (9); the background correction with this group's own
 negligible and minimum margins; the piecewise local environmental correction of
 ISO 11202 Equation (A.5) and ISO 11204 Equations (A.2) and (A.5), with both
-printed routes to the ratio it is a function of; the 4 dB grade boundary; the
+printed routes to the ratio it is a function of; the 4 dB grade boundary of
+ISO 11202 A.1.3 and the margin Condition (A.6) adds to it for method A.2; the
 total standard deviation and expanded uncertainty; and the duration-weighted
 summation of a cycle of operating periods.
 </ScopeClaim>
 <ScopeClaim status="not-covered" label="Not covered yet">
-The per-part measurement procedures themselves: the microphone positions and
-environmental qualification of ISO 11201, the directivity survey of ISO 11202
-method A.2, the accurate determination of `K_2` in ISO 11204, the measure of
-sound propagation `Q` of ISO 11203, and the intensity route of ISO 11205.
+The measurement is described here, and none of it is computed: the microphone
+positions of Clause 9 and the qualification of the ISO 11201 environment, the
+levels round the machine that give ISO 11202 method A.2 and ISO 11204 their
+directivity index, and the determination of `K_2` or `A` by ISO 3744 or
+ISO 3746 are carried out by the user, and the library takes their results. The
+measure of sound propagation `Q` of ISO 11203 and the intensity route of
+ISO 11205 are not implemented.
 </ScopeClaim>
 </Scope>
 

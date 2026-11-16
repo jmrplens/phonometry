@@ -6,12 +6,23 @@ description: "Dónde se ejecutan simulaciones y vídeos de phonometry: aquí o e
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Dos cosas de phonometry tardan lo bastante como para querer una máquina más
 rápida: hacer avanzar una simulación FDTD, acústica o elástica, y escribir un
 vídeo de ella. Las dos pueden ejecutarse en esta máquina o en un nodo al que
 llegas por SSH, y las dos pueden usar una GPU cuando la hay. Esta página es el
 mapa; cada camino tiene su propia página.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Mapa en dos carriles. Carril superior, dónde avanza una simulación: un registro de ejecución, FDTDRun o ElasticRun, y un registro Compute con device, dtype y host entran en una de cuatro funciones, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation o write_elastic_fdtd_animation. Con host None la ejecución avanza aquí en el dispositivo pedido, uno de cpu (NumPy, el valor por defecto), cupy (una GPU de NVIDIA con CuPy), torch:cpu, torch:cuda o torch:mps (la GPU de Apple, solo en float32). Con un host va a un nodo del fichero de hosts en pasos numerados: el fichero de hosts dice dónde está el nodo y cómo ejecuta un trabajo; un solo proceso ssh lleva la ejecución, como datos y nunca como código; phonometry se envía una vez por versión y se guarda bajo un digest; el nodo reconstruye la ejecución y la avanza en el dispositivo pedido; y vuelven las sondas y las instantáneas, o los bytes de un vídeo. Las dos ramas terminan en result.provenance, cuyos device, dtype y gpu dicen dónde avanzó la ejecución y cuyos host y package_sha256 nombran el nodo y el paquete que ejecutó. Una flecha discontinua de la rama del nodo a la rama que se ejecuta aquí lleva el rótulo fallback=True: un dispositivo que no se puede usar, o un nodo o una conexión que falla, avisa con ComputeFallbackWarning y la ejecución avanza con NumPy aquí. Carril inferior, dónde se codifica un vídeo: el codificador auto, el valor por defecto, prueba NVENC, Quick Sync, VAAPI, VideoToolbox y después la CPU, cada uno con una codificación real de un fotograma, y escribe el vídeo el primero que la supera; en la CPU es SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4; un GIF se escribe siempre en la CPU, y una animación que dibujas tú se codifica solo aquí." width="92%" loading="eager" />
+
+*La página en una lámina. Arriba, una ejecución y un registro `Compute` entran
+en una de las cuatro funciones que aceptan un host: sin él la ejecución avanza
+aquí, en uno de cinco dispositivos, y con él va a un nodo, en cinco pasos. Los
+dos caminos terminan en `result.provenance`, y `fallback=True` trae de vuelta a
+NumPy, aquí, un dispositivo que no se puede usar o un nodo o una conexión que
+falla. Abajo, el orden en que `encoder="auto"` prueba los codificadores, cada
+uno con la codificación de un fotograma.*
 
 ## Dónde avanza una simulación
 
@@ -103,7 +114,7 @@ resultado de la función tiene las sondas, los tiempos y la procedencia, con
 
 | | Un codificador de CPU | Un codificador de GPU |
 |---|---|---|
-| Aquí | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4 | `VideoOptions(encoder="auto")`, el valor por defecto, prueba NVENC, Quick Sync, VAAPI y VideoToolbox, cada uno con una codificación real de un fotograma, y después la CPU |
+| Aquí | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4 | `VideoOptions(encoder="auto")`, el valor por defecto, prueba NVENC, Quick Sync, VAAPI, VideoToolbox y después la CPU, cada uno con una codificación real de un fotograma |
 | En un nodo | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: el nodo calcula, dibuja y codifica. En un nodo Docker, NVENC necesita una ubicación en GPU (`"cupy"` o `"torch:cuda"`), la que da su GPU de NVIDIA al contenedor, y el contenedor no recibe ningún otro dispositivo; el ffmpeg de un nodo Python usa lo que tenga su máquina, sea cual sea la ubicación |
 
 ```py

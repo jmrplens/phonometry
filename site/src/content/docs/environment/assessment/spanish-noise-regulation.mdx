@@ -45,6 +45,81 @@ The per-period levels that feed it come from
 European $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators they coexist with, from
 [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/).
 
+## How the inspection measurement goes (Annex IV)
+
+For the inspection of an activity the indices are obtained by measurement and
+by nothing else (Annex IV A.1), and the same annex says how the measurement is
+made. No function of this page computes any of it: what follows is the
+procedure the levels of the later sections are assumed to come from.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rd1367_inspection.svg" alt="Three panels and a strip. Indoors, a room in section with its window and its door closed and a microphone on a stand about 1.5 m from the window, at least 1 m from the walls and between 1.2 m and 1.5 m above the floor, with the note that three positions or more are taken and the centre of the room when they do not fit. Outdoors, the activity on the left, a façade on the right and between them a microphone in its windscreen where the level is highest: the incident sound reaches it directly and is the one assessed, and the reflection off the façade is drawn dashed as what the reading is corrected for. Below, the series of one noise phase on a time axis: three readings of 5 s or longer, 3 min or more apart, their extremes within 6 dBA, the highest marked as the result, beside the rules for a series that fails, for a reading far from the rest and for the background with the activity stopped. The strip names the instrument, type 1 or class 1 with class 1 filters, the calibrator check within 0.3 dB before and after every measurement, and the weather limits outdoors: windscreen, no rain, no wind above 5 m/s." width="92%" />
+
+*Where the meter stands and what it reads: the positions come from Annex I A.3
+and Annex IV A.3.4, the series from A.3.4.2 b and the precautions from A.3.5.*
+
+**The instrument (Article 30, A.3.5 c).** The sound level meter and the
+calibrator meet, as type 1/class 1 (Article 30.2), the Order of 25 September
+2007 on the State metrological control of the instruments that measure
+audible sound and of acoustic calibrators. Article 30.1 attributes it to the
+Ministerio de Fomento; the Order of that date and title is Orden
+ITC/2845/2007, issued by the Ministerio de Industria, Turismo y Comercio, and
+it has been repealed with effect from 24 October 2020 by Orden ICT/155/2020,
+of 7 February. Where octave or one-third-octave bands are needed, and
+$K_\mathrm{t}$ always needs them, the filters meet type 1/class 1 of
+UNE-EN 61260:1997 and UNE-EN 61260/A1:2002 (Article 30.3).
+Type 2/class 2 instruments were tolerated for seven years after publication,
+and never for a measurement behind a sanction or a court case (second
+transitional provision). The chain is verified with the calibrator before and
+after each measurement, within 0.3 dB of the initial reference value.
+
+**The conditions (A.3.5).** Temperature and humidity stay within what the
+maker of the instrument specifies. Outdoors the microphone always carries a
+windscreen, a measurement in rain is not valid, and with more than 5 m/s of
+wind at the evaluation point the measurement is abandoned. Indoors rain does
+not forbid the measurement: it counts as background noise when the margin
+between the level and the background decides whether the reading is valid.
+
+**Where the microphone goes.** At the evaluation point where the level is
+highest, whether the noise is emitted to the outdoor environment or
+transmitted into a building (A.3.4.2 b).
+
+- **Indoors** (A.3.4 d, Annex I A.3 b): doors and windows closed, and at least
+  three positions, preferably at least 1 m from the walls and other surfaces,
+  between 1.2 m and 1.5 m above the floor and about 1.5 m from the windows.
+  Where the room does not allow them, the measurement is made at its centre.
+- **Outdoors**: what is assessed is the incident sound (Annex I A.4), so a
+  level read in front of a façade or another reflecting element is corrected
+  to exclude the reflection (A.3.2). The 4 m of height, the 1.20 m of clearance
+  from a façade and the minimum of 1.5 m that A.3.4.1 c prints belong to the
+  quality objectives of an acoustic area; for an emitter, A.3.4.2 gives the
+  microphone no height of its own.
+
+**What the activity does (A.3.4.2 b).** Its holder gives the inspectors access
+to the sources and runs them at the speeds, loads or gears the inspectors ask
+for, and may witness the whole process.
+
+**The series (A.3.4.2 b).**
+
+1. When the emission varies significantly within the evaluation period, the
+   period is divided into **noise phases**: intervals in which the level at the
+   evaluation point is perceived as uniform.
+2. In each phase at least three measurements of $L_{\mathrm{Keq},Ti}$ are made,
+   each at least 5 s long and at least 3 minutes after the one before.
+3. The three are valid when their extreme values differ by 6 dBA or less. If
+   they differ by more, a new series of three is taken.
+4. If one value keeps standing apart from the rest, its origin is looked for,
+   and once it is found the measurements are repeated up to five times with
+   that source running during the five seconds of each.
+5. The result is the highest of the values obtained.
+6. The background noise is measured the same way with the emitter stopped, and
+   $L_{\mathrm{Keq},Ti}$ is corrected for it.
+
+The phase levels then enter the duration-weighted sum of *Evaluation periods
+and noise phases* below, with the rounding that section gives. Road, rail and
+airport infrastructure follow a different series (A.3.4.2 a): at least three
+series of three measurements of $L_{\mathrm{Aeq},Ti}$, each measurement at least
+5 minutes long and the series at least 5 minutes apart.
+
 ## The corrected level LKeq and its three corrections
 
 The index of the regulation is (Annex I A.2 c):
@@ -70,7 +145,7 @@ the total,
 $L = 10\log_{10}(10^{L'/10} - 10^{L_\text{res}/10})$.
 
 It stops being meaningful as the two converge. With the activity 10 dB above the
-residual the correction is 0,4 dB and the residual hardly matters; at 3 dB the
+residual the correction is 0.4 dB and the residual hardly matters; at 3 dB the
 correction is 3 dB and the answer is as uncertain as the two measurements that
 made it. ISO 1996-2 draws the line there and so should an inspection report: with
 a margin below 3 dB no correction is allowed and the honest statement is the
@@ -79,7 +154,8 @@ percentile-based `gaussian_residual_level()` on
 [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/)
 do the arithmetic and carry that rule (`reportable_upper_bound`,
 `reliable=False`); the RD's own Annex IV procedure for the measurement series
-(how many measurements, how long, what invalidates them) is not implemented here.
+(how many measurements, how long, what invalidates them) is the one described
+above, and no function of the library checks it.
 
 Two field consequences. The residual has to be captured **in the same evaluation
 period**, because a night residual is not a day residual. And a phase whose
@@ -229,9 +305,10 @@ to 19:00 (12 h), evening from 19:00 to 23:00 (4 h) and night from 23:00 to
 `RD1367_PERIOD_CLOCK_LIMITS`.
 
 When emission varies within a period, the period is split into **noise phases**
-$T_i$ of uniformly perceived level. $L_{\mathrm{Aeq},Ti}$ is measured over at least 5 s
-in each phase and corrected, and the period level is the energy mean weighted
-by phase duration (Annex IV A.3.4.2 b):
+$T_i$ of uniformly perceived level. Each phase is measured at least three
+times, 5 s or longer each, the highest reading stands as its $L_{\mathrm{Keq},Ti}$,
+and the period level is the energy mean weighted by phase duration (Annex IV
+A.3.4.2 b):
 
 $$
 L_{\mathrm{Keq},T} = 10 \log_{10} \left[ \frac{1}{T} \sum_i T_i \, 10^{L_{\mathrm{Keq},Ti}/10} \right]
@@ -448,9 +525,10 @@ check of activities and port infrastructure.
 <ScopeClaim status="not-covered" label="Not covered">
 The acoustic zoning into acoustic areas, the noise maps and the action plans
 of Ley 37/2003 are planning instruments rather than calculations, and are out
-of scope. The measurement procedures themselves (microphone positions, series
-duration, number of measurements of Annex IV) are not implemented either: this
-page starts where the sound level meter ends.
+of scope. The measurement procedure of Annex IV (instrument, microphone
+positions, series duration and number of measurements) is described on this
+page and not computed: no function checks a position, a series or a
+calibration, and the calculation starts where the sound level meter ends.
 </ScopeClaim>
 </Scope>
 

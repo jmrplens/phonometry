@@ -53,19 +53,29 @@ _DOCS = _ROOT / "site" / "src" / "content" / "docs"
 _WORDS = {
     "en": {
         3: "three",
+        4: "four",
         5: "five",
+        6: "six",
         18: "eighteen",
         19: "nineteen",
+        20: "twenty",
         21: "twenty-one",
+        22: "twenty-two",
         24: "twenty-four",
+        28: "twenty-eight",
     },
     "es": {
         3: "tres",
+        4: "cuatro",
         5: "cinco",
+        6: "seis",
         18: "dieciocho",
         19: "diecinueve",
+        20: "veinte",
         21: "veintiuna",
+        22: "veintidós",
         24: "veinticuatro",
+        28: "veintiocho",
     },
 }
 #: The two overview pages and their language.

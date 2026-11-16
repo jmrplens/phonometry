@@ -258,7 +258,7 @@ half-wave resonator and the tone crosses as if it were not there; at
 $kL = \pi/2$ the two area jumps reflect in phase and send the wave back up the
 inlet, the 6.5 dB peak of the four-pole curve above.
 
-**Video:** [The expansion-chamber silencer in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_expansion_chamber.webm): A 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4, drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side. At 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB; at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak.
+**Video:** [The expansion-chamber silencer in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_expansion_chamber.webm): A 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4, drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side. At 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB; at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak.
 
 ### Side-branch and extended-tube resonators
 
@@ -461,7 +461,7 @@ bandwidth. No transmission loss is annotated anywhere on it: at the tuning
 frequency the lossless model's TL is infinite, so a finite number there
 would only be restating the frequency grid.
 
-**Video:** [A quarter-wave side branch charging, on and off tune (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_side_branch.webm): A 2D FDTD duct carrying the guide's 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below. On tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave; off tune it settles at 1.5 times immediately and never charges. An annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm, so a built device would be trimmed to tune.
+**Video:** [A quarter-wave side branch charging, on and off tune (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_side_branch.webm): A 2D FDTD duct carrying the guide's 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below. On tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave; off tune it settles at 1.5 times immediately and never charges. An annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm, so a built device would be trimmed to tune.
 
 Both branches are small hardware, and `.plot_geometry()` shows just how
 small: the resonator of the 120 Hz spike is a 1 L cavity fed by a 1 cm²

@@ -50,7 +50,15 @@ $$
 on the same staggered layout as the acoustic solver: the normal stresses
 ``txx``/``tyy`` share the cell centres where the acoustic pressure lives,
 the velocities sit on the faces and the shear stress ``txy`` on the
-corners (Virieux's fully staggered cell, shifted half a cell). The API
+corners (Virieux's fully staggered cell, shifted half a cell).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_staggered_cell_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_staggered_cell.svg" alt="Two panels, each the four cells at the top-left corner of a domain with the top and the left side drawn as the hatched domain edge. In (a), the acoustic solver: a blue dot at each cell centre for p, a red arrow across each interior x-face for vx and a green arrow across each interior y-face for vy. In (b), the elastic solver, Virieux's cell shifted half a cell: the dots at the cell centres are txx and tyy, the same arrows on the same faces are vx and vy, and a diamond on each interior corner is txy. Notes under (a) give the shapes (ny, nx), (ny, nx − 1) and (ny − 1, nx); notes under (b) add the shape (ny − 1, nx − 1) of txy, the density averaged arithmetically onto each face (Moczo et al. 2007, Eq. 7.39), the shear modulus averaged harmonically onto each corner and zero when any of its four cells is a fluid (Eq. 7.38), and no txy on the domain edge, a shear-free rigid wall. A line at the foot says both solvers leapfrog alike, vx and vy half a step from p or from the stresses (Virieux 1986, Eq. 5)" width="100%"></picture>
+
+*One cell for both solvers: where the acoustic one keeps `p`, the elastic one
+keeps `txx` and `tyy`, and it adds `txy` on the corners. The two averages
+under (b) are what puts a fluid-solid contact on a face plane (section 2).*
+
+The API
 mirrors `fdtd_simulation` piece by piece: wave-speed maps `c_p` and `c_s`
 (plus `rho`) instead of `c`, `ExplosionSource` (an isotropic stress
 injection) and `ForceSource` (a directional body force) as sources, probes
@@ -293,7 +301,7 @@ aluminium, same hit, same two body fronts; no surface train appears in the
 second. That is the claim of this section, drawn: the boundary condition makes
 the Rayleigh wave, not the material.
 
-**Video:** [Lamb's problem with a free and with a rigid top surface](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_halfspace_waves.webm): A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them.
+**Video:** [Lamb's problem with a free and with a rigid top surface](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_halfspace_waves.webm): A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them.
 
 Watch what the fronts do. Both body arcs sink into the block and out of the
 frame, the compressional one by 98 µs and the shear one by 169 µs, though the
@@ -329,7 +337,7 @@ this page needs an elastic solver rather than a flexural one. The
 [bending-wave transmission guide](../vibration/structural/junction-transmission.md)
 reads the same run against the transmission coefficient $\tau_{12}(0°)$.
 
-**Video:** [Bending waves at an L-junction in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_plate_junction.webm): A 4 kHz tone-burst force launches a bending-wave packet along a 10 mm steel plate. On the straight control plate the packet just runs on and nothing returns. At an L-junction with an identical perpendicular plate it splits: part reflects, part turns the corner as a bending wave descending the vertical plate, and a faster in-plane precursor races ahead, with the closed-form transmission coefficient of 0.50 at normal incidence and the diffuse vibration reduction index of 5.2 dB annotated.
+**Video:** [Bending waves at an L-junction in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_plate_junction.webm): A 4 kHz tone-burst force launches a bending-wave packet along a 10 mm steel plate. On the straight control plate the packet just runs on and nothing returns. At an L-junction with an identical perpendicular plate it splits: part reflects, part turns the corner as a bending wave descending the vertical plate, and a faster in-plane precursor races ahead, with the closed-form transmission coefficient of 0.50 at normal incidence and the diffuse vibration reduction index of 5.2 dB annotated.
 
 ## 4. Fluid-solid coupling at normal incidence
 
@@ -540,7 +548,7 @@ reading is trustworthy would take a panel four times as wide, in which the
 fringes are too fine to see. The measured column of the table comes from the
 validation suite instead, which has the room to do it properly.
 
-**Video:** [Mode conversion at a water-steel contact at three incidences](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_mode_conversion.webm): A sustained oblique beam in water strikes a steel half-space at ten, twenty and thirty-five degrees. At ten degrees two beams leave into the steel along the dashed Snell directions, the shear one plunging near the normal and the compressional one swinging much further out. At twenty degrees nothing departs at the compressional angle and only a thin skin clings to the contact, while the shear beam alone carries power away. At thirty-five degrees neither beam departs and the water above settles into a standing interference pattern between the incident and the totally reflected beam.
+**Video:** [Mode conversion at a water-steel contact at three incidences](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_mode_conversion.webm): A sustained oblique beam in water strikes a steel half-space at ten, twenty and thirty-five degrees. At ten degrees two beams leave into the steel along the dashed Snell directions, the shear one plunging near the normal and the compressional one swinging much further out. At twenty degrees nothing departs at the compressional angle and only a thin skin clings to the contact, while the shear beam alone carries power away. At thirty-five degrees neither beam departs and the water above settles into a standing interference pattern between the incident and the totally reflected beam.
 
 At 10° two beams leave the contact along the dashed Snell directions, and they
 leave at different angles because they travel at different speeds: the slower
@@ -603,15 +611,20 @@ evanescent tail reaches ~7 wavelengths up into the water: it is essentially
 a grazing water wave and cannot be separated by time of flight in any
 reasonable domain
 (over air-solid contacts the deficit collapses to ~$10^{-12}$ of $c$ and the
-wave is unobservable outright). Over a **soft** sediment the speed drops
-well below the water speed and the wave squeezes to within half a
-wavelength of the contact, which is why measured seabed interface waves are
-a standard probe of sediment shear speed. The snapshot below runs that soft
-case: an explosive shot just above the bottom, and the strongest late
-feature is the interface-hugging Scholte train, timed by the test suite at
+wave is unobservable outright). The softer the bed, the further the speed
+drops below the water speed. Over a **soft** sediment, whose shear speed lies
+well below the water's, it follows the shear speed down and the wave squeezes
+to within half a wavelength of the contact, which is why measured seabed
+interface waves are a standard probe of sediment shear speed: on the
+towed-streamer bed of van Vossen et al. (shear speed 400 m/s under water at
+1460 m/s) `scholte_speed` gives 347 m/s. The snapshot below runs the other
+bed of that paper, the benchmark seabed, which is not soft in this sense: its
+shear speed, 2000 m/s, is above the water's, and its Scholte train runs only
+4 % under the water speed. An explosive shot just above the bottom, and the
+strongest late feature is the interface-hugging Scholte train, timed by the test suite at
 1436 m/s within 2 % between two contact probes.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Snapshot of the vertical particle velocity in a 500 by 200 metre domain of water over a soft sediment half-space, 0.2 seconds after an explosive shot 10 metres above the contact: the direct water wavefront arcs up and to the right, oblique wavefronts radiate into the sediment, and the strongest lobes form a compact train hugging the dotted interface line, labelled as the Scholte wave, evanescent on both sides" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Snapshot of the vertical particle velocity in a 500 by 200 metre domain of water over a sediment half-space, 0.2 seconds after an explosive shot 10 metres above the contact: the direct water wavefront arcs up and to the right, oblique wavefronts radiate into the sediment, and the strongest lobes form a compact train hugging the dotted interface line, labelled as the Scholte wave, evanescent on both sides" width="96%"></picture>
 
 *The van Vossen benchmark media (water over a 3500/2000/2500 sediment):
 the Scholte train crawls along the contact at 1436 m/s, evanescent into
@@ -625,7 +638,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from phonometry import simulation
 
-# Water over a soft seabed; explosive 50 Hz Ricker 10 m above the contact.
+# Water over the van Vossen seabed; explosive 50 Hz Ricker 10 m above the contact.
 ny, nx, dx = 200, 500, 1.0
 c_p = np.full((ny, nx), 1500.0)
 c_s = np.zeros((ny, nx))
@@ -654,6 +667,35 @@ plt.show()
 ```
 
 </details>
+
+One frame leaves three things unsaid, and each of them is about time. The
+water front the caption names does run ahead, but only 64 m/s faster: at the
+instant of the snapshot it leads the train by 13 m, less than half of the
+28.7 m of a Scholte wavelength at 50 Hz, and the two are still one knot. That
+the train is the strongest *late* feature is a statement about what fades and
+what does not. And 1436 m/s is a time of flight. The clip below runs the same
+shot on a 0.5 m grid, in a view widened to 880 m and for 573 ms, with a dotted
+arc at the exact $c_\mathrm{w}(t - t_0)$ of the water front, a dot at the
+exact Scholte root, and three pressure probes: two on the contact, 100 m and
+400 m from the shot, and one 30 m above the second.
+
+**Video:** [A Scholte train along a water-seabed contact, timed and left behind by the water front](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_scholte.webm): An explosive shot 10 metres above a water-seabed contact, in a view 880 metres long and 160 metres deep. The compressional front in the seabed leaves the frame first and the shear front after it. A compact train of lobes rides the dotted contact line to the right with a dot at the exact Scholte speed on it, while a dotted arc, the exact water front, draws slowly ahead: the readout of the gap between the two on the contact grows from a few metres to about 35, past the 28.7 metres of one Scholte wavelength. Below the field, three pressure traces: the pulses of two contact probes 300 metres apart are nearly the same height, a bar between their peaks gives the time of flight and the speed it makes beside the exact 1436 metres per second, and the probe 30 metres above the contact shows a much smaller pulse.
+
+Watch the gap between the arc and the dot. It opens at 64 m/s, reaches one
+Scholte wavelength once the train has run 644 m, and stands at about 35 m when
+the clip ends with the train 780 m out. An interface wave 4 % slower than the
+fluid above it needs that much room before the two can be told apart, which is
+why the test times the train between two probes rather than from the shot. The
+compressional front in the seabed leaves the frame about 270 ms into the run, before
+it is half over, and the shear front at about 450 ms, four fifths of the way
+through;
+every body front thins as it spreads, as $1/\sqrt{r}$ in this two-dimensional
+scene. The train does not spread at all: the pulses of the two contact probes,
+300 m apart, stand nearly the same height on one shared scale, and the delay
+between the peaks of their envelopes is the speed printed beside them. The
+third trace is the evanescence. Thirty metres into the water, about one
+Scholte wavelength, the passage of the train is a small fraction of what the
+contact sees below it.
 
 ## 7. Immersed plates and the mass law
 
@@ -726,7 +768,7 @@ for levels, not the brightness. The
 [panel sound insulation guide](../buildings/design/panel-sound-insulation.md)
 reads the same run against the oblique mass law.
 
-**Video:** [Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_coincidence.webm): Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated.
+**Video:** [Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_coincidence.webm): Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated.
 
 ## Writing the run to a video
 
@@ -772,7 +814,7 @@ res = simulation.write_elastic_fdtd_animation(
   conversion against Brekhovskikh & Godin (Eqs. 4.2.22-4.2.26) at sub-critical
   and between-critical angles, the Scholte-wave speed against the exact
   characteristic equation (Eq. 4.4.20) and by time of flight in the van Vossen
-  (2002) soft-bed benchmark, the immersed-plate transmission with its first
+  (2002) benchmark seabed, the immersed-plate transmission with its first
   thickness resonance against the three-media closed form (Eqs. 2.4.14-2.4.19),
   the immersed-panel mass law and the air-steel extreme-contrast stress test.
   No measurement standard governs this solver: it implements a textbook
@@ -851,6 +893,6 @@ waves probe the sediment shear stiffness.
 - **Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).** The finite-difference and finite-element modeling of seismic wave propagation and earthquake motion. *Acta Physica Slovaca*, *57*(2), 177-406. https://doi.org/10.2478/v10155-010-0084-x
   The heterogeneous effective grid parameters of section 2 (harmonic shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging free surface of section 3 (Eq. 9.9).
 - **van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).** Finite-difference modeling of wave propagation in a fluid-solid configuration. *Geophysics*, *67*(2), 618-624. https://doi.org/10.1190/1.1468623
-  The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the soft-bed configuration of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave.
+  The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the water over a 3500/2000/2500 seabed of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave.
 - **Virieux, J. (1986).** P-SV wave propagation in heterogeneous media: velocity-stress finite-difference method. *Geophysics*, *51*(4), 889-901. https://doi.org/10.1190/1.1442147
   The elastic solver of section 1: the velocity-stress system (Eq. 2), the fully staggered cell and update (Fig. 1, Eq. 5), the P-only Courant bound (Eqs. 6-7), the dispersion relations (Eqs. 13-14) and the liquid as the shear-free limit.

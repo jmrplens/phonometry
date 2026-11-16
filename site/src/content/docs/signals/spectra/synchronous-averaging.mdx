@@ -11,13 +11,22 @@ references:
     issue: 1
     pages: "83-95"
     doi: "10.1016/0888-3270(87)90085-9"
-    note: "The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two."
+    note: "The comb-filter model of synchronous averaging (Eq. 8, with the unit height of its teeth in Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The limit Annex A.1 sets on a clamping magnet: below 2.5 kHz, on smooth flat surfaces of steel."
 ---
 
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 A rotating machine repeats its signature once per revolution. Buried in
 broadband noise and in the tones of every other shaft, that repetitive
@@ -104,15 +113,15 @@ a(t) = \frac{1}{N} \sum_{n=0}^{N-1} y(t + n\,T),
 $$
 
 is, in the frequency domain, the multiplication of the signal spectrum by a
-**comb filter** (Eq. 8). Its magnitude (Eq. 9) is the Dirichlet kernel
+**comb filter** (Eq. 8). Its magnitude is the Dirichlet kernel
 
 $$
 |C(f)| = \left| \frac{\sin(N\pi f T)}{N \sin(\pi f T)} \right| .
 $$
 
 The comb has a **tooth** of unit height at every harmonic $k/T$ (the orders
-$fT = 1, 2, 3, \dots$), *independent of $N$*: components synchronous with the
-period pass untouched. Between the teeth it has **nodes** at $j/(NT)$ for
+$fT = 1, 2, 3, \dots$), *independent of $N$* (the limit of Eq. 9): components
+synchronous with the period pass untouched. Between the teeth it has **nodes** at $j/(NT)$ for
 every $j$ that is not a multiple of $N$, where the response is exactly zero.
 `comb_filter_response` evaluates this closed form directly:
 
@@ -131,6 +140,38 @@ in `comb_frequencies` and `comb_response`, so the shape of the filter that
 the average applied is available alongside the recovered waveform.
 
 ## 2. Noise falls as the square root of the number of averages
+
+The comb of section 1 and the law of this one are the same process seen from
+two sides, and it is a process: it unfolds as $N$ grows. The clip below
+averages one record a period at a time, from 1 to 128. The record is the one
+of the figure further down: a waveform of three harmonics, orders 1, 3 and 5,
+in unit-variance noise, 256 samples per period at 8192 Hz.
+
+<Video
+  name="anim_synchronous_averaging"
+  width={2400}
+  height={1350}
+  title="Synchronous averaging as the number of averaged periods grows from 1 to 128"
+  description="Three panels that change as a counter N runs from 1 to 128. Top left: the average of the first N periods of a noisy record, drawn over the dashed true waveform of three harmonics; it starts as one noisy period swinging between about minus 3 and 3 and closes on the dashed curve. Top right: on logarithmic axes, the RMS error of that average against N; the measured points, marked at 1, 2, 4, 8, 16, 32, 64 and 128, run down a dashed line of one over the square root of N, from 0.97 to 0.090. Bottom: the magnitude of the comb filter over orders 0 to 6; flat at 1 for N equal to 1, then a tooth of height 1 on every whole order that keeps its height while it narrows, with N minus 1 nodes between each pair of teeth, until at 128 only thin spikes remain over a low band; three dots mark orders 1, 3 and 5, the harmonics of the waveform, at gain 1 throughout."
+/>
+
+Read the three panels together. Top left, the averaged period: at $N = 1$ it
+is one noisy period, and by $N = 128$ it lies on the dashed true waveform. Top
+right, its RMS error runs down the dashed $\sigma/\sqrt{N}$ line, from 0.97
+with one period to 0.090 with 128, where the line stands at 0.088. Bottom, the
+comb the average has applied so far. At $N = 1$ it is flat: one period,
+averaged with nothing, passes every frequency. From then on each pair of
+neighbouring teeth holds $N - 1$ nodes, the first of them $1/N$ of an order
+from its tooth, so the teeth thin as $1/N$ while their height never moves: the
+three dots, the harmonics of the waveform, sit at gain 1 on every frame. The
+two readouts on the right, the error above and the first node below, are one
+fact. The mean of $|C|^2$ over one order is
+exactly $1/N$, so white noise of variance $\sigma^2$ leaves the comb with
+$\sigma^2/N$: what the teeth lose in width is what the error loses in power.
+The side lobes sink as well, under the envelope $1/(N\,|\sin \pi f T|)$, which
+is $1/N$ midway between two teeth; but the lobe next to a tooth never falls
+below 0.217 of it, which is why section 3 places a node on an interfering tone
+instead of trusting a lobe.
 
 Asynchronous noise of variance $\sigma^2$ averaged over $N$ periods has
 residual variance $\sigma^2/N$: the residual standard deviation falls as
@@ -216,9 +257,9 @@ node falls nearest the interfering order.
 His own example is a tone at 32.05 orders. With $N = 20$ the product
 $20 \cdot 32.05 = 641$ is an integer, so a comb node lands on the tone and
 rejects it by more than 100 dB. The common choice $N = 32$ gives
-$32 \cdot 32.05 = 1025.6$, which sits on a side lobe: the tone is barely
-touched. The figure above shows both combs around order 32; the end-to-end
-average confirms it:
+$32 \cdot 32.05 = 1025.6$, which sits on a side lobe: 0.19 of the tone, 14 dB
+down, still gets through. The figure at the top of the page shows both combs
+around order 32; the end-to-end average confirms it:
 
 ```python
 # true 8th-order component plus a strong interferer at 32.05 orders
@@ -283,8 +324,9 @@ number of averages will remove it.
 
 - **Transducer and mounting.** A stud- or adhesive-mounted accelerometer on the
   bearing housing nearest the gear of interest, with its axis in the load
-  direction. A magnet base collapses the usable band to a couple of kilohertz
-  and hides the mesh harmonics the average exists to show.
+  direction. A magnet base leaves a few kilohertz of usable band at best
+  (ISO/TS 7849-1 accepts one only below 2.5 kHz) and hides the mesh harmonics
+  the average exists to show.
 - **Sample rate from the content you want to keep.** A 37-tooth pinion at
   1800 r/min meshes at $37 \times 30 = 1110$ Hz, so keeping five mesh harmonics
   needs $f_\mathrm{s} \ge 2.56 \times 5550 = 14.2$ kHz: 16 kHz in practice, 25.6 kHz on
@@ -367,7 +409,8 @@ error corrupts the averaging and the identification together.
 <ScopeClaim status="covered" label="Covered">
 McFadden's revised model for time domain averaging (*Mechanical Systems and
 Signal Processing*, 1987): the comb-filter description of the average (Eq. 8,
-magnitude Eq. 9) implemented by `comb_filter_response`, the square-root
+with the unit height of its teeth in Eq. 9) implemented by
+`comb_filter_response`, the square-root
 noise-reduction law reported as `noise_reduction` and `amplitude_snr_gain`,
 and the choice of $N$ that places a comb node on an interfering order,
 following the paper's own 32.05-order example. `time_synchronous_average` also

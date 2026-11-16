@@ -65,13 +65,13 @@ piecewise function of one dimensionless ratio :math:`z`,
 .. math::
 
    K_3 = \begin{cases}
-     7\ \mathrm{dB}, & z \le 0{,}2 \\
-     -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\
+     7\ \mathrm{dB}, & z \le 0.2 \\
+     -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\
      0\ \mathrm{dB}, & z > 1
    \end{cases}
 
 and differ only in how :math:`z` is reached. The two branches meet: at
-:math:`z = 0{,}2` the middle branch gives :math:`-10 \lg 0{,}2 = 6{,}99` dB, so
+:math:`z = 0.2` the middle branch gives :math:`-10 \lg 0.2 = 6.99` dB, so
 the 7 dB cap is the curve's own value rounded, not a discontinuity.
 
 **The uncertainty** is one pair of equations in all three measuring parts
@@ -166,9 +166,22 @@ MIN_BACKGROUND_MARGIN_DB: Mapping[Grade, float] = MappingProxyType(
 )
 
 #: Largest local environmental correction, in decibels, that still earns
-#: accuracy grade 2. Above it the result is grade 3 (ISO 11202:2010 A.1.3, and
-#: the same boundary reached through Condition (A.6) in A.2.5).
+#: accuracy grade 2. Above it the result is grade 3 (ISO 11202:2010 A.1.3).
+#: Method A.2 is stricter: Condition (A.6) adds the margin of A.2.5 to the
+#: right-hand side, which :func:`grade_from_local_correction` applies when it
+#: is given the largest dimension of the source.
 GRADE_2_MAX_K3 = 4.0
+
+#: The margin :math:`\Delta D^*_I`, in decibels, that A.2.5 of ISO 11202:2010
+#: adds to Condition (A.6), by the largest dimension of the source: each row
+#: holds up to and including its length in metres, 0.5 dB up to 1 m, 1 dB up
+#: to 3 m and 1.5 dB beyond. The uncertainty of the approximate directivity
+#: grows with the size of the source (the NOTE to Figure A.3).
+_DIRECTIVITY_MARGIN_ROWS: tuple[tuple[float, float], ...] = (
+    (1.0, 0.5),
+    (3.0, 1.0),
+    (math.inf, 1.5),
+)
 
 #: Cap on :math:`K_3`, in decibels, and the ratio it applies below
 #: (ISO 11202:2010 Eq. (A.5), ISO 11204:2010 Eq. (A.2)).
@@ -247,7 +260,7 @@ class WorkstationBackgroundCorrection(OwnsArrays):
 
     .. math::
 
-       K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB},
+       K_1 = -10 \lg \left( 1 - 10^{-0.1 \Delta L} \right)\ \mathrm{dB},
        \qquad \Delta L = L'_p - L_p(B)
 
     Above :data:`NEGLIGIBLE_BACKGROUND_MARGIN_DB` the correction is taken as
@@ -385,8 +398,8 @@ def local_environmental_correction(
     .. math::
 
        K_3 = \begin{cases}
-         7\ \mathrm{dB}, & z \le 0{,}2 \\
-         -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\
+         7\ \mathrm{dB}, & z \le 0.2 \\
+         -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\
          0\ \mathrm{dB}, & z > 1
        \end{cases}
 
@@ -396,7 +409,7 @@ def local_environmental_correction(
     :func:`environmental_ratio_from_absorption`.
 
     The cap is the curve's own value, not a separate rule:
-    :math:`-10 \lg 0{,}2 = 6{,}99` dB, so the function is continuous where the
+    :math:`-10 \lg 0.2 = 6.99` dB, so the function is continuous where the
     7 dB takes over. The upper branch is a floor for the same reason a
     correction cannot be negative: the room can only add to the reading.
 
@@ -452,7 +465,7 @@ def environmental_ratio_from_k2(
 
     .. math::
 
-       z = 1 - \left( 1 - 10^{-0,1 K_2} \right) 10^{-0,1 D^*_{I,\mathrm{op}}}
+       z = 1 - \left( 1 - 10^{-0.1 K_2} \right) 10^{-0.1 D^*_{I,\mathrm{op}}}
 
     ISO 11202:2010 Equation (A.4) and ISO 11204:2010 Equation (A.3). :math:`K_2`
     is the average environmental correction of the reference measurement
@@ -461,7 +474,7 @@ def environmental_ratio_from_k2(
     apparent directivity index the work station sees.
 
     With no directivity to speak of the expression collapses to
-    :math:`z = 10^{-0,1 K_2}`, so :math:`K_3 = K_2`: a work station that sees
+    :math:`z = 10^{-0.1 K_2}`, so :math:`K_3 = K_2`: a work station that sees
     the machine no more strongly than the measurement surface does needs the
     same correction the surface needed. That holds until the cap bites, at
     :math:`K_2 = 7` dB; above it the local correction stays at
@@ -520,7 +533,7 @@ def environmental_ratio_from_absorption(
 
     .. math::
 
-       z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0,1 D^*_{I,\mathrm{op}}}
+       z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0.1 D^*_{I,\mathrm{op}}}
 
     ISO 11204:2010 Equation (A.6). It is the same quantity
     :func:`environmental_ratio_from_k2` returns, reached without going through
@@ -699,7 +712,7 @@ def emission_expanded_uncertainty(
     ISO 11204:2010 Equation (13). The coverage factor is the caller's to choose:
     :math:`k = 2` gives the two-sided 95 % interval of a normal distribution,
     while the worked examples of ISO 11200:2014 Annex B all print
-    :math:`k = 1{,}6`, which is the one-sided factor used when the result is
+    :math:`k = 1.6`, which is the one-sided factor used when the result is
     compared with a limit value, and is this function's default.
 
     :param total_standard_deviation_db: :math:`\sigma_\mathrm{tot}` in decibels.
@@ -723,7 +736,7 @@ def subinterval_level(levels: NumericArrayLike, durations_s: NumericArrayLike) -
     .. math::
 
        L_p = 10 \lg \left[ \frac{1}{T} \sum_{i=1}^{N}
-       T_i\, 10^{0,1 L_{p,T_i}} \right]\ \mathrm{dB},
+       T_i\, 10^{0.1 L_{p,T_i}} \right]\ \mathrm{dB},
        \qquad T = \sum_i T_i
 
     ISO 11201:2010 Equation (8), ISO 11202:2010 Equation (11) and
@@ -754,24 +767,73 @@ def subinterval_level(levels: NumericArrayLike, durations_s: NumericArrayLike) -
     )
 
 
-def grade_from_local_correction(local_correction: NumericArrayLike) -> Grade:
+def _grade_2_limit_a2(largest_dimension_m: float) -> float:
+    r"""The greatest :math:`K_3` Condition (A.6) leaves grade 2, in decibels.
+
+    Substituting Equations (A.4) and (A.5) into Condition (A.6) takes
+    :math:`K_2` out of it altogether, and what is left bounds :math:`K_3`:
+
+    .. math::
+
+       K_3 \le -10 \lg \left[ 1 - \left( 1 - 10^{-0.4} \right)
+       10^{-0.1 \Delta D^*_I} \right]\ \mathrm{dB}
+
+    which is the 4 dB of A.1.3 for no margin, and 3.34 dB, 2.82 dB and
+    2.41 dB for the three margins of A.2.5.
+    """
+    margin = next(
+        step for upper, step in _DIRECTIVITY_MARGIN_ROWS if largest_dimension_m <= upper
+    )
+    grade_2_ratio = 10.0 ** (-0.1 * GRADE_2_MAX_K3)
+    return -10.0 * math.log10(1.0 - (1.0 - grade_2_ratio) * 10.0 ** (-0.1 * margin))
+
+
+def grade_from_local_correction(
+    local_correction: NumericArrayLike, *, largest_dimension_m: float | None = None
+) -> Grade:
     r"""The accuracy grade a local environmental correction earns.
 
     ISO 11202:2010 A.1.3 puts the boundary at
     :data:`GRADE_2_MAX_K3`: a greatest possible :math:`K_3` of 4 dB or less
-    is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
-    reaches the same boundary by a different road, Condition (A.6), which is
-    algebraically the same 4 dB once (A.4) and (A.5) are substituted into it.
+    is grade 2 (engineering), and more than that is grade 3 (survey). That is
+    the boundary applied when ``largest_dimension_m`` is not given, and the one
+    ISO 11204 5.6 applies too.
+
+    Method A.2 is stricter. Its Condition (A.6) of A.2.5 adds a margin
+    :math:`\Delta D^*_I` to the bound on the approximate directivity index,
+    because that index is only approximate, and the margin grows with the
+    largest dimension :math:`l_\mathrm{max}` of the source: 0.5 dB up to 1 m,
+    1 dB up to 3 m and 1.5 dB beyond. Give ``largest_dimension_m`` and the
+    margin is read from it. Once Equations (A.4) and (A.5) are substituted,
+    the condition no longer holds :math:`K_2` and bounds :math:`K_3` alone,
+
+    .. math::
+
+       K_3 \le -10 \lg \left[ 1 - \left( 1 - 10^{-0.4} \right)
+       10^{-0.1 \Delta D^*_I} \right]\ \mathrm{dB}
+
+    so grade 2 holds for :math:`K_3` up to 3.34 dB, 2.82 dB or 2.41 dB.
 
     The worst band decides, since a determination is only as good as its
     weakest part.
 
     :param local_correction: :math:`K_3` in decibels; a scalar or one value
         per band.
+    :param largest_dimension_m: Largest dimension :math:`l_\mathrm{max}` of
+        the source, in metres, for a :math:`K_3` determined by method A.2 of
+        ISO 11202 (Default: ``None``, the 4 dB of A.1.3).
     :return: ``'engineering'`` or ``'survey'``.
+    :raises ValueError: if ``largest_dimension_m`` is not strictly positive.
     :raises TypeError: if ``local_correction`` holds a text or a value that is not a
-        real number.
+        real number, or ``largest_dimension_m`` is not a single number.
     """
     k3 = real_array(local_correction, "local_correction")
+    limit = (
+        GRADE_2_MAX_K3
+        if largest_dimension_m is None
+        else _grade_2_limit_a2(
+            require_positive(largest_dimension_m, "largest_dimension_m")
+        )
+    )
     worst = float(np.max(k3)) if k3.size else 0.0
-    return "engineering" if worst <= GRADE_2_MAX_K3 else "survey"
+    return "engineering" if worst <= limit else "survey"

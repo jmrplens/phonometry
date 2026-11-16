@@ -551,6 +551,33 @@ _ES_EXACT = {
     "$T_2$ from the narrow band, Formula (23) and Table 1": "$T_2$ desde la banda estrecha, fórmula (23) y tabla 1",
     "Velocity level [dB re 5·10⁻⁸ m/s]": "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
     "Compression-wave speed over shear-wave speed (DIN 45672-1)": "Velocidad de la onda de compresión sobre la de cizalla (DIN 45672-1)",
+    # solid_wave_speeds: one steel as a beam, a plate and an unbounded solid.
+    # The three speeds and the two steps between them come from
+    # phonometry.solids at draw time, so each is an exact entry (F32): a
+    # change in the library draws a string with no entry here, and the
+    # language gate says so. A speed is drawn with the body it travels in:
+    # a key of digits and " m/s" alone is written by every clip that prints
+    # a speed, and would mark each of them stale.
+    "One steel, three longitudinal wave speeds: the wave travels along $x$,"
+    " into the page": "Un acero, tres velocidades de onda longitudinal: la onda viaja"
+    " según $x$, hacia dentro de la página",
+    "$E$ = 200 GPa, $\\rho$ = 7800 kg/m³, $\\nu$ = 0.28."
+    " Dashed: the slice at rest. The spread is drawn far larger than it is.": "$E$ = 200 GPa,"
+    " $\\rho$ = 7800 kg/m³, $\\nu$ = 0,28."
+    " A trazos: la rebanada en reposo. El ensanchamiento está dibujado mucho mayor de lo que es.",
+    "a) Beam": "a) Viga",
+    "b) Plate": "b) Placa",
+    "c) Unbounded solid": "c) Sólido extenso",
+    "free on every side": "libre por todos lados",
+    "held across its width,\nfree through its thickness": "sujeta a lo ancho,\nlibre a través del espesor",
+    "held on every side": "sujeto por todos lados",
+    "free face": "cara libre",
+    "held face": "cara sujeta",
+    "5064 m/s along a beam": "5064 m/s a lo largo de una viga",
+    "5275 m/s along a plate": "5275 m/s a lo largo de una placa",
+    "5725 m/s through the solid": "5725 m/s a través del sólido",
+    "4.2 % above the beam": "un 4,2 % por encima de la viga",
+    "8.5 % above the plate": "un 8,5 % por encima de la placa",
     "unbounded continuum, the inverse of Formula (3)": "continuo ilimitado, la inversa de la fórmula (3)",
     "Formula (1) as printed, second radical": "fórmula (1) impresa, segundo radical",
     "Formula (1) as printed, $\\sqrt{E/\\rho}$ of a thin rod": "fórmula (1) impresa, $\\sqrt{E/\\rho}$ de una barra delgada",
@@ -869,16 +896,14 @@ _ES_EXACT = {
     "las líneas de la envolvente caen en BPFO, no en BPFI: "
     "descascarillado de la pista exterior",
     # machine_fault_families: the three families of Norton 8.4 as patterns.
-    # The drawn line names (2xGMF, fsh, lobe n=1 m=2...) are the keys of the
+    # The drawn line names (2xGMF, fsh, BPF...) are the keys of the
     # FaultFrequencyResult and stay in English by design -- see
     # ENGLISH_BY_DESIGN in scripts/check_figure_language.py.
     "Fault Families Are Recognised by Their Pattern": "Las familias de fallos se reconocen por su patrón",
     "Localised fault: one chipped tooth": "Fallo localizado: un solo diente astillado",
     "Distributed wear: every tooth": "Desgaste distribuido: todos los dientes",
     "Induction motor: 1x, 2x, 2fe and the rotor-slot family": "Motor de inducción: 1x, 2x, 2fe y la familia de ranura de rotor",
-    # "rotating" dropped for width: both lobe annotations already say
-    # "gira a ... Hz", and the full title overflowed the figure by 34 px.
-    "Ducted fan: the blade rate and its rotating lobe patterns": "Ventilador entubado: el paso de pala y sus patrones lobulados",
+    "Ducted fan: both lobe patterns sound at the blade rate": "Ventilador entubado: los dos patrones suenan al paso de pala",
     "Spectrum amplitude": "Amplitud del espectro",
     "vibration spectrum": "espectro de vibración",
     # The family legend words, worded exactly as _plot/vibration.py already
@@ -886,7 +911,7 @@ _ES_EXACT = {
     "shaft": "eje",
     "gear": "engranaje",
     "motor": "motor",
-    "blade": "álabe",
+    "blade": "pala",
     # Both sideband blocks are set narrow, one clause per line: they stand in
     # the stretch of axis below the first mesh cluster, and the Spanish
     # reading is the wider of the two, so it sets the line breaks.
@@ -898,9 +923,15 @@ _ES_EXACT = {
     "the spacing is the diagnosis": "armónico de ranura de rotor\n"
     "con bandas laterales a $\\pm f_\\mathrm{s}$:\n"
     "el espaciado es el diagnóstico",
-    "$m_\\mathrm{L}$ = 10 turns at 35 Hz,\nbelow the shaft: weak": "$m_\\mathrm{L}$ = 10 gira a 35 Hz,\npor debajo del eje: débil",
-    "$m_\\mathrm{L}$ = 2 turns at 175 Hz,\n3x the shaft speed: strong": "$m_\\mathrm{L}$ = 2 gira a 175 Hz,\n"
-    "3 veces la velocidad del eje: fuerte",
+    # The two pattern speeds of Eq. (8.17) multiplied back to the blade rate
+    # (Norton p. 525: their noise "is also at the blade passing frequency").
+    "$m_\\mathrm{L}$ = 2 lobes × 175 turns a second\n"
+    "$m_\\mathrm{L}$ = 10 lobes × 35 turns a second\n"
+    "each is 350 lobes past a point a second,\nthe blade rate": "$m_\\mathrm{L}$ = 2 lóbulos × 175 vueltas por segundo\n"
+    "$m_\\mathrm{L}$ = 10 lóbulos × 35 vueltas por segundo\n"
+    "en ambos, 350 lóbulos pasan por un punto\ncada segundo: el paso de pala",
+    "no line of their own at 35 Hz or 175 Hz:\nthose are speeds of rotation": "ninguna línea propia en 35 Hz ni en 175 Hz:\n"
+    "son velocidades de giro",
     # envelope_chain_steps: the envelope route made visible, step by step.
     "What Each Step of the Envelope Route Does to the Signal": "Qué le hace cada paso de la ruta de la envolvente a la señal",
     "1. As recorded: noise and unbalance, no visible impacts": "1. Tal como se registra: ruido y desequilibrio, sin impactos "
@@ -2195,6 +2226,45 @@ _ES_EXACT = {
     "Burst start within the block [ms]": "Inicio de la ráfaga dentro del bloque [ms]",
     "Reading [dB]": "Lectura [dB]",
     "the block reading leaves the corridor": "la lectura por bloques sale del corredor",
+    # --- anim_synchronous_averaging: one record, one more period at a time ---
+    "Synchronous averaging, one more period at a time": "Promediado síncrono, un periodo más cada vez",
+    "average of $N$ periods": "promedio de $N$ periodos",
+    "true waveform, without the noise": "forma de onda verdadera, sin el ruido",
+    "RMS error of the average": "Error RMS del promedio",
+    "measured RMS error": "error RMS medido",
+    "comb of the average, $|C(f)|$ (McFadden Eq. 8)": "peine del promedio, $|C(f)|$ (McFadden Ec. 8)",
+    "the three harmonics of the waveform: gain 1 at every $N$": "los tres armónicos de la forma de onda: "
+    "ganancia 1 con cualquier $N$",
+    "$N$ = 1: every frequency passes with gain 1": "$N$ = 1: toda frecuencia pasa con ganancia 1",
+    # --- anim_bearing_load_zone: three impact trains of one bearing ---
+    "How the load zone modulates a bearing fault": "Cómo modula la zona de carga un fallo de rodamiento",
+    "load zone (Stribeck, a sketch)": "zona de carga (Stribeck, un esquema)",
+    "spall": "descascarillado",
+    "one roller, marked": "un rodillo, marcado",
+    "shaft 33.3 Hz, cage 13.8 Hz, slowed 50 times": "eje 33,3 Hz, jaula 13,8 Hz, 50 veces más lento",
+    "outer race": "pista exterior",
+    "inner race": "pista interior",
+    "roller": "rodillo",
+    "1/BPFO = 4.83 ms": "1/BPFO = 4,83 ms",
+    r"$1/f_\mathrm{s}$ = 30.0 ms": r"$1/f_\mathrm{s}$ = 30,0 ms",
+    "1/FTF = 72.5 ms": "1/FTF = 72,5 ms",
+    "dashed: the load on the spall": "a trazos: la carga sobre el descascarillado",
+    "Machine time [ms]": "Tiempo de máquina [ms]",
+    "Fixed under the load: every impact is alike": "Fijo bajo la carga: todos los impactos son iguales",
+    "Turning with the shaft, in and out of the load zone": "Gira con el eje: entra y sale de la zona de carga",
+    "Riding the cage, striking both races in turn": "Viaja con la jaula y golpea las dos pistas por turno",
+    "The modulation rate names the damaged part": "El ritmo de la modulación delata la pieza dañada",
+    # --- anim_fan_lobe_patterns: two lobe patterns, one rate at the wall ---
+    "Two lobe patterns of one fan pass the wall at one rate": "Dos patrones lobulados de un ventilador pasan por la pared al mismo ritmo",
+    "$m_\\mathrm{L}$ = 2 lobes, 175 turns a second": "$m_\\mathrm{L}$ = 2 lóbulos, 175 vueltas por segundo",
+    "$m_\\mathrm{L}$ = 10 lobes, 35 turns a second": "$m_\\mathrm{L}$ = 10 lóbulos, 35 vueltas por segundo",
+    "$m_\\mathrm{L}$ = 2 at the point": "$m_\\mathrm{L}$ = 2 en el punto",
+    "$m_\\mathrm{L}$ = 10 at the point": "$m_\\mathrm{L}$ = 10 en el punto",
+    "ticks: a blade passes the point": "marcas: una pala pasa por el punto",
+    "1/BPF = 2.86 ms for both": "1/BPF = 2,86 ms para los dos",
+    "6 blades, 4 vanes, 3500 r/min, slowed 500 times; "
+    "the lobes are a sketch of count and speed": "6 palas, 4 álabes, 3500 r/min, 500 veces más lento; "
+    "los lóbulos son un esquema del número y la velocidad",
     # --- anim_feedback_howl: the loop as a geometric series ---
     "Gain before feedback is a convergence condition": "La ganancia antes del acople es una condición de convergencia",
     "talker,\n0.3 m from\nthe microphone": "hablante,\na 0,3 m del\nmicrófono",
@@ -3418,11 +3488,38 @@ _ES_EXACT = {
     "Standing wave: reactive": "Onda estacionaria: reactiva",
     "p and u in phase": "p y u en fase",
     "p and u 90° apart": "p y u desfasados 90°",
-    r"spacer $\Delta r$": r"separador $\Delta r$",
+    r"spacer $\Delta r$": r"espaciador $\Delta r$",
     "T20 fit": "ajuste T20",
     "T30 fit": "ajuste T30",
     "Schroeder backward integration (ISO 3382)": "Integración inversa de Schroeder (ISO 3382)",
     "← integrate from the tail": "← integrar desde la cola",
+    # anim_scattering_average: the synchronous average of ISO 17497-1.
+    "Synchronous averaging over the turntable (ISO 17497-1)": "Promediado síncrono sobre la plataforma giratoria (ISO 17497-1)",
+    "one orientation": "una orientación",
+    "synchronous average": "media síncrona",
+    "model responses": "respuestas de un modelo",
+    "Time": "Tiempo",
+    "read from −5 dB to −20 dB": "se lee de −5 dB a −20 dB",
+    "integrated to −30 dB": "integrada hasta −30 dB",
+    "fitted first decay": "primer decaimiento ajustado",
+    "scattered energy\nleft in the\naverage": "energía dispersada\nque queda\nen la media",
+    "integration stopped\nat −30 dB": "integración detenida\nen −30 dB",
+    # anim_porous_air_gap: the porous layer moved off the wall. The three
+    # absorption coefficients are the library's for the guide's blanket, on
+    # the wall, 100 mm off it and half a wavelength off it.
+    "A porous layer moved off a rigid wall (250 Hz, normal incidence)": "Una capa porosa separada de una pared rígida (250 Hz, incidencia normal)",
+    "Relative amplitude": "Amplitud relativa",
+    "Distance from the rigid wall [mm]": "Distancia a la pared rígida [mm]",
+    "50 mm porous layer": "capa porosa de 50 mm",
+    "incident sound": "sonido incidente",
+    "velocity over one period": "velocidad a lo largo de un periodo",
+    "envelope of the velocity": "envolvente de la velocidad",
+    "envelope of the pressure": "envolvente de la presión",
+    "each point is drawn under": "cada punto se dibuja bajo",
+    "the back face of the layer": "la cara trasera de la capa",
+    "on the wall: 0.26": "sobre la pared: 0,26",
+    "100 mm gap: 0.78": "cámara de 100 mm:\n0,78",
+    "half a wavelength: 0.26": "media longitud de onda: 0,26",
     "squared impulse response $p^2$": "respuesta al impulso al cuadrado $p^2$",
     "tail energy": "energía de la cola",
     "Room modes in a rigid 5 m × 3.5 m room (2D FDTD)": "Modos propios en una sala rígida de 5 m × 3,5 m (FDTD 2D)",
@@ -3474,6 +3571,22 @@ _ES_EXACT = {
     "same information, different domain: sweep ⊛ inverse filter = impulse"
     " response": "la misma información en otro dominio: barrido ⊛ filtro inverso ="
     " respuesta al impulso",
+    # --- anim_sweep_harmonics: the harmonic ridges and their collapse ---
+    "One sweep, every harmonic: the ridges and their collapse": "Un barrido, todos los armónicos: las crestas y su colapso",
+    "recorded response (spectrogram)": "respuesta grabada (espectrograma)",
+    "after the inverse filter": "tras el filtro inverso",
+    "Time re linear response [s]": "Tiempo re respuesta lineal [s]",
+    "Level re $h_1$ peak [dB]": "Nivel re pico de $h_1$ [dB]",
+    "the device answers each frequency $f$ with $2f$, $3f$ and $4f$ as well": "el dispositivo responde a cada frecuencia $f$ también con $2f$, $3f$ y $4f$",
+    r"the sweep reaches $nf$ a time $L\,\ln n$ after it passed $f$: the ridges"
+    " run parallel": r"el barrido llega a $nf$ un tiempo $L\,\ln n$ después de pasar por $f$:"
+    " las crestas son paralelas",
+    "the inverse filter takes from each frequency the time the sweep took to"
+    " reach it": "el filtro inverso quita a cada frecuencia el tiempo que el barrido"
+    " tardó en alcanzarla",
+    r"each order lands in its own impulse response, $L\,\ln n$ ahead of the"
+    " linear one": r"cada orden cae en su propia respuesta al impulso, $L\,\ln n$ antes"
+    " que la lineal",
     r"Specific loudness $N^{\prime}(z)$ and its integral (ISO 532-1)": "Sonoridad específica $N^{\\prime}(z)$ y su integral (ISO 532-1)",
     "1 kHz ≈ 8.5 Bark": "1 kHz ≈ 8,5 Bark",
     "upward spread of masking": "extensión del enmascaramiento hacia agudos",
@@ -3518,6 +3631,39 @@ _ES_EXACT = {
     "image-source model": "modelo de fuente imagen",
     "predicted nulls": "mínimos previstos",
     "dips land exactly on the predicted nulls": "los mínimos caen exactamente en los nulos previstos",
+    "Lloyd's mirror: a source under the sea surface and its inverted image (2D FDTD)": "Espejo de Lloyd: una fuente bajo la superficie del mar y su imagen invertida (FDTD 2D)",
+    r"31.5 Hz: $k d_\mathrm{s}$ = 0.55": r"31,5 Hz: $k d_\mathrm{s}$ = 0,55",
+    r"315 Hz: $k d_\mathrm{s}$ = 5.54": r"315 Hz: $k d_\mathrm{s}$ = 5,54",
+    r"source, $d_\mathrm{s}$ = 4.2 m": r"fuente, $d_\mathrm{s}$ = 4,2 m",
+    "image, inverted": "imagen, invertida",
+    "surface": "superficie",
+    "horizontal distance [m]": "distancia horizontal [m]",
+    "Level at the hydrophones": "Nivel en los hidrófonos",
+    r"depression angle $\alpha$ [°]": r"ángulo de depresión $\alpha$ [°]",
+    "level re the source alone [dB]": "nivel re la fuente sola [dB]",
+    "hydrophones at 15°, 30° and 45°": "hidrófonos a 15°, 30° y 45°",
+    "the source alone": "la fuente sola",
+    "twice the power of one source": "el doble de potencia que una fuente",
+    "source + inverted image": "fuente + imagen invertida",
+    "31.5 Hz, FDTD": "31,5 Hz, FDTD",
+    "EN 1793-5 in situ: the reflection and what the window shuts out (2D FDTD)": "EN 1793-5 in situ: la reflexión y lo que la ventana deja fuera (FDTD 2D)",
+    "4 m sample": "muestra de 4 m",
+    "2.5 m sample": "muestra de 2,5 m",
+    "microphone 5": "micrófono 5",
+    "from the loudspeaker [m]": "desde el altavoz [m]",
+    "Microphone 5 in front of the 4 m sample": "Micrófono 5 frente a la muestra de 4 m",
+    "Microphone 5 in front of the 2.5 m sample": "Micrófono 5 frente a la muestra de 2,5 m",
+    "reflection": "reflexión",
+    "ground": "suelo",
+    "top edge": "borde superior",
+    "height [m]": "altura [m]",
+    "time since the pulse left the loudspeaker [ms]": "tiempo desde que el pulso sale del altavoz [ms]",
+    "pressure re the direct peak": "presión re el pico directo",
+    "window 7.7 ms: low frequency limit 167 Hz": "ventana de 7,7 ms: límite de baja frecuencia 167 Hz",
+    "window 3.6 ms: low frequency limit 376 Hz": "ventana de 3,6 ms: límite de baja frecuencia 376 Hz",
+    "in front of the sample": "frente a la muestra",
+    "free-field record subtracted": "restado el registro en campo libre",
+    "Adrienne window": "ventana de Adrienne",
     "FDTD": "FDTD",
     "SOFAR channel: sound trapped by the $c(z)$ minimum (2D FDTD)": "Canal SOFAR: sonido atrapado por el mínimo de $c(z)$ (FDTD 2D)",
     "Source on the channel axis (depth 400 m)": "Fuente en el eje del canal (400 m de profundidad)",
@@ -4526,6 +4672,36 @@ _ES_EXACT = {
     "depth [m]": "profundidad [m]",
     "distance from the impact [m]": "distancia al impacto [m]",
     "surface $v_y$ at 0.15 and 0.30 m": "$v_y$ en la superficie a 0,15 y 0,30 m",
+    # Boundaries clip (simulation/fdtd-simulation).
+    "Four boundaries, one pulse (2D FDTD)": "Cuatro contornos, un pulso (FDTD 2D)",
+    "rigid: $R = +1$ at every angle": "rígido: $R = +1$ a cualquier ángulo",
+    "sponge: the pulse leaves": "esponja: el pulso se va",
+    "$Z = \\rho c$: nothing back at 0°": "$Z = \\rho c$: nada vuelve a 0°",
+    "$Z = 1.92\\,\\rho c$: nothing back at 58.7°": "$Z = 1{,}92\\,\\rho c$: nada vuelve a 58,7°",
+    "rigid side": "lado rígido",
+    "side at $Z = 1.92\\,\\rho c$": "lado con $Z = 1{,}92\\,\\rho c$",
+    "side at $Z = \\rho c$": "lado con $Z = \\rho c$",
+    "angle from the normal [°]": "ángulo desde la normal [°]",
+    "reflection coefficient $R$": "coeficiente de reflexión $R$",
+    "What each side sends back": "Lo que devuelve cada lado",
+    "air in a 4.00 m by 2.25 m box; a locally reacting side reflects $R(\\theta) = (Z\\cos\\theta - \\rho c)/(Z\\cos\\theta "
+    "+ \\rho c)$; dotted: the two rays that are not reflected": "aire en una caja de 4,00 m por 2,25 m; un lado de reacción "
+    "local refleja $R(\\theta) = (Z\\cos\\theta - \\rho c)/(Z\\cos\\theta + \\rho c)$; punteados: los dos rayos que no se "
+    "reflejan",
+    # Scholte clip (simulation/elastic-waves).
+    "Scholte wave: the train a water-seabed contact keeps (elastic 2D FDTD)": "Onda de Scholte: el tren que retiene un contacto agua-sedimento "
+    "(FDTD elástico 2D)",
+    "depth below the contact [m]": "profundidad bajo el contacto [m]",
+    "range from the shot [m]": "distancia al disparo [m]",
+    "pressure in the water": "presión en el agua",
+    "on the contact, 100 m from the shot": "en el contacto, a 100 m del disparo",
+    "on the contact, 400 m": "en el contacto, a 400 m",
+    "30 m above the contact, 400 m": "30 m sobre el contacto, a 400 m",
+    "one Scholte wavelength at 50 Hz: 28.7 m": "una longitud de onda de Scholte a 50 Hz: 28,7 m",
+    "dotted arc: the water front, $c_\\mathrm{w}(t - t_0)$ round the shot; dot: the Scholte root, "
+    "$v_\\mathrm{Sch}(t - t_0)$ along the contact, 1436 m/s (B&G Eq. 4.4.20)": "arco punteado: el frente del agua, "
+    "$c_\\mathrm{w}(t - t_0)$ en torno al disparo; punto: la raíz de Scholte, $v_\\mathrm{Sch}(t - t_0)$ a lo largo "
+    "del contacto, 1436 m/s (B&G Ec. 4.4.20)",
     # Mode-conversion clip (simulation/elastic-waves).
     "Mode conversion: water on steel, three incidences (elastic 2D FDTD)": "Conversión de modo: agua sobre acero, tres incidencias "
     "(FDTD elástico 2D)",
@@ -4760,10 +4936,127 @@ _ES_EXACT = {
     # EN 15461 track decay rates: the two directions read the same in Spanish.
     "Vertical": "Vertical",
     "Lateral": "Lateral",
+    # IEC 61672-3 level linearity steps of the periodic tests guide
+    # (signals/metrology/sound-level-meter-periodic-tests).
+    "Level linearity in a periodic test: the steps of IEC 61672-3": "Linealidad de nivel en un ensayo periódico: los escalones de IEC 61672-3",
+    "Clause 16 · the reference level range at 8 kHz": "Apartado 16 · el rango de niveles de referencia a 8 kHz",
+    "frequency weighting A; every indication is recorded beside its anticipated level (§16.1)": "ponderación frecuencial A; cada indicación se registra junto a su nivel previsto (§16.1)",
+    "Anticipated level [dB]": "Nivel previsto [dB]",
+    "up first": "primero sube",
+    "then down": "después baja",
+    "linear operating range": "rango de funcionamiento lineal",
+    "the manual states for 8 kHz:": "que declara el manual a 8 kHz:",
+    "which the steps stop short of": "que los escalones no alcanzan",
+    "within 5 dB of the upper boundary,": "a menos de 5 dB del límite superior,",
+    "within 5 dB of the lower boundary,": "a menos de 5 dB del límite inferior,",
+    "The steps of §16.3": "Los escalones del §16.3",
+    "up from the starting point by 5 dB at most,\nand by 1 dB once within 5 dB of the upper\nboundary; then from the starting point down\nthe same way; smaller steps are accepted": (
+        "desde el punto de partida, hacia arriba de\n5 dB como mucho, y de 1 dB a menos de 5 dB\n"
+        "del límite superior; luego hacia abajo del\nmismo modo; se aceptan escalones más finos"
+    ),
+    "A step too wide": "Un escalón demasiado ancho",
+    "Clause 17 · the level range control at 1 kHz, on two level ranges": "Apartado 17 · el control de rango de niveles a 1 kHz, con dos rangos de niveles",
+    "frequency weighting A; drawn without a scale, the manual states each range; deviations are indicated minus anticipated level (§17.5)": "ponderación frecuencial A; sin escala, cada rango lo declara el manual; la desviación es el nivel indicado menos el previsto (§17.5)",
+    "reference sound level": "nivel de referencia",
+    "reference level range": "rango de niveles de referencia",
+    "the other level range": "el otro rango de niveles",
+    "§17.2 sets it here": "el §17.2 lo fija aquí",
+    "§17.3": "§17.3",
+    "§17.4": "§17.4",
+    "the first indication of under-range on that level range": "la primera indicación de «por debajo del rango» en ese rango de niveles",
+    "§17.4: the input 5 dB above it, on each level range, the reference one first": "§17.4: la entrada 5 dB por encima de ella, en cada rango de niveles, primero el de referencia",
+    "§17.3: the input held at the reference sound level, read on each other range that displays it": "§17.3: la entrada mantenida en el nivel de referencia, leída en cada uno de los demás rangos que lo muestran",
+    "on the reference range §17.3 has nothing to read: the anticipated level is the one §17.2 set (IEC 61672-1, 5.6.3)": "en el rango de referencia el §17.3 no tiene nada que leer: el nivel previsto es el que fijó el §17.2 (IEC 61672-1, 5.6.3)",
+    # The band ruler of IEC 61260-1: four fractions over three octaves.
+    "Fractional-octave bands about 1 kHz (IEC 61260-1)": (
+        "Bandas de fracción de octava en torno a 1 kHz (IEC 61260-1)"
+    ),
+    "in each band: its exact mid-band frequency in hertz and, in bold, its label": (
+        "en cada banda: su frecuencia central exacta en hercios y, en negrita, su etiqueta"
+    ),
+    "octave, $b$ = 1": "octava, $b$ = 1",
+    "half octave, $b$ = 2": "media octava, $b$ = 2",
+    "one-third octave, $b$ = 3": "tercio de octava, $b$ = 3",
+    "one-sixth octave, $b$ = 6": "sexto de octava, $b$ = 6",
+    "odd $b$: 1 kHz is a mid-band frequency": (
+        "$b$ impar: 1 kHz es una frecuencia central de banda"
+    ),
+    "even $b$: 1 kHz is a band edge, and no band is centred on it": (
+        "$b$ par: 1 kHz es un borde de banda, y ninguna banda está centrada en él"
+    ),
+    "reference frequency, 1 kHz": "frecuencia de referencia, 1 kHz",
+    # The two partitions of ECMA-418-1: the tone band of clause 11 and the
+    # three contiguous bands of clause 12.
+    "Tone-to-noise ratio: the tone band inside its critical band (ECMA-418-1, clause 11)": (
+        "Relación tono-ruido: la banda del tono dentro de su banda crítica "
+        "(ECMA-418-1, apartado 11)"
+    ),
+    "The critical band, $f_1$ to $f_2$": "La banda crítica, de $f_1$ a $f_2$",
+    "Inside the window, line by line": "Dentro de la ventana, línea a línea",
+    r"critical band of the tone, $L_\mathrm{tot}$; less the tone, the noise $L_\mathrm{n}$": (
+        r"banda crítica del tono, $L_\mathrm{tot}$; sin el tono, el ruido $L_\mathrm{n}$"
+    ),
+    r"15 % of $\Delta f_\mathrm{c}$": r"15 % de $\Delta f_\mathrm{c}$",
+    r"tone: what stands above the line, $L_\mathrm{t}$": (
+        r"tono: lo que queda por encima de la recta, $L_\mathrm{t}$"
+    ),
+    "line between the two end lines, $l_1$ and $l_2$": (
+        "recta entre las dos líneas extremas, $l_1$ y $l_2$"
+    ),
+    "lowest line inside the window: on its edge": (
+        "línea más baja dentro de la ventana: en su borde"
+    ),
+    "The minimum on the window edge: the search goes on to the next "
+    "local minimum (ECMA-418-1, 11.2)": (
+        "El mínimo en el borde de la ventana: la búsqueda sigue hasta el "
+        "siguiente mínimo local (ECMA-418-1, apartado 11.2)"
+    ),
+    "Prominence ratio: the band of the tone against its two neighbours "
+    "(ECMA-418-1, clause 12)": (
+        "Relación de prominencia: la banda del tono frente a sus dos vecinas "
+        "(ECMA-418-1, apartado 12)"
+    ),
+    "three whole critical bands (Formula 23)": (
+        "tres bandas críticas enteras (Fórmula 23)"
+    ),
 }
 
 
 _ES_PATTERNS = [
+    # slm_periodic_linearity: the levels of the guide's Clause 16 record.
+    (
+        r"^(\d+) dB: first indication of overload,$",
+        r"\1 dB: primera indicación de sobrecarga,",
+    ),
+    (
+        r"^(\d+) dB: first indication of under-range,$",
+        r"\1 dB: primera indicación de «por debajo del rango»,",
+    ),
+    (r"^from (\d+) dB: steps of 1 dB$", r"desde \1 dB: escalones de 1 dB"),
+    (
+        r"^starting point of the manual, (\d+) dB \(§16\.2\)$",
+        r"punto de partida del manual, \1 dB (§16.2)",
+    ),
+    (r"^(\d+) dB to (\d+) dB$", r"de \1 dB a \2 dB"),
+    (
+        r"^without its (\d+) dB step\nthe rise goes (\d+) dB where\n"
+        r"§16\.3 allows (\d+) dB, and the\nverdict lists Clause 16\nas incomplete$",
+        r"sin el escalón de \1 dB\nla subida da \2 dB donde\nel §16.3 admite \3 dB, y el\n"
+        r"dictamen deja incompleto\nel apartado 16",
+    ),
+    # anim_fan_lobe_patterns: the running count of crests past the wall point.
+    (r"^lobes past the point: (\d+)$", r"lóbulos por el punto: \1"),
+    # The partition figures of ECMA-418-1: widths the library counts in lines.
+    (
+        r"^tone band, \$\\Delta f_\\mathrm\{t\}\$ = (\d+) Hz$",
+        r"banda del tono, $\\Delta f_\\mathrm{t}$ = \1 Hz",
+    ),
+    (
+        r"^lower band cut at 20 Hz: \$\\Delta f_\\mathrm\{L\}\$ = (\d+) Hz,\n"
+        r"scaled by 100 Hz / \$\\Delta f_\\mathrm\{L\}\$ \(Formula 24\)$",
+        r"banda inferior cortada en 20 Hz: $\\Delta f_\\mathrm{L}$ = \1 Hz,\n"
+        r"escalada por 100 Hz / $\\Delta f_\\mathrm{L}$ (Fórmula 24)",
+    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",
@@ -5531,6 +5824,25 @@ _ES_PATTERNS = [
     (r"^block Leq    (.+) dB \((.+)\)$", r"Leq bloques  \1 dB (\2)"),
     (r"^spread so far, exponential: (.+) dB$", r"dispersión, exponencial: \1 dB"),
     (r"^spread so far, block Leq:   (.+) dB$", r"dispersión, Leq bloques: \1 dB"),
+    # --- anim_synchronous_averaging: readouts rewritten on every frame ---
+    (
+        r"^\$N\$ = (\d+): noise power down (\d+)\.(\d+) dB$",
+        r"$N$ = \1: la potencia de ruido baja \2,\3 dB",
+    ),
+    (
+        r"^RMS error (\d+)\.(\d+); ideal \$\\sigma/\\sqrt\{N\}\$ = (\d+)\.(\d+)$",
+        r"error RMS \1,\2; ideal $\\sigma/\\sqrt{N}$ = \3,\4",
+    ),
+    (
+        r"^nodes between neighbouring teeth: \$N - 1\$ = (\d+)$",
+        r"nodos entre dientes vecinos: $N - 1$ = \1",
+    ),
+    (
+        r"^first node \$1/N\$ = (\d+)\.(\d+) orders from each tooth$",
+        r"primer nodo a $1/N$ = \1,\2 órdenes de cada diente",
+    ),
+    # --- anim_sweep_harmonics: the lead of each ridge, from the library ---
+    (r"^\$L\\,\\ln (\d)\$ = (\d+)\.(\d+) s$", r"$L\\,\\ln \1$ = \2,\3 s"),
     # --- anim_feedback_howl: readouts rewritten on every frame ---
     (
         r"^\$Z_\\mathrm\{S\}\$ = (.+) dB, (\d+) open microphone\(s\)$",
@@ -6202,6 +6514,23 @@ _ES_PATTERNS = [
     (r"^10-90 % band \((\d+) yr\)$", r"banda 10-90 % (\1 años)"),
     # Tier-1 animation dynamic labels
     (r"^remaining energy: (.+) %$", r"energía restante: \1 %"),
+    (r"^turntable at (\d+)°$", r"plataforma giratoria a \1°"),
+    (r"^average of (\d+) of 72$", r"media de \1 de 72"),
+    (r"^first decay: \$T_4\$ = (.+) s$", r"primer decaimiento: $T_4$ = \1 s"),
+    (r"^one orientation: \$T_2\$ = (.+) s$", r"una orientación: $T_2$ = \1 s"),
+    (
+        r"^model built with \$T_4\$ = (.+) s, \$T_2\$ = (.+) s$",
+        r"modelo construido con $T_4$ = \1 s, $T_2$ = \2 s",
+    ),
+    (r"^specular absorption (\d\.\d+)$", r"absorción especular \1"),
+    (
+        r"^random-incidence absorption (\d\.\d+)$",
+        r"absorción de incidencia aleatoria \1",
+    ),
+    (r"^scattering coefficient (\d\.\d+)$", r"coeficiente de dispersión \1"),
+    (r"^gap behind the layer (\d+) mm$", r"cámara tras la capa \1 mm"),
+    (r"^velocity in the layer (\d\.\d+)$", r"velocidad en la capa \1"),
+    (r"^the layer absorbs (\d\.\d+)$", r"la capa absorbe \1"),
     (
         r"^\$\\langle p\\cdot u\\rangle\$ = ([+−-])(\d+)\.(\d+)$",
         r"$\\langle p\\cdot u\\rangle$ = \1\2,\3",
@@ -6363,6 +6692,14 @@ _ES_PATTERNS = [
     (r"^\$t\$ = ( *\d+)\.(\d+) ms$", r"$t$ = \1,\2 ms"),
     (r"^\$t\$ = ( *\d+)\.(\d+) s$", r"$t$ = \1,\2 s"),
     (r"^\$t\$ = ( *\d+)\.(\d+) µs$", r"$t$ = \1,\2 µs"),
+    (
+        r"^source and image nearly cancel:\npower mean of the three, (.+) dB$",
+        r"la fuente y su imagen casi se anulan:\nmedia en potencia de los tres, \1 dB",
+    ),
+    (
+        r"^lobes and nulls of a single frequency:\npower mean of the three, (.+) dB$",
+        r"lóbulos y nulos de una sola frecuencia:\nmedia en potencia de los tres, \1 dB",
+    ),
     (r"^\$ct\$ = ( *\d+)\.(\d+) m$", r"$ct$ = \1,\2 m"),
     (r"^counted (\d+)$", r"contadas \1"),
     (r"^law (\d+)$", r"ley \1"),
@@ -6742,6 +7079,24 @@ _ES_PATTERNS = [
             r"\(C&H Eq\. 3\.149\)$"
         ),
         r"aluminio: $c_\\mathrm{P}$ = \1, $c_\\mathrm{S}$ = \2, $c_\\mathrm{R}$ = \3 m/s (C&H ec. 3.149)",
+    ),
+    # Scholte clip: the measured time of flight, speed and evanescence, and
+    # the running lead of the water front.
+    (
+        r"^(\d+) m between the contact probes in (\d+)\.(\d+) ms$",
+        r"\1 m entre las dos sondas en \2,\3 ms",
+    ),
+    (
+        r"^the train timed at (\d+) m/s; the Scholte root is (\d+) m/s$",
+        r"el tren cronometrado a \1 m/s; la raíz de Scholte es \2 m/s",
+    ),
+    (
+        r"^30 m above the contact: (\d+)\.(\d+) of its amplitude$",
+        r"30 m sobre el contacto: \1,\2 de su amplitud",
+    ),
+    (
+        r"^water front ahead of the Scholte root: (\d+)\.(\d+) m$",
+        r"frente del agua por delante de la raíz de Scholte: \1,\2 m",
     ),
     # Mode-conversion clip: the display gain and the measured reflection.
     (r"^steel drawn ×(\d+) \(\+(\d+) dB\)$", r"acero dibujado ×\1 (+\2 dB)"),

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1897/1897 conformance checks pass** across 111 domains, against 230 normative designations and 121 further published sources - filters class 1 - weightings within IEC 61672-1 class 1.
+**1899/1899 conformance checks pass** across 111 domains, against 230 normative designations and 121 further published sources - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -634,7 +634,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Emission sound pressure level (ISO 11200 group)</b>: 100% (6/6)</summary>
+<summary><b>Emission sound pressure level (ISO 11200 group)</b>: 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -643,6 +643,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 11200:2014 Table B.2 expanded uncertainty | U from sigma_R0 = 1,5 dB and sigma_omc = 1,0 dB at k = 1,6, dB | 2.9 dB (+/-0.05 dB) | 2.884 dB | -0.016 dB | 32 % | ![Pass][cv-pass] Pass |
 | ISO 11200:2014 Table B.3 background-noise correction | K_1A for a 9 dB margin over the background, dB | 0.6 dB (+/-0.05 dB) | 0.584 dB | -0.016 dB | 32 % | ![Pass][cv-pass] Pass |
 | ISO 11200:2014 Table B.3 operating standard deviation | sigma_omc of three readings by Equation (C.1), dB | 2 dB (+/-0.05 dB) | 1.997 dB | -0.003 dB | 6 % | ![Pass][cv-pass] Pass |
+| ISO 11200:2014 Table B.3 local environmental correction | K_3A of ISO 11202 method A.2 from K_2A = 6.5 dB and DI*op,approx = 0.7 dB, dB | 4.7 dB (+/-0.05 dB) | 4.693 dB | -0.007 dB | 14 % | ![Pass][cv-pass] Pass |
+| ISO 11200:2014 Table B.3 accuracy grade | Grade of the method A.2 result for a machine 3 m in its largest dimension | grade = 3 | grade = 3 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11204:2010 A.1.2 the two routes to the ratio z | z from K_2 against z from the absorption area, dimensionless | 0.423423423 (+/-0) | 0.423423423 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>

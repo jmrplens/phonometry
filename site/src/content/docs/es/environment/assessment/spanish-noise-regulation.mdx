@@ -45,6 +45,83 @@ Los niveles por periodo que la alimentan salen de
 indicadores europeos $L_\mathrm{den}$/$L_\mathrm{dn}$ con los que conviven, de
 [Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/).
 
+## Cómo se hace la medida de inspección (anexo IV)
+
+En la inspección de una actividad los índices se obtienen midiendo y de
+ninguna otra forma (anexo IV A.1), y el mismo anexo dice cómo se mide. Ninguna
+función de esta página calcula nada de ello: lo que sigue es el procedimiento
+del que se supone que salen los niveles de las secciones posteriores.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rd1367_inspection.svg" alt="Tres paneles y una franja. En el interior, un recinto en sección con la ventana y la puerta cerradas y un micrófono sobre su soporte a unos 1,5 m de la ventana, a 1 m o más de las paredes y entre 1,2 m y 1,5 m sobre el suelo, con la nota de que se toman tres posiciones o más y el centro del recinto cuando no caben. En el exterior, la actividad a la izquierda, una fachada a la derecha y entre ambas un micrófono con su pantalla antiviento donde el nivel es más alto: el sonido incidente le llega directo y es el que se evalúa, y la reflexión en la fachada va a trazos como aquello de lo que se corrige la lectura. Debajo, la serie de una fase de ruido sobre un eje de tiempo: tres mediciones de 5 s o más, separadas 3 min o más, con sus extremos dentro de 6 dBA y la más alta marcada como resultado, junto a las reglas para una serie que no vale, para una medición muy distinta del resto y para el ruido de fondo con la actividad parada. La franja nombra el instrumento, de tipo 1 o clase 1 con filtros de clase 1, la verificación con calibrador dentro de 0,3 dB antes y después de cada medición y los límites meteorológicos en el exterior: pantalla antiviento, sin lluvia y sin viento de más de 5 m/s." width="92%" />
+
+*Dónde se pone el sonómetro y qué lee: las posiciones salen del anexo I A.3 y
+del anexo IV A.3.4, la serie del A.3.4.2 b y las precauciones del A.3.5.*
+
+**El instrumento (artículo 30, A.3.5 c).** El sonómetro y el calibrador
+cumplen, como instrumentos de tipo 1/clase 1 (artículo 30.2), la Orden de 25
+de septiembre de 2007 que regula el control metrológico del Estado de los
+instrumentos destinados a la medición de sonido audible y de los calibradores
+acústicos. El artículo 30.1 la atribuye al Ministerio de Fomento; la orden de
+esa fecha y ese título es la Orden ITC/2845/2007, del Ministerio de Industria,
+Turismo y Comercio, derogada con efectos desde el 24 de octubre de 2020 por la
+Orden ICT/155/2020, de 7 de febrero. Cuando hacen falta bandas de octava o de
+tercio de octava, y $K_\mathrm{t}$ las necesita siempre, los filtros cumplen el
+tipo 1/clase 1 de las normas UNE-EN 61260:1997 y UNE-EN 61260/A1:2002
+(artículo 30.3). Los instrumentos de tipo 2/clase 2 se
+toleraron durante siete años desde la publicación, y nunca en una medición que
+sustente una sanción o un proceso judicial (disposición transitoria segunda).
+La cadena se verifica con el calibrador antes y después de cada medición, sin
+desviarse más de 0,3 dB del valor de referencia inicial.
+
+**Las condiciones (A.3.5).** La temperatura y la humedad se mantienen dentro
+de lo que especifica el fabricante del equipo. En el exterior el micrófono
+lleva siempre pantalla antiviento, una medición con lluvia no es válida, y con
+más de 5 m/s de viento en el punto de evaluación se desiste de medir. En el
+interior la lluvia no impide la medición: cuenta como ruido de fondo cuando la
+diferencia entre el nivel y el fondo decide si la lectura es válida.
+
+**Dónde va el micrófono.** En el punto de evaluación donde el nivel es más
+alto, tanto si el ruido se emite al ambiente exterior como si se transmite al
+interior de un edificio (A.3.4.2 b).
+
+- **En el interior** (A.3.4 d, anexo I A.3 b): puertas y ventanas cerradas, y
+  como mínimo tres posiciones, preferentemente a 1 m o más de las paredes y
+  otras superficies, entre 1,2 m y 1,5 m sobre el suelo y a unos 1,5 m de las
+  ventanas. Si el recinto no las permite, se mide en su centro.
+- **En el exterior**: lo que se evalúa es el sonido incidente (anexo I A.4),
+  de modo que un nivel leído frente a una fachada u otro elemento reflectante
+  se corrige para excluir la reflexión (A.3.2). Los 4 m de altura, los 1,20 m
+  de separación de una fachada y el mínimo de 1,5 m que imprime el A.3.4.1 c
+  son de los objetivos de calidad de un área acústica; para un emisor, el
+  A.3.4.2 no da al micrófono ninguna altura propia.
+
+**Qué hace la actividad (A.3.4.2 b).** Su titular facilita a los inspectores
+el acceso a los focos y los pone en funcionamiento a las velocidades, cargas o
+marchas que le indiquen, y puede presenciar todo el proceso.
+
+**La serie (A.3.4.2 b).**
+
+1. Cuando la emisión varía de forma significativa dentro del periodo de
+   evaluación, este se divide en **fases de ruido**: intervalos en los que el
+   nivel en el punto de evaluación se percibe de manera uniforme.
+2. En cada fase se hacen al menos tres mediciones de $L_{\mathrm{Keq},Ti}$, de
+   5 s como mínimo cada una y separadas al menos 3 minutos.
+3. Las tres son válidas cuando sus valores extremos difieren en 6 dBA o menos.
+   Si difieren en más, se toma una nueva serie de tres.
+4. Si un valor sigue apartándose del resto, se busca su origen, y una vez
+   localizado se repiten las mediciones hasta cinco veces con ese foco en
+   funcionamiento durante los cinco segundos de cada una.
+5. El resultado es el más alto de los valores obtenidos.
+6. El ruido de fondo se mide igual con el emisor parado, y $L_{\mathrm{Keq},Ti}$
+   se corrige con él.
+
+Los niveles de fase entran después en la suma ponderada por duración de
+*Periodos temporales de evaluación y fases de ruido*, más abajo, con el
+redondeo que da esa sección. Las infraestructuras viarias, ferroviarias y
+aeroportuarias siguen otra serie (A.3.4.2 a): al menos tres series de tres
+mediciones de $L_{\mathrm{Aeq},Ti}$, cada medición de 5 minutos como mínimo y
+las series separadas al menos 5 minutos.
+
 ## El nivel corregido LKeq y sus tres correcciones
 
 El índice del reglamento es (anexo I A.2 c):
@@ -80,8 +157,8 @@ en percentiles de
 [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/)
 hacen la aritmética y llevan esa regla (`reportable_upper_bound`,
 `reliable=False`); el procedimiento propio del anexo IV del RD para la serie de
-mediciones (cuántas, de qué duración, qué las invalida) no está implementado
-aquí.
+mediciones (cuántas, de qué duración, qué las invalida) es el descrito arriba,
+y ninguna función de la biblioteca lo comprueba.
 
 Dos consecuencias en campo. El residual hay que capturarlo **en el mismo periodo
 de evaluación**, porque un residual de noche no es un residual de día. Y una fase
@@ -233,9 +310,10 @@ día de 07:00 a 19:00 (12 h), tarde de 19:00 a 23:00 (4 h) y noche de 23:00 a
 `RD1367_PERIOD_HOURS` y `RD1367_PERIOD_CLOCK_LIMITS`.
 
 Cuando la emisión varía dentro de un periodo, este se divide en **fases de
-ruido** $T_i$ de nivel percibido uniforme. En cada fase se mide $L_{\mathrm{Aeq},Ti}$
-durante al menos 5 s y se corrige, y el nivel del periodo es la media
-energética ponderada por la duración de las fases (anexo IV A.3.4.2 b):
+ruido** $T_i$ de nivel percibido uniforme. Cada fase se mide al menos tres
+veces, durante 5 s o más cada vez, la lectura más alta queda como su
+$L_{\mathrm{Keq},Ti}$, y el nivel del periodo es la media energética ponderada por
+la duración de las fases (anexo IV A.3.4.2 b):
 
 $$
 L_{\mathrm{Keq},T} = 10 \log_{10} \left[ \frac{1}{T} \sum_i T_i \, 10^{L_{\mathrm{Keq},Ti}/10} \right]
@@ -455,10 +533,11 @@ artículo 25.
 <ScopeClaim status="not-covered" label="No cubierto">
 La zonificación acústica en áreas acústicas, los mapas de ruido y los planes
 de acción del capítulo correspondiente de la Ley 37/2003 son instrumentos de
-planificación, no cálculo, y quedan fuera. Tampoco se implementan los
-procedimientos de medición en sí (posiciones de micrófono, duración de las
-series, número de mediciones del anexo IV): esta página empieza donde termina
-el sonómetro.
+planificación, no cálculo, y quedan fuera. El procedimiento de medición del
+anexo IV (instrumento, posiciones de micrófono, duración de las series y
+número de mediciones) está descrito en esta página y no se calcula: ninguna
+función comprueba una posición, una serie o una calibración, y el cálculo
+empieza donde termina el sonómetro.
 </ScopeClaim>
 </Scope>
 

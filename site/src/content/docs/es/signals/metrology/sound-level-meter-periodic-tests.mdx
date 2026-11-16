@@ -343,6 +343,20 @@ dictamen se atiene a ellas:
 - las condiciones ambientales entre 80 kPa y 105 kPa, 20 °C y 26 °C y 25 % y
   70 % (7.1), registradas al principio y al final como mínimo (7.2).
 
+Los dos ensayos de linealidad de nivel, dibujados para el registro de la
+sección 3: arriba, los 25 niveles de `linearity_levels` en el orden en que los
+recorre el 16.3, y abajo, dónde caen las lecturas de
+`range_linearity_deviations_db` en los dos rangos de niveles.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_linearity.svg" alt="Dos paneles. El superior representa el nivel previsto del ensayo del apartado 16 a 8 kHz en un eje vertical graduado de 40 dB a 120 dB, con el rango de funcionamiento lineal del manual, de 40 dB a 120 dB, sombreado. Desde el punto de partida, a 94 dB, una escalera sube en escalones de 5 dB por 99, 104, 109, 114 y 119 dB y después en escalones de 1 dB por 120, 121 y 122 dB, y termina en un aspa a 123 dB, la primera indicación de sobrecarga; una segunda escalera baja desde el mismo punto de partida en escalones de 5 dB de 89 dB a 44 dB y en escalones de 1 dB de 43 dB a 38 dB, y termina en un aspa a 37 dB, la primera indicación de «por debajo del rango». Unos corchetes marcan los 5 dB por debajo del límite superior y los 5 dB por encima del inferior, donde los escalones pasan a ser de 1 dB. Un recuadro dibuja la subida de 119 dB a 121 dB sin el escalón de 120 dB, 2 dB donde el 16.3 admite 1 dB, con lo que el dictamen deja incompleto el apartado 16. El panel inferior dibuja los dos rangos de niveles del ensayo del apartado 17 a 1 kHz como dos barras sin escala: en cada una, un aspa en la primera indicación de «por debajo del rango» y un punto 5 dB por encima para el 17.4; una línea discontinua en el nivel de referencia cruza las dos barras, con un círculo hueco donde el 17.2 lo fija en el rango de niveles de referencia y un punto donde el 17.3 lo lee en el otro" width="100%" />
+
+*Los escalones de los apartados 16 y 17, leídos por la biblioteca en el
+registro de la sección 3. La escalera es `linearity_levels` desde
+`linearity_starting_level`, las dos aspas son `linearity_overload_level` y
+`linearity_under_range_level`, y el recuadro es el dictamen sobre el mismo
+registro sin su escalón de 120 dB; el panel inferior es la lectura del 17.3 y
+las dos del 17.4 que contiene `range_linearity_deviations_db`.*
+
 Lo que un registro no puede mostrar es una característica que al sonómetro le
 falta: un sonómetro con un solo rango de niveles y un registro que dejó fuera
 el apartado 17 se leen igual, y lo mismo un sonómetro sin pico con ponderación

@@ -3095,6 +3095,42 @@ propósito sigue entrando en la tubería.
 | un nombre cuyo fichero tiene un enlace duro en otro sitio | los bytes nuevos en el fichero, y por tanto bajo los dos nombres | el fichero nuevo en el nombre; el otro nombre conserva los bytes antiguos |
 | un fichero con permiso de escritura en un directorio que no admite ficheros nuevos | se escribía en su sitio | el `PermissionError` del fichero de al lado, y el fichero antiguo intacto |
 
+## Los patrones lobulados de un ventilador entubado son velocidades de giro, no líneas
+
+`vibration.blade_pass_frequencies(..., n_vanes=...)` devolvía los patrones de
+interacción rotativos de un ventilador entubado entre sus líneas, como entradas
+`FaultLine` de la familia `"blade"` llamadas `lobe n=1 m=2`, con la velocidad de
+la Ec. (8.17) como frecuencia de la línea en hercios. Norton sitúa el ruido de
+esos patrones en el armónico de paso de pala del que salen, así que un espectro
+no tiene línea en esas velocidades, y `.plot()` y `combine_fault_lines` la
+marcaban igualmente. El número de lóbulos perdía además su signo, que es el
+sentido en que gira el patrón.
+
+En la 4.0 la función devuelve un `BladePassResult`, un `FaultFrequencyResult`
+cuyas líneas son solo los tonos del eje y de paso de pala, y guarda aparte los
+patrones en `lobe_patterns`, un `LobePattern` por armónico de pala y orden de
+álabe con su signo: `harmonic`, `vane_order`, `n_lobes` (negativo para un patrón
+que gira contra el rotor) y `speed_rpm`, la velocidad de la Ec. (8.17) en
+r/min, como la imprime Norton. `within` conserva los patrones;
+`combine_fault_lines` junta solo las líneas.
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `res["lobe n=N m=M"]`, la velocidad sin signo en hercios del patrón del armónico de pala `N` con `M` lóbulos en cualquier sentido | `abs(next(p for p in res.lobe_patterns if p.harmonic == N and abs(p.n_lobes) == M).speed_rpm) / 60` |
+| `res.names` con entradas `lobe n=… m=…` | `res.names` solo con las líneas del eje y de paso de pala; los patrones en `res.lobe_patterns` |
+| un patrón con $m_\mathrm{L} < 0$ nombrado por $\lvert m_\mathrm{L} \rvert$, con velocidad positiva | `n_lobes` y `speed_rpm` negativos, y un patrón de $+m_\mathrm{L}$ a su lado conservado como otro |
+| las velocidades marcadas como líneas por `.plot()` y llevadas por `combine_fault_lines` | líneas solo en el eje y en el paso de pala |
+
+```python
+from phonometry import vibration
+
+res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+print(res.names)
+print([(p.n_lobes, p.speed_rpm) for p in res.lobe_patterns])
+# ('shaft', 'BPF')
+# [(2, 10500.0), (10, 2100.0)]
+```
+
 ## Los setenta y ocho nombres que ya no están
 
 Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo público:

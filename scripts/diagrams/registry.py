@@ -19,10 +19,12 @@ from .aircraft import (
     _d_aircraft_noise_station,
     _d_anp_records,
     _d_doc29_segment_geometry,
+    _d_flight_path_adjustment,
     _d_rotorcraft_certification,
     _d_rotorcraft_hemisphere,
 )
 from .buildings import (
+    _d_ceiling_plenum_facility,
     _d_db_hr_requirements,
     _d_decay_range,
     _d_directivity_factor,
@@ -60,6 +62,7 @@ from .buildings import (
     _d_source_qualification,
     _d_survey_sweep,
     _d_sweep_budget,
+    _d_tapping_positions_scan_paths,
     _d_workroom_path,
 )
 from .canvas import _write
@@ -73,6 +76,7 @@ from .devices import (
     _d_high_frequency_room,
     _d_in_duct_rig,
     _d_induction_loop_measurement,
+    _d_intensity_discrete_points,
     _d_intensity_scan,
     _d_loudspeaker_freefield,
     _d_loudspeaker_polar,
@@ -83,6 +87,7 @@ from .devices import (
     _d_noise_declaration_chain,
     _d_open_end_solid_angles,
     _d_plant_contour,
+    _d_power_decision_path,
     _d_pp_probe,
     _d_precision_anechoic,
     _d_program_loudness,
@@ -94,6 +99,7 @@ from .devices import (
     _d_screen_in_situ,
     _d_silencer_in_situ,
     _d_silencer_iso7235,
+    _d_silencer_pressure_loss,
     _d_small_test_rooms,
     _d_sound_power_in_situ,
     _d_surfaces,
@@ -101,6 +107,7 @@ from .devices import (
     _d_swept_sine,
     _d_turbine_hall,
     _d_valve_noise_place,
+    _d_valve_quiet_trims,
     _d_vdi2081_sheet,
     _d_vibration_sound_power,
     _d_workstation_microphone,
@@ -109,6 +116,7 @@ from .environment import (
     _d_atmospheric_refraction,
     _d_barrier_four_paths,
     _d_barrier_in_situ,
+    _d_barrier_reflection_setup,
     _d_cnossos_rail,
     _d_cnossos_road,
     _d_env_positions,
@@ -118,7 +126,9 @@ from .environment import (
     _d_impulse_prominence,
     _d_outdoor,
     _d_rd1367_chain,
+    _d_rd1367_inspection,
     _d_rolling_stock_site,
+    _d_soundscape_study,
     _d_statistical_pass_by_site,
     _d_wind_turbine,
     _d_wind_turbine_board,
@@ -143,7 +153,9 @@ from .materials import (
     _d_suspended_ceiling_specimen,
 )
 from .perception import (
+    _d_anr_insertion_loss,
     _d_dosimeter,
+    _d_earmuff_test_fixture,
     _d_emission_positions,
     _d_hearing_protector_chain,
     _d_hearing_threshold,
@@ -155,6 +167,7 @@ from .perception import (
     _d_slm_workstation,
     _d_sound_quality,
     _d_soundfield_audiometry,
+    _d_soundfield_qualification,
     _d_speech_intelligibility,
     _d_sti_chain,
     _d_sti_setup,
@@ -199,10 +212,14 @@ from .signals import (
     _d_uncertainty,
     _d_uncertainty_sources,
     _d_verification_regimes,
+    _d_weighting_design_path,
 )
 from .simulation import (
+    _d_compute_map,
     _d_elastic_fluid_solid,
+    _d_elastic_staggered_cell,
     _d_fdtd,
+    _d_fdtd_staggered_cell,
     _d_immersed_plate_tl,
     _d_ntff_contour,
 )
@@ -220,6 +237,7 @@ from .vibration import (
     _d_hand_arm_vibration,
     _d_human_vibration,
     _d_iso2631_5_setup,
+    _d_junction_positions,
     _d_junction_rig,
     _d_machine_diagnostics,
     _d_machine_vibration_positions,
@@ -228,6 +246,7 @@ from .vibration import (
     _d_multiple_shock,
     _d_people_in_buildings,
     _d_power_injection_rig,
+    _d_railway_change_rule,
     _d_railway_cross_section,
     _d_railway_monitoring,
     _d_railway_prediction_chain,
@@ -236,6 +255,7 @@ from .vibration import (
     _d_transfer_stiffness_rig,
     _d_vibration_meter_coupling,
     _d_vibration_prediction_path,
+    _d_whole_body_axes,
 )
 
 DIAGRAMS = {
@@ -305,7 +325,17 @@ DIAGRAMS = {
     "diagram_impact_setup": (
         _d_impact,
         "ISO 16283-2 impact sound insulation setup",
-        600,
+        726,
+    ),
+    "diagram_ceiling_plenum_facility": (
+        _d_ceiling_plenum_facility,
+        "The suspended ceiling test facility (ISO 140-9) and the plenum model",
+        826,
+    ),
+    "diagram_tapping_positions_scan_paths": (
+        _d_tapping_positions_scan_paths,
+        "Tapping machine positions and manual scanning paths (ISO 16283)",
+        830,
     ),
     "diagram_facade_setup": (
         _d_facade_setup,
@@ -338,6 +368,11 @@ DIAGRAMS = {
         860,
     ),
     "sound_power_methods": (_d_methods, "Sound power methods compared", 944),
+    "diagram_sound_power_decision_path": (
+        _d_power_decision_path,
+        "This guide's decision path to a sound power method",
+        1020,
+    ),
     "diagram_noise_declaration_chain": (
         _d_noise_declaration_chain,
         "Declaring and verifying a sound power level (ISO 4871)",
@@ -418,6 +453,11 @@ DIAGRAMS = {
         "Precision sound intensity scanning (ISO 9614-3)",
         600,
     ),
+    "diagram_intensity_discrete_points": (
+        _d_intensity_discrete_points,
+        "How sound power is measured at discrete points (ISO 9614-1)",
+        580,
+    ),
     "diagram_reverberation_power": (
         _d_reverberation_power,
         "ISO 3741 reverberation test room",
@@ -471,7 +511,12 @@ DIAGRAMS = {
     "diagram_human_vibration": (
         _d_human_vibration,
         "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)",
-        580,
+        600,
+    ),
+    "diagram_whole_body_axes": (
+        _d_whole_body_axes,
+        "Whole-body vibration: where it is measured and how each axis is weighted",
+        966,
     ),
     "diagram_hand_arm_vibration": (
         _d_hand_arm_vibration,
@@ -531,7 +576,12 @@ DIAGRAMS = {
     "diagram_soundfield_audiometry": (
         _d_soundfield_audiometry,
         "Sound-field audiometry and the ISO 389-7 reference zero",
-        580,
+        590,
+    ),
+    "diagram_soundfield_qualification": (
+        _d_soundfield_qualification,
+        "Qualifying a sound field: where the microphone goes (ISO 8253-2, ISO 4869)",
+        950,
     ),
     "diagram_slm_workstation_iso9612": (
         _d_slm_workstation,
@@ -577,6 +627,16 @@ DIAGRAMS = {
         _d_hearing_protector_chain,
         "From sixteen subjects to the effective A-weighted level (ISO 4869-2)",
         910,
+    ),
+    "diagram_earmuff_test_fixture": (
+        _d_earmuff_test_fixture,
+        "An earmuff on the acoustic test fixture (ISO 4869-3)",
+        850,
+    ),
+    "diagram_anr_insertion_loss": (
+        _d_anr_insertion_loss,
+        "Active insertion loss of an earmuff, read in the ear (ISO 4869-6)",
+        600,
     ),
     "diagram_ntacou112": (
         _d_impulse_prominence,
@@ -809,6 +869,11 @@ DIAGRAMS = {
         "Junction vibration measurement on L- and T-junctions (ISO 10848)",
         620,
     ),
+    "diagram_junction_positions": (
+        _d_junction_positions,
+        "Where to excite and where to measure on a junction element (ISO 10848-1)",
+        552,
+    ),
     "diagram_power_injection_rig": (
         _d_power_injection_rig,
         "Power injection: coupling loss factors from measured energies",
@@ -853,6 +918,11 @@ DIAGRAMS = {
         _d_railway_monitoring,
         "How railway vibration is measured in a building (E DIN 4150-2)",
         890,
+    ),
+    "diagram_railway_change_rule": (
+        _d_railway_change_rule,
+        "The 25 % rule for an altered railway line (E DIN 4150-2, 6.5.3.6)",
+        728,
     ),
     "diagram_people_in_buildings": (
         _d_people_in_buildings,
@@ -933,6 +1003,11 @@ DIAGRAMS = {
         _d_anp_records,
         "From an ANP aircraft record to an event level (ECAC Doc 29)",
         866,
+    ),
+    "diagram_flight_path_adjustment": (
+        _d_flight_path_adjustment,
+        "The two sound paths of the Annex 16 adjustment (Figure A2-10)",
+        518,
     ),
     "diagram_rotorcraft_hemisphere": (
         _d_rotorcraft_hemisphere,
@@ -1124,6 +1199,16 @@ DIAGRAMS = {
         "RD 1367/2007: from a noise phase to the three acceptance criteria",
         580,
     ),
+    "diagram_rd1367_inspection": (
+        _d_rd1367_inspection,
+        "RD 1367/2007: where and how an activity is measured (Annex IV)",
+        734,
+    ),
+    "diagram_soundscape_study": (
+        _d_soundscape_study,
+        "A soundscape study: what is collected and what is made of it",
+        768,
+    ),
     "diagram_room_image_sources": (
         _d_room_image_sources,
         "Image-source lattice in plan: first reflections of a 7 × 5 m room",
@@ -1154,6 +1239,11 @@ DIAGRAMS = {
         "How a silencer is measured: the ISO 7235 substitution method",
         710,
     ),
+    "diagram_silencer_pressure_loss": (
+        _d_silencer_pressure_loss,
+        "How the pressure loss of a silencer is measured (ISO 7235, 6.5)",
+        856,
+    ),
     "diagram_silencer_in_situ": (
         _d_silencer_in_situ,
         "How a silencer is measured where it stands (ISO 11820)",
@@ -1169,6 +1259,11 @@ DIAGRAMS = {
         "How an outdoor barrier is measured once it is built (ISO 10847)",
         750,
     ),
+    "diagram_barrier_reflection_setup": (
+        _d_barrier_reflection_setup,
+        "How a noise barrier's reflection is measured in situ (EN 1793-5)",
+        950,
+    ),
     "diagram_open_end_solid_angles": (
         _d_open_end_solid_angles,
         "How a duct end is mounted, and what it keeps in (ISO 7235 Table B.1)",
@@ -1182,7 +1277,7 @@ DIAGRAMS = {
     "diagram_workstation_microphone": (
         _d_workstation_microphone,
         "Where the microphone goes at a work station (ISO 11201 Clause 9)",
-        600,
+        710,
     ),
     "diagram_in_duct_rig": (
         _d_in_duct_rig,
@@ -1194,10 +1289,20 @@ DIAGRAMS = {
         "Where control valve noise is made, and where it is quoted",
         502,
     ),
+    "diagram_valve_quiet_trims": (
+        _d_valve_quiet_trims,
+        "Trims built to be quiet, and the outlet that follows them",
+        680,
+    ),
     "diagram_vdi2081_sheet": (
         _d_vdi2081_sheet,
         "The VDI 2081 worked sheet as a place, and where each number comes from",
         596,
+    ),
+    "diagram_weighting_design_path": (
+        _d_weighting_design_path,
+        "The deterministic weighting design path",
+        750,
     ),
     "diagram_slm_pipeline": (
         _d_slm_pipeline,
@@ -1228,6 +1333,21 @@ DIAGRAMS = {
         _d_humid_air_chain,
         "Humid air from four inputs, step by step (IEC 61094-2 Annex F)",
         938,
+    ),
+    "diagram_fdtd_staggered_cell": (
+        _d_fdtd_staggered_cell,
+        "The staggered grid: where pressure and velocity live",
+        600,
+    ),
+    "diagram_elastic_staggered_cell": (
+        _d_elastic_staggered_cell,
+        "One staggered cell, two solvers: acoustic and elastic",
+        624,
+    ),
+    "diagram_compute_map": (
+        _d_compute_map,
+        "Where heavy work runs: the device, the node and the encoder",
+        890,
     ),
 }
 

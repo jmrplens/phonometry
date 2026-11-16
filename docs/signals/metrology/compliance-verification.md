@@ -8,7 +8,7 @@ Three kinds of evidence back a number computed with this library, and they
 live on different pages. The **verifiers** are public functions that grade a
 filter or weighting you configured against the acceptance limits of its
 governing standard. The **conformance report** is the published table of
-1897 checks that pins the shipped implementation to the standards'
+1899 checks that pins the shipped implementation to the standards'
 own expected values, regenerated on every change. And the **scope notes** on
 each guide say where the software's claim ends and a laboratory's begins.
 This page is the map of the three: what a performance class actually asserts,
@@ -336,7 +336,7 @@ shows.
 
 The verifiers grade *your* configuration. The
 [conformance report](../../CONFORMANCE.md) is the complementary
-evidence: 1897 numerical checks across 111 domains, against
+evidence: 1899 numerical checks across 111 domains, against
 230 normative designations and 121 further published
 sources, each row pinning one implemented quantity to the
 governing standard's own expected value, with the computed value, the signed

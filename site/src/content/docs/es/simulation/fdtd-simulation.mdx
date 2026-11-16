@@ -19,6 +19,14 @@ references:
     doi: "10.1201/9781315372150"
     note: "La sección 3.5 sitúa los métodos ondulatorios en el dominio del tiempo entre las aproximaciones numéricas a la ecuación de onda en recintos, y el capítulo 3 da los modos normales de sala rígida usados como oráculo analítico."
   - type: book
+    authors: ["Mechel, F. P. (Ed.)"]
+    year: 2008
+    title: "Formulas of acoustics"
+    edition: "2.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-76833-3"
+    note: "Sección D.5: la absorción de un plano de reacción local a incidencia oblicua (el integrando de la Ec. 6) y sus medias de campo difuso en dos y tres dimensiones (Ecs. 1, 2 y 4), contra las que la sección 2 lee un borde de impedancia."
+  - type: book
     authors: ["Williams, E. G."]
     year: 1999
     title: "Fourier acoustics: Sound radiation and nearfield acoustical holography"
@@ -119,6 +127,13 @@ precisión frente a una malla colocalizada (Ec. 4.9 frente a 4.10) y permite
 actualizaciones in situ. Como solo se almacenan las caras interiores, el
 borde del dominio es una **pared perfectamente rígida** (velocidad normal
 nula, Ec. 4.32) salvo que se pida otro contorno.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_staggered_cell.svg" alt="A la izquierda, las nueve celdas de la esquina superior izquierda de un dominio FDTD, tres por tres, con los lados superior e izquierdo dibujados como el borde rayado del dominio: un punto azul en cada centro de celda para la presión p, una flecha roja a través de cada cara x interior para vx y una flecha verde a través de cada cara y interior para vy, y ninguna marca en el borde. Una leyenda da las formas, (ny, nx) para p, (ny, nx − 1) para vx y (ny − 1, nx) para vy, sitúa el centro de la celda (ix, iy) en ((ix + 1/2)·dx, (iy + 1/2)·dx) y dice que en el borde no se guarda ninguna cara, una pared rígida según la Ec. 4.32. Un eje de tiempo marca p en los pasos n y n + 1 y vx y vy en n + 1/2 y n + 3/2, unidos por flechas rotuladas Ec. 4.11 y Ec. 4.12. Un recuadro muestra una celda contra una pared de impedancia, con la velocidad de la cara de la pared vb a media celda del centro y la relación p_surf = Z·v_out de las Ecs. 4.33-4.35" width="92%" />
+
+*Dónde guarda `FDTD2D` cada campo. Una fuente o una sonda en `(ix, iy)` actúa
+sobre el punto de esa celda; `vx[iy, ix]` y `vy[iy, ix]` son las caras a su
+derecha y debajo de ella, y un lado de impedancia añade una cara sobre la
+pared.*
 
 El esquema explícito solo es estable mientras un frente de onda cruce como
 mucho una celda por paso temporal. Con celdas cuadradas, el **número de
@@ -344,10 +359,31 @@ incidencia normal son dos pasos: la magnitud de la reflexión es
 $|R| = \sqrt{1-\alpha}$, y para una impedancia real
 $Z = \rho c\,(1+R)/(1-R)$, así que $\alpha = 0{,}5$ pide
 $Z \approx 5{,}83\,\rho c$ y $\alpha = 0{,}9$ alrededor de $1{,}92\,\rho c$. La
-salvedad viene con ello: $R$ solo es exacto a incidencia normal, así que un
-borde de reacción local absorbe menos cuanto más oblicua es la incidencia, y
-una sala rodeada de bordes así decae más despacio de lo que sugiere su
-$\alpha$ nominal.
+salvedad viene con ello: esa $R$ es la reflexión solo a incidencia normal. El
+borde ata la presión en la cara de la pared a la velocidad normal en ella,
+$p = Z v_n$ (Ec. 4.34), llegue la onda de donde llegue, y eso lo hace un plano
+de reacción local. A un ángulo $\theta$ de la normal, un plano así refleja
+$R(\theta) = (Z\cos\theta - \rho c)/(Z\cos\theta + \rho c)$ y absorbe
+$\alpha(\theta) = 4z\cos\theta/(1 + z\cos\theta)^2$, con $z = Z/\rho c$
+(Mechel, sec. D.5). Para $Z > \rho c$, que es lo que da todo objetivo por
+debajo de $\alpha = 1$, la absorción **sube** con la oblicuidad. Es total
+donde $\cos\theta = \rho c/Z$ (80,1° para $5{,}83\,\rho c$, 58,7° para
+$1{,}92\,\rho c$), que es donde la reflexión cambia de signo; se mantiene por
+encima de su valor a incidencia normal hasta $\cos\theta = (\rho c/Z)^2$
+(88,3° y 74,3°), y solo cae a cero en los últimos grados antes de la
+incidencia rasante. Promediados sobre las direcciones de un campo difuso, esos
+dos bordes absorben 0,61 y 0,93 en el plano de este esquema (Mechel, sec. D.5,
+Ec. 1) y 0,67 y 0,94 en tres dimensiones (Ec. 2, la integral de Paris, en la
+forma cerrada de la Ec. 4), no 0,5 y 0,9, así que una sala rodeada de bordes
+como estos dos decae **más deprisa** de lo que sugiere su $\alpha$ nominal. La
+ganancia no llega al final de la escala: por encima de un $\alpha$ nominal de
+unos 0,96 en el plano, y de 0,95 en tres dimensiones, donde ningún plano de
+reacción local promedia más de 0,951, el valor en campo difuso vuelve a quedar
+por debajo del nominal. Un borde absorbe menos cuanto más oblicua es la
+incidencia solo cuando $Z \le \rho c$: el anecoico $Z = \rho c$ se lo lleva
+todo a incidencia normal, devuelve un tercio de la amplitud a 60° y promedia
+0,95 en el plano y 0,91 en tres dimensiones. La batería de tests sujeta el
+borde a $R(\theta)$ de 20° a 80°, dentro de 0,02.
 
 **Pérdidas volumétricas: el mapa `damping`.** `damping` es una tasa de caída
 de amplitud $\sigma$ por celda, en s⁻¹, aplicada a la vez a la presión y a
@@ -482,6 +518,35 @@ plt.show()
 ```
 
 </details>
+
+Las cuatro condiciones se distinguen mejor en movimiento que en una lista. El
+clip de abajo suelta un pulso cerca de la esquina inferior derecha de una caja
+de aire de 4,00 m por 2,25 m cuyos lados llevan una cada uno: el izquierdo se
+deja rígido, el superior es una esponja, el derecho lleva la $\rho c$ anecoica
+y el inferior los $1{,}92\,\rho c$ de una absorción de 0,9 a incidencia
+normal. El panel lateral dibuja lo que devuelve cada uno a cada ángulo.
+
+<Video
+  name="anim_fdtd_boundaries"
+  width={2400}
+  height={1350}
+  title="Un pulso en una caja cuyos cuatro lados son rígido, esponja y dos impedancias"
+  description="Un pulso se extiende desde una fuente cercana a la esquina inferior derecha de una caja de aire. El lado izquierdo, rígido, devuelve el pulso entero como una imagen especular. La esponja del lado superior apenas devuelve nada cerca de su normal, y solo un frente débil desde su extremo lejano, donde el pulso la alcanza a más de 60 grados. El lado derecho, adaptado a la impedancia del aire, no devuelve nada por su normal, marcada con un rayo punteado, y sí un frente invertido que se intensifica cuanto más inclinada es la incidencia. El lado inferior, ajustado para una absorción de 0,9 a incidencia normal, devuelve un frente débil sin invertir cerca de la normal, nada por un segundo rayo punteado a 58,7 grados, y un frente invertido más allá. Un panel lateral traza el coeficiente de reflexión de los tres lados que reflejan frente al ángulo de incidencia: plano en más uno para el lado rígido, cayendo de cero a menos uno para el lado adaptado, y cayendo de 0,32, pasando por cero a 58,7 grados, hasta menos uno para el inferior."
+/>
+
+Compara los frentes que vuelven con el panel lateral. El lado rígido devuelve
+el pulso entero, igual a cualquier ángulo. La esponja apenas devuelve nada
+cerca de su normal, y un frente débil desde su extremo lejano, donde el pulso
+la alcanza a más de 60°: una esponja rinde menos a incidencia oblicua, como
+mide la sección 3. El
+lado derecho, adaptado a $\rho c$, no devuelve nada por su normal, el rayo
+punteado, y sí un frente invertido que crece cuanto más inclinada es la
+incidencia, un tercio de la amplitud a 60°. El inferior devuelve un frente
+débil sin invertir cerca de la normal, 0,32 de la amplitud, nada por el rayo
+punteado a 58,7°, y uno invertido más allá. Esa es la salvedad de la
+conversión de arriba, dibujada: un solo $\alpha$ fija lo que hace un borde de
+impedancia a incidencia normal, y en ningún otro sitio.
+
 
 ### Comprobaciones de que una ejecución es utilizable
 

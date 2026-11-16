@@ -3,16 +3,17 @@
 
 Implements the full-STI indirect method from impulse responses (Schroeder
 modulation transfer function), the direct STIPA method on recorded signals
-(Annex B), an Ed.5-conformant STIPA test-signal generator (clauses A.4
-and A.6.1) and the Annex M adjustment of a measured result to other speech
-and occupancy-noise levels. Only the male speech option exists: Edition 5
-removed the female spectrum and weighting factors (foreword, item d).
+(Annex B), an Ed.5-conformant STIPA test-signal generator (Ed.5 clauses
+A.5 and A.6.1, Ed.4 clause A.4) and the Annex M adjustment of a measured
+result to other speech and occupancy-noise levels. Only the male speech
+option exists: Edition 5 removed the female spectrum and weighting factors
+(foreword, item d).
 
 The computation chain (octave-band MTF -> auditory masking and reception
 threshold correction -> effective SNR clipped to +/-15 dB -> transmission
 indices -> band MTI -> weighted STI) is numerically identical between
-Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5; the only Ed.5 numeric change is
-the male test-signal spectrum (A.6.1).
+Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5, which moves them to A.2 and A.3;
+the only Ed.5 numeric change is the male test-signal spectrum (A.6.1).
 
 The level adjustment of :func:`sti_adjusted_for_levels` is the four-step
 procedure of Ed.4 (2011) Annex M, verified against the printed
@@ -74,7 +75,7 @@ class STIWarning(PhonometryWarning):
     """Warns about suspect STI/STIPA measurements or inputs."""
 
 
-# Octave-band analysis range: 125 Hz - 8 kHz (Ed.4 A.5.1 = Ed.5), 7 bands.
+# Octave-band analysis range: 125 Hz - 8 kHz (Ed.4 A.5.1; the same in Ed.5), 7 bands.
 _BAND_LIMITS = (125.0, 8000.0)
 _NUM_BANDS = 7
 
@@ -86,7 +87,7 @@ _MIN_FS = 22500
 _FS_NOT_POSITIVE_MSG = "Sample rate 'fs' must be positive."
 
 # The 14 full-STI modulation frequencies, 0.63-12.5 Hz in nominal
-# one-third-octave steps (Ed.4 A.2.2 = Ed.5).
+# one-third-octave steps (Ed.4 A.2.2, Ed.5 A.1.4).
 _MOD_FREQS = np.array(
     [0.63, 0.80, 1.00, 1.25, 1.60, 2.00, 2.50, 3.15, 4.00, 5.00, 6.30, 8.00, 10.0, 12.5]
 )
@@ -111,7 +112,7 @@ _AMDB_STEEP_SEGMENT_END_DB = 67.0
 _AMDB_SATURATION_DB = 100.0
 
 # Modulation-transfer validity ceiling: a value above 1.3 means the
-# measurement is likely invalid (IEC 60268-16 A.5.3 NOTE 1, Ed.4 = Ed.5).
+# measurement is likely invalid (Ed.4 A.5.3 NOTE 1; the same rule in Ed.5).
 _MTF_INVALID_ABOVE = 1.3
 
 # STIPA modulation frequency pairs per octave band (Table B.1, unchanged
@@ -132,7 +133,7 @@ _STIPA_MIN_SECONDS = 15.0
 # Table A.4 - the only numeric change of Edition 5).
 _SPEECH_SPECTRUM_ED5 = np.array([-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0])
 
-# Intensity-envelope low-pass cut-off, ~100 Hz (Ed.4 A.5.2 = Ed.5).
+# Intensity-envelope low-pass cut-off, ~100 Hz (Ed.4 A.5.2; the same in Ed.5).
 _ENVELOPE_LPF_HZ = 100.0
 
 # Annex F (informative) qualification bands: edges 0.36-0.76 in 0.04
@@ -386,10 +387,11 @@ def _validate_band_vector(values: NumericArrayLike, name: str) -> NDArray[np.flo
 
 
 def _truncated_mtf(mtf: NumericArrayLike) -> NDArray[np.float64]:
-    """Validate the modulation transfer matrix and truncate it to 1,0.
+    """Validate the modulation transfer matrix and truncate it to 1.0.
 
-    Ed.4 A.5.3 NOTE 1 (= Ed.5): a value above 1,3 means the measurement is
-    invalid, and every value is truncated to 1,0 before the chain runs.
+    Ed.4 A.5.3 NOTE 1 (the same rule in Ed.5): a value above 1.3 means the
+    measurement is invalid, and every value is truncated to 1.0 before the
+    chain runs.
     """
     m, invalid = _checked_mtf(mtf)
     _invalid_mtf_advisory(invalid=invalid)
@@ -397,7 +399,7 @@ def _truncated_mtf(mtf: NumericArrayLike) -> NDArray[np.float64]:
 
 
 def _checked_mtf(mtf: NumericArrayLike) -> tuple[NDArray[np.float64], bool]:
-    """The matrix truncated to 1,0, and whether a value lay above 1,3.
+    """The matrix truncated to 1.0, and whether a value lay above 1.3.
 
     The advisory on such a value is the caller's to give, once every argument
     of the call has been checked (:func:`_invalid_mtf_advisory`).
@@ -417,11 +419,11 @@ def _checked_mtf(mtf: NumericArrayLike) -> tuple[NDArray[np.float64], bool]:
 
 
 def _invalid_mtf_advisory(*, invalid: bool) -> None:
-    """Warn that a modulation transfer value above 1,3 was truncated."""
+    """Warn that a modulation transfer value above 1.3 was truncated."""
     if invalid:
         warn_caller(
             "Modulation transfer values above 1.3 detected: the measurement "
-            "is likely invalid (IEC 60268-16 A.5.3). Values truncated to 1.0.",
+            "is likely invalid (IEC 60268-16 Ed.4 A.5.3). Values truncated to 1.0.",
             STIWarning,
         )
 
@@ -449,7 +451,7 @@ class _LevelCorrection:
     r"""The level-dependent correction of one speech and noise condition.
 
     One entry per octave band, in the order Table M.1 of Annex M tabulates
-    them, so the whole of A.5.3 can be read off a single condition:
+    them, so the whole of Ed.4 A.5.3 can be read off a single condition:
 
     - ``snr``: speech level minus noise level, dB (None without noise);
     - ``noise_transfer``: :math:`m_k(f)` for noise only,
@@ -488,7 +490,7 @@ class _LevelCorrection:
 def _level_correction(
     speech_level: NDArray[np.float64], ambient_level: NDArray[np.float64] | None
 ) -> _LevelCorrection:
-    """Every term of the A.5.3 correction for one condition (Ed.4 = Ed.5).
+    """Every term of the Ed.4 A.5.3 correction for one condition (as in Ed.5).
 
     The single place the auditory masking of Table A.2 and the absolute
     reception threshold of Table A.3 are turned into a multiplicative
@@ -532,7 +534,7 @@ def _corrected_mtf(
     level: NumericArrayLike | None,
     ambient: NumericArrayLike | None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64] | None, NDArray[np.float64] | None]:
-    """Apply the noise and level-dependent corrections of A.5.3.
+    """Apply the noise and level-dependent corrections of Ed.4 A.5.3.
 
     Without absolute levels only the signal-to-noise correction applies; with
     them the auditory masking and absolute reception threshold join it.
@@ -569,21 +571,21 @@ def _index_from_corrected_mtf(
     band_levels: NDArray[np.float64] | None,
     ambient_levels: NDArray[np.float64] | None,
 ) -> STIResult:
-    r"""A.5.4 to A.5.6 on a matrix that already carries every correction.
+    r"""Ed.4 A.5.4 to A.5.6 on a matrix that already carries every correction.
 
     Effective SNR clipped to +/-15 dB, transmission indices
     :math:`TI = (SNR_{\mathrm{eff}} + 15)/30`, the band MTIs and the
-    male-weighted STI truncated to 1,0. ``m`` must already lie in [0, 1];
+    male-weighted STI truncated to 1.0. ``m`` must already lie in [0, 1];
     :func:`_truncated_mtf` is what puts it there.
     """
     # m = 0 and m = 1 map to the clip limits through the log divergences.
     with np.errstate(divide="ignore"):
         snr_eff = 10.0 * np.log10(m / (1.0 - m))
     snr_eff = np.clip(snr_eff, -15.0, 15.0)
-    ti = (snr_eff + 15.0) / 30.0  # A.5.5
+    ti = (snr_eff + 15.0) / 30.0  # Ed.4 A.5.5
     mti = ti.mean(axis=1)
 
-    # A.5.6 with the Ed.5 Table A.1 male factors; truncated to 1,0 (the
+    # Ed.4 A.5.6 with the Ed.5 Table A.1 male factors; truncated to 1.0 (the
     # known alpha/beta artefact can push the raw sum above 1).
     sti = float(
         np.dot(_ALPHA_MALE, mti) - np.dot(_BETA_MALE, np.sqrt(mti[:-1] * mti[1:]))
@@ -608,11 +610,11 @@ def _sti_from_mtf(
     r"""STI computation chain from a matrix of modulation transfer values.
 
     Applies, in order: m > 1 truncation (Ed.4 A.5.3 NOTE 1), the optional
-    signal-to-noise and level-dependent corrections (Ed.4 A.5.3 = Ed.5),
-    the effective SNR with +/-15 dB limits (A.5.4), the transmission
-    indices :math:`TI = (SNR_{\mathrm{eff}} + 15)/30` (A.5.5), the band MTIs
+    signal-to-noise and level-dependent corrections (Ed.4 A.5.3, the same in Ed.5),
+    the effective SNR with +/-15 dB limits (Ed.4 A.5.4), the transmission
+    indices :math:`TI = (SNR_{\mathrm{eff}} + 15)/30` (Ed.4 A.5.5), the band MTIs
     and the final
-    weighted STI truncated to 1.0 (A.5.6, male factors of Ed.5 Table A.1).
+    weighted STI truncated to 1.0 (Ed.4 A.5.6, male factors of Ed.5 Table A.1).
 
     Noise handling: ``snr`` alone multiplies ``m`` by
     :math:`1/(1 + 10^{-SNR/10})`,
@@ -659,10 +661,10 @@ def sti_adjusted_for_levels(
     3. multiply by the correction the operational levels produce, putting
        the occupancy noise, masking and threshold of the simulated
        condition back in;
-    4. process the resulting matrix into the index by the usual A.5.4 to
-       A.5.6 chain.
+    4. process the resulting matrix into the index by the usual Ed.4 A.5.4
+       to A.5.6 chain.
 
-    Steps 2 and 3 run the one level-dependent correction of clause A.5.3
+    Steps 2 and 3 run the one level-dependent correction of Ed.4 clause A.5.3
     that the forward chain applies, once inverted and once as it stands, so
     the adjustment cannot drift from the masking and threshold model the
     rest of the module uses.
@@ -714,7 +716,7 @@ def sti_adjusted_for_levels(
         if operational_ambient is None
         else _validate_band_vector(operational_ambient, "operational_ambient"),
     )
-    # Step 2 leaves the channel alone and may exceed 1,0; step 3 puts the
+    # Step 2 leaves the channel alone and may exceed 1.0; step 3 puts the
     # operational condition back, and only then is the matrix truncated.
     source = _truncated_mtf(mtf) / measured.factor[:, np.newaxis]
     adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis])
@@ -771,8 +773,8 @@ def sti_from_impulse_response(
        m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right|
        \Big/ \int h_k^2(t)\, dt
 
-    at the 14 modulation frequencies 0,63-12,5 Hz
-    (A.2.2). The result then follows the standard chain: optional noise
+    at the 14 modulation frequencies 0.63-12.5 Hz
+    (Ed.4 A.2.2, Ed.5 A.1.4). The result then follows the standard chain: optional noise
     degradation, optional auditory masking and absolute reception
     threshold correction, effective SNR clipped to +/-15 dB, transmission
     indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
@@ -784,7 +786,7 @@ def sti_from_impulse_response(
 
     .. note:: The indirect method has a small positive MTF bias that grows
        with reverberation time for a finite noise-carrier IR. It stays within
-       the IEC 60268-16 A.5.1.2 systematic-error allowance (<= 0.01 STI) up to
+       the IEC 60268-16 Ed.4 A.5.1.2 systematic-error allowance (<= 0.01 STI) up to
        about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
        (T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
        (exact) Schroeder integration, and does not depend on IR truncation.
@@ -800,7 +802,7 @@ def sti_from_impulse_response(
         moves neither the transfer values nor the STI. The absolute levels
         the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
-    :param fs: Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits).
+    :param fs: Sample rate in Hz (>= 22.5 kHz so the 8 kHz band fits).
         Required for a bare array; a :class:`~phonometry.io.Signal` brings
         its own, and an explicit value that disagrees with it raises
         instead of silently winning.
@@ -856,12 +858,12 @@ def sti_from_impulse_response(
 
 def _intensity_envelopes(x: NDArray[np.float64], fs: float) -> NDArray[np.float64]:
     """Octave-band intensity envelopes I_k(t) = x_k^2(t) low-passed at
-    ~100 Hz (Ed.4 A.5.2 = Ed.5), shape (7, n).
+    ~100 Hz (Ed.4 A.5.2; the same in Ed.5), shape (7, n).
 
     Zero-phase band filtering: forward-backward filtering has no phase
-    distortion (the A.3.1.2 edge-carrier bias criterion, < 0,01 STI over
-    TI 0,1-0,9) and doubles the effective skirt attenuation to >= 41 dB
-    at the adjacent octave (the C.4.2 filter-slope criterion, m >= 0,5,
+    distortion (the Ed.5 A.3.1.2 edge-carrier bias criterion, < 0.01 STI over
+    TI 0.1-0.9) and doubles the effective skirt attenuation to >= 41 dB
+    at the adjacent octave (the C.4.2 filter-slope criterion, m >= 0.5,
     steeper than IEC 61260-1 class 1). Single-pass filtering fails both
     verification criteria of IEC 60268-16:2020.
     """
@@ -993,8 +995,8 @@ def stipa(
     low-passed (~100 Hz) into intensity envelopes, and the modulation
     depths at the two Table B.1 modulation frequencies of each band are
     measured with the sine/cosine correlation over an integer number of
-    periods (Ed.4 A.5.2 = Ed.5). The modulation transfer values are the
-    measured depths normalized by the source modulation index 0,55
+    periods (Ed.4 A.5.2; the same in Ed.5). The modulation transfer values are the
+    measured depths normalized by the source modulation index 0.55
     (Annex B), or by the depths measured on ``reference`` when the
     actually emitted signal is supplied, and feed the same masking /
     threshold / TI / STI chain as the full method.
@@ -1016,12 +1018,12 @@ def stipa(
         moves neither the transfer values nor the STI. The absolute levels
         the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
-    :param fs: Sample rate in Hz (>= 22,5 kHz). Required for a bare array;
+    :param fs: Sample rate in Hz (>= 22.5 kHz). Required for a bare array;
         a :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
     :param reference: Optional reference recording of the undistorted
         test signal; its measured modulation depths replace the nominal
-        0,55 as normalization (useful for non-conformant sources). Accepts
+        0.55 as normalization (useful for non-conformant sources). Accepts
         a :class:`phonometry.io.Signal`. It is a second recording of the
         same test signal, so it has to share the rate: two Signals that
         disagree are refused rather than arbitrated, and measuring the
@@ -1116,19 +1118,19 @@ def stipa_signal(
     """Generate an IEC 60268-16:2020 conformant STIPA test signal.
 
     Pink-noise carriers are band-limited to half-octave bands centred on
-    the seven octave-band frequencies (clause A.4), set to the Ed.5 male
-    speech spectrum of clause A.6.1 (``-2,5; 0,5; 0; -6; -12; -18; -24``
+    the seven octave-band frequencies (Ed.5 clause A.5, Ed.4 A.4), set to the
+    Ed.5 male speech spectrum of clause A.6.1 (``-2,5; 0,5; 0; -6; -12; -18; -24``
     dB re the 500 Hz band) and intensity-modulated with
     ``0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))``: the Table B.1
     frequency pair of each band, 180 degrees between components, applied
     in amplitude through its square root (Annex B).
 
-    :param fs: Sample rate in Hz (>= 22,5 kHz).
+    :param fs: Sample rate in Hz (>= 22.5 kHz).
     :param duration_s: Duration in seconds (the standard recommends 15 s to
         25 s; default 18 s).
     :param level: Optional overall level in dB SPL: the output is
         scaled so its RMS, taken as pascals, sits at ``level`` re
-        20 uPa. Default (None) normalizes the RMS to 0,1 (digital full
+        20 uPa. Default (None) normalizes the RMS to 0.1 (digital full
         scale headroom for the 12-14 dB crest factor).
     :param seed: Seed for the pink-noise generator (None: random).
     :return: Test signal, 1D array of ``round(duration_s * fs)`` samples.

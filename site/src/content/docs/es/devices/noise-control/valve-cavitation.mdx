@@ -85,7 +85,7 @@ print(round(noise_control.corrected_incipient_ratio(x_fz, 1.0e6), 4))
 #                                                       # 0.2386  a 10 bar
 ```
 
-Esta válvula está por encima de su umbral, así que cavita. Un interno
+Esta válvula está por encima de su umbral, así que cavita. Un obturador
 multiorificio de la misma capacidad no lo estaría: la Ecuación (3b) responde a
 la geometría de los orificios y no a la capacidad, y ciento veinte agujeros de
 tres milímetros suben el umbral la mitad. La comparación hay que hacerla
@@ -314,11 +314,20 @@ for stage in stages:
 print(round(noise_control.combined_stage_level([78.0, 74.0, 71.0]), 1))   # 80.0
 ```
 
+Los obturadores con los que se construye una válvula multietapa están
+dibujados debajo, junto a las familias para gas de IEC 60534-8-3 que los
+comparten.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_quiet_trims.svg" alt="Cuatro secciones esquemáticas en una rejilla de dos por dos, ninguna a escala ni de ningún fabricante. Arriba a la izquierda, una jaula perforada: un obturador junto a una pared de jaula atravesada por cinco pasos, cuatro de ellos con un chorro de salida, la longitud de paso l acotada a lo ancho de la pared y el diámetro de paso d en el del medio; las notas dicen muchos chorros pequeños en vez de uno grande, pasos de un mismo diámetro hidráulico lo bastante separados para que los chorros no interactúen, y l entre d contado hasta 4 en la Ecuación 26. Arriba a la derecha, un solo paso de flujo a través de tres etapas cuyas aberturas se ensanchan a lo largo del flujo, con p1 en la entrada, pn antes de la última etapa y p2 en la salida, y la última etapa marcada con su coeficiente de caudal Cn; las notas dicen que cada etapa se lleva parte de la caída mientras el área de paso crece, que solo se calcula la última etapa, con pn en lugar de p1, y que las etapas anteriores entran por p1 entre pn en la Ecuación 31. Abajo a la izquierda, tres pasos en paralelo desde una misma entrada, cada uno con tres etapas que se ensanchan a lo largo del flujo y la última marcada; las notas dicen que todos los cálculos del 6.4 se hacen sobre la última etapa y que el subapartado solo cubre válvulas de recorrido lineal. Abajo a la derecha, la salida de la válvula de diámetro di que se abre por un cono a la tubería de diámetro Di, con el cono marcado como 30 grados de ángulo total como máximo según el 7.1; las notas dicen que el apartado 7 es para válvulas con números de Mach de salida más altos, con o sin expansor aguas abajo" width="100%" />
+
+*El panel (b) es el dispositivo de la Figura 2 de IEC 60534-8-4: el área de
+paso crece etapa a etapa y solo se calcula la última.*
+
 Esos tres coeficientes crecen a lo largo del flujo, que es el dispositivo de
 la Figura 2: la mayor parte de la presión se toma en las primeras etapas y la
 última queda trabajando con un diferencial lo bastante pequeño como para no
 cavitar. El 6.3.2 calcula entonces **solo** esa última etapa, porque el sonido
-que hacen las anteriores se absorbe dentro del interno antes de llegar a la
+que hacen las anteriores se absorbe dentro del obturador antes de llegar a la
 tubería, y limita el diferencial con el umbral de cavitación de la última
 etapa en vez de con el punto de bloqueo:
 
@@ -355,7 +364,7 @@ sonora de las (7a) y (7b), el nivel interior en la pared de la tubería de la
 (10), el número de Strouhal y las dos frecuencias de pico de las (11) a (13),
 la frecuencia de anillo y la pérdida por transmisión de las (14) a (17) con el
 suelo de la NOTA, el nivel exterior de las (18a) y (18b), y toda la ruta en
-frecuencia del 5.4 por bandas. Y el apartado 6 para un interno multietapa: las
+frecuencia del 5.4 por bandas. Y el apartado 6 para un obturador multietapa: las
 presiones y cocientes por etapa de las Ecuaciones (23a) a (26), la suma
 energética de la (27), y el diferencial, el modificador de estilo y el
 diámetro de asiento de la última etapa del 6.3.2.

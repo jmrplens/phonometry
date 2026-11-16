@@ -209,6 +209,19 @@ print(change.passes, change.kb_fmax_met, change.kb_ftr_met)  # False True False
 print(f"{change.kb_ftr_increase_percent:.0f} %")  # 44 %
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_change_rule.svg" alt="Un diagrama de decisión para el caso planificado de una línea de ferrocarril modificada o ampliada. Arriba, una pregunta: ¿KB Fmax es menor o igual que A u? El sí baja directo por el borde derecho hasta la caja del pie, requisitos dados por cumplidos. El no se divide en dos carriles. Carril izquierdo, apartado 6.5.3.6 a) de día y b) de noche: ¿KB Fmax es menor o igual que A o? El sí va a una caja, condición de KB Fmax cumplida; el no va a una segunda pregunta, ¿KB Fmax crece menos de un 25 por ciento?, cuyo sí llega a la misma caja y cuyo no lleva a una caja roja en el centro, estudiar la mitigación. Carril derecho, apartado 6.5.3.6 c): ¿KB FTr es menor o igual que A r?, y si no, ¿KB FTr crece menos de un 25 por ciento?, con las mismas dos salidas. Una línea une las dos cajas de condición bajo las palabras tienen que cumplirse las dos y lleva a la caja requisitos dados por cumplidos; bajo la caja roja, basta con una de las dos. Las notas del pie dicen que el crecimiento es el del caso planificado frente al caso sin proyecto, que de noche A o es 0,6 en superficie en cualquier zona y bajo tierra el de la tabla 1 en las filas 1 y 2 y 0,3 en las filas 3 a 5, que el apartado tal como está impreso pide una condición mientras su ejemplo 9 va a mitigación con KB Fmax sin cambios, y que 6.5.3.6 pide un valor por debajo de A o, mientras que en el propio A o la lámina sigue el 6.3, donde solo falla un valor por encima de A o" width="96%" />
+
+*El mismo párrafo como camino. Un $KB_\mathrm{Fmax}$ planificado igual o menor que
+$A_\mathrm{u}$ lo zanja de inmediato, como en la figura 2 del borrador. Pasado eso, cada
+magnitud tiene su propia condición, que se cumple manteniéndose en su valor guía
+o creciendo menos de un 25 % frente al caso sin proyecto, y la biblioteca pide
+las dos. El apartado imprime «por debajo de $A_\mathrm{o}$» de día y de noche; en el
+propio $A_\mathrm{o}$ la lámina sigue el 6.3, donde solo falla un valor por encima de
+$A_\mathrm{o}$. La noche del ejemplo 9 baja por los dos carriles: su $KB_\mathrm{Fmax}$ de
+0,66 supera el 0,6 que 6.5.3.6 b) fija en superficie y no crece, así que esa
+condición se cumple; su $KB_\mathrm{FTr}$ supera $A_\mathrm{r}$ y crece un 44 %, así que esa
+falla, y el proyecto va a mitigación, que es lo que imprimió `change.passes`.*
+
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example.svg" alt="Un gráfico de barras de la intensidad de valoración de día y de noche, sobre un eje de 0 a 0,13. En cada grupo una barra verde es el caso sin el proyecto y una barra azul el caso con la segunda vía: 0,039 y 0,046 de día, 0,065 y 0,094 de noche. Una línea roja marca A r, 0,1 de día y 0,07 de noche, y una línea gris discontinua un 25 por ciento por encima de la barra verde, en 0,048 de día y 0,081 de noche. De día las dos barras quedan por debajo de las dos líneas; de noche la barra azul sube por encima de la línea del 25 por ciento y por encima de A r, y una nota dice mitigación" width="96%" />
 
 <details>

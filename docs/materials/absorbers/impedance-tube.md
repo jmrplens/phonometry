@@ -358,7 +358,7 @@ with it; and read a healthy-looking $\alpha$ beside an implausible impedance
 (a negative real part, say) as an $x_1$ or a mismatch fault, not as a material
 result.
 
-**Video:** [Standing wave in the impedance tube (ISO 10534-2)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_standing_wave_tube.webm): The incident and reflected waves travel inside a drawn impedance tube and their sum forms the standing-wave envelope; a rigid termination with deep envelope nodes is compared with a porous sample with shallow ones, sampled by the two flush wall microphones.
+**Video:** [Standing wave in the impedance tube (ISO 10534-2)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_standing_wave_tube.webm): The incident and reflected waves travel inside a drawn impedance tube and their sum forms the standing-wave envelope; a rigid termination with deep envelope nodes is compared with a porous sample with shallow ones, sampled by the two flush wall microphones.
 
 ```python
 import numpy as np
@@ -887,9 +887,9 @@ duct: the empty tube passes it unchanged, the lossy layer splits it into a
 reflection and an attenuated transmission that the four ASTM microphones
 resolve.
 
-**Video:** [The virtual impedance tube in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_impedance_tube.webm): A loudspeaker drives a sustained 850 Hz plane tone into a 1.2 metre rigid-walled virtual impedance tube, drawn as the real instrument with its two flush microphones and rigid end plug. Against the rigid plug the standing-wave envelope grows deep minima, while a 10 cm lossy sample in front of the same plug leaves the minima shallow; the recovered absorption of 0.54 is annotated.
+**Video:** [The virtual impedance tube in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_impedance_tube.webm): A loudspeaker drives a sustained 850 Hz plane tone into a 1.2 metre rigid-walled virtual impedance tube, drawn as the real instrument with its two flush microphones and rigid end plug. Against the rigid plug the standing-wave envelope grows deep minima, while a 10 cm lossy sample in front of the same plug leaves the minima shallow; the recovered absorption of 0.54 is annotated.
 
-**Video:** [The virtual transmission tube in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_transmission_tube.webm): The loudspeaker end fires a carrier packet down a 1.6 metre rigid-walled virtual transmission tube drawn as the real instrument, with its four flush microphones and hatched anechoic termination. The empty tube passes the packet unchanged; a 10 cm lossy layer mid-tube splits it into a reflected train and an attenuated transmission, with the 3.1 dB transmission loss annotated.
+**Video:** [The virtual transmission tube in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_transmission_tube.webm): The loudspeaker end fires a carrier packet down a 1.6 metre rigid-walled virtual transmission tube drawn as the real instrument, with its four flush microphones and hatched anechoic termination. The empty tube passes the packet unchanged; a 10 cm lossy layer mid-tube splits it into a reflected train and an attenuated transmission, with the 3.1 dB transmission loss annotated.
 
 ## What this guide covers
 

@@ -41,13 +41,40 @@ $$
 f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
-**Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact midband
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Three octaves about 1 kHz, from 354.8 Hz to 2818.4 Hz on a logarithmic frequency axis, cut into four rows of bands, each band carrying its exact mid-band frequency and, in bold, its label. Octave, b = 1: three bands centred on 501.2, 1000.0 and 1995.3 Hz, labelled 500, 1k and 2k. Half octave, b = 2: six bands, the two that meet at 1 kHz centred on 841.4 and 1188.5 Hz and labelled 841 and 1.19k. One-third octave, b = 3: nine bands from 398.1 to 2511.9 Hz, the middle one centred on 1000.0 Hz and the next one, 1258.9 Hz, labelled 1.25k. One-sixth octave, b = 6: eighteen bands, the two that meet at 1 kHz centred on 944.1 and 1059.3 Hz and labelled 940 and 1.06k. A dashed line marks the reference frequency of 1 kHz: it meets a mid-band frequency in the two rows of odd b and runs along a band edge in the two rows of even b, where no band is centred on it" width="100%"></picture>
+
+The ruler draws the three octaves about 1 kHz as `nominal_frequencies` returns
+them for `fraction=1`, `2`, `3` and `6`, each band from $f_1$ to $f_2$. Every
+row shares the edges of the octave bands, so an octave band is exactly two
+half-octave, three one-third-octave or six one-sixth-octave bands. The rows
+differ at the reference: the odd ones have a band centred on it, the even ones
+a band edge.
+
+**Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact mid-band
 frequency; what an instrument prints (and what `nominal_frequencies` returns as
-its `labels`, or `octave_filter(..., nominal=True)`) is the ISO 266 preferred
-number nearest to it. The one-third-octave band whose exact centre is 1258.9 Hz
-is labelled 1250 Hz, and the sixth-octave band centred on 1059.3 Hz is labelled
-1.06k. Compare band levels between tools by index or by exact centre, never by
-matching label strings: different tools round the labels differently.
+its `labels`, or `octave_filter(..., nominal=True)`) is the *nominal* mid-band
+frequency of IEC 61260-1:2014 (5.5 and Annex E), and how it is rounded depends
+on the fraction:
+
+- **Octave and one-third octave.** The nominal frequencies of Table E.1, which
+  are the preferred frequencies of ISO 266: the one-third-octave band whose
+  exact centre is 1258.9 Hz is labelled 1250 Hz (`1.25k`).
+- **Half octave.** The exact centre rounded to its first three significant
+  digits (E.2): 841.4 Hz is labelled `841`.
+- **From 1/4 to 1/24 octave.** Three significant digits when the leading digit
+  of the exact centre is 1 to 4, and two when it is 5 to 9 (E.3.2 and E.3.3):
+  the sixth-octave bands centred on 944.1 Hz and 1059.3 Hz are labelled `940`
+  and `1.06k`.
+- **Finer than 1/24 octave.** E.3.5 asks for more significant digits until no
+  two labels in a decade are the same, and `nominal_frequencies` adds the
+  fewest that do it to both counts of E.3: none up to 1/36 octave, one at 1/48,
+  where the band centred on 497.6 Hz is labelled `497.6` and the next one, at
+  504.8 Hz, `505`.
+
+ISO 266 lists preferred frequencies for the octave and the one-third octave
+only, so the label of any other fraction is not a preferred number. Compare
+band levels between tools by index or by exact centre, never by matching label
+strings: different tools round the labels differently.
 
 ## Frequency Resolution vs FFT Bin Spacing
 
@@ -478,6 +505,10 @@ not because it lies above `max_valid_frequency` alone, but whenever the field
 reactivity climbs to within the bias-error factor of the instrument's residual
 index, which happens first at the *low*-frequency end.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spacer_bandwidth_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spacer_bandwidth.svg" alt="Two stacked panels against frequency. Above, the finite-difference bias for 6, 12 and 50 mm spacers, each falling away from 0 dB and crossing the dashed minus 0.3 dB line exactly at its own maximum valid frequency of 5.72, 2.86 and 0.69 kHz. Below, the residual-index margin each spacer inherits relative to the 25 mm separation IEC 61043 Table 2 is written for: minus 6.2 dB for 6 mm, minus 3.2 dB for 12 mm and plus 3.0 dB for 50 mm" width="92%"></picture>
+
+*Both ends of the band on one frequency axis, for 6, 12 and 50 mm spacers. Above, the finite-difference bias $\sin(k\Delta r)/(k\Delta r)$ of each: it crosses −0.3 dB at the spacer's own `max_valid_frequency`, 5.72, 2.86 and 0.69 kHz. That bound is stricter than the working ranges quoted above, which run on to about 1 dB of bias at their top (−1.0 dB at 1.25 kHz for 50 mm, −0.9 dB at 5 kHz for 12 mm). Below, what the spacer does to the other end: Table 2 of IEC 61043 states the minimum residual index for a 25 mm separation and its Note 1 moves the requirement by $10\log_{10}(x/25)$ for a separation of $x$ mm, which is how much the index a given phase mismatch leaves changes with the spacer: −6.2 dB for 6 mm, −3.2 dB for 12 mm and +3.0 dB for 50 mm. Doubling the spacer is worth 3 dB of low-frequency margin.*
+
 That residual index is measured, not looked up. A residual intensity testing
 device presents the same sound pressure to both microphones at once, both ports
 opening onto one small cavity, so whatever intensity the probe then indicates is
@@ -485,6 +516,10 @@ pure phase-mismatch residual and $\delta_{pI0} = L_p - L_I$ in that state, per
 band. It is part of the checks made before a survey, with the microphones in the
 same ports and orientation they will be used in, and any phase compensation
 applied there stays applied for the measurement.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_residual_intensity_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_residual_intensity_check.svg" alt="Three panels. First, the IEC 61043 residual-intensity testing device: a small coupler driving pink or white noise onto both probe capsules at the same level within plus or minus 0.1 decibel, from which the residual index is read as the pressure level minus the indicated intensity level. Second, an IEC 60942 class 0 or class 1 sound calibrator applied to one microphone at a time, with the instrument adjusted to within plus or minus 0.1 decibel in both channels. Third, the in-situ probe-reversal test: the probe on the measurement surface reading a positive normal intensity, then rotated 180 degrees about its acoustic centre and reading a negative one, accepted when the two have opposite signs and differ by less than 1.5 decibel in the band of maximum level" width="92%"></picture>
+
+*The paragraph above is the first panel: the testing device of IEC 61043 clause 10.2, with pink or white noise over the whole or part of 45 Hz to 7.1 kHz and both capsules at the same level within ±0.1 dB (at least from 45 Hz to 1 kHz), from which $\delta_{pI0}$ is read. The other two panels are checks this page does not develop: the pressure check of each channel with a sound calibrator, adjusted to ±0.1 dB (IEC 61043 clause 14 b; ISO 9614-1 clause 6.2.1), and the probe reversal on the measurement surface, in which the two readings must have opposite signs and differ by less than 1.5 dB in the band of maximum level (clause 6.2.2 of ISO 9614-1 and of ISO 9614-2). The [Sound Intensity guide](../../devices/emission/intensity.md) works through both.*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="88%"></picture>
 

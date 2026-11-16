@@ -42,7 +42,7 @@ The animation below shows that integration at work: as the band level of a
 1 kHz narrowband sound steps up, the specific-loudness pattern $N'(z)$ grows
 along the Bark axis and the area under it is the total loudness in sones.
 
-**Video:** [How specific loudness integrates to total loudness](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_specific_loudness.webm): The specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones.
+**Video:** [How specific loudness integrates to total loudness](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_specific_loudness.webm): The specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones.
 
 ### Measuring the input (clause 4)
 

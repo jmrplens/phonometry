@@ -120,14 +120,43 @@ $$
 f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Tres octavas en torno a 1 kHz, de 354,8 Hz a 2818,4 Hz sobre un eje de frecuencia logarítmico, cortadas en cuatro filas de bandas, cada banda con su frecuencia central exacta y, en negrita, su etiqueta. Octava, b = 1: tres bandas centradas en 501,2, 1000,0 y 1995,3 Hz, etiquetadas 500, 1k y 2k. Media octava, b = 2: seis bandas; las dos que se tocan en 1 kHz están centradas en 841,4 y 1188,5 Hz y etiquetadas 841 y 1,19k. Tercio de octava, b = 3: nueve bandas de 398,1 a 2511,9 Hz; la del medio está centrada en 1000,0 Hz y la siguiente, la de 1258,9 Hz, se etiqueta 1,25k. Sexto de octava, b = 6: dieciocho bandas; las dos que se tocan en 1 kHz están centradas en 944,1 y 1059,3 Hz y etiquetadas 940 y 1,06k. Una línea discontinua marca la frecuencia de referencia de 1 kHz: coincide con una frecuencia central en las dos filas de b impar y recorre un borde de banda en las dos filas de b par, donde ninguna banda está centrada en ella" width="100%" />
+
+La regla dibuja las tres octavas en torno a 1 kHz tal como las devuelve
+`nominal_frequencies` con `fraction=1`, `2`, `3` y `6`, cada banda de $f_1$ a
+$f_2$. Todas las filas comparten los bordes de las bandas de octava, así que una
+banda de octava son exactamente dos bandas de media octava, tres de tercio de
+octava o seis de sexto de octava. Las filas difieren en la referencia: las
+impares tienen una banda centrada en ella y las pares, un borde de banda.
+
 **Centro exacto frente a etiqueta impresa.** El $f_\mathrm{m}$ de arriba es la frecuencia
 central exacta; lo que imprime un instrumento (y lo que `nominal_frequencies`
-devuelve en `labels`, o `octave_filter(..., nominal=True)`) es el
-número preferente de ISO 266 más próximo a ella. La banda de tercio de octava
-cuyo centro exacto es 1258,9 Hz se etiqueta 1250 Hz, y la banda de sexto de
-octava centrada en 1059,3 Hz se etiqueta 1.06k. Los niveles de banda se comparan
-entre herramientas por índice o por centro exacto, nunca casando cadenas de
-etiqueta: cada herramienta redondea las etiquetas a su manera.
+devuelve en `labels`, o `octave_filter(..., nominal=True)`) es la frecuencia
+central *nominal* de IEC 61260-1:2014 (5.5 y Anexo E), y cómo se redondea
+depende de la fracción (las etiquetas entre comillas de código son las cadenas
+que devuelve `labels`, con punto decimal; la regla de arriba escribe las mismas
+con coma, `1.06k` es su 1,06k):
+
+- **Octava y tercio de octava.** Las frecuencias nominales de la Tabla E.1, que
+  son las frecuencias preferentes de ISO 266: la banda de tercio de octava cuyo
+  centro exacto es 1258,9 Hz se etiqueta 1250 Hz (`1.25k`).
+- **Media octava.** El centro exacto redondeado a sus tres primeras cifras
+  significativas (E.2): 841,4 Hz se etiqueta `841`.
+- **De 1/4 a 1/24 de octava.** Tres cifras significativas cuando la primera
+  cifra del centro exacto va de 1 a 4, y dos cuando va de 5 a 9 (E.3.2 y
+  E.3.3): las bandas de sexto de octava centradas en 944,1 Hz y 1059,3 Hz se
+  etiquetan `940` y `1.06k`.
+- **Más fina que 1/24 de octava.** E.3.5 pide más cifras significativas hasta
+  que ninguna etiqueta se repita dentro de una década, y `nominal_frequencies`
+  añade a las dos cuentas de E.3 las menos que lo consiguen: ninguna hasta 1/36
+  de octava y una a 1/48, donde la banda centrada en 497,6 Hz se etiqueta
+  `497.6` y la siguiente, en 504,8 Hz, `505`.
+
+ISO 266 solo da frecuencias preferentes para la octava y el tercio de octava,
+así que la etiqueta de cualquier otra fracción no es un número preferente. Los
+niveles de banda se comparan entre herramientas por índice o por centro exacto,
+nunca casando cadenas de etiqueta: cada herramienta redondea las etiquetas a su
+manera.
 
 <span id="resolucion-frecuencial-vs-separacion-de-bins-fft"></span>
 
@@ -565,7 +594,7 @@ $$
 \rho_0 \frac{\partial u}{\partial t} = -\frac{\partial p}{\partial r}
 $$
 
-Una sonda p-p aproxima el gradiente de presión por la **diferencia finita** de dos micrófonos separados una distancia de separador $\Delta r$ (IEC 61043:1993, definición 3.2):
+Una sonda p-p aproxima el gradiente de presión por la **diferencia finita** de dos micrófonos separados por un espaciador de longitud $\Delta r$ (IEC 61043:1993, definición 3.2):
 
 $$
 p = \frac{p_1 + p_2}{2}, \qquad u = -\frac{1}{\rho_0 \Delta r} \int (p_2 - p_1)\ dt, \qquad I = \overline{p\ u}
@@ -583,16 +612,16 @@ $$
 \frac{\sin(k \Delta r)}{k \Delta r}, \qquad k = \frac{2 \pi f}{c}
 $$
 
-El apartado 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un separador de 25 mm). Por debajo de $f = 0{,}1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
+El apartado 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un espaciador de 25 mm). Por debajo de $f = 0{,}1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
 
 **La banda útil también está acotada por abajo, y la biblioteca no expone
-ninguna cota para eso.** Partir el separador por la mitad duplica el techo de la
+ninguna cota para eso.** Partir el espaciador por la mitad duplica el techo de la
 banda y a la vez *reduce a la mitad* la diferencia de presión verdadera entre
 los dos micrófonos, porque esa diferencia se encoge como $k \Delta r$. Cualquier
 desajuste de fase residual entre canales queda por tanto amplificado en la misma
 proporción, y a baja frecuencia acaba tapando a la intensidad verdadera, que es
-la razón por la que una sonda se entrega con un juego de separadores y no con
-uno solo. Como órdenes de magnitud, un separador de 50 mm cubre
+la razón por la que una sonda se entrega con un juego de espaciadores y no con
+uno solo. Como órdenes de magnitud, un espaciador de 50 mm cubre
 aproximadamente los tercios de 50 Hz a 1,25 kHz y uno de 12 mm
 aproximadamente de 200 Hz a 5 kHz, así que una campaña en todo el rango son dos
 pasadas cosidas por el solape. La consecuencia para la validez es que una banda
@@ -600,6 +629,10 @@ falla no solo por quedar por encima de `max_valid_frequency`, sino siempre que
 la reactividad del campo se acerca al índice residual del instrumento a menos
 del factor de error de sesgo, y eso ocurre antes en el extremo de frecuencias
 *bajas*.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spacer_bandwidth.svg" alt="Dos paneles apilados frente a la frecuencia. Arriba, el sesgo por diferencias finitas de los espaciadores de 6, 12 y 50 mm, cada uno alejándose de 0 dB y cruzando la línea discontinua de menos 0,3 dB justo en su propia frecuencia máxima válida de 5,72, 2,86 y 0,69 kHz. Abajo, el margen de índice residual que hereda cada espaciador respecto a la separación de 25 mm para la que está escrita la Tabla 2 de IEC 61043: menos 6,2 dB con 6 mm, menos 3,2 dB con 12 mm y más 3,0 dB con 50 mm" width="92%" />
+
+*Los dos extremos de la banda sobre un mismo eje de frecuencia, para espaciadores de 6, 12 y 50 mm. Arriba, el sesgo por diferencias finitas $\sin(k\Delta r)/(k\Delta r)$ de cada uno: cruza los −0,3 dB en su propia `max_valid_frequency`, 5,72, 2,86 y 0,69 kHz. Esa cota es más estricta que los rangos de trabajo citados arriba, que siguen hasta cerca de 1 dB de sesgo en su extremo superior (−1,0 dB a 1,25 kHz con 50 mm, −0,9 dB a 5 kHz con 12 mm). Abajo, lo que el espaciador le hace al otro extremo: la Tabla 2 de IEC 61043 fija el índice residual mínimo para una separación de 25 mm y su Nota 1 mueve el requisito en $10\log_{10}(x/25)$ para una separación de $x$ mm, que es lo que cambia con el espaciador el índice que deja un mismo desajuste de fase: −6,2 dB con 6 mm, −3,2 dB con 12 mm y +3,0 dB con 50 mm. Duplicar el espaciador vale 3 dB de margen en baja frecuencia.*
 
 Ese índice residual se mide, no se consulta en una tabla. Un dispositivo de
 ensayo de intensidad residual presenta la misma presión acústica a los dos
@@ -611,7 +644,11 @@ micrófonos en las mismas entradas y con la misma orientación con las que se va
 a usar, y cualquier compensación de fase aplicada ahí sigue aplicada durante la
 medición.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Una sonda p-p de intensidad acústica de dos micrófonos: dos micrófonos de presión con un separador entre ellos, a partir de los cuales se estiman el gradiente de presión y con él la intensidad normal" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_residual_intensity_check.svg" alt="Tres paneles. Primero, el dispositivo de ensayo de intensidad residual de IEC 61043: un pequeño acoplador que lleva ruido rosa o blanco a las dos cápsulas de la sonda al mismo nivel dentro de más menos 0,1 decibelios, del que se lee el índice residual como el nivel de presión menos el nivel de intensidad indicado. Segundo, un calibrador acústico de clase 0 o clase 1 según IEC 60942 aplicado a un micrófono cada vez, con el instrumento ajustado dentro de más menos 0,1 decibelios en los dos canales. Tercero, el ensayo in situ de inversión de la sonda: la sonda sobre la superficie de medición marcando una intensidad normal positiva y después girada 180 grados alrededor de su centro acústico marcando una negativa, aceptado cuando las dos tienen signos opuestos y difieren menos de 1,5 decibelios en la banda de nivel máximo" width="92%" />
+
+*El párrafo anterior es el primer panel: el dispositivo de ensayo del apartado 10.2 de IEC 61043, con ruido rosa o blanco en todo o parte del rango de 45 Hz a 7,1 kHz y las dos cápsulas al mismo nivel dentro de ±0,1 dB (al menos de 45 Hz a 1 kHz), del que se lee $\delta_{pI0}$. Los otros dos paneles son comprobaciones que esta página no desarrolla: la comprobación de presión de cada canal con un calibrador acústico, ajustada a ±0,1 dB (IEC 61043, apartado 14 b; ISO 9614-1, apartado 6.2.1), y la inversión de la sonda sobre la superficie de medición, en la que las dos lecturas deben tener signos opuestos y diferir menos de 1,5 dB en la banda de nivel máximo (apartado 6.2.2 de ISO 9614-1 y de ISO 9614-2). La [guía de intensidad sonora](/phonometry/es/devices/emission/intensity/) recorre las dos.*
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Una sonda p-p de intensidad acústica de dos micrófonos: dos micrófonos de presión con un espaciador entre ellos, a partir de los cuales se estiman el gradiente de presión y con él la intensidad normal" width="88%" />
 
 El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo es el campo: en una onda plana progresiva libre vale $10 \log_{10}(\rho_0 c / 400) = 0{,}14$ dB, mientras que valores grandes delatan campos reactivos o ruidosos en los que domina el error de fase entre canales. El Anexo A de ISO 9614-1:1993 lo generaliza sobre una superficie de medición como el indicador F2 (con F3 para la potencia parcial negativa y F4 para la no uniformidad del campo), y la **capacidad dinámica** del instrumento $L_\mathrm{d} = \delta_{pI0} - K$ (índice presión-intensidad residual menos el factor de error de sesgo: 10 dB para los grados 1/2, 7 dB para el grado 3) debe superar F2 para que la medición sea válida (criterio 1).
 

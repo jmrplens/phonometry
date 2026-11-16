@@ -225,10 +225,11 @@ de ella.
 geometría obligatoria, así que ninguna puerta las separa; la traza roja del
 panel central es lo que deja la sustracción una vez retirada la referencia de
 campo libre. La puerta verde es la ventana de Adrienne en su valor por defecto
-de 0,5 + 5 + 5 ms, cuya duración total fija tanto el suelo de 95 Hz marcado en
-el panel inferior como el radio de 1,34 m de pavimento que contribuye. La
-llegada parásita de 15,8 ms queda fuera, y no lo estaría si la ventana se
-alargara para llegar más abajo en frecuencia.*
+de 0,5 + 5 + 5 ms: su duración total fija el suelo de 95 Hz marcado en el panel
+inferior, y su tramo plano de 5 ms es la anchura de ventana que el Anexo A
+convierte en el radio de 1,34 m de pavimento que debe quedar despejado. La
+llegada parásita de 15,8 ms queda fuera de la puerta, y no lo estaría si la
+ventana se alargara para llegar más abajo en frecuencia.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -400,14 +401,94 @@ carretera.
   misma área muestreada**, así que el radio dimensiona tanto la placa que hay
   que transportar como la distancia libre que hay que encontrar.
 
-La medición en sí es un procedimiento de trece pasos cuyo orden importa:
-comprobar la superficie y el tiempo, colocar el conjunto, calcular y caminar el
-radio, elegir la fuente y la señal, promediar al menos 50 respuestas sobre el
-pavimento, tomar la referencia de campo libre con el conjunto lejos de todo,
-restar, enventanar, transformar, formar el factor de reflexión con $K_\mathrm{r}$,
-repetirlo todo sobre la placa de referencia y solo entonces promediar en tercios
-de octava. Un resultado declarado sin la forma y las duraciones de la ventana, y
-sin la medición de referencia, no es un resultado de ISO 13472-1.
+**Con qué se mide (apartados 5 y 6).** El sistema de medición completo debe
+cumplir al menos los requisitos de un instrumento de tipo 2 según IEC 60651
+(apartado 5.1). Es una cadena electroacústica: un generador de señal, un
+amplificador de potencia y un altavoz, un micrófono con su amplificador y un
+analizador capaz de hacer la correlación cruzada y de pasar del dominio del
+tiempo al de la frecuencia y a la inversa. El altavoz es de cono simple o
+coaxial, en caja cerrada, con una respuesta en frecuencia lo bastante lisa
+para que su respuesta al impulso en campo libre no dure más de 2 ms
+(apartado 5.2). La señal de ensayo es corta y repetible, con una relación de
+pico a valor eficaz (el factor de cresta) baja, típicamente inferior a 2, y
+con energía suficiente en todas las bandas de tercio de octava de 250 Hz a
+4 kHz: una secuencia de longitud máxima o un barrido corto (apartado 5.3). La
+respuesta al impulso global se recupera por correlación cruzada entre la señal
+eléctrica de la fuente y la señal del micrófono (apartado 6.3), y la frecuencia
+de muestreo es superior a 40 kHz (apartado 6.2), porque la sustracción necesita
+la forma de onda exacta para detectar un cambio de retardo.
+
+**La medición, en orden (apartado 9).** El apartado 9 ordena la medición en
+quince puntos, de a) a o), y el orden forma parte del método. Los números de
+abajo siguen sus letras.
+
+1. **Comprobar la superficie y el tiempo** frente a los apartados 8.1 a 8.3,
+   los filtros de arriba. Si no se cumplen, la medición no puede llevarse a
+   cabo.
+2. **Colocar el conjunto** como pide el apartado 7.2: la fuente a 1,25 m y el
+   micrófono a 0,25 m sobre la superficie, en una misma recta normal a ella.
+   Aquí se aplica la nota de seguridad del apartado 7.5: en una carretera con
+   tráfico el método puede ser peligroso, y la norma deja las prácticas de
+   seguridad en manos de quien la usa.
+3. **Calcular el radio del área máxima muestreada** (Anexo A) y comprobar que
+   no hay ningún objeto reflectante dentro. Si lo hay, la medición no puede
+   realizarse.
+4. **Elegir la fuente sonora y la señal de ensayo** (apartados 5.2 y 5.3).
+5. **Generar la señal de ensayo.**
+6. **Muestrear la señal total** que recibe el micrófono, a la frecuencia de
+   muestreo del apartado 6.2.
+7. **Promediar** la respuesta del micrófono hasta que la respuesta al impulso
+   sea estable: al menos 50 promedios (apartado 4.3).
+8. **Registrar la respuesta al impulso de campo libre** con el conjunto
+   apartado de cualquier superficie reflectante que pueda influir, y con la
+   geometría tal como estaba (apartado 4.2).
+9. **Aislar el camino reflejado** con la técnica de sustracción. Una ventana
+   temporal adecuada cancela las reflexiones parásitas (apartado 6.4).
+10. **Enventanar y transformar.** Multiplicar las respuestas al impulso
+    directa y reflejada por la ventana temporal y calcular los espectros de
+    potencia de las dos por transformada de Fourier. Conservar los espectros
+    complejos si se quiere el factor de reflexión complejo.
+11. **Calcular el factor de reflexión de la potencia sonora**, con el factor
+    de divergencia geométrica $K_\mathrm{r}$ (apartado 4.1 y Anexo C).
+12. **Repetir los puntos 1 a 11 sobre la superficie de referencia** y aplicar
+    el Anexo B, la corrección de la sección 1.2.
+13. **Promediar linealmente la absorción de banda estrecha en bandas de tercio
+    de octava** (apartado 4.1 y Anexo B). Ese promedio es el coeficiente de
+    absorción de la superficie del pavimento.
+14. **Repetir en otros puntos** de la superficie si hace falta.
+15. **Redactar el informe** (apartado 11; el Anexo E imprime un ejemplo).
+
+**Qué lleva el informe (apartados 10 y 11).** El apartado 11 enumera también
+quince puntos. Además de la referencia a la norma, la organización que ensaya,
+la fecha y el lugar y la firma de la persona responsable, son:
+
+- el emplazamiento, en un dibujo o en fotografías que muestren la superficie
+  del pavimento, el montaje y cualquier objeto reflectante cercano al área
+  máxima muestreada;
+- la superficie del pavimento: su edad, las condiciones de medición y su
+  composición (número de capas, espesores, material, porosidad);
+- su sequedad y su temperatura;
+- el tiempo durante el ensayo: velocidad y dirección del viento, temperaturas
+  del aire y de la superficie;
+- la disposición del ensayo, en un plano a escala o en un croquis acotado con
+  las posiciones de la fuente y del micrófono;
+- el equipo de medición y de análisis (nombre, tipo, número de serie y
+  fabricante) y una descripción de la fuente sonora;
+- el tipo y las características del filtro antisolapamiento, y la frecuencia
+  de muestreo;
+- la forma y las longitudes de las ventanas temporales;
+- los resultados, en una gráfica y en una tabla del coeficiente de absorción
+  en bandas de tercio de octava de 250 Hz a 4 kHz, redondeado a dos decimales
+  (pueden añadirse las bandas estrechas);
+- la incertidumbre de los resultados.
+
+El apartado 10 espera una incertidumbre típica de 0,05 en todo el rango de
+frecuencias en condiciones normales, y mayor en todo el rango de temperatura y
+de viento que la norma admite o sobre capas absorbentes gruesas. El informe la
+declara como incertidumbre expandida para una probabilidad de cobertura del
+95 %; el ejemplo de la norma es $U = 0{,}1$ con $k = 2$. Un resultado declarado
+sin la forma y las duraciones de la ventana, y sin la medición de referencia,
+no es un resultado de ISO 13472-1.
 
 ### 1.4 Cuando el emplazamiento obliga a un ángulo
 

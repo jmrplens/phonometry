@@ -213,7 +213,10 @@ $\alpha_\mathrm{w} = 0.70(\text{H})$, class C, laid flat as a Type A, and
 $\alpha_\mathrm{w} = 0.90$, class A, on a Type E-400 mounting. Two classes come from one
 product because the 350 mm of air behind it moves the layer into the
 particle-velocity maximum at 250 Hz (where the predicted coefficient goes from
-0.37 to 0.86). A quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
+0.37 to 0.86); the porous absorbers guide
+[plays that move](porous-absorbers.md#spacing-the-layer-off-the-wall)
+at normal incidence, the layer leaving the wall and the velocity it meets. A
+quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
 therefore not a material property but an installation result, which is why the
 `mounting` field of the fiche below is not decoration.
 
@@ -413,7 +416,7 @@ section 4 puts a number on it: because $\alpha_\mathrm{s}$ is a difference of tw
 reciprocal decay times, its uncertainty is worst exactly where the two decays
 are most alike, at the low-frequency end.
 
-**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
+**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
 
 A room volume below the 150 m³ minimum or a
 sample area outside 10–12 m² raises an advisory `AbsorptionWarning`; the result

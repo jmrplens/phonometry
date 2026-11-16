@@ -64,14 +64,123 @@ intensidad sonora, un camino que esta biblioteca no implementa.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone.svg"
-  alt="Cinco paneles, uno por cada caso del capítulo 9. 9.1, con operador presente: la cabeza vista desde arriba con su plano central discontinuo y la línea de visión señalada con una flecha, y un micrófono a 0,20 m más menos 0,02 m hacia un lado, a la altura de los ojos y por el lado más ruidoso. 9.2, un asiento vacío: un micrófono a 0,80 m más menos 0,05 m sobre el centro del plano del asiento. 9.3, una posición de pie sin nadie: un micrófono sobre trípode a 1,55 m más menos 0,075 m sobre un punto de referencia marcado en el suelo, el punto bajo el centro de la cabeza del operador. 9.4, un operador en recorrido: cuatro micrófonos sobre trípode encima de un recorrido discontinuo marcado en el suelo, separados como mucho 2 m, a esa misma altura, con los niveles promediados sobre el recorrido. 9.5, sin puesto de trabajo: una vista en planta del paralelepípedo de referencia dibujado alrededor de la máquina con cuatro posiciones de micrófono a 1 m de cada lado, a 1,55 m sobre el suelo, de las que la más alta es el resultado. Debajo, una nota que dice que el nivel en una de estas posiciones es un nivel de emisión y no un nivel de potencia acústica, que la corrección por ruido de fondo K1 y la corrección ambiental K2 o K3 se le restan, y que un nivel de pico no lleva ninguna."
+  alt="Cinco paneles, uno por cada caso del capítulo 9. 9.1, con operador presente: la cabeza vista desde arriba con su plano central discontinuo y la línea de visión señalada con una flecha, y un micrófono a 0,20 m más menos 0,02 m hacia un lado, a la altura de los ojos y por el lado más ruidoso. 9.2, un asiento vacío: un micrófono a 0,80 m más menos 0,05 m sobre el centro del plano del asiento. 9.3, una posición de pie sin nadie: un micrófono sobre trípode a 1,55 m más menos 0,075 m sobre un punto de referencia marcado en el suelo, el punto bajo el centro de la cabeza del operador. 9.4, un operador en recorrido: cuatro micrófonos sobre trípode encima de un recorrido discontinuo marcado en el suelo, separados como mucho 2 m, a esa misma altura, con los niveles promediados sobre el recorrido. 9.5, sin puesto de trabajo: una vista en planta del paralelepípedo de referencia dibujado alrededor de la máquina con cuatro posiciones de micrófono a 1 m de cada lado, a 1,55 m sobre el suelo, de las que la más alta es el resultado. Debajo, una nota que dice que el nivel en una de estas posiciones es un nivel de emisión y no un nivel de potencia acústica, que la corrección por ruido de fondo K1 y la corrección ambiental K2 o K3 se le restan, y que un nivel de pico no lleva ninguna. Al pie, dos recuadros: el fondo en la posición, con la fuente parada al menos 10 dB por debajo para el grado 1 y 6 dB para el grado 2, K1 igual a cero a más de 15 dB y calculado con la Ecuación 5 si está más cerca (5.4); y la repetición de una medición, con la fuente parada y arrancada, el micrófono retirado y repuesto, las mismas condiciones y el número de repeticiones a cargo del código de ensayo de ruido (10.2.2)."
   width="100%"
 />
 
 *El capítulo es corto y esos cinco casos son todo: lo que cambia es dónde se
 pone el micrófono, nunca lo que se le resta a lo que mide.*
 
-## 1. Una ley, impresa tres veces
+## 1. Cómo se hace la medida
+
+ISO 11201, ISO 11202 e ISO 11204 imprimen un solo procedimiento, casi palabra
+por palabra, y solo se separan en lo que hacen con la sala; ISO 11203 no mide
+nada en el puesto de trabajo y no tiene un procedimiento de este tipo. Los
+números de capítulo de abajo son los de ISO 11201 e ISO 11204. ISO 11202 tiene
+un capítulo más antes del entorno de ensayo, así que desde el capítulo 5 sus
+números van uno por encima.
+
+1. **Probar la repetibilidad y después elegir la parte.** ISO 11200:2014 lo
+   pone primero (Figura 2): se lee $L'_{p\mathrm{A}}$ varias veces en una de
+   las posiciones y se forma la desviación típica $\sigma_\mathrm{omc}$ de la
+   Ecuación (C.1). Frente a ella está la $\sigma_{R0}$ del método, 0,5 dB en
+   el grado 1, 1,5 dB en el grado 2 y 3 dB en el grado 3 (Tabla 1 de cada
+   parte): una máquina cuya propia emisión varía más que eso no gana nada con
+   la parte más exacta. La Figura 3 elige después. Con solo un sonómetro de
+   clase 2, ISO 11202; donde la máquina se puede medir al aire libre, en una
+   cámara semianecoica o en una nave grande, ISO 11201; en una sala muy
+   reverberante y con equipo de intensidad, ISO 11205; donde de todos modos
+   hay que determinar el nivel de potencia acústica, ISO 11204; donde una
+   fuente dominante radia hacia el puesto de trabajo, el método A.1 de
+   ISO 11202, que no necesita ninguna otra posición de micrófono; y en los
+   demás casos el método A.2 o ISO 11204.
+2. **Comprobar los instrumentos (capítulo 4).** El sonómetro con su
+   micrófono, su cable y su pantalla antiviento es de clase 1 según
+   IEC 61672-1, y los filtros, si los hay, de clase 1 según IEC 61260.
+   ISO 11201 no admite otra cosa; ISO 11202 e ISO 11204 dejan entrar un
+   sonómetro de clase 2 y hacen por ello el resultado de grado 3
+   (apartado 4.1). Un calibrador de clase 1 se aplica a cada micrófono antes y
+   después de cada serie de medidas: sin ajustar nada entre medias, las dos
+   lecturas pueden diferir 0,5 dB como mucho, y una serie que no lo cumple se
+   descarta (apartado 4.2).
+3. **Montar y poner en marcha la máquina (capítulo 8).** Como diga su código
+   de ensayo de ruido, y exactamente igual que para la determinación de la
+   potencia acústica. Donde no hay código, el capítulo enumera los modos entre
+   los que elegir (una carga especificada, plena carga, en vacío, velocidad
+   máxima, la condición más ruidosa representativa del uso normal, una carga
+   simulada, un ciclo de trabajo característico) y pide que la máquina esté
+   estabilizada, a temperatura estable, antes de la primera lectura
+   (apartado 8.5). Una máquina cuyo ruido depende de la temperatura ambiente,
+   por ejemplo una con ventilador de refrigeración de velocidad regulada, se
+   mantiene a 23 °C ± 2 °C (apartado 8.1). Lo elegido se registra con
+   cifras, junto con los periodos de funcionamiento y el ciclo
+   (apartado 12.3).
+4. **Colocar el micrófono (capítulo 9).** Uno de los cinco casos de la figura
+   de arriba. La dirección de referencia del micrófono apunta a la fuente
+   dominante y, siempre que sea practicable, nadie atiende la máquina
+   (apartado 9.1). Donde el nivel cambia mucho de un punto a otro, el 9.1
+   recomienda el promedio sobre una superficie pequeña centrada en el puesto
+   de trabajo, de 0,5 m por 0,5 m por ejemplo.
+5. **Medir con la máquina en marcha (capítulo 10).** $L'_{p\mathrm{A}}$, y
+   $L_{p\mathrm{C,peak}}$ si se pide, durante 10 s como mínimo cuando el ruido
+   es estable y sobre un número entero de ciclos cuando la máquina tiene uno;
+   en bandas de frecuencia, 30 s para las bandas centradas en 160 Hz y por
+   debajo y 10 s desde 200 Hz (apartado 10.1). Los intervalos son los que se
+   usaron para el nivel de potencia acústica de la misma máquina. Un ciclo de
+   periodos distintos se mide periodo a periodo y se suma como en *Un ciclo de
+   periodos de funcionamiento*, más abajo. Para un nivel de pico el intervalo
+   abarca al menos diez sucesos impulsivos y se conserva el pico más alto
+   (apartado 10.2.3).
+6. **Medir el fondo (apartado 5.4).** La misma posición y el mismo sonómetro,
+   con la máquina apagada. La diferencia entre las dos lecturas da $K_1$, y
+   decide entre una determinación y una cota superior, según los márgenes de
+   *El fondo, y dónde una determinación deja de serlo*. Se determina para cada
+   puesto de trabajo.
+7. **Descontar la sala, como lo permita la parte.** Son los datos de entrada de *La
+   sala, y el único cociente al que se reduce*.
+   - ISO 11201 no admite corrección, así que lo que se hace es cualificar la
+     sala: en interiores y con grado 2, la corrección ambiental
+     $K_{2\mathrm{A}}$ de la superficie de medida de referencia que pasa por
+     el puesto de trabajo es de 2 dB como mucho, y la máquina no radia sobre
+     todo hacia arriba ni en dirección opuesta al puesto de trabajo
+     (apartado 5.2.2.1).
+   - El método A.1 de ISO 11202 no mide nada más:
+     $K_3 = 10 \lg (1 + 4S/A)$ con $S = 2 \pi d^2$, donde $d$ es la distancia
+     del puesto de trabajo a la fuente dominante y $A = \alpha S_V$ sale del
+     coeficiente de absorción medio y de la superficie total de la sala
+     (apartado A.1.2). La Modificación 1:2020 hace de $d$ la media entre la
+     distancia más corta y la más larga a la superficie radiante, y nunca
+     menos de 0,5 m.
+   - El método A.2 de ISO 11202 añade un recorrido alrededor de la máquina
+     sobre la superficie de medida de referencia, a media altura de la fuente,
+     con posiciones equidistantes, a menudo una por cada lado. Su promedio
+     energético, restado del nivel en el puesto de trabajo, es el índice de
+     directividad aproximado de la Ecuación (A.2), y la $K_2$ de esa misma
+     superficie sale de ISO 3744 o de ISO 3746 (apartados A.2.2 y A.2.3).
+   - ISO 11204 promedia sobre las posiciones de una superficie envolvente, y
+     recomienda las mismas posiciones de la determinación de potencia acústica
+     según ISO 3744 o ISO 3746 (apartado A.1.1), y después toma la $K_2$ de
+     esa superficie o el cociente $A/S_M$ (apartados A.2 y A.3).
+
+   Con corrección, una sala cuya $K_{2\mathrm{A}}$ pasa de 7 dB queda fuera
+   del alcance de las dos partes (apartado 5.2).
+8. **Repetir, para $\sigma_\mathrm{omc}$.** Una repetición es el acto entero
+   otra vez (apartado 10.2.2): la máquina apagada y encendida de nuevo si es
+   factible, el micrófono retirado y vuelto a colocar, y después el mismo
+   intervalo en las mismas condiciones. Para $\sigma_\mathrm{omc}$ se
+   reajustan además cada vez el montaje y las condiciones de funcionamiento, y
+   las lecturas entran en la Ecuación (C.1) tal como se midieron, sin
+   corrección (apartado 11.2). Ninguna parte imprime cuántas repeticiones: un
+   código de ensayo de ruido puede hacerlo, y los casos prácticos del Anexo B
+   de ISO 11200 usan tres y cinco.
+9. **Corregir, asignar el grado e informar.** $L_p = L'_p - K_1 - K_3$ para
+   los niveles y nada para el pico; el grado sale de las tres puertas de *Qué
+   decide el grado*; y $U = k \sigma_\mathrm{tot}$. Un valor se redondea a un
+   decimal solo después del último paso del cálculo (apartado 12.1), y el
+   informe declara el grado alcanzado junto al nivel y su incertidumbre
+   expandida (capítulo 13).
+
+## 2. Una ley, impresa tres veces
 
 Cada parte que mide del grupo imprime la misma resta:
 
@@ -101,7 +210,7 @@ $L_{p\mathrm{C,peak}}$ se informa exactamente como se midió, porque las dos
 correcciones se derivan de presiones cuadráticas medias y ninguna tiene sentido
 para una única excursión máxima.
 
-## 2. El fondo, y dónde una determinación deja de serlo
+## 3. El fondo, y dónde una determinación deja de serlo
 
 La corrección de fondo es la misma forma cerrada que usa el lado de la
 potencia,
@@ -126,7 +235,7 @@ print(round(background.correction, 1), background.upper_bound)
 # 0.6 False
 ```
 
-## 3. La sala, y el único cociente al que se reduce
+## 4. La sala, y el único cociente al que se reduce
 
 Tanto el método A.2 de ISO 11202 como ISO 11204 imprimen las mismas tres
 líneas, función de un único cociente adimensional $z$:
@@ -173,25 +282,42 @@ Sólo hasta el tope, eso sí. En $K_2 = 7$ dB el cociente llega a 0,2 y la
 corrección deja de seguirlo: una sala con $K_2 = 10$ dB sigue recibiendo
 $K_3 = 7$ dB, porque el tope es sobre $K_3$ y no sobre la sala.
 
-## 4. Qué decide el grado
+## 5. Qué decide el grado
 
 Lo deciden tres puertas y gana la peor. Un sonómetro de clase 2 hace el
 resultado de grado 3 pase lo que pase con las demás. El fondo tiene que dejar
 6 dB para el grado 2 y 3 dB para el grado 3. Y la corrección ambiental local no
-puede pasar de 4 dB: el A.1.3 de ISO 11202 pone la frontera ahí directamente, y
-el método A.2 llega a los mismos 4 dB por su Condición (A.6), que es la misma
-desigualdad una vez sustituidas en ella la (A.4) y la (A.5).
+puede pasar de 4 dB: el A.1.3 de ISO 11202 pone la frontera ahí directamente,
+sobre la corrección calculada para el punto más lejano de la zona radiante, y
+el 5.6 de ISO 11204 también la pone ahí. El método A.2 es más estricto. Su
+Condición (A.6) es esa misma desigualdad una vez sustituidas en ella la (A.4) y
+la (A.5), con un margen $\Delta D^*_I$ sumado al índice de directividad porque
+el índice es solo aproximado: 0,5 dB para una fuente de hasta 1 m en su mayor
+dimensión, 1 dB hasta 3 m y 1,5 dB por encima (apartado A.2.5). Escrito para
+$K_3$, eso baja la frontera a 3,3 dB, 2,8 dB y 2,4 dB.
+`grade_from_local_correction` aplica por defecto la frontera de 4 dB del
+A.1.3; con `largest_dimension_m`, la mayor dimensión de la fuente, lee el
+margen de esa longitud y aplica en su lugar la Condición (A.6).
 
 ```python
 from phonometry import emission
 
 print(emission.grade_from_local_correction(3.7))
 print(emission.grade_from_local_correction(5.2))
+print(emission.grade_from_local_correction(3.7, largest_dimension_m=0.8))
+print(emission.grade_from_local_correction(3.2, largest_dimension_m=0.8))
 # engineering
 # survey
+# survey
+# engineering
 ```
 
-## 5. El ejemplo resuelto, de principio a fin
+Los mismos 3,7 dB son de grado 2 por el A.1.3 y de grado 3 por el método A.2
+para una fuente de 0,8 m, cuyo margen de 0,5 dB corta el grado 2 en 3,3 dB.
+Los 4,7 dB del ejemplo del método A.2 en el anexo B de ISO 11200:2014, para una
+máquina de 3 m de alto, superan las dos fronteras, y su tabla da grado 3.
+
+## 6. El ejemplo resuelto, de principio a fin
 
 El anexo B de ISO 11200:2014 imprime cuatro casos con todos los valores
 intermedios. Este es el segundo: una máquina con una fuente dominante
@@ -224,7 +350,7 @@ print(round(sigma, 1), round(emission.emission_expanded_uncertainty(sigma), 1))
 Los cinco números están impresos en la tabla B.2, y seis filas de conformidad
 sujetan la biblioteca a ellos.
 
-## 6. Un ciclo de periodos de funcionamiento
+## 7. Un ciclo de periodos de funcionamiento
 
 Una máquina que ralentiza, corta y vuelve pasa un tiempo distinto en cada
 estado, y el nivel del ciclo entero es la media energética ponderada por
@@ -245,7 +371,7 @@ print(round(emission.subinterval_level([80.0, 90.0], [10.0, 1.0]), 1))
 Diez segundos a 80 dB llevan la misma energía que uno a 90, así que el ciclo
 cae en 82,6 dB. Contar los dos estados por igual daría 87,4.
 
-## 7. Donde la norma discute consigo misma
+## 8. Donde la norma discute consigo misma
 
 Los dos casos del anexo B calculan la misma desviación típica de dos maneras
 distintas. La Ecuación (C.1), impresa idéntica en ISO 11201, ISO 11202 e
@@ -266,14 +392,18 @@ ISO 11202 y la (9) de ISO 11204; la corrección de fondo con los márgenes
 despreciable y mínimo propios de este grupo; la corrección ambiental local a
 trozos de la Ecuación (A.5) de ISO 11202 y las (A.2) y (A.5) de ISO 11204, con
 las dos rutas impresas al cociente del que es función; la frontera de grado en
-4 dB; la desviación típica total y la incertidumbre expandida; y la suma
+4 dB del A.1.3 de ISO 11202 y el margen que la Condición (A.6) le añade para el
+método A.2; la desviación típica total y la incertidumbre expandida; y la suma
 ponderada por duración de un ciclo de periodos de funcionamiento.
 </ScopeClaim>
 <ScopeClaim status="not-covered" label="Todavía no cubierto">
-Los procedimientos de medida de cada parte: las posiciones de micrófono y la
-cualificación del entorno de ISO 11201, el barrido de directividad del método
-A.2 de ISO 11202, la determinación exacta de `K_2` en ISO 11204, la medida de
-propagación `Q` de ISO 11203 y la ruta por intensidad de ISO 11205.
+La medida se describe aquí, y nada de ella se calcula: las posiciones de
+micrófono del capítulo 9 y la cualificación del entorno de ISO 11201, los
+niveles alrededor de la máquina que dan su índice de directividad al método A.2
+de ISO 11202 y a ISO 11204, y la determinación de `K_2` o de `A` según ISO 3744
+o ISO 3746 las hace el usuario, y la biblioteca toma sus resultados. La medida
+de propagación `Q` de ISO 11203 y la ruta por intensidad de ISO 11205 no están
+implementadas.
 </ScopeClaim>
 </Scope>
 

@@ -487,7 +487,19 @@ sound pressure level at a specified position) **with** the enclosure and again
 **without** it, and report the difference band by band:
 $D_W = L_W(\text{without}) - L_W(\text{with})$, ISO 11546-1 Equation (1), over
 at least 100 Hz to 5 kHz in third octaves or 125 Hz to 4 kHz in octaves, 50 Hz
-to 10 kHz and 63 Hz to 8 kHz being preferred (clause 6.2).
+to 10 kHz and 63 Hz to 8 kHz being preferred (clause 6.2). The library computes
+that measurement as well:
+[Enclosures and Cabins Measured](enclosure-cabin-insulation.md)
+takes the two series of levels through `enclosure_sound_power_insulation` and
+its siblings, checks the test environment against Table C.1 and says, step by
+step, how the measurement goes.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement.svg" alt="Two arrangements side by side. On the left, the same machine measured twice on the same dashed measurement surface, once standing free and once inside the enclosure, and the insertion loss is the difference of the two sound powers. On the right, a room driven by a loudspeaker with three microphones in it and an empty cabin inside it with two more, and the insulation is the difference of the two sound pressure levels. A box at the foot carries both equations" width="100%"></picture>
+
+*The measurement of this section is the left half of the drawing: the same
+machine on the same measurement surface, once standing free and once enclosed.
+The right half is the cabin of ISO 11957, the inverse problem, which the guide
+linked above treats beside it.*
 
 Four conditions decide whether the result means anything. The **source** should
 be the actual machine: clause 4 makes that the preferred method and restricts
@@ -495,16 +507,20 @@ the reciprocity and artificial-source alternatives to enclosures under 2 m³,
 excluding close-fitting enclosures like the one drawn above entirely. Its
 **operating condition must not change** between the two series (clause 6.1.2),
 and active elements such as cooling fans must be running (clause 6.1.3). The
-**microphone positions must be the same** with and without, so the
+**microphone positions should be the same** with and without, so the
 environmental corrections cancel and the level difference is the power
-difference without either being converted (clause 6.1.4). And the **test
+difference without either being converted (ISO 11546-1 clause 6.1.5 and
+ISO 11546-2 clause 6.1.4, both wherever practicable). In a reverberation room
+the laboratory part also places the enclosure with no wall parallel to a wall
+of the room and none nearer than 1.5 m (ISO 11546-1 clause 6.1.4). And the **test
 environment** has to be good enough for the sound-power standard chosen from
 Table 1: ISO 11546-2 Table C.1 asks for an environmental correction
 $K_2 \le 2$ dB and a signal at least 6 dB above the background for ISO 3744,
 against $K_2 \le 7$ dB and 3 dB for the survey-grade ISO 3746, which is the
 practical ceiling on how large a measured insertion loss can be in a workshop.
-Verify the whole chain with a class 1 calibrator to $\pm 0.3$ dB before and
-after each series (clause 5).
+Verify the whole chain before and after each series with a calibrator
+accurate to $\pm 0.3$ dB, "type 1 in accordance with IEC 942" in the words of
+clause 5.
 
 What must be recorded is listed in clause 9, and two entries are the ones a
 prediction never captures: the **leak ratio** $\theta$, the total open area
@@ -537,10 +553,13 @@ with a value computed here compares two different things.
   model.
   `enclosure_insertion_loss` never predicts the panel transmission loss $R$
   itself; you supply it measured or from another model, and the module only
-  combines it with the interior correction. Nothing here is a measurement: the
-  ISO 11546 procedure of section 2.2 is described so that a declared figure can
-  be read, not implemented, and structure-borne transmission from a machine into
-  its enclosure or its slab is outside every model on the page.
+  combines it with the interior correction. Nothing on this page is a
+  measurement: the ISO 11546 procedure of section 2.2 is described here so that
+  a declared figure can be read, and it is computed in
+  [Enclosures and Cabins Measured](enclosure-cabin-insulation.md)
+  (`enclosure_sound_power_insulation` and its siblings). Structure-borne
+  transmission from a machine into its enclosure or its slab is outside every
+  model on the page.
 
 ## See also
 
@@ -554,6 +573,9 @@ with a value computed here compares two different things.
   radiator model.
 - [Sound Power](../emission/sound-power.md): the source $L_W$ that feeds a
   duct or an enclosure.
+- [Enclosures and Cabins Measured](enclosure-cabin-insulation.md):
+  the ISO 11546 substitution measurement of section 2.2 computed, with its
+  test-environment check and its set-up drawn.
 - [Room image sources and steady field](../../buildings/rooms/room-image-sources.md):
   the `room_constant` reused by the enclosure interior correction.
 - [Panel sound insulation](../../buildings/design/panel-sound-insulation.md):

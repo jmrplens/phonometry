@@ -82,6 +82,12 @@ be time-invariant across the whole set: diffusers fixed, no rotating vanes, no
 ventilation or air circulation running (6.1.1), and temperature and relative
 humidity measured before and after each of the four situations (7.4).
 
+The arrangement of ISO 17497-1 draws that requirement: the turntable is the only
+thing that moves, and the two loudspeaker and three microphone positions stay
+fixed.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable and base plate at least 1 m from the walls, two fixed loudspeaker positions and three fixed microphone positions, the turntable the only thing that moves, and the Table 2 mapping of T1 to T4 onto the random-incidence and specular absorption coefficients from which the scattering coefficient is derived" width="92%"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" width="88%"></picture>
 
 *A random-incidence scattering coefficient rising with frequency as the surface roughness becomes comparable with the wavelength.*

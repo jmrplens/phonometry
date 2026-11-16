@@ -30,6 +30,10 @@ from .absorption_placement import (
 )
 from .aperture import _aperture_fields, animate_fdtd_aperture_slit
 from .barrier import _barrier_fields, animate_fdtd_barrier
+from .barrier_reflection import (
+    _barrier_reflection_fields,
+    animate_fdtd_barrier_reflection,
+)
 from .diffusion import _diffusion_fields, animate_fdtd_diffusion
 from .dispersion import _dispersion_fields, animate_fdtd_dispersion
 from .duct_modes import _duct_cut_on_fields, animate_fdtd_duct_cut_on
@@ -46,6 +50,7 @@ from .expansion_chamber import (
 )
 from .ground_effect import _ground_effect_fields, animate_fdtd_ground_effect
 from .halfspace import _halfspace_fields, animate_elastic_halfspace_waves
+from .lloyd_mirror import _lloyd_mirror_fields, animate_fdtd_lloyd_mirror
 from .metadiffuser import (
     _meshed_metadiffuser_ntff_levels,
     _metadiffuser_fields,
@@ -82,6 +87,7 @@ __all__ = [
     "_absorption_placement_fields",
     "_aperture_fields",
     "_barrier_fields",
+    "_barrier_reflection_fields",
     "_coincidence_fields",
     "_diffusion_fields",
     "_dispersion_fields",
@@ -92,6 +98,7 @@ __all__ = [
     "_ground_effect_fields",
     "_halfspace_fields",
     "_impedance_tube_fields",
+    "_lloyd_mirror_fields",
     "_meshed_metadiffuser_ntff_levels",
     "_metadiffuser_fields",
     "_mode_conversion_fields",
@@ -113,6 +120,7 @@ __all__ = [
     "animate_fdtd_absorption_placement",
     "animate_fdtd_aperture_slit",
     "animate_fdtd_barrier",
+    "animate_fdtd_barrier_reflection",
     "animate_fdtd_critical_angle",
     "animate_fdtd_diffusion",
     "animate_fdtd_dispersion",
@@ -122,6 +130,7 @@ __all__ = [
     "animate_fdtd_open_end",
     "animate_fdtd_ground_effect",
     "animate_fdtd_impedance_tube",
+    "animate_fdtd_lloyd_mirror",
     "animate_fdtd_metadiffuser",
     "animate_fdtd_pillar_hall",
     "animate_fdtd_refraction",

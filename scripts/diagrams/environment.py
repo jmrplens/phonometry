@@ -794,7 +794,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.circle(x0, gy - hs, 9, th.secondary)
     s.line(x0, gy - hs, x0, gy, th.fg, 2.0)
     s.text(x0 + 12, gy - hs - 40, "Source", 17, th.fg, anchor="start", bold=True)
-    s.text(x0 + 12, gy - hs - 18, "$h_s$ = 1,5 m", 15, th.muted, anchor="start")
+    s.text(x0 + 12, gy - hs - 18, "$h_s$ = 1.5 m", 15, th.muted, anchor="start")
     s.mic(x1, gy - hs, gy, 1.0)
     s.text(x1 - 12, gy - hs - 40, "Receiver", 17, th.fg, anchor="end", bold=True)
     # The r of the receiver and the p of the projected distance d_p are
@@ -803,7 +803,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(
         x1 - 12,
         gy - hs - 18,
-        "$h_r$ = 1,5 m",
+        "$h_r$ = 1.5 m",
         15,
         th.muted,
         anchor="end",
@@ -857,11 +857,11 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
-    s.text(84.0, by + 54, "$G_s = 25/45$ = 0,55", 15, th.fg, anchor="start")
+    s.text(84.0, by + 54, "$G_s = 25/45$ = 0.56", 15, th.fg, anchor="start")
     s.text(
         84.0,
         by + 78,
-        "$G_m = 70/110$ = 0,64   $G_r$ = 1,00",
+        "$G_m = 70/110$ = 0.64   $G_r$ = 1.00",
         15,
         th.fg,
         anchor="start",
@@ -872,7 +872,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(
         484.0,
         by + 28,
-        "$q = 1 − 30(h_s + h_r)/d_p$ = 0,55",
+        "$q = 1 − 30(h_s + h_r)/d_p$ = 0.55",
         16,
         th.fg,
         anchor="start",
@@ -944,13 +944,13 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
         # through it, so that it hears the source and not the barrier.
         s.mic(440, top - 46, top, scale=0.8)
         s.line(430, top, 450, top, th.muted, 1.2, dash="3,3")
-        s.dim(470, top, 470, top - 46, "1,5 m", size=13, label_side="right")
+        s.dim(470, top, 470, top - 46, "1.5 m", size=13, label_side="right")
         s.text(440, base + 30, "reference microphone", 13, th.accent)
 
         # The receiver, at 1,2 m or more, where somebody actually stands.
         s.mic(740, base - 86, base, scale=0.9)
         s.text(740, base + 30, "receiver position", 13, th.accent)
-        s.dim(790, base, 790, base - 86, "≥ 1,2 m", size=13, label_side="right")
+        s.dim(790, base, 790, base - 86, "≥ 1.2 m", size=13, label_side="right")
 
         s.arrow(225, base - 26, 415, top + 24, colour, 1.8)
         if built:
@@ -989,6 +989,281 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
         "temperature, and never above 5 m/s"
     )
     s.text(450, 698, weather, s.fit_size([weather], [13, 12], 740), th.secondary)
+
+
+def _d_barrier_reflection_setup(s: SVG, th: Theme) -> None:
+    """The EN 1793-5 set-up: where everything stands and what is recorded.
+
+    Three views of one rig. The side view is to scale for the 4 m device of
+    5.3, so the two arrivals the window has to shut out (5.5.7) run where
+    they really run: over the top edge to the top row, and off the ground to
+    the bottom row. The front view is Figure 3 (b) laid on the minimum sample
+    of Figure 7, with the rows told apart as 5.5.5 tells them apart. The third
+    view is the free-field record of 3.16, and the list beside it names every
+    record the method asks for with the clause that asks for it.
+
+    The distances are the ones Table 1 defines (BS EN 1793-5:2016, PDF page
+    15, folio 13): the 1.50 m of the loudspeaker to the reference plane and
+    the 0.25 m of the plane to the grid. The Key of Figure 15 swaps their
+    words (docs/ERRATA.md), so nothing here is read from it. The path lengths
+    are those of Table 2 (PDF page 18) and the radius that of NOTE 1 of 5.6.1
+    (PDF page 37). Table 1 prints every subscript of these lengths italic.
+    """
+    # --- (a) side view, 90 px to the metre --------------------------------
+    scale = 90.0
+    gy = 470.0
+    xr = 330.0  # the reference plane
+    top = gy - 4.0 * scale
+    axis = gy - 2.0 * scale  # the reference height, half the device's
+    xf = xr - 1.50 * scale  # the loudspeaker's front panel
+    xg = xr - 0.25 * scale  # the measurement grid
+    rows = [axis - 0.40 * scale, axis, axis + 0.40 * scale]
+
+    s.text(
+        40,
+        72,
+        "(a) Side view of a 4 m device, to scale",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.ground(gy, 40, 470)
+
+    # The device, and the plane that touches its most protruding parts.
+    s.rect(xr, top, 22, gy - top, th.panel, th.fg, sw=2.0)
+    s.line(xr, top - 26, xr, top, th.primary, 1.4, dash="5,4")
+    s.text(xr + 8, top - 14, "reference plane", 13, th.primary, anchor="start")
+    s.text(xr + 34, top + 28, "the device", 13, th.fg, anchor="start")
+
+    # The loudspeaker on its stand, front panel towards the device.
+    s.rect(xf - 45, axis - 22, 45, 44, th.panel, th.fg, rx=4, sw=2.0)
+    s.circle(xf - 17, axis, 11, th.fg)
+    s.circle(xf - 17, axis, 4.5, th.bg)
+    s.line(xf, axis - 22, xf, axis + 22, th.primary, 3.2)
+    s.line(xf - 23, axis + 22, xf - 23, gy, th.fg, 2.2)
+    s.line(xf - 39, gy, xf - 7, gy, th.fg, 2.2)
+    s.text(xf, axis - 32, "loudspeaker", 13, th.fg, anchor="end", bold=True)
+
+    # The grid seen edge on: one microphone of each row.
+    s.line(xg, rows[0] - 10, xg, rows[2] + 10, th.fg, 1.6)
+    s.line(xg, rows[2] + 10, xg, gy, th.muted, 1.4)
+    s.text(xr + 38, rows[0] - 18, "microphones", 13, th.fg, anchor="start", bold=True)
+    for y, numbers in zip(rows, ("1 · 2 · 3", "4 · 5 · 6", "7 · 8 · 9"), strict=True):
+        s.line(xg + 8, y, xr + 32, y, th.muted, 0.9, dash="2,3")
+        s.text(xr + 38, y + 4.5, numbers, 13, th.fg, anchor="start")
+
+    # The reference height.
+    s.line(70, axis, xf - 47, axis, th.muted, 0.9, dash="3,3")
+    s.dim(70, gy, 70, axis, "$h_S = h_B/2$", size=13, label_side="right")
+
+    # The two arrivals the window has to end before: over the top edge to the
+    # top row, and off the ground (the loudspeaker's image below it) to the
+    # bottom row.
+    image_y = 2.0 * gy - axis
+    ground_x = xf + (image_y - gy) / (image_y - rows[2]) * (xg - xf)
+    s.path(
+        f"M {xf + 2} {axis - 3} L {xr} {top} L {xg + 3.4:.1f} {rows[0] - 22}",
+        stroke=th.secondary,
+        sw=1.7,
+        dash="6,4",
+    )
+    s.arrow(xg + 3.4, rows[0] - 22, xg + 1.2, rows[0] - 8, th.secondary, 1.7)
+    s.path(
+        f"M {xf + 2} {axis + 6} L {ground_x:.1f} {gy} L {xg - 6.2:.1f} {rows[2] + 18}",
+        stroke=th.secondary,
+        sw=1.7,
+        dash="6,4",
+    )
+    s.arrow(xg - 6.2, rows[2] + 18, xg - 2.4, rows[2] + 7, th.secondary, 1.7)
+
+    # The direct sound and the reflection, at microphone 5.
+    s.arrow(xf + 3, axis - 5, xg - 7, axis - 1.5, th.accent, 2.0)
+    s.line(xf + 3, axis + 5, xr - 1, axis + 9, th.primary, 2.0)
+    s.arrow(xr - 1, axis + 9, xg + 6, axis + 3, th.primary, 2.0)
+    for y in rows:
+        s.circle(xg, y, 4.6, th.fg, th.bg, 1.2)
+
+    # The two distances of Table 1, below the ground where nothing crosses
+    # them.
+    s.line(xf, axis + 22, xf, gy + 70, th.muted, 0.9, dash="3,3")
+    s.line(xg, gy, xg, gy + 36, th.muted, 0.9, dash="3,3")
+    s.line(xr, gy, xr, gy + 70, th.muted, 0.9, dash="3,3")
+    s.arrow(xg - 24, gy + 30, xg, gy + 30, th.muted, 1.2)
+    s.arrow(xr + 24, gy + 30, xr, gy + 30, th.muted, 1.2)
+    s.text(xr + 30, gy + 35, "$d_M$ = 0.25 m", 14, th.fg, anchor="start")
+    s.dim(xf, gy + 64, xr, gy + 64, "$d_S$ = 1.50 m", size=14)
+
+    legend = (
+        (th.accent, "", "direct sound: 1.25 m to microphone 5"),
+        (th.primary, "", "reflection off the device: 1.75 m to microphone 5"),
+        (
+            th.secondary,
+            "6,4",
+            "diffraction over the top edge, reflection off the ground:",
+        ),
+        ("", "", "the time window has to end before either arrives (5.5.7)"),
+    )
+    size = s.fit_size([row[2] for row in legend], [13, 12], 410)
+    for k, (colour, dash, label) in enumerate(legend):
+        y = 574 + 20 * k
+        if colour:
+            s.line(40, y - 4.5, 64, y - 4.5, colour, 2.0, dash=dash)
+        s.text(72, y, label, size, th.fg if colour else th.muted, anchor="start")
+
+    # --- (b) front view, 75 px to the metre -------------------------------
+    front = 75.0
+    cx, cy = 700.0, gy - 2.0 * front
+    half = 2.0 * front
+    radius = 1.96 * front
+    step = 0.40 * front
+
+    s.text(
+        500,
+        72,
+        "(b) The grid as the loudspeaker sees it",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.ground(gy, 520, 880)
+    s.rect(cx - half, gy - 2 * half, 2 * half, 2 * half, th.panel, th.fg, sw=2.0)
+    s.dim(cx - half, gy - 2 * half, cx + half, gy - 2 * half, "4 m", -18, 13)
+    s.dim(cx - half, gy, cx - half, gy - 2 * half, "4 m", -18, 13)
+    s.ellipse(cx, cy, radius, radius, stroke=th.muted, sw=1.4, dash="6,4")
+    # The radius, drawn from clear of the grid out to the circle.
+    ux, uy = -0.819, 0.574
+    s.arrow(
+        cx + 66 * ux, cy + 66 * uy, cx + radius * ux, cy + radius * uy, th.muted, 1.2
+    )
+    s.text(cx + 104 * ux - 6, cy + 104 * uy - 8, "$r$", 13, th.fg, anchor="end")
+    # The spacing, between two columns of the top row.
+    s.line(cx, cy - step - 22, cx + step, cy - step - 22, th.muted, 1.2)
+    for x in (cx, cx + step):
+        s.line(x, cy - step - 26, x, cy - step - 18, th.muted, 1.2)
+    s.text(cx + step / 2, cy - step - 31, "$s$ = 0.40 m", 12, th.fg)
+    for k in range(9):
+        x = cx + (k % 3 - 1) * step
+        y = cy + (k // 3 - 1) * step
+        if k < 6:
+            s.circle(x, y, 11, th.primary)
+            s.text(x, y + 4.5, str(k + 1), 12, th.bg, bold=True)
+        else:
+            s.circle(x, y, 11, th.bg, th.primary, 1.8)
+            s.text(x, y + 4.5, str(k + 1), 12, th.fg, bold=True)
+
+    key = (
+        (0, "1 to 6: every band, from 100 Hz"),
+        (1, "7 to 9: from the 200 Hz band up (5.5.5)"),
+        (2, "sampled area of microphone 5, $r$ = 1.96 m:"),
+        (-1, "nothing else that reflects inside it (5.6.1, 5.6.3)"),
+        (3, "4 m × 4 m: the smallest sample that is valid"),
+        (-1, "from 200 Hz to 5 kHz (5.3)"),
+    )
+    size = s.fit_size([label for _, label in key], [13, 12], 352)
+    y = 508.0
+    for mark, label in key:
+        if mark == 0:
+            s.circle(510, y - 4.5, 8, th.primary)
+        elif mark == 1:
+            s.circle(510, y - 4.5, 8, th.bg, th.primary, 1.8)
+        elif mark == 2:
+            s.ellipse(510, y - 4.5, 8, 8, stroke=th.muted, sw=1.4, dash="4,3")
+        elif mark == 3:
+            s.rect(503, y - 11.5, 14, 14, th.panel, th.fg, sw=1.6)
+        s.text(526, y, label, size, th.muted if mark < 0 else th.fg, anchor="start")
+        y += 18 if mark in (2, 3) else 22
+
+    # --- (c) the free-field record ------------------------------------------
+    s.line(40, 646, 860, 646, th.muted, 1.0, dash="6,5")
+    s.text(
+        40, 680, "(c) The free-field record", 15, th.primary, anchor="start", bold=True
+    )
+    tilt = math.radians(20.0)
+    ax_x, ax_y = math.cos(tilt), -math.sin(tilt)  # along the loudspeaker axis
+    up_x, up_y = math.sin(tilt), math.cos(tilt)  # along the grid, downwards
+    fx, fy = 112.0, 800.0
+    box = [
+        (fx + 22 * up_x, fy + 22 * up_y),
+        (fx - 22 * up_x, fy - 22 * up_y),
+        (fx - 45 * ax_x - 22 * up_x, fy - 45 * ax_y - 22 * up_y),
+        (fx - 45 * ax_x + 22 * up_x, fy - 45 * ax_y + 22 * up_y),
+    ]
+    s.path(
+        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in box) + " Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=2.0,
+    )
+    s.circle(fx - 17 * ax_x, fy - 17 * ax_y, 11, th.fg)
+    s.circle(fx - 17 * ax_x, fy - 17 * ax_y, 4.5, th.bg)
+    s.line(box[0][0], box[0][1], box[1][0], box[1][1], th.primary, 3.2)
+    reach = 1.25 * scale
+    mx, my = fx + reach * ax_x, fy + reach * ax_y
+    offset = 0.40 * scale
+    s.line(
+        mx - (offset + 10) * up_x,
+        my - (offset + 10) * up_y,
+        mx + (offset + 10) * up_x,
+        my + (offset + 10) * up_y,
+        th.fg,
+        1.6,
+    )
+    s.arrow(fx + 3 * ax_x, fy + 3 * ax_y, mx - 7 * ax_x, my - 7 * ax_y, th.accent, 2.0)
+    for k in (-1, 0, 1):
+        s.circle(mx + k * offset * up_x, my + k * offset * up_y, 4.6, th.fg, th.bg, 1.2)
+    s.text(fx + 34, fy + 36, "$d_{SM}$ = 1.25 m", 14, th.fg, anchor="start")
+    notes = (
+        "the same loudspeaker and grid, the same",
+        "distance apart, facing nothing: neither an",
+        "object nor the ground (3.16, 5.6.2.2)",
+    )
+    size = s.fit_size(notes, [13, 12], 292)
+    for k, note in enumerate(notes):
+        s.text(40, 866 + 18 * k, note, size, th.muted, anchor="start")
+
+    # --- what is recorded -----------------------------------------------------
+    s.text(
+        372,
+        680,
+        "What is recorded, and the clause that asks for it",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    records = (
+        (
+            "Directivity, once per loudspeaker: at each microphone position",
+            "and at the same distance on its specular path (Formula (3))",
+        ),
+        (
+            "In front of the device: nine impulse responses per grid position",
+            "(5.6.2.2); A, B and C if not flat, one per material if not",
+            "homogeneous (5.6.2.3), four or more in two directions (5.6.2.4)",
+        ),
+        (
+            "Free field: nine more per grid position, with the geometry",
+            "unchanged (5.6.2.2)",
+        ),
+        (
+            "Reflecting plate, 1.60 m × 1.60 m or larger: the path differences",
+            "within 25 mm of Table 3 (5.6.2.5, 5.6.2.6)",
+        ),
+        (
+            "Gain check, per grid position: the incident sound of both records,",
+            "1.3 ms window, bands from 500 Hz to 2 kHz (Formula (4))",
+        ),
+    )
+    size = s.fit_size([line for record in records for line in record], [13, 12], 478)
+    y = 708.0
+    for record in records:
+        s.circle(378, y - 4.5, 3.2, th.primary)
+        for k, line in enumerate(record):
+            s.text(390, y, line, size, th.fg if k == 0 else th.muted, anchor="start")
+            y += 18
+        y += 8
 
 
 def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
@@ -1552,6 +1827,435 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 # ISO 11819-1 statistical pass-by: the site and the microphone (6.1, 8.1)
 # ---------------------------------------------------------------------------
+
+
+def _d_rd1367_inspection(s: SVG, th: Theme) -> None:
+    """Where the meter stands and what it reads when an activity is inspected.
+
+    The chain plate beside this one starts at a phase level; this is how the
+    level gets there. Every figure is the consolidated BOE text of RD
+    1367/2007 (BOE-A-2007-18397): the indoor positions are Annex I A.3 b (PDF
+    page 22) through Annex IV A.3.4 d (page 27), the series of a noise phase
+    is A.3.4.2 b (page 28), the precautions are A.3.5 (page 29) and the
+    instrument is Article 30 (page 16). A.3.4.2 gives the microphone of an
+    activity no height outdoors (the 4 m of A.3.4.1 c belong to the quality
+    objectives of an area), so the outdoor panel draws none.
+    """
+    # --- (a) indoors: one position of the receiving room, in section ------
+    scale = 70.0
+    x0, floor = 70.0, 300.0
+    x1, ceiling = x0 + 4.2 * scale, floor - 2.5 * scale
+    s.text(
+        40,
+        72,
+        "(a) Indoors: the receiving room",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.rect(x0, ceiling, x1 - x0, floor - ceiling, th.panel, th.fg, sw=3.0)
+    # The window in one wall and the door in the other, both shut.
+    s.rect(x0 - 5, floor - 2.1 * scale, 10, 1.2 * scale, th.bg, th.primary, sw=2.0)
+    s.rect(x1 - 5, floor - 2.0 * scale, 10, 2.0 * scale, th.bg, th.muted, sw=2.0)
+    s.text(x0 + 2, ceiling - 12, "window, closed", 13, th.primary, anchor="start")
+    s.text(x1 - 2, ceiling - 12, "door, closed", 13, th.muted, anchor="end")
+    mic_x = x0 + 1.5 * scale
+    mic_y = floor - 1.35 * scale
+    s.mic(mic_x, mic_y, floor, scale=0.8)
+    s.dim(x0 + 6, mic_y - 14, mic_x, mic_y - 14, "≈ 1.5 m", size=13)
+    s.dim(mic_x, mic_y - 14, x1 - 6, mic_y - 14, "≥ 1 m", size=13)
+    s.dim(
+        mic_x + 34,
+        floor,
+        mic_x + 34,
+        mic_y,
+        "1.2 m to 1.5 m",
+        size=13,
+        label_side="right",
+    )
+    s.line(mic_x + 6, mic_y, mic_x + 34, mic_y, th.muted, 0.9, dash="3,3")
+    indoor = (
+        (th.fg, "doors and windows closed (A.3.4 d)"),
+        (th.fg, "three positions or more, each like this one;"),
+        (th.muted, "if they do not fit, the centre of the room (Annex I A.3 b)"),
+    )
+    size = s.fit_size([label for _, label in indoor], [13, 12], 400)
+    for k, (colour, label) in enumerate(indoor):
+        s.text(40, floor + 28 + 18 * k, label, size, colour, anchor="start")
+
+    # --- (b) outdoors: incident sound at the point of highest level --------
+    s.text(
+        480,
+        72,
+        "(b) Outdoors: the evaluation point",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.ground(floor, 480, 862)
+    s.rect(492, floor - 80, 80, 80, th.panel, th.fg, rx=3, sw=2.0)
+    s.circle(532, floor - 40, 14, th.fg)
+    s.circle(532, floor - 40, 5, th.bg)
+    s.text(532, floor - 92, "the activity", 13, th.fg, bold=True)
+    s.rect(806, floor - 180, 44, 180, th.panel, th.fg, sw=2.0)
+    for y in (floor - 158, floor - 98):
+        s.rect(815, y, 14, 28, th.bg, th.muted, sw=1.4)
+    s.text(828, floor - 192, "façade", 13, th.fg)
+    out_x, out_y = 700.0, floor - 53.0
+    # The reflection off the façade, which the reading is corrected for. It
+    # leaves the activity above the microphone, so the outgoing leg clears the
+    # windscreen, and meets the façade where the image construction puts it:
+    # on the line from the source to the mirror image, in the face x = 806, of
+    # the point where it reaches the windscreen.
+    wall = 806.0
+    start_x, start_y = 575.0, floor - 78.0
+    end_x, end_y = out_x + 9.0, out_y - 2.0
+    image_x = 2.0 * wall - end_x
+    bounce_y = start_y + (end_y - start_y) * (wall - start_x) / (image_x - start_x)
+    s.path(
+        f"M {start_x} {start_y} L {wall} {bounce_y:.2f} L {end_x} {end_y}",
+        stroke=th.secondary,
+        sw=1.7,
+        dash="6,4",
+    )
+    back = (end_x - wall, end_y - bounce_y)
+    reach = (back[0] ** 2 + back[1] ** 2) ** 0.5
+    s.arrow(
+        end_x - 12.0 * back[0] / reach,
+        end_y - 12.0 * back[1] / reach,
+        end_x,
+        end_y,
+        th.secondary,
+        1.7,
+    )
+    s.arrow(575, floor - 40, out_x - 13, out_y + 5.5, th.primary, 2.0)
+    s.mic(out_x, out_y, floor, scale=0.85)
+    s.circle(out_x, out_y + 5, 11, th.panel, th.fg, 1.3)
+    outdoor = (
+        (th.primary, "", "incident sound: the one assessed (Annex I A.4)"),
+        (th.secondary, "6,4", "reflection off a façade: corrected out (A.3.2)"),
+        ("", "", "microphone, in its windscreen, where the"),
+        ("", "", "level is highest (A.3.4.2 b, A.3.5 d)"),
+    )
+    size = s.fit_size([row[2] for row in outdoor], [13, 12], 350)
+    for k, (colour, dash, label) in enumerate(outdoor):
+        y = floor + 28 + 18 * k
+        if colour:
+            s.line(480, y - 4.5, 504, y - 4.5, colour, 2.0, dash=dash)
+        s.text(512, y, label, size, th.fg if colour else th.muted, anchor="start")
+
+    # --- (c) the series of one noise phase ---------------------------------
+    s.line(40, 404, 860, 404, th.muted, 1.0, dash="6,5")
+    s.text(
+        40,
+        436,
+        "(c) One noise phase: the series of A.3.4.2 b",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    base = 550.0
+    s.arrow(60, base, 452, base, th.fg, 1.6)
+    tops = (base - 68, base - 60, base - 76)
+    centres = (98.0, 218.0, 338.0)
+    highest = min(tops)
+    for x, top in zip(centres, tops, strict=True):
+        fill = th.primary if top == highest else th.muted
+        s.rect(x - 8, top, 16, base - top, fill, rx=2)
+        s.text(x, base + 18, "≥ 5 s", 12, th.fg)
+    s.dim(centres[0], base + 44, centres[1], base + 44, "≥ 3 min", size=13)
+    s.dim(centres[1], base + 44, centres[2], base + 44, "≥ 3 min", size=13)
+    # The spread the three readings have to keep within.
+    for y in (highest, max(tops)):
+        s.line(78, y, 372, y, th.secondary, 1.0, dash="4,3")
+    s.line(372, highest, 372, max(tops), th.secondary, 1.6)
+    s.text(
+        380,
+        (highest + max(tops)) / 2 + 4.5,
+        "≤ 6 dBA",
+        13,
+        th.secondary,
+        anchor="start",
+    )
+    s.text(centres[2], highest - 10, "the result", 13, th.primary, bold=True)
+    rules = (
+        (
+            "three readings of $L_{Keq,Ti}$ or more in each phase,",
+            "5 s or longer each and 3 min or more apart",
+        ),
+        ("valid within 6 dBA; beyond it, three more",),
+        (
+            "one reading far from the rest: find its source",
+            "and repeat up to five times with it running",
+        ),
+        ("the result is the highest reading",),
+        ("background: the same with the activity stopped",),
+    )
+    size = s.fit_size([line for rule in rules for line in rule], [13, 12], 348)
+    y = 468.0
+    for rule in rules:
+        s.circle(500, y - 4.5, 3.2, th.primary)
+        for line in rule:
+            s.text(512, y, line, size, th.fg, anchor="start")
+            y += 18
+        y += 5
+
+    # --- the instrument and the weather -------------------------------------
+    s.rect(40, 630, 820, 84, th.panel, th.fg, rx=6, sw=1.6)
+    kit = (
+        "type 1/class 1 sound level meter and calibrator, class 1 one-third-octave filters (Article 30)",
+        "calibrator check before and after every measurement: within 0.3 dB of the initial reference value (A.3.5 c)",
+        "outdoors: windscreen always, no measurement in rain, none with wind above 5 m/s (A.3.5 b, d)",
+    )
+    size = s.fit_size(kit, [13, 12, 11], 790)
+    for k, line in enumerate(kit):
+        s.text(56, 654 + 22 * k, line, size, th.fg, anchor="start")
+
+
+def _d_soundscape_study(s: SVG, th: Theme) -> None:
+    """What a soundscape study collects, and what the analysis makes of it.
+
+    The collection is ISO/TS 12913-2:2018: the soundwalk with predefined
+    assessment sites of C.2.3 (PDF page 18), the instructions of Method B in
+    C.3.2.2 (page 23), the questionnaires of C.3.1 and C.3.2.3 to C.3.2.5
+    (pages 19 to 25) and the binaural measurement of Annex D (pages 30 and
+    31): the microphones 1.6 m ± 0.1 m above the ground and at least 1 m from
+    reflecting structures (D.2), 3 min or longer (D.3), equalized for the
+    sound field (D.4), a wind shield outdoors (D.5), 44.1 kHz or more (D.6).
+    The analysis is ISO/TS 12913-3:2019, Annexes A, B and D (PDF pages 11 to
+    19). The head is drawn where the participants stand and facing where they
+    look, which is what C.3.2.2.2 asks of it; nothing here says when it
+    records, because the specification does not.
+    """
+    # --- (a) the soundwalk, in plan ----------------------------------------
+    s.text(
+        40, 72, "(a) The soundwalk (C.2.3)", 15, th.primary, anchor="start", bold=True
+    )
+    for x, y, w, h in (
+        (48, 92, 96, 34),
+        (236, 88, 84, 56),
+        (120, 176, 104, 52),
+        (330, 184, 90, 44),
+        (404, 92, 56, 34),
+    ):
+        s.rect(x, y, w, h, th.panel, th.muted, rx=3, sw=1.0)
+    route = ((52, 160), (112, 148), (196, 136), (286, 172), (368, 148), (456, 152))
+    d = f"M {route[0][0]} {route[0][1]}"
+    for k in range(len(route) - 1):
+        before = route[max(k - 1, 0)]
+        here, there = route[k], route[k + 1]
+        after = route[min(k + 2, len(route) - 1)]
+        c1 = (
+            here[0] + (there[0] - before[0]) / 6,
+            here[1] + (there[1] - before[1]) / 6,
+        )
+        c2 = (there[0] - (after[0] - here[0]) / 6, there[1] - (after[1] - here[1]) / 6)
+        d += f" C {c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {there[0]} {there[1]}"
+    s.path(d, stroke=th.primary, sw=2.2, dash="7,5")
+    for number, (x, y) in enumerate(route[1:5], start=1):
+        s.circle(x, y, 11, th.primary, th.bg, 1.6)
+        s.text(x, y + 4.5, str(number), 13, th.bg, bold=True)
+    walk = (
+        "the area and the assessment sites (1 to 4) are set beforehand",
+        "a moderator leads groups of up to five, who walk in silence",
+        "and all fill in the questionnaire at every site",
+        "20 or more independent observations of each site",
+    )
+    size = s.fit_size(walk, [13, 12], 424)
+    for k, line in enumerate(walk):
+        s.text(40, 258 + 18 * k, line, size, th.fg, anchor="start")
+
+    # --- (b) one assessment site, in elevation ------------------------------
+    s.text(
+        500,
+        72,
+        "(b) At each site (C.3.2.2, D.2)",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    ground = 232.0
+    s.ground(ground, 500, 860)
+    for x in (522, 550, 578):
+        s.person(x, ground, 78)
+    s.arrow(512, 134, 598, 134, th.accent, 1.6)
+    s.text(555, 126, "viewing direction", 12, th.accent)
+    # The artificial head on its tripod, the ear canal entrance 1.6 m up.
+    head_x, ear_y = 652.0, ground - 74.0
+    for foot in (-17.0, 0.0, 17.0):
+        s.line(head_x, ground - 40, head_x + foot, ground, th.fg, 2.0)
+    s.line(head_x, ground - 40, head_x, ear_y + 22, th.fg, 2.4)
+    s.rect(head_x - 13, ear_y + 15, 26, 8, th.muted, rx=3)
+    s.ellipse(head_x, ear_y, 9.5, 11.5, th.panel, th.fg, 1.8)
+    s.path(
+        f"M {head_x + 9} {ear_y - 3} L {head_x + 14} {ear_y + 3} L {head_x + 9} {ear_y + 4}",
+        stroke=th.fg,
+        sw=1.8,
+    )
+    s.circle(head_x, ear_y, 3.2, th.primary)
+    s.line(head_x + 4, ear_y, head_x + 34, ear_y, th.muted, 0.9, dash="3,3")
+    s.dim(
+        head_x + 34,
+        ground,
+        head_x + 34,
+        ear_y,
+        "1.6 m ± 0.1 m",
+        size=13,
+        label_side="right",
+    )
+    s.rect(814, ground - 126, 46, 126, th.panel, th.fg, sw=2.0)
+    s.text(860, ground - 134, "reflecting structure", 12, th.muted, anchor="end")
+    s.dim(head_x + 14, ground - 104, 814, ground - 104, "≥ 1 m", size=13)
+    site = (
+        "the participants listen in silence for a set time,",
+        "e.g. 3 min, then answer without leaving the spot",
+        "artificial head on a tripod, facing where they look",
+        "and not moved while it measures (C.3.2.2.2)",
+    )
+    size = s.fit_size(site, [13, 12], 360)
+    for k, line in enumerate(site):
+        s.text(500, 258 + 18 * k, line, size, th.fg, anchor="start")
+
+    # --- (c) to (e): what each record is, and what is made of it ------------
+    s.line(40, 332, 860, 332, th.muted, 1.0, dash="6,5")
+    lanes = (
+        (
+            "(c) Method A (C.3.1)",
+            "four parts, five boxes each:",
+            (
+                "1  sources heard (Figures C.2, C.3)",
+                "2  eight attributes (Figure C.4)",
+                "3  overall quality (Figure C.5)",
+                "4  appropriateness (Figure C.6)",
+            ),
+            "Annex A",
+            (
+                ("scale values of each part (Table A.1)", "method_a_scale_values"),
+                ("median and range per site (A.2)", "method_a_summary"),
+                ("$P$ and $E$ (Formulas A.1 and A.2)", "pleasantness_eventfulness"),
+                ("Spearman against the levels (A.4)", "spearman_rank_correlation"),
+                ("every scale is ordinal (A.2)", ""),
+            ),
+        ),
+        (
+            "(d) Method B (C.3.2)",
+            "the soundwalk sheet, in this order:",
+            (
+                "1  continuous scales (Figure C.7)",
+                "2  sources, by rank (Figure C.8):",
+                "    up to eight, the most noticeable first",
+                "3  free comments (Figure C.9)",
+            ),
+            "Annex B",
+            (
+                ("value 1 to 5, to one decimal (B.2)", "method_b_scale_values"),
+                ("mean, deviation, 95 % interval (B.2)", "method_b_summary"),
+                ("median rank of each source (B.2)", "method_b_source_ranking"),
+                ("Pearson against the levels (B.3)", "pearson_correlation"),
+                ("comments: qualitative analysis (B.2)", ""),
+            ),
+        ),
+        (
+            "(e) Binaural recording (Annex D)",
+            "two channels, one for each ear:",
+            (
+                "3 min or longer (D.3)",
+                "44.1 kHz or more, uncompressed (D.6)",
+                "wind shield outdoors (D.5)",
+                "equalized for the sound field (D.4)",
+            ),
+            "Annex D",
+            (
+                ("each metric of Table D.1 at each ear:", "binaural_indicators"),
+                ("levels, loudness, sharpness, tonality,", ""),
+                ("roughness and fluctuation strength", ""),
+                ("the higher of the two ears' values", ""),
+                ("is the representative value (D.2)", ""),
+                ("a percentile ratio such as $N_5$/$N_{95}$", ""),
+                ("tells the variation over time (D.2)", ""),
+            ),
+        ),
+    )
+    quiet_lines = (
+        "every scale is ordinal (A.2)",
+        "comments: qualitative analysis (B.2)",
+    )
+    width, top, mid, card = 260.0, 384.0, 532.0, 172.0
+    heads = s.fit_size([lane[0] for lane in lanes], [15, 14, 13], width, bold=True)
+    body = s.fit_size(
+        [
+            line
+            for lane in lanes
+            for line in (lane[1], *lane[2], *(item[0] for item in lane[4]))
+        ],
+        [13, 12, 11],
+        width - 30,
+    )
+    for k, (head, lead, parts, annex, items) in enumerate(lanes):
+        left = 40.0 + 280 * k
+        s.text(left, 362, head, heads, th.primary, anchor="start", bold=True)
+        s.rect(left, top, width, 108, th.panel, th.fg, rx=6, sw=1.4)
+        s.text(left + 14, top + 22, lead, body, th.muted, anchor="start")
+        for row, line in enumerate(parts):
+            # A line indented under an item carries on that item.
+            indent = 18 if line.startswith(" ") else 0
+            s.text(
+                left + 14 + indent,
+                top + 42 + 18 * row,
+                line.strip(),
+                body,
+                th.fg,
+                anchor="start",
+            )
+        s.arrow(left + 30, top + 108, left + 30, mid - 2, th.fg, 1.6)
+        s.text(
+            left + 44,
+            (top + 108 + mid) / 2 + 4.5,
+            f"ISO/TS 12913-3, {annex}",
+            12,
+            th.muted,
+            anchor="start",
+        )
+        s.rect(left, mid, width, card, th.bg, th.primary, rx=6, sw=1.6)
+        line_y = mid + 22
+        for label, function in items:
+            quiet = label in quiet_lines
+            s.text(
+                left + 14,
+                line_y,
+                label,
+                body,
+                th.muted if quiet else th.fg,
+                anchor="start",
+            )
+            if function:
+                s.text(
+                    left + 14,
+                    line_y + 15,
+                    function,
+                    11,
+                    th.primary,
+                    anchor="start",
+                    mono=True,
+                )
+            line_y += 33 if function else 18
+    # The levels the answers are correlated with come from the recording.
+    bus = mid + card + 22
+    s.line(40 + 2 * 280 + 130, mid + card, 40 + 2 * 280 + 130, bus, th.accent, 1.8)
+    s.line(170, bus, 40 + 2 * 280 + 130, bus, th.accent, 1.8)
+    for foot in (170.0, 450.0):
+        s.arrow(foot, bus, foot, mid + card + 2, th.accent, 1.8)
+    s.text(
+        450,
+        bus + 20,
+        "the acoustic data the answers are set against (A.4, B.3)",
+        13,
+        th.accent,
+    )
 
 
 def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:

@@ -29,6 +29,45 @@ amortiguamiento alto, las resonancias de subcomponentes u otros problemas
 prácticos limitan lo que vale la medida. Ofrece cuatro predictores y es franco
 con todos.
 
+**Si la frecuencia se puede medir**, el cuerpo de la norma dice cómo en pocas
+palabras. El apartado 5.3 pide que se conozca la frecuencia natural fundamental
+de la estructura y nombra dos caminos: el análisis espectral de su respuesta de
+bajo nivel a la excitación ambiental, o la excitación artificial, con
+excitadores por ejemplo. El apartado 11.2 encuadra el trabajo en el análisis de
+ingeniería, donde las frecuencias naturales «should be determined, if
+possible», con instrumentación de clase 1 (8.4.2): capacidad para al menos 30 s
+por canal a 1000 muestras por segundo o más, un muestreo no inferior a cinco
+veces la frecuencia más alta que se vaya a analizar, un filtro analógico
+antisolapamiento que atenúe al menos 40 dB a la mitad de la frecuencia de
+muestreo, un intervalo de al menos 1 Hz a 150 Hz entre sus puntos de 3 dB «or
+wider as necessary», un rango dinámico de al menos 72 dB y una amplitud mínima
+medible de 10 µm/s. Por el ajuste de la sección 2, cabe esperar que un edificio
+de más de unos 46 m quede por debajo de 1 Hz, que es el caso para el que está
+escrito ese «wider».
+
+Dónde van los transductores lo dicen 9.1.3 y 9.1.4: una estructura de más de
+12 m de altura lleva un punto de medida cada 12 m o en su planta más alta; una
+de más de 10 m de longitud, al menos tres a lo largo, en los dos extremos y en
+el centro; y para estudiar la respuesta de la estructura los sensores
+horizontales se orientan según sus ejes mayor y menor, no según la línea hacia
+la fuente. La NOTA de 9.1.3 añade que los puntos dependen de los modos de
+deformación considerados, y que la mayoría de los casos prácticos se quedan en
+los modos fundamentales. El montaje es 9.2.2: según la ISO 5348, sin escuadras,
+tres transductores uniaxiales en tres caras de un cubo metálico fijado
+rígidamente, y un equipo de medida que no pese más del 1 % de lo que lo
+sostiene, porque con el 10 % cambia el comportamiento modal que se quiere
+medir. Un suelo con revestimiento blando se evita, o se mide con los adaptadores
+de la DIN 45669-2, cuyas reglas de acoplamiento están dibujadas en
+[Medida de la inmisión de vibración](/phonometry/es/vibration/immission/vibration-meter/).
+
+Lo que el cuerpo de la norma no da es la extracción. No fija una duración de
+registro para una identificación con excitación ambiental, ni un procedimiento
+con excitador, ni la manera de leer la frecuencia en el espectro. Enuncia el
+objetivo de un análisis de ingeniería completo, «a system which would enable
+the frequency to be estimated within ± 0,5 % and damping within ± 20 %» (11.2),
+y una relación señal-ruido no inferior a 5 dB (8.3). Junto al ± 50 % de la
+sección 2, ese medio por ciento es toda la razón para medir.
+
 ## 1. Cuatro predictores, y de qué están hechos
 
 El más simple cuenta plantas. $f = 10/n$ hercios, que es la misma regla que

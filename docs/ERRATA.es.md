@@ -1298,6 +1298,54 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ambas salas en ISO 16283-1 y el punto de entrada aéreo ofrece ambas.
 - **Estado:** sin notificar.
 
+## ISO 16283-1:2014, apartado 7.5.3 (una hélice que termina «no more than 0,5 m from the ceiling»)
+
+- **Ubicación:** apartado 7.5.3 «Helix», primer párrafo (p. 10 impresa).
+- **El impreso:** «The operator holds the microphone or sound level meter with
+  outstretched arm at a starting position that is 0,5 m above the floor then
+  rotates the body at least twice through 360° from a crouched to a standing
+  position, finishing with the microphone at a position that is **no more
+  than** 0,5 m from the ceiling.»
+- **El problema:** la frase fija un máximo donde el mismo documento fija un
+  mínimo. El apartado 7.6 enumera «0,5 m between any microphone position and
+  the room boundaries» entre unas distancias de separación que «are minimum
+  values and shall be exceeded where possible», y el techo es un límite del
+  recinto. Leídas juntas, las dos dejan al final de la hélice una sola altura,
+  exactamente 0,5 m bajo el techo, que es la altura que el apartado 7.6 pide
+  superar. La trayectoria impresa a continuación no lleva ese conflicto: la de
+  tipo cilíndrico del apartado 7.5.4 sube «until the microphone is 0,5 m from
+  the ceiling», una distancia sin dirección, como lo es el «0,5 m above the
+  floor» del que parte la propia hélice. ISO 16283-2 llevó la misma frase (su
+  primera edición, en la traducción española UNE-EN ISO 16283-2:2016, dice
+  «en una posición no más alejada de 0,5 m del techo») hasta su tercera
+  edición, cuyo apartado 7.5.5 imprime «at a position that is **at least**
+  0,5 m from the ceiling» y cuyo prólogo enumera, entre los cambios
+  principales respecto a la edición anterior, «in the helical path (7.5.5)
+  distance of the microphone position to the ceiling changed to minimum
+  0,5 m». La frase se corrigió, pues, en la parte de impactos y se dejó en pie
+  en la Parte 1, y en la Parte 3: el apartado 7.2.3.3 de ISO 16283-3:2016
+  también imprime «no more than 0,5 m from the ceiling». La lectura
+  pretendida es la que ISO 16283-2:2020 imprime ahora: la hélice termina a
+  0,5 m del techo como mínimo, como el apartado 7.6 exige de toda posición de
+  micrófono.
+- **Evidencia:** una comparación de frases, cada una leída en su página: el
+  apartado 7.5.3 en la página 16 del PDF (p. 10 impresa) y el apartado 7.6 en
+  la página 18 del PDF (p. 12 impresa) de ISO 16283-1:2014, el primero
+  idéntico en la página 18 del PDF (p. 10 impresa) de BS EN ISO 16283-1:2014;
+  el apartado 7.5.5 en la página 16 del PDF (p. 10 impresa) y el prólogo en
+  la página 5 del PDF (p. v impresa) de ISO 16283-2:2020; el apartado 7.5.5
+  en la página 18 del PDF (p. 18 impresa) de UNE-EN ISO 16283-2:2016; y el
+  apartado 7.2.3.3 en la página 18 del PDF (p. 12 impresa) de
+  ISO 16283-3:2016. No se dispuso de ISO 16283-1:2014/Amd 1:2017, así que la
+  entrada describe el texto de 2014 y no dice nada del modificado.
+- **Comportamiento de la biblioteca:** no hizo falta ningún cambio: la
+  biblioteca calcula a partir de niveles por banda y no comprueba ninguna
+  posición de micrófono. La guía de aislamiento in situ cita las dos
+  redacciones con sus apartados y ediciones, y su dibujo de las cuatro
+  trayectorias de barrido acota el final de la hélice como 0,5 m del techo y
+  escribe las dos redacciones a su lado.
+- **Estado:** sin notificar.
+
 ## ISO 16283-2:2020, apartado 8.3 (una sala emisora en una medición de impacto)
 
 - **Ubicación:** apartado 8.3 «Microphone positions», último párrafo (p. 15
@@ -1470,6 +1518,68 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:** no hizo falta ninguno; la biblioteca
   implementa el ancho de banda crítico desde las Fórmulas (3)/(6)
   directamente.
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), apartado 12.4 (el borde superior de banda enviado a la Fórmula (21))
+
+- **Ubicación:** apartado 12.4 «Determination of the level of the upper
+  critical band» (p. 17 impresa), la frase que precede a la Fórmula (22).
+- **El impreso:** «For the purposes of this document, the value of
+  $f_{2,\mathrm{U}}$ shall be computed from Formula (21) (which has been
+  derived from an iterative solution through the use of curve fitting).»
+- **El problema:** la Fórmula (21) es el borde inferior de la banda crítica
+  inferior, $f_{1,\mathrm{L}}$, con las constantes de la tabla 2. La fórmula
+  impresa justo después de la frase es la Fórmula (22), $f_{2,\mathrm{U}}$
+  con las constantes de la tabla 3, que es la que la frase quiere decir; se
+  copió del 12.3 con el número de fórmula de ese apartado.
+- **Evidencia:** la frase y las dos fórmulas en una misma página. Verificado
+  en la página 25 del PDF (p. 17 impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** calcula $f_{2,\mathrm{U}}$ con la
+  Fórmula (22) y la tabla 3, en
+  [`tonality.py`](../src/phonometry/psychoacoustics/quality/tonality.py).
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), Fórmula (23) (la condición de la Fórmula (24) impresa a su lado)
+
+- **Ubicación:** apartado 12.5 «Determination of prominence ratio», Fórmula
+  (23) (p. 18 impresa).
+- **El impreso:** «The prominence ratio, $\Delta L_\mathrm{P}$ in decibels,
+  is calculated as follows (for discrete tone frequencies greater than 171,4
+  Hz):», y luego la Fórmula (23) con «for $f_t \le 171{,}4\ \text{Hz}$» al
+  lado.
+- **El problema:** la frase asigna la Fórmula (23) a los tonos por encima de
+  171,4 Hz, y el párrafo siguiente introduce la Fórmula (24) «for the
+  purposes of computing the prominence ratio for discrete tone frequencies
+  less than or equal to 171,4 Hz», condición que (24) también imprime a su
+  lado. Leído tal como está impreso, las dos fórmulas reclaman los tonos
+  bajos y ninguna los altos. La condición junto a (23) es la de (24); la que
+  se pretende es $f_t > 171{,}4\ \text{Hz}$.
+- **Evidencia:** la fórmula y las dos frases en una misma página. Verificado
+  en la página 26 del PDF (p. 18 impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** aplica la Fórmula (23) por encima de
+  171,4 Hz y la Fórmula (24) en o por debajo, como dicen las frases, en
+  [`tonality.py`](../src/phonometry/psychoacoustics/quality/tonality.py),
+  cuyo docstring de `prominence_ratio` señala la condición impresa como
+  errata.
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), apartado 12.5 (el truncado de la banda inferior remitido al 12.4)
+
+- **Ubicación:** apartado 12.5, el párrafo entre las Fórmulas (23) y (24)
+  (p. 18 impresa).
+- **El impreso:** «For discrete tone frequencies less than or equal to 171,4
+  Hz, the lower critical band becomes truncated (see 12.4) so that its width
+  is less than what would be calculated from Formula (2).»
+- **El problema:** el 12.4 es la banda crítica superior y no habla de ningún
+  truncado. La banda inferior se corta en 20 Hz en el 12.3: «For such cases,
+  the lower band-edge frequency shall be set equal to 20 Hz». La remisión
+  debería ser al 12.3.
+- **Evidencia:** los dos apartados leídos en sus páginas: 12.3 y 12.4 en la
+  página 25 del PDF (p. 17 impresa) y 12.5 en la página 26 del PDF (p. 18
+  impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** no hizo falta ninguno; la biblioteca
+  corta la banda inferior en 20 Hz como imprime el 12.3 y la reescala a
+  100 Hz con la Fórmula (24).
 - **Estado:** sin notificar.
 
 ## ECMA-418-2:2025 (4.ª edición), apartado 5.1.5.2 (índice del último bloque)
@@ -4463,6 +4573,47 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`tests/materials/absorbers/test_slow_sound.py`](../tests/materials/absorbers/test_slow_sound.py).
 - **Estado:** sin notificar (artículos de revista, no normas).
 
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Ec. (4.35)
+
+- **Ubicación:** apartado 4.2.4.1 «Impedance Plane Approach», Ec. (4.35)
+  (p. 133 impresa), la actualización de la velocidad de partícula en un
+  contorno de impedancia real y constante.
+- **El impreso:**
+  $$
+  v^{l+0.5}_{x(i+0.5,j,k)} = \left[1 + \frac{dt\,c_0 Z_0}{dx}\right]^{-1}
+  \left[v^{l-0.5}_{x(i+0.5,j,k)}\left(1 - \frac{dt\,c_0 Z_0}{dx}\right)
+  - \frac{2\,dt}{\rho_0\,dx}\,p^{l}_{(i+1,j,k)}\right]
+  $$
+- **El problema:** la ecuación no se sigue de las dos de las que se
+  construye. La Ec. (4.33) y la figura 4.4 están escritas para un contorno
+  derecho, «assuming a right boundary»: la celda dentro de la malla es $i$,
+  la pared está en $i+0.5$, y «$i+0.5$ is used instead of $i+1$ (that would
+  obviously fall outside the grid)». La Ec. (4.33) toma la diferencia entre
+  la presión de la pared y $p^{l}_{(i,j,k)}$, y la Ec. (4.34) iguala la
+  presión de la pared a la impedancia por la media de las dos velocidades.
+  Llevando (4.34), con la impedancia $Z_0 \rho_0 c_0$, a (4.33) y despejando
+  la velocidad nueva se obtienen el corchete y el factor impresos con el
+  último término $+\,(2\,dt/(\rho_0\,dx))\,p^{l}_{(i,j,k)}$: la presión de la
+  celda de dentro de la malla, con signo más. El término impreso, un signo
+  menos sobre la presión de la celda $i+1$, es la actualización de un
+  contorno izquierdo, cuya celda interior es $i+1$ y cuya normal exterior
+  apunta al otro lado.
+- **Evidencia:** la deducción anterior, a partir de las ecuaciones y la
+  figura leídas en sus páginas: las Ecs. (4.32) y (4.33) con la frase que las
+  precede en la página 151 del PDF (p. 132 impresa), y la figura 4.4 con las
+  Ecs. (4.34) y (4.35) en la página 152 del PDF (p. 133 impresa) de
+  Predicting Outdoor Sound 2e:2021.
+- **Comportamiento de la biblioteca:** ningún número depende de la errata.
+  El motor FDTD actualiza cada lado del dominio con el signo de su propia
+  normal exterior (`_ImpedanceEdge.update` en
+  [`fdtd.py`](../src/phonometry/simulation/fdtd.py): los lados derecho e
+  inferior suman la presión de la celda interior, los lados izquierdo y
+  superior la restan), que es la Ec. (4.35) deducida arriba a la derecha y la
+  forma impresa a la izquierda;
+  ``tests/simulation/test_fdtd_oblique_impedance.py`` sujeta la reflexión de
+  uno de esos lados a la de un plano de reacción local.
+- **Estado:** sin notificar (libro, no una norma).
+
 ## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Tabla 5.1
 
 - **Ubicación:** Tabla 5.1, «Coefficient and exponent values in the Delany
@@ -4971,6 +5122,45 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`low_frequency_correction`](../src/phonometry/environment/assessment/spain.py)
   e `impulsive_correction` implementan $10 < L \le 15$, con un test de
   regresión fijando las tres ramas en los límites de 10 dB y 15 dB.
+- **Estado:** sin notificar (reglamento nacional, no un organismo de
+  normalización).
+
+## Real Decreto 1367/2007, artículo 30.1 y 30.2 (la orden de metrología atribuida al Ministerio de Fomento)
+
+- **Ubicación:** artículo 30 «Instrumentos de medida», apartados 1 y 2.
+- **El impreso:** «Los instrumentos de medida y calibradores utilizados para
+  la evaluación del ruido deberán cumplir las disposiciones establecidas en
+  la Orden del Ministerio de Fomento, de 25 de septiembre de 2007, por la que
+  se regula el control metrológico del Estado de los instrumentos destinados
+  a la medición de sonido audible y de los calibradores acústicos»; el
+  apartado 2 remite a «la Orden del Ministerio de Fomento, de 25 de
+  septiembre de 2007».
+- **El problema:** la orden de esa fecha y ese título la dictó otro
+  ministerio. Es la Orden ITC/2845/2007, de 25 de septiembre
+  (BOE-A-2007-17278), que el Boletín Oficial del Estado publica bajo el
+  epígrafe «Ministerio de Industria, Turismo y Comercio» y que firma el
+  ministro de ese departamento. El Ministerio de Fomento había dictado la
+  orden a la que sustituyó: la disposición derogatoria única de la Orden
+  ITC/2845/2007 deroga «la Orden de 16 de diciembre de 1998, del Ministerio
+  de Fomento», sobre el control metrológico de los sonómetros. Quien busque
+  una orden del Ministerio de Fomento de 25 de septiembre de 2007 no la
+  encuentra. La Orden ITC/2845/2007 quedó derogada, con efectos desde el 24
+  de octubre de 2020, por la Orden ICT/155/2020, de 7 de febrero
+  (BOE-A-2020-2573), y el texto consolidado del artículo 30 sigue diciendo lo
+  citado.
+- **Evidencia:** una comparación del artículo con la orden, cada uno leído en
+  su página: el artículo 30 en la página 16 del PDF (p. 16 impresa) del Real
+  Decreto 1367/2007, texto consolidado BOE-A-2007-18397; el epígrafe y el
+  título en la página 1 del PDF (p. 40035 impresa), la disposición
+  derogatoria única en la página 3 del PDF (p. 40037 impresa) y la firma en
+  la página 4 (p. 40038 impresa), de la Orden ITC/2845/2007, BOE núm. 237
+  de 3 de octubre de 2007. La derogación por la Orden ICT/155/2020 es la que
+  el Boletín Oficial del Estado anota en BOE-A-2007-17278.
+- **Comportamiento de la biblioteca:** no hizo falta ningún cambio: la
+  biblioteca no calcula ningún requisito de instrumentos a partir del
+  artículo 30. La guía de la normativa española de ruido nombra la orden por
+  su número y su ministerio, dice que está derogada y recoge los dos
+  documentos UNE-EN 61260 del artículo 30.3.
 - **Estado:** sin notificar (reglamento nacional, no un organismo de
   normalización).
 
@@ -8312,6 +8502,55 @@ dos ediciones con las mismas entradas y en el mismo orden.
   docstring dice por qué.
 - **Estado:** sin comunicar; el documento es un borrador en consulta.
 
+## E DIN 4150-2:2023-08, 6.5.3.6 a) y b) (un máximo justo en el valor superior, que no recoge ninguno de los guiones)
+
+- **Ubicación:** los puntos a) y b) de 6.5.3.6 en la página impresa 22
+  (página 22 del PDF), frente a los guiones de 6.3 en las páginas impresas
+  14 y 15, a 5.4 en la página impresa 13 y a 6.5.1.1 en la página impresa
+  17.
+- **El impreso:** a) «Wenn der $KB_\mathrm{Fmax}$-Wert < $A_\mathrm{o}$ (nach
+  Tabelle 1); oder» y «wenn $KB_\mathrm{Fmax}$-Wert > $A_\mathrm{o}$ und Zunahme
+  des $KB_\mathrm{Fmax}$-Wertes um < 25 % im Vergleich des Prognoseplanfalls
+  zum Prognosenullfall»; b) «Wenn der $KB_\mathrm{Fmax}$-Wert den
+  $A_\mathrm{o}$-Wert wie folgt unterschreitet», y después «Oder wenn bei
+  einer Überschreitung des anzuwendenden oberen Anhaltswert $A_\mathrm{o}$ die
+  Zunahme des $KB_\mathrm{Fmax}$-Wertes um < 25 % [...] ist».
+- **El problema:** un máximo justo en $A_\mathrm{o}$ no lo recoge ninguno de
+  los dos guiones de a): el primero pide menos que $A_\mathrm{o}$, el segundo
+  más. b) deja el mismo hueco entre «unterschreitet» (queda por debajo) y
+  «Überschreitung» (superación). El borrador compara un máximo con
+  $A_\mathrm{o}$ de las dos maneras. El segundo guion de 6.3 solo lo da por
+  incumplido por encima: «Ist $KB_\mathrm{Fmax}$ größer als der obere
+  Anhaltswert $A_\mathrm{o}$, dann ist die Anforderung dieses Dokuments nicht
+  eingehalten», y 6.5.1.1 da por cumplido un suceso raro «kleiner oder gleich
+  dem (oberen) Anhaltswert $A_\mathrm{o}$». Pero el tercer guion de 6.3 da
+  por cumplido un suceso raro cuando «$KB_\mathrm{Fmax}$ kleiner als
+  $A_\mathrm{o}$ ist (siehe 6.5.1)», el cuarto recoge los sucesos frecuentes
+  «bei denen $KB_\mathrm{Fmax}$ größer als $A_\mathrm{u}$, aber kleiner als
+  $A_\mathrm{o}$ ist», su ANMERKUNG dice lo mismo, y 5.4 limita un punto de
+  medida sustitutivo al «Nachweis der Einhaltung der Anhaltswerte
+  $KB_\mathrm{Fmax}$ < $A_\mathrm{o}$». El hueco de 6.5.3.6 se repite así en
+  el propio 6.3: su segundo guion no da por incumplido un máximo en
+  $A_\mathrm{o}$, su cuarto no lo recoge, y el tercer guion y el 6.5.1.1 al
+  que remite discrepan sobre él. La lectura que cierra el hueco es «en o por
+  debajo de $A_\mathrm{o}$» en el primer guion de a) y de b), como lo tienen
+  el segundo guion de 6.3 y 6.5.1.1.
+- **Evidencia:** una comparación de frases, cada una leída en su página:
+  6.5.3.6 en la página 22 del PDF (p. impresa 22), el segundo guion de 6.3
+  en la página 14 del PDF (p. impresa 14), sus guiones tercero y cuarto y su
+  ANMERKUNG en la página 15 del PDF (p. impresa 15), 5.4 en la página 13 del
+  PDF (p. impresa 13) y 6.5.1.1 en la página 17 del PDF (p. impresa 17) de
+  la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; ningún
+  máximo de los ejemplos 8 y 9 cae en $A_\mathrm{o}$.
+- **Comportamiento de la biblioteca:**
+  [`assess_railway_change`](../src/phonometry/vibration/immission/train_categories.py)
+  da por cumplida la condición de a) y b) en o por debajo de $A_\mathrm{o}$,
+  como leen el valor superior el segundo guion de 6.3 y 6.5.1.1; la guía de
+  las categorías ferroviarias y su dibujo de la regla del 25 % lo dicen junto
+  al «<» impreso.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
 ## E DIN 4150-2:2023-08, anexo B, B.8.3.4 (un resultado que sus propias entradas de cuatro decimales no dan)
 
 - **Localización:** la última fórmula de B.8.3.4 en la página impresa 39
@@ -11455,6 +11694,42 @@ dos ediciones con las mismas entradas y en el mismo orden.
   EN 61260:1995 Table 1" y "EN 15610:2009 7.4.3 and EN 61260:1995 4.8 and
   Table 1" lo evalúan banda a banda y con tonos que pasan por él.
 - **Estado:** no reportada.
+
+## EN 15461:2008+A1:2010, 6.7 frente a la figura 2 (veintiocho posiciones del martillo en el texto, veintinueve en el dibujo)
+
+- **Ubicación:** 6.7 «Set of measuring positions», párrafos primero y
+  quinto (pp. 9 y 10 impresas), frente a la figura 2 y su detalle X (p. 11
+  impresa).
+- **El impreso:** «Each set of FRF shall contain response measurements at
+  the accelerometer position corresponding to pulses produced on the rail
+  for the set of excitation positions described in Figure 2», y después
+  «Measurements in the near field shall be carried out by applying the pulse
+  starting from the response measuring point situated at inter-sleeper space
+  0 with an interval equal to a quarter of the inter-sleeper space up to
+  inter-sleeper space 2, then from that with an interval corresponding to
+  half the inter-sleeper space up to the middle of inter-sleeper space 4 and
+  then at each median inter-sleeper position up to inter-sleeper space 8.»
+- **El problema:** la frase y la figura a la que remite difieren en una
+  posición. Leído tal como está impreso, los pasos de un cuarto de vano van
+  de 0 a 2, nueve posiciones, los de medio vano añaden 2,5, 3, 3,5 y 4, los
+  vanos enteros añaden de 5 a 8, y el campo lejano añade las once posiciones
+  de 10 a 66 del párrafo siguiente: 28 en total. El detalle X de la figura 2
+  dibuja once golpes separados un cuarto de vano de 0 a 2,5, marcados a sobre
+  una traviesa y b entre traviesas, lo que añade una posición de cuarto de
+  vano en 2,25; con 3, 3,5 y 4 y el resto, la figura tiene 29. El primer
+  párrafo del mismo apartado hace de la figura el conjunto que se mide, así
+  que el apartado no puede seguirse de las dos maneras a la vez.
+- **Evidencia:** una comparación de las frases con el dibujo, cada una leída
+  en su página: 6.7 en la página 11 del PDF (p. 9 impresa) y la página 12 del
+  PDF (p. 10 impresa), y la figura 2 con su detalle X en la página 13 del PDF
+  (p. 11 impresa) de la BS EN 15461:2008+A1:2010, idéntica a la EN
+  15461:2008+A1:2010.
+- **Comportamiento de la biblioteca:**
+  [`TRACK_DECAY_EXCITATION_INDICES`](../src/phonometry/environment/sources/track_decay.py)
+  y `track_decay_excitation_positions` siguen la figura, 29 posiciones,
+  porque el apartado nombra la figura como el conjunto; la guía del ruido del
+  material rodante da los dos recuentos y dice cuál sigue la biblioteca.
+- **Estado:** sin notificar.
 
 ## IEC 60268-7:2010, 8.7.3.3, fórmula (3) ($U_{470}$ por el producto a 460 Hz)
 

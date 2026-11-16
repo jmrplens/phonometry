@@ -2356,6 +2356,358 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
     _render_clip(fig, update, output_dir, "anim_sweep_deconvolution")
 
 
+@lru_cache(maxsize=1)
+def _sweep_harmonics_data() -> dict[str, Any]:
+    """The recording, its spectrogram and its deconvolution for the clip.
+
+    The sweep and the per-order impulse responses are the library's
+    (``synchronized_sweep_signal``, ``swept_sine_distortion``), on the
+    numbers of the guide: 20 Hz to 6 kHz in 4 s at 48 kHz, through the
+    guide's memoryless polynomial with a fourth-order term added so that a
+    fourth ridge exists. The spectrogram is one map on a logarithmic
+    frequency axis, where an exponential sweep is a straight line: each row
+    is read from the short-time spectra whose window is nearest the one
+    that resolves a ridge of that slope best, ``2 sqrt(L/f)`` long (a
+    longer window smears the sweep across the frequencies it crosses, a
+    shorter one widens the line), blended between the two nearest window
+    lengths so that no seam shows.
+    """
+    from scipy.signal import hilbert, spectrogram
+
+    from phonometry import electroacoustics
+
+    fs, f1, f2, seconds, fade = 48000, 20.0, 6000.0, 4.0, 0.02
+    sweep = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds, fade=fade)
+    recorded = sweep + 0.12 * sweep**2 + 0.08 * sweep**3 + 0.05 * sweep**4
+    result = electroacoustics.swept_sine_distortion(
+        np.concatenate([recorded, np.zeros(int(0.4 * fs))]),
+        fs,
+        f1=f1,
+        f2=f2,
+        duration_s=seconds,
+        n_harmonics=4,
+        fade=fade,
+    )
+    rate = float(result.rate)
+
+    lead = 1.2  # silence drawn before the sweep, where the orders will land
+    times = np.arange(-lead, 4.4, 0.008)
+    rows = np.geomspace(f1, fs / 2.0, 300)
+    padded = np.concatenate(
+        [np.zeros(int(lead * fs)), recorded, np.zeros(int(0.6 * fs))]
+    )
+    lengths = (512, 1024, 2048, 4096, 8192, 16384)
+    spectra = []
+    for n in lengths:
+        f_n, t_n, s_n = spectrogram(
+            padded,
+            fs,
+            window="hann",
+            nperseg=n,
+            noverlap=n - n // 8,
+            nfft=2 * max(n, 8192),
+            scaling="spectrum",
+        )
+        spectra.append((f_n, t_n - lead, s_n))
+
+    def row_of(index: int, frequency: float) -> NDArray[np.float64]:
+        f_n, t_n, s_n = spectra[index]
+        j = int(np.clip(np.searchsorted(f_n, frequency), 1, f_n.size - 1))
+        w = (frequency - f_n[j - 1]) / (f_n[j] - f_n[j - 1])
+        band = (1.0 - w) * s_n[j - 1] + w * s_n[j]
+        return np.asarray(np.interp(times, t_n, band, left=0.0, right=0.0))
+
+    power = np.empty((rows.size, times.size))
+    for i, frequency in enumerate(rows):
+        # position of the best window length among the six, in octaves
+        u = float(
+            np.clip(
+                np.log2(2.0 * np.sqrt(rate / frequency) * fs / lengths[0]),
+                0.0,
+                len(lengths) - 1.0,
+            )
+        )
+        lo = min(int(u), len(lengths) - 2)
+        power[i] = (1.0 - (u - lo)) * row_of(lo, frequency) + (u - lo) * row_of(
+            lo + 1, frequency
+        )
+    level = 10.0 * np.log10(np.maximum(power, power.max() * 1e-7) / power.max())
+
+    # the envelope of each order's impulse response, in its own window
+    irs = np.asarray(result.harmonic_irs)
+    envelope = np.abs(hilbert(irs, axis=1))
+    window_t = (np.arange(irs.shape[1]) - irs.shape[1] // 2) / fs
+    return {
+        "f1": f1,
+        "rate": rate,
+        "duration": float(result.duration_s),
+        "delays": np.asarray(result.delays),
+        "times": times,
+        "rows": rows,
+        "level": level,
+        "window_t": window_t,
+        "envelope_db": 20.0 * np.log10(np.maximum(envelope, 1e-12) / envelope[0].max()),
+    }
+
+
+def animate_sweep_harmonics(output_dir: str) -> None:
+    r"""Swept-sine distortion (Farina 2000; Novak, Lotton and Simon 2015):
+    the harmonic ridges of the recorded sweep and their collapse.
+
+    While the exponential sweep plays, the spectrogram of the response
+    builds on a logarithmic frequency axis: the fundamental ridge and,
+    fainter and parallel to it, the ridges at 2f, 3f and 4f, each
+    :math:`L \ln n` ahead of the sweep. The inverse filter then takes from
+    every frequency the time the sweep took to reach it,
+    :math:`L \ln(f/f_1)`, which is drawn as that shift growing on each row
+    of the recorded map: the ridges stand up into four vertical lines, and
+    the per-order impulse responses the library returns appear at
+    :math:`-L \ln n`.
+    """
+    from matplotlib.colors import Normalize
+
+    T = _translate_str
+    data = _sweep_harmonics_data()
+    f1, rate, duration = data["f1"], data["rate"], data["duration"]
+    delays, times, rows, level = (
+        data["delays"],
+        data["times"],
+        data["rows"],
+        data["level"],
+    )
+    orders = range(1, delays.size + 1)
+    floor = float(level.min())
+    row_shift = rate * np.log(rows / f1)  # what the filter takes from each row
+
+    fig = _anim_figure()
+    fig.suptitle(T("One sweep, every harmonic: the ridges and their collapse"))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.3, 1.0])
+
+    # --- the recorded map: a log frequency axis over an image drawn in a
+    # child axes, whose rows are already spaced logarithmically ---
+    # The fourth ridge ends on the last row, so the axis runs a little past
+    # it, over the colour of the map's floor: its mark and its label stay
+    # inside the frame.
+    f_top = 1.2 * float(rows[-1])
+    ax_s = fig.add_subplot(gs[0, 0])
+    ax_s.grid(visible=False)
+    ax_s.set_facecolor(plt.get_cmap("magma")(0.0))
+    ax_s.set_xlim(float(times[0]), float(times[-1]))
+    ax_s.set_ylim(float(rows[0]), f_top)
+    format_frequency_axis(
+        ax_s, float(rows[0]), f_top, minor=None, language=_LANG, axis="y"
+    )
+    ax_s.set_xlabel(T("Time [s]"), fontsize=8)
+    ax_s.set_ylabel(T("Frequency [Hz]"), fontsize=8)
+    ax_s.tick_params(labelsize=7)
+    ax_s.set_title(T("recorded response (spectrogram)"), fontsize=9)
+    ax_m = ax_s.inset_axes(
+        (0.0, 0.0, 1.0, float(np.log(rows[-1] / rows[0]) / np.log(f_top / rows[0]))),
+        zorder=0.5,
+    )
+    ax_m.axis("off")
+    disp = np.full_like(level, floor)
+    im = ax_m.imshow(
+        disp,
+        origin="lower",
+        aspect="auto",
+        extent=(float(times[0]), float(times[-1]), 0.0, 1.0),
+        cmap="magma",
+        norm=Normalize(-60.0, 0.0),
+        interpolation="bilinear",
+    )
+    # the instant being played: one mark per order, joined by the cursor
+    (cursor,) = ax_s.plot([], [], color="white", lw=0.9, alpha=0.8)
+    (marks,) = ax_s.plot([], [], "o", color="white", ms=3.0)
+    order_labels = [
+        ax_s.annotate(
+            "$f$" if n == 1 else f"${n}f$",
+            xy=(0.0, f1),
+            xytext=(5.0, 0.0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            color="white",
+            fontsize=7.5,
+            visible=False,
+        )
+        for n in orders
+    ]
+    readout = ax_s.text(
+        0.97,
+        0.15,
+        "",
+        transform=ax_s.transAxes,
+        ha="right",
+        va="bottom",
+        color="white",
+        fontsize=8,
+        family="monospace",
+    )
+    # how far ahead of the sweep each harmonic ridge runs, read along one
+    # frequency each: the sweep passes it L ln n after the ridge did
+    leads = []
+    for n, at in zip(orders[1:], (1000.0, 500.0, 250.0), strict=True):
+        t_sweep = rate * float(np.log(at / f1))
+        arrow = ax_s.annotate(
+            "",
+            xy=(t_sweep, at),
+            xytext=(t_sweep - float(delays[n - 1]), at),
+            arrowprops={
+                "arrowstyle": "<->",
+                "color": "white",
+                "lw": 0.9,
+                "shrinkA": 0.0,
+                "shrinkB": 0.0,
+            },
+            visible=False,
+        )
+        # Clear of the fundamental ridge's glow: at 0.12 s the first letters
+        # stood on its yellow edge.
+        label = ax_s.text(
+            t_sweep + 0.25,
+            at,
+            T(f"$L\\,\\ln {n}$ = {delays[n - 1]:.2f} s"),
+            ha="left",
+            va="center",
+            color="white",
+            fontsize=8,
+            visible=False,
+        )
+        leads.append((arrow, label))
+    landed = [
+        ax_s.text(
+            -float(delays[n - 1]) + 0.05,
+            0.9 * n * f1 * float(np.exp(duration / rate)),
+            f"$h_{n}$",
+            ha="left",
+            va="top",
+            color="white",
+            fontsize=8,
+            visible=False,
+        )
+        for n in orders
+    ]
+
+    # --- what the library returns: one impulse response per order ---
+    ax_i = fig.add_subplot(gs[0, 1])
+    _grid_axes(ax_i)
+    ax_i.set_xlim(-float(delays[-1]) - 0.16, 0.2)
+    ax_i.set_ylim(-95.0, 12.0)
+    ax_i.set_xticks(
+        [-float(d) for d in delays],
+        labels=[
+            "0" if n == 1 else _fmt_minus(-float(delays[n - 1]), ".2f") for n in orders
+        ],
+    )
+    ax_i.set_xlabel(T("Time re linear response [s]"), fontsize=8)
+    ax_i.set_ylabel(T("Level re $h_1$ peak [dB]"), fontsize=8)
+    ax_i.tick_params(labelsize=7)
+    ax_i.set_title(T("after the inverse filter"), fontsize=9)
+    traces = [ax_i.plot([], [], color=COLOR_PRIMARY, lw=1.0)[0] for _ in orders]
+    peaks = [
+        ax_i.text(
+            -float(delays[n - 1]),
+            float(data["envelope_db"][n - 1].max()) + 3.0,
+            f"$h_{n}$",
+            ha="center",
+            va="bottom",
+            color=COLOR_FG,
+            fontsize=9,
+            visible=False,
+        )
+        for n in orders
+    ]
+    caption = fig.supxlabel(" ", fontsize=9.5, fontstyle="italic", color=COLOR_FG)
+
+    play_end, lead_t, shear_t, shear_s, reveal_t = 4.4, 4.6, 6.3, 2.4, 8.8
+    action_frames = _ANIM_FRAMES - _ANIM_HOLD
+    captions = (
+        (0.0, "the device answers each frequency $f$ with $2f$, $3f$ and $4f$ as well"),
+        (
+            play_end,
+            "the sweep reaches $nf$ a time $L\\,\\ln n$ after it passed $f$:"
+            " the ridges run parallel",
+        ),
+        (
+            shear_t,
+            "the inverse filter takes from each frequency the time the sweep"
+            " took to reach it",
+        ),
+        (
+            reveal_t,
+            "each order lands in its own impulse response, $L\\,\\ln n$ ahead"
+            " of the linear one",
+        ),
+    )
+
+    def update(kf: int) -> tuple[Any, ...]:
+        tc = min(kf, action_frames - 1) / _ANIM_FPS
+        t_sig = min(tc / play_end, 1.0) * float(times[-1])
+        playing = tc < shear_t
+        # the map: built column by column while the sweep plays, then every
+        # row moved back by the share of its shift the filter has applied
+        u = float(np.clip((tc - shear_t) / shear_s, 0.0, 1.0))
+        share = u * u * (3.0 - 2.0 * u)
+        if share > 0.0:
+            for i in range(rows.size):
+                disp[i] = np.interp(
+                    times + share * row_shift[i],
+                    times,
+                    level[i],
+                    left=floor,
+                    right=floor,
+                )
+        else:
+            n_col = int(np.searchsorted(times, t_sig))
+            disp[:, :n_col] = level[:, :n_col]
+            disp[:, n_col:] = floor
+        im.set_data(disp)
+        # the marks ride the ridges, and wait at their ends once it is over
+        t_mark = min(t_sig, duration)
+        shown = playing and t_sig > 0.0
+        f_now = f1 * float(np.exp(t_mark / rate))
+        at = [n * f_now for n in orders]
+        cursor.set_data([t_mark, t_mark], [at[0], at[-1]])
+        marks.set_data([t_mark] * len(at), at)
+        cursor.set_visible(shown)
+        marks.set_visible(shown)
+        for text, f_n in zip(order_labels, at, strict=True):
+            text.xy = (t_mark, f_n)
+            text.set_visible(shown)
+        readout.set_text(f"$f$ = {f_now:5.0f} Hz" if shown and tc < play_end else "")
+        for k, (arrow, label) in enumerate(leads):
+            on = playing and tc >= lead_t + 0.5 * k
+            arrow.set_visible(on)
+            label.set_visible(on)
+        for arrival in landed:
+            arrival.set_visible(share >= 1.0)
+        # the impulse responses appear once the ridges stand
+        reveal = float(np.clip((tc - reveal_t) / 0.9, 0.0, 1.0))
+        x_lo, x_hi = ax_i.get_xlim()
+        edge = x_lo + reveal * (x_hi - x_lo)
+        for n, (trace, peak) in enumerate(zip(traces, peaks, strict=True)):
+            t_n = data["window_t"] - float(delays[n])
+            keep = t_n <= edge if reveal > 0.0 else np.zeros(t_n.size, dtype=bool)
+            trace.set_data(t_n[keep], data["envelope_db"][n][keep])
+            peak.set_visible(reveal >= 1.0)
+        caption.set_text(T([text for start, text in captions if tc >= start][-1]))
+        return (
+            im,
+            cursor,
+            marks,
+            *order_labels,
+            readout,
+            *(artist for pair in leads for artist in pair),
+            *landed,
+            *traces,
+            *peaks,
+            caption,
+        )
+
+    _render_clip(fig, update, output_dir, "anim_sweep_harmonics")
+
+
 def animate_specific_loudness(output_dir: str) -> None:
     """ISO 532-1 specific loudness: the N'(z) pattern of a 1 kHz narrowband
     sound builds along the Bark axis as the band level steps up, and the
@@ -5666,3 +6018,1560 @@ def animate_feedback_howl(output_dir: str) -> None:
 
     case_totals = [c["totals_db"] for c in cases]
     _render_clip(fig, update, output_dir, "anim_feedback_howl")
+
+
+# --- synchronous averaging, as the number of averages grows -----------------
+#
+# The guide's stills each hold N fixed: the waveform at N = 40, the comb at
+# N = 20 and 32 around order 32, the error at eight counts. McFadden's own
+# Figure 2 draws the comb at N = 1, 2, 4 and 8. What none of them shows is one
+# process: the same record, one more period at a time, with the comb the
+# average has applied so far and the error it has left. The record is the one
+# `generate_tsa_noise_reduction` averages (three harmonics, 256 samples per
+# period at 8192 Hz, unit-variance noise, seed 5), so the markers this clip
+# drops at 1, 2, 4 ... 128 are the points of that still.
+
+_TSA_FS = 8192.0
+_TSA_SAMPLES = 256  # one period: T = 1/32 s
+_TSA_N_MAX = 128
+#: The counts the still of the guide marks, and this clip marks as it passes.
+_TSA_COUNTS = (1, 2, 4, 8, 16, 32, 64, 128)
+#: (order, amplitude, phase) of the three harmonics of the signature.
+_TSA_HARMONICS = ((1, 1.0, 0.0), (3, 0.5, 0.7), (5, 0.25, 1.1))
+_TSA_ORDERS = 6  # the comb is drawn over orders 0 to 6
+# Points per lobe of the comb: with 24 the grid of N holds every node j/N and
+# every tooth exactly, so a node is drawn at zero and a tooth at one.
+_TSA_PER_LOBE = 24
+# Frames per doubling of N. The seven doublings end on frame 196 of the 240,
+# each count of the still falls on a frame of its own (frame 28 k shows
+# N = 2^k), and the 44 frames from 196 on hold N = 128.
+_TSA_FRAMES_PER_OCTAVE = 28
+
+
+def _synchronous_averaging_data() -> dict[str, Any]:
+    """The average, its error and its comb for every N from 1 to 128.
+
+    Everything drawn is the library's: the averaged period and the noise
+    reduction of ``time_synchronous_average`` over the first N periods of the
+    record, and ``comb_filter_response`` on a grid that holds the nodes and
+    the teeth of that N.
+    """
+    from phonometry import signals
+
+    fs, samples = _TSA_FS, _TSA_SAMPLES
+    period_s = samples / fs
+    t = np.arange(samples) / fs
+    true = np.zeros(samples)
+    for order, amplitude, phase in _TSA_HARMONICS:
+        true += amplitude * np.cos(2.0 * np.pi * order * t / period_s + phase)
+    rng = np.random.default_rng(5)
+    record = np.tile(true, _TSA_N_MAX) + rng.standard_normal(_TSA_N_MAX * samples)
+
+    averages, errors, reductions, combs = [], [], [], []
+    for n in range(1, _TSA_N_MAX + 1):
+        res = signals.time_synchronous_average(
+            record[: n * samples], fs, period_s=period_s, n_averages=n
+        )
+        average = np.asarray(res.period_waveform, dtype=np.float64)
+        averages.append(average)
+        errors.append(float(np.sqrt(np.mean((average - true) ** 2))))
+        reductions.append(float(res.noise_reduction))
+        orders = np.linspace(
+            0.0, float(_TSA_ORDERS), _TSA_ORDERS * n * _TSA_PER_LOBE + 1
+        )
+        combs.append(
+            (orders, signals.comb_filter_response(orders / period_s, period_s, n))
+        )
+    return {
+        "t_ms": 1e3 * t,
+        "period_ms": 1e3 * period_s,
+        "true": true,
+        "averages": averages,
+        "errors": np.asarray(errors),
+        "reductions": reductions,
+        "combs": combs,
+    }
+
+
+@lru_cache(maxsize=1)
+def _tsa_cached() -> dict[str, Any]:
+    """One data build per process, not one per language x theme variant."""
+    return _synchronous_averaging_data()
+
+
+def _tsa_count(frame: int) -> int:
+    """The number of averages drawn on *frame*: a doubling every 28 frames.
+
+    A geometric clock, so that each doubling of N takes the same time and
+    the first few combs, whose nodes can still be counted, stay on screen
+    as long as the last sixty-four. Every N up to 46 has a frame of its own;
+    past that the count skips, and the eight counts of the still are never
+    skipped.
+    """
+    octaves = min(frame / _TSA_FRAMES_PER_OCTAVE, float(np.log2(_TSA_N_MAX)))
+    return int(np.clip(round(2.0**octaves), 1, _TSA_N_MAX))
+
+
+def animate_synchronous_averaging(output_dir: str) -> None:
+    """One record averaged over 1, 2, 3 ... 128 of its periods. The averaged
+    period closes on the true waveform, its error runs down the
+    sigma/sqrt(N) line, and the comb the average has applied keeps a tooth
+    of unit height on every order while N - 1 nodes crowd in between each
+    pair and the teeth thin as 1/N (McFadden 1987, Eqs. 5, 8 and 9).
+    """
+    from matplotlib.ticker import NullFormatter
+
+    T = _translate_str
+
+    d = _tsa_cached()
+    counts = np.asarray(_TSA_COUNTS)
+    all_n = np.arange(1, _TSA_N_MAX + 1)
+
+    fig = _anim_figure()
+    fig.suptitle(T("Synchronous averaging, one more period at a time"))
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.25, 1.0], height_ratios=[1.0, 1.0])
+
+    # --- top left: the averaged period over the true waveform ------------
+    ax_w = fig.add_subplot(gs[0, 0])
+    _grid_axes(ax_w)
+    ax_w.set_xlim(0.0, d["period_ms"])
+    # The first period alone swings to +-3; the legend sits in the headroom
+    # above it, where no average reaches.
+    ax_w.set_ylim(-3.4, 5.3)
+    ax_w.set_yticks([-2.0, 0.0, 2.0])
+    ax_w.set_xlabel(T("Time [ms]"), fontsize=8.5)
+    ax_w.set_ylabel(T("Amplitude"), fontsize=8.5)
+    ax_w.tick_params(labelsize=8)
+    (avg_line,) = ax_w.plot(
+        [], [], color=COLOR_PRIMARY, lw=1.3, label=T("average of $N$ periods")
+    )
+    ax_w.plot(
+        d["t_ms"],
+        d["true"],
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="--",
+        label=T("true waveform, without the noise"),
+    )
+    ax_w.legend(loc="upper center", ncol=2, fontsize=7.5, framealpha=0.9)
+
+    # --- top right: the error against the square-root law ----------------
+    ax_e = fig.add_subplot(gs[0, 1])
+    ax_e.set_xscale("log")
+    ax_e.set_yscale("log")
+    ax_e.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5, which="major")
+    ax_e.set_xlim(0.8, 160.0)
+    ax_e.set_ylim(0.06, 1.6)
+    ax_e.set_xticks(counts)
+    ax_e.set_xticklabels([str(n) for n in counts])
+    ax_e.set_yticks([0.1, 0.2, 0.5, 1.0])
+    ax_e.set_yticklabels(["0.1", "0.2", "0.5", "1"])
+    ax_e.xaxis.set_minor_formatter(NullFormatter())
+    ax_e.yaxis.set_minor_formatter(NullFormatter())
+    ax_e.minorticks_off()
+    ax_e.set_xlabel(T("Number of averages $N$"), fontsize=8.5)
+    ax_e.set_ylabel(T("RMS error of the average"), fontsize=8.5)
+    ax_e.tick_params(labelsize=8)
+    ax_e.plot(
+        all_n,
+        1.0 / np.sqrt(all_n),
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="--",
+        label=T(r"Ideal $\sigma/\sqrt{N}$"),
+    )
+    (err_trace,) = ax_e.plot([], [], color=COLOR_PRIMARY, lw=1.1)
+    (err_marks,) = ax_e.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        marker="o",
+        ms=4.5,
+        ls="none",
+        label=T("measured RMS error"),
+    )
+    (err_now,) = ax_e.plot(
+        [], [], color=COLOR_TERTIARY, marker="o", ms=6.5, ls="none", zorder=5
+    )
+    # The line falls from the upper left to the lower right, and the lower
+    # left is the corner neither it nor a measured point reaches. The box is
+    # two short labels wide: in the upper right, with a longer second label,
+    # it lay over the points of N = 2 and 3 (and in Spanish over N = 2 for
+    # the whole clip).
+    ax_e.legend(loc="lower left", fontsize=7.5, framealpha=0.9)
+
+    # --- bottom: the comb the average has applied ------------------------
+    ax_c = fig.add_subplot(gs[1, :])
+    _grid_axes(ax_c)
+    ax_c.set_xlim(0.0, float(_TSA_ORDERS))
+    # A tooth reaches one at every N, and at N = 1 the whole comb is one:
+    # the legend takes the headroom above it.
+    ax_c.set_ylim(0.0, 1.42)
+    ax_c.set_yticks([0.0, 0.5, 1.0])
+    ax_c.set_xlabel(T("Frequency [orders]"), fontsize=8.5)
+    ax_c.set_ylabel(T("Comb filter magnitude"), fontsize=8.5)
+    ax_c.tick_params(labelsize=8)
+    (comb_line,) = ax_c.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        lw=0.9,
+        label=T("comb of the average, $|C(f)|$ (McFadden Eq. 8)"),
+    )
+    ax_c.plot(
+        [order for order, _, _ in _TSA_HARMONICS],
+        [1.0] * len(_TSA_HARMONICS),
+        color=COLOR_SECONDARY,
+        marker="o",
+        ms=5.0,
+        ls="none",
+        zorder=5,
+        label=T("the three harmonics of the waveform: gain 1 at every $N$"),
+    )
+    ax_c.legend(loc="upper center", ncol=2, fontsize=7.5, framealpha=0.9)
+
+    def update(kf: int) -> tuple[Any, ...]:
+        n = _tsa_count(kf)
+
+        avg_line.set_data(d["t_ms"], d["averages"][n - 1])
+        ax_w.set_title(
+            T(f"$N$ = {n}: noise power down {d['reductions'][n - 1]:.1f} dB"),
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+
+        err_trace.set_data(all_n[:n], d["errors"][:n])
+        reached = counts[counts <= n]
+        err_marks.set_data(reached, d["errors"][reached - 1])
+        err_now.set_data([n], [d["errors"][n - 1]])
+        ax_e.set_title(
+            T(
+                f"RMS error {d['errors'][n - 1]:.3f}; "
+                rf"ideal $\sigma/\sqrt{{N}}$ = {1.0 / np.sqrt(n):.3f}"
+            ),
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+
+        orders, comb = d["combs"][n - 1]
+        comb_line.set_data(orders, comb)
+        ax_c.set_title(
+            T(f"nodes between neighbouring teeth: $N - 1$ = {n - 1}"),
+            loc="left",
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+        ax_c.set_title(
+            T("$N$ = 1: every frequency passes with gain 1")
+            if n == 1
+            else T(f"first node $1/N$ = {1.0 / n:.3f} orders from each tooth"),
+            loc="right",
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+        return (avg_line, err_trace, err_marks, err_now, comb_line)
+
+    def settle() -> None:
+        # The three titles are rewritten on every frame, and under
+        # constrained layout a title that changes width moves the panels
+        # under it: measured, the waveform panel was 0.453 of the canvas wide
+        # at N = 1 in Spanish and 0.463 at N = 3. The layout is solved once,
+        # on the first frame in its final language, and then held.
+        update(0)
+        fig.canvas.draw()
+        fig.set_layout_engine("none")
+
+    _render_clip(fig, update, output_dir, "anim_synchronous_averaging", measure=settle)
+
+
+# --- a bearing fault read through its load zone -----------------------------
+#
+# The three localised faults of a rolling bearing ring the same housing
+# resonance; what tells them apart is what the load zone does to the train of
+# impacts. Randall & Antoni (2011), section 1: "The strength of the bursts
+# depends on the load borne by the rolling element(s), and this is normally
+# modulated by the rate at which the fault is passing through the load
+# zone", at shaft speed for an inner-race fault and cage speed for a
+# rolling-element fault, while "for unidirectional load, an outer race fault
+# would not be modulated" (section 6). The clip plays the three one after
+# another on the bearing of the page, timed by the library and slowed down:
+# one frame is one millisecond of the machine.
+#
+# The load each impact carries is the Stribeck distribution of McFadden &
+# Smith (1984), Eqs. (3) and (4): q(theta) = q0 [1 - (1 - cos theta) /
+# (2 epsilon)]^n inside the load zone and zero outside it, with n = 10/9 for
+# a roller bearing. The load distribution factor epsilon depends on the
+# clearance and the load of a real bearing, which the page does not have, so
+# the clip takes the half-circle zone, epsilon = 0.5, and says it is a sketch.
+
+_BLZ_SPAN_MS = 150.0  # machine time of each act
+_BLZ_ACT_FRAMES = 150  # frames of each act: one frame is one millisecond
+_BLZ_FS = 20_000.0  # sampling rate of the traces, the page's own record
+_BLZ_RING_HZ = 3000.0  # the housing resonance the page's record rings
+_BLZ_RING_TAU = 6.0e-4  # its decay time [s], as in the page's record
+_BLZ_EPSILON = 0.5  # Stribeck load distribution factor: a half-circle zone
+_BLZ_EXPONENT = 10.0 / 9.0  # McFadden & Smith (1984), Eq. (3): rollers
+
+
+def _stribeck_load(theta: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Load at *theta* from the load line over the peak load.
+
+    McFadden & Smith (1984), Eqs. (3) and (4): the Stribeck distribution
+    inside the load zone and nothing outside it.
+    """
+    base = 1.0 - (1.0 - np.cos(theta)) / (2.0 * _BLZ_EPSILON)
+    return np.asarray(np.clip(base, 0.0, None) ** _BLZ_EXPONENT, dtype=float)
+
+
+@lru_cache(maxsize=1)
+def _bearing_load_zone_data() -> dict[str, Any]:
+    """The three impact trains of the page's bearing, one per damaged part.
+
+    Angles run from the load line, positive the way the shaft turns. Every
+    act starts half an impact period before its first strike.
+    """
+    from phonometry import vibration
+
+    faults = vibration.bearing_fault_frequencies(
+        2000.0, 15, 6.0, 34.0, contact_angle_deg=12.96
+    )
+    shaft = float(faults.shaft_rate)
+    ftf, bsf = float(faults["FTF"]), float(faults["BSF"])
+    bpfo, bpfi, bdf = float(faults["BPFO"]), float(faults["BPFI"]), float(faults["BDF"])
+    n_rollers = 15
+    span = _BLZ_SPAN_MS / 1000.0
+    t = np.arange(round(span * _BLZ_FS)) / _BLZ_FS
+    tau = np.arange(round(0.004 * _BLZ_FS)) / _BLZ_FS
+    ring = np.exp(-tau / _BLZ_RING_TAU) * np.sin(2.0 * np.pi * _BLZ_RING_HZ * tau)
+    ring /= float(np.max(np.abs(ring)))
+    two_pi = 2.0 * np.pi
+
+    def act(rate: float, cage0: float, shaft0: float, where: str) -> dict[str, Any]:
+        times = (np.arange(int(span * rate) + 1) + 0.5) / rate
+        times = times[times < span]
+        if where == "outer":
+            angle_at = np.zeros_like(times)
+            envelope = np.ones_like(t)
+        elif where == "inner":
+            angle_at = shaft0 + two_pi * shaft * times
+            envelope = _stribeck_load(shaft0 + two_pi * shaft * t)
+        else:
+            angle_at = cage0 + two_pi * ftf * times
+            envelope = _stribeck_load(cage0 + two_pi * ftf * t)
+        loads = _stribeck_load(angle_at)
+        impulses = np.zeros_like(t)
+        index = np.minimum(np.round(times * _BLZ_FS).astype(int), t.size - 1)
+        np.add.at(impulses, index, loads)
+        return {
+            "where": where,
+            "cage0": cage0,
+            "shaft0": shaft0,
+            "times": times,
+            "angles": angle_at,
+            "loads": loads,
+            "trace": np.convolve(impulses, ring)[: t.size],
+            "envelope": envelope,
+        }
+
+    step = np.pi / n_rollers
+    return {
+        "shaft": shaft,
+        "ftf": ftf,
+        "bsf": bsf,
+        "bpfo": bpfo,
+        "bpfi": bpfi,
+        "bdf": bdf,
+        "n": n_rollers,
+        "t_ms": 1000.0 * t,
+        "acts": (
+            # A roller reaches the spall half a pass after the start.
+            act(bpfo, -step, 0.0, "outer"),
+            # The spall starts opposite the load and catches the roller
+            # half a pass ahead of it.
+            act(bpfi, np.pi + step, np.pi, "inner"),
+            # The damaged roller starts opposite the load, its spall a
+            # quarter of a spin short of the outer race.
+            act(bdf, np.pi, 0.0, "roller"),
+        ),
+    }
+
+
+def animate_bearing_load_zone(output_dir: str) -> None:
+    """The load zone of a bearing, and what it does to each fault's impacts.
+
+    Three acts on the bearing of the machine-diagnostics page: a spall on the
+    outer race, fixed under the load, strikes alike at every roller pass; on
+    the inner race it turns with the shaft in and out of the load zone; on a
+    roller it rides round with the cage and strikes the two races in turn.
+    Each strike flashes and writes a burst, scaled by the load at that
+    angle, on the trace of its act.
+    """
+    from matplotlib.patches import Annulus, Circle, Polygon
+
+    T = _translate_str
+
+    d = _bearing_load_zone_data()
+    acts = d["acts"]
+    shaft, ftf, bsf, n = d["shaft"], d["ftf"], d["bsf"], d["n"]
+    t_ms = d["t_ms"]
+    two_pi = 2.0 * np.pi
+    frame_s = _BLZ_SPAN_MS / 1000.0 / _BLZ_ACT_FRAMES
+    slow = 1.0 / (_ANIM_FPS * frame_s)
+
+    # The geometry of the page's bearing, in millimetres: 6 mm rollers on a
+    # 34 mm pitch circle and a 20 mm bore. The outer diameter is drawn, not
+    # quoted.
+    r_pitch, r_roller, r_bore, r_outside = 17.0, 3.0, 10.0, 24.0
+    r_outer, r_inner = r_pitch + r_roller, r_pitch - r_roller
+
+    fig = _anim_figure()
+    fig.suptitle(T("How the load zone modulates a bearing fault"))
+    gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.32])
+
+    # --- left: the bearing in end view, the load zone above it -----------
+    ax_b = fig.add_subplot(gs[:, 0])
+    _schematic_axes(ax_b, (-33.0, 33.0), (-39.0, 38.0), equal=True)
+    zone = np.linspace(-np.pi / 2.0, np.pi / 2.0, 121)
+    reach = r_outside + 7.0 * _stribeck_load(zone)
+    # A band on the outside of the outer ring, closed back along the ring.
+    lobe = np.column_stack(
+        [
+            np.concatenate([reach * np.sin(zone), r_outside * np.sin(zone[::-1])]),
+            np.concatenate([reach * np.cos(zone), r_outside * np.cos(zone[::-1])]),
+        ]
+    )
+    ax_b.add_patch(
+        Polygon(
+            lobe,
+            closed=True,
+            facecolor=theme_fill(COLOR_QUATERNARY, ax_b),
+            edgecolor=COLOR_QUATERNARY,
+            lw=1.0,
+        )
+    )
+    ax_b.text(
+        0.0,
+        33.0,
+        T("load zone (Stribeck, a sketch)"),
+        ha="center",
+        va="bottom",
+        color=COLOR_QUATERNARY,
+        fontsize=8.5,
+    )
+    solid = _solid_fill(ax_b)
+    for radius, width in (
+        (r_outside, r_outside - r_outer),
+        (r_inner, r_inner - r_bore),
+    ):
+        ax_b.add_patch(
+            Annulus(
+                (0.0, 0.0),
+                radius,
+                width,
+                facecolor=solid,
+                edgecolor=COLOR_FG,
+                lw=1.2,
+            )
+        )
+    rollers = [
+        Circle((0.0, 0.0), r_roller, facecolor="none", edgecolor=COLOR_PRIMARY, lw=1.3)
+        for _ in range(n)
+    ]
+    rollers[0].set_facecolor(theme_fill(COLOR_TERTIARY, ax_b))
+    rollers[0].set_edgecolor(COLOR_TERTIARY)
+    for roller in rollers:
+        ax_b.add_patch(roller)
+    (key_mark,) = ax_b.plot([], [], color=COLOR_FG, lw=1.6, solid_capstyle="butt")
+    (race_spall,) = ax_b.plot(
+        [], [], color=COLOR_SECONDARY, lw=3.2, solid_capstyle="butt", zorder=4
+    )
+    (roller_spall,) = ax_b.plot(
+        [], [], ls="none", marker="o", ms=4.2, color=COLOR_SECONDARY, zorder=4
+    )
+    (flash,) = ax_b.plot(
+        [],
+        [],
+        ls="none",
+        marker=(8, 1, 0),
+        color=COLOR_SECONDARY,
+        markeredgecolor=COLOR_SECONDARY,
+        zorder=5,
+    )
+    # The key and the rates, under the bearing where nothing moves.
+    ax_b.plot(
+        [-15.5, -12.5],
+        [-28.0, -28.0],
+        color=COLOR_SECONDARY,
+        lw=3.2,
+        solid_capstyle="butt",
+    )
+    ax_b.text(-10.0, -28.0, T("spall"), ha="left", va="center", fontsize=8.5)
+    ax_b.add_patch(
+        Circle(
+            (-14.0, -32.2),
+            1.5,
+            facecolor=theme_fill(COLOR_TERTIARY, ax_b),
+            edgecolor=COLOR_TERTIARY,
+            lw=1.3,
+        )
+    )
+    ax_b.text(
+        -10.0, -32.2, T("one roller, marked"), ha="left", va="center", fontsize=8.5
+    )
+    ax_b.text(
+        0.0,
+        -36.6,
+        T(f"shaft {shaft:.1f} Hz, cage {ftf:.1f} Hz, slowed {slow:.0f} times"),
+        ha="center",
+        va="center",
+        color=COLOR_MUTED,
+        fontsize=8.5,
+    )
+
+    # --- right: the trace each act writes --------------------------------
+    names = (T("outer race"), T("inner race"), T("roller"))
+    # One impact period on the first trace, one turn of the shaft on the
+    # second and one of the cage on the third, each between two crests.
+    half = 500.0 / d["bpfo"]
+    brackets = (
+        (9 * half, 11 * half, T(f"1/BPFO = {2.0 * half:.2f} ms")),
+        (
+            1500.0 / shaft,
+            2500.0 / shaft,
+            T(rf"$1/f_\mathrm{{s}}$ = {1000.0 / shaft:.1f} ms"),
+        ),
+        (500.0 / ftf, 1500.0 / ftf, T(f"1/FTF = {1000.0 / ftf:.1f} ms")),
+    )
+    panels: list[dict[str, Any]] = []
+    for row in range(3):
+        ax = fig.add_subplot(gs[row, 1])
+        _grid_axes(ax)
+        ax.set_xlim(0.0, _BLZ_SPAN_MS)
+        ax.set_ylim(-1.2, 2.3)
+        ax.set_yticks([])
+        ax.tick_params(labelsize=8, labelbottom=row == 2)
+        (envelope,) = ax.plot([], [], color=COLOR_MUTED, lw=1.0, ls="--")
+        (trace,) = ax.plot([], [], color=COLOR_PRIMARY, lw=0.9)
+        ax.text(
+            0.012,
+            0.93,
+            names[row],
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            color=COLOR_FG,
+            fontsize=8.5,
+        )
+        left, right, label = brackets[row]
+        (span_line,) = ax.plot(
+            [left, right],
+            [1.42, 1.42],
+            color=COLOR_SECONDARY,
+            lw=1.2,
+            marker="|",
+            ms=6.0,
+            visible=False,
+        )
+        # Beside the first bracket, which is one impact period wide; above
+        # the other two, which are wide enough to carry their label.
+        span_txt = ax.text(
+            right + 3.0 if row == 0 else 0.5 * (left + right),
+            1.42 if row == 0 else 1.68,
+            label,
+            ha="left" if row == 0 else "center",
+            va="center" if row == 0 else "bottom",
+            color=COLOR_SECONDARY,
+            fontsize=8,
+            visible=False,
+        )
+        panels.append(
+            {
+                "ax": ax,
+                "trace": trace,
+                "envelope": envelope,
+                "span": span_line,
+                "span_txt": span_txt,
+                "shown_at": right,
+            }
+        )
+    panels[0]["ax"].text(
+        0.988,
+        0.93,
+        T("dashed: the load on the spall"),
+        transform=panels[0]["ax"].transAxes,
+        ha="right",
+        va="top",
+        color=COLOR_MUTED,
+        fontsize=8,
+    )
+    panels[2]["ax"].set_xlabel(T("Machine time [ms]"), fontsize=8.5)
+    captions = (
+        T("Fixed under the load: every impact is alike"),
+        T("Turning with the shaft, in and out of the load zone"),
+        T("Riding the cage, striking both races in turn"),
+        T("The modulation rate names the damaged part"),
+    )
+
+    def at(radius: float, angle: float) -> tuple[float, float]:
+        """The point at *radius* and *angle* from the load line, drawn clockwise."""
+        return radius * float(np.sin(angle)), radius * float(np.cos(angle))
+
+    def strike(a: dict[str, Any], m: int) -> tuple[float, float]:
+        """Where impact *m* of act *a* lands."""
+        if a["where"] == "outer":
+            return at(r_outer, 0.0)
+        if a["where"] == "inner":
+            return at(r_inner, float(a["angles"][m]))
+        # The outer race on the even strikes and the inner one on the odd.
+        return at(r_outer if m % 2 == 0 else r_inner, float(a["angles"][m]))
+
+    def update(kf: int) -> tuple[Any, ...]:
+        done = kf >= 3 * _BLZ_ACT_FRAMES
+        which = 2 if done else kf // _BLZ_ACT_FRAMES
+        k = _BLZ_ACT_FRAMES if done else kf - which * _BLZ_ACT_FRAMES
+        a = acts[which]
+        now = k * frame_s
+        cage = a["cage0"] + two_pi * ftf * now
+        turned = a["shaft0"] + two_pi * shaft * now
+        for i, roller in enumerate(rollers):
+            roller.center = at(r_pitch, cage + two_pi * i / n)
+        (x0, y0), (x1, y1) = at(r_bore, turned), at(r_inner, turned)
+        key_mark.set_data([x0, x1], [y0, y1])
+        if a["where"] == "outer":
+            (x0, y0), (x1, y1) = at(r_outer, 0.0), at(r_outer + 2.6, 0.0)
+            race_spall.set_data([x0, x1], [y0, y1])
+            roller_spall.set_data([], [])
+        elif a["where"] == "inner":
+            (x0, y0), (x1, y1) = at(r_inner - 2.6, turned), at(r_inner, turned)
+            race_spall.set_data([x0, x1], [y0, y1])
+            roller_spall.set_data([], [])
+        else:
+            # The roller spins against the cage, a quarter of a turn short
+            # of the outer race at the start.
+            spin = np.pi / 2.0 - two_pi * bsf * now
+            cx, cy = at(r_pitch, cage)
+            dx, dy = at(0.78 * r_roller, cage + spin)
+            race_spall.set_data([], [])
+            roller_spall.set_data([cx + dx], [cy + dy])
+
+        # The last strike, for the three frames after it lands.
+        struck = int(np.searchsorted(a["times"], now, side="right")) - 1
+        flash.set_data([], [])
+        if struck >= 0 and not done:
+            age = (now - float(a["times"][struck])) / frame_s
+            load = float(a["loads"][struck])
+            if age < 3.0 and load > 0.02:
+                fx, fy = strike(a, struck)
+                flash.set_data([fx], [fy])
+                flash.set_markersize((6.0 + 9.0 * load) * (1.0 - age / 3.0))
+
+        arts: list[Any] = [*rollers, key_mark, race_spall, roller_spall, flash]
+        for row, panel in enumerate(panels):
+            if row < which or done:
+                upto = t_ms.size
+            elif row == which:
+                upto = int(np.searchsorted(t_ms, 1000.0 * now, side="right"))
+            else:
+                upto = 0
+            panel["trace"].set_data(t_ms[:upto], acts[row]["trace"][:upto])
+            panel["envelope"].set_data(t_ms[:upto], acts[row]["envelope"][:upto])
+            reached = upto > 0 and t_ms[upto - 1] >= panel["shown_at"]
+            panel["span"].set_visible(bool(reached))
+            panel["span_txt"].set_visible(bool(reached))
+            arts += [
+                panel["trace"],
+                panel["envelope"],
+                panel["span"],
+                panel["span_txt"],
+            ]
+        panels[0]["ax"].set_title(
+            captions[3 if done else which],
+            fontsize=8.5,
+            fontstyle="italic",
+            color=COLOR_FG,
+        )
+        arts.append(panels[0]["ax"].title)
+        return tuple(arts)
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_bearing_load_zone",
+        frames=3 * _BLZ_ACT_FRAMES + _ANIM_HOLD,
+    )
+
+
+# --- anim_fan_lobe_patterns: the two interaction patterns of a ducted fan ---
+_FLP_SLOW = 500.0  # times slower than the machine: one frame is 0.1 ms
+_FLP_FRAMES = 400  # 40 ms of machine time, 14 blade passes at the wall
+# The point on the duct wall, between two vanes. Not at 45 degrees: the two
+# patterns differ by kV = 8 lobes, and 8 x 45 degrees is a full turn, so there
+# their two traces would fall on one another.
+_FLP_PROBE = np.pi / 6.0
+
+
+@lru_cache(maxsize=1)
+def _fan_lobe_data() -> dict[str, Any]:
+    """The rates of the page's ducted fan, read from the library.
+
+    Six blades and four vanes at 3500 r/min, the example of the
+    machine-diagnostics page: Eq. (8.16) gives the two first patterns,
+    m_L = 6 - 4 = 2 and m_L = 6 + 4 = 10 lobes, and Eq. (8.17) their speeds
+    of rotation, which the library gives in r/min and the clip turns into
+    turns a second.
+    """
+    from phonometry import vibration
+
+    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+    return {
+        "shaft": float(fan.shaft_rate),
+        "bpf": float(fan["BPF"]),
+        "patterns": tuple(
+            (pattern.n_lobes, pattern.speed_rpm / 60.0) for pattern in fan.lobe_patterns
+        ),
+        "blades": 6,
+        "vanes": 4,
+    }
+
+
+def animate_fan_lobe_patterns(output_dir: str) -> None:
+    """The two lobe patterns of a ducted fan, and the rate a fixed point sees.
+
+    Norton & Karczub (2003), p. 525: blade-vane interaction sets up rotating
+    pressure patterns of m_L = nN +- kV lobes (Eq. 8.16) turning at
+    n N r.p.m. / m_L (Eq. 8.17), whose noise "is also at the blade passing
+    frequency". Each pattern is drawn as a ring of m_L lobes, the shape
+    cos(m_L (theta - phi)) turning at the speed of Eq. (8.17): a sketch of
+    the lobe count and the speed, not of a pressure. The point on the wall
+    is passed by 2 x 175 = 10 x 35 = 350 crests a second, the blade rate,
+    and the trace under the two panels writes what each pattern puts there.
+    """
+    from matplotlib.patches import Annulus, Circle
+
+    T = _translate_str
+
+    d = _fan_lobe_data()
+    shaft, bpf = d["shaft"], d["bpf"]
+    blades, vanes = d["blades"], d["vanes"]
+    patterns = d["patterns"]
+    two_pi = 2.0 * np.pi
+    frame_s = 1.0 / (_ANIM_FPS * _FLP_SLOW)
+    span_ms = 1000.0 * _FLP_FRAMES * frame_s
+    t_ms = np.linspace(0.0, span_ms, 2001)
+
+    def at(radius: float, angle: float) -> tuple[float, float]:
+        """The point at *radius* and *angle* from the top, drawn clockwise."""
+        return radius * float(np.sin(angle)), radius * float(np.cos(angle))
+
+    def phase(speed: float, seconds: float) -> float:
+        """How far a pattern turning *speed* times a second has gone."""
+        return two_pi * speed * seconds
+
+    fig = _anim_figure()
+    fig.suptitle(T("Two lobe patterns of one fan pass the wall at one rate"))
+    gs = fig.add_gridspec(2, 2, height_ratios=[2.15, 1.0])
+
+    theta = np.linspace(0.0, two_pi, 721)
+    rings: list[Any] = []
+    rotors: list[list[Any]] = []
+    flashes: list[Any] = []
+    counters: list[Any] = []
+    for col, (lobes, speed) in enumerate(patterns):
+        ax = fig.add_subplot(gs[0, col])
+        _schematic_axes(ax, (-1.32, 1.32), (-1.32, 1.18), equal=True)
+        ax.set_title(
+            T(f"$m_\\mathrm{{L}}$ = {lobes} lobes, {speed:.0f} turns a second"),
+            fontsize=9,
+            color=COLOR_FG,
+        )
+        ax.add_patch(
+            Annulus(
+                (0.0, 0.0),
+                1.08,
+                0.08,
+                facecolor=_solid_fill(ax),
+                edgecolor=COLOR_FG,
+                lw=1.1,
+            )
+        )
+        # The stator vanes, fixed and behind the rotor.
+        for v in range(vanes):
+            (x0, y0), (x1, y1) = (
+                at(0.2, two_pi * v / vanes),
+                at(0.62, two_pi * v / vanes),
+            )
+            ax.plot([x0, x1], [y0, y1], color=COLOR_MUTED, lw=1.4, ls="--")
+        ax.add_patch(
+            Circle(
+                (0.0, 0.0), 0.18, facecolor=_solid_fill(ax), edgecolor=COLOR_FG, lw=1.1
+            )
+        )
+        rotor = [
+            ax.plot([], [], color=COLOR_PRIMARY, lw=3.0, solid_capstyle="round")[0]
+            for _ in range(blades)
+        ]
+        ink = COLOR_SECONDARY if col == 0 else COLOR_TERTIARY
+        (ring,) = ax.plot([], [], color=ink, lw=1.8)
+        px, py = at(1.0, _FLP_PROBE)
+        ax.plot([px], [py], ls="none", marker="o", ms=5.0, color=COLOR_FG, zorder=5)
+        (flash,) = ax.plot(
+            [],
+            [],
+            ls="none",
+            marker=(8, 1, 0),
+            color=ink,
+            markeredgecolor=ink,
+            zorder=6,
+        )
+        counter = ax.text(
+            0.0,
+            -1.27,
+            "",
+            ha="center",
+            va="bottom",
+            color=COLOR_FG,
+            fontsize=8.5,
+        )
+        rings.append(ring)
+        rotors.append(rotor)
+        flashes.append(flash)
+        counters.append(counter)
+
+    # --- bottom: what each pattern puts on the point of the wall ----------
+    ax_t = fig.add_subplot(gs[1, :])
+    _grid_axes(ax_t)
+    ax_t.set_xlim(0.0, span_ms)
+    ax_t.set_ylim(-1.75, 2.75)
+    ax_t.set_yticks([])
+    ax_t.tick_params(labelsize=8)
+    ax_t.set_xlabel(T("Machine time [ms]"), fontsize=8.5)
+    traces = [
+        ax_t.plot([], [], color=ink, lw=1.2)[0]
+        for ink in (COLOR_SECONDARY, COLOR_TERTIARY)
+    ]
+    # A blade passes the point once every 1/BPF: the moment the first blade
+    # is at the point, then every pass after it.
+    first = ((_FLP_PROBE / two_pi) % (1.0 / blades)) / shaft
+    passes_ms = 1000.0 * (first + np.arange(64) / bpf)
+    passes_ms = passes_ms[passes_ms <= span_ms]
+    ticks = ax_t.vlines([], -1.6, -1.2, color=COLOR_FG, lw=1.1)
+    for x, text, ink in (
+        (0.008, T("$m_\\mathrm{L}$ = 2 at the point"), COLOR_SECONDARY),
+        (0.24, T("$m_\\mathrm{L}$ = 10 at the point"), COLOR_TERTIARY),
+        (0.48, T("ticks: a blade passes the point"), COLOR_FG),
+    ):
+        ax_t.text(
+            x,
+            0.96,
+            text,
+            transform=ax_t.transAxes,
+            ha="left",
+            va="top",
+            color=ink,
+            fontsize=8,
+        )
+    left, right = float(passes_ms[9]), float(passes_ms[10])
+    (bracket,) = ax_t.plot(
+        [left, right],
+        [1.5, 1.5],
+        color=COLOR_FG,
+        lw=1.1,
+        marker="|",
+        ms=6.0,
+        visible=False,
+    )
+    bracket_txt = ax_t.text(
+        right + 0.4,
+        1.5,
+        T(f"1/BPF = {1000.0 / bpf:.2f} ms for both"),
+        ha="left",
+        va="center",
+        color=COLOR_FG,
+        fontsize=8,
+        visible=False,
+    )
+    ax_t.set_title(
+        T(
+            f"6 blades, 4 vanes, 3500 r/min, slowed {_FLP_SLOW:.0f} times; "
+            "the lobes are a sketch of count and speed"
+        ),
+        fontsize=8.5,
+        fontstyle="italic",
+        color=COLOR_FG,
+    )
+
+    def at_point(
+        lobes: int, speed: float, seconds: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """The pattern's shape where the point is, at *seconds*."""
+        return np.asarray(
+            np.cos(lobes * (_FLP_PROBE - two_pi * speed * seconds)), dtype=float
+        )
+
+    def update(kf: int) -> tuple[Any, ...]:
+        k = min(kf, _FLP_FRAMES)
+        now = k * frame_s
+        arts: list[Any] = []
+        for col, (lobes, speed) in enumerate(patterns):
+            turned = phase(speed, now)
+            radius = 0.78 + 0.12 * np.cos(lobes * (theta - turned))
+            rings[col].set_data(radius * np.sin(theta), radius * np.cos(theta))
+            for b, blade in enumerate(rotors[col]):
+                angle = two_pi * b / blades + phase(shaft, now)
+                (x0, y0), (x1, y1) = at(0.2, angle), at(0.6, angle)
+                blade.set_data([x0, x1], [y0, y1])
+            # Crests that have reached the point: m_L (probe - phase) has
+            # come down through a multiple of 2 pi since the start.
+            start = lobes * _FLP_PROBE / two_pi
+            reached = int(np.floor(start)) - int(np.floor(start - lobes * speed * now))
+            counters[col].set_text(T(f"lobes past the point: {reached}"))
+            since = (start - lobes * speed * now) % 1.0
+            age = (1.0 - since) / (lobes * speed * frame_s) if since > 0.0 else 0.0
+            flashes[col].set_data([], [])
+            if reached > 0 and age < 3.0:
+                fx, fy = at(1.0, _FLP_PROBE)
+                flashes[col].set_data([fx], [fy])
+                flashes[col].set_markersize(13.0 * (1.0 - age / 3.0) + 2.0)
+            arts += [rings[col], *rotors[col], flashes[col], counters[col]]
+        upto = int(np.searchsorted(t_ms, 1000.0 * now, side="right"))
+        for trace, (lobes, speed) in zip(traces, patterns, strict=True):
+            trace.set_data(t_ms[:upto], at_point(lobes, speed, t_ms[:upto] / 1000.0))
+            arts.append(trace)
+        shown = passes_ms[passes_ms <= 1000.0 * now]
+        ticks.set_segments([[(x, -1.6), (x, -1.2)] for x in shown])
+        seen = 1000.0 * now >= right
+        bracket.set_visible(bool(seen))
+        bracket_txt.set_visible(bool(seen))
+        arts += [ticks, bracket, bracket_txt]
+        return tuple(arts)
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_fan_lobe_patterns",
+        frames=_FLP_FRAMES + _ANIM_HOLD,
+    )
+
+
+def animate_scattering_average(output_dir: str) -> None:
+    """Synchronous averaging over the turntable (ISO 17497-1, Clause 4 and 7.5).
+
+    A model, not a measurement, in the manner of the standard's Figure 1: each
+    response is one part that is the same at every orientation of the sample
+    plus one drawn afresh for each, and the two together decay as one
+    orientation does, with the reverberation time T2. The part every
+    orientation shares decays faster, with T4, because what the sample
+    scatters leaves it at each reflection. Averaging the responses sample by
+    sample therefore keeps the shared part and divides the energy of the
+    rest by the number averaged, which is what Clause 4 assumes when it calls
+    the scattered components statistically independent.
+
+    Left, the response of the orientation just added over the running
+    average, on axes without numbers as Figure 1 has them: the carrier is
+    slow enough for the cycles to show, so the two coincide at the start and
+    part later. Right, the backward-integrated decay of that average over
+    the whole response, so that its second, slower decay shows under the
+    first as the average grows to the 72 orientations 7.3 prefers; an inset
+    in its corner plots the energy of the scattered part left in the average
+    against n beside the 1/n that independence predicts. The clip
+    closes on what 7.5 reads: the same average integrated only from where
+    the response has fallen 30 dB, and the line fitted to its first decay
+    from −5 dB to −20 dB, drawn with its own intercept. The two
+    reverberation times read that way go to the library with the base
+    plate's of the guide's example (V = 200 m3, S = 10 m2, T1 = 8.0 s,
+    T3 = 7.5 s), and it returns the coefficients the closing frames print.
+    The band is narrow so the cycles show, and one narrow band reads its
+    decays short of the times the model is built with (about 2.7 s and
+    5.2 s for 3.0 s and 6.0 s), so the readout prints both.
+    """
+    from phonometry import materials
+    from phonometry._i18n import format_number
+
+    T = _translate_str
+    orientations = 72  # 7.3: the preferred number, steps of 5 degrees
+    volume, area, speed = 200.0, 10.0, 343.2  # the room of the guide's example
+    t1, t3 = 8.0, 7.5  # its base plate, still and turning
+    t2, t4 = 6.0, 3.0  # the model sample: one orientation, and the shared part
+    fs, seconds, carrier, width = 200, 12.0, 8.0, 3.5
+    t = np.arange(int(seconds * fs)) / fs
+    rng = np.random.default_rng(17497)
+    freqs = np.fft.rfftfreq(t.size, 1.0 / fs)
+    band = np.exp(-0.5 * ((freqs - carrier) / width) ** 2)
+    white = rng.standard_normal((orientations + 1, t.size))
+    parts = np.fft.irfft(np.fft.rfft(white, axis=1) * band, n=t.size, axis=1)
+    parts /= np.sqrt(np.mean(parts**2, axis=1, keepdims=True))
+    whole = np.exp(-13.8155 * t / t2)  # energy of one orientation's response
+    shared = np.exp(-13.8155 * t / t4)  # energy of the part they all share
+    responses = parts[0] * np.sqrt(shared) + parts[1:] * np.sqrt(whole - shared)
+    counts = np.arange(1, orientations + 1)
+    averages = np.cumsum(responses, axis=0) / counts[:, None]
+    energy = np.cumsum(averages[:, ::-1] ** 2, axis=1)[:, ::-1]
+    levels = 10.0 * np.log10(energy / energy[:, :1])
+    # The scattered part each orientation adds, and what is left of it in
+    # the average of n: its energy against n is what Clause 4's independence
+    # predicts to fall as 1/n.
+    scattered = parts[1:] * np.sqrt(whole - shared)
+    residue = np.cumsum(scattered, axis=0) / counts[:, None]
+    # Relative to the mean energy of one orientation's scattered part, so the
+    # first point is one realisation's spread about 1 and not 1 by fiat.
+    residue_energy = np.sum(residue**2, axis=1) / np.mean(np.sum(scattered**2, axis=1))
+
+    def _first_decay(n: int) -> tuple[float, float, float, NDArray[np.float64]]:
+        """What 7.5 reads from the average of *n* responses.
+
+        The backward integration starts where the response has fallen
+        30 dB, and the straight line is fitted to that integration between
+        -5 dB and -20 dB. Returned: the reverberation time, the fitted line's
+        slope and intercept, and the integrated level up to that point.
+        """
+        expected = shared + (whole - shared) / n
+        stop = int(np.argmax(10.0 * np.log10(expected) < -30.0))
+        tail = np.cumsum(averages[n - 1, :stop][::-1] ** 2)[::-1]
+        level = 10.0 * np.log10(tail / tail[0])
+        mask = (level <= -5.0) & (level >= -20.0)
+        slope, intercept = np.polyfit(t[:stop][mask], level[mask], 1)
+        return -60.0 / float(slope), float(slope), float(intercept), level
+
+    t2_read = _first_decay(1)[0]
+    t4_read, fit_slope, fit_intercept, truncated = _first_decay(orientations)
+    alpha_s = float(
+        materials.random_incidence_absorption(
+            volume, area, c1=speed, t1=t1, c2=speed, t2=t2_read
+        )
+    )
+    alpha_spec = float(
+        materials.specular_absorption_coefficient(
+            volume, area, c3=speed, t3=t3, c4=speed, t4=t4_read
+        )
+    )
+    scattering = float(materials.scattering_coefficient(alpha_spec, alpha_s))
+
+    fig = _anim_figure()
+    fig.suptitle(T("Synchronous averaging over the turntable (ISO 17497-1)"))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.1, 1.0])
+    ax_p = fig.add_subplot(gs[0])
+    span_p, span_d = 3.4, 5.0
+    near = t <= span_p
+    peak = float(np.max(np.abs(responses[:, near])))
+    ax_p.set_xlim(0.0, span_p)
+    ax_p.set_ylim(-1.3 * peak, 1.3 * peak)
+    ax_p.set_xticks([])
+    ax_p.set_yticks([])
+    ax_p.set_xlabel(T("Time"), fontsize=9)
+    ax_p.set_ylabel(T("Sound pressure"), fontsize=9)
+    quiet_gray = theme_line("gray", ax_p, quiet=0.4)
+    (one,) = ax_p.plot([], [], color=quiet_gray, lw=0.9, label=T("one orientation"))
+    (mean,) = ax_p.plot(
+        [], [], color=COLOR_PRIMARY, lw=1.6, label=T("synchronous average")
+    )
+    # Small enough to stay clear of the turntable readout at its widest, the
+    # Spanish one at the last orientation.
+    ax_p.legend(loc="upper right", fontsize=8, handlelength=1.6)
+    # The strips above and below the responses are the only places nothing
+    # reaches: the turntable readout rides the upper one, the closing notes
+    # the lower.
+    step_txt = ax_p.text(
+        0.02,
+        0.975,
+        "",
+        transform=ax_p.transAxes,
+        ha="left",
+        va="top",
+        family="monospace",
+        fontsize=9.5,
+        color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.2),
+    )
+    # Under the legend, where the responses have died down: the readout of
+    # the closing frames takes the lower strip whole.
+    ax_p.text(
+        0.98,
+        0.8,
+        T("model responses"),
+        transform=ax_p.transAxes,
+        ha="right",
+        va="top",
+        style="italic",
+        fontsize=8.5,
+        color=COLOR_MUTED,
+        zorder=4,
+        bbox=_page_chip(0.2),
+    )
+    notes = ax_p.text(
+        0.98,
+        0.03,
+        "",
+        transform=ax_p.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=8.5,
+        linespacing=1.35,
+        color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.25),
+    )
+
+    ax_d = fig.add_subplot(gs[1])
+    _grid_axes(ax_d)
+    far = t <= span_d
+    ax_d.set_xlim(0.0, span_d)
+    ax_d.set_ylim(-50.0, 2.0)
+    ax_d.set_xlabel(T("Time [s]"), fontsize=9)
+    ax_d.set_ylabel(T("Level [dB]"), fontsize=9)
+    fill_alpha = 0.5 if _FILENAME_SUFFIX else 0.35
+    window = ax_d.axhspan(-20.0, -5.0, color=COLOR_TERTIARY, alpha=fill_alpha, lw=0)
+    limit = ax_d.axhline(-30.0, color=COLOR_FG, lw=1.0, ls=":")
+    # Each closing mark is named on itself, at the right where the decays
+    # have already fallen below it: the window along its lower edge, the
+    # integration limit above its dotted line.
+    window_txt = ax_d.text(
+        span_d - 0.08,
+        -19.4,
+        T("read from −5 dB to −20 dB"),
+        ha="right",
+        va="bottom",
+        fontsize=8.5,
+        color=COLOR_FG,
+        zorder=4,
+    )
+    limit_txt = ax_d.text(
+        span_d - 0.08,
+        -29.3,
+        T("integration stopped\nat −30 dB"),
+        ha="right",
+        va="bottom",
+        linespacing=1.2,
+        fontsize=8.5,
+        color=COLOR_FG,
+        zorder=4,
+    )
+    (gray,) = ax_d.plot(
+        t[far], levels[0, far], color=quiet_gray, lw=1.4, label=T("one orientation")
+    )
+    (curve,) = ax_d.plot(
+        [], [], color=COLOR_PRIMARY, lw=2.4, label=T("synchronous average")
+    )
+    # What 7.5 reads: the same average integrated only from where it has
+    # fallen 30 dB, and the line fitted to it in the window, drawn with its
+    # own intercept over the curve it was fitted on.
+    (cut,) = ax_d.plot(
+        [],
+        [],
+        color=COLOR_QUATERNARY,
+        lw=1.6,
+        label=T("integrated to −30 dB"),
+    )
+    (fit,) = ax_d.plot(
+        [], [], color=COLOR_SECONDARY, ls="--", lw=1.7, label=T("fitted first decay")
+    )
+    # The inset takes the corner under the decays, left of where the
+    # integration to -30 dB drops away.
+    ax_n = ax_d.inset_axes((0.035, 0.06, 0.18, 0.17))
+    ax_n.set_facecolor(plt.rcParams["axes.facecolor"])
+    ax_n.set_xscale("log")
+    ax_n.set_yscale("log")
+    ax_n.set_xlim(1.0, 100.0)
+    ax_n.set_ylim(0.005, 2.0)
+    ax_n.set_xticks([1.0, 10.0, 72.0])
+    ax_n.set_xticklabels(["1", "10", "72"])
+    # The 1/n line is the scale: the axes carry ticks on n alone, so no
+    # label reaches out to the decay axes' own spine.
+    ax_n.set_yticks([0.01, 0.1, 1.0])
+    ax_n.set_yticklabels([])
+    ax_n.minorticks_off()
+    ax_n.tick_params(labelsize=7, length=2.5, pad=1.5)
+    ax_n.set_title(
+        T("scattered energy\nleft in the\naverage"),
+        fontsize=7.5,
+        pad=4,
+        linespacing=1.15,
+        loc="left",
+    )
+    ax_n.plot(counts, 1.0 / counts, color=COLOR_FG, lw=0.9, ls="--", label="$1/n$")
+    (residue_line,) = ax_n.plot([], [], color=COLOR_PRIMARY, lw=1.4)
+    ax_n.legend(loc="lower left", fontsize=7, handlelength=1.6, borderpad=0.3)
+    # Drawn down to the limit only: past it the truncated integral plunges
+    # to the stopping point, which 7.5 does not read.
+    above_limit = truncated[:-1] >= -30.0
+    cut_t = t[: truncated.size - 1][above_limit]
+    cut_level = truncated[:-1][above_limit]
+    # The fitted line, a little past each end of the window it was fitted in.
+    fit_level = np.array([-2.0, -24.0])
+    fit_t = (fit_level - fit_intercept) / fit_slope
+    legend_open = ax_d.legend(handles=[gray, curve], loc="upper right", fontsize=8)
+    ax_d.add_artist(legend_open)
+    legend_closing = ax_d.legend(
+        handles=[gray, curve, cut, fit], loc="upper right", fontsize=8
+    )
+
+    reveal = int(_ANIM_FRAMES * 0.8)
+
+    def _seconds(value: float) -> str:
+        return format_number(value, _LANG, decimals=1)
+
+    closing_notes = "\n".join(
+        (
+            T(f"first decay: $T_4$ = {_seconds(t4_read)} s"),
+            T(f"one orientation: $T_2$ = {_seconds(t2_read)} s"),
+            T(f"model built with $T_4$ = {_seconds(t4)} s, $T_2$ = {_seconds(t2)} s"),
+            T(f"specular absorption {alpha_spec:.2f}"),
+            T(f"random-incidence absorption {alpha_s:.2f}"),
+            T(f"scattering coefficient {scattering:.2f}"),
+        )
+    )
+
+    def update(k: int) -> tuple[Any, ...]:
+        n = 1 + (orientations - 1) * min(k, reveal - 1) // (reveal - 1)
+        one.set_data(t[near], responses[n - 1, near])
+        mean.set_data(t[near], averages[n - 1, near])
+        curve.set_data(t[far], levels[n - 1, far])
+        residue_line.set_data(counts[:n], residue_energy[:n])
+        step_txt.set_text(
+            T(f"turntable at {5 * (n - 1)}°") + "\n" + T(f"average of {n} of 72")
+        )
+        closing = k >= reveal
+        for artist in (window, limit, window_txt, limit_txt, legend_closing):
+            artist.set_visible(closing)
+        legend_open.set_visible(not closing)
+        if closing:
+            cut.set_data(cut_t, cut_level)
+            fit.set_data(fit_t, fit_level)
+            notes.set_text(closing_notes)
+        else:
+            cut.set_data([], [])
+            fit.set_data([], [])
+            notes.set_text("")
+        return (
+            one,
+            mean,
+            curve,
+            residue_line,
+            step_txt,
+            window,
+            limit,
+            window_txt,
+            limit_txt,
+            cut,
+            fit,
+            notes,
+            legend_open,
+            legend_closing,
+        )
+
+    _render_clip(fig, update, output_dir, "anim_scattering_average")
+
+
+def animate_porous_air_gap(output_dir: str) -> None:
+    """A porous layer moved off a rigid wall, at 250 Hz and normal incidence.
+
+    The 50 mm blanket of the porous absorbers guide (Miki, 20 kPa s/m2) in
+    front of a rigid wall, drawn to scale with the wall on the right and the
+    sound arriving from the left. The gap behind the layer opens from nothing
+    to 100 mm, the case the guide computes, and on to half a wavelength,
+    where the layer is back in a velocity node.
+
+    Every number is the library's: the characteristic impedance and the
+    wavenumber of the layer from ``materials.miki``, and the reflection
+    factor and the absorption coefficient of each gap from
+    ``materials.layered_absorber``. The field is what those leave no choice
+    about: in front of the face the incident wave and the reflection, and
+    behind it the pressure and the particle velocity carried through the
+    layer and the cavity by the transfer matrix of a plane wave (Cox and
+    D'Antonio, Eq. 6.37), which lands on zero velocity at the wall for the
+    reflection factor the library returned.
+
+    Above, the particle velocity over one period, its envelope and that of
+    the pressure, all relative to the incident wave. Below, on the same
+    axis, the absorption coefficient drawn where the back face of the layer
+    stands, so that the point being added is under the layer.
+    """
+    from matplotlib.patches import Rectangle
+
+    from phonometry import materials
+
+    T = _translate_str
+    frequency, resistivity, thickness = 250.0, 20_000.0, 0.05
+    medium = materials.miki(np.array([frequency]), resistivity)
+    z_layer = complex(medium.characteristic_impedance[0])
+    k_layer = complex(medium.wavenumber[0])
+    speed = float(medium.speed_of_sound)
+    z_air = float(medium.air_density) * speed
+    k_air = 2.0 * np.pi * frequency / speed
+    quarter_mm = 1000.0 * speed / (4.0 * frequency)
+    half_mm = 2.0 * quarter_mm
+    gaps_mm = np.arange(0.0, half_mm + 0.5)  # every millimetre up to half a wave
+    layer = materials.PorousLayer(thickness_m=thickness, medium=medium)
+    reflection = np.empty(gaps_mm.size, dtype=complex)
+    alpha = np.empty(gaps_mm.size)
+    for i, gap_mm in enumerate(gaps_mm):
+        stack: list[Any] = [layer]
+        if gap_mm > 0.0:
+            stack.append(materials.AirLayer(thickness_m=gap_mm / 1000.0))
+        result = materials.layered_absorber([frequency], stack)
+        reflection[i] = result.reflection[0]
+        alpha[i] = result.absorption[0]
+
+    span_mm = 1150.0
+    x_mm = np.linspace(0.0, span_mm, 576)  # distance from the rigid wall
+    inside = np.linspace(0.0, thickness, 41)  # depths through the layer
+
+    def _through(
+        p: complex, u: complex, k: complex, z: complex, depth: NDArray[np.float64]
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
+        """Pressure and velocity *depth* further along a layer (Eq. 6.37)."""
+        cos, sin = np.cos(k * depth), np.sin(k * depth)
+        return p * cos - 1j * z * u * sin, u * cos - 1j * p * sin / z
+
+    def _field(
+        i: int,
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128], float]:
+        """Complex pressure and velocity over ``x_mm``, and the layer's mean."""
+        gap = float(gaps_mm[i]) / 1000.0
+        face = gap + thickness
+        x = x_mm / 1000.0
+        r = complex(reflection[i])
+        ahead = np.clip(x - face, 0.0, None)
+        coming, going = np.exp(1j * k_air * ahead), r * np.exp(-1j * k_air * ahead)
+        p, u = coming + going, (coming - going) / z_air
+        p_face, u_face = 1.0 + r, (1.0 - r) / z_air
+        in_layer = (x <= face) & (x >= gap)
+        p[in_layer], u[in_layer] = _through(
+            p_face, u_face, k_layer, z_layer, face - x[in_layer]
+        )
+        p_inside, u_inside = _through(p_face, u_face, k_layer, z_layer, inside)
+        in_gap = x < gap
+        p[in_gap], u[in_gap] = _through(
+            complex(p_inside[-1]), complex(u_inside[-1]), k_air, z_air, gap - x[in_gap]
+        )
+        return p, u * z_air, float(np.mean(np.abs(u_inside))) * z_air
+
+    fig = _anim_figure()
+    fig.suptitle(T("A porous layer moved off a rigid wall (250 Hz, normal incidence)"))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.2, 1.0])
+    ax_w = fig.add_subplot(gs[0])
+    ax_a = fig.add_subplot(gs[1], sharex=ax_w)
+    _grid_axes(ax_w)
+    _grid_axes(ax_a)
+    reach = 2.05  # the waves stay inside; the strips beyond carry the labels
+    ax_w.set_xlim(span_mm, -60.0)
+    ax_w.set_ylim(-3.05, 2.95)
+    ax_w.set_yticks([-2.0, -1.0, 0.0, 1.0, 2.0])
+    ax_w.set_ylabel(T("Relative amplitude"), fontsize=9)
+    ax_w.tick_params(labelbottom=False)
+    ax_a.set_ylim(0.0, 1.0)
+    ax_a.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax_a.set_xlabel(T("Distance from the rigid wall [mm]"), fontsize=9)
+    ax_a.set_ylabel(T("Absorption coefficient"), fontsize=9)
+    quiet = theme_line("gray", ax_w, quiet=0.4)
+    for ax, low, high in ((ax_w, -reach, reach), (ax_a, 0.0, 1.0)):
+        ax.add_patch(
+            Rectangle(
+                (-60.0, low),
+                60.0,
+                high - low,
+                facecolor=_solid_fill(ax),
+                edgecolor=COLOR_FG,
+                lw=1.0,
+                hatch="///",
+                zorder=1,
+            )
+        )
+        for mark in (quarter_mm, half_mm):
+            ax.plot([mark, mark], [low, high], color=quiet, lw=1.1, ls=":", zorder=1)
+    for mark, name in ((quarter_mm, r"$\lambda/4$"), (half_mm, r"$\lambda/2$")):
+        ax_a.text(
+            mark + 9.0, 0.07, name, ha="right", va="center", fontsize=9, color=COLOR_FG
+        )
+
+    slab = Rectangle(
+        (0.0, -reach),
+        1000.0 * thickness,
+        2.0 * reach,
+        facecolor=theme_fill(COLOR_TERTIARY, ax_w),
+        edgecolor=COLOR_FG,
+        lw=1.0,
+        zorder=2,
+    )
+    ax_w.add_patch(slab)
+    slab_txt = ax_w.text(
+        0.0,
+        2.5,
+        T("50 mm porous layer"),
+        ha="center",
+        va="center",
+        fontsize=8.5,
+        color=COLOR_FG,
+    )
+    arrow = _make_arrow(ax_w, COLOR_FG, scale=11.0)
+    arrow.set_linewidth(1.4)
+    arrow.set_positions((span_mm - 15.0, 2.5), (span_mm - 85.0, 2.5))
+    ax_w.text(
+        span_mm - 95.0,
+        2.5,
+        T("incident sound"),
+        ha="left",
+        va="center",
+        fontsize=8.5,
+        color=COLOR_FG,
+    )
+    (velocity,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        lw=2.0,
+        zorder=4,
+        label=T("velocity over one period"),
+    )
+    (envelope,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_FG,
+        lw=1.0,
+        ls="--",
+        zorder=3,
+        label=T("envelope of the velocity"),
+    )
+    (envelope_low,) = ax_w.plot([], [], color=COLOR_FG, lw=1.0, ls="--", zorder=3)
+    (pressure,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="-.",
+        zorder=3,
+        label=T("envelope of the pressure"),
+    )
+    ax_w.legend(
+        loc="lower center",
+        ncol=3,
+        fontsize=8,
+        frameon=False,
+        borderaxespad=0.15,
+        handlelength=2.4,
+        columnspacing=2.2,
+    )
+
+    (curve,) = ax_a.plot([], [], color=COLOR_PRIMARY, lw=2.2, zorder=3)
+    (cursor,) = ax_a.plot(
+        [], [], marker="o", ms=6.5, ls="none", color=COLOR_PRIMARY, zorder=5
+    )
+    (marks,) = ax_a.plot(
+        [],
+        [],
+        marker="o",
+        ms=5.5,
+        ls="none",
+        mfc=plt.rcParams["figure.facecolor"],
+        mec=COLOR_FG,
+        mew=1.3,
+        zorder=4,
+    )
+    stops = (0, 100, gaps_mm.size - 1)  # on the wall, the guide's gap, half a wave
+    stop_notes = (
+        T(f"on the wall: {alpha[stops[0]]:.2f}"),
+        T(f"100 mm gap: {alpha[stops[1]]:.2f}"),
+        T(f"half a wavelength: {alpha[stops[2]]:.2f}"),
+    )
+    stop_at = ((14.0, 0.17), (104.0, 0.60), (half_mm + 14.0, 0.17))
+    stop_txt = [
+        ax_a.text(x, y, "", ha="right", va="center", fontsize=8.5, color=COLOR_FG)
+        for x, y in stop_at
+    ]
+    readout = ax_a.text(
+        0.012,
+        0.95,
+        "",
+        transform=ax_a.transAxes,
+        ha="left",
+        va="top",
+        family="monospace",
+        fontsize=8.5,
+        linespacing=1.35,
+        color=COLOR_FG,
+    )
+    ax_a.text(
+        0.012,
+        0.36,
+        T("each point is drawn under") + "\n" + T("the back face of the layer"),
+        transform=ax_a.transAxes,
+        ha="left",
+        va="center",
+        style="italic",
+        fontsize=8,
+        linespacing=1.3,
+        color=COLOR_MUTED,
+    )
+
+    # 16 s: on the wall, out to the guide's 100 mm, a pause there, on to half
+    # a wavelength, and the closing hold.
+    still, first, pause, second = 50, 80, 50, 100
+    frames = still + first + pause + second + _ANIM_HOLD
+    turns = 0.7  # periods of the display oscillation per second
+    state = {"half": 0.0}
+
+    def _measure() -> None:
+        state["half"] = _half_width(fig, ax_w, slab_txt)
+
+    def _gap_index(kf: int) -> int:
+        if kf < still:
+            return 0
+        if kf < still + first:
+            s = (kf - still + 1) / first
+            return round(stops[1] * s * s * (3.0 - 2.0 * s))
+        if kf < still + first + pause:
+            return stops[1]
+        s = min(1.0, (kf - still - first - pause + 1) / second)
+        return round(stops[1] + (stops[2] - stops[1]) * s * s * (3.0 - 2.0 * s))
+
+    def update(kf: int) -> tuple[Any, ...]:
+        i = _gap_index(kf)
+        gap_mm = float(gaps_mm[i])
+        p, u, mean_u = _field(i)
+        phase = np.exp(2j * np.pi * turns * kf / _ANIM_FPS)
+        velocity.set_data(x_mm, np.real(u * phase))
+        envelope.set_data(x_mm, np.abs(u))
+        envelope_low.set_data(x_mm, -np.abs(u))
+        pressure.set_data(x_mm, np.abs(p))
+        slab.set_x(gap_mm)
+        centre = gap_mm + 500.0 * thickness
+        slab_txt.set_x(max(centre, state["half"] - 45.0))
+        curve.set_data(gaps_mm[: i + 1], alpha[: i + 1])
+        cursor.set_data([gap_mm], [alpha[i]])
+        reached = [s for s in stops if s <= i]
+        marks.set_data(gaps_mm[reached], alpha[reached])
+        for txt, note, stop in zip(stop_txt, stop_notes, stops, strict=True):
+            txt.set_text(note if stop <= i else "")
+        readout.set_text(
+            "\n".join(
+                (
+                    T(f"gap behind the layer {gap_mm:.0f} mm"),
+                    T(f"velocity in the layer {mean_u:.2f}"),
+                    T(f"the layer absorbs {alpha[i]:.2f}"),
+                )
+            )
+        )
+        return (
+            velocity,
+            envelope,
+            envelope_low,
+            pressure,
+            slab,
+            slab_txt,
+            curve,
+            cursor,
+            marks,
+            readout,
+            *stop_txt,
+        )
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_porous_air_gap",
+        frames=frames,
+        measure=_measure,
+    )

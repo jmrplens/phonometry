@@ -83,16 +83,21 @@ hydraulic pulsations follow the same form with ``N`` pumping events per
 revolution (Eq. 8.18), and a rotary positive-displacement blower repeats
 four times per revolution. In a ducted axial fan the blade-vane interaction
 sets up rotating pressure patterns with :math:`m_\mathrm{L} = n N \pm k V` lobes for
-``V`` vanes (Eq. 8.16), turning at :math:`n N f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17): a
-pattern that spins faster than the blades themselves, and the reason a
-careful choice of ``N`` and ``V`` matters for radiated power.
+``V`` vanes (Eq. 8.16), turning at :math:`n N N_\mathrm{rpm} / m_\mathrm{L}` r/min
+(Eq. 8.17). That is a speed of rotation, not a tone: the noise of every pattern
+is at the blade-passing harmonic it comes from (Norton, p. 525), so the
+patterns come back as :class:`LobePattern` records beside the lines of a
+:class:`BladePassResult`, never as lines, and the sign of :math:`m_\mathrm{L}`
+is kept, because it is the sense in which the pattern turns. The faster a
+pattern turns, the more sound power it radiates, the reason a careful choice of
+``N`` and ``V`` matters.
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 import numpy as np
 
@@ -124,8 +129,10 @@ _MIN_POLES = 2
 
 
 __all__ = [
+    "BladePassResult",
     "FaultFrequencyResult",
     "FaultLine",
+    "LobePattern",
     "bearing_fault_frequencies",
     "blade_pass_frequencies",
     "combine_fault_lines",
@@ -262,7 +269,7 @@ class FaultFrequencyResult(RichDisplay):
         n = require_count(n_harmonics, "n_harmonics")
         return self[name] * np.arange(1, n + 1, dtype=np.float64)
 
-    def within(self, low: float, high: float) -> FaultFrequencyResult:
+    def within(self, low: float, high: float) -> Self:
         """The lines falling in ``[low, high]`` hertz, as a new result.
 
         Handy before plotting on an envelope spectrum whose useful span is
@@ -270,7 +277,8 @@ class FaultFrequencyResult(RichDisplay):
 
         :param low: Lower edge, in hertz (>= 0).
         :param high: Upper edge, in hertz (> *low*).
-        :return: A :class:`FaultFrequencyResult` with the surviving lines.
+        :return: A result of the same class with the surviving lines, and
+            everything else it holds unchanged.
         :raises ValueError: If the edges are invalid.
         :raises TypeError: if ``high`` or ``low`` is not a single number.
         """
@@ -280,9 +288,9 @@ class FaultFrequencyResult(RichDisplay):
             msg = "'high' must be greater than 'low'."
             raise ValueError(msg)
         kept = tuple(ln for ln in self.lines if lo <= ln.frequency <= hi)
-        return FaultFrequencyResult(
-            lines=kept, shaft_rate=self.shaft_rate, source=self.source
-        )
+        # replace() keeps the class and whatever else it holds, the lobe
+        # patterns of a BladePassResult among them: they are no lines.
+        return replace(self, lines=kept)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -310,6 +318,53 @@ class FaultFrequencyResult(RichDisplay):
         return plot_fault_frequencies(self, ax=ax, language=language, **kwargs)
 
 
+@dataclass(frozen=True, kw_only=True)
+class LobePattern(RichDisplay):
+    r"""One rotating blade-vane interaction pattern of a ducted fan (Norton 8.16-8.17).
+
+    The blades of an axial fan pass the stator vanes and set up a rotating
+    pattern of :math:`m_\mathrm{L} = n N \pm k V` pressure lobes (Eq. 8.16),
+    turning at :math:`M_\mathrm{L} = n N N_\mathrm{rpm} / m_\mathrm{L}`
+    (Eq. 8.17). That is a speed of rotation, not a frequency: :math:`m_\mathrm{L}`
+    lobes turning :math:`M_\mathrm{L}` times a minute pass a fixed point
+    :math:`n N N_\mathrm{rpm}` times a minute, the blade-passing harmonic the
+    pattern comes from, which is where its noise is (Norton, p. 525).
+
+    :ivar harmonic: The blade harmonic :math:`n` the pattern comes from.
+    :ivar vane_order: :math:`k` of Eq. (8.16), with its sign
+        (:math:`\pm 1, \pm 2, \ldots`).
+    :ivar n_lobes: :math:`m_\mathrm{L}`, with its sign: positive when the pattern
+        turns the way the rotor does, negative when it turns against it.
+    :ivar speed_rpm: :math:`M_\mathrm{L}`, the speed at which the pattern
+        turns, in r/min, of the sign of :math:`m_\mathrm{L}`.
+    """
+
+    harmonic: int
+    vane_order: int
+    n_lobes: int
+    speed_rpm: float
+
+
+@dataclass(frozen=True, kw_only=True)
+class BladePassResult(FaultFrequencyResult):
+    """The blade-passing lines of a bladed rotor and its interaction patterns.
+
+    A :class:`FaultFrequencyResult` whose lines are the shaft rate and the
+    blade-passing harmonics alone, so that :meth:`plot`,
+    :meth:`~FaultFrequencyResult.within` and :func:`combine_fault_lines` treat
+    it as any other family of lines. The lobe patterns of a ducted fan are
+    speeds of rotation, not lines, and are held apart in
+    :attr:`lobe_patterns`: no plot marks them on a spectrum and no merge
+    carries them as frequencies.
+
+    :ivar lobe_patterns: The :class:`LobePattern` records of Eqs. (8.16) and
+        (8.17), by blade harmonic, then by :math:`|k|`, the minus sign first;
+        empty when no vane count was given.
+    """
+
+    lobe_patterns: tuple[LobePattern, ...] = ()
+
+
 def combine_fault_lines(
     *results: FaultFrequencyResult, source: str | None = None
 ) -> FaultFrequencyResult:
@@ -318,7 +373,9 @@ def combine_fault_lines(
     A gearbox bearing carries its own bearing lines, the mesh family of the
     gear it supports and the shaft harmonics; this puts them on one axes.
     Duplicate names are disambiguated by appending the source of the family
-    they came from.
+    they came from. Only lines are merged: the lobe patterns of a
+    :class:`BladePassResult` are speeds of rotation, not frequencies, and are
+    not carried into the merged family.
 
     :param results: Two or more :class:`FaultFrequencyResult` objects.
     :param source: Label for the merged family (Default: the sources joined
@@ -713,38 +770,33 @@ def induction_motor_frequencies(
 
 
 def _lobe_patterns(
-    blades: int, vanes: int, fs: float, n_harmonics: int, k_max: int
-) -> list[FaultLine]:
+    blades: int, vanes: int, speed_rpm: float, n_harmonics: int, k_max: int
+) -> tuple[LobePattern, ...]:
     r"""Rotating blade-vane interaction patterns (Norton Eqs. 8.16 and 8.17).
 
-    :math:`m_\mathrm{L} = nN \pm kV` lobes turning at ``n N fs / mL``. The pattern
-    speed of Eq. (8.17) carries ``n`` in its numerator, so the same lobe
-    count reached from two different blade harmonics rotates at two
-    different speeds and both are real lines: the de-duplication is on the
-    ``(n, mL)`` pair, not on the lobe count alone. A zero lobe count (no
+    :math:`m_\mathrm{L} = nN + kV` lobes for :math:`k = \pm 1 .. \pm k_\mathrm{max}`,
+    turning at ``n N speed_rpm / mL`` r/min. Every ``(n, k)`` pair is its own
+    pattern: the same lobe count reached from two blade harmonics turns at
+    two speeds, and :math:`+m_\mathrm{L}` and :math:`-m_\mathrm{L}` turn opposite
+    ways, so the sign is kept and nothing is merged. A zero lobe count (no
     pattern) is skipped.
     """
-    out: list[FaultLine] = []
-    seen: set[tuple[int, int]] = set()
+    out: list[LobePattern] = []
     for n in range(1, n_harmonics + 1):
         for k in range(1, k_max + 1):
-            for sign in (-1, 1):
-                lobes = n * blades + sign * k * vanes
-                count = abs(lobes)
-                if lobes == 0 or (n, count) in seen:
+            for order in (-k, k):
+                lobes = n * blades + order * vanes
+                if lobes == 0:
                     continue
-                seen.add((n, count))
                 out.append(
-                    _line(
-                        f"lobe n={n} m={count}",
-                        abs(n * blades * fs / lobes),
-                        fs,
-                        "blade",
-                        f"rotating interaction pattern with {count} pressure "
-                        f"lobes, from blade harmonic {n}",
+                    LobePattern(
+                        harmonic=n,
+                        vane_order=order,
+                        n_lobes=lobes,
+                        speed_rpm=n * blades * speed_rpm / lobes,
                     )
                 )
-    return out
+    return tuple(out)
 
 
 def blade_pass_frequencies(
@@ -754,7 +806,7 @@ def blade_pass_frequencies(
     n_harmonics: int | np.integer[Any] = 3,
     n_vanes: int | np.integer[Any] | None = None,
     n_lobe_orders: int | np.integer[Any] = 1,
-) -> FaultFrequencyResult:
+) -> BladePassResult:
     r"""Blade-passing frequency and interaction patterns (Norton 8.15-8.17).
 
     :math:`f_\mathrm{b} = n\, N_{\text{blades}} \times N/60` for ``n = 1 .. n_harmonics``,
@@ -766,27 +818,37 @@ def blade_pass_frequencies(
     set up rotating pressure patterns with
     :math:`m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}`
     lobes (Eq. 8.16) turning at
-    :math:`M_\mathrm{L} = n\, N_{\text{blades}} f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17). Those
-    patterns radiate strongly when they can drive a higher-order duct mode, so
-    they are the lines to check against the duct cut-on frequencies. Give
-    *n_vanes* to include them, named ``"lobe n=1 m=2"``, ``"lobe n=1 m=10"``,
-    ... The blade harmonic is part of the name because Eq. (8.17) carries
-    ``n``: the same lobe count reached from a different harmonic is a distinct
-    pattern turning at a different speed.
+    :math:`M_\mathrm{L} = n\, N_{\text{blades}} N / m_\mathrm{L}` r/min (Eq. 8.17).
+    Each speed is a rate of rotation and not a tone of its own:
+    :math:`m_\mathrm{L}` lobes turning at :math:`M_\mathrm{L}` pass a fixed point
+    :math:`n\, N_{\text{blades}} N` times a minute, so the noise of every
+    pattern is at the blade-passing harmonic it comes from (Norton, p. 525).
+    The lobe count is what a duct sees, since a pattern can set up a
+    higher-order duct mode with the same pressure distribution, and the faster
+    a pattern turns, the more sound power it radiates. Give *n_vanes* and the
+    patterns come back in :attr:`BladePassResult.lobe_patterns`, one
+    :class:`LobePattern` per ``(n, k)``, never among the lines, so neither
+    :meth:`~FaultFrequencyResult.plot` nor :func:`combine_fault_lines` marks
+    one on a spectrum. A negative :math:`m_\mathrm{L}`, which Eq. (8.16) gives
+    when :math:`k\, N_{\text{vanes}}` exceeds :math:`n\, N_{\text{blades}}`, is
+    a pattern turning against the rotor, and its speed keeps that sign.
 
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
     :param n_blades: Number of blades (integer >= 1).
     :param n_harmonics: Number of blade-pass harmonics (integer >= 1,
         Default: 3).
     :param n_vanes: Number of stator vanes ``V`` (integer >= 1) to include the
-        lobed interaction patterns (Default: ``None``, blade tones only).
+        lobed interaction patterns (Default: ``None``, blade tones only and no
+        patterns).
     :param n_lobe_orders: Highest ``|k|`` in
         :math:`m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}`
         (integer >= 1, Default: 1).
-    :return: A :class:`FaultFrequencyResult` (source ``"bladed rotor"``).
+    :return: A :class:`BladePassResult` (source ``"bladed rotor"``): the
+        shaft and blade-passing lines, and the lobe patterns apart from them.
     :raises ValueError: for a non-positive or non-integer input.
-    :raises TypeError: if ``n_blades``, ``n_harmonics``, ``n_lobe_orders`` or
-        ``n_vanes`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``speed_rpm`` is not a single number, or
+        ``n_blades``, ``n_harmonics``, ``n_lobe_orders`` or ``n_vanes`` is a
+        flag, a text or an array where a count goes.
     """
     fs = shaft_rate(speed_rpm)
     blades = require_count(n_blades, "n_blades")
@@ -808,8 +870,16 @@ def blade_pass_frequencies(
                 else f"harmonic {n} of the blade-passing frequency",
             )
         )
-    if vanes is not None:
-        lines.extend(_lobe_patterns(blades, vanes, fs, n_harm, k_max))
-    return FaultFrequencyResult(
-        lines=tuple(lines), shaft_rate=fs, source="bladed rotor"
+    patterns = (
+        ()
+        if vanes is None
+        else _lobe_patterns(
+            blades, vanes, require_positive(speed_rpm, "speed_rpm"), n_harm, k_max
+        )
+    )
+    return BladePassResult(
+        lines=tuple(lines),
+        shaft_rate=fs,
+        source="bladed rotor",
+        lobe_patterns=patterns,
     )

@@ -44,7 +44,7 @@ in this layout is 6.6 cm between a column and a wall, so
 $\Delta x = \min(\text{smallest aperture}/4,\ \lambda/8)$ allows up to 1.6 cm,
 and the clip runs at 2.5 mm because a banner needs the definition.
 
-**Video:** [A wavefront through a hall of columns (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_pillar_hall.webm): An 800 Hz plane wavefront sweeps a 4 m rigid-walled hall filled with a staggered colonnade of rigid columns 10 to 17 cm across, simulated at 2.5 mm; every column diffracts the front and sheds a scattered wavelet, and the wavelets interfere until the whole hall is filled with structured energy that then drains through the absorbing ends.
+**Video:** [A wavefront through a hall of columns (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_pillar_hall.webm): An 800 Hz plane wavefront sweeps a 4 m rigid-walled hall filled with a staggered colonnade of rigid columns 10 to 17 cm across, simulated at 2.5 mm; every column diffracts the front and sheds a scattered wavelet, and the wavelets interfere until the whole hall is filled with structured energy that then drains through the absorbing ends.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" width="86%"></picture>
 
@@ -68,6 +68,12 @@ where the other field needs it gives a fourfold accuracy gain over a
 collocated grid (Eq. 4.9 vs 4.10) and allows in-place updates. Because only
 interior faces are stored, the domain edge is a perfectly **rigid wall**
 (zero normal velocity, Eq. 4.32) unless another boundary is requested.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_staggered_cell_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_staggered_cell.svg" alt="Left, the nine cells at the top-left corner of an FDTD domain, three by three, with the top and the left side drawn as the hatched domain edge: a blue dot at each cell centre for the pressure p, a red arrow across each interior x-face for vx and a green arrow across each interior y-face for vy, and no mark on the edge. A legend gives the shapes, (ny, nx) for p, (ny, nx − 1) for vx and (ny − 1, nx) for vy, puts the centre of cell (ix, iy) at ((ix + 1/2)·dx, (iy + 1/2)·dx), and says that no face is stored on the edge, a rigid wall by Eq. 4.32. A time axis marks p at steps n and n + 1 and vx and vy at n + 1/2 and n + 3/2, joined by arrows labelled Eq. 4.11 and Eq. 4.12. An inset shows one cell against an impedance wall, with the wall-face velocity vb half a cell from the cell centre and the relation p_surf = Z·v_out of Eqs. 4.33-4.35" width="92%"></picture>
+
+*Where `FDTD2D` keeps each field. A source or a probe at `(ix, iy)` acts on
+the dot of that cell; `vx[iy, ix]` and `vy[iy, ix]` are the faces to its
+right and below it, and an impedance side adds one face on the wall.*
 
 The explicit scheme is stable only while a wavefront crosses at most one cell
 per time step. With square cells the **Courant number** (Eq. 4.13) is
@@ -282,9 +288,31 @@ conversion from a target normal-incidence absorption coefficient is two
 steps: the reflection magnitude is $|R| = \sqrt{1-\alpha}$, and for a real
 impedance $Z = \rho c\,(1+R)/(1-R)$, so $\alpha = 0.5$ needs
 $Z \approx 5.83\,\rho c$ and $\alpha = 0.9$ about $1.92\,\rho c$. The caveat
-comes with it: $R$ is exact only at normal incidence, so a locally reacting
-edge absorbs less as the incidence gets more oblique and a room bounded by
-such edges decays more slowly than its nominal $\alpha$ suggests.
+comes with it: that $R$ is the reflection at normal incidence only. The edge
+ties the pressure on the wall face to the normal velocity there,
+$p = Z v_n$ (Eq. 4.34), whatever direction the wave arrives from, which makes
+it a locally reacting plane. At an angle $\theta$ from the normal such a plane
+reflects $R(\theta) = (Z\cos\theta - \rho c)/(Z\cos\theta + \rho c)$ and
+absorbs $\alpha(\theta) = 4z\cos\theta/(1 + z\cos\theta)^2$, with
+$z = Z/\rho c$ (Mechel, Sect. D.5). For $Z > \rho c$, which every target
+below $\alpha = 1$ gives, the absorption **rises** with obliquity. It is total
+where $\cos\theta = \rho c/Z$ (80.1° for $5.83\,\rho c$, 58.7° for
+$1.92\,\rho c$), where the reflection changes sign; it stays above its
+normal-incidence value up to $\cos\theta = (\rho c/Z)^2$ (88.3° and 74.3°),
+and it falls to zero only in the last degrees before grazing. Averaged over
+the directions of a diffuse field, those two edges absorb 0.61 and 0.93 in
+the plane of this solver (Mechel, Sect. D.5, Eq. 1) and 0.67 and 0.94 in
+three dimensions (Eq. 2, the Paris integral, in the closed form of Eq. 4),
+not 0.5 and 0.9, so a room bounded by edges like these two decays **faster**
+than its nominal $\alpha$ suggests. The gain does not reach the top of the
+scale: above a nominal $\alpha$ of about 0.96 in the plane, and 0.95 in three
+dimensions, where no locally reacting plane averages more than 0.951, the
+diffuse-field value falls below the nominal one again.
+An edge absorbs less as the incidence gets more oblique only when
+$Z \le \rho c$: the anechoic $Z = \rho c$ takes everything at normal
+incidence, sends back a third of the amplitude at 60°, and averages 0.95 in
+the plane and 0.91 in three dimensions. The test suite holds the edge to
+$R(\theta)$ from 20° to 80°, within 0.02.
 
 **Volumetric loss: the `damping` map.** `damping` is a per-cell amplitude
 decay rate $\sigma$ in s⁻¹, applied to the pressure and to both velocity
@@ -415,6 +443,28 @@ plt.show()
 ```
 
 </details>
+
+The four conditions are easier to tell apart in motion than in a list. The
+clip below sets one pulse loose near the bottom-right corner of a 4.00 m by
+2.25 m box of air whose sides carry one each: the left side is left rigid,
+the top is a sponge, the right side carries the anechoic $\rho c$ and the
+bottom the $1.92\,\rho c$ of a normal-incidence absorption of 0.9. The side
+panel draws what each of them sends back at every angle.
+
+**Video:** [One pulse in a box whose four sides are rigid, a sponge and two impedances](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_boundaries.webm): A pulse spreads from a source near the bottom-right corner of a box of air. The rigid left side sends the whole pulse back as a mirror image. The sponge along the top sends next to nothing back near its normal, and only a faint front from its far end, where the pulse meets it at more than 60 degrees. The right side, matched to the impedance of air, returns nothing along its normal, marked by a dotted ray, and an inverted front that brightens as the incidence gets more oblique. The bottom side, set for an absorption of 0.9 at normal incidence, returns a weak upright front near the normal, nothing along a second dotted ray at 58.7 degrees, and an inverted front beyond it. A side panel plots the reflection coefficient of the three reflecting sides against the angle of incidence: flat at plus one for the rigid side, falling from zero to minus one for the matched side, and falling from 0.32 through zero at 58.7 degrees to minus one for the bottom.
+
+Compare the returning fronts with the side panel. The rigid side sends the
+whole pulse back, the same at every angle. The sponge sends next to nothing
+back near its normal, and a faint front from its far end, where the pulse
+meets it at more than 60°: a sponge is weaker at oblique incidence, as
+section 3 measures. The
+right side, matched to $\rho c$, returns nothing along its normal, the dotted
+ray, and an inverted front that grows as the incidence gets more oblique, a third
+of the amplitude at 60°. The bottom returns a weak upright front near the
+normal, 0.32 of the amplitude, nothing along the dotted ray at 58.7°, and an
+inverted one beyond it. That is the caveat of the conversion above, drawn: a
+single $\alpha$ fixes what an impedance edge does at normal incidence, and
+nowhere else.
 
 ### Checks that a run is usable
 
@@ -912,7 +962,7 @@ wavelength). The exact continuous answer travels behind each trace in
 grey, so the numerical packet's lag is a gap on screen rather than a number
 in a table.
 
-**Video:** [Numerical dispersion measured on three grids (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_dispersion.webm): A 500 Hz tone burst travels down three otherwise identical plane FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey. By the end of the run the coarse packet has fallen two wavelengths behind and grown a long ripple tail, the ten-cell packet lags by half a wavelength, and the twenty-cell packet still sits on the exact wave. Each panel prints its running lag in metres and, once the packet has crossed the 6.6 metre finish line, the crossing time and the measured speed deficit against the closed form. A side panel carries the phase-speed and group-speed error laws with the three grids marked.
+**Video:** [Numerical dispersion measured on three grids (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_dispersion.webm): A 500 Hz tone burst travels down three otherwise identical plane FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey. By the end of the run the coarse packet has fallen two wavelengths behind and grown a long ripple tail, the ten-cell packet lags by half a wavelength, and the twenty-cell packet still sits on the exact wave. Each panel prints its running lag in metres and, once the packet has crossed the 6.6 metre finish line, the crossing time and the measured speed deficit against the closed form. A side panel carries the phase-speed and group-speed error laws with the three grids marked.
 
 *Read three things off it. First, the lag grows: it is 0.14 m at 2.4 ms and
 1.35 m by the end, because a speed error accumulates with distance. Second,
@@ -1169,5 +1219,7 @@ against a closed form or a 3D solver.
   The meshed Table-1 panel and the near-to-far-field polar comparison of section 4 reproduce, with this solver, the TMM-vs-full-wave cross-check the paper reports.
 - **Kuttruff, H. (2016).** *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
   Section 3.5 places time-domain wave-based methods among the numerical approaches to the wave equation in enclosures, and chapter 3 gives the rigid-room normal modes used as the analytic oracle.
+- **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
+  Section D.5: the absorption of a locally reacting plane at oblique incidence (the integrand of Eq. 6) and its diffuse-field averages in two and three dimensions (Eqs. 1, 2 and 4), which section 2 reads an impedance edge against.
 - **Williams, E. G. (1999).** *Fourier acoustics: Sound radiation and nearfield acoustical holography*. Academic Press. https://doi.org/10.1016/B978-0-12-753960-7.X5000-1
   Chapter 8: the Helmholtz integral equation behind far_field_from_contour, with the outgoing free-space Green function and the far-field limit of the near-to-far-field transformation of section 4.

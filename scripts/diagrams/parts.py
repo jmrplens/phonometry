@@ -275,3 +275,29 @@ def _hatch_rect(
         if x_hi > x_lo:
             s.line(x_hi, c - x_hi, x_lo, c - x_lo, colour, 0.8)
         c += spacing
+
+
+def _tapping_machine_plan(
+    s: SVG, th: Theme, cx: float, cy: float, angle: float, half: float = 21.0
+) -> None:
+    """Tapping machine seen from above: body and line of five hammers.
+
+    *angle* turns the hammer line from the x axis, in degrees, anticlockwise
+    on the sheet.
+    """
+    a = math.radians(angle)
+    ux, uy = math.cos(a), -math.sin(a)
+    px, py = -uy, ux
+    wide = 7.0
+    corners = [
+        (cx + i * half * ux + j * wide * px, cy + i * half * uy + j * wide * py)
+        for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))
+    ]
+    s.path(
+        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in corners) + " Z",
+        fill=th.primary,
+        stroke=th.fg,
+        sw=1.6,
+    )
+    for k in range(-2, 3):
+        s.circle(cx + k * 8.0 * ux, cy + k * 8.0 * uy, 2.2, th.fg)

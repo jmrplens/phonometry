@@ -189,7 +189,7 @@ cannot be placed until the whole pass is over, because its two edges are
 defined relative to a peak that is not known until the last record has been
 taken. The clip runs a synthetic flyover in that order:
 
-**Video:** [A certification flyover assembled record by record, from spectra to a single EPNL](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_epnl_flyover.webm): Forty-one one-third-octave spectra arrive at half-second intervals as an aircraft passes a microphone. On each spectrum a dashed background is fitted under the 2500 hertz fan tone and a double arrow measures the tone's excess over it, which at the peak reaches a correction of 3.97 decibels. Beside it two level histories are written point by point: the perceived noise level and, shaded above it, the tone-corrected level that exceeds it by that correction, rising to a peak of 120.57 PNdB as the aircraft reaches the microphone. Only once the pass has ended is the peak known; a dotted line then appears 10 decibels below it, the integration window fills between records 16 and 24, and the duration correction of -6.56 decibels and the final EPNL of 114.01 EPNdB appear last.
+**Video:** [A certification flyover assembled record by record, from spectra to a single EPNL](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_epnl_flyover.webm): Forty-one one-third-octave spectra arrive at half-second intervals as an aircraft passes a microphone. On each spectrum a dashed background is fitted under the 2500 hertz fan tone and a double arrow measures the tone's excess over it, which at the peak reaches a correction of 3.97 decibels. Beside it two level histories are written point by point: the perceived noise level and, shaded above it, the tone-corrected level that exceeds it by that correction, rising to a peak of 120.57 PNdB as the aircraft reaches the microphone. Only once the pass has ended is the peak known; a dotted line then appears 10 decibels below it, the integration window fills between records 16 and 24, and the duration correction of -6.56 decibels and the final EPNL of 114.01 EPNdB appear last.
 
 EPNL is not a maximum level, and it is not computed in the order it is written. The tone correction is a per-record measurement made while the aircraft is still passing, but the 10 dB-down window is retrospective: its edges are defined from a peak that only exists once the event is over, which is why a certification result cannot be read off a meter in real time.
 
@@ -308,6 +308,29 @@ reference day (sea-level pressure of 1 013.25 hPa, 25 °C at sea level with the
 ICAO Standard Atmosphere lapse rate, 70 % relative humidity, zero wind, per
 Chapter 3 §3.6.1.5) and to a fixed reference flight path. Appendix 2 §8 is
 that transport, and it is the missing half of the chain.
+
+The transport is written in two sound propagation paths (§8.1.3.1,
+Figure A2-10). $\mathrm{K}$ is the noise measurement point and $\mathrm{Q}$
+the position of the aircraft on the measured flight path when it emitted the
+sound that $\mathrm{K}$ observed as $\mathrm{PNLTM}$; the line
+$\mathrm{QK}$ makes the sound emission angle $\theta$ with the direction of
+flight. $\mathrm{K}_r$ is the reference measurement point and
+$\mathrm{Q}_r$ the position on the reference flight path from which
+$\mathrm{Q}_r\mathrm{K}_r$ makes the same angle $\theta$. $\mathrm{QK}$
+and $\mathrm{Q}_r\mathrm{K}_r$ are the lengths of the two paths, in
+metres: the first is travelled through the air of the test day, with the
+absorption $\alpha(i)$, and the second through that of the reference day, with
+$\alpha_\mathrm{R}(i)$.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flight_path_adjustment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flight_path_adjustment.svg" alt="Two elevations on one scale and, below them, the four terms the two lengths enter. (a) Measured flight path, test day: the path from X to Y climbing over a microphone K on the ground, the aircraft at Q, past the microphone, and the slant line QK down to it, labelled with the test-day absorption alpha(i); the angle theta is marked at Q between the direction of flight and QK. Q is where the aircraft was when it emitted the sound heard as PNLTM at K. (b) Reference flight path, reference day: a lower path from Xr to Yr over the reference point Kr, with Qr the point that sees Kr under the same angle theta, and a shorter slant line QrKr labelled with the reference-day absorption alphaR(i). The terms: 0.01 [alpha(i) minus alphaR(i)] QK, the two days' absorption over the measured sound path; 0.01 alphaR(i) (QK minus QrKr), the reference absorption over the change of length; 20 lg (QK/QrKr), spherical spreading over the change of length, all three from 8.3.2.1; and minus 7.5 lg (QK/QrKr) plus 10 lg (VG/VGR), the duration term Delta 2 of 8.3.4.2" width="100%"></picture>
+
+*The measured and the reference sound propagation paths of Figure A2-10, in
+elevation for a microphone beneath the flight path, and the terms the two
+lengths enter. The print draws them in perspective, the measured ground track
+apart from the extended runway centre line, and §8.1.3.3 has $\theta$
+established in three dimensions; a microphone to the side of the track is
+Figure A2-11, which adds the elevation angle $\psi$ of $\mathrm{QK}$ above
+the ground.*
 
 In the simplified method (§8.3) each band of the $\mathrm{PNLTM}$ spectrum is
 moved to the reference day by

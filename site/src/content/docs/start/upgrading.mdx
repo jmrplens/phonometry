@@ -3006,6 +3006,40 @@ goes into the pipe.
 | a name whose file has a hard link elsewhere | the new bytes in the file, so under both names | the new file at the name; the other name keeps the old bytes |
 | a writable file in a directory that takes no new file | written in place | the `PermissionError` of the file beside it, the old file kept |
 
+## The lobe patterns of a ducted fan are speeds of rotation, not lines
+
+`vibration.blade_pass_frequencies(..., n_vanes=...)` returned the rotating
+interaction patterns of a ducted fan among its lines, as `FaultLine` entries of
+family `"blade"` named `lobe n=1 m=2`, with the speed of Eq. (8.17) as the
+line's frequency in hertz. Norton puts the noise of those patterns at the
+blade-passing harmonic they come from, so a spectrum has no line at those
+speeds, and `.plot()` and `combine_fault_lines` marked one anyway. The lobe
+count lost its sign too, which is the sense in which the pattern turns.
+
+In 4.0 the function returns a `BladePassResult`, a `FaultFrequencyResult` whose
+lines are the shaft and blade tones alone, and holds the patterns apart in
+`lobe_patterns`, one `LobePattern` per blade harmonic and signed vane order:
+`harmonic`, `vane_order`, `n_lobes` (negative for a pattern turning against the
+rotor) and `speed_rpm`, the speed of Eq. (8.17) in r/min, as Norton prints it.
+`within` keeps the patterns; `combine_fault_lines` merges the lines only.
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `res["lobe n=N m=M"]`, the unsigned speed in hertz of the pattern of blade harmonic `N` with `M` lobes either way | `abs(next(p for p in res.lobe_patterns if p.harmonic == N and abs(p.n_lobes) == M).speed_rpm) / 60` |
+| `res.names` with `lobe n=… m=…` entries | `res.names` with the shaft and blade lines only; the patterns in `res.lobe_patterns` |
+| a pattern with $m_\mathrm{L} < 0$ named by $\lvert m_\mathrm{L} \rvert$, its speed positive | `n_lobes` and `speed_rpm` negative, and a pattern of $+m_\mathrm{L}$ beside it kept as another |
+| the speeds marked as lines by `.plot()` and carried by `combine_fault_lines` | lines at the shaft and blade rates only |
+
+```python
+from phonometry import vibration
+
+res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+print(res.names)
+print([(p.n_lobes, p.speed_rpm) for p in res.lobe_patterns])
+# ('shaft', 'BPF')
+# [(2, 10500.0), (10, 2100.0)]
+```
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

@@ -97,7 +97,7 @@ and the reason the room, not the array, is what has to be qualified. Both
 routes end on the same $L_W$, because sound power is a property of the source
 and not of the room it is measured in.
 
-**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
+**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
 
 ### Where the microphones and the source go
 

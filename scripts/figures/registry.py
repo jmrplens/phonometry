@@ -306,7 +306,9 @@ from .environment import (
     generate_rolling_stock_pass_by,
     generate_rolling_stock_roughness_methods,
     generate_rolling_stock_small_deviation,
+    generate_rolling_stock_test_positions,
     generate_rolling_stock_track_decay,
+    generate_rolling_stock_track_decay_grid,
     generate_rolling_stock_track_roughness,
     generate_rolling_stock_uncertainty,
     generate_sel_distribution_density,
@@ -334,6 +336,7 @@ from .fields import (
     _absorption_placement_fields,
     _aperture_fields,
     _barrier_fields,
+    _barrier_reflection_fields,
     _coincidence_fields,
     _diffusion_fields,
     _dispersion_fields,
@@ -343,6 +346,7 @@ from .fields import (
     _ground_effect_fields,
     _halfspace_fields,
     _impedance_tube_fields,
+    _lloyd_mirror_fields,
     _metadiffuser_fields,
     _mode_conversion_fields,
     _open_end_fields,
@@ -364,6 +368,7 @@ from .fields import (
     animate_fdtd_absorption_placement,
     animate_fdtd_aperture_slit,
     animate_fdtd_barrier,
+    animate_fdtd_barrier_reflection,
     animate_fdtd_critical_angle,
     animate_fdtd_diffusion,
     animate_fdtd_dispersion,
@@ -372,6 +377,7 @@ from .fields import (
     animate_fdtd_expansion_chamber,
     animate_fdtd_ground_effect,
     animate_fdtd_impedance_tube,
+    animate_fdtd_lloyd_mirror,
     animate_fdtd_metadiffuser,
     animate_fdtd_open_end,
     animate_fdtd_pillar_hall,
@@ -382,7 +388,9 @@ from .fields import (
     animate_fdtd_transmission_tube,
     animate_standing_wave_tube,
 )
+from .fields.boundaries import _boundaries_fields, animate_fdtd_boundaries
 from .fields.metadiffuser import _META_PAIR_BYTES, _META_PAIR_MARGIN
+from .fields.scholte import _scholte_fields, animate_elastic_scholte
 from .i18n import set_lang
 from .io import generate_signal_provenance
 from .materials import (
@@ -470,6 +478,7 @@ from .metrology import (
     generate_rice_nongaussian_screen,
     generate_rice_peak_distribution,
     generate_runs_test,
+    generate_slm_periodic_linearity,
     generate_slm_periodic_toneburst,
     generate_slm_periodic_verdict,
     generate_stationarity_glide_blind_spot,
@@ -509,6 +518,7 @@ from .perception import (
     generate_nipts_audiogram,
     generate_nipts_level_growth,
     generate_noise_induced_hearing_loss,
+    generate_prominence_ratio_partition,
     generate_psychoacoustic_annoyance,
     generate_sharpness_pair_and_targets,
     generate_sharpness_weighting,
@@ -537,7 +547,9 @@ from .perception import (
     generate_tone_audibility,
     generate_tone_audibility_levels,
     generate_tone_audibility_uncertainty,
+    generate_tone_band_window_edge,
     generate_tone_prominence_assessment,
+    generate_tone_to_noise_partition,
     generate_two_tone_separation,
     generate_zwicker_time_varying,
 )
@@ -589,10 +601,12 @@ from .room import (
     generate_workroom_spatial_decay,
 )
 from .schematics import (
+    animate_bearing_load_zone,
     animate_block_vs_exponential,
     animate_comb_filtering,
     animate_dynamic_stiffness_sweep,
     animate_epnl_flyover,
+    animate_fan_lobe_patterns,
     animate_feedback_howl,
     animate_flanking_paths,
     animate_image_source_buildup,
@@ -602,10 +616,14 @@ from .schematics import (
     animate_loudness_gating,
     animate_modulation_transfer,
     animate_onset_detection,
+    animate_porous_air_gap,
     animate_power_two_rooms,
+    animate_scattering_average,
     animate_schroeder,
     animate_specific_loudness,
     animate_sweep_deconvolution,
+    animate_sweep_harmonics,
+    animate_synchronous_averaging,
     animate_time_weighting_ballistics,
 )
 from .signals import (
@@ -625,6 +643,7 @@ from .signals import (
     generate_filter_summation,
     generate_filter_time_invariance,
     generate_filter_type_comparison,
+    generate_fractional_octave_band_ruler,
     generate_g_weighting_response,
     generate_group_delay_comparison,
     generate_leakage_floor,
@@ -759,6 +778,7 @@ from .vibration import (
     generate_rigid_mass_calibration,
     generate_seat_vibration_test,
     generate_shock_dose_measures,
+    generate_solid_wave_speeds,
     generate_spinal_response_peaks,
     generate_structural_damage_guidelines,
     generate_transfer_stiffness,
@@ -769,6 +789,7 @@ from .vibration import (
 
 _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_filter_type_comparison,
+    generate_fractional_octave_band_ruler,
     generate_filter_responses,
     generate_signal_responses,
     generate_multichannel_response,
@@ -807,6 +828,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # IEC 61672-3:2013: the verdict on a sound level meter's periodic tests.
     generate_slm_periodic_verdict,
     generate_slm_periodic_toneburst,
+    generate_slm_periodic_linearity,
     # The audio-files guide: the calibrated waveform a measurement WAV comes
     # back as, next to the bext provenance card that arrived with it.
     generate_signal_provenance,
@@ -836,6 +858,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_rd1367_activity_assessment,
     generate_dbhr_global_index,
     generate_tonality_spectrum,
+    generate_tone_to_noise_partition,
+    generate_tone_band_window_edge,
+    generate_prominence_ratio_partition,
     # Psychoacoustics / intensity plots (loudness, STI, p-p intensity)
     generate_loudness_pattern,
     generate_zwicker_time_varying,
@@ -1016,6 +1041,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_rolling_stock_track_roughness,
     generate_rolling_stock_roughness_methods,
     generate_rolling_stock_track_decay,
+    generate_rolling_stock_test_positions,
+    generate_rolling_stock_track_decay_grid,
     generate_rolling_stock_small_deviation,
     generate_rolling_stock_uncertainty,
     generate_exposure_uncertainty,
@@ -1136,6 +1163,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_railway_passage,
     generate_railway_spectra,
     generate_ground_wave_speeds,
+    # Solids: one steel as a beam, a plate and an unbounded solid, with what
+    # holds the cross-section in each and the three speeds the library gives.
+    generate_solid_wave_speeds,
     # People in buildings (DIN 4150-2): the guide values of Table 1 and
     # Figure D.1, trains an hour against the assessment value.
     generate_people_guide_values,
@@ -1680,6 +1710,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_onset_detection": animate_onset_detection,
     "anim_instantaneous_intensity": animate_instantaneous_intensity,
     "anim_schroeder": animate_schroeder,
+    "anim_scattering_average": animate_scattering_average,
     "anim_fdtd_room_modes": animate_fdtd_room_modes,
     "anim_fdtd_barrier": animate_fdtd_barrier,
     "anim_fdtd_critical_angle": animate_fdtd_critical_angle,
@@ -1693,9 +1724,11 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_fdtd_impedance_tube": animate_fdtd_impedance_tube,
     "anim_fdtd_transmission_tube": animate_fdtd_transmission_tube,
     "anim_standing_wave_tube": animate_standing_wave_tube,
+    "anim_porous_air_gap": animate_porous_air_gap,
     "anim_flanking_paths": animate_flanking_paths,
     "anim_intensity_scan_power": animate_intensity_scan_power,
     "anim_sweep_deconvolution": animate_sweep_deconvolution,
+    "anim_sweep_harmonics": animate_sweep_harmonics,
     "anim_specific_loudness": animate_specific_loudness,
     "anim_power_two_rooms": animate_power_two_rooms,
     "anim_comb_filtering": animate_comb_filtering,
@@ -1711,7 +1744,11 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_elastic_coincidence": animate_elastic_coincidence,
     "anim_elastic_halfspace_waves": animate_elastic_halfspace_waves,
     "anim_elastic_mode_conversion": animate_elastic_mode_conversion,
+    "anim_fdtd_lloyd_mirror": animate_fdtd_lloyd_mirror,
+    "anim_fdtd_barrier_reflection": animate_fdtd_barrier_reflection,
     "anim_elastic_radiation_efficiency": animate_elastic_radiation_efficiency,
+    "anim_elastic_scholte": animate_elastic_scholte,
+    "anim_fdtd_boundaries": animate_fdtd_boundaries,
     "anim_modulation_transfer": animate_modulation_transfer,
     "anim_loudness_gating": animate_loudness_gating,
     "anim_epnl_flyover": animate_epnl_flyover,
@@ -1719,6 +1756,9 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_iso717_shift": animate_iso717_shift,
     "anim_block_vs_exponential": animate_block_vs_exponential,
     "anim_feedback_howl": animate_feedback_howl,
+    "anim_synchronous_averaging": animate_synchronous_averaging,
+    "anim_bearing_load_zone": animate_bearing_load_zone,
+    "anim_fan_lobe_patterns": animate_fan_lobe_patterns,
 }
 
 
@@ -1751,7 +1791,11 @@ _ANIM_FIELDS: dict[str, Callable[[], Any]] = {
     "anim_elastic_coincidence": _coincidence_fields,
     "anim_elastic_halfspace_waves": _halfspace_fields,
     "anim_elastic_mode_conversion": _mode_conversion_fields,
+    "anim_fdtd_lloyd_mirror": _lloyd_mirror_fields,
+    "anim_fdtd_barrier_reflection": _barrier_reflection_fields,
     "anim_elastic_radiation_efficiency": _radiation_efficiency_fields,
+    "anim_elastic_scholte": _scholte_fields,
+    "anim_fdtd_boundaries": _boundaries_fields,
     # The banner's field is a CPU run held in its own cache: registered, it is
     # computed once before the four variants fork, instead of once in each.
     "anim_fdtd_pillar_hall": _pillar_fields,
@@ -2177,6 +2221,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_fdtd_pillar_hall": 200.0,
     "anim_standing_wave_tube": 130.0,
     "anim_sweep_deconvolution": 90.0,
+    "anim_sweep_harmonics": 90.0,
     "anim_power_two_rooms": 80.0,
     "anim_specific_loudness": 80.0,
     "anim_comb_filtering": 70.0,
@@ -2200,7 +2245,11 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_elastic_coincidence": 640.0,
     "anim_elastic_halfspace_waves": 320.0,
     "anim_elastic_mode_conversion": 820.0,
+    "anim_fdtd_lloyd_mirror": 900.0,
+    "anim_fdtd_barrier_reflection": 700.0,
     "anim_elastic_radiation_efficiency": 700.0,
+    "anim_elastic_scholte": 900.0,
+    "anim_fdtd_boundaries": 320.0,
     "anim_modulation_transfer": 95.0,
     "anim_loudness_gating": 90.0,
     "anim_epnl_flyover": 85.0,
@@ -2208,6 +2257,9 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_iso717_shift": 60.0,
     "anim_block_vs_exponential": 75.0,
     "anim_feedback_howl": 65.0,
+    "anim_synchronous_averaging": 70.0,
+    "anim_bearing_load_zone": 150.0,
+    "anim_fan_lobe_patterns": 120.0,
 }
 
 # A clip rename must not silently drop its scheduling weight; fail fast.
@@ -2261,7 +2313,11 @@ _ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
     "anim_elastic_coincidence": "gpu",
     "anim_elastic_halfspace_waves": "gpu",
     "anim_elastic_mode_conversion": "gpu",
+    "anim_fdtd_lloyd_mirror": "cpu",
+    "anim_fdtd_barrier_reflection": "cpu",
     "anim_elastic_radiation_efficiency": "cpu",  # CuPy: two values two float32 steps off
+    "anim_elastic_scholte": "cpu",  # not measured on a GPU yet
+    "anim_fdtd_boundaries": "cpu",  # not measured on a GPU yet
     "anim_fdtd_pillar_hall": "gpu",
 }
 

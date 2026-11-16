@@ -6,6 +6,7 @@ description: "Remote runs of fdtd_simulation and elastic_fdtd_simulation over SS
 import Scope from '../../../components/Scope.astro';
 import ScopeClaim from '../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../components/SeeAlso.astro';
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 A simulation can run on another machine, a node, when its `Compute` request
 names one: a workstation with a GPU, a server, the NAS under the desk. The run
@@ -30,6 +31,12 @@ and section 4 what a Python node needs.
 devices, the nodes and the encoders in one place.
 
 ## 1. What happens when a run goes to a node
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Map in two lanes. Upper lane, where a simulation steps: a run record, FDTDRun or ElasticRun, and a Compute record with device, dtype and host go into one of four functions, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation or write_elastic_fdtd_animation. With host None the run steps here on the device asked for, one of cpu (NumPy, the default), cupy (an NVIDIA GPU through CuPy), torch:cpu, torch:cuda or torch:mps (Apple's GPU, in float32 only). With a host it goes to a node of the hosts file in numbered steps: the hosts file says where the node is and how it runs a job; one ssh process carries the run, as data and never as code; phonometry is sent once per version and kept under a digest; the node builds the run again and steps it on the device asked for; and the probes and the snapshots, or the bytes of a video, come back. Both branches end in result.provenance, whose device, dtype and gpu say where the run stepped and whose host and package_sha256 name the node and the package it ran. A dashed arrow from the node branch back to the branch that runs here is labelled fallback=True: a device that cannot be used, or a node or a connection that fails, warns with ComputeFallbackWarning and the run steps on NumPy here. Lower lane, where a video is encoded: the encoder auto, the default, tries NVENC, Quick Sync, VAAPI, VideoToolbox and then the CPU, each with a real encode of one frame, and the first that passes writes the video; on the CPU that is SVT-AV1 or, without it, VP9 in a WebM and x265 or x264 in an MP4; a GIF is always written on the CPU, and an animation you draw yourself is encoded here only." width="92%" />
+
+*The map of [Where heavy work runs](/phonometry/simulation/where-it-runs/).
+This section walks its right-hand branch, the numbered steps and the
+provenance they end in; the dashed arrow is the fallback of section 5.*
 
 Everything that can refuse the call does so here first, before a connection
 opens. The run checked every argument when it was built, by the code a run

@@ -277,6 +277,14 @@ for stage in stages:
 print(round(noise_control.combined_stage_level([78.0, 74.0, 71.0]), 1))   # 80.0
 ```
 
+The trims a multistage valve is built from are drawn below, beside the
+gas-service families of IEC 60534-8-3 that share them.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_quiet_trims_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_quiet_trims.svg" alt="Four schematic sections in a two-by-two grid, none of them to scale or any maker's trim. Top left, a drilled cage: a valve plug beside a cage wall pierced by five passages, four of them sending a jet out, the passage length l drafted across the wall and the passage diameter d on the middle one; the notes say many small jets instead of one large one, passages of one hydraulic diameter far enough apart that the jets do not interact, and l over d counted up to 4 in Equation 26. Top right, a single flow path through three stages whose openings widen along the flow, with p1 at the inlet, pn before the last stage and p2 at the outlet, and the last stage marked with its flow coefficient Cn; the notes say each stage takes part of the drop while the flow area grows, only the last stage is computed, at pn in place of p1, and the stages before it enter through p1 over pn in Equation 31. Bottom left, three parallel paths from one inlet, each through three stages that widen along the flow, the last stage of each marked; the notes say every calculation of 6.4 is made on the last stage and the subclause covers linear travel valves only. Bottom right, the valve outlet of diameter di opening through a cone into the pipe of diameter Di, the cone marked as 30 degrees of total angle at most under 7.1; the notes say Clause 7 is for valves with higher outlet Mach numbers, with or without an expander downstream" width="100%"></picture>
+
+*Panel (b) is the device of Figure 2 of IEC 60534-8-4: the flow area grows
+stage by stage and only the last stage is computed.*
+
 Those three coefficients increase along the flow, which is the device of
 Figure 2: most of the pressure is taken in the first stages and the last one
 is left working at a differential small enough not to cavitate. 6.3.2 then

@@ -69,6 +69,24 @@ response does not do this; and the specimen must present the same surface, in
 a different orientation, at every average, which is why it is circular and
 centred on the axis.
 
+**Video:** [Synchronous averaging of the responses over one turn of the turntable](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_scattering_average.webm): A model of the ISO 17497-1 measurement. On the left, the band-pass filtered response of each new orientation of the sample is drawn over the running average of all those taken so far: the two start alike and part later, and as the average grows from 1 to 72 orientations in steps of 5 degrees its late part shrinks. On the right, the backward-integrated decay of that average steepens away from the decay of one orientation and then bends into a second, slower decay that sinks as more orientations are averaged; an inset in its lower corner plots the energy of the scattered part left in the average against the number averaged, beside a line falling as 1/n. The closing frames mark what clause 7.5 reads: the same average integrated only from where it has fallen 30 dB, and a straight line fitted to its first decay between minus 5 dB and minus 20 dB. They print the result, T4 = 2.7 s against T2 = 5.2 s for a model built with 3.0 s and 6.0 s, a specular absorption of 0.78 against a random-incidence absorption of 0.21, and a scattering coefficient of 0.72.
+
+*Model responses, drawn the way the standard's Figure 1 draws its three: one
+part common to every orientation and one that changes with each, on axes
+without numbers. The second decay is the scattered sound the average has not
+yet cancelled, and it sinks as orientations are added because Clause 4 takes
+the scattered parts as statistically independent: the inset follows the
+energy of the scattered part left in the average down the $1/n$ that
+independence predicts; 7.5 reads only the first
+decay, from −5 dB to −20 dB with the integration limit at −30 dB, which is the
+warning about the late slope of $T_4$ in section 1.1. The model is built with
+$T_4$ = 3.0 s and $T_2$ = 6.0 s, but its band is narrow so that the cycles
+show, and one narrow band read this way gives 2.7 s and 5.2 s: the coefficients
+in the closing frames are what the library returns for those two readings with
+the base plate of the example below ($T_1$ = 8.0 s, $T_3$ = 7.5 s,
+$V$ = 200 m³, $S$ = 10 m²), so they illustrate the arithmetic and grade no
+sample. The example computes with the model's 6.0 s.*
+
 ### 1.1 The rig and the run
 
 Every term in Eq. (5) is a difference of two nearly equal decay times, so the
@@ -105,8 +123,9 @@ snippets further down cannot repair a run that broke them.
 - **Excitation and averaging.** A deterministic signal, evaluated by the
   integrated impulse-response method (Clause 7.1): periodic pseudo-random
   noise or a sweep per ISO 18233. Either radiate continuously for one whole
-  revolution of the turntable (with a 5 s period and one revolution per
-  minute, 12 signal periods) or take $n$ measurements with the sample stepped
+  revolution of the turntable, $n$ signal periods with $60 \le n \le 120$
+  (a 5 s period and one revolution in 360 s make 72), or take $n$
+  measurements with the sample stepped
   by $\Delta\varphi = 360°/n$, with $60 \le n \le 120$ and $n = 72$ (5° steps)
   preferred, the excitation identical each time and the averaging phase-locked
   (Clause 7.3).
@@ -604,7 +623,7 @@ field, where the periodicity funnels the energy into a few grating lobes and
 drives every coefficient down. Diffusion coefficients only compare within one
 geometry, one arc and one distance; that is why ISO 17497-2 fixes all three.
 
-**Video:** [Flat panel versus Schroeder diffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_diffusion.webm): A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63.
+**Video:** [Flat panel versus Schroeder diffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_diffusion.webm): A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63.
 
 Measured polar data are bulky, so the example that follows uses *predicted*
 levels instead: the far-field model of section 3 evaluated on a published

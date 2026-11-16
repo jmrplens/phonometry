@@ -10,12 +10,47 @@ references:
     publisher: "Cambridge University Press"
     doi: "10.1017/CBO9781139163927"
     note: "Section 8.4 collects the discrete fault frequencies of rotating machinery implemented on this page: the eleven rolling-contact bearing frequencies after Shahan and Kamperman (Eqs. 8.4-8.14), the gear-meshing frequency (Eq. 8.3), the blade-passing frequency and the lobed interaction patterns of a ducted axial fan (Eqs. 8.15-8.17), the pump hydraulic pulsation frequency (Eq. 8.18) and the induction-motor supply and rotor-slot harmonic frequencies (Eqs. 8.19-8.20). ISBN 978-0-521-49913-2."
+  - type: article
+    authors: ["Randall, R. B.", "Antoni, J."]
+    year: 2011
+    title: "Rolling element bearing diagnostics—A tutorial"
+    journal: "Mechanical Systems and Signal Processing"
+    volume: 25
+    pages: "485-520"
+    doi: "10.1016/j.ymssp.2010.07.017"
+    note: "Sections 1 and 6 state what the load zone does to the impact train of each localised fault: modulated at shaft speed for an inner-race fault and at cage speed for a rolling-element fault, unmodulated for an outer-race fault under a load of fixed direction, and modulated at shaft speed when unbalance or misalignment turns the load."
+  - type: article
+    authors: ["McFadden, P. D.", "Smith, J. D."]
+    year: 1984
+    title: "Model for the vibration produced by a single point defect in a rolling element bearing"
+    journal: "Journal of Sound and Vibration"
+    volume: 96
+    issue: 1
+    pages: "69-82"
+    doi: "10.1016/0022-460X(84)90595-9"
+    note: "Section 2.2 gives the Stribeck distribution of the load round a bearing under radial load (Eqs. 3 and 4), with its exponent of 3/2 for ball and 10/9 for roller bearings, which the animation of the load zone on this page draws."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1998
+    title: "Mechanical vibration and shock — Mechanical mounting of accelerometers"
+    designation: "ISO 5348:1998"
+    implemented: false
+    note: "The characteristic responses of Figures 5 to 9 behind the mounting bands of the opening drawing: the resonance of a typical accelerometer on a stud, on adhesive, on a magnet and on a hand-held probe. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (https://www.iso.org/standard/78160.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The rule that sets the usable upper frequency of an accelerometer at one third of its resonance, for 1 dB (5.2), and the limits Annex A.1 gives for adhesive, wax and clamping magnets."
 ---
 
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 Condition monitoring begins with arithmetic, not with signal processing. Every
 rolling-contact bearing, gear pair, induction motor and bladed rotor excites a
@@ -35,7 +70,8 @@ band-passed vibration record with the predicted lines drawn on top and named.
 
 *The four tall lines land on BPFO and its harmonics; nothing appears on BPFI,
 on the roller rate BSF or on the 183 Hz BDF where a damaged roller would strike.
-That is the diagnosis: a spall on the outer race.*
+That is the diagnosis: a spall on the outer race. The small line at the shaft rate, 33.3 Hz, is the unbalance of this
+record turning the load once per revolution, which section 1 comes back to.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -157,9 +193,13 @@ record is clean. The strong form is the **modulation**, and it follows from the
 same geometry:
 
 - an **outer-race** defect sits at a fixed angular position in the load zone,
-  so every rolling element strikes it under the same load. The impact train is
-  unmodulated, and BPFO appears as a clean harmonic series with little or no
-  sideband structure;
+  so under a load of fixed direction every rolling element strikes it under
+  the same load. The impact train is unmodulated, and BPFO appears as a clean
+  harmonic series with little or no sideband structure. A load that turns with
+  the shaft, from unbalance or misalignment, does modulate it once per
+  revolution: the record of the opening figure carries one, which is where its
+  small line at 33.3 Hz and the low pair at $\pm f_\mathrm{s}$ beside each BPFO
+  harmonic come from;
 - an **inner-race** defect turns with the shaft, so it passes in and out of the
   load zone once per revolution. The impact train is amplitude-modulated at the
   shaft rate, and BPFI carries $\pm f_\mathrm{s}$ sidebands around the line and around
@@ -168,6 +208,30 @@ same geometry:
   travelling round with the cage, so it is modulated at the cage rate: BDF
   carries $\pm\text{FTF}$ sidebands. That is what `FTF` and `FTF_rel` are in
   the table for.
+
+Norton states the inner-race case in Section 8.3.5: discrete faults along the
+inner race "rotate in and out of the loaded zone, generating the amplitude
+modulation". Randall and Antoni (2011, Sections 1 and 6) give the three
+together, and the exception the opening figure shows: "For unidirectional
+load, an outer race fault would not be modulated, but modulation at shaft
+speed can occur because of significant unbalance or misalignment forces". The
+animation plays the three one after another on the bearing of this page, 50
+times slower than the machine, and scales every impact by the load at the
+angle where it lands.
+
+<Video
+  name="anim_bearing_load_zone"
+  width={2400}
+  height={1350}
+  title="How the load zone modulates the impacts of a bearing fault"
+  description="End view of the bearing of this page, fifteen rollers between a fixed outer race and an inner race turning with the shaft, with the load zone shaded as a lobe over the top half of the outer ring, beside three traces of impacts against machine time from 0 to 150 milliseconds. First a spall on the outer race, fixed at the middle of the load zone: every roller that passes strikes it alike, and the first trace fills with equal bursts 4.83 milliseconds apart under a flat dashed load line. Then a spall on the inner race, which turns with the shaft: it strikes hard while it crosses the load zone and not at all on the far side, so the second trace shows groups of bursts 3.41 milliseconds apart that swell and vanish once per shaft turn, every 30.0 milliseconds. Last a spall on one roller, which rides round with the cage and strikes the outer and the inner race in turn: the third trace shows groups of bursts 5.46 milliseconds apart that swell once per cage turn, every 72.5 milliseconds."
+/>
+
+*The rates are those of `bearing_fault_frequencies` for this bearing. The load
+zone is a sketch: the Stribeck distribution of McFadden and Smith (1984,
+Eq. 3) for a roller bearing, drawn at the half circle, $\varepsilon = 0.5$,
+that a bearing with clearance stays inside, because the clearance and the load
+of this one are not known.*
 
 The sideband *spacing* is therefore the tie-breaker whenever two predicted
 families fall close together, and it is the same argument the gear-sideband
@@ -326,32 +390,74 @@ bearing evidence.
 
 In a **ducted axial fan** the blades also interact with the stator vanes and set
 up rotating pressure patterns with $m_\mathrm{L} = nN \pm kV$ lobes for $V$ vanes
-(Eq. 8.16), turning at $n N f_\mathrm{s} / m_\mathrm{L}$ (Eq. 8.17). A pattern that spins faster
-than the blades themselves radiates far more strongly, which is why the choice
-of $N$ and $V$ matters, and why those speeds are the ones to check against the
-duct cut-on frequencies. Each line is named `lobe n=<n> m=<mL>`: the blade
-harmonic belongs in the name because Eq. (8.17) carries $n$, so the same lobe
-count reached from a different harmonic is a different pattern turning at a
-different speed.
+(Eq. 8.16), turning at $M_\mathrm{L} = n N \times \text{r/min} / m_\mathrm{L}$ (Eq. 8.17), a
+speed Norton writes in r/min. That is a speed of rotation, not a tone of its
+own: Norton puts the noise of these patterns "also at the blade passing
+frequency and its associated harmonics", and the arithmetic says why, since
+$m_\mathrm{L}$ lobes turning $nNf_\mathrm{s}/m_\mathrm{L}$ times a second pass a fixed point
+$nNf_\mathrm{s}$ times a second. What sets the patterns apart is the lobe count,
+and that is what a duct sees: a pattern can set up a higher-order duct mode with
+the same pressure distribution, and the faster it turns, the more sound power
+it radiates, which is why the choice of $N$ and $V$ matters. So the library
+keeps the patterns out of the lines. Give `n_vanes` and the result, a
+`BladePassResult`, holds the shaft and blade lines as any other family does and
+the patterns apart in `lobe_patterns`, one `LobePattern` for each blade
+harmonic $n$ and each signed $k$: its `n_lobes` is $m_\mathrm{L}$ and its `speed_rpm`
+is $M_\mathrm{L}$. `.plot()` draws only the lines, and `combine_fault_lines` merges
+only the lines.
 
 ```python
 # Six blades, four vanes, 3500 r/min (blade_pass_frequencies imported above).
 res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
 print(round(res.shaft_rate, 1))   # 58.3 Hz, the shaft itself
 print(round(res["BPF"]))          # 350
-print(round(res["lobe n=1 m=2"]), round(res["lobe n=1 m=10"]))    # 175 35
+print(res.names)                  # ('shaft', 'BPF'), the lines alone
+for pattern in res.lobe_patterns:
+    print(pattern.n_lobes, round(pattern.speed_rpm), round(pattern.speed_rpm / 60))
+# 2 10500 175
+# 10 2100 35
 ```
 
 Those two numbers are the principle, worked. Both patterns come from the *same*
 blade harmonic on the *same* fan; the only difference is the sign of $k$ in
-$m_\mathrm{L} = nN \pm kV$, which is why the lobe count has to be part of the line's
-name. The $m_\mathrm{L} = 2$ pattern turns at $nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58.3/2 = 175$ Hz,
-three times the shaft speed, so it is the strong radiator and the line to check
-against the duct cut-on frequency. The $m_\mathrm{L} = 10$ pattern turns at 35 Hz, below
-the shaft speed, so it radiates weakly. Six blades against four vanes is a
+$m_\mathrm{L} = nN \pm kV$. The $m_\mathrm{L} = 2$ pattern turns 10 500 times a minute, 175
+times a second, three times the shaft speed, and the $m_\mathrm{L} = 10$ pattern
+35 times a second, below it. $2 \times 175 = 10 \times 35 = 350$: both sound at the
+blade rate, and neither puts a line of its own at 175 Hz or 35 Hz in a
+spectrum, which is why neither is a line of the result. By Norton's rule the
+faster pattern is the stronger radiator. Six blades against four vanes is a
 design decision, and this is what it decides.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Four spectra with the library's predicted lines drawn over each. Top left, a gear-mesh spectrum with one chipped tooth: tall lines at 700, 1400 and 2100 hertz with low, flat sidebands spaced 25 hertz on either side, and the mesh harmonics falling away quickly. Top right, the same gear pair with distributed wear: the sidebands become tall groups and the second and third mesh harmonics stay high. Bottom left, an induction-motor spectrum on a logarithmic amplitude axis showing 1x at 60 hertz, 2x at 120 and twice the supply frequency at 360, with the rotor-slot harmonic three decades lower at 3600 hertz flanked by sidebands one shaft rate away. Bottom right, a ducted-fan spectrum with the shaft line at 58 hertz, the blade-passing line at 350, the two-lobe interaction pattern at 175 hertz drawn tall and the ten-lobe pattern at 35 hertz drawn small." width="92%" />
+The sign of $m_\mathrm{L}$ is kept, because it is the sense in which the pattern
+turns. With more vanes than blades, $k = -1$ gives a negative lobe count, and
+Eq. (8.17) a negative speed: the pattern turns against the rotor. Four blades
+and six vanes at 600 r/min give $m_\mathrm{L} = 4 - 6 = -2$, turning at
+$4 \times 600 / (-2) = -1200$ r/min, beside $m_\mathrm{L} = 10$ at 240 r/min with
+the rotor:
+
+```python
+res = vibration.blade_pass_frequencies(600.0, 4, n_harmonics=1, n_vanes=6)
+print([(p.vane_order, p.n_lobes, round(p.speed_rpm)) for p in res.lobe_patterns])
+# [(-1, -2, -1200), (1, 10, 240)]
+```
+
+The animation turns both patterns on the fan of this page and counts what a
+point on the duct wall sees.
+
+<Video
+  name="anim_fan_lobe_patterns"
+  width={2400}
+  height={1350}
+  title="The two lobe patterns of a ducted fan, and the rate a point on the wall sees"
+  description="Two end views of the fan of this page, six blades turning in front of four dashed stator vanes inside a duct, each with a ring drawn around the rotor. On the left the ring has two lobes and turns 175 times a second; on the right it has ten lobes and turns 35 times a second, both the way the rotor turns. A dot marks one point on the duct wall and flashes each time a lobe crest passes it, with a counter under each view; at 40 milliseconds both read 14. Under the views, two traces write the shape of each pattern at that point against machine time from 0 to 40 milliseconds, with a tick each time a blade passes the point: the two traces are shifted against each other but repeat with the same period, 2.86 milliseconds, the spacing of the blade ticks, marked once as 1/BPF."
+/>
+
+*The speeds are those of `blade_pass_frequencies` for this fan, slowed 500
+times. The rings are a sketch of a lobe count and a speed of rotation, not of
+a pressure field, and the clip says nothing about how strongly either pattern
+radiates.*
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Four spectra with the library's predicted lines drawn over each. Top left, a gear-mesh spectrum with one chipped tooth: tall lines at 700, 1400 and 2100 hertz with low, flat sidebands spaced 25 hertz on either side, and the mesh harmonics falling away quickly. Top right, the same gear pair with distributed wear: the sidebands become tall groups and the second and third mesh harmonics stay high. Bottom left, an induction-motor spectrum on a logarithmic amplitude axis showing 1x at 60 hertz, 2x at 120 and twice the supply frequency at 360, with the rotor-slot harmonic three decades lower at 3600 hertz flanked by sidebands one shaft rate away. Bottom right, a ducted-fan spectrum with the shaft line at 58 hertz and the blade-passing line at 350 and nothing between them; a note multiplies each lobe pattern back to the blade rate, 2 lobes times 175 turns a second and 10 lobes times 35 turns a second, both 350 lobes past a point each second, and a second note says there is no line of their own at 35 or 175 hertz, because those are speeds of rotation." width="92%" />
 
 *A fault family is recognised by its pattern, not by a single number. The two
 gear panels are the same 28-tooth pinion at 1500 r/min with two different
@@ -359,8 +465,8 @@ faults: a chipped tooth gives low, flat sidebands at $\pm f_\mathrm{s}$ and harm
 that fall away; distributed wear gives tall sideband groups and lifts the
 higher harmonics. The motor panel spans three decades of amplitude, which is
 why the rotor-slot harmonic and its $\pm f_\mathrm{s}$ sidebands need a logarithmic
-axis to be visible at all beside `1x`. The fan panel puts the two lobe
-patterns beside the blade rate they come from.*
+axis to be visible at all beside `1x`. The fan panel has no line for either
+lobe pattern: both sound at the blade rate they come from.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -408,9 +514,16 @@ or vertical where the load direction demands it) for the bearing and unbalance
 families, axial for misalignment and for helical or bevel gear meshes.
 
 **How it is mounted.** The mounting resonance sets the usable upper frequency,
-and this method needs kilohertz. A stud mount into a prepared flat reaches tens
-of kilohertz; an adhesive or thin cyanoacrylate bond a little less; a magnet
-base typically a few kilohertz; a hand-held probe barely one. The band used
+and this method needs kilohertz. The reading stays within about 1 dB up to a
+third of the accelerometer's resonance (ISO/TS 7849-1, 5.2), which on the
+machine is the mounted one. On a stud into a prepared
+flat a general-purpose accelerometer resonates near 30 kHz and is good to about
+10 kHz; an adhesive or thin cyanoacrylate bond costs little of that; a magnet
+base leaves a few kilohertz (about 6 kHz in Norton & Karczub, Section 4.3.2,
+while ISO/TS 7849-1, Annex A, accepts one only below 2.5 kHz, on smooth flat
+steel); a hand-held probe resonates near 2 kHz and stays under 1 kHz (the
+resonances are those of the characteristic curves of ISO 5348:1998, Figures 5
+to 9). The band used
 below is 2-4 kHz, which a magnet base is marginal at and a hand probe cannot
 reach: this is the single most common reason an envelope analysis finds
 nothing on a bearing that is in fact spalled.

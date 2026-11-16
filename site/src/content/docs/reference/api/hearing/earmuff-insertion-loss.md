@@ -10,9 +10,9 @@ Every name on this page is published by `phonometry.hearing`: `from phonometry i
 The insertion loss of an earmuff on an acoustic test fixture (ISO 4869-3:2007).
 
 ISO 4869-3 measures an earmuff without a listener. The acoustic test fixture
-(ATF) is a metal cylinder of 135 mm diameter with its end faces 145 mm apart,
-a pressure microphone flush with one of them and a spacer that carries the
-headband (5.1). In a random-incidence field or a plane progressive wave, the
+(ATF) is a cylinder of a non-magnetic material, 135 mm in diameter with its
+end faces 145 mm apart, a pressure microphone flush with one of them and a
+spacer that carries the headband (5.1). In a random-incidence field or a plane progressive wave, the
 level at the microphone is measured without the earmuff and again with it
 seated on the fixture, and the difference in each one-third-octave band is
 the insertion loss (3.5, 5.4.2):

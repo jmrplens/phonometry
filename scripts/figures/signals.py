@@ -13,7 +13,7 @@ the checks made around the measurement are in :mod:`figures.metrology`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -2545,6 +2545,188 @@ def generate_octave_band_levels(output_dir: str) -> None:
     ax.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
     fig.tight_layout()
     save_figure(output_dir, "octave_band_levels.png")
+    plt.close()
+
+
+#: The four fractions of the band ruler, each with the heading its row carries.
+_RULER_ROWS: tuple[tuple[int, str], ...] = (
+    (1, "octave, $b$ = 1"),
+    (2, "half octave, $b$ = 2"),
+    (3, "one-third octave, $b$ = 3"),
+    (6, "one-sixth octave, $b$ = 6"),
+)
+#: The reference frequency of IEC 61260-1:2014, 5.3, in hertz.
+_RULER_REFERENCE_HZ = 1000.0
+#: A row of the ruler, about its own ordinate: where its cells start and end.
+_RULER_CELL = (-0.36, 0.24)
+#: The most bands a row holds at the larger type; the one-sixth-octave row has more.
+_RULER_ROOMY = 9
+#: The dashes of the reference frequency, where no band is drawn.
+_RULER_DASHES = (0, (4, 2.5))
+
+
+def _ruler_bands(
+    fraction: int, low: float, high: float
+) -> list[tuple[float, float, float, str]]:
+    """The bands of ``fraction`` centred between *low* and *high*.
+
+    One ``(f1, fm, f2, label)`` per band, every value read from
+    :func:`phonometry.filters.nominal_frequencies`.
+    """
+    bands = filters.nominal_frequencies(fraction, [low, high])
+    rows = zip(
+        bands.lower_edges.tolist(),
+        bands.frequencies.tolist(),
+        bands.upper_edges.tolist(),
+        bands.labels,
+        strict=True,
+    )
+    return [band for band in rows if low < band[1] < high]
+
+
+def _draw_ruler_row(
+    ax: Axes, y: float, bands: list[tuple[float, float, float, str]], *, odd: bool
+) -> None:
+    """One row of the band ruler: a cell per band, its centre and its label."""
+    bottom, top = y + _RULER_CELL[0], y + _RULER_CELL[1]
+    middle = 0.5 * (bottom + top)
+    fill = theme_fill(COLOR_PRIMARY if odd else COLOR_SECONDARY, ax)
+    size = 9.6 if len(bands) <= _RULER_ROOMY else 8.0
+    for f1, fm, f2, label in bands:
+        ax.fill_between([f1, f2], bottom, top, color=fill, linewidth=0)
+        ax.plot(
+            [f1, f1, f2, f2, f1],
+            [bottom, top, top, bottom, bottom],
+            color=COLOR_FG,
+            linewidth=0.9,
+            solid_joinstyle="miter",
+        )
+        # The exact mid-band frequency is the geometric mean of the edges, so
+        # on a logarithmic axis its notch sits in the middle of the cell.
+        for edge, inward in ((bottom, 0.06), (top, -0.06)):
+            ax.plot([fm, fm], [edge, edge + inward], color=COLOR_FG, linewidth=0.9)
+        ax.text(
+            fm, middle + 0.105, f"{fm:.1f}", ha="center", va="center", fontsize=size
+        )
+        ax.text(
+            fm,
+            middle - 0.115,
+            label,
+            ha="center",
+            va="center",
+            fontsize=size + 0.5,
+            fontweight="bold",
+        )
+    heavy: dict[str, Any] = {
+        "color": COLOR_FG,
+        "linewidth": 2.6,
+        "solid_capstyle": "butt",
+    }
+    if odd:
+        # The reference is this row's mid-band frequency: its notches, heavier.
+        for edge, inward in ((bottom, 0.09), (top, -0.09)):
+            ax.plot([_RULER_REFERENCE_HZ] * 2, [edge, edge + inward], **heavy)
+    else:
+        # The reference is an edge two bands share: that edge, heavier.
+        ax.plot([_RULER_REFERENCE_HZ] * 2, [bottom, top], **heavy)
+
+
+def generate_fractional_octave_band_ruler(output_dir: str) -> None:
+    """Three octaves about 1 kHz, cut into the bands of four fractions.
+
+    The reference frequency of IEC 61260-1 is a mid-band frequency when the
+    fraction is odd and a band edge when it is even (5.4), and a band is
+    labelled with a nominal frequency that is not its exact one (5.5 and
+    Annex E). Every edge, centre and label drawn is the library's own.
+    """
+    print("Generating fractional_octave_band_ruler.png...")
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    octaves = filters.nominal_frequencies(1, [500.0, 2000.0])
+    low = float(octaves.lower_edges[0])
+    high = float(octaves.upper_edges[-1])
+
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.set_xscale("log")
+    ax.set_xlim(low / 1.008, high * 1.008)
+    top = len(_RULER_ROWS) - 1
+    floor, ceiling = _RULER_CELL[0] - 0.2, top + _RULER_CELL[1] + 0.42
+    ax.set_ylim(floor, ceiling)
+    ax.grid(visible=False)
+
+    for row, (fraction, heading) in enumerate(_RULER_ROWS):
+        y = top - row
+        _draw_ruler_row(
+            ax, y, _ruler_bands(fraction, low, high), odd=bool(fraction % 2)
+        )
+        ax.text(
+            low,
+            y + _RULER_CELL[1] + 0.07,
+            heading,
+            ha="left",
+            va="bottom",
+            fontsize=10.5,
+        )
+    # The reference frequency, drawn only where no band is: between the rows.
+    gaps = [(top + _RULER_CELL[1], ceiling), (floor, _RULER_CELL[0])]
+    gaps += [(y + _RULER_CELL[1], y + 1 + _RULER_CELL[0]) for y in range(top)]
+    for y0, y1 in gaps:
+        ax.plot(
+            [_RULER_REFERENCE_HZ] * 2,
+            [y0, y1],
+            color=COLOR_FG,
+            linewidth=1.3,
+            linestyle=_RULER_DASHES,
+        )
+
+    ax.set_yticks([])
+    format_frequency_axis(ax, low, high, minor=None, language=_LANG)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    for side in ("left", "right", "top"):
+        ax.spines[side].set_visible(False)
+    ax.set_title("Fractional-octave bands about 1 kHz (IEC 61260-1)", pad=28)
+    ax.text(
+        0.5,
+        1.025,
+        "in each band: its exact mid-band frequency in hertz and, in bold, its label",
+        transform=ax.transAxes,
+        ha="center",
+        va="bottom",
+        fontsize=9.5,
+    )
+    handles = [
+        Patch(
+            facecolor=theme_fill(COLOR_PRIMARY, ax),
+            edgecolor=COLOR_FG,
+            linewidth=0.9,
+            label="odd $b$: 1 kHz is a mid-band frequency",
+        ),
+        Patch(
+            facecolor=theme_fill(COLOR_SECONDARY, ax),
+            edgecolor=COLOR_FG,
+            linewidth=0.9,
+            label="even $b$: 1 kHz is a band edge, and no band is centred on it",
+        ),
+        Line2D(
+            [],
+            [],
+            color=COLOR_FG,
+            linewidth=1.3,
+            linestyle=_RULER_DASHES,
+            label="reference frequency, 1 kHz",
+        ),
+    ]
+    ax.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.14),
+        ncol=1,
+        frameon=False,
+        fontsize=9.5,
+    )
+    fig.tight_layout()
+    save_figure(output_dir, "fractional_octave_band_ruler.png")
     plt.close()
 
 

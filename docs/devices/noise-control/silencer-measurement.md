@@ -267,7 +267,7 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
 
-**Video:** [The open end of a duct in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_open_end.webm): A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19.
+**Video:** [The open end of a duct in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_open_end.webm): A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19.
 
 *Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
 inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
@@ -431,25 +431,42 @@ zeta = noise_control.average_pressure_loss_coefficient(
 print(round(zeta, 3))             # 1.9
 ```
 
-Five rates per series, spread evenly over the range, and the lowest has to
-produce more than 10 Pa so that the smallest number in the average is still a
-measurement rather than the resolution of the manometer. The library says so
-on both counts: `average_pressure_loss_coefficient` warns below five points,
+Five rates per series at least, spread evenly over the range (6.5.2.2.1).
+The simplified method of 6.5.2.1, which measures the object alone, adds that
+the lowest flow rate has to produce a pressure difference greater than 10 Pa,
+so that the smallest number in the average is still a measurement rather than
+the resolution of the manometer. The library says so on both counts: `average_pressure_loss_coefficient` warns below five points,
 and `pressure_loss_coefficient` warns on a loss of 10 Pa or less, the
-boundary included, because the clause reads *greater than*.
+boundary included, because the clause reads *greater than*. The rig is drawn
+below, with the rules of each method beside it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_pressure_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_pressure_loss.svg" alt="Two stacked runs on one duct axis, with the flow from left to right. In the upper run, series one, a fan feeds a flow meter and then a straight upstream duct, dimensioned as straight for five equivalent diameters or two metres, whichever is greater; a dashed plane 1 with pressure taps crosses that duct 1.5 equivalent diameters ahead of the test object, a silencer drawn with its baffles; and a dashed plane 2 crosses the downstream duct more than six baffle thicknesses past it. A manometer joins the two planes and reads the static pressure difference between them. The lower run, series two, is the same rig with the substitution duct in place of the object, on the same planes and the same manometer. Below, a square section of the duct at plane 1 shows a tap at the centre of each side joined by a ring, the two perpendicular survey axes, and a dashed margin by the walls. Beside it, the rules: four taps joined in a piezometric ring at plane 1; a velocity survey there at ten equally spaced positions along a pair of perpendicular axes, within plus or minus 10 % of the mean, leaving out the 15 mm by the walls; plane 2 more than six baffle thicknesses past the object, or the pressure of the reverberation room the duct opens into; for the fundamental method, both series at five flow rates or more each, spread evenly, and the loss coefficient from Equations 15 to 17 at a flow rate in the middle of the range; for the simplified method, five flow rates, the lowest giving a pressure difference above 10 Pa, and the flow rate corrected by Equations 9 and 10 when the density ratio is outside 0.98 to 1.02. A box at the foot, headed as the equations of the simplified method, carries Equation 11, the total pressure as the static pressure plus the dynamic pressure, Equation 12, the total pressure loss as the static difference plus the inlet dynamic pressure times one minus the squared area ratio, and Equation 14, the loss coefficient as the total loss over the inlet dynamic pressure. A second box below it, headed as the equations of the fundamental method at a flow rate q sub V n in the middle of the range, carries Equation 15, the total pressure loss at that flow rate as the difference of the static pressures of series one and series two at plane 1, Equation 16, the inlet velocity pressure as half the density times the square of the flow rate over the upstream duct area, and Equation 17, the loss coefficient as the one over the other; the running index n is set in italics in each." width="92%"></picture>
+
+*The rig of Figure 6 with the numbers of 6.5 on it. Everything upstream of the
+object exists to hand it a settled, uniform flow; the two planes are where the
+loss is read.*
 
 What the flow has to be before any of that counts is a matter of geometry.
 The upstream duct is straight for five equivalent diameters or two metres,
 whichever is greater, so that the velocity profile has settled; it must be
 uniform to ±10 % of the mean over the section, excluding the 15 mm nearest the
 walls, surveyed ten points along each of two perpendicular axes about
-$1{,}5\,d_e$ upstream. The two length rules cross at a 0,4 m equivalent
+$1.5\,d_\mathrm{e}$ upstream. The two length rules cross at a 0.4 m equivalent
 diameter:
 
 ```python
 print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
+
+The static pressure of plane 1 is taken in that same section, 1.5 equivalent
+diameters ahead of the object, through four taps joined in a piezometric ring:
+one at the centre of each side of a rectangular duct, or equally spaced round
+a circular one. It is read against a pressure downstream of the object, either
+in the test duct, where the key of Figure 6 puts the taps more than six baffle
+thicknesses past the object, or in the reverberation room the duct opens into.
+The air temperature is measured at the flow meter and two equivalent diameters
+ahead of the object, and may not drift by more than 3 K during the test.
 
 ## 11. The third standard, and the formula it shares
 

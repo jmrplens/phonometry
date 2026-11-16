@@ -91,7 +91,7 @@ ISO 3743-1).
 
 | Método | Norma | Magnitud medida | Entorno | Grado de precisión | Cuándo usarlo |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Superficie envolvente | **ISO 3744** (ingeniería) / **ISO 3746** (inspección) | Presión acústica sobre una semiesfera o caja | Campo esencialmente libre sobre uno o varios planos reflectantes | Grado 2 ($\sigma_{R0} \approx 1{,}5\ \text{dB}$) / grado 3 ($\approx 3{,}0\ \text{dB}$) | In situ o en una sala grande; sin instalación de ensayo especial disponible |
+| Superficie envolvente | **ISO 3744** (ingeniería) / **ISO 3746** (peritaje) | Presión acústica sobre una semiesfera o caja | Campo esencialmente libre sobre uno o varios planos reflectantes | Grado 2 ($\sigma_{R0} \approx 1{,}5\ \text{dB}$) / grado 3 ($\approx 3{,}0\ \text{dB}$) | In situ o en una sala grande; sin instalación de ensayo especial disponible |
 | Cámara reverberante | **ISO 3741** | Presión acústica en el campo difuso | Cámara reverberante cualificada de paredes rígidas | Grado 1 (precisión) | Máxima precisión para fuentes estacionarias de banda ancha en laboratorio |
 | Sala de ensayo de paredes rígidas | **ISO 3743-1** | Presión acústica de la fuente y de una fuente sonora de referencia calibrada en las mismas posiciones | Una sala corriente de paredes rígidas de al menos 40 m³, sin ninguna superficie con absorción mayor que 0,20 | Grado 2 ($\sigma_{R0} \approx 1{,}5\ \text{dB}$ ponderado A) | Una fuente pequeña y transportable, sin una sala de laboratorio cualificada a mano |
 | Sala reverberante especial | **ISO 3743-2** | Presión acústica en una sala cuyo tiempo de reverberación sigue una curva prescrita | Una sala reverberante especial de al menos 70 m³, como mucho 300 m³ en el método directo con las octavas de 4 kHz y 8 kHz | Grado 2 ($\sigma_{R0} \approx 2{,}0\ \text{dB}$ ponderado A) | Fuentes pequeñas ensayadas una tras otra, leídas a partir de la sala sola o frente a una fuente de referencia |
@@ -100,7 +100,7 @@ ISO 3743-1).
 | Barrido de intensidad | **ISO 9614-2** | Intensidad acústica normal barrida sobre una superficie | Casi cualquiera, tolerante al ruido extraño estacionario | Grado 2 / 3 (a partir de los indicadores de campo por banda) | In situ con ruido de fondo, o una máquina entre muchas |
 | Cámara anecoica | **ISO 3745** | Presión acústica sobre un conjunto fijo de micrófonos | Cámara anecoica o semianecoica cualificada | Grado 1 (precisión) | Emisión de grado de referencia en un laboratorio de campo libre |
 | Barrido de intensidad de precisión | **ISO 9614-3** | Intensidad normal barrida, con criterios más estrictos | Casi cualquiera, tolerante al ruido extraño estacionario | Grado 1 (precisión) | Precisión in situ, con las comprobaciones de indicadores de campo de ISO 9614-3 |
-| Vibración superficial | **ISO/TS 7849-1** (inspección) / **-2** (ingeniería) | Nivel de velocidad promediado sobre la superficie y un factor de radiación | Cualquiera; sin medición acústica | Límite superior ($\varepsilon = 1$) / ingeniería | La máquina no se puede silenciar, encerrar ni abordar con un micrófono |
+| Vibración superficial | **ISO/TS 7849-1** (peritaje) / **-2** (ingeniería) | Nivel de velocidad promediado sobre la superficie y un factor de radiación | Cualquiera; sin medición acústica | Límite superior ($\varepsilon = 1$) / ingeniería | La máquina no se puede silenciar, encerrar ni abordar con un micrófono |
 
 Los métodos de presión corrigen el nivel superficial por la sala ($K_2$) y por
 el ruido de fondo ($K_1$); el método en cámara reverberante necesita que la cámara esté
@@ -208,16 +208,18 @@ flujo de material o la variabilidad del proceso.
 
 ### Una ruta de decisión
 
-La tabla se condensa en una breve secuencia de preguntas (ISO 3740 dedica su
-Tabla 3 y su Anexo D exactamente a esta decisión). Recórrelas en orden; la
-primera coincidencia nombra la norma.
+La tabla se condensa en una breve secuencia de preguntas (ISO 3740:2019 dibuja
+la misma decisión como dos diagramas de flujo en su apartado 5, la Figura 1
+para toda la familia y la Figura 2 para las mediciones in situ). Recórrelas en
+orden; la primera coincidencia nombra la norma, y el diagrama que sigue a la
+lista dibuja el recorrido.
 
 1. **¿Para qué es el número?** Una declaración de hoja de características o una
    comprobación frente a un límite piden normalmente grado de ingeniería
    (grado 2, el grado preferido para las declaraciones de ruido); una fuente
    de referencia, una clasificación de productos o un litigio piden precisión
    (grado 1); un primer reconocimiento de una nave ruidosa tolera el grado de
-   inspección (grado 3). El grado 1 solo existe en una sala de laboratorio
+   peritaje (grado 3). El grado 1 solo existe en una sala de laboratorio
    cualificada (ISO 3741, ISO 3745) o mediante los métodos de intensidad de
    precisión, y aquí están los dos: ISO 9614-1 en puntos discretos en
    [Intensidad acústica](/phonometry/es/devices/emission/intensity/), e
@@ -237,7 +239,15 @@ primera coincidencia nombra la norma.
    15 dB) y $K_2 \le 4\ \text{dB}$. Si solo se alcanza un margen de 3 dB o
    $K_2 \le 7\ \text{dB}$, los
    mismos micrófonos y fórmulas pasan sin más a ISO 3746 en grado de
-   inspección.
+   peritaje. Una sala demasiado reverberante para ambas (ISO 3746 se
+   detiene en $K_2 = 7\ \text{dB}$) es el caso para el que está escrita
+   ISO 3747: si se dispone de una fuente sonora de referencia calibrada, la máquina
+   se compara con ella en las mismas posiciones de micrófono, en grado de
+   ingeniería donde el exceso de nivel de presión acústica $\Delta L_f$ es de
+   al menos 7 dB en todas las posiciones y la fuente no es muy directiva, y
+   en grado de peritaje en caso contrario, como desarrolla [Potencia
+   acústica in situ por
+   comparación](/phonometry/es/devices/emission/sound-power-in-situ/).
 4. **¿Es el fondo el problema?** Cuando las máquinas vecinas no se pueden
    apagar, o el margen es directamente negativo, los métodos de presión
    quedan descartados. La intensidad (ISO 9614-1 en puntos discretos,
@@ -254,11 +264,26 @@ primera coincidencia nombra la norma.
    caracteriza lo que radia la *estructura*, y queda ciega al sonido que
    escapa por aberturas, tomas y rendijas, y cuesta un factor de radiación que
    hay que suponer (Parte 1, un límite superior) o medir una vez (Parte 2).
+   Si se puede poner ahí un micrófono y nada de lo anterior ha encajado, la
+   vía vuelve a ser la intensidad: una nota al apartado 4.3 de ISO 3746 envía
+   la sala que supera su límite de $K_2$ a ISO 3747 o a ISO 9614, y la
+   Figura 1 de ISO 3740:2019 pone ISO 9614 en todas sus salidas in situ.
 6. **¿Cómo de repetible es la propia máquina?** Nada de lo anterior acota
    $\sigma_\text{omc}$, y en una máquina de proceso puede pesar más que toda la
    elección de grado: una instalación de grado 1 alrededor de una fuente cuyas
    propias condiciones de funcionamiento dispersan 2 dB compra una
    $\sigma_\text{tot}$ que no mejora el grado 2. Estímala antes de pagar la sala.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_decision_path.svg" alt="Diagrama de flujo de las seis preguntas de esta guía, leído de arriba abajo. Una puerta de trazo discontinuo en lo alto, la pregunta 1, para qué es el número, contiene tres fichas: grado 2 de ingeniería para una declaración o una comprobación frente a un límite, grado 1 de precisión para una fuente de referencia, una clasificación o un litigio, grado 3 de peritaje para un primer reconocimiento, con la nota de que el grado 1 solo se alcanza con ISO 3741, ISO 3745, ISO 9614-1 e ISO 9614-3. Siguen cuatro rombos por la izquierda, cada uno con sus salidas en cajas verdes a la derecha. Pregunta 2, puede la fuente viajar al laboratorio: el sí lleva a ISO 3741 en una cámara reverberante cualificada y a ISO 3745 en una cámara anecoica o semianecoica, ambas de grado 1, y a las salas de ensayo pequeñas de ISO 3743-1 y -2 en grado 2. La pregunta 3, cómo de silencioso y de seco es el emplazamiento, tiene tres salidas: ISO 3744 en grado 2 con el fondo al menos 6 dB por debajo de la fuente, preferiblemente más de 15 dB, y K2 de 4 dB como máximo; ISO 3746 en grado 3 con un margen de 3 dB y K2 de 7 dB como máximo; e ISO 3747, la comparación in situ en grado 2 o 3, para una sala demasiado reverberante para ambas, con una fuente sonora de referencia y un exceso de nivel de presión acústica de al menos 7 dB. Pregunta 4, es el fondo el problema: el sí lleva a la intensidad por ISO 9614-1 y -2, en puntos discretos o por barrido. Pregunta 5, se puede siquiera poner ahí un micrófono: el sí vuelve a la caja de intensidad, el no lleva a ISO/TS 7849-1 y -2, la velocidad superficial de la carcasa con un factor de radiación. Una línea gris recoge todas las salidas por el lado derecho hasta una segunda caja de trazo discontinuo, la pregunta 6, cómo de repetible es la propia máquina, con la desviación típica total como raíz de la suma de cuadrados de la del método y la de funcionamiento y montaje" width="92%" />
+
+*Las seis preguntas como recorrido. La pregunta 1 es una puerta: fija el grado y
+no nombra ninguna norma. La pregunta 6 es una comprobación por la que pasa toda
+vía al salir. Las cuatro intermedias son las decisiones, leídas de arriba abajo,
+y la primera caja verde que se alcanza nombra la norma. El orden es el de esta
+página: la Figura 1 de ISO 3740:2019 pregunta antes que nada si solo se quiere
+la parte de origen estructural, y no lleva ni la puerta ni la comprobación.
+Donde el obstáculo es el fondo, sus dos diagramas de flujo nombran solo
+ISO 9614-1 y -2, y la lámina los sigue ahí.*
 
 ### Qué significan los grados de precisión
 

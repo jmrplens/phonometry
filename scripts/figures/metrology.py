@@ -9,6 +9,7 @@ against, and the GUM budget that puts an uncertainty on the number finally
 reported. Everything here is embedded by a page under ``signals/metrology/``.
 """
 
+import math
 from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ from .theme import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from matplotlib.projections.polar import PolarAxes
 
@@ -332,6 +333,589 @@ def generate_slm_periodic_toneburst(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 5.6), layout="constrained")
     result.plot(ax=ax, language=_LANG)
     save_figure(output_dir, "slm_periodic_toneburst.svg")
+    plt.close()
+
+
+#: IEC 61672-3:2013 16.3 (BS EN 61672-3:2013, page 14): "5 dB steps of
+#: increasing input signal level from the starting point up to within 5 dB
+#: of the upper boundary", "then at 1 dB steps", and the same with decreasing
+#: level towards the lower boundary. The steps themselves are the record's.
+_LINEARITY_COARSE_DB = 5.0
+_LINEARITY_FINE_DB = 1.0
+
+
+def _linearity_runs(
+    levels: "Sequence[float]", start: float
+) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """The steps of a Clause 16 record, rising and then falling from the start.
+
+    Read as the verdict reads them: every level above the starting point in
+    rising order, every level below it in falling order.
+    """
+    rising = tuple(sorted(v for v in levels if v > start))
+    falling = tuple(sorted((v for v in levels if v < start), reverse=True))
+    return rising, falling
+
+
+def _linearity_gap_record(
+    result: "SoundLevelMeterPeriodicVerification",
+) -> tuple[float, float, float, "SoundLevelMeterPeriodicVerification"]:
+    """The guide's record without its first 1 dB step on the way up, re-graded.
+
+    Returns the step before the gap, the step left out, the step after it and
+    the verdict on the shortened record, which the inset of
+    :func:`generate_slm_periodic_linearity` draws. Raises if the library's
+    reading of 16.3 does not list Clause 16 as incomplete for it: the inset
+    says it does.
+    """
+    import dataclasses
+
+    from phonometry import metrology
+
+    m = result.measurements
+    levels = [float(v) for v in (m.linearity_levels or ())]
+    start = float(m.linearity_starting_level or 0.0)
+    rising, _ = _linearity_runs(levels, start)
+    steps = (start, *rising)
+    k = next(
+        i
+        for i in range(1, len(steps))
+        if math.isclose(steps[i] - steps[i - 1], _LINEARITY_FINE_DB)
+    )
+    left_out = steps[k]
+    deviations = m.linearity_deviations_db
+    uncertainties = m.linearity_uncertainties_db
+    if deviations is None or uncertainties is None:
+        msg = "the guide's record gives a deviation and an uncertainty per step"
+        raise RuntimeError(msg)
+    keep = [i for i, v in enumerate(levels) if not math.isclose(v, left_out)]
+    shortened = dataclasses.replace(
+        m,
+        linearity_levels=[levels[i] for i in keep],
+        linearity_deviations_db=[float(deviations[i]) for i in keep],
+        linearity_uncertainties_db=[float(uncertainties[i]) for i in keep],
+    )
+    verdict = metrology.verify_sound_level_meter_periodic(
+        1, shortened, features=result.features
+    )
+    if not any(clause == "16" for clause, _why in verdict.incomplete):
+        msg = (
+            f"the record without its {left_out:g} dB step should leave Clause 16 "
+            "incomplete, and the verdict lists nothing for it"
+        )
+        raise RuntimeError(msg)
+    return steps[k - 1], left_out, steps[k + 1], verdict
+
+
+def generate_slm_periodic_linearity(output_dir: str) -> None:
+    """IEC 61672-3:2013 Clauses 16 and 17: the level linearity steps of a record.
+
+    Every level is read from the record of :func:`_slm_periodic_verification`
+    through the library: above, the staircase of Clause 16 at 8 kHz is its
+    ``linearity_levels`` from ``linearity_starting_level``, rising then
+    falling as 16.3 takes them, inside its ``linear_operating_range_db``, and
+    the two crosses are ``linearity_overload_level`` and
+    ``linearity_under_range_level``; where the steps turn from 5 dB to 1 dB is
+    the print's 5 dB from each boundary (16.3). The inset re-grades the record
+    without its first 1 dB step and shows the gap the verdict then lists as
+    incomplete. Below, Clause 17 at 1 kHz, without a scale because the record
+    states none: one bar for each level range ``range_linearity_deviations_db``
+    reads under 17.4, the reference one first, the reading of 17.4 5 dB above
+    the first indication of under-range on each, and the reading of 17.3 on
+    every range besides the reference one, where the anticipated level is the
+    one 17.2 set (IEC 61672-1:2013, 5.6.3).
+    """
+    print("Generating slm_periodic_linearity...")
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Rectangle
+
+    result = _slm_periodic_verification()
+    m = result.measurements
+    levels = [float(v) for v in (m.linearity_levels or ())]
+    start = float(m.linearity_starting_level or 0.0)
+    lower, upper = (float(v) for v in (m.linear_operating_range_db or (0.0, 0.0)))
+    overload = float(m.linearity_overload_level or 0.0)
+    under = float(m.linearity_under_range_level or 0.0)
+    rising, falling = _linearity_runs(levels, start)
+    before, left_out, after, _ = _linearity_gap_record(result)
+    rows = dict(m.range_linearity_deviations_db or {})
+    n_ranges = len(rows.get("17.4", ()))
+    coarse = _LINEARITY_COARSE_DB
+
+    fig = plt.figure(figsize=(11, 11.6))
+    fig.suptitle(
+        "Level linearity in a periodic test: the steps of IEC 61672-3",
+        fontsize=15,
+        fontweight="bold",
+        y=0.985,
+    )
+    fig.text(
+        0.04,
+        0.935,
+        "Clause 16 · the reference level range at 8 kHz",
+        fontsize=12.5,
+        fontweight="bold",
+        color=COLOR_FG,
+    )
+    fig.text(
+        0.04,
+        0.915,
+        "frequency weighting A; every indication is recorded beside its "
+        "anticipated level (§16.1)",
+        fontsize=9.5,
+        color=COLOR_MUTED,
+    )
+
+    # --- Clause 16: the staircase against the anticipated level ------------
+    ax = fig.add_axes((0.09, 0.39, 0.88, 0.505))
+    x_room = 37.0
+    ax.set_xlim(-2.6, x_room)
+    ax.set_ylim(34.0, 127.0)
+    ax.set_xticks([])
+    ax.set_yticks(np.arange(10 * math.ceil(lower / 10), upper + 1, 10))
+    ax.tick_params(labelsize=9.5)
+    for side in ("top", "right", "bottom"):
+        ax.spines[side].set_visible(False)
+    ax.grid(visible=False)
+    ax.set_ylabel("Anticipated level [dB]", fontsize=10)
+    n_slots = max(len(rising), len(falling)) + 1
+    # A tint the white and the near-black page both read (check_figure_contrast).
+    ax.fill_between(
+        [-2.0, n_slots + 1.2], lower, upper, color=COLOR_PRIMARY, alpha=0.25, lw=0
+    )
+    # The two levels the step changes at, drawn where no step stands.
+    ax.plot(
+        [9.0, n_slots + 1.2], [upper - coarse] * 2, color=COLOR_MUTED, lw=0.9, ls="--"
+    )
+    ax.plot([-2.0, 7.4], [lower + coarse] * 2, color=COLOR_MUTED, lw=0.9, ls="--")
+
+    labelled_fine = {upper, rising[-1], lower, falling[-1]}
+
+    def run(steps: tuple[float, ...], end: float, *, up: bool) -> float:
+        xs = [0.0, *(float(k) for k in range(1, len(steps) + 1))]
+        ys = [start, *steps]
+        ax.step(xs, ys, where="pre", color=COLOR_PRIMARY, lw=1.4, zorder=3)
+        previous = start
+        for x, level in zip(xs[1:], steps, strict=True):
+            fine = math.isclose(abs(level - previous), _LINEARITY_FINE_DB)
+            ax.plot(
+                x, level, "o", ms=3.6 if fine else 6.0, color=COLOR_PRIMARY, zorder=4
+            )
+            if not fine or level in labelled_fine:
+                # A 5 dB step is labelled beside its riser; a 1 dB step,
+                # one slot from the next, straight over (or under) its dot.
+                ax.text(
+                    x if fine else x - 0.25,
+                    level + (1.6 if up else -1.6),
+                    f"{level:g}",
+                    ha="center" if fine else "right",
+                    va="bottom" if up else "top",
+                    fontsize=9,
+                    color=COLOR_FG,
+                )
+            previous = level
+        x_mark = xs[-1] + 1.0
+        ax.plot([xs[-1], x_mark], [steps[-1]] * 2, color=COLOR_PRIMARY, lw=1.2, ls=":")
+        ax.plot(x_mark, end, "x", ms=9, mew=2.2, color=COLOR_SECONDARY, zorder=5)
+        ax.plot([x_mark + 0.5, 20.0], [end] * 2, color=COLOR_MUTED, lw=0.7)
+        return x_mark
+
+    run(rising, overload, up=True)
+    run(falling, under, up=False)
+    ax.plot(
+        0.0,
+        start,
+        "o",
+        ms=8,
+        mfc=ax.get_facecolor(),
+        mec=COLOR_PRIMARY,
+        mew=2.0,
+        zorder=6,
+    )
+    ax.text(
+        1.3,
+        start,
+        f"starting point of the manual, {start:g} dB (§16.2)",
+        va="center",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+    ax.text(
+        -2.0,
+        upper + 1.5,
+        "up first",
+        fontsize=10,
+        fontweight="bold",
+        color=COLOR_PRIMARY,
+    )
+    ax.text(
+        -1.6, 58.0, "then down", fontsize=10, fontweight="bold", color=COLOR_PRIMARY
+    )
+    mid = 0.5 * (n_slots + 1.2) + 2.0
+    ax.text(
+        mid,
+        106.0,
+        "linear operating range",
+        ha="center",
+        fontsize=11.5,
+        fontweight="bold",
+        color=COLOR_FG,
+    )
+    ax.text(
+        mid,
+        102.6,
+        "the manual states for 8 kHz:",
+        ha="center",
+        fontsize=9.5,
+        color=COLOR_MUTED,
+    )
+    ax.text(
+        mid,
+        99.2,
+        f"{lower:g} dB to {upper:g} dB",
+        ha="center",
+        fontsize=10.5,
+        color=COLOR_FG,
+    )
+
+    # --- What each marked level means, beside it ---------------------------
+    x_note = 20.6
+    for top, foot in ((upper, upper - coarse), (lower + coarse, lower)):
+        ax.plot(
+            [19.6, 19.9, 19.9, 19.6], [top, top, foot, foot], color=COLOR_MUTED, lw=1.1
+        )
+    # The overload note rises above its cross and the under-range note
+    # falls below its own, so neither meets the bracket notes beside them.
+    for level, head, shift in (
+        (overload, f"{overload:g} dB: first indication of overload,", 1.6),
+        (under, f"{under:g} dB: first indication of under-range,", 0.0),
+    ):
+        ax.text(
+            x_note,
+            level + shift,
+            head,
+            va="center",
+            fontsize=9.5,
+            fontweight="bold",
+            color=COLOR_SECONDARY,
+        )
+        ax.text(
+            x_note,
+            level + shift - 3.0,
+            "which the steps stop short of",
+            va="center",
+            fontsize=9.5,
+            color=COLOR_MUTED,
+        )
+    ax.text(
+        x_note,
+        upper - 1.2,
+        "within 5 dB of the upper boundary,",
+        va="top",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+    ax.text(
+        x_note,
+        upper - 4.2,
+        f"from {upper - coarse:g} dB: steps of 1 dB",
+        va="top",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+    ax.text(
+        x_note,
+        lower + coarse + 1.2,
+        "within 5 dB of the lower boundary,",
+        va="top",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+    ax.text(
+        x_note,
+        lower + coarse - 1.8,
+        f"from {lower + coarse:g} dB: steps of 1 dB",
+        va="top",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+
+    # --- The rule in words ---------------------------------------------------
+    ax.text(
+        x_note,
+        102.0,
+        "The steps of §16.3",
+        fontsize=11,
+        fontweight="bold",
+        color=COLOR_FG,
+        va="bottom",
+    )
+    ax.text(
+        x_note,
+        100.6,
+        "up from the starting point by 5 dB at most,\n"
+        "and by 1 dB once within 5 dB of the upper\n"
+        "boundary; then from the starting point down\n"
+        "the same way; smaller steps are accepted",
+        fontsize=9.5,
+        color=COLOR_FG,
+        va="top",
+        linespacing=1.45,
+        bbox={
+            "boxstyle": "round,pad=0.6",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_PRIMARY,
+            "lw": 1.4,
+        },
+    )
+
+    # --- A step too wide -------------------------------------------------------
+    inset = ax.inset_axes((x_note - 0.4, 49.5, 16.6, 26.0), transform=ax.transData)
+    inset.set_xlim(0.0, 16.6)
+    inset.set_ylim(0.0, 26.0)
+    inset.set_xticks([])
+    inset.set_yticks([])
+    inset.set_facecolor("none")
+    for spine in inset.spines.values():
+        spine.set_linestyle((0, (5, 4)))
+        spine.set_edgecolor(COLOR_SECONDARY)
+        spine.set_linewidth(1.4)
+    inset.grid(visible=False)
+    inset.text(
+        0.6,
+        23.4,
+        "A step too wide",
+        fontsize=11,
+        fontweight="bold",
+        color=COLOR_FG,
+        va="top",
+    )
+    # The rise without the step, on a scale of its own: 4 units per dB.
+    y0, per_db = 6.0, 4.0
+    xa, xb, xc = 1.6, 3.4, 5.2
+
+    def iy(level: float) -> float:
+        return y0 + (level - before) * per_db
+
+    inset.plot(
+        [xa, xc, xc], [iy(before), iy(before), iy(after)], color=COLOR_PRIMARY, lw=1.4
+    )
+    inset.plot(
+        [xa, xc], [iy(before), iy(after)], "o", ms=6, color=COLOR_PRIMARY, ls="none"
+    )
+    inset.plot(xb, iy(left_out), "o", ms=6, mfc="none", mec=COLOR_MUTED, mew=1.4)
+    inset.text(
+        xa,
+        iy(before) - 1.4,
+        f"{before:g}",
+        ha="center",
+        va="top",
+        fontsize=9,
+        color=COLOR_FG,
+    )
+    inset.text(
+        xb - 0.4,
+        iy(left_out),
+        f"{left_out:g}",
+        ha="right",
+        va="center",
+        fontsize=9,
+        color=COLOR_MUTED,
+    )
+    inset.text(
+        xc,
+        iy(after) + 1.2,
+        f"{after:g}",
+        ha="center",
+        va="bottom",
+        fontsize=9,
+        color=COLOR_FG,
+    )
+    inset.annotate(
+        "",
+        xy=(xc + 0.9, iy(after)),
+        xytext=(xc + 0.9, iy(before)),
+        arrowprops={"arrowstyle": "<->", "color": COLOR_MUTED, "lw": 1.1},
+    )
+    inset.text(
+        xc + 1.2,
+        0.5 * (iy(before) + iy(after)),
+        f"{after - before:g} dB",
+        va="center",
+        fontsize=9,
+        color=COLOR_FG,
+    )
+    inset.text(
+        7.9,
+        17.6,
+        f"without its {left_out:g} dB step\n"
+        f"the rise goes {after - before:g} dB where\n"
+        f"§16.3 allows {_LINEARITY_FINE_DB:g} dB, and the\n"
+        "verdict lists Clause 16\n"
+        "as incomplete",
+        fontsize=9.5,
+        color=COLOR_FG,
+        va="top",
+        linespacing=1.45,
+    )
+
+    # --- Clause 17 -------------------------------------------------------------
+    fig.add_artist(
+        Line2D(
+            [0.04, 0.96],
+            [0.352, 0.352],
+            transform=fig.transFigure,
+            color=COLOR_MUTED,
+            lw=0.8,
+        )
+    )
+    fig.text(
+        0.04,
+        0.325,
+        "Clause 17 · the level range control at 1 kHz, on two level ranges",
+        fontsize=12.5,
+        fontweight="bold",
+        color=COLOR_FG,
+    )
+    fig.text(
+        0.04,
+        0.305,
+        "frequency weighting A; drawn without a scale, the manual states each "
+        "range; deviations are indicated minus anticipated level (§17.5)",
+        fontsize=9.5,
+        color=COLOR_MUTED,
+    )
+    bx = fig.add_axes((0.04, 0.115, 0.92, 0.175))
+    bx.set_xlim(0.0, 100.0)
+    bx.set_ylim(0.0, 10.0)
+    bx.axis("off")
+    x_ref = 62.0
+    spans = [(30.0, 78.0), (44.0, 96.0)]
+    names = ["reference level range", "the other level range"]
+    heights = [7.2, 2.6]
+    bx.text(
+        x_ref,
+        9.7,
+        "reference sound level",
+        ha="center",
+        va="bottom",
+        fontsize=9.5,
+        color=COLOR_FG,
+    )
+    bx.plot(
+        [x_ref, x_ref],
+        [9.5, heights[-1] - 1.0],
+        color=COLOR_MUTED,
+        lw=1.0,
+        ls=(0, (4, 4)),
+    )
+    for k in range(n_ranges):
+        x0, x1 = spans[min(k, 1)]
+        y = heights[min(k, 1)]
+        bx.text(
+            0.0,
+            y,
+            names[min(k, 1)],
+            va="center",
+            fontsize=10.5,
+            fontweight="bold",
+            color=COLOR_FG,
+        )
+        bx.add_patch(
+            Rectangle(
+                (x0, y - 0.55),
+                x1 - x0,
+                1.1,
+                facecolor="none",
+                edgecolor=COLOR_FG,
+                lw=1.3,
+            )
+        )
+        bx.plot(x0, y, "x", ms=9, mew=2.2, color=COLOR_SECONDARY, zorder=5)
+        bx.plot(x0 + 5.0, y, "o", ms=7, color=COLOR_TERTIARY, zorder=5)
+        bx.text(
+            x0 + 5.0,
+            y + 0.9,
+            "§17.4",
+            ha="center",
+            va="bottom",
+            fontsize=9.5,
+            fontweight="bold",
+            color=COLOR_TERTIARY,
+        )
+        bx.annotate(
+            "",
+            xy=(x0 + 5.0, y - 1.35),
+            xytext=(x0, y - 1.35),
+            arrowprops={"arrowstyle": "<->", "color": COLOR_MUTED, "lw": 1.1},
+        )
+        bx.text(
+            x0 + 2.5,
+            y - 1.7,
+            f"{coarse:g} dB",
+            ha="center",
+            va="top",
+            fontsize=9,
+            color=COLOR_FG,
+        )
+        if k == 0:
+            bx.plot(
+                x_ref,
+                y,
+                "o",
+                ms=7,
+                mfc=bx.get_facecolor(),
+                mec=COLOR_MUTED,
+                mew=1.5,
+                zorder=5,
+            )
+            bx.text(
+                x_ref + 1.0,
+                y + 0.9,
+                "§17.2 sets it here",
+                va="bottom",
+                fontsize=9.5,
+                color=COLOR_MUTED,
+            )
+        else:
+            bx.plot(x_ref, y, "o", ms=7, color=COLOR_PRIMARY, zorder=5)
+            bx.text(
+                x_ref + 1.0,
+                y + 0.9,
+                "§17.3",
+                va="bottom",
+                fontsize=9.5,
+                fontweight="bold",
+                color=COLOR_PRIMARY,
+            )
+
+    handles = [
+        Line2D([], [], ls="none", marker="x", ms=9, mew=2.2, color=COLOR_SECONDARY),
+        Line2D([], [], ls="none", marker="o", ms=7, color=COLOR_TERTIARY),
+        Line2D([], [], ls="none", marker="o", ms=7, color=COLOR_PRIMARY),
+        Line2D(
+            [], [], ls="none", marker="o", ms=7, mfc="none", mec=COLOR_MUTED, mew=1.5
+        ),
+    ]
+    labels = [
+        "the first indication of under-range on that level range",
+        "§17.4: the input 5 dB above it, on each level range, the reference one first",
+        "§17.3: the input held at the reference sound level, read on each other "
+        "range that displays it",
+        "on the reference range §17.3 has nothing to read: the anticipated level "
+        "is the one §17.2 set (IEC 61672-1, 5.6.3)",
+    ]
+    fig.legend(
+        handles,
+        labels,
+        loc="lower left",
+        bbox_to_anchor=(0.03, 0.005),
+        frameon=False,
+        fontsize=9.5,
+        handletextpad=0.6,
+        labelspacing=0.55,
+    )
+    save_figure(output_dir, "slm_periodic_linearity.svg")
     plt.close()
 
 

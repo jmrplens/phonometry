@@ -552,7 +552,19 @@ potencia acústica (o el nivel de presión acústica en una posición especifica
 **con** el cerramiento y otra vez **sin** él, y se informa la diferencia banda a
 banda: $D_W = L_W(\text{sin}) - L_W(\text{con})$, ISO 11546-1 Fórmula (1), al
 menos de 100 Hz a 5 kHz en tercios de octava o de 125 Hz a 4 kHz en octavas,
-siendo preferibles de 50 Hz a 10 kHz y de 63 Hz a 8 kHz (apartado 6.2).
+siendo preferibles de 50 Hz a 10 kHz y de 63 Hz a 8 kHz (apartado 6.2). La
+biblioteca calcula también esa medición:
+[Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/)
+pasa las dos series de niveles por `enclosure_sound_power_insulation` y sus
+hermanas, comprueba el entorno de ensayo contra la Tabla C.1 y dice, paso a
+paso, cómo se hace la medida.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement.svg" alt="Dos montajes uno al lado del otro. A la izquierda, la misma máquina medida dos veces sobre la misma superficie de medición de trazos, una exenta y otra dentro del cerramiento, y la pérdida por inserción es la diferencia de las dos potencias acústicas. A la derecha, una sala excitada por un altavoz con tres micrófonos en ella y una cabina vacía dentro con otros dos, y el aislamiento es la diferencia de los dos niveles de presión. Un recuadro al pie lleva las dos ecuaciones" width="100%" />
+
+*La medición de este apartado es la mitad izquierda del dibujo: la misma
+máquina sobre la misma superficie de medición, una vez al descubierto y otra
+dentro del cerramiento. La mitad derecha es la cabina de ISO 11957, el
+problema inverso, que la guía enlazada arriba trata a su lado.*
 
 Cuatro condiciones deciden si el resultado significa algo. La **fuente** debería
 ser la máquina real: el apartado 4 lo hace método preferente y limita las
@@ -561,16 +573,21 @@ alternativas de reciprocidad y de fuente artificial a cerramientos de menos de
 arriba. Su **régimen de funcionamiento no debe cambiar** entre las dos series
 (apartado 6.1.2), y los elementos activos, como los ventiladores de
 refrigeración, tienen que estar funcionando (apartado 6.1.3). Las **posiciones
-de micrófono deben ser las mismas** con y sin cerramiento, para que las
+de micrófono deberían ser las mismas** con y sin cerramiento, para que las
 correcciones ambientales se cancelen y la diferencia de niveles sea la
-diferencia de potencias sin convertir ninguna de las dos (apartado 6.1.4). Y el
+diferencia de potencias sin convertir ninguna de las dos (apartado 6.1.5 de
+ISO 11546-1 y apartado 6.1.4 de ISO 11546-2, las dos siempre que sea
+practicable). En una cámara reverberante, la parte de laboratorio coloca
+además el cerramiento sin ninguna pared paralela a una pared de la cámara ni a
+menos de 1,5 m (apartado 6.1.4 de ISO 11546-1). Y el
 **entorno de ensayo** tiene que ser lo bastante bueno para la norma de potencia
 acústica que se elija de la Tabla 1: la Tabla C.1 de ISO 11546-2 pide una
 corrección ambiental $K_2 \le 2$ dB y una señal al menos 6 dB por encima del
 ruido de fondo para ISO 3744, frente a $K_2 \le 7$ dB y 3 dB para la ISO 3746 de
-grado de inspección, que es el techo práctico de cuánta pérdida por inserción se
-puede medir en un taller. Verifica toda la cadena con un calibrador de clase 1
-con $\pm 0{,}3$ dB antes y después de cada serie (apartado 5).
+grado de peritaje, que es el techo práctico de cuánta pérdida por inserción se
+puede medir en un taller. Verifica toda la cadena antes y después de cada serie con un
+calibrador con una exactitud de $\pm 0{,}3$ dB, «type 1 in accordance with
+IEC 942» en palabras del apartado 5.
 
 Lo que hay que registrar está en el apartado 9, y dos entradas son justamente
 las que una predicción nunca captura: la **relación de fugas** $\theta$, el área
@@ -609,10 +626,13 @@ la forma cerrada de Wells gobernada por una absorción media declarada:
 ninguno de los dos es un modelo de revestimiento.
 `enclosure_insertion_loss` nunca predice la pérdida de transmisión de panel
 $R$; se aporta medida o de otro modelo, y el módulo solo la combina con la
-corrección interior. Nada de lo que hay aquí es una medición: el procedimiento
-de ISO 11546 del apartado 2.2 se describe para poder leer un valor declarado,
-no para implementarlo, y la transmisión estructural de una máquina a su
-cerramiento o a su solera queda fuera de todos los modelos de la página.
+corrección interior. Nada de lo que hay en esta página es una medición: el
+procedimiento de ISO 11546 del apartado 2.2 se describe aquí para poder leer
+un valor declarado, y se calcula en
+[Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/)
+(`enclosure_sound_power_insulation` y sus hermanas). La transmisión
+estructural de una máquina a su cerramiento o a su solera queda fuera de
+todos los modelos de la página.
 </ScopeClaim>
 </Scope>
 
@@ -630,6 +650,9 @@ cerramiento o a su solera queda fuera de todos los modelos de la página.
   radiador complementario.
 - [Potencia acústica](/phonometry/es/devices/emission/sound-power/): la $L_W$ de fuente que
   alimenta un conducto o un cerramiento.
+- [Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/):
+  la medición por sustitución de ISO 11546 del apartado 2.2 calculada, con la
+  comprobación de su entorno de ensayo y su montaje dibujado.
 - [Fuentes imagen y campo estacionario](/phonometry/es/buildings/rooms/room-image-sources/):
   la `room_constant` reutilizada por la corrección interior del cerramiento.
 - [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/):

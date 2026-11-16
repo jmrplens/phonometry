@@ -489,6 +489,235 @@ def _methods_pic_scan(s: SVG, th: Theme, cxc: float, py: float, col: str) -> Non
 
 
 # ---------------------------------------------------------------------------
+# The decision path of the sound power overview: six questions, in order
+# ---------------------------------------------------------------------------
+
+#: The slope keys of the decision path. ISO 3747:2010, 3.19, prints the f of
+#: the excess of sound pressure level italic; ISO 3740:2019, Formula (C.1),
+#: prints omc upright, as it does tot and R0.
+_PATH_SLOPED = ("ΔL_f",)
+_PATH_UPRIGHT = ("σ_omc",)
+
+
+def _d_power_decision_path(s: SVG, th: Theme) -> None:
+    """The guide's own path to a method, drawn as the flow its list describes.
+
+    Question 1 is a gate (it fixes the grade, it names no standard) and
+    question 6 a closing check every route passes through; the four between
+    them are the decisions, each with its exits on the right. The order is
+    the page's, not that of ISO 3740:2019, Figure 1, which asks the
+    structural-vibration question first and has neither the gate nor the
+    check. The numbers are those of the basic standards: ISO 3744:2010, 4.2.1.1
+    and 4.3.1 (6 dB, preferably more than 15 dB; K2A at most 4 dB),
+    ISO 3746:2010, 4.2 and 4.3 (3 dB; K2A at most 7 dB) and ISO 3747:2010, 4.1
+    (an excess of sound pressure level of at least 7 dB). The last yes of
+    question 5 falls back on intensity because ISO 3746:2010, 4.3, NOTE 1,
+    sends a room too reverberant for it to ISO 3747 or ISO 9614, and
+    ISO 3740:2019, Figure 1, lists ISO 9614 in every in situ exit.
+    """
+    spine, dw, dh = 180.0, 150.0, 56.0  # diamonds: centre x, half width, half height
+    ex, ew, bus = 366.0, 454.0, 850.0  # exits: left edge, width; the collector's x
+
+    questions = (
+        ("2 · Can the source", "travel to a laboratory?"),
+        ("3 · How quiet and", "how dry is the site?"),
+        ("4 · Is the background", "the problem?"),
+        ("5 · Can a microphone", "be put there at all?"),
+    )
+    # One size for the four diamonds, chosen on the longest line of the
+    # eight: the Spanish of question 3 is half again as long as its English,
+    # and a spine whose questions change size reads as a ranking of them.
+    qsize = s.fit_size(
+        [line for pair in questions for line in pair],
+        (12, 11, 10),
+        2 * dw * (1 - 16 / dh) - 12,
+        bold=True,
+    )
+
+    def diamond(cy: float, number: int) -> None:
+        s.path(
+            f"M {spine - dw} {cy} L {spine} {cy - dh} L {spine + dw} {cy} "
+            f"L {spine} {cy + dh} Z",
+            fill=th.panel,
+            stroke=th.fg,
+            sw=2,
+        )
+        l1, l2 = questions[number - 2]
+        s.text(spine, cy - 3, l1, qsize, th.fg, bold=True)
+        s.text(spine, cy + 13, l2, qsize, th.fg, bold=True)
+
+    def exit_box(top: float, height: float) -> None:
+        s.rect(ex, top, ew, height, th.panel, th.accent, rx=10, sw=2.2)
+        mid = top + height / 2
+        s.line(ex + ew, mid, bus, mid, th.muted, 1.4)
+
+    def route(y: float, name: str, what: str, grade: str) -> None:
+        s.text(ex + 16, y, name, 13, th.fg, anchor="start", bold=True)
+        if what:
+            s.text(ex + 136, y, what, 12, th.fg, anchor="start")
+        s.text(ex + ew - 14, y, grade, 12, th.accent, anchor="end", bold=True)
+
+    def condition(y: float, txt: str) -> None:
+        s.text(ex + 16, y, txt, 11, th.muted, anchor="start", sloped=_PATH_SLOPED)
+
+    # --- 1: the gate. It fixes the grade and names no standard. ------------
+    s.rect(30, 54, 840, 92, "none", th.primary, rx=12, sw=2, dash="7,5")
+    s.text(
+        450,
+        78,
+        "1 · What is the number for? The answer fixes the grade, not the standard",
+        14,
+        th.fg,
+        bold=True,
+    )
+    for x0, head, use in (
+        (42.0, "Grade 2 (engineering)", "a declaration, a check against a limit"),
+        (316.0, "Grade 1 (precision)", "a reference source, a ranking, a dispute"),
+        (590.0, "Grade 3 (survey)", "a first walk-through of a noisy plant"),
+    ):
+        s.rect(x0, 90, 268, 46, th.panel, th.primary, rx=8, sw=1.4)
+        s.text(x0 + 134, 109, head, 13, th.fg, bold=True)
+        s.text(x0 + 134, 127, use, 11, th.muted)
+    s.text(
+        540,
+        166,
+        "grade 1 is reached only by ISO 3741, ISO 3745, ISO 9614-1 and ISO 9614-3",
+        11,
+        th.muted,
+    )
+
+    # --- 2: the laboratory routes ------------------------------------------
+    q2, q3, q4, q5 = 238.0, 418.0, 578.0, 726.0
+    s.arrow(spine, 146, spine, q2 - dh - 2, th.fg, 1.8)
+    diamond(q2, 2)
+    s.arrow(spine + dw, q2, ex - 2, q2, th.accent, 1.8)
+    s.text(spine + dw + 17, q2 - 8, "yes", 12, th.accent, bold=True)
+    exit_box(q2 - 46, 92)
+    route(q2 - 20, "ISO 3741", "qualified reverberation room", "grade 1")
+    route(q2 + 4, "ISO 3745", "anechoic or hemi-anechoic room", "grade 1")
+    route(q2 + 28, "ISO 3743-1, -2", "small test rooms", "grade 2")
+
+    # --- 3: the enveloping surface in situ, and the comparison --------------
+    s.arrow(spine, q2 + dh, spine, q3 - dh - 2, th.fg, 1.8)
+    s.text(spine + 12, q2 + dh + 26, "no", 12, th.secondary, anchor="start", bold=True)
+    diamond(q3, 3)
+    s.line(spine + dw, q3, ex - 18, q3, th.accent, 1.8)
+    s.line(ex - 18, q3 - 58, ex - 18, q3 + 58, th.accent, 1.8)
+    for dy, name, what, grade, cond in (
+        (
+            -58.0,
+            "ISO 3744",
+            "enveloping surface",
+            "grade 2",
+            "background ≥ 6 dB below the source (preferably > 15 dB), $K_2$ ≤ 4 dB",
+        ),
+        (
+            0.0,
+            "ISO 3746",
+            "the same surface, looser limits",
+            "grade 3",
+            "background ≥ 3 dB below the source, $K_2$ ≤ 7 dB",
+        ),
+        (
+            58.0,
+            "ISO 3747",
+            "comparison in situ",
+            "grade 2 or 3",
+            "too reverberant for both: a reference sound source, $ΔL_f$ ≥ 7 dB",
+        ),
+    ):
+        s.arrow(ex - 18, q3 + dy, ex - 2, q3 + dy, th.accent, 1.8)
+        exit_box(q3 + dy - 25, 50)
+        route(q3 + dy - 5, name, what, grade)
+        condition(q3 + dy + 14, cond)
+
+    # --- 4: intensity -------------------------------------------------------
+    s.arrow(spine, q3 + dh, spine, q4 - dh - 2, th.fg, 1.8)
+    s.text(
+        spine + 12, q3 + dh + 26, "none", 12, th.secondary, anchor="start", bold=True
+    )
+    diamond(q4, 4)
+    s.arrow(spine + dw, q4, ex - 2, q4, th.accent, 1.8)
+    s.text(spine + dw + 17, q4 - 8, "yes", 12, th.accent, bold=True)
+    exit_box(q4 - 40, 80)
+    # ISO 3740:2019 names Parts 1 and 2 where the background is the obstacle
+    # (Figures 1 and 2); Part 3 enters in situ only in special cases.
+    route(q4 - 15, "ISO 9614-1, -2", "", "grade 1, 2 or 3")
+    s.text(
+        ex + 16,
+        q4 + 5,
+        "intensity at discrete points or by scanning",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    condition(
+        q4 + 24, "steady extraneous noise tolerated; the field indicators set the grade"
+    )
+
+    # --- 5: no acoustic measurement at all ----------------------------------
+    s.arrow(spine, q4 + dh, spine, q5 - dh - 2, th.fg, 1.8)
+    s.text(spine + 12, q4 + dh + 22, "no", 12, th.secondary, anchor="start", bold=True)
+    diamond(q5, 5)
+    s.line(spine + dw, q5, ex + 30, q5, th.accent, 1.8)
+    s.arrow(ex + 30, q5, ex + 30, q4 + 42, th.accent, 1.8)
+    s.text(spine + dw + 32, q5 - 8, "yes", 12, th.accent, bold=True)
+    s.text(
+        ex + 44,
+        q5 - 50,
+        "then intensity: ISO 9614 works in almost any environment",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    s.arrow(spine, q5 + dh, spine, 820, th.fg, 1.8)
+    s.text(spine + 12, q5 + dh + 24, "no", 12, th.secondary, anchor="start", bold=True)
+    s.rect(30, 822, 790, 62, th.panel, th.accent, rx=10, sw=2.2)
+    s.line(820, 853, bus, 853, th.muted, 1.4)
+    s.text(46, 847, "ISO/TS 7849-1, -2", 13, th.fg, anchor="start", bold=True)
+    s.text(
+        190,
+        847,
+        "surface velocity of the casing and a radiation factor",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(806, 847, "survey / engineering", 12, th.accent, anchor="end", bold=True)
+    s.text(
+        46,
+        868,
+        "the sound the structure radiates only, blind to openings; Part 1 assumes "
+        "$ε$ = 1 and returns an upper limit",
+        11,
+        th.muted,
+        anchor="start",
+    )
+
+    # --- 6: the closing check every route passes through --------------------
+    s.line(bus, q2, bus, 912, th.muted, 1.4)
+    s.arrow(bus, 912, bus, 926, th.muted, 1.4)
+    s.rect(30, 928, 840, 72, "none", th.primary, rx=12, sw=2, dash="7,5")
+    s.text(
+        450,
+        954,
+        "6 · Whichever route: how repeatable is the machine itself?",
+        14,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        980,
+        "$σ_{tot} = √(σ_{R0}^2 + σ_{omc}^2)$: no grade bounds $σ_{omc}$; estimate it "
+        "from repeated determinations first",
+        12,
+        th.fg,
+        upright=_PATH_UPRIGHT,
+    )
+
+
+# ---------------------------------------------------------------------------
 # d19 - ISO 3745 precision sound power (anechoic / hemi-anechoic room)
 # ---------------------------------------------------------------------------
 
@@ -669,6 +898,167 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
         ),
     ):
         s.text(450, y, txt, 16 if bold else 15, col, bold=bold, upright=normal)
+
+
+# ---------------------------------------------------------------------------
+# ISO 9614-1: the discrete-point surface and the loop of Figure B.1
+# ---------------------------------------------------------------------------
+
+#: The slope keys of the discrete-point plate: ISO 9614-1 prints the n of the
+#: normal intensity and the d of the dynamic capability index upright.
+_POINTS_UPRIGHT = ("I_n", "L_d")
+
+
+def _d_intensity_discrete_points(s: SVG, th: Theme) -> None:
+    """ISO 9614-1 as a place and as a loop.
+
+    Left, the measurement surface of clause 8.2: a box over a reflecting
+    floor, cut into segments with one held position in each face in view
+    (front, side and top), the source standing inside it more than 0.5 m from
+    the surface on average, and the probe at one position on the side face
+    with its two microphones on the normal to that face. Right, the scheme of
+    Figure B.1 in its order: the short-time samples at one typical position
+    give F1 first, and only when F1 passes are the N positions measured and
+    the three remaining gates walked; every gate fails into the action codes
+    Table B.3 prints for it and back to the top, never to the gate below.
+    """
+    # ===== a: the surface and its positions =====
+    s.text(250, 74, "a · The surface and its positions (clause 8.2)", 15, bold=True)
+    bx, gy, hw, ht, dp = 230.0, 440.0, 130.0, 260.0, 120.0
+    dx, dy = dp * 0.72, dp * 0.55  # the oblique of _box_wire
+    fl, fr, ft = bx - hw, bx + hw, gy - ht
+    s.ground(gy, 40, 470)
+    _box_wire(s, bx, gy, hw, dp, ht, th.primary)
+    # The source stands inside the surface, its front face set back by d0
+    # along the depth: drawn over the hidden back edges, under the front face.
+    d0, ds, hws, hs = 44.0, 24.0, 40.0, 62.0
+    # Centred between the two columns of the front face, so that no position
+    # stands on it.
+    sxl = bx - (2 * hws + 0.72 * ds) / 2
+    scx, sgy = sxl + hws, gy - d0 * 0.55
+    _box_solid(s, th, scx, sgy, hws, ds, hs)
+    s.text(sxl + hws / 2, sgy - 10, "source", 10, th.fg)
+    # The front face: two columns and three rows, the divider running across
+    # the source because the face stands in front of it.
+    s.line(bx, ft, bx, gy, th.muted, 1.1, dash="4,4")
+    rows = [ft + (i + 0.5) * ht / 3 for i in range(3)]
+    for k in (1, 2):
+        y = ft + k * ht / 3
+        s.line(fl, y, fr, y, th.muted, 1.1, dash="4,4")
+        s.line(fr, y, fr + dx, y - dy, th.muted, 1.1, dash="4,4")
+    s.line(bx, ft, bx + dx, ft - dy, th.muted, 1.1, dash="4,4")
+    front = [(x, y) for y in rows for x in (bx - hw / 2, bx + hw / 2)]
+    side = [(fr + dx / 2, y - dy / 2) for y in rows]
+    top = [(x + dx / 2, ft - dy / 2) for x in (bx - hw / 2, bx + hw / 2)]
+    for x, y in front + side + top:
+        s.circle(x, y, 5.0, th.accent)
+        s.circle(x, y, 1.8, th.bg)
+    s.text(
+        bx + dx / 2, ft - dy - 12, "measurement surface, segments $S_i$", 13, th.primary
+    )
+    for y in rows:
+        s.arrow(fl, y, fl - 34, y + 8, th.secondary, 2.0)
+    s.text(
+        fl - 40,
+        rows[1] + 30,
+        "$I_n$",
+        13,
+        th.secondary,
+        anchor="end",
+        bold=True,
+        upright=_POINTS_UPRIGHT,
+    )
+    # The probe at the middle position of the side face: its two microphones
+    # straddle the position on the normal to that face, the handle outside.
+    px, py = side[1]
+    s.circle(px - 12, py, 3.4, th.fg)
+    s.circle(px + 12, py, 3.4, th.fg)
+    s.line(px - 8.6, py, px - 5.6, py, th.fg, 1.6)
+    s.line(px + 15.4, py, px + 50, py, th.fg, 2.4)
+    s.text(px + 56, py + 4, "p-p probe", 11, th.fg, anchor="start")
+    # The dimension runs on the floor along the depth, from the source's
+    # front face to the front face of the surface.
+    s.arrow(sxl - 0.36 * d0, gy - 0.275 * d0, sxl, sgy, th.muted, 1.2)
+    s.arrow(sxl - 0.36 * d0, gy - 0.275 * d0, sxl - 0.72 * d0, gy, th.muted, 1.2)
+    # Its label under the floor at the arrow's foot: above it, the oblique
+    # edge of the surface and the lowest position leave no room.
+    s.text(sxl - 0.72 * d0, gy + 21, "> 0.5 m", 11, th.fg)
+    notes = (
+        "≥ 1 position per m² and ≥ 10 in all, spread evenly by segment area",
+        "probe held still at each one, its axis normal to the surface",
+        "a hard floor closes the surface: no positions on it, its area left out",
+        "more than 0.5 m from the source on average",
+    )
+    nsize = s.fit_size(notes, (12, 11, 10), 440)
+    for k, txt in enumerate(notes):
+        s.text(40, 482 + k * 20, txt, nsize, th.muted, anchor="start")
+
+    # ===== b: the scheme of Figure B.1 =====
+    cx, gw = 640.0, 240.0
+    s.text(690, 74, "b · The loop of Figure B.1", 15, bold=True)
+    s.rect(cx - gw / 2, 92, gw, 40, th.panel, th.primary, rx=8, sw=2)
+    s.text(cx, 109, "short-time $I_n$ → $F_1$", 12, bold=True, upright=_POINTS_UPRIGHT)
+    s.text(cx, 125, "at one typical position on the surface", 11, th.muted)
+
+    def gate(y: float, label: str, action: str) -> None:
+        s.rect(cx - gw / 2, y, gw, 30, th.panel, th.fg, rx=15, sw=1.8)
+        s.text(cx, y + 20, label, 13, bold=True, upright=_POINTS_UPRIGHT)
+        s.arrow(cx + gw / 2, y + 15, 790, y + 15, th.secondary, 1.6)
+        s.text(775, y + 9, "no", 11, th.secondary, bold=True)
+        s.rect(792, y + 1, 62, 28, th.bg, th.secondary, rx=6, sw=1.6)
+        s.text(823, y + 20, action, 12, th.secondary, bold=True)
+        s.line(854, y + 15, 866, y + 15, th.secondary, 1.6)
+
+    def down(y: float, *, yes: bool) -> None:
+        s.arrow(cx, y - 16, cx, y - 2, th.fg, 1.6)
+        if yes:
+            s.text(cx - 14, y - 4, "yes", 11, th.accent, anchor="end", bold=True)
+
+    down(148, yes=False)
+    gate(148, "$F_1$ ≤ 0.6", "e")
+    down(194, yes=True)
+    s.rect(cx - gw / 2, 194, gw, 32, th.panel, th.primary, rx=8, sw=2)
+    s.text(
+        cx,
+        215,
+        "$I_n$ and $L_p$ at the $N$ positions",
+        12,
+        bold=True,
+        upright=_POINTS_UPRIGHT,
+    )
+    gates = (
+        ("$L_d > F_2$  (criterion 1)", "a or b"),
+        ("$F_3 − F_2$ ≤ 3 dB", "a or b"),
+        ("$N > C·F_4^2$  (criterion 2)", "c or d"),
+    )
+    for k, (label, action) in enumerate(gates):
+        y = 242 + k * 48
+        down(y, yes=k > 0)
+        gate(y, label, action)
+    # Every action returns to the top of the scheme, as the line of Figure
+    # B.1 does: never to the gate below it.
+    s.line(866, 242 + 2 * 48 + 15, 866, 112, th.secondary, 1.6)
+    s.arrow(866, 112, cx + gw / 2 + 2, 112, th.secondary, 1.6)
+    s.text(860, 128, "act, then", 11, th.secondary, anchor="end")
+    s.text(860, 141, "measure again", 11, th.secondary, anchor="end")
+    yend = 384.0
+    down(yend, yes=True)
+    s.rect(cx - gw / 2, yend, gw, 46, th.panel, th.accent, rx=8, sw=2.2)
+    s.text(cx, yend + 19, "grade reached, stated (10.6)", 12, bold=True)
+    s.text(cx, yend + 37, "$F_1$ again before and after (B.1.4)", 11, th.muted)
+    actions = (
+        "a  surface closer, to 0.25 m at the least, or out to 1 m",
+        "b  shield the surface, or cut the reflections",
+        "c  more positions, spread evenly",
+        "d  surface farther out, or more positions on it",
+        "e  a steadier field, or longer at each position",
+    )
+    s.text(
+        500, 458, "Table B.3, what each action changes", 12, bold=True, anchor="start"
+    )
+    asize = s.fit_size(actions, (11, 10), 370)
+    for k, txt in enumerate(actions):
+        s.text(500, 478 + k * 18, txt, asize, th.muted, anchor="start")
 
 
 # ---------------------------------------------------------------------------
@@ -4463,6 +4853,34 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
         th.muted,
     )
 
+    # --- the background and the repetitions, by the same clauses ------------
+    top3, h3 = top2 + h2 + 76, 92.0
+    w3 = (900.0 - 2 * left - gap) / 2.0
+    for k, (title, lines) in enumerate(
+        (
+            (
+                "Background at the position (5.4)",
+                (
+                    "source off: at least 10 dB down (grade 1), 6 dB (grade 2)",
+                    "more than 15 dB down: $K_1$ = 0; closer: Equation (5)",
+                ),
+            ),
+            (
+                "Repeating a measurement (10.2.2)",
+                (
+                    "source off and on, microphone taken away and set again,",
+                    "same conditions; how many times: the noise test code",
+                ),
+            ),
+        )
+    ):
+        x = left + k * (w3 + gap)
+        s.rect(x, top3, w3, h3, th.panel, th.muted, rx=6, sw=1.4)
+        s.text(x + w3 / 2, top3 + 26, title, 13, th.fg, bold=True)
+        size = s.fit_size(lines, (12, 11, 10), w3 - 24)
+        for j, line in enumerate(lines):
+            s.text(x + w3 / 2, top3 + 52 + 20 * j, line, size, th.muted)
+
 
 def _d_in_duct_rig(s: SVG, th: Theme) -> None:
     """The ISO 5136 test arrangement of Figure 5: one fan, a test duct each side.
@@ -4791,6 +5209,161 @@ def _d_in_duct_rig(s: SVG, th: Theme) -> None:
         "without the straightener, the lower level kept",
         12,
         th.muted,
+    )
+
+
+def _d_valve_quiet_trims(s: SVG, th: Theme) -> None:
+    """The three trim families of IEC 60534-8-3 Clause 6 and its outlet expander.
+
+    Schematic sections, not to scale and not any maker's trim: the print calls
+    each of its Figures 1 to 3 "one example of many effective noise-reducing
+    trims". (a) is the drilled cage of 6.2 with the passage length l and
+    diameter d of Figure 1 and Equation (26), l/d counting up to 4; (b) the
+    single path through several stages of 6.3, with the pressures p1, pn and
+    p2 and the last-stage coefficient Cn that Figure 2 of IEC 60534-8-4
+    letters, the flow area growing along the path as that figure has it;
+    (c) the multipath, multistage trim of 6.4, whose NOTE 1 covers linear
+    travel valves only and whose NOTE 2 puts every calculation on the last
+    stage; (d) the valve outlet di opening into the pipe Di through a
+    transition piece, which 7.1 holds to 30 degrees of total angle.
+    """
+
+    def head(cx: float, oy: float, title: str, clause: str) -> None:
+        s.text(cx, oy + 20, title, 14, th.fg, bold=True)
+        s.text(cx, oy + 38, clause, 11, th.muted)
+
+    def notes(cx: float, oy: float, lines: tuple[str, ...]) -> None:
+        size = s.fit_size(lines, (12, 11), 420)
+        for k, line in enumerate(lines):
+            s.text(cx, oy + 266 + 18 * k, line, size, th.muted)
+
+    def stage(x: float, y: float, half: float, gap: float, colour: str) -> None:
+        """One restriction in a channel of half-height *half*, open by *gap*."""
+        s.rect(x - 4, y - half, 8, half - gap / 2, th.panel, colour, sw=1.4)
+        s.rect(x - 4, y + gap / 2, 8, half - gap / 2, th.panel, colour, sw=1.4)
+
+    # --- (a) drilled cage: many small jets through holes of length l, diameter d
+    ox, oy = 0.0, 60.0
+    cx, ay = ox + 225.0, oy + 140.0
+    head(cx, oy, "(a) drilled cage", "IEC 60534-8-3, 6.2 and Figure 1")
+    s.rect(80, oy + 60, 84, 160, th.panel, th.fg, sw=1.6)
+    s.text(122, ay + 4, "valve plug", 11, th.fg)
+    wall_x, wall_w, hh = 176.0, 50.0, 7.0
+    s.rect(wall_x, oy + 60, wall_w, 160, th.panel, th.fg, sw=1.6)
+    holes = (ay - 64, ay - 32, ay, ay + 32, ay + 64)
+    for k, y in enumerate(holes):
+        s.rect(wall_x - 1, y - hh, wall_w + 2, 2 * hh, th.bg)
+        s.line(wall_x, y - hh, wall_x + wall_w, y - hh, th.fg, 1.4)
+        s.line(wall_x, y + hh, wall_x + wall_w, y + hh, th.fg, 1.4)
+        if k != 2:
+            s.arrow(wall_x + wall_w + 4, y, wall_x + wall_w + 52, y, th.primary, 1.6)
+    s.text(wall_x + wall_w + 64, ay - 40, "jets", 12, th.primary, anchor="start")
+    # d, drafted on the middle passage: witness lines out of the wall and the
+    # two arrows pointing in from outside, the passage being too narrow for
+    # a dimension line between them.
+    xd = wall_x + wall_w + 30
+    s.line(wall_x + wall_w + 2, ay - hh, xd + 8, ay - hh, th.muted, 0.9)
+    s.line(wall_x + wall_w + 2, ay + hh, xd + 8, ay + hh, th.muted, 0.9)
+    s.arrow(xd, ay - hh - 16, xd, ay - hh, th.muted, 1.2)
+    s.arrow(xd, ay + hh + 16, xd, ay + hh, th.muted, 1.2)
+    s.text(xd + 14, ay + 5, "$d$", 13, th.fg, anchor="start")
+    s.dim(wall_x, oy + 246, wall_x + wall_w, oy + 246, "$l$", size=13)
+    notes(
+        cx,
+        oy,
+        (
+            "many small jets instead of one large one",
+            "passages of one hydraulic diameter, apart enough to keep",
+            "the jets from interacting; $l/d$ counts up to 4 (Eq. 26)",
+        ),
+    )
+
+    # --- (b) one path, several stages: only the last one is computed
+    ox = 450.0
+    cx = ox + 225.0
+    head(cx, oy, "(b) multistage, one path", "6.3, and IEC 60534-8-4, Figure 2")
+    x0, x1, half = ox + 40.0, ox + 410.0, 40.0
+    s.line(x0, ay - half, x1, ay - half, th.fg, 1.8)
+    s.line(x0, ay + half, x1, ay + half, th.fg, 1.8)
+    s.text(x0 + 6, ay - 10, "flow", 12, th.muted, anchor="start")
+    s.arrow(x0 + 6, ay + 4, x0 + 46, ay + 4, th.muted, 1.6)
+    plates = ((ox + 150.0, 16.0), (ox + 245.0, 30.0), (ox + 340.0, 46.0))
+    for k, (x, gap) in enumerate(plates):
+        last = k == len(plates) - 1
+        stage(x, ay, half, gap, th.primary if last else th.fg)
+        s.arrow(x + 8, ay, x + 40, ay, th.primary if last else th.muted, 1.6)
+    s.text(ox + 95, ay - half - 12, "$p_1$", 14, th.fg)
+    s.text(ox + 292, ay - half - 12, "$p_n$", 14, th.fg)
+    s.text(ox + 385, ay - half - 12, "$p_2$", 14, th.fg)
+    s.text(ox + 340, ay + half + 24, "$C_n$, last stage", 13, th.primary, bold=True)
+    notes(
+        cx,
+        oy,
+        (
+            "each stage takes part of the drop, and the flow area grows",
+            "only the last stage is computed, at $p_n$ for $p_1$ (6.3, NOTE 1)",
+            "the stages before it enter through $p_1/p_n$ (Eq. 31)",
+        ),
+    )
+
+    # --- (c) several paths, each of several stages
+    ox, oy = 0.0, 370.0
+    cx, ay = ox + 225.0, oy + 140.0
+    head(cx, oy, "(c) multipath, multistage", "IEC 60534-8-3, 6.4")
+    s.rect(98, oy + 66, 26, 148, th.panel, th.fg, sw=1.6)
+    s.text(111, oy + 232, "inlet", 11, th.muted)
+    for y in (ay - 48, ay, ay + 48):
+        s.line(136, y - 15, 318, y - 15, th.fg, 1.5)
+        s.line(136, y + 15, 318, y + 15, th.fg, 1.5)
+        for k, (x, gap) in enumerate(((178.0, 8.0), (233.0, 13.0), (288.0, 19.0))):
+            stage(x, y, 15.0, gap, th.primary if k == 2 else th.fg)
+        s.arrow(322, y, 366, y, th.primary, 1.6)
+    notes(
+        cx,
+        oy,
+        (
+            "several paths, several stages each, the flow area growing",
+            "every calculation of 6.4 on the last stage (NOTE 2)",
+            "linear travel valves only (NOTE 1)",
+        ),
+    )
+
+    # --- (d) the outlet: di opens into Di through a cone of 30 degrees at most
+    ox = 450.0
+    cx = ox + 225.0
+    head(cx, oy, "(d) outlet and expander", "IEC 60534-8-3, Clause 7")
+    small, large = 22.0, 40.0
+    # A cone of 15 degrees a side: 18 px of radius over 18 / tan 15 degrees.
+    xa, xb = ox + 50.0, ox + 160.0
+    xc = xb + (large - small) / math.tan(math.radians(15.0))
+    xd = ox + 400.0
+    for sign in (-1.0, 1.0):
+        s.line(xa, ay + sign * small, xb, ay + sign * small, th.fg, 1.8)
+        s.line(xb, ay + sign * small, xc, ay + sign * large, th.primary, 2.2)
+        s.line(xc, ay + sign * large, xd, ay + sign * large, th.fg, 1.8)
+    s.text(xa + 4, ay - small - 10, "valve outlet", 11, th.muted, anchor="start")
+    s.text(xd - 4, ay - large - 10, "pipe", 11, th.muted, anchor="end")
+    s.dim(
+        xa + 40, ay - small, xa + 40, ay + small, "$d_i$", size=13, label_side="right"
+    )
+    s.dim(xd - 40, ay - large, xd - 40, ay + large, "$D_i$", size=13)
+    s.arrow(xb - 30, ay, xc + 20, ay, th.muted, 1.6)
+    s.text(
+        (xb + xc) / 2,
+        ay + large + 24,
+        "30° of total angle at most (7.1)",
+        12,
+        th.primary,
+        bold=True,
+    )
+    notes(
+        cx,
+        oy,
+        (
+            "Clause 7 is for valves with higher outlet Mach numbers,",
+            "with or without an expander downstream; the transition",
+            "piece is held to 30° of total angle",
+        ),
     )
 
 
@@ -6213,4 +6786,297 @@ def _d_free_field_traverses(s: SVG, th: Theme) -> None:
         "every source to be measured is broadband (A.4.1)",
         12,
         th.muted,
+    )
+
+
+#: ISO 7235 prints the e of the equivalent diameter, the b of the baffle
+#: thickness and the d of the dynamic pressure upright (BS EN ISO 7235:2009,
+#: key of Figure 6 and Equations (13), (14) and 6.5.2.2.1).
+_LOSS_UPRIGHT = ("d_e", "t_b", "p_d")
+
+#: The series I and II of the two runs, upright in the static pressures
+#: ``p_s1(I)n`` and ``p_s1(II)n`` of ISO 7235 Equation (15), as printed.
+_SERIES_UPRIGHT = ("p_I", "p_II")
+
+
+def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
+    """The ISO 7235 total-pressure-loss rig of 6.5, both series on one axis.
+
+    The arrangement is that of Figure 6: a fan, a flow meter, a straight
+    upstream duct, the upstream static-pressure plane, the test object or the
+    substitution duct, and the downstream static-pressure plane, with one
+    manometer across the two planes. The annotations are the numbers of
+    6.5.2.2.1 (upstream duct straight for 5 equivalent diameters or 2 m,
+    plane 1 and the velocity survey 1.5 equivalent diameters ahead of the
+    object, four taps in a piezometric ring, the profile uniform to 10 %
+    outside the 15 mm by the walls) and of the key of Figure 6 (plane 2 more
+    than 6 baffle thicknesses past the object). Each method keeps its own
+    rules: the two series of the fundamental method (6.5.2.2) at five flow
+    rates or more and its Equations (15) to (17), and the simplified method
+    of 6.5.2.1 with its 10 Pa floor, its 0.98 to 1.02 density window and its
+    Equations (11), (12) and (14). Two strips at the foot carry the equations
+    of each method: (11), (12) and (14) of the simplified one, and (15) to
+    (17) of the graphical evaluation of 6.5.2.2.2 at the flow rate ``q_Vn``,
+    whose running index n the print sets upright and the plate sets italic,
+    an index by ISO 80000-2 (docs/contributing/docstrings.md#d18).
+    """
+    x_fan = 82.0
+    x_fm, w_fm = 132.0, 50.0
+    x_up = x_fm + w_fm
+    x_p1 = 372.0
+    x_ob, w_ob = 440.0, 150.0
+    x_p2 = 702.0
+    x_end = 850.0
+    duct_h = 56.0
+
+    def span(x1: float, x2: float, y: float, label: str, colour: str) -> None:
+        s.line(x1, y, x2, y, colour, 1.2)
+        s.line(x1, y - 5, x1, y + 5, colour, 1.2)
+        s.line(x2, y - 5, x2, y + 5, colour, 1.2)
+        s.text((x1 + x2) / 2, y - 7, label, 12, colour, upright=_LOSS_UPRIGHT)
+
+    for row, (y, title, obj, colour) in enumerate(
+        (
+            (150.0, "Series I: test object installed", "test object", th.primary),
+            (362.0, "Series II: substitution duct", "substitution duct", th.secondary),
+        )
+    ):
+        ax = y + duct_h / 2
+        bottom = y + duct_h
+        s.text(
+            50,
+            y - (74 if row == 0 else 44),
+            title,
+            15,
+            colour,
+            anchor="start",
+            bold=True,
+        )
+
+        # fan, flow meter and the straight upstream duct
+        s.circle(x_fan, ax, 26, th.panel, th.fg, 2.2)
+        for dx, dy in ((0, -17), (15, 9), (-15, 9)):
+            s.line(x_fan, ax, x_fan + dx, ax + dy, th.fg, 2.4)
+        s.circle(x_fan, ax, 4, th.fg)
+        s.line(x_fan + 26, ax, x_fm, ax, th.fg, 2.0)
+        s.rect(x_fm, y, w_fm, duct_h, th.panel, th.fg, sw=2.0)
+        s.line(x_fm + w_fm / 2, y + 2, x_fm + w_fm / 2, y + 18, th.accent, 3.0)
+        s.line(
+            x_fm + w_fm / 2, bottom - 18, x_fm + w_fm / 2, bottom - 2, th.accent, 3.0
+        )
+        s.rect(x_up, y, x_ob - x_up, duct_h, th.panel, th.fg, sw=2.0)
+        s.arrow(x_up + 24, ax + 10, x_up + 84, ax + 10, th.fg, 2.0)
+        s.text(x_up + 54, ax - 4, "flow", 12, th.muted)
+
+        # the object, then the downstream duct
+        s.rect(x_ob + w_ob, y, x_end - x_ob - w_ob, duct_h, th.panel, th.fg, sw=2.0)
+        s.rect(x_ob, y - 10, w_ob, duct_h + 20, th.panel, colour, rx=4, sw=2.6)
+        if row == 0:
+            for k in range(4):
+                s.rect(x_ob + 14, y - 3 + 19 * k, w_ob - 28, 9, colour, rx=2)
+        s.text(x_ob + w_ob / 2, y - 18, obj, 12, colour, bold=True)
+
+        # the two static-pressure planes and the manometer across them
+        for x in (x_p1, x_p2):
+            s.line(x, y - 6, x, bottom + 6, th.accent, 1.6, dash="4,3")
+            s.circle(x, y, 4, th.accent)
+            s.circle(x, bottom, 4, th.accent)
+        y_m = bottom + 44
+        s.line(x_p1, bottom + 6, x_p1, y_m, th.accent, 1.4)
+        s.line(x_p2, bottom + 6, x_p2, y_m, th.accent, 1.4)
+        s.line(x_p1, y_m, x_p2, y_m, th.accent, 1.4)
+        s.rect((x_p1 + x_p2) / 2 - 16, y_m - 11, 32, 22, th.bg, th.accent, rx=5, sw=1.8)
+        s.text(
+            (x_p1 + x_p2) / 2,
+            y_m + 30,
+            "manometer: $Δp_s$ between the two planes"
+            if row == 0
+            else "the same planes, the same manometer",
+            12,
+            th.accent,
+        )
+        if row == 0:
+            s.text(x_fan, bottom + 26, "fan", 12, th.muted)
+            # One line lower than the fan's: in Spanish the two names ran
+            # together on one baseline.
+            s.text(x_fm + w_fm / 2, bottom + 44, "flow meter", 12, th.muted)
+            s.text(
+                x_p1 - 8,
+                bottom + 26,
+                "plane 1: $p_{s1}$, $S_1$",
+                12,
+                th.accent,
+                anchor="end",
+            )
+            s.text(
+                x_p2 + 8,
+                bottom + 26,
+                "plane 2: $p_{s2}$, $S_2$",
+                12,
+                th.accent,
+                anchor="start",
+            )
+            span(
+                x_up,
+                x_ob,
+                y - 42,
+                "straight: 5 $d_e$ or 2 m, whichever is greater",
+                th.fg,
+            )
+            span(x_p1, x_ob, y - 16, "1.5 $d_e$", th.fg)
+            span(x_ob + w_ob, x_p2, y - 16, "> 6 $t_b$", th.fg)
+
+    # --- the section at plane 1 ---------------------------------------------
+    x_s, y_s, side = 70.0, 532.0, 104.0
+    s.rect(x_s - 10, y_s - 10, side + 20, side + 20, "none", th.accent, rx=14, sw=1.4)
+    s.rect(x_s, y_s, side, side, th.panel, th.fg, sw=2.2)
+    s.rect(x_s + 9, y_s + 9, side - 18, side - 18, "none", th.muted, sw=1.1, dash="3,3")
+    s.line(
+        x_s + 9,
+        y_s + side / 2,
+        x_s + side - 9,
+        y_s + side / 2,
+        th.primary,
+        1.4,
+        dash="6,3",
+    )
+    s.line(
+        x_s + side / 2,
+        y_s + 9,
+        x_s + side / 2,
+        y_s + side - 9,
+        th.primary,
+        1.4,
+        dash="6,3",
+    )
+    for cx, cy in (
+        (x_s + side / 2, y_s),
+        (x_s + side / 2, y_s + side),
+        (x_s, y_s + side / 2),
+        (x_s + side, y_s + side / 2),
+    ):
+        s.circle(cx, cy, 5, th.accent)
+    s.text(x_s + side / 2, y_s + side + 32, "section at plane 1", 12, th.muted)
+
+    x_n, y_n = 222.0, 526.0
+    notes = (
+        (
+            "Plane 1, 1.5 $d_e$ ahead of the object: four taps joined in a piezometric ring",
+            th.accent,
+        ),
+        (
+            "Velocity survey there: ten equally spaced positions along a pair of",
+            th.primary,
+        ),
+        (
+            "perpendicular axes, within ±10 % of the mean; 15 mm by the walls left out",
+            th.primary,
+        ),
+        (
+            "Plane 2: more than 6 baffle thicknesses $t_b$ past the object (Figure 6),",
+            th.accent,
+        ),
+        (
+            "or the pressure of the reverberation room the duct opens into",
+            th.accent,
+        ),
+        (
+            "Fundamental method (6.5.2.2), both series: at least five flow rates each, spread evenly,",
+            th.fg,
+        ),
+        (
+            "and $ζ$ from Equations (15) to (17) at a flow rate in the middle of the range",
+            th.fg,
+        ),
+        (
+            "Simplified method (6.5.2.1): five flow rates, the lowest giving a pressure difference above 10 Pa,",
+            th.fg,
+        ),
+        (
+            "and $q_V$ corrected by Equations (9) and (10) when $ρ_1/ρ_2$ is outside 0.98 to 1.02",
+            th.fg,
+        ),
+    )
+    nsize = s.fit_size([line for line, _ in notes], (12, 11), 850 - x_n)
+    for k, (line, colour) in enumerate(notes):
+        s.text(
+            x_n,
+            y_n + 19 * k,
+            line,
+            nsize,
+            colour,
+            anchor="start",
+            upright=_LOSS_UPRIGHT,
+        )
+
+    # The first strip carries the simplified method's equations, named as
+    # such; the second, below it, the fundamental method's (15) to (17).
+    s.text(
+        50,
+        704,
+        "Equations of the simplified method (6.5.2.1)",
+        12,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    y_f = 738.0
+    s.rect(50, y_f - 24, 800, 38, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(70, y_f, "$p_t = p_s + ρ·(q_V/S)^2/2$  (11)", 13, th.fg, anchor="start")
+    s.text(
+        450,
+        y_f,
+        "$Δp_t = Δp_s + p_{d1}·[1 − (S_1/S_2)^2]$  (12)",
+        13,
+        th.fg,
+        upright=_LOSS_UPRIGHT,
+    )
+    s.text(
+        830,
+        y_f,
+        "$ζ = Δp_t/p_{d1}$  (14)",
+        13,
+        th.fg,
+        anchor="end",
+        upright=_LOSS_UPRIGHT,
+    )
+
+    # Equations (15) to (17) of 6.5.2.2.2, at the flow rate q_Vn in the middle
+    # of the range: tot, s, d, 1 and the series I and II upright as printed,
+    # and the running index n italic.
+    s.text(
+        50,
+        786,
+        "Equations of the fundamental method (6.5.2.2.2), at a flow rate $q_{Vn}$ "
+        "in the middle of the range",
+        12,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    y_g = 820.0
+    s.rect(50, y_g - 24, 800, 38, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(
+        70,
+        y_g,
+        "$Δp_{tot,n} = Δp_{sn} = p_{s1(I)n} − p_{s1(II)n}$  (15)",
+        13,
+        th.fg,
+        anchor="start",
+        upright=_SERIES_UPRIGHT,
+    )
+    s.text(
+        560,
+        y_g,
+        "$p_{dn} = ρ_{1n}·(q_{Vn}/S_1)^2/2$  (16)",
+        13,
+        th.fg,
+    )
+    s.text(
+        830,
+        y_g,
+        "$ζ = Δp_{tot,n}/p_{dn}$  (17)",
+        13,
+        th.fg,
+        anchor="end",
     )

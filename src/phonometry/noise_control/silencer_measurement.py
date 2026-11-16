@@ -1331,12 +1331,14 @@ def pressure_loss_coefficient(
     velocity head of Equation (13) takes that out and leaves a number that
     belongs to the object: how many velocity heads it costs to push air
     through it. Equation (17) is the same division with the mid-range point
-    of the fundamental method, :math:`\Delta p_{tot,n} / p_{dn}`.
+    of the fundamental method, :math:`\Delta p_{\mathrm{tot},n} / p_{\mathrm{d}n}`,
+    whose running index :math:`n` ISO 7235 prints upright and this module sets
+    italic, an index.
 
     :param total_loss: :math:`\Delta p_\mathrm{t}` or
-        :math:`\Delta p_{tot,n}`, in Pa.
+        :math:`\Delta p_{\mathrm{tot},n}`, in Pa.
     :param inlet_dynamic_pressure_pa: :math:`p_\mathrm{d1}` or
-        :math:`p_\mathrm{dn}`, in Pa.
+        :math:`p_{\mathrm{d}n}`, in Pa.
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
         is not positive and finite.
@@ -1344,16 +1346,17 @@ def pressure_loss_coefficient(
         single number, or ``total_loss`` holds a text or a value that is not a real
         number.
     :warns SilencerMeasurementWarning: If the loss does not exceed the 10 Pa
-        6.5.2.1 asks even the lowest airflow rate of a series to produce.
-        The clause reads *greater than*, so a point sitting exactly on 10 Pa
-        is one the series may not be built from and warns like any below it.
+        the simplified method of 6.5.2.1 asks its lowest airflow rate to
+        produce. The clause reads *greater than*, so a point sitting exactly
+        on 10 Pa is one that method may not be built from and warns like any
+        below it.
     """
     loss = _require_finite_scalar(total_loss, "total_loss")
     head = require_positive(inlet_dynamic_pressure_pa, "inlet_dynamic_pressure_pa")
     if abs(loss) <= MIN_PRESSURE_DIFFERENCE_PA:
         msg = (
-            "6.5.2.1 wants the lowest airflow rate of a series to produce a "
-            f"pressure difference greater than {MIN_PRESSURE_DIFFERENCE_PA:.0f} "
+            "the simplified method of 6.5.2.1 wants its lowest airflow rate to "
+            f"produce a pressure difference greater than {MIN_PRESSURE_DIFFERENCE_PA:.0f} "
             f"Pa, so that the smallest number in the fit is still a "
             f"measurement; this point is {loss!r} Pa."
         )
@@ -1383,9 +1386,10 @@ def average_pressure_loss_coefficient(
     on the pressures, so the two series need not be run at matching flow
     rates and need not even have the same number of points.
 
-    Each series is at least five airflow rates spread over the test range,
-    and the lowest has to produce more than
-    :data:`MIN_PRESSURE_DIFFERENCE_PA`.
+    Each series is at least five airflow rates spread over the test range
+    (6.5.2.2.1). The 10 Pa floor on the lowest rate,
+    :data:`MIN_PRESSURE_DIFFERENCE_PA`, belongs to the simplified method of
+    6.5.2.1, and :func:`pressure_loss_coefficient` is where it is checked.
 
     :param object_static_pressure_pa: :math:`p_{s1(\mathrm{I})i}`, the upstream
         static pressures of the series with the test object, in Pa.

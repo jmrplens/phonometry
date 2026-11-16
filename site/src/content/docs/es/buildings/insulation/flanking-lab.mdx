@@ -398,6 +398,13 @@ sitúa a 45° respecto a las viguetas. En uniones ligeras el operador debería
 mantenerse fuera del forjado salvo que pueda demostrarse que su peso y su
 amortiguamiento no influyen.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_junction_positions.svg" alt="Planta de un elemento emisor y del elemento receptor abatido a su lado al otro lado de la unión ensayada: cuatro posiciones de excitación repartidas por el elemento emisor, las tres posiciones de medición de la primera en cada placa, y las seis distancias mínimas del apartado 7.2.5 dibujadas sobre los tramos que rigen, 0,5 m de una posición de excitación al borde del elemento, 1,0 m entre posiciones de excitación, 1,0 m a la unión, 1,0 m a sus posiciones de medición, 0,5 m entre estas y 0,25 m de una de ellas al borde; un recuadro muestra una máquina de impactos a 45° de las viguetas de un forjado entramado" width="92%" />
+
+La planta pone esos números sobre un elemento. Cada distancia que lleva es un
+mínimo, y ninguna de las marcas está en retícula: una disposición cumple
+cuando cada tramo mide al menos lo que el dibujado para él, estén donde estén
+las posiciones.
+
 **Las dos direcciones.** $K_{ij}$ es simétrico solo porque la norma lo hace
 serlo: recorre todo el procedimiento con el elemento $i$ excitado y otra vez
 con el elemento $j$ excitado, y promedia las dos diferencias de niveles antes
@@ -412,6 +419,20 @@ emisor a través de las placas del techo, viaja lateralmente por encima del
 tabique y vuelve a bajar a través de las placas del recinto receptor. Ese
 trayecto suele ser el eslabón más débil de una distribución de oficinas, y no
 es lo que describe el $R_\mathrm{w}$ de un tabique.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ceiling_plenum_facility.svg" alt="Dos paneles. A: sección de la instalación de ensayo de ISO 140-9, dos recintos de al menos 50 m³ bajo un único techo suspendido continuo, de 2,8 m ± 0,2 m de altura, el tabique divisorio que acaba bajo el techo con la cabeza biselada a 100 mm como máximo, un plenum de 650 mm a 760 mm de profundidad con revestimiento absorbente en sus testeras, y el trayecto medido dibujado hacia arriba a través del techo, a lo largo del plenum y de nuevo hacia abajo; a su lado una planta del plenum, de 4,5 m ± 0,5 m de anchura, con una pared lateral y las dos testeras revestidas, y lo que piden los apartados 5.1.2 a 5.1.5. B: los símbolos del modelo unidimensional de Vigran sobre la misma sección, las longitudes de techo LS y LR, la altura del recinto emisor HS, la profundidad del plenum h y los índices de reducción RS y RR" width="92%" />
+
+El dibujo separa dos cosas que comparten esa geometría. El panel A es la
+instalación de laboratorio en la que ISO 140-9 mide el trayecto, con lo que
+fijan sus apartados 5.1.2 a 5.1.5: un interior de 4,5 m ± 0,5 m de anchura y
+2,8 m ± 0,2 m de altura bajo el techo suspendido, dos recintos de al menos
+50 m³ cuyos volúmenes difieren en al menos un 10 %, un tabique divisorio que
+acaba bajo el techo con la cabeza biselada a 100 mm como máximo, un plenum de
+650 mm a 760 mm de profundidad y un revestimiento absorbente en una pared
+lateral y en las dos testeras del plenum. El panel B lleva los símbolos del
+modelo unidimensional de más abajo, que es de Vigran y ajeno a la norma: su
+ejemplo resuelto, con un plenum de 0,43 m de profundidad, no es una geometría
+que la instalación pueda tener.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ceiling_plenum_flanking.svg" alt="Dos paneles: el índice de reducción del trayecto techo-plenum Rcl por bandas de octava para dos profundidades de plenum frente a la suma de los índices de los dos techos, y la diferencia de niveles normalizada del techo de un informe de ensayo acreditado ASTM E1414 con la curva ASTM E413 ajustada y sus deficiencias sombreadas dando CAC 34" width="92%" />
 
@@ -533,7 +554,8 @@ Un techo no se valora por $R_\mathrm{cl}$ sino por la
 **diferencia de niveles normalizada del techo suspendido** $D_\mathrm{n,c} = D - 10\log_{10}(A/A_0)$
 (ISO 140-9:1985, apartado 3.3), con $A$ el área de absorción acústica
 equivalente del recinto receptor y la referencia $A_0 = 10\ \text{m}^2$. La
-instalación tiene dos recintos de al menos 50 m³ cuyos volúmenes difieren en al
+instalación (panel A del dibujo que abre esta sección, apartados
+5.1.2 a 5.1.5) tiene dos recintos de al menos 50 m³ cuyos volúmenes difieren en al
 menos un 10 %, un tabique divisorio adelgazado a 100 mm como máximo en su parte
 superior y un plenum de 650 mm a 760 mm de profundidad con una pared lateral y
 las dos testeras revestidas; la norma imprime la absorción exigida al

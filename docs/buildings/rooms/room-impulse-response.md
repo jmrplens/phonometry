@@ -356,7 +356,7 @@ envelope with the Schroeder energy-decay curve below: the straight decay
 whose slope becomes the reverberation time in the
 [Room Acoustics guide](room-acoustics.md).
 
-**Video:** [Sweep measurement and deconvolution to the impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_sweep_deconvolution.webm): An exponential sweep crosses a drawn room while the recorded spectrogram builds, with the discrete reflections appearing as delayed copies of the main ridge; the inverse filter then collapses the whole recording into the impulse response.
+**Video:** [Sweep measurement and deconvolution to the impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_sweep_deconvolution.webm): An exponential sweep crosses a drawn room while the recorded spectrogram builds, with the discrete reflections appearing as delayed copies of the main ridge; the inverse filter then collapses the whole recording into the impulse response.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.webp" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" width="88%"></picture>
 
@@ -511,7 +511,7 @@ floor reflection reaching the microphone alongside the direct sound comb-filters
 the response, and moving the microphone moves the comb with it. That is the
 mechanism behind the first two mistakes.
 
-**Video:** [Comb filtering from a single floor reflection](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_comb_filtering.webm): Direct sound and one floor reflection reach the microphone; as the microphone height changes, the delay between the two paths shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces.
+**Video:** [Comb filtering from a single floor reflection](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_comb_filtering.webm): Direct sound and one floor reflection reach the microphone; as the microphone height changes, the delay between the two paths shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces.
 
 Four placement mistakes bias the mean itself:
 

@@ -4,12 +4,27 @@ description: "Cepstrum de potencia, real y complejo: ecos y su coeficiente de re
 references:
   - type: standard
     organization: "International Organization for Standardization"
-    year: 2021
+    year: 1998
     title: "Mechanical vibration and shock — Mechanical mounting of accelerometers"
-    designation: "ISO 5348:2021"
+    designation: "ISO 5348:1998"
     implemented: false
-    url: "https://www.iso.org/standard/78160.html"
-    note: "Los métodos de montaje que hay detrás de la frecuencia superior utilizable de una medición de análisis de envolvente: montaje atornillado y pegado frente a bases magnéticas y sondas de mano."
+    note: "Los métodos de montaje que hay detrás de la frecuencia superior utilizable de una medición de análisis de envolvente: el rango de trabajo de 5.2.1, un quinto de la resonancia del acelerómetro montado, y las respuestas características de las Figuras 5 a 9 para montaje atornillado, pegado, sobre imán y con sonda de mano. La edición leída es su adopción alemana sin cambios, DIN ISO 5348:1999-07; revisada después como ISO 5348:2021 (https://www.iso.org/standard/78160.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "La regla que fija el límite superior de frecuencia de un acelerómetro en un tercio de su resonancia, para 1 dB (5.2), y los límites que da el Anexo A.1 para el adhesivo, la cera y los imanes de sujeción."
+  - type: book
+    authors: ["Norton, M. P.", "Karczub, D. G."]
+    year: 2003
+    title: "Fundamentals of noise and vibration analysis for engineers"
+    edition: "2.ª ed."
+    publisher: "Cambridge University Press"
+    doi: "10.1017/CBO9781139163927"
+    note: "Sección 4.3.2 (p. 272), las cinco formas habituales de montar un acelerómetro: el espárrago roscado, el espárrago pegado y una capa fina de cera dan respuestas en frecuencia muy buenas, un imán limita la respuesta a unos 6000 Hz y una sonda de mano a unos 1000 Hz."
   - type: book
     authors: ["Havelock, D.", "Kuwano, S.", "Vorländer, M. (Eds.)"]
     year: 2008
@@ -554,14 +569,26 @@ recórtalos antes de leer amplitudes.
 
 **El montaje.** La frecuencia superior utilizable la fija la resonancia del
 acelerómetro *montado*, no el límite de la hoja de características del sensor, y
-esa es justamente la banda que necesita la cadena de rodamientos. El montaje
-atornillado o con una capa fina de adhesivo mantiene utilizable un acelerómetro
-de uso general hasta unos 10 kHz; una base magnética suele hundir eso a un par de
-kilohercios, y una sonda de mano a cerca de 1 kHz, es decir, el montaje por sí
-solo puede destruir la banda de la que depende el método. Pon el sensor sobre el
-soporte del rodamiento, en la zona de carga, tan cerca de la pista exterior como
-permita la máquina, con su eje en la dirección de la carga y el cable con
-descarga de tracción. ISO 5348 es la referencia de montaje.
+esa es justamente la banda que necesita la cadena de rodamientos. La lectura se
+mantiene dentro de 1 dB aproximadamente hasta un tercio de la resonancia del
+acelerómetro (ISO/TS 7849-1, 5.2), que en la máquina es la del acelerómetro
+montado, y, en un acelerómetro sin amortiguar, dentro de un pequeño porcentaje
+hasta un quinto de esa misma resonancia (ISO 5348:1998, 5.2.1). Las curvas características
+que ISO 5348:1998 dibuja para un acelerómetro típico (Figuras 5 a 9) sitúan la
+resonancia cerca de 30 kHz atornillado con una película de aceite, algo más
+abajo con una capa fina de adhesivo duro, cerca de 20 kHz sobre un imán y cerca
+de 2 kHz con una sonda de mano. Así, el montaje atornillado o con una capa fina
+de adhesivo duro mantiene utilizable un acelerómetro de uso general hasta unos
+10 kHz; una base magnética deja unos pocos kilohercios (unos 6 kHz en Norton y
+Karczub, sección 4.3.2, mientras que ISO/TS 7849-1, Anexo A, solo admite un imán
+de sujeción por debajo de 2,5 kHz y sobre acero liso y plano); y una sonda de
+mano se queda por debajo de 1 kHz: es decir, el montaje por sí solo puede
+destruir la banda de la que depende el método. Pon el sensor sobre el soporte del rodamiento, en la zona de carga, tan
+cerca de la pista exterior como permita la máquina, con su eje en la dirección
+de la carga y el cable con descarga de tracción. ISO 5348 es la referencia de
+montaje, y la guía de
+[frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/#paso-0-conseguir-el-registro)
+dibuja estos montajes y posiciones sobre un tren de motor y reductora.
 
 ```python
 # Una resonancia estructural de 3 kHz excitada a una frecuencia de defecto de

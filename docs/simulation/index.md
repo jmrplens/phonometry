@@ -57,11 +57,11 @@ cross-section: interference and diffraction patterns, arrival times and modal
 frequencies, not 3D levels. When a closed form exists, prefer it, and use the
 solver to verify the assumptions it rests on.
 
-Those cross-checks are not only arguments: twenty-four of the animations in
-this documentation are output from these two solvers, nineteen from the
-acoustic one and five from the elastic one, and twenty-one of them are filed
-on the guides whose physics they settle rather than here. Eighteen of the
-acoustic solver's nineteen are on these guides:
+Those cross-checks are not only arguments: twenty-eight of the animations in
+this documentation are output from these two solvers, twenty-two from the
+acoustic one and six from the elastic one, and twenty-four of them are filed
+on the guides whose physics they settle rather than here. Twenty of the
+acoustic solver's twenty-two are on these guides:
 
 | Guide | What its animations show |
 |---|---|
@@ -69,6 +69,7 @@ acoustic solver's nineteen are on these guides:
 | [Reverberation prediction](../buildings/rooms/reverberation-prediction.md) | the same room modes, the hall of columns that turns one wavefront into a mixed field, and the same absorption placed two ways |
 | [Outdoor propagation](../environment/propagation/outdoor-propagation.md) | barrier diffraction at two wavelengths, and the ground-effect lobe pattern |
 | [Ground effect and barriers](../environment/propagation/ground-barriers.md) | barrier diffraction at two wavelengths |
+| [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md) | the EN 1793-5 pulse in front of a 4 m and a 2.5 m sample, and the Adrienne window of each closing before the ground reflection and the top edge arrive |
 | [Atmospheric refraction](../environment/propagation/atmospheric-refraction.md) | downwind and upwind refraction |
 | [Airport noise](../aircraft/airport-noise.md) | the ground-effect lobe pattern |
 | [Impedance tube](../materials/absorbers/impedance-tube.md) | the virtual impedance tube and the virtual transmission tube |
@@ -80,15 +81,18 @@ acoustic solver's nineteen are on these guides:
 | [Silencers](../devices/noise-control/silencers.md) | the expansion chamber and the quarter-wave side branch |
 | [Panel sound insulation](../buildings/design/panel-sound-insulation.md) | the wall aperture |
 | [Underwater propagation](../underwater/underwater-propagation.md) | the SOFAR duct, and the critical grazing angle over two seabeds |
+| [Underwater acoustics](../underwater/underwater-acoustics.md) | Lloyd's mirror: a source under a pressure-release surface at 31.5 Hz and at 315 Hz, with its inverted image |
 
-Three of the elastic solver's five are on guides too: the bending packet
+Four of the elastic solver's six are on guides too: the bending packet
 entering an L-junction, on
 [junction transmission](../vibration/structural/junction-transmission.md),
-the coincidence plate, on panel sound insulation, and a plate driven below and
+the coincidence plate, on panel sound insulation, a plate driven below and
 above coincidence, on
-[sound power from surface vibration](../devices/emission/vibration-sound-power.md).
-The first two also appear on the elastic page below, where the solver that
-produced them is explained.
+[sound power from surface vibration](../devices/emission/vibration-sound-power.md),
+and the hit on a half-space that leaves a Rayleigh train on its surface, on
+[predicting vibration](../vibration/immission/vibration-prediction.md).
+The first two and the last also appear on the elastic page below, where the
+solver that produced them is explained.
 
 Several of those guides do more than illustrate. The impedance-tube guide runs
 a **whole standardised measurement inside the domain**: the ISO 10534-2 and

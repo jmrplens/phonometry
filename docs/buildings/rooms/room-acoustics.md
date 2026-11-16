@@ -105,7 +105,7 @@ IR by hand to remove its pre-delay, and be suspicious of C50/C80 from a
 recording whose direct sound is soft or has been pre-ringed by external
 processing, because the trigger can then fire late.
 
-**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
+**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
@@ -446,7 +446,7 @@ dominates the RMS pressure map, off resonance the room still responds,
 but the forced field stays weak and never organises into that (2,1)
 nodal pattern.
 
-**Video:** [On-mode versus off-mode drive in a rigid room (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_room_modes.webm): A 2D FDTD simulation of a rigid 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency side by side. On resonance a standing-wave pattern with fixed nodal lines grows until it dominates the RMS pressure map; off resonance the forced response stays weak and never organises into that nodal structure.
+**Video:** [On-mode versus off-mode drive in a rigid room (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_room_modes.webm): A 2D FDTD simulation of a rigid 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency side by side. On resonance a standing-wave pattern with fixed nodal lines grows until it dominates the RMS pressure map; off resonance the forced response stays weak and never organises into that nodal structure.
 
 ### `room_parameters()` parameters
 

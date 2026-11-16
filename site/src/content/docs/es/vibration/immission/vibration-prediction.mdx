@@ -15,6 +15,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 La parte 1 de la DIN 4150 es la primera pregunta de la serie. Antes de volar
 una cantera, abatir una chimenea, hincar un pilote o construir una línea,
@@ -98,6 +99,29 @@ ax.legend()
 ```
 
 </details>
+
+La ley de decaimiento parte de la onda superficial porque, como dice la
+norma bajo la fórmula (1), la vibración de una fuente próxima a la superficie
+se propaga sobre todo por la superficie del terreno, como onda de Rayleigh. La
+animación lo enseña en el semiespacio del esquema elástico: un golpe sobre
+la superficie libre manda un frente de compresión y otro de cizalla hacia el
+interior, y a lo largo de la superficie el tren que los sigue es el movimiento
+más intenso y el último en pasar.
+
+<Video
+  name="anim_elastic_halfspace_waves"
+  width={2400}
+  height={1350}
+  title="El problema de Lamb con la superficie superior libre y con ella rígida"
+  description="Un golpe vertical sobre un semiespacio de aluminio emite un frente de compresión y un frente de cizalla más lento, ambos dibujados con arcos punteados en sus radios analíticos exactos, que se mantienen pegados a ellos mientras se expanden y salen del encuadre. En el panel de superficie libre un tren de lóbulos intensos recorre la superficie un paso por detrás del frente de cizalla, el movimiento más intenso del encuadre una vez lejos del impacto, hasta que sale por los lados, y las dos trazas de sonda de al lado se separan en el tiempo de vuelo de Rayleigh. El clip sigue hasta que los dos frentes de cuerpo han salido del encuadre. En el panel de superficie rígida aparecen esos mismos dos frentes y no los sigue ningún tren de superficie."
+/>
+
+*A lo largo de la superficie el tren de Rayleigh llega después de los dos
+frentes de cuerpo y lleva el movimiento más intenso. Es la onda en cuyas
+longitudes de onda mide la fórmula (1) el campo cercano, y de la que parte la
+figura 1 de la DIN 4150-1:2001-06. El semiespacio del clip es de aluminio, no de suelo: es el clip de la
+[guía de ondas elásticas](/phonometry/es/simulation/elastic-waves/), y enseña
+las clases de onda, no un decaimiento del que leer cifras.*
 
 El amortiguamiento solo ya merece dibujarse, y la figura 2 lo dibuja para una
 relación de amortiguamiento de 0,01 y una velocidad de onda de 200 m/s: en
@@ -298,6 +322,9 @@ numérica o experimental propia, y la biblioteca rechaza la distancia.
 - [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
   las velocidades de onda del terreno de las que sale la longitud de onda de
   aquí.
+- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+  el esquema que hay detrás de la animación de la sección 1, y el problema de
+  Lamb con la superficie libre y con ella rígida.
 - Referencia de API:
   [`vibration.immission.prediction`](/phonometry/es/reference/api/vibration/prediction/).
 

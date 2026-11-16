@@ -116,11 +116,39 @@ print(hearing.check_audiometric_ambient_noise(
 ).passes)                                                     # True
 ```
 
+### How the room measurement goes (11.1, 11.2)
+
+A verdict on the room is worth what the spectrum set against the limits is
+worth, and the last paragraph of 11.1 says how that spectrum is taken:
+
+- at a time when conditions are representative of those in which the
+  audiometric tests are carried out, with the ventilation system operating if
+  it usually operates during testing;
+- at the position the head of the test subject would occupy in the room, with
+  the subject not present;
+- with an instrument that meets the requirements for class 1 sound level
+  meters of IEC 61672-1 and, for its one-third-octave bands, those of the
+  filter standard IEC 61260, which the clause prints as "IEC 61620" (the
+  transposed digits are registered in
+  [ERRATA](/phonometry/reference/errata/));
+- with a noise floor at least 6 dB below the sound pressure level being
+  measured.
+
 A measurement that leaves bands out is judged on those it has and does not
 pass: the room is not shown to meet the bands nobody measured. `noise_floor_levels=`
 flags the bands where the reading is within 6 dB of the meter's own floor,
 which 11.1 forbids; such a reading overstates the room, so a band within its
 limit still is, and one over it may be the meter's.
+
+Where the sound pressure levels cannot be measured, 11.2 allows a
+psycho-acoustic check in their place: an audiometric test on at least two
+subjects known to have stable audiograms and, at every frequency, hearing
+threshold levels lower than the lowest hearing levels to be used in regular
+testing. Thresholds that come out higher by 5 dB or more show that the noise
+in the room has to be reduced. The check is made by bone conduction if bone
+conduction audiometry is performed in the room, and during the time in which
+the audiometry would normally be conducted. It is a procedure for the tester,
+and nothing in the library runs it.
 
 ## From responses to a threshold (6.2 to 7.5)
 
@@ -315,7 +343,9 @@ components of A.3.7 to A.3.9; `budget.plot()` draws the eight as bars.
 
 With loudspeakers the room is part of the instrument, so ISO 8253-2 qualifies
 it, with the subject and the chair absent and the audiometry's own signals, as
-one of three fields:
+one of three fields. Every level is read on a sound level meter that complies
+with IEC 61672-1, type 1, except the readings a directional microphone takes
+in the diffuse field (5.1):
 
 - a **free field** (5.2): the loudspeaker at least 1 m away, the level 0.15 m
   to the left, right, above and below the reference point within ±1 dB of the
@@ -328,10 +358,22 @@ one of three fields:
   the axial points 0.10 m out. Its usable frequency range is the range where the
   requirements hold;
 - a **diffuse field** (5.3): six positions 0.15 m out within ±2.5 dB and the ear
-  sides within 3 dB, and from 500 Hz up the levels a directional microphone
-  reads in the directions of the most and the least incident energy within the
-  variation Table 1 allows for its front-to-random index: 5 dB for an index of
-  5 dB or more, 4.5 dB for 4.5 dB, 4 dB for 4 dB.
+  sides within 3 dB, read with an omnidirectional microphone kept in the same
+  orientation at every position, and from 500 Hz up the levels a directional
+  microphone reads in the directions of the most and the least incident energy
+  within the variation Table 1 allows for its front-to-random index: 5 dB for
+  an index of 5 dB or more, 4.5 dB for 4.5 dB, 4 dB for 4 dB. The notes to the
+  table add that the microphone should be turned through enough directions to
+  include the two planes where the largest and the smallest levels may be
+  expected, and that the field takes more than one loudspeaker, fed if
+  necessary with non-coherent signals to reduce standing waves.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_qualification.svg" alt="Two rooms, each drawn in plan and in elevation with the listener and the chair dashed because both are out of the room. A, one loudspeaker on its axis, for the free and the quasi-free field of ISO 8253-2: the loudspeaker stands at the head height of a seated listener, its reference axis through the reference point and a distance r of at least 1 m from it; four points lie 0.15 m to the left, right, above and below the reference point, and two more on the axis a distance d in front of it and behind it. B, sound from every side, for the diffuse field of ISO 8253-2 and the test sites of ISO 4869: more than one loudspeaker around the reference point, six points on the three axes around it, and a directional microphone turned at the reference point. Under each drawing, what each clause asks. Free field, 5.2: the four lateral points within plus or minus 1 dB up to 4 kHz and 2 dB above, left and right within 3 dB of each other above 4 kHz, and with d equal to 0.15 m the level in front less the level behind within plus or minus 1 dB of the inverse distance law. Quasi-free field, 5.4: plus or minus 2 dB and d equal to 0.10 m. Plane progressive wave, ISO 4869-3 5.2.3: the two points the centres of the fixture's end faces will occupy, 145 mm apart, within 2 dB, and from 500 Hz a directional microphone reading at least 10 dB more facing the source than turned away. Diffuse field, 5.3: six points at 0.15 m within plus or minus 2.5 dB with an omnidirectional microphone kept in one orientation, and from 500 Hz the loudest and quietest directions within 5 dB for a front-to-random index of 5 dB or more. Hearing protector test site, ISO 4869-1 4.2.2: six points at 15 cm and the microphone turned through 360 degrees in the horizontal plane. Random-incidence field, ISO 4869-3 5.2.2: six positions at 150 mm with the fixture removed" width="96%" />
+
+*Where the microphone goes, in plan and in elevation. A is the room of 5.2 and
+5.4: one loudspeaker, four points off its axis and two on it. B is the room of
+5.3, whose six points and turned microphone ISO 4869-1 and ISO 4869-3 ask of
+their own test sites.*
 
 ```python
 # A treated room, the loudspeaker 1.2 m away: deviations from the level at

@@ -23,6 +23,7 @@ from phonometry.environment import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
     from phonometry.environment import (
@@ -4066,6 +4067,630 @@ def generate_rolling_stock_track_decay(output_dir: str) -> None:
     check.plot(ax=ax, panel="decay", language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "rolling_stock_track_decay.svg")
+    plt.close()
+
+
+def _track_decay_grid_strings() -> dict[str, str]:
+    """The words of the excitation grid figure, in the language being drawn."""
+    if _LANG == "es":
+        return {
+            "above": "impacto sobre una traviesa (figura 2, a)",
+            "between": "impacto entre traviesas (figura 2, b)",
+            "interval": r"$\Delta x_n$: el tramo de carril de cada posición (A.2)",
+            "accelerometer": "acelerómetro, en el centro de un vano (apartado 6.2)",
+            "bay": "vano",
+            "near_title": "Campo cercano a escala: cuartos de vano hasta 2,5, medios hasta 4, vanos enteros hasta 8",
+            "far_title": "La rejilla entera, de 0 a 66 vanos",
+            "distance": "Distancia al acelerómetro [m]",
+            "bays": "Vanos desde el acelerómetro (figura 2)",
+            "near_span": "campo cercano (arriba)",
+            "first": r"$\Delta x_0$ = {value} m, de 0 a medio camino",
+            "last": r"$\Delta x_\mathrm{{max}}$ = {value} m, simétrico respecto a $x_\mathrm{{max}}$ (A.2)",
+            "x_max": r"$x_\mathrm{{max}}$ = {value} m",
+            "section": "Sección del carril (figura 1)",
+            "vertical": "fuerza\nvertical",
+            "lateral": "fuerza\ntransversal",
+            "sensor_v": "acelerómetro vertical,\npreferentemente en la cabeza\n(apartado 6.3 a)",
+            "sensor_t": "acelerómetro transversal,\ncara exterior (apartado 6.3 b)",
+            "sets": "Dos series (apartado 6.6): fuerza vertical\ncon respuesta vertical y fuerza transversal\ncon respuesta transversal, cuatro impactos\nválidos o más por posición.",
+            "floor": "Fórmula 2: $\\mathrm{{DR}}_\\mathrm{{min}}$ = {constant}/$x_\\mathrm{{max}}$\n= {value} dB/m con esta rejilla.",
+            "drop": "Apartado 6.7: la respuesta en la posición\nmás lejana ha de quedar {value} dB o más\npor debajo de la directa en cada banda;\nsi no, se sigue más allá del vano 66.",
+        }
+    return {
+        "above": "impact above a sleeper (Figure 2, a)",
+        "between": "impact between sleepers (Figure 2, b)",
+        "interval": r"$\Delta x_n$: the length of rail of each position (A.2)",
+        "accelerometer": "accelerometer, at the middle of a bay (clause 6.2)",
+        "bay": "bay",
+        "near_title": "Near field to scale: quarter bays out to 2.5, half bays to 4, whole bays to 8",
+        "far_title": "The whole grid, from 0 to 66 bays",
+        "distance": "Distance from the accelerometer [m]",
+        "bays": "Sleeper bays from the accelerometer (Figure 2)",
+        "near_span": "near field (above)",
+        "first": r"$\Delta x_0$ = {value} m, from 0 to halfway",
+        "last": r"$\Delta x_\mathrm{{max}}$ = {value} m, symmetrical about $x_\mathrm{{max}}$ (A.2)",
+        "x_max": r"$x_\mathrm{{max}}$ = {value} m",
+        "section": "Rail cross-section (Figure 1)",
+        "vertical": "vertical\nforce",
+        "lateral": "transverse\nforce",
+        "sensor_v": "vertical accelerometer,\npreferably on the head\n(clause 6.3 a)",
+        "sensor_t": "transverse accelerometer,\noutside face (clause 6.3 b)",
+        "sets": "Two sets (clause 6.6): vertical force with vertical\nresponse and transverse force with transverse\nresponse, four validated impacts or more\nat each position.",
+        "floor": "Formula 2: $\\mathrm{{DR}}_\\mathrm{{min}}$ = {constant}/$x_\\mathrm{{max}}$\n= {value} dB/m on this grid.",
+        "drop": "Clause 6.7: the response at the farthest\nposition has to be {value} dB or more below\nthe direct one in every band; if not,\ngo on beyond bay 66.",
+    }
+
+
+def _draw_rail_section(ax: "Axes", words: dict[str, str]) -> None:
+    """EN 15461 Figure 1 in outline: the two forces and where the sensors sit."""
+    from matplotlib.patches import Rectangle
+
+    for x, y, w, h in (
+        (-0.5, 0.0, 1.0, 0.12),
+        (-0.09, 0.12, 0.18, 0.5),
+        (-0.3, 0.62, 0.6, 0.3),
+    ):
+        ax.add_patch(
+            Rectangle((x, y), w, h, facecolor="none", edgecolor=COLOR_FG, lw=1.4)
+        )
+    ax.add_patch(Rectangle((-0.06, 0.92), 0.12, 0.09, color=COLOR_TERTIARY))
+    ax.add_patch(Rectangle((0.3, 0.71), 0.09, 0.12, color=COLOR_TERTIARY))
+    arrow = {"arrowstyle": "-|>", "color": COLOR_SECONDARY, "lw": 1.8}
+    ax.annotate("", xy=(0.0, 1.03), xytext=(0.0, 1.75), arrowprops=arrow)
+    ax.annotate("", xy=(-0.32, 0.77), xytext=(-0.85, 0.77), arrowprops=arrow)
+    ax.text(
+        0.1,
+        1.62,
+        words["vertical"],
+        ha="left",
+        va="center",
+        fontsize=9,
+        color=COLOR_SECONDARY,
+    )
+    ax.text(
+        -0.45,
+        1.24,
+        words["lateral"],
+        ha="right",
+        va="center",
+        fontsize=9,
+        color=COLOR_SECONDARY,
+    )
+    # The two labels sit apart, each beside its own sensor, so they do not read
+    # as one block.
+    ax.text(0.5, 1.12, words["sensor_v"], ha="left", va="center", fontsize=8.5)
+    ax.text(0.5, 0.46, words["sensor_t"], ha="left", va="center", fontsize=8.5)
+    ax.plot([0.07, 0.48], [0.97, 1.12], color=COLOR_MUTED, lw=0.9)
+    ax.plot([0.4, 0.48], [0.76, 0.48], color=COLOR_MUTED, lw=0.9)
+    ax.set_title(words["section"], fontsize=10.5)
+    ax.set_xlim(-1.3, 2.3)
+    ax.set_ylim(-0.1, 1.9)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+
+def generate_rolling_stock_track_decay_grid(output_dir: str) -> None:
+    """EN 15461 6.7 and Annex A.2: the 29 hammer positions and their intervals.
+
+    Every position is :data:`TRACK_DECAY_EXCITATION_INDICES` through
+    ``track_decay_excitation_positions``, every interval the library's own
+    reading of A.2, and the floor of Formula 2 the one a result reports, so
+    the figure cannot drift from what ``track_decay_rate`` sums.
+    """
+    print("Generating rolling_stock_track_decay_grid...")
+    from matplotlib.patches import Rectangle
+
+    from phonometry import environment
+    from phonometry._i18n import format_number
+    from phonometry.environment.sources.track_decay import (
+        _DECAY_CONSTANT_DB,
+        _FAR_FIELD_DROP_DB,
+        _intervals,
+    )
+
+    words = _track_decay_grid_strings()
+    spacing = 0.6
+    indices = np.asarray(environment.TRACK_DECAY_EXCITATION_INDICES)
+    positions = np.asarray(
+        environment.track_decay_excitation_positions(sleeper_spacing_m=spacing)
+    )
+    widths = _intervals(positions)
+    upper = np.concatenate(
+        ((positions[1:] + positions[:-1]) / 2.0, [positions[-1] + widths[-1] / 2.0])
+    )
+    lower = upper - widths
+    above = np.isclose(indices % 1.0, 0.5)
+    flat = environment.track_decay_rate(
+        np.exp(-np.outer(positions, [1.0])), frequencies=[1000.0], direction="vertical"
+    )
+    floor = flat.min_measurable_db_per_m
+    if floor is None:
+        msg = "the grid of Figure 2 has a farthest position, so Formula 2 has a floor"
+        raise RuntimeError(msg)
+
+    def number(value: float, decimals: int) -> str:
+        return format_number(value, _LANG, decimals=decimals, trim=True)
+
+    fig = plt.figure(figsize=(12.0, 7.6))
+    grid = fig.add_gridspec(2, 2, width_ratios=[3.6, 1.3], height_ratios=[1.15, 1.0])
+    ax_near = fig.add_subplot(grid[0, 0])
+    ax_all = fig.add_subplot(grid[1, 0])
+    ax_section = fig.add_subplot(grid[0, 1])
+    ax_notes = fig.add_subplot(grid[1, 1])
+
+    def impacts(
+        ax: "Axes", mask: NDArray[np.bool_], height: float, size: float
+    ) -> None:
+        for filled in (True, False):
+            chosen = mask & (above == filled)
+            ax.vlines(positions[chosen], 0.03, height, color=COLOR_SECONDARY, lw=1.0)
+            ax.plot(
+                positions[chosen],
+                np.full(int(chosen.sum()), 0.05),
+                linestyle="none",
+                marker="v",
+                markersize=size,
+                markeredgecolor=COLOR_SECONDARY,
+                markerfacecolor=COLOR_SECONDARY if filled else COLOR_PANEL,
+                label=words["above" if filled else "between"],
+            )
+
+    def brackets(ax: "Axes", mask: NDArray[np.bool_], top: float, step: float) -> None:
+        for count, n in enumerate(np.flatnonzero(mask)):
+            y = top - step * (count % 2)
+            ax.plot(
+                [lower[n], upper[n]],
+                [y, y],
+                color=COLOR_PRIMARY,
+                lw=1.6,
+                marker="|",
+                markersize=7,
+                label=words["interval"] if count == 0 else None,
+            )
+
+    # --- the near field, to scale --------------------------------------------
+    near = indices <= 8.0
+    ax_near.add_patch(
+        Rectangle(
+            (-0.75, -0.10), 6.3, 0.10, facecolor=COLOR_MUTED, edgecolor=COLOR_FG, lw=1.0
+        )
+    )
+    for bay in range(-1, 9):
+        centre = (bay + 0.5) * spacing
+        ax_near.add_patch(
+            Rectangle(
+                (centre - 0.13, -0.34),
+                0.26,
+                0.24,
+                facecolor="none",
+                edgecolor=COLOR_FG,
+                lw=1.0,
+            )
+        )
+    for bay in range(9):
+        ax_near.text(
+            bay * spacing,
+            -0.24,
+            str(bay),
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=COLOR_FG,
+        )
+    ax_near.text(
+        -0.6, -0.24, words["bay"], ha="center", va="center", fontsize=9, color=COLOR_FG
+    )
+    impacts(ax_near, near, 0.6, 7.0)
+    ax_near.add_patch(
+        Rectangle((-0.05, -0.10), 0.10, 0.10, color=COLOR_TERTIARY, zorder=3)
+    )
+    # The leader leaves the label from its lower left corner and stays left
+    # of the first impact, so it crosses none of the hammer arrows.
+    ax_near.annotate(
+        words["accelerometer"],
+        xy=(-0.05, -0.07),
+        xytext=(-0.72, 0.8),
+        ha="left",
+        va="center",
+        fontsize=9,
+        arrowprops={
+            "arrowstyle": "-",
+            "color": COLOR_TERTIARY,
+            "lw": 1.2,
+            "relpos": (0.0, 0.0),
+        },
+    )
+    brackets(ax_near, near, -0.5, 0.13)
+    ax_near.text(
+        -0.72,
+        -1.1,
+        words["first"].format(value=number(float(widths[0]), 3)),
+        ha="left",
+        va="center",
+        fontsize=9,
+        color=COLOR_PRIMARY,
+    )
+    for n in (8, 11, 15):
+        ax_near.text(
+            float((lower[n] + upper[n]) / 2.0),
+            -0.86,
+            f"{number(float(widths[n]), 3)} m",
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=COLOR_PRIMARY,
+        )
+    ax_near.set_xlim(-0.75, 5.55)
+    ax_near.set_ylim(-1.3, 0.95)
+    ax_near.set_xticks(np.arange(0.0, 4.81, spacing))
+    ax_near.set_yticks([])
+    for side in ("left", "right", "top"):
+        ax_near.spines[side].set_visible(False)
+    ax_near.grid(visible=False)
+    ax_near.set_xlabel(words["distance"])
+    ax_near.set_title(words["near_title"], fontsize=11)
+
+    # --- the whole grid -------------------------------------------------------
+    everything = np.ones_like(near)
+    ax_all.axvspan(0.0, 8.0 * spacing, color=COLOR_PRIMARY, alpha=0.3, lw=0)
+    ax_all.text(
+        8.0 * spacing + 0.4,
+        0.78,
+        "← " + words["near_span"],
+        ha="left",
+        va="center",
+        fontsize=9,
+    )
+    ax_all.plot([0.0, float(upper[-1])], [0.0, 0.0], color=COLOR_FG, lw=2.2)
+    impacts(ax_all, everything, 0.45, 5.0)
+    brackets(ax_all, everything, -0.3, 0.13)
+    x_max = float(positions[-1])
+    ax_all.text(
+        x_max - 0.5,
+        0.78,
+        words["x_max"].format(value=number(x_max, 1)),
+        ha="right",
+        va="center",
+        fontsize=9.5,
+    )
+    ax_all.text(
+        float(upper[-1]),
+        -0.72,
+        words["last"].format(value=number(float(widths[-1]), 1)),
+        ha="right",
+        va="center",
+        fontsize=9.5,
+        color=COLOR_PRIMARY,
+    )
+    ax_all.set_xlim(-1.5, 45.0)
+    ax_all.set_ylim(-0.95, 0.95)
+    ax_all.set_yticks([])
+    for side in ("left", "right"):
+        ax_all.spines[side].set_visible(False)
+    ax_all.grid(visible=False)
+    ax_all.set_xlabel(words["distance"])
+
+    def to_bays(metres: "ArrayLike") -> NDArray[np.float64]:
+        return np.asarray(metres, dtype=float) / spacing
+
+    def to_metres(count: "ArrayLike") -> NDArray[np.float64]:
+        return np.asarray(count, dtype=float) * spacing
+
+    bays = ax_all.secondary_xaxis(
+        "top",
+        functions=(to_bays, to_metres),
+    )
+    bays.set_xticks([0, 8, 12, 16, 20, 24, 30, 36, 42, 48, 54, 66])
+    bays.set_xlabel(words["bays"])
+    ax_all.set_title(words["far_title"], fontsize=11, pad=34)
+
+    # --- the section and what the standard asks of the far end ---------------
+    _draw_rail_section(ax_section, words)
+    ax_notes.axis("off")
+    handles, labels = ax_near.get_legend_handles_labels()
+    ax_notes.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(-0.08, 1.12),
+        fontsize=8.5,
+        frameon=False,
+    )
+    notes = (
+        words["sets"],
+        words["floor"].format(
+            constant=number(_DECAY_CONSTANT_DB, 3), value=number(float(floor), 2)
+        ),
+        words["drop"].format(value=number(_FAR_FIELD_DROP_DB, 0)),
+    )
+    y = 0.72
+    for note in notes:
+        ax_notes.text(
+            -0.06,
+            y,
+            note,
+            ha="left",
+            va="top",
+            fontsize=8.8,
+            transform=ax_notes.transAxes,
+        )
+        y -= 0.07 + 0.065 * (note.count("\n") + 1)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_track_decay_grid.svg")
+    plt.close()
+
+
+def _test_positions_strings() -> dict[str, str]:
+    """The words of the test positions figure, in the language being drawn."""
+    if _LANG == "es":
+        return {
+            "title_a": "Ensayo estático: la malla del apartado 5.5.1.1 alrededor de una unidad de {length} m, en planta y a escala",
+            "title_b": "Ensayo de arranque, nivel máximo: las posiciones del apartado 7.5.1.1 en las cuatro unidades de la figura 10",
+            "unit": "unidad de {length} m: {count} áreas de {area} m",
+            "area": "una posición lateral vale por su área:\n$l_i$ = {value} m aquí (de 3 m a 5 m)",
+            "end": "una posición de extremo\nvale por (π/2) × {radius} m\n= {value} m de arco\n(apartado 5.8.1)",
+            "distance": "{radius} m",
+            "notes": "Las laterales a {radius} m del eje de la vía\n(la línea de trazo y punto); todas a {height} m\nsobre la cabeza del carril.\n\nEn cada extremo, dos posiciones a 30° del\neje sobre un semicírculo de {radius} m de\nradio con centro en el punto medio del\nextremo de la unidad. En una unidad\nremolcada, solo en los extremos con\ncabina (apartado 5.5.1.1).\n\nSe miden los dos lados, salvo que la\nunidad sea simétrica (apartado 5.5.1.2).",
+            "axis": "Distancia por detrás del frente de la unidad [m]",
+            "length": "$l$ = {value} m",
+            "front": "frente",
+            "middle": "centro",
+            "span": "{value} m",
+            "rule": "Una posición {ahead} m por delante del frente. Si la unidad pasa de {limit} m,\notra {ahead} m por delante de su centro, y entre las dos, repartidas por igual,\nlas que hagan falta para que no disten más de {limit} m. Cada una a {radius} m\ndel eje de la vía y a {height} m de altura, a ambos lados y en los dos sentidos\nde marcha salvo simetría (figura 11).",
+        }
+    return {
+        "title_a": "Stationary test: the mesh of clause 5.5.1.1 around a {length} m unit, in plan and to scale",
+        "title_b": "Starting test, maximum level: the positions of clause 7.5.1.1 along the four units of Figure 10",
+        "unit": "{length} m unit: {count} areas of {area} m",
+        "area": "a side position stands for its area:\n$l_i$ = {value} m here (3 m to 5 m)",
+        "end": "an end position stands\nfor (π/2) × {radius} m\n= {value} m of arc\n(clause 5.8.1)",
+        "distance": "{radius} m",
+        "notes": "The side positions {radius} m from the track\ncentreline (the dash-dot line); all {height} m\nabove the top of rail.\n\nOff each end, two positions at 30° from\nthe centreline on a half circle of {radius} m\nradius about the midpoint of the end of\nthe unit. On a trailer unit, only off the\nends with a cab (clause 5.5.1.1).\n\nBoth sides are measured, unless the\nunit is symmetrical (clause 5.5.1.2).",
+        "axis": "Distance behind the front of the unit [m]",
+        "length": "$l$ = {value} m",
+        "front": "front",
+        "middle": "middle",
+        "span": "{value} m",
+        "rule": "One position {ahead} m ahead of the front. Past {limit} m of unit, another {ahead} m\nahead of its middle and, between the two, as many evenly spaced ones as keep\nthem no more than {limit} m apart. Each {radius} m from the track centreline and\n{height} m high, on both sides and for both driving directions unless the\nsources are symmetrical (Figure 11).",
+    }
+
+
+def generate_rolling_stock_test_positions(output_dir: str) -> None:
+    """ISO 3095 5.5.1.1 and 7.5.1.1: where the microphones of two tests stand.
+
+    The length an end position stands for is
+    :data:`STATIONARY_END_POSITION_LENGTH_M`, the radius of the half circles
+    is that length over a quarter turn, and every starting position is what
+    ``acceleration_test_positions`` returns for the four unit lengths of
+    Figure 10, so the figure cannot drift from what the library computes.
+    """
+    print("Generating rolling_stock_test_positions...")
+    from matplotlib.patches import Arc, Rectangle
+
+    from phonometry import environment
+    from phonometry._i18n import format_number
+    from phonometry.environment.sources.rolling_stock_noise import (
+        _AHEAD_M,
+        _MAXIMUM_SPACING_M,
+    )
+
+    words = _test_positions_strings()
+
+    def number(value: float, decimals: int) -> str:
+        return format_number(value, _LANG, decimals=decimals, trim=True)
+
+    # The library holds the 7.5 m of 5.5.1.1 as the radius of the arc an end
+    # position stands for in Formula 1 (5.8.1), and nowhere else.
+    end_length = environment.STATIONARY_END_POSITION_LENGTH_M
+    radius = end_length / (math.pi / 2.0)
+    # The guide's own stationary example: a 20 m locomotive in four areas.
+    unit, areas = 20.0, 4
+    area = unit / areas
+    mark = COLOR_SECONDARY
+
+    fig = plt.figure(figsize=(12.0, 8.6))
+    grid = fig.add_gridspec(2, 1, height_ratios=[1.3, 1.0])
+    ax = fig.add_subplot(grid[0])
+    ax_s = fig.add_subplot(grid[1])
+
+    # --- the stationary mesh, in plan ----------------------------------------
+    ax.plot([-11.5, unit + 9.5], [0.0, 0.0], ls="-.", color=COLOR_MUTED, lw=1.0)
+    ax.add_patch(
+        Rectangle((0.0, -1.5), unit, 3.0, facecolor="none", edgecolor=COLOR_FG, lw=1.6)
+    )
+    ax.text(
+        unit / 2.0,
+        0.75,
+        words["unit"].format(length=number(unit, 0), count=areas, area=number(area, 1)),
+        ha="center",
+        va="center",
+        fontsize=9,
+    )
+    for k in range(areas + 1):
+        for low, high in ((-radius, -1.5), (1.5, radius)):
+            ax.plot([k * area] * 2, [low, high], color=COLOR_MUTED, lw=0.8, ls=":")
+    for side in (1.0, -1.0):
+        ax.plot([0.0, unit], [side * radius] * 2, color=COLOR_MUTED, lw=0.8)
+        ax.plot(
+            (np.arange(areas) + 0.5) * area,
+            np.full(areas, side * radius),
+            linestyle="none",
+            marker="o",
+            markersize=7,
+            color=COLOR_PRIMARY,
+        )
+    for end, outward, start in ((0.0, -1.0, 90.0), (unit, 1.0, -90.0)):
+        ax.add_patch(
+            Arc(
+                (end, 0.0),
+                2.0 * radius,
+                2.0 * radius,
+                theta1=start,
+                theta2=start + 180.0,
+                color=COLOR_MUTED,
+                lw=0.8,
+            )
+        )
+        for side in (1.0, -1.0):
+            x = end + outward * radius * math.cos(math.radians(30.0))
+            y = side * radius * math.sin(math.radians(30.0))
+            ax.plot([end, x], [0.0, y], color=COLOR_MUTED, lw=0.8)
+            ax.plot(
+                [x],
+                [y],
+                linestyle="none",
+                marker="o",
+                markersize=7,
+                color=COLOR_PRIMARY,
+            )
+    # What Formula 1 weights by: one area, and a quarter of a circle.
+    ax.plot(
+        [area, 2.0 * area],
+        [radius + 1.0] * 2,
+        color=mark,
+        lw=2.0,
+        marker="|",
+        markersize=9,
+    )
+    ax.text(
+        1.5 * area,
+        radius + 1.6,
+        words["area"].format(value=number(area, 1)),
+        ha="center",
+        va="bottom",
+        fontsize=9,
+        color=mark,
+    )
+    ax.add_patch(
+        Arc(
+            (0.0, 0.0),
+            2.0 * radius + 1.2,
+            2.0 * radius + 1.2,
+            theta1=90.0,
+            theta2=180.0,
+            color=mark,
+            lw=2.0,
+        )
+    )
+    ax.text(
+        -11.8,
+        radius + 1.1,
+        words["end"].format(radius=number(radius, 1), value=number(end_length, 2)),
+        ha="left",
+        va="bottom",
+        fontsize=9,
+        color=mark,
+    )
+    ax.add_patch(
+        Arc((0.0, 0.0), 6.0, 6.0, theta1=150.0, theta2=180.0, color=COLOR_FG, lw=0.9)
+    )
+    ax.text(-4.3, 1.15, "30°", ha="center", va="center", fontsize=9)
+    ax.add_patch(
+        Arc((0.0, 0.0), 6.0, 6.0, theta1=180.0, theta2=210.0, color=COLOR_FG, lw=0.9)
+    )
+    ax.text(-4.3, -1.15, "30°", ha="center", va="center", fontsize=9)
+    ax.annotate(
+        "",
+        xy=(0.55 * unit, -radius),
+        xytext=(0.55 * unit, 0.0),
+        arrowprops={"arrowstyle": "<->", "color": COLOR_FG, "lw": 1.0},
+    )
+    ax.text(
+        0.55 * unit + 0.4,
+        -0.62 * radius,
+        words["distance"].format(radius=number(radius, 1)),
+        ha="left",
+        va="center",
+        fontsize=9,
+    )
+    ax.text(
+        unit + radius + 2.2,
+        radius + 1.0,
+        words["notes"].format(radius=number(radius, 1), height=number(1.2, 1)),
+        ha="left",
+        va="top",
+        fontsize=9,
+    )
+    ax.set_xlim(-12.0, unit + 27.0)
+    ax.set_ylim(-radius - 1.2, radius + 4.6)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_title(words["title_a"].format(length=number(unit, 0)), fontsize=11)
+
+    # --- the starting test, along the track -----------------------------------
+    lengths = (42.0, 54.0, 87.0, 108.0)
+    for row, length in enumerate(lengths):
+        y = -1.0 * row
+        positions = np.asarray(environment.acceleration_test_positions(length))
+        ax_s.add_patch(
+            Rectangle(
+                (0.0, y), length, 0.3, facecolor="none", edgecolor=COLOR_FG, lw=1.4
+            )
+        )
+        ax_s.text(
+            length + 2.0,
+            y + 0.15,
+            words["length"].format(value=number(length, 1)),
+            ha="left",
+            va="center",
+            fontsize=9,
+        )
+        marks = [0.0]
+        if length > _MAXIMUM_SPACING_M:
+            marks.append(length / 2.0)
+            ax_s.text(
+                length / 2.0,
+                y + 0.36,
+                words["middle"],
+                ha="center",
+                va="bottom",
+                fontsize=8,
+            )
+        for x in marks:
+            ax_s.plot([x, x], [y - 0.42, y + 0.3], color=COLOR_MUTED, lw=0.9)
+        ax_s.plot(
+            positions,
+            np.full(positions.size, y - 0.3),
+            linestyle="none",
+            marker="o",
+            markersize=7,
+            color=COLOR_PRIMARY,
+        )
+        edges = np.unique(np.concatenate((positions, marks)))
+        for left, right in zip(edges[:-1], edges[1:], strict=True):
+            ax_s.text(
+                float((left + right) / 2.0),
+                y - 0.3,
+                words["span"].format(value=number(float(right - left), 1)),
+                ha="center",
+                va="center",
+                fontsize=8.5,
+            )
+    ax_s.text(0.0, 0.36, words["front"], ha="center", va="bottom", fontsize=8)
+    ax_s.text(
+        62.0,
+        0.62,
+        words["rule"].format(
+            ahead=number(_AHEAD_M, 0),
+            limit=number(_MAXIMUM_SPACING_M, 0),
+            radius=number(radius, 1),
+            height=number(1.2, 1),
+        ),
+        ha="left",
+        va="top",
+        fontsize=8.6,
+    )
+    ax_s.set_xlim(-16.0, 128.0)
+    ax_s.set_ylim(-3.62, 0.85)
+    ax_s.set_xticks([-10.0, 0.0, 20.0, 40.0, 60.0, 80.0, 100.0])
+    ax_s.set_yticks([])
+    for spine in ("left", "right", "top"):
+        ax_s.spines[spine].set_visible(False)
+    ax_s.grid(visible=False)
+    ax_s.set_xlabel(words["axis"])
+    ax_s.set_title(words["title_b"], fontsize=11)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_test_positions.svg")
     plt.close()
 
 

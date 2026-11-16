@@ -1321,13 +1321,14 @@ def test_a_child_that_runs_and_fails_fails_the_test(script: str, status: int) ->
     one has started, a skip from the failing child fails the test.
     """
     libm_identity.run_child([sys.executable, "-I", "-c", "pass"], timeout=60)
-    try:
-        with pytest.raises(
-            subprocess.CalledProcessError, match=f"non-zero exit status {status}"
-        ):
-            libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
-    except pytest.skip.Exception as skipped:
-        pytest.fail(f"a child that ran and failed skipped its test: {skipped}")
+    with pytest.raises(
+        (subprocess.CalledProcessError, pytest.skip.Exception)
+    ) as raised:
+        libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
+    assert not isinstance(raised.value, pytest.skip.Exception), (
+        f"a child that ran and failed skipped its test: {raised.value}"
+    )
+    raised.match(f"non-zero exit status {status}")
 
 
 def _real_glibc_libm() -> Path:

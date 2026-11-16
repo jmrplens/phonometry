@@ -103,7 +103,7 @@ definiciones de las ponderaciones; lo que esa norma dice del instrumento que
 las mide está en la [verificación del
 vibrómetro](/phonometry/es/vibration/human/meter-verification/).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Cadena de medida de vibración de cuerpo entero: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, y el mayor valor por eje ponderado en frecuencia max(1,4 a_wx, 1,4 a_wy, a_wz) se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" width="94%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Cadena de medida de vibración de cuerpo entero: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z, con y hacia dentro de la página, al lado izquierdo del cuerpo; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, y el mayor valor por eje ponderado en frecuencia max(1,4 a_wx, 1,4 a_wy, a_wz) se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" width="94%" loading="eager" />
 
 <span id="0-obtener-los-numeros"></span>
 
@@ -126,6 +126,8 @@ lugar cerca del área de contacto, normalmente a menos de 10 cm de su centro; un
 respaldo al que no se llega puede medirse sobre el bastidor de detrás del cojín
 y corregirse después por la transmisibilidad del cojín. Toda ubicación de medida
 debe declararse.
+La lámina de *Qué ponderación en qué eje*, en la sección 1, dibuja cada uno de
+estos puntos con sus ejes y sus ponderaciones.
 
 Sobre una superficie **elástica** (el cojín de un asiento, un diván) el
 transductor se interpone entre la persona y la superficie en un soporte de forma
@@ -342,6 +344,23 @@ vibración de la sección 3:
 ¹ La evaluación de salud del apartado 7 se define sobre la superficie del
 asiento; la medida en x en el respaldo con `Wc`, $k = 0{,}8$ se recomienda
 pero queda fuera de la evaluación de severidad del Anexo B (7.2.3).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_whole_body_axes.svg" alt="Cuatro paneles con los ejes basicéntricos de la ISO 2631-1 y los puntos donde se mide la vibración de cuerpo entero. Panel a, una persona sentada vista de lado con un transductor y sus ejes x, y, z en tres puntos numerados: 1, la superficie del asiento bajo las tuberosidades isquiáticas (x e y ponderados con Wd y k 1,4 para salud y 1 para confort, z ponderado con Wk y k 1 en ambos, la rotación en torno a los tres ejes ponderada con We y factores de confort 0,63, 0,4 y 0,2 m/rad); 2, el respaldo en la zona principal de apoyo (x ponderado con Wc y k 0,8, y y z ponderados con Wd y factores de confort 0,5 y 0,4); 3, los pies (x e y ponderados con Wk y factor de confort 0,25, z con 0,4). Panel b, una persona de pie con el punto 4 en el suelo: x e y ponderados con Wd, z con Wk, factor de confort 1. Panel c, una persona tumbada con el punto 5 bajo la pelvis (horizontal Wd, vertical Wk, factor de confort 1), el punto 6 bajo la espalda, para el que la norma no da factor de confort, y el punto 7 bajo la cabeza sin almohada blanda (vertical Wj, factor 1); el eje x del cuerpo tumbado apunta hacia arriba y el z hacia la cabeza. Panel d, un eje sensible dibujado a 15 grados del eje z basicéntrico, la mayor desviación admitida, y un asiento inclinado en el que z se inclina con el cuerpo y se aparta de la vertical. El eje y apunta hacia dentro de la página en todas las vistas, al lado izquierdo del cuerpo" width="94%" />
+
+*La tabla, leída sobre el cuerpo. Los triedros son los ejes basicéntricos tal
+como los dibuja la Figura 1 de la ISO 2631-1: x hacia delante, saliendo del
+pecho; y hacia el lado izquierdo; z a lo largo de la columna, hacia arriba. Por
+eso una persona tumbada tiene el eje x vertical, y la ponderación sigue a la
+dirección (vertical `Wk`, horizontal `Wd`), no a la letra. Solo la superficie
+del asiento lleva factores de salud; la espalda de una persona tumbada es un
+apoyo que la norma nombra (5.3.1) sin dar un factor de confort para él (el
+8.2.2.3 da $k$ solo bajo la pelvis); y el mareo queda fuera de la lámina, porque
+el apartado 9 pondera un único eje con `Wf`, el z en la superficie que sostiene
+a la persona, y su orientación vale solo para personas sentadas y de pie (9.2.2,
+NOTA 3). El panel d es
+el apartado 5.2.2: un transductor puede quedar hasta 15° fuera del eje que mide,
+y en un asiento inclinado z se inclina con el cuerpo, por lo que se anota su
+ángulo respecto de la gravedad.*
 
 Las tres ponderaciones restantes pertenecen a las partes complementarias y no al
 mapa de posturas de la ISO 2631-1: `Wm` para ocupantes de edificios en todos los

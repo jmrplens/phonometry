@@ -3,6 +3,8 @@ title: "Same bits on every machine"
 description: "Determinism: why floating point drifts, how a designed filter stays byte-identical on any CPU, BLAS or thread count, what still differs, and the evidence."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 A weighting filter designed by phonometry is the same filter, byte for byte,
 whatever C library, BLAS, LAPACK, thread count or hash seed it is designed
 under, whichever compiler built numpy, and on any processor: x86-64 with or
@@ -12,7 +14,7 @@ arithmetic IEEE&nbsp;754 fixes or computed correctly rounded in exact
 integer arithmetic, so glibc, Apple's libm, musl and the Windows runtime,
 and glibc's x86-64 routines, built with fused multiply-adds or without, have
 no say in its bits. The
-two steps after the fit that used to go through a numerical library are the
+two steps outside the fit that used to go through a numerical library are the
 package's own arithmetic too: the poles of the BS.468-4 prototype, which
 LAPACK found, are the correctly rounded roots of the network's exact
 polynomial, and the second-order sections, which SciPy formed through the
@@ -109,7 +111,7 @@ The deterministic design path answers each door in kind, in
 - **The grid spelled out.** The geometric frequency grid is generated term
   for term with the endpoints pinned, so the fit evaluates the same
   frequencies everywhere.
-- **No library step after the fit.** The BS.468-4 prototype's six poles
+- **No library step outside the fit.** The BS.468-4 prototype's six poles
   were numpy's polynomial roots: eigenvalues of the companion matrix, which
   LAPACK finds by an iteration whose sums the BLAS and the compiler are free
   to order and to fuse. The network's denominator is now built from its
@@ -128,6 +130,20 @@ The deterministic design path answers each door in kind, in
   exactly the same distance from a pole it takes the first, as a stable
   sort does, where SciPy's choice goes through numpy's default sort, whose
   order of ties follows the processor.
+
+The same path as one column, in the order the code runs it, each stage beside the
+library step it replaced:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_weighting_design_path.svg" alt="A plate in two parts. Above, three dashed boxes name the doors a result drifts through between machines: reductions that reassociate, the vectorised transcendentals that numpy dispatches by CPU, and the platform's own libm. Below, the design path as a column of six stages, each beside the library step it replaced: the analog prototype, with the BS.468-4 poles as correctly rounded exact roots, in place of numpy.roots; the frequency grid of 257 points, spelled term for term, in place of numpy.geomspace; the target curve in real arithmetic, in place of numpy's complex products; the fit, Lawson rounds of Levenberg-Marquardt steps with pinned log, exp and pow, pairwise sums and elimination written out, in place of the libm and numpy's log, exp and pow, BLAS sums and LAPACK's dgesv; the bilinear transform and its gain in real arithmetic, in place of SciPy's bilinear_zpk; and the second-order sections, spelled step for step, in place of SciPy's zpk2sos. The column ends in one box: the same SOS bytes on every machine, which the CI matrix holds to one SHA-256 digest per curve at 48 kHz on Linux, macOS and Windows. A note under the column says that sin, tan, arctan and the magnitude of a complex root are correctly rounded in exact integer arithmetic, by Ziv's loop" width="92%" />
+
+*The order is the order of the code, not of the list above. The prototype comes
+first, because the fit starts from its poles, so the two steps the list names
+last sit on either side of the fit: the BS.468-4 poles before it and the
+second-order sections after it. The dashed boxes on the right are what each
+stage used to call, and the three doors close along the way: the grid and the
+pinned transcendentals close the second and the third, the pairwise sums and
+the elimination written out close the first, and real arithmetic takes the
+complex products away from the compiler that may or may not fuse them.*
 
 ## The evidence
 
@@ -315,7 +331,7 @@ ordinary form remain reproducible on one machine but may differ in the last
 bits across CPUs, which is the normal condition of scientific Python; the
 deterministic treatment is applied where a filter's identity matters.
 
-Nothing after the fit is a library's either. The BS.468-4 prototype's
+Nothing outside the fit is a library's either. The BS.468-4 prototype's
 poles and the second-order sections were the last two steps that were, the
 roots LAPACK found and the sections SciPy formed through the BLAS, and on
 64-bit ARM under OpenBLAS they parted 33 of the 133 checked designs from the

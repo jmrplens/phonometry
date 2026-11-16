@@ -177,6 +177,13 @@ disagree mostly on how their subjects fit the protector.
 
 ### The test room (4.2.2)
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_qualification.svg" alt="Two rooms, each drawn in plan and in elevation with the listener and the chair dashed because both are out of the room. A, one loudspeaker on its axis, for the free and the quasi-free field of ISO 8253-2: the loudspeaker stands at the head height of a seated listener, its reference axis through the reference point and a distance r of at least 1 m from it; four points lie 0.15 m to the left, right, above and below the reference point, and two more on the axis a distance d in front of it and behind it. B, sound from every side, for the diffuse field of ISO 8253-2 and the test sites of ISO 4869: more than one loudspeaker around the reference point, six points on the three axes around it, and a directional microphone turned at the reference point. Under each drawing, what each clause asks. Free field, 5.2: the four lateral points within plus or minus 1 dB up to 4 kHz and 2 dB above, left and right within 3 dB of each other above 4 kHz, and with d equal to 0.15 m the level in front less the level behind within plus or minus 1 dB of the inverse distance law. Quasi-free field, 5.4: plus or minus 2 dB and d equal to 0.10 m. Plane progressive wave, ISO 4869-3 5.2.3: the two points the centres of the fixture's end faces will occupy, 145 mm apart, within 2 dB, and from 500 Hz a directional microphone reading at least 10 dB more facing the source than turned away. Diffuse field, 5.3: six points at 0.15 m within plus or minus 2.5 dB with an omnidirectional microphone kept in one orientation, and from 500 Hz the loudest and quietest directions within 5 dB for a front-to-random index of 5 dB or more. Hearing protector test site, ISO 4869-1 4.2.2: six points at 15 cm and the microphone turned through 360 degrees in the horizontal plane. Random-incidence field, ISO 4869-3 5.2.2: six positions at 150 mm with the fixture removed" width="96%" />
+
+*Panel B is this test room: six points 15 cm from the reference point on the
+three axes, and a directional microphone turned through 360° at it. The lists
+under the drawings set its numbers beside those of ISO 8253-2 and of the two
+sites of ISO 4869-3, further down this page.*
+
 The sound field is qualified with the subject and the chair absent. The level
 15 cm from the reference point on the three axes stays within ±2.5 dB of the
 level at it, the right and left positions within 3 dB of each other, and from
@@ -423,6 +430,19 @@ $$
 \alpha_{j,e,f} = L_{\mathrm{passive},j,e,f} - L_{\mathrm{active},j,e,f}
 $$
 
+The two readings of an ear are taken one straight after the other, with the
+fitting of the earmuff and the microphones in the ears left as they are
+(5.4.3), in the random-incidence field of ISO 4869-1 (5.2). Four pairs of
+earmuffs are submitted, and each is tested by four of the sixteen subjects
+(5.1, 5.4.1).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anr_insertion_loss.svg" alt="Left, a head seen from the front wearing an earmuff, drawn twice with sound arriving from every side: in passive mode with the circuit off and the cups drawn empty, and in active mode with the circuit on and the cups filled; a dot at each ear marks a microphone in the ear with the ear canal closed, and a note between the two heads, over an arrow pointing both ways, says the fitting and the microphones are left untouched and one reading follows the other as soon as possible. A list under them gives the active insertion loss as the level in passive mode less the level in active mode in each ear and band, the broadband noise at an A-weighted level from 85 dB to 95 dB read in one-third-octave bands from 50 Hz or 100 Hz to 10 kHz, the sixteen subjects with both ears, the four pairs of earmuffs each tested by four subjects, and the 10 dB by which each band under the earmuff has to exceed its level with the noise off. Right, the linearity check of 5.4.4 as two staircases against the steps of the noise outside: the A-weighted level outside rises in equal steps to a dashed line marked 110 dB at most, the level at the ear follows it step for step until its last step, which is drawn short and marked not linear, and a dot marks the highest level outside for which the ear still followed. A list under it gives the red noise with its maximum in the 125 Hz one-third-octave band, the 5 dB steps, the 5 dB plus or minus 1 dB the level at the ear has to rise in the 125 Hz octave band, and what is reported. A strip at the foot gives the total attenuation as the passive attenuation of ISO 4869-1 plus the active insertion loss of the ear with the lower value, added subject by subject" width="96%" />
+
+*Left, the two readings of 5.4.3 on one wearer, with a microphone in each ear.
+Right, the check of [5.4.4](#linear-operation-544), further down this page:
+the staircases are levels without a scale, and the last step of the one at the
+ear is drawn short to show what the check is there to find.*
+
 Annex A treats its uncertainty the way ISO 4869-1 treats the attenuation's,
 over the sixteen values of the ear with the lower insertion loss, and prints an
 example, Table A.3:
@@ -576,7 +596,7 @@ The three one-third-octave levels at the ear can go in instead, as
 ## Earmuffs on a test fixture (ISO 4869-3)
 
 Sixteen subjects are a laboratory's week. ISO 4869-3 measures an earmuff
-without any: the acoustic test fixture is a metal cylinder 135 mm across with
+without any: the acoustic test fixture is a non-magnetic cylinder 135 mm across with
 its end faces 145 mm apart and a pressure microphone flush with one of them
 (5.1), and the **insertion loss** is the level at that microphone without the
 earmuff less the level with it seated on the fixture, in one-third-octave bands
@@ -594,6 +614,28 @@ quoted as representing the real-ear sound attenuation of an ear-muff, nor the
 protection provided by the ear-muff" (Clause 1). So nothing here feeds an
 insertion loss to the ISO 4869-2 methods above, which take the real-ear
 attenuation of sixteen subjects.
+
+The fixture gives the earmuff the width of a head and a place to rest its
+headband, and nothing else of a wearer. Its axis is horizontal; each end face
+leans 4.5° to the vertical, so the two are further apart at the top, and a
+spacer above the cylinder ends in a rubber pad for the headband (5.1.2, 5.1.3).
+The measurement is three readings of the one microphone. The first is taken
+with nothing on the fixture. For the second the earmuff goes on with its
+cushions centred on the end faces and its headband tightened until it just
+touches its support (5.4.1), and the level is read once it has been in place
+for about 30 s (5.4.2); the difference is the insertion loss of that fitting,
+and at least three fittings are made unless the repeatability of the device is
+already known from experience (5.4.3). The third puts an isolation cup in the
+earmuff's place and has to fall at least 10 dB below the occluded one (5.3),
+which is what tells the sound that came through the earmuff from the floor of
+the fixture and of the measuring system:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_earmuff_test_fixture.svg" alt="Top, the acoustic test fixture of ISO 4869-3 drawn to scale in two views. Along its axis it is a circle 135 mm plus or minus 5 mm across with the microphone at its centre, two dashed circles and two diameters marked on the end face, a spacer above it carrying a rubber pad 50 mm wide and 6 mm thick, and a short stand on a spring below. From the side the cylinder is a trapezium, its two end faces 145 mm plus or minus 1 mm apart at their centres and each leaning 4.5 degrees plus or minus 0.5 degrees to the vertical so that they are further apart at the top; the microphone lies inside on the axis with its diaphragm in the plane of the right-hand face, and the spacer reaches 123 mm plus or minus 1 mm from the axis under a curved pad 77 mm long. A list beside the views gives what 5.1.2 and 5.1.3 ask: a non-magnetic cylinder with its axis horizontal, a pressure microphone WS1P or WS2P of IEC 61094-4, positioning marks on each end face, a resilient mounting, and a spacer whose free end has a 100 mm radius under a pad of 30 IRHD to 85 IRHD. Bottom, three readings at the same microphone, each with a bar for its level. One, open: nothing on the fixture, the tallest bar. Two, occluded: an earmuff with its cushions centred on the end faces and its headband just touching the pad, read after about 30 s in place and fitted at least three times; its bar is lower, and the drop is marked insertion loss. Three, isolation cup: a small cup with absorbing material sealed over the microphone in place of the earmuff; its bar is lower again by at least 10 dB. A strip at the foot gives the insertion loss as the open level minus the occluded level in one-third-octave bands from at least 63 Hz to 8 kHz, the requirements of 5.3 on the test signal, the acoustic isolation of 5.1.4 and the two test sites of 5.2" width="96%" />
+
+*Above, the fixture to scale in the two views of Figure 1 a), with the
+dimensions 5.1.2 and 5.1.3 give it. Below, the three readings: the bars are
+levels without a scale, drawn for their order and for the two differences the
+standard names.*
 
 ```python
 # An earmuff fitted three times on the fixture (5.4.3), 63 Hz to 8 kHz.
@@ -624,10 +666,15 @@ and `level_stable` and `response_smooth` check that the test signal held within
 ±1 dB and that no two adjacent bands of it differ by more than 5 dB.
 
 The test site is qualified as a random-incidence field or a plane progressive
-wave (5.2). The random-incidence field is the diffuse field of ISO 8253-2
+wave (5.2), with the fixture removed. The random-incidence field is the diffuse
+field of ISO 8253-2
 ([audiometric test methods](/phonometry/perception/hearing/audiometry/)) with
-this standard's own Table 1, and Annex A notes that the fixture itself can be
-the directional microphone where its front-to-random index reaches 4 dB:
+this standard's own Table 1: six positions 150 mm from the reference point,
+which here is midway between the end faces of the fixture (3.9). They are the
+points of panel B in the drawing under [the test room](#the-test-room-422),
+whose lists carry both sites of this standard. Annex A notes that the fixture
+itself can be the directional microphone where its front-to-random index
+reaches 4 dB:
 
 ```python
 index = [hearing.ATF_FRONT_TO_RANDOM_INDEX.get(f, np.nan) for f in bands]

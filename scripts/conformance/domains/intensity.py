@@ -1746,6 +1746,35 @@ def _chk_workstation_operating_deviation() -> Outcome:
     return numeric(2.0, got, 0.05, unit="dB", places=3)
 
 
+def _annex_b_example_3_k3() -> float:
+    """K_3 of Table B.3: method A.2, from K_2 = 6.5 dB and DI*op,approx = 0.7 dB."""
+    ratio = ph.emission.environmental_ratio_from_k2(6.5, 0.7)
+    return float(ph.emission.local_environmental_correction(ratio))
+
+
+@register(
+    _WORKSTATION,
+    "ISO 11200:2014 Table B.3 local environmental correction",
+    "K_3A of ISO 11202 method A.2 from K_2A = 6.5 dB and DI*op,approx = 0.7 dB, dB",
+)
+def _chk_workstation_k3_method_a2() -> Outcome:
+    return numeric(4.7, _annex_b_example_3_k3(), 0.05, unit="dB", places=3)
+
+
+@register(
+    _WORKSTATION,
+    "ISO 11200:2014 Table B.3 accuracy grade",
+    "Grade of the method A.2 result for a machine 3 m in its largest dimension",
+)
+def _chk_workstation_grade_method_a2() -> Outcome:
+    # The table prints "therefore a grade 3 result is obtained"; ISO 11202:2010
+    # A.2.5 sets the margin of Condition (A.6) at 1 dB for 1 m < l_max <= 3 m.
+    grade = ph.emission.grade_from_local_correction(
+        _annex_b_example_3_k3(), largest_dimension_m=3.0
+    )
+    return record({"grade": 3.0}, {"grade": 2.0 if grade == "engineering" else 3.0})
+
+
 @register(
     _WORKSTATION,
     "ISO 11204:2010 A.1.2 the two routes to the ratio z",

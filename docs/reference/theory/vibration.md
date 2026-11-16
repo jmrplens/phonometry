@@ -88,6 +88,28 @@ least one minute, and samples shorter than about 8 s avoided (5.4.1). The
 carries the mass, attachment and grip-force constraints and the rest of the
 fault list.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hand_arm_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hand_arm_vibration.svg" alt="Left: a chain-saw front handle of 30 mm diameter gripped by a hand over a gripping zone of about 100 mm, with three numbered accelerometer positions (under the hand at the middle of the gripping zone, either side of the hand, and on the underside of the handle next to the hand), the cable taped to the handle near the transducer, the grip force, and the basicentric x_h y_h z_h frame rotated so y_h lies along the handle axis. Right: the evaluation chain from the three Wh-weighted axis magnitudes to the vibration total value a_hv, the partial exposures A_i(8) over the contact times, and A(8) against the exposure action value 2.5 and exposure limit value 5 m/s^2 of Directive 2002/44/EC, with a box giving the mass, averaging, sampling and range rules" width="94%"></picture>
+
+*Three accelerometer positions of 6.1.3 on one handle, here the front handle of
+a chain saw. The numbers 1 to 3 are the drawing's, not the standard's: 6.1.3
+numbers none, and Annex A of the same amendment calls two other places, those of
+the emission standards, positions 1 and 2. Position 1, under the hand at the
+middle of the gripping zone, is the most representative and the one that needs
+an adaptor. Positions 2, either side of the hand, and 3, the underside of the
+handle next to the middle of the hand, are together where 6.1.3 says most
+practical measurements put the accelerometers, and on a side handle it
+recommends one on each side of the hand and the average of the two. The cable is taped
+to the handle near the transducer because a cable the vibration deforms produces
+a signal of its own (6.2.3), and the frame is the basicentric one of ISO 5349-1
+Figure 1, rotated so that $y_\mathrm{h}$ lies along the handle axis. The box
+lists the rules a record has to keep: transducer and mount under 5 % of the mass
+they are fixed to (6.1.5), linear averaging over complete work cycles (6.1.11),
+the sampling rule of 5.4.1 above, and the lowest input range that does not
+overload, found by trial (6.1.10). The chain on the right is the one the next
+section writes out: three $W_\mathrm{h}$-weighted axes, the total value
+$a_\mathrm{hv}$, one partial exposure per operation and their sum in quadrature
+$A(8)$, read against 2.5 and 5 m/s².*
+
 ### Weighted metrics and daily exposure
 
 The weighted metrics follow ISO 2631-1:1997: running rms with linear or
@@ -98,6 +120,17 @@ $a_\mathrm{v} = \sqrt{\sum_j k_j^2 a_{\mathrm{w}j}^2}$ (Eq. 10), whose multiplyi
 belong to the posture and axis rather than to the metric: for a seated person
 assessed for health, 1.4 on `Wd`-weighted x and y and 1.0 on `Wk`-weighted z
 (clause 7.2.3).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration, with y pointing into the page, to the left side of the body; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
+
+*The whole-body chain on one seat. The triaxial accelerometer sits at the
+seat/body interface, the only one of the three locations of 5.3.1 the drawing
+shows (it draws no transducer on the seat back or under the feet); each axis is
+band-limited and weighted, `Wd` on x and y and `Wk` on z, and reduced to a
+weighted r.m.s. value and a VDV. The last box is where the factors of clause
+7.2.3 act: the daily exposure is built on the largest of $1.4a_{\mathrm{w}x}$,
+$1.4a_{\mathrm{w}y}$ and $a_{\mathrm{w}z}$, one axis and not the vector total,
+which is the distinction the paragraphs below turn on.*
 
 **The crest factor decides which of them to report.** It is the peak of the
 weighted acceleration divided by its rms over the same interval (clause 6.2.1),
@@ -249,6 +282,12 @@ from-vibration chain without a power measurement, and it drives the resonant
 transmission path of the
 [panel sound insulation theory](rooms-buildings.md#predicted-panel-sound-insulation-bies-72-hopkins-294310-cremer-5),
 where $f_\mathrm{c}$ itself is defined.
+
+The clip from the [Sound Power from Vibration guide](../../devices/emission/vibration-sound-power.md) runs the two regimes on one 10 mm steel plate in air ($f_\mathrm{c} = 1205$ Hz), driven along its whole length, once at $f_\mathrm{c}/2$ and once at $2f_\mathrm{c}$.
+
+**Video:** [A steel plate driven below and above its coincidence frequency](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_radiation_efficiency.webm): A bending wave runs to the right along a steel plate with air above it. In the lower-frequency panel the plate ripples with a wavelength shorter than the sound wavelength and the pressure above it forms alternating lobes that cling to the plate and fade out within a few centimetres, so nothing leaves. In the higher-frequency panel the plate ripples with a longer wavelength and a plane beam of pressure departs at forty-five degrees along the whole driven span, growing as it goes.
+
+*What the clip shows is the infinite-plate mechanism alone (Hopkins 2.9.2). At 602 Hz the bending wavelength, 0.40 m, is shorter than the 0.57 m of sound in air, no angle satisfies $\sin\theta = \lambda/\lambda_\mathrm{B}$, and the air carries only a skin of alternating lobes that decays with a height of $1/\sqrt{k_\mathrm{B}^2 - k_0^2} = 0.091$ m and takes no power away (Eq. 2.216); at 2410 Hz the bending wavelength, 0.20 m, is longer than the 0.14 m in air and a plane beam leaves at 45° (Eq. 2.203). It does not show the other half of the paragraph above: the scene is an effectively infinite plate, with no edge that radiates, so the sub-critical radiation that survives at the edges and corners of a finite plate, the part that makes a real $\sigma$ small and not zero, is not in it.*
 
 See the [Predicting Panel Sound Insulation guide](../../buildings/design/panel-sound-insulation.md)
 for usage.

@@ -88,6 +88,12 @@ See the [Loudness guide](../../perception/psychoacoustics/loudness.md) for usage
 
 *Specific loudness N′(z) over the Bark axis: energy spread over many critical bands sums to more sones than the same band level in a single band.*
 
+That figure is drawn at one level, and stage 5 is the one that depends on level. The clip from the [Loudness guide](../../perception/psychoacoustics/loudness.md) raises the band level of the same 1 kHz narrowband sound from 45 to 85 dB:
+
+**Video:** [How specific loudness integrates to total loudness](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_specific_loudness.webm): The specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones.
+
+*The upper slope at work (Table A.9 gives its steepness by range of specific loudness and by critical band). The main lobe stays on the critical bands around 8.5 Bark while the flank on its high-frequency side reaches further along the Bark axis as the level rises, to about 14 Bark at 45 dB and almost 20 Bark at 85 dB, which the clip labels as the upward spread of masking. The area under the pattern goes from 1.3 sone at 45 dB through 4.9 sone at 65 dB to 19.8 sone at 85 dB.*
+
 ## Advanced loudness models & sound quality
 
 ISO 532-1 is one of three loudness models; two newer families refine the auditory front-end and add the sound-quality metrics tonality and roughness.
@@ -244,7 +250,44 @@ $$
 \mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
 $$
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition.svg" alt="Two panels on the averaged spectrum of a 1 kHz tone in noise. Left, the critical band of the tone, 162.2 Hz wide from 922.2 Hz to 1084.4 Hz, shaded under the spectrum as the total level, with the window of 15 % of that width marked about the peak. Right, that window line by line, from 988 Hz to 1012 Hz: the tone band is the seven lines between the minima on either side of the peak, a dashed straight line joins its two end lines l1 and l2, and the area between that line and the spectrum is shaded as the tone. The heading gives a tone level of minus 28.0 dB, a masking noise level of minus 40.0 dB and a tone-to-noise ratio of 12.0 dB" width="100%"></picture>
+
+*The split of clause 11 on a 1 kHz tone, with the 1 Hz line spacing the library
+defaults to. Left, the critical band, 162.2 Hz wide, and the window of 15 % of
+that width about the peak. Right, the window line by line: the tone band runs
+between the minima on either side of the peak, seven lines here, and Formula 9
+keeps as tone only what stands above the straight line that joins its two end
+lines. A minimum that falls on the edge of the window sends the search on to
+the nearest local minimum beyond it (clause 11.2), as the next figure draws.
+What is left of the critical band is the masking noise, which Formula 10
+scales to the whole bandwidth.*
+
+When the spectrum is still falling where the window ends, the lowest line
+inside the window is the edge line itself, and clause 11.2 then searches on to
+the nearest local minimum beyond it:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_band_window_edge_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_band_window_edge.svg" alt="The averaged spectrum, line by line, of a narrow hump of noise at 1 kHz. The window of 15 % of the critical bandwidth runs from 988 Hz to 1012 Hz, and on both sides its lowest line is the edge line itself, marked with a square. The tone band runs on to the nearest local minima beyond the window, at 980 Hz and 1015 Hz, 36 Hz wide; a dashed straight line joins those two end lines l1 and l2, and the area between it and the spectrum is shaded as the tone. The heading gives a tone level of minus 24.9 dB, a masking noise level of minus 33.4 dB and a tone-to-noise ratio of 8.5 dB" width="100%"></picture>
+
+*The same split on a peak whose skirt is still falling at both edges of the
+window: white noise through a resonance 3 Hz wide at 1 kHz, standing in for the
+"tone of time-varying frequency or another phenomenon" that clause 11.2 takes a
+tone band wider than the window to indicate. Inside the window the lowest line
+on each side is the edge line, so the search goes on to the nearest local
+minimum beyond it, at 980 Hz and 1015 Hz, and the tone band is 36 lines wide
+where the window holds 25. The edges, the straight line and the 8.5 dB are those
+`tone_to_noise_ratio` returns for the same signal.*
+
 **PR** (clause 12) compares the level of the critical band centred on the tone, $L_\mathrm{M}$, with the mean power of the two **contiguous** critical bands $L_\mathrm{L}$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition.svg" alt="Two panels, each an averaged spectrum cut into three shaded bands with the level of each written in it. Left, a 1 kHz tone: lower band from 782.5 Hz to 922.2 Hz at minus 40.5 dB, middle band from 922.2 Hz to 1084.4 Hz at minus 27.8 dB with the tone in it, upper band from 1084.4 Hz to 1261.5 Hz at minus 39.5 dB, and a prominence ratio of 12.2 dB by Formula 23. Right, a 120 Hz tone: the lower band is cut at 20 Hz and runs to 69.5 Hz, 49 Hz wide, at minus 45.0 dB, the middle band runs from 69.5 Hz to 170.5 Hz at minus 32.9 dB, the upper band from 170.5 Hz to 274.8 Hz at minus 42.0 dB, and the prominence ratio is 9.0 dB by Formula 24, which scales the lower band by 100 Hz over its width" width="100%"></picture>
+
+*The three bands of clause 12, each with its level. Left, a 1 kHz tone: the
+critical band of the tone between a lower band that starts at 782.5 Hz and an
+upper one that ends at 1261.5 Hz, the two edges Formulae 21 and 22 fit; the
+ratio is the level of the middle band less that of the mean power of the other
+two. Right, a 120 Hz tone: its lower band would start below 20 Hz, so it is
+cut there (clause 12.3), and the 49 Hz that are left are scaled to the 100 Hz
+of a whole critical band before the mean is taken (Formula 24).*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Tone-to-noise ratio of a 250 Hz fan tone plotted against the ECMA-418-1 prominence criterion: the criterion falls from about 17 dB at 89 Hz to a flat 8 dB above 1 kHz, and the assessed tone sits at 15.1 dB, 2.1 dB above the 13.0 dB criterion at 250 Hz, so it is prominent" width="88%"></picture>
 
@@ -259,7 +302,7 @@ See the [Prominent Discrete Tones guide](../../perception/psychoacoustics/tone-p
 
 ## Modulation transfer and STI (IEC 60268-16)
 
-Speech intelligibility rides on the slow intensity modulations of the speech envelope. The clause numbers below are those of IEC 60268-16 Ed. 5 (2020). The **modulation transfer function** $m(F)$ of a transmission channel is the ratio of received to emitted modulation depth of the octave-band intensity envelope at modulation frequency $F$; the full STI evaluates it at the 14 one-third-octave modulation frequencies 0.63–12.5 Hz in the seven octave bands 125 Hz – 8 kHz (A.2.2). From a measured impulse response the **Schroeder closed form** gives it directly (indirect method):
+Speech intelligibility rides on the slow intensity modulations of the speech envelope. The table numbers below are those of IEC 60268-16 Ed. 5 (2020); the clauses of the computation chain are cited by their Ed. 4 (2011) numbers, as the library cites them, because Ed. 5 rearranged Annex A (its A.5 is the generation of the test signal). The **modulation transfer function** $m(F)$ of a transmission channel is the ratio of received to emitted modulation depth of the octave-band intensity envelope at modulation frequency $F$; the full STI evaluates it at the 14 one-third-octave modulation frequencies 0.63–12.5 Hz in the seven octave bands 125 Hz – 8 kHz (A.2.2 of Ed. 4; A.1.4 in Ed. 5). From a measured impulse response the **Schroeder closed form** gives it directly (indirect method):
 
 $$
 m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
@@ -284,6 +327,12 @@ $$
 $$
 
 truncated to 1.0.
+
+The clip from the [Speech Transmission guide](../../perception/speech/speech-transmission.md) puts the two degradations on one envelope: a fully modulated 4 Hz probe, received through the 1 kHz octave band and drawn at a constant received mean. First the reverberation time sweeps from 0.30 to 2.50 s without noise: it acts on $m$ itself, through the integral above, and the depth at 4 Hz falls from 0.90 to 0.26 and the STI from 0.84 to 0.40. Then, at a fixed 1.00 s, the speech-to-noise ratio falls from 25 to 0 dB: it acts through the factor $1/(1 + 10^{-\mathrm{SNR}/10})$, which is one half at 0 dB, and the depth ends at 0.28 and the STI at 0.36.
+
+**Video:** [Reverberation and noise taking apart a speech-rate envelope](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_modulation_transfer.webm): A fully modulated four-hertz intensity envelope is received through the one-kilohertz octave band of a room. As the reverberation time sweeps from 0.30 to 2.50 seconds the peaks fall and the valleys fill toward a mean line that never moves, and the measured modulation depth falls from 0.90 to 0.26; the modulation transfer curve beside it drops at every one of the fourteen modulation frequencies, the seven band modulation transfer indices fall with it and the speech transmission index walks from 0.84 down to 0.40. Then, at a fixed one-second reverberation time, the speech-to-noise ratio sweeps from 25 to 0 decibels: a shaded noise floor rises under the trace instead, the mean still does not move, and the depth falls again to 0.28 for a speech transmission index of 0.36.
+
+Two mechanisms, one quantity. Reverberation smears energy across the gaps, so the envelope shrinks about its mean; steady noise fills the gaps from below, so a floor rises under it. Neither changes the average level, and both destroy the contrast a listener segments syllables by.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti.svg" alt="Modulation transfer index per octave band from 125 Hz to 8 kHz for a hall with a 0.9 s reverberation time and a 15 dB speech-to-noise ratio: the seven bars sit close together between about 0.54 and 0.60, giving STI = 0.58 with the Annex F rating E" width="88%"></picture>
 
@@ -483,7 +532,7 @@ See the [Noise-Induced Hearing Loss guide](../../perception/hearing/noise-induce
 - **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
   The modulation-transfer framework of the STI section.
 - **International Electrotechnical Commission. (2020).** [*Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index*](https://webstore.iec.ch/en/publication/26771) (IEC 60268-16:2020 (Edition 5)).
-  The STI section: the A.2.2 modulation frequencies, the A.5.4/A.5.5 index mapping, the Table A.1 band weights, the Table A.2/A.3 masking and reception-threshold data, the Annex B STIPA method and the Annex F qualification bands.
+  The STI section: the modulation frequencies (A.1.4; A.2.2 in Ed. 4), the index mapping (A.5.4/A.5.5 in the Ed. 4 numbering the page cites), the Table A.1 band weights, the Table A.2/A.3 masking and reception-threshold data, the Annex B STIPA method and the Annex F qualification bands.
 - **International Organization for Standardization. (2005).** [*Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions*](https://www.iso.org/standard/38976.html) (ISO 389-7:2005).
   The Table 1 free-field and diffuse-field reference thresholds of the hearing-threshold section.
 - **International Organization for Standardization. (2013).** [*Acoustics — Estimation of noise-induced hearing loss*](https://www.iso.org/standard/45103.html) (ISO 1999:2013).

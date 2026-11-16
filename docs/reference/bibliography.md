@@ -63,7 +63,7 @@ around.
   Cited by [Integrated and Statistical Levels](../signals/levels/levels.md).
 - **Norton, M. P., & Karczub, D. G. (2003).** *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
   The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for panel transmission loss of section 3.9 (Table 3.1), the higher-order acoustic modes of a rigid circular duct of section 7.2 (Table 7.1) and the worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers.
-  Cited by [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md), [Plate junctions: wave approach and experimental SEA](../vibration/structural/junction-transmission.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md), [Duct-Borne Noise: Fan to Room](../devices/noise-control/duct-path.md), [Room to Room: Partition, Receiving Room, Criterion](../devices/noise-control/room-to-room.md), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/), [Catalogue of plateau-method constants](https://docs.jmrp.io/phonometry/reference/catalogues/plateau-method-constants/) and [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/).
+  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md), [Plate junctions: wave approach and experimental SEA](../vibration/structural/junction-transmission.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md), [Duct-Borne Noise: Fan to Room](../devices/noise-control/duct-path.md), [Room to Room: Partition, Receiving Room, Criterion](../devices/noise-control/room-to-room.md), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/), [Catalogue of plateau-method constants](https://docs.jmrp.io/phonometry/reference/catalogues/plateau-method-constants/) and [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/).
 - **Rossing, T. D. (Ed.). (2014).** *Springer handbook of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-1-4939-0755-7
   ISBN 978-1-4939-0754-0. A one-volume survey of every domain this library touches, from room acoustics to psychoacoustics and underwater sound; the cross-domain reference of first resort.
   Cited by [Catalogue of orthotropic wood](https://docs.jmrp.io/phonometry/reference/catalogues/orthotropic-wood/), [Catalogue of transmission loss](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/), [Catalogue of the nonlinearity parameter B/A](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-ba/) and [Catalogue of the nonlinearity parameter of solids](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-of-solids/).
@@ -146,17 +146,17 @@ synchronous averaging, Golay for the complementary pairs.
   Cited by [Special Weightings (G, B, D, AU)](../signals/levels/special-weightings.md).
 - **International Organization for Standardization. (1997).** [*Acoustics — Preferred frequencies*](https://www.iso.org/standard/1350.html) (ISO 266:1997).
   Cited by [Octave and Fractional-Octave Filter Banks](../signals/filters/filter-banks.md).
+- **International Organization for Standardization. (1998).** *Mechanical vibration and shock — Mechanical mounting of accelerometers* (ISO 5348:1998).
+  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md) and [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md).
 - **International Organization for Standardization. (2015).** *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).
   Cited by [Integrated and Statistical Levels](../signals/levels/levels.md) and [Underwater acoustics: radiated noise and pile driving](../underwater/underwater-acoustics.md).
-- **International Organization for Standardization. (2021).** [*Mechanical vibration and shock — Mechanical mounting of accelerometers*](https://www.iso.org/standard/78160.html) (ISO 5348:2021).
-  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md).
 - **Kirkeby, O., & Nelson, P. A. (1999).** [Digital filter design for inversion problems in sound reproduction](https://aes.org/publications/elibrary-page/?id=12098). *Journal of the Audio Engineering Society*, *47*(7/8), 583-595.
   Cited by [System measurement: Golay, shaped sweeps, inversion](../signals/spectra/system-measurement.md).
 - **Knapp, C. H., & Carter, G. C. (1976).** The generalized correlation method for estimation of time delay. *IEEE Transactions on Acoustics, Speech, and Signal Processing*, *24*(4), 320-327. https://doi.org/10.1109/TASSP.1976.1162830
   The GCC framework, the Table I weightings (Roth, SCOT, PHAT) and their conditions, and the maximum-likelihood (Hannan-Thomson) processor.
   Cited by [Correlation, time delay and envelope](../signals/spectra/correlation-delay.md).
 - **McFadden, P. D. (1987).** A revised model for the extraction of periodic waveforms by time domain averaging. *Mechanical Systems and Signal Processing*, *1*(1), 83-95. https://doi.org/10.1016/0888-3270(87)90085-9
-  The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.
+  The comb-filter model of synchronous averaging (Eq. 8, with the unit height of its teeth in Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.
   Cited by [Time synchronous averaging](../signals/spectra/synchronous-averaging.md).
 - **Oppenheim, A. V., & Schafer, R. W. (2010).** [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
   ISBN 978-0-13-198842-2. The digital-filter theory behind the SOS cascades, the bilinear transform and the multirate decimation used by the filter banks.
@@ -638,7 +638,7 @@ the microperforated panel in closed form.
   Cited by [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md) and [Metamaterial Absorbers](../materials/absorbers/metamaterial-absorbers.md).
 - **Mechel, F. P. (Ed.). (2008).** *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
   ISBN 978-3-540-76832-6. Sections D.3-D.6 (layer reflection, multilayer scheme, diffuse-field integrals) and G.11 (empirical porous relations).
-  Cited by [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/).
+  Cited by [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md), [2D FDTD wave simulation](../simulation/fdtd-simulation.md), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/).
 - **Miki, Y. (1990).** Acoustical properties of porous materials — Modifications of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*, *11*(1), 19-24. https://doi.org/10.1250/ast.11.19
   The positive-real regression implemented in miki.
   Cited by [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md).
@@ -714,7 +714,7 @@ the transmission physics above them.
   Cited by [Transfer stiffness of resilient elements (ISO 10846)](../vibration/structural/transfer-stiffness.md).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The upper-limit sound power from surface velocity with ε = 1.
-  Cited by [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).
+  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Time synchronous averaging](../signals/spectra/synchronous-averaging.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md), [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor*](https://www.iso.org/standard/40538.html) (ISO/TS 7849-2:2009).
   The engineering method with a measured band-wise radiation factor.
   Cited by [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).
@@ -749,6 +749,10 @@ the transmission physics above them.
 - **Mansfield, N. J. (2004).** [*Human response to vibration*](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390). CRC Press.
   ISBN 978-0-415-28239-0. A compact modern textbook on the ISO 2631-1 and ISO 5349 evaluation chains, from perception and comfort to the occupational exposure limits.
   Cited by [Whole-body and hand-arm vibration](../vibration/human/human-vibration.md) and [Theory: Vibration](theory/vibration.md).
+- **McFadden, P. D., & Smith, J. D. (1984).** Model for the vibration produced by a single point defect in a rolling element bearing. *Journal of Sound and Vibration*, *96*(1), 69-82. https://doi.org/10.1016/0022-460X(84)90595-9
+  Cited by [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md).
+- **Randall, R. B., & Antoni, J. (2011).** Rolling element bearing diagnostics—A tutorial. *Mechanical Systems and Signal Processing*, *25*, 485-520. https://doi.org/10.1016/j.ymssp.2010.07.017
+  Cited by [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md).
 
 ## Environment and transport
 
@@ -1209,7 +1213,7 @@ checked against.
   The heterogeneous effective grid parameters (harmonic shear modulus, arithmetic density) and the stress-imaging free surface.
   Cited by [Elastic waves and fluid-solid coupling](../simulation/elastic-waves.md).
 - **van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).** Finite-difference modeling of wave propagation in a fluid-solid configuration. *Geophysics*, *67*(2), 618-624. https://doi.org/10.1190/1.1468623
-  The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the soft-bed Scholte configuration and the points-per-wavelength rule for interface waves.
+  The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the Scholte configuration of water over a 3500/2000/2500 seabed and the points-per-wavelength rule for interface waves.
   Cited by [Elastic waves and fluid-solid coupling](../simulation/elastic-waves.md).
 - **Virieux, J. (1986).** P-SV wave propagation in heterogeneous media: velocity-stress finite-difference method. *Geophysics*, *51*(4), 889-901. https://doi.org/10.1190/1.1442147
   The elastic velocity-stress scheme on the fully staggered cell, its Courant bound and dispersion relations, and the liquid as the shear-free limit.

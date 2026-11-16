@@ -34,11 +34,11 @@ def _energy_mean(levels: list[float]) -> float:
 
 
 def test_annex_b_example_2_reproduces_end_to_end() -> None:
-    """A machine in an assembly workshop, 73,2 dB at the work station.
+    """A machine in an assembly workshop, 73.2 dB at the work station.
 
     Every printed intermediate of Table B.2, in the order the table prints
-    them. The room is 11 m x 8 m x 4 m with a 1,2 s reverberation time, and the
-    work station is 1,6 m from the dominating source.
+    them. The room is 11 m x 8 m x 4 m with a 1.2 s reverberation time, and the
+    work station is 1.6 m from the dominating source.
     """
     distance, volume, reverberation = 1.6, 11.0 * 8.0 * 4.0, 1.2
     surface = 2.0 * math.pi * distance**2
@@ -64,7 +64,7 @@ def test_annex_b_example_2_reproduces_end_to_end() -> None:
 
 
 def test_annex_b_example_2_earns_grade_2() -> None:
-    """K3 of 3,7 dB is under the 4 dB boundary, which is what the table says."""
+    """K3 of 3.7 dB is under the 4 dB boundary, which is what the table says."""
     k3 = ws.local_environmental_correction(
         ws.environmental_ratio_from_absorption(46.933, 16.085)
     )
@@ -77,7 +77,7 @@ def test_annex_b_example_2_earns_grade_2() -> None:
 
 
 def test_annex_b_example_3_background_correction() -> None:
-    """79,0 dB against a 70,0 dB background is a 0,6 dB correction."""
+    """79.0 dB against a 70.0 dB background is a 0.6 dB correction."""
     outcome = ws.background_noise_correction_at_workstation(79.0, 70.0)
     k1, held = outcome.correction, outcome.upper_bound
     assert k1 == pytest.approx(0.6, abs=0.05)
@@ -88,10 +88,122 @@ def test_annex_b_example_3_background_correction() -> None:
 
 
 def test_annex_b_example_3_directivity_mean() -> None:
-    """The six directivity points energy-average to the printed 77,7 dB."""
+    """The six directivity points energy-average to the printed 77.7 dB."""
     assert _energy_mean([80.5, 81.0, 76.0, 75.0, 74.0, 72.0]) == pytest.approx(
         77.7, abs=0.05
     )
+
+
+def test_annex_b_example_3_is_grade_3_by_condition_a6() -> None:
+    """K2 = 6.5 dB and DI*op,approx = 0.7 dB give z = 0.34 and K3 = 4.7 dB.
+
+    Table B.3 prints both and "therefore a grade 3 result is obtained". The
+    machine is 3 m high, its largest dimension, so A.2.5 of ISO 11202:2010 puts
+    the margin at 1 dB, and the grade is read with it.
+    """
+    ratio = ws.environmental_ratio_from_k2(6.5, 0.7)
+    k3 = ws.local_environmental_correction(ratio)
+    assert ratio == pytest.approx(0.34, abs=0.005)
+    assert k3 == pytest.approx(4.7, abs=0.05)
+    assert ws.grade_from_local_correction(k3, largest_dimension_m=3.0) == "survey"
+
+
+def _condition_a6(k2: float, directivity_index: float, margin_db: float) -> bool:
+    r"""Condition (A.6) of ISO 11202:2010 A.2.5, in the form the clause gives it.
+
+    .. math::
+
+       D^*_{I,\mathrm{op,approx}} \ge -10 \lg
+       \frac{1 - 10^{-0.4}}{1 - 10^{-0.1 K_2}}\ \mathrm{dB} + \Delta D^*_I
+    """
+    bound = -10.0 * math.log10((1.0 - 10.0**-0.4) / (1.0 - 10.0 ** (-0.1 * k2)))
+    return directivity_index >= bound + margin_db
+
+
+@pytest.mark.parametrize(
+    ("largest_dimension_m", "margin_db"),
+    [(0.4, 0.5), (1.0, 0.5), (2.0, 1.0), (3.0, 1.0), (3.5, 1.5), (12.0, 1.5)],
+)
+@pytest.mark.parametrize("k2", [1.5, 4.0, 6.5])
+@pytest.mark.parametrize("side", [-0.05, 0.05])
+def test_method_a2_grade_is_what_condition_a6_says(
+    largest_dimension_m: float, margin_db: float, k2: float, side: float
+) -> None:
+    """Either side of Condition (A.6), the K3 of (A.4) and (A.5) grades alike.
+
+    The margin is the one A.2.5 sets by the largest dimension of the source:
+    0.5 dB up to 1 m, 1 dB up to 3 m and 1.5 dB beyond. The directivity index
+    is put 0.05 dB above or below where the condition starts to hold, and the
+    grade of the correction that index gives must be the condition's.
+    """
+    bound = -10.0 * math.log10((1.0 - 10.0**-0.4) / (1.0 - 10.0 ** (-0.1 * k2)))
+    directivity_index = bound + margin_db + side
+    k3 = ws.local_environmental_correction(
+        ws.environmental_ratio_from_k2(k2, directivity_index)
+    )
+    expected = (
+        "engineering" if _condition_a6(k2, directivity_index, margin_db) else "survey"
+    )
+    assert (
+        ws.grade_from_local_correction(k3, largest_dimension_m=largest_dimension_m)
+        == expected
+    )
+
+
+def test_a_method_a2_correction_under_4_db_can_still_be_grade_3() -> None:
+    """3.5 dB clears the 4 dB of A.1.3 but not Condition (A.6) for a small source.
+
+    With a 0.8 m source the margin is 0.5 dB, and (A.6) holds only while K3
+    stays at or below about 3.3 dB.
+    """
+    assert ws.grade_from_local_correction(3.5) == "engineering"
+    assert ws.grade_from_local_correction(3.5, largest_dimension_m=0.8) == "survey"
+    assert ws.grade_from_local_correction(3.3, largest_dimension_m=0.8) == "engineering"
+
+
+@pytest.mark.parametrize(
+    ("k3", "largest_dimension_m", "expected"),
+    [
+        (3.0, 1.0, "engineering"),  # 1 m is still the 0.5 dB row
+        (3.0, 1.01, "survey"),  # past it the margin is 1 dB
+        (2.6, 3.0, "engineering"),  # 3 m is still the 1 dB row
+        (2.6, 3.01, "survey"),  # past it the margin is 1.5 dB
+    ],
+)
+def test_the_margin_steps_where_a2_5_puts_its_rows(
+    k3: float, largest_dimension_m: float, expected: str
+) -> None:
+    """A.2.5 closes each row of its table on the right: lmax <= 1 m, <= 3 m."""
+    assert (
+        ws.grade_from_local_correction(k3, largest_dimension_m=largest_dimension_m)
+        == expected
+    )
+
+
+def test_the_worst_band_decides_under_condition_a6_too() -> None:
+    """One band past the method A.2 limit makes the whole result grade 3."""
+    assert (
+        ws.grade_from_local_correction([1.0, 2.0, 2.5], largest_dimension_m=5.0)
+        == "survey"
+    )
+    assert (
+        ws.grade_from_local_correction([1.0, 2.0, 2.3], largest_dimension_m=5.0)
+        == "engineering"
+    )
+
+
+def test_the_largest_dimension_is_a_length_and_given_by_name() -> None:
+    """A source has a size: zero, a negative value, a text or an array is refused."""
+    with pytest.raises(ValueError, match="largest_dimension_m"):
+        ws.grade_from_local_correction(3.0, largest_dimension_m=0.0)
+    with pytest.raises(ValueError, match="largest_dimension_m"):
+        ws.grade_from_local_correction(3.0, largest_dimension_m=-2.0)
+    with pytest.raises(TypeError, match="largest_dimension_m"):
+        ws.grade_from_local_correction(3.0, largest_dimension_m="2")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="largest_dimension_m"):
+        ws.grade_from_local_correction(3.0, largest_dimension_m=np.array([1.0, 2.0]))  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="positional"):
+        ws.grade_from_local_correction(3.0, 2.0)  # type: ignore[call-arg]
 
 
 # --------------------------------------------------------------------------
@@ -100,7 +212,7 @@ def test_annex_b_example_3_directivity_mean() -> None:
 
 
 def test_annex_b_example_1_uncertainty() -> None:
-    """1,5 dB of reproducibility and k = 1,6 give the printed 2,4 dB."""
+    """1.5 dB of reproducibility and k = 1.6 give the printed 2.4 dB."""
     sigma = ws.total_standard_deviation(1.5, 0.3)
     assert sigma == pytest.approx(1.5, abs=0.05)
     assert ws.emission_expanded_uncertainty(sigma) == pytest.approx(2.4, abs=0.05)
@@ -111,7 +223,7 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
 
     Equation (C.1) prints :math:`1/(N-1)`, and Table B.3 agrees with it while
     Table B.1 divides by :math:`N`. The library follows the equation, which
-    means it does not reproduce Table B.1's 0,3 dB and says so.
+    means it does not reproduce Table B.1's 0.3 dB and says so.
     """
     table_b1 = [94.5, 94.3, 93.8]
     table_b3 = [79.0, 80.2, 82.9]
@@ -119,11 +231,11 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
     # Table B.3 agrees with Equation (C.1).
     assert ws.operating_standard_deviation(table_b3) == pytest.approx(2.0, abs=0.05)
 
-    # Table B.1 does not: the equation gives 0,4 dB where the table prints 0,3.
+    # Table B.1 does not: the equation gives 0.4 dB where the table prints 0.3.
     by_equation = ws.operating_standard_deviation(table_b1)
     assert by_equation == pytest.approx(0.36, abs=0.005)
     assert round(by_equation, 1) == 0.4
-    # 0,3 is what dividing by N gives, which is not what (C.1) prints.
+    # 0.3 is what dividing by N gives, which is not what (C.1) prints.
     assert float(np.std(table_b1, ddof=0)) == pytest.approx(0.29, abs=0.005)
 
 
@@ -137,7 +249,7 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
     [
         (0.05, 7.0),  # deep in the capped branch
         (0.2, 7.0),  # the cap's own boundary
-        (0.5, 3.0103),  # -10 lg 0,5
+        (0.5, 3.0103),  # -10 lg 0.5
         (1.0, 0.0),  # the upper boundary
         (2.0, 0.0),  # above it, nothing to correct
     ],
@@ -149,9 +261,9 @@ def test_k3_follows_the_printed_branches(ratio: float, expected: float) -> None:
 def test_k3_is_continuous_where_the_cap_takes_over() -> None:
     """The 7 dB cap is the curve's own value rounded, not a separate rule.
 
-    Just above the boundary the middle branch gives -10 lg 0,2 = 6,9897 dB, so
-    the step onto the cap is 0,0103 dB: two orders below the 0,1 dB the
-    standard prints its corrections to, and a tenth of the 0,1 dB a sound level
+    Just above the boundary the middle branch gives -10 lg 0.2 = 6.9897 dB, so
+    the step onto the cap is 0.0103 dB: two orders below the 0.1 dB the
+    standard prints its corrections to, and a tenth of the 0.1 dB a sound level
     meter resolves. Pinned exactly, because a real discontinuity here would be
     a defect and a rounded assertion would not see one appear.
     """
@@ -244,7 +356,7 @@ def test_a_background_too_close_clamps_and_warns() -> None:
         outcome = ws.background_noise_correction_at_workstation(80.0, 77.0)
     k1, held = outcome.correction, outcome.upper_bound
     assert held
-    # Held at the grade-2 floor of 6 dB, which is a 1,3 dB correction.
+    # Held at the grade-2 floor of 6 dB, which is a 1.3 dB correction.
     assert k1 == pytest.approx(1.256, abs=0.005)
 
 

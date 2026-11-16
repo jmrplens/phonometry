@@ -256,8 +256,8 @@ Antes que nada, ISO 9614-1 plantea una pregunta sobre el *campo* y no sobre
 la superficie: ¿es lo bastante estacionario como para barrerlo? En el ensayo
 inicial (apartado 8.2) se elige una posición «típica» sobre una superficie
 inicial de medida y allí se muestrea la intensidad normal $M$ veces con un
-tiempo de promediación corto (la nota 9 sugiere $M = 10$ y, para señales
-periódicas, de 8 s a 12 s por muestra o cualquier número entero de ciclos).
+tiempo de promediación corto (la nota 9 sugiere $M = 10$ y de 8 s a 12 s por
+muestra, o cualquier número entero de ciclos si la señal es periódica).
 **$F_1$**, el indicador de variabilidad temporal, es el coeficiente de
 variación de esas muestras (ecuaciones (A.1)-(A.2)), de modo que vale cero
 para un campo perfectamente estacionario y crece a medida que la intensidad
@@ -724,6 +724,59 @@ print(round(power.sound_power_level_a, 1))   # 96.1 dB(A)
 print(round(power.surface_area, 2), power.n_positions)   # 14.24 16
 ```
 
+### Cómo se hace la medida
+
+Las piezas de arriba y de abajo son un solo procedimiento, y el apartado 8 lo
+recorre en este orden. La lámina muestra la superficie y el bucle que recorren
+los pasos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_discrete_points.svg" alt="Dos paneles. A la izquierda, una caja de trazo discontinuo dibujada como superficie de medición sobre un suelo reflectante rayado, con la fuente de pie dentro de ella, retirada de la cara frontal; las caras que se ven están cortadas en segmentos, dos a lo ancho y tres a lo alto en la frontal, tres a lo alto en la lateral y dos en la superior, con un punto anillado en la posición que se mantiene en cada uno, ninguno sobre la fuente, flechas rojas que salen del borde izquierdo para la intensidad normal, una sonda p-p en la posición central de la cara lateral con sus dos micrófonos a ambos lados de la posición sobre la normal a esa cara y el mango por fuera, y una cota de más de 0,5 m en el suelo desde la cara frontal de la fuente hasta la superficie. Cuatro notas debajo: al menos una posición por metro cuadrado y al menos diez en total, repartidas por igual según el área de los segmentos; la sonda quieta en cada una con el eje normal a la superficie; un suelo duro cierra la superficie, sin posiciones en él y sin contar su área; a más de 0,5 m de la fuente en promedio. A la derecha, el esquema de la figura B.1 en columna: una primera caja para la intensidad normal de corta duración en una posición típica de la superficie, que da F1; la puerta F1 de 0,6 como máximo; una caja para la intensidad normal y el nivel de presión acústica en las N posiciones; y después tres puertas en orden, Ld mayor que F2 como criterio 1, F3 menos F2 de 3 dB como máximo, y N mayor que C por F4 al cuadrado como criterio 2. Cada puerta tiene una salida roja de no hacia sus códigos de acción, e, a o b, a o b, c o d, y las cuatro vuelven por el lado derecho a la primera caja. El último sí llega a una caja verde, grado alcanzado y declarado, con F1 evaluado de nuevo antes y después. Una leyenda dice qué cambia cada acción de la tabla B.3: a acerca la superficie, hasta 0,25 m como mínimo, o la lleva a 1 m; b apantalla la superficie o reduce las reflexiones; c añade posiciones repartidas por igual; d aleja la superficie o añade posiciones en ella; e pide un campo más estable o más tiempo en cada posición" width="92%" />
+
+*La superficie que pide el apartado 8.2 y el bucle que el Anexo B cierra a su
+alrededor. Una acción nunca lleva a la puerta de abajo: cambia la superficie,
+las posiciones o el campo, y la medida empieza de nuevo.*
+
+1. **Comprobar el instrumento ese día.** El índice residual de la sonda con el
+   espaciador que se va a usar, los dos canales calibrados y la comprobación
+   por inversión sobre la propia superficie (apartado 6.2.2) son los tres
+   paneles de *Medir el índice residual, y comprobar la sonda*, más arriba.
+2. **Trazar la superficie (apartado 8.2).** Se encierra la fuente en una forma
+   sencilla (la nota 7 prefiere un paralelepípedo, una semiesfera, un cilindro
+   o un semicilindro) cuya distancia media a la fuente supere 0,5 m. Un suelo o
+   una pared duros pueden cerrarla: allí no se mide intensidad y su área queda
+   fuera de la suma. El resto se corta en segmentos, con al menos una posición
+   por metro cuadrado y al menos diez en total, repartidas tan uniformemente
+   como permitan las áreas de los segmentos.
+3. **Hacer el ensayo inicial en una posición típica de esa superficie
+   (apartado 8.2).** Se muestrea allí la intensidad normal $M$ veces con un
+   tiempo de promediación corto y se forma $F_1$. La nota 9 recomienda
+   $M = 10$ y de 8 s a 12 s por muestra, o un número entero de ciclos cuando la
+   señal es periódica. Por encima de 0,6, la tabla B.3 pide la acción (e) antes
+   de medir la superficie.
+4. **Medir en cada posición.** Se mantiene la sonda quieta sobre la superficie
+   con el eje normal a ella, y se leen el nivel de intensidad normal y el
+   nivel de presión acústica en cada banda. El apartado 8.1 dice cuánto
+   tiempo: para ruido blanco a través de un filtro de ancho de banda $B$, un
+   tiempo de promediación $T$ con $BT \ge 400$ mantiene el error de la
+   intensidad dentro del 5 % con una confianza del 95 %, que son unos 17 s en
+   la banda de tercio de octava de 100 Hz y menos de 2 s a 1 kHz, y una señal
+   cíclica pide más cuidado que eso. Conviene no ponerse en el eje de la sonda
+   mientras promedia (apartado 5.4).
+5. **Calcular $F_2$, $F_3$ y $F_4$ y recorrer las puertas de la figura B.1,** en
+   el orden de la tabla de *Qué grado alcanza la determinación*, más abajo. Se
+   actúa sobre la primera que falle, con la acción que la tabla B.3 imprime
+   para ella, y se mide de nuevo. La acción (a) mueve la superficie: la acerca
+   hasta una media de 0,25 m como mínimo cuando el problema es el ruido
+   extraño o la reverberación, y la aleja a 1 m cuando no lo es ninguno.
+6. **Evaluar $F_1$ de nuevo inmediatamente antes y después de cada
+   superficie** (B.1.4): el campo tiene que mantenerse estable todo lo que
+   dure la superficie.
+7. **Declarar el grado alcanzado (apartado 10.6) y las bandas que se dejan
+   fuera.** Una banda que no cumple el criterio 1 o el criterio 2 sale de la
+   determinación ponderada A, y el informe lo dice (apartado 10.5 b). Cuando
+   la acción repetida no logra cumplir los criterios, el apartado 8.4 hace
+   anotar el ensayo como resultado nulo, con sus motivos.
+
 ### El signo está en la impresión, no en el número
 
 ISO 9614-1 nunca imprime un nivel con signo. Un nivel de intensidad normal se
@@ -969,7 +1022,7 @@ estacionaria de la figura de dos paneles del principio de esta página. Lo
 mismo ocurre entre una máquina y una
 superficie reflectante rígida, y en cámaras reverberantes donde el campo difuso
 eleva la presión sin transportar energía hacia fuera. Por eso ISO 9614-1
-mantiene la superficie de medición a más de 0,5 m de la fuente en promedio, y
+mantiene la superficie de medición a más de 0,5 m de la fuente en promedio (apartado 8.2), y
 por eso, cuando un barrido no cumple el criterio de capacidad dinámica,
 alejar la superficie o añadir absorción a la sala suele bajar $F_2$ por
 debajo de $L_\mathrm{d}$ con menos coste que un hardware mejor.

@@ -247,8 +247,8 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
   "doi-10-1016-0888-3270-87-90085-9": Object.freeze({
     section: "signal-analysis",
     note: Object.freeze({
-      en: "The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.",
-      es: "El modelo de filtro peine del promediado síncrono (Ec. 8, magnitud Ec. 9), el modelo revisado de registro finito que da un resultado exactamente periódico, y la observación de que un orden interferente no armónico se rechaza mejor eligiendo el número de promedios para que un nodo del peine caiga sobre él, y no con la potencia de dos de costumbre.",
+      en: "The comb-filter model of synchronous averaging (Eq. 8, with the unit height of its teeth in Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.",
+      es: "El modelo de filtro peine del promediado síncrono (Ec. 8, con la altura unidad de sus dientes en la Ec. 9), el modelo revisado de registro finito que da un resultado exactamente periódico, y la observación de que un orden interferente no armónico se rechaza mejor eligiendo el número de promedios para que un nodo del peine caiga sobre él, y no con la potencia de dos de costumbre.",
     }),
   }),
   "doi-10-1109-tit-1961-1057620": Object.freeze({
@@ -1500,8 +1500,8 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
   "doi-10-1190-1-1468623": Object.freeze({
     section: "wave-simulation",
     note: Object.freeze({
-      en: "The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the soft-bed Scholte configuration and the points-per-wavelength rule for interface waves.",
-      es: "El benchmark fluido-sólido del esquema escalonado: las medias de los parámetros efectivos, la configuración de fondo blando de Scholte y la regla de puntos por longitud de onda para las ondas de interfase.",
+      en: "The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the Scholte configuration of water over a 3500/2000/2500 seabed and the points-per-wavelength rule for interface waves.",
+      es: "El benchmark fluido-sólido del esquema escalonado: las medias de los parámetros efectivos, la configuración de Scholte del agua sobre un lecho 3500/2000/2500 y la regla de puntos por longitud de onda para las ondas de interfase.",
     }),
   }),
   "std-jcgm-100-2008-the-gum": Object.freeze({

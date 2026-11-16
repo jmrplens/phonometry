@@ -1036,12 +1036,12 @@ def test_a_family_page_names_these_works(
 
 @pytest.mark.whole_tree
 @pytest.mark.parametrize("lang", ["en", "es"])
-def test_the_family_pages_of_a_language_name_133_works(lang: str) -> None:
-    """In each language, 95 family pages name 133 works in all."""
+def test_the_family_pages_of_a_language_name_134_works(lang: str) -> None:
+    """In each language, 96 family pages name 134 works in all."""
     named = {
         slug: works
         for (language, slug), works in _corrects().items()
         if language == lang
     }
-    assert sum(1 for works in named.values() if works) == 95
-    assert sum(len(works) for works in named.values()) == 133
+    assert sum(1 for works in named.values() if works) == 96
+    assert sum(len(works) for works in named.values()) == 134

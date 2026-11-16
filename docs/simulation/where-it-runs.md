@@ -9,6 +9,15 @@ an FDTD engine, acoustic or elastic, and writing a video of it. Both can run
 on this machine or on a node you reach over SSH, and both can use a GPU when
 one is there. This page is the map; each road has a page of its own.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Map in two lanes. Upper lane, where a simulation steps: a run record, FDTDRun or ElasticRun, and a Compute record with device, dtype and host go into one of four functions, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation or write_elastic_fdtd_animation. With host None the run steps here on the device asked for, one of cpu (NumPy, the default), cupy (an NVIDIA GPU through CuPy), torch:cpu, torch:cuda or torch:mps (Apple's GPU, in float32 only). With a host it goes to a node of the hosts file in numbered steps: the hosts file says where the node is and how it runs a job; one ssh process carries the run, as data and never as code; phonometry is sent once per version and kept under a digest; the node builds the run again and steps it on the device asked for; and the probes and the snapshots, or the bytes of a video, come back. Both branches end in result.provenance, whose device, dtype and gpu say where the run stepped and whose host and package_sha256 name the node and the package it ran. A dashed arrow from the node branch back to the branch that runs here is labelled fallback=True: a device that cannot be used, or a node or a connection that fails, warns with ComputeFallbackWarning and the run steps on NumPy here. Lower lane, where a video is encoded: the encoder auto, the default, tries NVENC, Quick Sync, VAAPI, VideoToolbox and then the CPU, each with a real encode of one frame, and the first that passes writes the video; on the CPU that is SVT-AV1 or, without it, VP9 in a WebM and x265 or x264 in an MP4; a GIF is always written on the CPU, and an animation you draw yourself is encoded here only." width="92%"></picture>
+
+*The page on one sheet. Above, a run and a `Compute` record go into one of the
+four functions that take a host: with none the run steps here, on one of five
+devices, and with one it goes to a node, in five steps. Both roads end in
+`result.provenance`, and `fallback=True` brings a device that cannot be used,
+or a node or a connection that fails, back to NumPy here. Below, the order
+`encoder="auto"` tries the encoders in, each with an encode of one frame.*
+
 ## Where a simulation steps
 
 A run is a record of what to simulate (`FDTDRun`, or `ElasticRun` for the
@@ -96,7 +105,7 @@ probes, the times and the provenance, with `snapshots` at `None`.
 
 | | A CPU encoder | A GPU encoder |
 |---|---|---|
-| Here | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1, or without it VP9 in a WebM and x265 or x264 in an MP4 | `VideoOptions(encoder="auto")`, the default, tries NVENC, Quick Sync, VAAPI and VideoToolbox, each with a real one-frame encode, then the CPU |
+| Here | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1, or without it VP9 in a WebM and x265 or x264 in an MP4 | `VideoOptions(encoder="auto")`, the default, tries NVENC, Quick Sync, VAAPI, VideoToolbox and then the CPU, each with a real one-frame encode |
 | On a node | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: the node computes, draws and encodes. On a Docker node NVENC needs a GPU placement (`"cupy"` or `"torch:cuda"`), the one that hands the container its NVIDIA GPU, and the container is given no other device; a Python node's ffmpeg uses what its machine has, whatever the placement |
 
 ```py

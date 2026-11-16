@@ -188,11 +188,11 @@ parasitic arrival inside it.
 *The whole method in three traces. The two arrivals are 1.47 ms apart on the
 mandatory geometry, so no gate separates them; the middle panel's red trace is
 what subtraction leaves once the free-field reference has been taken away.
-The green gate is the Adrienne window at its default 0.5 + 5 + 5 ms, whose
-total duration sets both the 95 Hz floor marked in the bottom panel and the
-1.34 m radius of road that contributes. The parasitic arrival at 15.8 ms is
-outside it; it would not be if the window were lengthened to reach lower in
-frequency.*
+The green gate is the Adrienne window at its default 0.5 + 5 + 5 ms: its
+total duration sets the 95 Hz floor marked in the bottom panel, and its 5 ms
+flat portion is the window width Annex A turns into the 1.34 m radius of road
+that has to be clear. The parasitic arrival at 15.8 ms is outside the gate; it
+would not be if the window were lengthened to reach lower in frequency.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -363,14 +363,89 @@ signal processing, are what usually invalidates a roadside campaign.
   sampled area**, so the radius sizes the plate you have to carry as well as
   the clearance you have to find.
 
-The measurement itself is a thirteen-step procedure whose order matters:
-check the surface and the weather, place the rig, compute and walk the
-radius, choose the source and the signal, average at least 50 responses over
-the road, take the free-field reference with the rig clear of everything,
-subtract, window, transform, form the reflection factor with $K_\mathrm{r}$, repeat the
-whole thing over the reference plate, and only then average into one-third
-octaves. A result reported without the window shape and durations, and without
-the reference measurement, is not an ISO 13472-1 result.
+**The measuring system (Clauses 5 and 6).** The whole system, end to end,
+must meet at least the requirements of a type 2 instrument of IEC 60651
+(Clause 5.1). It is an electroacoustic chain: a signal generator, a power
+amplifier and a loudspeaker, a microphone with its amplifier, and an analyser
+that can cross-correlate and pass between the time and the frequency domains.
+The loudspeaker is a single or a coaxial cone in a closed cabinet, with a
+frequency response smooth enough that its impulse response in a free field is
+no longer than 2 ms (Clause 5.2). The test signal is short and repeatable,
+with a low peak-to-RMS ratio (the crest factor), typically below 2, and enough
+energy in every one-third-octave band from 250 Hz to 4 kHz: a maximum-length
+sequence or a short sweep (Clause 5.3). The overall impulse response is recovered by
+cross-correlating the electrical source signal with the microphone signal
+(Clause 6.3), and the sampling frequency is above 40 kHz (Clause 6.2), because
+the subtraction needs the exact waveform to detect a change of delay.
+
+**The run, in order (Clause 9).** Clause 9 puts the measurement in fifteen items,
+a) to o), and the order is part of the method. The numbers below follow its
+letters.
+
+1. **Check the surface and the weather** against Clauses 8.1 to 8.3, the gates
+   above. If they are not met, the measurement cannot be carried out.
+2. **Place the rig** as Clause 7.2 asks: the source at 1.25 m and the
+   microphone at 0.25 m above the surface, on one line normal to it. The
+   safety note of Clause 7.5 applies here: on a road with traffic the method
+   can be hazardous, and the standard leaves the safety practice to its user.
+3. **Compute the radius of the maximum sampled area** (Annex A) and check that
+   no reflecting object is inside it. If one is, the measurement cannot be
+   performed.
+4. **Select the sound source and the test signal** (Clauses 5.2 and 5.3).
+5. **Generate the test signal.**
+6. **Sample the total signal** the microphone receives, at the sampling
+   frequency of Clause 6.2.
+7. **Average** the microphone response until the impulse response is stable:
+   at least 50 averages (Clause 4.3).
+8. **Record the free-field impulse response** with the rig taken away from any
+   reflecting surface that could influence it, and the geometry kept as it was
+   (Clause 4.2).
+9. **Isolate the reflected path** by the subtraction technique. A suitable
+   time window cancels the parasitic reflections (Clause 6.4).
+10. **Window and transform.** Multiply the direct and the reflected impulse
+    responses by the time window and compute the power spectra of the two by
+    Fourier transform. Keep the complex spectra if the complex reflection
+    factor is wanted.
+11. **Compute the sound power reflection factor**, with the geometrical
+    spreading factor $K_\mathrm{r}$ (Clause 4.1 and Annex C).
+12. **Repeat items 1 to 11 on the reference surface** and apply Annex B, the
+    correction of section 1.2.
+13. **Average the narrow-band absorption linearly into one-third-octave
+    bands** (Clause 4.1 and Annex B). That average is the absorption
+    coefficient of the road surface.
+14. **Repeat at other points** of the road surface if necessary.
+15. **Write the report** (Clause 11; Annex E prints an example).
+
+**What the report carries (Clauses 10 and 11).** Clause 11 lists fifteen items
+as well. Besides the reference to the standard, the testing organization, the
+date and place and the signature of the person responsible, they are:
+
+- the test site, as a drawing or pictures that show the road surface, the
+  set-up and any reflecting object near the maximum sampled area;
+- the road surface: its age, the measurement conditions and its composition
+  (number of layers, thicknesses, material, porosity);
+- its dryness and its temperature;
+- the weather during the test: wind speed and direction, air and road surface
+  temperatures;
+- the test arrangement, on a scale drawing or a dimensioned sketch with the
+  positions of the source and the microphone;
+- the equipment used to measure and to analyse (name, type, serial number and
+  manufacturer) and a description of the sound source;
+- the type and characteristics of the anti-aliasing filter, and the sample
+  rate;
+- the shape and the lengths of the time windows;
+- the results, as a graph and as a table of the absorption coefficient in
+  one-third-octave bands from 250 Hz to 4 kHz, rounded to two decimal places
+  (narrow bands may be added);
+- the uncertainty of the results.
+
+Clause 10 expects a standard uncertainty of 0.05 over the whole frequency
+range under normal conditions, and more over the full range of temperature and
+wind the standard allows or on thick absorptive layers. The report states it
+as an expanded uncertainty for a coverage probability of 95 %; the standard's
+example is $U = 0.1$ with $k = 2$. A result reported without the window shape
+and durations, and without the reference measurement, is not an ISO 13472-1
+result.
 
 ### 1.4 When the site forces an angle
 

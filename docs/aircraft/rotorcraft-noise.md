@@ -45,7 +45,7 @@ What a ground array can see is limited, and that is why real hemispheres arrive
 with holes. Doc 32 requires coverage of at least $-60° \le \varphi \le 60°$
 and the polar angles between the two 10 dB-down instants; measuring wider
 lateral angles, or polar angles approaching 0° and 180°, needs a more elaborate
-setup. The gap-filling of Eq. 6/7 is the direct consequence of that limit, not
+setup. The gap-filling of Eq. 14/15 (Doc 32 Eq. 6/7) is the direct consequence of that limit, not
 an implementation detail; outside the measured patch, the level is the nearest
 filled bin's, and the energetic average of them where several are equally near.
 

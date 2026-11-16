@@ -31,6 +31,29 @@ Figure A.1 (left), and the rank correlation of their pleasantness with their
 level (right), both drawn by the results' own `.plot()`, with the two rank
 axes named for what was ranked.*
 
+The map below is the whole study on one sheet. The collection is
+ISO/TS 12913-2: a soundwalk takes groups of up to five participants, led by a
+moderator and walking in silence, to assessment sites fixed beforehand, until
+each site has at least twenty independent observations (C.2.3). At each site
+they listen for a set time, 3 min for example, and then answer: the four-part
+questionnaire of Method A (C.3.1), or the sheet of Method B (C.3.2), with its
+continuous scales, its list of up to eight sources from the most noticeable
+down and its free comments. The binaural recording of Annex D is made where
+they stand: the artificial head on a tripod, the entrance of its ear canal
+1.6 m ± 0.1 m above the ground, 1 m or more from reflecting structures unless
+the usual listener stands closer, facing where the participants look and not
+moved while it measures (D.2, C.3.2.2.2); outdoors it wears a wind shield
+(D.5). The analysis is ISO/TS 12913-3, one annex for each record, and it is
+what the rest of this page computes.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundscape_study_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundscape_study.svg" alt="A map of a soundscape study in five panels. (a) The soundwalk in plan: a dashed route between buildings with four numbered assessment sites; the area and the sites are set beforehand, a moderator leads groups of up to five who walk in silence and all fill in the questionnaire at every site, with 20 or more independent observations of each site. (b) One site in elevation: three participants and, beside them, an artificial head on a tripod facing the same way, its ear 1.6 m plus or minus 0.1 m above the ground and at least 1 m from a reflecting structure; the participants listen in silence for a set time, for example 3 min, then answer on the spot, and the head is not moved while it measures. Below, three columns, each a card of what is collected with an arrow down to a card of what ISO/TS 12913-3 makes of it. (c) Method A: four parts of five boxes, sources heard, eight attributes, overall quality and appropriateness; Annex A gives the scale values of Table A.1, the median and range per site, P and E by Formulas A.1 and A.2 and Spearman's correlation against the levels. (d) Method B: continuous scales, up to eight sources by rank and free comments; Annex B gives the value from 1 to 5 to one decimal, the mean, deviation and 95 % interval, the median rank of each source and Pearson's correlation, with the comments left to a qualitative analysis. (e) The binaural recording: two channels, 3 min or longer, 44.1 kHz or more and uncompressed, a wind shield outdoors, equalized for the sound field; Annex D gives each metric of Table D.1 at each ear, the higher of the two ears' values as the representative value and a percentile ratio such as N5/N95 for the variation over time. A line from the last card feeds the two correlations: the acoustic data the answers are set against" width="100%"></picture>
+
+*What a soundscape study collects under ISO/TS 12913-2 (the two drawings and
+the upper cards) and what ISO/TS 12913-3 makes of each record (the lower
+cards, each line with the function of the library that computes it). The
+specification says where the head stands and which way it faces, not when it
+records.*
+
 ## 1. The questionnaire and its scale values
 
 Method A of ISO/TS 12913-2 (clause C.3.1) is a questionnaire in four parts,

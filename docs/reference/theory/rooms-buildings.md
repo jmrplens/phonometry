@@ -90,6 +90,21 @@ that stops with the sweep folds the tail back onto the head and biases every
 $T$ and every clarity value derived from it, silently and always in the same
 direction.
 
+The diagram below sizes both excitations for a room with $T = 1.2$ s. For the
+sweep, Annex B (B.3.1) considers a length of two to four times the longest
+reverberation time, followed by a silent gap equal to that time, normally safe
+under moderate background noise, and doubling the sweep duration normally adds
+3 dB of effective signal-to-noise ratio (B.6). For the MLS, the period of an
+order-$N$ sequence is $(2^N - 1)/f_\mathrm{s}$: at 48 kHz, order 17 lasts 2.73 s
+and satisfies Formula 10, while order 15 lasts 0.68 s and does not. Annex A
+takes the sequence as replayed periodically (A.2), and the room answers
+periodically only once a whole period has run through it, so in practice the
+first period played is discarded and the second is kept; that step is
+measurement practice, which the standard does not state. The third lane is what the deconvolution of the sweep
+returns, the linear response at time zero and the harmonic packets ahead of it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_budget.svg" alt="Three time lanes for a room with T = 1.2 s. The first shows the played sweep of 4.0 seconds, three and a third times T, followed by a silent gap of about one T and a bracketed record window of 5.2 seconds. The second shows a periodic MLS of order 17, period 2.73 seconds, with the first period marked as warm-up and discarded and the second kept, and below it a short order-15 period of 0.68 seconds marked as shorter than T so the tail folds onto the head. The third shows what the deconvolution returns: the linear impulse response and its tail at time zero with the causal part kept, the second, third and fourth harmonic packets at negative arrival times, and the deconvolution's own decaying noise tail" width="94%"></picture>
+
 The assumption that breaks first is time invariance, and clause 6.1 is explicit
 about it: moving the source or a microphone during the measurement is not
 acceptable, and neither air movement nor a change in the speed of sound through
@@ -111,6 +126,12 @@ E(t) = \int_t^{\infty} p^2(\tau)\ d\tau = \int_0^{\infty} p^2\ d\tau - \int_0^t 
 $$
 
 i.e. a reversed cumulative sum in discrete time. Backward integration cancels the random fluctuation of a single squared IR: for a purely exponential energy decay $p^2(t) = \mathrm{e}^{-a t}$ it gives $E(t) = \mathrm{e}^{-a t}/a$, an exactly straight line $L(t) = -(10 a / \ln 10)\ t$. Background noise flattens $E(t)$, so integration is truncated at the crossing $t_1$ of the fitted decay line with the noise level and the missing tail is compensated by an exponential with the fitted rate; without that term the finite integral systematically **underestimates** $T$.
+
+The clip runs that reversed sum: the tail energy fills from the end of the
+record while the decay curve is drawn toward $t = 0$, and the T20 and T30
+regression lines of the next subsection close it.
+
+**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
@@ -136,6 +157,14 @@ floor, never symmetric, and no closer to a source than
 $d_{\min} = 2\sqrt{V/(c\,T)}$, so that direct sound does not dominate the early
 decay. Positions packed closer than that are not the independent positions
 Table 1 counts, and a $T$ averaged over them carries no grade at all.
+
+The diagram below draws those rules on a room of 10 m by 6 m, 3.5 m high, for
+which $V = 210$ m³ and an expected $T$ of 0.6 s give $d_{\min} = 2.0$ m. It adds
+the two heights of ISO 3382-1 (clause 4.3): the acoustic centre of the source
+1.5 m above the floor and, in rooms for speech and music, the microphones at
+1.2 m, the ear height of a seated listener.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" width="94%"></picture>
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 
@@ -194,6 +223,15 @@ $$
 
 with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $\mathrm{e}^{-m r_n/2}$ ($m$ the power attenuation coefficient of the table above, so the intensity falls as $\mathrm{e}^{-m r}$ and the pressure as $\mathrm{e}^{-m r/2}$). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
 
+Integrated from $t = 0$, that density is a count: the sphere of radius $ct$
+about the receiver holds $N(t) = \tfrac{4\pi}{3}(ct)^3/V$ images, one per room
+volume. The clip sweeps that sphere over the lattice of a room of 7 m by 5 m,
+3 m high, and counts the arrivals against the law:
+
+**Video:** [A sphere expanding from the receiver sweeping the mirror-room lattice](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_image_source_buildup.webm): On the left, the 7 by 5 metre room sits at the centre of its grid of dashed mirror rooms, with the source as a star and the receiver as a triangle. A circle expands from the receiver at the speed of sound; as it reaches each image source that image lights up in its reflection-order colour and draws a straight line back to the receiver. On the right, the reflectogram fills in at the same instant: each image the circle reaches writes one stem at its arrival time and its level relative to the direct sound, under the dashed one-over-r spreading envelope. Below it a running count of arrivals climbs alongside the dashed analytic law, the two staying together as the count passes 44 at 30 milliseconds, 108 at 40, 202 at 50 and 344 at 60, where the law reads 348.
+
+The echogram is a lattice being swept, not a decaying signal. Because the expanding sphere gains volume as the cube of time while the images are spaced one per room volume, arrivals accumulate as the cube of time and their rate grows as its square: the early discrete reflections and the late diffuse tail are the same construction read at two densities.
+
 The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), with $S$ here the total boundary area, because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
 
 ### Steady-state room field (Bies 6.4, Kuttruff 5.6)
@@ -244,6 +282,22 @@ those three bands: a small-room rating computed without the corner procedure is
 not comparable with one that used it.
 
 The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference curve** in 1 dB steps toward the measured curve until the sum of *unfavourable* deviations $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the rating $R_\mathrm{w}$ is the shifted reference at 500 Hz. The **spectrum adaptation terms** are $C = X_{\mathrm{A}1} - X_\mathrm{w}$ and $C_\mathrm{tr} = X_{\mathrm{A}2} - X_\mathrm{w}$ with $X_{\mathrm{A}j} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (Table 4 spectra No. 1 pink noise, No. 2 urban traffic), each rounded to an integer. The ISO 717-1 Annex C worked example ($R_\mathrm{w} = 30$, $C = -2$, $C_\mathrm{tr} = -3$, unfavourable sum 31.8 dB) is reproduced exactly.
+
+The search is iterative, and the two positions that decide it are the ones a
+finished figure has already dropped: the last shift whose unfavourable sum still
+exceeded 32.0 dB, and the shift after the answer, which is allowed but gives a
+decibel away. The clip walks the Annex C spectrum of ISO 717-1 through them, and
+then the bare heavy floor of ISO 717-2 Annex C through the mirrored rule of the
+next subsection.
+
+**Video:** [Shifting the ISO 717 reference curve until it just fits](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_iso717_shift.webm): The reference curve steps in 1 dB increments toward the measured spectrum while the unfavourable deviations shade in band by band and their sum falls toward the 32.0 dB cap. The airborne engine stops at 31.8 dB for Rw = 30 dB, one step before the position that would waste the allowance; the impact engine then runs the same rule with the deviation's sign reversed, the curve stepping upward and stopping at 28.0 dB for Ln,w = 79 dB.
+
+*Both walks stop where the standard says, at the largest unfavourable sum that
+does not exceed 32.0 dB: 31.8 dB for $R_\mathrm{w} = 30$ dB and 28.0 dB for
+$L_\mathrm{n,w} = 79$ dB. The step before is rejected for overshooting the cap,
+and the step after is allowed but rates the element a decibel worse for no
+reason (a lower $R_\mathrm{w}$, a higher $L_\mathrm{n,w}$), which is what "as large
+as possible" in ISO 717-1:2020, 4.4 and ISO 717-2:2020, 4.3.1 excludes.*
 
 **Reading $C$ and $C_\mathrm{tr}$.** The weighted rating condenses a whole curve against
 one fixed reference curve, so it answers for the reference source and no other.
@@ -320,10 +374,22 @@ backing, air gap or framed edges change the answer, which is why a catalogue
 $\alpha_\mathrm{s}$ without its mounting code is not usable and why the same product
 gives different curves in different laboratories. Each $T$ is the average of at
 least 12 spatially independent decays, from at least 3 microphone and 2 source
-positions, with microphones at least 1.5 m apart, 2 m from any source and 1 m
-from any room surface and from the specimen (7.1.4, 7.1.3). Both measurements
-are made between 30 % and 90 % relative humidity and above 15 °C, at nearly the
-same climate (6.3.2).
+positions (7.1.4), with microphones at least 1.5 m apart, 2 m from any source
+and 1 m from any room surface and from the specimen (7.1.2), and source
+positions at least 3 m apart (7.1.3). Both measurements are made between 30 %
+and 90 % relative humidity and at 15 °C or more, at nearly the same climate
+(6.3.2).
+
+The diagram below draws that arrangement for a 200 m³ room and a 10.8 m² specimen.
+It also shows what the paragraph leaves to the standard's own text: the
+diffusers of Annex A, sheets of roughly 0.8 m² to 3 m² and about 5 kg/m²; the
+empty-room absorption area $A_1$ that must stay under the Table 1 limit
+(6.1.4), with $T_1$ measured without the frame of the specimen (6.2.1.3); each
+decay evaluated over 20 dB starting 5 dB below the initial level (7.4.1); and
+two of the Annex B mountings, Type A directly against the floor and Type E-400
+with 400 mm between the exposed face and the surface behind it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso354_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso354_room.svg" alt="Plan of an ISO 354 reverberation room with non-parallel walls: the 10.8 square metre rectangular specimen on the floor with its edges deliberately not parallel to the room edges and a 0.75 metre clearance dimensioned to the nearest boundary, three microphone positions and two loudspeaker positions with their separation rules, suspended diffuser panels near the ceiling, an inset showing the empty room giving T1 and A1 above the room with the specimen giving T2 and A2, and a strip comparing the Type A and Type E-400 mountings in section" width="92%"></picture>
 
 That last condition is not housekeeping. The result is the *difference* of two
 large and nearly equal absorption areas, so everything that changes between the
@@ -531,6 +597,24 @@ efficiency that decides how much of the plate's vibration becomes sound. Bottom
 right, the ceiling a leak imposes: a 1 % open area holds the composite at
 $10\log_{10}(S/S_\mathrm{a}) = 20$ dB however good the wall is, which is the panel worth
 showing a client.*
+
+The dip of the top left panel is a matching of wavelengths, and it can be
+watched. At $f_\mathrm{c}$ the free bending wavelength equals the trace of a wave at
+grazing incidence; for any smaller angle of incidence there is a frequency above
+$f_\mathrm{c}$ at which the two match again (Bies 7.2.1). With a trace of
+$\lambda/\sin\theta$ at an angle $\theta$ from the normal, and a bending
+wavelength that falls as $1/\sqrt{f}$, that frequency is
+$f_\mathrm{c}/\sin^2\theta$, which is $2 f_\mathrm{c}$ at 45°. The clip sends a sustained
+plane wave at 45° onto a 10 mm steel plate, for which the library gives
+$f_\mathrm{c} = 1205$ Hz, at half that frequency and at twice it:
+
+**Video:** [Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_coincidence.webm): Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated.
+
+*At 602 Hz the plate lets through −47 dB, where the oblique mass law predicts
+−48 dB. At 2410 Hz it still lets through −47 dB, where the mass law said −60 dB:
+the 12 dB that two octaves should have added are gone. The air below the plate
+is drawn with a gain of 150 (+44 dB) on both panels so that the transmitted
+field shows.*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="To-scale cross-section of a 2 mm slit through a 100 mm wall: the hatched wall drawn in section with the narrow horizontal air gap at mid-height, an incident-sound arrow pointing at the gap from the left, the 100 mm wall depth and 2 mm slit width dimensioned, and circular transmitted wavefronts sketched spreading from the slit exit on the right" width="80%"></picture>
 

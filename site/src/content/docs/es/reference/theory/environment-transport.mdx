@@ -344,7 +344,26 @@ la ISO 9613-1 anterior. El **efecto del suelo** $A_\mathrm{gr} = A_\mathrm{s} + 
 (Ec. (9)) suma una región fuente, receptor y media, cada una a partir de las
 funciones $a'/b'/c'/d'$ de la Tabla 3 y su factor de suelo $G$ (0 duro,
 1 poroso); un $A_\mathrm{gr}$ negativo es una ganancia neta por la reflexión en el
-suelo. Una forma alternativa, solo ponderada A,
+suelo. Las tres regiones son tramos del recorrido proyectado sobre el plano del
+suelo, $d_\mathrm{p}$ (7.3.1, figura 1): la región de la fuente ocupa
+$30 h_\mathrm{s}$ desde la fuente hacia el receptor y la región del receptor
+$30 h_\mathrm{r}$ hacia atrás desde el receptor, cada una como mucho $d_\mathrm{p}$, y la
+región media es lo que quede entre las dos. Una región de suelo mixto toma como
+$G$ la fracción de ella que es porosa, y el término medio lleva el factor
+$q = 1 - 30(h_\mathrm{s} + h_\mathrm{r})/d_\mathrm{p}$ (Tabla 3, nota 2), así que en un
+recorrido de $30(h_\mathrm{s} + h_\mathrm{r})$ o menos las dos regiones de los extremos se
+tocan o se solapan, $q = 0$ y no hay región media. El esquema dibuja un recorrido de 200 m
+con fuente y receptor a 1,5 m del suelo: una región de 45 m en cada extremo, una
+región media de 110 m dividida en 70 m de hierba y 40 m de asfalto
+($G_\mathrm{m} = 70/110 \approx 0{,}64$) y $q = 0{,}55$, mientras que su recuadro da a la
+región de la fuente 25 m de suelo poroso ($G_\mathrm{s} = 25/45 \approx 0{,}56$) sin dibujar
+la división; debajo,
+las mismas alturas en un recorrido de 60 m, que no llega a los 90 m a partir de
+los cuales hay región media.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_regions.svg" alt="Sección a escala de un recorrido de 200 m con fuente y receptor a 1,5 m del suelo: la región de la fuente sombreada sobre los primeros 45 m como 30 por hs, la región del receptor sombreada sobre los últimos 45 m como 30 por hr, y la región media de 110 m entre ellas dividida en 70 m de hierba y 40 m de asfalto con Gm = 70/110 = 0,64; un recuadro de fórmula da q = 1 menos 30 por (hs más hr) partido por dp, y un recuadro secundario repite el mismo recorrido a 60 m, donde las regiones de fuente y receptor se solapan, q = 0 y la región media no existe" width="92%" />
+
+Una forma alternativa del efecto del suelo, solo ponderada A,
 $A_\mathrm{gr} = 4{,}8 - (2 h_\mathrm{m}/d)[17 + 300/d] \ge 0$ (Ec. (10)) se ofrece para suelo
 poroso cuando solo importa el nivel ponderado A, acompañada del índice de ángulo
 sólido $D_\Omega$ (Ec. (11)). El **apantallamiento** por una barrera es la
@@ -480,7 +499,7 @@ medida, y la elección la dicta la sala de la que se disponga. La **presión
 acústica** sobre una superficie envolvente en campo libre sobre un plano
 reflectante supone que la intensidad normal a esa superficie es la presión
 cuadrática media dividida por $\rho c$: ISO 3744 (ingeniería) e ISO 3746
-(inspección), abajo, e ISO 3745 (precisión) cuando la sala es anecoica; leída en
+(peritaje), abajo, e ISO 3745 (precisión) cuando la sala es anecoica; leída en
 campo difuso, esa misma presión convierte la propia absorción de la sala en la
 calibración, que es la ISO 3741. La **intensidad acústica** mide el flujo
 directamente y no necesita ninguna sala cualificada, al precio de una sonda de
@@ -521,7 +540,7 @@ gruesos: 10 dB, 3 dB y un tope de 3 dB.) La respuesta honrada a un margen de 2 d
 es una hora del día más tranquila o una superficie de medición más cerca de la
 fuente, no una corrección mayor. En cuanto a $K_2$, puede despreciarse por debajo
 de 0,5 dB, y el método de ingeniería solo es válido mientras $K_{2\mathrm{A}} \le 4$ dB
-(7 dB para el método de inspección de ISO 3746, apartado 4.3), así que una sala
+(7 dB para el método de control de ISO 3746, apartado 4.3), así que una sala
 que devuelve 6 dB no es una corrección que aplicar sino una sala que rechazar. Y
 conviene leer con cuidado el sentido de $K_2$: crece con $4S/A$, así que agrandar
 la superficie de medición empeora la corrección de sala, que es lo contrario de
@@ -545,7 +564,14 @@ que el grado de ingeniería usa 10 posiciones clave sobre un plano reflectante
 (5 sobre dos, 3 sobre tres), y el método de inspección toma un subconjunto
 reducido. `measurement_positions()` las devuelve escaladas al radio elegido, y
 `plot_microphone_positions()` dibuja el conjunto antes de medir nada.
-ISO 3746 (inspección) comparte las matemáticas con criterios más
+
+El esquema siguiente dibuja las dos superficies de ISO 3744: la semiesfera de
+radio $r$ sobre un plano reflectante con las diez posiciones clave del Anexo B,
+y la caja a la distancia de medición $d$ alrededor de una fuente grande.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Superficies de medición de ISO 3744: una semiesfera de radio r envolviendo una fuente compacta sobre un plano reflectante, con las diez posiciones de micrófono del Anexo B marcadas, y un paralelepípedo recto (caja) a la distancia de medición d alrededor de una fuente grande" width="88%" />
+
+ISO 3746 (peritaje) comparte las matemáticas con criterios más
 laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$.
 
 ### Grado de precisión en cámaras anecoicas (ISO 3745)

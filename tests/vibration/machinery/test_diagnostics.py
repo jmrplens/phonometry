@@ -16,8 +16,11 @@ identity that the equations imply and the implementation does not:
   ``f_re = 91,6 Hz``, ``f_repfo = 207 Hz``, ``f_resf = 183,3 Hz``,
   ``f_rciso = 19,53 Hz``, ``f_recri = 293 Hz``.
 * **Problem 8.6** (printed p. 597; answer p. 619). Six-blade, four-vane axial
-  fan at 3500 r/min: blade-passing frequency 350 Hz, first lobed interaction
-  patterns at 35 Hz and 175 Hz.
+  fan at 3500 r/min: blade-passing frequency 350 Hz, and the first lobed
+  interaction patterns printed as 35 Hz and 175 Hz. Those are the speeds of
+  rotation of Eq. (8.17), 2100 and 10 500 r/min, in turns per second: the
+  noise of a pattern "is also at the blade passing frequency and its
+  associated harmonics" (printed p. 525).
 * **Problem 8.7** (printed pp. 597-598; answer p. 619). Induction motor with
   sixty rotor bars, six magnetic poles, 3600 r/min and zero slip: 60 Hz,
   120 Hz, 360 Hz and 3600 Hz.
@@ -36,7 +39,9 @@ import numpy as np
 import pytest
 
 from phonometry.vibration.machinery.diagnostics import (
+    BladePassResult,
     FaultFrequencyResult,
+    LobePattern,
     bearing_fault_frequencies,
     blade_pass_frequencies,
     combine_fault_lines,
@@ -169,38 +174,130 @@ class TestNortonProblem86:
         assert res["3xBPF"] == pytest.approx(1050.0, abs=0.1)
 
     def test_lobed_interaction_patterns(self) -> None:
-        """Printed answers: 35 Hz and 175 Hz (Eqs. 8.16 and 8.17).
+        """Printed answers: 35 Hz and 175 Hz, the turns per second of Eq. (8.17).
 
         With ``N = 6`` blades and ``V = 4`` vanes the first patterns have
         ``mL = 6 - 4 = 2`` and ``mL = 6 + 4 = 10`` lobes, rotating at
-        ``n N (r/min) / mL`` = 10 500 and 2100 r/min, i.e. 175 Hz and 35 Hz.
+        ``n N (r/min) / mL`` = 10 500 and 2100 r/min, i.e. 175 and 35 turns a
+        second.
         """
         res = blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
-        assert res["lobe n=1 m=2"] == pytest.approx(175.0, abs=0.05)
-        assert res["lobe n=1 m=10"] == pytest.approx(35.0, abs=0.05)
+        assert isinstance(res, BladePassResult)
+        speeds = {p.n_lobes: p.speed_rpm for p in res.lobe_patterns}
+        assert speeds[2] == pytest.approx(10500.0, rel=1e-12)
+        assert speeds[10] == pytest.approx(2100.0, rel=1e-12)
+        assert speeds[2] / 60.0 == pytest.approx(175.0, abs=0.05)
+        assert speeds[10] / 60.0 == pytest.approx(35.0, abs=0.05)
+
+    def test_a_pattern_is_a_speed_of_rotation_not_a_line(self) -> None:
+        """No pattern is a line: the lines are the shaft and blade tones alone.
+
+        ``mL`` lobes turning ``ML`` times a minute pass a fixed point
+        ``mL ML = n N (r/min)`` times a minute, the blade-passing rate, so the
+        duct hears every pattern at the harmonic it comes from (p. 525).
+        """
+        plain = blade_pass_frequencies(3500.0, 6, n_harmonics=1)
+        res = blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+        assert res.names == plain.names == ("shaft", "BPF")
+        np.testing.assert_array_equal(res.frequencies, plain.frequencies)
+        assert "lobe n=1 m=2" not in res
+        for pattern in res.lobe_patterns:
+            assert isinstance(pattern, LobePattern)
+            rate_hz = pattern.n_lobes * pattern.speed_rpm / 60.0
+            assert rate_hz == pytest.approx(pattern.harmonic * res["BPF"], rel=1e-12)
+
+    def test_a_negative_lobe_count_turns_against_the_rotor(self) -> None:
+        """Eq. (8.16) with ``k = -1`` and ``V > nN`` gives a negative ``mL``.
+
+        Four blades and six vanes: ``mL = 4 - 6 = -2``, and Eq. (8.17) puts the
+        pattern at ``4 x 600 / -2 = -1200`` r/min, against the rotor, while
+        ``mL = 4 + 6 = 10`` turns with it at 240 r/min. The sign is the sense
+        of rotation, and it is kept.
+        """
+        res = blade_pass_frequencies(600.0, 4, n_harmonics=1, n_vanes=6)
+        got = [(p.harmonic, p.vane_order, p.n_lobes) for p in res.lobe_patterns]
+        assert got == [(1, -1, -2), (1, 1, 10)]
+        assert res.lobe_patterns[0].speed_rpm == pytest.approx(-1200.0, rel=1e-12)
+        assert res.lobe_patterns[1].speed_rpm == pytest.approx(240.0, rel=1e-12)
 
     def test_equal_lobe_counts_from_different_harmonics_both_survive(self) -> None:
         """Eq. (8.17) carries ``n``, so ``mL`` alone does not identify a pattern.
 
         With ``N = 4`` blades and ``V = 2`` vanes, ``n = 1, k = +1`` and
         ``n = 2, k = -1`` both give ``mL = 6``, but Eq. (8.17) puts the first
-        at ``1 x 4 fs / 6 = 0,667 fs`` and the second at ``2 x 4 fs / 6 =
-        1,333 fs``. Two distinct patterns, two distinct speeds.
+        at ``1 x 4 x 60 / 6 = 40`` r/min and the second at ``2 x 4 x 60 / 6 =
+        80`` r/min. Two distinct patterns, two distinct speeds.
         """
         res = blade_pass_frequencies(60.0, 4, n_harmonics=2, n_vanes=2)
-        fs = res.shaft_rate
-        assert res["lobe n=1 m=6"] == pytest.approx(4.0 * fs / 6.0, rel=1e-12)
-        assert res["lobe n=2 m=6"] == pytest.approx(8.0 * fs / 6.0, rel=1e-12)
-        assert res["lobe n=2 m=6"] != pytest.approx(res["lobe n=1 m=6"])
         # Eq. (8.16) with n <= 2 and |k| = 1 has exactly these four patterns
-        # (mL = 2, 6, 6 and 10), and none of them is silently dropped.
-        lobes = [line.name for line in res.lines if line.name.startswith("lobe")]
-        assert lobes == [
-            "lobe n=1 m=2",
-            "lobe n=1 m=6",
-            "lobe n=2 m=6",
-            "lobe n=2 m=10",
+        # (mL = 2, 6, 6 and 10), and none of them is silently dropped. The
+        # integer fields are compared exactly and the speed alone with approx,
+        # which takes no nested data.
+        assert [(p.harmonic, p.vane_order, p.n_lobes) for p in res.lobe_patterns] == [
+            (1, -1, 2),
+            (1, 1, 6),
+            (2, -1, 6),
+            (2, 1, 10),
         ]
+        assert [p.speed_rpm for p in res.lobe_patterns] == pytest.approx(
+            [120.0, 40.0, 80.0, 48.0], rel=1e-12
+        )
+
+    def test_opposite_patterns_of_one_lobe_count_are_two_patterns(self) -> None:
+        """``mL = +2`` and ``mL = -2`` turn opposite ways, and both are kept.
+
+        With ``N = 4``, ``V = 2`` and ``|k|`` up to 3, ``k = -1`` gives
+        ``mL = 2`` and ``k = -3`` gives ``mL = -2``; ``k = -2`` gives no
+        pattern at all (``mL = 0``).
+        """
+        res = blade_pass_frequencies(60.0, 4, n_harmonics=1, n_vanes=2, n_lobe_orders=3)
+        lobes = [p.n_lobes for p in res.lobe_patterns]
+        assert lobes == [2, 6, 8, -2, 10]
+        assert 0 not in lobes
+        by_order = {p.vane_order: p.speed_rpm for p in res.lobe_patterns}
+        assert by_order[-1] == pytest.approx(120.0, rel=1e-12)
+        assert by_order[-3] == pytest.approx(-120.0, rel=1e-12)
+
+    def test_without_vanes_there_are_no_patterns(self) -> None:
+        """Blade tones only, and an empty tuple of patterns."""
+        assert blade_pass_frequencies(3500.0, 6).lobe_patterns == ()
+
+    def test_combining_carries_no_pattern_as_a_line(self) -> None:
+        """``combine_fault_lines`` merges lines; a pattern is none."""
+        fan = blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+        gear = gear_mesh_frequencies(3500.0, 20, n_harmonics=1, n_sidebands=1)
+        both = combine_fault_lines(fan, gear)
+        assert type(both) is FaultFrequencyResult
+        assert not np.any(np.isclose(both.frequencies, 175.0))
+        assert not np.any(np.isclose(both.frequencies, 35.0))
+        assert len(both.lines) == len(fan.lines) + len(gear.lines)
+
+    def test_within_keeps_the_patterns(self) -> None:
+        """Narrowing the lines to a band leaves the speeds of rotation alone."""
+        fan = blade_pass_frequencies(3500.0, 6, n_harmonics=3, n_vanes=4)
+        narrow = fan.within(0.0, 400.0)
+        assert isinstance(narrow, BladePassResult)
+        assert narrow.names == ("shaft", "BPF")
+        assert narrow.lobe_patterns == fan.lobe_patterns
+
+    def test_the_plot_marks_no_pattern(self) -> None:
+        """The overlay draws a line at the shaft and blade rates and nowhere else."""
+        pytest.importorskip("matplotlib")
+        import matplotlib.pyplot as plt
+        from matplotlib.lines import Line2D
+
+        fan = blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+        ax = fan.plot()
+        try:
+            drawn = sorted(
+                float(np.asarray(line.get_xdata())[0])
+                for line in ax.get_lines()
+                if isinstance(line, Line2D)
+            )
+            np.testing.assert_allclose(drawn, sorted(fan.frequencies))
+            assert all("lobe" not in text.get_text() for text in ax.texts)
+        finally:
+            plt.close(ax.figure)
 
     def test_rotary_blower_repeats_four_times_per_revolution(self) -> None:
         """Norton's rule: use Eq. 8.15 with ``4 x r/min`` (Section 8.4.4)."""

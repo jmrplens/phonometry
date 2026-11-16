@@ -223,6 +223,60 @@ def test_unknown_label_side_raises_instead_of_drawing_left() -> None:
         svg.dim(200, 100, 200, 300, "1.20 m", 0, 15, label_side="rigth")
 
 
+_LINE = re.compile(
+    r'<line x1="([-\d.]+)" y1="([-\d.]+)" x2="([-\d.]+)" y2="([-\d.]+)" '
+    r'stroke="[^"]*" stroke-width="([\d.]+)"( stroke-dasharray="[^"]*")?'
+)
+
+
+def _solid_lines(svg: SVG) -> list[tuple[float, float, float, float]]:
+    """End points of every undashed line the canvas has drawn so far."""
+    found = []
+    for part in svg.parts:
+        for match in _LINE.finditer(part):
+            if match.group(6) is None:
+                x1, y1, x2, y2 = (float(match.group(i)) for i in range(1, 5))
+                found.append((x1, y1, x2, y2))
+    return found
+
+
+def _parallel(line: tuple[float, float, float, float], dx: float, dy: float) -> bool:
+    x1, y1, x2, y2 = line
+    return abs((x2 - x1) * dy - (y2 - y1) * dx) < 1e-6 * (dx * dx + dy * dy)
+
+
+def test_an_aligned_dimension_runs_along_the_two_points() -> None:
+    # Two points apart in x and in y: the default dimension takes the larger
+    # projection and draws the 90 px horizontal gap, while an aligned one is
+    # the drafting dimension of the distance itself, set beside the segment.
+    svg = SVG(900, 560, LIGHT)
+    svg.dim(388.0, 440.0, 478.0, 400.0, "0.7 m", offset=-50, aligned=True)
+    shafts = [line for line in _solid_lines(svg) if _parallel(line, 90.0, -40.0)]
+    assert len(shafts) == 2
+    # The two shafts start at the middle and end at the arrow bases, so their
+    # reach plus the two heads spans the full 98.5 px between the points.
+    reach = sum(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5 for x1, y1, x2, y2 in shafts)
+    assert reach + 2 * 9.0 + 2 * 4.0 == pytest.approx((90.0**2 + 40.0**2) ** 0.5)
+    # Every shaft point lies 50 px from the measured segment, on the side
+    # the negative offset names.
+    ux, uy = 90.0 / 98.48857801796104, -40.0 / 98.48857801796104
+    for x1, y1, _x2, _y2 in shafts:
+        across = (x1 - 388.0) * -uy + (y1 - 440.0) * ux
+        assert across == pytest.approx(-50.0)
+
+
+def test_the_impact_set_up_dimensions_the_capsule_spacing() -> None:
+    # ISO 16283-2:2020, 7.6 a) is a distance between two microphone
+    # positions; the plate drew the horizontal gap between the capsules
+    # instead, which is shorter than the distance the rule states.
+    from diagrams.buildings import _d_impact
+
+    svg = SVG(900, 726, LIGHT)
+    _d_impact(svg, LIGHT)
+    shafts = [line for line in _solid_lines(svg) if _parallel(line, 90.0, -40.0)]
+    assert len(shafts) == 2
+
+
 def test_math_and_prose_escape_metacharacters_in_the_comment() -> None:
     element = _element("A & B $a<b$")
     assert "<!-- A &amp; B $a&lt;b$ -->" in element
@@ -753,3 +807,46 @@ def test_a_key_passed_to_a_measurement_is_accounted_for() -> None:
     svg.text_width("$L_{n,sum}$", 20, upright=("L_x",))
     with pytest.raises(ValueError, match=r"slope keys \['L_x'\] set no subscript"):
         svg.render("A title")
+
+
+def test_the_running_index_n_of_iso_7235_is_italic_beside_its_upright_descriptors() -> (
+    None
+):
+    # ISO 7235:2003, 6.5.2.2.2, Equations (15) to (17) (BS EN ISO 7235:2009,
+    # PDF page 38, folio 28), print every subscript upright, the running
+    # index n of the flow rate q_Vn included. ISO 80000-2 decides n: it is an
+    # index and italic, while tot, s, d, 1 and the series I and II stay
+    # upright as the print sets them.
+    assert _math_runs("$Δp_{tot,n}$")[1:] == [
+        ("p", True, 0.0, 1.0),
+        ("tot,", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$Δp_{sn}$")[2:] == [
+        ("s", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$p_{dn}$")[1:] == [
+        ("d", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$p_{s1(II)n}$", ("p_II",))[1:] == [
+        ("s1(II)", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    # The split hangs on the symbol: under another one the run is an index.
+    assert _math_runs("$x_{dn}$")[1:] == [("dn", True, 0.22, 0.70)]
+
+
+def test_the_silencer_plate_typesets_the_fundamental_method_equations() -> None:
+    """The plate carries Equations (15) to (17) of ISO 7235, n italic in each."""
+    from diagrams.registry import DIAGRAMS
+
+    builder, title, height = DIAGRAMS["diagram_silencer_pressure_loss"]
+    svg = SVG(900, height, LIGHT)
+    builder(svg, LIGHT)
+    markup = svg.render(title)
+    for number in ("(15)", "(16)", "(17)"):
+        assert re.search(rf"<!-- \$[^<]*\$\s+{re.escape(number)} -->", markup), number
+    assert "Δp_{tot,n}" in markup
+    assert "p_{dn}" in markup

@@ -9,11 +9,13 @@ here is embedded by a page under ``perception/``.
 
 import itertools
 from functools import cache
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from matplotlib.axes import Axes
+from numpy.typing import NDArray
 
 from phonometry._plot.common import format_frequency_axis, theme_fill, theme_line
 
@@ -133,6 +135,583 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     ax.set_ylabel("Bin power [dB]")
     ax.legend(loc="upper right", fontsize=9)
     save_figure(output_dir, "tonality_spectrum.png")
+    plt.close()
+
+
+class _TonePartition(NamedTuple):
+    """One tone in noise, cut the way ECMA-418-1 cuts its spectrum."""
+
+    freqs: NDArray[np.float64]
+    level: NDArray[np.float64]  # bin power in decibels
+    power: NDArray[np.float64]
+    df: float
+    peak: int
+    ft: float
+    f1: float  # the critical band of the tone, clause 10
+    f2: float
+    dfc: float
+
+
+def _tone_in_noise(tone_hz: float, amplitude: float, seed: int) -> _TonePartition:
+    """The averaged spectrum of a tone in white noise, and its critical band.
+
+    The spectrum, the peak and the band edges are the library's own
+    (clauses 10, 11.1 and 12.1), at the 1 Hz line spacing its two tone
+    methods default to.
+    """
+    from phonometry.psychoacoustics.quality.tonality import (
+        _averaged_spectrum,
+        _critical_band,
+        _find_peak,
+    )
+
+    fs = 8000.0
+    rng = np.random.default_rng(seed)
+    tt = np.arange(int(fs * 30)) / fs
+    x = amplitude * np.sin(2 * np.pi * tone_hz * tt) + 0.05 * rng.standard_normal(
+        tt.size
+    )
+    freqs, power, df = _averaged_spectrum(x, fs, 1.0)
+    peak = _find_peak(freqs, power, tone_hz)
+    ft = float(freqs[peak])
+    f1, f2, dfc = _critical_band(ft)
+    level = 10 * np.log10(np.maximum(power, 1e-18))
+    # The partitions below are drawn from the library's helpers; the two
+    # ratios they give are held to its public answers by each generator.
+    _TONE_SIGNALS[tone_hz] = (x, fs)
+    return _TonePartition(freqs, level, power, df, peak, ft, f1, f2, dfc)
+
+
+#: The amplitude of the 1 kHz tone both partition figures cut, over noise of 0.05 r.m.s.
+_PARTITION_TONE_1K = 0.056
+#: How far a ratio cut here may sit from the library's: rounding, no more.
+_PARTITION_TOLERANCE_DB = 1e-9
+#: The signals of the partition figures, by tone frequency, for the public calls.
+_TONE_SIGNALS: dict[float, tuple[NDArray[np.float64], float]] = {}
+
+
+def _held_to(drawn: float, published: float, what: str) -> None:
+    """Refuse to draw a partition whose ratio is not the library's.
+
+    :raises RuntimeError: if the two differ by more than rounding.
+    """
+    if abs(drawn - published) > _PARTITION_TOLERANCE_DB:
+        msg = f"{what}: the figure cuts {drawn!r} dB, the library {published!r} dB"
+        raise RuntimeError(msg)
+
+
+def _span_arrow(ax: Axes, x0: float, x1: float, y: float) -> None:
+    """A double-headed dimension arrow from *x0* to *x1* at height *y*."""
+    ax.annotate(
+        "",
+        xy=(x0, y),
+        xytext=(x1, y),
+        arrowprops={"arrowstyle": "<->", "lw": 1.0, "color": COLOR_FG},
+    )
+
+
+def generate_tone_to_noise_partition(output_dir: str) -> None:
+    """How clause 11 of ECMA-418-1 splits a critical band into tone and noise.
+
+    Left, the critical band of a 1 kHz tone and the window of 15 % of its
+    width about the peak; right, that window line by line: the tone band
+    between the minima on each side of the peak, and the straight line
+    between its two end lines that Formula (9) takes out of the tone.
+    """
+    print("Generating tone_to_noise_partition.png...")
+    from phonometry import psychoacoustics
+    from phonometry._i18n import format_number
+    from phonometry.psychoacoustics.quality.tonality import _band_power, _tone_band
+
+    tone = _tone_in_noise(1000.0, _PARTITION_TONE_1K, seed=21)
+    freqs, level, power = tone.freqs, tone.level, tone.power
+    half_width = max(1, round(0.075 * tone.dfc / tone.df))
+    lo, hi = _tone_band(power, tone.peak, half_width)
+    count = hi - lo + 1
+    # Formulae (9) to (11), on the library's own tone band and critical band.
+    p_tone = float(np.sum(power[lo : hi + 1])) - (power[lo] + power[hi]) * count / 2.0
+    p_tot, n_tot = _band_power(freqs, power, tone.f1, tone.f2)
+    p_noise = (p_tot - p_tone) * tone.dfc / (n_tot * tone.df)
+    l_t, l_n = 10 * np.log10(p_tone), 10 * np.log10(p_noise)
+    x, fs = _TONE_SIGNALS[1000.0]
+    result = psychoacoustics.tone_to_noise_ratio(x, fs, tone_frequency=1000.0)
+    _held_to(float(l_t - l_n), result.ratio_db, "tone-to-noise ratio")
+
+    def number(value: float, decimals: int = 1) -> str:
+        return format_number(value, _LANG, decimals=decimals)
+
+    floor = (
+        float(np.floor(np.min(level[(freqs > 880) & (freqs < 1130)]) / 5.0) * 5.0)
+        - 10.0
+    )
+    top = float(level[tone.peak]) + 21.0
+    fig, (wide, zoom) = plt.subplots(
+        1, 2, figsize=(10.5, 5.6), sharey=True, gridspec_kw={"width_ratios": [1.2, 1.0]}
+    )
+
+    # Left: the whole critical band.
+    margin = 0.22 * tone.dfc
+    shown = (freqs >= tone.f1 - margin) & (freqs <= tone.f2 + margin)
+    inside = (freqs > tone.f1) & (freqs <= tone.f2)
+    wide.fill_between(
+        freqs[inside],
+        level[inside],
+        floor,
+        color=theme_fill(COLOR_TERTIARY, wide),
+        linewidth=0,
+        label=r"critical band of the tone, $L_\mathrm{tot}$; less the tone, the noise $L_\mathrm{n}$",
+    )
+    wide.plot(freqs[shown], level[shown], color=COLOR_PRIMARY, linewidth=1.0)
+    for edge in (tone.f1, tone.f2):
+        wide.plot(
+            [edge, edge], [floor, top - 8.0], color=COLOR_FG, linewidth=1.0, ls="--"
+        )
+    window = (tone.ft - half_width * tone.df, tone.ft + half_width * tone.df)
+    for edge in window:
+        wide.plot(
+            [edge, edge], [floor, top - 15.5], color=COLOR_FG, linewidth=0.9, ls="-."
+        )
+    _span_arrow(wide, tone.f1, tone.f2, top - 6.0)
+    wide.text(
+        tone.ft,
+        top - 5.3,
+        rf"$\Delta f_\mathrm{{c}}$ = {number(tone.dfc)} Hz",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    wide.text(
+        window[1] + 5.0,
+        top - 14.0,
+        r"15 % of $\Delta f_\mathrm{c}$",
+        ha="left",
+        va="center",
+        fontsize=10,
+    )
+    wide.set_xlim(tone.f1 - margin, tone.f2 + margin)
+    wide.set_ylim(floor, top)
+    wide.set_xticks(
+        [tone.f1, tone.ft, tone.f2],
+        [number(tone.f1), number(tone.ft, 0), number(tone.f2)],
+    )
+    wide.set_xlabel(LABEL_FREQ_HZ)
+    wide.set_ylabel("Bin power [dB]")
+    wide.set_title("The critical band, $f_1$ to $f_2$", fontsize=11)
+    wide.grid(visible=False)
+    wide.legend(
+        loc="lower center", bbox_to_anchor=(0.5, -0.32), frameon=False, fontsize=9.5
+    )
+
+    # Right: the 15 % window, one marker per spectral line.
+    reach = half_width + 4
+    near = slice(tone.peak - reach, tone.peak + reach + 1)
+    band = slice(lo, hi + 1)
+    # The line Formula (9) subtracts joins the two end lines in power.
+    line = 10 * np.log10(np.linspace(power[lo], power[hi], count))
+    zoom.fill_between(
+        freqs[band],
+        level[band],
+        line,
+        color=theme_fill(COLOR_SECONDARY, zoom),
+        linewidth=0,
+        label=r"tone: what stands above the line, $L_\mathrm{t}$",
+    )
+    zoom.plot(
+        freqs[near], level[near], color=COLOR_PRIMARY, linewidth=1.0, marker="o", ms=3.2
+    )
+    zoom.plot(
+        [freqs[lo], freqs[hi]],
+        [level[lo], level[hi]],
+        color=COLOR_FG,
+        linewidth=1.2,
+        ls="--",
+        marker="o",
+        ms=6.5,
+        mfc="none",
+        label="line between the two end lines, $l_1$ and $l_2$",
+    )
+    for edge in window:
+        zoom.plot(
+            [edge, edge], [floor, top - 15.5], color=COLOR_FG, linewidth=0.9, ls="-."
+        )
+    _span_arrow(zoom, window[0], window[1], top - 14.0)
+    zoom.text(
+        tone.ft,
+        top - 13.3,
+        r"15 % of $\Delta f_\mathrm{c}$",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    _span_arrow(zoom, float(freqs[lo]), float(freqs[hi]), top - 6.0)
+    zoom.text(
+        tone.ft,
+        top - 5.3,
+        rf"tone band, $\Delta f_\mathrm{{t}}$ = {number(count * tone.df, 0)} Hz",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    zoom.text(
+        freqs[lo] - 0.9, level[lo] + 1.5, "$l_1$", ha="right", va="bottom", fontsize=11
+    )
+    zoom.text(
+        freqs[hi] + 0.9, level[hi] + 1.5, "$l_2$", ha="left", va="bottom", fontsize=11
+    )
+    zoom.set_xlim(freqs[near][0], freqs[near][-1])
+    zoom.set_xticks([window[0], tone.ft, window[1]])
+    zoom.set_xlabel(LABEL_FREQ_HZ)
+    zoom.set_title("Inside the window, line by line", fontsize=11)
+    zoom.grid(visible=False)
+    zoom.legend(
+        loc="lower center", bbox_to_anchor=(0.5, -0.38), frameon=False, fontsize=9.5
+    )
+
+    fig.suptitle(
+        "Tone-to-noise ratio: the tone band inside its critical band "
+        "(ECMA-418-1, clause 11)",
+        y=0.985,
+    )
+    fig.text(
+        0.5,
+        0.915,
+        rf"$L_\mathrm{{t}}$ = {number(l_t)} dB,  $L_\mathrm{{n}}$ = {number(l_n)} dB,  "
+        rf"$\Delta L_\mathrm{{T}}$ = $L_\mathrm{{t}} - L_\mathrm{{n}}$ = "
+        rf"{number(result.ratio_db)} dB",
+        ha="center",
+        va="center",
+        fontsize=10.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.915))
+    save_figure(output_dir, "tone_to_noise_partition.png")
+    plt.close()
+
+
+#: The -3 dB width in hertz of the resonance whose noise stands in, in
+#: :func:`generate_tone_band_window_edge`, for a tone of wandering frequency.
+_WANDERING_TONE_WIDTH_HZ = 3.0
+
+
+def _wandering_tone_in_noise(seed: int) -> _TonePartition:
+    """A narrow hump of noise at 1 kHz in white noise, cut as clause 11 cuts it.
+
+    White noise through a two-pole resonance at 1 kHz with a -3 dB width of
+    :data:`_WANDERING_TONE_WIDTH_HZ`, scaled to 0.06 r.m.s. over the 0.05 of
+    the background: a peak whose skirt is still falling where the 15 % window
+    ends, the "tone of time-varying frequency or another phenomenon" of
+    clause 11.2. Sixty seconds keep the averaged skirt free of local minima
+    near the peak. The spectrum, peak and band edges are the library's own.
+    """
+    from scipy import signal
+
+    from phonometry.psychoacoustics.quality.tonality import (
+        _averaged_spectrum,
+        _critical_band,
+        _find_peak,
+    )
+
+    fs, tone_hz = 8000.0, 1000.0
+    rng = np.random.default_rng(seed)
+    n = int(fs * 60)
+    radius = np.exp(-np.pi * _WANDERING_TONE_WIDTH_HZ / fs)
+    theta = 2 * np.pi * tone_hz / fs
+    hump = signal.lfilter(
+        [1.0],
+        [1.0, -2.0 * radius * np.cos(theta), radius * radius],
+        rng.standard_normal(n),
+    )
+    x = 0.06 * hump / np.std(hump) + 0.05 * rng.standard_normal(n)
+    freqs, power, df = _averaged_spectrum(x, fs, 1.0)
+    peak = _find_peak(freqs, power, tone_hz)
+    ft = float(freqs[peak])
+    f1, f2, dfc = _critical_band(ft)
+    level = 10 * np.log10(np.maximum(power, 1e-18))
+    _TONE_SIGNALS[-tone_hz] = (x, fs)
+    return _TonePartition(freqs, level, power, df, peak, ft, f1, f2, dfc)
+
+
+def generate_tone_band_window_edge(output_dir: str) -> None:
+    """Clause 11.2 when the minimum sits on the edge of the 15 % window.
+
+    A peak whose skirt is still falling where the window ends has its
+    lowest line inside the window on the window edge; the standard then
+    searches on to the nearest local minimum beyond it, and the tone band
+    is wider than the window. The edges, the line between them and the
+    ratio are the library's, held to ``tone_to_noise_ratio``.
+    """
+    print("Generating tone_band_window_edge.png...")
+    from phonometry import psychoacoustics
+    from phonometry._i18n import format_number
+    from phonometry.psychoacoustics.quality.tonality import _band_power, _tone_band
+
+    tone = _wandering_tone_in_noise(seed=1)
+    freqs, level, power = tone.freqs, tone.level, tone.power
+    half_width = max(1, round(0.075 * tone.dfc / tone.df))
+    lo, hi = _tone_band(power, tone.peak, half_width)
+    if not (tone.peak - lo > half_width and hi - tone.peak > half_width):
+        msg = "the tone band no longer runs past both window edges; pick another seed"
+        raise RuntimeError(msg)
+    count = hi - lo + 1
+    p_tone = float(np.sum(power[lo : hi + 1])) - (power[lo] + power[hi]) * count / 2.0
+    p_tot, n_tot = _band_power(freqs, power, tone.f1, tone.f2)
+    p_noise = (p_tot - p_tone) * tone.dfc / (n_tot * tone.df)
+    l_t, l_n = 10 * np.log10(p_tone), 10 * np.log10(p_noise)
+    x, fs = _TONE_SIGNALS[-1000.0]
+    result = psychoacoustics.tone_to_noise_ratio(x, fs, tone_frequency=1000.0)
+    _held_to(float(l_t - l_n), result.ratio_db, "tone-to-noise ratio")
+
+    def number(value: float, decimals: int = 1) -> str:
+        return format_number(value, _LANG, decimals=decimals)
+
+    window = (
+        tone.ft - half_width * tone.df,
+        tone.ft + half_width * tone.df,
+    )
+    reach = (tone.peak - lo) + 6
+    near = slice(tone.peak - reach, tone.peak + reach + 1)
+    floor = float(np.floor(np.min(level[near]) / 5.0) * 5.0) - 5.0
+    top = float(level[tone.peak]) + 16.0
+
+    fig, ax = plt.subplots(figsize=(10.0, 5.6))
+    band = slice(lo, hi + 1)
+    line = 10 * np.log10(np.linspace(power[lo], power[hi], count))
+    ax.fill_between(
+        freqs[band],
+        level[band],
+        line,
+        color=theme_fill(COLOR_SECONDARY, ax),
+        linewidth=0,
+        label=r"tone: what stands above the line, $L_\mathrm{t}$",
+    )
+    ax.plot(
+        freqs[near], level[near], color=COLOR_PRIMARY, linewidth=1.0, marker="o", ms=3.0
+    )
+    ax.plot(
+        [freqs[lo], freqs[hi]],
+        [level[lo], level[hi]],
+        color=COLOR_FG,
+        linewidth=1.2,
+        ls="--",
+        marker="o",
+        ms=6.5,
+        mfc="none",
+        label="line between the two end lines, $l_1$ and $l_2$",
+    )
+    for edge in window:
+        ax.plot(
+            [edge, edge], [floor, top - 15.5], color=COLOR_FG, linewidth=0.9, ls="-."
+        )
+    # The lowest line inside the window, on each side: the window edge itself.
+    ax.plot(
+        list(window),
+        [level[tone.peak - half_width], level[tone.peak + half_width]],
+        ls="none",
+        marker="s",
+        ms=7.0,
+        mfc="none",
+        color=COLOR_SECONDARY,
+        label="lowest line inside the window: on its edge",
+    )
+    _span_arrow(ax, window[0], window[1], top - 14.0)
+    ax.text(
+        tone.ft,
+        top - 13.3,
+        r"15 % of $\Delta f_\mathrm{c}$",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    _span_arrow(ax, float(freqs[lo]), float(freqs[hi]), top - 6.0)
+    ax.text(
+        tone.ft,
+        top - 5.3,
+        rf"tone band, $\Delta f_\mathrm{{t}}$ = {number(count * tone.df, 0)} Hz",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    ax.text(
+        freqs[lo] - 0.9, level[lo] + 1.5, "$l_1$", ha="right", va="bottom", fontsize=11
+    )
+    ax.text(
+        freqs[hi] + 0.9, level[hi] + 1.5, "$l_2$", ha="left", va="bottom", fontsize=11
+    )
+    ax.set_xlim(freqs[near][0], freqs[near][-1])
+    ax.set_ylim(floor, top)
+    ax.set_xticks(
+        [float(freqs[lo]), window[0], tone.ft, window[1], float(freqs[hi])],
+        [
+            number(float(freqs[lo]), 0),
+            number(window[0], 0),
+            number(tone.ft, 0),
+            number(window[1], 0),
+            number(float(freqs[hi]), 0),
+        ],
+    )
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Bin power [dB]")
+    ax.grid(visible=False)
+    ax.legend(
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.36),
+        frameon=False,
+        fontsize=9.5,
+        ncol=2,
+    )
+    ax.set_title(
+        "The minimum on the window edge: the search goes on to the next "
+        "local minimum (ECMA-418-1, 11.2)",
+        fontsize=11,
+    )
+    fig.text(
+        0.5,
+        0.925,
+        rf"$L_\mathrm{{t}}$ = {number(l_t)} dB,  $L_\mathrm{{n}}$ = {number(l_n)} dB,  "
+        rf"$\Delta L_\mathrm{{T}}$ = {number(result.ratio_db)} dB",
+        ha="center",
+        va="center",
+        fontsize=10.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.91))
+    save_figure(output_dir, "tone_band_window_edge.png")
+    plt.close()
+
+
+def _draw_prominence_bands(
+    ax: Axes, tone_hz: float, amplitude: float, seed: int
+) -> float:
+    """The three bands of clause 12 about one tone; returns the lower band's width.
+
+    The middle band is the critical band of the tone (12.2), the lower and
+    upper ones run to the fitted edges of Formulae (21) and (22), and a tone
+    at or below 171.4 Hz has its lower band cut at 20 Hz (12.3).
+    """
+    from phonometry import psychoacoustics
+    from phonometry._i18n import format_number
+    from phonometry.psychoacoustics.quality.tonality import (
+        _LOWER_EDGE_COEFFS,
+        _TRUNCATED_LOWER_BAND_MAX_HZ,
+        _UPPER_EDGE_COEFFS,
+        _band_power,
+        _fitted_edge,
+    )
+
+    tone = _tone_in_noise(tone_hz, amplitude, seed)
+    freqs, level, power = tone.freqs, tone.level, tone.power
+    cut = tone.ft <= _TRUNCATED_LOWER_BAND_MAX_HZ
+    f1_l = _fitted_edge(tone.ft, _LOWER_EDGE_COEFFS)
+    f1_l = max(f1_l, 20.0) if cut else f1_l
+    f2_u = _fitted_edge(tone.ft, _UPPER_EDGE_COEFFS)
+    p_m, _ = _band_power(freqs, power, tone.f1, tone.f2)
+    p_l, n_l = _band_power(freqs, power, f1_l, tone.f1)
+    p_u, _ = _band_power(freqs, power, tone.f2, f2_u)
+    width_l = n_l * tone.df
+    # Formula (24) for the cut band, Formula (23) otherwise.
+    lower = 100.0 / width_l * p_l if cut else p_l
+    ratio = float(10 * np.log10(p_m) - 10 * np.log10((lower + p_u) * 0.5))
+    x, fs = _TONE_SIGNALS[tone_hz]
+    result = psychoacoustics.prominence_ratio(x, fs, tone_frequency=tone_hz)
+    _held_to(ratio, result.ratio_db, "prominence ratio")
+
+    def number(value: float, decimals: int = 1) -> str:
+        return format_number(value, _LANG, decimals=decimals)
+
+    pad = 0.07 * (f2_u - f1_l)
+    left = 0.0 if cut else f1_l - pad
+    shown = (freqs >= max(left, tone.df)) & (freqs <= f2_u + pad)
+    floor = float(np.floor(np.min(level[shown]) / 5.0) * 5.0)
+    top = float(level[tone.peak]) + 16.0
+    bands = (
+        (f1_l, tone.f1, COLOR_TERTIARY, r"$L_\mathrm{L}$", p_l),
+        (tone.f1, tone.f2, COLOR_SECONDARY, r"$L_\mathrm{M}$", p_m),
+        (tone.f2, f2_u, COLOR_TERTIARY, r"$L_\mathrm{U}$", p_u),
+    )
+    for start, end, color, symbol, band_power in bands:
+        ax.fill_between(
+            [start, end], floor, top, color=theme_fill(color, ax), linewidth=0
+        )
+        ax.plot([start, start], [floor, top], color=COLOR_FG, linewidth=0.9)
+        ax.text(
+            0.5 * (start + end),
+            top - 1.6,
+            f"{symbol}\n{number(10 * np.log10(band_power))} dB",
+            ha="center",
+            va="top",
+            fontsize=10,
+            linespacing=1.35,
+        )
+    ax.plot([f2_u, f2_u], [floor, top], color=COLOR_FG, linewidth=0.9)
+    ax.plot(freqs[shown], level[shown], color=COLOR_PRIMARY, linewidth=1.0)
+    if cut:
+        # What is left of the lower band above 20 Hz, the width Formula (24) scales.
+        height = floor + 0.52 * (top - floor)
+        _span_arrow(ax, f1_l, tone.f1, height)
+        ax.text(
+            0.5 * (f1_l + tone.f1),
+            height + 0.9,
+            r"$\Delta f_\mathrm{L}$",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+        )
+    ax.set_xlim(left, f2_u + pad)
+    ax.set_ylim(floor, top)
+    ax.set_xticks(
+        [f1_l, tone.f1, tone.f2, f2_u],
+        [number(f1_l), number(tone.f1), number(tone.f2), number(f2_u)],
+    )
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.grid(visible=False)
+    ax.set_title(
+        rf"$f_\mathrm{{t}}$ = {number(tone.ft, 0)} Hz:  "
+        rf"$\Delta L_\mathrm{{P}}$ = {number(result.ratio_db)} dB",
+        fontsize=11,
+    )
+    return float(width_l)
+
+
+def generate_prominence_ratio_partition(output_dir: str) -> None:
+    """The three contiguous bands clause 12 of ECMA-418-1 compares.
+
+    Left, a 1 kHz tone with three whole critical bands (Formula 23); right, a
+    120 Hz tone, whose lower band stops at 20 Hz and is scaled to 100 Hz
+    (Formula 24).
+    """
+    print("Generating prominence_ratio_partition.png...")
+    from phonometry._i18n import format_number
+
+    fig, (whole, cut) = plt.subplots(1, 2, figsize=(10.5, 5.0))
+    _draw_prominence_bands(whole, 1000.0, _PARTITION_TONE_1K, seed=21)
+    whole.set_ylabel("Bin power [dB]")
+    whole.text(
+        0.5,
+        -0.25,
+        "three whole critical bands (Formula 23)",
+        transform=whole.transAxes,
+        ha="center",
+        va="top",
+        fontsize=9.5,
+    )
+    width_l = _draw_prominence_bands(cut, 120.0, 0.03, seed=7)
+    cut.text(
+        0.5,
+        -0.25,
+        "lower band cut at 20 Hz: "
+        rf"$\Delta f_\mathrm{{L}}$ = {format_number(width_l, _LANG, decimals=0)} Hz,"
+        "\n"
+        r"scaled by 100 Hz / $\Delta f_\mathrm{L}$ (Formula 24)",
+        transform=cut.transAxes,
+        ha="center",
+        va="top",
+        fontsize=9.5,
+    )
+    fig.suptitle(
+        "Prominence ratio: the band of the tone against its two neighbours "
+        "(ECMA-418-1, clause 12)",
+        y=0.985,
+    )
+    fig.tight_layout(rect=(0, 0.06, 1, 0.96))
+    save_figure(output_dir, "prominence_ratio_partition.png")
     plt.close()
 
 

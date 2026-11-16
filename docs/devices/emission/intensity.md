@@ -172,7 +172,7 @@ The same contrast plays out dynamically below: the pressure and velocity
 phasors of a progressive and a standing wave, with the instantaneous
 intensity averaging to a net flow in one case and to zero in the other.
 
-**Video:** [Instantaneous intensity phasors: progressive versus standing wave](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_instantaneous_intensity.webm): A two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave.
+**Video:** [Instantaneous intensity phasors: progressive versus standing wave](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_instantaneous_intensity.webm): A two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave.
 
 ## Knowing when to trust the number
 
@@ -200,8 +200,8 @@ Before any of that, ISO 9614-1 asks a question about the *field* rather than
 the surface: is it steady enough to be scanned at all? In the initial test
 (clause 8.2) one typical position is picked on an initial measurement surface
 and the normal intensity is sampled there $M$ times with a short averaging
-time (Note 9 suggests $M = 10$, and, for periodic signals, 8 s to 12 s per
-sample or any whole number of cycles). **$F_1$**, the
+time (Note 9 suggests $M = 10$ and 8 s to 12 s per sample, or any whole
+number of cycles for a periodic signal). **$F_1$**, the
 temporal variability indicator, is the coefficient of variation of those
 samples (equations (A.1)–(A.2)), so it is zero for a perfectly steady field
 and grows as the extraneous intensity wanders. Table B.3 asks for action code
@@ -352,7 +352,7 @@ plt.show()
 
 </details>
 
-**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
+**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
 
 ### The margin over the residual index
 
@@ -635,6 +635,55 @@ print(round(power.sound_power_level_a, 1))   # 96.1 dB(A)
 print(round(power.surface_area, 2), power.n_positions)   # 14.24 16
 ```
 
+### How the measurement goes
+
+The pieces above and below are one procedure, and clause 8 runs it in this
+order. The plate shows the surface and the loop the steps walk.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_discrete_points_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_discrete_points.svg" alt="Two panels. Left, a dashed box drawn as the measurement surface on a hatched reflecting floor, with the source standing inside it, set back from the front face; the faces in view are cut into segments, two across and three up on the front, three up on the side and two on the top, with a ringed dot at the position held in each, none of them on the source, red arrows leaving the left-hand edge for the normal intensity, a p-p probe at the middle position of the side face with its two microphones either side of the position on the normal to that face and its handle outside, and a dimension of more than 0.5 m on the floor from the source's front face to the surface. Four notes under it: at least one position per square metre and at least ten in all, spread evenly by segment area; the probe held still at each one with its axis normal to the surface; a hard floor closes the surface, with no positions on it and its area left out; more than 0.5 m from the source on average. Right, the scheme of Figure B.1 as a column: a first box for the short-time normal intensity at one typical position on the surface, giving F1; the gate F1 at most 0.6; a box for the normal intensity and the sound pressure level at the N positions; then three gates in order, Ld greater than F2 as criterion 1, F3 minus F2 at most 3 dB, and N greater than C times F4 squared as criterion 2. Each gate has a red no exit to its action codes, e, a or b, a or b, c or d, and all four return up the right-hand side to the first box. The last yes reaches a green box, grade reached and stated, with F1 evaluated again before and after. A legend lists what each Table B.3 action changes: a moves the surface closer, to 0.25 m at the least, or out to 1 m; b shields the surface or cuts the reflections; c adds positions spread evenly; d moves the surface farther out or adds positions on it; e asks for a steadier field or longer at each position" width="92%"></picture>
+
+*The surface clause 8.2 asks for, and the loop Annex B closes around it. An
+action never leads to the gate below it: it changes the surface, the positions
+or the field, and the measurement starts again.*
+
+1. **Check the instrument on the day.** The residual index of the probe with the
+   spacer about to be used, both channels calibrated, and the reversal check on
+   the surface itself (clause 6.2.2) are the three panels of *Measuring the
+   residual index, and checking the probe* above.
+2. **Lay out the surface (clause 8.2).** Enclose the source in a simple shape
+   (Note 7 prefers a parallelepiped, a hemisphere, a cylinder or a half
+   cylinder) whose average distance from the source is more than 0.5 m. A hard
+   floor or wall may close it: no intensity is measured there and its area
+   stays out of the sum. Cut the rest into segments, with at least one
+   position per square metre and at least ten in all, spread as evenly as the
+   segment areas allow.
+3. **Run the initial test at one typical position on that surface (clause
+   8.2).** Sample the normal intensity there $M$ times with a short averaging
+   time and form $F_1$. Note 9 recommends $M = 10$ and 8 s to 12 s per sample,
+   or a whole number of cycles when the signal is periodic. Above 0.6, Table
+   B.3 asks for action (e) before the surface is measured.
+4. **Measure at every position.** Hold the probe still on the surface with its
+   axis normal to it, and read the normal intensity level and the sound
+   pressure level in every band. Clause 8.1 sets how long: for white noise
+   through a filter of bandwidth $B$, an averaging time $T$ with $BT \ge 400$
+   keeps the error in the intensity within 5 % at 95 % confidence, which is
+   about 17 s in the 100 Hz one-third-octave band and under 2 s at 1 kHz, and a
+   cyclic signal needs more care than that. Stay off the probe axis while it
+   averages (clause 5.4).
+5. **Compute $F_2$, $F_3$ and $F_4$ and walk the gates of Figure B.1,** in the
+   order of the table in *Which grade the determination reaches* below. Act on
+   the first one that fails, with the action Table B.3 prints for it, and
+   measure again. Action (a) moves the surface: in to an average of 0.25 m at
+   the least where extraneous noise or reverberation is the trouble, out to
+   1 m where neither is.
+6. **Evaluate $F_1$ again immediately before and after each surface** (B.1.4):
+   the field has to hold steady for as long as the surface takes.
+7. **State the grade reached (clause 10.6) and the bands left out.** A band
+   that fails criterion 1 or criterion 2 drops out of the A-weighted
+   determination, and the report says so (clause 10.5 b). Where repeated
+   action cannot satisfy the criteria, clause 8.4 has the test recorded as a
+   null result, with the reasons.
+
 ### The sign is in the print, not in the number
 
 ISO 9614-1 never prints a signed level. A normal intensity level is written
@@ -873,7 +922,8 @@ two-panel figure at the top of this page.
 The same happens between a machine and a hard reflecting surface, and in
 reverberant rooms where the diffuse field raises pressure without
 transporting energy outward. This is why ISO 9614-1 keeps the measurement
-surface on average more than 0.5 m away from the source, and why, when a
+surface on average more than 0.5 m away from the source (clause 8.2), and
+why, when a
 scan fails the dynamic-capability criterion, moving the surface outward or
 adding absorption to the room usually lowers $F_2$ below $L_\mathrm{d}$ more cheaply
 than better hardware.

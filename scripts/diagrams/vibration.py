@@ -22,6 +22,7 @@ from .parts import (
     _plate_up,
     _rot_arrow,
     _spring_v,
+    _tapping_machine_plan,
 )
 
 if TYPE_CHECKING:
@@ -61,9 +62,31 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
     s.arrow(ox + 9, oy, ox + 62, oy, th.accent, 2.0)  # x (fore-aft)
     # Above the arrow's head, clear of the cushion's edge it sat on.
     s.text(ox + 62, oy - 8, "$x$", 15, th.accent, "start", bold=True)
-    s.arrow(ox - 7, oy + 6, ox - 44, oy + 34, th.accent, 2.0)  # y (lateral)
-    s.text(ox - 52, oy + 44, "$y$", 15, th.accent, "end", bold=True)
-    s.text(150, gy + 34, "Seat/body interface", 15, th.fg, "middle")
+    # y points to the left side of the body (ISO 2631-1, Figure 1): the
+    # figure faces right, so that is away from the reader, into the page, and
+    # not towards the reader as it once was. Drawn as the crossed circle of
+    # the axes plate, not as an oblique arrow, which the forearm would cut.
+    _axis_into_page(s, th, ox, oy)
+    s.text(ox - 13, oy - 3, "$y$", 15, th.accent, "end", bold=True)
+    # Under the cushion it names, right of the shin, and not under the floor
+    # hatch, where it named the ground the pedestal stands on. Two lines,
+    # so that neither language reaches the dashed box at x = 400.
+    s.text(240, 460, "Interface between", 15, th.fg, "start")
+    s.text(240, 478, "seat and body", 15, th.fg, "start")
+    # A leader from the label up to the top of the cushion it names, right
+    # of the shin and left of the cushion's end, with a dot where the body
+    # sits on the seat.
+    s.line(244, 445, 244, 427, th.fg, 1.0)
+    s.circle(244, 424, 2.4, th.fg, th.fg, 1.0)
+    _axis_into_page(s, th, 46, gy + 56)
+    s.text(
+        60,
+        gy + 61,
+        "$y$ points into the page, to the left side of the body (Figure 1)",
+        13,
+        th.muted,
+        "start",
+    )
 
     # --- Right: the vertical signal-processing chain ---
     # 348 px on "Limitación de banda + Wk / Wd", 317 px at the stage title
@@ -106,6 +129,390 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
         15,
         th.secondary,
         "middle",
+    )
+
+
+def _axis_into_page(s: SVG, th: Theme, x: float, y: float) -> None:
+    """The axis that leaves the drawing away from the reader: a crossed circle."""
+    r, d = 6.0, 3.6
+    s.circle(x, y, r, th.bg, th.accent, 1.6)
+    s.line(x - d, y - d, x + d, y + d, th.accent, 1.4)
+    s.line(x - d, y + d, x + d, y - d, th.accent, 1.4)
+
+
+def _weighting_rows(
+    s: SVG,
+    th: Theme,
+    y: float,
+    columns: tuple[float, float, float, float],
+    rows: Sequence[tuple[str, str, str, str]],
+) -> None:
+    """Rows of axis, weighting and the two multiplying factors of one point.
+
+    ``columns`` holds the x of the axis cell (set from its left edge) and the
+    centres of the weighting, health and comfort cells; a cell with no text is
+    a factor the print does not give, drawn as a short rule.
+    """
+    x_axis, x_weighting, x_health, x_comfort = columns
+    for i, (axis, weighting, health, comfort) in enumerate(rows):
+        yy = y + 20.0 * i
+        s.text(x_axis, yy, axis, 14, th.fg, "start")
+        s.text(x_weighting, yy, weighting, 14, th.primary, "middle", bold=True)
+        for x, value in ((x_health, health), (x_comfort, comfort)):
+            if x <= 0.0:
+                continue
+            if value:
+                s.text(x, yy, value, 14, th.fg, "middle")
+            else:
+                s.line(x - 7, yy - 5, x + 7, yy - 5, th.muted, 1.2)
+
+
+def _d_whole_body_axes(s: SVG, th: Theme) -> None:
+    """Where whole-body vibration is measured, and what each point is weighted with.
+
+    ISO 2631-1:1997: the basicentric axes of Figure 1 in its three postures,
+    the contact areas of 5.3.1, the weightings of Tables 1 and 2 and the
+    multiplying factors of 7.2.3 (health) and 8.2.2.1 to 8.2.2.3 (comfort).
+    Every figure faces right and the recumbent one lies with the head on the
+    left, so the y axis, which points to the left side of the body, leaves
+    every view into the page. Motion sickness (Wf, clause 9) is one axis,
+    z at the supporting surface, for sitting and standing persons only
+    (9.2.2, NOTE 3), and is not drawn.
+    """
+    block = th.secondary
+
+    def triad(ox: float, oy: float, *tips: tuple[float, float]) -> None:
+        """The axes in the plane of the drawing from ``(ox, oy)``, y into it."""
+        for dx, dy in tips:
+            n = math.hypot(dx, dy)
+            s.arrow(ox + 8 * dx / n, oy + 8 * dy / n, ox + dx, oy + dy, th.accent, 2.0)
+        _axis_into_page(s, th, ox, oy)
+
+    # ===== a) Seated =========================================================
+    s.text(36, 70, "(a) Seated", 16, th.fg, "start", bold=True)
+    gy = 328.0
+    s.ground(gy, 40, 340)
+    s.rect(98, 118, 14, 150, th.panel, th.fg, rx=3, sw=2)  # seat-back
+    s.rect(112, 252, 88, 16, th.panel, th.fg, rx=3, sw=2)  # seat pan
+    s.line(160, 268, 160, gy, th.fg, 2.4)  # pedestal
+    # The body: the lines are its middle, so each contact lies half a limb
+    # away from them, which is where the transducers are drawn.
+    s.circle(140, 95, 16, th.muted)
+    s.line(140, 111, 140, 230, th.muted, 3)  # trunk
+    s.line(140, 230, 236, 230, th.muted, 2.4)  # thigh
+    s.line(236, 230, 236, gy - 8, th.muted, 2.4)  # shin
+    s.line(236, gy - 8, 264, gy - 8, th.muted, 2.4)  # foot
+    s.line(140, 132, 200, 198, th.muted, 2.4)  # arm
+    # 1: seat surface, beneath the ischial tuberosities.
+    s.rect(141, 238, 16, 14, block, th.fg, rx=2, sw=1.5)
+    triad(149, 245, (50, 0), (0, -49))
+    s.text(206, 250, "$x$", 14, th.accent, "start", bold=True)
+    s.text(156, 207, "$z$", 14, th.accent, "start", bold=True)
+    s.text(135, 246, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 138, 286, "1", block)
+    # 2: seat-back, in the area of principal support.
+    s.rect(112, 175, 14, 22, block, th.fg, rx=2, sw=1.5)
+    triad(119, 186, (49, 0), (0, -53))
+    s.text(158, 180, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(126, 145, "$z$", 14, th.accent, "start", bold=True)
+    # Above the x arrow and under z, beside its own transducer: below the
+    # block it stood level with the z of point 1 and read as one pair with it.
+    s.text(127, 172, "$y$", 14, th.accent, "start", bold=True)
+    _numbered(s, 80, 186, "2", block)
+    # 3: feet, on the surface that supports them.
+    s.rect(270, gy - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    triad(278, gy - 8, (50, 0), (0, -50))
+    s.text(322, gy - 18, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(285, gy - 48, "$z$", 14, th.accent, "start", bold=True)
+    s.text(267, gy - 22, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 278, gy + 24, "3", block)
+
+    seated = (392.0, 560.0, 668.0, 800.0)
+    s.text(seated[0], 84, "axis", 13, th.muted, "start")
+    s.text(seated[1], 84, "weighting", 13, th.muted, "middle")
+    s.text(seated[2], 84, "$k$ health (7.2.3)", 13, th.muted, "middle")
+    s.text(seated[3], 84, "$k$ comfort (8.2.2.1)", 13, th.muted, "middle")
+    _numbered(s, 372, 107, "1", block)
+    s.text(
+        390,
+        112,
+        "Seat surface, beneath the ischial tuberosities",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        134,
+        seated,
+        (
+            ("$x$, $y$", "Wd", "1.4", "1"),
+            ("$z$", "Wk", "1", "1"),
+            ("$r_x$, $r_y$, $r_z$", "We", "", "0.63, 0.4, 0.2 m/rad"),
+        ),
+    )
+    _numbered(s, 372, 203, "2", block)
+    s.text(
+        390,
+        208,
+        "Seat-back, in the area of principal support",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        230,
+        seated,
+        (
+            ("$x$", "Wc", "(0.8)", "0.8"),
+            ("$y$", "Wd", "", "0.5"),
+            ("$z$", "Wd", "", "0.4"),
+        ),
+    )
+    _numbered(s, 372, 299, "3", block)
+    s.text(
+        390,
+        304,
+        "Feet, on the surface that supports them",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        326,
+        seated,
+        (
+            ("$x$, $y$", "Wk", "", "0.25"),
+            ("$z$", "Wk", "", "0.4"),
+        ),
+    )
+    s.text(
+        372,
+        372,
+        "(0.8): encouraged, outside the Annex B health assessment (7.2.3, NOTE)",
+        13,
+        th.muted,
+        "start",
+    )
+
+    # ===== b) Standing =======================================================
+    yb = 388.0
+    s.line(30, yb, 870, yb, th.muted, 0.9, dash="3,4")
+    s.text(36, yb + 26, "(b) Standing", 16, th.fg, "start", bold=True)
+    fb = yb + 204
+    s.ground(fb, 40, 216)
+    s.circle(104, fb - 152, 14, th.muted)
+    s.line(104, fb - 138, 104, fb - 72, th.muted, 3)  # trunk
+    s.line(104, fb - 72, 104, fb - 8, th.muted, 2.4)  # leg
+    s.line(104, fb - 8, 130, fb - 8, th.muted, 2.4)  # foot
+    s.line(104, fb - 126, 116, fb - 74, th.muted, 2.4)  # arm
+    # 4: the floor beneath the feet.
+    s.rect(140, fb - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    triad(148, fb - 8, (50, 0), (0, -50))
+    s.text(192, fb - 18, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(155, fb - 48, "$z$", 14, th.accent, "start", bold=True)
+    s.text(137, fb - 22, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 148, fb + 24, "4", block)
+
+    standing = (236.0, 306.0, 0.0, 424.0)
+    _numbered(s, 244, yb + 57, "4", block)
+    s.text(262, yb + 62, "Floor", 15, th.fg, "start", bold=True)
+    s.text(standing[0], yb + 88, "axis", 13, th.muted, "start")
+    s.text(standing[1], yb + 88, "weighting", 13, th.muted, "middle")
+    s.text(standing[3], yb + 88, "$k$ comfort (8.2.2.2)", 13, th.muted, "middle")
+    _weighting_rows(
+        s,
+        th,
+        yb + 112,
+        standing,
+        (
+            ("$x$, $y$", "Wd", "", "1"),
+            ("$z$", "Wk", "", "1"),
+        ),
+    )
+
+    # ===== d) Aligning the transducer (5.2.2) ================================
+    s.text(
+        490,
+        yb + 26,
+        "(d) Aligning the transducer (5.2.2)",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    # Left: the sensitive axis may sit up to 15 degrees off the basicentric one.
+    tilt = math.radians(15.0)
+    ax, ay = 548.0, fb - 16
+    s.line(506, fb, 590, fb, th.fg, 2.2)
+    s.rect(ax - 8, fb - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    s.arrow(ax, ay, ax, ay - 96, th.accent, 2.0)
+    s.line(
+        ax,
+        ay,
+        ax + 96 * math.sin(tilt),
+        ay - 96 * math.cos(tilt),
+        block,
+        1.8,
+        dash="6,4",
+    )
+    s.path(
+        f"M {ax:.1f} {ay - 66:.1f} A 66 66 0 0 1 "
+        f"{ax + 66 * math.sin(tilt):.1f} {ay - 66 * math.cos(tilt):.1f}",
+        stroke=th.fg,
+        sw=1.3,
+    )
+    s.text(ax - 8, ay - 84, "$z$", 14, th.accent, "end", bold=True)
+    s.text(ax + 30, ay - 62, "≤ 15°", 14, th.fg, "start")
+    s.text(ax, fb + 28, "sensitive axis up to 15°", 13, th.muted, "middle")
+    s.text(ax, fb + 45, "off the basicentric axis", 13, th.muted, "middle")
+    # Right: on an inclined seat the z axis follows the body, not the vertical.
+    lean = math.radians(25.0)
+    rise = math.radians(10.0)
+    back = (-math.sin(lean), -math.cos(lean))  # up the seat-back
+    pan = (math.cos(rise), -math.sin(rise))  # forward along the pan
+    out = (-math.sin(rise), -math.cos(rise))  # off the pan, towards the body
+    rx0, ry0 = 730.0, fb - 44
+
+    def at(a: float, b: float, c: float = 0.0) -> tuple[float, float]:
+        """The point ``a`` along the pan, ``b`` off it and ``c`` up the back."""
+        return (
+            rx0 + a * pan[0] + b * out[0] + c * back[0],
+            ry0 + a * pan[1] + b * out[1] + c * back[1],
+        )
+
+    s.ground(fb, 690, 866)
+    s.line(rx0, ry0, *at(0, 0, 112), th.fg, 5)  # seat-back
+    s.line(rx0, ry0, *at(86, 0), th.fg, 5)  # pan
+    px, py = at(44, 0)
+    s.line(px, py + 3, px, fb, th.fg, 2.4)  # pedestal
+    hip = at(22, 15)
+    neck = at(22, 15, 78)
+    head = at(22, 15, 91)
+    knee = at(88, 15)
+    s.circle(head[0], head[1], 12, th.muted)
+    s.line(*hip, *neck, th.muted, 3)
+    s.line(*hip, *knee, th.muted, 2.4)
+    s.line(*knee, knee[0] + 6, fb - 8, th.muted, 2.4)
+    s.line(knee[0] + 6, fb - 8, knee[0] + 28, fb - 8, th.muted, 2.4)
+    ox, oy = at(50, 7)
+    s.line(ox, oy, ox, oy - 78, th.muted, 1.4, dash="5,4")  # the vertical
+    s.arrow(ox, oy, ox + 70 * back[0], oy + 70 * back[1], th.accent, 2.0)
+    s.path(
+        f"M {ox:.1f} {oy - 48:.1f} A 48 48 0 0 0 "
+        f"{ox + 48 * back[0]:.1f} {oy + 48 * back[1]:.1f}",
+        stroke=th.fg,
+        sw=1.3,
+    )
+    s.circle(ox, oy, 5, block, th.fg, 1.3)
+    s.text(
+        ox + 70 * back[0] + 9,
+        oy + 70 * back[1] - 2,
+        "$z$",
+        14,
+        th.accent,
+        "start",
+        bold=True,
+    )
+    s.text(ox + 7, oy - 68, "vertical", 13, th.muted, "start")
+    s.text(766, fb + 28, "inclined seat: $z$ follows the body,", 13, th.muted, "middle")
+    s.text(766, fb + 45, "note its angle to gravity", 13, th.muted, "middle")
+
+    # ===== c) Recumbent ======================================================
+    yc = yb + 262
+    s.line(30, yc, 870, yc, th.muted, 0.9, dash="3,4")
+    s.text(36, yc + 26, "(c) Recumbent", 16, th.fg, "start", bold=True)
+    cy = yc + 122  # top of the couch
+    by = cy - 26  # middle of the body
+    s.rect(30, cy, 440, 14, th.panel, th.fg, rx=3, sw=2)
+    s.circle(98, by - 8, 14, th.muted)
+    s.line(111, by - 3, 124, by, th.muted, 3)  # neck
+    s.line(124, by, 262, by, th.muted, 3)  # trunk
+    s.line(262, by, 424, by, th.muted, 2.4)  # legs
+    s.line(424, by, 424, by - 20, th.muted, 2.4)  # feet
+    # 7, 6 and 5: under the head, the back and the pelvis.
+    for bx in (90.0, 164.0, 254.0):
+        s.rect(bx, cy - 20, 16, 20, block, th.fg, rx=2, sw=1.5)
+    triad(262, cy - 10, (-50, 0), (0, -58))
+    s.text(206, cy - 6, "$z$", 14, th.accent, "end", bold=True)
+    s.text(269, cy - 56, "$x$", 14, th.accent, "start", bold=True)
+    s.text(277, cy - 8, "$y$", 14, th.accent, "start", bold=True)
+    _numbered(s, 262, cy + 32, "5", block)
+    _numbered(s, 172, cy + 32, "6", block)
+    _numbered(s, 98, cy + 32, "7", block)
+
+    lying = (526.0, 668.0, 0.0, 800.0)
+    s.text(lying[0], yc + 30, "axis", 13, th.muted, "start")
+    s.text(lying[1], yc + 30, "weighting", 13, th.muted, "middle")
+    s.text(lying[3], yc + 30, "$k$ comfort (8.2.2.3)", 13, th.muted, "middle")
+    _numbered(s, 508, yc + 53, "5", block)
+    s.text(526, yc + 58, "Under the pelvis", 15, th.fg, "start", bold=True)
+    _weighting_rows(
+        s,
+        th,
+        yc + 80,
+        lying,
+        (
+            ("horizontal", "Wd", "", "1"),
+            ("vertical", "Wk", "", "1"),
+        ),
+    )
+    _numbered(s, 508, yc + 127, "6", block)
+    s.text(526, yc + 132, "Under the back", 15, th.fg, "start", bold=True)
+    s.text(
+        526,
+        yc + 153,
+        "weighted as Table 1: vertical Wk, horizontal Wd;",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(526, yc + 170, "no $k$ is printed for it (8.2.2.3)", 13, th.muted, "start")
+    _numbered(s, 508, yc + 197, "7", block)
+    s.text(
+        526,
+        yc + 202,
+        "Under the head, with no soft pillow",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(s, th, yc + 224, lying, (("vertical", "Wj", "", "1"),))
+
+    # ===== The key ===========================================================
+    _axis_into_page(s, th, 44, yc + 256)
+    s.text(
+        58,
+        yc + 261,
+        "$y$ points into the page, to the left side of the body (Figure 1)",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(
+        36,
+        yc + 281,
+        "Health (clause 7) is assessed on the seat surface of a seated person;",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(
+        36,
+        yc + 298,
+        "every other point carries comfort factors only.",
+        13,
+        th.muted,
+        "start",
     )
 
 
@@ -1313,11 +1720,11 @@ def _d_fault_kinematics(s: SVG, th: Theme) -> None:
     s.text(
         450,
         758,
-        "$m_L = n·N ± k·V = 6 ± 4$ → 2 or 10 lobes, turning at "
-        "$n·N·f_s/m_L$ = 175 or 35 Hz: the faster radiates much "
-        "more",
+        "$m_L = nN ± kV = 6 ± 4$ → 2 or 10 lobes, turning "
+        "10 500 or 2100 r/min: both sound at the blade rate",
         14,
         th.fg,
+        upright=("m_L",),
     )
 
 
@@ -1392,11 +1799,18 @@ def _d_machine_diagnostics(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
+    # The rule the four rows follow, and the sensor they are worked for: the
+    # stud-mounted resonance of the typical accelerometer of ISO 5348:1998,
+    # Figure 5 (the third is ISO/TS 7849-1, 5.2). Its Figures 6, 9 and 8 draw
+    # a typical accelerometer near 28 kHz on a hard adhesive, 20 kHz on a
+    # magnet and 2 kHz on a hand-held probe.
+    rule = "a third of the mounted resonance; for a 30 kHz sensor:"
+    s.text(70, 407, rule, s.fit_size([rule], [12, 11], 360), th.muted, anchor="start")
     rows = (
-        (420.0, "stud into a prepared flat", "tens of kHz"),
-        (450.0, "adhesive / thin cyanoacrylate", "~10 kHz"),
-        (480.0, "magnet base", "a few kHz"),
-        (510.0, "hand-held probe", "~1 kHz"),
+        (436.0, "stud into a prepared flat", "~10 kHz"),
+        (462.0, "adhesive / thin cyanoacrylate", "~10 kHz"),
+        (488.0, "magnet base", "a few kHz"),
+        (514.0, "hand-held probe", "under 1 kHz"),
     )
     for ry, what, limit in rows:
         s.text(70, ry, what, 14, th.fg, anchor="start")
@@ -1898,6 +2312,153 @@ def _d_junction_rig(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Where to excite and where to measure on a junction element
+# (ISO 10848-1:2017, 7.2.5)
+# ---------------------------------------------------------------------------
+
+
+def _span_between(
+    s: SVG,
+    th: Theme,
+    p: tuple[float, float],
+    q: tuple[float, float],
+    clear: float = 11.0,
+) -> None:
+    """Dimension line between two marks that share neither a row nor a column.
+
+    ``SVG.dim`` measures along one axis of the sheet; a distance between two
+    positions scattered over a plate lies along neither, so the line is drawn
+    from one to the other, stopping *clear* px short of each mark.
+    """
+    length = math.hypot(q[0] - p[0], q[1] - p[1])
+    ux, uy = (q[0] - p[0]) / length, (q[1] - p[1]) / length
+    mid = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+    for end, sign in ((p, 1.0), (q, -1.0)):
+        s.arrow(
+            mid[0] - sign * 4 * ux,
+            mid[1] - sign * 4 * uy,
+            end[0] + sign * clear * ux,
+            end[1] + sign * clear * uy,
+            th.muted,
+            1.2,
+        )
+
+
+def _d_junction_positions(s: SVG, th: Theme) -> None:
+    # The source element i in plan, 100 px to the metre, with the receiving
+    # element j unfolded beside it across the junction under test.
+    ix0, iy0, ix1, iy1 = 70.0, 96.0, 490.0, 416.0
+    jx1 = 700.0
+    s.rect(ix0, iy0, ix1 - ix0, iy1 - iy0, th.panel, th.fg, sw=2.2)
+    s.rect(ix1, iy0, jx1 - ix1, iy1 - iy0, th.panel, th.fg, sw=2.2)
+    s.line(ix1, iy0 - 8, ix1, iy1 + 8, th.accent, 4.0)
+    s.text(ix1, iy0 - 16, "junction under test", 14, th.accent, bold=True)
+    s.text(ix1 - 14, iy1 - 12, "source element $i$", 14, th.primary, "end", bold=True)
+    s.text(
+        ix1 + 14,
+        iy1 - 12,
+        "receiving element $j$",
+        14,
+        th.secondary,
+        "start",
+        bold=True,
+    )
+
+    # Four excitation positions, the minimum on a Type A element, scattered
+    # so that none is closer than 1.0 m to another, 0.5 m to a boundary or
+    # 1.0 m to the junction.
+    excitation = ((132.0, 160.0), (388.0, 150.0), (215.0, 318.0), (372.0, 350.0))
+    # The measurement positions of excitation position 1: three on each
+    # plate, at random and never a grid, 1.0 m or more from the excitation,
+    # 0.25 m or more from a boundary and 0.5 m or more from each other.
+    on_i = ((285.0, 240.0), (350.0, 275.0), (100.0, 370.0))
+    on_j = ((545.0, 172.0), (632.0, 268.0), (566.0, 350.0))
+
+    # The six minimum distances, each on a span it rules.
+    e1, e2, e3, _ = excitation
+    s.dim(e1[0], iy0, e1[0], e1[1] - 11, "≥ 0.5 m", size=13, label_side="right")
+    s.dim(e2[0] + 11, e2[1], ix1 - 3, e2[1], "≥ 1.0 m", size=13)
+    _span_between(s, th, e1, e3)
+    s.text(e1[0] + 24, e1[1] + 96, "≥ 1.0 m", 13, th.fg, "end")
+    _span_between(s, th, e1, on_i[0], 11.0)
+    s.text(e1[0] + 88, e1[1] + 28, "≥ 1.0 m", 13, th.fg, "start")
+    _span_between(s, th, on_i[0], on_i[1], 9.0)
+    s.text(on_i[1][0] + 14, on_i[1][1] - 14, "≥ 0.5 m", 13, th.fg, "start")
+    s.dim(
+        on_i[2][0],
+        on_i[2][1] + 8,
+        on_i[2][0],
+        iy1,
+        "≥ 0.25 m",
+        size=13,
+        label_side="right",
+    )
+
+    for number, (ex, ey) in enumerate(excitation, start=1):
+        s.circle(ex, ey, 9.0, th.primary, th.fg, 1.4)
+        s.circle(ex, ey, 2.6, th.bg)
+        side = "start" if number == 3 else "end"
+        dx = 15.0 if number == 3 else -15.0
+        s.text(ex + dx, ey + 5, str(number), 13, th.primary, side, bold=True)
+    for ax, ay in (*on_i, *on_j):
+        s.rect(ax - 6.5, ay - 6.5, 13, 13, th.secondary, th.fg, rx=2.5, sw=1.2)
+
+    # Key and the framed floor, to the right of the plan.
+    kx = 724.0
+    s.circle(kx + 9, 108, 9.0, th.primary, th.fg, 1.4)
+    s.circle(kx + 9, 108, 2.6, th.bg)
+    s.text(kx + 26, 113, "excitation position", 12, th.fg, "start")
+    s.rect(kx + 2.5, 131.5, 13, 13, th.secondary, th.fg, rx=2.5, sw=1.2)
+    s.text(kx + 26, 143, "measurement position", 12, th.fg, "start")
+
+    fx0, fy0, fx1, fy1 = kx, 190.0, kx + 150.0, 300.0
+    s.rect(fx0, fy0, fx1 - fx0, fy1 - fy0, th.panel, th.fg, sw=1.6)
+    for bx in (fx0 + 25.0, fx0 + 75.0, fx0 + 125.0):
+        s.line(bx, fy0 + 4, bx, fy1 - 4, th.secondary, 1.4, dash="9,6")
+    mx, my = fx0 + 75.0, fy0 + 66.0
+    _tapping_machine_plan(s, th, mx, my, 45.0)
+    s.path(
+        f"M {mx:.1f} {my - 34:.1f} A 34 34 0 0 1 "
+        f"{mx + 34 * math.sin(math.radians(45)):.1f} "
+        f"{my - 34 * math.cos(math.radians(45)):.1f}",
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(mx + 12, my - 40, "45°", 12, th.fg, "start")
+    for row, line in enumerate(
+        (
+            "framed floor: the axis of",
+            "the tapping machine at 45°",
+            "to its beams or joists",
+        )
+    ):
+        s.text(fx0, fy1 + 20 + 17 * row, line, 12, th.fg, "start")
+
+    for y, txt in (
+        (
+            456,
+            "≥ 4 excitation positions on a Type A source element, ≥ 6 on a Type B one",
+        ),
+        (
+            480,
+            "≥ 3 measurement positions on each plate for every excitation "
+            "position: those of position 1 are drawn",
+        ),
+        (
+            504,
+            "measurement positions distributed at random over each element; "
+            "some may fall on the frame",
+        ),
+        (
+            528,
+            "between two excitation positions: ≥ 1.0 m on a Type A element, "
+            "≥ 0.7 m on a Type B one",
+        ),
+    ):
+        s.text(ix0, y, txt, 14, th.fg, "start")
 
 
 # ---------------------------------------------------------------------------
@@ -3082,6 +3643,144 @@ def _d_railway_cross_section(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
+
+
+def _d_railway_change_rule(s: SVG, th: Theme) -> None:
+    """E DIN 4150-2:2023-08, 6.5.3.6: the 25 % rule as the library walks it.
+
+    The planned case of an altered or extended line is first held to the
+    guide values in the order of 6.3 and Figure 2: a KB_Fmax at or below A_u
+    meets the requirements on its own. Past that, each quantity has its own
+    condition, the two halves of 6.5.3.6 a) and b) for KB_Fmax and c) for
+    KB_FTr: it keeps to its guide value, or it exceeds it and grows by less
+    than 25 % against the case without the project. The clause is printed
+    with "eine der folgenden Bedingungen", one of them; Example 9 of Annex B
+    (B.9.3.3, B.9.4) leaves KB_Fmax unchanged, has KB_FTr more than 25 %
+    up above A_r and sends the project to mitigation, so the two lanes meet
+    in an "and" here, which is the reading of ``assess_railway_change``.
+    6.5.3.6 a) and b) print "below A_o"; at A_o itself the plate keeps the
+    condition, as 6.3 does, where only a KB_Fmax above A_o fails.
+    Nothing on the plate is a computed value: the 25 % and the night-time
+    A_o of the foot are the print's.
+    """
+
+    def diamond(cx: float, cy: float, w: float, h: float) -> None:
+        s.path(
+            f"M {cx} {cy - h / 2} L {cx + w / 2} {cy} L {cx} {cy + h / 2} "
+            f"L {cx - w / 2} {cy} Z",
+            th.panel,
+            th.fg,
+            sw=1.8,
+        )
+
+    mid, left, right = 450.0, 230.0, 670.0
+    s.text(
+        mid,
+        80,
+        "the planned case, with the project, against the guide values of its period",
+        13,
+        th.muted,
+    )
+
+    # --- KB_Fmax at or below A_u settles it on its own (6.3) -----------------
+    y1 = 128.0
+    diamond(mid, y1, 200, 60)
+    s.text(mid, y1 + 5, "$KB_{Fmax}$ ≤ $A_u$ ?", 13, th.fg)
+    met_y = 578.0
+    s.line(mid + 100, y1, 868, y1, th.accent, 1.8)
+    s.line(868, y1, 868, met_y, th.accent, 1.8)
+    s.arrow(868, met_y, 602, met_y, th.accent, 1.8)
+    s.text(mid + 108, y1 - 8, "yes", 11, th.accent, "start")
+    s.line(mid, y1 + 30, mid, 184, th.fg, 1.6)
+    s.line(left, 184, right, 184, th.fg, 1.6)
+    s.text(mid + 8, y1 + 48, "no", 11, th.muted, "start")
+
+    # --- One lane per quantity: its guide value, then its growth -------------
+    y2, y3, hold_y = 248.0, 362.0, 478.0
+    lanes: tuple[tuple[float, str, str, str, str, float], ...] = (
+        (
+            left,
+            "$KB_{Fmax}$ ≤ $A_o$ ?",
+            "$KB_{Fmax}$ grows by",
+            "$KB_{Fmax}$ condition holds",
+            "6.5.3.6 a) by day, b) by night",
+            -1.0,
+        ),
+        (
+            right,
+            "$KB_{FTr}$ ≤ $A_r$ ?",
+            "$KB_{FTr}$ grows by",
+            "$KB_{FTr}$ condition holds",
+            "6.5.3.6 c)",
+            1.0,
+        ),
+    )
+    for cx, keeps, grows, holds, clause, side in lanes:
+        s.arrow(cx, 184, cx, y2 - 33, th.fg, 1.6)
+        diamond(cx, y2, 200, 64)
+        s.text(cx, y2 + 5, keeps, 13, th.fg, upright=("A_r",) if side > 0 else ())
+        s.text(
+            cx + side * 12, 208, clause, 11, th.muted, "start" if side > 0 else "end"
+        )
+        # Keeping to the guide value passes the growth by.
+        out = cx + side * 172
+        s.line(cx + side * 100, y2, out, y2, th.accent, 1.8)
+        s.line(out, y2, out, hold_y, th.accent, 1.8)
+        s.arrow(out, hold_y, cx + side * 113, hold_y, th.accent, 1.8)
+        s.text(
+            cx + side * 108,
+            y2 - 8,
+            "yes",
+            11,
+            th.accent,
+            "start" if side > 0 else "end",
+        )
+        s.arrow(cx, y2 + 32, cx, y3 - 37, th.fg, 1.6)
+        s.text(cx + 8, y2 + 50, "no", 11, th.muted, "start")
+        diamond(cx, y3, 210, 72)
+        s.text(cx, y3 - 2, grows, 12, th.fg)
+        s.text(cx, y3 + 14, "less than 25 % ?", 12, th.fg)
+        s.arrow(cx, y3 + 36, cx, hold_y - 16, th.accent, 1.8)
+        s.text(cx + 8, y3 + 58, "yes", 11, th.accent, "start")
+        # Growing by 25 % or more above the guide value is the one way out.
+        s.arrow(cx - side * 105, y3, mid + side * 86, y3, th.secondary, 1.8)
+        s.text(cx - side * 119, y3 - 8, "no", 11, th.secondary)
+        s.rect(cx - 112, hold_y - 15, 224, 30, th.panel, th.accent, rx=15, sw=1.8)
+        s.text(cx, hold_y + 5, holds, 13, th.accent)
+        s.line(cx, hold_y + 15, cx, 528, th.accent, 1.8)
+    s.rect(mid - 85, y3 - 16, 170, 32, th.panel, th.secondary, rx=16, sw=2)
+    s.text(mid, y3 + 5, "look into mitigation", 12, th.secondary)
+    s.text(mid, y3 + 36, "either one is enough", 11, th.muted)
+
+    # --- Both conditions, not one of them ------------------------------------
+    s.line(left, 528, right, 528, th.accent, 1.8)
+    s.arrow(mid, 528, mid, met_y - 17, th.accent, 1.8)
+    s.text(mid, 518, "both have to hold", 12, th.fg, bold=True)
+    s.rect(mid - 150, met_y - 16, 300, 32, th.panel, th.accent, rx=16, sw=2)
+    s.text(mid, met_y + 5, "requirements count as met", 13, th.accent, bold=True)
+
+    # --- Foot: what grows against what, the night-time A_o, and the print ----
+    for k, line in enumerate(
+        (
+            "growth: the planned case against the case without the project, "
+            "the existing line on its present or forecast timetable",
+            "by night $A_o$ is 0.6 on the surface in any area; underground, "
+            "that of Table 1 in rows 1 and 2 and 0.3 in rows 3 to 5",
+            "as printed, one of the conditions is enough, yet Example 9 "
+            "leaves $KB_{Fmax}$ as it was and, with $KB_{FTr}$",
+            "above its guide value and more than 25 % up, goes to mitigation: "
+            "both conditions are asked for here",
+            "6.5.3.6 asks for a value below $A_o$; at $A_o$ itself the plate "
+            "follows 6.3, where only a value above $A_o$ fails",
+        )
+    ):
+        s.text(
+            mid,
+            628 + 18 * k,
+            line,
+            12,
+            th.muted,
+        )
 
 
 def _d_people_in_buildings(s: SVG, th: Theme) -> None:

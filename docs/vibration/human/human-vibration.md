@@ -21,7 +21,7 @@ chain. Only the weighting definitions are taken from ISO 8041-1 here; what
 that standard says about the instrument measuring them is [meter
 verification](meter-verification.md).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration, with y pointing into the page, to the left side of the body; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
 
 ## 0. Getting the numbers
 
@@ -41,6 +41,8 @@ the head. A rigid surface may be measured close to the contact area instead,
 usually within 10 cm of its centre; a seat back that cannot be reached may be
 measured on the frame behind the cushion and then corrected for the
 transmissibility of the cushion. Every measurement location must be reported.
+The plate under *Which weighting on which axis*, in section 1, draws each of
+these points with its axes and its weightings.
 
 On a **resilient** surface (a seat cushion, a couch), the transducer is
 interposed between the person and the surface in a suitably formed mount that
@@ -244,6 +246,21 @@ value of section 3:
 ¹ The health assessment of clause 7 is defined on the seat surface; the
 backrest x measurement with `Wc`, $k = 0.8$ is encouraged but excluded
 from the Annex B severity assessment (7.2.3).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_whole_body_axes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_whole_body_axes.svg" alt="Four panels on the basicentric axes of ISO 2631-1 and the points where whole-body vibration is measured. Panel a, a seated person in side view with a transducer and its x, y, z axes at three numbered points: 1, the seat surface beneath the ischial tuberosities (x and y weighted Wd with k 1.4 for health and 1 for comfort, z weighted Wk with k 1 for both, rotation about the three axes weighted We with comfort factors 0.63, 0.4 and 0.2 m/rad); 2, the seat-back in the area of principal support (x weighted Wc with k 0.8, y and z weighted Wd with comfort factors 0.5 and 0.4); 3, the feet (x and y weighted Wk with comfort factor 0.25, z with 0.4). Panel b, a standing person with point 4 on the floor: x and y weighted Wd, z weighted Wk, comfort factor 1. Panel c, a recumbent person with point 5 under the pelvis (horizontal Wd, vertical Wk, comfort factor 1), point 6 under the back, for which no comfort factor is printed, and point 7 under the head with no soft pillow (vertical Wj, factor 1); the x axis of the lying body points up and z towards the head. Panel d, a sensitive axis drawn 15 degrees off the basicentric z axis, the largest deviation allowed, and an inclined seat on which z leans with the body away from the vertical. The y axis points into the page in every view, to the left side of the body" width="94%"></picture>
+
+*The table, read on the body. The triads are the basicentric axes as Figure 1 of
+ISO 2631-1 draws them: x forward out of the chest, y towards the left side, z up
+the spine, so a person lying down has x vertical, and the weighting follows the
+direction (vertical `Wk`, horizontal `Wd`), not the letter. Only the seat
+surface carries health factors; the back of a recumbent person is a support the
+standard names (5.3.1) without printing a comfort factor for it (8.2.2.3 gives
+$k$ only under the pelvis); and motion sickness is left off the plate, because
+clause 9 weights a single axis with `Wf`, z at the surface that supports the
+person, and its guidance holds for sitting and standing persons only (9.2.2,
+NOTE 3). Panel d is clause 5.2.2:
+a transducer may sit up to 15° off the axis it measures, and on an inclined seat
+z leans with the body, which is why its angle to gravity is written down.*
 
 The remaining three weightings belong to the companion parts rather than to
 ISO 2631-1's posture map: `Wm` for building occupants on all axes (ISO 2631-2),

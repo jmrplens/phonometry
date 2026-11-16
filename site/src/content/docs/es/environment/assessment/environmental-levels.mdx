@@ -344,6 +344,111 @@ emplazamiento que incluya la cubierta del suelo y las alturas del micrófono y d
 la fuente sobre él; y las condiciones de funcionamiento de la fuente, incluidos
 cuántos sucesos de cada categoría se capturaron.
 
+<span id="la-meteorologia-y-el-tiempo-de-medida-apartados-6-8-y-9"></span>
+### La meteorología y el tiempo de medida (apartados 6, 8 y 9)
+
+El instrumento es la mitad pequeña del requisito. La otra mitad es con qué
+tiempo atmosférico se toma el nivel, durante cuánto tiempo y cuántas veces, e
+ISO 1996-2 dice cada una de las tres cosas.
+
+**Qué se registra de la meteorología** (8.1, 9.3.5). Tanto en las mediciones a
+largo plazo como en las de corto plazo se miden los parámetros meteorológicos:
+como mínimo la velocidad y la dirección del viento, la humedad relativa y la
+temperatura, con información sobre la estabilidad atmosférica, medida
+directamente o deducida de la nubosidad y la hora del día, y sobre la
+precipitación si la hay. La velocidad y la dirección del viento se miden a 10 m
+de altura. Se admite un mástil más bajo por razones prácticas, pero aumenta la
+incertidumbre, porque los datos y la experiencia en que se apoya la norma se
+tomaron a 10 m.
+
+**Cuándo importa la meteorología** (8.1). Sobre suelo blando el nivel varía
+poco con el tiempo atmosférico mientras
+$(h_\mathrm{s} + h_\mathrm{r})/D \ge 0{,}1$ (Fórmula (11)): la altura de la
+fuente más la del receptor frente a la distancia horizontal entre ambos. Un
+micrófono a 4 m y una fuente a 0,5 m la cumplen hasta 45 m; sobre suelo duro
+pueden aceptarse distancias mayores. Más allá de esa distancia, la propagación
+se clasifica por cuánto se curvan las trayectorias del sonido en la dirección
+de la distancia más corta del receptor a la fuente, mediante el cociente entre
+la distancia $D$ y el radio de curvatura $R_\mathrm{cur}$ de las trayectorias,
+que es negativo cuando se curvan hacia arriba. La Tabla 4 da cuatro **ventanas
+meteorológicas**:
+
+| Ventana | $D/R_\mathrm{cur}$ | Valor representativo | Propagación | Componente típica del viento a 10 m |
+| :--- | :--- | :--- | :--- | :--- |
+| M1 | menor que −0,04 | −0,08 | desfavorable | menos de 1 m/s de día, menos de −1 m/s de noche |
+| M2 | de −0,04 a 0,04 | 0,00 | neutra | de 1 m/s a 3 m/s |
+| M3 | de 0,04 a 0,12 | 0,08 | favorable | de 3 m/s a 6 m/s |
+| M4 | mayor que 0,12 | 0,16 | muy favorable | más de 6 m/s de día, −1 m/s o más de noche |
+
+La componente del viento es la que sigue la línea de la fuente al receptor, y
+el signo menos indica que el viento sopla del receptor hacia la fuente. La
+norma llama simplificada a la tabla y admite cualquier otra descripción que
+consiga las mismas curvaturas; $R_\mathrm{cur}$ también puede calcularse a
+partir de los parámetros meteorológicos medidos con el Anexo A, que es
+informativo, y la descripción puede no servir para fuentes muy altas, como los
+aerogeneradores. La Tabla 4 no da ningún sector angular para el viento: las
+ventanas se definen por $D/R_\mathrm{cur}$, y las componentes del viento son
+los valores típicos que las acompañan.
+
+**Una medición o unas pocas** (6.1, 8.2). Para que una medición aislada
+signifique algo, lo mínimo es que se tome con propagación favorable y que se
+vigile el funcionamiento de la fuente mientras dura (6.1). El apartado 8.2 lo
+da como recomendación para una o unas pocas mediciones a corto plazo: tomarlas
+en la ventana M3 o M4, o donde se cumpla la Fórmula (11). Entonces, salvo que
+se disponga de mejor información, la incertidumbre típica de la meteorología es
+2 dB para $D \le 400$ m (Fórmula (12)), que es la fila de 2,00 dB del balance
+de incertidumbre de [más abajo](#incertidumbre-de-medicion-apartado-4-anexo-f), y
+$(1 + D/400\ \mathrm{m})$ dB más allá de esa distancia (Fórmula (13)): 3 dB a
+800 m. El apartado avisa de que puede no ser del todo apropiado para el ruido
+de aeronaves, porque el sentido de despegue y aterrizaje sigue al viento a lo
+largo de la pista, y de que en algunas posiciones de micrófono nunca hay
+propagación favorable.
+
+**Lluvia** (8.3). Los resultados tomados con precipitación sobre la pantalla
+antiviento se descartan salvo que pueda demostrarse que su efecto fue
+despreciable. Una pantalla mojada sigue alterada cuando deja de llover: en una
+pantalla estándar de 9 cm el efecto puede ser significativo por encima de 1 kHz
+si han caído más de 1 mm, y dura hasta que la pantalla se seca, un tiempo que
+la Fórmula (14) estima a partir de la cantidad de lluvia, solo como ejemplo.
+Los datos tomados entretanto siguen siendo utilizables si se tiene en cuenta la
+incertidumbre añadida.
+
+**Cuánto tiempo** (9.1.2, 9.3.2.2). El intervalo de tiempo de medición cubre
+todas las variaciones significativas de la emisión. Si el ruido es periódico,
+el intervalo abarca preferiblemente un número entero de varios periodos, o
+bien varios intervalos representan cada uno una parte del ciclo y entre todos
+el ciclo completo. Para sucesos aislados, como el sobrevuelo de una aeronave,
+los intervalos se eligen de modo que pueda determinarse el nivel de exposición
+sonora $L_{E,T}$ del suceso. Frente a la meteorología hay una cifra:
+$L_{\mathrm{eq},T}$ se mide en bandas de frecuencia durante al menos 30 min,
+para promediar las variaciones meteorológicas a lo largo del camino, salvo que
+se cumpla la Fórmula (11) o la propagación sea favorable, en cuyo caso 10 min
+suelen bastar (9.3.2.2), y 10 min es también el tiempo mínimo de promediado de
+una medición a corto plazo que necesita condiciones favorables a una distancia
+que la Fórmula (11) no cubre (9.1.2). Los dos mínimos se aumentan cuanto haga
+falta para tener una muestra representativa del funcionamiento de la fuente
+(apartado 7).
+
+**Cuántas veces** (6.1, 6.2, 9.1.1). La norma no fija ningún número de
+intervalos ni ningún límite superior de incertidumbre: deja a quien usa el
+resultado la exactitud a la que aspirar, y exige que la incertidumbre se
+determine. Ofrece dos estrategias: una sola medición en condiciones
+meteorológicas muy bien definidas y con el funcionamiento de la fuente vigilado
+con cuidado, o una medición a largo plazo, o muchas muestreadas, repartidas en
+el tiempo y con la meteorología vigilada. En la segunda, cada resultado se
+archiva en una ventana, que combina una condición de emisión (día, tarde o
+noche, por ejemplo) y una de las cuatro ventanas meteorológicas. El nivel de
+una ventana es la media energética de las mediciones independientes hechas en
+ella (Fórmula (6)), y el nivel a largo plazo pondera las ventanas por la
+frecuencia con que se da cada una (Fórmula (5)), de modo que una campaña a
+largo plazo incluye tantas condiciones importantes de emisión y de propagación
+como pueda, y sobre todo las ventanas que más contribuyen (9.1.1). Dos
+mediciones solo cuentan como independientes cuando las separa tiempo
+suficiente. La Tabla 3 da la orientación: para el tráfico rodado, 24 h a menos
+de 100 m, 48 h de 100 m a 300 m y 72 h más allá, de día y de noche. La tabla
+tiene también filas para el ferrocarril, la industria y las aeronaves, y en
+varias de sus celdas es el funcionamiento de la fuente lo que fija el mínimo.
+
 <span id="ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007"></span>
 
 ### Ajuste tonal (método de ingeniería, Anexo C de ISO 1996-2:2007)
@@ -412,6 +517,7 @@ superior del sonido específico (expuesto como `reportable_upper_bound`, con
 niveles percentiles (Anexo I) y rechaza ordenaciones de percentiles
 invertidas.
 
+<span id="incertidumbre-de-medicion-apartado-4-anexo-f"></span>
 ### Incertidumbre de medición (apartado 4, Anexo F)
 
 `metrology.combined_standard_uncertainty()`, la única raíz de la suma de
@@ -468,7 +574,10 @@ no hace exacta una medición ambiental**: lo que lo decide es cuán
 representativas fueron las condiciones de propagación y el funcionamiento de la
 fuente durante esa hora, y por eso la forma más barata de encoger $u$ es medir
 más a menudo, que es para lo que está
-`uncertainty_from_repeated_measurements`.
+`uncertainty_from_repeated_measurements`. Lo que la norma pide de la
+meteorología, y durante cuánto tiempo, está en
+[la meteorología y el tiempo de medida](#la-meteorologia-y-el-tiempo-de-medida-apartados-6-8-y-9),
+más arriba.
 
 ## Qué cubre esta guía
 
@@ -486,7 +595,10 @@ de cribado del anexo K de la ISO 1996-2:2017.
 La ISO 1996-2 fija las posiciones del receptor y las correcciones de fachada
 que convierten una medida en bruto en el nivel que esperan las funciones de
 esta página: esos procedimientos de posición y corrección no están
-implementados, solo la aritmética que sigue una vez aplicados.
+implementados, solo la aritmética que sigue una vez aplicados. Las ventanas
+meteorológicas del apartado 8 y los intervalos de tiempo de medición del
+apartado 9 se enuncian en esta página y tampoco se calculan: ninguna función
+clasifica la meteorología ni obtiene el radio de curvatura del anexo A.
 </ScopeClaim>
 </Scope>
 

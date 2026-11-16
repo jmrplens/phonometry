@@ -61,11 +61,11 @@ ISO 11202 Equation (A.5) and ISO 11204 Equations (A.2)/(A.5) print the same
 piecewise function of one dimensionless ratio $z$,
 
 $$
-K_3 = \begin{cases} 7\ \mathrm{dB}, & z \le 0{,}2 \\ -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\ 0\ \mathrm{dB}, & z > 1 \end{cases}
+K_3 = \begin{cases} 7\ \mathrm{dB}, & z \le 0.2 \\ -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\ 0\ \mathrm{dB}, & z > 1 \end{cases}
 $$
 
 and differ only in how $z$ is reached. The two branches meet: at
-$z = 0{,}2$ the middle branch gives $-10 \lg 0{,}2 = 6{,}99$ dB, so
+$z = 0.2$ the middle branch gives $-10 \lg 0.2 = 6.99$ dB, so
 the 7 dB cap is the curve's own value rounded, not a discontinuity.
 
 **The uncertainty** is one pair of equations in all three measuring parts
@@ -154,7 +154,7 @@ ISO 11201:2010 Equation (11), ISO 11202:2010 Equation (14) and
 ISO 11204:2010 Equation (13). The coverage factor is the caller's to choose:
 $k = 2$ gives the two-sided 95 % interval of a normal distribution,
 while the worked examples of ISO 11200:2014 Annex B all print
-$k = 1{,}6$, which is the one-sided factor used when the result is
+$k = 1.6$, which is the one-sided factor used when the result is
 compared with a limit value, and is this function's default.
 
 **Parameters**
@@ -344,7 +344,7 @@ environmental_ratio_from_absorption(
 The ratio $z$ from the equivalent sound absorption area.
 
 $$
-z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0,1 D^*_{I,\mathrm{op}}}
+z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0.1 D^*_{I,\mathrm{op}}}
 $$
 
 ISO 11204:2010 Equation (A.6). It is the same quantity
@@ -397,7 +397,7 @@ environmental_ratio_from_k2(
 The ratio $z$ from the environmental correction of the test room.
 
 $$
-z = 1 - \left( 1 - 10^{-0,1 K_2} \right) 10^{-0,1 D^*_{I,\mathrm{op}}}
+z = 1 - \left( 1 - 10^{-0.1 K_2} \right) 10^{-0.1 D^*_{I,\mathrm{op}}}
 $$
 
 ISO 11202:2010 Equation (A.4) and ISO 11204:2010 Equation (A.3). $K_2$
@@ -407,7 +407,7 @@ computes for the sound-power methods, and $D^*_{I,\mathrm{op}}$ is the
 apparent directivity index the work station sees.
 
 With no directivity to speak of the expression collapses to
-$z = 10^{-0,1 K_2}$, so $K_3 = K_2$: a work station that sees
+$z = 10^{-0.1 K_2}$, so $K_3 = K_2$: a work station that sees
 the machine no more strongly than the measurement surface does needs the
 same correction the surface needed. That holds until the cap bites, at
 $K_2 = 7$ dB; above it the local correction stays at
@@ -443,6 +443,8 @@ GRADE_2_MAX_K3 = 4.0
 ```python
 grade_from_local_correction(
     local_correction: NumericArrayLike,
+    *,
+    largest_dimension_m: float | None = None,
 ) -> Literal['engineering', 'survey']
 ```
 
@@ -450,9 +452,23 @@ The accuracy grade a local environmental correction earns.
 
 ISO 11202:2010 A.1.3 puts the boundary at
 [`GRADE_2_MAX_K3`](/phonometry/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
-is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
-reaches the same boundary by a different road, Condition (A.6), which is
-algebraically the same 4 dB once (A.4) and (A.5) are substituted into it.
+is grade 2 (engineering), and more than that is grade 3 (survey). That is
+the boundary applied when `largest_dimension_m` is not given, and the one
+ISO 11204 5.6 applies too.
+
+Method A.2 is stricter. Its Condition (A.6) of A.2.5 adds a margin
+$\Delta D^*_I$ to the bound on the approximate directivity index,
+because that index is only approximate, and the margin grows with the
+largest dimension $l_\mathrm{max}$ of the source: 0.5 dB up to 1 m,
+1 dB up to 3 m and 1.5 dB beyond. Give `largest_dimension_m` and the
+margin is read from it. Once Equations (A.4) and (A.5) are substituted,
+the condition no longer holds $K_2$ and bounds $K_3$ alone,
+
+$$
+K_3 \le -10 \lg \left[ 1 - \left( 1 - 10^{-0.4} \right) 10^{-0.1 \Delta D^*_I} \right]\ \mathrm{dB}
+$$
+
+so grade 2 holds for $K_3$ up to 3.34 dB, 2.82 dB or 2.41 dB.
 
 The worst band decides, since a determination is only as good as its
 weakest part.
@@ -462,6 +478,7 @@ weakest part.
 | Name | Description |
 | :--- | :--- |
 | `local_correction` | $K_3$ in decibels; a scalar or one value per band. |
+| `largest_dimension_m` | Largest dimension $l_\mathrm{max}$ of the source, in metres, for a $K_3$ determined by method A.2 of ISO 11202 (Default: `None`, the 4 dB of A.1.3). |
 
 **Returns:** `'engineering'` or `'survey'`.
 
@@ -469,7 +486,8 @@ weakest part.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `local_correction` holds a text or a value that is not a real number. |
+| ValueError | if `largest_dimension_m` is not strictly positive. |
+| TypeError | if `local_correction` holds a text or a value that is not a real number, or `largest_dimension_m` is not a single number. |
 
 ## local_environmental_correction
 
@@ -490,7 +508,7 @@ local_environmental_correction(
 Local environmental correction $K_3$ from the ratio $z$.
 
 $$
-K_3 = \begin{cases} 7\ \mathrm{dB}, & z \le 0{,}2 \\ -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\ 0\ \mathrm{dB}, & z > 1 \end{cases}
+K_3 = \begin{cases} 7\ \mathrm{dB}, & z \le 0.2 \\ -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\ 0\ \mathrm{dB}, & z > 1 \end{cases}
 $$
 
 ISO 11202:2010 Equation (A.5) and ISO 11204:2010 Equations (A.2) and (A.5),
@@ -499,7 +517,7 @@ differs between them, and that is [`environmental_ratio_from_k2`](/phonometry/re
 [`environmental_ratio_from_absorption`](/phonometry/reference/api/power/workstation/#environmental_ratio_from_absorption).
 
 The cap is the curve's own value, not a separate rule:
-$-10 \lg 0{,}2 = 6{,}99$ dB, so the function is continuous where the
+$-10 \lg 0.2 = 6.99$ dB, so the function is continuous where the
 7 dB takes over. The upper branch is a floor for the same reason a
 correction cannot be negative: the room can only add to the reading.
 
@@ -591,7 +609,7 @@ subinterval_level(
 One level for a cycle made of operating periods of different lengths.
 
 $$
-L_p = 10 \lg \left[ \frac{1}{T} \sum_{i=1}^{N} T_i\, 10^{0,1 L_{p,T_i}} \right]\ \mathrm{dB}, \qquad T = \sum_i T_i
+L_p = 10 \lg \left[ \frac{1}{T} \sum_{i=1}^{N} T_i\, 10^{0.1 L_{p,T_i}} \right]\ \mathrm{dB}, \qquad T = \sum_i T_i
 $$
 
 ISO 11201:2010 Equation (8), ISO 11202:2010 Equation (11) and
@@ -664,7 +682,7 @@ WorkstationBackgroundCorrection(
 The background-noise correction $K_1$ of the ISO 11200 group.
 
 $$
-K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB}, \qquad \Delta L = L'_p - L_p(B)
+K_1 = -10 \lg \left( 1 - 10^{-0.1 \Delta L} \right)\ \mathrm{dB}, \qquad \Delta L = L'_p - L_p(B)
 $$
 
 Above [`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as

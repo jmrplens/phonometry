@@ -402,6 +402,19 @@ modos de la sala dentro del filtro, y esos modos se mueven con el micrófono. Po
 debajo del límite de la ventana, la alternativa habitual es una medida sobre
 plano rígido.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_bench.svg" alt="Dos bancos para una medición con barrido: el panel (a), una interfaz de audio que excita un dispositivo eléctrico bajo ensayo con un segundo canal de la interfaz cableado directamente de vuelta desde la salida como referencia de bucle que fija t igual a cero; el panel (b), un altavoz y un micrófono de medición, los dos a 1,20 m sobre un suelo duro y separados 1,00 m, con el camino reflejado de 2,60 m en trazo discontinuo y el tiempo libre de reflexiones resultante de 4,7 ms indicado; debajo de ambos, el eje temporal propio del barrido con la llegada lineal en t igual a cero, las prellegadas del segundo y el tercer armónico en menos 0,49 y menos 0,77 segundos, la ventana por orden de 8192 muestras y la separación de llegadas más corta L ln(3/2) igual a 0,28 s" width="92%" />
+
+*El panel (b) es el banco de esta sección: fuente y micrófono a 1,20 m sobre un
+suelo duro y separados 1,00 m, de modo que el camino reflejado mide
+$\sqrt{1{,}00^2 + 2{,}40^2} = 2{,}60$ m, 1,60 m más que el directo, y el suelo
+llega $1{,}60/343 = 4{,}7$ ms tarde. La ventana tiene que cerrarse antes, y una
+ventana de 4,7 ms no resuelve nada por debajo de unos 210 Hz. El panel (a) es el
+equivalente eléctrico, donde un canal de bucle fija $t = 0$; la franja bajo los
+dos es el balance temporal de los armónicos del barrido que reproduce la
+guía de
+[distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/),
+y no interviene en la inversión.*
+
 Ecualizar con una respuesta medida significa invertirla, y un recíproco puro
 $1/H(f)$ se dispara allí donde el sistema radia poca energía - un valle en
 banda, todo lo que queda fuera de banda - convirtiendo el ecualizador en un

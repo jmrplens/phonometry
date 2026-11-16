@@ -36,7 +36,7 @@ materials, vibration, environmental, aircraft and underwater acoustics,
 electroacoustics and wave simulation. Every metric is implemented from its
 governing standard and numerically checked against it: the auto-generated
 [conformance report](https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/CONFORMANCE.md)
-runs 1897 conformance checks across 111 domains, against
+runs 1899 conformance checks across 111 domains, against
 230 normative designations and 121 further published sources, each pinning an
 expected normative value to the value the library computes, and CI regenerates
 it on every pull request. Filters meet the class 1 mask of
@@ -45,9 +45,9 @@ banks are class 1 on every requirement the 2014 edition grades on a design.
 Weightings and levels are class 1 per
 **IEC 61672-1:2013**.
 
-<a href="https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/CONFORMANCE.md"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/v4.0.0rc1/.github/badges/conformance-summary.svg" alt="All 1897 conformance checks pass, across 111 domains, against 230 normative designations and 121 further published sources"></a>
+<a href="https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/CONFORMANCE.md"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/v4.0.0rc1/.github/badges/conformance-summary.svg" alt="All 1899 conformance checks pass, across 111 domains, against 230 normative designations and 121 further published sources"></a>
 
-<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
+<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
 
 *An 800 Hz wavefront threading a hall of columns, computed with the library's
 own [2D FDTD engine](https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/simulation/fdtd-simulation.md)

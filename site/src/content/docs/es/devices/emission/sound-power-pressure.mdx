@@ -29,7 +29,7 @@ references:
     title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Survey method using an enveloping measurement surface over a reflecting plane"
     designation: "ISO 3746:2010"
     url: "https://www.iso.org/standard/52056.html"
-    note: "El grado de inspección de la sección 1, que comparte las fórmulas de superficie envolvente con criterios menos exigentes."
+    note: "El grado de peritaje de la sección 1, que comparte las fórmulas de superficie envolvente con criterios menos exigentes."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -44,7 +44,7 @@ métodos de presión son los que no necesitan nada más exótico que un
 sonómetro: muestrear la presión acústica sobre una superficie que envuelve la
 fuente, promediarla en energía, corregirla y sumar el término de superficie.
 Esta guía cubre los tres. Los métodos de **superficie envolvente** de
-ISO 3744 (grado de ingeniería) e ISO 3746 (grado de inspección) funcionan in
+ISO 3744 (grado de ingeniería) e ISO 3746 (grado de peritaje) funcionan in
 situ, sobre uno o más planos reflectantes, y limpian el nivel superficial
 con la corrección de ruido de fondo $K_1$ y la corrección de entorno $K_2$.
 El **método de precisión** de ISO 3745 traslada la misma idea a una cámara
@@ -99,7 +99,7 @@ El área de la superficie es una forma cerrada de la geometría: una semiesfera
 es $S = 2\pi r^2$ sobre un plano reflectante (dividida entre dos y entre cuatro
 para dos y tres planos), y una caja de un plano es $S = 4(ab + bc + ca)$ con
 $a = 0{,}5\,l_1 + d$, $b = 0{,}5\,l_2 + d$, $c = l_3 + d$ para la distancia de
-medición $d$. ISO 3746 (inspección) comparte todas las fórmulas pero es más burda: menos
+medición $d$. ISO 3746 (peritaje) comparte todas las fórmulas pero es más burda: menos
 posiciones de micrófono, un criterio de fondo de 3 dB en lugar de 6 dB, y
 validez hasta $K_2 \le 7\ \text{dB}$ en lugar de 4 dB.
 
@@ -152,7 +152,7 @@ parciales iguales cuyo lado no supere $3d$; las posiciones clave son entonces el
 centro de cada área parcial más sus esquinas, excluidas las que se meten en el
 plano reflectante, lo que da un mínimo de nueve posiciones cuando un área
 parcial cubre cada plano (apartado C.1; diez con una subdivisión triangular). El
-grado de inspección se queda solo con los centros de las áreas parciales. La
+grado de peritaje se queda solo con los centros de las áreas parciales. La
 dirección de referencia de cada micrófono es la normal a su cara, salvo en una
 esquina de la superficie, donde apunta al origen $O$ de la caja de referencia
 (apartado 7.2.2).
@@ -406,7 +406,7 @@ micrófono **y** banda de frecuencia, forma `(NM, NB)`; ISO 3744 apartado 8.4),
 (expandida, 95 %) y `grade`. `measurement_positions('hemisphere', radius=…,
 n_reflecting_planes=…, tones=…, grade=…)` devuelve las coordenadas normativas
 `(N, 3)` de micrófono (Tabla B.1 para fuentes tonales, B.2 para banda ancha).
-El grado de inspección toma los conjuntos reducidos del apartado 8.2.1 de
+El grado de peritaje toma los conjuntos reducidos del apartado 8.2.1 de
 ISO 3746, uno solo sea cual sea la emisión de la fuente: las posiciones 4, 5, 6
 y 10 de la Tabla B.1 de ISO 3746 sobre un plano (las posiciones de banda ancha
 con esos números de la Tabla B.2 de ISO 3744), y las posiciones 14, 15 y 18
@@ -416,7 +416,7 @@ dos o tres planos reflectantes, ambas normas piden un radio de al menos 3 m
 coordenadas se dibujan directamente con `plot_microphone_positions`, que
 representa el array sobre su superficie de medición en 3-D y numera los puntos
 de 1 a N en el orden dado, de modo que un conjunto reducido como el de
-inspección se numera desde 1 y no con los números de posición de la norma.
+peritaje se numera desde 1 y no con los números de posición de la norma.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_positions_hemisphere.svg" alt="Vista tridimensional del array de micrófonos de ISO 3744: diez micrófonos numerados sobre un hemisferio de alambre de 2 m apoyado en un plano reflectante circular sombreado, con las posiciones 1 y 2 cerca del plano, las demás escalonadas en altura hasta las posiciones 9 y 10 cerca de la cúspide, y los ejes x, y y z graduados en metros" width="88%" />
 
@@ -445,7 +445,7 @@ plt.show()
 Diez es el número para **un** plano reflectante. Frente a dos planos el conjunto
 son las cinco posiciones clave 2, 3, 6, 7 y 9 de la Tabla B.2; en un rincón,
 frente a tres planos, son las tres posiciones 1, 2 y 3 de la Tabla B.3
-(apartado 8.1.1). El grado de inspección usa conjuntos aún más burdos: cuatro
+(apartado 8.1.1). El grado de peritaje usa conjuntos aún más burdos: cuatro
 posiciones sobre un plano.
 
 Esos números son un punto de partida, no un resultado. El apartado 8.1.1 exige
@@ -888,7 +888,7 @@ $$
 
 (apartados 3.22 y 3.23): la energía que radia el suceso, en decibelios re 1 pJ,
 en lugar de la potencia que no tiene. Su determinación (apartado 8.3, y
-apartado 8.4 de ISO 3746 para el grado de inspección) es la cadena de la
+apartado 8.4 de ISO 3746 para el grado de peritaje) es la cadena de la
 sección 1 con una sustitución. Cada micrófono registra el **nivel de presión
 acústica de suceso aislado integrado en el tiempo**
 
@@ -1031,7 +1031,7 @@ ingeniería de 6 dB, y $K_1$ es sus 1,26 dB completos. El [registro de
 erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md)
 recoge la lectura. Con el fondo en su sitio, los criterios y el tope son los de
 la sección 1: de 6 dB a 15 dB para el grado de ingeniería, de 3 dB a 10 dB
-para el grado de inspección de ISO 3746, y un `SoundPowerWarning` cuando una
+para el grado de peritaje de ISO 3746, y un `SoundPowerWarning` cuando una
 banda cae por debajo.
 
 ```python

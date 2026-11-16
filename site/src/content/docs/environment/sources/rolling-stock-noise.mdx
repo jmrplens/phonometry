@@ -228,6 +228,22 @@ print(standing.set_levels.round(2), standing.reported_level)
 # [66.31 66.71 66.01] 66.0
 ```
 
+Both layouts are easier to read drawn than out of a table cell: the mesh of
+the stationary test, with the two lengths Formula 1 weights a position by, and
+the positions of the starting test along the four units Figure 10 draws.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_test_positions.svg"
+  alt="Two layouts of ISO 3095 microphone positions. Above, the stationary test around a 20 m unit, in plan and to scale: the unit split into four areas of 5 m, a microphone opposite the middle of each area on both sides, 7.5 m from the track centreline, and two more off each end, 30 degrees either side of the centreline on a half circle of 7.5 m radius centred on the end of the unit; one area and one quarter of a circle are picked out as the lengths a side position and an end position stand for, 5 m and 11.78 m. Below, the maximum level starting test along units of 42 m, 54 m, 87 m and 108 m: every unit has a position 10 m ahead of its front; the 54 m unit a second one 17 m behind the front, which is 10 m ahead of its middle; the 87 m unit a second one 33.5 m behind the front; and the 108 m unit two more, 17 m and 44 m behind the front, 27 m apart."
+  width="92%"
+/>
+
+*An end position stands for a quarter of a circle of 7.5 m radius, which is
+where the $(\pi/2) \times 7.5$ m of Formula 1 comes from; a side position
+stands for its own area. The starting positions are the ones
+`acceleration_test_positions` returns for the four lengths the standard draws,
+and they land on the dimensions it prints.*
+
 ## 4. The reference track
 
 ### 4.1 The roughness of the rails (EN 15610)
@@ -392,8 +408,10 @@ The **track decay rate** is the attenuation of the vibration along the rail,
 in decibels per metre, one value per one-third octave band (EN 15461, 3.6).
 An accelerometer sits on the rail at the middle of a sleeper bay and a hammer
 strikes the rail at the positions of Figure 2, every quarter bay out to two and
-a half, then more sparsely, to 66 bays (6.7,
-`track_decay_excitation_positions`). From the band magnitudes $|A(x_n)|$ of
+a half, then more sparsely, to 66 bays (`track_decay_excitation_positions`).
+The text of 6.7 stops the quarter-bay steps at bay 2, which makes 28
+positions; Figure 2 draws them out to bay 2.5, which makes 29, and the library
+follows the figure. From the band magnitudes $|A(x_n)|$ of
 the responses, the direct one $A(x_0)$ first, Formula 1 estimates the rate
 from the integral of the squared response rather than from a fitted slope,
 
@@ -407,6 +425,25 @@ A grid that stops at $x_\mathrm{max}$ cannot measure a rate below
 $\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}$ (Formula 2), and a band whose rate is not at least
 twice that is unsuitable; the farthest response also has to be 10 dB below the
 direct one (6.7).
+
+Two sets are taken on that grid, the vertical response to a vertical force
+and the lateral one to a lateral force, which the standard calls transverse,
+each response averaged over at least four validated impacts (6.6); the
+vertical accelerometer sits preferably on the rail head, or on the rail foot
+where the head cannot take it, and the lateral one on the outside face of the
+head (6.3). The figure draws the grid for the default
+0.6 m bay, with the $\Delta x_n$ the library gives each position.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay_grid.svg"
+  alt="Two drawings of the EN 15461 hammer grid on a rail with sleepers every 0.6 m. Top, the near field to scale, from the accelerometer at the middle of bay 0 to bay 8: eleven impacts a quarter bay apart out to bay 2.5, then at 3, 3.5 and 4, then one per bay to 8, filled where the impact falls above a sleeper and open where it falls between two; under the rail, one bracket per position for the length of rail it stands for, 0.075 m for the direct response, 0.15 m in the quarter-bay stretch, 0.3 m in the half-bay stretch and 0.6 m in the whole-bay one. Bottom, the whole grid on a compressed scale, the near field shaded and the far-field impacts at bays 10, 12, 16, 20, 24, 30, 36, 42, 48, 54 and 66, the last at x max = 39.6 m with an interval of 7.2 m symmetrical about it. Beside them, the rail cross-section with the vertical force on the head and the vertical accelerometer on the head, where clause 6.3 prefers it, and the transverse force and accelerometer on the faces of the head, and three notes: two sets of responses with four validated impacts or more at each position, a floor DR min = 4.343/x max = 0.11 dB/m on this grid, and the response at the farthest position at least 10 dB below the direct one in every band"
+  width="100%"
+/>
+
+*The 29 hammer positions of Figure 2 on a 0.6 m sleeper bay, read from
+`TRACK_DECAY_EXCITATION_INDICES`, with the length of rail $\Delta x_n$ that
+Formula 1 gives each of them: the near field to scale, and the whole grid
+compressed under it.*
 
 ```python
 bands = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
@@ -431,7 +468,7 @@ print(round(decay[0].rate_at(1000.0), 2), round(decay[1].rate_at(1000.0), 2))
 # 1.19 0.5
 ```
 
-Formula 1 returns 1,19 dB/m for a response that decays at exactly 1,2 dB/m:
+Formula 1 returns 1.19 dB/m for a response that decays at exactly 1.2 dB/m:
 on the grid of Figure 2 the sum stands in for the integral, and it reads an
 exponential about 1 % low. The limits are ISO 3095's Figure 3, which prints
 them in a table beside its curves, fourteen bands from 250 Hz to 5 kHz for each
@@ -445,7 +482,7 @@ none.
 />
 
 *Both decay rates above the lower limits of Figure 3, the vertical one only
-just in the 1,25 kHz and 1,6 kHz bands.*
+just in the 1.25 kHz and 1.6 kHz bands.*
 
 ### 4.3 The verdict
 

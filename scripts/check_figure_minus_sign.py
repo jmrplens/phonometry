@@ -95,6 +95,9 @@ ALLOWED: dict[str, str] = {
             "diagram_airflow_resistance: Resistencia al flujo: métodos "
             "estático y alternante (ISO 9053-1/-2)",
             "diagram_railway_prediction_chain: DIN SPEC 45673-2, -3",
+            "diagram_sound_power_decision_path: ISO 3743-1, -2",
+            "diagram_sound_power_decision_path: ISO 9614-1, -2",
+            "diagram_sound_power_decision_path: ISO/TS 7849-1, -2",
             "diagram_soundfield_audiometry: fitted (ISO 389-1 / -2 / -8), "
             "referred to a",
             "diagram_soundfield_audiometry: colocado (ISO 389-1 / -2 / -8), "

@@ -92,9 +92,14 @@ hydraulic pulsations follow the same form with `N` pumping events per
 revolution (Eq. 8.18), and a rotary positive-displacement blower repeats
 four times per revolution. In a ducted axial fan the blade-vane interaction
 sets up rotating pressure patterns with $m_\mathrm{L} = n N \pm k V$ lobes for
-`V` vanes (Eq. 8.16), turning at $n N f_\mathrm{s} / m_\mathrm{L}$ (Eq. 8.17): a
-pattern that spins faster than the blades themselves, and the reason a
-careful choice of `N` and `V` matters for radiated power.
+`V` vanes (Eq. 8.16), turning at $n N N_\mathrm{rpm} / m_\mathrm{L}$ r/min
+(Eq. 8.17). That is a speed of rotation, not a tone: the noise of every pattern
+is at the blade-passing harmonic it comes from (Norton, p. 525), so the
+patterns come back as [`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) records beside the lines of a
+[`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult), never as lines, and the sign of $m_\mathrm{L}$
+is kept, because it is the sense in which the pattern turns. The faster a
+pattern turns, the more sound power it radiates, the reason a careful choice of
+`N` and `V` matters.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -165,7 +170,7 @@ blade_pass_frequencies(
     n_harmonics: int | np.integer[Any] = 3,
     n_vanes: int | np.integer[Any] | None = None,
     n_lobe_orders: int | np.integer[Any] = 1,
-) -> FaultFrequencyResult
+) -> BladePassResult
 ```
 
 Blade-passing frequency and interaction patterns (Norton 8.15-8.17).
@@ -179,13 +184,20 @@ In a ducted axial fan the blades also interact with the stator vanes and
 set up rotating pressure patterns with
 $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$
 lobes (Eq. 8.16) turning at
-$M_\mathrm{L} = n\, N_{\text{blades}} f_\mathrm{s} / m_\mathrm{L}$ (Eq. 8.17). Those
-patterns radiate strongly when they can drive a higher-order duct mode, so
-they are the lines to check against the duct cut-on frequencies. Give
-*n_vanes* to include them, named `"lobe n=1 m=2"`, `"lobe n=1 m=10"`,
-... The blade harmonic is part of the name because Eq. (8.17) carries
-`n`: the same lobe count reached from a different harmonic is a distinct
-pattern turning at a different speed.
+$M_\mathrm{L} = n\, N_{\text{blades}} N / m_\mathrm{L}$ r/min (Eq. 8.17).
+Each speed is a rate of rotation and not a tone of its own:
+$m_\mathrm{L}$ lobes turning at $M_\mathrm{L}$ pass a fixed point
+$n\, N_{\text{blades}} N$ times a minute, so the noise of every
+pattern is at the blade-passing harmonic it comes from (Norton, p. 525).
+The lobe count is what a duct sees, since a pattern can set up a
+higher-order duct mode with the same pressure distribution, and the faster
+a pattern turns, the more sound power it radiates. Give *n_vanes* and the
+patterns come back in [`BladePassResult.lobe_patterns`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult), one
+[`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) per `(n, k)`, never among the lines, so neither
+[`plot`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultplot) nor [`combine_fault_lines`](/phonometry/reference/api/vibration/diagnostics/#combine_fault_lines) marks
+one on a spectrum. A negative $m_\mathrm{L}$, which Eq. (8.16) gives
+when $k\, N_{\text{vanes}}$ exceeds $n\, N_{\text{blades}}$, is
+a pattern turning against the rotor, and its speed keeps that sign.
 
 **Parameters**
 
@@ -194,17 +206,48 @@ pattern turning at a different speed.
 | `speed_rpm` | Shaft speed `N`, in r/min (> 0). |
 | `n_blades` | Number of blades (integer >= 1). |
 | `n_harmonics` | Number of blade-pass harmonics (integer >= 1, Default: 3). |
-| `n_vanes` | Number of stator vanes `V` (integer >= 1) to include the lobed interaction patterns (Default: `None`, blade tones only). |
+| `n_vanes` | Number of stator vanes `V` (integer >= 1) to include the lobed interaction patterns (Default: `None`, blade tones only and no patterns). |
 | `n_lobe_orders` | Highest `\|k\|` in $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$ (integer >= 1, Default: 1). |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"bladed rotor"`).
+**Returns:** A [`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult) (source `"bladed rotor"`): the shaft and blade-passing lines, and the lobe patterns apart from them.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-integer input. |
-| TypeError | if `n_blades`, `n_harmonics`, `n_lobe_orders` or `n_vanes` is a flag, a text or an array where a count goes. |
+| TypeError | if `speed_rpm` is not a single number, or `n_blades`, `n_harmonics`, `n_lobe_orders` or `n_vanes` is a flag, a text or an array where a count goes. |
+
+## BladePassResult
+
+```python
+BladePassResult(
+    *,
+    lines: tuple[FaultLine, ...],
+    shaft_rate: float,
+    source: str,
+    lobe_patterns: tuple[LobePattern, ...] = (),
+)
+```
+
+The blade-passing lines of a bladed rotor and its interaction patterns.
+
+A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) whose lines are the shaft rate and the
+blade-passing harmonics alone, so that `plot`,
+[`within`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresultwithin) and [`combine_fault_lines`](/phonometry/reference/api/vibration/diagnostics/#combine_fault_lines) treat
+it as any other family of lines. The lobe patterns of a ducted fan are
+speeds of rotation, not lines, and are held apart in
+`lobe_patterns`: no plot marks them on a spectrum and no merge
+carries them as frequencies.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `lobe_patterns` | The [`LobePattern`](/phonometry/reference/api/vibration/diagnostics/#lobepattern) records of Eqs. (8.16) and (8.17), by blade harmonic, then by $\vert k\vert $, the minus sign first; empty when no vane count was given. |
+| `lines` | The predicted [`FaultLine`](/phonometry/reference/api/vibration/diagnostics/#faultline) entries, in the order the generating function produced them. |
+| `shaft_rate` | Shaft rotational frequency `fs`, in hertz. |
+| `source` | Description of the element (`"rolling-contact bearing"`, `"gear pair"`, ...), used as the plot title. |
 
 ## combine_fault_lines
 
@@ -220,7 +263,9 @@ Merge several fault-line families into one overlay.
 A gearbox bearing carries its own bearing lines, the mesh family of the
 gear it supports and the shaft harmonics; this puts them on one axes.
 Duplicate names are disambiguated by appending the source of the family
-they came from.
+they came from. Only lines are merged: the lobe patterns of a
+[`BladePassResult`](/phonometry/reference/api/vibration/diagnostics/#bladepassresult) are speeds of rotation, not frequencies, and are
+not carried into the merged family.
 
 **Parameters**
 
@@ -344,7 +389,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ### FaultFrequencyResult.within()
 
 ```python
-FaultFrequencyResult.within(low: float, high: float) -> FaultFrequencyResult
+FaultFrequencyResult.within(low: float, high: float) -> Self
 ```
 
 The lines falling in `[low, high]` hertz, as a new result.
@@ -359,7 +404,7 @@ much narrower than the highest predicted harmonic.
 | `low` | Lower edge, in hertz (>= 0). |
 | `high` | Upper edge, in hertz (> *low*). |
 
-**Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) with the surviving lines.
+**Returns:** A result of the same class with the surviving lines, and everything else it holds unchanged.
 
 **Raises**
 
@@ -502,6 +547,37 @@ it by the pole count.
 | :--- | :--- |
 | ValueError | for a non-positive, non-integer or inconsistent input. |
 | TypeError | if `slip` or `supply_frequency` is not a single number, or `n_poles`, `n_rotor_bars`, `n_sidebands` or `n_slot_harmonics` is a flag, a text or an array where a count goes. |
+
+## LobePattern
+
+```python
+LobePattern(
+    *,
+    harmonic: int,
+    vane_order: int,
+    n_lobes: int,
+    speed_rpm: float,
+)
+```
+
+One rotating blade-vane interaction pattern of a ducted fan (Norton 8.16-8.17).
+
+The blades of an axial fan pass the stator vanes and set up a rotating
+pattern of $m_\mathrm{L} = n N \pm k V$ pressure lobes (Eq. 8.16),
+turning at $M_\mathrm{L} = n N N_\mathrm{rpm} / m_\mathrm{L}$
+(Eq. 8.17). That is a speed of rotation, not a frequency: $m_\mathrm{L}$
+lobes turning $M_\mathrm{L}$ times a minute pass a fixed point
+$n N N_\mathrm{rpm}$ times a minute, the blade-passing harmonic the
+pattern comes from, which is where its noise is (Norton, p. 525).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `harmonic` | The blade harmonic $n$ the pattern comes from. |
+| `vane_order` | $k$ of Eq. (8.16), with its sign ($\pm 1, \pm 2, \ldots$). |
+| `n_lobes` | $m_\mathrm{L}$, with its sign: positive when the pattern turns the way the rotor does, negative when it turns against it. |
+| `speed_rpm` | $M_\mathrm{L}$, the speed at which the pattern turns, in r/min, of the sign of $m_\mathrm{L}$. |
 
 ## shaft_rate
 

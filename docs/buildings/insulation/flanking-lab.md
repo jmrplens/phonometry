@@ -313,6 +313,12 @@ the tapping-machine axis sits at 45° to the joists. On lightweight junctions
 the operator should stay off the floor unless their weight and damping can be
 shown not to matter.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_junction_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_junction_positions.svg" alt="Plan of a source element and the receiving element unfolded beside it across the junction under test: four excitation positions scattered over the source element, the three measurement positions of the first one on each plate, and the six minimum distances of Clause 7.2.5 drawn on the spans they rule, 0.5 m from an excitation position to the element boundary, 1.0 m between excitation positions, 1.0 m to the junction, 1.0 m to its measurement positions, 0.5 m between those and 0.25 m from one of them to the boundary; an inset shows a tapping machine at 45° to the joists of a framed floor" width="92%"></picture>
+
+The plan lays those numbers out on one element. Every distance on it is a
+minimum, and none of the marks is on a grid: a layout passes when each span is
+at least as long as the one drawn for it, whatever the positions are.
+
 **Both directions.** $K_{ij}$ is symmetric only because the standard makes it
 so: run the whole procedure with element $i$ excited and again with element $j$
 excited, and average the two level differences before Formula (13), which is
@@ -325,6 +331,19 @@ one continuous plenum above it. Sound leaves the source room through the
 ceiling tiles, travels sideways over the partition and comes back down through
 the tiles of the receiving room. That path is often the weakest link in an
 open-plan fit-out, and it is not what a partition's $R_\mathrm{w}$ describes.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ceiling_plenum_facility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ceiling_plenum_facility.svg" alt="Two panels. A: section of the ISO 140-9 test facility, two rooms of at least 50 m³ under one continuous suspended ceiling, 2.8 m ± 0.2 m high, the dividing wall ending under the ceiling with a bevelled head of at most 100 mm, a plenum 650 mm to 760 mm deep with absorbent lining on its end walls, and the measured path drawn up through the ceiling, along the plenum and down again; beside it a plan of the plenum, 4.5 m ± 0.5 m wide, with one side wall and both end walls lined, and what Clauses 5.1.2 to 5.1.5 ask. B: the symbols of Vigran's one-dimensional model on the same section, the ceiling lengths LS and LR, the source-room height HS, the plenum depth h and the reduction indices RS and RR" width="92%"></picture>
+
+The drawing keeps apart two things that share that geometry. Panel A is the
+laboratory facility in which ISO 140-9 measures the path, with what its
+Clauses 5.1.2 to 5.1.5 fix: an interior 4.5 m ± 0.5 m wide and 2.8 m ± 0.2 m
+high under the suspended ceiling, two rooms of at least 50 m³ whose volumes
+differ by at least 10 %, a dividing wall that ends under the ceiling with a
+head bevelled to at most 100 mm, a plenum 650 mm to 760 mm deep, and an
+absorbent lining on one side wall and both end walls of the plenum. Panel B
+carries the symbols of the one-dimensional model below, which is Vigran's and
+no part of the standard: its worked example, with a plenum 0.43 m deep, is not
+a geometry the facility could have.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ceiling_plenum_flanking_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ceiling_plenum_flanking.svg" alt="Two panels: the ceiling-plenum flanking reduction index Rcl per octave band for two plenum depths against the sum of the two ceiling reduction indices, and the normalized ceiling attenuation of an accredited ASTM E1414 test report with the fitted ASTM E413 contour and its shaded deficiencies giving CAC 34" width="92%"></picture>
 
@@ -397,7 +416,7 @@ that expression's denominator; that is a misprint, recorded in
 used here. Read literally, the printed form is non-monotonic in the plenum
 damping (adding absorber would predict a worse path than none) and unbounded as
 $m_\mathrm{R} \to 0$. For a plenum with little
-attenuation and $s_\mathrm{S} = s_\mathrm{R} = 0{,}5$ that collapses to the compact form that
+attenuation and $s_\mathrm{S} = s_\mathrm{R} = 0.5$ that collapses to the compact form that
 makes the geometry visible (Eqs. (9.19) and (9.20)):
 
 $$
@@ -440,14 +459,15 @@ print(building.partition_referenced_reduction_index(res.reduction_index, 2.7, 4.
 A ceiling is not rated by $R_\mathrm{cl}$ but by the
 **normalized ceiling attenuation** $D_\mathrm{n,c} = D - 10\log_{10}(A/A_0)$ (ISO 140-9:1985
 clause 3.3), with $A$ the receiving-room equivalent absorption area and the
-reference $A_0 = 10\ \text{m}^2$. The facility has two rooms of at least
+reference $A_0 = 10\ \text{m}^2$. The facility (panel A of the drawing that
+opens this section, Clauses 5.1.2 to 5.1.5) has two rooms of at least
 50 m³ whose volumes differ by at least 10 %, a dividing wall tapered to at most
 100 mm at the top, and a plenum 650 mm to 760 mm deep with one sidewall and
 both end walls lined; the standard prints the required lining absorption
 $\alpha_\mathrm{s} \ge 0{,}65$ at 125 Hz and $\ge 0{,}80$ from 250 Hz to 4000 Hz, and
 requires $\alpha < 0{,}10$ on the other sidewall and on the plenum ceiling.
 The North American counterpart, ASTM E1414, uses $A_0 = 12\ \text{m}^2$, so an
-ASTM value runs about $10\log_{10}(12/10) = 0{,}79$ dB higher for the same rooms.
+ASTM value runs about $10\log_{10}(12/10) = 0.79$ dB higher for the same rooms.
 
 ISO rates $D_\mathrm{n,c}$ with the ISO 717-1 curve, giving $D_\mathrm{n,c,w}$; ASTM E1414
 rates it through ASTM E413 as the **ceiling attenuation class**. E413 rounds the

@@ -38,6 +38,14 @@ _HZ_PER_KHZ = 1000
 # IEC 61260-1 Annex E.3: a most-significant digit of 1-4 keeps three
 # significant figures, one of 5-9 keeps two.
 _ANNEX_E3_MSD_THRESHOLD = 5.0
+#: The bandwidth designator 1/2, whose labels Annex E.2 rounds on its own rule.
+_HALF_OCTAVE = 2
+#: The largest denominator E.3.1 rounds by E.3.2 and E.3.3 as they stand;
+#: above it E.3.5 adds significant digits until the labels are unique.
+_ANNEX_E3_MAX_DENOMINATOR = 24
+#: The most digits E.3.5 may add: with two or three more, a double holds no
+#: further significant digit to round to.
+_ANNEX_E35_MAX_EXTRA_DIGITS = 14
 
 # Adjacent mid-band centre ratio separating the two IEC 61260 band structures:
 # octave spacing (2) above it, one-third-octave spacing (2**(1/3) ~ 1.26) below.
@@ -92,18 +100,60 @@ PREFERRED_FREQUENCIES: Mapping[int, tuple[float, ...]] = MappingProxyType(
 )
 
 
-def _iec_e3_round(f: float) -> float:
-    """IEC 61260-1 Annex E.3: 3 sig figs if MSD 1–4, 2 sig figs if MSD 5–9."""
+def _round_significant(f: float, digits: int) -> float:
+    """*f* rounded to its first *digits* significant digits; *f* is positive."""
+    step = 10.0 ** (int(np.floor(np.log10(f))) - (digits - 1))
+    return float(round(f / step) * step)
+
+
+def _iec_e2_round(f: float) -> float:
+    """IEC 61260-1 Annex E.2: a half-octave centre keeps 3 sig figs, always."""
     if f <= 0:
         return f
-    exponent = int(np.floor(np.log10(f)))
-    msd = f / (10.0**exponent)
-    step = (
-        10.0 ** (exponent - 2)
-        if msd < _ANNEX_E3_MSD_THRESHOLD
-        else 10.0 ** (exponent - 1)
-    )
-    return round(f / step) * step
+    return _round_significant(f, 3)
+
+
+def _iec_e3_round(f: float, extra_digits: int = 0) -> float:
+    """IEC 61260-1 Annex E.3: 3 sig figs if MSD 1–4, 2 sig figs if MSD 5–9.
+
+    ``extra_digits`` adds the same number of digits to both counts, as E.3.5
+    asks of a denominator above 24 (:func:`_iec_e35_extra_digits`).
+    """
+    if f <= 0:
+        return f
+    msd = f / (10.0 ** int(np.floor(np.log10(f))))
+    digits = 3 if msd < _ANNEX_E3_MSD_THRESHOLD else 2
+    return _round_significant(f, digits + extra_digits)
+
+
+@lru_cache(maxsize=16)
+def _iec_e35_extra_digits(frac: int) -> int:
+    """IEC 61260-1 Annex E.3.5: the digits a band of 1/``frac`` octave adds.
+
+    E.3.5 asks that, for a denominator above 24, "the number of significant
+    digits shall be increased to provide unique nominal mid-band frequencies
+    in any 10:1 frequency ratio". The base-ten centres of 5.4 repeat their
+    digits every ``10 * frac`` bands (:math:`G^{10} = 10^3`, three decades),
+    and the rounding never puts a higher centre below a lower one, so a label
+    repeats in some 10:1 ratio only if two neighbours of that run share it.
+    The count returned is the fewest digits that, added to both E.3.2 and
+    E.3.3, leaves every neighbour of the run apart: none up to 1/36 octave,
+    one at 1/48.
+    """
+    g = 10.0 ** (3.0 / 10.0)
+    # Formula (2) for an odd denominator, Formula (3) for an even one.
+    exponents = [(x if frac % 2 else x + 0.5) / frac for x in range(10 * frac + 1)]
+    centres = [1000.0 * g**e for e in exponents]
+    extra = 0
+    while extra < _ANNEX_E35_MAX_EXTRA_DIGITS and not _labels_apart(centres, extra):
+        extra += 1
+    return extra
+
+
+def _labels_apart(centres: Sequence[float], extra_digits: int) -> bool:
+    """Whether the E.3 labels of ascending ``centres`` all rise, none repeated."""
+    labels = [_iec_e3_round(f, extra_digits) for f in centres]
+    return all(low < high for low, high in zip(labels, labels[1:], strict=False))
 
 
 @lru_cache(maxsize=4)
@@ -122,14 +172,25 @@ def _extended_preferred(frac: int) -> list[float]:
 def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
     """Return IEC 61260-1 nominal frequency (float) for an exact mid-band frequency.
 
-    For standard fractions (1, 3), snaps to the IEC preferred table of
-    :data:`PREFERRED_FREQUENCIES`.  For non-standard fractions, falls back to Annex E.3
-    significant-figure rounding (``_iec_e3_round``).
+    Octave and one-third-octave bands (fractions 1 and 3) snap to the nominal
+    frequencies of Table E.1, held in :data:`PREFERRED_FREQUENCIES`. A
+    half-octave band (fraction 2) takes the three significant digits of
+    Annex E.2 (``_iec_e2_round``). Fractions 4 to 24 take the rounding of
+    Annex E.3.2 and E.3.3 (``_iec_e3_round``), which drops to two digits from
+    a leading 5, and a whole fraction above 24 the digits E.3.5 adds to that
+    rounding so that no two labels in a decade are the same
+    (``_iec_e35_extra_digits``). A fraction that is not a whole number has no
+    rule in Annex E and keeps the rounding of E.3.2 and E.3.3.
     """
     frac = round(fraction)
-    if np.isclose(fraction, frac) and frac in (1, 3):
-        extended = _extended_preferred(frac)
-        return min(extended, key=lambda f: abs(np.log(f / exact_freq)))
+    if np.isclose(fraction, frac):
+        if frac in (1, 3):
+            extended = _extended_preferred(frac)
+            return min(extended, key=lambda f: abs(np.log(f / exact_freq)))
+        if frac == _HALF_OCTAVE:
+            return _iec_e2_round(exact_freq)
+        if frac > _ANNEX_E3_MAX_DENOMINATOR:
+            return _iec_e3_round(exact_freq, _iec_e35_extra_digits(frac))
     return _iec_e3_round(exact_freq)
 
 

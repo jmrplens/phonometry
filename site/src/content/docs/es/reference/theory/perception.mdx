@@ -105,7 +105,7 @@ references:
     title: "Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index"
     designation: "IEC 60268-16:2020 (Edición 5)"
     url: "https://webstore.iec.ch/en/publication/26771"
-    note: "La sección del STI: las frecuencias de modulación del A.2.2, la conversión a índice del A.5.4/A.5.5, los pesos de banda de la Tabla A.1, los datos de enmascaramiento y de umbral de recepción de las Tablas A.2/A.3, el método STIPA del Anexo B y las bandas de calificación del Anexo F."
+    note: "La sección del STI: las frecuencias de modulación (A.1.4; A.2.2 en la Ed. 4), la conversión a índice (A.5.4/A.5.5 en la numeración de la Ed. 4 que cita la página), los pesos de banda de la Tabla A.1, los datos de enmascaramiento y de umbral de recepción de las Tablas A.2/A.3, el método STIPA del Anexo B y las bandas de calificación del Anexo F."
   - type: standard
     organization: "American National Standards Institute"
     year: 1997
@@ -154,6 +154,7 @@ sidebar:
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Esta página reúne la teoría de la audición y la psicoacústica: las líneas isofónicas, los modelos de sonoridad de Zwicker, Moore-Glasberg y Sottek, las métricas de calidad sonora (tonalidad, aspereza y agudeza), la prominencia tonal, las métricas del habla STI y SII, y la estadística de los umbrales de audición y de la pérdida auditiva. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
 
@@ -248,6 +249,18 @@ Consulta la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudn
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
 
 *Sonoridad específica N′(z) sobre el eje de Bark: la energía repartida entre muchas bandas críticas suma más sonios que el mismo nivel de banda concentrado en una sola.*
+
+Esa figura está dibujada a un solo nivel, y la etapa 5 es la que depende del nivel. El clip de la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) sube el nivel de banda del mismo sonido de banda estrecha de 1 kHz de 45 a 85 dB:
+
+<Video
+  name="anim_specific_loudness"
+  width={2400}
+  height={1350}
+  title="Cómo la sonoridad específica se integra en la sonoridad total"
+  description="El patrón de sonoridad específica de una banda estrecha de 1 kHz se construye sobre el eje de Bark mientras el nivel de banda sube de 45 a 85 dB, y el área bajo el patrón se integra en la sonoridad total en sonios."
+/>
+
+*La pendiente superior en acción (la Tabla A.9 da su inclinación según el rango de sonoridad específica y la banda crítica). El lóbulo principal se queda en las bandas críticas en torno a 8,5 Bark mientras el flanco de su lado de alta frecuencia llega más lejos por el eje de Bark al subir el nivel, hasta unos 14 Bark a 45 dB y casi 20 Bark a 85 dB, lo que el clip rotula como extensión del enmascaramiento hacia agudos. El área bajo el patrón pasa de 1,3 sonios a 45 dB a 4,9 sonios a 65 dB y a 19,8 sonios a 85 dB.*
 
 ## Modelos avanzados de sonoridad y calidad sonora
 
@@ -426,7 +439,47 @@ $$
 \mathrm{TNR}_{\text{crit}} = \begin{cases} 8{,}0 + 8{,}33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8{,}0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
 $$
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition.svg" alt="Dos paneles sobre el espectro promediado de un tono de 1 kHz en ruido. A la izquierda, la banda crítica del tono, de 162,2 Hz de ancho entre 922,2 Hz y 1084,4 Hz, sombreada bajo el espectro como nivel total, con la ventana del 15 % de ese ancho marcada en torno al pico. A la derecha, esa ventana línea a línea, de 988 Hz a 1012 Hz: la banda del tono son las siete líneas entre los mínimos de cada lado del pico, una recta discontinua une sus dos líneas extremas l1 y l2, y el área entre esa recta y el espectro está sombreada como tono. El encabezado da un nivel del tono de menos 28,0 dB, un nivel del ruido enmascarante de menos 40,0 dB y una relación tono-ruido de 12,0 dB" width="100%" />
+
+*El reparto del apartado 11 sobre un tono de 1 kHz, con la separación entre
+líneas de 1 Hz que la biblioteca usa por defecto. A la izquierda, la banda
+crítica, de 162,2 Hz de ancho, y la ventana del 15 % de ese ancho en torno al
+pico. A la derecha, la ventana línea a línea: la banda del tono va entre los
+mínimos de cada lado del pico, siete líneas aquí, y la Fórmula 9 conserva como
+tono solo lo que queda por encima de la recta que une sus dos líneas extremas.
+Un mínimo que cae en el borde de la ventana manda la búsqueda al mínimo local
+más próximo que haya más allá (apartado 11.2), como dibuja la figura siguiente.
+Lo que queda de la banda crítica es el ruido enmascarante, que la Fórmula 10
+escala al ancho de banda completo.*
+
+Cuando el espectro sigue bajando donde acaba la ventana, la línea más baja
+dentro de ella es la propia línea del borde, y el apartado 11.2 sigue entonces
+buscando hasta el mínimo local más próximo que haya más allá:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_band_window_edge.svg" alt="El espectro promediado, línea a línea, de una joroba estrecha de ruido en 1 kHz. La ventana del 15 % del ancho de banda crítico va de 988 Hz a 1012 Hz, y a ambos lados su línea más baja es la propia línea del borde, marcada con un cuadrado. La banda del tono sigue hasta los mínimos locales más próximos fuera de la ventana, en 980 Hz y 1015 Hz, con 36 Hz de ancho; una recta discontinua une esas dos líneas extremas l1 y l2, y el área entre ella y el espectro está sombreada como tono. El encabezado da un nivel del tono de menos 24,9 dB, un nivel del ruido enmascarante de menos 33,4 dB y una relación tono-ruido de 8,5 dB" width="100%" />
+
+*El mismo reparto sobre un pico cuya falda sigue bajando en los dos bordes de
+la ventana: ruido blanco a través de una resonancia de 3 Hz de ancho en 1 kHz,
+en lugar del «tono de frecuencia variable en el tiempo u otro fenómeno» que,
+según el apartado 11.2, indica una banda del tono más ancha que la ventana.
+Dentro de la ventana, la línea más baja de cada lado es la del borde, así que
+la búsqueda sigue hasta el mínimo local más próximo que haya más allá, en
+980 Hz y 1015 Hz, y la banda del tono tiene 36 líneas donde la ventana tiene
+25. Los bordes, la recta y los 8,5 dB son los que devuelve
+`tone_to_noise_ratio` para la misma señal.*
+
 **PR** (apartado 12) compara el nivel de la banda crítica centrada en el tono, $L_\mathrm{M}$, con la potencia media de las dos bandas críticas **contiguas** $L_\mathrm{L}$, $L_\mathrm{U}$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Fórmula 23). Para $f_\mathrm{t} \le 171{,}4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_\mathrm{t} \ge 1$ kHz, y crece como $9{,}0 + 10{,}0\log_{10}(1000/f_\mathrm{t})$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (apartados 11.5 / 12.6).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition.svg" alt="Dos paneles, cada uno un espectro promediado cortado en tres bandas sombreadas con el nivel de cada una escrito dentro. A la izquierda, un tono de 1 kHz: banda inferior de 782,5 Hz a 922,2 Hz con menos 40,5 dB, banda central de 922,2 Hz a 1084,4 Hz con menos 27,8 dB y el tono dentro, banda superior de 1084,4 Hz a 1261,5 Hz con menos 39,5 dB, y una relación de prominencia de 12,2 dB por la Fórmula 23. A la derecha, un tono de 120 Hz: la banda inferior está cortada en 20 Hz y llega a 69,5 Hz, con 49 Hz de ancho y menos 45,0 dB, la banda central va de 69,5 Hz a 170,5 Hz con menos 32,9 dB, la banda superior de 170,5 Hz a 274,8 Hz con menos 42,0 dB, y la relación de prominencia es de 9,0 dB por la Fórmula 24, que escala la banda inferior por 100 Hz entre su ancho" width="100%" />
+
+*Las tres bandas del apartado 12, cada una con su nivel. A la izquierda, un
+tono de 1 kHz: la banda crítica del tono entre una banda inferior que empieza
+en 782,5 Hz y una superior que acaba en 1261,5 Hz, los dos bordes que ajustan
+las Fórmulas 21 y 22; la relación es el nivel de la banda central menos el de
+la potencia media de las otras dos. A la derecha, un tono de 120 Hz: su banda
+inferior empezaría por debajo de 20 Hz, así que se corta ahí (apartado 12.3), y
+los 49 Hz que quedan se escalan a los 100 Hz de una banda crítica entera antes
+de hacer la media (Fórmula 24).*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Relación tono-ruido de un tono de ventilador de 250 Hz representada frente al criterio de prominencia de ECMA-418-1: el criterio cae desde unos 17 dB a 89 Hz hasta 8 dB constantes por encima de 1 kHz, y el tono evaluado se sitúa en 15,1 dB, 2,1 dB por encima del criterio de 13,0 dB a 250 Hz, así que es prominente" width="88%" />
 
@@ -444,7 +497,7 @@ Consulta la [guía de tonos discretos prominentes](/phonometry/es/perception/psy
 
 ## Transferencia de modulación y STI (IEC 60268-16)
 
-La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. Los números de apartado que siguen son los de IEC 60268-16 Ed. 5 (2020). La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):
+La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. Los números de tabla que siguen son los de IEC 60268-16 Ed. 5 (2020); los apartados de la cadena de cálculo se citan con su numeración de la Ed. 4 (2011), como los cita la biblioteca, porque la Ed. 5 reordenó el Anexo A (su A.5 es la generación de la señal de ensayo). La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2 de la Ed. 4; A.1.4 en la Ed. 5). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):
 
 $$
 m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
@@ -469,6 +522,17 @@ $$
 $$
 
 truncado a 1,0.
+
+El clip de la [guía de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/) pone las dos degradaciones sobre una misma envolvente: una sonda de 4 Hz con modulación plena, recibida a través de la banda de octava de 1 kHz y dibujada con la media recibida constante. Primero el tiempo de reverberación barre de 0,30 a 2,50 s sin ruido: actúa sobre la propia $m$, a través de la integral de arriba, y la profundidad a 4 Hz cae de 0,90 a 0,26 y el STI de 0,84 a 0,40. Después, con 1,00 s fijo, la relación señal-ruido baja de 25 a 0 dB: actúa a través del factor $1/(1 + 10^{-\mathrm{SNR}/10})$, que vale un medio a 0 dB, y la profundidad termina en 0,28 y el STI en 0,36.
+
+<Video
+  name="anim_modulation_transfer"
+  width={2400}
+  height={1350}
+  title="La reverberación y el ruido desmontando una envolvente al ritmo del habla"
+  description="Una envolvente de intensidad de cuatro hercios con modulación plena se recibe a través de la banda de octava de un kilohercio de una sala. Mientras el tiempo de reverberación barre de 0,30 a 2,50 segundos los picos bajan y los valles se rellenan hacia una línea media que no se mueve, y la profundidad de modulación medida cae de 0,90 a 0,26; la curva de transferencia de modulación de al lado baja en cada una de las catorce frecuencias de modulación, los siete índices de transferencia de modulación por banda caen con ella y el índice de transmisión del habla recorre desde 0,84 hasta 0,40. Después, con un tiempo de reverberación fijo de un segundo, la relación señal-ruido de habla barre de 25 a 0 decibelios: en su lugar sube un suelo de ruido sombreado bajo la traza, la media sigue sin moverse y la profundidad vuelve a caer, hasta 0,28, para un índice de transmisión del habla de 0,36."
+  caption="Dos mecanismos, una sola magnitud. La reverberación esparce energía por los huecos, así que la envolvente se encoge en torno a su media; el ruido estacionario rellena los huecos desde abajo, así que sube un suelo por debajo. Ninguno de los dos cambia el nivel medio, y los dos destruyen el contraste con el que quien escucha segmenta las sílabas."
+/>
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti.svg" alt="Índice de transmisión de modulación por banda de octava de 125 Hz a 8 kHz para una sala con 0,9 s de tiempo de reverberación y una relación habla-ruido de 15 dB: las siete barras quedan próximas entre sí, entre unos 0,54 y 0,60, y dan STI = 0,58 con la valoración E del Anexo F" width="88%" />
 

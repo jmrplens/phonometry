@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 from .diagnostics import (
+    BladePassResult,
     FaultFrequencyResult,
     FaultLine,
+    LobePattern,
     bearing_fault_frequencies,
     blade_pass_frequencies,
     combine_fault_lines,
@@ -45,6 +47,7 @@ from .evaluation import (
 )
 
 __all__ = [
+    "BladePassResult",
     "FaultFrequencyResult",
     "FaultLine",
     "GEAR_ACCEPTANCE_HEADROOM",
@@ -56,6 +59,7 @@ __all__ = [
     "GEAR_VELOCITY_SLOPE_DB_PER_DECADE",
     "GearUnitRatings",
     "INDUSTRIAL_MACHINE_ZONES",
+    "LobePattern",
     "MachineZoneLimits",
     "OPERATIONAL_LIMIT_HEADROOM",
     "SIGNIFICANT_CHANGE_FRACTION",

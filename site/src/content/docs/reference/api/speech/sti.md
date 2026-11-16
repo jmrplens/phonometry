@@ -9,16 +9,17 @@ Speech Transmission Index (STI) per IEC 60268-16:2020 (Edition 5).
 
 Implements the full-STI indirect method from impulse responses (Schroeder
 modulation transfer function), the direct STIPA method on recorded signals
-(Annex B), an Ed.5-conformant STIPA test-signal generator (clauses A.4
-and A.6.1) and the Annex M adjustment of a measured result to other speech
-and occupancy-noise levels. Only the male speech option exists: Edition 5
-removed the female spectrum and weighting factors (foreword, item d).
+(Annex B), an Ed.5-conformant STIPA test-signal generator (Ed.5 clauses
+A.5 and A.6.1, Ed.4 clause A.4) and the Annex M adjustment of a measured
+result to other speech and occupancy-noise levels. Only the male speech
+option exists: Edition 5 removed the female spectrum and weighting factors
+(foreword, item d).
 
 The computation chain (octave-band MTF -> auditory masking and reception
 threshold correction -> effective SNR clipped to +/-15 dB -> transmission
 indices -> band MTI -> weighted STI) is numerically identical between
-Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5; the only Ed.5 numeric change is
-the male test-signal spectrum (A.6.1).
+Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5, which moves them to A.2 and A.3;
+the only Ed.5 numeric change is the male test-signal spectrum (A.6.1).
 
 The level adjustment of [`sti_adjusted_for_levels`](/phonometry/reference/api/speech/sti/#sti_adjusted_for_levels) is the four-step
 procedure of Ed.4 (2011) Annex M, verified against the printed
@@ -59,10 +60,10 @@ it without measuring again:
 3. multiply by the correction the operational levels produce, putting
    the occupancy noise, masking and threshold of the simulated
    condition back in;
-4. process the resulting matrix into the index by the usual A.5.4 to
-   A.5.6 chain.
+4. process the resulting matrix into the index by the usual Ed.4 A.5.4
+   to A.5.6 chain.
 
-Steps 2 and 3 run the one level-dependent correction of clause A.5.3
+Steps 2 and 3 run the one level-dependent correction of Ed.4 clause A.5.3
 that the forward chain applies, once inverted and once as it stands, so
 the adjustment cannot drift from the masking and threshold model the
 rest of the module uses.
@@ -142,8 +143,8 @@ $$
 m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right| \Big/ \int h_k^2(t)\, dt
 $$
 
-at the 14 modulation frequencies 0,63-12,5 Hz
-(A.2.2). The result then follows the standard chain: optional noise
+at the 14 modulation frequencies 0.63-12.5 Hz
+(Ed.4 A.2.2, Ed.5 A.1.4). The result then follows the standard chain: optional noise
 degradation, optional auditory masking and absolute reception
 threshold correction, effective SNR clipped to +/-15 dB, transmission
 indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
@@ -156,7 +157,7 @@ skipped (they require absolute band levels), matching the common
 :::note
 The indirect method has a small positive MTF bias that grows
 with reverberation time for a finite noise-carrier IR. It stays within
-the IEC 60268-16 A.5.1.2 systematic-error allowance (\<= 0.01 STI) up to
+the IEC 60268-16 Ed.4 A.5.1.2 systematic-error allowance (\<= 0.01 STI) up to
 about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
 (T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
 (exact) Schroeder integration, and does not depend on IR truncation.
@@ -171,7 +172,7 @@ STI itself stays within ~0.001.
 | Name | Description |
 | :--- | :--- |
 | `ir` | Impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
-| `fs` | Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `fs` | Sample rate in Hz (>= 22.5 kHz so the 8 kHz band fits). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `snr` | Optional signal-to-noise ratio in dB, scalar or one value per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined with `levels` it is interpreted as ambient levels `levels - snr` so noise is not applied twice. Mutually exclusive with `ambient`. |
 | `levels` | Optional speech octave-band levels in dB SPL (7 values) at the listener position; enables the auditory masking (Ed.5 Table A.2) and reception threshold (Ed.5 Table A.3) corrections. |
 | `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
@@ -218,8 +219,8 @@ The recording is filtered into the seven octave bands, squared and
 low-passed (~100 Hz) into intensity envelopes, and the modulation
 depths at the two Table B.1 modulation frequencies of each band are
 measured with the sine/cosine correlation over an integer number of
-periods (Ed.4 A.5.2 = Ed.5). The modulation transfer values are the
-measured depths normalized by the source modulation index 0,55
+periods (Ed.4 A.5.2; the same in Ed.5). The modulation transfer values are the
+measured depths normalized by the source modulation index 0.55
 (Annex B), or by the depths measured on `reference` when the
 actually emitted signal is supplied, and feed the same masking /
 threshold / TI / STI chain as the full method.
@@ -239,8 +240,8 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 | Name | Description |
 | :--- | :--- |
 | `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
-| `fs` | Sample rate in Hz (>= 22,5 kHz). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0,55 as normalization (useful for non-conformant sources). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). It is a second recording of the same test signal, so it has to share the rate: two Signals that disagree are refused rather than arbitrated, and measuring the reference on a rate that is not its own would return a perfect STI for a mismatch. Its calibration is applied like any other record's, and then cancels, because what is taken from it is a modulation depth and those are normalised. |
+| `fs` | Sample rate in Hz (>= 22.5 kHz). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0.55 as normalization (useful for non-conformant sources). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). It is a second recording of the same test signal, so it has to share the rate: two Signals that disagree are refused rather than arbitrated, and measuring the reference on a rate that is not its own would return a perfect STI for a mismatch. Its calibration is applied like any other record's, and then cancels, because what is taken from it is a modulation depth and those are normalised. |
 | `levels` | Optional speech octave-band levels in dB SPL (7 values) enabling auditory masking and reception threshold corrections. |
 | `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
 
@@ -267,8 +268,8 @@ stipa_signal(
 Generate an IEC 60268-16:2020 conformant STIPA test signal.
 
 Pink-noise carriers are band-limited to half-octave bands centred on
-the seven octave-band frequencies (clause A.4), set to the Ed.5 male
-speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
+the seven octave-band frequencies (Ed.5 clause A.5, Ed.4 A.4), set to the
+Ed.5 male speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
 dB re the 500 Hz band) and intensity-modulated with
 `0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))`: the Table B.1
 frequency pair of each band, 180 degrees between components, applied
@@ -278,9 +279,9 @@ in amplitude through its square root (Annex B).
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate in Hz (>= 22,5 kHz). |
+| `fs` | Sample rate in Hz (>= 22.5 kHz). |
 | `duration_s` | Duration in seconds (the standard recommends 15 s to 25 s; default 18 s). |
-| `level` | Optional overall level in dB SPL: the output is scaled so its RMS, taken as pascals, sits at `level` re 20 uPa. Default (None) normalizes the RMS to 0,1 (digital full scale headroom for the 12-14 dB crest factor). |
+| `level` | Optional overall level in dB SPL: the output is scaled so its RMS, taken as pascals, sits at `level` re 20 uPa. Default (None) normalizes the RMS to 0.1 (digital full scale headroom for the 12-14 dB crest factor). |
 | `seed` | Seed for the pink-noise generator (None: random). |
 
 **Returns:** Test signal, 1D array of `round(duration_s * fs)` samples.

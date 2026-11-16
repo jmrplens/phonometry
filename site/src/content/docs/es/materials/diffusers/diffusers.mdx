@@ -36,7 +36,7 @@ references:
     designation: "ISO 17497-1:2004+A1:2014"
     url: "https://www.iso.org/standard/31397.html"
     primary: true
-    note: "La edición implementada aquí: el método de mesa giratoria de la sección 1 y los límites de placa base de la Tabla 1 de la norma."
+    note: "La edición implementada aquí: el método de plataforma giratoria de la sección 1 y los límites de placa base de la Tabla 1 de la norma."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2012
@@ -131,6 +131,31 @@ emborrone la respuesta al impulso no hace esto; y la probeta debe presentar la
 misma superficie, en una orientación distinta, en cada promedio, que es la razón
 de que sea circular y esté centrada sobre el eje.
 
+<Video
+  name="anim_scattering_average"
+  width={2400}
+  height={1350}
+  title="Promediado síncrono de las respuestas a lo largo de una vuelta de la plataforma giratoria"
+  description="Un modelo de la medición de la ISO 17497-1. A la izquierda, la respuesta filtrada en banda de cada nueva orientación de la muestra se dibuja sobre la media acumulada de todas las tomadas hasta entonces: las dos empiezan iguales y se separan después, y a medida que la media crece de 1 a 72 orientaciones en pasos de 5 grados su parte tardía se encoge. A la derecha, el decaimiento por integración inversa de esa media se hace más empinado que el de una sola orientación y luego se dobla hacia un segundo decaimiento, más lento, que se hunde cuantas más orientaciones se promedian; un recuadro en su esquina inferior traza la energía de la parte dispersada que queda en la media frente al número promediado, junto a una recta que cae como 1/n. Los fotogramas finales marcan lo que lee el apartado 7.5: la misma media integrada solo desde donde ha caído 30 dB, y una recta ajustada a su primer decaimiento entre menos 5 dB y menos 20 dB. Imprimen el resultado, T4 = 2,7 s frente a T2 = 5,2 s para un modelo construido con 3,0 s y 6,0 s, una absorción especular de 0,78 frente a una absorción de incidencia aleatoria de 0,21 y un coeficiente de dispersión de 0,72."
+/>
+
+*Respuestas de un modelo, dibujadas como la Figura 1 de la norma dibuja las tres
+suyas: una parte común a todas las orientaciones y otra que cambia con cada una,
+sobre ejes sin números. El segundo decaimiento es el sonido dispersado que la
+media todavía no ha cancelado, y se hunde al añadir orientaciones porque el
+apartado 4 toma las partes dispersadas como estadísticamente independientes: el
+recuadro sigue la energía de la parte dispersada que queda en la media a lo
+largo del $1/n$ que predice esa independencia; el
+7.5 lee solo el primer decaimiento, de −5 dB a −20 dB con el límite de
+integración en −30 dB, que es el aviso sobre la pendiente tardía de $T_4$ de la
+sección 1.1. El modelo está construido con $T_4$ = 3,0 s y $T_2$ = 6,0 s, pero
+su banda es estrecha para que se vean los ciclos, y una banda estrecha leída así
+da 2,7 s y 5,2 s: los coeficientes de los fotogramas finales son los que
+devuelve la biblioteca para esas dos lecturas con la placa base del ejemplo de
+más abajo ($T_1$ = 8,0 s, $T_3$ = 7,5 s, $V$ = 200 m³, $S$ = 10 m²), así que
+ilustran la aritmética y no califican ninguna muestra. El ejemplo calcula con
+los 6,0 s del modelo.*
+
 ### 1.1 El banco y la tanda
 
 Cada término de la ec. (5) es una diferencia de dos tiempos de decaimiento casi
@@ -171,8 +196,9 @@ las rompió.
 - **Excitación y promediado.** Una señal determinista, evaluada por el método de
   la respuesta al impulso integrada (apartado 7.1): ruido pseudoaleatorio
   periódico o un barrido según ISO 18233. O bien radiar de forma continua
-  durante una revolución completa de la plataforma (con un periodo de 5 s y una
-  revolución por minuto, 12 periodos de señal), o bien tomar $n$ mediciones con
+  durante una revolución completa de la plataforma, $n$ periodos de señal con
+  $60 \le n \le 120$ (un periodo de 5 s y una revolución en 360 s dan 72), o
+  bien tomar $n$ mediciones con
   la muestra avanzada a pasos de $\Delta\varphi = 360°/n$, con
   $60 \le n \le 120$ y con $n = 72$ (pasos de 5°) como preferencia, con la
   excitación idéntica cada vez y el promediado enganchado en fase
@@ -1177,7 +1203,7 @@ plt.show()
 
 Las secciones 1 y 2 dan por hecho que puedes medir, y la 3 que la superficie es
 un difusor de Schroeder que estás diseñando tú. En el caso corriente no se
-cumple ninguna de las dos: la cámara reverberante con un plato giratorio dentro
+cumple ninguna de las dos: la cámara reverberante con una plataforma giratoria dentro
 es de otro, el arco del goniómetro más todavía, y el número hace falta esta
 tarde para una superficie que ya está construida y que no es un difusor de
 Schroeder. Cox y D'Antonio imprimen tres apéndices de valores de difusores

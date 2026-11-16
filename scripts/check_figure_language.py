@@ -105,6 +105,9 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "the algorithm behind it",
     "shape (4, N)": "a numpy attribute and its value, as the reader sees it printed",
     "OctaveFilterBank": "a class name; translating it would name a class that does not exist",
+    "txx, tyy": "the two normal stress fields of ElasticFDTD2D, named as the reader types "
+    "them",
+    "txy": "the shear stress field of ElasticFDTD2D, named as the reader types it",
     "francois-garrison": "the model= literal of seawater_absorption, quoted as the reader "
     "would type it",
     "ainslie-mccolm": "the model= literal of seawater_absorption, quoted as the reader "
@@ -135,7 +138,7 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "quoted as the reader would type them",
     # The machine-fault line names drawn by FaultFrequencyResult.plot() are
     # the keys of the result the figure documents (res["2xGMF+1x"],
-    # res["lobe n=1 m=2"]...), and the library draws line.name verbatim even
+    # res["fsh"]...), and the library draws line.name verbatim even
     # for language="es": the label is what the reader indexes, in either
     # language, so translating one would name a key that does not exist.
     "2xGMF": "a FaultFrequencyResult key, drawn as the reader indexes it",
@@ -150,10 +153,6 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "3xGMF-2x": "a FaultFrequencyResult key, drawn as the reader indexes it",
     "fsh": "the rotor-slot key of induction_motor_frequencies, drawn as the "
     "reader indexes it",
-    "lobe n=1 m=2": "a lobe-pattern key of blade_pass_frequencies, drawn as the reader "
-    "indexes it",
-    "lobe n=1 m=10": "a lobe-pattern key of blade_pass_frequencies, drawn as the reader "
-    "indexes it",
     "butter": "the filter_type= literal of FilterDesign, quoted as the reader "
     "would type it (architecture_tradeoff tick labels)",
     "cheby1": "the filter_type= literal of FilterDesign, quoted as the reader "
@@ -169,6 +168,16 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "reader would type them (calibration data-flow plate)",
     "laeq · sel · lc_peak": "the level functions of the API, listed as the reader would type "
     "them (sound-level-meter pipeline plate)",
+    "FDTDRun  |  ElasticRun": "the two run records of the API, named as the reader would type "
+    "them (compute map plate)",
+    "Compute(device, dtype, host)": "the record of the API and three of its fields, as the reader "
+    "would type them (compute map plate)",
+    "result.provenance": "the attribute of a result the compute map plate ends in, as the "
+    "reader would type it",
+    "Quick Sync": "Intel's name for its hardware video encoder, which has no Spanish form "
+    "(compute map plate)",
+    "VideoToolbox": "Apple's name for its hardware video encoder, which has no Spanish form "
+    "(compute map plate)",
     r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$": "Formula (8) of IEC 61183 in "
     "the standard's own symbols; the ref subscript is the one the standard prints, "
     "and a subscript follows its source (diffuse_field_sensitivity)",

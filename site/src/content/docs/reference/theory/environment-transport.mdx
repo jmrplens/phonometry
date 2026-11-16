@@ -322,7 +322,24 @@ $A_\mathrm{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the ISO 9613-1 coefficient 
 **Ground effect** $A_\mathrm{gr} = A_\mathrm{s} + A_\mathrm{r} + A_\mathrm{m}$ (Eq. (9)) sums a source, receiver and
 middle region, each evaluated from the Table 3 functions $a'/b'/c'/d'$ and its
 ground factor $G$ (0 hard, 1 porous); a negative $A_\mathrm{gr}$ denotes a net gain from
-the ground reflection. An alternative A-weighted-only form
+the ground reflection. The three regions are lengths of the path as projected on
+the ground plane, $d_\mathrm{p}$ (7.3.1, Figure 1): the source region runs
+$30 h_\mathrm{s}$ from the source towards the receiver and the receiver region
+$30 h_\mathrm{r}$ back from the receiver, each of them $d_\mathrm{p}$ at most, and the
+middle region is what is left between the two. A region of mixed ground takes for
+$G$ the fraction of it that is porous, and the middle term carries the factor
+$q = 1 - 30(h_\mathrm{s} + h_\mathrm{r})/d_\mathrm{p}$ (Table 3, note 2), so on a path of
+$30(h_\mathrm{s} + h_\mathrm{r})$ or less the two end regions meet or overlap, $q = 0$ and
+there is no middle region at all. The diagram draws a 200 m path with source and
+receiver 1.5 m above the ground: a 45 m region at each end, a 110 m middle region
+split into 70 m of grass and 40 m of asphalt ($G_\mathrm{m} = 70/110 \approx 0.64$), and
+$q = 0.55$, while its box gives the source region 25 m of porous ground
+($G_\mathrm{s} = 25/45 \approx 0.56$) without drawing the split; under it, the same heights on
+a 60 m path, short of the 90 m past which there is a middle region.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_regions.svg" alt="Section to scale of a 200 m path with a source and a receiver 1.5 m above the ground: the source region shaded over the first 45 m as 30 times hs, the receiver region shaded over the last 45 m as 30 times hr, and the 110 m middle region between them split into 70 m of grass and 40 m of asphalt with Gm = 70/110 = 0.64; a formula box gives q = 1 minus 30 times (hs plus hr) over dp and an inset repeats the same path at 60 m where the source and receiver regions overlap, q = 0 and the middle region does not exist" width="92%" />
+
+An alternative A-weighted-only form of the ground effect,
 $A_\mathrm{gr} = 4.8 - (2 h_\mathrm{m}/d)[17 + 300/d] \ge 0$ (Eq. (10)) is offered for porous
 ground when only the A-weighted level matters, paired with the solid-angle index
 $D_\Omega$ (Eq. (11)). **Screening** by a barrier is the diffraction insertion
@@ -505,7 +522,15 @@ broadband ones, of which the engineering grade uses 10 key positions over one
 reflecting plane (5 over two, 3 over three), with the survey method taking a
 reduced subset. `measurement_positions()` returns them scaled to the chosen
 radius, and `plot_microphone_positions()` draws the array before anything is
-measured. ISO 3746 (survey) shares
+measured.
+
+The diagram below draws the two surfaces of ISO 3744: the hemisphere of radius
+$r$ over one reflecting plane with the ten key positions of Annex B, and the box
+at measurement distance $d$ around a large source.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Measurement surfaces of ISO 3744: a hemisphere of radius r enveloping a compact source on a reflecting plane, with the ten Annex B microphone positions marked, and a right parallelepiped (box) at measurement distance d around a large source" width="88%" />
+
+ISO 3746 (survey) shares
 the maths with looser criteria. The expanded uncertainty is
 $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$.
 

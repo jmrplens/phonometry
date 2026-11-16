@@ -285,6 +285,103 @@ the measurement; the time intervals; a description of the site including ground
 cover and the heights of microphone and source above it; and the source operating
 conditions, including how many events of each category were captured.
 
+### The weather and the time to measure (Clauses 6, 8 and 9)
+
+The instrument is the smaller half of the requirement. The other half is the
+weather the level is taken in, for how long and how many times, and ISO 1996-2
+states each of them.
+
+**What is recorded about the weather** (8.1, 9.3.5). For long-term and
+short-term measurements alike the meteorological parameters are measured: as a
+minimum wind speed, wind direction, relative humidity and temperature, with
+information about atmospheric stability, measured directly or taken from cloud
+cover and time of day, and about precipitation if there is any. Wind speed and
+wind direction are measured at a height of 10 m. A lower mast is admitted for
+practical reasons, but it raises the uncertainty, because the data and the
+experience behind the standard were gathered at 10 m.
+
+**When the weather matters** (8.1). Over soft ground the level varies only
+modestly with the weather as long as $(h_\mathrm{s} + h_\mathrm{r})/D \ge 0.1$
+(Formula (11)): source height plus receiver height against the horizontal
+distance between them. A microphone at 4 m and a source at 0.5 m satisfy it out
+to 45 m; over hard ground larger distances may be acceptable. Beyond that
+distance the propagation is classed by how far the sound paths bend in the
+direction of the shortest distance from the receiver to the source, through the
+ratio of the distance $D$ to the radius of curvature $R_\mathrm{cur}$ of the
+paths, which is negative when they curve upwards. Table 4 gives four
+**meteorological windows**:
+
+| Window | $D/R_\mathrm{cur}$ | Representative value | Propagation | Typical wind component at 10 m |
+| :--- | :--- | :--- | :--- | :--- |
+| M1 | below −0.04 | −0.08 | unfavourable | below 1 m/s by day, below −1 m/s by night |
+| M2 | −0.04 to 0.04 | 0.00 | neutral | 1 m/s to 3 m/s |
+| M3 | 0.04 to 0.12 | 0.08 | favourable | 3 m/s to 6 m/s |
+| M4 | above 0.12 | 0.16 | very favourable | above 6 m/s by day, −1 m/s or more by night |
+
+The wind component is the one along the line from the source to the receiver,
+and a minus sign means that the wind blows from the receiver towards the
+source. The standard calls the table simplified and admits any other
+description that achieves the same curvatures; $R_\mathrm{cur}$ can also be
+calculated from the measured meteorological parameters with the informative
+Annex A, and the description may not suit very high sources such as wind
+turbines. Table 4 gives no angular sector for the wind: the windows are defined
+by $D/R_\mathrm{cur}$, and the wind components are the typical values that go
+with them.
+
+**One measurement or a few** (6.1, 8.2). For a single measurement to mean
+anything, the minimum is that it is taken under favourable propagation and that
+the source operation is monitored while it lasts (6.1). Clause 8.2 puts it as a
+recommendation for one or a few short-term measurements: take them in window M3
+or M4, or where Formula (11) holds. Then, unless better information is
+available, the standard uncertainty of the meteorology is 2 dB for
+$D \le 400$ m (Formula (12)), which is the 2.00 dB row of the budget
+[further down](#measurement-uncertainty-clause-4-annex-f), and
+$(1 + D/400\ \mathrm{m})$ dB beyond that distance (Formula (13)): 3 dB at
+800 m. The clause warns that it may not suit aircraft noise entirely, because
+the direction of take-off and landing follows the wind along the runway, and
+that some microphone locations never have favourable propagation.
+
+**Rain** (8.3). Results taken with precipitation on the windscreen are
+discarded unless its effect can be shown to have been negligible. A windscreen
+that has been rained on stays altered after the rain stops: for a standard 9 cm
+windscreen the effect can be significant above 1 kHz once more than 1 mm has
+fallen, and it lasts until the windscreen has dried, a time that Formula (14)
+estimates from the amount of rain, as an example only. Data taken meanwhile
+remain usable if the added uncertainty is taken into account.
+
+**How long** (9.1.2, 9.3.2.2). The measurement time interval covers all the
+significant variations of the emission. If the noise is periodic the interval
+preferably spans a whole number of several periods, or else several intervals
+each represent a part of the cycle and together the whole of it. For single
+events, such as an aircraft fly-over, the intervals are chosen so that the
+sound exposure level $L_{E,T}$ of the event can be determined. Against the
+weather there is a number: $L_{\mathrm{eq},T}$ is measured in frequency bands
+for at least 30 min, to average the meteorological variations along the path,
+unless Formula (11) holds or the propagation is favourable, when 10 min is
+usually sufficient (9.3.2.2), and 10 min is also the minimum averaging time of
+a short-term measurement that needs favourable conditions over a distance
+Formula (11) does not cover (9.1.2). Both minima are increased as far as a
+representative sample of the source operation requires (Clause 7).
+
+**How many** (6.1, 6.2, 9.1.1). The standard fixes no number of intervals and
+no upper limit of uncertainty: it leaves the accuracy to aim for to whoever
+uses the result, and requires the uncertainty to be determined. It offers two
+strategies: a single measurement under very well-defined meteorological
+conditions with the source operation carefully monitored, or a long-term
+measurement, or many sampled ones, spread over time with the meteorology
+monitored. In the second, each result is filed in a window, a combination of an
+emission condition (day, evening or night, for instance) and one of the four
+meteorological windows. The level of a window is the energy mean of the
+independent measurements made in it (Formula (6)), and the long-term level
+weights the windows by how often each occurs (Formula (5)), so a long-term
+campaign includes as many of the important emission and propagation conditions
+as it can, and above all the windows that contribute most (9.1.1). Two
+measurements count as independent only when enough time separates them. Table 3
+gives the guidance: for road traffic 24 h under 100 m, 48 h from 100 m to 300 m
+and 72 h beyond, by day and by night. The table has rows for rail, industry and
+aircraft too, and in several of their cells it is the operation of the source
+that sets the minimum.
+
 ### Tonal adjustment (engineering method, ISO 1996-2:2007 Annex C)
 
 The 2017
@@ -405,7 +502,10 @@ instrument is nowhere near the top of the list. **A class 1 meter does not make
 an environmental measurement accurate.** How representative the propagation
 conditions and the source operation were during that hour is what decides it, and
 the cheapest way to shrink $u$ is therefore to measure more often, which is what
-`uncertainty_from_repeated_measurements` is for.
+`uncertainty_from_repeated_measurements` is for. What the standard asks of the
+weather, and for how long, is in
+[the weather and the time to measure](#the-weather-and-the-time-to-measure-clauses-6-8-and-9)
+above.
 
 ## What this guide covers
 
@@ -418,7 +518,10 @@ the cheapest way to shrink $u$ is therefore to measure more often, which is what
 - **Not covered.** ISO 1996-2 fixes the receiver positions and the façade corrections that turn a
   raw measurement into the level this page's functions expect: those position
   and correction procedures are not implemented, only the arithmetic that
-  follows once you have applied them.
+  follows once you have applied them. The meteorological windows of Clause 8 and
+  the measurement time intervals of Clause 9 are stated on this page and not
+  computed either: no function classifies the weather or derives the radius of
+  curvature of Annex A.
 
 ## See also
 

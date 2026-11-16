@@ -6,6 +6,7 @@ description: "Ejecución remota de fdtd_simulation y elastic_fdtd_simulation por
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Una simulación puede calcularse en otra máquina, un nodo, cuando su petición
 `Compute` nombra uno: una estación de trabajo con GPU, un servidor, el NAS de
@@ -32,6 +33,14 @@ la imagen, y la sección 4, qué necesita un nodo Python.
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ## 1. Qué pasa cuando una ejecución va a un nodo
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_compute_map.svg" alt="Mapa en dos carriles. Carril superior, dónde avanza una simulación: un registro de ejecución, FDTDRun o ElasticRun, y un registro Compute con device, dtype y host entran en una de cuatro funciones, fdtd_simulation, elastic_fdtd_simulation, write_fdtd_animation o write_elastic_fdtd_animation. Con host None la ejecución avanza aquí en el dispositivo pedido, uno de cpu (NumPy, el valor por defecto), cupy (una GPU de NVIDIA con CuPy), torch:cpu, torch:cuda o torch:mps (la GPU de Apple, solo en float32). Con un host va a un nodo del fichero de hosts en pasos numerados: el fichero de hosts dice dónde está el nodo y cómo ejecuta un trabajo; un solo proceso ssh lleva la ejecución, como datos y nunca como código; phonometry se envía una vez por versión y se guarda bajo un digest; el nodo reconstruye la ejecución y la avanza en el dispositivo pedido; y vuelven las sondas y las instantáneas, o los bytes de un vídeo. Las dos ramas terminan en result.provenance, cuyos device, dtype y gpu dicen dónde avanzó la ejecución y cuyos host y package_sha256 nombran el nodo y el paquete que ejecutó. Una flecha discontinua de la rama del nodo a la rama que se ejecuta aquí lleva el rótulo fallback=True: un dispositivo que no se puede usar, o un nodo o una conexión que falla, avisa con ComputeFallbackWarning y la ejecución avanza con NumPy aquí. Carril inferior, dónde se codifica un vídeo: el codificador auto, el valor por defecto, prueba NVENC, Quick Sync, VAAPI, VideoToolbox y después la CPU, cada uno con una codificación real de un fotograma, y escribe el vídeo el primero que la supera; en la CPU es SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4; un GIF se escribe siempre en la CPU, y una animación que dibujas tú se codifica solo aquí." width="92%" />
+
+*El mapa de
+[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/).
+Esta sección recorre su rama derecha, los pasos numerados y la
+procedencia en que terminan; la flecha discontinua es la vuelta a NumPy de la
+sección 5.*
 
 Todo lo que puede rechazar la llamada lo hace primero aquí, antes de que se
 abra ninguna conexión. La ejecución comprobó todos sus argumentos al

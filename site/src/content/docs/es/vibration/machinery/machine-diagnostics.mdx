@@ -10,12 +10,47 @@ references:
     publisher: "Cambridge University Press"
     doi: "10.1017/CBO9781139163927"
     note: "La sección 8.4 reúne las frecuencias discretas de fallo de la maquinaria rotativa implementadas en esta página: las once frecuencias del rodamiento de contacto rodante según Shahan y Kamperman (Ecs. 8.4-8.14), la frecuencia de engrane (Ec. 8.3), la frecuencia de paso de pala y los patrones lobulados de interacción de un ventilador axial entubado (Ecs. 8.15-8.17), la frecuencia de pulsación hidráulica de las bombas (Ec. 8.18) y las frecuencias de alimentación y de armónicos de ranura del motor de inducción (Ecs. 8.19-8.20). ISBN 978-0-521-49913-2."
+  - type: article
+    authors: ["Randall, R. B.", "Antoni, J."]
+    year: 2011
+    title: "Rolling element bearing diagnostics—A tutorial"
+    journal: "Mechanical Systems and Signal Processing"
+    volume: 25
+    pages: "485-520"
+    doi: "10.1016/j.ymssp.2010.07.017"
+    note: "Las secciones 1 y 6 enuncian lo que la zona de carga hace con el tren de impactos de cada fallo localizado: modulado a la frecuencia del eje para un fallo de pista interior y a la de la jaula para uno de elemento rodante, sin modular para un fallo de pista exterior bajo una carga de dirección fija, y modulado a la frecuencia del eje cuando un desequilibrio o una desalineación hacen girar la carga."
+  - type: article
+    authors: ["McFadden, P. D.", "Smith, J. D."]
+    year: 1984
+    title: "Model for the vibration produced by a single point defect in a rolling element bearing"
+    journal: "Journal of Sound and Vibration"
+    volume: 96
+    issue: 1
+    pages: "69-82"
+    doi: "10.1016/0022-460X(84)90595-9"
+    note: "La sección 2.2 da la distribución de Stribeck de la carga alrededor de un rodamiento bajo carga radial (Ecs. 3 y 4), con su exponente de 3/2 para rodamientos de bolas y de 10/9 para los de rodillos, que es la que dibuja la animación de la zona de carga de esta página."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1998
+    title: "Mechanical vibration and shock — Mechanical mounting of accelerometers"
+    designation: "ISO 5348:1998"
+    implemented: false
+    note: "Las respuestas características de las Figuras 5 a 9 que hay detrás de las bandas de montaje del dibujo inicial: la resonancia de un acelerómetro típico atornillado, pegado, sobre imán y con sonda de mano. La edición leída es su adopción alemana sin cambios, DIN ISO 5348:1999-07; revisada después como ISO 5348:2021 (https://www.iso.org/standard/78160.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "La regla que fija la frecuencia superior utilizable de un acelerómetro en un tercio de su resonancia, para 1 dB (5.2), y los límites que da el Anexo A.1 para el adhesivo, la cera y los imanes de sujeción."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 El mantenimiento predictivo empieza por la aritmética, no por el tratamiento de
 señal. Todo rodamiento de contacto rodante, todo engranaje, todo motor de
@@ -40,7 +75,9 @@ encima y con su nombre.
 *Las cuatro líneas altas caen sobre la BPFO y sus armónicos; no aparece nada en
 la BPFI, ni en la BSF, la frecuencia de rotación del elemento rodante, ni en la
 BDF de 183 Hz, donde golpearía un elemento rodante dañado. Ese es el
-diagnóstico: un descascarillado en la pista exterior.*
+diagnóstico: un descascarillado en la pista exterior. La pequeña línea a la frecuencia del eje, 33,3 Hz, es el desequilibrio de
+este registro, que hace girar la carga una vez por vuelta; la sección 1 vuelve
+sobre ella.*
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -170,9 +207,13 @@ separadas y el registro está limpio. La forma fuerte es la **modulación**, y s
 deduce de la misma geometría:
 
 - un defecto en la **pista exterior** ocupa una posición angular fija dentro de
-  la zona de carga, así que todos los elementos rodantes lo golpean con la misma
-  carga. El tren de impactos no está modulado, y la BPFO aparece como una serie
-  armónica limpia, con poca o ninguna estructura de bandas laterales;
+  la zona de carga, así que bajo una carga de dirección fija todos los
+  elementos rodantes lo golpean con la misma carga. El tren de impactos no
+  está modulado, y la BPFO aparece como una serie armónica limpia, con poca o
+  ninguna estructura de bandas laterales. Una carga que gira con el eje, por
+  desequilibrio o por desalineación, sí lo modula una vez por vuelta: el
+  registro de la figura inicial lleva una, y de ahí salen su pequeña línea en
+  33,3 Hz y la pareja baja a $\pm f_\mathrm{s}$ junto a cada armónico de la BPFO;
 - un defecto en la **pista interior** gira con el eje, así que entra y sale de
   la zona de carga una vez por vuelta. El tren de impactos está modulado en
   amplitud a la frecuencia del eje, y la BPFI lleva bandas laterales a
@@ -182,6 +223,30 @@ deduce de la misma geometría:
   mientras viaja con la jaula, así que está modulado a la frecuencia de la
   jaula: la BDF lleva bandas laterales a $\pm\text{FTF}$. Para eso están en la
   tabla `FTF` y `FTF_rel`.
+
+Norton enuncia el caso de la pista interior en la sección 8.3.5: los fallos
+discretos de la pista interior «rotate in and out of the loaded zone,
+generating the amplitude modulation». Randall y Antoni (2011, secciones 1 y 6)
+dan los tres juntos, y la excepción que muestra la figura inicial: «For
+unidirectional load, an outer race fault would not be modulated, but
+modulation at shaft speed can occur because of significant unbalance or
+misalignment forces». La animación reproduce los tres uno tras otro sobre el
+rodamiento de esta página, 50 veces más despacio que la máquina, y escala cada
+impacto con la carga que hay en el ángulo donde cae.
+
+<Video
+  name="anim_bearing_load_zone"
+  width={2400}
+  height={1350}
+  title="Cómo modula la zona de carga los impactos de un fallo de rodamiento"
+  description="Vista frontal del rodamiento de esta página, quince rodillos entre una pista exterior fija y una pista interior que gira con el eje, con la zona de carga sombreada como un lóbulo sobre la mitad superior del anillo exterior, junto a tres trazas de impactos frente al tiempo de máquina de 0 a 150 milisegundos. Primero un descascarillado en la pista exterior, fijo en el centro de la zona de carga: todos los rodillos que pasan lo golpean igual, y la primera traza se llena de ráfagas iguales separadas 4,83 milisegundos bajo una línea de carga discontinua y plana. Después un descascarillado en la pista interior, que gira con el eje: golpea fuerte mientras cruza la zona de carga y nada en el lado opuesto, así que la segunda traza muestra grupos de ráfagas separadas 3,41 milisegundos que crecen y desaparecen una vez por vuelta del eje, cada 30,0 milisegundos. Por último un descascarillado en un rodillo, que viaja con la jaula y golpea por turno la pista exterior y la interior: la tercera traza muestra grupos de ráfagas separadas 5,46 milisegundos que crecen una vez por vuelta de la jaula, cada 72,5 milisegundos."
+/>
+
+*Las frecuencias son las de `bearing_fault_frequencies` para este rodamiento.
+La zona de carga es un esquema: la distribución de Stribeck de McFadden y
+Smith (1984, Ec. 3) para un rodamiento de rodillos, dibujada en la media
+circunferencia, $\varepsilon = 0{,}5$, de la que un rodamiento con holgura no
+sale, porque la holgura y la carga de este no se conocen.*
 
 El *espaciado* de las bandas laterales es por tanto el criterio de desempate
 siempre que dos familias previstas caigan cerca, y es el mismo argumento que
@@ -353,32 +418,75 @@ evidencia de rodamiento.
 En un **ventilador axial entubado** las palas interaccionan además con los
 álabes del estátor y establecen patrones de presión rotativos con
 $m_\mathrm{L} = nN \pm kV$ lóbulos para $V$ álabes (Ec. 8.16), que giran a
-$n N f_\mathrm{s} / m_\mathrm{L}$ (Ec. 8.17). Un patrón que gira más rápido que las propias palas
-radia con mucha más fuerza, y por eso importa la elección de $N$ y $V$, y por
-eso esas velocidades son las que hay que contrastar con las frecuencias de corte
-del conducto. Cada línea se llama `lobe n=<n> m=<mL>`: el armónico de pala forma
-parte del nombre porque la Ec. (8.17) lleva $n$, de modo que el mismo número de
-lóbulos alcanzado desde otro armónico es otro patrón, que gira a otra velocidad.
+$M_\mathrm{L} = n N \times \text{r/min} / m_\mathrm{L}$ (Ec. 8.17), una velocidad que Norton
+escribe en r/min. Eso es una velocidad de giro, no un tono propio: Norton sitúa
+el ruido de estos patrones «also at the blade passing frequency and its
+associated harmonics», y la aritmética dice por qué, ya que $m_\mathrm{L}$ lóbulos
+que dan $nNf_\mathrm{s}/m_\mathrm{L}$ vueltas por segundo pasan por un punto fijo
+$nNf_\mathrm{s}$ veces por segundo. Lo que distingue a los patrones es el número de
+lóbulos, y eso es lo que ve el conducto: un patrón puede establecer un modo de
+orden superior del conducto con la misma distribución de presión, y cuanto más
+deprisa gira, más potencia sonora radia, y por eso importa la elección de $N$ y
+$V$. Por eso la biblioteca deja los patrones fuera de las líneas. Con
+`n_vanes`, el resultado, un `BladePassResult`, guarda las líneas del eje y de
+paso de pala como cualquier otra familia y aparte los patrones, en
+`lobe_patterns`, un `LobePattern` por cada armónico de pala $n$ y cada $k$ con
+su signo: su `n_lobes` es $m_\mathrm{L}$ y su `speed_rpm` es $M_\mathrm{L}$. `.plot()`
+dibuja solo las líneas, y `combine_fault_lines` junta solo las líneas.
 
 ```python
 # Seis palas, cuatro álabes, 3500 r/min (blade_pass_frequencies importado arriba).
 res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
 print(round(res.shaft_rate, 1))   # 58.3 Hz, el eje mismo
 print(round(res["BPF"]))          # 350
-print(round(res["lobe n=1 m=2"]), round(res["lobe n=1 m=10"]))    # 175 35
+print(res.names)                  # ('shaft', 'BPF'), solo las líneas
+for pattern in res.lobe_patterns:
+    print(pattern.n_lobes, round(pattern.speed_rpm), round(pattern.speed_rpm / 60))
+# 2 10500 175
+# 10 2100 35
 ```
 
 Esos dos números son el principio, resuelto. Los dos patrones salen del *mismo*
 armónico de pala del *mismo* ventilador; la única diferencia es el signo de $k$
-en $m_\mathrm{L} = nN \pm kV$, que es la razón de que el recuento de lóbulos tenga que
-formar parte del nombre de la línea. El patrón de $m_\mathrm{L} = 2$ gira a
-$nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58{,}3/2 = 175$ Hz, tres veces la velocidad del eje, así
-que es el que radia con fuerza y la línea que hay que contrastar con la
-frecuencia de corte del conducto. El patrón de $m_\mathrm{L} = 10$ gira a 35 Hz, por
-debajo de la velocidad del eje, así que radia poco. Seis palas contra cuatro
-álabes es una decisión de diseño, y esto es lo que decide.
+en $m_\mathrm{L} = nN \pm kV$. El patrón de $m_\mathrm{L} = 2$ da 10 500 vueltas por
+minuto, 175 por segundo, tres veces la velocidad del eje, y el de
+$m_\mathrm{L} = 10$, 35 vueltas por segundo, por debajo de ella.
+$2 \times 175 = 10 \times 35 = 350$: los dos suenan al paso de pala, y ninguno pone
+una línea propia en 175 Hz ni en 35 Hz en un espectro, y por eso ninguno es una
+línea del resultado. Por la regla de Norton, el patrón más rápido es el que más
+radia. Seis palas contra cuatro álabes es una decisión de diseño, y esto es lo
+que decide.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Cuatro espectros con las líneas previstas por la biblioteca dibujadas sobre cada uno. Arriba a la izquierda, un espectro de engrane con un diente astillado: líneas altas en 700, 1400 y 2100 hercios con bandas laterales bajas y planas espaciadas 25 hercios a uno y otro lado, y armónicos de engrane que caen deprisa. Arriba a la derecha, el mismo par de engranajes con desgaste distribuido: las bandas laterales se convierten en grupos altos y el segundo y el tercer armónico de engrane se mantienen altos. Abajo a la izquierda, un espectro de motor de inducción en eje de amplitud logarítmico con el 1x en 60 hercios, el 2x en 120 y el doble de la frecuencia de alimentación en 360, con el armónico de ranura de rotor tres décadas por debajo en 3600 hercios flanqueado por bandas laterales a una frecuencia de eje. Abajo a la derecha, un espectro de ventilador entubado con la línea del eje en 58 hercios, la línea de paso de pala en 350, el patrón de interacción de dos lóbulos en 175 hercios dibujado alto y el de diez lóbulos en 35 hercios dibujado pequeño." width="92%" />
+El signo de $m_\mathrm{L}$ se conserva, porque es el sentido en que gira el patrón.
+Con más álabes que palas, $k = -1$ da un número de lóbulos negativo, y la
+Ec. (8.17) una velocidad negativa: el patrón gira contra el rotor. Cuatro palas
+y seis álabes a 600 r/min dan $m_\mathrm{L} = 4 - 6 = -2$, que gira a
+$4 \times 600 / (-2) = -1200$ r/min, junto a $m_\mathrm{L} = 10$ a 240 r/min con el
+rotor:
+
+```python
+res = vibration.blade_pass_frequencies(600.0, 4, n_harmonics=1, n_vanes=6)
+print([(p.vane_order, p.n_lobes, round(p.speed_rpm)) for p in res.lobe_patterns])
+# [(-1, -2, -1200), (1, 10, 240)]
+```
+
+La animación hace girar los dos patrones en el ventilador de esta página y
+cuenta lo que ve un punto de la pared del conducto.
+
+<Video
+  name="anim_fan_lobe_patterns"
+  width={2400}
+  height={1350}
+  title="Los dos patrones lobulados de un ventilador entubado, y el ritmo que ve un punto de la pared"
+  description="Dos vistas frontales del ventilador de esta página, seis palas que giran delante de cuatro álabes del estátor dibujados a trazos dentro de un conducto, cada una con un anillo alrededor del rotor. A la izquierda el anillo tiene dos lóbulos y da 175 vueltas por segundo; a la derecha tiene diez lóbulos y da 35 vueltas por segundo, los dos en el sentido en que gira el rotor. Un punto marca un lugar de la pared del conducto y destella cada vez que pasa por él la cresta de un lóbulo, con un contador bajo cada vista; a los 40 milisegundos los dos marcan 14. Bajo las vistas, dos trazas escriben la forma de cada patrón en ese punto frente al tiempo de máquina de 0 a 40 milisegundos, con una marca cada vez que una pala pasa por el punto: las dos trazas están desplazadas entre sí pero se repiten con el mismo periodo, 2,86 milisegundos, la separación de las marcas de pala, señalado una vez como 1/BPF."
+/>
+
+*Las velocidades son las de `blade_pass_frequencies` para este ventilador, 500
+veces más lentas. Los anillos son un esquema de un número de lóbulos y de una
+velocidad de giro, no de un campo de presión, y el clip no dice nada de cuánto
+radia cada patrón.*
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Cuatro espectros con las líneas previstas por la biblioteca dibujadas sobre cada uno. Arriba a la izquierda, un espectro de engrane con un diente astillado: líneas altas en 700, 1400 y 2100 hercios con bandas laterales bajas y planas espaciadas 25 hercios a uno y otro lado, y armónicos de engrane que caen deprisa. Arriba a la derecha, el mismo par de engranajes con desgaste distribuido: las bandas laterales se convierten en grupos altos y el segundo y el tercer armónico de engrane se mantienen altos. Abajo a la izquierda, un espectro de motor de inducción en eje de amplitud logarítmico con el 1x en 60 hercios, el 2x en 120 y el doble de la frecuencia de alimentación en 360, con el armónico de ranura de rotor tres décadas por debajo en 3600 hercios flanqueado por bandas laterales a una frecuencia de eje. Abajo a la derecha, un espectro de ventilador entubado con la línea del eje en 58 hercios y la línea de paso de pala en 350, sin nada entre ellas; una nota multiplica cada patrón lobulado hasta el paso de pala, 2 lóbulos por 175 vueltas por segundo y 10 lóbulos por 35 vueltas por segundo, 350 lóbulos por un punto cada segundo en ambos casos, y otra nota dice que no hay línea propia en 35 ni en 175 hercios, porque son velocidades de giro." width="92%" />
 
 *Una familia de fallos se reconoce por su patrón, no por un solo número. Los dos
 paneles de engranaje son el mismo piñón de 28 dientes a 1500 r/min con dos
@@ -387,8 +495,9 @@ $\pm f_\mathrm{s}$ y armónicos que caen; un desgaste distribuido da grupos alto
 bandas laterales y levanta los armónicos superiores. El panel del motor abarca
 tres décadas de amplitud, que es la razón de que el armónico de ranura de rotor
 y sus bandas laterales a $\pm f_\mathrm{s}$ necesiten un eje logarítmico para verse
-siquiera al lado del `1x`. El panel del ventilador pone los dos patrones
-lobulados junto a la frecuencia de pala de la que salen.*
+siquiera al lado del `1x`. El panel del ventilador no tiene línea para
+ninguno de los dos patrones lobulados: los dos suenan al paso de pala del que
+salen.*
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -439,10 +548,16 @@ y de desequilibrio, la axial para la desalineación y para los engranes
 helicoidales o cónicos.
 
 **Cómo se fija.** La resonancia de la fijación fija la frecuencia superior
-utilizable, y este método necesita kilohercios. Una fijación por espárrago sobre
-una cara preparada llega a decenas de kilohercios; una unión con adhesivo o con
-una capa fina de cianoacrilato, algo menos; una base magnética, típicamente unos
-pocos kilohercios; una sonda de mano, apenas uno. La banda que se usa más abajo
+utilizable, y este método necesita kilohercios. La lectura se mantiene dentro de
+1 dB aproximadamente hasta un tercio de la resonancia del acelerómetro fijado
+(ISO/TS 7849-1, 5.2). Con espárrago sobre una cara preparada, un acelerómetro de
+uso general resuena cerca de 30 kHz y vale hasta unos 10 kHz; una unión con
+adhesivo o con una capa fina de cianoacrilato le quita poco; una base magnética
+deja unos pocos kilohercios (unos 6 kHz en Norton y Karczub, sección 4.3.2,
+mientras que ISO/TS 7849-1, Anexo A, solo la admite por debajo de 2,5 kHz y
+sobre acero liso y plano); una sonda de mano resuena cerca de 2 kHz y se queda
+por debajo de 1 kHz (las resonancias son las de las curvas características de
+ISO 5348:1998, Figuras 5 a 9). La banda que se usa más abajo
 es de 2 a 4 kHz, que para una base magnética está en el límite y para una sonda
 de mano queda fuera de alcance: esta es, con diferencia, la razón más frecuente
 de que un análisis de envolvente no encuentre nada en un rodamiento que sí está

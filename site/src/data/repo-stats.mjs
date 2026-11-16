@@ -113,7 +113,7 @@ export const version = (() => {
   }
 })();
 
-/** Whether {@link version} is a pre-release, which is not on PyPI yet. */
+/** Whether {@link version} is a pre-release, which pip installs only when asked for it. */
 export const preRelease = isPreRelease(version);
 
 /**

@@ -627,7 +627,7 @@ def test_a_version_is_a_pre_release_as_pep_440_and_packaging_say(
 def test_the_index_says_a_pre_release_is_not_on_pypi_yet_and_nothing_at_the_stamp() -> (
     None
 ):
-    said = "phonometry 4.0.0rc1 is a pre-release and is not on PyPI yet."
+    said = "phonometry 4.0.0rc1 is a pre-release, which pip installs only when it is asked for by version or with --pre."
     assert said in llms._summary("4.0.0rc1")
     final = "\n".join(llms._summary("4.0.0"))
     assert "not on PyPI" not in final

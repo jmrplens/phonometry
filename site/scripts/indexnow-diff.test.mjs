@@ -230,7 +230,7 @@ test('a copy that differs only in its release lines (Version:, Install:, Pre-rel
 });
 
 test('the stamp of a pre-release, which takes its Pre-release: line away, moves no copy', (t) => {
-	// While VERSION is a pre-release every copy says it is not on PyPI yet
+	// While VERSION is a pre-release every copy says it is a pre-release
 	// (src/lib/agent-md/header.mjs); stamping 4.0.0rc1 as 4.0.0 drops that
 	// line from all of them at once and changes nothing a page says.
 	const stamped = (version, pre) =>
@@ -241,7 +241,7 @@ test('the stamp of a pre-release, which takes its Pre-release: line away, moves 
 					header: [
 						`Version: phonometry ${version}`,
 						'Install: pip install "phonometry[full]"',
-						...(pre ? [`Pre-release: phonometry ${version} is not on PyPI yet`] : []),
+						...(pre ? [`Pre-release: phonometry ${version} is a pre-release, which pip installs only when it is asked for by version or with --pre`] : []),
 						'License: MIT',
 					],
 				}),

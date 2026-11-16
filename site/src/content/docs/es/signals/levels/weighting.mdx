@@ -1,6 +1,6 @@
 ---
 title: "Ponderación frecuencial (A, C, Z)"
-description: "Ponderación frecuencial A/C/Z según IEC 61672-1, clase 1 con modo de precisión en alta frecuencia, verificada frente a las tolerancias de la Tabla 3."
+description: "Ponderación frecuencial A/C/Z con Python según IEC 61672-1, clase 1 con modo de precisión en alta frecuencia, verificada con las tolerancias de la Tabla 3."
 references:
   - type: article
     authors: ["Fletcher, H.", "Munson, W. A."]
@@ -103,11 +103,36 @@ para infrasonido (ISO 7196), las históricas `'B'` (ANSI S1.4-1983) y `'D'`
 (IEC 537), y `'AU'` para sonido audible en presencia de ultrasonidos
 (IEC 61012).
 
-La respuesta en una línea es
-`filters.weighting_filter(recording, fs, weighting='A')`. El apartado 2 lo enseña
-sobre una señal ejecutable, el 5 explica por qué el diseño por defecto
-se ajusta a la frecuencia de muestreo en lugar de transformar el prototipo
-impreso, y el 6 demuestra que el resultado cumple la clase 1.
+El apartado 2 muestra la llamada sobre una señal ejecutable, el 5 explica por qué
+el diseño por defecto se ajusta a la frecuencia de muestreo en lugar de
+transformar el prototipo impreso, y el 6 demuestra que el resultado cumple la
+clase 1.
+
+## ¿Cómo aplico la ponderación A a una señal con Python?
+
+Llama a `filters.weighting_filter(recording, fs, weighting='A')` sobre una señal
+calibrada. Devuelve la señal temporal ponderada A, filtrada con el diseño de
+polos y ceros de IEC 61672-1:2013 dentro de las tolerancias de clase 1, así que
+`signals.leq()` sobre la salida es el $L_\mathrm{Aeq}$, y
+`signals.laeq(recording, fs)` hace los dos pasos en una sola llamada. La misma
+función aplica las ponderaciones C, Z, B, D, AU y la G de infrasonido mediante
+su argumento `weighting`. Con el tono de abajo, la ponderación A lleva el nivel
+de `77.0` dB a `57.8` dB.
+
+```python
+import numpy as np
+from phonometry import filters, signals
+
+# recording: una señal de presión calibrada en pascales, muestreada a fs hercios.
+# Aquí la sustituye un segundo de un tono de 100 Hz.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 100 * np.arange(fs) / fs)
+
+weighted = filters.weighting_filter(recording, fs, weighting="A")
+print(round(float(signals.leq(recording)), 1))       # 77.0 dB, sin ponderar
+print(round(float(signals.leq(weighted)), 1))        # 57.8 dB, ponderado A
+print(round(float(signals.laeq(recording, fs)), 1))  # 57.8 dB, lo mismo en una llamada
+```
 
 ## 1. De dónde vienen las curvas
 
@@ -623,14 +648,6 @@ especiales](/phonometry/es/signals/levels/special-weightings/).
 </SeeAlso>
 
 ## Respuestas rápidas
-
-### ¿Cómo aplico la ponderación A a una señal con Python?
-
-Llama a `filters.weighting_filter(recording, fs, weighting='A')` sobre una señal
-calibrada. Devuelve la señal temporal ponderada A, filtrada con el diseño de
-polos y ceros de IEC 61672-1:2013 dentro de las tolerancias de clase 1, así que
-`signals.leq()` sobre la salida es el $L_\mathrm{Aeq}$. La misma función aplica las
-ponderaciones C, Z, B, D, AU y la G de infrasonido mediante su argumento `weighting`.
 
 ### ¿Cuándo debo usar la ponderación C en lugar de la ponderación A?
 

@@ -1012,3 +1012,28 @@ está.
   montaje sobre el que se midió cada uno.
 
 </SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Qué coeficiente de absorción ponderado pide cada clase de ISO 11654?
+
+`materials.absorption_class(alpha_w)` lee la Tabla B.1 de ISO 11654, y
+`weighted_absorption` devuelve la misma letra en `absorption_class`, junto a la
+propia valoración. El coeficiente ponderado $\alpha_\mathrm{w}$ avanza en pasos
+fijos, así que cada clase es una serie de pasos, y el bucle de abajo imprime el
+paso más bajo de cada clase junto al inmediatamente inferior: la clase A empieza
+en `0.9`, la B en `0.8`, la C en `0.6`, la D en `0.3` y la E en `0.15`, y por
+debajo de eso un producto queda `Not classified`.
+
+```python
+from phonometry import materials
+
+for lowest in (0.9, 0.8, 0.6, 0.3, 0.15):
+    below = round(lowest - 0.05, 2)
+    print(lowest, materials.absorption_class(lowest), below, materials.absorption_class(below))
+# 0.9 A 0.85 B
+# 0.8 B 0.75 C
+# 0.6 C 0.55 D
+# 0.3 D 0.25 E
+# 0.15 E 0.1 Not classified
+```

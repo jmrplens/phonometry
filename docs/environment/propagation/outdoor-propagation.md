@@ -15,6 +15,39 @@ into an octave-band prediction. The atmospheric coefficient also closes the loop
 with room acoustics, since ISO 354 defers its air power-attenuation coefficient
 $m$ entirely to $\alpha$.
 
+## How do I predict outdoor sound propagation with ISO 9613-2 in Python?
+
+Give `environment.predicted_receiver_level` the octave-band sound power of the
+source, a `PropagationGeometry` with the distance and the two heights, the
+`GroundFactors` of the source, middle and receiver regions and, where there is
+one, a `Barrier`. It subtracts the divergence, atmospheric absorption, ground
+and screening terms of ISO 9613-2 band by band and returns the downwind level
+at the receiver in the same octave bands, while
+`environment.outdoor_propagation_attenuation` returns the terms themselves and
+their total. For the path over porous ground below, `np.round(lp, 1)` prints
+`[42.6 35.6 24.  27.7 35.7 36.2 33.4 22.7]`: the ground takes the most in the
+middle bands, the air in the top one.
+
+```python
+import numpy as np
+from phonometry import environment
+
+# A source of 95 dB in each octave band from 63 Hz to 8 kHz, 1.5 m high, heard
+# 200 m away at the same height over porous ground (G = 1) with no barrier.
+lw = np.full(8, 95.0)
+geometry = environment.PropagationGeometry(distance=200.0, source_height_m=1.5, receiver_height_m=1.5)
+ground = environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0)
+
+lp = environment.predicted_receiver_level(lw, geometry, ground=ground)
+print(np.round(lp, 1))            # [42.6 35.6 24.  27.7 35.7 36.2 33.4 22.7] dB
+
+att = environment.outdoor_propagation_attenuation(
+    200.0, source_height_m=1.5, receiver_height_m=1.5,
+    ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
+)
+print(np.round(att.a_total, 1))   # [52.4 59.4 71.  67.3 59.3 58.8 61.6 72.3] dB
+```
+
 ## 1. Atmospheric absorption (ISO 9613-1)
 
 Air is not lossless. A propagating tone bleeds energy into shear viscosity and

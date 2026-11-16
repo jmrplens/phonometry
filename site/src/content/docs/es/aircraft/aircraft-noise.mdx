@@ -617,3 +617,19 @@ aeropuertos](/phonometry/es/aircraft/airport-noise/).
 - Referencia de la API: [`aircraft.certification`](/phonometry/es/reference/api/aeroacoustics/certification/) y [`aircraft.atmospheric_absorption`](/phonometry/es/reference/api/aeroacoustics/atmospheric-absorption/).
 
 </SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Por qué el EPNL puede quedar por debajo del máximo del nivel corregido por tonos?
+
+El EPNL no es el máximo: `aircraft.effective_perceived_noise_level` suma la
+energía corregida por tonos de los registros que lo rodean y la divide por una
+duración de referencia fija, `reference_time`, cuyo valor por defecto es el que
+fija el Apéndice 2 y da la sección [EPNL](#epnl). Lo que decide el signo es la
+energía corregida por tonos de toda la ventana de 10 dB por debajo del máximo
+frente al PNLTM mantenido durante `reference_time`, no cuánto dura el máximo:
+una ventana cuya energía se queda por debajo de esa puntúa por debajo de su
+PNLTM, y una cuya energía la supera, aunque el máximo sea breve sobre una cola
+larga, por encima. `res.duration_correction` es esa diferencia,
+`res.epnl` menos el máximo `res.pnltm`, y `res.band_limits` indica el primer y
+el último registro que entran en la suma.

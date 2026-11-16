@@ -14,6 +14,38 @@ This guide covers the road source, section 2.2 of Annex II with the coefficient
 database of Appendix F. The railway source (2.3, Appendix G) and the CNOSSOS-EU
 propagation model (2.5) are separate.
 
+## How do I compute CNOSSOS-EU road traffic noise emission in Python?
+
+Describe the flow of each vehicle category with `environment.RoadTraffic`, then
+pass the list to
+`environment.road_source_power(traffic, surface=..., temperature_c=...)`. It
+sums the rolling and propulsion sound powers of Annex II for each category and
+octave band and turns them into a directional sound power per metre of source
+line: `result.total_line_power` holds the octave bands and
+`result.a_weighted_line_power` their A-weighted total, which a propagation
+model then carries to the receiver. For the urban arterial below, whose
+spectrum is drawn further down, `result.a_weighted_line_power` rounds to
+`84.2` dB(A) per metre.
+
+```python
+from phonometry import environment
+
+# An urban arterial: vehicles per hour of each category, all at 50 km/h.
+traffic = [
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MEDIUM_HEAVY, flow_rate=90.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.HEAVY, flow_rate=45.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MOTORCYCLES, flow_rate=60.0, speed_kmh=50.0),
+]
+result = environment.road_source_power(
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
+    junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
+)
+print(result.frequencies)                             # [  63.  125.  250.  500. 1000. 2000. 4000. 8000.] Hz
+print(result.total_line_power.round(1))               # [89.1 82.7 81.3 80.2 80.4 76.2 71.7 66. ] dB re 1 pW per metre
+print(round(float(result.a_weighted_line_power), 1))  # 84.2 dB(A) per metre
+```
+
 ## 1. Which text is implemented
 
 Annex II is a moving target and getting the layering wrong is the easiest way to

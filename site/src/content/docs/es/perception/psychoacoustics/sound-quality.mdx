@@ -704,3 +704,24 @@ psicoacústica](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyan
 - Teoría: [Modelos avanzados de sonoridad y calidad sonora](/phonometry/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): el patrón de sonoridad específica sobre el que se construyen la agudeza, la aspereza y la intensidad de fluctuación.
 
 </SeeAlso>
+
+## Respuestas rápidas
+
+### ¿A partir de qué valores considera ECMA-418-2 prominentes la tonalidad, la aspereza o la intensidad de fluctuación?
+
+ECMA-418-2 fija un umbral por métrica, y la biblioteca guarda cada uno como
+constante: `psychoacoustics.PROMINENT_TONALITY_TU_HMS` vale `0.4` tu_HMS
+(apartado 6.3), `PROMINENT_ROUGHNESS_ASPER` vale `0.2` asper (apartado 7.2) y
+`PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS` vale `0.2` vacil_HMS
+(apartado 9.2). La aspereza y la intensidad de fluctuación comparan con él su
+valor único $R$ o $F$. La tonalidad compara la tonalidad específica de una
+banda que es un máximo local, con su frecuencia tonal entre $F(z - 1)$ y
+$F(z + 1)$, en un sonido estacionario, y el valor único $T$ en uno que varía en el tiempo.
+
+```python
+from phonometry import psychoacoustics
+
+print(psychoacoustics.PROMINENT_TONALITY_TU_HMS)                 # 0.4 tu_HMS
+print(psychoacoustics.PROMINENT_ROUGHNESS_ASPER)                 # 0.2 asper
+print(psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS)  # 0.2 vacil_HMS
+```

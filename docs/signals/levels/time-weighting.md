@@ -402,6 +402,21 @@ $L_\mathrm{eq}$/$L_N$ metrics built on these envelopes, and
 - API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/).
 - Theory: [Time Integration](../../reference/theory/signal-analysis.md#time-integration): the first-order equation the exponential detectors solve, and what integrating it over a fixed block instead would change.
 
+## Quick answers
+
+### Which time weighting should I use, and which is the default?
+
+`filters.time_weighting(x, fs)` and `TimeWeighting` use Fast unless `mode`
+names another, and Fast is what nearly every current method expects: percentile
+levels, event detection, community noise and the level-against-time plot. Slow
+suits quasi-stationary sources and the procedures that prescribe it, aircraft
+certification among them. Impulse is legacy: IEC 61672-1 dropped it from its
+requirements and current practice rates impulsiveness on $L_\mathrm{Aeq}$ with
+an adjustment, but the Spanish RD 1367/2007 still grades its impulsive
+correction on $L_\mathrm{AIeq} - L_\mathrm{Aeq}$, which is why
+`mode='impulse'` stays. The time constants are in
+[The three time weightings](#2-the-three-time-weightings).
+
 ## References
 
 - **American National Standards Institute. (1983).** [*Specification for sound level meters*](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985) (ANSI S1.4-1983).

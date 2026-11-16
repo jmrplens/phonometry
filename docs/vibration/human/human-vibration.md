@@ -907,6 +907,27 @@ Daily vibration exposure fiche (DailyVibrationExposure.report), the ISO 5349-2 A
 - API reference: [`vibration.human.exposure`](https://docs.jmrp.io/phonometry/reference/api/vibration/exposure/).
 - Theory: [Human vibration](../../reference/theory/vibration.md#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec): the frequency weightings of ISO 2631-1 and ISO 5349-1, and the running r.m.s., VDV and MTVV definitions.
 
+## Quick answers
+
+### What are the action and limit values for hand-arm and whole-body vibration?
+
+Directive 2002/44/EC sets them on the daily exposure $A(8)$, and the library
+holds them as the constants `daily_vibration_exposure` assesses against.
+Hand-arm vibration has an exposure action value of `2.5` m/s² and an exposure
+limit value of `5.0` m/s²; whole-body vibration has `0.5` and `1.15` m/s², or
+`9.1` and `21.0` m/s¹·⁷⁵ where a Member State works with the vibration dose
+value instead. The whole-body $A(8)$ is built from the highest ISO 2631-1
+frequency-weighted axis value (`wbv_exposure_basis`), the hand-arm one from the
+ISO 5349-1 vibration total value.
+
+```python
+from phonometry import vibration
+
+print(vibration.HAV_EAV_A8_M_S2, vibration.HAV_ELV_A8_M_S2)  # 2.5 5.0 m/s^2, hand-arm A(8)
+print(vibration.WBV_EAV_A8_M_S2, vibration.WBV_ELV_A8_M_S2)  # 0.5 1.15 m/s^2, whole-body A(8)
+print(vibration.WBV_EAV_VDV, vibration.WBV_ELV_VDV)          # 9.1 21.0 m/s^1.75, whole-body VDV
+```
+
 ## References
 
 - **European Parliament and Council. (2002).** [*Directive 2002/44/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)*](https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng) (Directive 2002/44/EC). Official Journal of the European Union.

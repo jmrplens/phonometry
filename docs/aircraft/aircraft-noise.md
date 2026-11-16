@@ -522,6 +522,22 @@ the ECAC Doc 29 method of
   data ends up for modelling work.
 - API reference: [`aircraft.certification`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
 
+## Quick answers
+
+### Why can EPNL come out below the peak tone-corrected level?
+
+EPNL is not the peak: `aircraft.effective_perceived_noise_level` sums the
+tone-corrected energy of the records around it and divides that energy by a
+fixed reference duration, `reference_time`, whose default is the one Appendix 2
+sets and the [EPNL](#epnl) section gives. What decides the sign is the
+tone-corrected energy of the whole 10 dB-down window against PNLTM held for
+`reference_time`, not how long the peak lasts: a window whose energy falls short
+of that scores below its PNLTM, and one whose energy exceeds it, a brief peak
+over a long shoulder included, scores above it.
+`res.duration_correction` is that difference, `res.epnl` minus the peak
+`res.pnltm`, and `res.band_limits` names the first and last records the sum
+took in.
+
 ## References
 
 - **International Civil Aviation Organization. (2017).** [*Annex 16 to the Convention on International Civil Aviation: Environmental protection — Volume I: Aircraft noise*](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise) (ICAO Annex 16, Vol. I, 8th ed.).

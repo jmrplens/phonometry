@@ -76,10 +76,10 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Levels and weighting
 
 - [Overview](https://docs.jmrp.io/phonometry/signals/levels/): IEC 61672-1 and special weightings, Fast/Slow/Impulse, integrated, statistical and dose levels, and the ISO 1996 indicators built on them. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-levels.txt)
-- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): A/C/Z frequency weighting by IEC 61672-1, class 1 with a high-frequency accuracy mode, verified against the Table 3 tolerances.
+- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): A/C/Z frequency weighting in Python by IEC 61672-1, class 1 with a high-frequency accuracy mode, verified against the Table 3 tolerances.
 - [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/): G-weighting for infrasound (ISO 7196), historical B (ANSI S1.4-1983) and D (IEC 537), AU (IEC 61012) in the presence of ultrasound, and B and AU checks.
 - [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/): IEC 61672-1:2013 exponential detector: Fast and Slow, the dropped Impulse ballistics, tone-burst verification (Table 4), initial state and streaming.
-- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): Leq, LAeq, L10/L50/L90 percentile levels, LCpeak/SEL and noise dose (IEC 61252), and octave spectrograms, with the ISO 1996 indicators in their own guide.
+- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): Leq, LAeq, L10/L50/L90 percentiles, LCpeak, SEL and noise dose (IEC 61252) in Python, with octave spectrograms; ISO 1996 indicators have their own guide.
 
 ### Signals and spectra
 
@@ -134,7 +134,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Psychoacoustics
 
 - [Overview](https://docs.jmrp.io/phonometry/perception/psychoacoustics/): Loudness (ISO 532, ECMA-418-2), sharpness, tonality, roughness, fluctuation strength, tonal assessment (ECMA-418-1, ISO/PAS 20065) and annoyance. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-psychoacoustics.txt)
-- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): Zwicker loudness in sones (ISO 532-1) and the ISO 226:2023 equal-loudness contours, with the ISO 532-2/-3 and ECMA-418-2 models in their own guide.
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): Zwicker loudness in sones (ISO 532-1) and ISO 226:2023 equal-loudness contours in Python; the ISO 532-2/-3 and ECMA-418-2 models have their own guide.
 - [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/): ERB_N and the Cam scale, Moore-Glasberg loudness (ISO 532-2), time-varying loudness (ISO 532-3), Sottek loudness (ECMA-418-2) and which model to choose.
 - [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): Sharpness in acum (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil_HMS).
 - [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/): ECMA-418-1 tone-to-noise and prominence ratios: FFT verdicts for discrete tones, ECMA-74 positions and how to choose among four tonality metrics.
@@ -144,7 +144,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Speech
 
 - [Overview](https://docs.jmrp.io/phonometry/perception/speech/): Three speech intelligibility measures: IEC 60268-16 STI rates a channel, ANSI S3.5 SII a listening condition, and STOI/ESTOI a processor. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-speech.txt)
-- [Speech Transmission Index (STI)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/): IEC 60268-16 speech transmission index (STI): modulation transfer function, the indirect method from an impulse response and direct STIPA.
+- [Speech Transmission Index (STI)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/): IEC 60268-16 speech transmission index (STI) in Python: modulation transfer function, the indirect method from an impulse response and direct STIPA.
 - [Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/): ANSI S3.5-1997 Speech Intelligibility Index (SII) in its four band procedures: band importance, audibility, noise and hearing loss.
 - [Objective Intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/): Correlation-based objective intelligibility of time-frequency weighted noisy speech: STOI (Taal et al. 2011) and ESTOI (Jensen & Taal 2016).
 
@@ -165,7 +165,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://docs.jmrp.io/phonometry/buildings/rooms/): Room acoustics: ISO 18233 impulse responses, ISO 3382 parameters, open-plan offices, image sources, ANSI S12.2 noise and EN 12354-6 reverberation. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-2.txt)
 - [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/): Room impulse response measurement with the ISO 18233 excitations: the exponential sine sweep, MLS, and source and microphone placement.
-- [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): Decay analysis of a room impulse response by ISO 3382-1/2: Schroeder curve, EDT, T20, T30, clarity, definition, centre time and the fiche.
+- [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): Decay analysis of a room impulse response in Python by ISO 3382-1/2: Schroeder curve, EDT, T20, T30, clarity, definition, centre time and the fiche.
 - [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/): Open-plan office speech privacy (ISO 3382-3): D2,S, level at 4 m, distraction and privacy distances, the fiche and Long's occupant-noise prediction.
 - [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/): Image-source impulse response of a rectangular room, steady-state level, room constant, critical distance, Schroeder frequency and the room modes.
 - [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/): Spatial sound decay in workrooms: the ISO 14257 curve, its descriptors DL2 and DLf, the Annex B correction and ISO 11690-3 prediction.
@@ -201,7 +201,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Insulation ratings and the envelope
 
 - [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
-- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): ISO 717-1 airborne and ISO 717-2 impact single-number ratings with C, Ctr and CI terms, the enlarged-range and one-decimal variants, and the ISO 717 fiche.
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): ISO 717-1 airborne and ISO 717-2 impact single-number ratings in Python: C, Ctr and CI terms, enlarged-range and one-decimal variants, ISO 717 fiche.
 - [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): Façade insulation measured by ISO 16283-3 (loudspeaker and road-traffic methods) and predicted by EN 12354-3, with EN 12354-4 outdoor radiation.
 - [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/): CTE DB-HR global index: the Annex A formula over eighteen one-third-octave bands, normalized spectra, rounding, requirements and window correction.
 
@@ -301,7 +301,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Outdoor sound
 
 - [Overview](https://docs.jmrp.io/phonometry/environment/propagation/): Sound in open air: ISO 9613 propagation, ground effect, barriers, refraction, EN 1793-5 barrier reflection and ISO 17534-1 software checks. · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation.txt)
-- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): Outdoor sound propagation from a point source by ISO 9613-1 and -2: divergence, air absorption, ground, barriers and meteorology, per term and octave band.
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): Outdoor sound propagation from a point source in Python by ISO 9613-1 and -2: divergence, air absorption, ground, barriers and meteorology, per octave band.
 - [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/): Weyl-Van der Pol spherical-wave reflection over finite-impedance ground and wave-theory diffraction: Kurze-Anderson, rigid half-plane, thick barriers.
 - [Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): Ray tracing and the Green's Function parabolic equation (GFPE) in a refracting atmosphere: sound-speed profiles, curved rays and shadow zones.
 - [Sound reflection of a noise barrier in situ](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/): EN 1793-5 sound reflection index of a road noise barrier measured in situ: signal subtraction, Adrienne window, DL_RI and the low frequency limit.
@@ -310,7 +310,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Environmental sources
 
 - [Overview](https://docs.jmrp.io/phonometry/environment/sources/): Source descriptors for prediction: CNOSSOS-EU road and rail emission, ISO 11819-1 road surfaces, ISO 3095 rail vehicles and IEC 61400-11 wind turbines. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-sources-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-sources-2.txt)
-- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/): CNOSSOS-EU road traffic emission (Directive 2002/49/EC Annex II): rolling and propulsion power per vehicle category, corrections and power per metre.
+- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/): CNOSSOS-EU road traffic emission in Python (Directive 2002/49/EC Annex II): rolling and propulsion power per vehicle category, corrections and power per metre.
 - [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/): CNOSSOS-EU railway emission (Directive 2002/49/EC Annex II): roughness, contact filter, impact, squeal, traction, aerodynamic noise and bridges.
 - [Railway rolling-stock noise: the ISO 3095 type test](https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/): Train, locomotive and wagon noise by the ISO 3095:2013 type test: stationary, constant-speed, starting and braking tests on an EN 15610/EN 15461 track.
 - [Road-surface noise: the statistical pass-by method](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/): Road-surface noise by the ISO 11819-1 statistical pass-by method: how much a surface adds, level against log speed, the SPBI and the Annex E example.

@@ -118,6 +118,12 @@ const REPLACED_TYPES = new Set([
 ]);
 
 /**
+ * Marks a code span cannot hold: inside `<code>` or `<kbd>` they are written
+ * as the text they wrap.
+ */
+const CODE_DROPS_MARK = new Set(['emphasis', 'strong', 'delete']);
+
+/**
  * Node types that sit inside a paragraph rather than beside it.
  *
  * jmrp.io found that a shorter list split `<li>Uses **nonces** or
@@ -822,7 +828,17 @@ function createRenderer(source, options, mode) {
     },
     abbr: (node) => renderChildren(node),
     b: (node) => `**${renderChildren(node)}**`,
-    br: () => '\n',
+    // A bare line end inside a paragraph is a space to a Markdown reader, so
+    // the break is the backslash CommonMark and GitHub both draw as one. The
+    // line end the source already has after the tag is kept as the break's;
+    // a break that ends its paragraph breaks nothing and is dropped. A table
+    // cell, which holds no line, flattens it to a space (markdown-table.mjs).
+    br(node) {
+      const end = node.position?.end.offset;
+      const rest = end === undefined ? '' : source.slice(end);
+      if (/^[ \t]*(?:$|\r?\n[ \t]*(?:\r?\n|$))/u.test(rest)) return '';
+      return /^[ \t]*\r?\n/u.test(rest) ? '\\' : '\\\n';
+    },
     caption: (node) => `**${captionText(node)}**`,
     code: (node) => codeSpan(codeChildren(node)),
     del: (node) => `~~${renderChildren(node)}~~`,
@@ -907,6 +923,13 @@ function createRenderer(source, options, mode) {
    */
   function renderNode(node, options) {
     if (node.type === 'yaml' || node.type === 'mdxjsEsm') return '';
+    if (codeDepth > 0) {
+      // Between backticks every character reads as it stands, so the text of
+      // a `<code>` or `<kbd>` is what the page shows: `&lt;` written as `<`,
+      // `\*` as `*`, and a mark, which a code span cannot carry, as its text.
+      if (node.type === 'text' || node.type === 'inlineCode') return node.value ?? '';
+      if (CODE_DROPS_MARK.has(node.type)) return renderChildren(node);
+    }
     if (EXPRESSION_TYPES.has(node.type)) return renderExpression(node);
     if (ELEMENT_TYPES.has(node.type)) return renderElement(node);
     if (node.type === 'containerDirective') return renderAside(node);

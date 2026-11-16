@@ -30,13 +30,26 @@ import { codeLines } from '../markdown-fences.mjs';
 const SPACES = /[ \t\n\v\f\r]+/gu;
 
 /**
+ * A hard line break: a backslash before the line end, after an even run of
+ * backslashes (which are escaped backslashes the text shows).
+ */
+const HARD_BREAK = /(\\+)(?=\r?\n)/gu;
+
+/**
  * Text on one line: each run of {@link SPACES} becomes one space, and none is
- * left at either end. The no-break spaces stay where they are, ends included.
+ * left at either end. A hard line break has no line to break on one, so its
+ * backslash goes with it. The no-break spaces stay where they are, ends
+ * included.
  *
  * @param {string} text
  * @returns {string}
  */
-const flatten = (text) => text.replaceAll(SPACES, ' ').replace(/^ /u, '').replace(/ $/u, '');
+const flatten = (text) =>
+  text
+    .replace(HARD_BREAK, (slashes) => (slashes.length % 2 === 1 ? slashes.slice(1) : slashes))
+    .replaceAll(SPACES, ' ')
+    .replace(/^ /u, '')
+    .replace(/ $/u, '');
 
 /**
  * One table cell: whitespace flattened to single spaces, pipes escaped. A pipe

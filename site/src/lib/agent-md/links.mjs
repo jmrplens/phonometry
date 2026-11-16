@@ -36,37 +36,111 @@ const LINK_TYPES = new Set(['link', 'image', 'definition']);
 const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?\/(?!\/)/u;
 
 /**
- * @param {string} text
- * @returns {string}
+ * What every fragment destination is preceded by, in the same forms as
+ * {@link ROOT_DESTINATION}: an inline link's `](#`, a reference definition's
+ * `]: #`, either with spacing, a line break or a `<` before the `#`.
  */
-const escapeRegExp = (text) => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
+const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?#/u;
 
 /**
- * The offset of the destination of every `link` and `definition` node (and
- * of every `image` node too when `images` is set) whose URL `wanted` accepts,
- * with that URL: where the destination's text starts in the document.
+ * The destination as the source writes it, from just after the `](` of a link
+ * or image or the `]:` of a definition: the spacing (at most one line break)
+ * skipped, then either `<...>` up to its closing bracket or a run without
+ * spacing whose parentheses balance, a backslash keeping the character after
+ * it. `start` and `end` bound the text inside the brackets of the `<...>`
+ * form, which is the part a rewrite replaces.
+ *
+ * @param {string} text
+ * @param {number} from
+ * @returns {{ start: number, end: number, angle: boolean } | undefined}
+ */
+function writtenDestination(text, from) {
+  const lead = /^[ \t]*(?:\r?\n[ \t]*)?/u.exec(text.slice(from));
+  const at = from + (lead ? lead[0].length : 0);
+  if (text[at] === '<') {
+    for (let i = at + 1; i < text.length; i += 1) {
+      if (text[i] === '\\') i += 1;
+      else if (text[i] === '>') return { start: at + 1, end: i, angle: true };
+      else if (text[i] === '\n' || text[i] === '<') return undefined;
+    }
+    return undefined;
+  }
+  let depth = 0;
+  let end = at;
+  for (; end < text.length; end += 1) {
+    const char = text[end];
+    if (char === '\\' && end + 1 < text.length) end += 1;
+    else if (/\s/u.test(char)) break;
+    else if (char === '(') depth += 1;
+    else if (char === ')') {
+      if (depth === 0) break;
+      depth -= 1;
+    }
+  }
+  return end > at ? { start: at, end, angle: false } : undefined;
+}
+
+/** @type {Map<string, string | undefined>} */
+const DECODED = new Map();
+
+/**
+ * What the parser makes of a destination written as the source writes it:
+ * its character references and backslash escapes resolved, exactly as the
+ * node's `url` was. The same parser does it, so the two cannot disagree.
+ *
+ * @param {string} written
+ * @param {boolean} angle
+ * @returns {string | undefined}
+ */
+function decodedDestination(written, angle) {
+  const key = `${angle ? '<' : ' '}${written}`;
+  if (!DECODED.has(key)) {
+    const probe = parse(`[x](${angle ? `<${written}>` : written})\n`, { mdx: false });
+    const link = probe.children?.[0]?.children?.[0];
+    DECODED.set(key, link?.type === 'link' ? link.url : undefined);
+  }
+  return DECODED.get(key);
+}
+
+/**
+ * The destination of every `link` and `definition` node (and of every `image`
+ * node too when `images` is set) whose URL `wanted` accepts: where its written
+ * text starts and ends in the document, and the URL it decodes to.
+ *
+ * Each `](` of the node (each `]:` of a definition) is read, and the last
+ * whose destination decodes to the node's URL is the one; a title, if any,
+ * comes after it. A destination with a character reference or an escape
+ * decodes to text the source does not hold, so a search for the URL itself
+ * would miss it and leave the link as it was without a word. A destination
+ * that cannot be found is refused instead.
  *
  * @param {string} markdown
  * @param {(url: string) => boolean} wanted
  * @param {{ images?: boolean }} [options]
- * @returns {{ at: number, url: string }[]}
+ * @returns {{ start: number, end: number, url: string }[]}
  */
 function destinations(markdown, wanted, { images = true } = {}) {
   const types = images ? LINK_TYPES : new Set(['link', 'definition']);
   const tree = parse(markdown, { mdx: false });
-  /** @type {{ at: number, url: string }[]} */
+  /** @type {{ start: number, end: number, url: string }[]} */
   const found = [];
   const visit = (node) => {
     if (types.has(node.type) && wanted(node.url ?? '') && node.position) {
       const start = node.position.start.offset;
-      const end = node.position.end.offset;
-      // The destination follows the text: `](`, `](<` for a link or image,
-      // `]:` and spacing for a definition. The last such occurrence in the
-      // node is the destination; a title, if any, comes after it.
-      const pattern = new RegExp(String.raw`(\]\(\s*<?|\]:\s*<?)(${escapeRegExp(node.url)})`, 'gu');
+      const text = markdown.slice(start, node.position.end.offset);
+      const opener = node.type === 'definition' ? /\]:/gu : /\]\(/gu;
       let match;
-      for (const one of markdown.slice(start, end).matchAll(pattern)) match = one;
-      if (match?.index !== undefined) found.push({ at: start + match.index + match[1].length, url: node.url });
+      for (const one of text.matchAll(opener)) {
+        const written = writtenDestination(text, one.index + 2);
+        if (written && decodedDestination(text.slice(written.start, written.end), written.angle) === node.url) {
+          match = written;
+        }
+      }
+      if (!match) {
+        const line = node.position.start.line;
+        throw new Error(`line ${line}: the destination ${JSON.stringify(node.url)} is not found where its link is written`);
+      }
+      found.push({ start: start + match.start, end: start + match.end, url: node.url });
     }
     for (const child of node.children ?? []) visit(child);
   };
@@ -88,7 +162,7 @@ export function absolutizeRootLinks(markdown, origin) {
   if (!ROOT_DESTINATION.test(markdown)) return markdown;
   let out = markdown;
   const found = destinations(markdown, (url) => /^\/(?!\/)/u.test(url));
-  for (const { at } of found.sort((a, b) => b.at - a.at)) out = `${out.slice(0, at)}${root}${out.slice(at)}`;
+  for (const { start } of found.sort((a, b) => b.start - a.start)) out = `${out.slice(0, start)}${root}${out.slice(start)}`;
   return out;
 }
 
@@ -109,15 +183,16 @@ export function rewriteLinks(markdown, rewrite, hint) {
   if (hint !== undefined && !markdown.includes(hint)) return markdown;
   const found = destinations(markdown, (url) => rewrite(url) !== undefined, { images: false });
   let out = markdown;
-  for (const { at, url } of found.sort((a, b) => b.at - a.at)) {
-    out = `${out.slice(0, at)}${rewrite(url)}${out.slice(at + url.length)}`;
+  for (const { start, end, url } of found.sort((a, b) => b.start - a.start)) {
+    out = `${out.slice(0, start)}${rewrite(url)}${out.slice(end)}`;
   }
   return out;
 }
 
 /**
  * Every fragment link to one of `anchors`, ids the copy leaves out, sent to
- * the page itself: `[x](#old-id)` becomes `[x](<page>#old-id)`. The copy is
+ * the page itself: `[x](#old-id)` becomes `[x](<page>#old-id)`, and so does a
+ * reference definition `[x]: #old-id` or an `<#old-id>` destination. The copy is
  * parsed, as {@link absolutizeRootLinks} parses it, so a fragment written in
  * code is left alone; a fragment to any other id is left as written.
  *
@@ -127,30 +202,20 @@ export function rewriteLinks(markdown, rewrite, hint) {
  * @returns {string}
  */
 export function pointDroppedAnchors(markdown, anchors, pageUrl) {
-  if (anchors.size === 0 || !markdown.includes('](#')) return markdown;
-  const tree = parse(markdown, { mdx: false });
-  /** @type {number[]} */
-  const inserts = [];
-  const visit = (node) => {
-    const url = node.url ?? '';
-    if (LINK_TYPES.has(node.type) && url.startsWith('#') && node.position) {
-      let id = url.slice(1);
-      try {
-        id = decodeURIComponent(id);
-      } catch {
-        // A fragment that is no valid escape is compared as written.
-      }
-      if (anchors.has(id)) {
-        const start = node.position.start.offset;
-        const text = markdown.slice(start, node.position.end.offset);
-        const at = text.lastIndexOf(`(${url}`);
-        if (at >= 0) inserts.push(start + at + 1);
-      }
+  if (anchors.size === 0 || !FRAGMENT_DESTINATION.test(markdown)) return markdown;
+  const dropped = (url) => {
+    if (!url.startsWith('#')) return false;
+    let id = url.slice(1);
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      // A fragment that is no valid escape is compared as written.
     }
-    for (const child of node.children ?? []) visit(child);
+    return anchors.has(id);
   };
-  visit(tree);
   let out = markdown;
-  for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${pageUrl}${out.slice(at)}`;
+  for (const { start } of destinations(markdown, dropped).sort((a, b) => b.start - a.start)) {
+    out = `${out.slice(0, start)}${pageUrl}${out.slice(start)}`;
+  }
   return out;
 }

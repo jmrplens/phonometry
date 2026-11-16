@@ -7,6 +7,7 @@ import { describe, test } from 'node:test';
 
 import { codeSpan, renderTree, SITE } from '../render.mjs';
 import { parse } from '../processor.mjs';
+import { pointDroppedAnchors, rewriteLinks } from '../links.mjs';
 import { Box, Show, registryOf, render } from './helpers.mjs';
 
 describe('what is kept byte for byte', () => {
@@ -200,6 +201,24 @@ describe('raw HTML', () => {
     );
   });
 
+  test('code and kbd print the characters the page shows, not the references and escapes written for them', () => {
+    // Inside backticks Markdown reads every character as it stands, so a
+    // reference or an escape copied from the source would show as written.
+    assert.equal(render('Use <code>a &lt; b</code> here.\n').markdown, 'Use `a < b` here.\n');
+    assert.equal(render('Press <kbd>Ctrl &amp; C</kbd>.\n').markdown, 'Press `Ctrl & C`.\n');
+    assert.equal(render('a <code>x\\*y</code> b\n').markdown, 'a `x*y` b\n');
+  });
+
+  test('br is a line break the copy keeps', () => {
+    // A bare line end inside a paragraph is a space to a Markdown reader; a
+    // backslash before it is the hard break CommonMark and GitHub both draw.
+    assert.equal(render('first<br />second\n').markdown, 'first\\\nsecond\n');
+    assert.equal(render('first<br />\nsecond\n').markdown, 'first\\\nsecond\n');
+    assert.equal(render('last<br />\n\nNext.\n').markdown, 'last\n\nNext.\n');
+    const cells = '<table><tbody><tr><td>a<br />b</td></tr></tbody></table>\n';
+    assert.doesNotMatch(render(cells).markdown, /\\/u);
+  });
+
   test('a table under its caption, standing apart from the text inline around it', () => {
     const source =
       '<div class="r"><table><caption><strong>Result</strong><span>FAIL</span></caption>' +
@@ -275,6 +294,23 @@ describe('links', () => {
     assert.doesNotMatch(markdown, /[(<\s]\/phonometry\//u);
     const none = '| a | b |\n| --- | --- |\n| [x](https://example.org/) | `](/` in code |\n';
     assert.equal(render(none, { mdx: false }).markdown, none);
+  });
+
+  test('a destination written with a character reference or an escape is still made absolute', () => {
+    // The parser hands over the destination decoded, so it cannot be found by
+    // searching the source for the decoded text.
+    const source = '[search](/phonometry/?a=1&amp;b=2) and [a](/phonometry/a\\_b/).\n\n[d]: </phonometry/d&#95;e/>\n';
+    const { markdown } = render(source, { mdx: false });
+    assert.equal(
+      markdown,
+      '[search](https://docs.jmrp.io/phonometry/?a=1&amp;b=2) and [a](https://docs.jmrp.io/phonometry/a\\_b/).\n\n' +
+        '[d]: <https://docs.jmrp.io/phonometry/d&#95;e/>\n',
+    );
+  });
+
+  test('a link is rewritten whole however its destination is written', () => {
+    const rewrite = (url) => (url === '/old/a_b' ? '/new/' : undefined);
+    assert.equal(rewriteLinks('[x](/old/a\\_b) and [y](</old/a&#95;b>).\n', rewrite), '[x](/new/) and [y](</new/>).\n');
   });
 
   test('the site address builds absolute URLs from any of the forms writers hold', () => {
@@ -353,6 +389,16 @@ describe('anchors the copy drops', () => {
     assert.match(markdown, /\[the tube\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/a\/#tubo-o-camara\)/);
     assert.match(markdown, /\[the heading\]\(#tubo-o-cámara\)/);
     assert.deepEqual(issues, []);
+  });
+
+  test('a reference link and an angle-bracketed fragment lead to the page too', () => {
+    const page = 'https://docs.jmrp.io/phonometry/a/';
+    const anchors = new Set(['old']);
+    assert.equal(
+      pointDroppedAnchors('See [details][target] and [here](<#old>).\n\n[target]: #old\n', anchors, page),
+      `See [details][target] and [here](<${page}#old>).\n\n[target]: ${page}#old\n`,
+    );
+    assert.equal(pointDroppedAnchors('[t]:\n  <#old>\n', anchors, page), `[t]:\n  <${page}#old>\n`);
   });
 });
 

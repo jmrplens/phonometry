@@ -2026,6 +2026,7 @@ def english_files(root: pathlib.Path = ROOT) -> list[tuple[pathlib.Path, str]]:
         ["git", "-C", str(root), "ls-files"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     ).stdout.split("\n")
     files: list[tuple[pathlib.Path, str]] = []

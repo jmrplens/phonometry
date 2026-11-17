@@ -43,33 +43,42 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
-    # A conflict resolved carelessly during a rebase can leave markers behind in
-    # a file no other gate reads. CHANGELOG.md is the usual victim: it collides
-    # on every parallel branch and nothing lints it, so the markers ride a fully
-    # green pull request all the way to main. Only the opening and closing
-    # markers are matched, never a bare row of "=", because that is legitimate
-    # Markdown (a setext heading underline).
-    - name: Check for merge-conflict markers
-      run: |
-        if git grep -nE '^(<{7} |>{7} )' -- . ; then
-          echo "::error::Unresolved merge-conflict markers found in the files listed above."
-          exit 1
-        fi
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
         cache: 'pip'
     - name: Install dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install -r requirements-notebook.txt
         pip install -e .
+    # Every check below is a step of its own that runs whatever the checks
+    # before it said, so a lint finding no longer hides the type check, the
+    # security check or the workflow audit; each names the step it needs.
+    # A conflict resolved carelessly during a rebase can leave markers behind in
+    # a file no other gate reads. CHANGELOG.md is the usual victim: it collides
+    # on every parallel branch and nothing lints it, so the markers ride a fully
+    # green pull request all the way to main. Only the opening and closing
+    # markers are matched, never a bare row of "=", because that is legitimate
+    # Markdown (a setext heading underline). It reads the checkout alone, so a
+    # failed install leaves it its verdict.
+    - name: Check for merge-conflict markers
+      id: conflict-markers
+      if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
+      run: |
+        if git grep -nE '^(<{7} |>{7} )' -- . ; then
+          echo "::error::Unresolved merge-conflict markers found in the files listed above."
+          exit 1
+        fi
     # The clips are the one committed asset CI never regenerates: an FDTD run
     # plus four video encodes each is far too slow for a pull request, and the
     # encoders are not bit-reproducible anyway. So nothing could tell that the
@@ -85,6 +94,8 @@ jobs:
     # commit is a few hundred kilobytes, where the clips are a third of a
     # gigabyte, and the check only ever needed the names.
     - name: Fetch the names of the published clips, without the clips
+      id: clip-names
+      if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
       run: |
         git init -q assets-tree
         git -C assets-tree remote add origin https://github.com/jmrplens/phonometry-assets.git
@@ -92,14 +103,20 @@ jobs:
         git -C assets-tree ls-tree -r --name-only FETCH_HEAD images/ > assets-manifest.txt
         echo "$(wc -l < assets-manifest.txt) clip files published at $(cut -c1-12 assets.lock)"
     - name: Check every published clip matches the code that draws it
+      id: animation-freshness
+      if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.clip-names.outcome == 'success' }}
       run: python scripts/check_animation_freshness.py --manifest assets-manifest.txt
     - name: Lint with Ruff
+      id: ruff
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff check .
     # Ruff is also the formatter. Before this step the tree had no formatter at
     # all and 673 of its 812 Python files disagreed with any single style; the
     # gate is what keeps that from happening again. Markdown is excluded in
     # `[tool.ruff]`, so this never touches the documentation snippets.
     - name: Check formatting with Ruff
+      id: ruff-format
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff format --check .
     # Bare `mypy`: the paths it checks are `files` under [tool.mypy] in
     # pyproject.toml, which `make lint` and every page that gives the command
@@ -120,8 +137,12 @@ jobs:
     # checker was told where those live, every value read from them was
     # `Any` and the comparison went unchecked.
     - name: Type check with Mypy
+      id: mypy
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: mypy
     - name: Security check with Bandit
+      id: bandit
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: bandit -r src
     # The workflows hold the repository's tokens and the release's identity, and
     # nothing reviewed them: the release step expanded `${{ }}` straight into a
@@ -132,6 +153,8 @@ jobs:
     # .github/zizmor.yml. The token lets it ask GitHub whether a pinned action
     # has a published advisory.
     - name: Audit the workflows with zizmor
+      id: zizmor
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       env:
         GH_TOKEN: ${{ github.token }}
       run: zizmor --config .github/zizmor.yml --format github .github/
@@ -1021,31 +1044,45 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
         cache: 'pip'
     - name: Install the locked figure-rendering stack
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -e .
         # Pin the render+compute stack last so it wins over looser deps.
         pip install -r requirements-figures.txt
     - name: Fail if any label's mathematics does not parse
+      id: mathtext
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # Before the regeneration, not after: an unparseable label aborts the
       # generation, and this names the file and line instead of leaving a
       # traceback in the middle of a four-hundred-figure run. Reads the
       # sources, so it costs seconds and covers labels no figure exercises.
       run: python scripts/check_mathtext.py
     - name: Fail if a Spanish label would keep an English decimal point
+      id: decimal-comma-labels
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # The one defect the language gate structurally cannot see: it compares
       # untranslated WORDS, and a number is not a word. Static, so it needs no
       # generation run. The English half of the same script runs in a job of
       # its own, "English text writes the decimal point".
       run: python scripts/check_decimal_comma.py --labels
+    # Runs after a red decimal-comma check, which the generation does not
+    # depend on, so the twelve verdicts below come in the same run; not after
+    # a red mathematics check, since a label that does not parse aborts the
+    # generation half way.
     - name: Regenerate figures and diagrams
+      id: graphs
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.mathtext.outcome == 'success' }}
       run: make graphs
     - name: Regenerate the plates again and demand identical bytes
+      id: plates-reproducible
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The diagram plates bake their labels to glyph outlines and must be
       # bit-deterministic: two runs in the same job have to agree byte for
       # byte, which is stronger than the tolerance gate below and catches an
@@ -1059,6 +1096,8 @@ jobs:
           cmp "$f" ".github/images/$(basename "$f")"
         done
     - name: Fail if any committed figure is stale
+      id: figures
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Tolerance-aware compare instead of a byte diff: GitHub's runner fleet is
       # hardware-heterogeneous, so the pinned stack computes a few path
       # coordinates ~1 ULP apart depending on the CPU the run lands on. That
@@ -1067,6 +1106,8 @@ jobs:
       # changes still fail while cross-CPU noise passes. See scripts/check_figures.py.
       run: python scripts/check_figures.py
     - name: Fail if any shaded region is illegible
+      id: figure-contrast
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Staleness says the figures match the code; it says nothing about
       # whether a shaded region can be seen. This measures every filled area
       # against the page it is drawn on and fails below the CIEDE2000
@@ -1075,6 +1116,8 @@ jobs:
       # for the whole set) and needs no rendering stack of its own.
       run: python scripts/check_figure_contrast.py
     - name: Check every line can be seen on the dark page
+      id: stroke-contrast
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The step above measures filled areas. A stroke is not a fill, and the
       # ISO 3745 microphone array shipped with its hemisphere drawn in a
       # half-opacity grey hairline that composited to 1.3:1 on the dark theme:
@@ -1084,6 +1127,8 @@ jobs:
       # furniture exempt because they are drawn to recede.
       run: python scripts/check_stroke_contrast.py
     - name: Check the Spanish figures are in Spanish
+      id: figure-language
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The Spanish variant of a figure is the English one with its strings
       # looked up in a table at save time, so a string nobody added to the
       # table ships in English inside `X_es.svg` while every other gate stays
@@ -1097,6 +1142,8 @@ jobs:
       # that has been paid off and not deleted.
       run: python scripts/check_figure_language.py
     - name: Fail if an annotation on a figure cannot be read
+      id: figure-annotations
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Two ways a label fails the reader, and nothing else can see either. A
       # label across a curve and given no backing is hard to read: the strokes
       # of the letters and of the curve are the same weight, and on the dark
@@ -1111,6 +1158,8 @@ jobs:
       # below that for a person to judge.
       run: python scripts/check_figure_annotations.py
     - name: Fail if two tick labels of one axis run into each other
+      id: figure-ticks
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A band axis set by hand on a logarithmic scale keeps matplotlib's own
       # minor labels between the bands unless the minor formatter is cleared:
       # the octave axis of enclosed_space_absorption shipped reading
@@ -1123,6 +1172,8 @@ jobs:
       # two labels of one axis that touch.
       run: python scripts/check_figure_ticks.py
     - name: Fail if a Spanish figure numbers a tick with an English point
+      id: figure-decimal-point
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The decimal-comma check above reads the label a generator writes; this
       # reads the label a formatter wrote, in the figure as committed. They are
       # different halves: three machines localise a Spanish figure (the
@@ -1134,6 +1185,8 @@ jobs:
       # needs no rendering stack.
       run: python scripts/check_figure_decimal_point.py
     - name: Fail if a legend closes over a plotted point
+      id: figure-legends
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A legend is an opaque plate the author places by hand, and its width is
       # set by its longest label, which is a defect waiting to happen in a
       # bilingual corpus: the Spanish label is routinely half again as long as
@@ -1146,6 +1199,8 @@ jobs:
       # each one is a decision.
       run: python scripts/check_figure_legends.py
     - name: Fail if a legend, a curve or a marker covers a tick label
+      id: figure-tick-clearance
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A legend can land on a tick label as well as on a point, and a curve
       # can run through one: the radial labels of a polar plot sit inside it,
       # strung along one ray, and an inset writes its labels over the data of
@@ -1156,6 +1211,8 @@ jobs:
       # with, so it needs no rendering stack.
       run: python scripts/check_figure_tick_clearance.py
     - name: Fail if a label is drawn over a tick label, another label or a line
+      id: figure-text-clearance
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The step above measures the marks drawn over a tick label, not a
       # text, and the annotation step leaves the plates out. A note placed by
       # hand landed on the numbers of the axis beside it, the heading of a
@@ -1166,6 +1223,8 @@ jobs:
       # annotation, the grid and a line behind a chip pass.
       run: python scripts/check_figure_text_clearance.py
     - name: Fail if a figure signs a number with a hyphen
+      id: figure-minus-sign
+      if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The corpus signs its negative numbers with U+2212, and a polar angle
       # formatter that ignores axes.unicode_minus, a reading built with an
       # f-string and a plate that sets the characters it is handed each wrote
@@ -1617,11 +1676,13 @@ jobs:
     # to break, and the pure-Python kernel is covered on both versions by the
     # main matrix regardless.
     - name: Set up Python 3.14
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.14"
         cache: 'pip'
     - name: Install dependencies (with numba)
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
@@ -1630,9 +1691,15 @@ jobs:
     # would leave this job green while exercising nothing it exists for.
     # Compiling here also fills numba's on-disk cache next to the module, so
     # the test workers below load the kernel instead of each compiling a copy.
+    # The tests run whatever this said: a kernel that falls back still leaves
+    # the library's verdict on the newest Python.
     - name: Check the jitted kernel compiles
+      id: jit-kernel
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
     - name: Run tests (jitted kernel)
+      id: tests
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # Same fan-out as the main matrix. The compiled kernel is not a reason
       # to stay serial: the step above compiles it once and the workers that
       # reach it read the cache in a fraction of a second, against a suite
@@ -2125,10 +2192,12 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install the floors pyproject.toml declares for this Python, exactly
+      id: install
       run: |
         python -m pip install --upgrade pip
         python scripts/minimum_requirements.py > minimum-requirements.txt
@@ -2141,7 +2210,12 @@ jobs:
         pip install -r minimum-requirements.txt -r test-tools.txt
         pip install --no-deps -e .
         python scripts/minimum_requirements.py --check
+    # Each check below runs whatever the one before it said, so a type
+    # completeness under 100% no longer skips the jitted kernels and the
+    # tests at the floors.
     - name: Fail below a type completeness of 100% at the floors
+      id: type-completeness
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
         set -o pipefail
         grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > pyright-pin.txt
@@ -2150,9 +2224,18 @@ jobs:
         pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
         grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
     - name: Check the jitted kernels compile at the numba floor
+      id: jit-kernel
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
+    # The type check installs pyright beside the floors, and may stop before
+    # its own check that the floors are still what is installed; the check
+    # runs again here, so the tests never run on anything but the floors.
     - name: Run the library tests at the floors
-      run: pytest -q -n auto --without-pinned-stack --without-whole-tree
+      id: library-tests
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: |
+        python scripts/minimum_requirements.py --check
+        pytest -q -n auto --without-pinned-stack --without-whole-tree
 
   # The suite calls _repr_html_ and _repr_pretty_ itself; a notebook goes
   # through IPython, which picks the method, runs matplotlib on its inline

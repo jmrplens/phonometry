@@ -121,14 +121,22 @@ const REPLACED_TYPES = new Set([
  * `inner` between two `mark`s, with any line break it opens or ends with
  * put outside them: a mark cannot close after a break (or open before one)
  * and still touch its text, so `<strong>a<br /></strong>b` is `**a**`, the
- * break, then `b`.
+ * break, then `b`. The spacing and the line ends of the source on the far
+ * side of such a break go out with it, since a mark that a line end or a
+ * space parts from its text does not close (or open) either. Each run of
+ * spacing belongs to one place in the pattern only, the break after it or
+ * the end of the edge, so a run of breaks and spaces is read in one pass
+ * and not split every way it could be.
  *
  * @param {string} mark
  * @param {string} inner
  * @returns {string}
  */
 function marked(mark, inner) {
-  const edges = new RegExp(`^((?:${LINE_BREAK}[ \\t]*)*)([\\s\\S]*?)((?:[ \\t]*${LINE_BREAK})*)$`, 'u').exec(inner);
+  const edges = new RegExp(
+    `^((?:(?:[ \\t\\r\\n]*${LINE_BREAK})+[ \\t\\r\\n]*)?)([\\s\\S]*?)((?:(?:[ \\t\\r\\n]*${LINE_BREAK})+[ \\t\\r\\n]*)?)$`,
+    'u',
+  ).exec(inner);
   const [, before = '', text = inner, after = ''] = edges ?? [];
   return `${before}${mark}${text}${mark}${after}`;
 }

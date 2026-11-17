@@ -7,7 +7,7 @@ import { describe, test } from 'node:test';
 
 import { codeSpan, renderTree, SITE } from '../render.mjs';
 import { parse } from '../processor.mjs';
-import { pointDroppedAnchors, rewriteLinks } from '../links.mjs';
+import { absolutizeRootLinks, pointDroppedAnchors, rewriteLinks } from '../links.mjs';
 import { Box, Show, registryOf, render } from './helpers.mjs';
 
 describe('what is kept byte for byte', () => {
@@ -213,6 +213,15 @@ describe('raw HTML', () => {
     assert.equal(render('<code><em title={foo}>x</em></code>\n').issues[0]?.kind, 'expression');
   });
 
+  test('a run of breaks and spaces inside a mark is read in one pass', () => {
+    // Each space between two breaks could once be read as the end of one
+    // break or the start of the next, and a failed match tried every split:
+    // 26 pairs took tens of seconds.
+    const started = performance.now();
+    render(`<strong>a${'<br /> '.repeat(26)}b</strong>\n`);
+    assert.ok(performance.now() - started < 1000);
+  });
+
   test('br is a line break the copy keeps', () => {
     // A bare line end inside a paragraph is a space to a Markdown reader; a
     // backslash before it is the hard break CommonMark and GitHub both draw.
@@ -223,6 +232,8 @@ describe('raw HTML', () => {
     assert.equal(render('first<br /> \nsecond\n').markdown, 'first\\\nsecond\n');
     assert.equal(render('<strong>a<br /></strong>b\n').markdown, '**a**\\\nb\n');
     assert.equal(render('first<br /><em>second</em>\n').markdown, 'first\\\n*second*\n');
+    assert.equal(render('<strong>a<br />\n</strong>b\n').markdown, '**a**\\\nb\n');
+    assert.equal(render('x <em><br />\na</em>\n').markdown, 'x \\\n*a*\n');
     const cells = '<table><tbody><tr><td>a<br />b</td></tr></tbody></table>\n';
     assert.doesNotMatch(render(cells).markdown, /\\/u);
   });
@@ -332,6 +343,30 @@ describe('links', () => {
   test('an autolink and a bare address are left as written', () => {
     const text = 'See <https://docs.jmrp.io/phonometry/a/> and https://docs.jmrp.io/phonometry/a/.\n';
     assert.equal(rewriteLinks(text, () => '/elsewhere/'), text);
+  });
+
+  test('a destination before a lone CR line end is found', () => {
+    assert.equal(absolutizeRootLinks('[x](/phonometry/p\r)\n', 'https://docs.jmrp.io'), '[x](https://docs.jmrp.io/phonometry/p\r)\n');
+  });
+
+  test('an escaped bracket in a label is never taken for the end of the label', () => {
+    const rewrite = (url) => (url === '/p"' ? '/new/' : undefined);
+    assert.equal(rewriteLinks('[a\\](/p" "b](/p")\n', rewrite), '[a\\](/p" "b](/new/)\n');
+    assert.equal(
+      absolutizeRootLinks('![a\\](/phonometry/p" "b](/phonometry/p")\n', 'https://docs.jmrp.io'),
+      '![a\\](/phonometry/p" "b](https://docs.jmrp.io/phonometry/p")\n',
+    );
+    // An escaped backslash before the bracket leaves the bracket the label's end.
+    assert.equal(absolutizeRootLinks('![a\\\\](/phonometry/p)\n', 'https://docs.jmrp.io'), '![a\\\\](https://docs.jmrp.io/phonometry/p)\n');
+  });
+
+  test('a label that holds an escaped bracket is left as the label', () => {
+    const rewrite = (url) => (url === '/p' ? '/new/' : undefined);
+    assert.equal(rewriteLinks('[x][a\\]: /p ]\n\n[a\\]: /p ]: /p\n', rewrite), '[x][a\\]: /p ]\n\n[a\\]: /p ]: /new/\n');
+    assert.equal(
+      render('![a\\](/phonometry/p/) b](/phonometry/p/)\n', { mdx: false }).markdown,
+      '![a\\](/phonometry/p/) b](https://docs.jmrp.io/phonometry/p/)\n',
+    );
   });
 
   test('a link is rewritten whole however its destination is written', () => {

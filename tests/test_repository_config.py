@@ -1856,12 +1856,13 @@ def test_the_pyodide_job_keeps_the_packages_pyodide_downloads() -> None:
     The job hands ``smoke.mjs`` a directory of its own instead, which the
     script passes to ``loadPyodide`` as ``packageCacheDir``, and caches that
     directory under the lockfile that pins Pyodide, so a new Pyodide starts
-    from an empty one.
+    from an empty one. The Pyodide steps are those of the built-package job,
+    which builds the wheel they load.
     """
     workflow = yaml.safe_load(
         (_ROOT / ".github" / "workflows" / "python-app.yml").read_text(encoding="utf-8")
     )
-    steps = workflow["jobs"]["pyodide"]["steps"]
+    steps = workflow["jobs"]["built-package"]["steps"]
     caches = [
         step for step in steps if str(step.get("uses", "")).startswith("actions/cache@")
     ]

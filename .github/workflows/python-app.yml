@@ -136,39 +136,71 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: zizmor --config .github/zizmor.yml --format github .github/
 
-  # The PyOctaveBand transition stub under stub/ is built from the tree by a
-  # workflow_dispatch publish job, so until now the first time anything looked
-  # at it was the moment it went to PyPI: a README that named the wrong
-  # warning class and a dependency line with no ceiling were both discovered
-  # after they had shipped. Building it on every pull request costs seconds
-  # and moves `twine check` (which is what renders the long description and
-  # would reject a malformed one) to where a mistake is still cheap.
-  transition-stub:
-    name: Transition stub builds and its metadata is sound
+  # What a user installs, built as it is published: the PyOctaveBand
+  # transition stub, and phonometry's wheel as the release builds it, read by
+  # a type checker and loaded in Pyodide. One runner, one install of the
+  # release tooling and one build of the wheel for the three, where each
+  # used to install the tooling and two built the wheel. The stub's steps
+  # and the wheel's are independent: a failure of either leaves the other
+  # its verdict, and the type checker and Pyodide run on the wheel only when
+  # it was built. The last step names every step that failed on the checks
+  # page.
+  built-package:
+    name: Package / stub and wheel
     runs-on: ubuntu-26.04
+    # The type check took most of it; about 1.5 min in all.
+    timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      # No step leaves a compiled file beside the source it read.
+      PYTHONDONTWRITEBYTECODE: "1"
+      # corepack fetches the pnpm tests/pyodide pins and says so first; the
+      # pin is the decision, so the announcement adds nothing to the log.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    # With the setuptools requirements-release.txt pins, used in place
-    # (--no-isolation), as publish-stub.yml builds the stub it uploads: a
-    # Dependabot bump of that pin, or of build, that breaks the build of the
-    # stub fails here rather than the day it is published. The build fails on
-    # a warning (PYTHONWARNINGS=error), and is stamped with the commit's time
-    # (SOURCE_DATE_EPOCH), which setuptools writes into every member of the
-    # wheel in place of the time of the build. check-wheel-contents reads
-    # the wheel for stray or duplicated files, as the release does for
-    # phonometry's.
-    - name: Build the stub and check its long description and contents
+    # The setuptools requirements-release.txt pins, used in place
+    # (--no-isolation), as the release and publish-stub.yml build what they
+    # upload: a Dependabot bump of that pin, or of build, that breaks a build
+    # fails here rather than the day it is published.
+    - name: Install the release tooling
+      id: tooling
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements-release.txt
+    # The wheel the release would publish, built as the release builds it and
+    # first, while the checkout holds nothing its commit does not, which
+    # build_release.py refuses.
+    - name: Build the wheel as the release does
+      id: wheel
+      if: ${{ !cancelled() && steps.tooling.outcome == 'success' }}
+      env:
+        PYTHONWARNINGS: error
+      run: python scripts/build_release.py --outdir dist
+    # The PyOctaveBand transition stub under stub/ is built from the tree by a
+    # workflow_dispatch publish job, so until it was built here the first time
+    # anything looked at it was the moment it went to PyPI: a README that
+    # named the wrong warning class and a dependency line with no ceiling were
+    # both discovered after they had shipped. Building it on every pull
+    # request costs seconds and moves `twine check` (which is what renders the
+    # long description and would reject a malformed one) to where a mistake
+    # is still cheap. The build fails on a warning (PYTHONWARNINGS=error), and
+    # is stamped with the commit's time (SOURCE_DATE_EPOCH), which setuptools
+    # writes into every member of the wheel in place of the time of the
+    # build. check-wheel-contents reads the wheel for stray or duplicated
+    # files, as the release does for phonometry's.
+    - name: Build the stub and check its long description and contents
+      id: stub-build
+      if: ${{ !cancelled() && steps.tooling.outcome == 'success' }}
+      run: |
         SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation stub/
         python -m twine check --strict stub/dist/*
         check-wheel-contents stub/dist/*.whl
@@ -178,6 +210,8 @@ jobs:
     # clock, user and modes into it, which only build_release.py's rewrite
     # of phonometry's sdist takes out.
     - name: Build the stub's wheel again and compare it with the first
+      id: stub-reproducible
+      if: ${{ !cancelled() && steps.stub-build.outcome == 'success' }}
       run: |
         SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation --wheel stub/ --outdir "$RUNNER_TEMP/stub-rebuild"
         cmp stub/dist/*.whl "$RUNNER_TEMP"/stub-rebuild/*.whl
@@ -186,8 +220,98 @@ jobs:
     # shim re-exports is asserted where it will actually be enforced. The
     # licence is read there too: the expression the metadata declares and the
     # LICENSE text the wheel and the sdist carry.
-    - name: Fail if the built stub does not cap phonometry below the next major or carry its licence
+    - name: The built stub caps phonometry below the next major and carries its licence
+      id: stub-metadata
+      if: ${{ !cancelled() && steps.stub-build.outcome == 'success' }}
       run: python scripts/check_stub_metadata.py
+    # pyright's --verifytypes reads the installed package as a user's type
+    # checker does and scores the share of its public names whose type it
+    # knows. It read 99.2%, 137 ambiguous and 8 unknown of 18 689: attributes
+    # a constructor set from an expression (OctaveFilterBank.sos,
+    # WeightingFilter.zi, FDTD2D.p), whose type pyright and mypy may infer
+    # differently, and the hash override of the catalogue's provenance, left
+    # undeclared, which made every catalogue row and each function that takes
+    # one partly unknown. Nothing read the score, so a new attribute of the
+    # kind would have lowered it unseen. The wheel goes into an environment
+    # of its own beside the pyright that requirements-dev.txt pins, and the
+    # check fails below 100%: on any public type that is ambiguous or
+    # unknown, which pyright reports as an error and which is what keeps the
+    # score under 100%. --ignoreexternal leaves out the types numpy's and
+    # matplotlib's own stubs leave unknown, which no annotation here can make
+    # known; the base install is enough, since no extra adds a public type.
+    # `make type-completeness` runs the same check on a wheel built here.
+    - name: Install the wheel and the pinned pyright in an environment of their own
+      id: venv
+      if: ${{ !cancelled() && steps.wheel.outcome == 'success' }}
+      run: |
+        python -m venv "$RUNNER_TEMP/user"
+        "$RUNNER_TEMP/user/bin/python" -m pip install --upgrade pip
+        grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > "$RUNNER_TEMP/pyright-pin.txt"
+        "$RUNNER_TEMP/user/bin/python" -m pip install dist/phonometry-*.whl -r "$RUNNER_TEMP/pyright-pin.txt"
+    - name: Every public name has a type a type checker knows
+      id: type-completeness
+      if: ${{ !cancelled() && steps.venv.outcome == 'success' }}
+      run: |
+        set -o pipefail
+        export PATH="$RUNNER_TEMP/user/bin:$PATH" VIRTUAL_ENV="$RUNNER_TEMP/user"
+        pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
+        grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
+    # JupyterLite runs Python in the browser on Pyodide, where micropip
+    # installs a package against the numpy, scipy and matplotlib Pyodide
+    # builds for WebAssembly, whatever PyPI holds. The steps below load the
+    # Pyodide that tests/pyodide pins under Node. The first installs the
+    # wheel as a JupyterLite user would, requirements included, then the
+    # requirements of the plot and report extras (keep_going, so every one
+    # Pyodide cannot meet is named at once), and fails saying which floor in
+    # pyproject.toml the builds Pyodide ships fall short of. The second runs
+    # whatever the first said: it installs the wheel without its
+    # requirements, on Pyodide's own numpy and scipy, and runs an import and
+    # an octave filter bank, so the job also says whether the code itself
+    # runs there.
+    - id: node
+      if: ${{ !cancelled() && steps.wheel.outcome == 'success' }}
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+    - name: Install the Pyodide tests/pyodide pins, with the pnpm it pins
+      id: pyodide-deps
+      if: ${{ !cancelled() && steps.node.outcome == 'success' }}
+      working-directory: tests/pyodide
+      run: |
+        corepack enable
+        pnpm install --frozen-lockfile
+    # The wheels Pyodide fetches from its CDN for numpy, scipy, matplotlib and
+    # the rest, kept between runs. They are the ones its lock file names, so
+    # the key is the lockfile that pins Pyodide: a new Pyodide starts empty.
+    # smoke.mjs hands the directory to loadPyodide as packageCacheDir, which
+    # loads a wheel found there and keeps one it had to download.
+    - name: Restore the packages Pyodide downloads
+      id: pyodide-cache
+      if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
+      uses: actions/cache@v6
+      with:
+        path: ${{ runner.temp }}/pyodide-packages
+        key: pyodide-packages-${{ hashFiles('tests/pyodide/pnpm-lock.yaml') }}
+    - name: Install the wheel and its plot and report extras with micropip
+      id: pyodide-install
+      if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
+      env:
+        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
+      run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
+    # Runs whatever the step above said, so the job says whether the code
+    # itself runs on Pyodide when its requirements are not met there.
+    - name: Run an octave filter bank on the numpy and scipy Pyodide ships
+      id: pyodide-run
+      if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
+      env:
+        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
+      run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
+    # One annotation per failed step on the checks page, titled by its id.
+    - name: Name the steps that failed
+      if: ${{ failure() }}
+      env:
+        STEPS: ${{ toJSON(steps) }}
+      run: python3 .github/scripts/failed_steps.py
 
   # The release builds the files it publishes with scripts/build_release.py,
   # twice, and after publishing rebuilds the tag on macOS and compares the
@@ -1323,56 +1447,6 @@ jobs:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
 
-  # pyright's --verifytypes reads the installed package as a user's type
-  # checker does and scores the share of its public names whose type it
-  # knows. It read 99.2%, 137 ambiguous and 8 unknown of 18 689: attributes a
-  # constructor set from an expression (OctaveFilterBank.sos, WeightingFilter.zi,
-  # FDTD2D.p), whose type pyright and mypy may infer differently, and the hash
-  # override of the catalogue's provenance, left undeclared, which made every
-  # catalogue row and each function that takes one partly unknown. Nothing
-  # read the score, so a new attribute of the kind would have lowered it
-  # unseen. This builds the wheel as the release does, installs it in an
-  # environment of its own beside the pyright that requirements-dev.txt pins,
-  # and fails below 100%: on any public type that is ambiguous or unknown, which
-  # pyright reports as an error and which is what keeps the score under 100%.
-  # --ignoreexternal leaves out the types numpy's and matplotlib's own stubs
-  # leave unknown, which no annotation here can make known; the base install
-  # is enough, since no extra adds a public type. `make type-completeness`
-  # runs the same check on a wheel built here.
-  type-completeness:
-    name: Every public name has a type a type checker knows
-    runs-on: ubuntu-26.04
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Build the wheel as the release does
-      env:
-        PYTHONWARNINGS: error
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements-release.txt
-        python scripts/build_release.py --outdir dist
-    - name: Install the wheel and the pinned pyright in an environment of their own
-      run: |
-        python -m venv "$RUNNER_TEMP/user"
-        "$RUNNER_TEMP/user/bin/python" -m pip install --upgrade pip
-        grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > "$RUNNER_TEMP/pyright-pin.txt"
-        "$RUNNER_TEMP/user/bin/python" -m pip install dist/phonometry-*.whl -r "$RUNNER_TEMP/pyright-pin.txt"
-    - name: Fail below a type completeness of 100%
-      run: |
-        set -o pipefail
-        export PATH="$RUNNER_TEMP/user/bin:$PATH" VIRTUAL_ENV="$RUNNER_TEMP/user"
-        pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
-        grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
-
   # The committed example .report() fiches (.github/reports) must match a fresh
   # `make reports` run. Same drift gate as the figures, one layer further down
   # the pipeline: the fiches are what the documentation links to as worked
@@ -2103,70 +2177,6 @@ jobs:
         pip install ".[plot,report]"
     - name: Execute the smoke notebook and read its outputs
       run: python scripts/check_notebook.py tests/notebooks/smoke.ipynb
-
-  # JupyterLite runs Python in the browser on Pyodide, where micropip
-  # installs a package against the numpy, scipy and matplotlib Pyodide builds
-  # for WebAssembly, whatever PyPI holds. This builds the wheel and loads the
-  # Pyodide that tests/pyodide pins under Node. The first step installs the
-  # wheel as a JupyterLite user would, requirements included, then the
-  # requirements of the plot and report extras (keep_going, so every one
-  # Pyodide cannot meet is named at once), and fails saying which floor in
-  # pyproject.toml the builds Pyodide ships fall short of. The second
-  # runs whatever the first said: it installs the wheel without its
-  # requirements, on Pyodide's own numpy and scipy, and runs an import and an
-  # octave filter bank, so the job also says whether the code itself runs
-  # there.
-  pyodide:
-    name: phonometry installs and runs in Pyodide (JupyterLite)
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    env:
-      # corepack fetches the pnpm tests/pyodide pins and says so first; the
-      # pin is the decision, so the announcement adds nothing to the log.
-      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    # The wheel the release would publish, built as the release builds it,
-    # with the setuptools requirements-release.txt pins.
-    - name: Build the wheel
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements-release.txt
-        PYTHONWARNINGS=error python scripts/build_release.py --outdir dist
-    - uses: actions/setup-node@v7
-      with:
-        node-version: 24
-    - name: Install the Pyodide tests/pyodide pins, with the pnpm it pins
-      run: |
-        corepack enable
-        pnpm install --frozen-lockfile
-      working-directory: tests/pyodide
-    # The wheels Pyodide fetches from its CDN for numpy, scipy, matplotlib and
-    # the rest, kept between runs. They are the ones its lock file names, so
-    # the key is the lockfile that pins Pyodide: a new Pyodide starts empty.
-    # smoke.mjs hands the directory to loadPyodide as packageCacheDir, which
-    # loads a wheel found there and keeps one it had to download.
-    - name: Restore the packages Pyodide downloads
-      uses: actions/cache@v6
-      with:
-        path: ${{ runner.temp }}/pyodide-packages
-        key: pyodide-packages-${{ hashFiles('tests/pyodide/pnpm-lock.yaml') }}
-    - name: Install the wheel and its plot and report extras with micropip
-      env:
-        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
-      run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
-    - name: Run an octave filter bank on the numpy and scipy Pyodide ships
-      if: ${{ !cancelled() }}
-      env:
-        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
-      run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
 
   sonar:
     needs: tests

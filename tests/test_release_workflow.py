@@ -594,7 +594,7 @@ _COMMIT_TIME = "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)"
 
 @pytest.mark.parametrize(
     ("name", "job"),
-    [("python-app.yml", "transition-stub"), ("publish-stub.yml", "build")],
+    [("python-app.yml", "built-package"), ("publish-stub.yml", "build")],
 )
 def test_the_bridge_is_built_at_its_commit_time_and_its_wheel_checked(
     name: str, job: str
@@ -615,7 +615,7 @@ def test_the_bridge_is_built_at_its_commit_time_and_its_wheel_checked(
 
 def test_ci_builds_the_bridge_wheel_twice_and_compares_the_two() -> None:
     """A second wheel of the commit, byte for byte the first."""
-    runs = _job_runs(_load("python-app.yml"), "transition-stub")
+    runs = _job_runs(_load("python-app.yml"), "built-package")
     wheels = [
         line for line in runs.splitlines() if "-m build" in line and "--wheel" in line
     ]

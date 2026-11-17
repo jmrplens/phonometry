@@ -590,6 +590,11 @@ def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     monkeypatch.setattr(llms, "PUBLIC", public)
     monkeypatch.setattr(llms, "SHARDS_DIR", public / "llms")
     monkeypatch.setattr(llms, "INDEX", tmp_path / "llms.txt")
+    # The names this dump's shards publish are its own, not the site's; the
+    # run without --build writes them into the record, here a copy of its own.
+    names = tmp_path / "llms-shards.json"
+    names.write_text('{"published": [], "redirects": {}}', encoding="utf-8")
+    monkeypatch.setattr(llms, "SHARD_NAMES", names)
     # main() sets the dump it reads for the module; put it back afterwards.
     monkeypatch.setattr(llms, "PAGES", llms.PAGES)
 
@@ -614,6 +619,8 @@ def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     assert (tmp_path / "llms.txt").read_text(encoding="utf-8") == (
         public / "llms.txt"
     ).read_text(encoding="utf-8")
+    recorded = json.loads(names.read_text(encoding="utf-8"))
+    assert {f"llms-{name}.txt" for name in recorded["published"]} == written
 
 
 def test_the_test_dumps_give_every_route_the_kind_the_site_gives_it() -> None:

@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { redirects as committed } from '../src/data/redirects.mjs';
-import { cloudflareItems } from './cloudflare-redirects.mjs';
+import { cloudflareItems, copyOf, retiredShards } from './cloudflare-redirects.mjs';
 import {
 	deriveRedirects,
 	redirectModuleSource,
@@ -123,8 +123,13 @@ if (misquoted.length > 0) {
 // Redirects list that scripts/cloudflare-redirects.mjs prints from this map.
 // Each address has to be there with and without its trailing slash, aimed at
 // the same absolute destination, or one spelling falls through to the stub.
+// The Markdown copy of each, `<address>index.md`, has to lead to the copy of
+// the page it moved to, and each llms shard name retired before the generator
+// kept them (src/data/llms-shards.json) to the file it names: neither has a
+// stub to fall back on, so a missing item is a 404.
+const shards = retiredShards();
 {
-	const items = cloudflareItems(committed);
+	const items = cloudflareItems(committed, shards);
 	const host = new URL(siteUrl).host;
 	const expected = new Map();
 	for (const [from, to] of Object.entries(committed)) {
@@ -132,6 +137,12 @@ if (misquoted.length > 0) {
 		if (from.endsWith('/') && from.length > 1) {
 			expected.set(`${host}${basePath}${from.slice(0, -1)}`, `${siteUrl}${to}`);
 		}
+		if (from.endsWith('/') && to.endsWith('/')) {
+			expected.set(`${host}${basePath}${from}index.md`, `${siteUrl}${copyOf(to)}`);
+		}
+	}
+	for (const [from, to] of Object.entries(shards)) {
+		expected.set(`${host}${basePath}/llms/llms-${from}.txt`, `${siteUrl}${basePath}/llms/llms-${to}.txt`);
 	}
 	const sources = new Map(items.map(({ redirect }) => [redirect.source_url, redirect]));
 	const wrong = [];
@@ -147,7 +158,10 @@ if (misquoted.length > 0) {
 	if (wrong.length > 0) {
 		fail(`the Cloudflare list disagrees with the map: ${wrong.slice(0, 8).join('; ')}`);
 	} else {
-		ok(`the Cloudflare list carries every address in both spellings: ${items.length} items, each a 301`);
+		ok(
+			`the Cloudflare list carries every address in both spellings, its Markdown copy and every retired shard name: ` +
+				`${items.length} items, each a 301`,
+		);
 	}
 }
 
@@ -208,6 +222,24 @@ if (!existsSync(dist)) {
 		fail(`${chained.length} redirect(s) point at another redirect: ${chained.slice(0, 8).join(', ')}`);
 	} else {
 		ok(`no redirect points at another redirect`);
+	}
+
+	// The copy a retired address's `index.md` leads to, and the shard a retired
+	// shard name leads to, are files of the build like the pages.
+	const missingFiles = [];
+	for (const to of new Set(Object.values(committed))) {
+		if (!to.endsWith('/')) continue;
+		const copy = copyOf(to);
+		const file = copy.startsWith(basePath) ? copy.slice(basePath.length) : copy;
+		if (!existsSync(join(dist, file))) missingFiles.push(copy);
+	}
+	for (const to of new Set(Object.values(shards))) {
+		if (!existsSync(join(dist, 'llms', `llms-${to}.txt`))) missingFiles.push(`${basePath}/llms/llms-${to}.txt`);
+	}
+	if (missingFiles.length > 0) {
+		fail(`${missingFiles.length} edge redirect target(s) the build did not write: ${missingFiles.slice(0, 8).join(' ')}`);
+	} else {
+		ok(`every Markdown copy and llms shard the edge redirects to is a file the build wrote`);
 	}
 
 	// An address cannot be both a page and a redirect. Astro resolves the

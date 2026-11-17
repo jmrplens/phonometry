@@ -83,6 +83,10 @@ def _built(dump: Path, public: Path, monkeypatch: pytest.MonkeyPatch) -> list[Pa
     monkeypatch.setattr(llms, "PUBLIC", public)
     monkeypatch.setattr(llms, "SHARDS_DIR", public / "llms")
     monkeypatch.setattr(llms, "INDEX", public / "index-only.txt")
+    # The names this dump's shards publish are its own, not the site's.
+    names = public.parent / "llms-shards.json"
+    names.write_text('{"published": [], "redirects": {}}', encoding="utf-8")
+    monkeypatch.setattr(llms, "SHARD_NAMES", names)
     # main() sets the dump it reads for the module; put it back afterwards.
     monkeypatch.setattr(llms, "PAGES", llms.PAGES)
     llms.main(["--pages", str(dump), "--build"])

@@ -592,6 +592,7 @@ Every material, gas and fluid the library reads from a printed page, from elasti
 
 One file per area, each small enough to fetch whole. An area too long for one fetch travels in numbered parts, cut between its pages, and a page too long for one at its own sections. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
+- [Start here, the list of its 2 parts](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
 - [Start here, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-1.txt)
 - [Start here, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-2.txt)
 - [Upgrading from 3.3 to 4.0, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-1.txt)

@@ -757,7 +757,8 @@ brand:
 # one run of agent-md.mjs: it dumps the English routes and the Markdown copy of
 # every page the llms files carry, without the two dated header lines llms.txt
 # does not state, and writes every page of the edition (docs/<route>.md) from
-# its source; generate_llms.py then writes the index from the dump. The shards
+# its source; generate_llms.py then writes the index from the dump, and adds
+# every shard name it writes to site/src/data/llms-shards.json. The shards
 # and llms-full.txt carry those dates, so the site build writes them
 # (site/package.json `prebuild`) and they are not committed. The run fails
 # before it writes when docs/README.md, which is kept by hand, does not link

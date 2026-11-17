@@ -579,6 +579,16 @@ commit that commits it. The site build writes them (`site/package.json`
 just written), and the build's check of the copies fails when a page they carry
 differs from its copy.
 
+A shard's name, once published, is kept: agents are told to fetch these files
+and keep the links. `site/src/data/llms-shards.json` records every name the
+site has published, and `make llms` adds the names it writes (commit it with
+`llms.txt`). An area published in one file that comes to need parts keeps its
+own name as a short file listing them; an area published in parts is cut into
+at least as many again. A recorded name the generator can no longer write stops
+it. If a regrouping really retires one, move the name from `published` to
+`redirects`, mapped to the file that now carries its first page, and replace the
+edge's redirect list (5b) so the old name answers with a 301.
+
 ### 5b. Retired site addresses (auto-generated map)
 
 A page that moves keeps answering at its old address. In `site/`,
@@ -588,10 +598,14 @@ the map is current. The build writes a stub page for every old address, which
 is all GitHub Pages can serve. On docs.jmrp.io the same addresses answer a
 permanent 301 at the edge, from the Cloudflare Bulk Redirects list
 `phonometry_retired`, and that list does not follow the map by itself: when a
-change touches `redirects.mjs`, print the list items with
-`node scripts/cloudflare-redirects.mjs > items.json` and replace the items of
-the list with them, in the dashboard or through the API's list items endpoint.
-The credentials for that stay with the maintainer, never in this repository.
+change touches `redirects.mjs` or the `redirects` of `src/data/llms-shards.json`,
+print the list items with `node scripts/cloudflare-redirects.mjs > items.json`
+and replace the items of the list with them, in the dashboard or through the
+API's list items endpoint. The list also leads each retired address's Markdown
+copy (`<address>index.md`) to the copy of the page it moved to, and each retired
+llms shard name to the file that now carries its first page; neither has a stub
+to fall back on. The credentials for that stay with the maintainer, never in
+this repository.
 
 ### 6. Filing an errata entry
 
@@ -830,6 +844,15 @@ Releases are fully automated from the repository-root `VERSION` file:
    for: if the dispatch fails, re-running the failed jobs runs it again alone.
    Zenodo registers the DOI from the release webhook.
    `SECURITY.md` says how anyone can verify and rebuild the files.
+4. The docs deploy of the release tells IndexNow only the pages whose text
+   changed, and the lines of a Markdown copy that name the release are left
+   out of that comparison, so a release that takes back something every page
+   said (a banner naming the version on PyPI, for instance) reaches the
+   engines through no page at all. After such a release, once the deploy of
+   the merge has finished, run the **Docs** workflow by hand on `main`
+   (Actions, Docs, Run workflow) with **Send IndexNow every URL of the site
+   once** ticked: that deploy sends every URL of the sitemap and keeps its
+   record, so the deploys after it go back to sending what changed.
 
 Never push tags manually; the workflow is idempotent (an existing tag is
 skipped). The trusted publisher is configured on pypi.org, in the project's

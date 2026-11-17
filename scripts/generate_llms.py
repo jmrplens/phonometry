@@ -43,6 +43,16 @@ Three kinds of artifact are produced:
     it looks like the old narrow library. A shard too long for one fetch
     travels in numbered parts instead, ``llms-<area>-1.txt``,
     ``llms-<area>-2.txt`` and so on (see :func:`_shard_parts`).
+    A name once published stays published: an agent is told to fetch these
+    files, and a link to one is kept long after the index it came from. The
+    record of every name, ``site/src/data/llms-shards.json``, holds the names
+    the site has published, and a run keeps writing each of them (see
+    :func:`_check_names_kept`): an area published in one file that comes to
+    need parts keeps its own name as a short file listing them, an area in
+    parts is cut into at least as many as it was, and a name the run cannot
+    write any more stops it, unless the record redirects that name to the
+    file that now carries its first page, which the edge then answers with a
+    301 (``site/scripts/cloudflare-redirects.mjs``).
 ``llms-full.txt``
     The complete concatenation, kept for clients that can take it.
 
@@ -101,6 +111,11 @@ PUBLIC = ROOT / "site" / "public"
 SHARDS_DIR = PUBLIC / "llms"
 #: The dump ``site/scripts/agent-md.mjs --dump`` writes, read by default.
 PAGES = ROOT / "build" / "agent-md"
+#: The record of every shard name the site has published: the names a run
+#: must keep writing, and the names retired before that rule, each with the
+#: file the edge redirects it to (see :func:`_check_names_kept`). ``make
+#: llms`` adds the names it writes; nothing takes one out.
+SHARD_NAMES = ROOT / "site" / "src" / "data" / "llms-shards.json"
 #: The committed index ``make llms`` writes.
 INDEX = ROOT / "llms.txt"
 SITE_URL = "https://docs.jmrp.io/phonometry"
@@ -1103,14 +1118,25 @@ def _part_label(label: str, number: int, count: int) -> str:
     return f"{label}, part {number} of {count}"
 
 
-def _full_text_entries(label: str, files: tuple[str, ...]) -> list[str]:
-    """The index lines for one shard: one, or one per part, in order."""
+def _full_text_entries(
+    label: str, files: tuple[str, ...], listing: str | None = None
+) -> list[str]:
+    """The index lines for one shard: one, or one per part, in order.
+
+    *listing* is the name of the file that lists the parts of a shard once
+    published whole (:func:`_part_index`), linked before them.
+    """
     if len(files) == 1:
         return [f"- [{label}]({_shard_url(files[0])})"]
-    return [
+    lines = [
         f"- [{_part_label(label, number, len(files))}]({_shard_url(name)})"
         for number, name in enumerate(files, start=1)
     ]
+    if listing is not None:
+        lines.insert(
+            0, f"- [{label}, the list of its {len(files)} parts]({_shard_url(listing)})"
+        )
+    return lines
 
 
 def _full_text_links(files: tuple[str, ...]) -> str:
@@ -1494,6 +1520,7 @@ def _topic_shards(shard_slugs: Iterable[str]) -> list[str]:
 def _full_text_section(
     plan: Sequence[tuple[str, str, list[str]]],
     shard_files: Mapping[str, tuple[str, ...]],
+    listed: Iterable[str] = (),
 ) -> list[str]:
     intro = "One file per area, each small enough to fetch whole."
     if any(len(files) > 1 for files in shard_files.values()):
@@ -1506,8 +1533,13 @@ def _full_text_section(
         "for a single fetch in most clients."
     )
     lines = ["## Full text", "", intro, ""]
+    listed = frozenset(listed)
     for slug, label, _routes in plan:
-        lines += _full_text_entries(label, shard_files.get(slug, (slug,)))
+        lines += _full_text_entries(
+            label,
+            shard_files.get(slug, (slug,)),
+            slug if slug in listed else None,
+        )
     lines += [f"- [Everything]({SITE_URL}/llms-full.txt)", ""]
     return lines
 
@@ -1555,11 +1587,14 @@ def build_llms_txt(
     version: str,
     shard_files: Mapping[str, tuple[str, ...]],
     plan: Sequence[tuple[str, str, list[str]]] | None = None,
+    listed: Iterable[str] = (),
 ) -> str:
     """The index, *shard_files* naming the files each shard published.
 
     A shard in one piece names one file; a shard cut into parts names one per
     part (see :func:`_part_names`), and the index lists every one of them.
+    *listed* are the shards whose own name lists their parts
+    (:func:`_part_indexes`), which the index links too.
     """
     lines = _summary(version)
     lines += _start_section()
@@ -1569,7 +1604,9 @@ def build_llms_txt(
     lines += _provenance_section()
     lines += _errata_section()
     lines += _catalogue_section()
-    lines += _full_text_section(_shard_plan() if plan is None else plan, shard_files)
+    lines += _full_text_section(
+        _shard_plan() if plan is None else plan, shard_files, listed
+    )
     lines += _closing_sections()
     return "\n".join(lines)
 
@@ -1908,6 +1945,48 @@ def _balanced_starts(
     return _starts(base, extra, high)
 
 
+def _split_to(
+    starts: Sequence[int],
+    base: Sequence[int],
+    extra: Sequence[int],
+    count: int,
+    room: int,
+) -> list[int]:
+    """*starts* cut further, until there are *count* parts or no cut is left.
+
+    The balanced cut fills parts in order, so units of one size can come out
+    in fewer parts than a shard is held to (:func:`_kept_parts`): four equal
+    pages make two parts or four, never three. The largest part with a cut
+    left is cut where its larger half is smallest, as often as it takes.
+    """
+    starts = list(starts)
+    while len(starts) < count:
+        bounds = [*starts, len(base)]
+        best: tuple[int, int] | None = None
+        for begin, end in sorted(
+            zip(bounds, bounds[1:], strict=False),
+            key=lambda span: -(extra[span[0]] + sum(base[span[0] : span[1]])),
+        ):
+            options = [
+                (
+                    max(
+                        extra[begin] + sum(base[begin:cut]),
+                        extra[cut] + sum(base[cut:end]),
+                    ),
+                    cut,
+                )
+                for cut in range(begin + 1, end)
+                if extra[cut] + sum(base[cut:end]) <= room
+            ]
+            if options:
+                best = min(options)
+                break
+        if best is None:
+            break
+        starts = sorted([*starts, best[1]])
+    return starts
+
+
 def _unit_name(unit: _Unit) -> str:
     """What a unit is, for a refusal that has to name it."""
     first = next((line for line in unit.lines if line.strip()), "")
@@ -1929,7 +2008,9 @@ def _oversized(slug: str, unit: _Unit, size: int, room: int) -> str:
     )
 
 
-def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...]:
+def _shard_parts(
+    slug: str, title: str, routes: Sequence[str], *, at_least: int = 1
+) -> tuple[str, ...]:
     """A shard's text: one file, or numbered parts when it outgrows one fetch.
 
     The parts are as few as fit the budget and as even as the cuts allow. A
@@ -1944,6 +2025,13 @@ def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...
     Where the cuts fall is decided on the pages measured with their dated
     header lines whether those are there or not (:func:`_measured_head`), so
     a dump with dates and one without cut every shard at the same places.
+
+    *at_least* is the fewest parts to cut it into: a shard the site published in
+    parts keeps every one of their names (:func:`_kept_parts`), so a shard
+    that shrank is cut into as many as before rather than fewer. Its pieces
+    are its pages and the sections and rows the budget already parts, so a
+    shard of fewer pieces than that comes back in fewer parts, and the run
+    stops on the names it cannot write any more.
     """
     copies = {route: _copy(route) for route in routes}
     single = _shard_head(title, "Full text of the pages in this area.")
@@ -1955,7 +2043,7 @@ def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...
         + _lines_bytes(copies[route].rest.split("\n") if copies[route].rest else ())
         for route in routes
     )
-    if measured <= SHARD_LIMIT_BYTES:
+    if measured <= SHARD_LIMIT_BYTES and at_least <= 1:
         return (whole,)
 
     units = [
@@ -1984,7 +2072,7 @@ def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...
         ]
         return base, extra
 
-    count = 2
+    count = max(2, at_least)
     while True:
         # The longest head a part of this count can have: its number at the
         # count, and a note naming every kind of cut.
@@ -2024,8 +2112,15 @@ def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...
         if needed <= count:
             break
         count = needed
-    starts = [*_balanced_starts(base, extra, count, room), len(units)]
+    starts = _balanced_starts(base, extra, count, room)
+    if at_least > 1:
+        starts = _split_to(starts, base, extra, count, room)
+    starts = [*starts, len(units)]
     count = len(starts) - 1
+    if count == 1:
+        # Only a shard held to more parts than it has pieces ends here, and
+        # it fits one file, or the budget would have cut it.
+        return (whole,)
     cuts = [units[start].cut for start in starts[1:-1]]
     parts = []
     for number, (begin, end) in enumerate(
@@ -2068,6 +2163,171 @@ def _published(shards: Mapping[str, tuple[str, ...]]) -> dict[str, str]:
                 raise SystemExit(msg)
             files[name] = text
     return files
+
+
+@dataclasses.dataclass(frozen=True)
+class ShardNames:
+    """The record of the shard names the site has published (:data:`SHARD_NAMES`).
+
+    *published* are the names a run must still write; *redirects* the names
+    retired before that rule, each to the name now carrying its first page.
+    """
+
+    published: frozenset[str]
+    redirects: Mapping[str, str]
+
+
+def _read_shard_names(path: pathlib.Path) -> ShardNames:
+    """The record at *path*, refusing one that is not a record."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        msg = f"generate_llms.py: {_shown(path)} cannot be read as the record of shard names: {error}"
+        raise SystemExit(msg) from error
+    published = data.get("published") if isinstance(data, dict) else None
+    redirects = data.get("redirects") if isinstance(data, dict) else None
+    if (
+        not isinstance(published, list)
+        or not all(isinstance(name, str) for name in published)
+        or not isinstance(redirects, dict)
+        or not all(
+            isinstance(key, str) and isinstance(value, str)
+            for key, value in redirects.items()
+        )
+    ):
+        msg = (
+            f"generate_llms.py: {_shown(path)} is no record of shard names: it "
+            'holds a "published" list of names and a "redirects" object of '
+            "retired name to current name."
+        )
+        raise SystemExit(msg)
+    both = sorted(set(published) & set(redirects))
+    if both:
+        msg = (
+            f"generate_llms.py: {_shown(path)} lists "
+            + ", ".join(f"llms-{name}.txt" for name in both)
+            + " both as published and as redirected; a name is one or the other."
+        )
+        raise SystemExit(msg)
+    return ShardNames(frozenset(published), dict(sorted(redirects.items())))
+
+
+def _shard_names() -> ShardNames:
+    """The record this run keeps (:data:`SHARD_NAMES`)."""
+    return _read_shard_names(SHARD_NAMES)
+
+
+def _kept_parts(slug: str, kept: Iterable[str]) -> int:
+    """The fewest parts *slug* is cut into: the most it was published in.
+
+    A shard the site published as ``llms-<slug>-1.txt`` to ``-<n>.txt`` keeps
+    all *n* names, so it is never cut into fewer parts than *n*.
+    """
+    numbered = re.compile(rf"{re.escape(slug)}-([1-9][0-9]*)")
+    return max(
+        (int(found[1]) for name in kept if (found := numbered.fullmatch(name))),
+        default=1,
+    )
+
+
+def _part_index(slug: str, title: str, count: int) -> str:
+    """The file a shard published whole keeps once it travels in parts.
+
+    The shard's own name, which links and fetch tools still hold, answers
+    with the list of its parts rather than with a 404.
+    """
+    urls = [_shard_url(name) for name in _part_names(slug, count)]
+    head = _shard_head(
+        f"{title}, in {count} parts",
+        f"This area was published whole at {_shard_url(slug)} and now travels "
+        f"in {count} parts, so that each fits one fetch. They are listed below.",
+    )
+    return (
+        head
+        + "".join(
+            f"\n- [{_part_label(title, number, count)}]({url})"
+            for number, url in enumerate(urls, start=1)
+        )
+        + "\n"
+    )
+
+
+def _part_indexes(
+    plan: Sequence[tuple[str, str, list[str]]],
+    shards: Mapping[str, tuple[str, ...]],
+    kept: Iterable[str],
+) -> dict[str, str]:
+    """The listing file of every shard the site published whole and now in parts."""
+    whole = frozenset(kept)
+    return {
+        slug: _part_index(slug, label, len(shards[slug]))
+        for slug, label, _routes in plan
+        if slug in whole and len(shards.get(slug, ())) > 1
+    }
+
+
+def _check_names_kept(written: Iterable[str], record: ShardNames) -> None:
+    """Every name the site published is written again or redirected.
+
+    The shards used to be renamed as they grew: an area past the budget of
+    one fetch was cut into ``-1`` and ``-2`` parts and its own name, the one
+    the index of the week before had linked, answered 404 from then on.
+    Fourteen names went that way between the index of one week and the
+    next. A name the record holds now has to be one this run writes, or one
+    the record redirects to a name it writes.
+    """
+    names = frozenset(written)
+    gone = sorted(record.published - names)
+    revived = sorted(name for name in record.redirects if name in names)
+    nowhere = sorted(
+        f"llms-{name}.txt -> llms-{target}.txt"
+        for name, target in record.redirects.items()
+        if target not in names
+    )
+    problems = []
+    if gone:
+        problems.append(
+            "the site published "
+            + ", ".join(f"llms-{name}.txt" for name in gone)
+            + " and this run writes no such file. Keep the shard under its "
+            'name, or move the name from "published" to "redirects" in '
+            f"{_shown(SHARD_NAMES)}, mapped to the file that now carries its "
+            "first page, and replace the edge's redirect list as CONTRIBUTING.md "
+            "says"
+        )
+    if revived:
+        problems.append(
+            ", ".join(f"llms-{name}.txt" for name in revived)
+            + " is written again and redirected too; the redirect would hide "
+            f'it: take it out of "redirects" in {_shown(SHARD_NAMES)}'
+        )
+    if nowhere:
+        problems.append(
+            "redirect(s) to a file this run does not write: " + ", ".join(nowhere)
+        )
+    if problems:
+        raise SystemExit("generate_llms.py: " + "; ".join(problems) + ".")
+
+
+def _write_shard_names(written: Iterable[str], record: ShardNames) -> None:
+    """The record with every name this run writes added; none taken out."""
+    published = sorted(record.published | frozenset(written))
+    text = json.dumps(
+        {
+            "about": (
+                "Every shard name docs.jmrp.io/phonometry/llms/ has published. "
+                "scripts/generate_llms.py writes each name under published "
+                "again on every run, and make llms adds the names it writes; "
+                "a name is never taken out. A name under redirects was retired "
+                "before that rule and answers a 301 to the name it maps to."
+            ),
+            "published": published,
+            "redirects": dict(record.redirects),
+        },
+        indent=2,
+        ensure_ascii=False,
+    )
+    SHARD_NAMES.write_text(text + "\n", encoding="utf-8", newline="\n")
 
 
 def _index_order(index: str, members: Iterable[str]) -> list[str]:
@@ -2210,11 +2470,20 @@ def _check_every_page_in_one_shard(plan: Sequence[tuple[str, str, list[str]]]) -
 
 def build_shards(
     plan: Sequence[tuple[str, str, list[str]]] | None = None,
+    kept: Iterable[str] | None = None,
 ) -> dict[str, tuple[str, ...]]:
-    """Shard slug -> its text, in one file or in parts."""
+    """Shard slug -> its text, in one file or in parts.
+
+    *kept* are the names the site published (the record by default): a shard
+    published in parts is cut into at least as many again.
+    """
     plan = _shard_plan() if plan is None else plan
+    kept = _shard_names().published if kept is None else frozenset(kept)
     _check_every_page_in_one_shard(plan)
-    return {slug: _shard_parts(slug, label, routes) for slug, label, routes in plan}
+    return {
+        slug: _shard_parts(slug, label, routes, at_least=_kept_parts(slug, kept))
+        for slug, label, routes in plan
+    }
 
 
 def build_llms_full(llms_txt: str, plan: Sequence[tuple[str, str, list[str]]]) -> str:
@@ -2341,12 +2610,17 @@ def main(argv: Sequence[str] | None = None) -> None:
     _check_dump_matches_the_tree()
     version = _version()
     plan = _shard_plan()
-    shards = build_shards(plan)
+    record = _shard_names()
+    shards = build_shards(plan, record.published)
     files = _published(shards)
+    indexes = _part_indexes(plan, shards, record.published)
+    files.update(indexes)
+    _check_names_kept(files, record)
     llms = build_llms_txt(
         version,
         {slug: _part_names(slug, len(parts)) for slug, parts in shards.items()},
         plan,
+        indexes,
     )
     _check_index_covers_the_site(llms)
     _check_index_budget(llms)
@@ -2355,6 +2629,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         where = "site/public"
     else:
         INDEX.write_text(llms, encoding="utf-8", newline="\n")
+        _write_shard_names(files, record)
         where = "llms.txt"
     print(
         f"llms.txt regenerated (v{version}) into {where}: {len(_routes())} pages "

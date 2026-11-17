@@ -97,7 +97,7 @@
 //     deploy handed IndexNow after that record, as `pending-run-id`, leaving
 //     out the list of run <id>, the one a deploy re-run of that run works
 //     out again
-//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--pending <dir>] [--out <dir>]
+//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--pending <dir>] [--out <dir>] [--full]
 //     checks the published manifest against the pages, or reads the manifest
 //     a build handed on (`--current`, where there are no pages: the IndexNow
 //     job of a deploy re-run), compares it with the previous one (a record,
@@ -106,7 +106,13 @@
 //     `--out` wrote), prints the changed, new and removed URLs, and writes
 //     into <dir> the URLs to submit (urls.json: {"urls": [...]} and the
 //     lists behind it) and the manifest they were worked out from, which the
-//     IndexNow job keeps once it has submitted them
+//     IndexNow job keeps once it has submitted them. `--full` sends every URL
+//     whatever the comparison finds, with the removals still: the digest
+//     leaves the release lines out, so a release that takes back a statement
+//     every page made (a banner, the version a page says is on PyPI) changes
+//     no digest, and the engines keep the copies that make it until each page
+//     changes again. The docs workflow passes it when dispatched with
+//     `indexnow_full`
 //   node scripts/indexnow-diff.mjs keep-record --deployed-at <time>
 //     asks the GitHub API (GITHUB_GRAPHQL_URL as well) for the deployments of
 //     the site made after <time>, when this run's pages went out, and writes
@@ -137,6 +143,8 @@ export const URLS_NAME = 'urls.json';
 export const MANIFEST_FORMAT = 1;
 /** Every URL of the site starts with this and a slash. */
 export const ORIGIN = `${siteUrl}${basePath}`;
+/** Why the list is the full one when `diff --full` asked for it, as urls.json and the log say. */
+export const ASKED_FOR_FULL = 'a full list was asked for';
 /** How long a fetch from another server may take before the full list is sent instead. */
 const FETCH_TIMEOUT_MS = 30_000;
 /**
@@ -391,10 +399,10 @@ export async function loadPrevious(source) {
  * may be the handed list's, a page that list removed or changed and this
  * build puts back as the previous pages had it differs from what IndexNow
  * holds, and a page the list was to send may never have reached IndexNow,
- * its job having kept no record. With no previous pages, every current URL,
- * and the removals still.
+ * its job having kept no record. With no previous pages, or when `full` asks
+ * for every URL, every current URL, and the removals still.
  */
-export function urlsToSubmit(current, previous, pending) {
+export function urlsToSubmit(current, previous, pending, { full = false } = {}) {
 	const urls = Object.keys(current).sort();
 	const handed = pending?.pages ?? {};
 	const handedRemoved = new Set(pending?.removed ?? []);
@@ -402,7 +410,7 @@ export function urlsToSubmit(current, previous, pending) {
 	const handedSent = new Set(pending?.urls ?? []);
 	const named = new Set([...Object.keys(previous ?? {}), ...Object.keys(handed), ...handedRemoved, ...handedSent]);
 	const removed = [...named].filter((url) => !Object.hasOwn(current, url)).sort();
-	if (!previous) return { full: true, changed: [], added: [], removed, urls: [...urls, ...removed].sort() };
+	if (!previous || full) return { full: true, changed: [], added: [], removed, urls: [...urls, ...removed].sort() };
 	const added = urls.filter((url) => !Object.hasOwn(previous, url) || handedRemoved.has(url) || handedNew.has(url));
 	const changed = urls.filter(
 		(url) =>
@@ -804,9 +812,13 @@ async function diff(args) {
 			console.log(`[indexnow] read the list a later deploy handed IndexNow, at ${handed.from} (${Object.keys(handed.pages).length} pages, ${handed.removed.length} removed, ${handed.urls.length} to send).`);
 		}
 	}
-	const result = urlsToSubmit(current.pages, previous.pages, pending);
+	const asked = args.includes('--full');
+	const result = urlsToSubmit(current.pages, previous.pages, pending, { full: asked });
 	const total = Object.keys(current.pages).length;
-	if (result.full) {
+	if (asked) {
+		console.log(`[indexnow] ${ASKED_FOR_FULL}: every URL goes out, whatever changed since ${previous.from}.`);
+		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs, ${result.removed.length} of them removed.`);
+	} else if (result.full) {
 		console.log(`[indexnow] no previous manifest to compare with from ${previous.from}: ${previous.reason}.`);
 		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs, ${result.removed.length} of them removed.`);
 	} else {
@@ -822,10 +834,10 @@ async function diff(args) {
 	const out = option(args, '--out');
 	if (out) {
 		mkdirSync(out, { recursive: true });
-		const reason = result.full ? previous.reason : null;
+		const reason = asked ? ASKED_FOR_FULL : result.full ? previous.reason : null;
 		writeFileSync(
 			join(out, URLS_NAME),
-			`${JSON.stringify({ previous: previous.from, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
+			`${JSON.stringify({ previous: previous.from, reason, full: result.full, asked, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
 		);
 		writeFileSync(join(out, MANIFEST_NAME), serialize(current));
 	}

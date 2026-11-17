@@ -97,6 +97,21 @@ on:
       # site has to be rebuilt to serve it.
       - "assets.lock"
   workflow_dispatch:
+    inputs:
+      # IndexNow is sent only the pages whose digest changed, and the digest
+      # leaves out the lines of a Markdown copy that name the release, so
+      # that stamping a release does not report every page. A release that
+      # takes back a statement every page made (the banner that said which
+      # version was on PyPI, say) therefore changes no digest, and the
+      # engines keep the copies that make the statement until each page
+      # changes again. Run the workflow by hand on main with this set, once,
+      # after such a release: the deploy then sends every URL of the sitemap,
+      # and the removed pages as before, and keeps its record as any deploy
+      # does, so the next one compares with it.
+      indexnow_full:
+        description: "Send IndexNow every URL of the site once, not only the pages that changed"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -297,11 +312,14 @@ jobs:
         # banner or footer around a page read from its <main>, no previous
         # manifest, or one that cannot be read, sends every URL, the record
         # compared with is the newest one a run of main kept, read from a
-        # stand-in for the API, and a deploy job re-run after a newer deploy
-        # sends what its pages put back. Node's own test runner, after the
-        # install: the structured-data check and the guides' dates read a
-        # page's frontmatter with the parser the content collection uses, from
-        # @astrojs/markdown-remark.
+        # stand-in for the API, a deploy job re-run after a newer deploy
+        # sends what its pages put back, and a run asked for the full list
+        # sends every URL whatever changed. The edge's list of retired
+        # addresses is tested here too: each address in both spellings, its
+        # Markdown copy and every retired llms shard name. Node's own test
+        # runner, after the install: the structured-data check and the guides'
+        # dates read a page's frontmatter with the parser the content
+        # collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -325,12 +343,15 @@ jobs:
         # committed edition page that is not what its source writes, fails in
         # seconds; the build writes the llms files it publishes again, from
         # copies with their dates (package.json `prebuild`), and a step after
-        # it holds its llms.txt to this one.
+        # it holds its llms.txt to this one. The run also adds every shard
+        # name it writes to site/src/data/llms-shards.json, and stops on a
+        # name the site published that it no longer writes, so a shard cannot
+        # be renamed without its old name answering.
         run: |
           (cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated --docs ../docs)
           python3 scripts/generate_llms.py --pages build/agent-md
-          if ! git diff --exit-code -- llms.txt docs; then
-            echo "::error::llms.txt or the docs/ edition is not what the site pages write: run 'make llms' and commit the result."
+          if ! git diff --exit-code -- llms.txt docs site/src/data/llms-shards.json; then
+            echo "::error::llms.txt, the record of shard names or the docs/ edition is not what the site pages write: run 'make llms' and commit the result."
             exit 1
           fi
           untracked=$(git ls-files --others --exclude-standard -- docs)
@@ -701,12 +722,19 @@ jobs:
         # run whose job failed, or which a newer push cancelled in between,
         # would otherwise leave its pages out for good. It fails if a step
         # changed the pages after the manifest was written, which would
-        # publish a manifest that does not describe the site.
-        run: >-
-          node scripts/indexnow-diff.mjs diff
-          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
-          --pending "$RUNNER_TEMP/indexnow/pending"
-          --out "$RUNNER_TEMP/indexnow/next"
+        # publish a manifest that does not describe the site. A run
+        # dispatched with indexnow_full sends every URL whatever changed
+        # (`--full`); the input is false on every other event.
+        env:
+          INDEXNOW_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.indexnow_full }}
+        run: |
+          full=()
+          if [ "$INDEXNOW_FULL" = "true" ]; then full=(--full); fi
+          node scripts/indexnow-diff.mjs diff \
+            --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json" \
+            --pending "$RUNNER_TEMP/indexnow/pending" \
+            --out "$RUNNER_TEMP/indexnow/next" \
+            "${full[@]}"
         working-directory: site
       - name: Hand the list of changed pages to the IndexNow job
         # With the manifest it was worked out from, which the job keeps once
@@ -855,13 +883,20 @@ jobs:
           rm -rf "$RUNNER_TEMP/indexnow/pending"
           echo "::warning::[indexnow] the list run $RUN_ID handed IndexNow could not be downloaded: a page it named and this deploy no longer has is not sent as removed, nor one it removed, changed or was to send and this deploy has as the record has it."
       - name: Work out the list again against the newest record, on a deploy re-run
+        # A re-run keeps the inputs of the run it re-runs, so a run dispatched
+        # with indexnow_full sends every URL again here too.
         if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
-        run: >-
-          node site/scripts/indexnow-diff.mjs diff
-          --current "indexnow/indexnow-manifest.json"
-          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
-          --pending "$RUNNER_TEMP/indexnow/pending"
-          --out "indexnow"
+        env:
+          INDEXNOW_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.indexnow_full }}
+        run: |
+          full=()
+          if [ "$INDEXNOW_FULL" = "true" ]; then full=(--full); fi
+          node site/scripts/indexnow-diff.mjs diff \
+            --current "indexnow/indexnow-manifest.json" \
+            --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json" \
+            --pending "$RUNNER_TEMP/indexnow/pending" \
+            --out "indexnow" \
+            "${full[@]}"
       - name: Hand on the list worked out again, on a deploy re-run
         # Before the submission, as the build hands its list on before the
         # deploy, and kept as long as a record is. A run keeps the artifacts
@@ -905,7 +940,9 @@ jobs:
           with open("indexnow/urls.json", encoding="utf-8") as handle:
               listed = json.load(handle)
           urls = listed["urls"]
-          if listed["full"]:
+          if listed.get("asked"):
+              print(f"Dispatched with indexnow_full: every URL of the sitemap goes out, {len(urls)} in all, {len(listed['removed'])} of them removed pages.")
+          elif listed["full"]:
               print(f"No record of the pages IndexNow was last sent to compare with, because {listed['reason']}: all {len(urls)} URLs of the sitemap.")
           else:
               print(

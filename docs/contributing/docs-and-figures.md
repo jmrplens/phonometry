@@ -1841,6 +1841,9 @@ dist/llms-full.txt, dist/llms/     every English guide, catalogue and
                                    in llms-full.txt and in one shard, a page
                                    cut into parts whole again in order
 dist/llms.txt                      links every shard file, and no other
+site/src/data/llms-shards.json     every shard name the site has published,
+                                   each written again or redirected to the
+                                   file that carries its first page
 ```
 
 **Don't**
@@ -1848,11 +1851,12 @@ dist/llms.txt                      links every shard file, and no other
 ```text
 a kind of page that publishes no copy, a copy written or edited by hand, a
 header line that says something the page does not (a day other than the
-sitemap's <lastmod>), a copy that lost the body or a row of its tables, or an
-llms file that carries a page other than its copy reads, twice, or not at all
+sitemap's <lastmod>), a copy that lost the body or a row of its tables, an
+llms file that carries a page other than its copy reads, twice, or not at all,
+or a shard name the site published that no file answers
 ```
 
-**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`
+**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py`
 
 **Exceptions.** A page with no copy of its own is a class of the check's table, with its reason: the Spanish API pages, which show the English text and name the English copy, the redirect stubs and the error page. A new kind of page is a new class with its reason, never a page left out of the table.
 

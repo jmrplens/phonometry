@@ -670,7 +670,7 @@ def refused_in_build(
 #: ``Key: value`` on a line of its own, in a copy and in each copy the llms
 #: files carry.
 _HEADER_FIELD = re.compile(
-    r"^(?:Canonical|Language|Alternate|Version|Install|Pre-release|Author|"
+    r"^(?:Canonical|Language|Alternate|Version|Install|Pre-release|Unreleased|Author|"
     r"Published|Updated|Standards|Verified|License|Summary): ",
     re.MULTILINE,
 )

@@ -27,8 +27,8 @@ _ROOT = Path(__file__).resolve().parents[1]
 _WORDS = {"en": {21: "twenty-one"}, "es": {21: "veintiún"}}
 #: Each page, its language, and the phrase that carries the count.
 _PHRASES = [
-    ("site/src/data/home.ts", "en", "over {} import namespaces"),
-    ("site/src/data/home.ts", "es", "sobre {} espacios de nombres de importación"),
+    ("site/src/data/home-en.ts", "en", "over {} import namespaces"),
+    ("site/src/data/home-es.ts", "es", "sobre {} espacios de nombres de importación"),
     (
         "site/src/content/docs/start/getting-started.mdx",
         "en",

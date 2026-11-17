@@ -89,7 +89,8 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { en as homeEn } from '../src/data/home-en.ts';
+import { es as homeEs } from '../src/data/home-es.ts';
 import { dependencies, extras, requiresPython } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';

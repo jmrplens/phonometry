@@ -2,8 +2,8 @@
  * Home: the landing page, block by block, in the page's order.
  *
  * The landing is a component layout rather than prose: everything it prints
- * comes from the object src/data/home.ts holds for its language, which the
- * page passes as `content`, and from the hero in the page's frontmatter. The
+ * comes from the object of its language, src/data/home-en.ts or home-es.ts,
+ * which the page passes as `content`, and from the hero in the page's frontmatter. The
  * writer reads the same two sources, so the copy says what the page says.
  *
  * Kept, in order: the hero's tagline and its actions as links; the four
@@ -74,7 +74,7 @@ export default markdownFor({
   toMarkdown(node, ctx) {
     const content = /** @type {import('../../data/home.ts').HomeContent | undefined} */ (ctx.expr(node, 'content'));
     if (!content || typeof content !== 'object') {
-      ctx.issue(node, 'Home needs content={en} or content={es} from src/data/home.ts');
+      ctx.issue(node, 'Home needs content={en} from src/data/home-en.ts or content={es} from src/data/home-es.ts');
       return '';
     }
     const blocks = [];

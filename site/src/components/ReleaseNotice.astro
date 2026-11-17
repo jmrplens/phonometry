@@ -1,0 +1,69 @@
+---
+/**
+ * The notice under the title of a page whose content changed after the
+ * latest release: the page may describe code that release does not have, and
+ * the changelog's Unreleased section lists what is new since.
+ *
+ * The site is built from main, so a fix to the documentation reaches readers
+ * the day it merges, and so can a page about a function no release has yet.
+ * The notice stands only where that can be true: on the pages whose content
+ * date, the date their footer shows, is later than the commit the release was
+ * published from (src/lib/release-commit.mjs, which src/routeData.ts asks once
+ * per build and sets `newerThanRelease` from). A page that has not changed
+ * since the release shows nothing, and the next release takes the notice off
+ * every page it stood on, with nothing typed for it. The page's Markdown copy
+ * says the same in its `Unreleased:` header line, and the check of the copies
+ * (scripts/check-markdown-twins.mjs) finds this notice by its attribute
+ * (`NEWER_THAN_RELEASE_ATTRIBUTE`) and holds the two together.
+ *
+ * It is the site's frame rather than the page's text, so the search index and
+ * the IndexNow digest of the page leave it out (`data-pagefind-ignore`), as
+ * they leave out the rest of the frame.
+ */
+import { NEWER_THAN_RELEASE_ATTRIBUTE } from '../lib/page-markdown.mjs';
+import { UNRELEASED_URL } from '../lib/release-commit.mjs';
+
+const route = Astro.locals.starlightRoute as typeof Astro.locals.starlightRoute & { newerThanRelease?: string };
+const version = route.newerThanRelease;
+const words = route.lang.startsWith('es')
+  ? {
+      before: (release: string) =>
+        `Esta página cambió después de phonometry ${release}, la última versión publicada en PyPI, así que puede ` +
+        'describir código que esa versión aún no tiene. Lo nuevo desde entonces figura en la sección Unreleased del ',
+      link: 'registro de cambios',
+    }
+  : {
+      before: (release: string) =>
+        `This page changed after phonometry ${release}, the latest release on PyPI, so it may describe code that ` +
+        'release does not have yet. What is new since then is listed under Unreleased in the ',
+      link: 'changelog',
+    };
+const attribute = { [NEWER_THAN_RELEASE_ATTRIBUTE]: version ?? '' };
+---
+
+{
+  version && (
+    <p class="ph-release-notice" role="note" data-pagefind-ignore {...attribute}>
+      {words.before(version)}
+      <a href={UNRELEASED_URL}>{words.link}</a>.
+    </p>
+  )
+}
+
+<style>
+  .ph-release-notice {
+    border: 1px solid var(--sl-color-blue);
+    border-inline-start-width: 0.25rem;
+    background-color: var(--sl-color-blue-low);
+    color: var(--sl-color-white);
+    padding: 0.5em 0.85em;
+    font-size: var(--sl-text-body-sm);
+    line-height: var(--sl-line-height);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .ph-release-notice a {
+    color: var(--sl-color-blue-high);
+  }
+</style>

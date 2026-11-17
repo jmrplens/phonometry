@@ -30,6 +30,7 @@ import { catalogueSlugs } from '../../data/topics.mjs';
 import { installCommand, preRelease, version } from '../../data/repo-stats.mjs';
 import { implementedStandards } from '../reference-chips.ts';
 import { isoDay } from '../date-rules.mjs';
+import { changedAfter } from '../release-commit.mjs';
 import { markdownCopyPath, routeOf } from '../page-markdown.mjs';
 import { citationParts, noteParts, opening, sortedReferences } from '../references-format.mjs';
 import { fileOfRoute } from './content.mjs';
@@ -48,6 +49,9 @@ import { CONTENT_DIR, SITE, SITE_DIR, renderFile } from './render.mjs';
  * @property {(file: string) => Date} dateOf  The date its content last changed.
  * @property {(file: string) => string | undefined} publishedOf  The day it was
  *   first published, `YYYY-MM-DD`, or nothing when git cannot say.
+ * @property {import('../release-commit.mjs').Release} [release]  The latest
+ *   release, which a page whose content changed after it is said to be newer
+ *   than (the header's `Unreleased:` line).
  */
 
 /** The heading of the References section, as the site's own strings word it. */
@@ -184,7 +188,12 @@ export async function pageMarkdown(file, { registry, dates, flavour = 'agent', c
         lang,
         canonical: pageUrl(route),
         alternate: fileOfRoute(other, contentDir) ? SITE.url(markdownCopyPath(other, SITE.base)) : undefined,
-        release: { version, install: installCommand, preRelease },
+        release: {
+          version,
+          install: installCommand,
+          preRelease,
+          changedSince: dates?.release ? changedAfter(dates.release, dates.dateOf(file)) : false,
+        },
         author,
         published: dates?.publishedOf(file),
         updated: dates ? isoDay(dates.dateOf(file)) : undefined,

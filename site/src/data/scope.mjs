@@ -9,9 +9,9 @@
  * node said another, and a model reading the page takes the machine-readable
  * one.
  *
- * So the feature list is derived here from `home.ts`, which already holds the
- * areas and the standards actually implemented in each and is what the
- * landing page renders. Adding an area to the landing page now adds it to the
+ * So the feature list is derived here from `home-en.ts` and `home-es.ts`,
+ * which already hold the areas and the standards actually implemented in each
+ * and are what the landing pages render. Adding an area to the landing page now adds it to the
  * structured data, with nothing to keep in step by hand.
  *
  * The site is written in English and in Spanish, and the site-wide graph is
@@ -20,7 +20,8 @@
  * software in English alone. Both landing pages are read, each in its own
  * language.
  */
-import { en, es } from './home.ts';
+import { en } from './home-en.ts';
+import { es } from './home-es.ts';
 import { designations, domains, sources, totalChecks } from './conformance-stats.mjs';
 
 /** The landing page in each language the site is written in. */

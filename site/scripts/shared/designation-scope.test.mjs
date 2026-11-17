@@ -7,7 +7,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { en, es } from '../../src/data/home.ts';
+import { en } from '../../src/data/home-en.ts';
+import { es } from '../../src/data/home-es.ts';
 import { namedBy, scopeDefects } from './designation-scope.mjs';
 
 const area = (name, href, standards) => ({ name, href, standards });

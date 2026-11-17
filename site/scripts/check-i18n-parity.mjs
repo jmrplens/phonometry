@@ -16,7 +16,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { en as homeEn, es as homeEs } from "../src/data/home.ts";
+import { en as homeEn } from "../src/data/home-en.ts";
+import { es as homeEs } from "../src/data/home-es.ts";
 import { scopeDefects } from "./shared/designation-scope.mjs";
 import { authorsFigure } from "./shared/page-prose.mjs";
 
@@ -119,7 +120,7 @@ if (scope.length) {
 	console.error("i18n parity check FAILED:");
 	for (const defect of scope)
 		console.error(
-			`  The landing pages' designations differ in scope (src/data/home.ts): ${defect}`,
+			`  The landing pages' designations differ in scope (src/data/home-en.ts, src/data/home-es.ts): ${defect}`,
 		);
 	process.exit(1);
 }

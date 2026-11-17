@@ -1,8 +1,8 @@
 // The designations the landing page lists for each area, held to the same
 // scope in English and in Spanish.
 //
-// The two landing pages (src/data/home.ts) list, area by area, the standards
-// implemented there, and src/data/scope.mjs makes the site-wide graph's
+// The two landing pages (src/data/home-en.ts and home-es.ts) list, area by
+// area, the standards implemented there, and src/data/scope.mjs makes the site-wide graph's
 // `featureList` and `keywords` of every page from those lists. A designation
 // is mostly the same in both languages, "ISO 9613-2" is not translated, but a
 // few are written in the page's own words ("ICAO Annex 16", "Anexo 16 OACI"),

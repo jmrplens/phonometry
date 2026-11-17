@@ -17,9 +17,14 @@
  * visually hidden text and the artwork is hidden from the accessibility tree
  * (see src/lib/brand.ts). The mark stays decoration: the H1 beside it is the
  * name, so that SVG carries no accessible name of its own either.
+ *
+ * A landing page has no PageTitle, so the notice of a page whose content
+ * changed after the latest release (ReleaseNotice.astro) follows the hero
+ * here, where PageTitle puts it under the title of every other page.
  */
 import Default from '@astrojs/starlight/components/Hero.astro';
 import { brandSvg } from '../lib/brand';
+import ReleaseNotice from './ReleaseNotice.astro';
 
 const { data } = Astro.locals.starlightRoute.entry;
 if (data.hero && !data.hero.image) {
@@ -35,3 +40,4 @@ if (data.hero && !data.hero.title) {
 ---
 
 <Default />
+<ReleaseNotice />

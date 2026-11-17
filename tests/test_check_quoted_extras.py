@@ -130,7 +130,8 @@ def test_the_files_a_command_is_copied_from_are_read() -> None:
         "llms.txt",
         "Makefile",
         "scripts/generate_llms.py",
-        "site/src/data/home.ts",
+        "site/src/data/home-en.ts",
+        "site/src/data/home-es.ts",
         "src/phonometry/__init__.py",
         ".github/workflows/python-app.yml",
     } <= read

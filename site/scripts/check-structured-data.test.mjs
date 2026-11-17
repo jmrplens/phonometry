@@ -53,7 +53,8 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { en as homeEn } from '../src/data/home-en.ts';
+import { es as homeEs } from '../src/data/home-es.ts';
 import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { domainIds, topicForSlug, topics } from '../src/data/topics.mjs';

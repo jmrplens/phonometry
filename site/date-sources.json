@@ -33,7 +33,16 @@
     "reads \"_via\", which maps each module the pages reach and are not dated by to the",
     "source or count that stands for it, or to the reason it moves no page. A reason given",
     "for repo-stats.mjs or conformance-stats.mjs, which read the repository as the site",
-    "builds, names in backticks each export of it the pages take, and stands for those alone."
+    "builds, names in backticks each export of it the pages take, and stands for those alone.",
+    "A source dates a page by its commits, not by the words of it the page shows, so a file",
+    "that holds the text of both languages moves the pages of both with a commit that",
+    "changed one language's words. Data written as a whole object per language is a module",
+    "per language, each page naming its own: the landing pages read src/data/home-en.ts",
+    "and src/data/home-es.ts. What stays shared is accepted as moving both: a component's",
+    "own table of words (Conformance.astro, Home.md.mjs), whose code renders both pages",
+    "anyway, and the wording of the glossary, the catalogues and the index of fiches",
+    "(glossary.mjs, catalogue-copy.mjs, report-index-copy.mjs), which keep the two",
+    "languages of each term, column or area together, beside the code that picks one."
   ],
   "entries": [
     {
@@ -57,13 +66,44 @@
       }
     },
     {
-      "_why": "The landing page states the conformance counts, the release, the Python it needs and the line that installs it, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show. repo-stats.mjs and conformance-stats.mjs compute the numbers, so every commit to them can change one the page shows: the guides went from 163 to 168 by a change to how repo-stats.mjs picks the topics it counts, with no guide added.",
-      "pages": ["site/src/content/docs/index.mdx", "site/src/content/docs/es/index.mdx"],
+      "_why": "The landing page states the conformance counts, the release, the Python it needs and the line that installs it, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show. repo-stats.mjs and conformance-stats.mjs compute the numbers, so every commit to them can change one the page shows: the guides went from 163 to 168 by a change to how repo-stats.mjs picks the topics it counts, with no guide added. Its text is home-en.ts, and home.ts holds what both landing pages show alike (the DOI and the two code examples): the Spanish page has an entry of its own, so a commit to one language's text moves that language's page alone.",
+      "pages": ["site/src/content/docs/index.mdx"],
       "sources": [
         ".github/badges/conformance-summary.svg",
         "VERSION",
         "pyproject.toml",
         "site/src/data/home.ts",
+        "site/src/data/home-en.ts",
+        "site/src/data/repo-stats.mjs",
+        "site/src/data/conformance-stats.mjs",
+        "site/src/components/home/",
+        "site/src/generated/catalogues.mjs"
+      ],
+      "counts": {
+        "guides": [
+          "site/src/content/docs/{topic}/",
+          ":(exclude,glob)site/src/content/docs/**/index.*"
+        ],
+        "apiPages": [
+          "site/src/content/docs/reference/api/",
+          ":(exclude,glob)site/src/content/docs/**/index.*"
+        ],
+        "fiches": [":(glob).github/reports/*.pdf"]
+      },
+      "_via": {
+        "site/src/data/topics.mjs": "the icon each area row carries, matched on its link, and the topics the guides are counted under, which counts.guides takes through {topic}, so a topic added with its guides moves the page. A topic added over guides its folder already holds, or a topic that did not teach made one that does, changes the number with no guide added, and that commit moves nothing, since the count reads every commit through the topics of the tree it builds: dating the page by topics.mjs instead would move it with every edit to the navigation, a label, an order or an icon, that changes no number it shows",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which the landing page shows"
+      }
+    },
+    {
+      "_why": "The Spanish landing page states the same numbers as the English one, read from the same sources and counted the same way, and its own text, which is home-es.ts. Each landing page is dated by its own language's module alone: when both texts were one file, a commit that changed only the Spanish scope of CNOSSOS-EU dated the English page too, which then said it had changed after the release with not a word of it changed. home.ts holds what both pages show alike, the DOI and the two code examples, and moves both.",
+      "pages": ["site/src/content/docs/es/index.mdx"],
+      "sources": [
+        ".github/badges/conformance-summary.svg",
+        "VERSION",
+        "pyproject.toml",
+        "site/src/data/home.ts",
+        "site/src/data/home-es.ts",
         "site/src/data/repo-stats.mjs",
         "site/src/data/conformance-stats.mjs",
         "site/src/components/home/",

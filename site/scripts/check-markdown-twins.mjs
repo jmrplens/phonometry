@@ -32,10 +32,12 @@
 // language, its meta description and the `datePublished` of the node that
 // declares the copy; `Updated:` is the sitemap's <lastmod>; `Alternate:` is
 // the copy of the page its hreflang link names; `Verified:` stands exactly
-// where the page states its conformance checks; `License:` stands on every
-// page but a catalogue. Only the release lines are read from the release:
-// `Version:` names the VERSION being built, and every key of
-// `releaseHeaderKeys` and `Author:` are there.
+// where the page states its conformance checks; `Unreleased:` stands exactly
+// where the page shows the notice that it changed after the latest release,
+// and names the release the notice names; `License:` stands on every page but
+// a catalogue. Only the release lines are read from the release: `Version:`
+// names the VERSION being built, and every key of `releaseHeaderKeys` but the
+// two that stand on some pages only, and `Author:`, are there.
 //
 // THE BODY HAS TO BE THERE. A copy of a page that owes one has text between its
 // header and its references, and a catalogue's copy has as many table rows as
@@ -87,13 +89,19 @@ import { preRelease, version } from '../src/data/repo-stats.mjs';
 import { basePath, siteTitle, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { fileOfRoute } from '../src/lib/agent-md/content.mjs';
-import { LEAD_OPENING, PRE_RELEASE } from '../src/lib/agent-md/header.mjs';
+import { LEAD_OPENING, PRE_RELEASE, UNRELEASED } from '../src/lib/agent-md/header.mjs';
 import { REFERENCES_HEADING } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR } from '../src/lib/agent-md/render.mjs';
 import { rewrittenSource } from '../src/lib/agent-md/rewrites.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { codeLines } from '../src/lib/markdown-fences.mjs';
-import { FULL_TEXT_KINDS, VERIFIED_BY_ATTRIBUTE, pageKind, releaseHeaderKeys } from '../src/lib/page-markdown.mjs';
+import {
+  FULL_TEXT_KINDS,
+  NEWER_THAN_RELEASE_ATTRIBUTE,
+  VERIFIED_BY_ATTRIBUTE,
+  pageKind,
+  releaseHeaderKeys,
+} from '../src/lib/page-markdown.mjs';
 import { decode, isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
 import { copyDefects, frontmatterSource, headingText, stripFrontmatter } from './shared/page-twin.mjs';
 
@@ -861,7 +869,8 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
       add('header', `${copy} ${said('Canonical')}, and the page's canonical is ${canonical}`);
     }
     if (fields.get('Language') !== lang) add('header', `${copy} ${said('Language')}, not ${lang}`);
-    for (const key of [...releaseHeaderKeys.filter((key) => key !== 'Pre-release' || preRelease), 'Author']) {
+    const sometimes = new Set(['Unreleased', ...(preRelease ? [] : ['Pre-release'])]);
+    for (const key of [...releaseHeaderKeys.filter((key) => !sometimes.has(key)), 'Author']) {
       if (!fields.has(key)) add('header', `${copy} has no "${key}:" line`);
     }
     // Read in the copy's own language, so a copy in the wrong one fails once, on Language:.
@@ -902,6 +911,23 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
           ? `${route} states the conformance checks that verify it, and ${copy} has no "Verified:" line`
           : `${copy} has a "Verified:" line, and ${route} states no conformance check`,
       );
+    }
+    // The notice under the title of a page changed after the latest release,
+    // and the copy's line that says the same, in the copy's language.
+    const notices = tags(html, 'p').filter((p) => Object.hasOwn(p, NEWER_THAN_RELEASE_ATTRIBUTE));
+    const newerThan = notices.length === 1 ? notices[0][NEWER_THAN_RELEASE_ATTRIBUTE] : undefined;
+    if (notices.length > 1) add('header', `${route} shows ${notices.length} notices that it changed after the release, not one`);
+    const unreleasedLine = newerThan === undefined ? undefined : UNRELEASED[fields.get('Language') === 'es' ? 'es' : 'en'](newerThan);
+    if (fields.get('Unreleased') !== unreleasedLine) {
+      add(
+        'header',
+        newerThan === undefined
+          ? `${copy} ${said('Unreleased')}, and ${route} shows no notice that it changed after the release`
+          : `${copy} ${said('Unreleased')}, and ${route} shows the notice that it changed after phonometry ${newerThan}: "Unreleased: ${unreleasedLine}"`,
+      );
+    }
+    if (newerThan !== undefined && newerThan !== version) {
+      add('header', `${route} says it changed after phonometry ${newerThan}, and the build is of phonometry ${version}`);
     }
     // A catalogue transcribes published tables and carries no licence of its own.
     const licensed = pageClass.id !== 'catalogue';

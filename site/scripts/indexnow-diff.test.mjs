@@ -216,8 +216,8 @@ test('a previous manifest that cannot be read sends every URL, and says why, whe
 	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
 });
 
-test('a copy that differs only in its release lines (Version:, Install:, Pre-release:) hashes the same', (t) => {
-	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release']);
+test('a copy that differs only in its release lines (Version:, Install:, Pre-release:, Unreleased:) hashes the same', (t) => {
+	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release', 'Unreleased']);
 	const stamped = (version) =>
 		Object.fromEntries(
 			Object.keys(BASE).map((route) => [
@@ -248,6 +248,26 @@ test('the stamp of a pre-release, which takes its Pre-release: line away, moves 
 			]),
 		);
 	assert.deepEqual(submit(t, stamped('4.0.0rc1', true), stamped('4.0.0', false)).urls, []);
+});
+
+test('the release that takes the Unreleased: line off the pages changed since the last one moves none of them', (t) => {
+	// A page changed after 4.0.0 says so in its copy (src/lib/agent-md/header.mjs);
+	// releasing 4.0.1 takes the line away and changes nothing the page says.
+	const stamped = (version, unreleased) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [
+				route,
+				guide(route, {
+					header: [
+						`Version: phonometry ${version}`,
+						'Install: pip install "phonometry[full]"',
+						...(unreleased ? [`Unreleased: this page changed after phonometry ${version}, the latest release on PyPI`] : []),
+						'License: MIT',
+					],
+				}),
+			]),
+		);
+	assert.deepEqual(submit(t, stamped('4.0.0', true), stamped('4.0.1', false)).urls, []);
 });
 
 test('every other header line, and the same words in the body, still move a page', (t) => {

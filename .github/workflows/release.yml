@@ -261,7 +261,10 @@ jobs:
 
       # Without PYTHONWARNINGS=error, unlike the builds: cyclonedx-bom raises
       # DeprecationWarnings and a ResourceWarning of its own and exits 1 under
-      # it, which says nothing about the package.
+      # it, which says nothing about the package. --output-reproducible leaves
+      # out the serial number the SBOM attestation requires; release_sbom.py
+      # writes one of the document's own and refuses an SBOM the attestation
+      # would refuse, here, where a rehearsal sees it too.
       - name: Write the SBOM of what pip installs with the wheel
         run: |
           python -m venv --without-pip "$RUNNER_TEMP/sbom-env"

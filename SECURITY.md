@@ -179,7 +179,14 @@ page on PyPI shows under Provenance. The GitHub Release carries the same wheel
 and sdist, a checksum file, `phonometry-<version>.sha256`, and a CycloneDX
 SBOM, `phonometry-<version>.cdx.json`, of what `pip install phonometry`
 resolved on the day. GitHub keeps a build provenance attestation for each of
-those four files, and an SBOM attestation that ties the SBOM to the wheel.
+those four files and, for every release after 4.0.0, an SBOM attestation that
+ties the SBOM to the wheel.
+
+4.0.0 has no SBOM attestation. Its run uploaded the wheel and the sdist to
+PyPI and recorded the build provenance of all four files, then stopped at the
+SBOM attestation, which refused an SBOM without a serial number. The tag and
+the GitHub Release were then made by hand, from the files that run had built
+and attested, so every check below holds for 4.0.0 but the SBOM attestation.
 
 The signing is keyless, so there is no key file to fetch or to trust: each
 attestation is signed with a short-lived Sigstore certificate issued to the
@@ -200,12 +207,6 @@ gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonomet
     --signer-workflow jmrplens/phonometry/.github/workflows/release.yml \
     --source-ref refs/heads/main --deny-self-hosted-runners
 
-# The SBOM attestation, made for the wheel.
-gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonometry \
-    --predicate-type https://cyclonedx.org/bom \
-    --signer-workflow jmrplens/phonometry/.github/workflows/release.yml \
-    --source-ref refs/heads/main --deny-self-hosted-runners
-
 # The PEP 740 attestation PyPI serves, without downloading anything first.
 python -m pip install pypi-attestations
 python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
@@ -213,6 +214,16 @@ python -m pypi_attestations verify pypi --repository https://github.com/jmrplens
 
 # The files of the GitHub Release against the checksum file it carries.
 sha256sum --check phonometry-4.0.0.sha256
+```
+
+The SBOM attestation of a release after 4.0.0 is checked on its wheel, with
+the version of that release where this shows `<version>`:
+
+```bash
+gh attestation verify "phonometry-<version>-py3-none-any.whl" --repo jmrplens/phonometry \
+    --predicate-type https://cyclonedx.org/bom \
+    --signer-workflow jmrplens/phonometry/.github/workflows/release.yml \
+    --source-ref refs/heads/main --deny-self-hosted-runners
 ```
 
 The signed source of a release is its sdist: the source the wheel was built
@@ -238,8 +249,11 @@ GitHub Release hold, on Linux and on macOS. The release workflow builds every
 release twice before it publishes and refuses one whose builds differ, and
 once it has published it clones the tag on macOS, rebuilds it as below and
 compares the files with PyPI's; a rehearsal does the same with the commit it
-builds and its own files, and so does every pull request. To rebuild one
-yourself, with Python 3.13, which the release builds with:
+builds and its own files, and so does every pull request. For 4.0.0 that
+rebuild after the release did not run, since the run stopped before it, at
+the SBOM attestation; Python CI had rebuilt the same commit on macOS to the
+bytes the release published. To rebuild one yourself, with Python 3.13, which
+the release builds with:
 
 ```bash
 git clone --depth 1 --branch v4.0.0 --config core.autocrlf=false \

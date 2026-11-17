@@ -21,6 +21,16 @@ on:
 permissions:
   contents: read
 
+# A push to a pull request cancels the run of the commit it replaces, which
+# can no longer be merged, and hands its runners to the run that can. Only
+# pull request runs give way, and only to a newer run of the same pull
+# request: a push to main and a run dispatched by hand each get a group of
+# their own, so the run the release waits for on a merge commit is never
+# cancelled by another.
+concurrency:
+  group: python-app-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # pip prints a notice whenever the pip a step runs lags its newest
 # release, which says nothing about the build and lands in every log.
 env:
@@ -2381,7 +2391,11 @@ jobs:
   pr-comment:
     needs: [quality, tests]
     runs-on: ubuntu-26.04
-    if: always() && github.event_name == 'pull_request'
+    # After a red quality or tests job, which the comment reports, but never
+    # in a run a newer push cancelled: that run holds the results of whatever
+    # finished before the cancel, none on a run cancelled early, and would
+    # rewrite the comment from them, "No test results found." in that case.
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     permissions:
       contents: read
       pull-requests: write

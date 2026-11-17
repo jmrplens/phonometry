@@ -17,6 +17,12 @@ name: Release
 # rehearsal can run as often as needed, for a version already released as
 # well.
 #
+# On a pull request's branch, the rehearsal waits for that pull request's
+# Python CI run on the same commit, and a push to the branch cancels that run,
+# as Python CI cancels any pull request run a newer push replaces. The
+# rehearsal then stops on "concluded 'cancelled'": run it again on the new
+# head, which is the commit that will be merged.
+#
 # Jobs, in order:
 #   preflight       the version, its changelog section, a green CI on this commit
 #   build           one sdist and one wheel, built twice to the same bytes and

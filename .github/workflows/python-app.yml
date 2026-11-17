@@ -72,6 +72,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
     - name: Install dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
@@ -86,6 +87,7 @@ jobs:
     # programme-audio cases and the full-bench inventory guard); pytest prints
     # the resolution in its run header.
     - name: Run tests
+      id: tests
       # -n auto fans the suite out across the runner's cores via pytest-xdist;
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
       # Pin the numerical thread pools to one thread each so the per-core xdist
@@ -582,6 +584,7 @@ jobs:
     - name: Regenerate the example fiches
       run: make reports
     - name: Fail if any committed fiche is stale
+      id: reports
       # Tolerance-aware compare instead of a byte diff: GitHub's heterogeneous
       # runner CPUs shift a few of the embedded plot's path coordinates ~1 ULP,
       # which rewrites the PDF page stream for no visible reason. The script
@@ -628,6 +631,7 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -y -q --no-install-recommends ffmpeg
     - name: Install dependencies
+      id: install
       # The guides plot and print fiches, so the snippets need the figure and
       # report stacks as well as the package itself.
       run: |
@@ -643,6 +647,7 @@ jobs:
         grep -E '^pytest==' requirements-dev.txt | cut -d' ' -f1 > snippet-tools.txt
         pip install -r snippet-tools.txt
     - name: Run every snippet the guides print
+      id: doc-snippets
       run: python scripts/check_doc_snippets.py
 
   # Lint. Ruff, mypy, bandit and zizmor over the tree, with the checks that
@@ -2048,6 +2053,7 @@ jobs:
     # holds: with PyPI beside that index pip takes the newest torch on either,
     # and PyPI's brings the CUDA wheels. The second line finds the pin met.
     - name: Install dependencies (torch from its CPU index)
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
@@ -2058,6 +2064,7 @@ jobs:
     # tolerance test measured, and where, so every run leaves its number
     # in the log.
     - name: Run the backend tests
+      id: backend-tests
       run: pytest -q -rfEP -n auto tests/simulation
 
   # Apple's MPS device, on the macOS runners that expose a working one
@@ -2093,12 +2100,14 @@ jobs:
     # on it. This job alone keeps 2.14.1 until a release reads that GPU
     # again; every other job takes the pin in requirements-torch.txt.
     - name: Install dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         grep -v '^torch==' requirements-torch.txt > requirements-torch-mps.txt
         pip install -r requirements.txt -r requirements-dev.txt -r requirements-torch-mps.txt torch==2.14.1
         pip install -e .
     - name: Check MPS is usable, then run the tolerance and contour tests on it
+      id: mps-tests
       run: |
         python -c "import torch, sys; ok = torch.backends.mps.is_available() and torch.ones(4, device='mps').sum().item() == 4.0; sys.exit(0 if ok else 'no usable MPS device on this runner')"
         pytest -q -rfEP tests/simulation/test_backend_tolerance.py tests/simulation/test_fdtd_backends.py -k "torch:mps"
@@ -2153,6 +2162,7 @@ jobs:
       with:
         python-version: "3.13"
     - name: Install dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
@@ -2221,6 +2231,7 @@ jobs:
     # bash -e alone, so pipefail is set for pytest's status to pass through
     # tee.
     - name: Run the simulations on the node and here, and compare them
+      id: node-runs
       env:
         PHONOMETRY_TEST_NODE: ci
         PHONOMETRY_HOSTS_FILE: ${{ runner.temp }}/hosts.toml
@@ -2286,12 +2297,14 @@ jobs:
           echo "This ffmpeg has no SVT-AV1, so the AV1-first CPU path is not tested below (VP9 is)" >> "$GITHUB_STEP_SUMMARY"
         fi
     - name: Install dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
     # -rs prints why a test skipped, so a missing encoder reads in the log.
     - name: Write and decode the videos
+      id: videos
       run: >-
         pytest -q -rs -n auto
         tests/io/test_video_encoders.py tests/io/test_write_video.py
@@ -2333,6 +2346,7 @@ jobs:
         pip install -r requirements.txt -r requirements-reports.txt -r requirements-notebook.txt
         pip install ".[plot,report]"
     - name: Execute the smoke notebook and read its outputs
+      id: notebook
       run: python scripts/check_notebook.py tests/notebooks/smoke.ipynb
 
   # Report. What the run reports once the tests are done: the SonarCloud

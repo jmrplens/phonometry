@@ -7,9 +7,13 @@
  *
  * The rule: a commit moves a page's date unless
  *
- * - every change it made to the file is inside the frontmatter keys `title`,
- *   `description` or `sidebar` (search snippets and navigation, not the text
- *   of the page), or a mode change that left the content as it was;
+ * - every change it made to the file is inside the frontmatter keys that
+ *   src/lib/frontmatter-keys.mjs classes as `label` (`title`, `description`,
+ *   `sidebar`: search snippets and navigation, not the text of the page) or
+ *   `metadata` (`corrects`, `searchTitle`: read by the structured data or the
+ *   site search, never shown), or a mode change that left the content as it
+ *   was; a frontmatter key in no class stops the build, named, so that a key
+ *   added for machines is classed before it can move a date;
  * - it moved the file without changing it: the page reached its new address
  *   with the same blob, and its history carries on at the old one;
  * - or it is listed in `site/date-ignore-revs.txt`, which names the
@@ -48,6 +52,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 
 import { domainIds } from '../data/topics.mjs';
+import { keysOfClass, refuseUnclassifiedKeys, topLevelKey } from './frontmatter-keys.mjs';
 
 /** The content collection, relative to the site root. */
 export const CONTENT_DIR = 'src/content/docs';
@@ -58,8 +63,11 @@ export const IGNORE_REVS = 'date-ignore-revs.txt';
 /** The pages built from data outside their file, and that data; relative to the site root. */
 export const DATE_SOURCES = 'date-sources.json';
 
-/** The frontmatter keys whose changes move no date. */
-export const DATELESS_KEYS = Object.freeze(['title', 'description', 'sidebar']);
+/**
+ * The frontmatter keys whose changes move no date: the labels of the page and
+ * the keys only machines read, as src/lib/frontmatter-keys.mjs classes them.
+ */
+export const DATELESS_KEYS = Object.freeze([...keysOfClass('label'), ...keysOfClass('metadata')]);
 
 /** A commit as git names it in full, and as the ignore list has to. */
 export const FULL_SHA = /^[0-9a-f]{40}$/;
@@ -88,8 +96,11 @@ function splitPage(text) {
  * The frontmatter with the dateless keys taken out: each top-level key with
  * the lines that continue it (a folded description, the fields of `sidebar`),
  * trailing blank lines dropped, so the same text before and after a commit
- * means the commit changed nothing else up there. A comment at column 0 is a
- * block of its own and counts like any other key.
+ * means the commit changed nothing else up there. A key is read as YAML
+ * reads it, bare, dotted or in quotes (`topLevelKey`), so a quoted key is
+ * classed like a bare one and is never taken for part of the key above it. A
+ * comment at column 0 is a block of its own and counts like any other key. A
+ * key in no class is refused, named.
  *
  * @param {string} head
  * @returns {string}
@@ -97,13 +108,17 @@ function splitPage(text) {
 function datedFrontmatter(head) {
   const blocks = [];
   for (const line of head.split('\n')) {
-    const key = /^([A-Za-z_][\w-]*)\s*:/.exec(line);
-    if (key || line.startsWith('#') || blocks.length === 0) {
-      blocks.push({ key: key?.[1] ?? null, lines: [line] });
+    const key = topLevelKey(line);
+    if (key !== null || line.startsWith('#') || blocks.length === 0) {
+      blocks.push({ key, lines: [line] });
     } else {
       blocks.at(-1).lines.push(line);
     }
   }
+  refuseUnclassifiedKeys(
+    blocks.flatMap((block) => (block.key === null ? [] : [block.key])),
+    'the date rule',
+  );
   return blocks
     .filter((block) => !DATELESS.has(block.key))
     .map((block) => block.lines.join('\n').replace(/\s+$/, ''))
@@ -112,7 +127,8 @@ function datedFrontmatter(head) {
 
 /**
  * Whether going from `before` to `after` changed only the dateless keys of
- * the frontmatter (or nothing at all).
+ * the frontmatter (or nothing at all). Throws on a frontmatter key in no
+ * class of src/lib/frontmatter-keys.mjs, on either side.
  *
  * @param {string} before The page as it was.
  * @param {string} after The page as the commit left it.
@@ -121,9 +137,12 @@ function datedFrontmatter(head) {
 export function frontmatterOnly(before, after) {
   const a = splitPage(before);
   const b = splitPage(after);
+  // Both sides are read whatever the body did, so a key in no class is
+  // refused the first time the rule meets it, not the first time it matters.
+  const [datedA, datedB] = [a, b].map(({ head }) => (head === null ? null : datedFrontmatter(head)));
   if (a.body !== b.body) return false;
-  if (a.head === null || b.head === null) return a.head === b.head;
-  return datedFrontmatter(a.head) === datedFrontmatter(b.head);
+  // A frontmatter added or taken away counts: null is no string.
+  return datedA === datedB;
 }
 
 /**

@@ -7,7 +7,8 @@
 // The date is the one src/lib/content-dates.mjs gives the page, the same one
 // its footer shows and its structured data carries as `dateModified`: the last
 // commit that changed its content, passing over the commits that only rewrote
-// its title, description or sidebar entry and the sweeps listed in
+// its title, description or sidebar entry or a key only machines read (the
+// classes of src/lib/frontmatter-keys.mjs) and the sweeps listed in
 // site/date-ignore-revs.txt.
 //
 // Every URL has to name its source. A section page is built from

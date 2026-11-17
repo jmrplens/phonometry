@@ -82,7 +82,9 @@ const { counts, domains, checks, panels } = report;
  * the one before. The commit that last changed it is read from the history
  * at build time, through the same one reading of the history that dates
  * every page (src/lib/content-dates.mjs), so the line names the exact code
- * the rows came from and the day they last changed.
+ * the report was generated from, and that commit's day. It says no more than
+ * that: the commit can have changed the version the report names and no row
+ * (a release's does), so the line never says the rows changed there.
  */
 const generated = (await loadContentDates()).sourceCommit('docs/conformance.json');
 const generatedDay = isoDay(generated.date);
@@ -243,7 +245,7 @@ const t =
 				bannerSources: (n: number) =>
 					`${n} ${n === 1 ? 'fuente publicada adicional' : 'fuentes publicadas adicionales'}`,
 				generatedFor: 'Generado para phonometry',
-				generatedCommit: '; sus filas cambiaron por última vez en el commit',
+				generatedCommit: ' a partir del commit',
 				generatedOn: ', el',
 				archived: 'Informes archivados con cada versión:',
 				archivedFor: (version: string) => `phonometry ${version}`,
@@ -301,7 +303,7 @@ const t =
 				bannerSources: (n: number) =>
 					`${n} ${n === 1 ? 'further published source' : 'further published sources'}`,
 				generatedFor: 'Generated for phonometry',
-				generatedCommit: '; its rows last changed in commit',
+				generatedCommit: ' from commit',
 				generatedOn: ', on',
 				archived: 'Reports archived with each release:',
 				archivedFor: (version: string) => `phonometry ${version}`,
@@ -427,9 +429,10 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 			)}
 		</div>
 		{/*
-			Which code and which day the rows are of. The words sit beside the
-			values, each in an element of its own, and the spaces between them
-			are text, so a reader with no style still reads them apart.
+			Which code the report was generated from, and that commit's day. The
+			words sit beside the values, each in an element of its own, and the
+			spaces between them are text, so a reader with no style still reads
+			them apart.
 		*/}
 		<p class="banner-provenance" data-report-provenance>
 			{t.generatedFor} <b data-report-library>{report.library}</b>{t.generatedCommit}{' '}

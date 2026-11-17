@@ -1075,8 +1075,8 @@ const CONFORMANCE = JSON.parse(readFileSync(REPORT_FILE, 'utf8'));
 const REPORT_LIBRARY = CONFORMANCE.library;
 
 /**
- * The day the report page prints as the one its rows last changed: the
- * `<time datetime>` of its `[data-report-provenance]` line, which
+ * The day the report page prints as the one of the commit it was generated
+ * from: the `<time datetime>` of its `[data-report-provenance]` line, which
  * Conformance.astro writes from the last commit of docs/conformance.json.
  */
 const provenanceLine = (html) => /<p\b[^>]*\bdata-report-provenance\b[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1];
@@ -2127,9 +2127,10 @@ for (const file of files) {
 			if (dataset.version !== REPORT_LIBRARY) {
 				problems.push(`its version is ${JSON.stringify(dataset.version)}, and docs/conformance.json was generated for ${REPORT_LIBRARY}`);
 			}
-			// Dated by its data: the day the page prints as the one its rows
-			// last changed, not the page's own date, which a change to how the
-			// rows are drawn or to the page's text moves as well.
+			// Dated by its data: the day the page prints as the one of the
+			// commit the report was generated from, not the page's own date,
+			// which a change to how the rows are drawn or to the page's text
+			// moves as well.
 			const dataDay = provenanceDay(html);
 			if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dataset.dateModified ?? ''))) {
 				problems.push(`its dateModified is ${JSON.stringify(dataset.dateModified)}, not a day`);
@@ -2138,11 +2139,11 @@ for (const file of files) {
 					problems.push(`its data changed on ${dataset.dateModified}, after the page's own last change, ${article.dateModified}`);
 				}
 				if (dataDay !== undefined && dataset.dateModified !== dataDay) {
-					problems.push(`its dateModified is ${dataset.dateModified}, and the page says its rows last changed on ${dataDay}`);
+					problems.push(`its dateModified is ${dataset.dateModified}, and the page says the report was generated from a commit of ${dataDay}`);
 				}
 			}
 			if (dataDay === undefined) {
-				problems.push('the page prints no day its rows last changed ([data-report-provenance] with a <time datetime>)');
+				problems.push('the page prints no day of the commit the report was generated from ([data-report-provenance] with a <time datetime>)');
 			}
 			// Of the commit its rows are of: the files it hands out and the
 			// script it names are read at the commit the banner prints, as the
@@ -2967,7 +2968,7 @@ if (
 		} else if (counted && described && unwritten.length === 0 && en.problems.length === 0 && es.problems.length === 0) {
 			ok(
 				`the conformance report's Dataset is the main entity of both report pages, versioned ${REPORT_LIBRARY}, ` +
-					`dated by the day its rows last changed, based on the ${en.named.size} work${en.named.size === 1 ? '' : 's'} ` +
+					`dated by the day of the commit it was generated from, based on the ${en.named.size} work${en.named.size === 1 ? '' : 's'} ` +
 					`the standards of its checks resolve to, named in each language, and written in each page's language ` +
 					`(${keys.length} texts)`,
 			);

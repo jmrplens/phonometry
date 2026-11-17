@@ -151,7 +151,7 @@ const stub = (node) =>
 /** The library the committed report was generated for, which the report's Dataset gives as its version. */
 const LIBRARY = JSON.parse(readFileSync(new URL('../../docs/conformance.json', import.meta.url), 'utf8')).library;
 
-/** The day the report's rows last changed, which its banner prints and its Dataset gives. */
+/** The day of the commit the report was generated from, which its banner prints and its Dataset gives. */
 const DATA_DAY = '2026-09-15';
 
 /** The commit the report's rows are of, which its banner names and every repository address of its Dataset is at. */
@@ -165,8 +165,8 @@ const atCommit = (path, host = 'raw') =>
 
 /** The banner line of the report page that names the commit and the day its rows are of (Conformance.astro). */
 const provenance = (day) =>
-	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b>; ' +
-	`its rows last changed in commit <a href="https://github.com/jmrplens/phonometry/commit/${DATA_COMMIT}"><code data-report-commit="${DATA_COMMIT}">${DATA_COMMIT.slice(0, 9)}</code></a>, ` +
+	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b> ' +
+	`from commit <a href="https://github.com/jmrplens/phonometry/commit/${DATA_COMMIT}"><code data-report-commit="${DATA_COMMIT}">${DATA_COMMIT.slice(0, 9)}</code></a>, ` +
 	`on <time datetime="${day}">${day}</time>.</p>`;
 
 /** What the report's Dataset says in each language. */
@@ -2270,7 +2270,7 @@ test('a report whose Dataset is its main entity, versioned, dated by its data, b
 		ran.out,
 		new RegExp(
 			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${RegExp.escape(LIBRARY)}, ` +
-				'dated by the day its rows last changed, based on the 1 work the standards of its checks resolve to, named in each language, ' +
+				'dated by the day of the commit it was generated from, based on the 1 work the standards of its checks resolve to, named in each language, ' +
 				'and written in each page\'s language \\(5 texts\\)',
 		),
 	);
@@ -2426,7 +2426,7 @@ test('report Datasets that name a different number of works in the two languages
 	assert.match(ran.err, /FAIL the conformance report's Dataset names 2 works in English and 1 in Spanish/);
 });
 
-test('a report Dataset dated by the page and not by the day its rows last changed fails', (t) => {
+test('a report Dataset dated by the page and not by the day of the commit the report was generated from fails', (t) => {
 	const built = build();
 	// The page's own date, 2026-10-01, the variant that would date the data by
 	// a change to how the rows are drawn.
@@ -2435,19 +2435,19 @@ test('a report Dataset dated by the page and not by the day its rows last change
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says its rows last changed on 2026-09-15/,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says the report was generated from a commit of 2026-09-15/,
 	);
 	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
 });
 
-test('a report page that prints no day its rows last changed fails', (t) => {
+test('a report page that prints no day of the commit the report was generated from fails', (t) => {
 	const built = build();
 	built['es/report'].text = '';
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day its rows last changed \(\[data-report-provenance\] with a <time datetime>\)/,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day of the commit the report was generated from \(\[data-report-provenance\] with a <time datetime>\)/,
 	);
 });
 

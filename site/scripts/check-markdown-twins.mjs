@@ -8,7 +8,8 @@
 //   3. what the page says of it    the <link rel="alternate" type="text/markdown">
 //                                  in its head and the `encoding` of its
 //                                  structured data
-//   4. the sitemap                 the <lastmod> the copy's `Updated:` repeats
+//   4. the sitemap                 the <lastmod> whose day the copy's
+//                                  `Updated:` names
 //
 // The copies used to be cut out of the page source by regular expressions, and
 // that left them short of the page in ways no check saw: the two landing pages
@@ -30,7 +31,10 @@
 // copy's title is the page's <title> without the site's name; `Canonical:`,
 // `Language:`, `Summary:` and `Published:` are the page's canonical link, its
 // language, its meta description and the `datePublished` of the node that
-// declares the copy; `Updated:` is the sitemap's <lastmod>; `Alternate:` is
+// declares the copy; `Updated:` is the moment the last <time datetime> of the
+// page's footer gives, to the second, on the day of the sitemap's <lastmod>
+// (the edge serves the page's Last-Modified from the one and the copy's from
+// the other, and a day alone would read as midnight); `Alternate:` is
 // the copy of the page its hreflang link names; `Verified:` stands exactly
 // where the page states its conformance checks; `Unreleased:` stands exactly
 // where the page shows the notice that it changed after the latest release,
@@ -104,6 +108,9 @@ import {
 } from '../src/lib/page-markdown.mjs';
 import { decode, isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
 import { copyDefects, frontmatterSource, headingText, stripFrontmatter } from './shared/page-twin.mjs';
+
+/** The `Updated:` value src/lib/agent-md/header.mjs writes: a moment in UTC, to the second. */
+const UPDATED_MOMENT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u;
 
 /** The API reference served under /es/, which has no file of its own. */
 const API_FALLBACK = /^\/es\/reference\/api\//u;
@@ -889,9 +896,24 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
       }
     }
     const lastmod = dates.get(route);
+    const updated = fields.get('Updated');
     if (!lastmod) add('header', `${route} has a copy and no <lastmod> in the sitemap: nothing dates it`);
-    else if (fields.get('Updated') !== lastmod) {
+    else if (!UPDATED_MOMENT.test(updated ?? '')) {
+      add(
+        'header',
+        `${copy} ${said('Updated')}${/^\d{4}-\d{2}-\d{2}$/u.test(updated ?? '') ? ', a day with no time' : ''}: ` +
+          "the line states the moment the page's footer gives, as YYYY-MM-DDTHH:MM:SSZ",
+      );
+    } else if (updated?.slice(0, 10) !== lastmod) {
       add('header', `${copy} ${said('Updated')}, and the sitemap dates the page ${lastmod}`);
+    } else {
+      // The footer's last <time datetime> is where the edge reads the page's
+      // Last-Modified, and the copy's Updated: line is where it reads the
+      // copy's: the two name one moment.
+      const footer = tags(html, 'time').map((time) => time.datetime).filter((at) => at !== undefined).at(-1);
+      if (footer === undefined || Date.parse(footer) !== Date.parse(updated ?? '')) {
+        add('header', `${copy} ${said('Updated')}, and the page's footer dates it ${footer ?? 'nowhere'}`);
+      }
     }
     const other = tags(html, 'link').find(
       (link) => link.rel === 'alternate' && link.hreflang && link.hreflang !== 'x-default' && link.hreflang !== lang,

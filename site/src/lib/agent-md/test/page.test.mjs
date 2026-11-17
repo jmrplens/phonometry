@@ -33,7 +33,7 @@ const FULL = Object.freeze({
   release: RELEASE,
   author,
   published: '2026-01-06',
-  updated: '2026-10-20',
+  updated: '2026-10-20T10:00:00Z',
   standards: ['IEC 61260-1:2014', 'ANSI S1.11-2004'],
   summary: 'Fractional-octave band mathematics and the octave_filter parameters.',
 });
@@ -52,7 +52,7 @@ describe('the header', () => {
         'Install: pip install "phonometry[full]"',
         'Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)',
         'Published: 2026-01-06',
-        'Updated: 2026-10-20',
+        'Updated: 2026-10-20T10:00:00Z',
         'Standards: IEC 61260-1:2014; ANSI S1.11-2004',
         `License: ${LICENSE}`,
         'Summary: Fractional-octave band mathematics and the octave_filter parameters.',
@@ -314,7 +314,7 @@ describe('a page', () => {
     assert.ok(markdown.split('\n').includes(`Canonical: ${SITE}/a/`));
     assert.ok(markdown.split('\n').includes(`Alternate: ${SITE}/es/a/index.md`));
     assert.match(markdown, /^Published: 2026-01-06$/mu);
-    assert.match(markdown, /^Updated: 2026-10-20$/mu);
+    assert.match(markdown, /^Updated: 2026-10-20T10:00:00Z$/mu, 'the moment the content changed, to the second, not its day alone');
     assert.match(markdown, /^Standards: IEC 61260-1:2014$/mu, 'a document the page only cites is not one it implements');
     assert.match(markdown, /^Summary: What the guide is for\.$/mu);
     assert.match(markdown, /---\n\nThe body\.\n\n\[note\]\n\nInside\.\n\n## References\n\n- \*\*IEC\. \(2014\)\.\*\*/u);

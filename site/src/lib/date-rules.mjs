@@ -363,3 +363,20 @@ export function readDateSources(file, { topics = domainIds } = {}) {
 export function isoDay(date) {
   return date.toISOString().slice(0, 10);
 }
+
+/**
+ * The moment a date names in UTC, to the second, as `YYYY-MM-DDTHH:MM:SSZ`:
+ * the form the footer's `<time datetime>` and a Markdown copy's `Updated:`
+ * line carry. The edge serves a page's Last-Modified from it (the last
+ * `<time datetime>` of the footer, the `Updated:` line of a copy), and a day
+ * alone reads there as midnight, so a second change on the same day would
+ * answer a revalidation with 304. A commit's time is whole seconds, as an
+ * HTTP date is; the part of a second any other date carries is dropped, never
+ * rounded up past the moment.
+ *
+ * @param {Date} date
+ * @returns {string}
+ */
+export function isoInstant(date) {
+  return `${date.toISOString().slice(0, 19)}Z`;
+}

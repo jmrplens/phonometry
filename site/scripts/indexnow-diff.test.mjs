@@ -309,6 +309,21 @@ test('the release that takes the Unreleased: line off the pages changed since th
 	assert.deepEqual(submit(t, stamped('4.0.0', true), stamped('4.0.1', false)).urls, []);
 });
 
+test('a copy whose Updated: line states the instant hashes as the one that stated its day, and a new day still moves it', (t) => {
+	// The header of a copy states the instant its content last changed, which
+	// the edge serves as its Last-Modified; it stated the day alone before. The
+	// record keeps the day, which the sitemap's date gives it as well, so the
+	// change of shape reports no page as changed, and neither does a later
+	// change of the hour that leaves the text as it was.
+	const dated = (updated) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [route, guide(route, { header: ['Version: phonometry 4.0.0', `Updated: ${updated}`, 'License: MIT'] })]),
+		);
+	assert.deepEqual(submit(t, dated('2026-10-01'), dated('2026-10-01T10:30:31Z')).urls, []);
+	assert.deepEqual(submit(t, dated('2026-10-01T10:30:31Z'), dated('2026-10-01T15:02:00Z')).urls, []);
+	assert.deepEqual(submit(t, dated('2026-10-01T10:30:31Z'), dated('2026-10-02T10:30:31Z')).urls, Object.keys(BASE).map(url).sort());
+});
+
 test('every other header line, and the same words in the body, still move a page', (t) => {
 	const before = { '/signals/levels/': guide('/signals/levels/', { header: ['Version: phonometry 4.0.0', 'License: MIT'] }) };
 	const header = { '/signals/levels/': guide('/signals/levels/', { header: ['Version: phonometry 4.0.0', 'License: BSD'] }) };

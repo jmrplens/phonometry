@@ -123,8 +123,8 @@ describe('a page dated after the release and one dated before it', () => {
       const before = await copy('before.md');
       assert.ok(after.split('\n').includes(`Unreleased: ${UNRELEASED[lang](version)}`), after);
       assert.doesNotMatch(before, /^Unreleased:/mu);
-      assert.match(after, /^Updated: 2026-11-18$/mu);
-      assert.match(before, /^Updated: 2026-11-16$/mu);
+      assert.match(after, /^Updated: 2026-11-18T09:00:00Z$/mu);
+      assert.match(before, /^Updated: 2026-11-16T09:00:00Z$/mu);
     });
   }
 

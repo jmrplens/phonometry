@@ -27,7 +27,7 @@ const ONE_CALL = `import { execFileSync } from 'node:child_process';\nexecFileSy
 /** The files the list names, each as it should be. */
 const LISTED = {
 	'astro.config.mjs': `${ONE_CALL}export default {};\n`,
-	'src/lib/page-dates.mjs': `${ONE_CALL}export function firstPublished() {}\n`,
+	'src/lib/page-dates.mjs': `${ONE_CALL}export function firstPublished() {}\nexport function firstPublishedAt() {}\n`,
 	'src/lib/content-dates.mjs': `import { spawn } from 'node:child_process';\nspawn('git', ['log']);\nexport function loadContentDates() {}\n`,
 	'src/lib/release-commit.mjs': `import { execFile } from 'node:child_process';\nexecFile('git', ['tag']);\nexport function loadRelease() {}\n`,
 };
@@ -183,6 +183,7 @@ export function git(...args) {
 	return execFileSync('git', args);
 }
 export function firstPublished() {}
+export function firstPublishedAt() {}
 `,
 		'src/components/Head.astro': `---
 import { git } from '../lib/page-dates.mjs';

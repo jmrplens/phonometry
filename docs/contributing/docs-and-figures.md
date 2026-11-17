@@ -1828,7 +1828,9 @@ dist/<route>/index.md              the copy, each part held to the page:
   Version:, Install:, Author:      present; Version: the release being built
   Published:                       the datePublished of the node that
                                    declares the copy
-  Updated:                         the sitemap's <lastmod>
+  Updated:                         the moment of the footer's last
+                                   <time datetime>, YYYY-MM-DDTHH:MM:SSZ,
+                                   on the day of the sitemap's <lastmod>
   Standards:                       documents separated by "; "
   Verified:                        exactly where it states its checks
   License:                         on every page but a catalogue

@@ -29,7 +29,7 @@ import { author, siteTitle } from '../../data/site.mjs';
 import { catalogueSlugs } from '../../data/topics.mjs';
 import { installCommand, preRelease, version } from '../../data/repo-stats.mjs';
 import { implementedStandards } from '../reference-chips.ts';
-import { isoDay } from '../date-rules.mjs';
+import { isoInstant } from '../date-rules.mjs';
 import { changedAfter } from '../release-rules.mjs';
 import { markdownCopyPath, routeOf } from '../page-markdown.mjs';
 import { citationParts, noteParts, opening, sortedReferences } from '../references-format.mjs';
@@ -196,7 +196,7 @@ export async function pageMarkdown(file, { registry, dates, flavour = 'agent', c
         },
         author,
         published: dates?.publishedOf(file),
-        updated: dates ? isoDay(dates.dateOf(file)) : undefined,
+        updated: dates ? isoInstant(dates.dateOf(file)) : undefined,
         standards: implementedStandards(references),
         verified: verified?.(route),
         license: !isCatalogueRoute(route),

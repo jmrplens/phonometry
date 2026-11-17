@@ -84,7 +84,10 @@
 // name the release (`Version:` and `Install:`, listed in
 // src/lib/page-markdown.mjs) are left out, so stamping a release does not
 // report every page as changed; the landing pages state the release in their
-// text, and the sitemap dates them by it, so they are reported.
+// text, and the sitemap dates them by it, so they are reported. The
+// `Updated:` line is read as the day it names, as it was written before it
+// carried the moment for the edge's Last-Modified, so that change reported no
+// page either; a change of the text moves a page by itself.
 //
 // Usage:
 //   node scripts/indexnow-diff.mjs manifest [dist]
@@ -125,7 +128,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { hasMarkdownCopy, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
+import { hasMarkdownCopy, withoutReleaseLines, withUpdatedDay } from '../src/lib/page-markdown.mjs';
 import { attributes, decode, markupOf, tags } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -282,7 +285,8 @@ export const routeOfUrl = (loc) => decodeURIComponent(loc.slice(ORIGIN.length + 
 /**
  * What one page says, as one string: its title, its meta description, its
  * date and its text. The text is the Markdown copy beside the page without its
- * release lines, or, on a page src/lib/page-markdown.mjs gives no copy, the
+ * release lines and with its `Updated:` line cut to its day, or, on a page
+ * src/lib/page-markdown.mjs gives no copy, the
  * page's own text in its <main> ({@link mainText}). Which pages have a copy
  * is that module's rule, not whatever the build happens to hold: a copy the
  * build should have written and did not fails here, rather than the page
@@ -306,7 +310,7 @@ export function pageRecord(dist, { loc, lastmod }) {
 				`${loc} has a Markdown copy by src/lib/page-markdown.mjs, and the build wrote no ${copy}: scripts/agent-md.mjs --public writes every copy before the build (package.json prebuild).`,
 			);
 		}
-		text = withoutReleaseLines(readFileSync(copy, 'utf8'));
+		text = withUpdatedDay(withoutReleaseLines(readFileSync(copy, 'utf8')));
 	} else {
 		text = mainText(html);
 		if (text === null) {

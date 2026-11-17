@@ -50,7 +50,7 @@ const ONCE_PER_BUILD = new Map([
 		'src/lib/page-dates.mjs',
 		{
 			calls: 1,
-			exports: ['firstPublished'],
+			exports: ['firstPublished', 'firstPublishedAt'],
 			why: 'reads the docs tree in one pass on the first page that asks; scripts/page-dates.test.mjs counts the processes',
 		},
 	],

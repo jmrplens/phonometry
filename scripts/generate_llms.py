@@ -210,20 +210,26 @@ UPGRADING_ROUTE = "start/upgrading"
 #: ``pageKind``).
 KINDS = frozenset({"home", "api", "catalogue", "errata-family", "guide"})
 
-#: The header lines of a copy that carry a date read from git. ``make llms``
-#: writes llms.txt from copies without them (``agent-md.mjs --dump
-#: --undated``), so a shard is measured as if both were there, whether they are
-#: or not: the cut, and the file names llms.txt lists, cannot then depend on
-#: what git answered.
-DATED_HEADER_KEYS = ("Published", "Updated")
+#: The header lines of a copy that carry a date read from git, each with the
+#: shape of its value: ``Published:`` the day the page was first published,
+#: ``Updated:`` the moment its content last changed, to the second in UTC, which
+#: the edge serves as the copy's Last-Modified. ``make llms`` writes llms.txt
+#: from copies without them (``agent-md.mjs --dump --undated``), so a shard is
+#: measured as if both were there, whether they are or not: the cut, and the
+#: file names llms.txt lists, cannot then depend on what git answered.
+DATED_HEADER_SHAPES = (
+    ("Published", "0000-00-00"),
+    ("Updated", "0000-00-00T00:00:00Z"),
+)
 
-#: What the dated lines take when they are there: the key, ``: ``, a
-#: ``YYYY-MM-DD`` day and the end of the line.
-DATED_LINES_BYTES = sum(len(f"{key}: 0000-00-00\n") for key in DATED_HEADER_KEYS)
+#: What the dated lines take when they are there: the key, ``: ``, the value
+#: in its shape and the end of the line.
+DATED_LINES_BYTES = sum(len(f"{key}: {shape}\n") for key, shape in DATED_HEADER_SHAPES)
 
 #: A dated header line, as the header writes one.
 _DATED_LINE = re.compile(
-    rf"^(?:{'|'.join(DATED_HEADER_KEYS)}): [0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}$"
+    r"^(?:Published: [0-9]{4}-[0-9]{2}-[0-9]{2}"
+    r"|Updated: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)$"
 )
 
 #: The header line of a copy whose page changed after the latest release

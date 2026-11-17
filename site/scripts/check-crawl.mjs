@@ -46,10 +46,14 @@
 //    the attribute as written;
 // 7. a <lastmod> on every URL of the sitemap, the same day the page gives as
 //    its `dateModified` in its structured data and as the last date of its
-//    footer, and a `datePublished` no later than it. The three are written in
-//    three places from one date (src/lib/content-dates.mjs): the sitemap
-//    stamp, Head.astro and LastUpdated.astro, the last two through the
-//    `lastUpdated` src/routeData.ts sets. Without that override Starlight
+//    footer, and a `datePublished` no later than it. That last date of the
+//    footer is a moment, with its time of day: the edge serves the page's
+//    Last-Modified from it, and a day alone reads as midnight there, so a
+//    second change on the same day would answer a revalidation with 304. The
+//    three are written in three places from one date
+//    (src/lib/content-dates.mjs): the sitemap stamp, Head.astro and
+//    LastUpdated.astro, the last two through the `lastUpdated`
+//    src/routeData.ts sets. Without that override Starlight
 //    sets its own, the last commit that touched the file, and nothing else
 //    would notice; nor would anything notice a stamp that found no sitemap
 //    to write into;
@@ -87,6 +91,8 @@ import { numberGlue } from './shared/crawler-text.mjs';
 const here = dirname(fileURLToPath(import.meta.url));
 const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
 const ORIGIN = `${siteUrl}${basePath}`;
+/** A `<time datetime>` that names a moment, with its time of day and its offset, as the edge reads one. */
+const MOMENT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 /** Starlight titles a page "<frontmatter title> | <site title>". */
 const SITE_TITLE = 'phonometry';
 const TITLE_DELIMITER = ' | ';
@@ -300,12 +306,18 @@ report(
 		for (const [loc, lastmod, page] of dated) {
 			const own = page.graph.find((node) => node['@id'] === `${loc}#article` || node['@id'] === `${loc}#webpage`);
 			const modified = own?.dateModified;
-			const footer = page.times.at(-1)?.slice(0, 10);
+			const footerAt = page.times.at(-1);
+			const footer = footerAt?.slice(0, 10);
 			if (!/^\d{4}-\d{2}-\d{2}$/.test(lastmod ?? '')) {
 				disagree.push(`${loc}: <lastmod> ${JSON.stringify(lastmod ?? null)}, not a day`);
 			} else if (modified !== lastmod || footer !== lastmod) {
 				disagree.push(
 					`${loc}: <lastmod> ${lastmod}, dateModified ${modified ?? 'none'}, footer ${footer ?? 'none'}`,
+				);
+			} else if (!MOMENT.test(footerAt)) {
+				disagree.push(
+					`${loc}: the footer's last date is ${footerAt}, a day with no time, so a second change on that day ` +
+						'would leave its Last-Modified where it was',
 				);
 			}
 			if (own?.datePublished !== undefined && modified !== undefined && own.datePublished > modified) {

@@ -38,7 +38,7 @@ import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 
-import { isoDay } from './date-rules.mjs';
+import { isoDay, isoInstant } from './date-rules.mjs';
 
 /** Where the docs collection lives, from the repository's root. */
 const DOCS_TREE = 'site/src/content/docs';
@@ -57,7 +57,7 @@ function git(...args) {
   });
 }
 
-/** The older of two adds, each `{ time, date }`; `current` may be missing. */
+/** The older of two adds, each `{ time, date, at }`; `current` may be missing. */
 function older(current, candidate) {
   return current && current.time <= candidate.time ? current : candidate;
 }
@@ -75,7 +75,7 @@ function older(current, candidate) {
  * merge adds, and any other for one that did, whose add it keeps.
  *
  * @param {string} log
- * @returns {Map<string, {time: number, date: string}>} Repo-relative path to add.
+ * @returns {Map<string, {time: number, date: string, at: string}>} Repo-relative path to add.
  */
 function addsIn(log) {
   const added = new Map();
@@ -87,7 +87,8 @@ function addsIn(log) {
     const field = fields[i].trimStart();
     if (field.startsWith('C ')) {
       const time = Number(field.slice(2));
-      commit = { time, date: isoDay(new Date(time * 1000)) };
+      const when = new Date(time * 1000);
+      commit = { time, date: isoDay(when), at: isoInstant(when) };
     } else if (/^[A-Z]{2,}$/.test(field)) {
       // A merge, read before a one-parent status that starts with the same
       // letter: one letter per parent, its path in each, and the path it holds.
@@ -213,8 +214,29 @@ let history;
  *   checkout is shallow.
  */
 export function firstPublished(filePath) {
+  return addOf(filePath)?.date;
+}
+
+/**
+ * The moment a file first appeared in history: the time of the same commit
+ * {@link firstPublished} gives the day of, in UTC to the second
+ * (`isoInstant` in src/lib/date-rules.mjs). The footer writes it into the
+ * `<time datetime>` of the publication date, which is the page's last one when
+ * it was published and last changed on one day, and the edge serves a page's
+ * Last-Modified from that last one: a day alone would read there as midnight.
+ *
+ * @param {string} filePath As for {@link firstPublished}.
+ * @returns {string|undefined} `YYYY-MM-DDTHH:MM:SSZ`, or undefined where
+ *   {@link firstPublished} gives no day.
+ */
+export function firstPublishedAt(filePath) {
+  return addOf(filePath)?.at;
+}
+
+/** The add a file goes back to, read from the one pass over the tree. */
+function addOf(filePath) {
   if (!filePath) return undefined;
   history ??= readHistory();
   if (history === NO_HISTORY) return undefined;
-  return history.added.get(repoPath(filePath, history.root))?.date;
+  return history.added.get(repoPath(filePath, history.root));
 }

@@ -95,7 +95,9 @@ const agreeing = () => ({
 	pages: {
 		'/': page('/', { modified: '2026-03-01' }),
 		'/es/': page('/es/', { modified: '2026-03-02' }),
-		'/a/': page('/a/', { modified: '2026-03-03', published: '2026-03-03', footer: ['2026-03-03'] }),
+		// Published and changed on one day: the footer shows the one date, and
+		// its datetime is the moment the content changed.
+		'/a/': page('/a/', { modified: '2026-03-03', published: '2026-03-03', footer: ['2026-03-03T12:00:00Z'] }),
 		'/es/a/': page('/es/a/', { modified: '2026-03-04' }),
 	},
 	lastmod: { '/': '2026-03-01', '/es/': '2026-03-02', '/a/': '2026-03-03', '/es/a/': '2026-03-04' },
@@ -125,6 +127,19 @@ test('a footer that is not the <lastmod> fails', (t) => {
 	const ran = check(t, pages, lastmod);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /\/es\/a\/: <lastmod> 2026-03-04, dateModified 2026-03-04, footer 2026-03-05/);
+});
+
+test('a footer whose last date is a day with no time fails, since the edge reads it as midnight', (t) => {
+	const { pages, lastmod } = agreeing();
+	// What LastUpdated.astro wrote on a page published and changed on one day:
+	// the day of the commit that added it, and nothing of the time.
+	pages['/a/'] = page('/a/', { modified: '2026-03-03', published: '2026-03-03', footer: ['2026-03-03'] });
+	const ran = check(t, pages, lastmod);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/\/a\/: the footer's last date is 2026-03-03, a day with no time, so a second change on that day would leave its Last-Modified where it was/,
+	);
 });
 
 test('a sitemap URL with no <lastmod> fails, as when the stamp found no sitemap to write into', (t) => {

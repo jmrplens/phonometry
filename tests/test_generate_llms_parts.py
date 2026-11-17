@@ -344,7 +344,7 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
     def undate(text: str) -> str:
         return (
             text.replace("Published: 2026-01-06\n", "")
-            .replace("Updated: 2026-10-20\n", "")
+            .replace("Updated: 2026-10-20T10:00:00Z\n", "")
             .replace(f"{UNRELEASED_LINE}\n", "")
         )
 

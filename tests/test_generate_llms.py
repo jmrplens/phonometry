@@ -667,3 +667,31 @@ def test_the_index_says_a_pre_release_is_not_on_pypi_yet_and_nothing_at_the_stam
     final = "\n".join(llms._summary("4.0.0"))
     assert "not on PyPI" not in final
     assert "pre-release" not in final
+
+
+def test_the_site_url_follows_phonometry_site_as_the_site_build_does() -> None:
+    """The llms files name the host the site was built for, from the same closed table.
+
+    ``PHONOMETRY_SITE`` picks the host in ``site/src/data/site.mjs`` and here,
+    so the llms files a phonometry.dev build publishes link phonometry.dev
+    pages; unset, both name docs.jmrp.io; any other value stops the run.
+    """
+    assert llms.site_url(None) == "https://docs.jmrp.io/phonometry"
+    assert llms.site_url("") == "https://docs.jmrp.io/phonometry"
+    assert llms.site_url("docs.jmrp.io") == "https://docs.jmrp.io/phonometry"
+    assert llms.site_url("phonometry.dev") == "https://phonometry.dev/phonometry"
+    with pytest.raises(
+        SystemExit, match=r"PHONOMETRY_SITE=phonometry\.org is not one of"
+    ):
+        llms.site_url("phonometry.org")
+    site = (llms.ROOT / "site" / "src" / "data" / "site.mjs").read_text(
+        encoding="utf-8"
+    )
+    targets = {
+        name: f"{url}{base}"
+        for name, url, base in re.findall(
+            r"'([^']+)': Object\.freeze\(\{ siteUrl: '([^']+)', basePath: '([^']*)' \}\)",
+            site,
+        )
+    }
+    assert targets == dict(llms.SITE_TARGETS)

@@ -422,13 +422,13 @@ jobs:
         # Before the build, this job wrote llms.txt at the repository root from
         # a dump of the copies with no dates, the way `make llms` writes the
         # committed file. The build wrote the one it publishes from copies that
-        # state the day each page was published and last changed. Where a
-        # shard is cut, and so which part files llms.txt links, must not depend
-        # on those dates: a writer whose text grew with them, or a dated header
-        # line the generator does not measure as one, would leave the committed
-        # index linking files the site does not serve, with every other check
-        # green, since each compares a file only with what was written beside
-        # it. The two are compared here on every build.
+        # state the day each page was published and the moment it last changed.
+        # Where a shard is cut, and so which part files llms.txt links, must
+        # not depend on those dates: a writer whose text grew with them, or a
+        # dated header line the generator does not measure as one, would leave
+        # the committed index linking files the site does not serve, with every
+        # other check green, since each compares a file only with what was
+        # written beside it. The two are compared here on every build.
         run: |
           if ! diff -u llms.txt site/dist/llms.txt; then
             echo "::error::The llms.txt the build publishes differs from the one written from copies without their dates: where a shard is cut depends on the dates, so the committed llms.txt would link part files the site does not serve."
@@ -436,20 +436,20 @@ jobs:
           fi
       - name: Check every page's Markdown copy carries what the page carries
         # Every page publishes a copy of itself at <page>/index.md, written
-        # from its source before the build (scripts/agent-md.mjs --public),
-        # and an agent reads the page through it. The copies cut from the
-        # source by regular expressions had no title in Spanish, none at all
-        # for the two landing pages, and leaked {expressions}, ::: asides,
-        # HTML comments and links that only resolve on the site. This reads
-        # the build: every page in exactly one class of what it owes, every
-        # copy announced by its page's head and structured data, a title and
-        # a header held line by line to the page and the sitemap (canonical,
-        # language, translation, release, publication day, Updated: date,
-        # licence, summary), a body that is there, with every row of a
+        # from its source before the build (scripts/agent-md.mjs --public), and
+        # an agent reads the page through it. The copies cut from the source by
+        # regular expressions had no title in Spanish, none at all for the two
+        # landing pages, and leaked {expressions}, ::: asides, HTML comments
+        # and links that only resolve on the site. This reads the build: every
+        # page in exactly one class of what it owes, every copy announced by
+        # its page's head and structured data, a title and a header held line
+        # by line to the page and the sitemap (canonical, language,
+        # translation, release, publication day, the Updated: moment its footer
+        # states, licence, summary), a body that is there, with every row of a
         # catalogue's tables, and a text a Markdown reader can use. The llms
-        # files the build wrote carry every English guide, catalogue and
-        # errata family once in llms-full.txt and in exactly one shard, as
-        # its copy reads, and llms.txt links every shard file and no other.
+        # files the build wrote carry every English guide, catalogue and errata
+        # family once in llms-full.txt and in exactly one shard, as its copy
+        # reads, and llms.txt links every shard file and no other.
         run: pnpm run check:markdown-twins
         working-directory: site
       - name: Check the Python examples the llms files restate

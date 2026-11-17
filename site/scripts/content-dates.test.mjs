@@ -42,6 +42,7 @@ import {
 	DATELESS_KEYS,
 	frontmatterOnly,
 	isoDay,
+	isoInstant,
 	readDateSources,
 	readIgnoreRevs,
 } from '../src/lib/date-rules.mjs';
@@ -2319,4 +2320,17 @@ test('a build with no sitemap to stamp fails instead of publishing one without d
 	ran = run();
 	assert.equal(ran.status, 1);
 	assert.match(ran.stderr, /FAIL the sitemap index lists .*sitemap-renamed\.xml, which the build did not write/);
+});
+
+test('a content date is stated to the second, so two changes on one day give two dates', () => {
+	// The footer and the Markdown copy state it, and the edge serves it as the
+	// Last-Modified of both: by the day alone, the second change of a day would
+	// look no newer than the first to a client that asks with If-Modified-Since.
+	const morning = new Date('2026-11-14T09:19:00Z');
+	const evening = new Date('2026-11-14T20:17:00Z');
+	assert.equal(isoDay(morning), isoDay(evening));
+	assert.equal(isoInstant(morning), '2026-11-14T09:19:00Z');
+	assert.equal(isoInstant(evening), '2026-11-14T20:17:00Z');
+	assert.equal(isoInstant(new Date('2026-11-14T20:17:00.999Z')), '2026-11-14T20:17:00Z', 'cut to the second, as HTTP dates are');
+	assert.equal(isoDay(new Date(isoInstant(evening))), isoDay(evening), 'on the day the sitemap gives');
 });

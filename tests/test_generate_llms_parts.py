@@ -348,11 +348,19 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
             .replace(f"{UNRELEASED_LINE}\n", "")
         )
 
+    def in_two(limit: int) -> bool:
+        # A budget too small for one section refuses the page outright, which
+        # is no cut into two parts either.
+        try:
+            return len(cut(undated, limit)) <= 2
+        except SystemExit:
+            return False
+
     # The smallest budget that holds the page in two parts, by bisection.
     low, high = 1_000, _bytes(cut(dated, 10**9)[0])
     while low < high:
         middle = (low + high) // 2
-        if len(cut(undated, middle)) <= 2:
+        if in_two(middle):
             high = middle
         else:
             low = middle + 1

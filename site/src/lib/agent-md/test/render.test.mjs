@@ -223,6 +223,8 @@ describe('raw HTML', () => {
     assert.equal(render('first<br /> \nsecond\n').markdown, 'first\\\nsecond\n');
     assert.equal(render('<strong>a<br /></strong>b\n').markdown, '**a**\\\nb\n');
     assert.equal(render('first<br /><em>second</em>\n').markdown, 'first\\\n*second*\n');
+    assert.equal(render('<strong>a<br />\n</strong>b\n').markdown, '**a**\\\nb\n');
+    assert.equal(render('x <em><br />\na</em>\n').markdown, 'x \\\n*a*\n');
     const cells = '<table><tbody><tr><td>a<br />b</td></tr></tbody></table>\n';
     assert.doesNotMatch(render(cells).markdown, /\\/u);
   });
@@ -332,6 +334,15 @@ describe('links', () => {
   test('an autolink and a bare address are left as written', () => {
     const text = 'See <https://docs.jmrp.io/phonometry/a/> and https://docs.jmrp.io/phonometry/a/.\n';
     assert.equal(rewriteLinks(text, () => '/elsewhere/'), text);
+  });
+
+  test('a label that holds an escaped bracket is left as the label', () => {
+    const rewrite = (url) => (url === '/p' ? '/new/' : undefined);
+    assert.equal(rewriteLinks('[x][a\\]: /p ]\n\n[a\\]: /p ]: /p\n', rewrite), '[x][a\\]: /p ]\n\n[a\\]: /p ]: /new/\n');
+    assert.equal(
+      render('![a\\](/phonometry/p/) b](/phonometry/p/)\n', { mdx: false }).markdown,
+      '![a\\](/phonometry/p/) b](https://docs.jmrp.io/phonometry/p/)\n',
+    );
   });
 
   test('a link is rewritten whole however its destination is written', () => {

@@ -83,6 +83,23 @@ function writtenDestination(text, from) {
   return end > at ? { start: at, end, angle: false } : undefined;
 }
 
+/**
+ * A link title in any of its three forms, a backslash keeping the character
+ * after it, and the spacing (at most one line break, and the `>` of the block
+ * quotes the next line sits in) that may stand before it or before the end.
+ */
+const TITLE = String.raw`(?:"(?:[^"\\]|\\[\s\S])*"|'(?:[^'\\]|\\[\s\S])*'|\((?:[^()\\]|\\[\s\S])*\))`;
+const GAP = String.raw`[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?`;
+
+/**
+ * What may follow the destination of an inline link or image up to its end:
+ * an optional title, then the `)` that closes it.
+ */
+const INLINE_TAIL = new RegExp(`^(?:${GAP}${TITLE})?${GAP}\\)$`, 'u');
+
+/** What may follow the destination of a definition up to its end: an optional title. */
+const DEFINITION_TAIL = new RegExp(`^(?:${GAP}${TITLE})?[ \\t]*$`, 'u');
+
 /** @type {Map<string, string | undefined>} */
 const DECODED = new Map();
 
@@ -110,9 +127,9 @@ function decodedDestination(written, angle) {
  * node too when `images` is set) whose URL `wanted` accepts: where its written
  * text starts and ends in the document, and the URL it decodes to.
  *
- * Each `](` of the node (each `]:` of a definition) is read, and the last
- * whose destination decodes to the node's URL is the one; a title, if any,
- * comes after it. A destination with a character reference or an escape
+ * Each `](` of the node (each `]:` of a definition) is read, and the one
+ * whose destination decodes to the node's URL and is followed by nothing but
+ * a title and the end of the link is the one. A destination with a character reference or an escape
  * decodes to text the source does not hold, so a search for the URL itself
  * would miss it and leave the link as it was without a word. A destination
  * that cannot be found is refused instead.
@@ -136,15 +153,21 @@ function destinations(markdown, wanted, { images = true } = {}) {
       // An autolink (`<https://...>`) and a bare address have no destination
       // apart from their text, which is what the reader sees: left as written.
       if (openers.length === 0 && node.type === 'link') return;
-      // The destination comes right after the label and before any title, so
-      // the first opener past the label that decodes to the URL is the one; an
-      // opener inside a title (`"see ](/p)"`) comes later and is never taken.
-      const labelEnd = node.children?.at(-1)?.position?.end.offset;
+      // The destination comes right after the label and is followed by
+      // nothing but a title and the end of the link, so the opener whose
+      // destination decodes to the URL and ends the link that way is the
+      // one. An opener inside the label (`[a\\]: /p ]: /p`, `![a\\](/p) b](/p)`)
+      // is followed by the rest of the label, and one inside a title
+      // (`"see ](/p)"`) by the rest of the title: neither is ever taken.
+      const tail = node.type === 'definition' ? DEFINITION_TAIL : INLINE_TAIL;
       let match;
       for (const one of openers) {
-        if (labelEnd !== undefined && start + one.index < labelEnd) continue;
         const written = writtenDestination(text, one.index + 2);
-        if (written && decodedDestination(text.slice(written.start, written.end), written.angle) === node.url) {
+        if (
+          written &&
+          tail.test(text.slice(written.end + (written.angle ? 1 : 0))) &&
+          decodedDestination(text.slice(written.start, written.end), written.angle) === node.url
+        ) {
           match = written;
           break;
         }

@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """A remote run on a real node, over a real ssh, equals the run here.
 
-The CI job "Remote simulation on a localhost node" builds the cpu stage of
+The remote-node job of python-app.yml builds the cpu stage of
 the node image with the pins it installs itself, serves it through sshd on
 localhost, names it in a hosts file and sets PHONOMETRY_TEST_NODE to that
 name. Without it this module skips: it needs Docker and an sshd that only

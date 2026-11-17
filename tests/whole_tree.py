@@ -6,9 +6,9 @@ guard run over the package, the scripts, the documentation, the site or the
 committed figures, a census of every public function or record, a generator
 run over the package. What they judge is the repository's own text, which
 neither the numba-jitted kernel nor the dependency floors change, so the two
-CI jobs that exist for those, "tests (numba-jitted kernel)" and "Library
-tests at the dependency floors", run ``pytest --without-whole-tree``, and the
-nine jobs of the test matrix run these tests. Such a test carries the mark,
+CI jobs that exist for those, ``tests-perf`` and ``minimum-versions``, run
+``pytest --without-whole-tree``, and the nine jobs of the test matrix run
+these tests. Such a test carries the mark,
 on itself or, for a module of them, as the module's ``pytestmark``::
 
     @pytest.mark.whole_tree

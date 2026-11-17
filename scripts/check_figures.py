@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Tolerance-aware staleness check for the committed documentation figures.
 
-The ``Documentation figures up to date`` CI job regenerates ``.github/images``
+The ``figures`` job of python-app.yml regenerates ``.github/images``
 with ``make graphs`` and must confirm the result still matches what is
 committed. A byte-exact ``git diff`` cannot do this reliably: GitHub's runner
 fleet is hardware-heterogeneous, so the same pinned software stack computes a

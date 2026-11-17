@@ -44,10 +44,11 @@ jobs:
   # and its critical path, so they come first.
 
   tests:
+    name: Tests / ${{ matrix.python-version }} ${{ startsWith(matrix.os, 'ubuntu') && 'Linux' || startsWith(matrix.os, 'macos') && 'macOS' || 'Windows' }}
     runs-on: ${{ matrix.os }}
     # Its longest cell in the last 72 passing runs took 45 min, on Windows,
     # and one has taken 65 min since, macOS on 3.12 in run 44041238523.
-    # The Run tests step has a limit of its own; this one leaves the steps
+    # The tests step has a limit of its own; this one leaves the steps
     # around it, the setup before and the uploads after, a quarter of an hour.
     timeout-minutes: 95
     permissions:
@@ -71,7 +72,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
-    - name: Install dependencies
+    - name: Install the dev dependencies
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -86,7 +87,7 @@ jobs:
     # only to exercise a full set do skip here and report as such (the EBU
     # programme-audio cases and the full-bench inventory guard); pytest prints
     # the resolution in its run header.
-    - name: Run tests
+    - name: The library's tests pass
       id: tests
       # -n auto fans the suite out across the runner's cores via pytest-xdist;
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
@@ -115,7 +116,7 @@ jobs:
     # their own; -k leaves the torch cases out, which need the array-api job.
     - name: Record the NumPy float32 measurement
       run: pytest -q -rfEP tests/simulation/test_backend_tolerance.py -k "cpu and float32 and not torch"
-    - name: Upload Test Results
+    - name: Keep the test results
       uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
@@ -123,7 +124,7 @@ jobs:
           test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml
           coverage.xml
       if: always()
-    - name: Upload coverage to Codecov
+    - name: Send the coverage to Codecov
       if: matrix.os == 'ubuntu-26.04'
       uses: codecov/codecov-action@v7
       with:
@@ -136,7 +137,7 @@ jobs:
   # numba (numba pins numpy, so it lives in its own environment), and
   # minimum-versions below builds the same kernels at the numba floor.
   tests-perf:
-    name: tests (numba-jitted kernel)
+    name: Tests / numba JIT 3.14
     runs-on: ubuntu-26.04
     # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
     # 2026-11-05, all but a minute or two of it in the test step, and the run of
@@ -181,7 +182,7 @@ jobs:
       with:
         python-version: "3.14"
         cache: 'pip'
-    - name: Install dependencies (with numba)
+    - name: Install the dev dependencies and the perf and plot extras
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -193,11 +194,11 @@ jobs:
     # the test workers below load the kernel instead of each compiling a copy.
     # The tests run whatever this said: a kernel that falls back still leaves
     # the library's verdict on the newest Python.
-    - name: Check the jitted kernel compiles
+    - name: The jitted kernel compiles
       id: jit-kernel
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
-    - name: Run tests (jitted kernel)
+    - name: The library's tests pass with the kernel jitted
       id: tests
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # Same fan-out as the main matrix. The compiled kernel is not a reason
@@ -257,7 +258,7 @@ jobs:
   # time of the Linux 3.12 matrix job of that run, which puts the step near
   # 25 minutes.
   minimum-versions:
-    name: Library tests at the dependency floors
+    name: Tests / floors
     runs-on: ubuntu-26.04
     # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
     # 2026-11-05, all but a minute or two of it in the test step. A hung test
@@ -304,7 +305,7 @@ jobs:
     # Each check below runs whatever the one before it said, so a type
     # completeness under 100% no longer skips the jitted kernels and the
     # tests at the floors.
-    - name: Fail below a type completeness of 100% at the floors
+    - name: Type completeness is 100% at the floors
       id: type-completeness
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
@@ -314,14 +315,14 @@ jobs:
         python scripts/minimum_requirements.py --check
         pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
         grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
-    - name: Check the jitted kernels compile at the numba floor
+    - name: The jitted kernels compile at the numba floor
       id: jit-kernel
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
     # The type check installs pyright beside the floors, and may stop before
     # its own check that the floors are still what is installed; the check
     # runs again here, so the tests never run on anything but the floors.
-    - name: Run the library tests at the floors
+    - name: The library's tests pass at the floors
       id: library-tests
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
@@ -345,7 +346,7 @@ jobs:
   # breaks a byte compare. Bump the pinned stack together with a fresh
   # `make graphs` regeneration.
   figures:
-    name: Documentation figures up to date
+    name: Generated / figures
     runs-on: ubuntu-26.04
     # 32 min at the longest in the measured runs, nearly all of it
     # make graphs; twice that, rounded up.
@@ -371,7 +372,7 @@ jobs:
         pip install -e .
         # Pin the render+compute stack last so it wins over looser deps.
         pip install -r requirements-figures.txt
-    - name: Fail if any label's mathematics does not parse
+    - name: Every label's mathematics parses
       id: mathtext
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # Before the regeneration, not after: an unparseable label aborts the
@@ -379,7 +380,7 @@ jobs:
       # traceback in the middle of a four-hundred-figure run. Reads the
       # sources, so it costs seconds and covers labels no figure exercises.
       run: python scripts/check_mathtext.py
-    - name: Fail if a Spanish label would keep an English decimal point
+    - name: No Spanish label keeps an English decimal point
       id: decimal-comma-labels
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       # The one defect the language gate structurally cannot see: it compares
@@ -395,7 +396,7 @@ jobs:
       id: graphs
       if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.mathtext.outcome == 'success' }}
       run: make graphs
-    - name: Regenerate the plates again and demand identical bytes
+    - name: The plates regenerate to identical bytes
       id: plates-reproducible
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The diagram plates bake their labels to glyph outlines and must be
@@ -410,7 +411,7 @@ jobs:
         for f in /tmp/plates-first-run/*.svg; do
           cmp "$f" ".github/images/$(basename "$f")"
         done
-    - name: Fail if any committed figure is stale
+    - name: Documentation figures up to date
       id: figures
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Tolerance-aware compare instead of a byte diff: GitHub's runner fleet is
@@ -420,7 +421,7 @@ jobs:
       # SVG structure + numeric tolerance and raster RMS instead, so real figure
       # changes still fail while cross-CPU noise passes. See scripts/check_figures.py.
       run: python scripts/check_figures.py
-    - name: Fail if any shaded region is illegible
+    - name: Every shaded region is legible
       id: figure-contrast
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Staleness says the figures match the code; it says nothing about
@@ -430,7 +431,7 @@ jobs:
       # invisible on the other. It parses the committed SVGs (a few seconds
       # for the whole set) and needs no rendering stack of its own.
       run: python scripts/check_figure_contrast.py
-    - name: Check every line can be seen on the dark page
+    - name: Every line can be seen on the dark page
       id: stroke-contrast
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The step above measures filled areas. A stroke is not a fill, and the
@@ -441,7 +442,7 @@ jobs:
       # holds hairlines to 3:1 and thicker lines to 2:1, with the grid and axis
       # furniture exempt because they are drawn to recede.
       run: python scripts/check_stroke_contrast.py
-    - name: Check the Spanish figures are in Spanish
+    - name: The Spanish figures are in Spanish
       id: figure-language
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The Spanish variant of a figure is the English one with its strings
@@ -456,7 +457,7 @@ jobs:
       # committed baseline does not already record -- and on a baseline line
       # that has been paid off and not deleted.
       run: python scripts/check_figure_language.py
-    - name: Fail if an annotation on a figure cannot be read
+    - name: Every annotation on a figure can be read
       id: figure-annotations
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # Two ways a label fails the reader, and nothing else can see either. A
@@ -472,7 +473,7 @@ jobs:
       # over the calibrated number of pixels either way, printing the band
       # below that for a person to judge.
       run: python scripts/check_figure_annotations.py
-    - name: Fail if two tick labels of one axis run into each other
+    - name: No two tick labels of one axis run into each other
       id: figure-ticks
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A band axis set by hand on a logarithmic scale keeps matplotlib's own
@@ -486,7 +487,7 @@ jobs:
       # labels left to the scale beside major ticks set by hand, and on any
       # two labels of one axis that touch.
       run: python scripts/check_figure_ticks.py
-    - name: Fail if a Spanish figure numbers a tick with an English point
+    - name: No Spanish figure numbers a tick with an English point
       id: figure-decimal-point
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The decimal-comma check above reads the label a generator writes; this
@@ -499,7 +500,7 @@ jobs:
       # of distances each shipped that way. Reads the committed SVGs, so it
       # needs no rendering stack.
       run: python scripts/check_figure_decimal_point.py
-    - name: Fail if a legend closes over a plotted point
+    - name: No legend closes over a plotted point
       id: figure-legends
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A legend is an opaque plate the author places by hand, and its width is
@@ -513,7 +514,7 @@ jobs:
       # the mark under the box is a rail rather than a reading with the reason
       # each one is a decision.
       run: python scripts/check_figure_legends.py
-    - name: Fail if a legend, a curve or a marker covers a tick label
+    - name: No legend, curve or marker covers a tick label
       id: figure-tick-clearance
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # A legend can land on a tick label as well as on a point, and a curve
@@ -525,7 +526,7 @@ jobs:
       # for anything drawn over a tick label, through the clip it is drawn
       # with, so it needs no rendering stack.
       run: python scripts/check_figure_tick_clearance.py
-    - name: Fail if a label is drawn over a tick label, another label or a line
+    - name: No label is drawn over a tick label, another label or a line
       id: figure-text-clearance
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The step above measures the marks drawn over a tick label, not a
@@ -537,7 +538,7 @@ jobs:
       # on a 3-D plate is read along its own baseline; the leader of an
       # annotation, the grid and a line behind a chip pass.
       run: python scripts/check_figure_text_clearance.py
-    - name: Fail if a figure signs a number with a hyphen
+    - name: No figure signs a number with a hyphen
       id: figure-minus-sign
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
       # The corpus signs its negative numbers with U+2212, and a polar angle
@@ -558,7 +559,7 @@ jobs:
   # svglib/reportlab/pypdfium2 in -reports) because every link in the chain
   # fixes the rendered page the check compares.
   reports:
-    name: Example report fiches up to date
+    name: Generated / fiches
     runs-on: ubuntu-26.04
     # 4.2 min at the longest in the measured runs.
     # A job still going past its limit has hung: without one it would hold a
@@ -583,7 +584,7 @@ jobs:
         pip install -r requirements-figures.txt -r requirements-reports.txt
     - name: Regenerate the example fiches
       run: make reports
-    - name: Fail if any committed fiche is stale
+    - name: Example report fiches up to date
       id: reports
       # Tolerance-aware compare instead of a byte diff: GitHub's heterogeneous
       # runner CPUs shift a few of the embedded plot's path coordinates ~1 ULP,
@@ -606,7 +607,7 @@ jobs:
   # written reason, the pages whose blocks are excerpts of a workflow rather
   # than a script.
   doc-snippets:
-    name: Documentation snippets run
+    name: Docs / snippets run
     runs-on: ubuntu-26.04
     # 12 min at the longest in the measured runs, and installing
     # ffmpeg from Ubuntu's mirror took 15 and 17 min in two runs of the video
@@ -630,7 +631,7 @@ jobs:
       run: |
         sudo apt-get update -q
         sudo apt-get install -y -q --no-install-recommends ffmpeg
-    - name: Install dependencies
+    - name: Install the audio extra and the figure and report stacks
       id: install
       # The guides plot and print fiches, so the snippets need the figure and
       # report stacks as well as the package itself.
@@ -646,7 +647,7 @@ jobs:
         # pytest.raises, so its pinned pytest is installed too.
         grep -E '^pytest==' requirements-dev.txt | cut -d' ' -f1 > snippet-tools.txt
         pip install -r snippet-tools.txt
-    - name: Run every snippet the guides print
+    - name: Documentation snippets run
       id: doc-snippets
       run: python scripts/check_doc_snippets.py
 
@@ -654,6 +655,7 @@ jobs:
   # need the dev install beside them.
 
   quality:
+    name: Lint / code, workflows
     runs-on: ubuntu-26.04
     # 3.4 min at the longest in the measured runs.
     # A job still going past its limit has hung: without one it would hold a
@@ -672,7 +674,7 @@ jobs:
       with:
         python-version: "3.13"
         cache: 'pip'
-    - name: Install dependencies
+    - name: Install the runtime, dev and notebook dependencies
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -690,7 +692,7 @@ jobs:
     # markers are matched, never a bare row of "=", because that is legitimate
     # Markdown (a setext heading underline). It reads the checkout alone, so a
     # failed install leaves it its verdict.
-    - name: Check for merge-conflict markers
+    - name: No merge-conflict marker is committed
       id: conflict-markers
       if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
       run: |
@@ -721,11 +723,11 @@ jobs:
         git -C assets-tree fetch -q --depth 1 --filter=blob:none origin "$(cat assets.lock)"
         git -C assets-tree ls-tree -r --name-only FETCH_HEAD images/ > assets-manifest.txt
         echo "$(wc -l < assets-manifest.txt) clip files published at $(cut -c1-12 assets.lock)"
-    - name: Check every published clip matches the code that draws it
+    - name: Every published clip matches the code that draws it
       id: animation-freshness
       if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.clip-names.outcome == 'success' }}
       run: python scripts/check_animation_freshness.py --manifest assets-manifest.txt
-    - name: Lint with Ruff
+    - name: No lint finding (ruff)
       id: ruff
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff check .
@@ -733,7 +735,7 @@ jobs:
     # all and 673 of its 812 Python files disagreed with any single style; the
     # gate is what keeps that from happening again. Markdown is excluded in
     # `[tool.ruff]`, so this never touches the documentation snippets.
-    - name: Check formatting with Ruff
+    - name: Every file formatted (ruff format)
       id: ruff-format
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff format --check .
@@ -756,11 +758,11 @@ jobs:
     # scripts compare against the oracle tables in `tests/`: until the
     # checker was told where those live, every value read from them was
     # `Any` and the comparison went unchecked.
-    - name: Type check with Mypy
+    - name: Every annotation type checks (mypy)
       id: mypy
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: mypy
-    - name: Security check with Bandit
+    - name: No security finding in src (bandit)
       id: bandit
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: bandit -r src
@@ -772,7 +774,7 @@ jobs:
     # settings, including the rule that actions are pinned to a tag, are in
     # .github/zizmor.yml. The token lets it ask GitHub whether a pinned action
     # has a published advisory.
-    - name: Audit the workflows with zizmor
+    - name: No workflow finding (zizmor)
       id: zizmor
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       env:
@@ -1513,7 +1515,7 @@ jobs:
     # parts (a single name, each key and each value of a mapping) in each of
     # them, and no Literal lists a value every call refuses, whatever the
     # other arguments.
-    - name: Check that every fixed public choice is typed Literal
+    - name: Every fixed public choice is typed Literal
       id: choice-literals
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_choice_literals.py
@@ -1624,7 +1626,7 @@ jobs:
   # "Package would be ignored" blocks on every build, which only a strict
   # build turned into the failure it was for anyone who built from source.
   release-build:
-    name: The release build gives the same bytes twice
+    name: Package / build twice
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
@@ -1651,19 +1653,20 @@ jobs:
         mkdir "$RUNNER_TEMP/extras"
         (cd dist && sha256sum -- *) > "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
         cat "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
-    - name: Build both again and compare them with the checksum file
+    - name: Both rebuilds match the checksum file byte for byte
       env:
         PYTHONWARNINGS: error
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
-    - name: Check the metadata, the long description and the contents
+    - name: The sdist and wheel pass twine check and carry the expected contents
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         python -m twine check --strict dist/*
         check-wheel-contents dist/*.whl
         python scripts/check_release_artifacts.py dist --version "$VERSION"
-    - uses: actions/upload-artifact@v7
+    - name: Keep the release checksums
+      uses: actions/upload-artifact@v7
       with:
         name: release-checksums
         path: ${{ runner.temp }}/extras/
@@ -1671,7 +1674,7 @@ jobs:
         retention-days: 7
 
   release-rebuild-macos:
-    name: The release build gives the same bytes on macOS
+    name: Package / macOS rebuild
     needs: release-build
     runs-on: macos-latest
     timeout-minutes: 20
@@ -1694,11 +1697,12 @@ jobs:
         python -m venv "$RUNNER_TEMP/build-env"
         "$RUNNER_TEMP/build-env/bin/python" -m pip install --upgrade pip
         "$RUNNER_TEMP/build-env/bin/python" -m pip install -r requirements-release.txt
-    - uses: actions/download-artifact@v8
+    - name: Fetch the release checksums
+      uses: actions/download-artifact@v8
       with:
         name: release-checksums
         path: ${{ runner.temp }}/extras
-    - name: Rebuild and compare with the build on Linux
+    - name: A rebuild on macOS matches the Linux build byte for byte
       env:
         PYTHONWARNINGS: error
       run: |
@@ -1768,7 +1772,7 @@ jobs:
     # writes into every member of the wheel in place of the time of the
     # build. check-wheel-contents reads the wheel for stray or duplicated
     # files, as the release does for phonometry's.
-    - name: Build the stub and check its long description and contents
+    - name: The stub builds and passes twine check with the expected contents
       id: stub-build
       if: ${{ !cancelled() && steps.tooling.outcome == 'success' }}
       run: |
@@ -1780,7 +1784,7 @@ jobs:
     # the tag. The sdist is not compared: setuptools writes the builder's
     # clock, user and modes into it, which only build_release.py's rewrite
     # of phonometry's sdist takes out.
-    - name: Build the stub's wheel again and compare it with the first
+    - name: The stub's wheel builds again byte for byte
       id: stub-reproducible
       if: ${{ !cancelled() && steps.stub-build.outcome == 'success' }}
       run: |
@@ -1871,7 +1875,7 @@ jobs:
       run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
     # Runs whatever the step above said, so the job says whether the code
     # itself runs on Pyodide when its requirements are not met there.
-    - name: Run an octave filter bank on the numpy and scipy Pyodide ships
+    - name: An octave filter bank runs on the numpy and scipy Pyodide ships
       id: pyodide-run
       if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
       env:
@@ -2017,7 +2021,7 @@ jobs:
   # torch on CPU is the backend a user without a GPU can install, held to
   # the tolerance the guide publishes.
   array-api:
-    name: FDTD engines on array-api-strict and torch (CPU)
+    name: FDTD / array-api, torch
     runs-on: ubuntu-26.04
     # Under 5 min in its last 18 passing runs, and a hung test ends the run
     # fifteen minutes after it started (pyproject.toml).
@@ -2052,7 +2056,7 @@ jobs:
     # torch alone from its CPU index, at the pin requirements-torch.txt
     # holds: with PyPI beside that index pip takes the newest torch on either,
     # and PyPI's brings the CUDA wheels. The second line finds the pin met.
-    - name: Install dependencies (torch from its CPU index)
+    - name: Install the dev dependencies and torch from its CPU index
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -2063,7 +2067,7 @@ jobs:
     # -rfEP keeps the failure summary and prints what each passing
     # tolerance test measured, and where, so every run leaves its number
     # in the log.
-    - name: Run the backend tests
+    - name: The simulation tests pass on array-api-strict and torch
       id: backend-tests
       run: pytest -q -rfEP -n auto tests/simulation
 
@@ -2073,7 +2077,7 @@ jobs:
   # float32 contour check on MPS, whose sums are float32 with Neumaier's
   # compensation: a compiler that reassociates the compensated sum fails it.
   mps:
-    name: FDTD engines on torch MPS
+    name: FDTD / torch MPS
     runs-on: macos-15
     # Under 2 min in its last 18 passing runs, and a hung test ends the run
     # fifteen minutes after it started (pyproject.toml).
@@ -2099,14 +2103,14 @@ jobs:
     # (https://github.com/pytorch/pytorch/issues/202529); 2.14.1 still runs
     # on it. This job alone keeps 2.14.1 until a release reads that GPU
     # again; every other job takes the pin in requirements-torch.txt.
-    - name: Install dependencies
+    - name: Install the dev dependencies and torch
       id: install
       run: |
         python -m pip install --upgrade pip
         grep -v '^torch==' requirements-torch.txt > requirements-torch-mps.txt
         pip install -r requirements.txt -r requirements-dev.txt -r requirements-torch-mps.txt torch==2.14.1
         pip install -e .
-    - name: Check MPS is usable, then run the tolerance and contour tests on it
+    - name: The tolerance and contour tests pass on a usable MPS device
       id: mps-tests
       run: |
         python -c "import torch, sys; ok = torch.backends.mps.is_available() and torch.ones(4, device='mps').sum().item() == 4.0; sys.exit(0 if ok else 'no usable MPS device on this runner')"
@@ -2123,7 +2127,7 @@ jobs:
   # cpu stage's base image runs it too, so a new digest is checked before it
   # is merged.
   remote-node:
-    name: Remote simulation on a localhost node
+    name: FDTD / remote node
     # The release the node image's cpu stage starts from (docker/node/
     # Dockerfile, ubuntu:24.04): where NumPy falls back to libm, the run here
     # and the run in the container agree bit for bit only on the same glibc.
@@ -2141,7 +2145,7 @@ jobs:
       with:
         persist-credentials: false
     # hadolint by its release tag; shellcheck is the runner image's own.
-    - name: Lint the node image's Dockerfile and its provisioning script
+    - name: The node image's Dockerfile and provisioning script lint clean
       run: |
         docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --failure-threshold warning - < docker/node/Dockerfile
         shellcheck docker/node/provision.sh
@@ -2161,7 +2165,7 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    - name: Install dependencies
+    - name: Install the dev dependencies
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -2230,7 +2234,7 @@ jobs:
     # put first and the check would read past. Actions runs a step with
     # bash -e alone, so pipefail is set for pytest's status to pass through
     # tee.
-    - name: Run the simulations on the node and here, and compare them
+    - name: The simulations run on the node match the ones run here
       id: node-runs
       env:
         PHONOMETRY_TEST_NODE: ci
@@ -2266,7 +2270,7 @@ jobs:
   # tested, and the summary says which, before the tests run, rather than
   # failing the build over a distribution's choice of encoders.
   video:
-    name: Videos encode with a real ffmpeg
+    name: Runtime / ffmpeg video
     runs-on: ubuntu-26.04
     # Its tests take under a minute in its first five passing runs, and
     # installing ffmpeg took under a minute in three of them and 15 and 17
@@ -2296,14 +2300,14 @@ jobs:
         else
           echo "This ffmpeg has no SVT-AV1, so the AV1-first CPU path is not tested below (VP9 is)" >> "$GITHUB_STEP_SUMMARY"
         fi
-    - name: Install dependencies
+    - name: Install the dev dependencies
       id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
     # -rs prints why a test skipped, so a missing encoder reads in the log.
-    - name: Write and decode the videos
+    - name: Every video writes and decodes with a real ffmpeg
       id: videos
       run: >-
         pytest -q -rs -n auto
@@ -2323,7 +2327,7 @@ jobs:
   # FilterBankWarning, the topic class under PhonometryWarning that the
   # low sampling rate provokes.
   notebook:
-    name: phonometry runs in a notebook kernel
+    name: Runtime / notebook
     runs-on: ubuntu-26.04
     # 1.4 min at the longest in the measured runs.
     # A job still going past its limit has hung: without one it would hold a
@@ -2345,7 +2349,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-reports.txt -r requirements-notebook.txt
         pip install ".[plot,report]"
-    - name: Execute the smoke notebook and read its outputs
+    - name: Every cell of the smoke notebook puts out what it should
       id: notebook
       run: python scripts/check_notebook.py tests/notebooks/smoke.ipynb
 
@@ -2353,6 +2357,7 @@ jobs:
   # analysis and the pull request comment.
 
   sonar:
+    name: Report / SonarCloud
     needs: tests
     runs-on: ubuntu-26.04
     # 3.2 min at the longest in the measured runs.
@@ -2369,7 +2374,7 @@ jobs:
       with:
         persist-credentials: false
         fetch-depth: 0
-    - name: Download coverage report
+    - name: Fetch the coverage report
       uses: actions/download-artifact@v8
       with:
         name: test-results-ubuntu-26.04-3.13
@@ -2391,7 +2396,7 @@ jobs:
           exit 1
         fi
         echo "version=$version" >> "$GITHUB_OUTPUT"
-    - name: SonarCloud Scan
+    - name: Scan with SonarCloud
       uses: SonarSource/sonarqube-scan-action@v8
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2400,6 +2405,7 @@ jobs:
         args: -Dsonar.projectVersion=${{ steps.version.outputs.version }}
 
   pr-comment:
+    name: Report / PR comment
     needs: [quality, tests]
     runs-on: ubuntu-26.04
     # Under a minute in the measured runs.
@@ -2437,14 +2443,14 @@ jobs:
     # guards-package has already proven current, which meant a stale artefact
     # was reported twice and fixed by neither.
 
-    - name: Download Test Results
+    - name: Fetch the test results
       uses: actions/download-artifact@v8
       with:
         pattern: test-results-*
         path: test-results
       continue-on-error: true
     
-    - name: Generate Comment Body
+    - name: Write the comment
       run: python .github/scripts/comment_pr.py
       env:
         GITHUB_REPOSITORY: ${{ github.repository }}
@@ -2455,7 +2461,7 @@ jobs:
         GITHUB_BASE_REF: ${{ github.base_ref }}
         GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
-    - name: Post PR Comment
+    - name: Post the comment on the pull request
       uses: actions/github-script@v9
       with:
         script: |

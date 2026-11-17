@@ -22,7 +22,7 @@ import sys
 # Deterministic figure output: pin every numerical thread pool to a single
 # thread BEFORE numpy/scipy/numba import their backends, so multi-threaded
 # reductions cannot reorder floating-point sums and perturb the rendered bytes
-# across machines (the CI "Documentation figures" job runs on a different core
+# across machines (the figures job of CI runs on a different core
 # count than a dev box, which is what made the heavy compute figures flaky).
 for _threads_var in (
     "OMP_NUM_THREADS",

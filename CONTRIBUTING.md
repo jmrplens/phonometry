@@ -568,9 +568,8 @@ after changing a public name, a signature or a docstring. `make llms` reads
 every page of the site, through the Markdown copy `site/scripts/agent-md.mjs`
 writes of it, so run it after changing any page, a component a page uses or
 its Markdown writer (it needs the site's dependencies, step 4 of the setup).
-Commit whatever each changes: the "Generated API reference up to date" and
-"llms artifacts up to date" steps of CI diff those paths and fail on any
-difference.
+Commit whatever each changes: the CI steps `guards-package/api-docs` and
+`guards-prose/llms` diff those paths and fail on any difference.
 
 The shards under `/llms/` and `llms-full.txt` are not committed. Each page in
 them is its Markdown copy, whose header carries the day the page was first

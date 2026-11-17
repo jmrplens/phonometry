@@ -488,9 +488,9 @@ jobs:
         run: python3 scripts/check_doc_snippets.py --static --restated site/dist
       - name: Check the files the build restates the pages in state no count of standards
         # The llms shards, llms-full.txt and every page's Markdown copy exist
-        # only in the build, so the refusal of a count of standards that the
-        # conformance job runs on a checkout cannot see them; this reads them
-        # where the build wrote them.
+        # only in the build, so the refusal of a count of standards that
+        # guards-package/conformance-claims of python-app.yml runs on a checkout
+        # cannot see them; this reads them where the build wrote them.
         run: python3 scripts/check_conformance_claims.py --generated site/dist
 
       # Every page, component and script of the site type-checked in strict

@@ -467,7 +467,7 @@ def main() -> None:
     blob = f"https://github.com/{repo}/blob/{sha}"
 
     # Hidden marker so the CI updates one sticky comment instead of posting a
-    # new one every run (see the "Post PR Comment" step in python-app.yml).
+    # new one every run (see the comment step of the pr-comment job in python-app.yml).
     body = f"""<!-- phonometry-ci-conformance -->
 {conformance}
 

@@ -968,7 +968,7 @@ Export a chart from a notebook or an editor, drop it in .github/images and refer
 
 **Enforced by:** `scripts/check_figures.py`, `make figures`, `CI: figures/figures`
 
-**Exceptions.** Each figure ships as `<n>`, `<n>_dark`, `<n>_es` and `<n>_es_dark`, in SVG, except the figures named in `_RASTER_FIGURES` of `scripts/figures/theme.py`, which are lossless WebP. Example fiches are generated the same way (`make reports`) and compared by their preview within a tolerance (`scripts/check_reports.py`, CI 'Example report fiches up to date'); `make reports` rewrites every PDF, so judge drift with `check_reports.py`, never with `git status`. Clips are not committed here ([F51](#f51)).
+**Exceptions.** Each figure ships as `<n>`, `<n>_dark`, `<n>_es` and `<n>_es_dark`, in SVG, except the figures named in `_RASTER_FIGURES` of `scripts/figures/theme.py`, which are lossless WebP. Example fiches are generated the same way (`make reports`) and compared by their preview within a tolerance (`scripts/check_reports.py`, the CI step `reports/reports`); `make reports` rewrites every PDF, so judge drift with `check_reports.py`, never with `git status`. Clips are not committed here ([F51](#f51)).
 
 <a id="f41"></a>
 ### F41. Register a figure, diagram or fiche builder in its package's registry

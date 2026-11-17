@@ -1,5 +1,5 @@
-# Locked fiche-rendering stack for the reports CI check (the "Example report
-# fiches up to date" job in python-app.yml). Install it on top of
+# Locked fiche-rendering stack for the reports CI check (the reports job of
+# python-app.yml). Install it on top of
 # requirements-figures.txt, which pins the matplotlib/numpy half of the chain.
 #
 # A fiche goes matplotlib -> SVG -> svglib -> reportlab -> PDF -> pypdfium2 ->

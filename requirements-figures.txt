@@ -1,5 +1,5 @@
 # Locked rendering + compute stack for the figures CI check
-# (the "Documentation figures up to date" job in python-app.yml).
+# (the figures job of python-app.yml).
 #
 # This pins the figure *structure*, not the last bit of every coordinate:
 # matplotlib/fonttools/pillow fix SVG text layout and WebP encoding, while

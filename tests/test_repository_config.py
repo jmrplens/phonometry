@@ -1345,9 +1345,13 @@ def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
 
 
 def _engine_digests_step(steps: list[dict[str, object]], runs: str) -> int:
-    """The index of the one step of the engine-digests job whose script has *runs*."""
+    """The index of the one step of the baseline-glibc job whose script has *runs*.
+
+    The digests are steps of that job, beside the glibc tests, which run no
+    digest script and so never match.
+    """
     found = [i for i, step in enumerate(steps) if runs in str(step.get("run", ""))]
-    assert len(found) == 1, f"{len(found)} engine-digests steps run {runs!r}"
+    assert len(found) == 1, f"{len(found)} baseline-glibc steps run {runs!r}"
     return found[0]
 
 
@@ -1362,7 +1366,7 @@ def test_the_engine_digests_test_names_a_moved_digest_after_the_measurement_fail
     whatever happened.
     """
     workflow = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))
-    steps: list[dict[str, object]] = workflow["jobs"]["engine-digests"]["steps"]
+    steps: list[dict[str, object]] = workflow["jobs"]["baseline-glibc"]["steps"]
     measure = _engine_digests_step(steps, "scripts/engine_digests.py --output")
     test = _engine_digests_step(steps, "tests/simulation/test_engine_golden_digests.py")
     assert measure < test
@@ -1572,11 +1576,12 @@ def test_no_workflow_runs_on_the_moving_ubuntu_label() -> None:
     same bytes twice and the coverage upload to one cell of the matrix, so a
     job that followed the label changed under them on the day it moved, with
     no commit of ours. The jobs name ubuntu-26.04, the image the label names
-    now. Four name ubuntu-24.04, three of them because they hold their
-    numbers to its glibc: the FDTD engines' golden digests, measured there,
-    the remote-node job, which compares its runs with those of the node image
-    built on ``ubuntu:24.04``, and the weighting design on glibc's routines
-    without FMA, which only that release's baseline build of glibc carries.
+    now. Three name ubuntu-24.04, two of them because they hold their numbers
+    to its glibc: the baseline-glibc job, where the FDTD engines' golden
+    digests were measured and the weighting design runs on glibc's routines
+    without FMA, which only that release's baseline build of glibc carries,
+    and the remote-node job, which compares its runs with those of the node
+    image built on ``ubuntu:24.04``.
     A release is moved by an edit to the workflows and to the pair above,
     once the gates pass on it.
     """

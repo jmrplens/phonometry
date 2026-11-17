@@ -1647,47 +1647,109 @@ jobs:
       # run, which puts this step near 25 minutes.
       run: pytest -q -n auto --without-whole-tree
 
-  # glibc built for the x86-64 baseline carries exp, log, pow, sin, tan and
-  # atan twice, with fused multiply-adds and without, and the weighting
-  # design gives the documented bytes on both. The test that hands a child
-  # the set without FMA runs on no job of the matrix: its Linux runner,
-  # ubuntu-26.04, has a glibc built for x86-64-v3 that carries the FMA set
-  # alone, so the test skips there by name, and macOS and Windows run no
-  # glibc. Ubuntu 24.04's glibc 2.39 is the baseline build (its libm declares
-  # x86-64-baseline needed), so the test runs here, with the tests of the
-  # helper that tells the two builds apart and holds each mask to what it
-  # does to glibc. Those that start a masked child need glibc 2.29 or later,
-  # the routines the pins spell, on an x86-64 processor with FMA and AVX2,
-  # and those that read the real library need glibc on x86-64. The job fails
-  # on any skip: a runner image whose glibc moves to the x86-64-v3 build
-  # turns it red instead of green on nothing.
-  glibc-without-fma:
-    name: The weighting design on glibc's routines without FMA
-    # The baseline build of glibc, which Ubuntu 26.04 no longer installs.
+  # The numbers held to Ubuntu 24.04's glibc 2.39, the baseline build that
+  # Ubuntu 26.04 no longer installs: the FDTD engines' golden digests and the
+  # weighting design on glibc's routines without FMA. Both install the
+  # same dev dependencies and their checks take seconds, so they share one
+  # runner and one install. The digests come first, in their own order; the
+  # glibc tests come last, and each set runs whatever the other said. The
+  # last step names every step that failed on the checks page.
+  baseline-glibc:
+    name: Platform / glibc 2.39
+    # The baseline build of glibc, which Ubuntu 26.04 no longer installs, and
+    # the C library the digests file records.
     runs-on: ubuntu-24.04
-    # Its tests take seconds and the install a few minutes; a hung test ends
+    # Its checks take seconds and the install a few minutes; a hung test ends
     # the run fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 25
     permissions:
       contents: read
+    env:
+      # No step leaves a compiled file beside the source it read.
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
         cache: 'pip'
-    - name: Install dependencies
+    - name: Install the dev dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
+    # The FDTD engines' NumPy numbers, held to the golden digests in
+    # engine-digests.json. Their bits depend on the C library's libm and on
+    # NumPy's SIMD dispatch, so they are checked in the one environment the
+    # file records, which is this job's: Ubuntu 24.04 and its C library,
+    # glibc 2.39 (GitHub refreshes the image behind the label, not its
+    # release), Python 3.13, the pinned stack, and NumPy's AVX-512 kernels
+    # switched off, so whichever x86 runner this lands on computes the same
+    # bits. The measured file is kept as an artifact: a moved digest can be
+    # read there and, when the move is meant, committed with
+    # `make engine-digests RUN=<this run's id>`. A NumPy bump fails here on
+    # the environment line alone until that is done.
+    # The features are assigned before they are written: echo would return
+    # its own status and hide the helper's, so a helper that fails would not
+    # fail the step.
+    - name: Name NumPy's AVX-512 kernels to switch off
+      id: avx512
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: |
+        features="$(python scripts/engine_digests.py --avx512-features)"
+        echo "features=$features" >> "$GITHUB_OUTPUT"
+    - name: Measure the engines' digests
+      id: digests-measure
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      env:
+        PHONOMETRY_ENGINE_DIGESTS: require
+        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
+      run: python scripts/engine_digests.py --output engine-digests.measured.json
+    # A step of its own, which runs when the measurement fails: a moved digest
+    # fails the measurement, and this test names the scenario and the key.
+    # Not when the helper above failed, which would leave the kernels on.
+    - name: FDTD engines hold their golden digests
+      id: engine-digests
+      if: (success() || failure()) && steps.avx512.outcome == 'success'
+      env:
+        PHONOMETRY_ENGINE_DIGESTS: require
+        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
+      run: pytest -q -n0 tests/simulation/test_engine_golden_digests.py
+    - name: Keep the measured digests
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: engine-digests-measured
+        path: engine-digests.measured.json
+    # glibc built for the x86-64 baseline carries exp, log, pow, sin, tan and
+    # atan twice, with fused multiply-adds and without, and the weighting
+    # design gives the documented bytes on both. The test that hands a child
+    # the set without FMA runs on no job of the matrix: its Linux runner,
+    # ubuntu-26.04, has a glibc built for x86-64-v3 that carries the FMA set
+    # alone, so the test skips there by name, and macOS and Windows run no
+    # glibc. Ubuntu 24.04's glibc 2.39 is the baseline build (its libm
+    # declares x86-64-baseline needed), so the test runs here, with the tests
+    # of the helper that tells the two builds apart and holds each mask to
+    # what it does to glibc. Those that start a masked child need glibc 2.29
+    # or later, the routines the pins spell, on an x86-64 processor with FMA
+    # and AVX2, and those that read the real library need glibc on x86-64.
+    # The step runs last, after the digests, with NumPy's kernels as the
+    # runner has them: NPY_DISABLE_CPU_FEATURES lives on the digest steps
+    # alone, and in the job's env it would change what this measures without
+    # failing anything.
     # A test that skips checks nothing, and pytest exits 0 all the same: the
-    # job fails on any skip, whatever its reason, as the localhost-node job
-    # does and for the same reasons (no colour, pipefail through tee).
-    - name: Design on glibc's routines without FMA, and read glibc's build
+    # step fails on any skip, whatever its reason, as the localhost-node job
+    # does and for the same reasons (no colour, pipefail through tee). A
+    # runner image whose glibc moves to the x86-64-v3 build turns it red
+    # instead of green on nothing.
+    - name: The weighting design on glibc's routines without FMA
+      id: glibc-without-fma
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
         set -o pipefail
         pytest -q --color=no -rfEPs tests/test_libm_identity.py \
@@ -1697,6 +1759,12 @@ jobs:
           echo "::error::A test of glibc's build skipped instead of running on the baseline glibc."
           exit 1
         fi
+    # One annotation per failed step on the checks page, titled by its id.
+    - name: Name the steps that failed
+      if: ${{ failure() }}
+      env:
+        STEPS: ${{ toJSON(steps) }}
+      run: python3 .github/scripts/failed_steps.py
 
   # The FDTD engines step on any Array API backend. array-api-strict refuses
   # every call outside the standard and every mix of host and device arrays,
@@ -1804,67 +1872,6 @@ jobs:
         tests/simulation/test_write_fdtd_animation.py
         tests/simulation/test_write_elastic_fdtd_animation.py
         tests/simulation/test_video_job.py
-
-  # The FDTD engines' NumPy numbers, held to the golden digests in
-  # engine-digests.json. Their bits depend on the C library's libm and on
-  # NumPy's SIMD dispatch, so they are checked in the one environment the
-  # file records, which is this job's: Ubuntu 24.04 and its C library, glibc
-  # 2.39 (GitHub refreshes the image behind the label, not its release),
-  # Python 3.13, the pinned stack, and NumPy's AVX-512 kernels switched off,
-  # so whichever x86 runner this lands on computes the same bits. The
-  # measured file is kept as an artifact: a moved digest can be read there
-  # and, when the move is meant, committed with
-  # `make engine-digests RUN=<this run's id>`. A NumPy bump fails here on the
-  # environment line alone until that is done.
-  engine-digests:
-    name: FDTD engines hold their golden digests
-    runs-on: ubuntu-24.04
-    # Under a minute in its first five runs, and a hung test ends the run
-    # fifteen minutes after it started (pyproject.toml).
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt -r requirements-dev.txt
-        pip install -e .
-    # Assigned before it is written: echo would return its own status and
-    # hide the helper's, so a helper that fails would not fail the step.
-    - name: Name NumPy's AVX-512 kernels to switch off
-      id: avx512
-      run: |
-        features="$(python scripts/engine_digests.py --avx512-features)"
-        echo "features=$features" >> "$GITHUB_OUTPUT"
-    - name: Measure the engines' digests
-      env:
-        PHONOMETRY_ENGINE_DIGESTS: require
-        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
-      run: python scripts/engine_digests.py --output engine-digests.measured.json
-    # A step of its own, which runs when the measurement fails: a moved digest
-    # fails the measurement, and this test names the scenario and the key.
-    # Not when the helper above failed, which would leave the kernels on.
-    - name: Hold the engines to their golden digests
-      if: (success() || failure()) && steps.avx512.outcome == 'success'
-      env:
-        PHONOMETRY_ENGINE_DIGESTS: require
-        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
-      run: pytest -q -n0 tests/simulation/test_engine_golden_digests.py
-    - name: Keep the measured digests
-      if: always()
-      uses: actions/upload-artifact@v7
-      with:
-        name: engine-digests-measured
-        path: engine-digests.measured.json
 
   # Apple's MPS device, on the macOS runners that expose a working one
   # (macOS 14 reports MPS available but cannot allocate on it). It holds the

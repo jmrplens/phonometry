@@ -2773,3 +2773,21 @@ def test_no_llms_file_the_site_build_writes_is_tracked() -> None:
         "llms-full.txt",
     )
     assert tracked == [], tracked
+
+
+def test_every_python_ci_job_has_a_time_limit() -> None:
+    """A hung job of Python CI ends at its own limit, never at GitHub's six hours.
+
+    Seven jobs had none, so one that hung held a runner for 360 minutes,
+    and the account runs at most forty jobs at a time across its
+    repositories: every runner a hung job holds is one a test leg of the
+    next pull request waits for. Each job states its limit, above the
+    longest run measured for it with room for a slow mirror or a loaded
+    runner.
+    """
+    jobs = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))["jobs"]
+    unlimited = [name for name, job in jobs.items() if "timeout-minutes" not in job]
+    assert unlimited == [], (
+        f"these Python CI jobs have no timeout-minutes, so a hang holds a runner "
+        f"for six hours: {unlimited}"
+    )

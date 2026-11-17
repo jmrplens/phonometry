@@ -40,6 +40,10 @@ env:
 jobs:
   quality:
     runs-on: ubuntu-26.04
+    # 3.4 min at the longest in the measured runs.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -1037,6 +1041,11 @@ jobs:
   figures:
     name: Documentation figures up to date
     runs-on: ubuntu-26.04
+    # 32 min at the longest in the measured runs, nearly all of it
+    # make graphs; twice that, rounded up.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 65
     permissions:
       contents: read
     steps:
@@ -1246,6 +1255,12 @@ jobs:
   doc-snippets:
     name: Documentation snippets run
     runs-on: ubuntu-26.04
+    # 12 min at the longest in the measured runs, and installing
+    # ffmpeg from Ubuntu's mirror took 15 and 17 min in two runs of the video
+    # job.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -1518,6 +1533,10 @@ jobs:
   reports:
     name: Example report fiches up to date
     runs-on: ubuntu-26.04
+    # 4.2 min at the longest in the measured runs.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -2249,6 +2268,10 @@ jobs:
   notebook:
     name: phonometry runs in a notebook kernel
     runs-on: ubuntu-26.04
+    # 1.4 min at the longest in the measured runs.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -2271,6 +2294,10 @@ jobs:
   sonar:
     needs: tests
     runs-on: ubuntu-26.04
+    # 3.2 min at the longest in the measured runs.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 15
     # Dependabot runs with a restricted token and no access to repository secrets, so
     # SONAR_TOKEN is empty there and the scan can only ever fail. Skip it for those runs.
     if: >-
@@ -2314,6 +2341,10 @@ jobs:
   pr-comment:
     needs: [quality, tests]
     runs-on: ubuntu-26.04
+    # Under a minute in the measured runs.
+    # A job still going past its limit has hung: without one it would hold a
+    # runner, under the account's cap on concurrent jobs, for six hours.
+    timeout-minutes: 10
     # After a red quality or tests job, which the comment reports, but never
     # in a run a newer push cancelled: that run holds the results of whatever
     # finished before the cancel, none on a run cancelled early, and would

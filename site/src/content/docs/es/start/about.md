@@ -150,7 +150,7 @@ la versión que hayas ejecutado realmente.
 APA:
 
 > Requena-Plens, J. M. (2026). *phonometry: acoustic measurement, analysis and
-> prediction for Python (formerly PyOctaveBand)* (Versión 4.0.0rc1) [Software].
+> prediction for Python (formerly PyOctaveBand)* (Versión 4.0.0) [Software].
 > https://doi.org/10.5281/zenodo.21215280
 
 BibTeX:
@@ -161,7 +161,7 @@ BibTeX:
   title   = {phonometry: acoustic measurement, analysis and prediction for
              Python (formerly PyOctaveBand)},
   year    = {2026},
-  version = {4.0.0rc1},
+  version = {4.0.0},
   doi     = {10.5281/zenodo.21215280},
   url     = {https://docs.jmrp.io/phonometry/},
   license = {MIT}

@@ -2791,3 +2791,233 @@ def test_every_python_ci_job_has_a_time_limit() -> None:
         f"these Python CI jobs have no timeout-minutes, so a hang holds a runner "
         f"for six hours: {unlimited}"
     )
+
+
+#: The jobs of Python CI that group several guards or checks, each run as a
+#: step of its own: the five built from jobs that each ran one, and the four
+#: kept apart that carry several verdicts.
+_GROUPED_JOBS = (
+    "guards-prose",
+    "guards-source",
+    "guards-package",
+    "built-package",
+    "baseline-glibc",
+)
+_SEVERAL_VERDICTS = ("quality", "figures", "minimum-versions", "tests-perf")
+#: The jobs that install nothing with pip, so every script they run stays in
+#: the probe of tests/test_scripts_without_numpy.py that imports it bare.
+_INSTALL_NOTHING = ("guards-prose", "guards-source")
+#: The ids of the steps that set a job up, after its checkout.
+_SETUP_IDS = frozenset({"checkout", "python", "install", "tooling"})
+#: A condition that runs a step whatever the steps before it said, unless the
+#: run was cancelled, and names the step it needs.
+_RUNS_UNLESS_CANCELLED = re.compile(r"^\$\{\{ !cancelled\(\) && .*\}\}$")
+_NEEDS_STEP = re.compile(r"steps\.([\w-]+)\.outcome == 'success'")
+#: The two conditions a test holds literally elsewhere: the golden-digest test
+#: runs after a failed measurement and the measured file is kept whatever
+#: happened (test_the_engine_digests_test_names_a_moved_digest_after_the_
+#: measurement_fails).
+_KEPT_CONDITIONS = frozenset(
+    {"(success() || failure()) && steps.avx512.outcome == 'success'", "always()"}
+)
+#: The last step of a grouped job.
+_SUMMARY = "python3 .github/scripts/failed_steps.py"
+#: A guard that only reads: a checker script, or a generator asked to compare.
+_READS_ONLY = re.compile(r"\bscripts/check_\w+\.py\b|\s--check\b")
+#: A step that writes what a drift gate then compares.
+_REGENERATES = re.compile(r"^make [\w-]+$|\bscripts/generate_\w+\.py(?!.*--check)")
+#: The step that puts a checkout back as committed.
+_RESETS = ("git reset --hard", "git clean -fd")
+
+
+def _python_ci_jobs(text: str | None = None) -> dict[str, dict[str, object]]:
+    """The jobs of python-app.yml, or of *text* written in its place."""
+    if text is None:
+        text = _PYTHON_WORKFLOW.read_text(encoding="utf-8")
+    jobs: dict[str, dict[str, object]] = yaml.safe_load(text)["jobs"]
+    return jobs
+
+
+def _steps_of(job: Mapping[str, object]) -> list[dict[str, object]]:
+    steps = job.get("steps")
+    assert isinstance(steps, list)
+    return steps
+
+
+def _is_setup(step: Mapping[str, object]) -> bool:
+    uses = str(step.get("uses", ""))
+    return uses.startswith("actions/checkout@") or step.get("id") in _SETUP_IDS
+
+
+def _step_shape_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why the steps of *job* would let one check hide another, or ``[]``.
+
+    After the steps that set the job up, every step has an id and runs under
+    ``!cancelled()`` and the outcome of a step before it that it needs; none
+    runs under ``always()``, which starts a step in a cancelled run. The
+    summary of a grouped job, its last step, runs on ``failure()``, and the
+    two conditions of the golden digests are kept as their test holds them.
+    """
+    steps = _steps_of(job)
+    problems = []
+    seen: set[str] = set()
+    setup = True
+    for index, step in enumerate(steps):
+        label = f"{name} step {index} ({step.get('name') or step.get('uses')})"
+        if setup and _is_setup(step):
+            if "id" in step:
+                seen.add(str(step["id"]))
+            continue
+        setup = False
+        condition = str(step.get("if", ""))
+        if _SUMMARY in str(step.get("run", "")):
+            if condition != "${{ failure() }}":
+                problems.append(f"{label}: the summary runs on {condition!r}")
+            continue
+        if condition in _KEPT_CONDITIONS:
+            if "id" in step:
+                seen.add(str(step["id"]))
+            continue
+        if "id" not in step:
+            problems.append(f"{label}: no id, so its outcome cannot be named")
+        if "always()" in condition:
+            problems.append(f"{label}: always() starts it in a cancelled run")
+        if not _RUNS_UNLESS_CANCELLED.match(condition):
+            problems.append(
+                f"{label}: runs on {condition or 'the default success()'!r}, so a "
+                "failure before it hides its verdict"
+            )
+        needed = _NEEDS_STEP.findall(condition)
+        if not needed:
+            problems.append(f"{label}: names no step it needs")
+        problems += [
+            f"{label}: needs {other!r}, which is no step before it"
+            for other in needed
+            if other not in seen
+        ]
+        if "id" in step:
+            seen.add(str(step["id"]))
+    return problems
+
+
+def _group_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why a grouped job is not shaped as its guards need, or ``[]``."""
+    steps = _steps_of(job)
+    problems = []
+    env = job.get("env") or {}
+    assert isinstance(env, dict)
+    if str(env.get("PYTHONDONTWRITEBYTECODE")) != "1":
+        problems.append(f"{name}: a guard may write bytecode into the checkout")
+    if "timeout-minutes" not in job:
+        problems.append(f"{name}: no timeout-minutes")
+    summary_env = steps[-1].get("env") if steps else None
+    if not steps or _SUMMARY not in str(steps[-1].get("run", "")):
+        problems.append(f"{name}: the last step does not name the failed steps")
+    elif not isinstance(summary_env, dict) or (
+        summary_env.get("STEPS") != "${{ toJSON(steps) }}"
+    ):
+        problems.append(f"{name}: the summary is not handed the steps context")
+    for index, step in enumerate(steps):
+        run = str(step.get("run", ""))
+        if _READS_ONLY.search(run) and len(run.strip().splitlines()) != 1:
+            problems.append(
+                f"{name} step {index}: a guard shares its run with other lines, "
+                "so a probe that reads it one line at a time misses it"
+            )
+    return problems
+
+
+def _drift_order_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why a guard of *job* reads a checkout a regeneration wrote, or ``[]``.
+
+    The guards that only read come first; then a step fails when one of them
+    wrote into the checkout; then each regeneration starts from a checkout
+    put back as committed since the one before it, so a drift gate says only
+    what is its own. The gates that compare are shell after their
+    regeneration, never a checker script.
+    """
+    problems = []
+    clean_tree_at = None
+    regenerated = False
+    reset_since = False
+    for index, step in enumerate(_steps_of(job)):
+        run = str(step.get("run", "")).strip()
+        if step.get("id") == "clean-tree":
+            clean_tree_at = index
+        if all(command in run for command in _RESETS):
+            if clean_tree_at is None:
+                problems.append(
+                    f"{name} step {index}: resets before the clean-tree step"
+                )
+            reset_since = True
+            continue
+        if _READS_ONLY.search(run) and (regenerated or reset_since):
+            problems.append(
+                f"{name} step {index}: a guard after a reset or a regeneration "
+                "reads a checkout it did not find"
+            )
+        if _REGENERATES.search(run):
+            if not reset_since:
+                problems.append(
+                    f"{name} step {index}: regenerates without first putting the "
+                    "checkout back as committed"
+                )
+            regenerated = True
+            reset_since = False
+    if clean_tree_at is None:
+        problems.append(f"{name}: no step fails when a guard wrote into the checkout")
+    return problems
+
+
+def test_no_check_of_a_grouped_job_hides_another() -> None:
+    """Each guard is a step that runs whatever the others said, and names itself.
+
+    Thirty-five jobs each ran one guard or two; grouped into five, a guard
+    that ran only when every one before it passed would leave its verdict to
+    the next run, one failure at a time. The jobs kept apart that carry
+    several checks are held the same way: a ruff finding used to hide mypy,
+    bandit and zizmor. A grouped job ends on a step that names every step
+    that failed, and writes no bytecode beside what its guards read.
+    """
+    jobs = _python_ci_jobs()
+    problems = []
+    for name in (*_GROUPED_JOBS, *_SEVERAL_VERDICTS):
+        problems += _step_shape_problems(name, jobs[name])
+    for name in _GROUPED_JOBS:
+        problems += _group_problems(name, jobs[name])
+    assert problems == []
+
+
+def test_every_drift_gate_of_the_guard_groups_starts_from_the_committed_checkout() -> (
+    None
+):
+    """A drift gate says what is stale on its own, never what a guard left.
+
+    The conformance gate reads git status over the whole checkout: run after
+    a guard that wrote a file, or after the API reference regeneration, it
+    would call the report stale for a file that is not its own.
+    """
+    jobs = _python_ci_jobs()
+    problems = []
+    for name in ("guards-prose", "guards-source", "guards-package"):
+        problems += _drift_order_problems(name, jobs[name])
+    assert problems == []
+
+
+def test_the_guard_groups_that_install_nothing_stay_so() -> None:
+    """A pip line in either job would take its scripts out of the bare probe.
+
+    tests/test_scripts_without_numpy.py imports every script of a job that
+    installs nothing with no site-packages at all; a job that installs the
+    project is left out of that probe, so one pip line would drop thirty
+    scripts from it without failing anything.
+    """
+    jobs = _python_ci_jobs()
+    installing = [
+        f"{name}: {line.strip()}"
+        for name in _INSTALL_NOTHING
+        for step in _steps_of(jobs[name])
+        for line in str(step.get("run", "")).splitlines()
+        if re.search(r"\bpip3?\s+install\b|-m\s+pip\b", line)
+    ]
+    assert installing == []

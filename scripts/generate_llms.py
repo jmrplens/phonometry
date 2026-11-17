@@ -1233,8 +1233,8 @@ def _provenance_section() -> list[str]:
             "the library renders, in the reporting format its standard defines, "
             "with the guide that explains the measurement behind each one"
         ),
-        f"- [Bibliography]({SITE_URL}/reference/bibliography/)",
-        f"- [About the author and the method]({SITE_URL}/start/about/)",
+        _site_entry("Bibliography", BIBLIOGRAPHY_ROUTE),
+        _site_entry("About the author and the method", "start/about"),
         "",
         "## Source and metadata",
         "",

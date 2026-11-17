@@ -33,6 +33,8 @@ import { isLibraryTable, printedTables } from '../src/lib/catalogue-sources.mjs'
 const BIBLIOGRAPHY = 'https://docs.example/phonometry/reference/bibliography/';
 const PAGE = 'https://docs.example/phonometry/reference/catalogues/absorption-coefficients/';
 const TWIN = 'https://docs.example/phonometry/es/reference/catalogues/absorption-coefficients/';
+/** The site's Person, who transcribed the rows. */
+const PERSON = 'https://jmrp.io/#person';
 const CATALOG = {
   '@id': 'https://docs.example/phonometry/reference/catalogues/#article',
   name: 'Published catalogues',
@@ -707,6 +709,7 @@ test('a dataset names its sources, its catalogue and its twin, and claims no lic
     twinUrl: TWIN,
     bibliographyUrl: BIBLIOGRAPHY,
     dataCatalog: CATALOG,
+    personId: PERSON,
   });
   assert.equal(node['@type'], 'Dataset');
   assert.equal(node['@id'], `${PAGE}#dataset-absorptionAreas`);
@@ -731,9 +734,35 @@ test('a dataset names its sources, its catalogue and its twin, and claims no lic
     twinUrl: PAGE,
     bibliographyUrl: BIBLIOGRAPHY,
     dataCatalog: CATALOG,
+    personId: PERSON,
   });
   assert.deepEqual(spanish.translationOfWork, { '@id': `${PAGE}#dataset-absorptionAreas` });
   assert.equal(spanish.isBasedOn, undefined);
+});
+
+test('a dataset names the Person who transcribed it as its creator and publisher, free to read', () => {
+  // The rows stay attributed to the works they were printed in through
+  // isBasedOn; the creator is whoever read them off the page and made the
+  // table, the one name Dataset Search shows as the provider.
+  const options = {
+    dataset: { key: 'solids', name: 'N', description: 'D' },
+    catalogue: { columns: [], rows: rows('bies-2017-table-6-2') },
+    references: [book('Bies', 2017, ['bies-2017-table-6-2'])],
+    lang: 'es',
+    pageUrl: TWIN,
+    twinUrl: PAGE,
+    bibliographyUrl: BIBLIOGRAPHY,
+    dataCatalog: CATALOG,
+    personId: PERSON,
+  };
+  const node = datasetNode(options);
+  assert.deepEqual(node.creator, { '@id': PERSON });
+  assert.deepEqual(node.publisher, { '@id': PERSON });
+  assert.equal(node.isAccessibleForFree, true);
+  assert.equal(node.isBasedOn[0].name, 'A book by Bies');
+  assert.equal(node.license, undefined);
+  // Without the Person there is no one to name, and the build stops.
+  assert.throws(() => datasetNode({ ...options, personId: undefined }), /needs the @id of the Person who transcribed it/);
 });
 
 test("a dataset is dated as its page is, and says no date its page does not give", () => {
@@ -746,6 +775,7 @@ test("a dataset is dated as its page is, and says no date its page does not give
     twinUrl: TWIN,
     bibliographyUrl: BIBLIOGRAPHY,
     dataCatalog: CATALOG,
+    personId: PERSON,
   };
   assert.equal(datasetNode({ ...options, dateModified: '2026-10-29' }).dateModified, '2026-10-29');
   assert.equal('dateModified' in datasetNode(options), false);

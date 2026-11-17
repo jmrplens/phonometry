@@ -3,12 +3,20 @@ title: "JupyterLite y Pyodide"
 description: "phonometry en el navegador con JupyterLite o Pyodide: los extras que instala micropip, qué funciona allí, qué no y cómo publicar un sitio de JupyterLite."
 ---
 
-JupyterLite ejecuta un cuaderno en una pestaña del navegador, sobre Pyodide:
-CPython compilado a WebAssembly, sin nada que instalar en la máquina.
-phonometry es Python puro, así que se instala allí con micropip y funciona
-sobre el NumPy, el SciPy y el matplotlib que Pyodide compila para el
-navegador. Lo que no puede acompañarlo es lo que necesita un paquete
-compilado que Pyodide no compila, o un programa propio.
+[JupyterLite](https://jupyterlite.readthedocs.io/en/stable/) ejecuta un
+cuaderno en una pestaña del navegador, sobre
+[Pyodide](https://pyodide.org/en/stable/): CPython compilado a WebAssembly,
+sin nada que instalar en la máquina. phonometry es Python puro, así que se
+instala allí con [micropip](https://micropip.pyodide.org/en/stable/) y
+funciona sobre el NumPy, el SciPy y el matplotlib que Pyodide compila para el
+navegador. Lo que no puede acompañarlo es lo que necesita un paquete compilado
+que Pyodide no compila, o un programa propio.
+
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI: la
+instalación y los ejemplos en Pyodide 314.0.8 bajo Node.js, con micropip
+0.11.1, NumPy 2.4.6, SciPy 1.18.0 y matplotlib 3.10.8, y la construcción del
+sitio con jupyterlite-core 0.8.7, jupyterlite-pyodide-kernel 0.8.7 y
+jupyter-server 2.21.1.
 
 ## Instalación en un cuaderno
 
@@ -25,7 +33,8 @@ llegan de PyPI.
 extras de un paquete que ya instaló: con phonometry instalado, un
 `%pip install "phonometry[report]"` posterior no instala nada, y tampoco
 imprime nada. Para añadir lo que habría traído un extra posterior, nombra sus
-paquetes:
+paquetes, que [Primeros pasos](/phonometry/es/start/getting-started/#extras-opcionales)
+enumera extra por extra:
 
 ```py
 %pip install reportlab svglib
@@ -37,9 +46,10 @@ JupyterLite se ejecuta con un `%` delante.
 
 ## Qué funciona en el navegador
 
-Todos los dominios se importan, y las tablas de los resultados, `.plot()`
-bajo la celda y `.report()` funcionan como en Jupyter. Los archivos WAV y
-FLAC se escriben y se vuelven a leer en la propia carpeta del cuaderno. Las
+Todos los dominios se importan, y las tablas de los resultados, `.plot()` bajo
+la celda y `.report()` funcionan como en
+[Jupyter](/phonometry/es/start/environments/jupyter/). Los archivos WAV y FLAC
+se escriben y se vuelven a leer en la propia carpeta del cuaderno. Las
 simulaciones FDTD calculan con NumPy.
 
 ```python

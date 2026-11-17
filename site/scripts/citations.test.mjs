@@ -17,6 +17,8 @@ import {
   citedWorks,
   correctedWorks,
   englishStandardIds,
+  isBodyName,
+  publisherName,
   referenceId,
   referenceNode,
   referenceStub,
@@ -174,8 +176,42 @@ test('every standards body has one identity, on the English bibliography, in bot
   assert.equal(standardsBody(unknown, EN), undefined);
   assert.deepEqual(referenceNode(unknown, EN).publisher, { '@type': 'Organization', name: 'Somebody Else' });
 
-  // Only a standard has a standards body.
+  // A book from a publisher that is no body keeps the publisher's name.
   assert.equal(standardsBody(book, EN), undefined);
+  assert.deepEqual(referenceNode(book, EN).publisher, { '@type': 'Organization', name: 'A Press' });
+});
+
+test('a body that publishes a report, a paper or a web page is named by the identity its standards name it by', () => {
+  // An RFC cited as a report, ECAC Doc 29 and EASA's levels: each publisher is
+  // the body its standards are filed under, read from the field the kind
+  // writes it in. They used to be written out anonymously, because only a
+  // standard looked its body up.
+  const rfc = { type: 'report', organization: 'Internet Engineering Task Force', number: 'RFC 8259', year: 2017, title: 'JSON' };
+  const doc29 = { type: 'report', organization: 'European Civil Aviation Conference', year: 2016, title: 'ECAC Doc 29' };
+  const easa = { type: 'report', institution: 'European Union Aviation Safety Agency', year: 2024, title: 'Noise levels' };
+  const aes = { type: 'web', organization: 'Audio Engineering Society', year: 2006, title: 'A convention paper' };
+  const asaBook = { type: 'book', authors: ['Roe, R.'], publisher: 'Acoustical Society of America', year: 1993, title: 'A book' };
+  assert.deepEqual(referenceNode(rfc, ES, { bodiesUrl: EN }).publisher, { '@id': `${EN}#org-ietf` });
+  assert.deepEqual(referenceNode(doc29, EN).publisher, { '@id': `${EN}#org-ecac` });
+  assert.deepEqual(referenceNode(easa, EN).publisher, { '@id': `${EN}#org-easa` });
+  assert.deepEqual(referenceNode(aes, EN).publisher, { '@id': `${EN}#org-aes` });
+  assert.deepEqual(referenceNode(asaBook, EN).publisher, { '@id': `${EN}#org-asa` });
+  assert.equal(standardsBody(doc29, EN).url, 'https://www.ecac-ceac.org/');
+  assert.equal(publisherName(easa), 'European Union Aviation Safety Agency');
+
+  // A committee of a body is not the body: its pages keep the name they print.
+  const wg = { type: 'web', organization: 'Acoustical Society of America, Working Group S3-79', title: 'Errata' };
+  assert.deepEqual(referenceNode(wg, EN).publisher, {
+    '@type': 'Organization',
+    name: 'Acoustical Society of America, Working Group S3-79',
+  });
+  // A journal article names its journal and no publisher; a page that names
+  // no organization names no publisher either.
+  assert.equal(publisherName(paper), undefined);
+  assert.equal('publisher' in referenceNode(paper, EN), false);
+  assert.equal('publisher' in referenceNode({ type: 'web', title: 'A page' }, EN), false);
+  assert.equal(isBodyName('Internet Engineering Task Force'), true);
+  assert.equal(isBodyName('A Press'), false);
 });
 
 test('a Spanish standard is the English one it pairs with, translated edition notes included', () => {

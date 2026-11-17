@@ -427,8 +427,8 @@ export const es: HomeContent = {
 			{
 				name: 'Medio ambiente y transporte',
 				href: '/phonometry/es/environment/',
-				summary: 'Propagación en exteriores, barreras, refracción, indicadores ambientales, tráfico y aerogeneradores.',
-				standards: ['ISO 9613-1/-2', 'ISO 1996-1/-2', 'ISO/PAS 1996-3', 'NT ACOU 112', 'CNOSSOS-EU (Directiva 2002/49/CE, anexo II)', 'IEC 61400-11'],
+				summary: 'Propagación en exteriores, barreras, refracción, indicadores ambientales, tráfico y aerogeneradores. De CNOSSOS-EU, la parte de fuentes del anexo II: el método de propagación de su apartado 2.5 no está implementado, y la atenuación en exteriores pasa aquí por ISO 9613-2 en su lugar.',
+				standards: ['ISO 9613-1/-2', 'ISO 1996-1/-2', 'ISO/PAS 1996-3', 'NT ACOU 112', 'CNOSSOS-EU (Directiva 2002/49/CE, anexo II, 2.2 y 2.3)', 'IEC 61400-11'],
 			},
 			{
 				name: 'Ruido de aeronaves',

@@ -191,9 +191,15 @@ function reportPage(lang, work) {
 		name: text.name,
 		description: text.description,
 		inLanguage: lang,
+		[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
+			'@id': `${ORIGIN}${lang === 'en' ? '/es' : ''}/reference/conformance/#dataset`,
+		},
 		version: LIBRARY,
 		dateModified: DATA_DAY,
 		license: 'https://opensource.org/license/MIT',
+		isAccessibleForFree: true,
+		creator: { '@id': SITE.person },
+		publisher: { '@id': SITE.person },
 		measurementTechnique: text.technique,
 		variableMeasured: [{ '@type': 'PropertyValue', name: text.column[0], description: text.column[1] }],
 		distribution: [
@@ -919,6 +925,29 @@ test('a standard whose publisher has no identity of its own fails, anonymous or 
 	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 1 of 3 standards name a publisher with no identity/);
 });
 
+test('a work that is no standard and writes out a standards body anonymously fails, and another publisher passes', (t) => {
+	const passing = check(t, build());
+	assert.equal(passing.status, 0, passing.err);
+	assert.match(
+		passing.out,
+		/ok {3}\/reference\/bibliography\/: none of the 2 works that are no standard writes out a standards body anonymously/,
+	);
+
+	// The book of the fixture published by a body that has an identity of its
+	// own, written out by name as a report or a paper used to be.
+	const built = build();
+	nodeAt(built, 'es/bibliography', `${ES}#doi-10-1000-book`).publisher = {
+		'@type': 'Organization',
+		name: 'Internet Engineering Task Force',
+	};
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/bibliography\/: 1 of the 2 works that are no standard write out anonymously a publisher that has an identity of its own under .*#org-: Internet Engineering Task Force \(1\)/,
+	);
+});
+
 test('a standards body without its official site fails, and only the Spanish state issuers go without', (t) => {
 	const built = build();
 	delete nodeAt(built, 'en/bibliography', ISO['@id']).url;
@@ -1056,6 +1085,9 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 				'@id': `${ORIGIN}${twin}/${pageSlug}/#dataset-${key}`,
 			},
 			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
+			creator: { '@id': SITE.person },
+			publisher: { '@id': SITE.person },
+			isAccessibleForFree: true,
 			isBasedOn: [stub(book(url))],
 			// The day page() says the page was last edited.
 			dateModified: '2026-10-01',
@@ -1101,6 +1133,10 @@ test('a build whose every catalogue is a dataset of its page, listed by the over
 	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets is dated as the page that renders it`));
 	assert.match(
 		ran.out,
+		new RegExp(`each of the ${count * 2} datasets names the site's Person as its creator and publisher, free to read`),
+	);
+	assert.match(
+		ran.out,
 		new RegExp(`each of the ${count * 2} datasets is named by a heading of its page and described by a paragraph of it`),
 	);
 });
@@ -1123,6 +1159,19 @@ test('a dataset that claims a licence or a download over the rows fails', (t) =>
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /solids\/ carpets: the dataset claims license over rows other works printed/);
 	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl over rows other works printed/);
+});
+
+test('a dataset that names no creator, another publisher or no free access fails', (t) => {
+	const built = catalogueBuild();
+	delete datasetOf(built, 'en', 'carpets').creator;
+	datasetOf(built, 'es', 'solids').publisher = { '@type': 'Organization', name: 'A Press' };
+	delete datasetOf(built, 'es', 'gases').isAccessibleForFree;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /solids\/ carpets: the dataset names no creator, not the site's Person https:\/\/jmrp\.io\/#person/);
+	assert.match(ran.err, /solids\/ solids: the dataset names publisher "A Press", not the site's Person/);
+	assert.match(ran.err, /solids\/ gases: the dataset does not say it is free to read \(isAccessibleForFree\)/);
+	assert.doesNotMatch(ran.out, /datasets names the site's Person as its creator/);
 });
 
 test('a dataset whose source is a bare @id, or that names none, fails', (t) => {
@@ -2308,6 +2357,25 @@ test("a report Dataset that gives the software's DOI as its own identifier fails
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, new RegExp(`FAIL /reference/conformance/: the conformance report's Dataset: it gives the software's DOI ${RegExp.escape(SOFTWARE_DOI)} as its own identifier`));
+});
+
+test("a report Dataset not paired with the other language's, or made by no one, fails", (t) => {
+	// The two report pages render one report, and their articles were paired
+	// while their Datasets were not.
+	const built = build();
+	delete built['en/report'].article.mainEntity.workTranslation;
+	built['es/report'].article.mainEntity.translationOfWork = { '@id': `${ORIGIN}/reference/conformance/#article` };
+	delete built['es/report'].article.mainEntity.creator;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL /reference/conformance/: the conformance report's Dataset: its workTranslation is undefined, not the other language's report, ${RegExp.escape(`${ORIGIN}/es/reference/conformance/#dataset`)}`,
+		),
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: its translationOfWork is ".*\/reference\/conformance\/#article", not the other language's report/);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: it names no creator, not the site's Person/);
 });
 
 test('a report Dataset with no version, another one, or no day its data changed fails', (t) => {

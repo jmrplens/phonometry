@@ -3,11 +3,17 @@ title: "pip y uv"
 description: "Instala phonometry con pip o uv en Python 3.12 a 3.14: cada extra y lo que trae, torch sin CUDA, un proyecto de uv y la instalación desde un clon."
 ---
 
-phonometry se instala desde PyPI con pip o con uv en Python 3.12, 3.13 y
-3.14, como un único wheel sin código compilado propio. Las dos herramientas
-llegan a los mismos paquetes; lo que las distingue es cómo guardan las
-dependencias de un proyecto y cómo se le indica a cada una que tome torch del
-índice de CPU de PyTorch.
+phonometry se instala desde PyPI con [pip](https://pip.pypa.io/en/stable/) o
+con [uv](https://docs.astral.sh/uv/) en Python 3.12, 3.13 y 3.14, como un
+único wheel sin código compilado propio. Las dos herramientas llegan a los
+mismos paquetes; lo que las distingue es cómo guardan las dependencias de un
+proyecto y cómo se le indica a cada una que tome torch del índice de CPU de
+PyTorch.
+
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, en las
+imágenes `python:3.12-slim`, `python:3.13-slim` y `python:3.14-slim`, con
+Python 3.12.16, 3.13.18 y 3.14.10: pip 26.3 con NumPy 2.5.5 y SciPy 1.18.1, uv
+0.13.9 con Python 3.13.18, y torch 2.15.0 del índice de CPU de PyTorch.
 
 ## pip en un entorno virtual
 

@@ -3,10 +3,16 @@ title: "conda y mamba"
 description: "Usa phonometry en un entorno de conda o mamba: sus dependencias desde conda-forge con los nombres que tienen allí y después phonometry con pip."
 ---
 
-phonometry se instala desde PyPI. En un entorno de conda, toma primero sus
-dependencias de conda-forge y después instala phonometry con el pip del propio
-entorno: pip encuentra ya instalado cada requisito y añade solo phonometry, de
-modo que NumPy, SciPy y los demás siguen siendo compilaciones de conda-forge.
+phonometry se instala desde PyPI. En un entorno de
+[conda](https://docs.conda.io/projects/conda/en/stable/), toma primero sus
+dependencias de [conda-forge](https://conda-forge.org/) y después instala
+phonometry con el pip del propio entorno: pip encuentra ya instalado cada
+requisito y añade solo phonometry, de modo que NumPy, SciPy y los demás siguen
+siendo compilaciones de conda-forge.
+
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, en la
+imagen `condaforge/miniforge3`: conda 26.9.4 y mamba 2.9.0, Python 3.13.18 con
+el NumPy 2.5.5 de conda-forge, y Python 3.14.10 con pytorch 2.14.1.
 
 ## Un entorno con todos los extras
 
@@ -18,13 +24,13 @@ python -m pip install "phonometry[full]"
 
 pip da cada requisito por satisfecho e instala solo phonometry. `conda list`
 muestra entonces phonometry con el canal `pypi` junto a los paquetes de
-conda-forge, y `python -m pip check` no encuentra nada roto. mamba acepta los
-mismos argumentos: `mamba create -n acoustics -c conda-forge ...` construye el
-mismo entorno. Funcionan Python 3.12, 3.13 y 3.14.
-conda-forge no publica Python 3.12 ni posterior para Windows ni para Linux de
-32 bits, así que allí phonometry se instala solo con pip, con
-`[plot,report,audio]` en lugar de `[full]`, como dice [pip y
-uv](/phonometry/es/start/environments/pip-and-uv/).
+conda-forge, y `python -m pip check` no encuentra nada roto.
+[mamba](https://mamba.readthedocs.io/en/latest/) acepta los mismos argumentos:
+`mamba create -n acoustics -c conda-forge ...` construye el mismo entorno.
+Funcionan Python 3.12, 3.13 y 3.14. conda-forge no publica Python 3.12 ni
+posterior para Windows ni para Linux de 32 bits, así que allí phonometry se
+instala solo con pip, con `[plot,report,audio]` en lugar de `[full]`, como
+dice [pip y uv](/phonometry/es/start/environments/pip-and-uv/).
 
 ## Los extras con sus nombres de conda-forge
 

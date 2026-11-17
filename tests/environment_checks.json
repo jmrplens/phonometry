@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-17",
+  "phonometry": "4.0.0",
+  "pages": {
+    "index": {},
+    "pip-and-uv": {
+      "images": ["python:3.12-slim", "python:3.13-slim", "python:3.14-slim"],
+      "Python": ["3.12.16", "3.13.18", "3.14.10"],
+      "pip": "26.3",
+      "uv": "0.13.9",
+      "NumPy": "2.5.5",
+      "SciPy": "1.18.1",
+      "torch": "2.15.0"
+    },
+    "conda": {
+      "images": ["condaforge/miniforge3"],
+      "conda": "26.9.4",
+      "mamba": "2.9.0",
+      "Python": ["3.13.18", "3.14.10"],
+      "NumPy": "2.5.5",
+      "pytorch": "2.14.1"
+    },
+    "jupyter": {
+      "images": ["python:3.13-slim"],
+      "Python": "3.13.18",
+      "JupyterLab": "4.6.6",
+      "ipykernel": "7.4.0",
+      "matplotlib": "3.11.2",
+      "ffmpeg": "7.1.5"
+    },
+    "jupyterlite": {
+      "Pyodide": "314.0.8",
+      "micropip": "0.11.1",
+      "NumPy": "2.4.6",
+      "SciPy": "1.18.0",
+      "matplotlib": "3.10.8",
+      "jupyterlite-core": "0.8.7",
+      "jupyterlite-pyodide-kernel": "0.8.7",
+      "jupyter-server": "2.21.1"
+    },
+    "docker": {
+      "images": ["python:3.13-slim"],
+      "digest": "sha256:09a17cad02668ae61ece136b4fd36ac3849e14f670ebedb637ea3e15580525bc",
+      "Docker": "29.9.3",
+      "Python": "3.13.18"
+    },
+    "type-checking": {
+      "images": ["python:3.12-slim", "python:3.14-slim"],
+      "Python": ["3.12.16", "3.14.10"],
+      "NumPy": "2.5.5",
+      "mypy": "2.4.1",
+      "pyright": "1.1.414"
+    }
+  }
+}

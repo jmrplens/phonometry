@@ -27,6 +27,11 @@
  *
  * The software's DOI is not the Dataset's: it names every version of the
  * library, and a report is the record of one.
+ *
+ * The two pages render one report, so the two Datasets are one work in two
+ * languages, paired as their articles are: the English one names the Spanish
+ * as its `workTranslation`, and the Spanish one names the English as the work
+ * it is a `translationOfWork` of.
  */
 
 /** What the Dataset says in each language; the counts are filled in from the report. */
@@ -99,12 +104,27 @@ const DOWNLOADS = [
  *   at it.
  * @param {object[]} options.standards The works the checks quote, as the
  *   short nodes a page names them with (src/lib/citations.mjs, `referenceStub`).
+ * @param {string} options.twinCanonical The absolute URL of the report page in
+ *   the other language, whose Dataset this one translates or is translated by.
  * @param {string} options.personId
  * @param {string} options.softwareId
  */
-export function conformanceDataset({ lang, canonical, report, modified, commit, standards, personId, softwareId }) {
+export function conformanceDataset({
+  lang,
+  canonical,
+  report,
+  modified,
+  commit,
+  standards,
+  twinCanonical,
+  personId,
+  softwareId,
+}) {
   if (!/^[0-9a-f]{40}$/.test(String(commit))) {
     throw new Error(`the conformance report's Dataset needs the commit its rows are of, 40 hexadecimal digits, not ${JSON.stringify(commit)}`);
+  }
+  if (typeof twinCanonical !== 'string' || twinCanonical === '' || twinCanonical === canonical) {
+    throw new Error(`the conformance report's Dataset needs the report page of the other language, not ${JSON.stringify(twinCanonical)}`);
   }
   const text = TEXT[lang];
   return {
@@ -114,6 +134,7 @@ export function conformanceDataset({ lang, canonical, report, modified, commit, 
     description: text.description(report.counts),
     url: canonical,
     inLanguage: lang,
+    [lang === 'en' ? 'workTranslation' : 'translationOfWork']: { '@id': `${twinCanonical}#dataset` },
     version: report.library,
     dateModified: modified,
     license: 'https://opensource.org/license/MIT',

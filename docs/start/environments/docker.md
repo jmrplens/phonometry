@@ -5,36 +5,42 @@
 # Docker and servers
 
 phonometry needs nothing from the operating system beyond Python on a
-`python:*-slim` image for x86-64 or ARM64 (`linux/amd64`, `linux/arm64`):
-every extra installs from wheels there, libsndfile inside the soundfile wheel
-included. The one system package worth adding is ffmpeg, and only for videos.
-The same tag publishes six more architectures, and Docker pulls the one of
-the host: 32-bit ARM (`linux/arm/v5`, `linux/arm/v7`), 32-bit x86
-(`linux/386`), `linux/ppc64le`, `linux/riscv64` and `linux/s390x`. numba no
-longer supports 32-bit Linux, where its last wheels, of 0.56.4, are for Python
-3.10 at most, so neither `[perf]` nor `[full]`, which holds it, is supported
-on the three 32-bit ones, where
-`python -m pip install "phonometry[plot,report,audio]"` installs the other
-three extras. torch publishes no wheel for any of the six and no source to
-build, so `[torch]` does not install on them from PyPI. PyPI has no Python
-3.13 wheel for any of the six of NumPy, SciPy, matplotlib or Pillow, nor of
-numba and the llvmlite it needs on `linux/ppc64le`, `linux/riscv64` and
-`linux/s390x`, which numba supports on a best-effort basis only, nor for some
-of them of contourpy, kiwisolver, cffi or lxml, so pip builds those from
-source there, NumPy and SciPy even for a plain install. That takes what the
-slim image leaves out: a C and a C++ compiler and the development files of the
-libraries each one links, a Fortran compiler with BLAS and LAPACK for SciPy,
-and for llvmlite LLVM 22 with `cmake` and `make` on `PATH`. python-soundfile
-installs its pure-Python wheel there, which loads the system's libsndfile:
-`apt-get install libsndfile1`. On `linux/arm/v5`, whose soft-float ABI no
-manylinux wheel targets, the builds of NumPy, SciPy and matplotlib also ask
-for ninja and patchelf, and pip would build those from source too, which runs
-`make` and autoreconf, unless `apt-get install ninja-build patchelf` has put
-the image's own on `PATH`. An Alpine image, built on musl, needs more,
-since python-soundfile has no wheel there that carries libsndfile and numba
-none at all; [Getting
-Started](../getting-started.md#from-pypi-recommended) says
-what each extra takes there.
+[`python:*-slim`](https://hub.docker.com/_/python) image for x86-64 or ARM64
+(`linux/amd64`, `linux/arm64`): every extra installs from wheels there,
+libsndfile inside the soundfile wheel included. The one system package worth
+adding is ffmpeg, and only for videos. The same tag publishes six more
+architectures, and [Docker](https://docs.docker.com/) pulls the one of the
+host: 32-bit ARM (`linux/arm/v5`, `linux/arm/v7`), 32-bit x86 (`linux/386`),
+`linux/ppc64le`, `linux/riscv64` and `linux/s390x`. numba no longer supports
+32-bit Linux, where its last wheels, of 0.56.4, are for Python 3.10 at most,
+so neither `[perf]` nor `[full]`, which holds it, is supported on the three
+32-bit ones, where `python -m pip install "phonometry[plot,report,audio]"`
+installs the other three extras. torch publishes no wheel for any of the six
+and no source to build, so `[torch]` does not install on them from PyPI. PyPI
+has no Python 3.13 wheel for any of the six of NumPy, SciPy, matplotlib or
+Pillow, nor of numba and the llvmlite it needs on `linux/ppc64le`,
+`linux/riscv64` and `linux/s390x`, which numba supports on a best-effort basis
+only, nor for some of them of contourpy, kiwisolver, cffi or lxml, so pip
+builds those from source there, NumPy and SciPy even for a plain install. That
+takes what the slim image leaves out: a C and a C++ compiler and the
+development files of the libraries each one links, a Fortran compiler with
+BLAS and LAPACK for SciPy, and for llvmlite LLVM 22 with `cmake` and `make` on
+`PATH`. python-soundfile installs its pure-Python wheel there, which loads the
+system's libsndfile: `apt-get install libsndfile1`. On `linux/arm/v5`, whose
+soft-float ABI no manylinux wheel targets, the builds of NumPy, SciPy and
+matplotlib also ask for ninja and patchelf, and pip would build those from
+source too, which runs `make` and autoreconf, unless
+`apt-get install ninja-build patchelf` has put the image's own on `PATH`. An
+Alpine image, built on musl, needs more, since python-soundfile has no wheel
+there that carries libsndfile and numba none at all; [Getting
+Started](../getting-started.md#from-pypi-recommended) says what
+each extra takes there.
+
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, with Docker
+29.9.3 and the `python:3.13-slim` image of digest
+`sha256:09a17cad02668ae61ece136b4fd36ac3849e14f670ebedb637ea3e15580525bc` on
+Python 3.13.18: the image and the job below, as root, as another user id, as
+`nobody` and on a read-only root.
 
 ## An image
 
@@ -98,13 +104,13 @@ root, `--user` runs the job as you, so the files are yours and not root's.
 Make the folder first: one that such a daemon makes for the mount belongs to
 root, and the job, running as you, cannot write in it.
 
-Rootless Docker and rootless Podman already run the container's root as you,
-and map every other user id of the container, your own included, to a
-subordinate id of the host that cannot write in your `out`: there `--user`
-stops the job with a `PermissionError`. Leave it out, or pass
+Rootless Docker and rootless [Podman](https://podman.io/docs) already run the
+container's root as you, and map every other user id of the container, your
+own included, to a subordinate id of the host that cannot write in your `out`:
+there `--user` stops the job with a `PermissionError`. Leave it out, or pass
 `--userns=keep-id` under Podman, and the files are yours. The folder made
-first serves both: rootless Docker would make a missing one as you, and
-Podman refuses to mount one that does not exist.
+first serves both: rootless Docker would make a missing one as you, and Podman
+refuses to mount one that does not exist.
 
 matplotlib picks its Agg backend by itself in a container with no display,
 so nothing has to set `MPLBACKEND`.

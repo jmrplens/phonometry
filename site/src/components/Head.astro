@@ -231,6 +231,7 @@ const datasets =
           twinUrl: `${SITE}${BASE}${lang === 'en' ? '/es' : ''}/${slug}/`,
           bibliographyUrl,
           dataCatalog,
+          personId: PERSON_ID,
           dateModified: modified,
         }),
       )
@@ -273,6 +274,7 @@ if (isConformanceReport && !is404) {
     modified: isoDay(data.date),
     commit: data.sha,
     standards: evidence.governing.map((ref) => referenceStub(ref, bibliographyUrl)),
+    twinCanonical: `${SITE}${BASE}${lang === 'en' ? '/es' : ''}/${slug}/`,
     personId: PERSON_ID,
     softwareId: SOFTWARE_ID,
   });

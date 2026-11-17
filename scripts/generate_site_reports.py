@@ -39,7 +39,8 @@ its hand-written introduction above a marker line, and everything below the
 marker is replaced on every run. The transformation is purely textual and
 deterministic (no timestamps, no environment-dependent text), so CI can diff a
 fresh run against the committed pages exactly like it does for the generated
-API reference (see the ``site-reports`` job in .github/workflows/python-app.yml).
+API reference (see the ``site-reports`` step of the ``guards-prose`` job in
+.github/workflows/python-app.yml).
 
 The Spanish pages transplant ``docs/ERRATA.es.md``, the hand-maintained
 entry-for-entry translation of the registry. The English wording stays the

@@ -29,7 +29,7 @@ Run after ``python -m build stub/``::
 
     python scripts/check_stub_metadata.py
 
-CI runs it in the ``transition-stub`` job, right after ``twine check``, and
+CI runs it in the ``built-package`` job, right after ``twine check``, and
 ``publish-stub.yml`` runs it on the files it is about to upload.
 """
 

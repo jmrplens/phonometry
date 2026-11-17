@@ -795,7 +795,7 @@ ax.plot(x, y, **{"color": _C_PRIMARY, "lw": 1.5, **kwargs})
 
 **Enforced by:** `scripts/check_plot_style_defaults.py`, `make plot-style-defaults`, `CI: Every call passes the language on`, `tests/test_check_plot_style_defaults.py::test_the_package_is_clean`
 
-**Exceptions.** Only the aliased properties are refused; `label`, `marker` and `zorder` have one name. A local dictionary the caller never sees may hold anything. The gate also fails if its alias table drifts from `_STYLE_ALIASES` in `src/phonometry/_plot/common.py`. It runs as a step of the CI job named 'Every call passes the language on'.
+**Exceptions.** Only the aliased properties are refused; `label`, `marker` and `zorder` have one name. A local dictionary the caller never sees may hold anything. The gate also fails if its alias table drifts from `_STYLE_ALIASES` in `src/phonometry/_plot/common.py`.
 
 <a id="f34"></a>
 ### F34. Copy the keyword arguments per curve before setting a label inside a loop

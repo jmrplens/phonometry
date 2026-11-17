@@ -8,7 +8,7 @@ a figure typed in beside them, and the documents that point at them must point
 at files that exist.
 
 The guards below are the ones that would otherwise fail somewhere far away. A
-non-deterministic byte fails as a red ``conformance`` job on an unrelated pull
+non-deterministic byte fails as a red conformance gate on an unrelated pull
 request. A hard-coded count fails as a banner that says 566 for ever. A renamed
 badge fails as a broken image in a rendered document and nowhere else, because
 the old file is still tracked, still unchanged, and still green. And a colour

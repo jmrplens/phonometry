@@ -787,7 +787,8 @@ snippets-static:
 
 # Catch a paragraph that wraps onto a "-" or a ">", which CommonMark reads as a
 # new block and which then either takes the site build down or publishes a
-# quoted block in the middle of a sentence (see the markdown-wrapping job).
+# quoted block in the middle of a sentence (see the markdown-hazards step of
+# the guards-prose job in python-app.yml).
 hazards:
 	$(PYTHON) scripts/check_markdown_hazards.py
 
@@ -828,7 +829,8 @@ claims:
 
 # Regenerate the committed Starlight API reference (site/src/content/docs/
 # reference/api + site/src/generated/api-sidebar.mjs) from the source
-# docstrings. CI fails if this drifts (see the api-docs job in python-app.yml).
+# docstrings. CI fails if this drifts (see the api-docs step of the
+# guards-package job in python-app.yml).
 api-docs:
 	$(PYTHON) scripts/generate_api_docs.py
 
@@ -837,7 +839,7 @@ api-docs:
 # and the index there, below the hand-written introduction it keeps. It writes
 # nothing and fails when a family corrects a work no page cites, which the
 # bibliography then cannot name (rule F59). CI fails on that, and if the pages
-# drift (see the `site-reports` job in python-app.yml).
+# drift (see the `site-reports` step of the guards-prose job in python-app.yml).
 site-reports:
 	$(PYTHON) scripts/generate_site_reports.py
 
@@ -846,14 +848,15 @@ site-reports:
 # loader adds what follows from them, so the page shows what the library holds
 # rather than a second reading of the same books. CI runs the --check form and
 # fails if the committed module drifts (see the `catalogue-data` step of the
-# quality job in python-app.yml).
+# guards-package job in python-app.yml).
 catalogue-data:
 	$(PYTHON) scripts/generate_catalogue_data.py
 
 # Write the JSON Schema of a catalogue file (every published row class) into
 # site/public/schemas/, where the site serves it for an editor to complete a
 # catalogue file with. CI runs the --check form and fails if the committed
-# file drifts from a fresh run (see the `published-sources` job).
+# file drifts from a fresh run (see the `catalogue-schema` step of the
+# guards-package job in python-app.yml).
 catalogue-schema:
 	$(PYTHON) scripts/generate_catalogue_schema.py
 
@@ -913,7 +916,8 @@ reports:
 # from site/src/data/conformance-stats.mjs and need nothing. The last two steps
 # are the read-only validations CI also runs: the artefact against itself, and
 # its vocabularies against the site that has to accept and word them. CI fails
-# if any output drifts (see the `conformance` job in python-app.yml).
+# if any output drifts (see the `conformance` step of the guards-package job
+# in python-app.yml).
 conformance:
 	$(PYTHON) scripts/conformance_report.py --file-header --output docs/CONFORMANCE.md
 	$(PYTHON) scripts/conformance_badges.py
@@ -994,9 +998,10 @@ engine-digests:
 # pyright --verifytypes on the package as a user installs it: a wheel built
 # here, in an environment of its own beside the pyright requirements-dev.txt
 # pins, where pyright reads the installed package rather than src/. It fails
-# below a type completeness of 100%, as the type-completeness CI job does on
-# the release's own build of the wheel. setuptools stages the build in
-# build/lib, which is cleared first so a module deleted since cannot ride along.
+# below a type completeness of 100%, as the type-completeness step of CI's
+# built-package job does on the release's own build of the wheel. setuptools
+# stages the build in build/lib, which is cleared first so a module deleted
+# since cannot ride along.
 TYPE_COMPLETENESS_DIR = build/type-completeness
 type-completeness:
 	rm -rf $(TYPE_COMPLETENESS_DIR) build/lib build/bdist.*

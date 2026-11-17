@@ -82,7 +82,7 @@ parameters that tell it from the other heads, as they are annotated there
 others nor the implementation. An entry that covers nothing fails the check
 too.
 
-Static and dependency-free, so it runs on its own.
+Static and dependency-free: it imports the standard library alone.
 """
 
 from __future__ import annotations

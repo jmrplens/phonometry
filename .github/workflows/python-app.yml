@@ -745,8 +745,9 @@ jobs:
     # only a type checker can see, such as a published catalogue joined with
     # a caller's being accepted by a lookup's `catalogue=`: the suite runs
     # those files, but a wrong annotation passes at run time.
-    # `.github/scripts` holds the script that writes this pull request's
-    # comment, which sat under none of the paths. And the conformance
+    # `.github/scripts` holds the scripts CI runs itself, the one that writes
+    # this pull request's comment and the one that names the failed steps of
+    # a grouped job, which sat under none of the paths. And the conformance
     # scripts compare against the oracle tables in `tests/`: until the
     # checker was told where those live, every value read from them was
     # `Any` and the comparison went unchecked.

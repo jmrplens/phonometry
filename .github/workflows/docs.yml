@@ -401,8 +401,9 @@ jobs:
         # Before the build, this job wrote llms.txt at the repository root from
         # a dump of the copies with no dates, the way `make llms` writes the
         # committed file. The build wrote the one it publishes from copies that
-        # state the day each page was published and last changed. Where a
-        # shard is cut, and so which part files llms.txt links, must not depend
+        # state the day each page was published and the instant it last
+        # changed. Where a shard is cut, and so which part files llms.txt
+        # links, must not depend
         # on those dates: a writer whose text grew with them, or a dated header
         # line the generator does not measure as one, would leave the committed
         # index linking files the site does not serve, with every other check
@@ -423,10 +424,11 @@ jobs:
         # the build: every page in exactly one class of what it owes, every
         # copy announced by its page's head and structured data, a title and
         # a header held line by line to the page and the sitemap (canonical,
-        # language, translation, release, publication day, Updated: date,
-        # licence, summary), a body that is there, with every row of a
-        # catalogue's tables, and a text a Markdown reader can use. The llms
-        # files the build wrote carry every English guide, catalogue and
+        # language, translation, release, publication day, the Updated:
+        # instant its footer states, licence, summary), a body that is there,
+        # with every row of a catalogue's tables, and a text a Markdown reader
+        # can use. The llms files the build wrote carry every English guide,
+        # catalogue and
         # errata family once in llms-full.txt and in exactly one shard, as
         # its copy reads, and llms.txt links every shard file and no other.
         run: pnpm run check:markdown-twins

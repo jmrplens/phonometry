@@ -30,7 +30,10 @@
 // copy's title is the page's <title> without the site's name; `Canonical:`,
 // `Language:`, `Summary:` and `Published:` are the page's canonical link, its
 // language, its meta description and the `datePublished` of the node that
-// declares the copy; `Updated:` is the sitemap's <lastmod>; `Alternate:` is
+// declares the copy; `Updated:` is the instant the page's footer dates its
+// content (the last `<time datetime>` of Starlight's footer, which the edge
+// serves both as their Last-Modified), on the day the sitemap's <lastmod>
+// gives; `Alternate:` is
 // the copy of the page its hreflang link names; `Verified:` stands exactly
 // where the page states its conformance checks; `License:` stands on every
 // page but a catalogue. Only the release lines are read from the release:
@@ -457,6 +460,26 @@ function sitemapDates(dist) {
   return dates;
 }
 
+/** An instant as the footer and a copy's `Updated:` state it (src/lib/date-rules.mjs `isoInstant`). */
+const INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u;
+
+/**
+ * The date a page's footer gives its content: the last `<time datetime>` in
+ * Starlight's `<div class="meta sl-flex">` (src/components/LastUpdated.astro),
+ * where the edge reads the page's Last-Modified.
+ *
+ * @param {string} html
+ * @returns {string | undefined}  Undefined on a page with no dated footer.
+ */
+export function footerDate(html) {
+  const markup = markupOf(html);
+  const start = markup.lastIndexOf('<div class="meta sl-flex');
+  if (start === -1) return undefined;
+  const end = markup.indexOf('</div>', start);
+  const footer = markup.slice(start, end === -1 ? undefined : end);
+  return tags(footer, 'time').map((time) => time.datetime).filter((datetime) => datetime !== undefined).at(-1);
+}
+
 /** What closes every page in a shard and in llms-full.txt (scripts/generate_llms.py `PAGE_END`). */
 export const PAGE_END = '\n\n---\n';
 
@@ -879,10 +902,19 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
         add('header', `${copy} ${said('Published')}, and the page's structured data gives ${datePublished ?? 'no datePublished'}`);
       }
     }
+    // `Updated:` states the instant the content last changed, as the footer
+    // does: the edge gives the copy and the page that Last-Modified, and a day
+    // alone would give two changes made on one day the same one.
     const lastmod = dates.get(route);
+    const updated = fields.get('Updated');
+    const footer = footerDate(html);
     if (!lastmod) add('header', `${route} has a copy and no <lastmod> in the sitemap: nothing dates it`);
-    else if (fields.get('Updated') !== lastmod) {
+    else if (!INSTANT.test(updated ?? '')) {
+      add('header', `${copy} ${said('Updated')}, not an instant to the second in UTC (YYYY-MM-DDThh:mm:ssZ)`);
+    } else if (updated?.slice(0, 10) !== lastmod) {
       add('header', `${copy} ${said('Updated')}, and the sitemap dates the page ${lastmod}`);
+    } else if (footer !== updated) {
+      add('header', `${copy} ${said('Updated')}, and the page's footer dates its content ${footer ?? 'nowhere'}`);
     }
     const other = tags(html, 'link').find(
       (link) => link.rel === 'alternate' && link.hreflang && link.hreflang !== 'x-default' && link.hreflang !== lang,

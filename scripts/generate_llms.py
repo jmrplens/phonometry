@@ -201,13 +201,26 @@ KINDS = frozenset({"home", "api", "catalogue", "errata-family", "guide"})
 #: what git answered.
 DATED_HEADER_KEYS = ("Published", "Updated")
 
-#: What the dated lines take when they are there: the key, ``: ``, a
-#: ``YYYY-MM-DD`` day and the end of the line.
-DATED_LINES_BYTES = sum(len(f"{key}: 0000-00-00\n") for key in DATED_HEADER_KEYS)
+#: What each dated line states: ``Published:`` the day the page was first
+#: published, ``Updated:`` the instant its content last changed, to the second
+#: in UTC, as the page's footer states it (``site/src/lib/date-rules.mjs``
+#: ``isoInstant``).
+_DATED_VALUES = {
+    "Published": "[0-9]{4}-[0-9]{2}-[0-9]{2}",
+    "Updated": "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z",
+}
+
+#: What the dated lines take when they are there: the key, ``: ``, the value
+#: and the end of the line.
+DATED_LINES_BYTES = len("Published: 0000-00-00\n") + len(
+    "Updated: 0000-00-00T00:00:00Z\n"
+)
 
 #: A dated header line, as the header writes one.
 _DATED_LINE = re.compile(
-    rf"^(?:{'|'.join(DATED_HEADER_KEYS)}): [0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}$"
+    "^(?:"
+    + "|".join(f"{key}: {_DATED_VALUES[key]}" for key in DATED_HEADER_KEYS)
+    + ")$"
 )
 
 #: What closes every page in a shard and in llms-full.txt: a blank line and a

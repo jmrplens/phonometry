@@ -140,7 +140,7 @@ describe('a dump of a content tree', () => {
     const copy = readFileSync(join(dump, 'signals/levels/index.md'), 'utf8');
     assert.match(copy, /^# Levels\n/u);
     assert.match(copy, /^Published: 2026-01-06$/mu);
-    assert.match(copy, /^Updated: 2026-10-20$/mu);
+    assert.match(copy, /^Updated: 2026-10-20T10:00:00Z$/mu);
     assert.match(copy, /^Standards: IEC 61672-1:2013$/mu);
     assert.match(copy, /^## Weighting$/mu);
   });
@@ -160,7 +160,7 @@ describe('a dump of a content tree', () => {
     assert.equal(copies.length, 4);
     for (const path of copies) {
       const lines = dated[path].split('\n');
-      const left = lines.filter((line) => !/^(?:Published|Updated): \d{4}-\d{2}-\d{2}$/u.test(line));
+      const left = lines.filter((line) => !/^(?:Published: \d{4}-\d{2}-\d{2}|Updated: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)$/u.test(line));
       assert.equal(lines.length - left.length, 2, `${path} states both dates when dated`);
       assert.equal(readFileSync(join(dump, path), 'utf8'), left.join('\n'), path);
     }

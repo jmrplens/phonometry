@@ -83,7 +83,7 @@ def copy_text(
         "Version: phonometry 4.0.0",
         'Install: pip install "phonometry[full]"',
         "Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)",
-        *(["Published: 2026-01-06", "Updated: 2026-10-20"] if dated else []),
+        *(["Published: 2026-01-06", "Updated: 2026-10-20T10:00:00Z"] if dated else []),
         *(
             ["License: MIT (https://github.com/jmrplens/phonometry/blob/main/LICENSE)"]
             if license_line

@@ -14,7 +14,16 @@
  * day the page's content last changed (src/lib/content-dates.mjs), the date
  * the structured data and the sitemap give it too. A page published and last
  * changed on the same day shows one date, not the same date twice.
+ *
+ * The last `<time>` here states when the content last changed, to the second
+ * (`isoInstant`), and the one date of a page published and changed on the
+ * same day states it too, since that date stands for both. The edge reads it
+ * as the page's Last-Modified (as it reads the `Updated:` line of the
+ * Markdown copy, which states the same instant), and a day alone would give
+ * two changes made on one day the same Last-Modified, so a client that
+ * revalidated with If-Modified-Since would keep the first.
  */
+import { isoInstant } from '../lib/date-rules.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
 
 const route = Astro.locals.starlightRoute;
@@ -26,6 +35,7 @@ const fmt = (date: Date) => date.toLocaleDateString(lang, { dateStyle: 'medium',
 const publishedText = published ? fmt(new Date(published)) : undefined;
 const updatedText = lastUpdated ? fmt(lastUpdated) : undefined;
 const showUpdated = updatedText && updatedText !== publishedText;
+const updatedAt = lastUpdated ? isoInstant(lastUpdated) : undefined;
 
 const t = lang.startsWith('es')
   ? { published: 'Publicado el', updated: 'actualizado el', updatedOnly: 'Última actualización:' }
@@ -35,18 +45,18 @@ const t = lang.startsWith('es')
 {
   publishedText ? (
     <p>
-      {t.published} <time datetime={published}>{publishedText}</time>
+      {t.published} <time datetime={showUpdated ? published : (updatedAt ?? published)}>{publishedText}</time>
       {showUpdated && (
         <>
           {', '}
-          {t.updated} <time datetime={lastUpdated?.toISOString()}>{updatedText}</time>
+          {t.updated} <time datetime={updatedAt}>{updatedText}</time>
         </>
       )}
     </p>
   ) : (
     updatedText && (
       <p>
-        {t.updatedOnly} <time datetime={lastUpdated?.toISOString()}>{updatedText}</time>
+        {t.updatedOnly} <time datetime={updatedAt}>{updatedText}</time>
       </p>
     )
   )

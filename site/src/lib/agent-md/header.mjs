@@ -19,7 +19,8 @@
  *
  * Every value comes from the module that already publishes it on the site:
  * the version and the install line from src/data/repo-stats.mjs, the dates
- * from src/lib/content-dates.mjs (the sitemap's `<lastmod>`) and
+ * from src/lib/content-dates.mjs (the footer's last date, whose day the
+ * sitemap's `<lastmod>` gives) and
  * src/lib/page-dates.mjs (the structured data's `datePublished`), the
  * standards from src/lib/reference-chips.ts (the standards the header chips
  * stand for), the author and the repository from src/data/site.mjs. Nothing
@@ -50,7 +51,10 @@ import { line } from './markdown-table.mjs';
  * @property {{ version: string, install: string, preRelease?: boolean }} release
  * @property {{ name: string, orcid: string }} [author]
  * @property {string} [published]  `YYYY-MM-DD`.
- * @property {string} [updated]  `YYYY-MM-DD`.
+ * @property {string} [updated]  `YYYY-MM-DDThh:mm:ssZ`, the instant the page's
+ *   content last changed, as its footer's `<time datetime>` states it: the
+ *   edge dates the copy by it (its Last-Modified), so two changes on one day
+ *   give the copy two dates.
  * @property {readonly string[]} [standards]  Designations the page implements.
  * @property {{ checks: number, designations: readonly string[], url: string }} [verified]
  *   What the page's "Verified by" line states: how many conformance checks

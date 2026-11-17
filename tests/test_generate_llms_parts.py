@@ -338,14 +338,22 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
 
     def undate(text: str) -> str:
         return text.replace("Published: 2026-01-06\n", "").replace(
-            "Updated: 2026-10-20\n", ""
+            "Updated: 2026-10-20T10:00:00Z\n", ""
         )
+
+    def in_two(limit: int) -> bool:
+        # A budget too small for one section refuses the page outright, which
+        # is no cut into two parts either.
+        try:
+            return len(cut(undated, limit)) <= 2
+        except SystemExit:
+            return False
 
     # The smallest budget that holds the page in two parts, by bisection.
     low, high = 1_000, _bytes(cut(dated, 10**9)[0])
     while low < high:
         middle = (low + high) // 2
-        if len(cut(undated, middle)) <= 2:
+        if in_two(middle):
             high = middle
         else:
             low = middle + 1

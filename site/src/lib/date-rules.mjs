@@ -344,3 +344,21 @@ export function readDateSources(file, { topics = domainIds } = {}) {
 export function isoDay(date) {
   return date.toISOString().slice(0, 10);
 }
+
+/**
+ * The instant a date stands for, to the second in UTC, as
+ * `YYYY-MM-DDThh:mm:ssZ`: the form the footer's `<time datetime>` and a
+ * Markdown copy's `Updated:` line state the content date in. A day is too
+ * coarse for them: the edge answers a conditional request for the page or its
+ * copy from that date (its Last-Modified), and two changes on one day would
+ * give both versions the same one, so a client that asked with
+ * If-Modified-Since after the first would keep it after the second. Git
+ * dates a commit to the second, and a date read from a file's mtime is cut to
+ * the second too, as HTTP dates are.
+ *
+ * @param {Date} date
+ * @returns {string}
+ */
+export function isoInstant(date) {
+  return new Date(Math.floor(date.getTime() / 1000) * 1000).toISOString().replace('.000Z', 'Z');
+}

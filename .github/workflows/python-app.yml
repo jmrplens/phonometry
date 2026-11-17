@@ -805,7 +805,8 @@ jobs:
       # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
@@ -1098,9 +1099,10 @@ jobs:
           echo "$untracked"
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id.
+    # One annotation per failed step on the checks page, titled by its id. A
+    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
-      if: ${{ failure() }}
+      if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
@@ -1126,7 +1128,8 @@ jobs:
       # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
@@ -1324,9 +1327,10 @@ jobs:
           echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id.
+    # One annotation per failed step on the checks page, titled by its id. A
+    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
-      if: ${{ failure() }}
+      if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
@@ -1357,7 +1361,8 @@ jobs:
       # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
@@ -1584,9 +1589,10 @@ jobs:
           echo "$untracked"
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id.
+    # One annotation per failed step on the checks page, titled by its id. A
+    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
-      if: ${{ failure() }}
+      if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
@@ -1718,7 +1724,8 @@ jobs:
       # pin is the decision, so the announcement adds nothing to the log.
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
@@ -1865,9 +1872,10 @@ jobs:
       env:
         PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
       run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
-    # One annotation per failed step on the checks page, titled by its id.
+    # One annotation per failed step on the checks page, titled by its id. A
+    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the steps that failed
-      if: ${{ failure() }}
+      if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
@@ -1895,7 +1903,8 @@ jobs:
       # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
-    - uses: actions/checkout@v7
+    - id: checkout
+      uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
@@ -1986,9 +1995,10 @@ jobs:
           echo "::error::A test of glibc's build skipped instead of running on the baseline glibc."
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id.
+    # One annotation per failed step on the checks page, titled by its id. A
+    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the steps that failed
-      if: ${{ failure() }}
+      if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py

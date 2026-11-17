@@ -15,7 +15,9 @@ as failed for no named reason.
 
 Standard library only, and run as ``python3``: it has to work in the jobs
 that install nothing, and after a setup step failed and left no other
-Python on the path.
+Python on the path. A failed checkout is the one setup failure it never
+sees: the step that runs it waits for the checkout, since without one there
+is no script to run and the job would fail a second time.
 """
 
 from __future__ import annotations

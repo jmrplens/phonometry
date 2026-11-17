@@ -2820,8 +2820,11 @@ _NEEDS_STEP = re.compile(r"steps\.([\w-]+)\.outcome == 'success'")
 _KEPT_CONDITIONS = frozenset(
     {"(success() || failure()) && steps.avx512.outcome == 'success'", "always()"}
 )
-#: The last step of a grouped job.
+#: The last step of a grouped job, and the condition it runs on: after a
+#: failure, unless the failure was the checkout, which leaves no script to run
+#: and would fail the job a second time.
 _SUMMARY = "python3 .github/scripts/failed_steps.py"
+_SUMMARY_CONDITION = "${{ failure() && steps.checkout.outcome == 'success' }}"
 #: A guard that only reads: a checker script, or a generator asked to compare.
 _READS_ONLY = re.compile(r"\bscripts/check_\w+\.py\b|\s--check\b")
 #: A step that writes what a drift gate then compares.
@@ -2855,8 +2858,9 @@ def _step_shape_problems(name: str, job: Mapping[str, object]) -> list[str]:
     After the steps that set the job up, every step has an id and runs under
     ``!cancelled()`` and the outcome of a step before it that it needs; none
     runs under ``always()``, which starts a step in a cancelled run. The
-    summary of a grouped job, its last step, runs on ``failure()``, and the
-    two conditions of the golden digests are kept as their test holds them.
+    summary of a grouped job, its last step, runs on ``failure()`` once the
+    checkout succeeded, and the two conditions of the golden digests are kept
+    as their test holds them.
     """
     steps = _steps_of(job)
     problems = []
@@ -2871,8 +2875,13 @@ def _step_shape_problems(name: str, job: Mapping[str, object]) -> list[str]:
         setup = False
         condition = str(step.get("if", ""))
         if _SUMMARY in str(step.get("run", "")):
-            if condition != "${{ failure() }}":
-                problems.append(f"{label}: the summary runs on {condition!r}")
+            if condition != _SUMMARY_CONDITION:
+                problems.append(
+                    f"{label}: the summary runs on {condition!r}, so a failed "
+                    "checkout fails the job again on a script that is not there"
+                )
+            elif "checkout" not in seen:
+                problems.append(f"{label}: the summary needs a checkout with that id")
             continue
         if condition in _KEPT_CONDITIONS:
             if "id" in step:

@@ -17,7 +17,7 @@ authors:
 affiliations:
   - name: Independent researcher, València, Spain
     index: 1
-date: 27 July 2026
+date: 17 November 2026
 bibliography: paper.bib
 ---
 
@@ -26,30 +26,31 @@ bibliography: paper.bib
 `phonometry` is a pure-Python library, built on NumPy [@harris2020array] and
 SciPy [@virtanen2020scipy], for acoustic measurement, analysis and prediction.
 It covers sound level metrology, fractional-octave filtering, psychoacoustics,
-room and building acoustics, acoustic materials, human vibration, environmental
-and transport noise, underwater acoustics, electroacoustics and wave
-simulation. Every result is a typed, frozen dataclass that carries the inputs
-it was computed from, draws its own figure, and, for the metrics that certify
-or rate something, renders an accredited-style report.
+speech intelligibility and hearing, room and building acoustics, acoustic
+materials, sound power, human and structural vibration, environmental, aircraft
+and transport noise, underwater acoustics, electroacoustics, broadcast loudness
+and wave simulation. A result that holds more than one quantity is a typed,
+frozen dataclass that carries what it was computed from, draws its own figure,
+and, for the metrics that certify or rate something, renders an
+accredited-style report.
 
 What distinguishes the library is not the breadth of that list but how each
-entry on it is built and verified. Every metric is implemented from the text of
-its governing standard, clause by clause, rather than from a secondary
+entry on it is built and verified. Every metric is implemented from the text
+of its governing standard, clause by clause, rather than from a secondary
 description or another implementation. Where a standard publishes worked
 examples, tolerance tables or nominal responses, those numbers are transcribed
 into the test suite as oracles: the IEC 61672-1 weighting tolerances
 [@iec61672], the IEC 61260-1 filter class limits [@iec61260], the ISO 532-1
 loudness test signals [@iso532], the ISO 717 rating examples [@iso717], and
-hundreds more. At the time of writing, continuous integration enforces 533
-numerical conformance checks across 57 domains against 362 referenced
-standards on every change, and the per-check report (standard and clause,
-normative expected value, computed value, delta, verdict) is published with
-the documentation
+hundreds more. In release 4.0.0, continuous integration enforces 1899
+numerical conformance checks across 111 domains, against 230 normative
+designations and 121 further published sources, on every change, and the
+per-check report (standard and clause, normative expected value, computed
+value, delta, verdict) is published with the documentation
 (<https://docs.jmrp.io/phonometry/reference/conformance/>), alongside a
 bibliography of every source the guides cite, standards included with their
-catalogue records
-(<https://docs.jmrp.io/phonometry/reference/bibliography/>). A
-regression that moves a computed value outside a standard's acceptance limit
+catalogue records (<https://docs.jmrp.io/phonometry/reference/bibliography/>).
+A regression that moves a computed value outside a standard's acceptance limit
 fails the build, so the conformance claim cannot silently stop being true
 between releases. \autoref{fig:mask} shows one such check as the user sees it:
 the realized A and C frequency weightings against the class limits of
@@ -113,17 +114,18 @@ signal-processing foundations it happily coexists with `pyfar`.
 
 # Software design
 
-Three design decisions carry the method. First, every computation returns a
-typed, frozen dataclass rather than a bare array: the result object carries
-the inputs and parameters it was computed from, exposes a `plot()` method that
-draws the conventional figure for that quantity, and, for metrics whose
-standards define a reporting format (insulation ratings, absorption classes,
-declared noise emission), a `report()` method that renders an
-accredited-laboratory-style fiche citing the governing clauses
-(\autoref{fig:fiche}). The trade-off is verbosity against provenance: a
-frozen result is a self-documenting evidence trail, which is what a
-defensible number needs, at the cost of one attribute access compared with
-returning arrays.
+Three design decisions carry the method. First, a computation that yields
+several quantities, or a judgment against a limit, returns a typed, frozen
+dataclass rather than a tuple, a bare array or a bare boolean, while a single
+number stays a number: the result object carries the inputs and parameters it
+was computed from, exposes a `plot()` method that draws the conventional
+figure for that quantity, and, for metrics whose standards define a reporting
+format (insulation ratings, absorption classes, declared noise emission), a
+`report()` method that renders an accredited-laboratory-style fiche citing the
+governing clauses (\autoref{fig:fiche}). The trade-off is verbosity against
+provenance: a frozen result is a self-documenting evidence trail, which is
+what a defensible number needs, at the cost of one attribute access compared
+with returning arrays.
 
 ![The `report()` method of an airborne insulation result: a single-page fiche
 in the layout of an accredited laboratory report, stating the measured curve,
@@ -144,29 +146,33 @@ test expectations, and the published conformance report is generated from the
 same run that gates merges. The alternative, a hand-maintained validation
 report, was rejected because it can silently drift from the code; here the
 report cannot exist in a state the tests did not produce. The library is
-organised in eighteen domain namespaces over a flat API that remains importable
-directly, and the documentation, in English and Spanish, pairs every metric
-with a guide that teaches the method and a reference page that cites the
-exact clauses and formula numbers implemented; machine-readable copies of
-every page are published alongside the rendered site.
+organised in twenty-one domain namespaces, and a function is reached through
+the one that owns it (`building.airborne_insulation`,
+`underwater.propagation_loss`), so the call site names its domain and two
+domains can each hold a quantity of the same name. The documentation, in
+English and Spanish, pairs every metric with a guide that teaches the method
+and a reference page that cites the exact clauses and formula numbers
+implemented; machine-readable copies of every page are published alongside the
+rendered site.
 
 # Research impact statement
 
 The library has seen research use under its previous name, `PyOctaveBand`,
 released in 2020 and downloaded and integrated by third parties since; a
 published example is the DNN-based hearing-aid processing line of work of
-@drakopoulos2023, whose released models use it for octave-band analysis. A
-second, distinctive form of impact runs in the other direction: re-deriving
-formulas and recomputing worked examples from the source documents has
-surfaced defects in the published standards themselves (misprints, worked
-examples that contradict their own normative clauses, broken
-cross-references). Each confirmed case is documented in a public errata
-registry with the evidence, the reading the library implements, and whether
-it has been reported to the issuing body, so the verification work feeds back
-into the standards it verifies. The per-check conformance report also gives
-researchers a citable, reproducible baseline: a paper comparing a new loudness
-or insulation model against `phonometry` can point to the exact normative
-checks its baseline passes.
+@drakopoulos2023, whose released models use it for octave-band analysis, and
+`acoustic-toolbox` [@acoustictoolbox], the maintained continuation of
+`python-acoustics`, declares it as a dependency. A second, distinctive form of
+impact runs in the other direction: re-deriving formulas and recomputing
+worked examples from the source documents has surfaced defects in the
+published standards themselves (misprints, worked examples that contradict
+their own normative clauses, broken cross-references). Each confirmed case is
+documented in a public errata registry with the evidence, the reading the
+library implements, and whether it has been reported to the issuing body, so
+the verification work feeds back into the standards it verifies. The per-check
+conformance report also gives researchers a citable, reproducible baseline: a
+paper comparing a new loudness or insulation model against `phonometry` can
+point to the exact normative checks its baseline passes.
 
 # AI usage disclosure
 

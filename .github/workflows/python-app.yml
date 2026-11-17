@@ -1174,308 +1174,231 @@ jobs:
     - name: Fail on a decimal comma in English text
       run: python scripts/check_decimal_comma.py --english --strict
 
-  # A private module-level constant is a number lifted out of a standard so the
-  # code that uses it can say where it came from, and one nothing reads is
-  # either a leftover or the trace of a check the docstring above it still
-  # promises. The sweep this came from found both: a recommended specimen
-  # velocity carried and never checked, and a docstring promising a default the
-  # code did not take. Static and dependency-free, so it runs on its own.
-  dead-constants:
-    name: No private constant goes unread
+  # The guards that read the library's source, its tests and its scripts as
+  # text or as a syntax tree. Nothing is installed: each one imports the
+  # standard library alone, which tests/test_scripts_without_numpy.py holds
+  # every script of this job to, so a pip line here would take its scripts
+  # out of that probe without anything failing. One runner for all twelve
+  # instead of one each: under the account's cap on concurrent jobs, a runner
+  # a guard does not need is one a test leg waits for. Every guard is a step
+  # of its own that runs whatever the guards before it said, so a red one
+  # names itself and hides none of the others, and the last step names every
+  # one that failed on the checks page. Cheapest first.
+  guards-source:
+    name: Guards / source
     runs-on: ubuntu-26.04
+    # About 6.5 min by the medians of its steps, 8.5 by their maxima.
+    timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      # No step leaves a compiled file beside the source it read.
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    - name: Check that every private constant is read somewhere
-      run: python scripts/check_dead_constants.py
-
-  # A pytest.raises, pytest.warns or pytest.deprecated_call block passes on
-  # whatever call inside it raises or warns. Seven writer tests built their
-  # catalogue inside the block of the write they checked, and six warning
-  # tests built their case inside the block of the model, so a refusal from
-  # the builder would have passed for the one under test. Ruff holds the block
-  # to one statement; this holds the statement to one call that could raise
-  # or warn, with SonarCloud's own definition (S5778, S9088), so the mistake
-  # is caught before a pull request rather than after.
-  # Static and dependency-free, so it runs on its own.
-  raises-blocks:
-    name: Every exception test waits on one call
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that no raises, warns or deprecated_call block holds a second call
-      run: python scripts/check_raises_blocks.py
-
-  # A name a caller or the environment hands a reader can hold a named pipe,
-  # a device or a directory, and a pipe kept the audio readers, the ANP tables
-  # and the hosts file of the remote runs waiting at the open for a writer
-  # that never came. Every reader in src opens a file through the shared
-  # check of _internal/json_input.py, or asks it before a reader of another
-  # library opens the name itself; this fails on a read that does neither.
-  # Static and dependency-free, so it runs on its own.
-  regular-file-reads:
-    name: Every reader asks what a name holds before it opens it
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every read of a file a caller names goes through the shared check
-      run: python scripts/check_regular_file_reads.py
-
-  # np.asarray(x, dtype=np.float64) gives back the real part of a complex
-  # value with no more than a ComplexWarning, parses a text and reads a
-  # bytearray in a list as the codes of its characters, and a method of
-  # ISO/TS 12913-3 rated a mark given as np.complex128(0.5 + 0.3j) as the
-  # mark at 0.5. Every caller's value the library converts, to floats or to
-  # complex numbers, goes through real_array or complex_array of
-  # _internal/validation.py, or a check of it on every path first; this fails
-  # on a conversion that does neither. Static and dependency-free, so it runs
-  # on its own.
-  real-conversions:
-    name: Every conversion of a caller's numbers goes through a check
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that no conversion reads a caller's numbers unchecked
-      run: python scripts/check_real_conversions.py
-
-  # A level is a ratio to a reference value, and ISO 1683 fixes one per
-  # quantity. The package publishes them once, as
-  # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa
-  # was typed out seventeen times and one name meant a pressure in four modules
-  # and a power in two. This fails on a reference value in src that repeats a
-  # value of the table instead of reading it, and on one that differs from it
-  # without naming the document it comes from. Deciding what a reference is
-  # needs the name, the value and the comment beside it, so it is an AST walk
-  # rather than a grep. Static and dependency-free, so it runs on its own.
-  reference-values:
-    name: Every reference value points at ISO 1683 or names its source
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that no reference value is a copy or has no document
+    # A conformance row states what a standard prints and what this library
+    # computes. A row that computes the expected value itself, from the same
+    # constants, compares a formula with a second copy of it and reports Pass
+    # whatever the library does; three did, and a wrong sign in the function
+    # they certified would have gone out green. Counting them needs the
+    # delegation resolved, through helpers, across modules, and under whatever
+    # name the imports gave the library, so the check is an AST walk rather
+    # than a grep.
+    - name: Every conformance row runs the library
+      id: conformance-rows
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_conformance_rows.py
+    # A level is a ratio to a reference value, and ISO 1683 fixes one per
+    # quantity. The package publishes them once, as
+    # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa
+    # was typed out seventeen times and one name meant a pressure in four
+    # modules and a power in two. This fails on a reference value in src that
+    # repeats a value of the table instead of reading it, and on one that
+    # differs from it without naming the document it comes from. Deciding
+    # what a reference is needs the name, the value and the comment beside
+    # it, so it is an AST walk rather than a grep.
+    - name: Every reference value points at ISO 1683 or names its source
+      id: reference-values
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_reference_values.py
-
-  # A standard prints its limits in decimal, and a margin of two readings that
-  # is 6 dB in decimal comes out 5.999 999 999 999 996 or 6.000 000 000 000 004
-  # in binary, so a verdict read straight off the comparison turns on the last
-  # bit. The sweep that settled this class fixed more than a hundred sites;
-  # this keeps the next one out. It fails on a computed decimal compared with a
-  # printed limit, or with zero, that is neither settled through
-  # phonometry._internal.boundary nor compared with a named slack, unless
-  # scripts/boundary_comparison_exemptions.tsv lists it with its reason, and on
-  # an exemption that no longer matches anything. Telling a computed value from
-  # a caller's means following it through assignments, calls and dataclass
-  # fields, so it is an AST data-flow walk rather than a grep. Static and
-  # dependency-free, so it runs on its own.
-  boundary-comparisons:
-    name: No verdict hangs on the last bits of a computed decimal
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every boundary comparison is settled or exempted with a reason
-      run: python scripts/check_boundary_comparisons.py
-
-  # np.asarray hands back the caller's own array when it is already of the
-  # asked type, and so does every validation helper built on it, so a result
-  # that keeps what it was given shares memory with the caller: changing the
-  # caller's array afterwards changes a result already computed, judged and
-  # perhaps printed, and nothing raises. Clearing the writeable flag on such an
-  # array is worse, because it freezes the caller's own. A public record that
-  # can hold an array inherits OwnsArrays, which copies every array it is
-  # built with (an array a factory allocates and passes through handed_over
-  # is sealed instead of copied), so this fails on such a record that does
-  # not, and on a copy written around an array handed to one, which would be
-  # made twice. Then it follows every parameter through assignments, views,
-  # containers and the package's own helpers to the other places an array is
-  # kept, and fails on one that is not a read-only copy of its own, and on any
-  # handed_over call it cannot prove is the only holder of a new array. A
-  # record a caller builds converts each container it holds, and a field
-  # stored back as given, or wrapped by MappingProxyType without a copy, is no
-  # conversion. An AST data-flow walk, static and dependency-free, so it runs
-  # on its own.
-  array-aliasing:
-    name: Every result keeps its own copy of the arrays it was given
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that no result keeps an array it was handed
-      run: python scripts/check_array_aliasing.py
-
-  # Jupyter, VS Code, Colab and the IPython terminal display the last
-  # expression of a cell whole, and a dataclass record with nothing else to
-  # show is its repr: every field, and every array as numpy prints it, in
-  # full up to a thousand values, pages of numbers for a record of a few such
-  # arrays. A public record inherits RichDisplay (through OwnsArrays when it
-  # can hold an array), which shows a table of its fields instead, so this
-  # fails on a public record that does not, or that sets the table aside with
-  # a display method of its own. It
-  # shares the AST reading of the array-aliasing gate: static and
-  # dependency-free, so it runs on its own.
-  record-display:
-    name: Every public record shows itself as a table in a notebook
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every public record displays itself
+    # A private module-level constant is a number lifted out of a standard so
+    # the code that uses it can say where it came from, and one nothing reads
+    # is either a leftover or the trace of a check the docstring above it
+    # still promises. The sweep this came from found both: a recommended
+    # specimen velocity carried and never checked, and a docstring promising
+    # a default the code did not take.
+    - name: No private constant goes unread
+      id: dead-constants
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_dead_constants.py
+    # A pytest.raises, pytest.warns or pytest.deprecated_call block passes on
+    # whatever call inside it raises or warns. Seven writer tests built their
+    # catalogue inside the block of the write they checked, and six warning
+    # tests built their case inside the block of the model, so a refusal from
+    # the builder would have passed for the one under test. Ruff holds the
+    # block to one statement; this holds the statement to one call that could
+    # raise or warn, with SonarCloud's own definition (S5778, S9088), so the
+    # mistake is caught before a pull request rather than after.
+    - name: Every exception test waits on one call
+      id: raises-blocks
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_raises_blocks.py
+    # Jupyter, VS Code, Colab and the IPython terminal display the last
+    # expression of a cell whole, and a dataclass record with nothing else to
+    # show is its repr: every field, and every array as numpy prints it, in
+    # full up to a thousand values, pages of numbers for a record of a few
+    # such arrays. A public record inherits RichDisplay (through OwnsArrays
+    # when it can hold an array), which shows a table of its fields instead,
+    # so this fails on a public record that does not, or that sets the table
+    # aside with a display method of its own. It shares the AST reading of
+    # the array-aliasing step below.
+    - name: Every public record shows itself as a table in a notebook
+      id: record-display
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_record_display.py
-
-  # A multi-panel .plot() draws one panel on the axes a caller hands it and
-  # returns that axes, and without one makes a column of panels and returns a
-  # tuple of them; a polar plot returns a polar axes. The argument decides, so
-  # the return is overloaded on it: annotated as one union, it makes every
-  # typed caller narrow a value the call already fixed. This fails on a
-  # return naming one axes and several with no overload heads, on a head that
-  # returns such a union, and on a function that reaches a polar axes, by
-  # making one or calling one that does, typed plain Axes, Any, or panels
-  # none of which is polar. A function of a number or an array of them is the
-  # same case: a return naming a single value and an array needs heads that
-  # return each alone, and so is one that takes a Signal or an array and
-  # names a record of the package and an array (Signal | ndarray, a
-  # TimeWeightedEnvelope or an array, a pair of each). It reads the
-  # annotations through the package's aliases and imports and follows calls
-  # across modules. Static and dependency-free, so it runs on its own.
-  return-overloads:
-    name: Every return an argument decides is overloaded on it
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every return an argument decides is overloaded
-      run: python scripts/check_return_overloads.py
-
-  # A function that hands its levels to np.asarray takes a list, a tuple, an
-  # array of any dtype and a nested list; annotated list[float] or
-  # NDArray[np.float64], it makes a typed caller's working code a type error,
-  # and list is invariant besides. This fails on a public parameter that
-  # holds an array or a sequence of numbers and no ArrayLike while its body
-  # converts it, followed through the helpers it is handed to and the loops
-  # over a vararg or a literal of parameters, on one converted item by item
-  # whose item type takes no sequence of numbers, on an overload head that
-  # takes such a parameter narrower, and on any public parameter that holds
-  # list, dict or set. It holds a count, a band fraction or a flag to the
-  # numpy scalar its validator or a scalar check takes, through the helpers
-  # and the record constructors it is handed to, a field a caller-built
-  # record stores to its constructor, a mapping keyed by float to one keyed
-  # by int beside it, and fs and the other scalar quantities of the
-  # vocabulary to one family of numbers, a field handed by its name together
-  # with its record (_hold_cells(self, "ix")) included, and an item a body
-  # unpacks or indexes (ny, nx = shape; ix, iy = entry) to the items of the
-  # annotation or the elements of its items. It reads the annotations through
-  # the package's aliases and imports. Static and dependency-free, so it runs
-  # on its own.
-  parameter-annotations:
-    name: Every public parameter admits what its body converts
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every public parameter admits what its body converts
-      run: python scripts/check_parameter_annotations.py
-
-  # numpy gives np.ndarray, np.dtype and its abstract scalar types (np.floating,
-  # np.integer, np.number and the others) default type arguments only from
-  # 2.3, and the package runs on 2.0.2. Below 2.3 a type checker reads a bare
-  # np.ndarray as ndarray[Unknown, Unknown], so every public name annotated
-  # with one is partly unknown to it, and mypy reports a [type-arg] error for
-  # each: the package wrote 3000, and pyright's --verifytypes read 86.9% of its
-  # public names as known at NumPy 2.1.0. This fails on a numpy array or
-  # abstract scalar type written without the type arguments it takes below
-  # 2.3 in any type expression of src/phonometry, read through the package's
-  # imports and re-exports, and lists the arrays whose dtype is left open
-  # (NDArray[Any]) and np.generic for review. The minimum-versions job reads
-  # the result at the floors. Static and dependency-free, so it runs on its own.
-  bare-array-annotations:
-    name: Every numpy type an annotation names carries its type arguments
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that every numpy type an annotation names carries its type arguments
+    # numpy gives np.ndarray, np.dtype and its abstract scalar types
+    # (np.floating, np.integer, np.number and the others) default type
+    # arguments only from 2.3, and the package runs on 2.0.2. Below 2.3 a type
+    # checker reads a bare np.ndarray as ndarray[Unknown, Unknown], so every
+    # public name annotated with one is partly unknown to it, and mypy reports
+    # a [type-arg] error for each: the package wrote 3000, and pyright's
+    # --verifytypes read 86.9% of its public names as known at NumPy 2.1.0.
+    # This fails on a numpy array or abstract scalar type written without the
+    # type arguments it takes below 2.3 in any type expression of
+    # src/phonometry, read through the package's imports and re-exports, and
+    # lists the arrays whose dtype is left open (NDArray[Any]) and np.generic
+    # for review. The minimum-versions job reads the result at the floors.
+    - name: Every numpy type an annotation names carries its type arguments
+      id: bare-array-annotations
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_bare_array_annotations.py
+    # A name a caller or the environment hands a reader can hold a named pipe,
+    # a device or a directory, and a pipe kept the audio readers, the ANP
+    # tables and the hosts file of the remote runs waiting at the open for a
+    # writer that never came. Every reader in src opens a file through the
+    # shared check of _internal/json_input.py, or asks it before a reader of
+    # another library opens the name itself; this fails on a read that does
+    # neither.
+    - name: Every reader asks what a name holds before it opens it
+      id: regular-file-reads
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_regular_file_reads.py
+    # A multi-panel .plot() draws one panel on the axes a caller hands it and
+    # returns that axes, and without one makes a column of panels and returns
+    # a tuple of them; a polar plot returns a polar axes. The argument
+    # decides, so the return is overloaded on it: annotated as one union, it
+    # makes every typed caller narrow a value the call already fixed. This
+    # fails on a return naming one axes and several with no overload heads, on
+    # a head that returns such a union, and on a function that reaches a polar
+    # axes, by making one or calling one that does, typed plain Axes, Any, or
+    # panels none of which is polar. A function of a number or an array of
+    # them is the same case: a return naming a single value and an array
+    # needs heads that return each alone, and so is one that takes a Signal
+    # or an array and names a record of the package and an array (Signal |
+    # ndarray, a TimeWeightedEnvelope or an array, a pair of each). It reads
+    # the annotations through the package's aliases and imports and follows
+    # calls across modules.
+    - name: Every return an argument decides is overloaded on it
+      id: return-overloads
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_return_overloads.py
+    # A standard prints its limits in decimal, and a margin of two readings
+    # that is 6 dB in decimal comes out 5.999 999 999 999 996 or
+    # 6.000 000 000 000 004 in binary, so a verdict read straight off the
+    # comparison turns on the last bit. The sweep that settled this class
+    # fixed more than a hundred sites; this keeps the next one out. It fails
+    # on a computed decimal compared with a printed limit, or with zero, that
+    # is neither settled through phonometry._internal.boundary nor compared
+    # with a named slack, unless scripts/boundary_comparison_exemptions.tsv
+    # lists it with its reason, and on an exemption that no longer matches
+    # anything. Telling a computed value from a caller's means following it
+    # through assignments, calls and dataclass fields, so it is an AST
+    # data-flow walk rather than a grep.
+    - name: No verdict hangs on the last bits of a computed decimal
+      id: boundary-comparisons
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_boundary_comparisons.py
+    # np.asarray(x, dtype=np.float64) gives back the real part of a complex
+    # value with no more than a ComplexWarning, parses a text and reads a
+    # bytearray in a list as the codes of its characters, and a method of
+    # ISO/TS 12913-3 rated a mark given as np.complex128(0.5 + 0.3j) as the
+    # mark at 0.5. Every caller's value the library converts, to floats or to
+    # complex numbers, goes through real_array or complex_array of
+    # _internal/validation.py, or a check of it on every path first; this
+    # fails on a conversion that does neither.
+    - name: Every conversion of a caller's numbers goes through a check
+      id: real-conversions
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_real_conversions.py
+    # np.asarray hands back the caller's own array when it is already of the
+    # asked type, and so does every validation helper built on it, so a
+    # result that keeps what it was given shares memory with the caller:
+    # changing the caller's array afterwards changes a result already
+    # computed, judged and perhaps printed, and nothing raises. Clearing the
+    # writeable flag on such an array is worse, because it freezes the
+    # caller's own. A public record that can hold an array inherits
+    # OwnsArrays, which copies every array it is built with (an array a
+    # factory allocates and passes through handed_over is sealed instead of
+    # copied), so this fails on such a record that does not, and on a copy
+    # written around an array handed to one, which would be made twice. Then
+    # it follows every parameter through assignments, views, containers and
+    # the package's own helpers to the other places an array is kept, and
+    # fails on one that is not a read-only copy of its own, and on any
+    # handed_over call it cannot prove is the only holder of a new array. A
+    # record a caller builds converts each container it holds, and a field
+    # stored back as given, or wrapped by MappingProxyType without a copy, is
+    # no conversion. An AST data-flow walk.
+    - name: Every result keeps its own copy of the arrays it was given
+      id: array-aliasing
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_array_aliasing.py
+    # A function that hands its levels to np.asarray takes a list, a tuple, an
+    # array of any dtype and a nested list; annotated list[float] or
+    # NDArray[np.float64], it makes a typed caller's working code a type
+    # error, and list is invariant besides. This fails on a public parameter
+    # that holds an array or a sequence of numbers and no ArrayLike while its
+    # body converts it, followed through the helpers it is handed to and the
+    # loops over a vararg or a literal of parameters, on one converted item by
+    # item whose item type takes no sequence of numbers, on an overload head
+    # that takes such a parameter narrower, and on any public parameter that
+    # holds list, dict or set. It holds a count, a band fraction or a flag to
+    # the numpy scalar its validator or a scalar check takes, through the
+    # helpers and the record constructors it is handed to, a field a
+    # caller-built record stores to its constructor, a mapping keyed by float
+    # to one keyed by int beside it, and fs and the other scalar quantities of
+    # the vocabulary to one family of numbers, a field handed by its name
+    # together with its record (_hold_cells(self, "ix")) included, and an item
+    # a body unpacks or indexes (ny, nx = shape; ix, iy = entry) to the items
+    # of the annotation or the elements of its items. It reads the
+    # annotations through the package's aliases and imports.
+    - name: Every public parameter admits what its body converts
+      id: parameter-annotations
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: python scripts/check_parameter_annotations.py
+    # The guards only read: one that wrote into the checkout would change
+    # what the next one reads, so a file left behind is a failure of its own.
+    - name: The guards left the checkout as they found it
+      id: clean-tree
+      if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          git status --porcelain
+          echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
+          exit 1
+        fi
+    # One annotation per failed step on the checks page, titled by its id.
+    - name: Name the guards that failed
+      if: ${{ failure() }}
+      env:
+        STEPS: ${{ toJSON(steps) }}
+      run: python3 .github/scripts/failed_steps.py
 
   # pyright's --verifytypes reads the installed package as a user's type
   # checker does and scores the share of its public names whose type it
@@ -1526,30 +1449,6 @@ jobs:
         export PATH="$RUNNER_TEMP/user/bin:$PATH" VIRTUAL_ENV="$RUNNER_TEMP/user"
         pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
         grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
-
-  # A conformance row states what a standard prints and what this library
-  # computes. A row that computes the expected value itself, from the same
-  # constants, compares a formula with a second copy of it and reports Pass
-  # whatever the library does; three did, and a wrong sign in the function they
-  # certified would have gone out green. Counting them needs the delegation
-  # resolved -- through helpers, across modules, and under whatever name the
-  # imports gave the library -- so the check is an AST walk rather than a grep.
-  # Static and dependency-free, so it runs on its own.
-  conformance-rows:
-    name: Every conformance row runs the library
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-    - name: Check that no row certifies the library without running it
-      run: python scripts/check_conformance_rows.py
 
   # The committed example .report() fiches (.github/reports) must match a fresh
   # `make reports` run. Same drift gate as the figures, one layer further down

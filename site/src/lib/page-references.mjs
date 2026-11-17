@@ -61,6 +61,42 @@ export async function readPageReferences(contentDir, { parseFrontmatter: given }
 }
 
 /**
+ * The fields of a cited reference the bibliography shows or publishes. A
+ * page's own marks on it (`primary`, `implemented`, `tables`) reach no entry,
+ * and its `note` only describes a work src/data/bibliography.mjs holds no
+ * note for, so a change to them moves no bibliography date. A Spanish page
+ * that translates a work's title cites it under its own id, which the
+ * Spanish bibliography files under the English work's (`englishWorkIds`):
+ * the note looked up is that work's.
+ */
+function shownFields(ref, { works, referenceId, english }) {
+	if (ref === null || typeof ref !== 'object' || Array.isArray(ref)) return ref;
+	const { primary, implemented, tables, ...shown } = ref;
+	if (shown.note !== undefined && typeof shown.type === 'string') {
+		const id = referenceId(shown, '');
+		const fragment = id.slice(id.indexOf('#') + 1);
+		if (works[english.get(fragment) ?? fragment]?.note !== undefined) delete shown.note;
+	}
+	return shown;
+}
+
+/**
+ * Each Spanish work's fragment to its English work's, for every Spanish work
+ * the pages of `contentDir` pair with an English one, as the Spanish
+ * bibliography pairs them.
+ *
+ * @param {string} contentDir
+ * @param {Function} parseFrontmatter
+ * @returns {Promise<Map<string, string>>}
+ */
+async function englishFragments(contentDir, parseFrontmatter) {
+	const { englishWorkIds } = await import('./bibliography-entries.mjs');
+	const pages = await readPageReferences(contentDir, { parseFrontmatter });
+	const fragment = (id) => id.slice(id.indexOf('#') + 1);
+	return new Map([...englishWorkIds(pages, 'es', 'en')].map(([es, en]) => [fragment(es), fragment(en)]));
+}
+
+/**
  * What a page gives the bibliography, read off one version of its text: the
  * works its frontmatter cites and, when it cites any and `titles` holds, its
  * title, as one string; empty for a page that cites nothing. The history
@@ -72,31 +108,18 @@ export async function readPageReferences(contentDir, { parseFrontmatter: given }
  * version whose frontmatter does not parse is read whole, so any change to
  * it counts.
  *
- * @param {{ titles?: boolean }} [options]
+ * @param {{ titles?: boolean, contentDir?: string }} [options]  `contentDir`,
+ *   the content tree, pairs each translated work with its English one; with
+ *   none, a work is looked up under its own id.
  * @returns {Promise<(text: string) => string>}
  */
-/**
- * The fields of a cited reference the bibliography shows or publishes. A
- * page's own marks on it (`primary`, `implemented`, `tables`) reach no entry,
- * and its `note` only describes a work src/data/bibliography.mjs holds no
- * note for, so a change to them moves no bibliography date.
- */
-function shownFields(ref, { works, referenceId }) {
-	if (ref === null || typeof ref !== 'object' || Array.isArray(ref)) return ref;
-	const { primary, implemented, tables, ...shown } = ref;
-	if (shown.note !== undefined && typeof shown.type === 'string') {
-		const id = referenceId(shown, '');
-		if (works[id.slice(id.indexOf('#') + 1)]?.note !== undefined) delete shown.note;
-	}
-	return shown;
-}
-
-export async function citationReader({ titles = true } = {}) {
+export async function citationReader({ titles = true, contentDir } = {}) {
 	const parseFrontmatter = await (parser ??= import('@astrojs/markdown-remark').then((module) => module.parseFrontmatter));
 	// Read when the history is read, not when a page imports this module: the
 	// pages that read their references here show none of the bibliography's data.
 	const { BIBLIOGRAPHY_WORKS: works } = await import('../data/bibliography.mjs');
 	const { referenceId } = await import('./citations.mjs');
+	const english = contentDir === undefined ? new Map() : await englishFragments(contentDir, parseFrontmatter);
 	return (text) => {
 		let frontmatter;
 		try {
@@ -106,7 +129,7 @@ export async function citationReader({ titles = true } = {}) {
 		}
 		const cited = Array.isArray(frontmatter?.references) ? frontmatter.references : [];
 		if (cited.length === 0) return '';
-		const references = cited.map((ref) => shownFields(ref, { works, referenceId }));
+		const references = cited.map((ref) => shownFields(ref, { works, referenceId, english }));
 		return JSON.stringify(titles ? { title: frontmatter.title, references } : { references });
 	};
 }

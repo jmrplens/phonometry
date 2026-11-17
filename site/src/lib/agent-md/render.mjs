@@ -55,7 +55,7 @@ import { readCommittedText } from '../line-ends.mjs';
 import { codeLines } from '../markdown-fences.mjs';
 import { MARKER } from '../bibliography-entries.mjs';
 import { absolutizeRootLinks, pointDroppedAnchors } from './links.mjs';
-import { escapeMarks, htmlAttribute, line, plainText as plainMarkdown, table } from './markdown-table.mjs';
+import { escapeMarks, htmlAttribute, line, LINE_BREAK, plainText as plainMarkdown, resolveBreaks, table } from './markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from './processor.mjs';
 import { rewrittenSource } from './rewrites.mjs';
 
@@ -116,6 +116,31 @@ const REPLACED_TYPES = new Set([
   'html',
   'yaml',
 ]);
+
+/**
+ * `inner` between two `mark`s, with any line break it opens or ends with
+ * put outside them: a mark cannot close after a break (or open before one)
+ * and still touch its text, so `<strong>a<br /></strong>b` is `**a**`, the
+ * break, then `b`.
+ *
+ * @param {string} mark
+ * @param {string} inner
+ * @returns {string}
+ */
+function marked(mark, inner) {
+  const edges = new RegExp(`^((?:${LINE_BREAK}[ \\t]*)*)([\\s\\S]*?)((?:[ \\t]*${LINE_BREAK})*)$`, 'u').exec(inner);
+  const [, before = '', text = inner, after = ''] = edges ?? [];
+  return `${before}${mark}${text}${mark}${after}`;
+}
+
+/**
+ * Marks a code span cannot hold: inside `<code>` or `<kbd>` they are written
+ * as the text they wrap.
+ */
+const CODE_DROPS_MARK = new Set(['emphasis', 'strong', 'delete']);
+
+/** The HTML elements of those marks, written as their text there too. */
+const CODE_DROPS_TAG = new Set(['em', 'i', 'strong', 'b', 'del', 's']);
 
 /**
  * Node types that sit inside a paragraph rather than beside it.
@@ -821,18 +846,23 @@ function createRenderer(source, options, mode) {
       return href && inner ? `[${inner}](${href})` : inner;
     },
     abbr: (node) => renderChildren(node),
-    b: (node) => `**${renderChildren(node)}**`,
-    br: () => '\n',
+    b: (node) => marked('**', renderChildren(node)),
+    // A bare line end inside a paragraph is a space to a Markdown reader, so
+    // the break is held as LINE_BREAK until the copy is whole, and then made
+    // the backslash CommonMark and GitHub both draw, or dropped where its
+    // paragraph ends (resolveBreaks, markdown-table.mjs). Inside a code span a
+    // backslash is text, so there the break is the line end it always was.
+    br: () => (codeDepth > 0 ? '\n' : LINE_BREAK),
     caption: (node) => `**${captionText(node)}**`,
     code: (node) => codeSpan(codeChildren(node)),
-    del: (node) => `~~${renderChildren(node)}~~`,
+    del: (node) => marked('~~', renderChildren(node)),
     details: renderDetails,
     div: (node) => renderChildren(node),
-    em: (node) => `*${renderChildren(node)}*`,
-    i: (node) => `*${renderChildren(node)}*`,
+    em: (node) => marked('*', renderChildren(node)),
+    i: (node) => marked('*', renderChildren(node)),
     kbd: (node) => codeSpan(codeChildren(node)),
     mark: (node) => renderChildren(node),
-    s: (node) => `~~${renderChildren(node)}~~`,
+    s: (node) => marked('~~', renderChildren(node)),
     small: (node) => renderChildren(node),
     // An empty `<span id>` is an anchor kept for old links (F13): it has no
     // text, and a Markdown copy has no anchors to keep. The GitHub edition
@@ -847,7 +877,7 @@ function createRenderer(source, options, mode) {
       if (id && (node.children ?? []).length === 0) droppedAnchors?.add(id);
       return inner;
     },
-    strong: (node) => `**${renderChildren(node)}**`,
+    strong: (node) => marked('**', renderChildren(node)),
     // GitHub draws both, so the GitHub edition keeps them as the page has them.
     sub: (node) => (flavour === 'github' ? `<sub>${renderChildren(node)}</sub>` : `_${renderChildren(node)}`),
     summary: (node) => `**${line(renderChildren(node))}**`,
@@ -907,6 +937,17 @@ function createRenderer(source, options, mode) {
    */
   function renderNode(node, options) {
     if (node.type === 'yaml' || node.type === 'mdxjsEsm') return '';
+    if (codeDepth > 0) {
+      // Between backticks every character reads as it stands, so the text of
+      // a `<code>` or `<kbd>` is what the page shows: `&lt;` written as `<`,
+      // `\*` as `*`, and a mark, which a code span cannot carry, as its text.
+      if (node.type === 'text' || node.type === 'inlineCode') return node.value ?? '';
+      if (CODE_DROPS_MARK.has(node.type)) return renderChildren(node);
+      if (ELEMENT_TYPES.has(node.type) && CODE_DROPS_TAG.has(node.name)) {
+        checkElement(node);
+        return renderChildren(node);
+      }
+    }
     if (EXPRESSION_TYPES.has(node.type)) return renderExpression(node);
     if (ELEMENT_TYPES.has(node.type)) return renderElement(node);
     if (node.type === 'containerDirective') return renderAside(node);
@@ -1014,8 +1055,8 @@ export function renderTree(tree, source, options) {
   // top-level block into the next, and a block that holds none (the
   // conformance report's hundreds of kilobytes of tables) is then never
   // parsed again for links (links.mjs says why that matters).
-  const written = createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) =>
-    absolutizeRootLinks(block, SITE.origin),
+  const written = resolveBreaks(
+    createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) => absolutizeRootLinks(block, SITE.origin)),
   );
   // A link to an anchor only an empty span carried leads nowhere in the copy,
   // which leaves the span out: it goes to the page, where the span still is.

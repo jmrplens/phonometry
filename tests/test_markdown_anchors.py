@@ -33,7 +33,7 @@ def test_an_anchor_inside_a_fence_is_not_a_fragment(tmp_path: pathlib.Path) -> N
 def test_a_repeated_heading_takes_the_next_number(tmp_path: pathlib.Path) -> None:
     page = tmp_path / "page.md"
     page.write_text("# A\n\n## Notes\n\n## Notes\n\n## Notes\n", encoding="utf-8")
-    assert {"a", "notes", "notes-1", "notes-2"} == markdown_anchors.fragments(page)
+    assert markdown_anchors.fragments(page) == {"a", "notes", "notes-1", "notes-2"}
 
 
 def test_a_heading_that_is_a_link_anchors_on_its_label(tmp_path: pathlib.Path) -> None:

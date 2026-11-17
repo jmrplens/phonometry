@@ -897,16 +897,20 @@ def _is_pre_release(version: str) -> bool:
 
 
 def _pre_release_lines(version: str) -> list[str]:
-    """The paragraph that says a pre-release is not on PyPI yet, or nothing.
+    """The paragraph that says the version is a pre-release, or nothing.
 
-    The install lines below install the last release PyPI has, so while
-    VERSION is a pre-release the index says the version it documents is not
-    there yet. It names no version PyPI serves, so it cannot go stale, and it
-    goes by itself at the stamp.
+    The install lines below install the last final release, since pip leaves
+    a pre-release out unless it is asked for by version or with ``--pre``, so
+    while VERSION is a pre-release the index says so, whether PyPI has it or
+    not. It names no version PyPI serves, so it cannot go stale, and it goes
+    by itself at the stamp.
     """
     if not _is_pre_release(version):
         return []
-    return [f"phonometry {version} is a pre-release and is not on PyPI yet.", ""]
+    return [
+        f"phonometry {version} is a pre-release, which pip installs only when it is asked for by version or with --pre.",
+        "",
+    ]
 
 
 def _summary(version: str) -> list[str]:

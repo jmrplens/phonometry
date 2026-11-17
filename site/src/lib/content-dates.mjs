@@ -683,16 +683,18 @@ async function lineCountDate(repo, { file, lines }) {
  * reads the works alone.
  *
  * @param {string} repo
+ * @param {string} contentDir  The content tree, whose pages pair a translated
+ *   work with its English one (`citationReader`).
  * @param {{ files: string[], pattern?: string, frontmatter?: 'references' | 'works' }} text
  * @returns {Promise<Date | undefined>}
  */
-async function textDate(repo, { files, pattern, frontmatter }) {
+async function textDate(repo, contentDir, { files, pattern, frontmatter }) {
   const history = await readHistory(repo, files);
   if (history.head === null) return undefined;
   const regex = frontmatter === undefined ? new RegExp(pattern, 'gm') : null;
   const textOf =
     regex === null
-      ? await citationReader({ titles: frontmatter === 'references' })
+      ? await citationReader({ titles: frontmatter === 'references', contentDir })
       : (text) => (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n');
   const matched = new Map();
   const matches = (oid) => (NO_BLOB.test(oid) ? '' : matched.get(oid));
@@ -976,7 +978,7 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
   );
   for (const [key, set] of texts) {
     if ((await filesAtHead(repo, set.files)).length === 0) throw stale(`the files of the text ${set.files.join(' ')}`);
-    newest.set(key, await textDate(repo, set));
+    newest.set(key, await textDate(repo, contentDir, set));
   }
 
   const sourced = new Set();

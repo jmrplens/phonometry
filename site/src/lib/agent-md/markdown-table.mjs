@@ -27,16 +27,62 @@ import { codeLines } from '../markdown-fences.mjs';
  * that ties a value to its unit (U+00A0). Folded into plain spaces, they left
  * a number a line could break inside.
  */
-const SPACES = /[ \t\n\v\f\r]+/gu;
+const SPACES = /[ \t\n\v\f\r\uE010]+/gu;
 
 /**
- * Text on one line: each run of {@link SPACES} becomes one space, and none is
- * left at either end. The no-break spaces stay where they are, ends included.
+ * What the renderer writes for an HTML line break (`<br>`) until the copy is
+ * whole: a character no page holds, which {@link resolveBreaks} turns into a
+ * hard break or drops once the paragraph around it can be seen, and which a
+ * line or a table cell, holding no line break, reads as a space.
+ */
+export const LINE_BREAK = '\uE010';
+
+/**
+ * Every {@link LINE_BREAK} of a finished copy made a CommonMark hard break,
+ * the backslash before the line end that CommonMark and GitHub both draw: the
+ * spacing written after the tag is dropped, since a backslash before a space
+ * breaks nothing, and the marks that close around the tag (`**`, `_`, `~~`, an
+ * HTML closing tag) are put before the backslash. A break with no more text of
+ * its paragraph after it breaks nothing, and only its marks are kept.
  *
  * @param {string} text
  * @returns {string}
  */
-const flatten = (text) => text.replaceAll(SPACES, ' ').replace(/^ /u, '').replace(/ $/u, '');
+export function resolveBreaks(text) {
+  if (!text.includes(LINE_BREAK)) return text;
+  // Marks are moved only when they end the line: there they close around the
+  // break. A mark with text after it on the same line opens what follows
+  // (`first<br /><em>second</em>`) and stays with that text.
+  const pattern = new RegExp(`${LINE_BREAK}[ \\t]*(?:((?:[*_~]|</[a-z]+>)*)[ \\t]*(\\r?\\n|$))?`, 'gu');
+  return text.replace(pattern, (match, marks, newline, offset, whole) => {
+    const after = whole.slice(offset + match.length);
+    if (newline === undefined) return '\\\n';
+    if (/^[ \t]*(?:\r?\n|$)/u.test(after)) return `${marks}${newline}`;
+    return `${marks}\\\n`;
+  });
+}
+
+/**
+ * A hard line break: a backslash before the line end, after an even run of
+ * backslashes (which are escaped backslashes the text shows).
+ */
+const HARD_BREAK = /(\\+)(?=\r?\n)/gu;
+
+/**
+ * Text on one line: each run of {@link SPACES} becomes one space, and none is
+ * left at either end. A hard line break has no line to break on one, so its
+ * backslash goes with it. The no-break spaces stay where they are, ends
+ * included.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+const flatten = (text) =>
+  text
+    .replace(HARD_BREAK, (slashes) => (slashes.length % 2 === 1 ? slashes.slice(1) : slashes))
+    .replaceAll(SPACES, ' ')
+    .replace(/^ /u, '')
+    .replace(/ $/u, '');
 
 /**
  * One table cell: whitespace flattened to single spaces, pipes escaped. A pipe

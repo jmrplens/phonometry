@@ -94,10 +94,11 @@ export const LIST_SEPARATOR = '; ';
  * copy on every release.
  *
  * A pre-release (`preRelease`, read from VERSION by PEP 440 in
- * src/data/repo-stats.mjs) adds a line that says the version is not on PyPI
- * yet, since the install line installs the last release there; it names no
- * version PyPI serves, so it cannot go stale, and it goes at the stamp with
- * nothing to change.
+ * src/data/repo-stats.mjs) adds a line that says so, and that pip installs it
+ * only when asked for it by version or with `--pre`: the install line above
+ * gives the last final release, whether PyPI has the pre-release or not. It
+ * names no version PyPI serves, so it cannot go stale, and it goes at the
+ * stamp with nothing to change.
  *
  * @param {{ version: string, install: string, preRelease?: boolean }} release
  * @param {'en' | 'es'} lang
@@ -126,8 +127,8 @@ function releaseLines(release, lang) {
 
 /** The `Pre-release:` value in each language. */
 export const PRE_RELEASE = Object.freeze({
-  en: (version) => `phonometry ${version} is not on PyPI yet`,
-  es: (version) => `phonometry ${version} aún no está en PyPI`,
+  en: (version) => `phonometry ${version} is a pre-release, which pip installs only when it is asked for by version or with --pre`,
+  es: (version) => `phonometry ${version} es una versión preliminar, que pip solo instala si se pide por su versión o con --pre`,
 });
 
 /**

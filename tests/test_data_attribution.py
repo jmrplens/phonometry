@@ -167,13 +167,31 @@ def _glued(left: list[Piece], right: list[Piece]) -> list[Piece]:
     return [*left, *right]
 
 
+def _literal_text(node: ast.expr) -> str | None:
+    """The string *node* is when it is made of string literals alone, or ``None``.
+
+    A literal is its text, and ``+`` glues two such strings into one: the
+    expressions a list given to ``"/".join`` can hold and still be a path the
+    page spells out.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        left = _literal_text(node.left)
+        right = _literal_text(node.right)
+        if left is not None and right is not None:
+            return left + right
+    return None
+
+
 def _joined(separator: str, items: list[ast.expr]) -> list[Piece]:
     """What ``separator.join(items)`` builds: each run of literal items joined."""
     pieces: list[Piece] = []
     run: list[str] = []
     for item in [*items, None]:
-        if isinstance(item, ast.Constant) and isinstance(item.value, str):
-            run.append(item.value)
+        text = None if item is None else _literal_text(item)
+        if text is not None:
+            run.append(text)
             continue
         if run:
             pieces.append(separator.join(run))
@@ -497,6 +515,8 @@ def test_a_folder_the_readme_does_not_attribute_in_the_language_is_reported() ->
         'ir = np.load(str(repo) + "/tests/data/audio/" + "chapel")',
         'ir = np.load("/".join(["tests", "data", "audio", "chapel"]))',
         'ir = np.load("/".join(("tests/data/audio", "chapel", "ir.npz")))',
+        'ir = np.load("/".join(["tests/data/audio", "chap" + "el/ir.npz"]))',
+        'ir = np.load("/".join(("tests/data" + "/audio", ("chapel"))))',
         'ir = np.load(Path("tests/data/audio/") / "chapel" / "ir.npz")',
         'ir = np.load(Path("tests/data/audio") / "/chapel" / "ir.npz")',
         'ir = np.load(os.path.join("tests/data/audio/", "chapel/", "ir.npz"))',

@@ -1,6 +1,6 @@
 /**
  * While VERSION is a PEP 440 pre-release, the header of every copy says the
- * version is not on PyPI yet, in a line the IndexNow manifest leaves out with
+ * version is a pre-release pip installs only when asked for it, in a line the IndexNow manifest leaves out with
  * the other release lines; at a final version the line is gone.
  */
 import assert from 'node:assert/strict';
@@ -26,10 +26,10 @@ const fields = (lang, version) => ({
 });
 
 for (const lang of /** @type {const} */ (['en', 'es'])) {
-  test(`the ${lang} header says the version is not on PyPI yet at 4.0.0rc1, and nothing of it at 4.0.0`, () => {
+  test(`the ${lang} header says 4.0.0rc1 is a pre-release pip installs only when asked for it, and nothing of it at 4.0.0`, () => {
     const pre = header(fields(lang, '4.0.0rc1'));
     const final = header(fields(lang, '4.0.0'));
-    const said = lang === 'es' ? 'phonometry 4.0.0rc1 aún no está en PyPI' : 'phonometry 4.0.0rc1 is not on PyPI yet';
+    const said = lang === 'es' ? 'phonometry 4.0.0rc1 es una versión preliminar, que pip solo instala si se pide por su versión o con --pre' : 'phonometry 4.0.0rc1 is a pre-release, which pip installs only when it is asked for by version or with --pre';
     assert.match(pre, new RegExp(`^Pre-release: ${said}`, 'mu'));
     assert.doesNotMatch(final, /^Pre-release:/mu);
     assert.doesNotMatch(pre, /PyPI .*\d+\.\d+\.\d+(?!rc1)/u, 'it names no version PyPI serves');

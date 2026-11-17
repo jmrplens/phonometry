@@ -6,7 +6,7 @@ phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
-phonometry 4.0.0rc1 is a pre-release and is not on PyPI yet.
+phonometry 4.0.0rc1 is a pre-release, which pip installs only when it is asked for by version or with --pre.
 
 Install:
 
@@ -592,7 +592,8 @@ Every material, gas and fluid the library reads from a printed page, from elasti
 
 One file per area, each small enough to fetch whole. An area too long for one fetch travels in numbered parts, cut between its pages, and a page too long for one at its own sections. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
-- [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
+- [Start here, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-1.txt)
+- [Start here, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-2.txt)
 - [Upgrading from 3.3 to 4.0, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-1.txt)
 - [Upgrading from 3.3 to 4.0, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-2.txt)
 - [Theory and reference, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-theory-1.txt)

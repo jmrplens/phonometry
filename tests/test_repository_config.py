@@ -48,6 +48,7 @@ import github_edition
 _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
 _PYTHON_WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
+_MAKEFILE = _ROOT / "Makefile"
 
 
 def _workflow_files(root: pathlib.Path | None = None) -> list[pathlib.Path]:
@@ -3307,3 +3308,97 @@ def test_every_python_ci_job_says_its_group_and_what_it_checks() -> None:
     its job key and step id, so a renamed job leaves every citation standing.
     """
     assert job_name_problems(_python_ci_jobs()) == []
+
+
+#: The guard groups of Python CI that the Makefile runs as one target each.
+_MAKE_GUARD_GROUPS = ("guards-prose", "guards-source", "guards-package")
+_GUARD_RUN = re.compile(r"^python3? (scripts/\S+\.py(?: [^|;&]*)?)$")
+_RECIPE_GUARD = re.compile(
+    r'^\$\(PYTHON\) (scripts/\S+\.py(?: [^|;&]*?)?) \|\| failed="\$\$failed ([\w-]+)"; \\$'
+)
+
+
+def ci_guards(job: Mapping[str, object]) -> list[tuple[str, str]]:
+    """The guard commands of *job* in the order it runs them, each with its step id."""
+    guards: list[tuple[str, str]] = []
+    for step in _steps_of(job):
+        match = _GUARD_RUN.match(str(step.get("run", "")).strip())
+        if match is not None:
+            guards.append((match.group(1).strip(), str(step.get("id"))))
+    return guards
+
+
+def make_guards(makefile: str, target: str) -> list[tuple[str, str]] | None:
+    """The guard commands the recipe of *target* runs, each with the id it reports.
+
+    None when the Makefile has no such target. A line of the recipe that runs
+    a script some other way than one guard that reports its id is returned as
+    it stands, with no id, so a comparison with the job names it.
+    """
+    lines = makefile.splitlines()
+    try:
+        start = lines.index(f"{target}:")
+    except ValueError:
+        return None
+    guards: list[tuple[str, str]] = []
+    for line in lines[start + 1 :]:
+        if not line.startswith("\t"):
+            break
+        body = line.strip()
+        match = _RECIPE_GUARD.match(body)
+        if match is not None:
+            guards.append((match.group(1).strip(), match.group(2)))
+        elif "scripts/" in body:
+            guards.append((body, ""))
+    return guards
+
+
+def test_a_make_guard_group_that_parts_from_its_job_is_reported() -> None:
+    job = {
+        "steps": [
+            {"id": "python", "uses": "actions/setup-python@v6"},
+            {"id": "dead-constants", "run": "python scripts/check_dead_constants.py"},
+            {
+                "id": "decimal-comma",
+                "run": "python scripts/check_decimal_comma.py --english",
+            },
+        ]
+    }
+    assert ci_guards(job) == [
+        ("scripts/check_dead_constants.py", "dead-constants"),
+        ("scripts/check_decimal_comma.py --english", "decimal-comma"),
+    ]
+    recipe = (
+        "guards-x:\n"
+        '\t@failed=""; \\\n'
+        '\t$(PYTHON) scripts/check_dead_constants.py || failed="$$failed dead-constants"; \\\n'
+        '\t$(PYTHON) scripts/check_decimal_comma.py || failed="$$failed decimal-comma"; \\\n'
+        "\t$(PYTHON) scripts/check_em_dashes.py; \\\n"
+        '\tif [ -n "$$failed" ]; then exit 1; fi\n'
+        "\n"
+        "other:\n"
+        "\t$(PYTHON) scripts/check_raises_blocks.py\n"
+    )
+    assert make_guards(recipe, "guards-x") == [
+        ("scripts/check_dead_constants.py", "dead-constants"),
+        ("scripts/check_decimal_comma.py", "decimal-comma"),
+        ("$(PYTHON) scripts/check_em_dashes.py; \\", ""),
+    ]
+    assert make_guards(recipe, "guards-y") is None
+
+
+def test_each_make_guard_group_runs_what_its_ci_job_runs() -> None:
+    """``make guards-source`` and its two siblings are the CI job, on a laptop.
+
+    Each target runs the guards of its job with the same arguments, in the
+    same order, and reports a failed one by its step id, so a guard added to
+    a job and not to its target, or run there with other flags, fails here.
+    """
+    jobs = _python_ci_jobs()
+    makefile = _MAKEFILE.read_text(encoding="utf-8")
+    parted = {
+        group: (ci_guards(jobs[group]), make_guards(makefile, group))
+        for group in _MAKE_GUARD_GROUPS
+        if ci_guards(jobs[group]) != make_guards(makefile, group)
+    }
+    assert parted == {}

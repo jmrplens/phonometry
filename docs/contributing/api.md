@@ -24,7 +24,7 @@ from phonometry.building.measurement.insulation import weighted_rating
 partial_exposure = daily_exposure  # a second name for one function
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: guards-package/api-reference`, `tests/test_removed_names.py::test_a_leaf_module_publishes_only_what_it_defines`, `tests/test_package_architecture.py::test_every_public_name_is_reachable_from_its_domain`, `tests/test_package_architecture.py::test_no_public_name_is_published_by_two_domains`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`, `tests/test_removed_names.py::test_a_leaf_module_publishes_only_what_it_defines`, `tests/test_package_architecture.py::test_every_public_name_is_reachable_from_its_domain`, `tests/test_package_architecture.py::test_no_public_name_is_published_by_two_domains`
 
 **Exceptions.** A name a private module defines is published by the one public module that imports it; the private path is not an address. `Signal` has two: `phonometry.io` owns it and the root re-exports it, because every package that takes measured audio accepts it ([A3](#a3), `ROOT_ONLY` in `tests/test_package_architecture.py`).
 
@@ -52,7 +52,7 @@ def octave_band_centers() -> tuple[float, ...]:
 OCTAVE_BANDS = (125.0, 250.0, 500.0)
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: guards-package/api-reference`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`
 
 **Exceptions.** A type alias, a `TypeVar` or a `Protocol` needs neither a listing nor an underscore ([A5](#a5)). Any other exception is keyed by location, with its reason, in `UNLISTED_EXEMPTIONS` of `scripts/check_api_reference.py`.
 
@@ -120,7 +120,7 @@ __all__ = ["NoiseEmissionDeclaration"]
 __all__ = ["DeclarationForm", "NoiseEmissionDeclaration"]
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: guards-package/api-reference`, `tests/test_package_architecture.py::test_a_protocol_declares_its_data_members_as_properties`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`, `tests/test_package_architecture.py::test_a_protocol_declares_its_data_members_as_properties`
 
 <a id="a6"></a>
 ### A6. Publish every type a published record's field can hold
@@ -162,7 +162,7 @@ __all__ = ["TrackDescriptor"]  # its fields are TrackMeasure and RailJoints
 | `AUDIOMETRIC_FREQUENCIES_HZ` | `table` | The audiometric frequencies |
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: guards-package/api-reference`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`
 
 **Exceptions.** Rows for methods, namespace subpackages and `convention` rows (`.plot()`) are allowed although no `__all__` lists them.
 
@@ -1899,7 +1899,7 @@ def draw() -> None:
 msg = 'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
 ```
 
-**Enforced by:** `scripts/check_quoted_extras.py`, `CI: guards-prose/quoted-extras`, `tests/test_check_quoted_extras.py::test_the_package_spells_no_install_command_outside_its_hints`, `tests/test_install_hints.py`
+**Enforced by:** `scripts/check_quoted_extras.py`, `make quoted-extras`, `CI: guards-prose/quoted-extras`, `tests/test_check_quoted_extras.py::test_the_package_spells_no_install_command_outside_its_hints`, `tests/test_install_hints.py`
 
 **Exceptions.** `src/phonometry/_internal/extras.py` itself, which spells the commands. A library no extra brings, CuPy's wheel for the CUDA version, takes `package_hint(pip_package, conda_package)` from the same module. The check reads the text of every file of the package, so a command split between two string literals escapes it, which review catches.
 

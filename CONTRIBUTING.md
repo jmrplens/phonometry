@@ -97,6 +97,15 @@ ruff check .
 ruff format --check .
 ```
 
+The guard scripts CI runs in its three guard jobs run here as one target
+each, with the same arguments and in the same order, and each target names
+every guard that failed, by the id of its CI step:
+```bash
+make guards-prose     # the prose, the pages and the markdown (stdlib only)
+make guards-source    # the source read as text (stdlib only)
+make guards-package   # the guards that import the package
+```
+
 ### 3. Testing (Pytest)
 Run the full test suite to ensure no regressions. We aim for 100% code coverage.
 ```bash

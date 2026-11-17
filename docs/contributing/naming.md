@@ -65,7 +65,7 @@ def _warn_above_plane_wave_limit(frequency: float) -> None: ...
 OCTAVE_BANDS = (125.0, 250.0, 500.0, 1000.0)  # read by this module only, missing from __all__
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: guards-package/api-reference`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`
 
 **Exceptions.** Typing constructs (a type alias, a `TypeVar`, a `Protocol`) stay PascalCase, unlisted and unprefixed. A rare public-looking name may go in `UNLISTED_EXEMPTIONS` of `scripts/check_api_reference.py`, keyed by location with its reason.
 

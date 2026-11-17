@@ -1377,7 +1377,7 @@ a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_
 - **Evidence:** the extracted text of /home/me/iso9613.pdf reads ...
 ```
 
-**Enforced by:** `scripts/check_errata_evidence.py`, `CI: guards-prose/errata-evidence`
+**Enforced by:** `scripts/check_errata_evidence.py`, `make errata-evidence`, `CI: guards-prose/errata-evidence`
 
 **Exceptions.** Cite the document, never a file path. A claimed ratio within 0.5 % of a familiar irrational (sqrt 2, sqrt 3, pi, 2 pi, ln 2) or a small integer is the signature of a lost glyph, and clears only when the same entry cites the page it read (`--ratios`). `PAGE_CITATION_ALLOWLIST` of the script holds, by entry title with its reason, the entries filed before the page rule or whose claim is not a reading of characters (24); it only shrinks.
 
@@ -1520,7 +1520,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu   # a CPU-onl
 pip install phonometry[torch]   # zsh: no matches found: phonometry[torch]
 ```
 
-**Enforced by:** `scripts/check_quoted_extras.py`, `CI: guards-prose/quoted-extras`, `tests/test_check_quoted_extras.py`
+**Enforced by:** `scripts/check_quoted_extras.py`, `make quoted-extras`, `CI: guards-prose/quoted-extras`, `tests/test_check_quoted_extras.py`
 
 **Exceptions.** A line that shows zsh's own "no matches found" is the failure shown on purpose. Tests are not published and are not read. A sentence that names an extra without installing it (the `[torch]` extra) is not a command. A requirement is one word of the command, so a quote that opens it quotes all of it, a path or a variable inside included.
 

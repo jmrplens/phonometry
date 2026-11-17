@@ -105,6 +105,28 @@ export function retiredAddresses(map = redirects, shards = retiredShards()) {
 }
 
 /**
+ * Every retired address as a path, with the path it now answers at.
+ *
+ * The same addresses as the list items below, read without the host: the
+ * `_redirects` file of the phonometry.dev preview (site/worker/lib/redirects.mjs)
+ * is written from these, so the two edges cannot drift apart.
+ *
+ * @param {Record<string, string>} [map] Old address without the base path ->
+ *   destination with it, as src/data/redirects.mjs exports them.
+ * @param {Record<string, string>} [shards] Retired shard name -> current name.
+ * @returns {{from: string, to: string}[]} One pair per source path, in the order listed.
+ */
+export function redirectPairs(map = redirects, shards = retiredShards()) {
+	const host = new URL(siteUrl).host;
+	return [...retiredAddresses(map, shards)].map(([source, target]) => {
+		if (!source.startsWith(`${host}/`) || !target.startsWith(`${siteUrl}/`)) {
+			throw new Error(`${source} -> ${target} is not on ${siteUrl}`);
+		}
+		return { from: source.slice(host.length), to: target.slice(siteUrl.length) };
+	});
+}
+
+/**
  * The list items for a redirect map.
  *
  * @param {Record<string, string>} [map] Old address without the base path ->

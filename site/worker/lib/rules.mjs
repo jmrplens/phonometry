@@ -1,0 +1,196 @@
+// The zone rules of phonometry.dev, as the JSON the rulesets API takes.
+//
+// Rules are zone configuration the edge evaluates before any Worker
+// (https://developers.cloudflare.com/rules/url-forwarding/, "Execution
+// order"), so they cost no Worker invocation and keep working whatever the
+// daily quota says. A Free zone takes ten Single Redirect rules with wildcard
+// matching and no regular expressions; these are four.
+//
+// scripts/apply-rules.mjs puts them in the two phase entrypoints, and with
+// --check fails when the live rules differ from these.
+
+/** The Accept patterns of the Markdown rule, shared by the expression and its model below. */
+export const ACCEPT_WANTS_MARKDOWN = '*text/markdown*';
+export const ACCEPT_HTML_FIRST = Object.freeze(['*text/html*text/markdown*', '*application/xhtml+xml*text/markdown*']);
+
+/**
+ * A literal for an expression, refused when it could end the string it sits in.
+ *
+ * @param {string} value The text.
+ * @param {string} what What it is, for the error.
+ * @returns {string} The value in double quotes.
+ */
+function literal(value, what) {
+	if (/["\\]/.test(value)) throw new Error(`${what} cannot hold a quote or a backslash: ${value}`);
+	return `"${value}"`;
+}
+
+const anyAccept = (pattern) => `any(http.request.headers["accept"][*] wildcard ${literal(pattern, 'Accept pattern')})`;
+
+/**
+ * The `http_request_dynamic_redirect` rules, in order.
+ *
+ * @param {object} options
+ * @param {string} options.host The zone apex: `phonometry.dev`.
+ * @param {string} options.prefix The base path the site is served under, or `` at the root.
+ * @param {{pages: string[], subtrees: string[]}} options.exclusions Pages without a Markdown copy.
+ * @param {string} options.clipBase Where a clip is answered with byte ranges, ending in `/`:
+ *   `https://docs.jmrp.io/phonometry/media/` until the R2 bucket exists.
+ * @returns {object[]} The rules.
+ */
+export function redirectRules({ host, prefix, exclusions, clipBase }) {
+	const h = literal(host, 'host');
+	literal(clipBase, 'clip base');
+	const rules = [
+		{
+			ref: 'www-to-apex',
+			description: 'www goes to the apex, path and query kept',
+			expression: `http.host eq ${literal(`www.${host}`, 'host')}`,
+			action: 'redirect',
+			action_parameters: {
+				from_value: {
+					status_code: 301,
+					target_url: { expression: `concat(${literal(`https://${host}`, 'host')}, http.request.uri.path)` },
+					preserve_query_string: true,
+				},
+			},
+			enabled: true,
+		},
+	];
+	if (prefix !== '') {
+		rules.push({
+			ref: 'root-to-base',
+			description: 'the bare root goes to the base path the site is built under',
+			expression: `http.host eq ${h} and http.request.uri.path eq "/"`,
+			action: 'redirect',
+			action_parameters: {
+				from_value: {
+					status_code: 302,
+					target_url: { value: `https://${host}${prefix}/` },
+					preserve_query_string: true,
+				},
+			},
+			enabled: true,
+		});
+	}
+	const clips = `${prefix}/media/*.webm`;
+	rules.push({
+		ref: 'clips-to-range-host',
+		description: 'a clip is served where a byte range gets a 206 (Static Assets answers 200 with the whole file)',
+		expression: `http.host eq ${h} and http.request.uri.path wildcard ${literal(clips, 'prefix')}`,
+		action: 'redirect',
+		action_parameters: {
+			from_value: {
+				status_code: 302,
+				target_url: {
+					expression: `wildcard_replace(http.request.uri.path, ${literal(clips, 'prefix')}, ${literal(`${clipBase}\${1}.webm`, 'clip base')})`,
+				},
+				preserve_query_string: false,
+			},
+		},
+		enabled: true,
+	});
+	rules.push({
+		ref: 'markdown-twin',
+		description: 'a request that asks for Markdown and names no HTML type before it gets the page Markdown copy',
+		expression: markdownExpression({ host, prefix, exclusions }),
+		action: 'redirect',
+		action_parameters: {
+			from_value: {
+				status_code: 302,
+				target_url: { expression: 'concat(http.request.uri.path, "index.md")' },
+				preserve_query_string: false,
+			},
+		},
+		enabled: true,
+	});
+	return rules;
+}
+
+/**
+ * The expression of the Markdown rule.
+ *
+ * @param {{host: string, prefix: string, exclusions: {pages: string[], subtrees: string[]}}} options
+ * @returns {string} The expression.
+ */
+export function markdownExpression({ host, prefix, exclusions }) {
+	const parts = [
+		`http.host eq ${literal(host, 'host')}`,
+		'http.request.method in {"GET" "HEAD"}',
+		`starts_with(http.request.uri.path, ${literal(`${prefix}/`, 'prefix')})`,
+		'ends_with(http.request.uri.path, "/")',
+		anyAccept(ACCEPT_WANTS_MARKDOWN),
+		...ACCEPT_HTML_FIRST.map((pattern) => `not ${anyAccept(pattern)}`),
+		...exclusions.subtrees.map((root) => `not starts_with(http.request.uri.path, ${literal(root, 'subtree')})`),
+	];
+	if (exclusions.pages.length > 0) {
+		parts.push(`not http.request.uri.path in {${exclusions.pages.map((page) => literal(page, 'page')).join(' ')}}`);
+	}
+	return parts.join(' and ');
+}
+
+/**
+ * The `http_response_headers_transform` rules: the Markdown rule's 302 varies
+ * on Accept and is never stored, as docs-edge's own 302 does. Should this rule
+ * fail to apply, the 302 still works: a 302 without freshness information is
+ * not stored by a shared cache.
+ *
+ * @param {{host: string}} options
+ * @returns {object[]} The rules.
+ */
+export function responseHeaderRules({ host }) {
+	return [
+		{
+			ref: 'markdown-twin-vary',
+			description: 'the redirect to a Markdown copy varies on Accept and is never stored',
+			expression: `http.host eq ${literal(host, 'host')} and http.response.code eq 302 and ends_with(http.request.uri.path, "/") and ${anyAccept(ACCEPT_WANTS_MARKDOWN)}`,
+			action: 'rewrite',
+			action_parameters: {
+				headers: {
+					Vary: { operation: 'set', value: 'Accept' },
+					'Cache-Control': { operation: 'set', value: 'no-store' },
+				},
+			},
+			enabled: true,
+		},
+	];
+}
+
+/**
+ * The `wildcard` operator: the whole value matches, case-insensitively, `*`
+ * standing for any run of characters, none included.
+ *
+ * @param {string} value The field value.
+ * @param {string} pattern The literal with `*`.
+ * @returns {boolean} Whether the operator would match.
+ */
+export function wildcardMatch(value, pattern) {
+	const body = pattern
+		.split('*')
+		.map((part) => part.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
+		.join('.*');
+	return new RegExp(`^${body}$`, 'is').test(value);
+}
+
+/**
+ * What the Markdown rule decides for a request: the model the negotiation
+ * test holds against docs-edge's prefersMarkdown.
+ *
+ * @param {{host: string, method: string, path: string, accept: string[]}} request Every Accept field it carries.
+ * @param {{host: string, prefix: string, exclusions: {pages: string[], subtrees: string[]}}} zone
+ * @returns {boolean} True when the rule answers with the 302.
+ */
+export function markdownRuleMatches(request, zone) {
+	const { host, method, path, accept } = request;
+	const anyOf = (pattern) => accept.some((value) => wildcardMatch(value, pattern));
+	return (
+		host === zone.host &&
+		(method === 'GET' || method === 'HEAD') &&
+		path.startsWith(`${zone.prefix}/`) &&
+		path.endsWith('/') &&
+		anyOf(ACCEPT_WANTS_MARKDOWN) &&
+		!ACCEPT_HTML_FIRST.some(anyOf) &&
+		!zone.exclusions.subtrees.some((root) => path.startsWith(root)) &&
+		!zone.exclusions.pages.includes(path)
+	);
+}

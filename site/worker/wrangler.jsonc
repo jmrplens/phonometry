@@ -1,0 +1,33 @@
+// The phonometry.dev preview: one Worker that serves the staged build as
+// Static Assets and runs no code (site/worker/README.md says why).
+//
+// Requests for static assets are free and unlimited on Workers Free and run
+// no script, so the 100,000 daily requests of the plan cannot stop anything
+// this site serves: it fails open by having nothing to fail. Keep it so.
+// `main`, bindings and `assets.run_worker_first` turn requests into
+// invocations, and with run_worker_first a Free account over its quota
+// answers 429 instead of the asset; none of them is added without reviewing
+// that trade first (the visitor analytics task is where that review belongs).
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "phonometry-docs",
+	"compatibility_date": "2026-11-17",
+	"assets": {
+		// Written by stage.mjs: the build under its base path, plus _headers,
+		// _redirects and .assetsignore.
+		"directory": "./stage",
+		// A folder's index.html answers at the path with a trailing slash, the
+		// form every link of the site uses; the other form gets a redirect.
+		"html_handling": "auto-trailing-slash",
+		// No asset: 404 with the nearest 404.html, the site's own page.
+		"not_found_handling": "404-page"
+	},
+	// The apex is the Worker's Custom Domain: Cloudflare creates its DNS record
+	// and certificate on the first deploy. www reaches the apex through a zone
+	// redirect rule (lib/rules.mjs).
+	"routes": [{ "pattern": "phonometry.dev", "custom_domain": true }],
+	// Only phonometry.dev serves it: no workers.dev address, no preview URLs.
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": { "enabled": false }
+}

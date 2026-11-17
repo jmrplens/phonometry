@@ -322,6 +322,16 @@ jobs:
         # collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
+      - name: Test the phonometry.dev preview's configuration on small trees made to fail it
+        # The preview serves this build from a Cloudflare Worker with no code
+        # (site/worker/README.md), so what it adds lives in files written
+        # beside the build and in zone rules: the headers, the retired
+        # addresses, the Markdown redirect and its agreement with docs.jmrp.io's
+        # negotiation, the staging checks, the scripts that apply the rules and
+        # the zone settings, and the daily quota check. Node's own test runner
+        # and nothing installed: wrangler is the Worker project's alone.
+        run: node --test 'worker/test/*.test.mjs'
+        working-directory: site
       - name: Check the pages start no process of their own
         # A process a page starts runs about a thousand times in a build, and a
         # synchronous one stops every other page while it runs. One git log per
@@ -417,6 +427,16 @@ jobs:
         # process warning, wherever on its line it is printed; the one the site
         # cannot silence is listed in the check with its reason.
         run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
+        working-directory: site
+      - name: Check this build stages for the phonometry.dev preview
+        # The preview deploys this very build. Staging refuses a build over
+        # the Free plan's limits, one that carries its own _headers or
+        # _redirects, a page that lost its Markdown copy outside the pages
+        # the headers and the redirect rule exclude, and a retired address
+        # whose target the build no longer writes. Checked on every build, so
+        # a pull request that breaks the preview fails here and not on the
+        # day of a deploy. Nothing is written.
+        run: node worker/stage.mjs --from dist --check
         working-directory: site
       - name: Check llms.txt names the shard files the build wrote
         # Before the build, this job wrote llms.txt at the repository root from

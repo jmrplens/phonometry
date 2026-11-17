@@ -1,0 +1,14 @@
+# A project of its own, beside the site's: only the deploy installs wrangler,
+# so the documentation build and its tests never download it.
+#
+# wrangler's two install scripts are not run: esbuild bundles Worker code and
+# workerd runs `wrangler dev`, and this Worker has no code to bundle or run.
+# `wrangler deploy` of an assets-only Worker needs neither. pnpm would stop the
+# install on scripts it has not been told about (ERR_PNPM_IGNORED_BUILDS).
+allowBuilds:
+  esbuild: false
+  workerd: false
+
+# As in site/pnpm-workspace.yaml: the committed lockfile is the trust root,
+# and Dependabot holds back a new release for three days before proposing it.
+minimumReleaseAge: 0

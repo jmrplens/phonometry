@@ -13,8 +13,10 @@ eggs/
 lib/
 lib64/
 # The Python build-artifact rule above also matches the site's source
-# helpers directory, which is real source and must stay tracked.
+# helpers directory and the phonometry.dev Worker's, which are real source
+# and must stay tracked.
 !site/src/lib/
+!site/worker/lib/
 parts/
 sdist/
 var/
@@ -95,6 +97,10 @@ tests/data-local/
 site/node_modules/
 site/dist/
 site/.astro/
+# The phonometry.dev Worker's staged build and wrangler's local state
+# (site/worker/README.md).
+site/worker/stage/
+site/worker/.wrangler/
 
 # The llms files the site publishes: llms.txt, llms-full.txt and the shards
 # under llms/, written into site/public/ before the build by

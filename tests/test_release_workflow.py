@@ -15,6 +15,9 @@ any run failing until the day of a release:
   which Python CI did not succeed: the upload waits for that run, nothing on
   the way lets it go ahead after the wait failed, and the wait has the time it
   allows itself;
+- the Python CI run that wait reads on a merge commit is never cancelled: only
+  a newer run of the same pull request cancels a run, and a cancelled run
+  posts nothing on the pull request;
 - the built wheel is verified on the same platforms and Python versions the
   test suite runs on;
 - every file the GitHub Release carries has build provenance, and the
@@ -213,6 +216,61 @@ def test_the_wait_for_ci_ends_before_its_job_is_killed(name: str) -> None:
     assert timeout_seconds > int(deadline.group(1)), (
         f"{name}: {job} is killed after {timeout_seconds} s, before the wait "
         f"gives up at {deadline.group(1)} s"
+    )
+
+
+#: The concurrency of Python CI: a pull request's runs share a group and a
+#: newer one cancels the older, while a push or a dispatched run, which has no
+#: pull request number, falls back on its own run id and shares its group with
+#: nothing. The group names the workflow because groups span the repository.
+_CI_CONCURRENCY = {
+    "group": "python-app-${{ github.event.pull_request.number || github.run_id }}",
+    "cancel-in-progress": "${{ github.event_name == 'pull_request' }}",
+}
+
+
+def test_only_a_newer_run_of_the_same_pull_request_cancels_python_ci() -> None:
+    """The run the release waits for on main finishes, whatever is pushed next.
+
+    The wait reads the newest Python CI run on the commit, whatever its event,
+    and any conclusion but success stops the release. A group shared by push
+    runs, or ``cancel-in-progress`` true for every event, lets the next merge
+    to main cancel the run of the one before, and that release then stops on
+    a cancelled run that found nothing wrong.
+    """
+    concurrency = _load("python-app.yml").get("concurrency")
+    assert isinstance(concurrency, dict), (
+        "Python CI has no concurrency block, so a push to a pull request no "
+        "longer cancels the run of the commit it replaces"
+    )
+    cancels = concurrency.get("cancel-in-progress")
+    assert cancels == _CI_CONCURRENCY["cancel-in-progress"], (
+        f"Python CI cancels under {cancels!r}; only a pull request run may be cancelled"
+    )
+    assert concurrency.get("group") == _CI_CONCURRENCY["group"], (
+        f"Python CI groups its runs as {concurrency.get('group')!r}; a push or "
+        "a dispatched run must fall back on its own run id"
+    )
+
+
+def test_a_cancelled_run_leaves_the_pull_request_comment_alone() -> None:
+    """The comment is posted after a red job, but not from a cancelled run.
+
+    ``always()`` runs the job in a run a newer push cancelled, which holds
+    the results of whatever finished before the cancel, none at all on a run
+    cancelled early, and rewrites the sticky comment from them, "No test
+    results found." in the second case.
+    """
+    condition = str(_load("python-app.yml")["jobs"]["pr-comment"].get("if", ""))
+    assert "always()" not in condition, (
+        f"pr-comment runs under {condition!r}, which includes a cancelled run"
+    )
+    assert "!cancelled()" in condition, (
+        f"pr-comment runs under {condition!r}, which skips it after a red job, "
+        "the run whose comment matters most"
+    )
+    assert "github.event_name == 'pull_request'" in condition, (
+        f"pr-comment runs under {condition!r}, outside a pull request"
     )
 
 

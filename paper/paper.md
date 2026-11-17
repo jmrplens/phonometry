@@ -27,16 +27,17 @@ bibliography: paper.bib
 SciPy [@virtanen2020scipy], for acoustic measurement, analysis and prediction.
 It covers sound level metrology, fractional-octave filtering, psychoacoustics,
 speech intelligibility and hearing, room and building acoustics, acoustic
-materials, sound power, human and structural vibration, environmental, aircraft
-and transport noise, underwater acoustics, electroacoustics, broadcast loudness
-and wave simulation. A result that holds more than one quantity is a typed,
-frozen dataclass that carries what it was computed from, draws its own figure,
-and, for the metrics that certify or rate something, renders an
-accredited-style report.
+materials, sound power, human and structural vibration, environmental,
+aircraft and transport noise, underwater acoustics, electroacoustics,
+broadcast loudness and wave simulation. A result that holds more than one
+quantity is a typed, frozen dataclass that keeps the axes and parameters its
+numbers depend on, nearly always draws its own figure, and, for the metrics
+that certify or rate something, renders an accredited-style report.
 
 What distinguishes the library is not the breadth of that list but how each
-entry on it is built and verified. Every metric is implemented from the text
-of its governing standard, clause by clause, rather than from a secondary
+entry on it is built and verified. Every standardized metric is implemented
+from the text of its governing standard, clause by clause, and every other
+model from its primary published source, rather than from a secondary
 description or another implementation. Where a standard publishes worked
 examples, tolerance tables or nominal responses, those numbers are transcribed
 into the test suite as oracles: the IEC 61672-1 weighting tolerances
@@ -45,8 +46,8 @@ loudness test signals [@iso532], the ISO 717 rating examples [@iso717], and
 hundreds more. In release 4.0.0, continuous integration enforces 1899
 numerical conformance checks across 111 domains, against 230 normative
 designations and 121 further published sources, on every change, and the
-per-check report (standard and clause, normative expected value, computed
-value, delta, verdict) is published with the documentation
+per-check report (source and clause, expected value, computed value, delta,
+verdict) is published with the documentation
 (<https://docs.jmrp.io/phonometry/reference/conformance/>), alongside a
 bibliography of every source the guides cite, standards included with their
 catalogue records (<https://docs.jmrp.io/phonometry/reference/bibliography/>).
@@ -117,15 +118,15 @@ signal-processing foundations it happily coexists with `pyfar`.
 Three design decisions carry the method. First, a computation that yields
 several quantities, or a judgment against a limit, returns a typed, frozen
 dataclass rather than a tuple, a bare array or a bare boolean, while a single
-number stays a number: the result object carries the inputs and parameters it
-was computed from, exposes a `plot()` method that draws the conventional
-figure for that quantity, and, for metrics whose standards define a reporting
-format (insulation ratings, absorption classes, declared noise emission), a
-`report()` method that renders an accredited-laboratory-style fiche citing the
-governing clauses (\autoref{fig:fiche}). The trade-off is verbosity against
-provenance: a frozen result is a self-documenting evidence trail, which is
-what a defensible number needs, at the cost of one attribute access compared
-with returning arrays.
+number stays a number: the result object keeps the axes and parameters its
+numbers depend on, nearly every result exposes a `plot()` method that draws
+the conventional figure for that quantity, and the results of metrics whose
+standards define a reporting format (insulation ratings, absorption classes,
+declared noise emission) add a `report()` method that renders an
+accredited-laboratory-style fiche citing the governing clauses
+(\autoref{fig:fiche}). The trade-off is verbosity against provenance: a frozen
+result is a self-documenting evidence trail, which is what a defensible number
+needs, at the cost of one attribute access compared with returning arrays.
 
 ![The `report()` method of an airborne insulation result: a single-page fiche
 in the layout of an accredited laboratory report, stating the measured curve,

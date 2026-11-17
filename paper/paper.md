@@ -30,9 +30,10 @@ speech intelligibility and hearing, room and building acoustics, acoustic
 materials, sound power, human and structural vibration, environmental,
 aircraft and transport noise, underwater acoustics, electroacoustics,
 broadcast loudness and wave simulation. A result that holds more than one
-quantity is a typed, frozen dataclass that keeps the parameters its numbers
-depend on, nearly always draws its own figure, and, for the metrics whose
-standards define a reporting format, renders an accredited-style report.
+quantity is a typed, frozen dataclass that keeps its numbers together with the
+key parameters behind them, nearly always draws its own figure, and, for the
+metrics whose standards define a reporting format, renders an accredited-style
+report.
 
 What distinguishes the library is not the breadth of that list but how each
 entry on it is built and verified. Every standardized metric is implemented
@@ -108,21 +109,21 @@ off when it is systematic, across every metric a library ships and enforced in
 its own continuous integration, and none of the existing projects is
 structured around that contract. What no library in this space publishes is
 conformance evidence that is complete (every shipped metric), granular (per
-check, with the normative expected value and the delta) and live (regenerated
-and enforced on every change), so that the verification cannot drift from the
-code it describes. That is the niche `phonometry` occupies; for
-signal-processing foundations it happily coexists with `pyfar`.
+check, with the expected value and the delta) and live (regenerated and
+enforced on every change), so that the verification cannot drift from the code
+it describes. That is the niche `phonometry` occupies; for signal-processing
+foundations it happily coexists with `pyfar`.
 
 # Software design
 
 Three design decisions carry the method. First, a computation that yields
 several quantities, or a judgment against a limit, returns a typed, frozen
 dataclass rather than a tuple, a bare array or a bare boolean, while a single
-number stays a number: the result object keeps the parameters its numbers
-depend on, nearly every result exposes a `plot()` method that draws the
-conventional figure for that quantity, and the results of metrics whose
-standards define a reporting format (insulation ratings, absorption classes,
-declared noise emission) add a `report()` method that renders an
+number stays a number: the result object keeps its numbers together with the
+key parameters behind them, nearly every result exposes a `plot()` method that
+draws the conventional figure for that quantity, and the results of metrics
+whose standards define a reporting format (insulation ratings, absorption
+classes, declared noise emission) add a `report()` method that renders an
 accredited-laboratory-style fiche citing the governing clauses
 (\autoref{fig:fiche}). The trade-off is verbosity against provenance: a frozen
 result is a self-documenting evidence trail, which is what a defensible number

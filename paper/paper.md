@@ -30,9 +30,9 @@ speech intelligibility and hearing, room and building acoustics, acoustic
 materials, sound power, human and structural vibration, environmental,
 aircraft and transport noise, underwater acoustics, electroacoustics,
 broadcast loudness and wave simulation. A result that holds more than one
-quantity is a typed, frozen dataclass that keeps the axes and parameters its
-numbers depend on, nearly always draws its own figure, and, for the metrics
-that certify or rate something, renders an accredited-style report.
+quantity is a typed, frozen dataclass that keeps the parameters its numbers
+depend on, nearly always draws its own figure, and, for the metrics whose
+standards define a reporting format, renders an accredited-style report.
 
 What distinguishes the library is not the breadth of that list but how each
 entry on it is built and verified. Every standardized metric is implemented
@@ -118,9 +118,9 @@ signal-processing foundations it happily coexists with `pyfar`.
 Three design decisions carry the method. First, a computation that yields
 several quantities, or a judgment against a limit, returns a typed, frozen
 dataclass rather than a tuple, a bare array or a bare boolean, while a single
-number stays a number: the result object keeps the axes and parameters its
-numbers depend on, nearly every result exposes a `plot()` method that draws
-the conventional figure for that quantity, and the results of metrics whose
+number stays a number: the result object keeps the parameters its numbers
+depend on, nearly every result exposes a `plot()` method that draws the
+conventional figure for that quantity, and the results of metrics whose
 standards define a reporting format (insulation ratings, absorption classes,
 declared noise emission) add a `report()` method that renders an
 accredited-laboratory-style fiche citing the governing clauses

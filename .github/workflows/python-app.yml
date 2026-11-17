@@ -289,37 +289,219 @@ jobs:
         "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
           --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
 
-  # Fast gate (runtime deps only, no pytest): the committed
-  # docs/conformance.json, the docs/CONFORMANCE.md rendered from it, and every
-  # count quoted from either must equal a fresh `make conformance` run.
-  conformance:
-    name: Conformance report up to date
+  # The guards that import the package: they walk its published names,
+  # tables and catalogues as a caller's code would, so they run on the
+  # runtime dependencies alone, requirements.txt and the package, which also
+  # proves it imports with nothing else beside it. Then the drift gates of
+  # what the package generates, the conformance artefact and report and the
+  # API reference. One runner and one install for all of them instead of
+  # seven of each. Every guard is a step of its own that runs whatever the
+  # guards before it said, so a red one names itself and hides none of the
+  # others, and the last step names every one that failed on the checks page.
+  # A failed install fails once, on its own step, and runs no guard. The
+  # guards only read and run cheapest first, the three that read the
+  # committed conformance artefact among them, so they give their verdict
+  # even when its regeneration fails. Each drift gate starts from a checkout
+  # put back as committed, so a stale report is not read as a stale API
+  # reference too, nor the other way round.
+  guards-package:
+    name: Guards / package
     runs-on: ubuntu-26.04
+    # About 6.7 min by the medians of its steps, 7.6 by their maxima.
+    timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      # No step leaves a compiled file beside the source it read.
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
     - name: Set up Python 3.13
+      id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
         cache: 'pip'
-    - name: Install runtime dependencies
+    - name: Install the runtime dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
+    # The solids catalogue's point is that a published value is worth more
+    # beside another published value than alone, and four books print the
+    # same material. Two densities that disagree are a digit somebody typed
+    # wrong, because every density the script does not already accept agrees
+    # across these tables to within 2.6 per cent, so it fails above 8 per
+    # cent and lets anything under that pass without a word. Moduli and
+    # speeds disagree by thirty per cent between books without anybody being
+    # wrong, so those it reports and never fails; the ones it reports by
+    # default are the few an order of magnitude apart, which is how tin's
+    # twelvefold modulus surfaced. It walks the imported package, like the
+    # units and sources guards.
+    - name: The books agree about the solids they share
+      id: solid-agreement
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_solid_agreement.py
+    - name: Every published catalogue reaches the catalogues page
+      id: published-catalogues
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_published_catalogues_reach_the_page.py
+    # The artefact is committed, so it can be wrong in ways a regeneration
+    # diff cannot see: a count that no longer matches its rows, a numpy scalar
+    # where a float belongs, a citation whose split no longer rebuilds it, a
+    # dead line in the override ratchet. This reads what is committed and
+    # says which one.
+    - name: The committed conformance artefact is internally consistent
+      id: conformance-artifact
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_conformance_artifact.py
+    # The artefact's closed vocabularies are restated by the site: once in the
+    # Zod schema that validates it into the content collection, once in the
+    # label maps that word a verdict and a relation in each language. Nothing
+    # compared them until this, and a relation added to the reader and
+    # missing from the schema stopped the site build with a content error
+    # naming ten checks and no cause. Cheap and stdlib-only, so it runs here
+    # rather than waiting for the docs workflow to build the site.
+    - name: The site accepts and words every conformance vocabulary
+      id: conformance-vocabulary
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_conformance_vocabulary.py
+    # The JSON Schema of a catalogue file is written from the row classes, so
+    # a field added to one would be missing from every editor that completes
+    # a catalogue file until the published schema is written again.
+    - name: The catalogue schema the site publishes is current
+      id: catalogue-schema
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/generate_catalogue_schema.py --check
+    # The site renders the catalogues from a module this dumps, so a row added
+    # to a data file without regenerating it would leave the page showing the
+    # catalogue as it was. Same arrangement as the API reference: the
+    # artefact is committed and CI checks it against a fresh run.
+    - name: The catalogue data the site renders is current
+      id: catalogue-data
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/generate_catalogue_data.py --check
+    # The idea of the solids guard over every catalogue: two books that credit
+    # one study for one material are two readings of one measurement, and a
+    # pair that does not overlap is a misread page rather than a
+    # disagreement.
+    - name: The rows two books took from the same place agree
+      id: shared-sources
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_shared_sources.py
+    # A published table is shared by every caller in the process, so a dict
+    # behind a `Mapping` annotation, or a writeable array, lets one caller
+    # change a printed number for everyone after it without anything raising.
+    # This holds every value reachable from a public name to immutable
+    # containers all the way down. It walks the imported package, like the
+    # units guard, because a table built by a function call only shows its
+    # type once it exists.
+    - name: Every published table refuses writes
+      id: frozen-constants
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_frozen_constants.py
+    # A value transcribed from a book is only checkable if the next reader can
+    # open the same page. The convention lived in review until a table came
+    # to cite a folio its page does not print and another attributed to a
+    # table two columns it does not carry. This holds every published record
+    # that carries a `source` to the grammar the errata registry uses, and
+    # every table transcribed from a book or a paper to a banner naming both
+    # its PDF page and its printed folio; a standard stays outside, because
+    # it numbers its own clauses and tables and is cited by that number. It
+    # walks the imported package, like the units guard, and re-runs its own
+    # census over the banners so a table from a new book fails until it is
+    # registered.
+    - name: Every published value names its page
+      id: published-sources
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_published_sources.py
+    # The walk of the units guard holds every public identifier, and every
+    # value a caller types, to the American spelling the library is written
+    # in, and in situ to in_situ: a caller who wrote center_frequency on one
+    # function should not meet centre_frequency on the next.
+    - name: Every public identifier is spelled in American English
+      id: identifier-spelling
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_identifier_spelling.py
+    # The read-only check of the committed state, and the command to run
+    # locally. The report can be current while the prose quoting it is not;
+    # the counts were typed out in three places and two of them fell a
+    # release behind.
+    - name: No page quotes a stale conformance count
+      id: conformance-claims
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_conformance_claims.py
+    # The curated quick table in docs/reference/api/index.md: every
+    # phonometry.__all__ name must have a table row (extra rows such as
+    # methods or namespace entries are fine). See scripts/check_api_reference.py.
+    - name: Curated API quick table covers __all__
+      id: api-reference
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_api_reference.py
+    # A pressure of 101 325 and a pressure of 101.325 are both legitimate
+    # values here: the ISO 3740 family prints kilopascals, IEC 61094-2 and
+    # ISO 15186-3 print pascals, and the result of the mix-up is still a
+    # float. No guard by magnitude can separate them, because either reading
+    # is a real duty somewhere else in the tree, so the unit lives in the
+    # parameter name and this holds it there. It walks the imported package
+    # rather than the source tree, because ReportMetadata is published from
+    # the root and defined in a private module, and a scan by file path does
+    # not see it.
+    - name: Every public quantity names its unit
+      id: parameter-units
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_parameter_units.py
+    # The walk of the units guard holds every public choice of a fixed set of
+    # strings to a Literal of its options, so a type checker refuses a
+    # misspelt option before the call runs; a string open by its nature says
+    # why. Each one is checked on every path, a choice written in several
+    # parts (a single name, each key and each value of a mapping) in each of
+    # them, and no Literal lists a value every call refuses, whatever the
+    # other arguments.
+    - name: Check that every fixed public choice is typed Literal
+      id: choice-literals
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: python scripts/check_choice_literals.py
+    # The guards above only read: one that wrote into the checkout would
+    # change what the next one reads, so a file left behind is a failure of
+    # its own.
+    - name: The guards left the checkout as they found it
+      id: clean-tree
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          git status --porcelain
+          echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
+          exit 1
+        fi
+    # The conformance gate reads the whole checkout, so it starts from what is
+    # committed whatever a guard above left behind, and says only what is its
+    # own. Ignored files stay, the editable install's metadata among them.
+    - name: Put the checkout back as committed for the conformance gate
+      id: reset-conformance
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      run: |
+        git reset --hard -q
+        git clean -fdq
+    # The committed docs/conformance.json, the docs/CONFORMANCE.md rendered
+    # from it, and every count quoted from either must equal a fresh `make
+    # conformance` run, on the runtime dependencies alone and no pytest.
     - name: Regenerate the conformance artefact, the report and the quoted counts
+      id: conformance-regenerate
+      if: ${{ !cancelled() && steps.reset-conformance.outcome == 'success' }}
       run: make conformance
-    # `make conformance` now writes as well as reads: it regenerates the report
+    # `make conformance` writes as well as reads: it regenerates the report
     # and rewrites the counts quoted in .zenodo.json, the files of docs/
-    # written by hand and the site frontmatter. So the staleness gate has to cover the whole tree, not
-    # just the report. Diffing only docs/CONFORMANCE.md would let the rewrite
-    # fix the prose in the runner's checkout and pass, while the branch keeps
-    # the stale numbers.
-    - name: Fail if the committed report or any quoted count is stale
+    # written by hand and the site frontmatter. So the staleness gate has to
+    # cover the whole tree, not just the report. Diffing only
+    # docs/CONFORMANCE.md would let the rewrite fix the prose in the runner's
+    # checkout and pass, while the branch keeps the stale numbers.
+    - name: Conformance report up to date
+      id: conformance
+      if: ${{ !cancelled() && steps.conformance-regenerate.outcome == 'success' }}
       run: |
         # --porcelain rather than `git diff`, because a diff is blind to an
         # untracked file and the artefact is one of the things this regenerates.
@@ -331,54 +513,24 @@ jobs:
           echo "::error::The conformance artefact, the report or a count quoted from either is out of date, or a generated file is untracked - run 'make conformance' and commit the result."
           exit 1
         fi
-    # Belt and braces, and the command to run locally: the read-only check on
-    # the committed state. The report can be current while the prose quoting it
-    # is not; the counts were typed out in three places and two of them fell a
-    # release behind.
-    - name: Fail if any page quotes a stale conformance count
-      run: python scripts/check_conformance_claims.py
-    # The artefact is committed, so it can be wrong in ways a regeneration
-    # diff cannot see: a count that no longer matches its rows, a numpy scalar
-    # where a float belongs, a citation whose split no longer rebuilds it, a
-    # dead line in the override ratchet. This reads what is committed and says
-    # which one.
-    - name: Fail if the committed artefact is not internally consistent
-      run: python scripts/check_conformance_artifact.py
-    # The artefact's closed vocabularies are restated by the site: once in the
-    # Zod schema that validates it into the content collection, once in the
-    # label maps that word a verdict and a relation in each language. Nothing
-    # compared them until this, and a relation added to the reader and missing
-    # from the schema stopped the site build with a content error naming ten
-    # checks and no cause. Cheap and stdlib-only, so it runs here rather than
-    # waiting for the docs workflow to build the site.
-    - name: Fail if the site does not accept and word every vocabulary
-      run: python scripts/check_conformance_vocabulary.py
-
-  # Drift gate for the generated Starlight API reference: the committed pages
-  # under site/src/content/docs/reference/api and the sidebar fragment must
-  # equal a fresh `make api-docs` run (deterministic, stdlib-only generator).
-  api-docs:
-    name: Generated API reference up to date
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
+    # Whatever the conformance regeneration left, a whole run or half of one,
+    # the API reference gate starts from what is committed.
+    - name: Put the checkout back as committed for the API reference gate
+      id: reset-api-docs
+      if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
+        git reset --hard -q
+        git clean -fdq
+    # The generated Starlight API reference: the committed pages under
+    # site/src/content/docs/reference/api and the sidebar fragment must equal
+    # a fresh `make api-docs` run (deterministic, stdlib-only generator).
     - name: Regenerate the API reference
+      id: api-docs-regenerate
+      if: ${{ !cancelled() && steps.reset-api-docs.outcome == 'success' }}
       run: make api-docs
-    - name: Fail if the committed API reference is stale
+    - name: Generated API reference up to date
+      id: api-docs
+      if: ${{ !cancelled() && steps.api-docs-regenerate.outcome == 'success' }}
       run: |
         if ! git diff --exit-code -- site/src/content/docs/reference/api site/src/generated; then
           echo "::error::The generated API reference is out of date - run 'make api-docs' and commit the result."
@@ -390,6 +542,12 @@ jobs:
           echo "$untracked"
           exit 1
         fi
+    # One annotation per failed step on the checks page, titled by its id.
+    - name: Name the guards that failed
+      if: ${{ failure() }}
+      env:
+        STEPS: ${{ toJSON(steps) }}
+      run: python3 .github/scripts/failed_steps.py
 
   # The guards that read the published text: the pages, the files of docs/
   # written by hand, the docstrings, the labels and the evidence pages, and
@@ -715,185 +873,6 @@ jobs:
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
-
-  # Coverage gate for the curated quick table in docs/reference/api/index.md: every
-  # phonometry.__all__ name must have a table row (extra rows such as methods
-  # or namespace entries are fine). See scripts/check_api_reference.py.
-  api-reference-table:
-    name: Curated API quick table covers __all__
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Check docs/reference/api/index.md coverage
-      run: python scripts/check_api_reference.py
-
-  # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
-  # here: the ISO 3740 family prints kilopascals, IEC 61094-2 and ISO 15186-3
-  # print pascals, and the result of the mix-up is still a float. No guard by
-  # magnitude can separate them, because either reading is a real duty
-  # somewhere else in the tree, so the unit lives in the parameter name and
-  # this holds it there. It walks the imported package rather than the source
-  # tree, because ReportMetadata is published from the root and defined in a
-  # private module, and a scan by file path does not see it.
-  parameter-units:
-    name: Every public quantity names its unit
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Check that no public name or constant hides its unit or misspells it
-      run: python scripts/check_parameter_units.py
-    # The same walk holds every public identifier, and every value a caller
-    # types, to the American spelling the library is written in, and in situ
-    # to in_situ: a caller who wrote center_frequency on one function should
-    # not meet centre_frequency on the next.
-    - name: Check that every public identifier is spelled in American English
-      run: python scripts/check_identifier_spelling.py
-    # The same walk holds every public choice of a fixed set of strings to a
-    # Literal of its options, so a type checker refuses a misspelt option
-    # before the call runs; a string open by its nature says why. Each one is
-    # checked on every path, a choice written in several parts (a single
-    # name, each key and each value of a mapping) in each of them, and no
-    # Literal lists a value every call refuses, whatever the other arguments.
-    - name: Check that every fixed public choice is typed Literal
-      run: python scripts/check_choice_literals.py
-
-  # A published table is shared by every caller in the process, so a dict
-  # behind a `Mapping` annotation, or a writeable array, lets one caller change
-  # a printed number for everyone after it without anything raising. This holds
-  # every value reachable from a public name to immutable containers all the
-  # way down. It walks the imported package, like parameter-units, because a
-  # table built by a function call only shows its type once it exists.
-  frozen-constants:
-    name: Every published table refuses writes
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Check that no published constant can be changed in place
-      run: python scripts/check_frozen_constants.py
-
-  # A value transcribed from a book is only checkable if the next reader can
-  # open the same page. The convention lived in review until a table came to
-  # cite a folio its page does not print and another attributed to a table two
-  # columns it does not carry. This holds every published record that carries a
-  # `source` to the grammar the errata registry uses, and every table
-  # transcribed from a book or a paper to a banner naming both its PDF page and
-  # its printed folio; a standard stays outside, because it numbers its own
-  # clauses and tables and is cited by that number. It walks the imported
-  # package, like the units guard, and re-runs its own census over the banners
-  # so a table from a new book fails until it is registered.
-  published-sources:
-    name: Every published value names its page
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Check that every published value cites its page and folio
-      run: python scripts/check_published_sources.py
-    - name: Check that every published catalogue reaches the catalogues page
-      run: python scripts/check_published_catalogues_reach_the_page.py
-    # The site renders the catalogues from a module this dumps, so a row added
-    # to a data file without regenerating it would leave the page showing the
-    # catalogue as it was. Same arrangement as the API reference: the artefact
-    # is committed and CI checks it against a fresh run.
-    - name: Check the catalogue data the site renders
-      run: python scripts/generate_catalogue_data.py --check
-    # The JSON Schema of a catalogue file is written from the row classes, so
-    # a field added to one would be missing from every editor that completes
-    # a catalogue file until the published schema is written again.
-    - name: Check the catalogue schema the site publishes
-      run: python scripts/generate_catalogue_schema.py --check
-
-  # The solids catalogue's point is that a published value is worth more beside
-  # another published value than alone, and four books print the same material.
-  # Two densities that disagree are a digit somebody typed wrong, because every
-  # density the script does not already accept agrees across these tables to
-  # within 2.6 per cent, so it fails above 8 per cent and lets anything under
-  # that pass without a word. Moduli and speeds disagree by thirty per cent
-  # between books without anybody being wrong, so those it reports and never
-  # fails; the ones it reports by default are the few an order of magnitude
-  # apart, which is how tin's twelvefold modulus surfaced. It walks the
-  # imported package, like the units and sources guards.
-  solid-agreement:
-    name: The books agree about the solids they share
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
-        cache: 'pip'
-    - name: Install runtime dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Check that the books agree about the solids they share
-      run: python scripts/check_solid_agreement.py
-    # The same idea over every catalogue: two books that credit one study for
-    # one material are two readings of one measurement, and a pair that does
-    # not overlap is a misread page rather than a disagreement.
-    - name: Check the rows two books took from the same place
-      run: python scripts/check_shared_sources.py
 
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in

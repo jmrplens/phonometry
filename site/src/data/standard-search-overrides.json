@@ -6,9 +6,16 @@
     "could decide what a reader would search it by. Keys are the designation",
     "exactly as the bibliography spells it; values are the tokens, lowercase",
     "alphanumerics only. Keys beginning with an underscore are ignored, which is",
-    "what lets this note live in the file it documents."
+    "what lets this note live in the file it documents.",
+    "An entry also takes a designation the rules do parse when a word they read",
+    "as an issuer is not one: the EASA research project NOISE is an acronym in",
+    "capitals in front of its number, and the field carrying \"noise\" moved the",
+    "guide it cites up an ordinary search for the word once Pagefind 1.6 weighed",
+    "metadata coverage differently. Both languages' spellings are listed."
   ],
   "108th AES Convention, Paris, preprint 5093": ["aes", "5093"],
   "CTE DB-HR": ["cte", "dbhr"],
-  "OJ L 5, 10.1.2018, p. 35": ["oj", "l5", "l52018"]
+  "OJ L 5, 10.1.2018, p. 35": ["oj", "l5", "l52018"],
+  "Research Project NOISE SC01, deliverable D1.5d, contract EASA.2020.FC.06": ["sc01"],
+  "Research Project NOISE SC01, entregable D1.5d, contrato EASA.2020.FC.06": ["sc01"]
 }

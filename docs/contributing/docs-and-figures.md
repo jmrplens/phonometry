@@ -1709,7 +1709,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 
 **Enforced by:** `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
-**Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.42.8 with Astro 7.4.4), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.
+**Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.43.1 with Astro 7.4.12), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.
 
 ## Catalogue links
 

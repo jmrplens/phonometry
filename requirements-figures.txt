@@ -21,11 +21,11 @@
 # maintainer's venv that produced the committed figures.
 matplotlib==3.11.2
 fonttools==4.68.0
-numpy==2.5.4
+numpy==2.5.5
 scipy==1.18.1
 pillow==13.0.0
 contourpy==1.4.0
 kiwisolver==1.5.1
 pyparsing==3.3.3
 cycler==0.12.1
-python-dateutil==3.0.0
+python-dateutil==4.0.0

@@ -367,7 +367,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cell. CI now runs the package in a notebook kernel, displaying a result, a
   verdict, an inline `.plot()`, a `.report()` and a warning, and installs the
   wheel in Pyodide, the Python of JupyterLite, with its `plot` and `report`
-  extras. On Pyodide 314.0.7 it installs on the numpy 2.4.6, scipy 1.18.0 and
+  extras. On Pyodide 314.0.8 it installs on the numpy 2.4.6, scipy 1.18.0 and
   matplotlib 3.10.8 Pyodide ships, and a one-third-octave filter bank runs
   there. The job fails, naming the floor, the day a floor in `pyproject.toml`
   rises above what Pyodide ships.
@@ -2349,6 +2349,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The IEC 61400-11 tonality fiche shows the spectrum under its critical
+  band on every svglib the `report` extra admits.** The plot shaded the band
+  with `alpha=0.12`, which matplotlib writes as the SVG `opacity` property,
+  and svglib before 2.4 ignores it, so `.report()` drew the band solid green
+  over the spectrum and left only the tone marker in sight. The band is now
+  the opaque wash the other fiche plots use (`theme_fill`). The fiche test
+  reads the SVG of every example fiche's plot and fails on a shape drawn
+  through `opacity`, a legend's frame excepted.
+
 - **The standing-wave impedance and the room constant of ISO 9295 keep their
   digits where a reflection or an absorption rounds to one.**
   `materials.standing_wave_normalized_impedance` formed $(1 + r)/(1 - r)$
@@ -2466,7 +2475,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   in a checkout with nothing above it, so a parent directory cannot change
   what the pages run (`site/src/lib/bundled-packages.mjs`).
 
-- **The site and the Pyodide smoke test install with pnpm 12.18.0, the
+- **The site and the Pyodide smoke test install with pnpm 12.21.0, the
   newest release.** Both pinned 12.10.1, so pnpm printed its notice of a newer
   release on a contributor's machine once a day. The two pins and their
   lockfiles, which pnpm 12 writes its own release into, now have a test that

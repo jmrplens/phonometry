@@ -532,6 +532,14 @@ const siteManifest = JSON.parse(readFileSync(new URL('./package.json', import.me
 export default defineConfig({
   site: siteUrl,
   base: basePath,
+  // The scoped-style selectors every component of the site was written and
+  // audited against. Starlight forced `:where(.astro-HASH)` up to 0.42 and
+  // leaves the choice to Astro from 0.43, whose own default, attribute
+  // selectors, outranks the `:where()` form and stops a class handed to a
+  // child component from carrying its parent's scope. Named here so the
+  // cascade the contrast, layout and visual checks measured stays the one the
+  // pages ship with.
+  scopedStyleStrategy: 'where',
   vite: {
     // Every package site/package.json does not list goes into the prerender
     // bundle, as it does in a checkout with no node_modules above it, so that a

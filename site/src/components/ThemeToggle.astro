@@ -12,7 +12,7 @@
  * No theme state is forked. The button never writes the theme itself: it sets
  * the value on Starlight's own `<select>` and fires its `change` event, so
  * the site ends up in exactly the state it would have been in had the reader
- * picked that option from the menu (`StarlightThemeProvider.updatePickers()`,
+ * picked that option from the menu (the value of every theme `<select>`,
  * `document.documentElement.dataset.theme`, and the `starlight-theme` key in
  * localStorage, all written by Starlight's handler). The button then reads
  * its own state back from `data-theme` on <html>, which is the output of that
@@ -85,13 +85,16 @@ const copy = isEs
 				}
 				// Only if Starlight's custom element has not upgraded yet, which
 				// can only happen in the moment before its module runs. Same key,
-				// same picker sync, so it lands in the same state.
+				// and every theme select set to the same value, as Starlight's own
+				// handler sets them, so it lands in the same state.
 				if (root.dataset.theme !== to) {
 					root.dataset.theme = to;
 					try {
 						localStorage.setItem('starlight-theme', to);
 					} catch {}
-					window.StarlightThemeProvider?.updatePickers(to);
+					for (const picker of document.querySelectorAll('starlight-theme-select select')) {
+						picker.value = to;
+					}
 					sync();
 				}
 			});

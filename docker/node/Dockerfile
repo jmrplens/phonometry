@@ -63,7 +63,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends cuda-cudart-dev-13-3=13.3.29-1 \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH=/opt/venv/bin:$PATH
-RUN pip install --no-cache-dir --no-deps cupy-cuda13x==14.2.0 cuda-pathfinder==1.8.3 \
+RUN pip install --no-cache-dir --no-deps cupy-cuda13x==14.2.0 cuda-pathfinder==1.9.0 \
     && pip check
 COPY src/phonometry/simulation/_remote/bootstrap.py /usr/local/share/phonometry-node/bootstrap.py
 COPY docker/node/Dockerfile /usr/local/share/phonometry-node/Dockerfile

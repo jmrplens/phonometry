@@ -432,8 +432,17 @@ def plot_wind_turbine_tonality(
             kwargs, color=_C_PRIMARY, lw=1.0, label=_t("Narrowband spectrum", language)
         ),
     )
+    # Opaque wash derived from the page: the fiche renders this plot through
+    # svglib, and every svglib before 2.4 ignores the ``opacity`` matplotlib
+    # writes for an artist's alpha, so a translucent band came out solid and
+    # hid the spectrum it marks.
     ax.axvspan(
-        lo, hi, color=_C_TERTIARY, alpha=0.12, label=_t("Critical band", language)
+        lo,
+        hi,
+        facecolor=theme_fill(_C_TERTIARY, ax),
+        edgecolor="none",
+        zorder=0,
+        label=_t("Critical band", language),
     )
     ax.axhline(
         result.masking_level,

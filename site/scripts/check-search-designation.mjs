@@ -151,7 +151,10 @@ const CONTROLS = [
  *
  * "noise" (the NOISE research project) is deliberately absent: it is an
  * ordinary word on an acoustics site first, and so would "air" be, were SAE AIR
- * 5662 ever declared again. "en" is here even though it is the Spanish
+ * 5662 ever declared again. The project's number reaches the field without it,
+ * through src/data/standard-search-overrides.json: under Pagefind 1.6 the field
+ * carrying "noise" moved the rotorcraft guide to the top of a search for the
+ * word. "en" is here even though it is the Spanish
  * preposition, because a search is never "en" alone and the Spanish searches
  * built around it are in CONTROLS.
  *

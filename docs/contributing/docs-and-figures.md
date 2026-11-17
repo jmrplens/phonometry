@@ -24,7 +24,7 @@ site/src/content/docs/es/<route>.mdx, then runs make llms
 the English page fixed now and the Spanish twin later, or docs/<route>.md edited by hand
 ```
 
-**Enforced by:** `site/scripts/check-i18n-parity.mjs`, `CI: llms artifacts up to date`, review
+**Enforced by:** `site/scripts/check-i18n-parity.mjs`, `CI: guards-prose/llms`, review
 
 **Exceptions.** The contributor guide (`docs/contributing/`) is repository-only: no site page, no Spanish twin. The source documents under `docs/` (the README, the curated API table, the errata registers) are written where they live ([F5](#f5)). `check-i18n-parity.mjs` proves each English page has a twin at the same path, not that a change reached both.
 
@@ -49,7 +49,7 @@ a new component imported by a guide with no <Name>.md.mjs beside it, or a prop
 passed to a component whose writer does not list it in props
 ```
 
-**Enforced by:** `site/scripts/check-markdown-writers.mjs`, `CI: Check every component a page uses has a Markdown writer`, `site/src/lib/agent-md/test/check-markdown-writers.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`
+**Enforced by:** `site/scripts/check-markdown-writers.mjs`, `CI: docs.yml:build/markdown-writers`, `site/src/lib/agent-md/test/check-markdown-writers.test.mjs`, `CI: docs.yml:build/agent-md-tests`
 
 **Exceptions.** A component that shows nothing a reader of the copy could use (a filter over a table the copy already writes, a script that reroutes old links) still has a writer, one that returns `""` and whose opening comment starts `<Name>: dropped on purpose.` and then says why, so the rule needs no list of exceptions. The layout's own components (`References`) are not imported by a page and have none. The GitHub edition under `docs/` is written by the same writers in their GitHub form, so a writer serves both: it carries no frontmatter, a figure as a `<picture>` with raw.githubusercontent.com URLs, a `<details>` as a collapsible block and an aside as a GitHub alert, and its references section is written from the frontmatter.
 
@@ -70,7 +70,7 @@ passed to a component whose writer does not list it in props
 docs/buildings/rooms/workroom-sound-decay.md added, docs/README.md unchanged
 ```
 
-**Enforced by:** `site/scripts/agent-md.mjs`, `site/src/lib/agent-md/edition.mjs`, `CI: llms artifacts up to date`
+**Enforced by:** `site/scripts/agent-md.mjs`, `site/src/lib/agent-md/edition.mjs`, `CI: guards-prose/llms`
 
 <a id="f4"></a>
 ### F4. Register a new guide in `topics.mjs` and the guides index, counted in figures and words
@@ -91,7 +91,7 @@ the count in figures (description and body) and in words
 The new .mdx page added alone, the sidebar assumed to find it.
 ```
 
-**Enforced by:** `site/scripts/check-guides-index.mjs`, `CI: Site builds and validates`
+**Enforced by:** `site/scripts/check-guides-index.mjs`, `CI: docs.yml:build/guides-index`
 
 **Exceptions.** A guide that opens a new area also needs its `AREAS` entry in `scripts/generate_llms.py`, its section in `docs/README.md` and a 24x24 drawing in `site/src/data/icons.mjs` (look at the icon sheet at 16 px); renumber the guides index's JSON-LD positions top to bottom.
 
@@ -113,7 +113,7 @@ change a conformance script, then make conformance
 edit docs/<route>.md or docs/conformance.json directly
 ```
 
-**Enforced by:** `site/scripts/agent-md.mjs`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: Conformance report up to date`, `CI: llms artifacts up to date`
+**Enforced by:** `site/scripts/agent-md.mjs`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: guards-package/conformance-artifact`, `CI: guards-package/conformance`, `CI: guards-prose/llms`
 
 **Exceptions.** A file of the edition opens with a comment that names the page it is written from. `docs/README.md`, the curated API table `docs/reference/api/index.md`, the errata registers `docs/ERRATA.md` and `docs/ERRATA.es.md` and `docs/contributing/` are written by hand.
 
@@ -135,7 +135,7 @@ python scripts/check_conformance_claims.py
 Edit docs/CONFORMANCE.md, or type "1899 conformance checks" into a guide or .zenodo.json.
 ```
 
-**Enforced by:** `scripts/check_conformance_claims.py`, `make conformance`, `CI: Conformance report up to date`
+**Enforced by:** `scripts/check_conformance_claims.py`, `make conformance`, `CI: guards-package/conformance-claims`, `CI: guards-package/conformance`
 
 **Exceptions.** Site page bodies import the counts from `site/src/data/conformance-stats.mjs` at build time; that module withholds `counts.citation_groups` and the site's content schema does not name it, so no page or component can print it. A new place a count is quoted needs a pattern in `CLAIMS` of the script and nothing else. Generated and historical files (`docs/CONFORMANCE.md`, `CHANGELOG.md`, `docs/ERRATA.md`, and the GitHub edition under `docs/`, which `make llms` writes from the site pages) are excluded from the rewriting. The refusal of a count of standards reads the files the rewriting reads (the site's guides, the other files of `docs/` written by hand, the root Markdown, `stub/README.md` and `.zenodo.json`) and `docs/CONFORMANCE.md`, the llms files and the banner. It does not read `CHANGELOG.md`, `docs/ERRATA.md` or `paper/paper.md`, the parked JOSS draft, which is revised on its own after the release.
 
@@ -163,7 +163,7 @@ references:
 - ITU-R BS.468-4
 ```
 
-**Enforced by:** `CI: Site builds and validates`
+**Enforced by:** `CI: docs.yml:build/build`
 
 **Exceptions.** The GitHub edition of a page, read on GitHub without the layout, prints the frontmatter references as its own section, written by `make llms`. Clauses used go in each reference's `note:`. A standard cited on several pages carries one designation on all of them, and an edition, a date or an annex that only one page needs goes in that page's note. The build refuses two designations of one body whose bases carry the same numbers in one year, whatever words surround them (`ECMA-418-2:2025` and `ECMA-418-2, 4th ed.`, or `Recomendación UIT-R BS.468-4` and `Recommendation ITU-R BS.468-4` on the Spanish pages), unless `SEPARATE_STANDARDS` in `site/src/lib/citations.mjs` lists them with the reason they are different documents. A standard a conformance check cites is a work the site cites too: the report's structured data names each one as the bibliography defines it, so the build fails until the guide that implements the check cites it, or `SAME_WORKS` in `site/src/lib/conformance-evidence.mjs` says, with the reason, which cited work it is (a national edition, a consolidated text).
 
@@ -184,7 +184,7 @@ references:
 <ScopeClaim>...</ScopeClaim>
 ```
 
-**Enforced by:** `CI: Site builds and validates`
+**Enforced by:** `CI: docs.yml:build/build`
 
 **Exceptions.** `label` is separate and optional: give it where the status varies in the panel (one of each in a guide's 'What this guide covers'), only on the first of a run of the same status, and omit it in an index's 'What this section does not cover'.
 
@@ -205,7 +205,7 @@ references:
 <ThemeImage src="workroom_spatial_decay_es.svg" alt="..." />
 ```
 
-**Enforced by:** `CI: Site builds and validates`
+**Enforced by:** `CI: docs.yml:build/build`
 
 <a id="f10"></a>
 ### F10. Link an API reference page by its hyphenated module slug
@@ -270,7 +270,7 @@ the sum $L_{n,ij,w} = L_{n,w} - \Delta R_{j,w}
 - K_{ij}$ gives ...
 ```
 
-**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
+**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: guards-prose/markdown-hazards`
 
 **Exceptions.** A list that follows its introducing line without a blank line is ordinary (3830 of them) and only reported when it interrupts an open `$`. A deliberate block quote, and a thematic break, are preceded by a blank line. A display block between two `$$` lines is maths, not markdown: a formula written one term per line may put `=` alone on a line.
 
@@ -295,7 +295,7 @@ the sum $L_{n,ij,w} = L_{n,w} - \Delta R_{j,w}
 ... ver [la medición](#la-medición)
 ```
 
-**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`, `site/scripts/check-crawl.mjs`, `CI: Check what a search engine reads on every page`
+**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: guards-prose/markdown-hazards`, `site/scripts/check-crawl.mjs`, `CI: docs.yml:build/crawl`
 
 <a id="f14"></a>
 ### F14. Open and close a `$$` display block on lines of their own
@@ -316,7 +316,7 @@ $$
 $$\tau = \frac{1}{2}$$
 ```
 
-**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
+**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: guards-prose/markdown-hazards`
 
 <a id="f15"></a>
 ### F15. Escape a `<` in MDX prose unless a space or a tag name follows it
@@ -335,7 +335,7 @@ a deviation of \<0.02 dB above 200 Hz
 a deviation of <0.02 dB above 200 Hz
 ```
 
-**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
+**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: guards-prose/markdown-hazards`
 
 **Exceptions.** A `<` in inline code, in math, inside a quoted JSX attribute value, or in the YAML frontmatter is fine; a plain .md page is not read as MDX.
 
@@ -360,7 +360,7 @@ bands = filters.nominal_frequencies(3)
 spl, freq = filters.octave_filter(x, fs)  # a tuple unpacking that is false in 4.0
 ```
 
-**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`
+**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets`, `CI: doc-snippets/doc-snippets`
 
 **Exceptions.** `_SKIP` in `scripts/check_doc_snippets.py`, keyed by page slug with a specific reason ('needs a file the repository does not ship' is a fact, 'example' is not); a page that starts passing must leave it. A file the reader brings is written first by `_FIXTURES`. A block that passes `...` to a call is a sketch: read by the static checks, not run. `--static` runs nothing: run the full check (about five minutes) before pushing prose with snippets.
 
@@ -383,7 +383,7 @@ spl, freq = filters.octave_filter(x, fs)  # a tuple unpacking that is false in 4
 (later fence)  volume = 200.0
 ```
 
-**Enforced by:** `scripts/check_fence_names.py`, `make fence-names`, `CI: Documentation fences read in order`
+**Enforced by:** `scripts/check_fence_names.py`, `make fence-names`, `CI: guards-prose/fence-names`
 
 **Exceptions.** Names the reader owns are registered placeholders ([F19](#f19)). Builtins and `_` are exempt.
 
@@ -428,7 +428,7 @@ the page's fence:
 audio_blocks = np.random.default_rng(0).normal(size=(10, 4800))  # the page's data posing as the reader's
 ```
 
-**Enforced by:** `scripts/check_fence_names.py`, `make fence-names`, `CI: Documentation fences read in order`
+**Enforced by:** `scripts/check_fence_names.py`, `make fence-names`, `CI: guards-prose/fence-names`
 
 **Exceptions.** Key the entry by the page's route with the es/ prefix stripped, so the Spanish twin is held to the same set; the GitHub edition carries the English page's fences, which are read there, and needs no entry of its own. A page of `docs/` written by hand is keyed `docs/<path>`. A page that uses a placeholder cannot run, so it also goes in `_SKIP` of `scripts/check_doc_snippets.py` with its reason ([F16](#f16)). Binding the name to `...` (Ellipsis) with the same comment is the older idiom and also valid: it defines the name, needs no registry line, and makes the fence unrunnable.
 
@@ -452,7 +452,7 @@ from phonometry import signals
 from scipy import signal as signals
 ```
 
-**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets-static`, `CI: Documentation snippets run`
+**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets-static`, `CI: doc-snippets/doc-snippets`
 
 <a id="f21"></a>
 ### F21. Import exactly the same phonometry names on a Spanish page as on its English twin
@@ -472,7 +472,7 @@ English twin: from phonometry import room
 Spanish twin: from phonometry.room import spatial_decay
 ```
 
-**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets-static`, `CI: Documentation snippets run`
+**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets-static`, `CI: doc-snippets/doc-snippets`
 
 **Exceptions.** The GitHub edition under `docs/` carries its English page's code, so it needs no pairing of its own.
 
@@ -530,7 +530,7 @@ for line in text.splitlines():
         in_code = not in_code
 ```
 
-**Enforced by:** `scripts/check_fence_readers.py`, `make fence-readers`, `CI: Markdown renders the way it reads`
+**Enforced by:** `scripts/check_fence_readers.py`, `make fence-readers`, `CI: guards-prose/fence-readers`
 
 **Exceptions.** The site's code reads fences through `site/src/lib/markdown-fences.mjs` (`codeLines()`, `prose()`, `fences()`), and a test holds the two readers to the same answer. A script that writes a fence is not reading one. A pattern joined from names that stand for several strings, or written as a choice (`a if flag else b`, `a or b`), is read as every string it can make; one that can make more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes; a method does not see the names of its class body. `EXEMPT` of the check, keyed (file, function) with its reason, is empty.
 
@@ -645,7 +645,7 @@ def _label_band_axis(ax, *, language="en"):
     format_frequency_axis(ax, 63.0, 8000.0, language="en")  # also dropped
 ```
 
-**Enforced by:** `scripts/check_language_forwarding.py`, `make language-forwarding`, `CI: Every call passes the language on`
+**Enforced by:** `scripts/check_language_forwarding.py`, `make language-forwarding`, `CI: guards-prose/language-forwarding`
 
 **Exceptions.** A call that must stay English on purpose goes in `EXEMPT` of the script, keyed by 'file:line::caller -> callee' with its reason (one entry), so one approved call cannot cover a second; a moved or fixed entry fails. `MIXED_NAMESAKES` and `FOREIGN_NAMESAKES` record method names shared by unrelated things (`plot` is also `Axes.plot`). A callable pulled out of a mapping, reached by `getattr` or passed in as a parameter is out of the gate's reach and is review.
 
@@ -676,7 +676,7 @@ twin = ax.twinx()
 localize_axes(ax, language)  # the twin keeps 0.1 and 0.2
 ```
 
-**Enforced by:** `tests/test_plot_localized_panels.py`, `scripts/check_figure_decimal_point.py`, `make figure-decimal-point`, `CI: Documentation figures up to date`
+**Enforced by:** `tests/test_plot_localized_panels.py`, `scripts/check_figure_decimal_point.py`, `make figure-decimal-point`, `CI: figures/figure-decimal-point`
 
 **Exceptions.** End a plot function with `localize_axes` on every axes it built (a twin, a colorbar, the z of a 3-D panel each carry their own formatter); a panel the save-time pass cannot reach (a zoom inset, a contour colorbar) is localized by the generator with `figures.i18n.localize_panel`. Write the clause word before a clause number a figure cites after a designation ('(ISO 7626-5, clause 6.4)'), or the pass turns it into a decimal. A clause number is not a measurement and keeps its point (`ALLOWED` of the check, keyed 'figure: label' with its reason).
 
@@ -699,7 +699,7 @@ label = f"$L_\\mathrm{{eq}}$ = {format_number(52.4, 'es')} dB"
 label = "$L_\\mathrm{eq}$ = 52.4 dB"
 ```
 
-**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: figures/decimal-comma-labels`
 
 **Exceptions.** Numbers that are not measurements keep their point in both languages and are skipped by `_NOT_A_MEASUREMENT`: clause numbers (5.3.3), designations (S3.5, ISO 9613-2), and a pointer into a document (Eq., clause, table, figure, annex, note, in English and Spanish). Placeholders are ignored. The alternative fix the guard accepts is baking the comma into the Spanish value.
 
@@ -722,7 +722,7 @@ label = fmt_minus(-3.5, ".1f")  # "−3.5", signed with U+2212
 label = f"{value:.1f} dB"  # -3.5 with a hyphen-minus
 ```
 
-**Enforced by:** `scripts/check_figure_minus_sign.py`, `make figure-minus-sign`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_minus_sign.py`, `make figure-minus-sign`, `CI: figures/figure-minus-sign`
 
 **Exceptions.** A hyphen that is not a sign (a part number after a slash, 'ISO 9053-1/-2'; code quoted as typed) goes in `ALLOWED` of the script with its reason; a stale entry fails. Generators use `_fmt_minus` from `scripts/figures/i18n.py`, plates sign from `scripts/diagrams/canvas.py`, and a polar angle grid below zero restates its labels. Mathtext in a matplotlib figure is not read (matplotlib sets U+2212 itself).
 
@@ -743,7 +743,7 @@ scripts/figures/i18n.py, _ES_EXACT:  "Scattering coefficient": "Coeficiente de d
 ax.set_ylabel("Scattering coefficient")  # and no entry added to _ES_EXACT or _ES_PATTERNS
 ```
 
-**Enforced by:** `scripts/check_figure_language.py`, `make figure-language`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_language.py`, `make figure-language`, `CI: figures/figure-language`
 
 **Exceptions.** When a drawn English label changes, change its Spanish key in the same edit: the language gate sees the old key only on a full run. Give each drawn label its own constant and Spanish twin; never derive one from another (a legend cut from the title at the dash breaks when a translation punctuates differently). `ENGLISH_BY_DESIGN` of the script holds a string that stays English with its reason (an API call quoted as typed); `scripts/figure_language_baseline.txt` is a ratchet of debt, empty, never added to by hand.
 
@@ -793,7 +793,7 @@ color = kwargs.pop("color", _C_PRIMARY)
 ax.plot(x, y, **{"color": _C_PRIMARY, "lw": 1.5, **kwargs})
 ```
 
-**Enforced by:** `scripts/check_plot_style_defaults.py`, `make plot-style-defaults`, `CI: Every call passes the language on`, `tests/test_check_plot_style_defaults.py::test_the_package_is_clean`
+**Enforced by:** `scripts/check_plot_style_defaults.py`, `make plot-style-defaults`, `CI: guards-prose/plot-style-defaults`, `tests/test_check_plot_style_defaults.py::test_the_package_is_clean`
 
 **Exceptions.** Only the aliased properties are refused; `label`, `marker` and `zorder` have one name. A local dictionary the caller never sees may hold anything. The gate also fails if its alias table drifts from `_STYLE_ALIASES` in `src/phonometry/_plot/common.py`.
 
@@ -854,7 +854,7 @@ ax.set_xscale("log")
 ax.set_xticks([125, 250, 500], ["125", "250", "500"])  # minor labels left to the scale
 ```
 
-**Enforced by:** `scripts/check_figure_ticks.py`, `make figure-ticks`, `CI: Documentation figures up to date`, review
+**Enforced by:** `scripts/check_figure_ticks.py`, `make figure-ticks`, `CI: figures/figure-ticks`, review
 
 **Exceptions.** A categorical band axis uses `_band_axis`. A log axis that is not a frequency (distance, speed, wavelength, ka) takes `NullFormatter` for its minor ticks. A frequency axis that reaches below 1 Hz keeps a plain log axis, because the octave centers the helper labels start at 1 Hz (the whole-body vibration verifications, `plot_weighting_verification` and `plot_phase_verification`). The check catches stray minor labels beside hand-set major ticks and tick labels that touch, not a default formatter left on a frequency axis: that half is review.
 
@@ -898,7 +898,7 @@ label = r"$x^{\prime\prime}$"
 label = r"$x^{\prime}^{\prime}$"
 ```
 
-**Enforced by:** `scripts/check_mathtext.py`, `make mathtext`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_mathtext.py`, `make mathtext`, `CI: figures/mathtext`
 
 **Exceptions.** Strings that carry a dollar without being a label are recognized by shape, not listed: the `_ES_PATTERNS` regexes and their replacements, and the shell text of the GPU ffmpeg wrapper.
 
@@ -966,7 +966,7 @@ git add .github/images/<the figures that changed> src/<the change>
 Export a chart from a notebook or an editor, drop it in .github/images and reference it from a guide.
 ```
 
-**Enforced by:** `scripts/check_figures.py`, `make figures`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figures.py`, `make figures`, `CI: figures/figures`
 
 **Exceptions.** Each figure ships as `<n>`, `<n>_dark`, `<n>_es` and `<n>_es_dark`, in SVG, except the figures named in `_RASTER_FIGURES` of `scripts/figures/theme.py`, which are lossless WebP. Example fiches are generated the same way (`make reports`) and compared by their preview within a tolerance (`scripts/check_reports.py`, CI 'Example report fiches up to date'); `make reports` rewrites every PDF, so judge drift with `check_reports.py`, never with `git status`. Clips are not committed here ([F51](#f51)).
 
@@ -1009,7 +1009,7 @@ metadata={"Date": None}; a raster figure: lossless WebP from a PNG with no Softw
 svg.fonttype = "none" and the font family normalized to a generic sans
 ```
 
-**Enforced by:** `scripts/check_figures.py`, `make figures`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figures.py`, `make figures`, `CI: figures/figures`
 
 **Exceptions.** Set the hash salt at save time, in `save_figure`: `set_theme()` runs `plt.style.use()`, which resets it. Generate with the pinned matplotlib, never a system one.
 
@@ -1032,7 +1032,7 @@ text changes length; a fiche: page 1 of the PDF.
 The generator finished and the gates passed, so the figure is done.
 ```
 
-**Enforced by:** `scripts/check_figures.py`, `CI: Documentation figures up to date`, review
+**Enforced by:** `scripts/check_figures.py`, `CI: figures/figures`, review
 
 ## Legibility
 
@@ -1058,7 +1058,7 @@ plt.close(fig)
 ax.text(0.5, 0.5, "$L_p$", bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})  # across the curve
 ```
 
-**Enforced by:** `scripts/check_figure_annotations.py`, `make figure-annotations`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_annotations.py`, `make figure-annotations`, `CI: figures/figure-annotations`
 
 **Exceptions.** The chip's `pad` follows the neighbors (0.5 most, 0.4 tight, 0.3 a small label pinned to a point). The translucent box is for a note in an empty corner. `scripts/figure_annotation_exemptions.txt` takes an entry only when the fix would make the figure wrong, never because a chip is inconvenient (empty). The check reads a `make graphs` recording, so `make figure-annotations` needs `make graphs` first.
 
@@ -1082,7 +1082,7 @@ plt.close(fig)
 ax = fig.add_subplot(projection="polar")  # radial labels left on the default ray, under the curve
 ```
 
-**Enforced by:** `scripts/check_figure_tick_clearance.py`, `make figure-tick-clearance`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_tick_clearance.py`, `make figure-tick-clearance`, `CI: figures/figure-tick-clearance`
 
 **Exceptions.** Fills, gridlines and tick marks are not counted. There is no exemption table.
 
@@ -1107,7 +1107,7 @@ plt.close(fig)
 ax.text(0.85, 0.05, "Banda de octava", transform=ax.transAxes)  # runs out through the right spine in Spanish
 ```
 
-**Enforced by:** `scripts/check_figure_text_clearance.py`, `make figure-text-clearance`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_text_clearance.py`, `make figure-text-clearance`, `CI: figures/figure-text-clearance`
 
 **Exceptions.** `EXEMPTIONS` of the script, keyed by drawing with its reason, is empty; a stale entry fails. Gridlines, tick marks, legend frames, chips and an annotation's own leader are not counted as strokes. A fill or a chip under a label is its backing; one painted after the label over its letters (the chip of a later label, a legend plate) is counted. A label drawn with a halo (a path effect) is read as its string, and the halo hides what is painted before it, not what is painted after.
 
@@ -1131,7 +1131,7 @@ plt.close(fig)
 ax.legend(loc="lower right")  # over the last markers once the labels are Spanish
 ```
 
-**Enforced by:** `scripts/check_figure_legends.py`, `make figure-legends`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_legends.py`, `make figure-legends`, `CI: figures/figure-legends`
 
 **Exceptions.** `EXEMPTIONS` in `scripts/check_figure_legends.py`, keyed by drawing with the reason it is a decision (a legend that is merely inconvenient to move does not belong); one entry, `true_peak_intersample` (a comb of identical grid ticks). Ratcheted both ways. A legend with `frameon=False` is not measured (its letters are the annotation check's business). A chip counts only over a point painted before it, and not when it is fainter than half opacity or filled with the point's own colour: a badge centred on the point it numbers stands in for it. A tick mark is the frame of the axes, not a plotted point, and is not counted.
 
@@ -1154,7 +1154,7 @@ plt.close(fig)
 ax.axvspan(f1, f2, color="tab:blue", alpha=0.10)  # invisible on the dark page
 ```
 
-**Enforced by:** `scripts/check_figure_contrast.py`, `make figure-contrast`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_figure_contrast.py`, `make figure-contrast`, `CI: figures/figure-contrast`
 
 **Exceptions.** SVG only: raster figures (`_RASTER_FIGURES` in `scripts/figures/theme.py`) map color through the background-aware `_field_cmap` of `src/phonometry/_plot/common.py`. Regions below `MIN_AREA_FRACTION` of the axes are ignored. There is no exemption table.
 
@@ -1177,7 +1177,7 @@ plt.close(fig)
 ax.plot(x, y, color="#555555", alpha=0.5, linewidth=0.4)
 ```
 
-**Enforced by:** `scripts/check_stroke_contrast.py`, `CI: Documentation figures up to date`
+**Enforced by:** `scripts/check_stroke_contrast.py`, `CI: figures/stroke-contrast`
 
 **Exceptions.** A hairline is a stroke under 0.6 pt. A stroke is read at the opacity it is painted with (its `stroke-opacity`, times the `opacity` matplotlib writes for a patch faded with `set_alpha`, times that of every group round it) against the page its drawing paints behind it: the axes or figure background (black for a dark matplotlib figure), a diagram's plate, else the site's dark ground. Grid and axis furniture is exempt by color (`SCAFFOLDING`: #555555, #e0e0e0, #b0b0b0) and the 3-D grid by group name (`grid3d`); strokes inside an axes covered by a filled contour or a mesh (`QuadContourSet`, `QuadMesh`) are read against that field, which `scripts/check_figure_contrast.py` judges. No other exemption.
 
@@ -1298,7 +1298,7 @@ class RoomVerdict:
         ...
 ```
 
-**Enforced by:** `scripts/check_record_display.py`, `make record-display`, `CI: Every public record shows itself as a table in a notebook`, `tests/test_check_record_display.py::test_the_package_shows_every_public_record_as_a_table`, `scripts/check_notebook.py`, `CI: phonometry runs in a notebook kernel`
+**Enforced by:** `scripts/check_record_display.py`, `make record-display`, `CI: guards-source/record-display`, `tests/test_check_record_display.py::test_the_package_shows_every_public_record_as_a_table`, `scripts/check_notebook.py`, `CI: notebook/notebook`
 
 **Exceptions.** A record that can hold an array has it already through `OwnsArrays`. A private record that cannot take a base (a named tuple) defines `_repr_html_` and `_repr_pretty_` as calls to `record_html` and `record_pretty`. `EXEMPT` of the script takes a record that must display otherwise, with its reason (empty). The display reads the fields and, on a verdict, `passes`, so keep `passes` cheap; `repr()` and `print()` keep the dataclass's.
 
@@ -1354,7 +1354,7 @@ and a catalogue page shows it in both languages
 a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_data.py
 ```
 
-**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts`, `site/scripts/catalogue-sources.test.mjs`, `site/scripts/catalogue-datasets.test.mjs`, `tests/test_catalogue_data_generator.py::test_every_band_column_names_the_quantity_it_holds`, `tests/test_catalogue_data_generator.py::test_every_band_quantity_is_named_as_the_pages_of_its_language_name_it`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`
+**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: guards-package/published-catalogues`, `site/src/lib/catalogue-pages.ts`, `site/scripts/catalogue-sources.test.mjs`, `site/scripts/catalogue-datasets.test.mjs`, `tests/test_catalogue_data_generator.py::test_every_band_column_names_the_quantity_it_holds`, `tests/test_catalogue_data_generator.py::test_every_band_quantity_is_named_as_the_pages_of_its_language_name_it`, `site/scripts/check-structured-data.mjs`, `CI: docs.yml:build/structured-data`
 
 **Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`. The page's frontmatter `references` name the work behind every table its rows come from, in both languages, each entry listing in `tables` the keys of the tables it printed (the `table` every row carries), so the bibliography describes every book a row cites; the airs the library fixes itself (`phonometry-...`) name none. A key starts with its work, the first word of the first author's surname or of the organization (`ORGANIZATION_KEYS` in `site/src/lib/catalogue-sources.mjs` holds a short name such as `ashrae`) with the year, or a standard's issuer and number, and only that work's entry may claim it: for a standard, an entry whose designation carries the key's number. The issuer is not held, since one text carries the designations of several bodies (`en-12354-annex-a` is claimed by ISO 12354-1:2017, which Europe publishes as EN ISO 12354-1:2017). Each entry's note names its catalogue ("the source of the rows of the catalogue of carpets that cite it"), never "this catalogue": a work only catalogue pages cite is described on the bibliography by those notes, unless `site/src/data/bibliography.mjs` writes a note of its own for it, and the structured data check fails on a description that points at a catalogue it does not name. Each catalogue a page renders is a `Dataset` in the page's structured data, and the overview of the catalogues is the `DataCatalog` that lists them: the first catalogue takes the page's title, and its description too unless the page renders more than one, when the paragraph that opens the page describes it, and a catalogue the page renders after it sits under a `##` heading of its own, whose text names its dataset and whose opening paragraph describes it. That paragraph is one the page itself holds, never one inside an aside, a list, a quotation or a component, and its text is what the page shows of it, so write each of those paragraphs to stand on its own. A column headed by its band alone (`125 Hz`) holds a quantity the dataset has to name, so a new banded table adds its quantity to `BAND_QUANTITIES` in the generator, in English and Spanish, named as the pages of each language already name it. The dataset is based on the works its tables were read from, is dated as its page is, and claims no licence and offers no download of its own: each work keeps its rights over the rows it printed. The structured data check holds each dataset to its built page: its name is the page's title or one of its `##` headings, and its description one of its paragraphs, or the page's own description on a page of one catalogue. The guard sees only the generator; the generator fails on a band column whose quantity it does not name, and the site build fails on the rest, a catalogue the generator writes that no page of a language renders, a page under `reference/catalogues/` missing from `catalogueSlugs`, a printed table no entry of the page's references claims or two entries claim, a claim on a key of another work, `tables` on a page that is not a catalogue page, a first catalogue of several with no paragraph before it, a later catalogue with no heading or no paragraph of its own, and a heading or a paragraph that names or describes a dataset and holds what the page shows as something other than text: a component of its own, an expression or a formula.
 
@@ -1377,7 +1377,7 @@ a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_
 - **Evidence:** the extracted text of /home/me/iso9613.pdf reads ...
 ```
 
-**Enforced by:** `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page`
+**Enforced by:** `scripts/check_errata_evidence.py`, `CI: guards-prose/errata-evidence`
 
 **Exceptions.** Cite the document, never a file path. A claimed ratio within 0.5 % of a familiar irrational (sqrt 2, sqrt 3, pi, 2 pi, ln 2) or a small integer is the signature of a lost glyph, and clears only when the same entry cites the page it read (`--ratios`). `PAGE_CITATION_ALLOWLIST` of the script holds, by entry title with its reason, the entries filed before the page rule or whose claim is not a reading of characters (24); it only shrinks.
 
@@ -1402,7 +1402,7 @@ a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_
   ISO 9613-1 prints a = 2,2560 × 10⁻⁵ m⁻¹ (`a = 2.256e-5`).
 ```
 
-**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`, review
+**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: guards-prose/decimal-comma`, review
 
 **Exceptions.** A literal transcription keeps the print's separator, whichever it is: the `**The print:**` field of an entry, every line of it; text between quotation marks (`Clause 7.6 lists "0,5 m between any microphone position and the wall"`); a block quote that reproduces the page; the printed column of the conformance report. Look at the page before assuming the separator: a comma for ISO, EN, IEC, DIN, ECMA, UNE, the EU Official Journal and the BOE, a point for English books and papers. Outside a transcription a restated value takes the point and keeps its digits and its grouping: `83,523 4` becomes `83.523 4`, `$0{,}16/5$` becomes `$0.16/5$`, the printed “75,2527 dB” becomes the printed `75.2527 dB`. A decimal comma in transcribed maths is `{,}`; display math sits on its own lines; no Unicode superscripts, no `3.2e5`, no formula in backticks; a quantity in prose stays prose (`20 kHz`). The English wording is authoritative; the Spanish edition quotes the same print and writes its own text with the comma ([F28](#f28)). A number that may be a thousands group as well as a decimal (`1,840 m`) is decided by a person against the page, not by a sweep.
 
@@ -1423,7 +1423,7 @@ One commit adds the entry to docs/ERRATA.md and its translation, same position, 
 A commit that adds the English entry and leaves the Spanish register for later.
 ```
 
-**Enforced by:** `make site-reports`, `CI: Generated evidence pages up to date`, `tests/test_generate_site_reports.py::test_every_family_page_names_the_works_it_corrects`, `tests/test_generate_site_reports.py::test_a_family_page_names_these_works`, `tests/test_generate_site_reports.py::test_the_index_says_each_thing_of_its_introduction_once`, `tests/test_generate_site_reports.py::test_an_edit_inside_a_paragraph_left_out_stops_the_run`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`
+**Enforced by:** `make site-reports`, `CI: guards-prose/site-reports`, `tests/test_generate_site_reports.py::test_every_family_page_names_the_works_it_corrects`, `tests/test_generate_site_reports.py::test_a_family_page_names_these_works`, `tests/test_generate_site_reports.py::test_the_index_says_each_thing_of_its_introduction_once`, `tests/test_generate_site_reports.py::test_an_edit_inside_a_paragraph_left_out_stops_the_run`, `site/scripts/check-structured-data.mjs`, `CI: docs.yml:build/structured-data`
 
 **Exceptions.** A document no guide implements goes in the references of the bibliography page itself. Where the registry writes a cited document otherwise than the guides do, its spelling goes in `DESIGNATED_AS` in `scripts/generate_site_reports.py`, never a second entry, and only for the same text: one amendment written two ways, or an identical-text adoption whose defect the registry shows in the original. A translation or any other adoption whose errata may be its own is cited under its own designation, in an entry of its own, marked `implemented: false` when the guide implements the original. A book or a paper's family names its works in its `SOURCES` row. The generator writes `corrects`, never `references`, on an errata page: references would also make its chips and its search tokens and rank it with the guides written to the document. The registry's index opens with an introduction of its own, so the generator transplants only the paragraphs of the registry's introduction the index does not say (`said_on_index` in the generator, each by its opening words, the digest of its text and the words the index says it in); a paragraph added to the registry's introduction reaches the index, and the run stops when the index no longer says one it leaves out, or when the registry edits one: carry the edit to the index's introduction, then pin the digest the stop prints.
 
@@ -1520,7 +1520,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu   # a CPU-onl
 pip install phonometry[torch]   # zsh: no matches found: phonometry[torch]
 ```
 
-**Enforced by:** `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py`
+**Enforced by:** `scripts/check_quoted_extras.py`, `CI: guards-prose/quoted-extras`, `tests/test_check_quoted_extras.py`
 
 **Exceptions.** A line that shows zsh's own "no matches found" is the failure shown on purpose. Tests are not published and are not read. A sentence that names an extra without installing it (the `[torch]` extra) is not a command. A requirement is one word of the command, so a quote that opens it quotes all of it, a path or a variable inside included.
 
@@ -1543,7 +1543,7 @@ description: "Airport noise by ECAC Doc 29: the noise-power-distance engine, per
 description: "The ECAC Doc 29 airport-noise method: the noise-power-distance engine, the per-segment corrections of the single-event calculation (impedance, lateral attenuation, engine installation, duration, noise fraction, start-of-roll directivity) and the ground-grid SEL contour."
 ```
 
-**Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
+**Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: docs.yml:build/descriptions`, `site/scripts/check-descriptions.test.mjs`, `CI: docs.yml:build/script-tests`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
 
 **Exceptions.** The Spanish API pages carry the English description of their twin and name that twin canonical (`site/src/lib/fallback-routes.mjs`), and the redirect stubs and the error page are not pages a search engine indexes; the check skips all three. A Spanish description is written for its page, not cut down from the English one, and the length counts characters, not bytes.
 
@@ -1568,7 +1568,7 @@ every catalogue on one page, each of its 25 800 cells carrying a scoped
 class, its column's heading and its unit
 ```
 
-**Enforced by:** `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads`
+**Enforced by:** `site/scripts/check-page-size.mjs`, `CI: docs.yml:build/page-size`
 
 **Exceptions.** None. The redirect stubs and the error page are small and are counted like any other file; a page that cannot be split or slimmed below the cap is a design question to settle before it is published, not an entry here.
 
@@ -1601,7 +1601,7 @@ spans = [cell[start:end] for start, end in inline_spans(cell)]  # ['``a`b``', '`
 names = re.findall(r"`([^`]+)`", cell)  # ['a', ' and ']: the prose read as code
 ```
 
-**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`, `tests/test_markdown_spans.py`, review
+**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: guards-prose/span-readers`, `tests/test_check_span_readers.py`, `tests/test_markdown_spans.py`, review
 
 **Exceptions.** The site's scripts read spans through `site/scripts/shared/markdown-spans.mjs`, the same reading in JavaScript. A backtick right after a colon opens a role of reStructuredText (`:math:` and its kin), which Markdown does not have, and is not read as a span. A script that reads the docstrings of the library reads reStructuredText, whose inline literal is two backticks, and one that reads a JavaScript template literal reads no span at all: each is listed in `EXEMPT` of the check, keyed by the file, with the reason, and an entry that covers nothing fails. The site's code is read line by line, without a parser, so a pattern built across lines is not seen there. The check knows a span by its opening, a backtick or a run of them written out or with a quantifier, with any white space after it, and by what it holds written as anything but a backtick or as anything at all; a pattern that takes only some characters between two backticks, a word (`\S+?`) or a file name (`[\w./-]+\.json`), reads a token that no span reader stops at, and is left alone: a pattern of that kind that is meant as a span reader is not seen. A pattern built from names bound to several strings (in two branches, to the items of a tuple, by `+=`, or by a loop or a comprehension to each item it walks), or written as a choice (`a if flag else b`, `a or b`), is read as every string it can be; one that can be more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes, whatever the function or the module binds under that name; a method does not see the names of its class body.
 
@@ -1625,7 +1625,7 @@ after it reads the map that pass built
 each page runs git log --follow on its own file while it renders its head
 ```
 
-**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `site/scripts/content-dates.test.mjs`, `site/scripts/release-commit.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: docs.yml:build/render-spawns`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `site/scripts/content-dates.test.mjs`, `site/scripts/release-commit.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** A file whose process does run once per build is listed in `ONCE_PER_BUILD` of the check, with the reason, the number of calls it holds and what it exports; a call the entry does not count, an export it does not name, which would hand the process to every page, and an entry that covers nothing, fail. The check reads what a page can run: everything under `site/src/`, `site/astro.config.mjs` and what those import from elsewhere in the site, found the way Vite finds them. The scripts the build runs before and after it renders start what they need, because each runs once. The check reads text, so that it needs no install: a module name built up at run time is not seen, a call under an alias is not counted, and it does not read the dependencies. The packages it knows to wrap `child_process` are a closed list, `SPAWNER`: a package not on it is not seen, and a new wrapper has to be added to it.
 
@@ -1648,7 +1648,7 @@ print(round(2 / 3, 2), 5)  # 0.67 m, 5 s: the second room
 print(round(2 / 3, 2), 5)  # 0.66 m, 5 s: a value the print does not write
 ```
 
-**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py`
+**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets`, `CI: doc-snippets/doc-snippets`, `tests/test_check_doc_snippets.py`
 
 **Exceptions.** A comment is an output when it opens like one: with a digit, a sign or a decimal point before one, a bracket or a quote around a value, an empty container (`()`), `True`, `False`, `None`, `nan`, `inf`, an ellipsis or `~`, or with the word the print's own label opens with. What leads the output is read past first: the second `#` of a comment aligned under another, an `e.g.` (`p. ej.`), and the symbol the value is named by with any arithmetic that leads to it, so that `LWA = 89.7 dB(A)` and `Ld = 12 - 10 = 2.0 dB` are read from the value after the last `=` and `ΔLta ≈ 11.1 dB` from the value the `≈` gives roughly. The reference of a formula that the print writes before its values (`(A.4) -0.638 0.035`) is read with them. A comment that opens on any other word is held when the run shows the print writes that word first, as it writes a rating, the name of a class or a message (`engineering`, `GuideValues(a_u=0.1, ...)`, `leq() takes 1 positional argument but 2 were given`); otherwise it describes the line and is not read, and neither is a comment that opens on a bracket around words (`(n_samples,)`). A comment that names the values in words of its own before giving them (`well depths in cm: [ 0. 4.9 ...]`) is therefore not held, since it reads exactly like a row quoted from a source beside the print (`Long: 52 42 30 18 ...`): write the values first and the note after them to have them held. Every call of `print` in a block the check runs is read, a statement of its own or inside another (`result = print(2)`), and a name `print` the page binds to something else, by a statement (`from rich import print`), by importing every name of a module (`from rich import *`) or as it runs (`builtins.print = ...`, `globals()["print"] = ...`, which the run shows by what the name holds when it ends), is held when its calls reach the builtin, and on such a page a print whose calls the run did not record is not reported as one the page does not run; a sketch is not run, and a page of `_SKIP` is run only to show that it still fails, so neither has its comments held ([F16](#f16)). A print is read as it writes: with the separator and the ending it was given, so `print(1, 2, sep="")` writes the one value `12` and a loop of `print(x, end=" ")` writes one line, and with only what its file took of each argument, each separator and the ending, so a print to a closed file writes nothing, one to a file whose `write` says it took the first character of each piece writes those characters, and one to a file that takes none of the separator writes `print(1, 2)` as `12`; a minus sign (U+2212) it writes reads as a hyphen, as it does in a comment. A sign right after a digit, a letter, a point or a closing bracket joins what stands either side of it and signs no value, in a comment and in what the print wrote alike, whichever wrote it, as the hyphen of a range or a name does (`50-80 Hz`, `NC-35`, which `f"{a}-{b} Hz"` and `f"NC{n}"` with a negative `n` print); any other sign is the sign of the value after it, so a sign the print's own string writes right before a value it formats is that value's (`f"-{x:.2f} dB"` writes a negative number). A comment is read at the end of the print's last line or on the comment line under it, where, inside a statement that runs on past the print, only a comment that opens like its output is its own; a print that has none there is read at the end of the statement it stands in or on the comment line under it, as are the other such prints of that statement, held together to what their calls wrote in the order they came (`0 10 1 11` beside two prints of a comprehension that take turns), each call read with the label of the print that made it. A print inside another's arguments makes a call of its own, told apart from the other by where it stands and not by the line both open on: a comment on the inner print's own lines holds its call and those of the prints inside its own arguments that have no comment of their own, at any depth, and the comment of the print around it holds that print's call and none of theirs (`None 2` beside `print(print(1), 2)` when `# 1` stands on the inner print's line, `None 3` beside `print(print(print(1, end=" "), 2), 3)` when `# 1 None 2` stands on the middle print's last line). An inner print that closes on the line the print around it closes on shares its comment, which then holds the calls of both in the order they wrote (`2 1 None` beside `print(1,` over `print(2))`), and the comment of a statement whose prints are all held by comments on their own lines stands for none of them. A comment goes on over the comment lines under it which open like an output or that an open bracket carries on to. Prints that follow one another with no comment of their own share the comment lines under the last of them, one each; when one of those lines opens on a word, only if there is exactly one line for each print. The values are held, not the layout or the words: a unit or a word may stand between two of them, a word or a number of the print's own string literal (its label) need not be repeated, a unit's power (`m/s^2`) and a symbol's index (`A(8)`) are not values, a number holds at the last digit it writes (`0.67` states `0.6666`, `1.0012e6` states `1001249`), read digit for digit rather than as the float it becomes (`9007199254740993` does not state `9007199254740992`, the one float both read as), a complex number holds each of its parts that way (`(1.23+4.57j)` states `(1.234+4.567j)`), spaces around the sign of its imaginary part, as NumPy pads an array (`[ 1. +1.j 10.5+2.j]`), not splitting it, nor a print that spells it from two values it computes and its own sign and `j` (`f"{a} + {b}j"`), nor one whose own string writes one of its parts (`f"{a} + 2.5j"`), which the comment may state whole (`1.0 + 2.5j`) or by the part the code computes alone (`1.0`), and a part it does not write at exactly zero, `~` widens that to a unit of the digit, digits followed by an ellipsis (`55.350667...`, or the imaginary part of `1.23+4.56j...`, whose real part is written in full and rounds) state the start of the printed ones, sign and all (`-0.0...` does not state `0.00`), an ellipsis stands for the values it leaves out and the ones after it end a line, two ellipses with only words between them leave out one stretch, one value states an output that is that value throughout, and a Spanish page may write a decimal comma, a comma between two digits inside a bracket being read as the comma of a list (`[1,2]`) when that is how the comment states the output, the commas of all its brackets alike: a comment that writes a decimal comma in one of its brackets has said what its commas are, so “[0,5; 1,5] [1,2]” reads `[1,2]` as 1.2, as a reader does, and a list beside it is written `[1, 2]` or `[1; 2]`; one outside a bracket is read only as a decimal point (“0,5 dB” does not state `0.4 dB`). What a comment writes after the last value the print wrote is a note, except a value that stands inside a bracket still open at that last value, or that follows it with only spaces, commas or opening brackets between and no word after it, the words the print wrote and the numbers of its label read past with a colon or an equals sign after them, so that the value right after them is the comment's opening value when the print wrote no value; and except the first value after the first ellipsis, a note before it or not, which says the print goes on to it: a print that writes `[0.52 0.7  0.8 ]`, `(5,)`, `Bands: []`, `[99.8]` or `99.8 dB` beside the comment `[0.52 0.7  0.8  0.89]`, `(5, 59225)`, `Bands: [12.6, 15.8]`, `[99.8 ... 87.7]` or `99.8 dB at 125 Hz ... 87.7 dB at 8000 Hz` fails, while `0.358  (0.458 with normal hearing)`, `4.606 1/s` and `engineering (Table 2 class 3)` beside `engineering` keep their note. An arrow (`->`) may end what a line states and start its note, unless the print writes the arrow itself; a note that writes an ellipsis before a number of its own (`7 octaves ... 3 thirds`) goes after an arrow, since the number after that ellipsis is read as promised. A comment beside a print in a loop states the first lines it writes; a comment over several lines may instead state one line each, with its own note; a comment that quotes a message word for word may stop where its quotation does, inside the message: the words of the print's own label are repeated, not quoted, and a value the print writes apart from the message, as another argument, is still to be stated (`Levels: 1` does not state `print("Levels:", 1, 2)`). Every edition written by hand runs and is held to its own run: the English page and the Spanish twin; the GitHub edition carries the English page's code byte for byte and is not run again. There is no list of excused comments and none is to be started: a comment the check misreads is taught to it, and a comment that is wrong is corrected in all three editions.
 
@@ -1707,7 +1707,7 @@ the formula writes the character µ inside \text{}, the page builds, and every
 build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 ```
 
-**Enforced by:** `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/scripts/check-build-output.mjs`, `CI: docs.yml:build/build-output`, `site/scripts/check-build-output.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.43.1 with Astro 7.4.12), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.
 
@@ -1736,7 +1736,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
   [iso.org catalogue](https://www.iso.org/standard/10868.html).
 ```
 
-**Enforced by:** `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: Every catalogue link opens the document beside it`, `tests/test_check_catalogue_links.py`
+**Enforced by:** `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: guards-prose/catalogue-links`, `tests/test_check_catalogue_links.py`
 
 **Exceptions.** A document the catalogue no longer lists (IEC 651:1979 has no page on the webstore) is cited without a link. A later edition is linked under its own designation, as a "since revised as" link in an entry or in a reference's `note`, and the entry's catalogue link and the reference's `url` stay on the edition the page cites. Only the ISO and IEC catalogues are read: their numbers are opaque, where the other publishers the pages link put the designation in the address; the two CEN project links are read by review. A file of the GitHub edition under `docs/` is left to the site page it is written from ([F74](#f74)): its links are that page's, read there.
 
@@ -1775,7 +1775,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 }
 ```
 
-**Enforced by:** `site/scripts/check-schema-vocabulary.mjs`, `CI: Check the structured data against the schema.org vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/scripts/check-schema-vocabulary.mjs`, `CI: docs.yml:build/schema-vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** The software node carries `codeRepository` and `programmingLanguage`, which schema.org defines on SoftwareSourceCode only: jmrp.io publishes the same node, `@id` for `@id`, with both, and its software drift check compares the values this site publishes with its own. `DOMAIN_EXCEPTIONS` in the check names each with that reason, and the check fails on an exception no page uses any more. The Person node is jmrp.io's: the build fetches it from jmrp.io's main branch and splices it in as published, so a change made there reaches this site's next build with nothing changed here. On that node, and on every node nested in it, a value outside its range fails, as it does in jmrp.io's own check, but a type or a property schema.org does not define, a property outside its domain and a node with no type are reported and do not fail, so that change cannot stop this site from deploying. The check knows that node by its `@id`, `personId` in `site/src/data/site.mjs`, the one each page's head names the maintainer by; every other node is this site's writing, whatever its `@id`, and fails on every finding. A literal stands for Text in any property, and a Role stands in for the value it qualifies and carries the property it qualifies, as the Schema Markup Validator accepts. A node with no `@type` of its own that adds properties to a node typed elsewhere, by its `@id`, is held to that node's types; one whose `@id` names a node of another site is reported as a reference to it, and is still held to what does not depend on a type: each property defined, each node value in its range. The JSON-LD keywords are read as a JSON-LD processor reads them: a value object is a literal whatever datatype its `@type` names, each member of a `@list` or a `@set` is held to the range on its own, a property under `@reverse` holds the node under it to the domain and the node that carries it to the range, and the properties a node groups under `@nest` are its own. The vocabulary is one pinned release in `site/scripts/schema-vocabulary.json`, written by `site/scripts/generate-schema-vocabulary.mjs`; moving to a newer one is a change of its own, reviewed as the terms that changed.
 
@@ -1806,7 +1806,7 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
   Cited by [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/).
 ```
 
-**Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: Site builds and validates`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`, `site/scripts/agent-md.mjs`, `CI: llms artifacts up to date`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: docs.yml:build/build`, `site/scripts/check-structured-data.mjs`, `CI: docs.yml:build/structured-data`, `site/scripts/agent-md.mjs`, `CI: guards-prose/llms`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `CI: docs.yml:build/script-tests`
 
 **Exceptions.** A work with nothing written of it still gets its entry, with no note, in the section most of the pages that cite it belong to (`BIBLIOGRAPHY_PREFIXES`). The Spanish page reads the record of the English work it is, whatever its own fragment, and a note carries both languages. The page keeps its headings and the prose under them, each section closed by the comment that marks where its list goes, `<!-- bibliography: signal-analysis -->`. The build stops on a record of a work no page cites, a section the page does not mark or marks twice, a citing page with no title, and a list the page writes itself, the Don't above; check:structured-data then holds the built list to the structured data and to the pages that cite each work, each page once, and fails an item of a list no reference wrote. The GitHub copy, `docs/reference/bibliography.md`, is the page's file in the GitHub edition, written from the same source and the same pages by `make llms`, and CI fails while it is stale, so a citation that changes the list reaches the site page, its Spanish twin and the copy together ([F1](#f1)) with nothing written in any of them by hand.
 
@@ -1858,7 +1858,7 @@ llms file that carries a page other than its copy reads, twice, or not at all,
 or a shard name the site published that no file answers
 ```
 
-**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py`
+**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: docs.yml:build/markdown-twins`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: docs.yml:build/agent-md-tests`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py`
 
 **Exceptions.** A page with no copy of its own is a class of the check's table, with its reason: the Spanish API pages, which show the English text and name the English copy, the redirect stubs and the error page. A new kind of page is a new class with its reason, never a page left out of the table.
 

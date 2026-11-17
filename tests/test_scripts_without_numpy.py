@@ -88,10 +88,49 @@ _RELEASE_TOOLING = re.compile(
     r"(?:^|\s)-r\s+[\"']?(?:\S*/)?requirements-release\.txt[\"']?(?=\s|$)"
 )
 #: The distributions requirements-release.txt installs, none of which depends
-#: on NumPy. A new one is read before it joins: if it brings NumPy, the jobs
-#: that install the file are no longer NumPy-free.
+#: on NumPy: the release tools, then what cyclonedx-bom installs, which the
+#: file pins too. A new one is read before it joins: if it brings NumPy, the
+#: jobs that install the file are no longer NumPy-free.
 _RELEASE_TOOLS = frozenset(
-    {"build", "setuptools", "twine", "check-wheel-contents", "cyclonedx-bom"}
+    {
+        "build",
+        "setuptools",
+        "trove-classifiers",
+        "twine",
+        "check-wheel-contents",
+        "cyclonedx-bom",
+        "arrow",
+        "attrs",
+        "boolean.py",
+        "chardet",
+        "cyclonedx-python-lib",
+        "defusedxml",
+        "fqdn",
+        "idna",
+        "isoduration",
+        "jsonpointer",
+        "jsonschema",
+        "jsonschema-specifications",
+        "lark",
+        "license-expression",
+        "lxml",
+        "packageurl-python",
+        "packaging",
+        "pip-requirements-parser",
+        "py-serializable",
+        "pyparsing",
+        "python-dateutil",
+        "referencing",
+        "rfc3339-validator",
+        "rfc3986-validator",
+        "rfc3987-syntax",
+        "rpds-py",
+        "six",
+        "sortedcontainers",
+        "tzdata",
+        "uri-template",
+        "webcolors",
+    }
 )
 
 #: Imports one script by path, as ``__name__ != "__main__"`` so its entry

@@ -35,13 +35,16 @@ any run failing until the day of a release:
   own files, which publishes nothing;
 - the GitLab mirror is dispatched from a job of its own, the only one that
   can dispatch a workflow, so a failed dispatch neither fails the GitHub
-  Release job nor keeps the rebuild from running.
+  Release job nor keeps the rebuild from running;
+- every tool a publishing workflow installs comes from a pinned requirements
+  file, and the build checks the classifiers against the list PyPI takes.
 """
 
 from __future__ import annotations
 
 import pathlib
 import re
+import shlex
 import tomllib
 from typing import Any
 
@@ -572,6 +575,105 @@ def test_the_pinned_back_end_satisfies_both_packages() -> None:
             assert requirement.specifier.contains(pins[name]), (
                 f"{project} asks for {entry}, and the release pins {name} {pins[name]}"
             )
+
+
+def _pins(name: str) -> dict[str, str]:
+    """The exact pins of requirements file *name*, by normalised name."""
+    pins = {}
+    for line in (_ROOT / name).read_text(encoding="utf-8").splitlines():
+        line = line.split("#", 1)[0].strip()
+        if line:
+            requirement = Requirement(line)
+            (pinned,) = requirement.specifier
+            assert pinned.operator == "==", f"{name}: {line} is not an exact pin"
+            pins[re.sub(r"[-_.]+", "-", requirement.name).lower()] = pinned.version
+    return pins
+
+
+def test_the_build_holds_the_classifiers_to_the_list_pypi_takes() -> None:
+    """setuptools checks ``project.classifiers`` only when trove-classifiers is there.
+
+    Without it a classifier PyPI does not know builds, passes ``twine check
+    --strict`` and a rehearsal, and is refused by PyPI at the upload, which
+    only a release makes. ``scripts/build_release.py`` builds without
+    isolation in the environment ``requirements-release.txt`` makes, so the
+    list it pins is the one the build reads, in a rehearsal and on every pull
+    request.
+    """
+    assert "trove-classifiers" in _pins("requirements-release.txt")
+
+
+#: A requirements file of the repository, from the checkout or from a clone.
+_PINNED_FILE = re.compile(r"(?:source/)?requirements(?:-[a-z]+)?\.txt")
+#: What a publishing workflow installs by name rather than from a pinned file:
+#: pip itself, the wheel the run built and the version it published.
+_INSTALLED_BY_NAME = frozenset(
+    {
+        "pip",
+        "dist/phonometry-$VERSION-py3-none-any.whl",
+        "dist/phonometry-$VERSION-py3-none-any.whl[full]",
+        "phonometry==$VERSION",
+    }
+)
+
+
+def _installed(line: str) -> list[str]:
+    """What the ``pip install`` command of *line* installs, each ``-r`` file as ``-r FILE``."""
+    if not re.search(r"\bpip\b.*\binstall\b", line):
+        return []
+    lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+    lexer.whitespace_split = True
+    tokens = list(lexer)
+    if "pip" not in tokens or "install" not in tokens[tokens.index("pip") :]:
+        return []
+    arguments = tokens[tokens.index("install", tokens.index("pip")) + 1 :]
+    found = []
+    while arguments and arguments[0] not in {";", "&&", "||", "|"}:
+        argument = arguments.pop(0)
+        if argument == "-r":
+            found.append(f"-r {arguments.pop(0)}")
+        elif not argument.startswith("-"):
+            found.append(argument)
+    return found
+
+
+@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
+def test_every_tool_a_publishing_workflow_installs_is_pinned(name: str) -> None:
+    """A tool installed by name is whatever version came out that morning.
+
+    The attestation of the wheel on PyPI was verified with the
+    ``pypi-attestations`` of the day, which no rehearsal runs, so a release
+    would have been the first run to meet a new one.
+    """
+    unpinned = [
+        f"{job}: {item}"
+        for job, step in _steps(_load(name))
+        for line in re.sub(r"\\\n\s*", " ", step.get("run", "")).splitlines()
+        for item in _installed(line)
+        if not (
+            _PINNED_FILE.fullmatch(item.removeprefix("-r "))
+            if item.startswith("-r ")
+            else item in _INSTALLED_BY_NAME
+        )
+    ]
+    assert unpinned == []
+
+
+def test_the_reading_of_a_pip_command_line() -> None:
+    assert _installed(
+        'python -m pip install --no-cache-dir "phonometry==$VERSION"; then'
+    ) == ["phonometry==$VERSION"]
+    assert _installed(
+        'python -m pip --python "$X/bin/python" install --no-cache-dir "dist/a.whl"'
+    ) == ["dist/a.whl"]
+    assert _installed(
+        '"$B/bin/python" -m pip install -r source/requirements-release.txt'
+    ) == ["-r source/requirements-release.txt"]
+    assert _installed("python -m pip install --upgrade pip") == ["pip"]
+    assert _installed("python -m pip install --no-cache-dir pypi-attestations") == [
+        "pypi-attestations"
+    ]
+    assert _installed("python -m pypi_attestations verify pypi") == []
 
 
 def test_the_release_builds_twice_and_holds_the_second_to_the_first() -> None:

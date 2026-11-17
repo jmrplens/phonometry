@@ -6,7 +6,8 @@ checks it runs on the way have to be right before they are needed: the notes
 come from the changelog section and nowhere else, a built file the package is
 missing stops the release, so does a built file that does not declare the
 licence or carry its text, the SBOM names what ``pip install phonometry``
-resolves, and the package the verification imports is the installed wheel.
+resolves and is one the SBOM attestation accepts, and the package the
+verification imports is the installed wheel.
 The build itself gives the same bytes on every Linux and macOS machine and
 every day, and refuses Windows: the sdist keeps nothing of the builder's
 clock, user or umask, the wheel is built from it, a setuptools plugin of
@@ -25,6 +26,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import struct
 import subprocess
 import sys
@@ -527,15 +529,56 @@ def test_git_tracks_the_package_data_the_wheel_has_to_carry() -> None:
 # The SBOM
 # ==========================================================================
 def _sbom() -> dict[str, object]:
+    """An SBOM shaped as ``cyclonedx-py --output-reproducible`` wrote 4.0.0's.
+
+    The keys are the ones of ``phonometry-4.0.0.cdx.json`` as the release
+    workflow wrote it, in its order: no ``serialNumber``, which that option
+    leaves out, and no ``version`` or ``purl`` on the root component, which
+    the tool cannot read from a dynamic version.
+    """
     return {
-        "bomFormat": "CycloneDX",
-        "metadata": {"component": {"name": "phonometry", "type": "library"}},
         "components": [
             {"name": "numpy", "version": "2.5.4"},
             {"name": "scipy", "version": "1.18.1"},
             {"name": "pip", "version": "25.1"},
         ],
+        "dependencies": [],
+        "metadata": {"component": {"name": "phonometry", "type": "library"}},
+        "version": 1,
+        "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+        "bomFormat": "CycloneDX",
+        "specVersion": "1.6",
     }
+
+
+def _attest_accepts(document: object) -> bool:
+    """Whether ``actions/attest-sbom`` takes ``document`` as an SBOM.
+
+    The predicate of ``src/sbom.ts`` in ``actions/attest``, which
+    ``attest-sbom@v4`` runs: a document is SPDX when ``spdxVersion`` and
+    ``SPDXID`` are both truthy, CycloneDX when ``bomFormat``,
+    ``serialNumber`` and ``specVersion`` all are, and anything else fails the
+    step with "Unsupported SBOM format. Must be valid SPDX or CycloneDX
+    JSON.", as it failed the GitHub Release job of 4.0.0. The fields are
+    strings, whose truth is the same in JavaScript and in Python.
+    """
+    if not isinstance(document, dict):
+        return False
+    spdx = bool(document.get("spdxVersion")) and bool(document.get("SPDXID"))
+    cyclonedx = all(
+        bool(document.get(key)) for key in ("bomFormat", "serialNumber", "specVersion")
+    )
+    return spdx or cyclonedx
+
+
+def _uuid5_url(name: str) -> str:
+    """RFC 9562 section 5.5 by hand: the SHA-1 UUID of ``name`` among URLs."""
+    namespace = bytes.fromhex("6ba7b8119dad11d180b400c04fd430c8")
+    digest = bytearray(hashlib.sha1(namespace + name.encode()).digest()[:16])
+    digest[6] = (digest[6] & 0x0F) | 0x50
+    digest[8] = (digest[8] & 0x3F) | 0x80
+    text = digest.hex()
+    return f"{text[:8]}-{text[8:12]}-{text[12:16]}-{text[16:20]}-{text[20:]}"
 
 
 def test_the_sbom_names_the_release_and_drops_the_installer() -> None:
@@ -545,6 +588,216 @@ def test_the_sbom_names_the_release_and_drops_the_installer() -> None:
     assert root["version"] == "2.0.0"
     assert root["purl"] == "pkg:pypi/phonometry@2.0.0"
     assert [c["name"] for c in sbom["components"]] == ["numpy", "scipy"]  # type: ignore[attr-defined]
+
+
+def test_the_attestation_refuses_the_sbom_the_tool_writes() -> None:
+    """The document as cyclonedx-py writes it is the one 4.0.0 attested in vain."""
+    assert not _attest_accepts(_sbom())
+
+
+def test_the_finished_sbom_is_one_the_attestation_accepts(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The file the script writes, read back as the attestation reads it."""
+    path = tmp_path / "phonometry-4.0.0.cdx.json"
+    path.write_text(json.dumps(_sbom()), encoding="utf-8")
+    assert release_sbom.main([str(path), "--version", "4.0.0"]) == 0
+    assert _attest_accepts(json.loads(path.read_text(encoding="utf-8")))
+
+
+def test_the_serial_number_names_the_release_and_the_document() -> None:
+    """Version 5 UUID, by RFC 9562, of the package URL and the document's hash.
+
+    The hash is the SHA-256 of the finished document without its serial
+    number, written with its keys sorted, appended to the package URL after
+    a ``#``; the UUID is the one of that name in the URL namespace.
+    """
+    sbom = _sbom()
+    assert release_sbom.finish(sbom, "4.0.0", ["numpy", "scipy"]) == []
+    content = {key: value for key, value in sbom.items() if key != "serialNumber"}
+    digest = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
+    expected = "urn:uuid:" + _uuid5_url(f"pkg:pypi/phonometry@4.0.0#{digest}")
+    assert sbom["serialNumber"] == expected
+    assert re.fullmatch(
+        r"urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+        expected,
+    )
+
+
+def test_the_sbom_of_a_release_is_written_to_the_same_bytes(
+    tmp_path: pathlib.Path,
+) -> None:
+    """One document of one release is written to one file, serial number and all."""
+    written = []
+    for name in ("first.cdx.json", "second.cdx.json"):
+        path = tmp_path / name
+        path.write_text(json.dumps(_sbom()), encoding="utf-8")
+        assert release_sbom.main([str(path), "--version", "4.0.0"]) == 0
+        written.append(path.read_bytes())
+    assert written[0] == written[1]
+    assert b'"serialNumber": "urn:uuid:' in written[0]
+
+
+def test_two_releases_have_two_serial_numbers() -> None:
+    first, second = _sbom(), _sbom()
+    release_sbom.finish(first, "4.0.0", ["numpy", "scipy"])
+    release_sbom.finish(second, "4.0.1", ["numpy", "scipy"])
+    assert first["serialNumber"] != second["serialNumber"]
+
+
+def test_two_sboms_of_one_release_have_two_serial_numbers() -> None:
+    """A rehearsal run again after numpy publishes a release writes another SBOM.
+
+    The CycloneDX schema asks every BOM for a serial number of its own, and a
+    reader takes the serial number and the BOM version (1 here) as the name
+    of the document: two documents that list different components never
+    share them.
+    """
+    first, later = _sbom(), _sbom()
+    later["components"][0]["version"] = "2.6.0"  # type: ignore[index]
+    assert release_sbom.finish(first, "4.0.0", ["numpy", "scipy"]) == []
+    assert release_sbom.finish(later, "4.0.0", ["numpy", "scipy"]) == []
+    assert first["version"] == later["version"]
+    assert first["serialNumber"] != later["serialNumber"]
+
+
+def test_a_serial_number_the_tool_wrote_is_replaced() -> None:
+    """A random one would make every writing of the release's SBOM differ."""
+    written, without = _sbom(), _sbom()
+    written["serialNumber"] = "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79"
+    assert release_sbom.finish(written, "4.0.0", ["numpy", "scipy"]) == []
+    assert release_sbom.finish(without, "4.0.0", ["numpy", "scipy"]) == []
+    assert written["serialNumber"] == without["serialNumber"]
+
+
+def test_an_sbom_larger_than_the_attestation_reads_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``actions/attest`` refuses a file over 16 MiB before it reads a field.
+
+    The script writes nothing then, and says why, as for a missing field.
+    """
+    sbom = _sbom()
+    sbom["metadata"]["properties"] = [  # type: ignore[index]
+        {"name": "padding", "value": "x" * (17 * 1024 * 1024)}
+    ]
+    path = tmp_path / "phonometry-4.0.0.cdx.json"
+    original = json.dumps(sbom)
+    path.write_text(original, encoding="utf-8")
+    assert release_sbom.main([str(path), "--version", "4.0.0"]) == 1
+    assert path.read_text(encoding="utf-8") == original
+
+
+def test_the_size_the_attestation_reads_is_held_to_the_byte() -> None:
+    """``stats.size > MAX_SBOM_SIZE_BYTES`` in ``src/sbom.ts``: 16 MiB passes."""
+    limit = 16 * 1024 * 1024
+    assert release_sbom.size_problems(b"x" * limit) == []
+    assert release_sbom.size_problems(b"x" * (limit + 1)) == [
+        f"the SBOM is {limit + 1} bytes, over the {limit} the SBOM attestation reads"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("key", "problem"),
+    [
+        ("bomFormat", "the SBOM gives bomFormat None, not 'CycloneDX'"),
+        ("specVersion", "the SBOM gives no specVersion"),
+    ],
+)
+def test_an_sbom_the_attestation_would_refuse_is_reported(
+    key: str, problem: str
+) -> None:
+    sbom = _sbom()
+    del sbom[key]
+    assert release_sbom.finish(sbom, "4.0.0", ["numpy", "scipy"]) == [problem]
+    assert not _attest_accepts(sbom)
+
+
+@pytest.mark.parametrize(
+    ("serial", "problem"),
+    [
+        (None, "the SBOM has no serialNumber"),
+        ("", "the SBOM has no serialNumber"),
+        (
+            "3e671687-395b-41f5-a30f-a58921a69b79",
+            "the SBOM's serialNumber '3e671687-395b-41f5-a30f-a58921a69b79'"
+            " is not urn:uuid: and a UUID",
+        ),
+        (
+            "urn:uuid:3E671687-395B-41F5-A30F-A58921A69B79",
+            "the SBOM's serialNumber 'urn:uuid:3E671687-395B-41F5-A30F-A58921A69B79'"
+            " is not urn:uuid: and a UUID",
+        ),
+    ],
+)
+def test_a_serial_number_out_of_form_is_reported(
+    serial: str | None, problem: str
+) -> None:
+    sbom = _sbom()
+    if serial is not None:
+        sbom["serialNumber"] = serial
+    assert release_sbom.format_problems(sbom) == [problem]
+
+
+def _written_by(**versions: str) -> dict[str, Any]:
+    """An SBOM whose ``metadata.tools`` names the tools as 4.0.0's did."""
+    sbom = _sbom()
+    sbom["metadata"]["tools"] = {  # type: ignore[index]
+        "components": [
+            {"group": "CycloneDX", "name": name, "type": "application", "version": v}
+            for name, v in versions.items()
+        ]
+    }
+    return sbom
+
+
+def test_the_sbom_of_4_0_0_was_written_by_a_tool_nothing_pinned() -> None:
+    """4.0.0's SBOM names cyclonedx-python-lib 11.12.0, which only a range bounded.
+
+    cyclonedx-bom 8.0.1 asks for ``cyclonedx-python-lib>=8,<12``; the
+    library writes its own version into the document, so the SBOM of one
+    release written again a week later could differ by that line alone.
+    """
+    sbom = _written_by(**{"cyclonedx-py": "8.0.1", "cyclonedx-python-lib": "11.12.0"})
+    assert release_sbom.tool_problems(sbom, {"cyclonedx-bom": "8.0.1"}) == [
+        "the SBOM was written by cyclonedx-python-lib 11.12.0, which"
+        " requirements-release.txt does not pin"
+    ]
+
+
+def test_the_tools_that_write_the_sbom_are_the_pinned_ones() -> None:
+    pins = release_sbom.pinned_tools()
+    written = {
+        "cyclonedx-py": pins["cyclonedx-bom"],
+        "cyclonedx-python-lib": pins["cyclonedx-python-lib"],
+    }
+    assert release_sbom.tool_problems(_written_by(**written), pins) == []
+    written["cyclonedx-python-lib"] = "11.11.0"
+    assert release_sbom.tool_problems(_written_by(**written), pins) == [
+        "the SBOM was written by cyclonedx-python-lib 11.11.0, and"
+        f" requirements-release.txt pins {pins['cyclonedx-python-lib']}"
+    ]
+
+
+def test_a_tool_the_sbom_names_is_refused_when_unpinned(tmp_path: pathlib.Path) -> None:
+    """The script writes nothing when the tool is not the pinned one."""
+    path = tmp_path / "phonometry-4.0.0.cdx.json"
+    original = json.dumps(_written_by(**{"cyclonedx-py": "0.0.1"}))
+    path.write_text(original, encoding="utf-8")
+    assert release_sbom.main([str(path), "--version", "4.0.0"]) == 1
+    assert path.read_text(encoding="utf-8") == original
+
+
+def test_the_pins_are_read_by_their_normalised_names(tmp_path: pathlib.Path) -> None:
+    requirements = tmp_path / "requirements-release.txt"
+    requirements.write_text(
+        "# a comment\nboolean.py==5.0\nPy_Serializable==2.2.0  # why\n\n",
+        encoding="utf-8",
+    )
+    assert release_sbom.pinned_tools(requirements) == {
+        "boolean-py": "5.0",
+        "py-serializable": "2.2.0",
+    }
 
 
 def test_an_sbom_without_a_declared_dependency_is_reported() -> None:

@@ -316,7 +316,7 @@ The entry that added the ISO 11546 functions, edited where it stands:
 
 **Enforced by:** review
 
-**Exceptions.** A name that shipped in a release (3.3.0 or 4.0.0rc1) is recorded in the migration guide instead ([A14](api.md#a14)).
+**Exceptions.** A name that shipped in 3.3.0 or 4.0.0rc1 and that 4.0.0 does not publish is recorded in the migration guide instead ([A14](api.md#a14)). A name that shipped in 4.0.0, the last release, is renamed only through a deprecation ([A16](api.md#a16)), which its entry under `[Unreleased]` says.
 
 ## Commits and pull requests
 

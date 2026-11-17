@@ -23,6 +23,13 @@ takes uv, conda, Jupyter, JupyterLite, Docker and type checkers in turn.
 pip install phonometry
 ```
 
+If phonometry 3.x is already installed, upgrade it with
+`pip install -U phonometry`, naming the extras you use
+(`pip install -U "phonometry[full]"` for all four where `[full]` installs);
+3.x has a different import layout and `from phonometry import filters` fails
+on it. Code written for 3.x needs changes to run on 4.x; the
+[upgrade guide](upgrading.md) maps each of them.
+
 phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
 or later. Each of those floors, and each floor of the extras, is the oldest
 release the library's tests pass with, and a CI job installs exactly those

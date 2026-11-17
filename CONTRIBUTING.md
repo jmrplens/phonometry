@@ -759,19 +759,42 @@ enforces it.
 
 Releases are fully automated from the repository-root `VERSION` file:
 
-1. Open a PR that bumps `VERSION` (semver) and carries the three things that
-   have to move with it. Bumping `VERSION` on its own turns the build red.
-   - Move the `[Unreleased]` CHANGELOG section to the new version.
+1. Open a PR that bumps `VERSION` (semver) and carries everything that has
+   to move with it. Bumping `VERSION` on its own turns the build red.
+   - Move the `[Unreleased]` CHANGELOG section under a heading for the new
+     version, dated the day the PR merges (UTC), and leave an empty
+     `[Unreleased]` above it for the next changes. At the foot of the file,
+     `[Unreleased]` then compares the new tag with `HEAD`, and the new
+     version gets a link that compares the previous release with its tag.
    - Update `CITATION.cff`'s `version` and `date-released` to match.
      `site/src/data/citation.mjs` fails the build when the CFF's `version`
      differs from `VERSION`, or when its `date-released` is later than the
      CHANGELOG heading for that version, and the docs workflow runs on any
      PR touching any of them.
+   - Write the new version into the citations of the About page by hand, the
+     APA line and the BibTeX `version`, in its three editions
+     (`site/src/content/docs/start/about.md`,
+     `site/src/content/docs/es/start/about.md` and `docs/start/about.md`):
+     `site/src/data/citation.mjs` fails the build when either names a
+     version other than `VERSION`.
+   - Write the new version into the `__version__` row of
+     `docs/reference/api/index.md` by hand. `make api-docs` leaves that cell
+     alone, and `scripts/check_api_reference.py` fails when it differs from
+     the installed `phonometry.__version__`, so reinstall first
+     (`pip install -e .`): the version an installed package reports comes
+     from its metadata, not from `VERSION`.
+   - Run `make conformance`, which writes the new version into
+     `docs/conformance.json` and regenerates `docs/CONFORMANCE.md` and the
+     badges.
    - Run `make pypi-readme` and commit `README_PYPI.md`. The PyPI page pins
      every link into this repository to the release tag and reads that tag
      from `VERSION`, so a bump on its own leaves the whole guide map on the
      published page pointing at the previous release. The packaging tests
      fail until the page is regenerated.
+   - Run `make llms` last: `llms.txt` and its shards read `VERSION`,
+     `docs/conformance.json`, the About page and the API table, so it has to
+     come after every edit above, or the check that the llms files are up to
+     date fails.
 2. Before merging it, rehearse the release: run the **Release** workflow by
    hand on the PR's branch (Actions, Release, Run workflow). A manual run is
    always a rehearsal and no input turns it into a release. It reads the

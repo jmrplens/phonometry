@@ -2,11 +2,9 @@
 
 > Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1899 numerical conformance checks enforced in CI, against 230 normative designations and 121 further published sources.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.12). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1899 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
+phonometry v4.0.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.12). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1899 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
-
-phonometry 4.0.0rc1 is a pre-release, which pip installs only when it is asked for by version or with --pre.
 
 Install:
 
@@ -19,6 +17,8 @@ pip install "phonometry[audio]"     # + python-soundfile, for FLAC, AIFF, Ogg/Op
 pip install "phonometry[full]"      # all of the above (recommended)
 pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
 ```
+
+If phonometry 3.x is already installed, upgrade it with `pip install -U phonometry`, naming the extras you use (`pip install -U "phonometry[full]"` for all four where `[full]` installs); 3.x has a different import layout and `from phonometry import filters` fails on it. Code written for 3.x needs changes to run on 4.x; the upgrade guide (https://docs.jmrp.io/phonometry/start/upgrading/) maps each of them.
 
 I recommend `pip install "phonometry[full]"`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. On 32-bit Windows and 32-bit Linux, where numba, and so `[full]`, is not supported, `pip install "phonometry[plot,report,audio]"` installs the other three extras. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install "phonometry[torch]"` takes the CPU wheels instead.
 
@@ -38,7 +38,7 @@ la = signals.laeq(x, fs)                                 # A-weighted Leq
 stats = signals.ln_levels(x, fs, n=(10, 50, 90))         # statistical levels
 ```
 
-If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies on Linux with glibc on x86-64 or ARM64, on macOS on ARM or on 64-bit Windows; Getting Started says what other platforms build from source), remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octave_filter()` calls in tight loops (although designs are cached either way). The library computes standardized quantities; it is not a certified instrument and does not acquire data from hardware.
+If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies on Linux with glibc on x86-64 or ARM64, on macOS on ARM or on 64-bit Windows; Getting Started says what other platforms build from source), and if the user's environment already has phonometry 3.x, upgrade it with `pip install -U phonometry` and the extras the user installed, since its imports differ and `from phonometry import filters` fails on 3.x; remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octave_filter()` calls in tight loops (although designs are cached either way). The library computes standardized quantities; it is not a certified instrument and does not acquire data from hardware.
 
 ## Start here
 
@@ -592,8 +592,7 @@ Every material, gas and fluid the library reads from a printed page, from elasti
 
 One file per area, each small enough to fetch whole. An area too long for one fetch travels in numbered parts, cut between its pages, and a page too long for one at its own sections. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
-- [Start here, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-1.txt)
-- [Start here, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-2.txt)
+- [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
 - [Upgrading from 3.3 to 4.0, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-1.txt)
 - [Upgrading from 3.3 to 4.0, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-2.txt)
 - [Theory and reference, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-theory-1.txt)

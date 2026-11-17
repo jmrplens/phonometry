@@ -24,11 +24,12 @@ jobs:
     name: Preflight
     runs-on: ubuntu-26.04
     # A job of its own because the wait outlasts the build job's ten minutes
-    # by far. Fifty, above the wait's own forty-five, so the message the wait
-    # writes is the one a reader gets. The ceiling is not redundant: the loop
-    # tests its deadline between iterations, so a `gh` call that hangs on a
-    # stalled connection never reaches the test.
-    timeout-minutes: 50
+    # by far. 340 minutes, above the wait's own 330, so the message the wait
+    # writes is the one a reader gets, and below the 360 a hosted job may run.
+    # The ceiling is not redundant: the loop tests its deadline between
+    # iterations, so a `gh` call that hangs on a stalled connection never
+    # reaches the test.
+    timeout-minutes: 340
     permissions:
       actions: read # the conclusion of the CI run on this commit
     steps:
@@ -45,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           appear_deadline=$(( SECONDS + 300 ))
-          finish_deadline=$(( SECONDS + 2700 ))
+          finish_deadline=$(( SECONDS + 19800 ))
           while :; do
             # A failed call leaves the substitution empty rather than killing
             # the step (a here-string discards its exit status), so name that
@@ -76,7 +77,7 @@ jobs:
                 ;;
               *)
                 if [ "$SECONDS" -ge "$finish_deadline" ]; then
-                  echo "::error::Python CI still '$status' on $GITHUB_SHA after 45 minutes. Not releasing."
+                  echo "::error::Python CI still '$status' on $GITHUB_SHA after 330 minutes. Not releasing."
                   exit 1
                 fi
                 ;;

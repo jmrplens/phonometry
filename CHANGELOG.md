@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   have their build provenance, but it has no SBOM attestation. The serial
   number is now a UUID derived from `pkg:pypi/phonometry@<version>` and the
   content of the document, so one SBOM of a release always gets the same one
-  and two different SBOMs never share one. The release refuses an SBOM the
+  and two different SBOMs never share one. The tools that write the SBOM are
+  pinned with everything they install, so the SBOM of a release written again
+  differs only in what pip resolves that day. The release refuses an SBOM the
   attestation would refuse, for a missing field or for its size, before it
   uploads anything, in a rehearsal too. `SECURITY.md` says which releases
   carry the SBOM attestation.

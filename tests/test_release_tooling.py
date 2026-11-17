@@ -739,6 +739,67 @@ def test_a_serial_number_out_of_form_is_reported(
     assert release_sbom.format_problems(sbom) == [problem]
 
 
+def _written_by(**versions: str) -> dict[str, Any]:
+    """An SBOM whose ``metadata.tools`` names the tools as 4.0.0's did."""
+    sbom = _sbom()
+    sbom["metadata"]["tools"] = {  # type: ignore[index]
+        "components": [
+            {"group": "CycloneDX", "name": name, "type": "application", "version": v}
+            for name, v in versions.items()
+        ]
+    }
+    return sbom
+
+
+def test_the_sbom_of_4_0_0_was_written_by_a_tool_nothing_pinned() -> None:
+    """4.0.0's SBOM names cyclonedx-python-lib 11.12.0, which only a range bounded.
+
+    cyclonedx-bom 8.0.1 asks for ``cyclonedx-python-lib>=8,<12``; the
+    library writes its own version into the document, so the SBOM of one
+    release written again a week later could differ by that line alone.
+    """
+    sbom = _written_by(**{"cyclonedx-py": "8.0.1", "cyclonedx-python-lib": "11.12.0"})
+    assert release_sbom.tool_problems(sbom, {"cyclonedx-bom": "8.0.1"}) == [
+        "the SBOM was written by cyclonedx-python-lib 11.12.0, which"
+        " requirements-release.txt does not pin"
+    ]
+
+
+def test_the_tools_that_write_the_sbom_are_the_pinned_ones() -> None:
+    pins = release_sbom.pinned_tools()
+    written = {
+        "cyclonedx-py": pins["cyclonedx-bom"],
+        "cyclonedx-python-lib": pins["cyclonedx-python-lib"],
+    }
+    assert release_sbom.tool_problems(_written_by(**written), pins) == []
+    written["cyclonedx-python-lib"] = "11.11.0"
+    assert release_sbom.tool_problems(_written_by(**written), pins) == [
+        "the SBOM was written by cyclonedx-python-lib 11.11.0, and"
+        f" requirements-release.txt pins {pins['cyclonedx-python-lib']}"
+    ]
+
+
+def test_a_tool_the_sbom_names_is_refused_when_unpinned(tmp_path: pathlib.Path) -> None:
+    """The script writes nothing when the tool is not the pinned one."""
+    path = tmp_path / "phonometry-4.0.0.cdx.json"
+    original = json.dumps(_written_by(**{"cyclonedx-py": "0.0.1"}))
+    path.write_text(original, encoding="utf-8")
+    assert release_sbom.main([str(path), "--version", "4.0.0"]) == 1
+    assert path.read_text(encoding="utf-8") == original
+
+
+def test_the_pins_are_read_by_their_normalised_names(tmp_path: pathlib.Path) -> None:
+    requirements = tmp_path / "requirements-release.txt"
+    requirements.write_text(
+        "# a comment\nboolean.py==5.0\nPy_Serializable==2.2.0  # why\n\n",
+        encoding="utf-8",
+    )
+    assert release_sbom.pinned_tools(requirements) == {
+        "boolean-py": "5.0",
+        "py-serializable": "2.2.0",
+    }
+
+
 def test_an_sbom_without_a_declared_dependency_is_reported() -> None:
     assert release_sbom.finish(_sbom(), "2.0.0", ["numpy", "scipy", "matplotlib"]) == [
         "the SBOM does not list matplotlib, which phonometry depends on"

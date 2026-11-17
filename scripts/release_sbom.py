@@ -14,11 +14,12 @@ so a ``pip``, ``setuptools`` or ``wheel`` component is dropped.
 
 The tool is run with ``--output-reproducible``, which leaves out the time of
 writing and the serial number, so that the document holds nothing of the day
-it was made but what pip resolved. The serial number is required all the
-same by the SBOM attestation the release makes: ``actions/attest-sbom``
-takes a CycloneDX document only when ``bomFormat``, ``specVersion`` and
-``serialNumber`` are all set, and refused the 4.0.0 SBOM, which had no
-serial number, after the files were on PyPI.
+it was made but what pip resolved and what the tool, pinned with everything
+it imports in ``requirements-release.txt``, wrote of itself. The serial
+number is required all the same by the SBOM attestation the release makes:
+``actions/attest-sbom`` takes a CycloneDX document only when ``bomFormat``,
+``specVersion`` and ``serialNumber`` are all set, and refused the 4.0.0 SBOM,
+which had no serial number, after the files were on PyPI.
 
 The serial number written here is not a random one: it is the name-based
 UUID (version 5, of RFC 9562), in the URL namespace, of the package URL
@@ -31,10 +32,13 @@ of one release: a rehearsal run again after numpy or scipy published a
 release, or a release run again after a failure, describes what pip resolves
 that day. Whatever serial number the tool wrote is replaced.
 
-The result is then checked twice. Against ``pyproject.toml``: every runtime
-dependency the package declares has to appear, with a version, or the
-document describes some other environment than the one a user gets. And
-against what the attestation reads before it attests anything: a file of at
+The result is then checked three times. Against ``pyproject.toml``: every
+runtime dependency the package declares has to appear, with a version, or the
+document describes some other environment than the one a user gets. Against
+``requirements-release.txt``: every tool the document says wrote it has to
+be there at that version, so a tool that moved on its own is seen before the
+document is published. And against what the attestation reads before it
+attests anything: a file of at
 most 16 MiB, the three fields set, ``bomFormat`` set to ``CycloneDX`` and
 the serial number in the form the CycloneDX schema requires. A rehearsal
 attests nothing, so this check is the only place where a rehearsal can see
@@ -64,6 +68,14 @@ SERIAL_NUMBER = re.compile(
 #: of ``src/sbom.ts`` in ``actions/attest``, which refuses a larger one before
 #: it reads a field.
 MAX_SBOM_BYTES = 16 * 1024 * 1024
+#: The distribution of a tool the SBOM names by another name: ``cyclonedx-bom``
+#: writes itself into ``metadata.tools`` as its command, ``cyclonedx-py``.
+TOOL_DISTRIBUTIONS = {"cyclonedx-py": "cyclonedx-bom"}
+
+
+def _normalised(name: str) -> str:
+    """``name`` as PEP 503 compares distribution names."""
+    return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def package_url(version: str) -> str:
@@ -130,6 +142,48 @@ def size_problems(data: bytes) -> list[str]:
             " attestation reads"
         ]
     return []
+
+
+def pinned_tools(
+    requirements: pathlib.Path = _ROOT / "requirements-release.txt",
+) -> dict[str, str]:
+    """The exact pins of the release tooling.
+
+    :param requirements: The requirements file the release installs.
+    :return: The version of every ``name==version`` line, by normalised name.
+    """
+    pins = {}
+    for line in requirements.read_text(encoding="utf-8").splitlines():
+        name, separator, version = line.split("#", 1)[0].strip().partition("==")
+        if separator:
+            pins[_normalised(name)] = version.strip()
+    return pins
+
+
+def tool_problems(sbom: dict[str, Any], pins: dict[str, str]) -> list[str]:
+    """Which tools ``sbom`` says wrote it that are not the ones pinned.
+
+    :param sbom: A CycloneDX document.
+    :param pins: The pinned release tooling (:func:`pinned_tools`).
+    :return: The problems found; empty when every tool in
+        ``metadata.tools.components`` is pinned at the version it gives.
+    """
+    problems = []
+    tools = sbom.get("metadata", {}).get("tools", {}).get("components", [])
+    for tool in tools:
+        name, version = tool.get("name", ""), tool.get("version")
+        pinned = pins.get(_normalised(TOOL_DISTRIBUTIONS.get(name, name)))
+        if pinned is None:
+            problems.append(
+                f"the SBOM was written by {name} {version}, which"
+                " requirements-release.txt does not pin"
+            )
+        elif pinned != version:
+            problems.append(
+                f"the SBOM was written by {name} {version}, and"
+                f" requirements-release.txt pins {pinned}"
+            )
+    return problems
 
 
 def declared_dependencies(
@@ -203,6 +257,7 @@ def main(argv: list[str] | None = None) -> int:
     version = args.version or (_ROOT / "VERSION").read_text(encoding="utf-8").strip()
     sbom = json.loads(args.sbom.read_text(encoding="utf-8"))
     problems = finish(sbom, version, declared_dependencies())
+    problems += tool_problems(sbom, pinned_tools())
     data = (json.dumps(sbom, indent=2) + "\n").encode("utf-8")
     problems += size_problems(data)
     for problem in problems:

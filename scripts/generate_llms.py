@@ -963,8 +963,10 @@ def _summary(version: str) -> list[str]:
         "",
         (
             "If phonometry 3.x is already installed, upgrade it with "
-            '`pip install -U "phonometry[full]"`; 3.x has a different import '
-            "layout and `from phonometry import filters` fails on it."
+            "`pip install -U phonometry`, naming the extras you use "
+            '(`pip install -U "phonometry[full]"` for all four where `[full]` '
+            "installs); 3.x has a different import layout and "
+            "`from phonometry import filters` fails on it."
         ),
         "",
         (
@@ -1020,8 +1022,8 @@ def _summary(version: str) -> list[str]:
             "(no system dependencies on Linux with glibc on x86-64 or ARM64, on "
             "macOS on ARM or on 64-bit Windows; Getting Started says what other "
             "platforms build from source), and if the user's environment already has "
-            "phonometry 3.x, upgrade it with "
-            '`pip install -U "phonometry[full]"`, since its imports differ and '
+            "phonometry 3.x, upgrade it with `pip install -U phonometry` and the "
+            "extras the user installed, since its imports differ and "
             "`from phonometry import filters` fails on 3.x; remember integer audio (e.g. wavfile.read "
             "int16) is handled automatically, use `calibration_factor` from "
             "`sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over "

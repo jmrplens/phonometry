@@ -658,7 +658,10 @@ the next major release.
 - **Installs on Python 3.12**, with floors measured in CI on each Python it
   supports: on 3.12 NumPy 2.0.2, SciPy 1.14.0, numba 0.60.0 and torch 2.3.0,
   on 3.13 and 3.14 the first releases with a wheel for them, and matplotlib
-  3.10.7, reportlab 4.3.0, svglib 0.9.1 and soundfile 0.12.0 everywhere.
+  3.10.7, reportlab 4.3.0, svglib 0.9.1 and soundfile 0.12.0 everywhere. The
+  torch floor on Python 3.13, 2.5.0, has a wheel for Linux on x86-64 only;
+  macOS on ARM, Windows on x86-64 and Linux on ARM take torch 2.6.0, the
+  oldest release with a wheel there.
 - **The conformance claim counts normative designations and further
   sources.** The README, the badge, the conformance report and the
   documentation say that the checks run across 111 domains, against 230
@@ -671,8 +674,8 @@ the next major release.
   same topic layout, so its 3.3.0 file paths are gone, and the `llms.txt`
   shards are served by the site under topic names. The errata register cites
   each defect by edition, PDF page and printed folio. Every install line a
-  reader with 3.x may follow says to upgrade with
-  `pip install -U "phonometry[full]"`. A new Environments section says how
+  reader with 3.x may follow says to upgrade with `pip install -U phonometry`,
+  with the extras they use. A new Environments section says how
   to install and run phonometry with pip and uv, conda, Jupyter,
   JupyterLite and Pyodide, Docker and a type checker. The API reference
   shows the tables its docstrings hold as tables, `help()` of every domain

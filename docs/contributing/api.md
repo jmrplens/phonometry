@@ -330,7 +330,7 @@ CHANGELOG only: "partial_exposure is now daily_exposure"
 
 **Enforced by:** review
 
-**Exceptions.** A name newer than the last release, v4.0.0, goes in the CHANGELOG `[Unreleased]` only. `git grep -nw NAME v4.0.0 -- src` tells whether a name shipped in 4.0.0, and so follows [A16](#a16); `git grep -nw NAME v3.3.0 -- src` and `git grep -nw NAME v4.0.0rc1 -- src` tell whether it shipped in a release the guide maps from.
+**Exceptions.** A name newer than the last release, v4.0.0, goes in the CHANGELOG `[Unreleased]` only. A name shipped in a release when that release published it: `git grep -nw NAME v4.0.0 -- src` finds where the name appears, and it shipped in 4.0.0, and so follows [A16](#a16), only if a package of that tag lists it in `__all__` (`git show v4.0.0:src/phonometry/<package>/__init__.py`), not because a private function, a local name or a comment matches. The same reading of v3.3.0 and v4.0.0rc1 says whether it shipped in a release the guide maps from; a name no release published is removed outright ([A13](#a13)).
 
 <a id="a15"></a>
 ### A15. Move every caller of a renamed name in the same commit

@@ -220,9 +220,12 @@ def test_an_area_of_fewer_pages_than_its_parts_stops_the_run_by_name(
 
     shards = llms.build_shards(plan, kept=kept)
 
-    assert set(llms._published(shards)) == {"area"}
+    published = llms._published(shards)
+    record = llms.ShardNames(kept, {})
+
+    assert set(published) == {"area"}
     with pytest.raises(SystemExit, match=r"llms-area-1\.txt, llms-area-2\.txt"):
-        llms._check_names_kept(llms._published(shards), llms.ShardNames(kept, {}))
+        llms._check_names_kept(published, record)
 
 
 def test_make_llms_adds_the_names_it_writes_and_takes_none_out(

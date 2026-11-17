@@ -21,7 +21,8 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { loadContentDates } from '../src/lib/content-dates.mjs';
-import { UNRELEASED_URL, changedAfter, loadRelease, releaseTag } from '../src/lib/release-commit.mjs';
+import { loadRelease } from '../src/lib/release-commit.mjs';
+import { UNRELEASED_URL, changedAfter, releaseTag } from '../src/lib/release-rules.mjs';
 
 /** This site and the repository holding it, for the test that reads the real tree. */
 const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -70,8 +71,9 @@ function repository(t) {
 			git(['commit', '-q', '-m', message], { GIT_AUTHOR_DATE: when, GIT_COMMITTER_DATE: when });
 			return git(['rev-parse', 'HEAD']);
 		},
-		tag(name, sha) {
-			git(['tag', name, sha]);
+		/** Tag `sha` as `name`; `force` moves a tag that exists. */
+		tag(name, sha, { force = false } = {}) {
+			git(['tag', ...(force ? ['--force'] : []), name, sha]);
 		},
 	};
 }
@@ -227,6 +229,27 @@ test('a commit to the Spanish landing text leaves the English landing page as th
 	const dates = await loadContentDates({ siteRoot: repo.site });
 	const after = (path) => changedAfter(release, dates.dateOf(path.replace(/^site\//u, '')));
 	assert.deepEqual({ english: after(english), spanish: after(spanish) }, { english: false, spanish: true });
+});
+
+test('every page asks and git reads the release once per site root and version', async (t) => {
+	const repo = repository(t);
+	repo.write('VERSION', '1.0.0\n');
+	repo.page('a.md', 'Text.');
+	const first = repo.commit(AT(1), 'phonometry 1.0.0');
+	repo.tag(releaseTag('1.0.0'), first);
+	const asked = loadRelease({ siteRoot: repo.site, version: '1.0.0' });
+	assert.equal(loadRelease({ siteRoot: repo.site, version: '1.0.0' }), asked);
+	assert.equal((await asked).sha, first);
+	// A tag moved after the first read would change the answer of a second
+	// git; the build keeps the one it read.
+	repo.page('a.md', 'Rewritten.');
+	const second = repo.commit(AT(2));
+	repo.tag(releaseTag('1.0.0'), second, { force: true });
+	assert.equal((await loadRelease({ siteRoot: repo.site, version: '1.0.0' })).sha, first);
+	// Another version is another read.
+	const other = loadRelease({ siteRoot: repo.site, version: '1.0.1' });
+	assert.notEqual(other, asked);
+	assert.equal((await other).from, 'VERSION');
 });
 
 test('a clone with neither the tag nor a commit that set VERSION stops the build', async (t) => {

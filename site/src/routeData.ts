@@ -2,7 +2,8 @@ import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlig
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { version } from './data/repo-stats.mjs';
 import { loadContentDates } from './lib/content-dates.mjs';
-import { changedAfter, loadRelease } from './lib/release-commit.mjs';
+import { loadRelease } from './lib/release-commit.mjs';
+import { changedAfter } from './lib/release-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from './lib/fallback-routes.mjs';
 import { hasMarkdownCopy, markdownCopyPath, routeOf } from './lib/page-markdown.mjs';
 

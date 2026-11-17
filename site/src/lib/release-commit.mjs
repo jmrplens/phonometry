@@ -38,7 +38,10 @@
  *
  * Read once per site root and version, with git; a git that fails, or a
  * VERSION no commit ever set, stops the build rather than leaving the notice
- * off every page.
+ * off every page. This module gives out only that read: the rule a page
+ * applies to the result, the changelog link and the names of the release live
+ * in src/lib/release-rules.mjs, which starts no process, so importing them
+ * hands no page a git of its own.
  *
  * @module
  */
@@ -46,27 +49,9 @@ import { execFile } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { repositoryUrl } from '../data/site.mjs';
+import { VERSION_FILE, releaseTag } from './release-rules.mjs';
 
-/** The file that names the release, at the root of the repository. */
-export const VERSION_FILE = 'VERSION';
-
-/** The tag the release workflow gives the commit it publishes `version` from. */
-export const releaseTag = (version) => `v${version}`;
-
-/** Where the changelog lists what changed after the latest release. */
-export const UNRELEASED_URL = `${repositoryUrl}/blob/main/CHANGELOG.md#unreleased`;
-
-/**
- * The latest release, as the build reads it.
- *
- * @typedef {object} Release
- * @property {string} version  As VERSION names it.
- * @property {string} sha  The commit it was published from.
- * @property {Date} date  When that commit was committed.
- * @property {'tag' | 'VERSION'} from  Read from the release tag, or from the
- *   commit that set VERSION when the clone has no such tag yet.
- */
+/** @typedef {import('./release-rules.mjs').Release} Release */
 
 /**
  * Run git in `cwd`; resolves with its stdout, or with `null` when git exits 1
@@ -157,16 +142,4 @@ export function loadRelease({ siteRoot = process.cwd(), version }) {
   const key = `${root}\0${version}`;
   if (!loaded.has(key)) loaded.set(key, readRelease(root, version));
   return loaded.get(key);
-}
-
-/**
- * Whether content dated `date` changed after `release`: later than the
- * release commit, to the second.
- *
- * @param {Pick<Release, 'date'>} release
- * @param {Date} date
- * @returns {boolean}
- */
-export function changedAfter(release, date) {
-  return date.getTime() > release.date.getTime();
 }

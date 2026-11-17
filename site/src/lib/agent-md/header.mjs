@@ -36,7 +36,7 @@
  */
 import { basePath, repositoryUrl, siteUrl } from '../../data/site.mjs';
 import { releaseHeaderKeys } from '../page-markdown.mjs';
-import { UNRELEASED_URL } from '../release-commit.mjs';
+import { UNRELEASED_URL } from '../release-rules.mjs';
 import { line } from './markdown-table.mjs';
 
 /**

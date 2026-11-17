@@ -21,7 +21,7 @@
  * they leave out the rest of the frame.
  */
 import { NEWER_THAN_RELEASE_ATTRIBUTE } from '../lib/page-markdown.mjs';
-import { UNRELEASED_URL } from '../lib/release-commit.mjs';
+import { UNRELEASED_URL } from '../lib/release-rules.mjs';
 
 const route = Astro.locals.starlightRoute as typeof Astro.locals.starlightRoute & { newerThanRelease?: string };
 const version = route.newerThanRelease;

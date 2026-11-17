@@ -19,7 +19,7 @@ import { describe, test } from 'node:test';
 import { ROUTES_FILE, writePages } from '../../../../scripts/agent-md.mjs';
 import { version } from '../../../data/repo-stats.mjs';
 import { releaseHeaderKeys, withoutReleaseLines } from '../../page-markdown.mjs';
-import { UNRELEASED_URL } from '../../release-commit.mjs';
+import { UNRELEASED_URL } from '../../release-rules.mjs';
 import { UNRELEASED, header } from '../header.mjs';
 import { pageMarkdown } from '../page.mjs';
 import { Box, registryOf } from './helpers.mjs';

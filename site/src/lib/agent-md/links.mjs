@@ -136,11 +136,17 @@ function destinations(markdown, wanted, { images = true } = {}) {
       // An autolink (`<https://...>`) and a bare address have no destination
       // apart from their text, which is what the reader sees: left as written.
       if (openers.length === 0 && node.type === 'link') return;
+      // The destination comes right after the label and before any title, so
+      // the first opener past the label that decodes to the URL is the one; an
+      // opener inside a title (`"see ](/p)"`) comes later and is never taken.
+      const labelEnd = node.children?.at(-1)?.position?.end.offset;
       let match;
       for (const one of openers) {
+        if (labelEnd !== undefined && start + one.index < labelEnd) continue;
         const written = writtenDestination(text, one.index + 2);
         if (written && decodedDestination(text.slice(written.start, written.end), written.angle) === node.url) {
           match = written;
+          break;
         }
       }
       if (!match) {

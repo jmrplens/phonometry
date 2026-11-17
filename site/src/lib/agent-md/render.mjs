@@ -118,6 +118,22 @@ const REPLACED_TYPES = new Set([
 ]);
 
 /**
+ * `inner` between two `mark`s, with any line break it opens or ends with
+ * put outside them: a mark cannot close after a break (or open before one)
+ * and still touch its text, so `<strong>a<br /></strong>b` is `**a**`, the
+ * break, then `b`.
+ *
+ * @param {string} mark
+ * @param {string} inner
+ * @returns {string}
+ */
+function marked(mark, inner) {
+  const edges = new RegExp(`^((?:${LINE_BREAK}[ \\t]*)*)([\\s\\S]*?)((?:[ \\t]*${LINE_BREAK})*)$`, 'u').exec(inner);
+  const [, before = '', text = inner, after = ''] = edges ?? [];
+  return `${before}${mark}${text}${mark}${after}`;
+}
+
+/**
  * Marks a code span cannot hold: inside `<code>` or `<kbd>` they are written
  * as the text they wrap.
  */
@@ -830,7 +846,7 @@ function createRenderer(source, options, mode) {
       return href && inner ? `[${inner}](${href})` : inner;
     },
     abbr: (node) => renderChildren(node),
-    b: (node) => `**${renderChildren(node)}**`,
+    b: (node) => marked('**', renderChildren(node)),
     // A bare line end inside a paragraph is a space to a Markdown reader, so
     // the break is held as LINE_BREAK until the copy is whole, and then made
     // the backslash CommonMark and GitHub both draw, or dropped where its
@@ -839,14 +855,14 @@ function createRenderer(source, options, mode) {
     br: () => (codeDepth > 0 ? '\n' : LINE_BREAK),
     caption: (node) => `**${captionText(node)}**`,
     code: (node) => codeSpan(codeChildren(node)),
-    del: (node) => `~~${renderChildren(node)}~~`,
+    del: (node) => marked('~~', renderChildren(node)),
     details: renderDetails,
     div: (node) => renderChildren(node),
-    em: (node) => `*${renderChildren(node)}*`,
-    i: (node) => `*${renderChildren(node)}*`,
+    em: (node) => marked('*', renderChildren(node)),
+    i: (node) => marked('*', renderChildren(node)),
     kbd: (node) => codeSpan(codeChildren(node)),
     mark: (node) => renderChildren(node),
-    s: (node) => `~~${renderChildren(node)}~~`,
+    s: (node) => marked('~~', renderChildren(node)),
     small: (node) => renderChildren(node),
     // An empty `<span id>` is an anchor kept for old links (F13): it has no
     // text, and a Markdown copy has no anchors to keep. The GitHub edition
@@ -861,7 +877,7 @@ function createRenderer(source, options, mode) {
       if (id && (node.children ?? []).length === 0) droppedAnchors?.add(id);
       return inner;
     },
-    strong: (node) => `**${renderChildren(node)}**`,
+    strong: (node) => marked('**', renderChildren(node)),
     // GitHub draws both, so the GitHub edition keeps them as the page has them.
     sub: (node) => (flavour === 'github' ? `<sub>${renderChildren(node)}</sub>` : `_${renderChildren(node)}`),
     summary: (node) => `**${line(renderChildren(node))}**`,
@@ -927,7 +943,10 @@ function createRenderer(source, options, mode) {
       // `\*` as `*`, and a mark, which a code span cannot carry, as its text.
       if (node.type === 'text' || node.type === 'inlineCode') return node.value ?? '';
       if (CODE_DROPS_MARK.has(node.type)) return renderChildren(node);
-      if (ELEMENT_TYPES.has(node.type) && CODE_DROPS_TAG.has(node.name)) return renderChildren(node);
+      if (ELEMENT_TYPES.has(node.type) && CODE_DROPS_TAG.has(node.name)) {
+        checkElement(node);
+        return renderChildren(node);
+      }
     }
     if (EXPRESSION_TYPES.has(node.type)) return renderExpression(node);
     if (ELEMENT_TYPES.has(node.type)) return renderElement(node);

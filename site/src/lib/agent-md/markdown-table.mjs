@@ -50,11 +50,14 @@ export const LINE_BREAK = '\uE010';
  */
 export function resolveBreaks(text) {
   if (!text.includes(LINE_BREAK)) return text;
-  const pattern = new RegExp(`${LINE_BREAK}[ \\t]*((?:[*_~]|</[a-z]+>)*)[ \\t]*(\\r?\\n)?`, 'gu');
+  // Marks are moved only when they end the line: there they close around the
+  // break. A mark with text after it on the same line opens what follows
+  // (`first<br /><em>second</em>`) and stays with that text.
+  const pattern = new RegExp(`${LINE_BREAK}[ \\t]*(?:((?:[*_~]|</[a-z]+>)*)[ \\t]*(\\r?\\n|$))?`, 'gu');
   return text.replace(pattern, (match, marks, newline, offset, whole) => {
     const after = whole.slice(offset + match.length);
-    const ends = newline ? /^[ \t]*(?:\r?\n|$)/u.test(after) : after === '';
-    if (ends) return `${marks}${newline ?? ''}`;
+    if (newline === undefined) return '\\\n';
+    if (/^[ \t]*(?:\r?\n|$)/u.test(after)) return `${marks}${newline}`;
     return `${marks}\\\n`;
   });
 }

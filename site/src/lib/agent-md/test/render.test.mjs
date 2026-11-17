@@ -209,6 +209,8 @@ describe('raw HTML', () => {
     assert.equal(render('a <code>x\\*y</code> b\n').markdown, 'a `x*y` b\n');
     assert.equal(render('Use <code><em>x</em> and <strong>y</strong></code>.\n').markdown, 'Use `x and y`.\n');
     assert.doesNotMatch(render('<code>a<br />b</code>\n').markdown, /\\/u);
+    // The attributes of a tag written as its text are still read.
+    assert.equal(render('<code><em title={foo}>x</em></code>\n').issues[0]?.kind, 'expression');
   });
 
   test('br is a line break the copy keeps', () => {
@@ -220,6 +222,7 @@ describe('raw HTML', () => {
     assert.equal(render('<strong>last<br /></strong>\n\nNext.\n').markdown, '**last**\n\nNext.\n');
     assert.equal(render('first<br /> \nsecond\n').markdown, 'first\\\nsecond\n');
     assert.equal(render('<strong>a<br /></strong>b\n').markdown, '**a**\\\nb\n');
+    assert.equal(render('first<br /><em>second</em>\n').markdown, 'first\\\n*second*\n');
     const cells = '<table><tbody><tr><td>a<br />b</td></tr></tbody></table>\n';
     assert.doesNotMatch(render(cells).markdown, /\\/u);
   });
@@ -319,6 +322,11 @@ describe('links', () => {
       render(source, { mdx: false }).markdown,
       '> [a](https://docs.jmrp.io/phonometry/a/)\n> [b](\n>   https://docs.jmrp.io/phonometry/b/)\n',
     );
+  });
+
+  test('a title that holds a link form leaves the destination to be the one rewritten', () => {
+    const source = '[x](/phonometry/p/ "see ](/phonometry/p/)")\n';
+    assert.equal(render(source, { mdx: false }).markdown, '[x](https://docs.jmrp.io/phonometry/p/ "see ](/phonometry/p/)")\n');
   });
 
   test('an autolink and a bare address are left as written', () => {

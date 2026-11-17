@@ -966,7 +966,9 @@ def _summary(version: str) -> list[str]:
             "`pip install -U phonometry`, naming the extras you use "
             '(`pip install -U "phonometry[full]"` for all four where `[full]` '
             "installs); 3.x has a different import layout and "
-            "`from phonometry import filters` fails on it."
+            "`from phonometry import filters` fails on it. Code written for 3.x "
+            "needs changes to run on 4.x; the upgrade guide "
+            "(https://docs.jmrp.io/phonometry/start/upgrading/) maps each of them."
         ),
         "",
         (

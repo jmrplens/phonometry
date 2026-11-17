@@ -35,7 +35,7 @@ import pytest
 import yaml
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping, Sequence
+    from collections.abc import Callable, Iterator, Mapping, Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -3030,3 +3030,148 @@ def test_the_guard_groups_that_install_nothing_stay_so() -> None:
         if re.search(r"\bpip3?\s+install\b|-m\s+pip\b", line)
     ]
     assert installing == []
+
+
+#: The methods by which a script writes a file named by a path.
+_PATH_WRITES = frozenset({"write_text", "write_bytes"})
+
+
+def _written_paths(script: str) -> list[str]:
+    """Where *script* writes, relative to the root, by its own ``ROOT`` paths.
+
+    Every call of ``write_text`` or ``write_bytes`` is read, and its path is
+    resolved through the module's ``NAME = ROOT / "a" / "b"`` constants; an
+    f-string part stands for one sample name of its pattern, and any other
+    part built at run time ends the path at the directory before it. A write
+    whose path does not resolve is returned as ``?<line>``, so a script that
+    writes somewhere this reader cannot follow fails the test instead of
+    passing it unseen.
+    """
+    tree = ast.parse((_ROOT / script).read_text(encoding="utf-8"))
+    constants: dict[str, list[str]] = {"ROOT": []}
+
+    def resolve(node: ast.expr) -> list[str] | None:
+        if isinstance(node, ast.Name):
+            return constants.get(node.id)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            head = resolve(node.left)
+            if head is None:
+                return None
+            if isinstance(node.right, ast.Constant) and isinstance(
+                node.right.value, str
+            ):
+                return [*head, node.right.value]
+            if isinstance(node.right, ast.JoinedStr):
+                # A name built at run time, as one sample of its pattern.
+                sample = "".join(
+                    str(part.value) if isinstance(part, ast.Constant) else "0"
+                    for part in node.right.values
+                )
+                return [*head, sample]
+            return head
+        return None
+
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
+            target = statement.targets[0]
+            value = resolve(statement.value)
+            if isinstance(target, ast.Name) and value is not None:
+                constants[target.id] = value
+    written = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in _PATH_WRITES
+        ):
+            parts = resolve(node.func.value)
+            written.append("/".join(parts) if parts else f"?{node.lineno}")
+    return sorted(set(written))
+
+
+def _llms_outputs(recipe: str) -> list[str]:
+    """The paths ``make llms`` writes, by the commands of its *recipe*."""
+    outputs = []
+    for line in recipe.splitlines():
+        words = shlex.split(line)
+        if "scripts/agent-md.mjs" in words:
+            # The recipe runs it from site/, so its paths start from there.
+            base = pathlib.PurePosixPath("site")
+            for option in ("--dump", "--docs"):
+                if option in words:
+                    path = base / words[words.index(option) + 1]
+                    outputs.append(os.path.normpath(path.as_posix()))
+        script = next((word for word in words if word.endswith(".py")), None)
+        if script is not None:
+            outputs += _written_paths(script)
+    return outputs
+
+
+def _llms_gate_problems(
+    recipe: str, gate: str, ignored: Callable[[list[str]], set[str]]
+) -> list[str]:
+    """The committed paths ``make llms`` writes that the llms gate never diffs."""
+    match = re.search(r"git diff --exit-code -- ([^;\n]+?)(?:;|\n|$)", gate)
+    if match is None:
+        return ["the llms gate runs no `git diff --exit-code -- <paths>`"]
+    compared = shlex.split(match.group(1))
+    outputs = _llms_outputs(recipe)
+    unreadable = [path for path in outputs if path.startswith("?")]
+    committed = sorted(set(outputs) - set(unreadable) - ignored(outputs))
+    return [
+        f"scripts/generate_llms.py writes at line {path[1:]} to a path this "
+        "test cannot follow"
+        for path in unreadable
+    ] + [
+        f"make llms writes {path}, which the llms gate does not compare"
+        for path in committed
+        if not any(path == root or path.startswith(f"{root}/") for root in compared)
+    ]
+
+
+def _git_ignored(paths: list[str]) -> set[str]:
+    """The *paths* git ignores, so that no commit ever carries them."""
+    named = [path for path in paths if not path.startswith("?")]
+    listed = child_process.run(
+        ["git", "check-ignore", "--no-index", "--", *named],
+        cwd=_ROOT,
+        capture_output=True,
+        timeout=120,
+    ).stdout.decode("utf-8")
+    return set(listed.splitlines())
+
+
+def _llms_recipe() -> str:
+    text = (_ROOT / "Makefile").read_text(encoding="utf-8")
+    match = re.search(r"^llms:.*\n((?:\t.*\n)+)", text, re.MULTILINE)
+    assert match is not None, "the Makefile has no llms target"
+    return match.group(1)
+
+
+@pytest.mark.git_checkout
+def test_the_llms_gate_compares_every_committed_file_make_llms_writes() -> None:
+    """A file the generator starts writing is held to its commit at once.
+
+    The gate regenerates with `make llms` and then diffs a list of paths
+    typed into the workflow. A new committed output of the generator, left
+    out of that list, would be rewritten on every run and never compared:
+    the gate stays green while the committed file goes stale.
+    """
+    gate = next(
+        str(step.get("run", ""))
+        for step in _steps_of(_python_ci_jobs()["guards-prose"])
+        if step.get("id") == "llms"
+    )
+    assert _llms_gate_problems(_llms_recipe(), gate, _git_ignored) == []
+
+
+def test_the_llms_gate_reader_names_an_output_left_out_of_the_diff() -> None:
+    """The reader above, on a gate that dropped ``docs`` from its list."""
+    gate = "if ! git diff --exit-code -- llms.txt; then\n  exit 1\nfi\n"
+
+    def ignored(paths: list[str]) -> set[str]:
+        return {path for path in paths if path.startswith(("build/", "site/"))}
+
+    assert _llms_gate_problems(_llms_recipe(), gate, ignored) == [
+        "make llms writes docs, which the llms gate does not compare"
+    ]

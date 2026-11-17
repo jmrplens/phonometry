@@ -800,33 +800,35 @@ Releases are fully automated from the repository-root `VERSION` file:
    always a rehearsal and no input turns it into a release. It reads the
    version and its CHANGELOG section, waits for the PR's CI, builds the sdist
    and the wheel with `scripts/build_release.py` under `PYTHONWARNINGS=error`,
-   so a warning the build prints fails it, builds them again and refuses the
-   run if a byte differs, checks both against git and checks the licence each
-   declares and carries, installs the wheel with every extra on Linux, macOS
-   and Windows with each supported Python and runs the conformance report on
-   it, writes the checksum file, the SBOM and the release notes, refuses an
-   SBOM the release could not attest, asks PyPI for an upload token with this
-   workflow's identity, which proves the trusted publisher is configured,
-   without uploading anything, and rebuilds the commit on macOS and compares
-   the files with the ones the run built. The job summary shows the notes the
-   release will carry. The build and the rebuild on macOS are not new to a
-   rehearsal: Python CI makes them on every pull request, so a change to
-   `requirements-release.txt` or to what the sdist carries that breaks them
-   shows on that pull request.
+   so a warning the build prints fails it, and with the list of classifiers
+   PyPI takes installed, so a classifier PyPI would refuse at the upload fails
+   it too, builds them again and refuses the run if a byte differs, checks both
+   against git and checks the licence each declares and carries, installs the
+   wheel with every extra on Linux, macOS and Windows with each supported
+   Python and runs the conformance report on it, writes the checksum file, the
+   SBOM and the release notes, refuses an SBOM the release could not attest,
+   asks PyPI for an upload token with this workflow's identity, which proves
+   the trusted publisher is configured, without uploading anything, and
+   rebuilds the commit on macOS and compares the files with the ones the run
+   built. The job summary shows the notes the release will carry. The build and
+   the rebuild on macOS are not new to a rehearsal: Python CI makes them on
+   every pull request, so a change to `requirements-release.txt` or to what the
+   sdist carries that breaks them shows on that pull request.
 3. When the PR merges to `main`, the same workflow runs for real: it uploads to
    PyPI through trusted publishing (no token is stored; PyPI attaches a signed
    PEP 740 attestation to each file), creates the GitHub Release with its tag,
    the files, the checksum file `phonometry-<version>.sha256` and the SBOM,
    records the build provenance of every one of them and attests the SBOM for
    the wheel, dispatches the GitLab mirror, installs the published version back
-   from PyPI on every platform, and clones the new tag on macOS, rebuilds it as
-   `SECURITY.md` tells anyone to and compares the files with PyPI's. The
-   rebuild runs after the upload, so a failure there does not stop the release:
-   it says the release cannot be rebuilt to the same bytes, which is a defect
-   to fix in the next one. The mirror is dispatched from a job of its own,
-   which the rebuild does not wait for: if the dispatch fails, re-running the
-   failed jobs runs it again alone. Zenodo registers the DOI from the release
-   webhook.
+   from PyPI on every platform and verifies the PEP 740 attestation of the
+   wheel there with the verifier `requirements-attestations.txt` pins, and
+   clones the new tag on macOS, rebuilds it as `SECURITY.md` tells anyone to
+   and compares the files with PyPI's. The rebuild runs after the upload, so a
+   failure there does not stop the release: it says the release cannot be
+   rebuilt to the same bytes, which is a defect to fix in the next one. The
+   mirror is dispatched from a job of its own, which the rebuild does not wait
+   for: if the dispatch fails, re-running the failed jobs runs it again alone.
+   Zenodo registers the DOI from the release webhook.
    `SECURITY.md` says how anyone can verify and rebuild the files.
 
 Never push tags manually; the workflow is idempotent (an existing tag is

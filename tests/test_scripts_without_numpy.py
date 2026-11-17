@@ -95,6 +95,7 @@ _RELEASE_TOOLS = frozenset(
     {
         "build",
         "setuptools",
+        "trove-classifiers",
         "twine",
         "check-wheel-contents",
         "cyclonedx-bom",

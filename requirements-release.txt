@@ -10,6 +10,11 @@
 #   whatever setuptools is newest on the day, and get the same bytes.
 #   pyproject.toml keeps the measured floor, so a distribution packager is not
 #   bound to this pin.
+# - trove-classifiers: the list of classifiers PyPI takes. setuptools holds
+#   the classifiers of pyproject.toml to it only when it is installed, and
+#   PyPI refuses an unknown one only at the upload, which a rehearsal never
+#   makes; with it, the build refuses one, in a rehearsal and on every pull
+#   request.
 # - twine: `twine check --strict`, the long description PyPI will render.
 # - check-wheel-contents: a wheel with stray or duplicated files.
 # - cyclonedx-bom: the SBOM of the environment `pip install phonometry` makes.
@@ -23,6 +28,7 @@
 # trusted-publishing exchange and writes the PEP 740 attestations.
 build==1.6.1
 setuptools==84.2.1
+trove-classifiers==2026.9.21.13
 twine==7.0.0
 check-wheel-contents==0.6.3
 cyclonedx-bom==8.0.1

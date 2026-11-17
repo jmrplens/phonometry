@@ -580,7 +580,9 @@ jobs:
     if: needs.preflight.outputs.skip != 'true' && github.event_name != 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
-    permissions: {}
+    # Read access for the checkout of requirements-attestations.txt alone.
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -612,9 +614,20 @@ jobs:
           done
           python -c "import phonometry, sys; v = phonometry.__version__; print('phonometry', v, 'from PyPI'); sys.exit(v != '$VERSION')"
 
+      # The verifier comes from requirements-attestations.txt, the one file
+      # this job reads from the commit: no rehearsal runs this step, so the
+      # version that verifies a release is the one a pull request moved to.
+      - uses: actions/checkout@v7
+        if: matrix.os == 'ubuntu-26.04' && matrix.python-version == '3.14'
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: /requirements-attestations.txt
+          sparse-checkout-cone-mode: false
+
       - name: Verify the PEP 740 attestation of the wheel on PyPI
         if: matrix.os == 'ubuntu-26.04' && matrix.python-version == '3.14'
         run: |
-          python -m pip install --no-cache-dir pypi-attestations
+          python -m pip install --no-cache-dir -r source/requirements-attestations.txt
           python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
             "pypi:phonometry-$VERSION-py3-none-any.whl"

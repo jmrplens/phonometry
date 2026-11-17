@@ -35,7 +35,7 @@ const LINK_TYPES = new Set(['link', 'image', 'definition']);
  * table rows. The conformance report, all tables and no root-relative link,
  * cost more to parse for nothing than every other page together.
  */
-const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:\/(?!\/)|&)/u;
+const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:(?:\r\n?|\n)(?:[ \t]*>)*[ \t]*)?<?(?:\/(?!\/)|&)/u;
 
 /**
  * What every fragment destination is preceded by, in the same forms as
@@ -43,7 +43,7 @@ const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:\/(?!
  * `]: #`, either with spacing, a line break or a `<` before the `#`, or an
  * `&` that may open a character reference to it (`&#35;`).
  */
-const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:#|&)/u;
+const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:(?:\r\n?|\n)(?:[ \t]*>)*[ \t]*)?<?(?:#|&)/u;
 
 /**
  * The destination as the source writes it, from just after the `](` of a link
@@ -58,13 +58,13 @@ const FRAGMENT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?<?(?:#
  * @returns {{ start: number, end: number, angle: boolean } | undefined}
  */
 function writtenDestination(text, from) {
-  const lead = /^[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?/u.exec(text.slice(from));
+  const lead = /^[ \t]*(?:(?:\r\n?|\n)(?:[ \t]*>)*[ \t]*)?/u.exec(text.slice(from));
   const at = from + (lead ? lead[0].length : 0);
   if (text[at] === '<') {
     for (let i = at + 1; i < text.length; i += 1) {
       if (text[i] === '\\') i += 1;
       else if (text[i] === '>') return { start: at + 1, end: i, angle: true };
-      else if (text[i] === '\n' || text[i] === '<') return undefined;
+      else if (text[i] === '\n' || text[i] === '\r' || text[i] === '<') return undefined;
     }
     return undefined;
   }
@@ -85,11 +85,12 @@ function writtenDestination(text, from) {
 
 /**
  * A link title in any of its three forms, a backslash keeping the character
- * after it, and the spacing (at most one line break, and the `>` of the block
- * quotes the next line sits in) that may stand before it or before the end.
+ * after it, and the spacing (at most one line break, a CR, an LF or both as
+ * Markdown reads one, and the `>` of the block quotes the next line sits in)
+ * that may stand before it or before the end.
  */
 const TITLE = String.raw`(?:"(?:[^"\\]|\\[\s\S])*"|'(?:[^'\\]|\\[\s\S])*'|\((?:[^()\\]|\\[\s\S])*\))`;
-const GAP = String.raw`[ \t]*(?:\r?\n(?:[ \t]*>)*[ \t]*)?`;
+const GAP = String.raw`[ \t]*(?:(?:\r\n?|\n)(?:[ \t]*>)*[ \t]*)?`;
 
 /**
  * What may follow the destination of an inline link or image up to its end:
@@ -160,8 +161,21 @@ function destinations(markdown, wanted, { images = true } = {}) {
       // is followed by the rest of the label, and one inside a title
       // (`"see ](/p)"`) by the rest of the title: neither is ever taken.
       const tail = node.type === 'definition' ? DEFINITION_TAIL : INLINE_TAIL;
+      // The label's own `]` comes first when the parser hands it over: the
+      // end of a link's last child, which knows a code span from an escape.
+      // A node with no children (a definition, an image, an empty link) is
+      // read by its escapes instead: a `]` after an odd run of backslashes is
+      // the label's text, not its end (`[a\\](/p" "b](/p")`).
+      const labelEnd = node.children?.at(-1)?.position?.end.offset;
       let match;
       for (const one of openers) {
+        if (labelEnd !== undefined) {
+          if (start + one.index < labelEnd) continue;
+        } else {
+          let slashes = 0;
+          while (text[one.index - 1 - slashes] === '\\') slashes += 1;
+          if (slashes % 2 === 1) continue;
+        }
         const written = writtenDestination(text, one.index + 2);
         if (
           written &&

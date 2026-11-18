@@ -58,6 +58,43 @@ describe('zonePlan', () => {
 		assert.equal(plan.create.some(({ type, name, content }) => type === 'TXT' && name === zone && content.includes('spf1')), false);
 	});
 
+	test('a second MX beside the null MX is a conflict, not a match', () => {
+		const records = [
+			{ id: 'n', type: 'MX', name: zone, content: '.', priority: 0, proxied: false },
+			{ id: 'm', type: 'MX', name: zone, content: 'mx.example', priority: 10, proxied: false },
+		];
+		const plan = zonePlan({ zone, records, settings: MEASURED });
+		assert.match(plan.conflicts.join('\n'), /MX phonometry\.dev: holds .*"mx\.example".*left alone/);
+		assert.equal(plan.keep.includes('MX phonometry.dev'), false);
+	});
+
+	test('a second SPF record beside the wanted one is a conflict, not a match', () => {
+		const records = [
+			{ id: 's', type: 'TXT', name: zone, content: '"v=spf1 -all"', proxied: false },
+			{ id: 't', type: 'TXT', name: zone, content: '"v=spf1 include:_spf.example -all"', proxied: false },
+		];
+		const plan = zonePlan({ zone, records, settings: MEASURED });
+		assert.match(plan.conflicts.join('\n'), /TXT phonometry\.dev: holds .*include:_spf\.example.*left alone/);
+		assert.equal(plan.keep.includes('TXT phonometry.dev'), false);
+	});
+
+	test('the same record twice in one place is still right', () => {
+		const records = [
+			{ id: 'a', type: 'MX', name: zone, content: '.', priority: 0, proxied: false },
+			{ id: 'b', type: 'MX', name: zone, content: '.', priority: 0, proxied: false },
+		];
+		const plan = zonePlan({ zone, records, settings: MEASURED });
+		assert.ok(plan.keep.includes('MX phonometry.dev'));
+		assert.equal(plan.conflicts.some((line) => line.startsWith('MX phonometry.dev')), false);
+	});
+
+	test('a DKIM key without the optional v= tag stands in the DKIM place and is reported', () => {
+		const records = [{ id: 'k', type: 'TXT', name: `*._domainkey.${zone}`, content: '"k=rsa; p=QUJD"', proxied: false }];
+		const plan = zonePlan({ zone, records, settings: MEASURED });
+		assert.match(plan.conflicts.join('\n'), /TXT \*\._domainkey\.phonometry\.dev: holds .*k=rsa.*left alone/);
+		assert.equal(plan.create.some(({ name }) => name === `*._domainkey.${zone}`), false);
+	});
+
 	test('another TXT record at the apex does not stand in the SPF place', () => {
 		const records = [{ id: 'g', type: 'TXT', name: zone, content: '"google-site-verification=abc"', proxied: false }];
 		const plan = zonePlan({ zone, records, settings: MEASURED });
@@ -180,7 +217,9 @@ describe('apply-rules', () => {
 		assert.ok(mediaOrigins.includes(new URL(CLIP_BASE).origin));
 		assert.doesNotThrow(() => checkClipBase(CLIP_BASE));
 		assert.throws(() => checkClipBase('http://docs.jmrp.io/phonometry/media/'), /https/);
-		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media'), /end in \//);
+		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media'), /path end in \//);
+		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media/?v=1/'), /query or fragment/);
+		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media/#x/'), /query or fragment/);
 	});
 
 	test('the rules go to phonometry.dev whatever CLOUDFLARE_ZONE_ID says', async () => {

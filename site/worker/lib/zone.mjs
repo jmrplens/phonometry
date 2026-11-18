@@ -51,6 +51,9 @@ export const fqdn = (name, zone) => (name === '@' ? zone : `${name}.${zone}`);
 function samePlace(wanted, record, zone) {
 	if (record.type !== wanted.type || record.name !== fqdn(wanted.name, zone)) return false;
 	if (wanted.type !== 'TXT') return true;
+	// Every TXT record at a key name is a key, whatever it starts with: DKIM
+	// lets the v= tag be left out (RFC 6376 3.6.1).
+	if (wanted.name.endsWith('_domainkey')) return true;
 	// Several TXT records can share a name; the one in this place starts with the same tag.
 	const tag = (text) => text.replace(/^"/, '').split(/[;\s]/, 1)[0].toLowerCase();
 	return tag(record.content) === tag(wanted.content);
@@ -69,9 +72,10 @@ function sameRecord(wanted, record) {
 /**
  * What it takes to bring a zone to the records and settings above.
  *
- * A record that is missing is created. A record that is right is left alone.
- * A record in the same place that says something else is a conflict: it is
- * reported and never changed, since it may be one the maintainer added.
+ * A record that is missing is created. A place whose every record is right is
+ * left alone. A record in the same place that says something else is a
+ * conflict, even beside a right one: it is reported and never changed, since it
+ * may be one the maintainer added.
  *
  * @param {object} options
  * @param {string} options.zone The zone name.
@@ -90,10 +94,13 @@ export function zonePlan({ zone, records, settings }) {
 		if (here.length === 0) {
 			const { name, ...rest } = wanted;
 			create.push({ ...rest, name: fqdn(name, zone), ttl: 1 });
-		} else if (here.some((record) => sameRecord(wanted, record))) {
+		} else if (here.every((record) => sameRecord(wanted, record))) {
 			keep.push(label);
 		} else {
-			conflicts.push(`${label}: holds ${here.map((r) => JSON.stringify(r.content)).join(', ')}, not ${JSON.stringify(wanted.content)}; left alone`);
+			// One record that says something else spoils the place (a second MX
+			// beside the null MX, a second SPF record), even beside a right one.
+			const wrong = here.filter((record) => !sameRecord(wanted, record));
+			conflicts.push(`${label}: holds ${wrong.map((r) => JSON.stringify(r.content)).join(', ')}, not ${JSON.stringify(wanted.content)}; left alone`);
 		}
 	}
 	const changes = [];

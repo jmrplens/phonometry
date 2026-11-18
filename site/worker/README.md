@@ -114,6 +114,7 @@ later change.
 ```bash
 cd site
 PHONOMETRY_SITE=phonometry.dev pnpm build
+rm -rf worker/stage                      # staging refuses a directory that exists
 node worker/stage.mjs --from dist --site phonometry.dev
 ```
 
@@ -135,6 +136,7 @@ key:
 ```bash
 cd site/worker
 pnpm install --frozen-lockfile
+rm -rf stage                             # staging refuses a directory that exists
 node stage.mjs --from ../dist            # or the unpacked github-pages artifact
 CLOUDFLARE_EMAIL=... CLOUDFLARE_API_KEY=... pnpm exec wrangler deploy --config wrangler.jsonc
 ```

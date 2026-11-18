@@ -44,7 +44,11 @@ export function checkClipBase(clipBase) {
 	} catch {
 		throw new Error(`clip base is not a URL: ${clipBase}`);
 	}
-	if (url.protocol !== 'https:' || !clipBase.endsWith('/')) throw new Error(`clip base must be https and end in /: ${clipBase}`);
+	if (url.protocol !== 'https:' || !url.pathname.endsWith('/')) throw new Error(`clip base must be https and its path end in /: ${clipBase}`);
+	// The clip name is appended to the base, so a query or a fragment would swallow it.
+	if (url.search !== '' || url.hash !== '' || clipBase.includes('?') || clipBase.includes('#')) {
+		throw new Error(`clip base must carry no query or fragment: ${clipBase}`);
+	}
 	if (!mediaOrigins.includes(url.origin)) {
 		throw new Error(`clip host ${url.origin} is not in mediaOrigins (site/src/data/site.mjs), so the pages would block its clips`);
 	}

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { cloudflareItems, redirectPairs } from '../../scripts/cloudflare-redirects.mjs';
+import { cloudflareItems, copyOf, redirectPairs, retiredShards } from '../../scripts/cloudflare-redirects.mjs';
 import { redirects } from '../../src/data/redirects.mjs';
 import { basePath, siteUrl } from '../../src/data/site.mjs';
 import {
@@ -35,6 +35,16 @@ describe('redirectsFile', () => {
 		for (const from of Object.keys(redirects)) {
 			assert.ok(sources.has(`${basePath}${from}`), from);
 			if (from.endsWith('/')) assert.ok(sources.has(`${basePath}${from.slice(0, -1)}`), from);
+		}
+	});
+
+	test('the Markdown copy of every retired page and every retired llms shard name, as on docs.jmrp.io', () => {
+		const to = new Map(lines.map((line) => [line.from, line.to]));
+		for (const [from, target] of Object.entries(redirects)) {
+			if (from.endsWith('/') && target.endsWith('/')) assert.equal(to.get(`${basePath}${from}index.md`), copyOf(target), from);
+		}
+		for (const [from, name] of Object.entries(retiredShards())) {
+			assert.equal(to.get(`${basePath}/llms/llms-${from}.txt`), `${basePath}/llms/llms-${name}.txt`, from);
 		}
 	});
 

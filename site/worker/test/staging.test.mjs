@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { afterEach, describe, test } from 'node:test';
 
 import { twinExclusions } from '../lib/twins.mjs';
-import { MAX_FILE_BYTES, MAX_FILES, buildOrigin, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems, twinPairs } from '../lib/staging.mjs';
+import { MAX_FILE_BYTES, MAX_FILES, buildOrigin, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 const prefix = '/phonometry';
 const exclusions = twinExclusions(prefix);
@@ -45,9 +45,11 @@ const good = () => ({
 	'_astro/a.css': 'x',
 	'robots.txt': 'Sitemap: https://docs.jmrp.io/phonometry/sitemap-index.xml\n',
 });
+// As redirectPairs() lists them: the address with and without its slash, and its Markdown copy.
 const pairs = [
 	{ from: '/phonometry/about/', to: '/phonometry/signals/' },
 	{ from: '/phonometry/about', to: '/phonometry/signals/' },
+	{ from: '/phonometry/about/index.md', to: '/phonometry/signals/index.md' },
 ];
 
 describe('the checks', () => {
@@ -132,11 +134,6 @@ describe('the checks', () => {
 		assert.throws(() => buildOrigin(tree({ ...good(), 'index.html': '<html></html>' }), prefix), /canonical/);
 	});
 
-	test('a retired address also retires its Markdown copy when the target has one', () => {
-		const listed = listTree(tree(good()));
-		assert.deepEqual(twinPairs(pairs, listed, prefix), [{ from: '/phonometry/about/index.md', to: '/phonometry/signals/index.md' }]);
-		assert.deepEqual(twinPairs([...pairs, { from: '/phonometry/about/index.md', to: '/x/' }], listed, prefix), []);
-	});
 });
 
 describe('stage', () => {

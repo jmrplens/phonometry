@@ -129,26 +129,6 @@ export function exclusionProblems(noTwin, pages, exclusions) {
 }
 
 /**
- * The Markdown copies of the retired addresses: `<old>/index.md` answers a 301
- * to `<new>/index.md`. The zone rule sends a Markdown-preferring request for a
- * retired address to `<old>/index.md` before `_redirects` is read, and this is
- * what keeps that request from ending in a 404.
- *
- * @param {{from: string, to: string}[]} pairs The retired addresses.
- * @param {{path: string}[]} files The build's files.
- * @param {string} prefix The base path.
- * @returns {{from: string, to: string}[]} The pairs to add, in order.
- */
-export function twinPairs(pairs, files, prefix) {
-	const have = new Set(files.map(({ path }) => `${prefix}/${path}`));
-	const sources = new Set(pairs.map(({ from }) => from));
-	return pairs
-		.filter(({ from, to }) => from.endsWith('/') && to.endsWith('/'))
-		.map(({ from, to }) => ({ from: `${from}index.md`, to: `${to}index.md` }))
-		.filter(({ from, to }) => !sources.has(from) && have.has(to));
-}
-
-/**
  * The origin the build names as canonical on its home page.
  *
  * @param {string} root The build.
@@ -231,9 +211,8 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	if (built !== null && built !== origin) problems.push(`the build was built for ${built}, not ${origin}`);
 	problems.push(...exclusionProblems(noTwinPages(files, prefix, pairs), servedPages(files, prefix, pairs), exclusions));
 	problems.push(...mediaPolicyProblems(from, files, mediaOrigins));
-	const all = [...pairs, ...twinPairs(pairs, files, prefix)];
 	const have = new Set(files.map(({ path }) => `${prefix}/${path}`));
-	problems.push(...redirectProblems(all, { exists: (to) => have.has(to.endsWith('/') ? `${to}index.html` : to) }));
+	problems.push(...redirectProblems(pairs, { exists: (to) => have.has(to.endsWith('/') ? `${to}index.html` : to) }));
 	const headers = headersFile({ prefix, origin, exclusions, indexable });
 	const rules = parseHeaders(headers).length;
 	if (rules > HEADER_RULE_LIMIT) problems.push(`_headers has ${rules} rules, over the ${HEADER_RULE_LIMIT}`);
@@ -243,7 +222,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	const rootCopies = prefix === '' ? [] : ['404.html', ...ROOT_COPIES].filter((name) => have.has(`${prefix}/${name}`));
 	const extra = rootCopies.length;
 	if (files.length + extra > MAX_FILES) problems.push(`${files.length + extra} files once staged, over the ${MAX_FILES}`);
-	const report = { problems, files: files.length + extra, redirects: all.length, headerRules: rules };
+	const report = { problems, files: files.length + extra, redirects: pairs.length, headerRules: rules };
 	if (checkOnly || problems.length > 0) return report;
 
 	const site = join(out, ...prefix.split('/').filter(Boolean));
@@ -254,7 +233,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	// and llms.txt answer at the root as well.
 	for (const name of rootCopies) cpSync(join(from, name), join(out, name));
 	writeFileSync(join(out, '_headers'), headers);
-	writeFileSync(join(out, '_redirects'), redirectsFile(all));
+	writeFileSync(join(out, '_redirects'), redirectsFile(pairs));
 	writeFileSync(join(out, '.assetsignore'), '.*\n');
 	return report;
 }

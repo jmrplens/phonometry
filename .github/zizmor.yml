@@ -1,4 +1,4 @@
-# zizmor reviews every workflow in CI (the "Audit the workflows" step of
+# zizmor reviews every workflow in CI (the quality/zizmor step of
 # python-app.yml). One policy is set here rather than in each workflow.
 rules:
   unpinned-uses:

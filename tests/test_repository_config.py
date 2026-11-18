@@ -48,6 +48,7 @@ import github_edition
 _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
 _PYTHON_WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
+_MAKEFILE = _ROOT / "Makefile"
 
 
 def _workflow_files(root: pathlib.Path | None = None) -> list[pathlib.Path]:
@@ -3176,3 +3177,228 @@ def test_the_llms_gate_reader_names_an_output_left_out_of_the_diff() -> None:
     assert _llms_gate_problems(_llms_recipe(), gate, ignored) == [
         "make llms writes docs, which the llms gate does not compare"
     ]
+
+
+#: The groups of Python CI, in the order their jobs stand in the file.
+_JOB_GROUPS = (
+    "Tests",
+    "Generated",
+    "Docs",
+    "Lint",
+    "Guards",
+    "Package",
+    "Platform",
+    "FDTD",
+    "Runtime",
+    "Report",
+)
+#: The longest visible job name the checks list of a pull request shows whole.
+_JOB_NAME_BUDGET = 24
+_JOB_NAME = re.compile(r"^(?P<group>[A-Za-z]+) / \S.*$")
+
+
+def job_name_problems(jobs: Mapping[str, Mapping[str, object]]) -> list[str]:
+    """Each job of *jobs* whose visible name is not ``<Group> / <subject>``.
+
+    A name says the group first and what the job checks after it, a group is
+    one of ``_JOB_GROUPS`` and the jobs of one group stand together, in that
+    order, and a name with nothing to fill in fits the checks list whole.
+    """
+    problems: list[str] = []
+    last = 0
+    for key, job in jobs.items():
+        name = str(job.get("name") or "")
+        match = _JOB_NAME.match(name)
+        if match is None or match.group("group") not in _JOB_GROUPS:
+            problems.append(
+                f"{key}: {name or '(no name)'!r} is not '<Group> / <subject>'"
+            )
+            continue
+        rank = _JOB_GROUPS.index(match.group("group"))
+        if rank < last:
+            problems.append(
+                f"{key}: {name!r} stands after a job of {_JOB_GROUPS[last]}"
+            )
+        last = max(last, rank)
+        if "${{" not in name and len(name) > _JOB_NAME_BUDGET:
+            problems.append(f"{key}: {name!r} is longer than {_JOB_NAME_BUDGET}")
+    return problems
+
+
+def test_a_job_name_is_reported_unless_it_says_its_group_and_its_subject() -> None:
+    jobs: dict[str, Mapping[str, object]] = {
+        "quality": {"name": "Lint / code, workflows"},
+        "tests": {"name": "Tests / numba JIT 3.14"},
+        "sonar": {},
+        "video": {"name": "Videos encode with a real ffmpeg"},
+        "notebook": {"name": "Runtime / phonometry runs in a notebook kernel"},
+        "remote": {"name": "Remote / node"},
+    }
+    assert job_name_problems(jobs) == [
+        "tests: 'Tests / numba JIT 3.14' stands after a job of Lint",
+        "sonar: '(no name)' is not '<Group> / <subject>'",
+        "video: 'Videos encode with a real ffmpeg' is not '<Group> / <subject>'",
+        "notebook: 'Runtime / phonometry runs in a notebook kernel' is longer than 24",
+        "remote: 'Remote / node' is not '<Group> / <subject>'",
+    ]
+    assert (
+        job_name_problems({"tests": {"name": "Tests / ${{ matrix.os }} and more"}})
+        == []
+    )
+
+
+#: The start of a step name that orders a check rather than saying what holds:
+#: a verdict step is named for its invariant, and a step that builds and then
+#: compares or checks is a verdict step too.
+_IMPERATIVE_VERDICT = re.compile(
+    r"^(?:Check|Fail|Run|Lint|Compare|Rebuild|Verify|Test|Audit|Validate|Ensure)\b"
+    r"|\band (?:compare|check)\b"
+)
+
+
+def step_name_problems(jobs: Mapping[str, Mapping[str, object]]) -> list[str]:
+    """Each step of *jobs* whose name orders a check instead of stating it.
+
+    The checks page lists a failed step by its name: "Check the metadata"
+    says what ran, "The sdist and wheel pass twine check" says what no
+    longer holds.
+    """
+    problems = []
+    for key, job in jobs.items():
+        steps = job.get("steps")
+        assert isinstance(steps, list)
+        for step in steps:
+            name = str(step.get("name") or "")
+            if _IMPERATIVE_VERDICT.search(name):
+                problems.append(f"{key}: {name!r} orders a check; name what holds")
+    return problems
+
+
+def test_a_step_named_as_an_order_to_check_is_reported() -> None:
+    jobs: dict[str, Mapping[str, object]] = {
+        "quality": {
+            "steps": [
+                {"name": "Check formatting with Ruff"},
+                {"name": "Every file is formatted (ruff)"},
+                {"name": "Build both again and compare them"},
+                {"name": "Install the runtime dependencies"},
+                {"uses": "actions/checkout@v7"},
+            ]
+        },
+        "remote": {"steps": [{"name": "Lint the Dockerfile"}]},
+    }
+    assert step_name_problems(jobs) == [
+        "quality: 'Check formatting with Ruff' orders a check; name what holds",
+        "quality: 'Build both again and compare them' orders a check; name what holds",
+        "remote: 'Lint the Dockerfile' orders a check; name what holds",
+    ]
+
+
+def test_every_python_ci_verdict_step_is_named_for_what_holds() -> None:
+    """A step that judges says the invariant it holds, as the guards' steps do."""
+    assert step_name_problems(_python_ci_jobs()) == []
+
+
+def test_every_python_ci_job_says_its_group_and_what_it_checks() -> None:
+    """The checks list of a pull request cuts a job's name at about 24 characters.
+
+    Named for its invariant, most jobs read the same up to the cut, and
+    fifteen began with "Every". Named ``<Group> / <subject>``, the group
+    sorts the list and the subject stays whole; the guide cites each check by
+    its job key and step id, so a renamed job leaves every citation standing.
+    """
+    assert job_name_problems(_python_ci_jobs()) == []
+
+
+#: The guard groups of Python CI that the Makefile runs as one target each.
+_MAKE_GUARD_GROUPS = ("guards-prose", "guards-source", "guards-package")
+_GUARD_RUN = re.compile(r"^python3? (scripts/\S+\.py(?: [^|;&]*)?)$")
+_RECIPE_GUARD = re.compile(
+    r'^\$\(PYTHON\) (scripts/\S+\.py(?: [^|;&]*?)?) \|\| failed="\$\$failed ([\w-]+)"; \\$'
+)
+
+
+def ci_guards(job: Mapping[str, object]) -> list[tuple[str, str]]:
+    """The guard commands of *job* in the order it runs them, each with its step id."""
+    guards: list[tuple[str, str]] = []
+    for step in _steps_of(job):
+        match = _GUARD_RUN.match(str(step.get("run", "")).strip())
+        if match is not None:
+            guards.append((match.group(1).strip(), str(step.get("id"))))
+    return guards
+
+
+def make_guards(makefile: str, target: str) -> list[tuple[str, str]] | None:
+    """The guard commands the recipe of *target* runs, each with the id it reports.
+
+    None when the Makefile has no such target. A line of the recipe that runs
+    a script some other way than one guard that reports its id is returned as
+    it stands, with no id, so a comparison with the job names it.
+    """
+    lines = makefile.splitlines()
+    try:
+        start = lines.index(f"{target}:")
+    except ValueError:
+        return None
+    guards: list[tuple[str, str]] = []
+    for line in lines[start + 1 :]:
+        if not line.startswith("\t"):
+            break
+        body = line.strip()
+        match = _RECIPE_GUARD.match(body)
+        if match is not None:
+            guards.append((match.group(1).strip(), match.group(2)))
+        elif "scripts/" in body:
+            guards.append((body, ""))
+    return guards
+
+
+def test_a_make_guard_group_that_parts_from_its_job_is_reported() -> None:
+    job = {
+        "steps": [
+            {"id": "python", "uses": "actions/setup-python@v6"},
+            {"id": "dead-constants", "run": "python scripts/check_dead_constants.py"},
+            {
+                "id": "decimal-comma",
+                "run": "python scripts/check_decimal_comma.py --english",
+            },
+        ]
+    }
+    assert ci_guards(job) == [
+        ("scripts/check_dead_constants.py", "dead-constants"),
+        ("scripts/check_decimal_comma.py --english", "decimal-comma"),
+    ]
+    recipe = (
+        "guards-x:\n"
+        '\t@failed=""; \\\n'
+        '\t$(PYTHON) scripts/check_dead_constants.py || failed="$$failed dead-constants"; \\\n'
+        '\t$(PYTHON) scripts/check_decimal_comma.py || failed="$$failed decimal-comma"; \\\n'
+        "\t$(PYTHON) scripts/check_em_dashes.py; \\\n"
+        '\tif [ -n "$$failed" ]; then exit 1; fi\n'
+        "\n"
+        "other:\n"
+        "\t$(PYTHON) scripts/check_raises_blocks.py\n"
+    )
+    assert make_guards(recipe, "guards-x") == [
+        ("scripts/check_dead_constants.py", "dead-constants"),
+        ("scripts/check_decimal_comma.py", "decimal-comma"),
+        ("$(PYTHON) scripts/check_em_dashes.py; \\", ""),
+    ]
+    assert make_guards(recipe, "guards-y") is None
+
+
+def test_each_make_guard_group_runs_what_its_ci_job_runs() -> None:
+    """``make guards-source`` and its two siblings are the CI job, on a laptop.
+
+    Each target runs the guards of its job with the same arguments, in the
+    same order, and reports a failed one by its step id, so a guard added to
+    a job and not to its target, or run there with other flags, fails here.
+    """
+    jobs = _python_ci_jobs()
+    makefile = _MAKEFILE.read_text(encoding="utf-8")
+    parted = {
+        group: (ci_guards(jobs[group]), make_guards(makefile, group))
+        for group in _MAKE_GUARD_GROUPS
+        if ci_guards(jobs[group]) != make_guards(makefile, group)
+    }
+    assert parted == {}

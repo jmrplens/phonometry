@@ -2,7 +2,7 @@
 """A video written on a real node: the result equals the local run, the file decodes.
 
 Runs only where ``PHONOMETRY_TEST_NODE`` names a node in the hosts file: the
-CI job "Remote simulation on a localhost node", which serves the cpu stage of
+remote-node job of python-app.yml, which serves the cpu stage of
 the node image (with its pinned ffmpeg build and the figure stack) built
 with the pins of the job, so the run steps the same numbers, and installs
 the ffprobe that decodes the video here.

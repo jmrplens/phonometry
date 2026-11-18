@@ -792,6 +792,11 @@ snippets-static:
 hazards:
 	$(PYTHON) scripts/check_markdown_hazards.py
 
+# Refuse an install command that leaves its extras unquoted, which zsh reads
+# as a glob and stops on before pip runs. Stdlib only.
+quoted-extras:
+	$(PYTHON) scripts/check_quoted_extras.py
+
 # Where a fence of a page closes is decided once, the way CommonMark decides
 # it, in scripts/markdown_fences.py and in its JavaScript twin for the site,
 # site/src/lib/markdown-fences.mjs. This fails on a script or a piece of the
@@ -812,6 +817,12 @@ fence-readers:
 span-readers:
 	$(PYTHON) scripts/check_span_readers.py
 
+# Refuse an em dash in the prose the project publishes: the pages, the
+# CHANGELOG, the README, the docstrings the API reference is drawn from and the
+# text drawn into the figures (rule P6). Stdlib only.
+em-dashes:
+	$(PYTHON) scripts/check_em_dashes.py
+
 # Catch a C0 control character in a text file. A form feed in a raw docstring
 # is what \frac looks like once the backslash and the f have been eaten, and
 # the published formula then loses its fraction with nothing reporting it.
@@ -827,12 +838,22 @@ control-characters:
 claims:
 	$(PYTHON) scripts/list_coverage_claims.py
 
+# Fail when a public name has no row in the curated API quick table,
+# docs/reference/api/index.md. It imports the package.
+api-reference:
+	$(PYTHON) scripts/check_api_reference.py
+
 # Regenerate the committed Starlight API reference (site/src/content/docs/
 # reference/api + site/src/generated/api-sidebar.mjs) from the source
 # docstrings. CI fails if this drifts (see the api-docs step of the
 # guards-package job in python-app.yml).
 api-docs:
 	$(PYTHON) scripts/generate_api_docs.py
+
+# Hold every entry of docs/ERRATA.md to the page it cites: the evidence is the
+# printed page, not the text a PDF extracts from it. Stdlib only.
+errata-evidence:
+	$(PYTHON) scripts/check_errata_evidence.py
 
 # Transplant docs/ERRATA.md and docs/ERRATA.es.md into their Starlight pages:
 # one page per document family under site/src/content/docs/{,es/}reference/errata/,
@@ -1012,6 +1033,69 @@ type-completeness:
 	PATH="$(CURDIR)/$(TYPE_COMPLETENESS_DIR)/user/bin:$$PATH" VIRTUAL_ENV="$(CURDIR)/$(TYPE_COMPLETENESS_DIR)/user" \
 		pyright --verifytypes phonometry --ignoreexternal
 
+# The guards of each group of Python CI, as its job runs them: the same
+# commands, in the same order, and each one runs whatever another reports, so
+# one run names every guard that fails. They read the tree and write nothing;
+# the gates that regenerate a committed file and diff it (make conformance,
+# make api-docs, make llms) stay targets of their own. A test holds each list
+# to its job (tests/test_repository_config.py). guards-package imports the
+# package; the other two run on the standard library.
+guards-prose:
+	@failed=""; \
+	$(PYTHON) scripts/check_errata_evidence.py || failed="$$failed errata-evidence"; \
+	$(PYTHON) scripts/generate_site_reports.py --check || failed="$$failed site-reports"; \
+	$(PYTHON) scripts/check_catalogue_links.py || failed="$$failed catalogue-links"; \
+	$(PYTHON) scripts/check_euler_number.py || failed="$$failed euler-number"; \
+	$(PYTHON) scripts/check_control_characters.py || failed="$$failed control-characters"; \
+	$(PYTHON) scripts/check_plot_style_defaults.py || failed="$$failed plot-style-defaults"; \
+	$(PYTHON) scripts/check_subscript_slope.py || failed="$$failed subscript-slope"; \
+	$(PYTHON) scripts/check_markdown_hazards.py || failed="$$failed markdown-hazards"; \
+	$(PYTHON) scripts/check_docstring_math.py || failed="$$failed docstring-math"; \
+	$(PYTHON) scripts/check_quoted_extras.py || failed="$$failed quoted-extras"; \
+	$(PYTHON) scripts/check_fence_names.py || failed="$$failed fence-names"; \
+	$(PYTHON) scripts/check_span_readers.py || failed="$$failed span-readers"; \
+	$(PYTHON) scripts/check_spanish_accents.py || failed="$$failed spanish-accents"; \
+	$(PYTHON) scripts/check_fence_readers.py || failed="$$failed fence-readers"; \
+	$(PYTHON) scripts/check_digit_grouping.py || failed="$$failed digit-grouping"; \
+	$(PYTHON) scripts/check_decimal_comma.py --english --strict || failed="$$failed decimal-comma"; \
+	$(PYTHON) scripts/check_em_dashes.py || failed="$$failed em-dashes"; \
+	$(PYTHON) scripts/check_language_forwarding.py || failed="$$failed language-forwarding"; \
+	if [ -n "$$failed" ]; then echo "failed:$$failed" >&2; exit 1; fi
+
+guards-source:
+	@failed=""; \
+	$(PYTHON) scripts/check_conformance_rows.py || failed="$$failed conformance-rows"; \
+	$(PYTHON) scripts/check_reference_values.py || failed="$$failed reference-values"; \
+	$(PYTHON) scripts/check_dead_constants.py || failed="$$failed dead-constants"; \
+	$(PYTHON) scripts/check_raises_blocks.py || failed="$$failed raises-blocks"; \
+	$(PYTHON) scripts/check_record_display.py || failed="$$failed record-display"; \
+	$(PYTHON) scripts/check_bare_array_annotations.py || failed="$$failed bare-array-annotations"; \
+	$(PYTHON) scripts/check_regular_file_reads.py || failed="$$failed regular-file-reads"; \
+	$(PYTHON) scripts/check_return_overloads.py || failed="$$failed return-overloads"; \
+	$(PYTHON) scripts/check_boundary_comparisons.py || failed="$$failed boundary-comparisons"; \
+	$(PYTHON) scripts/check_real_conversions.py || failed="$$failed real-conversions"; \
+	$(PYTHON) scripts/check_array_aliasing.py || failed="$$failed array-aliasing"; \
+	$(PYTHON) scripts/check_parameter_annotations.py || failed="$$failed parameter-annotations"; \
+	if [ -n "$$failed" ]; then echo "failed:$$failed" >&2; exit 1; fi
+
+guards-package:
+	@failed=""; \
+	$(PYTHON) scripts/check_solid_agreement.py || failed="$$failed solid-agreement"; \
+	$(PYTHON) scripts/check_published_catalogues_reach_the_page.py || failed="$$failed published-catalogues"; \
+	$(PYTHON) scripts/check_conformance_artifact.py || failed="$$failed conformance-artifact"; \
+	$(PYTHON) scripts/check_conformance_vocabulary.py || failed="$$failed conformance-vocabulary"; \
+	$(PYTHON) scripts/generate_catalogue_schema.py --check || failed="$$failed catalogue-schema"; \
+	$(PYTHON) scripts/generate_catalogue_data.py --check || failed="$$failed catalogue-data"; \
+	$(PYTHON) scripts/check_shared_sources.py || failed="$$failed shared-sources"; \
+	$(PYTHON) scripts/check_frozen_constants.py || failed="$$failed frozen-constants"; \
+	$(PYTHON) scripts/check_published_sources.py || failed="$$failed published-sources"; \
+	$(PYTHON) scripts/check_identifier_spelling.py || failed="$$failed identifier-spelling"; \
+	$(PYTHON) scripts/check_conformance_claims.py || failed="$$failed conformance-claims"; \
+	$(PYTHON) scripts/check_api_reference.py || failed="$$failed api-reference"; \
+	$(PYTHON) scripts/check_parameter_units.py || failed="$$failed parameter-units"; \
+	$(PYTHON) scripts/check_choice_literals.py || failed="$$failed choice-literals"; \
+	if [ -n "$$failed" ]; then echo "failed:$$failed" >&2; exit 1; fi
+
 check: lint security test
 
 .PHONY: install site-deps lint format security snyk sonar graphs figure-contrast figure-language \
@@ -1023,4 +1107,5 @@ check: lint security test
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \
 	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations bare-array-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
-	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues
+	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues \
+	em-dashes quoted-extras errata-evidence api-reference guards-prose guards-source guards-package

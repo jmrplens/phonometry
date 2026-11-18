@@ -97,6 +97,15 @@ ruff check .
 ruff format --check .
 ```
 
+The guard scripts CI runs in its three guard jobs run here as one target
+each, with the same arguments and in the same order, and each target names
+every guard that failed, by the id of its CI step:
+```bash
+make guards-prose     # the prose, the pages and the markdown (stdlib only)
+make guards-source    # the source read as text (stdlib only)
+make guards-package   # the guards that import the package
+```
+
 ### 3. Testing (Pytest)
 Run the full test suite to ensure no regressions. We aim for 100% code coverage.
 ```bash
@@ -568,9 +577,8 @@ after changing a public name, a signature or a docstring. `make llms` reads
 every page of the site, through the Markdown copy `site/scripts/agent-md.mjs`
 writes of it, so run it after changing any page, a component a page uses or
 its Markdown writer (it needs the site's dependencies, step 4 of the setup).
-Commit whatever each changes: the "Generated API reference up to date" and
-"llms artifacts up to date" steps of CI diff those paths and fail on any
-difference.
+Commit whatever each changes: the CI steps `guards-package/api-docs` and
+`guards-prose/llms` diff those paths and fail on any difference.
 
 The shards under `/llms/` and `llms-full.txt` are not committed. Each page in
 them is its Markdown copy, whose header carries the day the page was first

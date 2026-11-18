@@ -60,7 +60,7 @@ background_clear = bool(settled(margin_db) >= _MIN_BACKGROUND_MARGIN_DB)
 background_clear = margin_db >= _MIN_BACKGROUND_MARGIN_DB  # False for 66.1 dB over 60.1 dB
 ```
 
-**Enforced by:** `scripts/check_boundary_comparisons.py`, `make boundary-comparisons`, `CI: No verdict hangs on the last bits of a computed decimal`
+**Enforced by:** `scripts/check_boundary_comparisons.py`, `make boundary-comparisons`, `CI: guards-source/boundary-comparisons`
 
 **Exceptions.** `settled` is for a quantity of ordinary size; `settled_ratio` is for one in the caller's own unit, `settled_net_share` for a signed sum judged against zero (a canceling sum, a fit or a discriminant can land a few units in the last place either side), and the `round_half_*` helpers for a half. A named slack (`_RATIO_SLACK = 1e-12`) is the other way out; an epsilon that keeps a divisor off zero is no slack. A comparison of the refused shape that cannot sit on its limit (a level through a logarithm, a band edge at an irrational ratio) goes in `scripts/boundary_comparison_exemptions.tsv`, one line per comparison with its reason; a stale line fails. Code under `_plot` and `_report` is not scanned. A name is read in the scope Python reads it in: a comprehension's variable is an item of what it walks inside the comprehension only, never the function's name of the same spelling.
 
@@ -281,7 +281,7 @@ class DecayCurve:
     levels: NDArray[np.float64]  # shares the caller's array
 ```
 
-**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given`, `tests/test_owns_arrays.py`, `tests/test_bytearray_refusals.py`
+**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: guards-source/array-aliasing`, `tests/test_owns_arrays.py`, `tests/test_bytearray_refusals.py`
 
 **Exceptions.** A public record that can hold an array inherits `OwnsArrays` (`phonometry._internal.frozen`), last among its bases; it copies every array it is built with, inside a tuple, a list, a mapping or an array of objects too, and seals the copy read-only. Any other object NumPy reads as an array, through `__array__`, `__array_interface__`, `__array_struct__` or the buffer protocol (a column of a data frame, a labelled array, a `memoryview`), is read with `np.asarray` and the array that comes back is copied the same way, since it is the caller's own memory; `bytes` and a NumPy scalar stay what they are, a `bytearray` is a text as a `bytes` is and is held as the `bytes` it spells, never the caller's `bytearray` nor an array of the codes of its characters, and a record held in a field is not read. A check that names the type of a value it refuses, or quotes it, does so through `given_type` and `given_repr`, which name and quote that `bytes` as the `bytearray` the caller gave while the record's checks run, wherever the record holds it: inside a tuple, a list, a named tuple, a mapping or an array of objects as well. A `__post_init__` that takes the members out of a field a caller may give as any other sequence (a deque, a generator) reads them through `owned_members(self.bands, "bands", self)`, which copies each array the record could not reach before and refuses a container that holds itself by the record and the field. A plain class stores `read_only_copy(array)`, never `read_only` of an argument, which would clear the flag on the caller's own array. A record held in a field answers for its own arrays, an `io.Signal` included, whose samples stay writeable ([A37](api.md#a37)). `RECORD_EXEMPT` (only `io.Signal`, which copies its samples itself) and `EXEMPT` at the top of the script take an entry with its reason; a stale entry fails.
 
@@ -306,7 +306,7 @@ return DecayCurve(levels=levels.copy())
 return DecayCurve(levels=read_only_copy(levels))
 ```
 
-**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given`
+**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: guards-source/array-aliasing`
 
 **Exceptions.** A type that has to change is written `np.asarray(values, dtype=...)`, which converts only when it must. Normalize and seal inside the record's `__post_init__` with `read_only`, never with a second copy: what `__post_init__` reads back from `self` is already the record's copy. A copy the guard cannot vouch for (a helper's own return) is left alone.
 
@@ -351,7 +351,7 @@ view = snapshots[::2]
 return Frames(snapshots=handed_over(snapshots))  # a view escapes: the gate fails it
 ```
 
-**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given`
+**Enforced by:** `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: guards-source/array-aliasing`
 
 ## Units, references and precision
 
@@ -405,7 +405,7 @@ p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"].value
 _P0 = 2e-5  # reference sound pressure, ISO 1683
 ```
 
-**Enforced by:** `scripts/check_reference_values.py`, `make reference-values`, `CI: Every reference value points at ISO 1683 or names its source`, `tests/test_check_reference_values.py::test_the_package_is_clean`
+**Enforced by:** `scripts/check_reference_values.py`, `make reference-values`, `CI: guards-source/reference-values`, `tests/test_check_reference_values.py::test_the_package_is_clean`
 
 **Exceptions.** A reference that differs from the table (DIN 45672-2's 5e-8 m/s written in mm/s, ISO 226's squared reference pressure, ISO 9611's 50 nm/s) names the document it comes from in the comment above it or on its line (ISO 1683 itself does not count) and is listed in `DIFFERENT_REFERENCES` of the script with the value it holds. A bare `2e-05`, or a table value used as a logarithm's divisor or an antilogarithm's factor, is caught anywhere; a literal that is something else goes in `EXEMPT_LITERALS` with its reason. A name ending in `db` or naming a level holds a level, not a reference.
 
@@ -451,7 +451,7 @@ source = "Hopkins (2007) Eq. (1.165), PDF page 108 (printed p. 81)"
 source = "Hopkins 2007, p. 81"
 ```
 
-**Enforced by:** `scripts/check_published_sources.py`, `make published-sources`, `CI: Every published value names its page`, `tests/test_check_published_sources.py`
+**Enforced by:** `scripts/check_published_sources.py`, `make published-sources`, `CI: guards-package/published-sources`, `tests/test_check_published_sources.py`
 
 **Exceptions.** Several citations are joined by `; `. The folio has four forms: `printed p. N`, `printed pp. N-M`, `printed folio N`, and `no printed folio; between folios N and M` for a plate with no number; a handbook with independently paginated chapters writes N as chapter.page (`32.8`). The document must split and recompose character for character through `scripts/conformance/references.py` and have an entry in `docs/reference/bibliography.md`. The guard holds a standard (ISO, IEC, EN, DIN) to this form too: it refuses one cited by its clause or table number alone, and `docs/reference/bibliography.md` lists a standard under its publishing body, so no published record names one yet. The comment banner above a table transcribed from a standard cites it by its number ([D13](docstrings.md#d13)).
 
@@ -526,7 +526,7 @@ tin = solids.solids_named("tin")  # every book's row, 4.4 GPa and 54 GPa side by
 TIN_YOUNGS_MODULUS_PA = 4.4e9  # two books against one
 ```
 
-**Enforced by:** `scripts/check_solid_agreement.py`, `scripts/check_shared_sources.py`, `make solid-agreement`, `make shared-sources`, `CI: The books agree about the solids they share`, `tests/test_check_solid_agreement.py`
+**Enforced by:** `scripts/check_solid_agreement.py`, `scripts/check_shared_sources.py`, `make solid-agreement`, `make shared-sources`, `CI: guards-package/solid-agreement`, `tests/test_check_solid_agreement.py`
 
 **Exceptions.** A density two books print more than 8 % apart is read as a transcription error and fails; a disagreement that is the books' own goes in `ACCEPTED` of `scripts/check_solid_agreement.py` with its reason read from both pages (polypropylene, and the polystyrene, polyurethane and PVC that one book prints as foams). Moduli and speeds that differ between books are reported, never failed. An errata needs a page that contradicts itself, so a disagreement between books never enters `docs/ERRATA.md`.
 
@@ -579,6 +579,6 @@ div.fill(0.0)
 values = p[rows, cols]
 ```
 
-**Enforced by:** `CI: FDTD engines on array-api-strict and torch (CPU)`, `CI: FDTD engines hold their golden digests`, `make engine-digests`, `tests/simulation/test_engine_golden_digests.py`, `tests/simulation/test_gpu_parity_lock.py`
+**Enforced by:** `CI: array-api/backend-tests`, `CI: baseline-glibc/engine-digests`, `make engine-digests`, `tests/simulation/test_engine_golden_digests.py`, `tests/simulation/test_gpu_parity_lock.py`
 
 **Exceptions.** The maps are built on the host in NumPy float64 when the engine is constructed and handed to the backend once; that code may use any NumPy call. Every method that reads or writes a field after that uses only the standard, in the order of operations the NumPy path had, with no fused kernels. The `array-api` CI job steps every scenario of `scripts/engine_scenarios.py` on array-api-strict, which refuses a call outside the standard and a NumPy call on a device array. The golden-digest steps of the `baseline-glibc` CI job hold the NumPy path bit for bit to `engine-digests.json`, the SHA-256 digests of every array those scenarios return and the exact energy of the elastic engine's fluid branch at five seeds (the fluid-energy record), taken from the engines before they could step anywhere else (`make engine-digests` compares here, or takes a moved measurement from that job's run when the move is meant). The lock test fails when an engine file changes without a new CuPy proof (`make gpu-parity` on a GPU).

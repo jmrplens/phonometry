@@ -16,7 +16,7 @@
  * The fiche is an opaque white A4 page, so — unlike the theme-aware figures —
  * a single WebP serves both themes; a light frame keeps it legible on the dark
  * ground. The WebP is not byte-checked in CI (its embedded vector plot differs
- * by ~1 ULP across CPUs); the `Example report fiches up to date` job compares
+ * by ~1 ULP across CPUs); the `reports` job of python-app.yml compares
  * it within a tolerance instead, so a stale preview fails the build.
  */
 interface Props {

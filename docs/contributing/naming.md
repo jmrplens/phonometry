@@ -43,7 +43,7 @@ src/phonometry/signals/_correlation.py, its names reached as phonometry.signals.
 src/phonometry/signals/correlation.py beside the published function signals.correlation
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `tests/test_removed_names.py::test_a_module_hidden_behind_its_function_is_private`, `CI: Curated API quick table covers __all__`
+**Enforced by:** `scripts/check_api_reference.py`, `tests/test_removed_names.py::test_a_module_hidden_behind_its_function_is_private`, `CI: guards-package/api-reference`
 
 <a id="n3"></a>
 ### N3. Give every top-level name a module keeps for itself a leading underscore
@@ -65,7 +65,7 @@ def _warn_above_plane_wave_limit(frequency: float) -> None: ...
 OCTAVE_BANDS = (125.0, 250.0, 500.0, 1000.0)  # read by this module only, missing from __all__
 ```
 
-**Enforced by:** `scripts/check_api_reference.py`, `CI: Curated API quick table covers __all__`
+**Enforced by:** `scripts/check_api_reference.py`, `make api-reference`, `CI: guards-package/api-reference`
 
 **Exceptions.** Typing constructs (a type alias, a `TypeVar`, a `Protocol`) stay PascalCase, unlisted and unprefixed. A rare public-looking name may go in `UNLISTED_EXEMPTIONS` of `scripts/check_api_reference.py`, keyed by location with its reason.
 
@@ -185,7 +185,7 @@ background_corrected_level_db(...)
 air_attenuation_m(...)
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_public_function_is_named_for_what_it_returns`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_every_public_function_is_named_for_what_it_returns`
 
 **Exceptions.** A unit stays where the quantity has more than one customary unit (`peak_velocity_from_kb_mm_s`, `admissible_exposure_s`, `air_power_attenuation_per_m`). A method that reads a printed row's columns, or returns a quantity the record also holds in another unit, goes in `FUNCTION_UNIT_EXEMPT` of the guard, keyed by (module, qualified name) with its reason (`WindowMetricsResult.enbw_hz` sits beside the `enbw_bins` its record holds).
 
@@ -390,7 +390,7 @@ atmospheric_absorption(100.0, temperature=15.0, humidity=70.0, pressure=101.325)
 result.frequencies_hz  # a band axis carries no unit
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py`, `tests/test_public_vocabulary.py::test_one_concept_is_spelled_one_way`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py`, `tests/test_public_vocabulary.py::test_one_concept_is_spelled_one_way`
 
 **Exceptions.** The guard demands the unit on the quantities where two customary units compete, the ones `scripts/check_parameter_units.py` lists (pressure, temperature, humidity, diameter, angle, period, gradient, molar mass, thickness, spacing, height, phase, speed, attenuation rates; distance inside `aircraft`); any other scalar keeps a unit it carries, so a single frequency is `frequency_hz` and a time signal of one quantity is `pressure_pa` ([N13](#n13)). A name built on a listed quantity may instead end in a suffix that says it has no unit of its own (`pressure_ratio`, `temperature_correction`: `_level`, `_index`, `_ratio`, `_coefficient`, `_correction`, `_uncertainty`); a quantity in decibels follows [N23](#n23) and [N24](#n24). A `bool` parameter is outside the rule. Anything else goes in `EXEMPT` of the guard, keyed by (module, qualified name, parameter) with its reason (acoustic waveforms, ratios of two figures in any unit); a stale entry fails. A band axis carries no unit ([N12](#n12)), except two second units: `distances_m` in `aircraft` (NPD tables in feet) and `frequencies_hz` in `underwater` (formulas in kHz).
 
@@ -412,7 +412,7 @@ def exposure(duration_s: float, angle_deg: float, period_hours: float) -> float:
 def exposure(duration_seconds, angle_degrees, period_h): ...
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_spells_every_unit_one_way`, review
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_the_tree_spells_every_unit_one_way`, review
 
 **Exceptions.** The retired spellings the guard refuses are `_degrees`, `_seconds`, `_km_h`, `_db_s`, `_knots` and an `_h` that means hours. An `_min` that means minutes is retired too (`_min` is a minimum): the guard reports it on a period or another quantity it lists (`assessment_period_min` names no unit), and on any other duration it is review. A name that means something else by the suffix goes in `SPELLING_EXEMPT` of the guard with its reason (`inductance_h` is the henry). An hour or a minute that ends a compound rate is a denominator and stays (`_mm_h`, `_ft_per_min`).
 
@@ -437,7 +437,7 @@ fluids.air(temperature_k=293.15)
 temperature_coefficient_db_per_c
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_temperature_on_its_scale`, `tests/test_check_parameter_units.py::test_the_temperature_scale_rule_reads_a_name`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_temperature_on_its_scale`, `tests/test_check_parameter_units.py::test_the_temperature_scale_rule_reads_a_name`
 
 **Exceptions.** A coefficient per degree ends in `_per_k`. An interval of temperature ends in `_k` and is listed in `TEMPERATURE_INTERVALS` of the guard, keyed by (module, qualified name, parameter) with its reason (`u_temperature_k` of the reciprocity uncertainty budgets, `TEMPERATURE_TOLERANCE_K` of ISO 10847), so a new one is read before it is admitted; a stale entry fails.
 
@@ -461,7 +461,7 @@ def air_density(temperature_c, ambient_pressure): ...
 def speed_of_sound(temperature_c, barometric_pressure_hpa): ...
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_pressure_of_the_medium_has_one_stem`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_the_pressure_of_the_medium_has_one_stem`
 
 **Exceptions.** Each function keeps the pascal or kilopascal its clause prints. `atmospheric_pressure_pa` names only the outside atmosphere, where the same signature also takes a stream pressure (`ATMOSPHERIC_ADMITTED` of the guard: `pipe_transmission_loss`, `normal_air_density` and others).
 
@@ -483,7 +483,7 @@ def air_loss(distance_m: float, air_absorption_db_per_m: float) -> float:
 def air_loss(distance_m, absorption_coefficient): ...  # documented in dB/km
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_holds_every_closing_rule`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_the_tree_holds_every_closing_rule`
 
 **Exceptions.** The guard holds a name that says absorption, attenuation or coefficient and whose docstring gives a unit per distance. A name that is not a rate goes in `RATE_EXEMPT` of the guard with its reason.
 
@@ -506,7 +506,7 @@ def layer(thickness_m): ...
 def plate(thickness): ...  # same subpackage, same quantity
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_holds_every_closing_rule`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_the_tree_holds_every_closing_rule`
 
 **Exceptions.** Two different quantities under one word (a subscript such as `r_w` beside a watt, `l_n` beside newtons, an A-weighted figure beside the band one) go in `PAIR_EXEMPT` of the guard with their reason. A frequency is the one quantity kept both ways on purpose: the bare word is a result's stated frequency or a vectorized argument, `frequency_hz` the scalar argument ([N16](#n16)), and the pair is listed there for each subpackage that has both.
 
@@ -533,7 +533,7 @@ absorption(100.0, 15.0, 340.0)
 noise_signal(48000, 0.5)
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_condition_on_the_tree_is_written_by_name`, `tests/test_check_parameter_units.py::test_a_unit_named_default_is_passed_by_name`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_every_condition_on_the_tree_is_written_by_name`, `tests/test_check_parameter_units.py::test_a_unit_named_default_is_passed_by_name`
 
 **Exceptions.** The conditions of the medium and of the measuring chain are held to it whatever their suffix (`speed_of_sound`, `air_density`, `air_sound_speed`, `water_density`, `calibration_factor`, the ground factors; `CONDITIONS` of the guard), and every defaulted parameter whose name ends in a unit of the guard's `UNITS` whatever quantity it names (`duration_s`, `length_m`, `high_hz`, `wind_directions_deg`). The first parameter is not held to it, nor an option (`mode`, `method`, `fraction`, `n`, `seed`), nor a condition the call cannot do without (`tube_wavenumber(frequency, speed_of_sound)`). A record's fields are held by [A18](api.md#a18). A signature that must stay positional goes in `POSITIONAL` of the guard with its reason (`metrology.sensitivity(reference_pressure_pa)`, part of the `Signal` overload contract).
 
@@ -558,7 +558,7 @@ def correct(levels: Sequence[float], background_levels: Sequence[float], fixture
 def correct(levels_db, background_levels_db, fixture_uncertainty): ...
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_no_level_carries_a_unit_suffix`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_no_level_carries_a_unit_suffix`
 
 **Exceptions.** The head noun is the last noun once trailing qualifiers are set aside (`_1000`, `_a`, `_before`, `_with`, `_max`). Level nouns: level, loss, insulation, isolation, reduction, rejection, difference, improvement, single-value attenuation, correction, adjustment, index, emergence, the ISO 717 adaptation term, and a shift, increase, decrease or excess of a named level; also a printed symbol of one (`l_n`, `delta_lw`; `kij` in `building`, `max_k3` in `emission`). A drop, rise, change or increment of a named level is one too (`level_drop`); a bare `shift` or `drop_db` names no level and keeps its unit, and in `materials` an `l1` is the length of ASTM E2611, not a level. A tolerance, margin, uncertainty, deviation, step, slope (`_db_per_decade`), rate (`_db_per_m`) or ratio keeps `_db`, and so does a statistic of a level (`sigma_level_db`: a leading `sigma_` or `u_` says it). A difference or a loss of another quantity keeps that quantity's unit (`phase_difference_deg`; a pressure loss is in pascals). `LEVEL_SUFFIX_EXEMPT` of the guard lists, with its reason, a name that holds something else under the word.
 
@@ -581,7 +581,7 @@ def hearing_threshold(threshold_level: float, *, expanded_uncertainty_db: float)
 def hearing_threshold(threshold_db, floor_db): ...
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_name_in_decibels_says_its_quantity`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_every_name_in_decibels_says_its_quantity`
 
 **Exceptions.** A level takes the noun that says so and then loses its `_db` (`corrected_levels`, `threshold_level`), a level difference takes its own (`floor_level_difference`), and any other quantity keeps `_db` after its noun (`fixture_uncertainty_db`, `lower_tolerance_db`). The nouns read as a quantity are `DECIBEL_QUANTITY_NOUNS` of the guard; `QUALIFIER_ONLY_EXEMPT` lists, with its reason, a name whose `_db` is not the unit of a number it holds (a flag, a printed symbol, the DB HR of the Spanish building code).
 
@@ -605,7 +605,7 @@ ROAD_REFERENCE_SPEED = 70.0
 UNIVERSAL_GAS_CONSTANT = 8314.0
 ```
 
-**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_every_published_constant_says_its_unit`
+**Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: guards-package/parameter-units`, `tests/test_check_parameter_units.py::test_every_published_constant_says_its_unit`
 
 **Exceptions.** A single number ends in its unit, in the one spelling each unit has (`_HZ`, `_M_S`, `_KMH`, `_KT`, `_DEG`, `_S`, `_HOURS`), or in `_DB` when it is in decibels and its head noun does not say so (a tolerance, a margin); a constant named for a level carries none (`EARPHONE_ATTENUATION`). A factor, a fraction or a ratio carries none. A table ends in its unit when its name names a quantity (`NOY_BANDS_HZ`). A count, a label or a pure number goes in `CONSTANT_EXEMPT` of the guard, keyed by (module, name) with its reason.
 
@@ -652,7 +652,7 @@ def specimen_velocity_margin(velocity_m_s: float) -> float:
 _MAX_SPECIMEN_VELOCITY_M_S = 0.5  # defined, cited in a docstring, never compared
 ```
 
-**Enforced by:** `scripts/check_dead_constants.py`, `make dead-constants`, `CI: No private constant goes unread`
+**Enforced by:** `scripts/check_dead_constants.py`, `make dead-constants`, `CI: guards-source/dead-constants`
 
 **Exceptions.** A name counts as read when it is loaded, used as an attribute, imported or named in a string anywhere in `src`, `tests` or `scripts`. `KEPT` in the script takes a constant, keyed (module, name), with its reason, and nothing belongs there that could be used instead. A constant kept only for documentation belongs in a docstring.
 
@@ -776,7 +776,7 @@ insitu_absorption_coefficient(...)
 location="centre"
 ```
 
-**Enforced by:** `scripts/check_identifier_spelling.py`, `make identifier-spelling`, `CI: Every public quantity names its unit`
+**Enforced by:** `scripts/check_identifier_spelling.py`, `make identifier-spelling`, `CI: guards-package/identifier-spelling`
 
 **Exceptions.** In situ is `in_situ` (`InSitu` in a class). `catalogue` is the one sanctioned British form: it is an American variant too, used uniformly, and part of the file format users write (the `catalogue` key, `phonometry-catalogue`, the schema URN). A string a published source prints keeps its print, in `EXEMPT` of the script, keyed by location with its reason ('optimised brushed down concrete', 'aluminium', the surname Doutres). The check reads `-ise`, `-yse`, `-our`, `-tre` and `-bre` as whole families. Prose in docstrings, guides and comments is not held to it.
 

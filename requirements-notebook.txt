@@ -1,4 +1,4 @@
-# The notebook kernel the "phonometry runs in a notebook kernel" CI job
+# The notebook kernel the notebook job of python-app.yml
 # executes tests/notebooks/smoke.ipynb on (scripts/check_notebook.py), pinned
 # exactly, on top of requirements.txt and requirements-reports.txt, which pin
 # the plotting and the fiche-rendering halves of what the notebook calls.

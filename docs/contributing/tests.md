@@ -187,7 +187,7 @@ with pytest.raises(ValueError):
     room.sabine_reverberation_time(-200.0, surfaces)
 ```
 
-**Enforced by:** `scripts/check_raises_blocks.py`, `make raises-blocks`, `CI: Every exception test waits on one call`, `ruff PT012`, `tests/test_check_raises_blocks.py`
+**Enforced by:** `scripts/check_raises_blocks.py`, `make raises-blocks`, `CI: guards-source/raises-blocks`, `ruff PT012`, `tests/test_check_raises_blocks.py`
 
 **Exceptions.** Calls SonarCloud holds safe do not count (python:S5778 and S9088, which the script copies): builtin conversions and containers (`float("nan")`, `len`, `list`), `pathlib` paths, `copy`, and anything in NumPy or SciPy. A call inside a lambda or a nested `def` is deferred. Unlike ruff PT012, the script refuses a block of several statements even with `noqa: PT012`. `EXEMPT` in the script, keyed by (file, test) with its reason, is empty.
 
@@ -466,7 +466,7 @@ pytestmark = pytest.mark.pinned_stack
 from figures import registry
 ```
 
-**Enforced by:** `tests/test_minimum_requirements.py`, `CI: Library tests at the dependency floors`
+**Enforced by:** `tests/test_minimum_requirements.py`, `CI: minimum-versions/library-tests`
 
 <a id="t19"></a>
 ### T19. Group the tests of an expensive module fixture with `xdist_group`
@@ -512,7 +512,7 @@ got = 10 * math.log10(...)  # Eq. (16) again, from the same constants, not the l
 assert abs(got - 38.0) <= 0.5
 ```
 
-**Enforced by:** `scripts/check_conformance_rows.py`, `make conformance-rows`, `CI: Every conformance row runs the library`
+**Enforced by:** `scripts/check_conformance_rows.py`, `make conformance-rows`, `CI: guards-source/conformance-rows`
 
 **Exceptions.** `ORACLE_ONLY` in `scripts/check_conformance_rows.py`, keyed `'<module>.<check function>'`, each entry with its reason: a row that pins the geometry of a test case, checks the standard against itself, or pins a dependency's published constant. A declared row that has since learned to call the library fails, so the list cannot rot.
 
@@ -536,7 +536,7 @@ then                                    make conformance
 the enum member in Python only, and the artifact regenerated
 ```
 
-**Enforced by:** `scripts/check_conformance_vocabulary.py`, `make conformance-vocabulary`, `CI: Conformance report up to date`
+**Enforced by:** `scripts/check_conformance_vocabulary.py`, `make conformance-vocabulary`, `CI: guards-package/conformance-vocabulary`
 
 <a id="t22"></a>
 ### T22. Write every workflow so that zizmor finds nothing under `.github/`
@@ -557,7 +557,7 @@ the enum member in Python only, and the artifact regenerated
 - uses: actions/checkout@v7  # leaves the token in .git for every later step
 ```
 
-**Enforced by:** `CI: Audit the workflows with zizmor`
+**Enforced by:** `CI: quality/zizmor`
 
 **Exceptions.** A finding that is not a defect is settled once for the repository in `.github/zizmor.yml`, with its reason in a comment, never in a workflow.
 
@@ -578,7 +578,7 @@ the enum member in Python only, and the artifact regenerated
 - uses: openjournals/openjournals-draft-action@master  # runs whatever lands on the branch next
 ```
 
-**Enforced by:** `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: Audit the workflows with zizmor`
+**Enforced by:** `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: quality/zizmor`
 
 **Exceptions.** An action whose maintainers publish no moving major tag is followed on the branch its README names as the release channel, listed with its reason in `_ACTION_CHANNELS` of the test: `pypa/gh-action-pypi-publish@release/v1`.
 
@@ -668,7 +668,7 @@ def test_the_shipped_pages_pass() -> None:  # opens 932 pages of docs/ and site/
     assert check_markdown_hazards.main() == 0
 ```
 
-**Enforced by:** `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors`
+**Enforced by:** `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests-perf/tests`, `CI: minimum-versions/library-tests`
 
 **Exceptions.** A test that reads the tree to find what it then runs through the library, so that the kernel or a floor dependency decides its verdict, stays unmarked and stands in `RUNS_THE_LIBRARY` of `tests/whole_tree.py` with its reason. A file the package opens itself, as the remote runner ships its own modules, and a file the import system opens are not counted. The count does not see a file a child process reads, a test that lists names without opening files, or one that takes what a guard's own cache kept from an earlier test of its worker; a test that reads a smaller part of a tree whole, such as the 85 rows of the conformance package, is marked by review.
 

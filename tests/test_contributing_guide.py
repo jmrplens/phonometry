@@ -19,6 +19,7 @@ import sys
 import tomllib
 
 import pytest
+import yaml
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -70,6 +71,12 @@ _ROW = re.compile(
     r"^\| \[([A-Z]\d+)\]\(([a-z-]+\.md)#([a-z]\d+)\) \| (.+?) \| (.+?) \|$"
 )
 _SPAN = re.compile(r"^`([^`]+)`$")
+#: A CI enforcer: ``CI: <job>/<step>`` in python-app.yml, or
+#: ``CI: <workflow>.yml:<job>/<step>`` in another workflow, by job key and step id.
+_CI = re.compile(r"^CI: (?:(?P<workflow>[\w.-]+\.ya?ml):)?([\w-]+)/([\w-]+)$")
+_CI_WORKFLOW = "python-app.yml"
+#: A guard script an enforcer names, or a step runs.
+_GUARD_SCRIPT = re.compile(r"\bscripts/check_\w+\.py\b")
 _GUIDE_LINK = re.compile(r"contributing/([a-z-]+\.md)(?:#([\w-]+))?")
 _LOCAL_LINK = re.compile(r"\]\(([a-z-]+\.md)(?:#([\w-]+))?\)")
 _COMMENT_LEAD = re.compile(r"^\s*(?:#:|#|//|\*|>)?\s*")
@@ -228,22 +235,7 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
     if target.startswith("ruff "):
         return _ruff_problem(target.removeprefix("ruff ").strip(), root)
     if target.startswith("CI: "):
-        # A job's name, or the name of one step of a job (``- name:``).
-        job = target.removeprefix("CI: ").strip().strip('"')
-        workflows = "\n".join(
-            p.read_text(encoding="utf-8")
-            for pattern in ("*.yml", "*.yaml")
-            for p in sorted((root / ".github" / "workflows").glob(pattern))
-        )
-        return (
-            None
-            if re.search(
-                rf"^\s*(?:-\s+)?name:\s*['\"]?{re.escape(job)}['\"]?\s*$",
-                workflows,
-                re.MULTILINE,
-            )
-            else f"no CI job or step named {job!r}"
-        )
+        return ci_problem(target, root)
     if target in ("mypy", "bandit"):
         return (
             None
@@ -262,6 +254,37 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
     ):
         return f"{file_part} has no {test_name}"
     return None
+
+
+def ci_step(target: str, root: pathlib.Path) -> tuple[dict[str, object] | None, str]:
+    """The step ``target`` (``CI: [<workflow>:]<job>/<step>``) cites, or why none.
+
+    A citation names the step by its job's key and its own ``id``, which a
+    renamed job or step keeps, never by the name the checks page shows. The
+    workflow is ``python-app.yml`` unless the citation names another.
+    """
+    m = _CI.match(target)
+    if m is None:
+        return None, (
+            f"{target!r} is not 'CI: <job>/<step>' or 'CI: <workflow>.yml:<job>/<step>'"
+        )
+    workflow, key, step_id = m.group("workflow") or _CI_WORKFLOW, m.group(2), m.group(3)
+    path = root / ".github" / "workflows" / workflow
+    if not path.is_file():
+        return None, f"no workflow .github/workflows/{workflow}"
+    jobs = yaml.safe_load(path.read_text(encoding="utf-8")).get("jobs") or {}
+    if key not in jobs:
+        return None, f"{workflow} has no job {key!r}"
+    found = [s for s in jobs[key].get("steps", []) if s.get("id") == step_id]
+    if not found:
+        return None, f"job {key!r} of {workflow} has no step with id {step_id!r}"
+    return found[0], ""
+
+
+def ci_problem(target: str, root: pathlib.Path) -> str | None:
+    """Why the CI step ``target`` names does not exist, or None when it does."""
+    step, problem = ci_step(target, root)
+    return None if step is not None else problem
 
 
 def _ruff_problem(code: str, root: pathlib.Path) -> str | None:
@@ -477,18 +500,144 @@ def test_a_ruff_code_the_configuration_ignores_is_reported(
     assert enforcer_problem("`ruff D212`", _ROOT) is None
 
 
-def test_a_ci_job_or_one_of_its_steps_is_an_enforcer(tmp_path: pathlib.Path) -> None:
+def test_a_ci_step_is_cited_by_its_job_key_and_its_id(tmp_path: pathlib.Path) -> None:
+    """A step is cited as ``<job>/<step>`` in python-app.yml, or with its
+    workflow in front in another one; renaming a job or a step on the checks
+    page leaves every citation standing, and a citation that names no step is
+    reported whichever part of it is wrong.
+    """
     _write(
-        tmp_path / ".github" / "workflows" / "ci.yml",
-        "jobs:\n  quality:\n    name: Quality gate\n    steps:\n"
-        "    - name: Audit the workflows\n      run: zizmor .github/\n",
+        tmp_path / ".github" / "workflows" / "python-app.yml",
+        "jobs:\n  quality:\n    name: Lint / code\n    steps:\n"
+        "    - name: No workflow finding\n      id: zizmor\n      run: zizmor .github/\n"
+        "    - name: Install the tools\n      run: pip install zizmor\n",
     )
-    assert enforcer_problem("`CI: Quality gate`", tmp_path) is None
-    assert enforcer_problem("`CI: Audit the workflows`", tmp_path) is None
+    _write(
+        tmp_path / ".github" / "workflows" / "docs.yml",
+        "jobs:\n  build:\n    steps:\n"
+        "    - name: Build site\n      id: build\n      run: pnpm build\n",
+    )
+    assert enforcer_problem("`CI: quality/zizmor`", tmp_path) is None
+    assert enforcer_problem("`CI: docs.yml:build/build`", tmp_path) is None
+    assert enforcer_problem("`CI: python-app.yml:quality/zizmor`", tmp_path) is None
+    form = "is not 'CI: <job>/<step>' or 'CI: <workflow>.yml:<job>/<step>'"
+    assert enforcer_problem("`CI: No workflow finding`", tmp_path) == (
+        f"'CI: No workflow finding' {form}"
+    )
+    assert enforcer_problem("`CI: quality`", tmp_path) == f"'CI: quality' {form}"
     assert (
-        enforcer_problem("`CI: Audit the docs`", tmp_path)
-        == "no CI job or step named 'Audit the docs'"
+        enforcer_problem("`CI: lint/zizmor`", tmp_path)
+        == "python-app.yml has no job 'lint'"
     )
+    assert (
+        enforcer_problem("`CI: quality/ruff`", tmp_path)
+        == "job 'quality' of python-app.yml has no step with id 'ruff'"
+    )
+    assert (
+        enforcer_problem("`CI: docs.yml:quality/zizmor`", tmp_path)
+        == "docs.yml has no job 'quality'"
+    )
+    assert (
+        enforcer_problem("`CI: release.yml:build/build`", tmp_path)
+        == "no workflow .github/workflows/release.yml"
+    )
+
+
+def cited_guard_problems(rule: Rule, root: pathlib.Path) -> list[str]:
+    """A guard step a rule cites that runs none of the guard scripts it names.
+
+    A rule names the script that holds it and the CI step that runs that
+    script; a citation of the step beside it, one that runs another guard,
+    leaves the rule held by a check that does not look at it. A rule that
+    names a guard script and cites CI at all has one cited step that runs
+    one of them: a citation of a step that runs no guard, such as the one
+    that fails on a dirty checkout, would otherwise stay green while the
+    guard itself runs nowhere in CI.
+    """
+    named = set(_GUARD_SCRIPT.findall(rule.enforced_by))
+    problems: list[str] = []
+    cites_ci = False
+    runs_named = False
+    for item in _items(rule.enforced_by):
+        span = _SPAN.match(item)
+        if span is None or not span.group(1).startswith("CI: "):
+            continue
+        cites_ci = True
+        step, _ = ci_step(span.group(1), root)
+        runs = set(_GUARD_SCRIPT.findall(str((step or {}).get("run") or "")))
+        runs_named = runs_named or bool(runs & named)
+        if runs and not runs & named:
+            problems.append(
+                f"{rule.rule_id}: {span.group(1)} runs {', '.join(sorted(runs))}, "
+                "which the rule does not name"
+            )
+    if named and cites_ci and not runs_named:
+        problems.append(
+            f"{rule.rule_id}: no cited CI step runs {', '.join(sorted(named))}"
+        )
+    return problems
+
+
+def test_a_cited_step_that_runs_another_guard_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "python-app.yml",
+        "jobs:\n  guards:\n    steps:\n"
+        "    - name: Every unit named\n      id: units\n"
+        "      run: python scripts/check_parameter_units.py\n"
+        "    - name: Every identifier in American English\n      id: spelling\n"
+        "      run: python scripts/check_identifier_spelling.py\n",
+    )
+    rule = Rule(
+        "N32",
+        "naming.md",
+        "Spell every identifier in American English",
+        "`scripts/check_identifier_spelling.py`, `CI: guards/units`",
+    )
+    assert cited_guard_problems(rule, tmp_path) == [
+        "N32: CI: guards/units runs scripts/check_parameter_units.py, which the rule does not name",
+        "N32: no cited CI step runs scripts/check_identifier_spelling.py",
+    ]
+    right = dataclasses.replace(
+        rule, enforced_by=rule.enforced_by.replace("guards/units", "guards/spelling")
+    )
+    assert cited_guard_problems(right, tmp_path) == []
+
+
+def test_a_rule_whose_cited_steps_run_no_guard_of_its_own_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A guard dropped from CI, its rule left citing the clean-tree step."""
+    _write(
+        tmp_path / ".github" / "workflows" / "python-app.yml",
+        "jobs:\n  guards-prose:\n    steps:\n"
+        "    - name: No guard left a file behind\n      id: clean-tree\n"
+        "      run: git status --porcelain\n"
+        "    - name: No em dash in the published prose\n      id: em-dashes\n"
+        "      run: python scripts/check_em_dashes.py\n",
+    )
+    rule = Rule(
+        "P6",
+        "prose.md",
+        "Write no em dash anywhere",
+        "`scripts/check_em_dashes.py`, `CI: guards-prose/clean-tree`, review",
+    )
+    assert cited_guard_problems(rule, tmp_path) == [
+        "P6: no cited CI step runs scripts/check_em_dashes.py"
+    ]
+    right = dataclasses.replace(
+        rule, enforced_by=rule.enforced_by.replace("clean-tree", "em-dashes")
+    )
+    assert cited_guard_problems(right, tmp_path) == []
+    beside = dataclasses.replace(
+        rule,
+        enforced_by=rule.enforced_by.replace(
+            "`CI: guards-prose/clean-tree`",
+            "`CI: guards-prose/clean-tree`, `CI: guards-prose/em-dashes`",
+        ),
+    )
+    assert cited_guard_problems(beside, tmp_path) == []
 
 
 def test_a_link_to_a_missing_anchor_is_reported(tmp_path: pathlib.Path) -> None:
@@ -559,6 +708,10 @@ def test_every_enforcer_exists() -> None:
         if (problem := enforcer_problem(item, _ROOT))
     ]
     assert problems == []
+
+
+def test_every_cited_guard_step_runs_a_guard_its_rule_names() -> None:
+    assert [p for rule in _all_rules() for p in cited_guard_problems(rule, _ROOT)] == []
 
 
 @pytest.mark.whole_tree

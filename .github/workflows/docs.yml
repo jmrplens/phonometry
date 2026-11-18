@@ -276,6 +276,7 @@ jobs:
         run: pnpm run check:icons
         working-directory: site
       - name: Check the guides index lists every guide
+        id: guides-index
         # The page the Start topic offers as the map of the library is written
         # by hand, and it had drifted to 100 of 104 links while stating 104 in
         # the prose and in its own meta description, in both languages. Cheap,
@@ -286,6 +287,7 @@ jobs:
         run: node scripts/check-i18n-parity.mjs
         working-directory: site
       - name: Test the build checks on small builds made to fail them
+        id: script-tests
         # A check of the build only ever reads a build that passes it, so a
         # check that stopped seeing a missing description, counted one
         # character too many or compared two descriptions as written rather
@@ -333,6 +335,7 @@ jobs:
         run: node --test 'worker/test/*.test.mjs'
         working-directory: site
       - name: Check the pages start no process of their own
+        id: render-spawns
         # A process a page starts runs about a thousand times in a build, and a
         # synchronous one stops every other page while it runs. One git log per
         # page was 86 % of the route phase in a CPU profile, and the same pages
@@ -371,6 +374,7 @@ jobs:
             exit 1
           fi
       - name: Test the Markdown writers on small pages made to fail them
+        id: agent-md-tests
         # The renderer, each component's writer in each language, the title,
         # header and references around a page's copy, and the two checks of
         # the copies (the one below and the one after the build), handed
@@ -380,6 +384,7 @@ jobs:
         run: pnpm run test:agent-md
         working-directory: site
       - name: Check every component a page uses has a Markdown writer
+        id: markdown-writers
         # The Markdown copy of a page is written from its source, and each
         # component in it by the writer beside it (<Name>.md.mjs). A
         # component with no writer reached the old copies as nothing, and the
@@ -399,6 +404,7 @@ jobs:
       # (scripts/check-markdown-twins.mjs, through copyDefects of
       # scripts/shared/page-twin.mjs).
       - name: Build site
+        id: build
         # The build's output is kept for the step after this one, which reads
         # it for warnings. bash, so that pipefail hands a failed build its exit
         # status through the tee.
@@ -418,6 +424,7 @@ jobs:
           GIT_CONFIG_KEY_0: diff.renames
           GIT_CONFIG_VALUE_0: "false"
       - name: Check the build printed no warning
+        id: build-output
         # A build that passes says nothing about what it printed on the way,
         # and nobody reads a thousand route lines. Astro's notice that the
         # Markdown plugins were set through deprecated keys, and KaTeX's that
@@ -455,6 +462,7 @@ jobs:
             exit 1
           fi
       - name: Check every page's Markdown copy carries what the page carries
+        id: markdown-twins
         # Every page publishes a copy of itself at <page>/index.md, written
         # from its source before the build (scripts/agent-md.mjs --public), and
         # an agent reads the page through it. The copies cut from the source by
@@ -480,9 +488,9 @@ jobs:
         run: python3 scripts/check_doc_snippets.py --static --restated site/dist
       - name: Check the files the build restates the pages in state no count of standards
         # The llms shards, llms-full.txt and every page's Markdown copy exist
-        # only in the build, so the refusal of a count of standards that the
-        # conformance job runs on a checkout cannot see them; this reads them
-        # where the build wrote them.
+        # only in the build, so the refusal of a count of standards that
+        # guards-package/conformance-claims of python-app.yml runs on a checkout
+        # cannot see them; this reads them where the build wrote them.
         run: python3 scripts/check_conformance_claims.py --generated site/dist
 
       # Every page, component and script of the site type-checked in strict
@@ -547,6 +555,7 @@ jobs:
         run: pnpm run check:cited-standards
         working-directory: site
       - name: Check the structured data every page publishes
+        id: structured-data
         # The JSON-LD graph is the only part of a page written for machines
         # alone, and nothing else here reads it: html-validate does not look
         # inside a <script>, pa11y has no reason to, and the link checker sees
@@ -559,6 +568,7 @@ jobs:
         run: pnpm run check:structured-data
         working-directory: site
       - name: Check the structured data against the schema.org vocabulary
+        id: schema-vocabulary
         # The step above proves each graph parses and joins; it does not ask
         # whether schema.org allows a property on the type that carries it.
         # The guides hub's ItemList carried inLanguage, the journal articles
@@ -575,6 +585,7 @@ jobs:
         run: pnpm run check:schema-vocabulary
         working-directory: site
       - name: Check what a search engine reads on every page
+        id: crawl
         # The title, the one h1, the canonical and hreflang links, the sitemap
         # and the links a page carries are read by crawlers and seen by nobody
         # else. The Spanish API pages declared themselves Spanish pages of
@@ -589,6 +600,7 @@ jobs:
         run: pnpm run check:crawl
         working-directory: site
       - name: Check every page has a short meta description of its own
+        id: descriptions
         # The description is the line a search result shows under the title,
         # and no reader of the page ever sees it. 461 of the 996 pages carried
         # one past 160 characters, which Bing's tools flag as too long and
@@ -598,6 +610,7 @@ jobs:
         run: pnpm run check:descriptions
         working-directory: site
       - name: Check every page fits in what a search engine reads
+        id: page-size
         # Googlebot fetches the first 2 MB of a page's HTML, uncompressed, and
         # indexes nothing past it, and no console reports the cut. The
         # published catalogues were 4.7 MB in English and 5.2 MB in Spanish

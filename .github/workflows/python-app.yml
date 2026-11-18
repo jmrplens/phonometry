@@ -3,18 +3,10 @@ name: Python CI
 on:
   push:
     branches: [ "master", "main" ]
-  # No base-branch filter, deliberately. A pull request that targets another
-  # branch is the bottom half of a stack, and it is the half that still has to
-  # be reviewed and merged: with `branches` set to main it arrived with four
-  # checks instead of the thirty-one jobs this workflow runs, and the gates
-  # only spoke once it was already at the front of the queue.
-  #
-  # This does not double any run. The `push` trigger above is limited to the
-  # two trunk branches, so a commit on a working branch fires `pull_request`
-  # alone and a commit on main fires `push` alone. The two jobs that care which
-  # one it was, `sonar` and `pr-comment`, key on `github.event_name` rather
-  # than on the base, so they behave for a stacked pull request exactly as they
-  # do for any other.
+  # No base-branch filter: a pull request stacked on another branch is the
+  # half still to be reviewed, and runs every job. Nothing runs twice: push
+  # fires on the two trunks alone, and sonar and pr-comment key on
+  # github.event_name, not on the base.
   pull_request:
   workflow_dispatch:
 
@@ -32,6 +24,13 @@ concurrency:
   group: python-app-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' && github.run_attempt == 1 }}
 
+# Every job ends at a limit of its own, above its longest measured run with
+# room for a slow mirror or a loaded runner: one still going past it has hung,
+# and would otherwise hold a runner, under the account's cap on concurrent
+# jobs, for six hours. A hung test ends fifteen minutes after it started
+# (pyproject.toml), and the test jobs run one thread per pool, so the xdist
+# workers do not oversubscribe the cores.
+#
 # pip prints a notice whenever the pip a step runs lags its newest
 # release, which says nothing about the build and lands in every log.
 env:
@@ -44,11 +43,9 @@ jobs:
   # and its critical path, so they come first.
 
   tests:
+    name: Tests / ${{ matrix.python-version }} ${{ startsWith(matrix.os, 'ubuntu') && 'Linux' || startsWith(matrix.os, 'macos') && 'macOS' || 'Windows' }}
     runs-on: ${{ matrix.os }}
-    # Its longest cell in the last 72 passing runs took 45 min, on Windows,
-    # and one has taken 65 min since, macOS on 3.12 in run 44041238523.
-    # The Run tests step has a limit of its own; this one leaves the steps
-    # around it, the setup before and the uploads after, a quarter of an hour.
+    # Longest cell measured: 65 min, macOS on 3.12 in run 44041238523.
     timeout-minutes: 95
     permissions:
       contents: read
@@ -58,9 +55,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-26.04, macos-latest, windows-latest]
-        # From the oldest Python requires-python admits to the newest the
-        # classifiers name, every one in between included;
-        # tests/test_minimum_requirements.py holds the list to pyproject.toml.
+        # tests/test_minimum_requirements.py holds this list to pyproject.toml.
         python-version: ["3.12", "3.13", "3.14"]
     steps:
     - uses: actions/checkout@v7
@@ -71,33 +66,17 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
-    - name: Install dependencies
+    - name: Install the dev dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install -e .
-    # Heavy third-party oracle sets (the EBU loudness test set, the stipa.info
-    # certified STIPA bench, the NORAH2 public release) are never fetched here.
-    # The suites that use them fall back to the committed derived series and
-    # extracts under tests/data/ - see tests/data/README.md - which is the path
-    # CI takes, and whose assertions never skip. A handful of cases that exist
-    # only to exercise a full set do skip here and report as such (the EBU
-    # programme-audio cases and the full-bench inventory guard); pytest prints
-    # the resolution in its run header.
-    - name: Run tests
-      # -n auto fans the suite out across the runner's cores via pytest-xdist;
-      # pytest-cov combines the per-worker coverage into a single coverage.xml.
-      # Pin the numerical thread pools to one thread each so the per-core xdist
-      # workers do not oversubscribe the CPU with nested BLAS/OpenMP pools.
-      # The step took at most 43 min in those runs. A test that hangs is
-      # ended fifteen minutes after it started (faulthandler_timeout in
-      # pyproject.toml), and fifteen minutes after its failure when its
-      # teardown hangs; the other workers then run what was already sent to
-      # them, so a hang late in the run still ends inside 80 min, with the
-      # test named and the JUnit and coverage files written. Past that the
-      # runner stops pytest, which may then write neither for the uploads
-      # below.
+    # The heavy oracle sets are not fetched: their suites read tests/data/.
+    - name: The library's tests pass
+      id: tests
+      # The step took at most 43 min; a hung test still ends inside 80.
       timeout-minutes: 80
       env:
         OMP_NUM_THREADS: "1"
@@ -107,13 +86,10 @@ jobs:
         VECLIB_MAXIMUM_THREADS: "1"
       run: |
         pytest -n auto --junitxml=test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml
-    # The run above holds NumPy in float32 to the bound the guide publishes,
-    # but a pass leaves no number behind. This prints what each runner
-    # measured, and where, so the ARM and Windows runners keep a record of
-    # their own; -k leaves the torch cases out, which need the array-api job.
+    # Leaves each runner's float32 measurement in the log (torch: array-api).
     - name: Record the NumPy float32 measurement
       run: pytest -q -rfEP tests/simulation/test_backend_tolerance.py -k "cpu and float32 and not torch"
-    - name: Upload Test Results
+    - name: Keep the test results
       uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
@@ -121,7 +97,7 @@ jobs:
           test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml
           coverage.xml
       if: always()
-    - name: Upload coverage to Codecov
+    - name: Send the coverage to Codecov
       if: matrix.os == 'ubuntu-26.04'
       uses: codecov/codecov-action@v7
       with:
@@ -129,31 +105,18 @@ jobs:
         use_oidc: true
         fail_ci_if_error: false
 
-  # The main matrix runs against the latest numpy with the pure-Python
-  # impulse kernel; this job exercises the numba-jitted path on the newest
-  # numba (numba pins numpy, so it lives in its own environment), and
-  # minimum-versions below builds the same kernels at the numba floor.
+  # The numba-jitted kernel on the newest numba, in an environment of its own
+  # since numba pins numpy; minimum-versions builds it at the floor.
   tests-perf:
-    name: tests (numba-jitted kernel)
+    name: Tests / numba JIT 3.14
     runs-on: ubuntu-26.04
-    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
-    # 2026-11-05, all but a minute or two of it in the test step, and the run of
-    # 2026-11-04 reached this limit and was stopped. A hung test ends the run
-    # fifteen minutes after it started (pyproject.toml).
+    # 14 to 40 min in its passing runs on main, nearly all in the tests.
     timeout-minutes: 50
     permissions:
       contents: read
-    # Declared once for the whole job so the guard below runs under exactly the
-    # environment it vouches for. Split across the two steps, the guard could
-    # stay green on its own NUMBA_DISABLE_JIT while the suite lost its copy and
-    # ran interpreted from end to end.
     env:
-      # conftest.py disables JIT by default (coverage); override it here, this
-      # is the only job exercising the numba-compiled kernel.
+      # conftest.py disables JIT by default, for coverage; this job turns it on.
       NUMBA_DISABLE_JIT: "0"
-      # Pin the numerical thread pools to one thread each so the per-core xdist
-      # workers do not oversubscribe the CPU with nested BLAS/OpenMP pools,
-      # exactly as the main test job does.
       OMP_NUM_THREADS: "1"
       MKL_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
@@ -163,111 +126,46 @@ jobs:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
-    # The newest Python the package supports. This job used to sit on 3.13
-    # because numba trails a new interpreter by a release or two, and while it
-    # did, the jitted kernel was never built against the newest Python we ship
-    # for. numba publishes cp314 wheels from 0.63.0 on, the floor pyproject.toml
-    # gives 3.14 (numba>=0.63.0 behind its python_version marker), and the
-    # minimum-versions job builds each Python's floor on that Python.
-    # Tracking the newest version is the strictest single choice for this job:
-    # a compiled extension meeting a new interpreter is the thing most likely
-    # to break, and the pure-Python kernel is covered on both versions by the
-    # main matrix regardless.
+    # The newest Python the package supports, where a compiled extension is
+    # likeliest to break: numba ships cp314 wheels from 0.63.0, and
+    # pyproject.toml gives 3.14 numba>=0.63.0 as its floor.
     - name: Set up Python 3.14
       id: python
       uses: actions/setup-python@v7
       with:
         python-version: "3.14"
         cache: 'pip'
-    - name: Install dependencies (with numba)
+    - name: Install the dev dependencies and the perf and plot extras
       id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
         pip install -e ".[perf,plot]"
-    # Fails the job if the kernel falls back to the interpreted path, which
-    # would leave this job green while exercising nothing it exists for.
-    # Compiling here also fills numba's on-disk cache next to the module, so
-    # the test workers below load the kernel instead of each compiling a copy.
-    # The tests run whatever this said: a kernel that falls back still leaves
-    # the library's verdict on the newest Python.
-    - name: Check the jitted kernel compiles
+    # Fails on a fallback to the interpreted path, and warms numba's cache.
+    - name: The jitted kernel compiles
       id: jit-kernel
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
-    - name: Run tests (jitted kernel)
+    - name: The library's tests pass with the kernel jitted
       id: tests
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      # Same fan-out as the main matrix. The compiled kernel is not a reason
-      # to stay serial: the step above compiles it once and the workers that
-      # reach it read the cache in a fraction of a second, against a suite
-      # that takes about twenty minutes to run one test at a time.
-      # --without-whole-tree leaves out the tests that read the repository
-      # whole (tests/whole_tree.py): the guards, censuses and generators run
-      # over the package, the scripts, the documentation, the site and the
-      # committed figures. They read the repository's own text, which the
-      # jitted kernel does not change, and the nine jobs of the test matrix
-      # run them. With them this step took 38:57 on 2026-11-06; they were
-      # 39 % of the summed test time of the Linux 3.14 matrix job of that
-      # run, which puts this step near 25 minutes.
+      # The matrix runs the whole-tree tests; with them this step took 39 min.
       run: pytest -q -n auto --without-whole-tree
 
-  # The floors in pyproject.toml are measured: each is the oldest release the
-  # library's suite passes with, on each Python the package supports. Every
-  # other job installs the pinned, newest stack, so without this one a floor
-  # would be a promise nobody checks, and the day the code started to need
-  # something newer it would go on claiming the old release. Here the floors
-  # are installed exactly, read from pyproject.toml by
-  # scripts/minimum_requirements.py so that raising one is an edit in one
-  # place, and --check fails the job if pip settled on anything else.
-  #
-  # It runs on every supported Python, since the floors differ between them:
-  # the oldest numpy, scipy, numba and torch have no wheel for 3.13 or 3.14,
-  # so pyproject.toml gives those Pythons newer floors behind python_version
-  # markers, and the script prints the floors of the Python it runs on. A
-  # floor measured on one Python says nothing about another.
-  #
-  # It runs the library's tests, not the figure and documentation tooling:
-  # the generators and their checkers compare against artefacts drawn on the
-  # pinned figure stack, so they are tied to it, and their test modules carry
-  # the `pinned_stack` mark. --without-pinned-stack (tests/conftest.py) leaves
-  # those modules out before importing them, since some import names the floor
-  # matplotlib does not have. The jitted kernels are on, so the numba floor is
-  # compiled and exercised too.
-  #
-  # It reads the installed package as a user's type checker does at the
-  # floors, too. numpy gives its array and abstract scalar types default type
-  # arguments only from 2.3, so below it a numpy type written without them is
-  # partly unknown, and pyright's --verifytypes, at the pin of
-  # requirements-dev.txt, read 86.9% of the public names as known at NumPy
-  # 2.1.0 while the type completeness step of built-package read 100% on the
-  # newest stack. The step fails below 100% on each Python's floors; the
-  # bare-array-annotations step of guards-source refuses the bare type where
-  # it is written.
-  #
-  # Nor does it run the tests that read the repository whole: the guards,
-  # censuses and generators run over the package, the scripts, the
-  # documentation, the site and the committed figures read the repository's
-  # own text, which no dependency floor changes, and the nine jobs of the
-  # test matrix run them.
-  # --without-whole-tree (tests/whole_tree.py) deselects them. With them the
-  # test step took 38:55 on 2026-11-06; they were 37 % of the summed test
-  # time of the Linux 3.12 matrix job of that run, which puts the step near
-  # 25 minutes.
+  # The floors pyproject.toml declares for each Python, installed exactly
+  # (scripts/minimum_requirements.py --check), with the type completeness,
+  # the jitted kernels and the library's tests at them.
   minimum-versions:
-    name: Library tests at the dependency floors
+    name: Tests / floors
     runs-on: ubuntu-26.04
-    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
-    # 2026-11-05, all but a minute or two of it in the test step. A hung test
-    # ends the run fifteen minutes after it started (pyproject.toml).
+    # 14 to 40 min in its passing runs, nearly all in the tests.
     timeout-minutes: 50
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        # Every Python the classifiers name, as in the test matrix;
-        # tests/test_minimum_requirements.py holds the list to pyproject.toml.
+        # tests/test_minimum_requirements.py holds this list to pyproject.toml.
         python-version: ["3.12", "3.13", "3.14"]
     env:
       NUMBA_DISABLE_JIT: "0"
@@ -299,10 +197,7 @@ jobs:
         pip install -r minimum-requirements.txt -r test-tools.txt
         pip install --no-deps -e .
         python scripts/minimum_requirements.py --check
-    # Each check below runs whatever the one before it said, so a type
-    # completeness under 100% no longer skips the jitted kernels and the
-    # tests at the floors.
-    - name: Fail below a type completeness of 100% at the floors
+    - name: Type completeness is 100% at the floors
       id: type-completeness
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
@@ -312,14 +207,12 @@ jobs:
         python scripts/minimum_requirements.py --check
         pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
         grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
-    - name: Check the jitted kernels compile at the numba floor
+    - name: The jitted kernels compile at the numba floor
       id: jit-kernel
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_jit_kernel.py
-    # The type check installs pyright beside the floors, and may stop before
-    # its own check that the floors are still what is installed; the check
-    # runs again here, so the tests never run on anything but the floors.
-    - name: Run the library tests at the floors
+    # The floors again: pyright, installed beside them, may stop before it.
+    - name: The library's tests pass at the floors
       id: library-tests
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
@@ -329,26 +222,12 @@ jobs:
   # Generated. The committed figures and example fiches against a fresh
   # regeneration on their pinned stacks.
 
-  # The committed documentation figures (.github/images) must match a fresh
-  # `make graphs` run. The rendering + compute stack is pinned in
-  # requirements-figures.txt so SVG *structure* (elements, text, colours) and
-  # WebP dimensions/encoding are stable -- matplotlib/fonttools/pillow fix the
-  # layout, numpy/scipy fix the computed data. The pin is also load-bearing
-  # for the diagram plates' baked glyph outlines (scripts/diagrams/outline.py
-  # shapes them through the wheel's FT2Font/libraqm and DejaVu faces): a wheel
-  # bump rewrites every glyph in all 592 plate files and is reviewed as its
-  # own regeneration. The comparison itself (scripts/check_figures.py) is
-  # tolerance-aware rather than a byte diff: GitHub's heterogeneous runner
-  # CPUs shift a few path coordinates ~1 ULP, which is visually irrelevant but
-  # breaks a byte compare. Bump the pinned stack together with a fresh
-  # `make graphs` regeneration.
+  # The committed figures against a fresh `make graphs` on the pinned stack
+  # (requirements-figures.txt), which also fixes the plates' glyph outlines.
   figures:
-    name: Documentation figures up to date
+    name: Generated / figures
     runs-on: ubuntu-26.04
-    # 32 min at the longest in the measured runs, nearly all of it
-    # make graphs; twice that, rounded up.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
+    # 32 min at the longest in the measured runs, nearly all of it make graphs.
     timeout-minutes: 65
     permissions:
       contents: read
@@ -369,38 +248,24 @@ jobs:
         pip install -e .
         # Pin the render+compute stack last so it wins over looser deps.
         pip install -r requirements-figures.txt
-    - name: Fail if any label's mathematics does not parse
+    - name: Every label's mathematics parses
       id: mathtext
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      # Before the regeneration, not after: an unparseable label aborts the
-      # generation, and this names the file and line instead of leaving a
-      # traceback in the middle of a four-hundred-figure run. Reads the
-      # sources, so it costs seconds and covers labels no figure exercises.
+      # Before the regeneration, which an unparseable label aborts.
       run: python scripts/check_mathtext.py
-    - name: Fail if a Spanish label would keep an English decimal point
+    - name: No Spanish label keeps an English decimal point
       id: decimal-comma-labels
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      # The one defect the language gate structurally cannot see: it compares
-      # untranslated WORDS, and a number is not a word. Static, so it needs no
-      # generation run. The English half of the same script is a step of
-      # guards-prose, "English text writes the decimal point".
       run: python scripts/check_decimal_comma.py --labels
-    # Runs after a red decimal-comma check, which the generation does not
-    # depend on, so the twelve verdicts below come in the same run; not after
-    # a red mathematics check, since a label that does not parse aborts the
-    # generation half way.
+    # Runs after a red decimal-comma check, not after a red mathematics one.
     - name: Regenerate figures and diagrams
       id: graphs
       if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.mathtext.outcome == 'success' }}
       run: make graphs
-    - name: Regenerate the plates again and demand identical bytes
+    - name: The plates regenerate to identical bytes
       id: plates-reproducible
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The diagram plates bake their labels to glyph outlines and must be
-      # bit-deterministic: two runs in the same job have to agree byte for
-      # byte, which is stronger than the tolerance gate below and catches an
-      # accidentally unordered collection in the glyph store the moment it
-      # appears.
+      # Two runs in one job agree byte for byte, stricter than the gate below.
       run: |
         mkdir /tmp/plates-first-run
         cp .github/images/diagram_*.svg .github/images/sound_power_methods*.svg /tmp/plates-first-run/
@@ -408,159 +273,58 @@ jobs:
         for f in /tmp/plates-first-run/*.svg; do
           cmp "$f" ".github/images/$(basename "$f")"
         done
-    - name: Fail if any committed figure is stale
+    - name: Documentation figures up to date
       id: figures
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # Tolerance-aware compare instead of a byte diff: GitHub's runner fleet is
-      # hardware-heterogeneous, so the pinned stack computes a few path
-      # coordinates ~1 ULP apart depending on the CPU the run lands on. That
-      # sub-pixel drift is irrelevant but breaks a byte diff; the script checks
-      # SVG structure + numeric tolerance and raster RMS instead, so real figure
-      # changes still fail while cross-CPU noise passes. See scripts/check_figures.py.
       run: python scripts/check_figures.py
-    - name: Fail if any shaded region is illegible
+    - name: Every shaded region is legible
       id: figure-contrast
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # Staleness says the figures match the code; it says nothing about
-      # whether a shaded region can be seen. This measures every filled area
-      # against the page it is drawn on and fails below the CIEDE2000
-      # threshold, which is what catches a fill tuned on one theme and left
-      # invisible on the other. It parses the committed SVGs (a few seconds
-      # for the whole set) and needs no rendering stack of its own.
       run: python scripts/check_figure_contrast.py
-    - name: Check every line can be seen on the dark page
+    - name: Every line can be seen on the dark page
       id: stroke-contrast
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The step above measures filled areas. A stroke is not a fill, and the
-      # ISO 3745 microphone array shipped with its hemisphere drawn in a
-      # half-opacity grey hairline that composited to 1.3:1 on the dark theme:
-      # present in the SVG, invisible to a reader, and green on every gate.
-      # This blends each stroke with its own opacity over the dark page and
-      # holds hairlines to 3:1 and thicker lines to 2:1, with the grid and axis
-      # furniture exempt because they are drawn to recede.
       run: python scripts/check_stroke_contrast.py
-    - name: Check the Spanish figures are in Spanish
+    - name: The Spanish figures are in Spanish
       id: figure-language
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The Spanish variant of a figure is the English one with its strings
-      # looked up in a table at save time, so a string nobody added to the
-      # table ships in English inside `X_es.svg` while every other gate stays
-      # green: the page is Spanish, the i18n parity gate sees a translated
-      # page, this job sees a figure that matches its generator, and the
-      # figure is in English. That is how roughly two hundred of them reached
-      # the tree. The lookup itself writes down what it could not translate,
-      # during the `make graphs` above (no second render, and it cannot change
-      # a rendered byte), and this fails on any untranslated string the
-      # committed baseline does not already record -- and on a baseline line
-      # that has been paid off and not deleted.
       run: python scripts/check_figure_language.py
-    - name: Fail if an annotation on a figure cannot be read
+    - name: Every annotation on a figure can be read
       id: figure-annotations
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # Two ways a label fails the reader, and nothing else can see either. A
-      # label across a curve and given no backing is hard to read: the strokes
-      # of the letters and of the curve are the same weight, and on the dark
-      # page close to the same lightness. A label something is drawn over is
-      # not there at all. The figure matches its generator, the contrast steps
-      # above measure fills and strokes rather than what overlaps what, and
-      # `svg.fonttype = "path"` means the committed file has no text node to
-      # find the label in -- so the measurement has to happen while the
-      # matplotlib artists are alive, which is what the `make graphs` above
-      # did, for both language editions. This reads it and fails on any label
-      # over the calibrated number of pixels either way, printing the band
-      # below that for a person to judge.
       run: python scripts/check_figure_annotations.py
-    - name: Fail if two tick labels of one axis run into each other
+    - name: No two tick labels of one axis run into each other
       id: figure-ticks
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # A band axis set by hand on a logarithmic scale keeps matplotlib's own
-      # minor labels between the bands unless the minor formatter is cleared:
-      # the octave axis of enclosed_space_absorption shipped reading
-      # "2 × 10²50 4 × 10²500" under both panels. The figure matches its
-      # generator, the annotation step above measures the labels a generator
-      # places and not the ones an axis draws, and the committed file has no
-      # text node to find a tick in, so the `make graphs` above measures every
-      # axis of both language editions as it saves them. This fails on minor
-      # labels left to the scale beside major ticks set by hand, and on any
-      # two labels of one axis that touch.
       run: python scripts/check_figure_ticks.py
-    - name: Fail if a Spanish figure numbers a tick with an English point
+    - name: No Spanish figure numbers a tick with an English point
       id: figure-decimal-point
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The decimal-comma check above reads the label a generator writes; this
-      # reads the label a formatter wrote, in the figure as committed. They are
-      # different halves: three machines localise a Spanish figure (the
-      # library's localize_axes, format_frequency_axis where a caller hands it
-      # the language, and the save-time pass), and a panel none of them reached
-      # keeps its English point while the legend beside it carries the comma.
-      # A zoom inset, a contour colorbar, the z of a 3-D array and a log axis
-      # of distances each shipped that way. Reads the committed SVGs, so it
-      # needs no rendering stack.
       run: python scripts/check_figure_decimal_point.py
-    - name: Fail if a legend closes over a plotted point
+    - name: No legend closes over a plotted point
       id: figure-legends
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # A legend is an opaque plate the author places by hand, and its width is
-      # set by its longest label, which is a defect waiting to happen in a
-      # bilingual corpus: the Spanish label is routinely half again as long as
-      # the English one, so a box that clears the data in one language reaches
-      # back over it in the other. Every other gate stays green, because the
-      # figure matches its generator, the colours pass and the annotation audit
-      # measures labels rather than legends. This reads the committed SVGs for
-      # a plotted point under a legend frame, and carries the drawings where
-      # the mark under the box is a rail rather than a reading with the reason
-      # each one is a decision.
       run: python scripts/check_figure_legends.py
-    - name: Fail if a legend, a curve or a marker covers a tick label
+    - name: No legend, curve or marker covers a tick label
       id: figure-tick-clearance
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # A legend can land on a tick label as well as on a point, and a curve
-      # can run through one: the radial labels of a polar plot sit inside it,
-      # strung along one ray, and an inset writes its labels over the data of
-      # the panel it sits in. The tick step above measures the labels of one
-      # axis against each other and the annotation step the labels a
-      # generator places, so neither sees it. This reads the committed SVGs
-      # for anything drawn over a tick label, through the clip it is drawn
-      # with, so it needs no rendering stack.
       run: python scripts/check_figure_tick_clearance.py
-    - name: Fail if a label is drawn over a tick label, another label or a line
+    - name: No label is drawn over a tick label, another label or a line
       id: figure-text-clearance
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The step above measures the marks drawn over a tick label, not a
-      # text, and the annotation step leaves the plates out. A note placed by
-      # hand landed on the numbers of the axis beside it, the heading of a
-      # plate lane was crossed by the impulse it names, and a note that ran
-      # out of its axes was struck through by the spine. This reads the
-      # committed SVGs, figures and plates, glyph by glyph, so a label turned
-      # on a 3-D plate is read along its own baseline; the leader of an
-      # annotation, the grid and a line behind a chip pass.
       run: python scripts/check_figure_text_clearance.py
-    - name: Fail if a figure signs a number with a hyphen
+    - name: No figure signs a number with a hyphen
       id: figure-minus-sign
       if: ${{ !cancelled() && steps.graphs.outcome == 'success' }}
-      # The corpus signs its negative numbers with U+2212, and a polar angle
-      # formatter that ignores axes.unicode_minus, a reading built with an
-      # f-string and a plate that sets the characters it is handed each wrote
-      # the hyphen-minus instead, a shorter, lower glyph beside the proper one.
-      # This reads the string every committed SVG records beside its outlines,
-      # all four variants, figures and plates alike.
       run: python scripts/check_figure_minus_sign.py
 
-  # The committed example .report() fiches (.github/reports) must match a fresh
-  # `make reports` run. Same drift gate as the figures, one layer further down
-  # the pipeline: the fiches are what the documentation links to as worked
-  # examples of what the library prints, so a stale one publishes a wrong
-  # answer. Nothing checked them until this job existed, and two of them sat a
-  # plot-styling release behind the code for weeks. The rendering stack is
-  # pinned across both requirements files (matplotlib/numpy in -figures,
-  # svglib/reportlab/pypdfium2 in -reports) because every link in the chain
-  # fixes the rendered page the check compares.
+  # The committed example fiches (.github/reports) against a fresh `make
+  # reports`, on the stack requirements-figures.txt and requirements-reports.txt
+  # pin between them: every link of the chain fixes the page the check compares.
   reports:
-    name: Example report fiches up to date
+    name: Generated / fiches
     runs-on: ubuntu-26.04
     # 4.2 min at the longest in the measured runs.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 15
     permissions:
       contents: read
@@ -581,35 +345,22 @@ jobs:
         pip install -r requirements-figures.txt -r requirements-reports.txt
     - name: Regenerate the example fiches
       run: make reports
-    - name: Fail if any committed fiche is stale
-      # Tolerance-aware compare instead of a byte diff: GitHub's heterogeneous
-      # runner CPUs shift a few of the embedded plot's path coordinates ~1 ULP,
-      # which rewrites the PDF page stream for no visible reason. The script
-      # compares the extracted text exactly and the rendered page within a
-      # calibrated pixel tolerance, so a real fiche change fails while
-      # cross-CPU coordinate noise passes. See scripts/check_reports.py.
+    - name: Example report fiches up to date
+      id: reports
+      # The text exactly and the page within a pixel tolerance: the runners' CPUs
+      # move the embedded plot by ~1 ULP (scripts/check_reports.py).
       run: python scripts/check_reports.py
 
   # Docs. The snippets the guides print, run as a reader runs them.
 
-  # The Python snippets printed in the guides must run. They are the first
-  # thing a reader copies, and nothing executed them until this job existed:
-  # the metrology split shipped seven blocks where `from phonometry import
-  # signals` sat next to `from scipy import signal` and silently rebound the
-  # name, which Python does not warn about and no other gate can see. The
-  # script also holds the English and Spanish pages to the same API, holds
-  # every output comment ("print(x)  # 5958.0") to what that print wrote in
-  # the same run, in English and in Spanish, and skips, with a
-  # written reason, the pages whose blocks are excerpts of a workflow rather
-  # than a script.
+  # Every Python snippet the guides print, run in page order as a reader runs
+  # it, on the extras and the pinned figure and report stacks the pages use.
   doc-snippets:
-    name: Documentation snippets run
+    name: Docs / snippets run
     runs-on: ubuntu-26.04
     # 12 min at the longest in the measured runs, and installing
     # ffmpeg from Ubuntu's mirror took 15 and 17 min in two runs of the video
     # job.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 45
     permissions:
       contents: read
@@ -627,32 +378,27 @@ jobs:
       run: |
         sudo apt-get update -q
         sudo apt-get install -y -q --no-install-recommends ffmpeg
-    - name: Install dependencies
-      # The guides plot and print fiches, so the snippets need the figure and
-      # report stacks as well as the package itself.
+    - name: Install the audio extra and the figure and report stacks
+      id: install
       run: |
         python -m pip install --upgrade pip
-        # The audio extra rides along because the io guide's snippets read and
-        # write the formats it serves; a guide that documents the extra has to
-        # run under it, the same reason the figure and report requirements are
-        # here for the pages that draw and render.
+        # The io guide reads and writes audio, the contributor guide's examples
+        # wait on pytest.raises.
         pip install -e ".[audio]"
         pip install -r requirements-figures.txt -r requirements-reports.txt
-        # The contributor guide's examples of tests wait on errors with
-        # pytest.raises, so its pinned pytest is installed too.
         grep -E '^pytest==' requirements-dev.txt | cut -d' ' -f1 > snippet-tools.txt
         pip install -r snippet-tools.txt
-    - name: Run every snippet the guides print
+    - name: Documentation snippets run
+      id: doc-snippets
       run: python scripts/check_doc_snippets.py
 
   # Lint. Ruff, mypy, bandit and zizmor over the tree, with the checks that
   # need the dev install beside them.
 
   quality:
+    name: Lint / code, workflows
     runs-on: ubuntu-26.04
     # 3.4 min at the longest in the measured runs.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 15
     permissions:
       contents: read
@@ -667,7 +413,7 @@ jobs:
       with:
         python-version: "3.13"
         cache: 'pip'
-    - name: Install dependencies
+    - name: Install the runtime, dev and notebook dependencies
       id: install
       run: |
         python -m pip install --upgrade pip
@@ -675,17 +421,8 @@ jobs:
         pip install -r requirements-dev.txt
         pip install -r requirements-notebook.txt
         pip install -e .
-    # Every check below is a step of its own that runs whatever the checks
-    # before it said, so a lint finding no longer hides the type check, the
-    # security check or the workflow audit; each names the step it needs.
-    # A conflict resolved carelessly during a rebase can leave markers behind in
-    # a file no other gate reads. CHANGELOG.md is the usual victim: it collides
-    # on every parallel branch and nothing lints it, so the markers ride a fully
-    # green pull request all the way to main. Only the opening and closing
-    # markers are matched, never a bare row of "=", because that is legitimate
-    # Markdown (a setext heading underline). It reads the checkout alone, so a
-    # failed install leaves it its verdict.
-    - name: Check for merge-conflict markers
+    # Each check runs whatever the ones before it said.
+    - name: No merge-conflict marker is committed
       id: conflict-markers
       if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
       run: |
@@ -693,20 +430,7 @@ jobs:
           echo "::error::Unresolved merge-conflict markers found in the files listed above."
           exit 1
         fi
-    # The clips are the one committed asset CI never regenerates: an FDTD run
-    # plus four video encodes each is far too slow for a pull request, and the
-    # encoders are not bit-reproducible anyway. So nothing could tell that the
-    # code drawing a clip had moved since the clip was written, and twelve of
-    # them shipped an ASCII hyphen in their Spanish tick labels for months
-    # after that was repaired, with every gate green. Each render stamps a
-    # fingerprint of the code that drew it; this recomputes the fingerprints
-    # from the sources and names any clip whose one has moved. It parses the
-    # figure package rather than importing it, so it needs no rendering stack
-    # and runs in seconds. The clips themselves live in
-    # jmrplens/phonometry-assets, so "is every file there" is answered from
-    # the tree of the commit assets.lock records: a blobless fetch of that one
-    # commit is a few hundred kilobytes, where the clips are a third of a
-    # gigabyte, and the check only ever needed the names.
+    # Blobless: the clips' names are a few hundred kB, the clips 0.3 GB.
     - name: Fetch the names of the published clips, without the clips
       id: clip-names
       if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
@@ -716,19 +440,15 @@ jobs:
         git -C assets-tree fetch -q --depth 1 --filter=blob:none origin "$(cat assets.lock)"
         git -C assets-tree ls-tree -r --name-only FETCH_HEAD images/ > assets-manifest.txt
         echo "$(wc -l < assets-manifest.txt) clip files published at $(cut -c1-12 assets.lock)"
-    - name: Check every published clip matches the code that draws it
+    - name: Every published clip matches the code that draws it
       id: animation-freshness
       if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.clip-names.outcome == 'success' }}
       run: python scripts/check_animation_freshness.py --manifest assets-manifest.txt
-    - name: Lint with Ruff
+    - name: No lint finding (ruff)
       id: ruff
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff check .
-    # Ruff is also the formatter. Before this step the tree had no formatter at
-    # all and 673 of its 812 Python files disagreed with any single style; the
-    # gate is what keeps that from happening again. Markdown is excluded in
-    # `[tool.ruff]`, so this never touches the documentation snippets.
-    - name: Check formatting with Ruff
+    - name: Every file formatted (ruff format)
       id: ruff-format
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: ruff format --check .
@@ -751,23 +471,16 @@ jobs:
     # scripts compare against the oracle tables in `tests/`: until the
     # checker was told where those live, every value read from them was
     # `Any` and the comparison went unchecked.
-    - name: Type check with Mypy
+    - name: Every annotation type checks (mypy)
       id: mypy
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: mypy
-    - name: Security check with Bandit
+    - name: No security finding in src (bandit)
       id: bandit
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: bandit -r src
-    # The workflows hold the repository's tokens and the release's identity, and
-    # nothing reviewed them: the release step expanded `${{ }}` straight into a
-    # shell, eight checkouts left their token in .git for any later step to
-    # read, and the mirror ran on a workflow_run trigger that had never fired.
-    # zizmor reads every file under .github/ and fails on any finding; its
-    # settings, including the rule that actions are pinned to a tag, are in
-    # .github/zizmor.yml. The token lets it ask GitHub whether a pinned action
-    # has a published advisory.
-    - name: Audit the workflows with zizmor
+    # Settings in .github/zizmor.yml; the token lets it look up advisories.
+    - name: No workflow finding (zizmor)
       id: zizmor
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       env:
@@ -775,25 +488,14 @@ jobs:
       run: zizmor --config .github/zizmor.yml --format github .github/
 
   # Guards. The repository's own checks, one job for each thing they need:
-  # nothing installed for the published text and for the source, the
-  # runtime dependencies for the package. Each guard is a step of its own,
-  # runs whatever the others said, and is named on the checks page when it
-  # fails.
+  # nothing installed for the published text and for the source, the runtime
+  # dependencies for the package. Each guard is a step of its own that runs
+  # whatever the others said and writes no bytecode; the guards only read, so
+  # a file one leaves behind fails the clean-tree step. The last step names
+  # every failed step on the checks page, unless the checkout itself failed.
 
-  # The guards that read the published text: the pages, the files of docs/
-  # written by hand, the docstrings, the labels and the evidence pages, and
-  # last the drift gate of the llms artifacts. Nothing is installed with pip:
-  # each guard imports the standard library alone, which
-  # tests/test_scripts_without_numpy.py holds every script of this job to, so
-  # a pip line here would take its scripts out of that probe without anything
-  # failing. One runner for all of them instead of one each: under the
-  # account's cap on concurrent jobs, a runner a guard does not need is one a
-  # test leg waits for. Every guard is a step of its own that runs whatever
-  # the guards before it said, so a red one names itself and hides none of
-  # the others, and the last step names every one that failed on the checks
-  # page. The guards only read and run cheapest first; the llms gate, which
-  # needs the site's Node and packages and writes what it compares, runs
-  # after them on a checkout put back as committed.
+  # The guards that read the published text, then the llms drift gate.
+  # Nothing is installed with pip (tests/test_scripts_without_numpy.py).
   guards-prose:
     name: Guards / prose
     runs-on: ubuntu-26.04
@@ -802,7 +504,6 @@ jobs:
     permissions:
       contents: read
     env:
-      # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - id: checkout
@@ -814,54 +515,22 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    # Each entry of docs/ERRATA.md is a permanent public statement that a
-    # named body or author printed something wrong, so it must cite the page
-    # it quotes rather than an extraction: PDF text layers delete radicals and
-    # minus signs silently, and one entry was drafted on an extraction that
-    # had eaten a square root, and caught in review. The script flags any
-    # multiplicative claim whose ratio sits on sqrt(2), sqrt(3), pi, 2 pi,
-    # 1/sqrt(2), ln 2 or a small integer, which is the signature of a lost
-    # glyph. See scripts/check_errata_evidence.py and CONTRIBUTING.md.
     - name: Errata entries cite their page
       id: errata-evidence
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_errata_evidence.py
-    # The evidence pages the site renders from docs/: the entries of
-    # docs/ERRATA.md and docs/ERRATA.es.md are transplanted into one
-    # reference/errata page per document family and an index (EN + ES), so
-    # the site can never show a hand-copied or stale version of them. The
-    # conformance pages are no longer transplanted: they render from
-    # docs/conformance.json through src/components/Conformance.astro, which
-    # the conformance steps of guards-package gate instead. It also stops,
-    # before it compares any errata page, when an errata family corrects a
-    # work no page cites, so the bibliography has nothing to name it by (rule
-    # F59): a guide edit that drops a reference can fail here.
     - name: Generated evidence pages up to date
       id: site-reports
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/generate_site_reports.py --check
-    # A link to the ISO catalogue or the IEC webstore carries only a number,
-    # so a slip opens another document while every page builds and every
-    # link resolves. This holds each such link of the site's pages and the
-    # files of docs/ written by hand (the GitHub edition carries its page's
-    # links) to the designation scripts/catalogue_ids.json pins for its
-    # number. It reads nothing from the network.
     - name: Every catalogue link opens the document beside it
       id: catalogue-links
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_catalogue_links.py
-    # ISO 80000-2 prints the mathematical constants upright, and an italic e
-    # is a variable. KaTeX and mathtext set a bare letter italic, so the
-    # exponential is upright only where the source asks for it, and the
-    # corpus had both.
     - name: Euler's number is upright
       id: euler-number
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_euler_number.py
-    # A form feed is one invisible byte, and inside a raw docstring it is the
-    # backslash and the f of the command that follows it: `\frac` was
-    # published as `rac`, with the fraction gone and no error anywhere. Guard
-    # the class rather than the byte.
     - name: No stray control character
       id: control-characters
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
@@ -870,95 +539,34 @@ jobs:
       id: plot-style-defaults
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_plot_style_defaults.py
-    # ISO 80000-2 sets a subscript by what it is, and a glyph pair can
-    # honestly take both slopes: the z of the ISO 9613-2 barrier screening is
-    # a path-length difference, the z of the ISO 2631-5 dose is a direction,
-    # and both documents print D_z. So the slope is decided per file, which
-    # opens with the standard it implements, and two slopes for one symbol
-    # inside one file is a page contradicting itself.
     - name: One meaning per subscript per file
       id: subscript-slope
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_subscript_slope.py
-    # The guides are hard-wrapped, so a sentence can wrap onto a "-" or a ">"
-    # and stop being a sentence: CommonMark ends the paragraph at the marker.
-    # One variant takes the site build down (unclosed inline maths, which MDX
-    # then evaluates as JavaScript); the other is silent and ships a quoted
-    # block in the middle of a paragraph.
     - name: Markdown renders the way it reads
       id: markdown-hazards
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_markdown_hazards.py
-    # generate_api_docs copies the mathematics of a docstring to the site
-    # verbatim, and KaTeX reads what the docstring actually holds. A doubled
-    # backslash is a line break with a command after it, which KaTeX refuses,
-    # and the page still ships with everything after the bad block swallowed.
-    # The same four characters are correct in one kind of docstring and wrong
-    # in the other, so this reads the value Python builds rather than the
-    # file. It also refuses a bare command KaTeX will not take as a sub- or
-    # superscript (|dL_n|_\max where |dL_n|_{\max} is meant), in the
-    # docstrings and in the hand-written pages. The site job catches both
-    # too, after a full build; this costs a second and runs without one.
     - name: Docstring mathematics reaches the page intact
       id: docstring-math
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_docstring_math.py
-    # zsh reads the brackets of an extras requirement as a glob and stops
-    # before pip runs, so every install command a reader copies (the pages,
-    # the docstrings, the library's messages, the README, the llms files, the
-    # CHANGELOG) quotes the requirement that carries extras.
     - name: Every install command quotes its extras
       id: quoted-extras
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_quoted_extras.py
-    # The Python fences of a page form one sequential example: a later fence
-    # may use names an earlier fence defined, never the reverse. One shipped
-    # page used names its own figure block defined further down, while a
-    # same-named variable from a different room sat in scope, so reading top
-    # to bottom gave numbers that were not the annotated ones. Reader-owned
-    # placeholders (the reader's measurement, never invented by the page) are
-    # registered in the script. See scripts/check_fence_names.py and
-    # docs/contributing/docs-and-figures.md#f17.
     - name: Documentation fences read in order
       id: fence-names
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_fence_names.py
-    # Where a code span opens and closes is decided in
-    # scripts/markdown_spans.py, as CommonMark decides it, and in
-    # site/scripts/shared/markdown-spans.mjs for the site's scripts. Nine
-    # readers used to find spans with a pattern of their own, each misreading
-    # a span of two backticks, an escaped backtick or a span that holds a
-    # backslash.
     - name: Every script reads an inline code span the one way
       id: span-readers
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_span_readers.py
-    # A translation typed without the Spanish keyboard layout reads fine to
-    # every other gate, and twenty-nine figure labels shipped as
-    # "Correccion", "medicion" and "aqui". This reads the translation tables
-    # of the figures, the diagrams and the library's renderers, the labels of
-    # every committed Spanish figure, and the example fiches built in Spanish,
-    # and fails on a form that is never correct Spanish without its mark. It
-    # reads the Spanish pages too for the translation glossary, which a word
-    # it has replaced passes every other gate: «seno» for the waveform and
-    # «incertidumbre extendida» shipped in about fifty places, and «media
-    # cuadrática» or «cuadrado medio» for the mean square in two diagrams, two
-    # figures, two renderers, seven pages and an erratum, and «presupuesto»,
-    # which is money, for a budget of decibels, absorption or error (a
-    # «balance») in sixteen pages and a diagram. «Cuadrado medio» passes only
-    # in a sentence of an analysis of variance, one that names the analysis,
-    # the mean square by its row, or the header of its table.
     - name: Every Spanish string keeps its accents and eñes and uses the glossary's terms
       id: spanish-accents
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_spanish_accents.py
-    # Where a fence closes is decided in scripts/markdown_fences.py, as
-    # CommonMark decides it, for the markdown check above and every other
-    # script that reads a page, and in site/src/lib/markdown-fences.mjs, the
-    # same reading in JavaScript, for the site's own code. Four scripts and
-    # four pieces of the site used to work it out by themselves, each right
-    # on the pages it was written against and each reading a fence shown
-    # inside another fence inside out.
     - name: Every script reads a fence the one way
       id: fence-readers
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
@@ -967,45 +575,18 @@ jobs:
       id: digit-grouping
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_digit_grouping.py
-    # English text writes the decimal point, a value restated from a print
-    # among them, and keeps the comma only where it transcribes the print: in
-    # quotation marks, in a block quote, in the print field of an errata
-    # entry and in the printed column of the conformance report. Spanish keeps
-    # its comma, and a thousands group, a list, code and notation are no
-    # decimal. Before this ran nothing read English text for a comma at all,
-    # and the convention that a restated print kept its separator had spread
-    # to some thirteen thousand numbers of the library's own prose. Reads
-    # every tracked file by its tokens, its tree or its Markdown structure, so
-    # it needs git and nothing installed.
     - name: English text writes the decimal point
       id: decimal-comma
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_decimal_comma.py --english --strict
-    # The house style writes its prose without the em dash, in the pages, the
-    # files of docs/ written by hand, the CHANGELOG, the docstrings, the
-    # figure labels and the site's robots.txt alike; a standard's title
-    # reproduced as printed keeps its own. The double hyphen is the same dash
-    # in ASCII, which the site's smartypants publishes as the em dash, and is
-    # refused outside code too.
     - name: No em dash in the published prose
       id: em-dashes
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_em_dashes.py
-    # Every helper that takes a language defaults to English, so a call that
-    # does not pass the caller's on raises nothing and ships an English string
-    # or an English decimal point in the Spanish figure. On a log frequency
-    # axis nothing in the library repairs it: localize_axes skips that axis,
-    # whose labels are fixed strings by the time it runs. Finding the calls
-    # needs the helper resolved through the imports, a result's .plot()
-    # through its receiver and a **kwargs through what it can carry, so the
-    # check is an AST walk rather than a grep.
     - name: Every call passes the language on
       id: language-forwarding
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_language_forwarding.py
-    # The guards above only read: one that wrote into the checkout would
-    # change what the next one reads, so a file left behind is a failure of
-    # its own.
     - name: The guards left the checkout as they found it
       id: clean-tree
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
@@ -1015,45 +596,22 @@ jobs:
           echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
           exit 1
         fi
-    # The llms gate compares a regeneration with what is committed, so it
-    # starts from what is committed whatever a guard above left behind, and
-    # says only what is its own. Ignored files stay.
     - name: Put the checkout back as committed
       id: reset
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: |
         git reset --hard -q
         git clean -fdq
-    # The llms artifacts: the committed llms.txt and the GitHub edition under
-    # docs/ (every English guide, overview and start page and the reference
-    # pages written as guides, less the pages that EDITION_LEFT_OUT in
-    # site/src/lib/agent-md/edition.mjs names, each at docs/<route>.md or
-    # docs/<route>/index.md, written from the site pages) must equal a fresh
-    # `make llms` run, and so must site/src/data/llms-shards.json, the record
-    # of every shard name the site has published, to which the run adds the
-    # names it writes. Every other generated artifact had this gate; these
-    # were regenerated by the docs workflow and never compared, so a stale
-    # commit could not be told from a fresh one. Both are written from the
-    # site's own pages (site/scripts/agent-md.mjs dumps their Markdown copies
-    # and writes the edition), so the steps below set up the site's Node and
-    # dependencies as the site build does. The shards and llms-full.txt are
-    # not committed: they carry the dates of each page, and the site build
-    # writes them and checks every page they carry against its copy. Each
-    # step of the chain runs only when the one before it did, so a guard
-    # that failed above leaves the llms gate its own verdict.
+    # The llms chain sets up the site's Node and packages as docs.yml does.
     - id: node
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       uses: actions/setup-node@v7
       with:
-        # The line the site build runs on (docs.yml), which strips the types
-        # of the two TypeScript data modules the copies read.
         node-version: 24
     - name: Enable the pnpm the site pins, via corepack
       id: corepack
       if: ${{ !cancelled() && steps.node.outcome == 'success' }}
       env:
-        # corepack fetches the pnpm site/package.json pins and says so first;
-        # the pin is the decision, so the announcement adds nothing to the log.
         COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
       working-directory: site
       run: |
@@ -1072,17 +630,10 @@ jobs:
         path: ${{ env.PNPM_STORE }}
         key: pnpm-store-${{ runner.os }}-${{ hashFiles('site/pnpm-lock.yaml') }}
         restore-keys: pnpm-store-${{ runner.os }}-
-    # `make llms` installs the site's dependencies first (`make site-deps`),
-    # from the store restored above; the cache is a saving, not a condition.
     - name: Regenerate the llms artifacts
       id: llms-regenerate
       if: ${{ !cancelled() && steps.reset.outcome == 'success' && steps.pnpm-store.outcome == 'success' }}
       env:
-        # The install runs puppeteer's own install script, which downloads
-        # Chrome and its headless shell for the site's accessibility audits.
-        # This only parses the pages, so it skips the download; the site
-        # workflow asks for the browser in a step of its own, and `make
-        # site-deps` on a contributor's machine still fetches it.
         PUPPETEER_SKIP_DOWNLOAD: "true"
       run: make llms
     - name: llms artifacts up to date
@@ -1099,24 +650,14 @@ jobs:
           echo "$untracked"
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id. A
-    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
       if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
 
-  # The guards that read the library's source, its tests and its scripts as
-  # text or as a syntax tree. Nothing is installed: each one imports the
-  # standard library alone, which tests/test_scripts_without_numpy.py holds
-  # every script of this job to, so a pip line here would take its scripts
-  # out of that probe without anything failing. One runner for all twelve
-  # instead of one each: under the account's cap on concurrent jobs, a runner
-  # a guard does not need is one a test leg waits for. Every guard is a step
-  # of its own that runs whatever the guards before it said, so a red one
-  # names itself and hides none of the others, and the last step names every
-  # one that failed on the checks page. Cheapest first.
+  # The guards that read the source, the tests and the scripts, cheapest
+  # first. Nothing is installed (tests/test_scripts_without_numpy.py).
   guards-source:
     name: Guards / source
     runs-on: ubuntu-26.04
@@ -1125,7 +666,6 @@ jobs:
     permissions:
       contents: read
     env:
-      # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - id: checkout
@@ -1137,187 +677,54 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    # A conformance row states what a standard prints and what this library
-    # computes. A row that computes the expected value itself, from the same
-    # constants, compares a formula with a second copy of it and reports Pass
-    # whatever the library does; three did, and a wrong sign in the function
-    # they certified would have gone out green. Counting them needs the
-    # delegation resolved, through helpers, across modules, and under whatever
-    # name the imports gave the library, so the check is an AST walk rather
-    # than a grep.
     - name: Every conformance row runs the library
       id: conformance-rows
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_conformance_rows.py
-    # A level is a ratio to a reference value, and ISO 1683 fixes one per
-    # quantity. The package publishes them once, as
-    # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa
-    # was typed out seventeen times and one name meant a pressure in four
-    # modules and a power in two. This fails on a reference value in src that
-    # repeats a value of the table instead of reading it, and on one that
-    # differs from it without naming the document it comes from. Deciding
-    # what a reference is needs the name, the value and the comment beside
-    # it, so it is an AST walk rather than a grep.
     - name: Every reference value points at ISO 1683 or names its source
       id: reference-values
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_reference_values.py
-    # A private module-level constant is a number lifted out of a standard so
-    # the code that uses it can say where it came from, and one nothing reads
-    # is either a leftover or the trace of a check the docstring above it
-    # still promises. The sweep this came from found both: a recommended
-    # specimen velocity carried and never checked, and a docstring promising
-    # a default the code did not take.
     - name: No private constant goes unread
       id: dead-constants
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_dead_constants.py
-    # A pytest.raises, pytest.warns or pytest.deprecated_call block passes on
-    # whatever call inside it raises or warns. Seven writer tests built their
-    # catalogue inside the block of the write they checked, and six warning
-    # tests built their case inside the block of the model, so a refusal from
-    # the builder would have passed for the one under test. Ruff holds the
-    # block to one statement; this holds the statement to one call that could
-    # raise or warn, with SonarCloud's own definition (S5778, S9088), so the
-    # mistake is caught before a pull request rather than after.
     - name: Every exception test waits on one call
       id: raises-blocks
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_raises_blocks.py
-    # Jupyter, VS Code, Colab and the IPython terminal display the last
-    # expression of a cell whole, and a dataclass record with nothing else to
-    # show is its repr: every field, and every array as numpy prints it, in
-    # full up to a thousand values, pages of numbers for a record of a few
-    # such arrays. A public record inherits RichDisplay (through OwnsArrays
-    # when it can hold an array), which shows a table of its fields instead,
-    # so this fails on a public record that does not, or that sets the table
-    # aside with a display method of its own. It shares the AST reading of
-    # the array-aliasing step below.
     - name: Every public record shows itself as a table in a notebook
       id: record-display
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_record_display.py
-    # numpy gives np.ndarray, np.dtype and its abstract scalar types
-    # (np.floating, np.integer, np.number and the others) default type
-    # arguments only from 2.3, and the package runs on 2.0.2. Below 2.3 a type
-    # checker reads a bare np.ndarray as ndarray[Unknown, Unknown], so every
-    # public name annotated with one is partly unknown to it, and mypy reports
-    # a [type-arg] error for each: the package wrote 3000, and pyright's
-    # --verifytypes read 86.9% of its public names as known at NumPy 2.1.0.
-    # This fails on a numpy array or abstract scalar type written without the
-    # type arguments it takes below 2.3 in any type expression of
-    # src/phonometry, read through the package's imports and re-exports, and
-    # lists the arrays whose dtype is left open (NDArray[Any]) and np.generic
-    # for review. The minimum-versions job reads the result at the floors.
     - name: Every numpy type an annotation names carries its type arguments
       id: bare-array-annotations
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_bare_array_annotations.py
-    # A name a caller or the environment hands a reader can hold a named pipe,
-    # a device or a directory, and a pipe kept the audio readers, the ANP
-    # tables and the hosts file of the remote runs waiting at the open for a
-    # writer that never came. Every reader in src opens a file through the
-    # shared check of _internal/json_input.py, or asks it before a reader of
-    # another library opens the name itself; this fails on a read that does
-    # neither.
     - name: Every reader asks what a name holds before it opens it
       id: regular-file-reads
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_regular_file_reads.py
-    # A multi-panel .plot() draws one panel on the axes a caller hands it and
-    # returns that axes, and without one makes a column of panels and returns
-    # a tuple of them; a polar plot returns a polar axes. The argument
-    # decides, so the return is overloaded on it: annotated as one union, it
-    # makes every typed caller narrow a value the call already fixed. This
-    # fails on a return naming one axes and several with no overload heads, on
-    # a head that returns such a union, and on a function that reaches a polar
-    # axes, by making one or calling one that does, typed plain Axes, Any, or
-    # panels none of which is polar. A function of a number or an array of
-    # them is the same case: a return naming a single value and an array
-    # needs heads that return each alone, and so is one that takes a Signal
-    # or an array and names a record of the package and an array (Signal |
-    # ndarray, a TimeWeightedEnvelope or an array, a pair of each). It reads
-    # the annotations through the package's aliases and imports and follows
-    # calls across modules.
     - name: Every return an argument decides is overloaded on it
       id: return-overloads
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_return_overloads.py
-    # A standard prints its limits in decimal, and a margin of two readings
-    # that is 6 dB in decimal comes out 5.999 999 999 999 996 or
-    # 6.000 000 000 000 004 in binary, so a verdict read straight off the
-    # comparison turns on the last bit. The sweep that settled this class
-    # fixed more than a hundred sites; this keeps the next one out. It fails
-    # on a computed decimal compared with a printed limit, or with zero, that
-    # is neither settled through phonometry._internal.boundary nor compared
-    # with a named slack, unless scripts/boundary_comparison_exemptions.tsv
-    # lists it with its reason, and on an exemption that no longer matches
-    # anything. Telling a computed value from a caller's means following it
-    # through assignments, calls and dataclass fields, so it is an AST
-    # data-flow walk rather than a grep.
     - name: No verdict hangs on the last bits of a computed decimal
       id: boundary-comparisons
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_boundary_comparisons.py
-    # np.asarray(x, dtype=np.float64) gives back the real part of a complex
-    # value with no more than a ComplexWarning, parses a text and reads a
-    # bytearray in a list as the codes of its characters, and a method of
-    # ISO/TS 12913-3 rated a mark given as np.complex128(0.5 + 0.3j) as the
-    # mark at 0.5. Every caller's value the library converts, to floats or to
-    # complex numbers, goes through real_array or complex_array of
-    # _internal/validation.py, or a check of it on every path first; this
-    # fails on a conversion that does neither.
     - name: Every conversion of a caller's numbers goes through a check
       id: real-conversions
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_real_conversions.py
-    # np.asarray hands back the caller's own array when it is already of the
-    # asked type, and so does every validation helper built on it, so a
-    # result that keeps what it was given shares memory with the caller:
-    # changing the caller's array afterwards changes a result already
-    # computed, judged and perhaps printed, and nothing raises. Clearing the
-    # writeable flag on such an array is worse, because it freezes the
-    # caller's own. A public record that can hold an array inherits
-    # OwnsArrays, which copies every array it is built with (an array a
-    # factory allocates and passes through handed_over is sealed instead of
-    # copied), so this fails on such a record that does not, and on a copy
-    # written around an array handed to one, which would be made twice. Then
-    # it follows every parameter through assignments, views, containers and
-    # the package's own helpers to the other places an array is kept, and
-    # fails on one that is not a read-only copy of its own, and on any
-    # handed_over call it cannot prove is the only holder of a new array. A
-    # record a caller builds converts each container it holds, and a field
-    # stored back as given, or wrapped by MappingProxyType without a copy, is
-    # no conversion. An AST data-flow walk.
     - name: Every result keeps its own copy of the arrays it was given
       id: array-aliasing
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_array_aliasing.py
-    # A function that hands its levels to np.asarray takes a list, a tuple, an
-    # array of any dtype and a nested list; annotated list[float] or
-    # NDArray[np.float64], it makes a typed caller's working code a type
-    # error, and list is invariant besides. This fails on a public parameter
-    # that holds an array or a sequence of numbers and no ArrayLike while its
-    # body converts it, followed through the helpers it is handed to and the
-    # loops over a vararg or a literal of parameters, on one converted item by
-    # item whose item type takes no sequence of numbers, on an overload head
-    # that takes such a parameter narrower, and on any public parameter that
-    # holds list, dict or set. It holds a count, a band fraction or a flag to
-    # the numpy scalar its validator or a scalar check takes, through the
-    # helpers and the record constructors it is handed to, a field a
-    # caller-built record stores to its constructor, a mapping keyed by float
-    # to one keyed by int beside it, and fs and the other scalar quantities of
-    # the vocabulary to one family of numbers, a field handed by its name
-    # together with its record (_hold_cells(self, "ix")) included, and an item
-    # a body unpacks or indexes (ny, nx = shape; ix, iy = entry) to the items
-    # of the annotation or the elements of its items. It reads the
-    # annotations through the package's aliases and imports.
     - name: Every public parameter admits what its body converts
       id: parameter-annotations
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
       run: python scripts/check_parameter_annotations.py
-    # The guards only read: one that wrote into the checkout would change
-    # what the next one reads, so a file left behind is a failure of its own.
     - name: The guards left the checkout as they found it
       id: clean-tree
       if: ${{ !cancelled() && steps.python.outcome == 'success' }}
@@ -1327,29 +734,17 @@ jobs:
           echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id. A
-    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
       if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
 
-  # The guards that import the package: they walk its published names,
-  # tables and catalogues as a caller's code would, so they run on the
-  # runtime dependencies alone, requirements.txt and the package, which also
-  # proves it imports with nothing else beside it. Then the drift gates of
-  # what the package generates, the conformance artefact and report and the
-  # API reference. One runner and one install for all of them instead of
-  # seven of each. Every guard is a step of its own that runs whatever the
-  # guards before it said, so a red one names itself and hides none of the
-  # others, and the last step names every one that failed on the checks page.
-  # A failed install fails once, on its own step, and runs no guard. The
-  # guards only read and run cheapest first, the three that read the
-  # committed conformance artefact among them, so they give their verdict
-  # even when its regeneration fails. Each drift gate starts from a checkout
-  # put back as committed, so a stale report is not read as a stale API
-  # reference too, nor the other way round.
+  # The guards that import the package, on requirements.txt alone; those that
+  # read the committed conformance artefact run before its regeneration. Each
+  # drift gate starts from a checkout put back as committed, and the
+  # conformance one reads the whole tree, since `make conformance` also
+  # rewrites the counts quoted across docs/, .zenodo.json and the site.
   guards-package:
     name: Guards / package
     runs-on: ubuntu-26.04
@@ -1358,7 +753,6 @@ jobs:
     permissions:
       contents: read
     env:
-      # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - id: checkout
@@ -1377,17 +771,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
-    # The solids catalogue's point is that a published value is worth more
-    # beside another published value than alone, and four books print the
-    # same material. Two densities that disagree are a digit somebody typed
-    # wrong, because every density the script does not already accept agrees
-    # across these tables to within 2.6 per cent, so it fails above 8 per
-    # cent and lets anything under that pass without a word. Moduli and
-    # speeds disagree by thirty per cent between books without anybody being
-    # wrong, so those it reports and never fails; the ones it reports by
-    # default are the few an order of magnitude apart, which is how tin's
-    # twelvefold modulus surfaced. It walks the imported package, like the
-    # units and sources guards.
     - name: The books agree about the solids they share
       id: solid-agreement
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
@@ -1396,125 +779,54 @@ jobs:
       id: published-catalogues
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_published_catalogues_reach_the_page.py
-    # The artefact is committed, so it can be wrong in ways a regeneration
-    # diff cannot see: a count that no longer matches its rows, a numpy scalar
-    # where a float belongs, a citation whose split no longer rebuilds it, a
-    # dead line in the override ratchet. This reads what is committed and
-    # says which one.
     - name: The committed conformance artefact is internally consistent
       id: conformance-artifact
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_conformance_artifact.py
-    # The artefact's closed vocabularies are restated by the site: once in the
-    # Zod schema that validates it into the content collection, once in the
-    # label maps that word a verdict and a relation in each language. Nothing
-    # compared them until this, and a relation added to the reader and
-    # missing from the schema stopped the site build with a content error
-    # naming ten checks and no cause. Cheap and stdlib-only, so it runs here
-    # rather than waiting for the docs workflow to build the site.
     - name: The site accepts and words every conformance vocabulary
       id: conformance-vocabulary
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_conformance_vocabulary.py
-    # The JSON Schema of a catalogue file is written from the row classes, so
-    # a field added to one would be missing from every editor that completes
-    # a catalogue file until the published schema is written again.
     - name: The catalogue schema the site publishes is current
       id: catalogue-schema
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/generate_catalogue_schema.py --check
-    # The site renders the catalogues from a module this dumps, so a row added
-    # to a data file without regenerating it would leave the page showing the
-    # catalogue as it was. Same arrangement as the API reference: the
-    # artefact is committed and CI checks it against a fresh run.
     - name: The catalogue data the site renders is current
       id: catalogue-data
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/generate_catalogue_data.py --check
-    # The idea of the solids guard over every catalogue: two books that credit
-    # one study for one material are two readings of one measurement, and a
-    # pair that does not overlap is a misread page rather than a
-    # disagreement.
     - name: The rows two books took from the same place agree
       id: shared-sources
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_shared_sources.py
-    # A published table is shared by every caller in the process, so a dict
-    # behind a `Mapping` annotation, or a writeable array, lets one caller
-    # change a printed number for everyone after it without anything raising.
-    # This holds every value reachable from a public name to immutable
-    # containers all the way down. It walks the imported package, like the
-    # units guard, because a table built by a function call only shows its
-    # type once it exists.
     - name: Every published table refuses writes
       id: frozen-constants
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_frozen_constants.py
-    # A value transcribed from a book is only checkable if the next reader can
-    # open the same page. The convention lived in review until a table came
-    # to cite a folio its page does not print and another attributed to a
-    # table two columns it does not carry. This holds every published record
-    # that carries a `source` to the grammar the errata registry uses, and
-    # every table transcribed from a book or a paper to a banner naming both
-    # its PDF page and its printed folio; a standard stays outside, because
-    # it numbers its own clauses and tables and is cited by that number. It
-    # walks the imported package, like the units guard, and re-runs its own
-    # census over the banners so a table from a new book fails until it is
-    # registered.
     - name: Every published value names its page
       id: published-sources
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_published_sources.py
-    # The walk of the units guard holds every public identifier, and every
-    # value a caller types, to the American spelling the library is written
-    # in, and in situ to in_situ: a caller who wrote center_frequency on one
-    # function should not meet centre_frequency on the next.
     - name: Every public identifier is spelled in American English
       id: identifier-spelling
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_identifier_spelling.py
-    # The read-only check of the committed state, and the command to run
-    # locally. The report can be current while the prose quoting it is not;
-    # the counts were typed out in three places and two of them fell a
-    # release behind.
     - name: No page quotes a stale conformance count
       id: conformance-claims
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_conformance_claims.py
-    # The curated quick table in docs/reference/api/index.md: every
-    # phonometry.__all__ name must have a table row (extra rows such as
-    # methods or namespace entries are fine). See scripts/check_api_reference.py.
     - name: Curated API quick table covers __all__
       id: api-reference
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_api_reference.py
-    # A pressure of 101 325 and a pressure of 101.325 are both legitimate
-    # values here: the ISO 3740 family prints kilopascals, IEC 61094-2 and
-    # ISO 15186-3 print pascals, and the result of the mix-up is still a
-    # float. No guard by magnitude can separate them, because either reading
-    # is a real duty somewhere else in the tree, so the unit lives in the
-    # parameter name and this holds it there. It walks the imported package
-    # rather than the source tree, because ReportMetadata is published from
-    # the root and defined in a private module, and a scan by file path does
-    # not see it.
     - name: Every public quantity names its unit
       id: parameter-units
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_parameter_units.py
-    # The walk of the units guard holds every public choice of a fixed set of
-    # strings to a Literal of its options, so a type checker refuses a
-    # misspelt option before the call runs; a string open by its nature says
-    # why. Each one is checked on every path, a choice written in several
-    # parts (a single name, each key and each value of a mapping) in each of
-    # them, and no Literal lists a value every call refuses, whatever the
-    # other arguments.
-    - name: Check that every fixed public choice is typed Literal
+    - name: Every fixed public choice is typed Literal
       id: choice-literals
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: python scripts/check_choice_literals.py
-    # The guards above only read: one that wrote into the checkout would
-    # change what the next one reads, so a file left behind is a failure of
-    # its own.
     - name: The guards left the checkout as they found it
       id: clean-tree
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
@@ -1524,53 +836,32 @@ jobs:
           echo "::error::A guard of this job wrote into the checkout: the files above are what it left."
           exit 1
         fi
-    # The conformance gate reads the whole checkout, so it starts from what is
-    # committed whatever a guard above left behind, and says only what is its
-    # own. Ignored files stay, the editable install's metadata among them.
     - name: Put the checkout back as committed for the conformance gate
       id: reset-conformance
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
         git reset --hard -q
         git clean -fdq
-    # The committed docs/conformance.json, the docs/CONFORMANCE.md rendered
-    # from it, and every count quoted from either must equal a fresh `make
-    # conformance` run, on the runtime dependencies alone and no pytest.
     - name: Regenerate the conformance artefact, the report and the quoted counts
       id: conformance-regenerate
       if: ${{ !cancelled() && steps.reset-conformance.outcome == 'success' }}
       run: make conformance
-    # `make conformance` writes as well as reads: it regenerates the report
-    # and rewrites the counts quoted in .zenodo.json, the files of docs/
-    # written by hand and the site frontmatter. So the staleness gate has to
-    # cover the whole tree, not just the report. Diffing only
-    # docs/CONFORMANCE.md would let the rewrite fix the prose in the runner's
-    # checkout and pass, while the branch keeps the stale numbers.
     - name: Conformance report up to date
       id: conformance
       if: ${{ !cancelled() && steps.conformance-regenerate.outcome == 'success' }}
       run: |
-        # --porcelain rather than `git diff`, because a diff is blind to an
-        # untracked file and the artefact is one of the things this regenerates.
-        # docs/conformance.json arrived untracked once and the job went green
-        # while a fresh checkout could not build the site at all.
         if [ -n "$(git status --porcelain)" ]; then
           git status --porcelain
           git diff
           echo "::error::The conformance artefact, the report or a count quoted from either is out of date, or a generated file is untracked - run 'make conformance' and commit the result."
           exit 1
         fi
-    # Whatever the conformance regeneration left, a whole run or half of one,
-    # the API reference gate starts from what is committed.
     - name: Put the checkout back as committed for the API reference gate
       id: reset-api-docs
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
       run: |
         git reset --hard -q
         git clean -fdq
-    # The generated Starlight API reference: the committed pages under
-    # site/src/content/docs/reference/api and the sidebar fragment must equal
-    # a fresh `make api-docs` run (deterministic, stdlib-only generator).
     - name: Regenerate the API reference
       id: api-docs-regenerate
       if: ${{ !cancelled() && steps.reset-api-docs.outcome == 'success' }}
@@ -1589,8 +880,6 @@ jobs:
           echo "$untracked"
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id. A
-    # failed checkout leaves no script to run, and the job stays red once.
     - name: Name the guards that failed
       if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
@@ -1599,27 +888,18 @@ jobs:
 
   # Package. What is published, built as it is published: the release build
   # twice and again on macOS, the transition stub, and the wheel as a type
-  # checker and Pyodide read it.
+  # checker and Pyodide read it. The stub is stamped with the commit's time
+  # (SOURCE_DATE_EPOCH), and only its wheel is rebuilt to compare: setuptools
+  # writes the builder's clock, user and modes into the sdist.
 
-  # The release builds the files it publishes with scripts/build_release.py,
-  # twice, and after publishing rebuilds the tag on macOS and compares the
-  # files with PyPI's (release.yml). Nothing ran that build before a release
-  # depended on it, so a Dependabot bump of setuptools or build in
-  # requirements-release.txt that broke the build without isolation, or let
-  # the machine into the files, and a new file setuptools packs that
-  # .gitattributes does not pin to LF, would have shown for the first time
-  # in a rehearsal or in the release itself. This job builds the commit as
-  # the release does, twice, holds the second build to the checksum file of
-  # the first and checks the files against git; the next one rebuilds it on
-  # macOS and holds that build to the same checksum file, so a difference
-  # between the two operating systems shows here and not after publishing.
-  # The checksum file is written under the runner's temporary directory: the
-  # build refuses a checkout holding a file its commit does not. Both builds
-  # fail on a warning (PYTHONWARNINGS=error): setuptools printed nine
-  # "Package would be ignored" blocks on every build, which only a strict
-  # build turned into the failure it was for anyone who built from source.
+  # The build the release publishes (scripts/build_release.py), run on every
+  # pull request: twice here, the second held to the checksum file of the
+  # first, and once more on macOS against the same file, so a bump of the
+  # release tooling that breaks it or a difference between the two systems
+  # shows here and not after publishing. The checksum file goes under the
+  # runner's temporary directory, since the build refuses a stray file.
   release-build:
-    name: The release build gives the same bytes twice
+    name: Package / build twice
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
@@ -1646,19 +926,20 @@ jobs:
         mkdir "$RUNNER_TEMP/extras"
         (cd dist && sha256sum -- *) > "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
         cat "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
-    - name: Build both again and compare them with the checksum file
+    - name: Both rebuilds match the checksum file byte for byte
       env:
         PYTHONWARNINGS: error
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
-    - name: Check the metadata, the long description and the contents
+    - name: The sdist and wheel pass twine check and carry the expected contents
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         python -m twine check --strict dist/*
         check-wheel-contents dist/*.whl
         python scripts/check_release_artifacts.py dist --version "$VERSION"
-    - uses: actions/upload-artifact@v7
+    - name: Keep the release checksums
+      uses: actions/upload-artifact@v7
       with:
         name: release-checksums
         path: ${{ runner.temp }}/extras/
@@ -1666,7 +947,7 @@ jobs:
         retention-days: 7
 
   release-rebuild-macos:
-    name: The release build gives the same bytes on macOS
+    name: Package / macOS rebuild
     needs: release-build
     runs-on: macos-latest
     timeout-minutes: 20
@@ -1689,11 +970,12 @@ jobs:
         python -m venv "$RUNNER_TEMP/build-env"
         "$RUNNER_TEMP/build-env/bin/python" -m pip install --upgrade pip
         "$RUNNER_TEMP/build-env/bin/python" -m pip install -r requirements-release.txt
-    - uses: actions/download-artifact@v8
+    - name: Fetch the release checksums
+      uses: actions/download-artifact@v8
       with:
         name: release-checksums
         path: ${{ runner.temp }}/extras
-    - name: Rebuild and compare with the build on Linux
+    - name: A rebuild on macOS matches the Linux build byte for byte
       env:
         PYTHONWARNINGS: error
       run: |
@@ -1701,15 +983,9 @@ jobs:
         "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
           --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
 
-  # What a user installs, built as it is published: the PyOctaveBand
-  # transition stub, and phonometry's wheel as the release builds it, read by
-  # a type checker and loaded in Pyodide. One runner, one install of the
-  # release tooling and one build of the wheel for the three, where each
-  # used to install the tooling and two built the wheel. The stub's steps
-  # and the wheel's are independent: a failure of either leaves the other
-  # its verdict, and the type checker and Pyodide run on the wheel only when
-  # it was built. The last step names every step that failed on the checks
-  # page.
+  # The transition stub, and the wheel as the release builds it, read by a
+  # type checker and loaded in Pyodide: one install of the release tooling,
+  # one build of the wheel, and the wheel's checks only when it was built.
   built-package:
     name: Package / stub and wheel
     runs-on: ubuntu-26.04
@@ -1718,10 +994,7 @@ jobs:
     permissions:
       contents: read
     env:
-      # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
-      # corepack fetches the pnpm tests/pyodide pins and says so first; the
-      # pin is the decision, so the announcement adds nothing to the log.
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
     - id: checkout
@@ -1733,79 +1006,35 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    # The setuptools requirements-release.txt pins, used in place
-    # (--no-isolation), as the release and publish-stub.yml build what they
-    # upload: a Dependabot bump of that pin, or of build, that breaks a build
-    # fails here rather than the day it is published.
     - name: Install the release tooling
       id: tooling
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements-release.txt
-    # The wheel the release would publish, built as the release builds it and
-    # first, while the checkout holds nothing its commit does not, which
-    # build_release.py refuses.
+    # First, while the checkout holds nothing build_release.py would refuse.
     - name: Build the wheel as the release does
       id: wheel
       if: ${{ !cancelled() && steps.tooling.outcome == 'success' }}
       env:
         PYTHONWARNINGS: error
       run: python scripts/build_release.py --outdir dist
-    # The PyOctaveBand transition stub under stub/ is built from the tree by a
-    # workflow_dispatch publish job, so until it was built here the first time
-    # anything looked at it was the moment it went to PyPI: a README that
-    # named the wrong warning class and a dependency line with no ceiling were
-    # both discovered after they had shipped. Building it on every pull
-    # request costs seconds and moves `twine check` (which is what renders the
-    # long description and would reject a malformed one) to where a mistake
-    # is still cheap. The build fails on a warning (PYTHONWARNINGS=error), and
-    # is stamped with the commit's time (SOURCE_DATE_EPOCH), which setuptools
-    # writes into every member of the wheel in place of the time of the
-    # build. check-wheel-contents reads the wheel for stray or duplicated
-    # files, as the release does for phonometry's.
-    - name: Build the stub and check its long description and contents
+    - name: The stub builds and passes twine check with the expected contents
       id: stub-build
       if: ${{ !cancelled() && steps.tooling.outcome == 'success' }}
       run: |
         SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation stub/
         python -m twine check --strict stub/dist/*
         check-wheel-contents stub/dist/*.whl
-    # A second build of the wheel from the same commit gives the same bytes,
-    # so the wheel publish-stub.yml uploads is the one anyone rebuilds from
-    # the tag. The sdist is not compared: setuptools writes the builder's
-    # clock, user and modes into it, which only build_release.py's rewrite
-    # of phonometry's sdist takes out.
-    - name: Build the stub's wheel again and compare it with the first
+    - name: The stub's wheel builds again byte for byte
       id: stub-reproducible
       if: ${{ !cancelled() && steps.stub-build.outcome == 'success' }}
       run: |
         SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation --wheel stub/ --outdir "$RUNNER_TEMP/stub-rebuild"
         cmp stub/dist/*.whl "$RUNNER_TEMP"/stub-rebuild/*.whl
-    # The resolver reads the built metadata, not stub/pyproject.toml, so the
-    # cap that keeps `pip install -U PyOctaveBand` on the line whose API the
-    # shim re-exports is asserted where it will actually be enforced. The
-    # licence is read there too: the expression the metadata declares and the
-    # LICENSE text the wheel and the sdist carry.
     - name: The built stub caps phonometry below the next major and carries its licence
       id: stub-metadata
       if: ${{ !cancelled() && steps.stub-build.outcome == 'success' }}
       run: python scripts/check_stub_metadata.py
-    # pyright's --verifytypes reads the installed package as a user's type
-    # checker does and scores the share of its public names whose type it
-    # knows. It read 99.2%, 137 ambiguous and 8 unknown of 18 689: attributes
-    # a constructor set from an expression (OctaveFilterBank.sos,
-    # WeightingFilter.zi, FDTD2D.p), whose type pyright and mypy may infer
-    # differently, and the hash override of the catalogue's provenance, left
-    # undeclared, which made every catalogue row and each function that takes
-    # one partly unknown. Nothing read the score, so a new attribute of the
-    # kind would have lowered it unseen. The wheel goes into an environment
-    # of its own beside the pyright that requirements-dev.txt pins, and the
-    # check fails below 100%: on any public type that is ambiguous or
-    # unknown, which pyright reports as an error and which is what keeps the
-    # score under 100%. --ignoreexternal leaves out the types numpy's and
-    # matplotlib's own stubs leave unknown, which no annotation here can make
-    # known; the base install is enough, since no extra adds a public type.
-    # `make type-completeness` runs the same check on a wheel built here.
     - name: Install the wheel and the pinned pyright in an environment of their own
       id: venv
       if: ${{ !cancelled() && steps.wheel.outcome == 'success' }}
@@ -1822,18 +1051,6 @@ jobs:
         export PATH="$RUNNER_TEMP/user/bin:$PATH" VIRTUAL_ENV="$RUNNER_TEMP/user"
         pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
         grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
-    # JupyterLite runs Python in the browser on Pyodide, where micropip
-    # installs a package against the numpy, scipy and matplotlib Pyodide
-    # builds for WebAssembly, whatever PyPI holds. The steps below load the
-    # Pyodide that tests/pyodide pins under Node. The first installs the
-    # wheel as a JupyterLite user would, requirements included, then the
-    # requirements of the plot and report extras (keep_going, so every one
-    # Pyodide cannot meet is named at once), and fails saying which floor in
-    # pyproject.toml the builds Pyodide ships fall short of. The second runs
-    # whatever the first said: it installs the wheel without its
-    # requirements, on Pyodide's own numpy and scipy, and runs an import and
-    # an octave filter bank, so the job also says whether the code itself
-    # runs there.
     - id: node
       if: ${{ !cancelled() && steps.wheel.outcome == 'success' }}
       uses: actions/setup-node@v7
@@ -1846,11 +1063,6 @@ jobs:
       run: |
         corepack enable
         pnpm install --frozen-lockfile
-    # The wheels Pyodide fetches from its CDN for numpy, scipy, matplotlib and
-    # the rest, kept between runs. They are the ones its lock file names, so
-    # the key is the lockfile that pins Pyodide: a new Pyodide starts empty.
-    # smoke.mjs hands the directory to loadPyodide as packageCacheDir, which
-    # loads a wheel found there and keeps one it had to download.
     - name: Restore the packages Pyodide downloads
       id: pyodide-cache
       if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
@@ -1864,43 +1076,34 @@ jobs:
       env:
         PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
       run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
-    # Runs whatever the step above said, so the job says whether the code
-    # itself runs on Pyodide when its requirements are not met there.
-    - name: Run an octave filter bank on the numpy and scipy Pyodide ships
+    - name: An octave filter bank runs on the numpy and scipy Pyodide ships
       id: pyodide-run
       if: ${{ !cancelled() && steps.pyodide-deps.outcome == 'success' }}
       env:
         PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
       run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
-    # One annotation per failed step on the checks page, titled by its id. A
-    # failed checkout leaves no script to run, and the job stays red once.
+    # Names each failed step on the checks page, unless the checkout failed.
     - name: Name the steps that failed
       if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
         STEPS: ${{ toJSON(steps) }}
       run: python3 .github/scripts/failed_steps.py
 
-  # Platform. The numbers held to one platform's C library.
+  # Platform. The numbers held to one platform's C library: Ubuntu 24.04's
+  # baseline glibc 2.39, which Ubuntu 26.04 no longer installs. The digests'
+  # bits depend on libm and on NumPy's SIMD dispatch, so they are checked in
+  # the one environment engine-digests.json records, AVX-512 kernels off.
 
-  # The numbers held to Ubuntu 24.04's glibc 2.39, the baseline build that
-  # Ubuntu 26.04 no longer installs: the FDTD engines' golden digests and the
-  # weighting design on glibc's routines without FMA. Both install the
-  # same dev dependencies and their checks take seconds, so they share one
-  # runner and one install. The digests come first, in their own order; the
-  # glibc tests come last, and each set runs whatever the other said. The
-  # last step names every step that failed on the checks page.
+  # The FDTD engines' golden digests, then the weighting design on glibc's
+  # routines without FMA, on one runner, each whatever the other said.
   baseline-glibc:
     name: Platform / glibc 2.39
-    # The baseline build of glibc, which Ubuntu 26.04 no longer installs, and
-    # the C library the digests file records.
     runs-on: ubuntu-24.04
-    # Its checks take seconds and the install a few minutes; a hung test ends
-    # the run fifteen minutes after it started (pyproject.toml).
+    # Its checks take seconds and the install a few minutes.
     timeout-minutes: 25
     permissions:
       contents: read
     env:
-      # No step leaves a compiled file beside the source it read.
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
     - id: checkout
@@ -1919,20 +1122,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
-    # The FDTD engines' NumPy numbers, held to the golden digests in
-    # engine-digests.json. Their bits depend on the C library's libm and on
-    # NumPy's SIMD dispatch, so they are checked in the one environment the
-    # file records, which is this job's: Ubuntu 24.04 and its C library,
-    # glibc 2.39 (GitHub refreshes the image behind the label, not its
-    # release), Python 3.13, the pinned stack, and NumPy's AVX-512 kernels
-    # switched off, so whichever x86 runner this lands on computes the same
-    # bits. The measured file is kept as an artifact: a moved digest can be
-    # read there and, when the move is meant, committed with
-    # `make engine-digests RUN=<this run's id>`. A NumPy bump fails here on
-    # the environment line alone until that is done.
-    # The features are assigned before they are written: echo would return
-    # its own status and hide the helper's, so a helper that fails would not
-    # fail the step.
+    # A meant move is committed with `make engine-digests RUN=<this run's id>`.
     - name: Name NumPy's AVX-512 kernels to switch off
       id: avx512
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
@@ -1946,9 +1136,6 @@ jobs:
         PHONOMETRY_ENGINE_DIGESTS: require
         NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
       run: python scripts/engine_digests.py --output engine-digests.measured.json
-    # A step of its own, which runs when the measurement fails: a moved digest
-    # fails the measurement, and this test names the scenario and the key.
-    # Not when the helper above failed, which would leave the kernels on.
     - name: FDTD engines hold their golden digests
       id: engine-digests
       if: (success() || failure()) && steps.avx512.outcome == 'success'
@@ -1962,27 +1149,7 @@ jobs:
       with:
         name: engine-digests-measured
         path: engine-digests.measured.json
-    # glibc built for the x86-64 baseline carries exp, log, pow, sin, tan and
-    # atan twice, with fused multiply-adds and without, and the weighting
-    # design gives the documented bytes on both. The test that hands a child
-    # the set without FMA runs on no job of the matrix: its Linux runner,
-    # ubuntu-26.04, has a glibc built for x86-64-v3 that carries the FMA set
-    # alone, so the test skips there by name, and macOS and Windows run no
-    # glibc. Ubuntu 24.04's glibc 2.39 is the baseline build (its libm
-    # declares x86-64-baseline needed), so the test runs here, with the tests
-    # of the helper that tells the two builds apart and holds each mask to
-    # what it does to glibc. Those that start a masked child need glibc 2.29
-    # or later, the routines the pins spell, on an x86-64 processor with FMA
-    # and AVX2, and those that read the real library need glibc on x86-64.
-    # The step runs last, after the digests, with NumPy's kernels as the
-    # runner has them: NPY_DISABLE_CPU_FEATURES lives on the digest steps
-    # alone, and in the job's env it would change what this measures without
-    # failing anything.
-    # A test that skips checks nothing, and pytest exits 0 all the same: the
-    # step fails on any skip, whatever its reason, as the localhost-node job
-    # does and for the same reasons (no colour, pipefail through tee). A
-    # runner image whose glibc moves to the x86-64-v3 build turns it red
-    # instead of green on nothing.
+    # Last, on NumPy's own kernels; a skip checks nothing, so any fails it.
     - name: The weighting design on glibc's routines without FMA
       id: glibc-without-fma
       if: ${{ !cancelled() && steps.install.outcome == 'success' }}
@@ -1995,8 +1162,7 @@ jobs:
           echo "::error::A test of glibc's build skipped instead of running on the baseline glibc."
           exit 1
         fi
-    # One annotation per failed step on the checks page, titled by its id. A
-    # failed checkout leaves no script to run, and the job stays red once.
+    # Names each failed step on the checks page, unless the checkout failed.
     - name: Name the steps that failed
       if: ${{ failure() && steps.checkout.outcome == 'success' }}
       env:
@@ -2006,21 +1172,15 @@ jobs:
   # FDTD. The simulation engines on the Array API backends, on Apple's GPU
   # and on a remote node.
 
-  # The FDTD engines step on any Array API backend. array-api-strict refuses
-  # every call outside the standard and every mix of host and device arrays,
-  # so a NumPy-only call in the engines fails here before it fails on a GPU;
-  # torch on CPU is the backend a user without a GPU can install, held to
-  # the tolerance the guide publishes.
+  # The FDTD engines on array-api-strict, which refuses any call outside the
+  # standard, and on torch on CPU, held to the tolerance the guide publishes.
   array-api:
-    name: FDTD engines on array-api-strict and torch (CPU)
+    name: FDTD / array-api, torch
     runs-on: ubuntu-26.04
-    # Under 5 min in its last 18 passing runs, and a hung test ends the run
-    # fifteen minutes after it started (pyproject.toml).
+    # Under 5 min in its last 18 passing runs.
     timeout-minutes: 25
     permissions:
       contents: read
-    # One thread per pool, as in the main test job: torch and the BLAS pools
-    # would otherwise each start one thread per core in every xdist worker.
     env:
       OMP_NUM_THREADS: "1"
       MKL_NUM_THREADS: "1"
@@ -2031,10 +1191,7 @@ jobs:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
-    # A cache key of its own. setup-python keys the pip cache on
-    # requirements.txt alone by default, which every Python 3.13 job on Linux
-    # shares; the first of them to finish saves the cache without torch, and
-    # the wheel would be fetched again on every run.
+    # A pip cache key of its own, so the cache it saves holds torch.
     - name: Set up Python 3.13
       uses: actions/setup-python@v7
       with:
@@ -2044,32 +1201,26 @@ jobs:
           requirements.txt
           requirements-dev.txt
           requirements-torch.txt
-    # torch alone from its CPU index, at the pin requirements-torch.txt
-    # holds: with PyPI beside that index pip takes the newest torch on either,
-    # and PyPI's brings the CUDA wheels. The second line finds the pin met.
-    - name: Install dependencies (torch from its CPU index)
+    # torch from its CPU index alone: PyPI's would bring the CUDA wheels.
+    - name: Install the dev dependencies and torch from its CPU index
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install --index-url https://download.pytorch.org/whl/cpu torch -c requirements-torch.txt
         pip install -r requirements-torch.txt
         pip install -e .
-    # -rfEP keeps the failure summary and prints what each passing
-    # tolerance test measured, and where, so every run leaves its number
-    # in the log.
-    - name: Run the backend tests
+    # -rfEP prints what each passing tolerance test measured, and where.
+    - name: The simulation tests pass on array-api-strict and torch
+      id: backend-tests
       run: pytest -q -rfEP -n auto tests/simulation
 
-  # Apple's MPS device, on the macOS runners that expose a working one
-  # (macOS 14 reports MPS available but cannot allocate on it). It holds the
-  # float32 tolerance the guide publishes for torch:mps, and runs the long
-  # float32 contour check on MPS, whose sums are float32 with Neumaier's
-  # compensation: a compiler that reassociates the compensated sum fails it.
+  # Apple's MPS device, on the macOS runners that can allocate on it: the
+  # float32 tolerance the guide gives torch:mps and the compensated contour.
   mps:
-    name: FDTD engines on torch MPS
+    name: FDTD / torch MPS
     runs-on: macos-15
-    # Under 2 min in its last 18 passing runs, and a hung test ends the run
-    # fifteen minutes after it started (pyproject.toml).
+    # Under 2 min in its last 18 passing runs.
     timeout-minutes: 25
     permissions:
       contents: read
@@ -2087,83 +1238,52 @@ jobs:
           requirements.txt
           requirements-dev.txt
           requirements-torch.txt
-    # torch 2.15 asks the device for MTLGPUFamilyApple7, which the runners'
-    # paravirtual GPU does not report, and skips it as no MPS device
-    # (https://github.com/pytorch/pytorch/issues/202529); 2.14.1 still runs
-    # on it. This job alone keeps 2.14.1 until a release reads that GPU
-    # again; every other job takes the pin in requirements-torch.txt.
-    - name: Install dependencies
+    # torch 2.15 skips the runners' paravirtual GPU as no MPS device
+    # (pytorch/pytorch#202529); this job keeps 2.14.1 until a release reads it.
+    - name: Install the dev dependencies and torch
+      id: install
       run: |
         python -m pip install --upgrade pip
         grep -v '^torch==' requirements-torch.txt > requirements-torch-mps.txt
         pip install -r requirements.txt -r requirements-dev.txt -r requirements-torch-mps.txt torch==2.14.1
         pip install -e .
-    - name: Check MPS is usable, then run the tolerance and contour tests on it
+    - name: The tolerance and contour tests pass on a usable MPS device
+      id: mps-tests
       run: |
         python -c "import torch, sys; ok = torch.backends.mps.is_available() and torch.ones(4, device='mps').sum().item() == 4.0; sys.exit(0 if ok else 'no usable MPS device on this runner')"
         pytest -q -rfEP tests/simulation/test_backend_tolerance.py tests/simulation/test_fdtd_backends.py -k "torch:mps"
 
-  # A run on a node must give the numbers the run here gives. This job builds
-  # the cpu stage of the node image (docker/node/Dockerfile) with the pins it
-  # installs itself, serves it through sshd on localhost, names it in a hosts
-  # file, and runs the simulation functions both ways, compared with
-  # array_equal: the same pins on the same CPU agree bit for bit. It writes
-  # a video there too, compares its run with the run here and counts its
-  # frames here with ffprobe. It lints the image's Dockerfile and its
-  # provisioning script first. A pull request that moves the digest of the
-  # cpu stage's base image runs it too, so a new digest is checked before it
-  # is merged.
+  # A run on a node matches the run here bit for bit: the image's cpu stage,
+  # served through sshd on localhost, runs the simulations and a video.
   remote-node:
-    name: Remote simulation on a localhost node
-    # The release the node image's cpu stage starts from (docker/node/
-    # Dockerfile, ubuntu:24.04): where NumPy falls back to libm, the run here
-    # and the run in the container agree bit for bit only on the same glibc.
-    # Move both together.
+    name: FDTD / remote node
+    # The release the image's cpu stage starts from, for the same libm.
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    # A build of the image with nothing cached takes minutes and the runs take
-    # seconds; installing ffmpeg, for ffprobe, took 15 and 17 min in two runs
-    # of the video job, waiting on Ubuntu's mirror: a job still going after
-    # this has hung.
+    # An uncached image build takes minutes, Ubuntu's ffmpeg up to 17 min.
     timeout-minutes: 45
     steps:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
-    # hadolint by its release tag; shellcheck is the runner image's own.
-    - name: Lint the node image's Dockerfile and its provisioning script
+    - name: The node image's Dockerfile and provisioning script lint clean
       run: |
         docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --failure-threshold warning - < docker/node/Dockerfile
         shellcheck docker/node/provision.sh
-    # The caches. A pip cache and the image's layer cache would both be safe
-    # here: Actions scopes a cache to the ref of the run that wrote it, so a
-    # pull_request run writes only under its merge ref and reads its own, its
-    # base branch's and main's, and only runs on main (its pushes and
-    # dispatches) write under main. The pip cache is left off all the same:
-    # zizmor's cache-poisoning rule takes a job that builds an image with
-    # docker/build-push-action for one that publishes, and refuses a
-    # setup-python cache in it. The layer cache, which that rule does not
-    # cover, stays: it spares the build its downloads, and what the image
-    # computes is checked against the run here regardless. The job publishes
-    # nothing: the image goes no further than this runner's Docker, and the
-    # build uploads no record of itself as an artifact.
+    # No pip cache: zizmor's cache-poisoning rule reads this job as publishing.
     - name: Set up Python 3.13
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
-    - name: Install dependencies
+    - name: Install the dev dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
-    # The cpu stage fetches the pinned ffmpeg build (checked against its
-    # SHA-256), Python 3.13 from the deadsnakes PPA and the figure stack, and
-    # reaches no keyserver: the PPA's key is a file of the repository, checked
-    # by its fingerprint. All of it is kept in the Actions cache by build
-    # step, rebuilt only when its inputs change, the ffmpeg pin included.
     - name: Build the node image for a CPU
       uses: docker/build-push-action@v7
       env:
@@ -2176,17 +1296,7 @@ jobs:
         load: true
         cache-from: type=gha,scope=node-cpu
         cache-to: type=gha,mode=max,scope=node-cpu
-    # sshd runs as root on a port of its own, on 127.0.0.1 alone, and lets
-    # this runner's user in with a key made here, never with a password. The
-    # runner image carries OpenSSH's server (its ssh package); ssh-keygen -A
-    # makes any host key it lacks. Without PAM, sshd refuses even a key to an
-    # account whose password is locked, as a runner's may be: '*' is no
-    # password, and not a locked one. sshd logs to a file of the job, which
-    # the last step shows when the job fails or is cancelled. The hosts file
-    # bounds each run at five minutes, under the fifteen pytest gives a test
-    # (faulthandler_timeout in pyproject.toml), so a node that stops
-    # answering fails its test with the client's own error instead of
-    # holding the job or ending pytest; the step takes seconds.
+    # sshd on 127.0.0.1 alone, with a key made here; each run ends at 5 min.
     - name: Serve the node through sshd on localhost
       run: |
         user="$(id -un)"
@@ -2208,19 +1318,12 @@ jobs:
         printf '%s\n' "[hosts.ci]" 'ssh = "phonometry-ci-node"' 'runner = "docker"' \
           'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 300' \
           > "$RUNNER_TEMP/hosts.toml"
-    # ffprobe counts the frames of the video the node sends back.
     - name: Install ffmpeg
       run: |
         sudo apt-get update -q
         sudo apt-get install -y -q --no-install-recommends ffmpeg
-    # A test that skips compares nothing, and pytest exits 0 all the same:
-    # the job fails on any skip, whatever its reason. pytest writes no
-    # colour, so that a summary line starts with SKIPPED and not with an
-    # escape sequence that a forced colour (FORCE_COLOR, PY_COLORS) would
-    # put first and the check would read past. Actions runs a step with
-    # bash -e alone, so pipefail is set for pytest's status to pass through
-    # tee.
-    - name: Run the simulations on the node and here, and compare them
+    - name: The simulations run on the node match the ones run here
+      id: node-runs
       env:
         PHONOMETRY_TEST_NODE: ci
         PHONOMETRY_HOSTS_FILE: ${{ runner.temp }}/hosts.toml
@@ -2232,11 +1335,6 @@ jobs:
           echo "::error::The localhost-node tests skipped instead of running on the node."
           exit 1
         fi
-    # Why a login was refused, or why sshd did not start or could not take
-    # its port, is in sshd's log and in no step's output: with -E, sshd
-    # writes there what it would otherwise send to the system log. A job
-    # past its timeout is cancelled, not failed, and a run that hangs is the
-    # one whose log is wanted most.
     - name: Show sshd's log
       if: failure() || cancelled()
       run: |
@@ -2247,20 +1345,14 @@ jobs:
   # Runtime. The package where a user runs it: writing video with a real
   # ffmpeg, and in a notebook kernel.
 
-  # The video writer pipes frames into ffmpeg, a system program rather than a
-  # wheel, so the main matrix runs its logic against a fake ffmpeg and skips
-  # the real encodes. This job installs Ubuntu's ffmpeg and runs them: WebM,
-  # MP4 and GIF are written, then decoded and counted with ffprobe. Whether
-  # that ffmpeg has SVT-AV1 decides whether the AV1-first CPU path is
-  # tested, and the summary says which, before the tests run, rather than
-  # failing the build over a distribution's choice of encoders.
+  # The real encodes the matrix runs against a fake ffmpeg: Ubuntu's ffmpeg
+  # writes WebM, MP4 and GIF, and ffprobe decodes and counts them. Whether
+  # that ffmpeg has SVT-AV1 decides whether the AV1-first CPU path is tested,
+  # and the summary says which before the tests run.
   video:
-    name: Videos encode with a real ffmpeg
+    name: Runtime / ffmpeg video
     runs-on: ubuntu-26.04
-    # Its tests take under a minute in its first five passing runs, and
-    # installing ffmpeg took under a minute in three of them and 15 and 17
-    # min in the other two, waiting on Ubuntu's mirror; a hung test ends the
-    # run fifteen minutes after it started (pyproject.toml).
+    # Tests under a minute; Ubuntu's ffmpeg has taken up to 17 min to install.
     timeout-minutes: 45
     permissions:
       contents: read
@@ -2285,13 +1377,15 @@ jobs:
         else
           echo "This ffmpeg has no SVT-AV1, so the AV1-first CPU path is not tested below (VP9 is)" >> "$GITHUB_STEP_SUMMARY"
         fi
-    - name: Install dependencies
+    - name: Install the dev dependencies
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
     # -rs prints why a test skipped, so a missing encoder reads in the log.
-    - name: Write and decode the videos
+    - name: Every video writes and decodes with a real ffmpeg
+      id: videos
       run: >-
         pytest -q -rs -n auto
         tests/io/test_video_encoders.py tests/io/test_write_video.py
@@ -2300,21 +1394,14 @@ jobs:
         tests/simulation/test_write_elastic_fdtd_animation.py
         tests/simulation/test_video_job.py
 
-  # The suite calls _repr_html_ and _repr_pretty_ itself; a notebook goes
-  # through IPython, which picks the method, runs matplotlib on its inline
-  # backend and sends a warning to the cell's stderr. This executes
-  # tests/notebooks/smoke.ipynb with nbclient on a real ipykernel, with the
-  # package installed as a user installs it, and reads what each cell put
-  # out: a filter bank result as its table, .plot() as an inline PNG, a
-  # verdict as FAIL, a .report() PDF in a temporary directory and a
-  # FilterBankWarning, the topic class under PhonometryWarning that the
-  # low sampling rate provokes.
+  # tests/notebooks/smoke.ipynb on a real ipykernel through nbclient, with the
+  # package installed as a user installs it: what IPython picks to show and
+  # what each cell puts out, which the suite, calling the methods itself,
+  # cannot see (scripts/check_notebook.py).
   notebook:
-    name: phonometry runs in a notebook kernel
+    name: Runtime / notebook
     runs-on: ubuntu-26.04
     # 1.4 min at the longest in the measured runs.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 15
     permissions:
       contents: read
@@ -2332,18 +1419,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-reports.txt -r requirements-notebook.txt
         pip install ".[plot,report]"
-    - name: Execute the smoke notebook and read its outputs
+    - name: Every cell of the smoke notebook puts out what it should
+      id: notebook
       run: python scripts/check_notebook.py tests/notebooks/smoke.ipynb
 
   # Report. What the run reports once the tests are done: the SonarCloud
   # analysis and the pull request comment.
 
   sonar:
+    name: Report / SonarCloud
     needs: tests
     runs-on: ubuntu-26.04
     # 3.2 min at the longest in the measured runs.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 15
     # Dependabot runs with a restricted token and no access to repository secrets, so
     # SONAR_TOKEN is empty there and the scan can only ever fail. Skip it for those runs.
@@ -2355,19 +1442,13 @@ jobs:
       with:
         persist-credentials: false
         fetch-depth: 0
-    - name: Download coverage report
+    - name: Fetch the coverage report
       uses: actions/download-artifact@v8
       with:
         name: test-results-ubuntu-26.04-3.13
-    # SonarCloud counts as new code everything since the version changed, and
-    # a scan that names no version leaves it "not provided" for ever: every
-    # analysis from the first one on carried that, so the new-code period never
-    # moved and every smell ever written counted as new. VERSION names the last
-    # release and changes only in a release commit, so the analysis of each
-    # release commit records a new version and opens a new period. The value
-    # is held to the PEP 440 form release.yml holds it to before the scanner
-    # reads it (tests/test_repository_config.py holds the two patterns equal),
-    # and it reaches the scan as an input, never through a shell.
+    # SonarCloud counts as new code everything since the version changed, so
+    # each release opens a new period; the value, in release.yml's PEP 440 form,
+    # reaches the scan as an input, never through a shell.
     - name: Read the version in VERSION (the last release until a release commit bumps it)
       id: version
       run: |
@@ -2377,7 +1458,7 @@ jobs:
           exit 1
         fi
         echo "version=$version" >> "$GITHUB_OUTPUT"
-    - name: SonarCloud Scan
+    - name: Scan with SonarCloud
       uses: SonarSource/sonarqube-scan-action@v8
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2386,27 +1467,20 @@ jobs:
         args: -Dsonar.projectVersion=${{ steps.version.outputs.version }}
 
   pr-comment:
+    name: Report / PR comment
     needs: [quality, tests]
     runs-on: ubuntu-26.04
     # Under a minute in the measured runs.
-    # A job still going past its limit has hung: without one it would hold a
-    # runner, under the account's cap on concurrent jobs, for six hours.
     timeout-minutes: 10
-    # After a red quality or tests job, which the comment reports, but never
-    # in a run a newer push cancelled: that run holds the results of whatever
-    # finished before the cancel, none on a run cancelled early, and would
-    # rewrite the comment from them, "No test results found." in that case.
+    # After a red quality or tests job, never in a run a newer push cancelled,
+    # whose partial results would rewrite the comment.
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     permissions:
       contents: read
       pull-requests: write
       issues: write
     steps:
-    # Full history: the comment is a diff of the committed conformance artefact
-    # against the same file on the base branch, and a checkout at the default
-    # depth has only the merge commit to show for it. A missing baseline is not
-    # an error - the comment falls back to totals and says so - but it makes
-    # every pull request look like it changed nothing.
+    # Full history: the comment diffs the artefact against the base branch's.
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
@@ -2417,31 +1491,25 @@ jobs:
       with:
         python-version: "3.13"
 
-    # Stdlib only. The comment reads two committed JSON files and joins them;
-    # it does not run the checks. It used to install the whole scientific stack
-    # and spend 45 s regenerating a report the conformance gate of
-    # guards-package has already proven current, which meant a stale artefact
-    # was reported twice and fixed by neither.
+    # Stdlib only: the comment joins two committed JSON files and runs no check.
 
-    - name: Download Test Results
+    - name: Fetch the test results
       uses: actions/download-artifact@v8
       with:
         pattern: test-results-*
         path: test-results
       continue-on-error: true
     
-    - name: Generate Comment Body
+    - name: Write the comment
       run: python .github/scripts/comment_pr.py
       env:
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_RUN_ID: ${{ github.run_id }}
-        # The branch the artefact is diffed against, and the commit the two
-        # "full report" links are permalinks to. `github.sha` on a pull request
-        # is the merge commit, which is not a commit anyone can browse.
+        # The base the artefact is diffed against, and the head the links pin.
         GITHUB_BASE_REF: ${{ github.base_ref }}
         GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
-    - name: Post PR Comment
+    - name: Post the comment on the pull request
       uses: actions/github-script@v9
       with:
         script: |

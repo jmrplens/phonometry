@@ -47,7 +47,7 @@ Spanish twin
 "Correccion por ruido de fondo", "medicion", "aqui"
 ```
 
-**Enforced by:** `scripts/check_spanish_accents.py`, `make spanish-accents`, `CI: Markdown renders the way it reads`, `tests/test_check_spanish_accents.py::test_the_published_tables_carry_every_accent`
+**Enforced by:** `scripts/check_spanish_accents.py`, `make spanish-accents`, `CI: guards-prose/spanish-accents`, `tests/test_check_spanish_accents.py::test_the_published_tables_carry_every_accent`
 
 **Exceptions.** A listed form that really is another word (the verb "limite" in "que limite la banda") goes in `ALLOWED` of the script, keyed by the Spanish value and the word, with its reason; an entry that no longer matches fails. Pairs a list cannot decide (si and sí, aun and aún, mas and más) stay with the author.
 
@@ -71,7 +71,7 @@ Spanish twin
 "presupuesto de incertidumbre", "incertidumbre extendida"
 ```
 
-**Enforced by:** `scripts/check_spanish_accents.py`, `make spanish-accents`, `CI: Markdown renders the way it reads`, `tests/test_check_spanish_accents.py`
+**Enforced by:** `scripts/check_spanish_accents.py`, `make spanish-accents`, `CI: guards-prose/spanish-accents`, `tests/test_check_spanish_accents.py`
 
 **Exceptions.** Where the word really is the other sense (the sine of an angle, a quadratic mean, money), its context goes in `TRIGONOMETRIC`, `QUADRATIC_MEAN` or `MONEY` of the script with its reason, written on the words of the one sentence it exempts; a context that exempts nothing fails. "cuadrado medio" passes only in a sentence of an analysis of variance (`ANALYSIS_OF_VARIANCE`). An identifier such as `presupuesto_ruido` is code and is left alone. A "presupuesto" that is a premise ("los presupuestos del modelo") is reworded ("los supuestos", "las hipótesis").
 
@@ -114,7 +114,7 @@ python scripts/generate_catalogue_data.py --untranslated   (the missing strings,
 a new catalogue row note committed in English only
 ```
 
-**Enforced by:** `scripts/generate_catalogue_data.py`, `make catalogue-data`, `CI: Every published value names its page`
+**Enforced by:** `scripts/generate_catalogue_data.py`, `make catalogue-data`, `CI: guards-package/catalogue-data`
 
 **Exceptions.** The book's name inside a source stays as printed ("Allard & Atalla 2e", "ASHRAE (2019) HVAC Applications Handbook"); the words around it are translated, so `Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)` reads `Allard & Atalla 2e Tabla 10.1, página 229 del PDF (p. 222 impresa)`.
 
@@ -141,7 +141,7 @@ The level is energy-averaged <U+2014> each band is summed in power.
 * ``peaking`` - the bell of a parametric EQ.
 ```
 
-**Enforced by:** `scripts/check_em_dashes.py`, `CI: Markdown renders the way it reads`, review
+**Enforced by:** `scripts/check_em_dashes.py`, `make em-dashes`, `CI: guards-prose/em-dashes`, review
 
 **Exceptions.** What is not prose keeps its dash, by position, with no exemption table: a standard's title reproduced as printed (in a frontmatter `title:`, an italic span, a bibliographic entry, a quotation, or right before a part number, `<U+2014> Part 3:`, each exempting its own dash and no other on the line, a value of the frontmatter being plain text the site shows as written, so only a quotation closed inside the value, over the lines it wraps, or a part number marks a title there and nothing it opens reaches the next value or the body, and a line of a data module quoting with curly quotes or guillemets alone, a straight quote there being the string's own; an italic span or a quotation that nothing closes in its block exempts nothing, since the site shows its mark as written), fenced and inline code, a string a test compares with, and a dash that fills a whole table cell or a whole slash-separated item of one (the empty-cell mark of the fiches), in a row of a table: a pipe with no delimiter row under it is text. A double hyphen is code in the same places, and also in a docstring's literal block after `::`, the body of a `.. math::` or `.. code-block::` directive, a doctest, math on a page (`$...$` and a `$$` block), a link destination or URL (a heading's slug may carry `--`), a comment the page does not show (an HTML comment, an MDX comment `{/* ... */}` on an MDX page, a comment of the frontmatter), an `href`, `src`, `style`, `id` or `class` value (`var(--sl-color-accent)`) and a line that is only a rule. In the frontmatter, an identifier field of a reference (`number`, `doi`, `isbn`, `url`) is no prose: the References section prints it as written, outside the text smartypants reads, or not at all, so a run of hyphens with no blank on either side is the identifier's own there (the Naval Research Laboratory numbers its RANDI report `NRL/FR/7176--95-9628`), while a spaced one, one at the edge of the value and one in any other field of the entry are read as everywhere else; the GitHub edition under `docs/` writes such a number in code. An em dash in maths is still read, because the site shows what maths holds, whatever quotation, italic span, reference or part number stands around it, but maths marks nothing around it: an asterisk between dollar signs is a superscript star (`$DI_i^*$`), not an italic marker, a quotation mark there opens no quotation, and four digits in parentheses there or in code (`$L(1000)$`) open no bibliographic entry. A `$$` block is read the same way whatever its lines open with, since `+ `, `|` or `>` on a line of it starts no block of markdown, as on a line of a fenced code block. Both are read behind the marks of a quotation or a list item as anywhere else, and each ends with what holds it. Every reading goes by one walk of the page, by its kind (`page_lines` of `scripts/markdown_fences.py`): what opens a block on a `.md` page need not on an `.mdx` one. A plain-text file the site serves (`robots.txt`) is shown as written, so a double hyphen there stays two hyphens. In a string that is not a page or a docstring only the spaced form ` -- ` is a dash, so an option of a command line (`--keep`) and a console banner (`--- Generating ---`) stand; a comment is published nowhere and keeps its double hyphens, and so does the docstring of a figure or diagram generator, which publishes only what it draws. A docstring and the API page made from it read the same, because the generator publishes a code directive's body and a doctest as fenced code, under a fence longer than any run of backticks the example shows, and the math as `$` and `$$` spans. Away from a list item's head, a single hyphen between spaces is also a minus (“32,3 - 26,3 dB”), and there the rule holds by review. Outside the guard's roots (commit messages, pull requests, tests and the other scripts) the rule holds by review.
 
@@ -162,7 +162,7 @@ r"""... :math:`10 \log_{10} \frac{S_1}{S_2}` ..."""
 r"""... :math:`10 \log_{10} <FF>rac{S_1}{S_2}` ..."""   (<FF>: one form feed byte where \f was)
 ```
 
-**Enforced by:** `scripts/check_control_characters.py`, `make control-characters`, `CI: No stray control character`
+**Enforced by:** `scripts/check_control_characters.py`, `make control-characters`, `CI: guards-prose/control-characters`
 
 **Exceptions.** A file that is a copy of someone else's (a license, an oracle extracted as delivered) may keep its carriage returns: it goes in `AS_DELIVERED` of the script, keyed by path with its reason, and an entry whose file is gone or no longer carries one fails. Binary files and SVG are not read (`NOT_TEXT`).
 
@@ -183,7 +183,7 @@ r"""... :math:`10 \log_{10} <FF>rac{S_1}{S_2}` ..."""   (<FF>: one form feed byt
 6.251 5   0.647 829   101 325   (ordinary spaces: a line may break inside the number)
 ```
 
-**Enforced by:** `scripts/check_digit_grouping.py`, `make digit-grouping`, `CI: Every call passes the language on`, `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`
+**Enforced by:** `scripts/check_digit_grouping.py`, `make digit-grouping`, `CI: guards-prose/digit-grouping`, `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: guards-prose/decimal-comma`
 
 **Exceptions.** A figure or diagram label, because an SVG text line does not reflow; inside `$...$` mathtext the separator is `\,` instead. In a Python file only docstrings and comments are prose: another string may be a data key (the CNOSSOS traction table is keyed `"diesel locomotive, c. 2 200 kW"`, which a caller passes in). Inline code and fences are literals and are not read.
 
@@ -208,7 +208,7 @@ The floor is at least 0,5 m from the wall, as Clause 7.6 lists.
 msg = "'temperature_c' must be a finite temperature above -273,15 degC."
 ```
 
-**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`, `tests/test_package_architecture.py::test_no_error_message_carries_a_comma_decimal`
+**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: guards-prose/decimal-comma`, `tests/test_package_architecture.py::test_no_error_message_carries_a_comma_decimal`
 
 **Exceptions.** The rule covers every English text: prose, docstrings, comments, error and warning messages, test docstrings and comments, the CHANGELOG, the English site pages and their frontmatter, the prose attributes of a tag (`alt`, `title`, `caption`), the text of English figures, diagrams, plates and fiches, and the generated English pages (their generator writes the point, and they are mended at their source). A value never changes on the way: `1,5` becomes `1.5`, `83,523 4` becomes `83.523 4`, `$2{,}256$` becomes `$2.256$`.
 
@@ -242,7 +242,7 @@ Verified on PDF page 31 (printed p. 25) of ISO 3744:2010.
 Rendered at 600 dpi with pdftoppm and confirmed by two engines.
 ```
 
-**Enforced by:** `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page`, review
+**Enforced by:** `scripts/check_errata_evidence.py`, `make errata-evidence`, `CI: guards-prose/errata-evidence`, review
 
 **Exceptions.** The guard reads `docs/ERRATA.md` and `docs/ERRATA.es.md` (a resolution in dpi anywhere, and the procedural "rendered at", "rendered from" or "render the page" in an Evidence bullet); pull request bodies, review replies, the CHANGELOG, the guides and the curated API table are review. Reading the page as an image stays the method ([CONTRIBUTING.md, "Filing an errata entry"](../../CONTRIBUTING.md)); only its narration goes. "render" in its ordinary sense is allowed, and so is how the site or a figure is rendered.
 

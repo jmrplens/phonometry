@@ -413,7 +413,7 @@ def pressure_level(pressure_pa):
     r"""The level :math:`L_p = 20 \\lg(p/p_0)`, in dB."""
 ```
 
-**Enforced by:** `scripts/check_docstring_math.py`, `make docstring-math`, `CI: Docstring mathematics reaches the page intact`, `ruff D301`
+**Enforced by:** `scripts/check_docstring_math.py`, `make docstring-math`, `CI: guards-prose/docstring-math`, `ruff D301`
 
 **Exceptions.** A `\\` that ends a row of an `aligned` or `cases` block is followed by a newline, never a letter, and is not refused.
 
@@ -436,7 +436,7 @@ def largest_deviation(deviations):
     r"""The largest deviation :math:`|dL_n|_\max`, in dB."""
 ```
 
-**Enforced by:** `scripts/check_docstring_math.py`, `make docstring-math`, `CI: Docstring mathematics reaches the page intact`
+**Enforced by:** `scripts/check_docstring_math.py`, `make docstring-math`, `CI: guards-prose/docstring-math`
 
 **Exceptions.** The commands KaTeX takes bare (`BARE_SCRIPT_COMMANDS` in the checker: the Greek letters, `\circ`, `\mathrm` and the other font and text commands) may stay unbraced. The checker reads docstrings (`:math:` roles and `.. math::` blocks) and the prose of hand-written pages; the generated API reference is judged through its docstrings.
 
@@ -457,7 +457,7 @@ L_p    L_W    R_\mathrm{w}    \sum_i 10^{L_i/10}
 L_\mathrm{p}    R_w    \sum_\mathrm{i} 10^{L_\mathrm{i}/10}
 ```
 
-**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: One meaning per subscript per file`, review
+**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: guards-prose/subscript-slope`, review
 
 **Exceptions.** A Greek letter follows its case: lowercase italic, uppercase upright. The identifier of a symbol is never translated (the prose, operators and units around it are). The errata registers reproduce each print as it is. The checker holds a subscript to one slope per file; whether that slope is right for its standard is review. A plate sets its slopes through the composer ([F39](docs-and-figures.md#f39)).
 
@@ -498,7 +498,7 @@ L_\mathrm{v,i}    (UNE-EN 15657:2018 Formula (12) as printed)
 \Delta_{SOR}     (ECAC Doc 29 as printed)
 ```
 
-**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: One meaning per subscript per file`, review
+**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: guards-prose/subscript-slope`, review
 
 **Exceptions.** An upright i that opens a subscript is not an index: it is the impact level `L_\mathrm{i}` of ISO 16283-2, which [D19](#d19) keeps apart from an index. The errata registers quote such prints as printed, index upright.
 
@@ -521,7 +521,7 @@ def impact_level(position_levels):
     r"""The impact level :math:`L_\mathrm{i} = 10 \lg(\frac{1}{n} \sum_i 10^{L_i/10})`, in dB."""
 ```
 
-**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: One meaning per subscript per file`, `tests/test_check_subscript_slope.py::test_the_tree_it_ships_with_passes`
+**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: guards-prose/subscript-slope`, `tests/test_check_subscript_slope.py::test_the_tree_it_ships_with_passes`
 
 **Exceptions.** Check what the source prints before renaming anything. A letter that keeps one meaning under several bases takes one slope across its family (`LINKED` in the checker: the r of "Beurteilung" in DIN 4150-2). A page whose subject is the collision itself is registered in `DECLARED` with both meanings named, and a symbol two standards print alike for two meanings goes in the ambiguity table of the glossary. `docs/ERRATA.md` and the drawing modules (`_plot`, `_report`, `scripts/`) are held only to the running index and the corpus-wide bases.
 
@@ -542,7 +542,7 @@ KB_\mathrm{Fmax}    KB_\mathrm{FTr}
 \mathrm{KB}_\mathrm{Fmax}
 ```
 
-**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: One meaning per subscript per file`
+**Enforced by:** `scripts/check_subscript_slope.py`, `make subscripts`, `CI: guards-prose/subscript-slope`
 
 **Exceptions.** `BASES` in the checker lists the letter runs held corpus-wide. A run inside a subscript is a word and stays upright (the KB filter of `H_\mathrm{KB}`). On a plate the composer sets a run of two or more letters upright, except the runs of `_ITALIC_BASE_RUNS` in `scripts/diagrams/canvas.py`.
 
@@ -563,7 +563,7 @@ p(t) = \hat{p}\,\mathrm{e}^{-t/\tau}    \ln x = \log_\mathrm{e} x
 p(t) = \hat{p}\,e^{-t/\tau}    \log_e x
 ```
 
-**Enforced by:** `scripts/check_euler_number.py`, `make euler-number`, `CI: Euler's number is upright`
+**Enforced by:** `scripts/check_euler_number.py`, `make euler-number`, `CI: guards-prose/euler-number`
 
 **Exceptions.** A plate label writes `exp(...)`, since the plate canvas sets every lone letter italic. An italic e stays where it is a variable (the strain of a Biot frame), declared in `DECLARED` of the checker. A subscript e takes the slope of what it names.
 
@@ -615,7 +615,7 @@ _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 _BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 ```
 
-**Enforced by:** `scripts/check_published_sources.py`, `make published-sources`, `CI: Every published value names its page`
+**Enforced by:** `scripts/check_published_sources.py`, `make published-sources`, `CI: guards-package/published-sources`
 
 **Exceptions.** A table transcribed from a standard is cited by the standard's table or clause number, which is the citation ([D13](#d13)); its page is optional. A table transcribed from a book or a paper is registered in `SOURCED` of the guard, keyed by module path and constant name, with the citation first. A comment that names a document only for its formula, while the values are arithmetic, is declared in `NOT_TRANSCRIBED` with the reason, and a table whose page cannot be established goes in `PAGE_UNKNOWN` with the reason; that list is meant to stay empty, and an entry in either that stops matching the tree fails the guard. Any comment block counts as the banner, and a data file the banner names must say its own page.
 
@@ -775,7 +775,7 @@ StraightJunction = Literal["X", "T1"]
 junction: Junction = "X"   # Junction lists "T2" and "L", and every call with them raises
 ```
 
-**Enforced by:** `tests/test_choice_values_documented.py`, `scripts/check_choice_literals.py`, `make choice-literals`, `CI: Check that every fixed public choice is typed Literal`, `tests/test_check_choice_literals.py::test_no_literal_lists_a_value_every_call_refuses`
+**Enforced by:** `tests/test_choice_values_documented.py`, `scripts/check_choice_literals.py`, `make choice-literals`, `CI: guards-package/choice-literals`, `tests/test_check_choice_literals.py::test_no_literal_lists_a_value_every_call_refuses`
 
 **Exceptions.** A record written by `dataclasses` documents its constructor's parameters as the class's `:ivar` fields, and a class whose `__init__` has no docstring as the class's `:param` fields. An inline `Literal[...]` shows its values in the signature and needs no list. A value is written as the caller types it, a text in double quotes inside the code span; an alias that keys a mapping lists its values as the keys ("Keyed by any of"), and one that types the items of a sequence as each item's ("Each one of"). The guard reads each text, number or `Enum` member that a `Literal` of the choice itself lists, an alias, one written in place or one it lists in turn, from the annotation's value and not its text, and follows it through the function as it runs, every other argument unknown: a test the value alone decides (`==` or `in` against what the module writes, `isinstance`, and `not`, `and` and `or` of such tests) takes its branch, and a test that asks anything else takes both. A local, an import and a dict of keywords spread into a call (`f(**options)`) hold what the path that reaches them bound them to, as it was when it was bound. A dict built on one branch only, a key two branches build differently, a key a later `**` mapping or a key the guard cannot read may fill, also where one dict is merged into another (`{**base, **extra}`), a dict, a list or a set read in any way other than to look into it (a `**` spread, a lookup by key, a comparison, a test or a method that changes nothing), so one written into, handed to a call, put in a list or a tuple, bound to another name or looped over, a name a function written inside the body binds again with `nonlocal`, and a helper or a table imported on one branch of two, hand the call nothing the guard can vouch for. The value fails when every path raises and one raises for it: at a shared check that does not take it (`require_choice` against fewer options), a lookup in a fixed table with no key for it, or, for a table keyed by tuples, with no key that holds it in its place, an `Enum` with no member of its value, a `raise` a test of it steered the call to, or a function of the package it is handed to, a record's `__post_init__` among them, that refuses it on every call; what such a function hands back is read the same way (`_, _, j3 = _junction(junction)` then `if j3 is None: raise`). A value refused only beside a value of another argument is a combination the `Literal` cannot say, and stays: `io.write(subtype="PCM_32")` refuses it beside a FLAC file alone, and a refusal on a branch another argument picks, inside a loop, or in a `try` whose handler goes on, passes. A choice whose vocabulary is shared takes a narrower alias of its own (`StraightJunction` of `Junction`, `ConstructionArea` of `Area`), and its field says why the other values are not offered.
 

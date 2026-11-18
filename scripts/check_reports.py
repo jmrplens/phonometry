@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Tolerance-aware staleness check for the committed ``.report()`` fiches.
 
-The ``Example report fiches up to date`` CI job regenerates ``.github/reports``
+The ``reports`` job of python-app.yml regenerates ``.github/reports``
 with ``make reports`` and must confirm the result still matches what is
 committed. Nothing used to check this, and the fiches drifted: two of them sat
 a plot-styling release behind the library for weeks, and one was registered in

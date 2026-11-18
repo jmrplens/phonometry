@@ -36,8 +36,9 @@ export function moveOrigin(dist, origin) {
 	for (const name of ORIGIN_FILES) {
 		const path = join(dist, name);
 		const text = readFileSync(path, 'utf8');
-		if (!text.includes(CANONICAL_ORIGIN)) throw new Error(`${name} names no ${CANONICAL_ORIGIN}; take it off ORIGIN_FILES`);
-		writeFileSync(path, text.replaceAll(CANONICAL_ORIGIN, origin));
+		const rewritten = text.replaceAll(CANONICAL_ORIGIN, origin);
+		if (rewritten === text) throw new Error(`${name} names no ${CANONICAL_ORIGIN}; take it off ORIGIN_FILES`);
+		writeFileSync(path, rewritten);
 		moved.push(name);
 	}
 	return moved;

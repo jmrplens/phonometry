@@ -133,7 +133,7 @@ describe('headersFile', () => {
 		const csp = SECURITY_HEADERS.find(([name]) => name === 'Content-Security-Policy')[1];
 		const media = csp.split('; ').find((part) => part.startsWith('media-src '));
 		assert.deepEqual(media.split(' ').slice(1), ["'self'", ...mediaOrigins]);
-		assert.ok(mediaOrigins.includes('https://docs.jmrp.io'));
+		assert.ok(new Set(mediaOrigins).has('https://docs.jmrp.io'));
 		const rest = csp.split('; ').filter((part) => !part.startsWith('media-src ')).join('; ');
 		assert.equal(
 			rest,

@@ -280,6 +280,36 @@ describe('quota-switch.mjs', async () => {
 		assert.equal(deploy.body.annotations['workers/message'], 'quota guard: off at 97000 of 95000');
 	});
 
+	test('off over the guard\'s own off deploy takes it over: the same assets-only version again under the hand mark', async () => {
+		const table = answers(96000);
+		table[`GET /zones/${Z}/rulesets/phases/http_request_firewall_custom/entrypoint`] = { success: true, result: { id: 'rs1', rules: [{ ...RULE, enabled: true, last_updated: today }] } };
+		table[`GET /accounts/${A}/workers/scripts/phonometry-docs/deployments`] = { success: true, result: { deployments: [{ id: 'd1', annotations: { 'workers/message': TRIPPED }, versions: [{ version_id: 'v-assets-2', percentage: 100 }] }] } };
+		const { calls, fetchImpl } = recorded(table);
+		assert.equal(await runQuotaSwitch({ argv: ['--mode', 'off'], env: { CLOUDFLARE_API_TOKEN: 't' }, fetchImpl, now: NOW, sink: { log: [] } }), 0);
+		const writes = calls.filter((c) => c.method !== 'GET' && c.path !== '/graphql');
+		assert.deepEqual(writes.map((c) => `${c.method} ${c.path}`), [`POST /accounts/${A}/workers/scripts/phonometry-docs/deployments`]);
+		assert.deepEqual(writes[0].body.versions, [{ version_id: 'v-assets-2', percentage: 100 }]);
+		assert.equal(writes[0].body.annotations['workers/message'], 'quota switch by hand: off at 96000 of 95000');
+		// After 00:00 UTC the guard leaves the hand switch as it is.
+		const after = decide(state({ count: 7, now: new Date('2026-11-19T00:15:00Z'), rule: { enabled: true, lastUpdated: today }, current: { id: 'v-assets-2', tag: 'assets-200-1', message: writes[0].body.annotations['workers/message'] } }));
+		assert.deepEqual(after.actions, []);
+	});
+
+	test('off over an off state already set by hand, or over an assets-only version nobody marked: no second deploy', async () => {
+		for (const message of ['quota switch by hand: off at 7 of 95000', 'beacon off while I look at something']) {
+			const table = answers(10);
+			table[`GET /accounts/${A}/workers/scripts/phonometry-docs/deployments`] = { success: true, result: { deployments: [{ id: 'd1', annotations: { 'workers/message': message }, versions: [{ version_id: 'v-assets-2', percentage: 100 }] }] } };
+			const { calls, fetchImpl } = recorded(table);
+			assert.equal(await runQuotaSwitch({ argv: ['--mode', 'off'], env: { CLOUDFLARE_API_TOKEN: 't' }, fetchImpl, now: NOW, sink: { log: [] } }), 0);
+			assert.equal(calls.filter((c) => c.method === 'POST' && c.path.endsWith('/deployments')).length, 0, message);
+		}
+	});
+
+	test('a guard pinned off by its MODE never redeploys its own off deploy on every run', () => {
+		const d = decide(state({ count: 10, mode: 'off', rule: { enabled: true, lastUpdated: today }, current: { id: 'v-assets-2', tag: 'assets-200-1', message: TRIPPED } }));
+		assert.deepEqual(d.actions, []);
+	});
+
 	test('usage errors make no call', async () => {
 		const { calls, fetchImpl } = recorded({});
 		assert.equal(await runQuotaSwitch({ argv: ['--mode', 'maybe'], env: { CLOUDFLARE_API_TOKEN: 't' }, fetchImpl, sink: { log: [] } }), 2);

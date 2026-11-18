@@ -150,6 +150,7 @@ Markdown-preferring request for `/phonometry/nope/` gets a 302 to
 | `src/index.mjs`, `lib/agent-paths.mjs` | The Worker's handler, and the paths that run it |
 | `lib/beacon.mjs`, `lib/edge-log.mjs` | The beacon script, what the Worker accepts from it, and the data point (docs-edge's logging block, verbatim) |
 | `guard/`, `lib/guard.mjs`, `scripts/quota-switch.mjs` | The quota guard Worker (Cron Trigger, no route), its decision, and the same decision run by hand |
+| `scripts/guard-state.mjs`, `scripts/check-beacon.mjs` | What a deploy reads of the guard before it goes live and after, and the beacon check against the live deployment |
 | `stage.mjs` | Stages a build into `stage/` and runs every check first |
 | `lib/headers.mjs`, `lib/redirects.mjs`, `lib/twins.mjs` | What `_headers` and `_redirects` say, and which pages have no Markdown copy |
 | `lib/staging.mjs` | The checks: 20 000 files and 25 MiB a file (Workers Free), no `_headers` or `_redirects` in the build, the pages without a copy equal to the exclusions, every redirect target served |
@@ -224,7 +225,13 @@ assets-only half goes live under the off mark it printed
 --message "<mark>: off, deploy of <k>" --yes`), so whoever switched the code
 paths off still switches this deploy back on. With `tripped=false` and a
 `mark`, the guard may still have its rule to turn off, so the deploy carries
-`--message "<mark>: on, full half of <k>"`. Cron Triggers need the
+`--message "<mark>: on, full half of <k>"`. The guard, or quota-switch.mjs,
+can switch between that read and the deploy: `node scripts/guard-state.mjs
+--since <deployment> --pair <k>`, with the `deployment` the first read
+printed, then says `switched=true` and the `tripped` and `mark` that switch
+left, and when they differ from the first read the deploy is promoted again
+the way they say (`wrangler versions deploy --version-tag assets-<k>@100` or
+`full-<k>@100`, with the same messages). Cron Triggers need the
 account's workers.dev subdomain to exist; both Workers keep workers.dev and
 preview URLs off, so nothing answers there.
 
@@ -239,13 +246,19 @@ Routes Edit) and `CF_PHONOMETRY_RULES_TOKEN` (zone: Dynamic URL Redirects Edit,
 Transform Rules Edit, Zone Read). The job stages with the beacon, reads whether the
 quota guard holds the code paths off (`scripts/guard-state.mjs`), uploads the
 assets-only version and deploys the full one as a tagged pair, checks what the
-assets answer (and that the beacon answers 204 and the WAF refuses a GET of it), checks the zone rules against `lib/rules.mjs` (or puts them,
+assets answer (and that the beacon answers what the live deployment says, `scripts/check-beacon.mjs`, and the WAF refuses a GET of it), checks the zone rules against `lib/rules.mjs` (or puts them,
 with the `apply_rules` input, saving what was there as an artifact), checks
 what the rules answer, and plays two clips in Chrome. While the guard holds
 the code paths off, the job only uploads the full half, puts the assets-only
 half live under the off mark the live deployment had, so the guard (or
-`quota-switch.mjs --mode on`) switches this deploy back on with the rest, and
-expects the beacon's 403 from the WAF instead of a 204.
+`quota-switch.mjs --mode on`) switches this deploy back on with the rest.
+After the deploy it reads the deployments made since the state it read, and
+when the guard or `quota-switch.mjs` switched in between, it promotes the
+half that switch calls for, under its mark. The beacon check reads the live
+deployment just before and after its POST of `/_v` (and probes again when it
+changed meanwhile): 204 with full code live; held off, the WAF rule's 403
+or, while that rule is not on yet, the assets-only half's 404 (no asset is
+called `_v`), never a 204. A GET of `/_v` answers the WAF's 403 either way.
 
 The zone itself, from the maintainer's machine:
 
@@ -304,7 +317,9 @@ docs.jmrp.io's traffic for /phonometry, plus the guard's 96 cron runs, of the
 - By hand, when the guard cannot act (no token yet, or a quota spent so fast
   that its cron stopped too): `node scripts/quota-switch.mjs --mode off` (or
   `on`, `auto`, `dry-run`, the default) with the account key. Off by hand stays
-  off until `--mode on`.
+  off until `--mode on`, also over an off state the guard set: the same
+  assets-only version is deployed again under `quota switch by hand`, so the
+  guard no longer switches it back after 00:00 UTC.
 
 Up to 15 minutes pass between runs, plus a few minutes of GraphQL lag: the 5 000
 requests between 95 % and 100 % hold against any sustained rate under about 4

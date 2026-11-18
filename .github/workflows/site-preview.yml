@@ -161,29 +161,53 @@ jobs:
         # guard holds the code paths off, the full half is only uploaded and
         # the assets-only half goes live under the same mark the off state
         # had, so the guard (or quota-switch.mjs --mode on, for an off state
-        # set by hand) switches this deploy back on with the rest.
+        # set by hand) switches this deploy back on with the rest. The guard,
+        # or quota-switch.mjs, may switch between the read and this deploy:
+        # the deployments made since the one read show it, and the deploy
+        # then follows what that switch left, so it never puts full code over
+        # an off state (or holds off a site just switched back on).
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
           PAIR: ${{ github.run_id }}-${{ github.run_attempt }}
           TRIPPED: ${{ steps.guard.outputs.tripped }}
           MARK: ${{ steps.guard.outputs.mark }}
+          DEPLOYMENT: ${{ steps.guard.outputs.deployment }}
         run: |
           set -euo pipefail
-          if [ "$TRIPPED" = true ]; then
-            pnpm exec wrangler versions upload --config wrangler.jsonc --tag "full-$PAIR" --message "full half of $PAIR"
-            pnpm exec wrangler versions deploy --config wrangler.jsonc --version-tag "assets-$PAIR@100" --message "$MARK: off, deploy of $PAIR while the code paths are off" --yes
-            echo "::notice::the quota guard holds the code paths off: the assets-only half of $PAIR is live, the full half waits for the switch back" | tee -a "$GITHUB_STEP_SUMMARY"
-          else
+          hold_off() { # <mark>
+            pnpm exec wrangler versions deploy --config wrangler.jsonc --version-tag "assets-$PAIR@100" --message "$1: off, deploy of $PAIR while the code paths are off" --yes
+            echo "::notice::the code paths are held off: the assets-only half of $PAIR is live, the full half waits for the switch back" | tee -a "$GITHUB_STEP_SUMMARY"
+          }
+          full_message() { # <mark>
             # After a switch back the guard may still have its rule to turn
             # off; carrying its mark keeps that rule the guard's to clear.
-            message="full half of $PAIR"
-            if [ -n "$MARK" ]; then message="$MARK: on, $message"; fi
-            pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "$message"
+            if [ -n "$1" ]; then echo "$1: on, full half of $PAIR"; else echo "full half of $PAIR"; fi
+          }
+          if [ "$TRIPPED" = true ]; then
+            pnpm exec wrangler versions upload --config wrangler.jsonc --tag "full-$PAIR" --message "full half of $PAIR"
+            hold_off "$MARK"
+          else
+            pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "$(full_message "$MARK")"
+          fi
+          after=$(node scripts/guard-state.mjs --since "$DEPLOYMENT" --pair "$PAIR")
+          if grep -qx 'switched=true' <<<"$after"; then
+            tripped=$(sed -n 's/^tripped=//p' <<<"$after")
+            mark=$(sed -n 's/^mark=//p' <<<"$after")
+            if [ "$tripped" != "$TRIPPED" ] || [ "$mark" != "$MARK" ]; then
+              echo "::warning::the code paths were switched during this deploy: it follows that switch (tripped=$tripped, mark=$mark)"
+              if [ "$tripped" = true ]; then
+                hold_off "$mark"
+              else
+                pnpm exec wrangler versions deploy --config wrangler.jsonc --version-tag "full-$PAIR@100" --message "$(full_message "$mark")" --yes
+              fi
+            fi
           fi
         working-directory: site/worker
       - name: Check what the assets answer
         env:
-          TRIPPED: ${{ steps.guard.outputs.tripped }}
+          # The beacon check reads the live deployment just before and after
+          # its probe (scripts/check-beacon.mjs); the deploy token reads it.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
           base=https://phonometry.dev/phonometry
@@ -203,21 +227,11 @@ jobs:
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
           expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
-          # While the code paths are held off the beacon runs no code: the
+          # 204 with full code live; while the code paths are held off, the
           # guard's WAF rule answers 403 before any Worker runs, or, while
           # that rule is not on yet, the assets-only half answers 404 (no
           # asset is called _v). A 204 then would mean code is running.
-          want=204
-          if [ "$TRIPPED" = true ]; then want="403 404"; fi
-          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H 'Origin: https://phonometry.dev' -H 'Content-Type: text/plain' --data '{"p":"/phonometry/signals/","wd":1}' https://phonometry.dev/_v)
-          if ! grep -qwF -- "$code" <<<"$want"; then
-            echo "::error::the beacon answered $code, not $want (quota guard tripped: $TRIPPED)"
-            fail=1
-          elif [ "$TRIPPED" = true ]; then
-            echo "ok   the beacon answers $code: the code paths are off until they are switched back"
-          else
-            echo "ok   the beacon answers 204"
-          fi
+          node site/worker/scripts/check-beacon.mjs || fail=1
           code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 https://phonometry.dev/_v)
           if [ "$code" != 403 ]; then echo "::error::a GET of the beacon answered $code, not the WAF's 403"; fail=1; else echo "ok   the WAF refuses a GET of the beacon"; fi
           n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')

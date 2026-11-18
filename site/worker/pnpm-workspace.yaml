@@ -5,9 +5,14 @@
 # workerd runs `wrangler dev`, and this Worker has no code to bundle or run.
 # `wrangler deploy` of an assets-only Worker needs neither. pnpm would stop the
 # install on scripts it has not been told about (ERR_PNPM_IGNORED_BUILDS).
+#
+# puppeteer's install script would download Chrome on every install; the
+# clip check asks for it by name instead (`pnpm exec puppeteer browsers
+# install chrome`), as the docs job does in site/.
 allowBuilds:
   esbuild: false
   workerd: false
+  puppeteer: false
 
 # As in site/pnpm-workspace.yaml: the committed lockfile is the trust root,
 # and Dependabot holds back a new release for three days before proposing it.

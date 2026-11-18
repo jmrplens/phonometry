@@ -16,7 +16,7 @@ import { topics } from './src/data/topics.mjs';
 import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
-import { author, basePath, repositoryUrl, siteTitle, siteUrl } from './src/data/site.mjs';
+import { author, basePath, mediaOrigins, repositoryUrl, siteTitle, siteUrl } from './src/data/site.mjs';
 import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
@@ -732,7 +732,9 @@ export default defineConfig({
         // mint per-response nonces: Starlight's theme bootstrap and Astro's
         // island hydration are inline by design. 'wasm-unsafe-eval' is for
         // Pagefind, whose search index is compiled WebAssembly fetched from
-        // this origin.
+        // this origin. media-src also names the clip hosts of mediaOrigins:
+        // the phonometry.dev preview redirects every clip to one of them for
+        // byte ranges, and a browser holds the redirect target to this policy.
         {
           tag: 'meta',
           attrs: {
@@ -744,7 +746,7 @@ export default defineConfig({
               "img-src 'self' data:",
               "font-src 'self' data:",
               "connect-src 'self'",
-              "media-src 'self'",
+              ["media-src 'self'", ...mediaOrigins].join(' '),
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

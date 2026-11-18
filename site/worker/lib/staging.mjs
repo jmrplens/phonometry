@@ -8,11 +8,13 @@
 // check below runs before anything is written, and a problem stops the
 // deploy: the limits of the Free plan, a file of the build that would
 // shadow a generated one, the pages without a Markdown copy against the
-// exclusions the headers and the zone rule are written from, and the
-// retired addresses against the pages they lead to.
+// exclusions the headers and the zone rule are written from, the retired
+// addresses against the pages they lead to, and the clip hosts against the
+// Content-Security-Policy of every page.
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
+import { mediaOrigins } from '../../src/data/site.mjs';
 import { headersFile, parseHeaders, HEADER_LINE_LIMIT, HEADER_RULE_LIMIT } from './headers.mjs';
 import { redirectProblems, redirectsFile } from './redirects.mjs';
 import { isExcluded } from './twins.mjs';
@@ -163,6 +165,46 @@ export function buildOrigin(root, prefix) {
 }
 
 /**
+ * The pages whose own Content-Security-Policy would block a clip host.
+ *
+ * Every page carries a meta policy, and a browser enforces it beside the
+ * header, holding the address a clip is redirected to to both. A build made
+ * before a clip host was added to `mediaOrigins` would play no clip on the
+ * preview, so it is refused here. Pages with no meta policy (the stubs of
+ * retired addresses) load no media and are skipped; the home must have one.
+ *
+ * @param {string} root The build.
+ * @param {{path: string}[]} files The build's files.
+ * @param {readonly string[]} origins The clip hosts (mediaOrigins).
+ * @returns {string[]} One line per page that blocks one, at most ten and a count.
+ */
+export function mediaPolicyProblems(root, files, origins) {
+	const blocked = [];
+	let homeHasPolicy = false;
+	for (const { path } of files) {
+		if (!path.endsWith('.html')) continue;
+		const html = readFileSync(join(root, path), 'utf8');
+		const content = /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/i.exec(html)?.[1];
+		if (content === undefined) continue;
+		if (path === 'index.html') homeHasPolicy = true;
+		const directives = new Map(
+			content
+				.split(';')
+				.map((part) => part.trim().split(/\s+/))
+				.filter(([name]) => name)
+				.map(([name, ...sources]) => [name.toLowerCase(), sources]),
+		);
+		const sources = directives.get('media-src') ?? directives.get('default-src') ?? [];
+		const missing = origins.filter((origin) => !sources.includes(origin));
+		if (missing.length > 0) blocked.push(`${path}: media-src does not allow ${missing.join(' ')}`);
+	}
+	const problems = blocked.slice(0, 10);
+	if (blocked.length > 10) problems.push(`and ${blocked.length - 10} more pages whose media-src blocks a clip host`);
+	if (!homeHasPolicy) problems.push('the home page carries no Content-Security-Policy meta tag');
+	return problems;
+}
+
+/**
  * Checks a build and, unless checkOnly, writes the asset directory.
  *
  * @param {object} options
@@ -188,6 +230,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	}
 	if (built !== null && built !== origin) problems.push(`the build was built for ${built}, not ${origin}`);
 	problems.push(...exclusionProblems(noTwinPages(files, prefix, pairs), servedPages(files, prefix, pairs), exclusions));
+	problems.push(...mediaPolicyProblems(from, files, mediaOrigins));
 	const all = [...pairs, ...twinPairs(pairs, files, prefix)];
 	const have = new Set(files.map(({ path }) => `${prefix}/${path}`));
 	problems.push(...redirectProblems(all, { exists: (to) => have.has(to.endsWith('/') ? `${to}index.html` : to) }));

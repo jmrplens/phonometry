@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { afterEach, describe, test } from 'node:test';
 
 import { twinExclusions } from '../lib/twins.mjs';
-import { MAX_FILE_BYTES, MAX_FILES, buildOrigin, exclusionProblems, listTree, noTwinPages, servedPages, stage, treeProblems, twinPairs } from '../lib/staging.mjs';
+import { MAX_FILE_BYTES, MAX_FILES, buildOrigin, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems, twinPairs } from '../lib/staging.mjs';
 
 const prefix = '/phonometry';
 const exclusions = twinExclusions(prefix);
@@ -26,7 +26,10 @@ function tree(files) {
 	return root;
 }
 
-const home = (origin = 'https://docs.jmrp.io') => `<html><head><link rel="canonical" href="${origin}/phonometry/"/></head></html>`;
+/** The meta policy every page of a build carries; `media` is its media-src. */
+const policy = (media = "'self' https://docs.jmrp.io") =>
+	`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src ${media}; object-src 'none'">`;
+const home = (origin = 'https://docs.jmrp.io') => `<html><head>${policy()}<link rel="canonical" href="${origin}/phonometry/"/></head></html>`;
 /** The smallest build the real checks accept. */
 const good = () => ({
 	'index.html': home(),
@@ -48,6 +51,33 @@ const pairs = [
 ];
 
 describe('the checks', () => {
+	test('every page with a meta policy allows the clip hosts; stubs without one are skipped', () => {
+		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy()}</head></html>` });
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), []);
+	});
+
+	test('a page whose policy keeps clips to its own origin blocks the redirected clips', () => {
+		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy("'self'")}</head></html>` });
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['signals/index.html: media-src does not allow https://docs.jmrp.io']);
+		assert.match(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io', 'https://media.phonometry.dev']).join('\n'), /index\.html: media-src does not allow https:\/\/media\.phonometry\.dev/);
+	});
+
+	test('without media-src the default-src decides', () => {
+		const root = tree({ ...good(), 'index.html': `<meta http-equiv="Content-Security-Policy" content="default-src 'self'">` });
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['index.html: media-src does not allow https://docs.jmrp.io']);
+	});
+
+	test('a home with no meta policy is refused, so the check cannot pass by finding nothing', () => {
+		const root = tree({ ...good(), 'index.html': '<link rel="canonical" href="https://docs.jmrp.io/phonometry/"/>' });
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['the home page carries no Content-Security-Policy meta tag']);
+	});
+
+	test('stage refuses a build made before the clip host was allowed', () => {
+		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy("'self'")}</head></html>` });
+		const report = stage({ from: root, out: join(root, 'never'), prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, checkOnly: true });
+		assert.match(report.problems.join('\n'), /signals\/index\.html: media-src does not allow https:\/\/docs\.jmrp\.io/);
+	});
+
 	test('the slash pages without a copy, retired addresses aside', () => {
 		const files = listTree(tree(good()));
 		assert.deepEqual(noTwinPages(files, prefix, pairs), ['/phonometry/es/reference/api/', '/phonometry/es/reference/api/levels/']);

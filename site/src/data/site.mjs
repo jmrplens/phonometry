@@ -47,6 +47,22 @@ export const siteUrl = target.siteUrl;
 export const basePath = target.basePath;
 
 /**
+ * The origins besides the page's own that may answer a clip (`<video>`).
+ *
+ * The phonometry.dev preview answers a clip with a redirect to docs.jmrp.io,
+ * which serves byte ranges (site/worker/lib/rules.mjs, rule
+ * clips-to-range-host), and a browser checks the Content-Security-Policy of
+ * the page against the address a media load is redirected to. Both policies
+ * every page carries, the meta tag in astro.config.mjs and the header in
+ * site/worker/lib/headers.mjs, list these in `media-src`. On docs.jmrp.io the
+ * entry is the page's own origin, so the build it serves behaves as before.
+ * A new clip host is added here first: the staging step refuses a build whose
+ * pages do not allow every origin listed, and apply-rules.mjs refuses a clip
+ * host that is not listed.
+ */
+export const mediaOrigins = Object.freeze(['https://docs.jmrp.io']);
+
+/**
  * The `@id` of the Person node, which the build fetches from jmrp.io and
  * splices in as published. Each page's head names the maintainer by it, and
  * check-schema-vocabulary.mjs holds that one node to jmrp.io's rule rather

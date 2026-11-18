@@ -943,6 +943,17 @@ and the rule that matters most here: a new normative implementation names the
 numeric oracle it was validated against, independent of the implementation
 ([T3](docs/contributing/tests.md#t3)).
 
+Python CI starts the test legs, the numba and floors suites, the figures, the
+snippets, the remote node and the macOS job with the run, and its short jobs
+one after another in two lanes, one from the lint job and one from the release
+build, so a run does not fill the runner queue with short jobs while other pull
+requests wait. Each short job keeps its own check: a red one leaves the rest
+of its lane to run, and "Re-run failed jobs" also re-runs the jobs after it in
+its lane. A job starts with the run only when it holds a macOS runner or takes
+longer than a quarter of the lane bound, and waits on another only to read an
+artifact it uploads. The lanes and the durations they are balanced on are in
+[`tests/ci_lanes.json`](tests/ci_lanes.json).
+
 ### Manufacturers' data
 
 The library publishes the tables of books and standards, with the page each

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+import fnmatch
 import io
 import json
 import os
@@ -2793,6 +2794,479 @@ def test_every_python_ci_job_has_a_time_limit() -> None:
         f"these Python CI jobs have no timeout-minutes, so a hang holds a runner "
         f"for six hours: {unlimited}"
     )
+
+
+#: The lanes of Python CI and the durations they are balanced on.
+_CI_LANES = _ROOT / "tests" / "ci_lanes.json"
+#: The condition of every link after the head of a lane: whatever the link
+#: before it said, unless the run was cancelled, with any condition of the
+#: job's own after it.
+_LINK_CONDITION = re.compile(r"^\$\{\{ !cancelled\(\)(?: && \(.+\))? \}\}$")
+
+
+def _ci_lanes() -> dict[str, object]:
+    record: dict[str, object] = json.loads(_CI_LANES.read_text(encoding="utf-8"))
+    return record
+
+
+def _lane_shape_problems(
+    jobs: Mapping[str, Mapping[str, object]], record: Mapping[str, object]
+) -> list[str]:
+    """Why the jobs of Python CI do not run in the lanes *record* lists, or ``[]``.
+
+    Every job is a lane link, a job that starts with the run, or a job that
+    waits on another for what it reads, and exactly one of them. There are at
+    most two lanes and a job is in one: the head of a lane waits on nothing,
+    each other link on the link before it alone, under ``!cancelled()``, so a
+    red link skips none after it. A job outside the lanes waits only on the
+    head of a lane, so it is not held up by the links before.
+    """
+    lanes = record["lanes"]
+    parallel, after = record["parallel_jobs"], record["after_jobs"]
+    assert isinstance(lanes, list)
+    assert isinstance(parallel, dict)
+    assert isinstance(after, dict)
+    problems = []
+    if len(lanes) > 2:
+        problems.append(f"{len(lanes)} lanes, where two hold the short jobs")
+    lane_of: dict[str, int] = {}
+    for number, lane in enumerate(lanes, start=1):
+        for name in lane:
+            if name in lane_of:
+                problems.append(f"{name}: in lane {lane_of[name]} and in lane {number}")
+            else:
+                lane_of[name] = number
+    kinds = (("a lane", lane_of), ("parallel_jobs", parallel), ("after_jobs", after))
+    for name in sorted(set(jobs) | set(lane_of) | set(parallel) | set(after)):
+        listed = [kind for kind, names in kinds if name in names]
+        if name not in jobs:
+            problems.append(
+                f"{name}: listed in {listed}, but Python CI has no such job"
+            )
+        elif len(listed) != 1:
+            problems.append(
+                f"{name}: listed in {listed or 'none'} of the lanes, parallel_jobs "
+                "and after_jobs, where each job is in exactly one"
+            )
+    for lane in lanes:
+        for index, name in enumerate(lane):
+            if name not in jobs:
+                continue
+            job = jobs[name]
+            needs = _needs(dict(job))
+            before = lane[index - 1] if index else None
+            wanted = {before} if before else set()
+            if needs != wanted:
+                problems.append(
+                    f"{name}: waits on {sorted(needs) or 'nothing'}, where its lane "
+                    f"has it wait on {before or 'nothing'}"
+                )
+            condition = str(job.get("if", ""))
+            if before and not _LINK_CONDITION.match(condition):
+                problems.append(
+                    f"{name}: runs on {condition or 'the default success()'!r}, so a "
+                    f"red {before} skips it and every link after it"
+                )
+    heads = {lane[0] for lane in lanes if lane}
+    problems += [
+        f"{name}: waits on another job, so it does not start with the run"
+        for name in sorted(set(parallel) & set(jobs))
+        if _needs(dict(jobs[name]))
+    ]
+    for name in sorted(set(after) & set(jobs)):
+        needs = _needs(dict(jobs[name]))
+        if not needs:
+            problems.append(
+                f"{name}: waits on no job, so it is no job that runs after one"
+            )
+        problems += [
+            f"{name}: waits on {need}, which is no head of a lane, so it waits for "
+            "the links before it"
+            for need in sorted(needs & set(lane_of) - heads)
+        ]
+    return problems
+
+
+def _lane_time_problems(record: Mapping[str, object]) -> list[str]:
+    """Why a lane of *record* could end after the test matrix, or ``[]``.
+
+    A lane takes the longer measured run of each of its jobs and the allowance
+    for each link after its head, and stays within the bound; the bound is at
+    most two thirds of the shortest matrix measured, and the allowance at least
+    the longest wait measured for a job queued once the jobs it waits on ended.
+    In each run measured with the lanes, the links of a lane waited no longer
+    in all than the allowance for each, and the lane ended within the bound.
+    """
+    lanes, measured = record["lanes"], record["measured"]
+    matrix, bound = record["tests_matrix_wall_s"], record["lane_bound_s"]
+    allowance, link_waits = record["link_allowance_s"], record["link_waits_s"]
+    assert isinstance(lanes, list)
+    assert isinstance(measured, dict)
+    assert isinstance(matrix, dict)
+    assert isinstance(bound, int)
+    assert isinstance(allowance, int)
+    assert isinstance(link_waits, dict)
+    run_s = measured["run_s"]
+    problems = []
+    walls = [seconds for run, seconds in matrix.items() if run != "about"]
+    if not walls or 3 * bound > 2 * min(walls):
+        problems.append(
+            f"the bound of {bound} s is above two thirds of the shortest test "
+            f"matrix measured ({min(walls, default=0)} s)"
+        )
+    waits = [
+        seconds
+        for run, by_job in link_waits.items()
+        if run != "about"
+        for seconds in by_job.values()
+    ]
+    if not waits or allowance < max(waits):
+        problems.append(
+            f"the allowance of {allowance} s for each link is below the longest "
+            f"wait measured for a job queued after another ended "
+            f"({max(waits, default=0)} s)"
+        )
+    lane_runs = record["lane_runs"]
+    assert isinstance(lane_runs, dict)
+    for run, seen in lane_runs.items():
+        if run == "about":
+            continue
+        assert isinstance(seen, dict)
+        for number, (lane, lane_waits, end) in enumerate(
+            zip(lanes, seen["link_waits_s"], seen["end_s"], strict=True), start=1
+        ):
+            if len(lane_waits) != len(lane) - 1:
+                problems.append(
+                    f"run {run}, lane {number}: {len(lane_waits)} link waits "
+                    f"recorded for {len(lane) - 1} links"
+                )
+            elif sum(lane_waits) > allowance * len(lane_waits):
+                problems.append(
+                    f"run {run}, lane {number}: its links waited {sum(lane_waits)} s "
+                    f"in all, above the allowance of {allowance} s for each of its "
+                    f"{len(lane_waits)} links"
+                )
+            if end > bound:
+                problems.append(
+                    f"run {run}, lane {number} ended {end} s after the run started, "
+                    f"above the bound of {bound} s"
+                )
+    in_lanes = {name for lane in lanes for name in lane}
+    problems += [
+        f"{name}: a duration is recorded for a job in no lane"
+        for name in sorted(set(run_s) - in_lanes)
+    ]
+    for number, lane in enumerate(lanes, start=1):
+        missing = [name for name in lane if not run_s.get(name)]
+        if missing:
+            problems.append(f"lane {number}: no measured duration for {missing}")
+            continue
+        total = sum(max(run_s[name]) for name in lane) + allowance * (len(lane) - 1)
+        if total > bound:
+            problems.append(
+                f"lane {number} takes {total} s, above the bound of {bound} s: move "
+                "a job to the other lane or out of the lanes"
+            )
+    return problems
+
+
+def _matrix_cells(job: Mapping[str, object]) -> list[dict[str, str]]:
+    """Every cell of the plain list matrix of *job*, one cell when it has none."""
+    strategy = job.get("strategy", {})
+    assert isinstance(strategy, dict)
+    matrix = strategy.get("matrix", {})
+    assert isinstance(matrix, dict)
+    cells: list[dict[str, str]] = [{}]
+    for key, values in matrix.items():
+        if isinstance(values, list):
+            cells = [{**cell, key: str(value)} for cell in cells for value in values]
+    return cells
+
+
+def _uploaded_artifacts(job: Mapping[str, object]) -> set[str]:
+    """The name of each artifact *job* uploads, in every cell of its matrix.
+
+    An expression the matrix does not resolve stays as written, and matches
+    nothing a reader names.
+    """
+    steps = job.get("steps", [])
+    assert isinstance(steps, list)
+    names = set()
+    for step in steps:
+        if str(step.get("uses", "")).startswith("actions/upload-artifact@"):
+            name = str(step.get("with", {}).get("name", ""))
+            for cell in _matrix_cells(job):
+                resolved = name
+                for key, value in cell.items():
+                    expression = r"\$\{\{\s*matrix\." + re.escape(key) + r"\s*\}\}"
+                    resolved = re.sub(expression, value.replace("\\", r"\\"), resolved)
+                names.add(resolved)
+    return names - {""}
+
+
+def _downloaded_artifacts(job: Mapping[str, object]) -> list[re.Pattern[str]]:
+    """What each download step of *job* takes, as the action matches it.
+
+    ``name`` is one exact artifact name; ``pattern`` is a glob over the names.
+    """
+    steps = job.get("steps", [])
+    assert isinstance(steps, list)
+    readers = []
+    for step in steps:
+        if str(step.get("uses", "")).startswith("actions/download-artifact@"):
+            given = step.get("with", {})
+            if given.get("name"):
+                readers.append(re.compile(re.escape(str(given["name"]))))
+            elif given.get("pattern"):
+                readers.append(re.compile(fnmatch.translate(str(given["pattern"]))))
+    return readers
+
+
+def _outside_lane_problems(
+    jobs: Mapping[str, Mapping[str, object]], record: Mapping[str, object]
+) -> list[str]:
+    """Why a job of *record* outside the lanes should be in one, or ``[]``.
+
+    A job starts with the run when it holds a macOS runner, whose cap of five
+    the test legs fill, or when its shortest measured run takes longer than a
+    quarter of the lane bound; any shorter job belongs in a lane. A job waits
+    on another only to read an artifact that a job it waits on uploads.
+    """
+    parallel, after = record["parallel_jobs"], record["after_jobs"]
+    measured, bound = record["measured"], record["lane_bound_s"]
+    assert isinstance(parallel, dict)
+    assert isinstance(after, dict)
+    assert isinstance(measured, dict)
+    assert isinstance(bound, int)
+    run_s = measured["parallel_run_s"]
+    problems = [
+        f"{name}: a duration is recorded for a job that does not start with the run"
+        for name in sorted(set(run_s) - set(parallel))
+    ]
+    for name in sorted(set(parallel) & set(jobs)):
+        if str(jobs[name].get("runs-on", "")).startswith("macos"):
+            continue
+        if not run_s.get(name):
+            problems.append(f"{name}: starts with the run, with no measured duration")
+        elif 4 * min(run_s[name]) <= bound:
+            problems.append(
+                f"{name}: starts with the run, but its shortest measured run "
+                f"({min(run_s[name])} s) is no longer than a quarter of the lane "
+                f"bound ({bound} s), so it belongs in a lane"
+            )
+    for name in sorted(set(after) & set(jobs)):
+        uploaded = {
+            artifact
+            for need in _needs(dict(jobs[name]))
+            if need in jobs
+            for artifact in _uploaded_artifacts(jobs[need])
+        }
+        if not any(
+            reader.fullmatch(artifact)
+            for reader in _downloaded_artifacts(jobs[name])
+            for artifact in uploaded
+        ):
+            problems.append(
+                f"{name}: reads no artifact of the jobs it waits on, so it belongs "
+                "in a lane or with the jobs that start with the run"
+            )
+    return problems
+
+
+def test_the_short_jobs_of_python_ci_run_in_two_lanes_that_skip_no_link() -> None:
+    """A run starts its long jobs and the head of two lanes, not every job at once.
+
+    The account runs at most forty jobs at a time across its repositories, and
+    a run that started its twenty-eight jobs together filled the queue with
+    short ones while the test legs of the next pull request waited. The short
+    jobs keep a job, a check and an environment each, and run one after
+    another: a red link leaves the rest of its lane to run, a cancelled run
+    stops it, and the jobs that wait on quality or on the release build find
+    them at the head of a lane.
+    """
+    problems = _lane_shape_problems(_python_ci_jobs(), _ci_lanes())
+    assert problems == [], "\n".join(problems)
+
+
+def test_each_lane_of_python_ci_ends_well_inside_the_test_matrix() -> None:
+    """No lane, run one job after another, becomes the critical path of a run."""
+    problems = _lane_time_problems(_ci_lanes())
+    assert problems == [], "\n".join(problems)
+
+
+def test_only_long_or_macos_jobs_start_with_the_run_and_only_readers_wait() -> None:
+    """A short job cannot leave its lane to start with the run or to wait on a head.
+
+    A job starts with the run when it holds a macOS runner, where a link would
+    queue behind the test legs that fill the cap of five, or when it takes, in
+    its shortest measured run, longer than a quarter of the lane bound. A job
+    outside the lanes that waits on another reads an artifact it uploads.
+    """
+    problems = _outside_lane_problems(_python_ci_jobs(), _ci_lanes())
+    assert problems == [], "\n".join(problems)
+
+
+def test_a_lane_that_skips_a_link_or_shares_a_job_is_reported() -> None:
+    """The lane readers name a link without its guard, a job in two lanes, a job
+    left out of every list, a link that waits on the other lane and a lane
+    measured past its bound.
+    """
+    jobs = _python_ci_jobs()
+    record = _ci_lanes()
+    lanes = record["lanes"]
+    assert isinstance(lanes, list)
+    first, second = lanes
+    link = first[1]
+    unguarded = {**jobs, link: {k: v for k, v in jobs[link].items() if k != "if"}}
+    assert _lane_shape_problems(unguarded, record) == [
+        f"{link}: runs on 'the default success()', so a red {first[0]} skips it and "
+        "every link after it"
+    ]
+    shared = {**record, "lanes": [first, [*second, first[-1]]]}
+    assert f"{first[-1]}: in lane 1 and in lane 2" in _lane_shape_problems(jobs, shared)
+    merged = {**jobs, first[-1]: {**jobs[first[-1]], "needs": [first[-2], second[-1]]}}
+    assert any(
+        problem.startswith(f"{first[-1]}: waits on ")
+        for problem in _lane_shape_problems(merged, record)
+    )
+    stray_job: dict[str, object] = {"name": "Stray / job"}
+    stray = {**jobs, "stray": stray_job}
+    assert _lane_shape_problems(stray, record) == [
+        "stray: listed in none of the lanes, parallel_jobs and after_jobs, where "
+        "each job is in exactly one"
+    ]
+    late = {**jobs, "sonar": {**jobs["sonar"], "needs": [first[1]]}}
+    assert _lane_shape_problems(late, record) == [
+        f"sonar: waits on {first[1]}, which is no head of a lane, so it waits for "
+        "the links before it"
+    ]
+    measured = record["measured"]
+    assert isinstance(measured, dict)
+    slow = {
+        **record,
+        "measured": {
+            **measured,
+            "run_s": {**measured["run_s"], second[-1]: [record["lane_bound_s"]]},
+        },
+    }
+    assert any(
+        problem.startswith("lane 2 takes ") for problem in _lane_time_problems(slow)
+    )
+    loose = {**record, "lane_bound_s": 10**6}
+    assert _lane_time_problems(loose)[0].startswith("the bound of 1000000 s")
+    idle = {**record, "link_allowance_s": 30}
+    assert any(
+        problem.startswith("the allowance of 30 s for each link is below")
+        for problem in _lane_time_problems(idle)
+    )
+    slow = {
+        **record,
+        "lane_runs": {
+            "1": {"link_waits_s": [[900, 1, 1, 1, 1], [1, 1, 1]], "end_s": [2084, 1]}
+        },
+    }
+    assert [
+        problem for problem in _lane_time_problems(slow) if problem.startswith("run 1")
+    ] == [
+        "run 1, lane 1: its links waited 904 s in all, above the allowance of 180 s "
+        "for each of its 5 links",
+        "run 1, lane 1 ended 2084 s after the run started, above the bound of 2083 s",
+        "run 1, lane 2: 3 link waits recorded for 4 links",
+    ]
+
+
+def test_a_short_job_outside_the_lanes_is_reported() -> None:
+    """The reader names a short job that starts with the run, a job that starts
+    with the run with no duration, and a job that waits on a head it reads
+    nothing from; a job on a macOS runner starts with the run whatever its
+    length.
+    """
+    jobs = _python_ci_jobs()
+    record = _ci_lanes()
+    parallel, measured = record["parallel_jobs"], record["measured"]
+    assert isinstance(parallel, dict)
+    assert isinstance(measured, dict)
+    run_s, parallel_run_s = measured["run_s"], measured["parallel_run_s"]
+    out = {
+        **record,
+        "parallel_jobs": {**parallel, "guards-source": "x"},
+        "measured": {
+            **measured,
+            "parallel_run_s": {
+                **parallel_run_s,
+                "guards-source": run_s["guards-source"],
+            },
+        },
+    }
+    assert _outside_lane_problems(jobs, out) == [
+        "guards-source: starts with the run, but its shortest measured run (325 s) "
+        "is no longer than a quarter of the lane bound (2083 s), so it belongs in a "
+        "lane"
+    ]
+    unmeasured = {**out, "measured": measured}
+    assert _outside_lane_problems(jobs, unmeasured) == [
+        "guards-source: starts with the run, with no measured duration"
+    ]
+    after = record["after_jobs"]
+    assert isinstance(after, dict)
+    waiting = {**record, "after_jobs": {**after, "video": "x"}}
+    video = {**jobs, "video": {**jobs["video"], "needs": "quality"}}
+    assert _outside_lane_problems(video, waiting) == [
+        "video: reads no artifact of the jobs it waits on, so it belongs in a lane "
+        "or with the jobs that start with the run"
+    ]
+    blind = {**jobs, "sonar": {**jobs["sonar"], "needs": "quality"}}
+    assert _outside_lane_problems(blind, record) == [
+        "sonar: reads no artifact of the jobs it waits on, so it belongs in a lane "
+        "or with the jobs that start with the run"
+    ]
+
+    def reading(job: str, given: dict[str, str]) -> dict[str, dict[str, object]]:
+        steps = jobs[job]["steps"]
+        assert isinstance(steps, list)
+        swapped = [
+            {**step, "with": given}
+            if str(step.get("uses", "")).startswith("actions/download-artifact@")
+            else step
+            for step in steps
+        ]
+        return {**jobs, job: {**jobs[job], "steps": swapped}}
+
+    # An exact name is not a prefix: no leg uploads "test-results" itself.
+    assert _outside_lane_problems(
+        reading("sonar", {"name": "test-results"}), record
+    ) == [
+        "sonar: reads no artifact of the jobs it waits on, so it belongs in a lane "
+        "or with the jobs that start with the run"
+    ]
+    assert _outside_lane_problems(
+        reading("pr-comment", {"pattern": "test-results-linux-*"}), record
+    ) == [
+        "pr-comment: reads no artifact of the jobs it waits on, so it belongs in a "
+        "lane or with the jobs that start with the run"
+    ]
+    assert (
+        _outside_lane_problems(
+            reading("sonar", {"name": "test-results-windows-latest-3.12"}), record
+        )
+        == []
+    )
+    assert str(jobs["mps"]["runs-on"]).startswith("macos")
+    short_mps = {
+        **record,
+        "measured": {**measured, "parallel_run_s": {**parallel_run_s, "mps": [1]}},
+    }
+    assert _outside_lane_problems(jobs, short_mps) == []
+    stale = {
+        **record,
+        "measured": {
+            **measured,
+            "parallel_run_s": {**parallel_run_s, "video": run_s["video"]},
+        },
+    }
+    assert _outside_lane_problems(jobs, stale) == [
+        "video: a duration is recorded for a job that does not start with the run"
+    ]
 
 
 #: The jobs of Python CI that group several guards or checks, each run as a

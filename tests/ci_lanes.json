@@ -34,45 +34,55 @@
     ]
   ],
   "measured": {
-    "about": "Seconds from start to end of each job in run 44207513864 (pull request 1158, green) and run 44207512197 (pull request 1157, whose short jobs all ended green but whose macOS test legs and macOS rebuild never started, so the run did not finish), with every job still starting with the run. A lane counts the longer of the two runs of each link; a job that starts with the run counts the shorter, and a matrix its shortest leg that ran.",
+    "about": "Seconds from start to end of each job in run 44207513864 (pull request 1158, green) and run 44207512197 (pull request 1157, whose short jobs all ended green but whose macOS test legs and macOS rebuild never started, so the run did not finish), with every job still starting with the run, and in run 44228030331 (pull request 1161, green), the first with the lanes. A lane counts the longest run of each link; a job that starts with the run counts the shortest, and a matrix its shortest leg that ran.",
     "runs": [
       44207513864,
-      44207512197
+      44207512197,
+      44228030331
     ],
     "run_s": {
-      "quality": [187, 151],
-      "built-package": [88, 80],
-      "reports": [250, 248],
-      "video": [115, 108],
-      "baseline-glibc": [73, 55],
-      "array-api": [245, 371],
-      "release-build": [64, 57],
-      "guards-package": [277, 351],
-      "guards-prose": [247, 278],
-      "guards-source": [509, 441],
-      "notebook": [66, 60]
+      "quality": [187, 151, 180],
+      "built-package": [88, 80, 66],
+      "reports": [250, 248, 250],
+      "video": [115, 108, 100],
+      "baseline-glibc": [73, 55, 55],
+      "array-api": [245, 371, 258],
+      "release-build": [64, 57, 57],
+      "guards-package": [277, 351, 288],
+      "guards-prose": [247, 278, 343],
+      "guards-source": [509, 441, 325],
+      "notebook": [66, 60, 61]
     },
     "parallel_run_s": {
-      "tests": [1615, 2080],
-      "tests-perf": [1274, 1456],
-      "minimum-versions": [1017, 1243],
-      "figures": [1020, 1803],
-      "doc-snippets": [1166, 551],
-      "remote-node": [825, 577],
-      "mps": [101, 103]
+      "tests": [1615, 2080, 1691],
+      "tests-perf": [1274, 1456, 1702],
+      "minimum-versions": [1017, 1243, 1042],
+      "figures": [1020, 1803, 1900],
+      "doc-snippets": [1166, 551, 660],
+      "remote-node": [825, 577, 878],
+      "mps": [101, 103, 92]
     }
   },
   "link_waits_s": {
-    "about": "The queue wait, from creation to start, of each job created when the jobs it waits on ended, which is what a lane link goes through: sonar and pr-comment of each run that reached them (run 44207512197 never did). The 21 Ubuntu jobs created with run 44207513864 waited 10 s to 795 s, median 302 s, but those waits come from 28 jobs queued at once and say nothing of a link queued later.",
+    "about": "The queue wait, from creation to start, of each job created when the jobs it waits on ended, which is what a lane link goes through: sonar and pr-comment of each run that reached them (run 44207512197 never did); the links of the lanes are under lane_runs. The 21 Ubuntu jobs created with run 44207513864 waited 10 s to 795 s, median 302 s, but those waits come from 28 jobs queued at once and say nothing of a link queued later.",
     "44207513864": {"sonar": 175, "pr-comment": 138},
-    "44206498227": {"sonar": 27, "pr-comment": 31}
+    "44206498227": {"sonar": 27, "pr-comment": 31},
+    "44228030331": {"sonar": 3, "pr-comment": 3}
   },
   "link_allowance_s": 180,
-  "link_allowance_about": "The wait of a link for its runner once the one before it ends, at least the longest link wait measured (175 s, sonar in run 44207513864). To be measured again on the first runs with the lanes, where links queue behind fewer jobs.",
+  "link_allowance_about": "The wait of a link for its runner once the one before it ends: at least the longest wait measured for a job queued after the jobs it waits on ended (175 s, sonar in run 44207513864), and in each run with the lanes at least what the links of a lane waited, shared among them.",
+  "lane_runs": {
+    "about": "Runs with the lanes. For each lane, the queue wait from creation to start of each link after the head, and the seconds from the start of the run to the end of its last link. In run 44228030331 (pull request 1161) the first link of each lane waited while the 19 jobs that start with the run took their runners (152 s and 238 s), and every later link waited 2 s to 11 s.",
+    "44228030331": {
+      "link_waits_s": [[152, 11, 2, 2, 4], [238, 11, 3, 7]],
+      "end_s": [1268, 1492]
+    }
+  },
   "tests_matrix_wall_s": {
     "about": "The longest leg of the test matrix, start to end, in each run: the time the matrix holds its last runner.",
     "44207513864": 3217,
-    "44206498227": 3125
+    "44206498227": 3125,
+    "44228030331": 3223
   },
   "lane_bound_s": 2083,
   "lane_bound_about": "Two thirds of the shortest matrix measured, so a lane ends well before the tests and never becomes the critical path."

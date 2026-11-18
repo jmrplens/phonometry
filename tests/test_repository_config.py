@@ -2894,6 +2894,8 @@ def _lane_time_problems(record: Mapping[str, object]) -> list[str]:
     for each link after its head, and stays within the bound; the bound is at
     most two thirds of the shortest matrix measured, and the allowance at least
     the longest wait measured for a job queued once the jobs it waits on ended.
+    In each run measured with the lanes, the links of a lane waited no longer
+    in all than the allowance for each, and the lane ended within the bound.
     """
     lanes, measured = record["lanes"], record["measured"]
     matrix, bound = record["tests_matrix_wall_s"], record["lane_bound_s"]
@@ -2924,6 +2926,31 @@ def _lane_time_problems(record: Mapping[str, object]) -> list[str]:
             f"wait measured for a job queued after another ended "
             f"({max(waits, default=0)} s)"
         )
+    lane_runs = record["lane_runs"]
+    assert isinstance(lane_runs, dict)
+    for run, seen in lane_runs.items():
+        if run == "about":
+            continue
+        assert isinstance(seen, dict)
+        for number, (lane, lane_waits, end) in enumerate(
+            zip(lanes, seen["link_waits_s"], seen["end_s"], strict=True), start=1
+        ):
+            if len(lane_waits) != len(lane) - 1:
+                problems.append(
+                    f"run {run}, lane {number}: {len(lane_waits)} link waits "
+                    f"recorded for {len(lane) - 1} links"
+                )
+            elif sum(lane_waits) > allowance * len(lane_waits):
+                problems.append(
+                    f"run {run}, lane {number}: its links waited {sum(lane_waits)} s "
+                    f"in all, above the allowance of {allowance} s for each of its "
+                    f"{len(lane_waits)} links"
+                )
+            if end > bound:
+                problems.append(
+                    f"run {run}, lane {number} ended {end} s after the run started, "
+                    f"above the bound of {bound} s"
+                )
     in_lanes = {name for lane in lanes for name in lane}
     problems += [
         f"{name}: a duration is recorded for a job in no lane"
@@ -3132,6 +3159,20 @@ def test_a_lane_that_skips_a_link_or_shares_a_job_is_reported() -> None:
         problem.startswith("the allowance of 30 s for each link is below")
         for problem in _lane_time_problems(idle)
     )
+    slow = {
+        **record,
+        "lane_runs": {
+            "1": {"link_waits_s": [[900, 1, 1, 1, 1], [1, 1, 1]], "end_s": [2084, 1]}
+        },
+    }
+    assert [
+        problem for problem in _lane_time_problems(slow) if problem.startswith("run 1")
+    ] == [
+        "run 1, lane 1: its links waited 904 s in all, above the allowance of 180 s "
+        "for each of its 5 links",
+        "run 1, lane 1 ended 2084 s after the run started, above the bound of 2083 s",
+        "run 1, lane 2: 3 link waits recorded for 4 links",
+    ]
 
 
 def test_a_short_job_outside_the_lanes_is_reported() -> None:
@@ -3158,7 +3199,7 @@ def test_a_short_job_outside_the_lanes_is_reported() -> None:
         },
     }
     assert _outside_lane_problems(jobs, out) == [
-        "guards-source: starts with the run, but its shortest measured run (441 s) "
+        "guards-source: starts with the run, but its shortest measured run (325 s) "
         "is no longer than a quarter of the lane bound (2083 s), so it belongs in a "
         "lane"
     ]

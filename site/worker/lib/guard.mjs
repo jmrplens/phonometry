@@ -133,7 +133,7 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 		// switched it off is who switches the rule back.
 		const owned = made.off || (current.message ?? '').startsWith(`${HAND_MARK}: off`) || pinned;
 		if (actions.some((action) => action.kind === 'deploy') || (half === 'assets' && owned)) ruleAction(true);
-		else if (half === 'assets') notes.push(`live ${current.id} (${current.tag}) was put there by ${by}, not by the guard or quota-switch.mjs: the rule is not turned on, since nothing would turn it off after 00:00 UTC (the assets-only version runs no code)`);
+		else if (half === 'assets') notes.push(`live ${current.id} (${current.tag}) was put there by ${by}, not by the guard or quota-switch.mjs: ${rule?.enabled ? 'the rule is on and stays as it is' : 'the rule is not turned on, since nothing would turn it off after 00:00 UTC (the assets-only version runs no code)'}`);
 		else notes.push(`the rule stays as it is: there is no assets-only version to go with it`);
 		return { desired, actions, notes };
 	}

@@ -290,9 +290,10 @@ docs.jmrp.io's traffic for /phonometry, plus the guard's 96 cron runs, of the
   deployed by hand, or `quota-switch.mjs --mode off` (which says `quota switch
   by hand`) stays as it is after 00:00 UTC, with a note in the log. Switching
   off does not ask: at the threshold it rolls whatever is live to assets only
-  and turns the rule on. An assets-only version already live that neither the
-  guard nor `quota-switch.mjs` marked keeps the rule off: it runs no code, and
-  a rule turned on beside it would have no one to turn it off after 00:00 UTC.
+  and turns the rule on. Beside an assets-only version already live that
+  neither the guard nor `quota-switch.mjs` marked, it leaves the rule as it
+  finds it (unless `MODE` pins off): that version runs no code, and a rule
+  turned on beside it would have no one to turn it off after 00:00 UTC.
   It has no route, so no visitor request can reach the one Worker holding a
   token able to redeploy the site. Its variable `MODE` is `dry-run` (log the
   decision, change nothing) until the maintainer sets `auto`; without the

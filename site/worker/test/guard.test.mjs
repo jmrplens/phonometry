@@ -139,6 +139,9 @@ describe('decide', () => {
 		assert.deepEqual(d.actions, []);
 		assert.match(d.notes.join('\n'), /live v-assets-2 \(assets-200-1\) was put there by "beacon off while I look at something", not by the guard or quota-switch\.mjs: the rule is not turned on/);
 		assert.deepEqual(decide(state({ count: 96000, current: { ...hand, message: '' } })).actions, []);
+		const on = decide(state({ count: 96000, rule: { enabled: true, lastUpdated: yesterday }, current: hand }));
+		assert.deepEqual(on.actions, []);
+		assert.match(on.notes.join('\n'), /not by the guard or quota-switch\.mjs: the rule is on and stays as it is/);
 	});
 
 	test('at the threshold over an assets-only version switched off by hand, or with mode off: the rule goes on', () => {

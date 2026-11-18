@@ -36,6 +36,15 @@ concurrency:
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
+# The test jobs, the figures, the snippets, the remote node and the macOS
+# job start with the run; the short jobs run one after another in two lanes,
+# one from quality and one from release-build, the two jobs pr-comment and
+# the macOS rebuild wait for, so a run holds a few runners under the
+# account's cap rather than one for every job. Each link waits on the one
+# before it under !cancelled(): a red link skips none after it, and a
+# cancelled run stops the lane. Re-running a failed link re-runs the links
+# after it. tests/ci_lanes.json lists the lanes and the durations they are
+# balanced on, each lane well inside the test matrix.
 jobs:
   # Tests. The library's suite on every Python the package supports and on
   # the three systems, the numba-jitted kernel on the newest Python, and the
@@ -323,6 +332,8 @@ jobs:
   # pin between them: every link of the chain fixes the page the check compares.
   reports:
     name: Generated / fiches
+    needs: built-package
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # 4.2 min at the longest in the measured runs.
     timeout-minutes: 15
@@ -498,6 +509,8 @@ jobs:
   # Nothing is installed with pip (tests/test_scripts_without_numpy.py).
   guards-prose:
     name: Guards / prose
+    needs: guards-package
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # About 5.1 min by the medians of its steps, 5.8 by their maxima.
     timeout-minutes: 20
@@ -660,6 +673,8 @@ jobs:
   # first. Nothing is installed (tests/test_scripts_without_numpy.py).
   guards-source:
     name: Guards / source
+    needs: guards-prose
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # About 6.5 min by the medians of its steps, 8.5 by their maxima.
     timeout-minutes: 20
@@ -747,6 +762,8 @@ jobs:
   # rewrites the counts quoted across docs/, .zenodo.json and the site.
   guards-package:
     name: Guards / package
+    needs: release-build
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # About 6.7 min by the medians of its steps, 7.6 by their maxima.
     timeout-minutes: 20
@@ -988,6 +1005,8 @@ jobs:
   # one build of the wheel, and the wheel's checks only when it was built.
   built-package:
     name: Package / stub and wheel
+    needs: quality
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # The type check took most of it; about 1.5 min in all.
     timeout-minutes: 20
@@ -1098,6 +1117,8 @@ jobs:
   # routines without FMA, on one runner, each whatever the other said.
   baseline-glibc:
     name: Platform / glibc 2.39
+    needs: video
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     # Its checks take seconds and the install a few minutes.
     timeout-minutes: 25
@@ -1176,6 +1197,8 @@ jobs:
   # standard, and on torch on CPU, held to the tolerance the guide publishes.
   array-api:
     name: FDTD / array-api, torch
+    needs: baseline-glibc
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # Under 5 min in its last 18 passing runs.
     timeout-minutes: 25
@@ -1351,6 +1374,8 @@ jobs:
   # and the summary says which before the tests run.
   video:
     name: Runtime / ffmpeg video
+    needs: reports
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # Tests under a minute; Ubuntu's ffmpeg has taken up to 17 min to install.
     timeout-minutes: 45
@@ -1400,6 +1425,8 @@ jobs:
   # cannot see (scripts/check_notebook.py).
   notebook:
     name: Runtime / notebook
+    needs: guards-source
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     # 1.4 min at the longest in the measured runs.
     timeout-minutes: 15

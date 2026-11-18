@@ -1,0 +1,79 @@
+{
+  "about": "The lanes of Python CI (.github/workflows/python-app.yml) and the durations they are balanced on. tests/test_repository_config.py holds the workflow to the lanes, each lane with the allowance for each link to the bound, each job that starts with the run to its measured length, and each job that waits on another to an artifact it reads.",
+  "parallel_jobs": {
+    "tests": "the critical path of a run",
+    "tests-perf": "the numba suite",
+    "minimum-versions": "the suite at the dependency floors",
+    "figures": "regenerates every figure",
+    "doc-snippets": "runs every snippet of the documentation",
+    "remote-node": "builds the node image and runs the simulations on it",
+    "mps": "holds a macOS runner, whose cap of five the test legs fill, so a link queued behind them would wait out a whole test leg"
+  },
+  "parallel_about": "A job starts with the run when it holds a macOS runner, or when its shortest measured run takes longer than a quarter of lane_bound_s, so a short job cannot leave its lane.",
+  "after_jobs": {
+    "release-rebuild-macos": "reads the release-checksums artifact of release-build",
+    "sonar": "reads the coverage that tests uploads",
+    "pr-comment": "reads the test results that tests uploads"
+  },
+  "after_about": "A job waits on another only to read an artifact that a job it waits on uploads.",
+  "lanes": [
+    [
+      "quality",
+      "built-package",
+      "reports",
+      "video",
+      "baseline-glibc",
+      "array-api"
+    ],
+    [
+      "release-build",
+      "guards-package",
+      "guards-prose",
+      "guards-source",
+      "notebook"
+    ]
+  ],
+  "measured": {
+    "about": "Seconds from start to end of each job in run 44207513864 (pull request 1158, green) and run 44207512197 (pull request 1157, whose short jobs all ended green but whose macOS test legs and macOS rebuild never started, so the run did not finish), with every job still starting with the run. A lane counts the longer of the two runs of each link; a job that starts with the run counts the shorter, and a matrix its shortest leg that ran.",
+    "runs": [
+      44207513864,
+      44207512197
+    ],
+    "run_s": {
+      "quality": [187, 151],
+      "built-package": [88, 80],
+      "reports": [250, 248],
+      "video": [115, 108],
+      "baseline-glibc": [73, 55],
+      "array-api": [245, 371],
+      "release-build": [64, 57],
+      "guards-package": [277, 351],
+      "guards-prose": [247, 278],
+      "guards-source": [509, 441],
+      "notebook": [66, 60]
+    },
+    "parallel_run_s": {
+      "tests": [1615, 2080],
+      "tests-perf": [1274, 1456],
+      "minimum-versions": [1017, 1243],
+      "figures": [1020, 1803],
+      "doc-snippets": [1166, 551],
+      "remote-node": [825, 577],
+      "mps": [101, 103]
+    }
+  },
+  "link_waits_s": {
+    "about": "The queue wait, from creation to start, of each job created when the jobs it waits on ended, which is what a lane link goes through: sonar and pr-comment of each run that reached them (run 44207512197 never did). The 21 Ubuntu jobs created with run 44207513864 waited 10 s to 795 s, median 302 s, but those waits come from 28 jobs queued at once and say nothing of a link queued later.",
+    "44207513864": {"sonar": 175, "pr-comment": 138},
+    "44206498227": {"sonar": 27, "pr-comment": 31}
+  },
+  "link_allowance_s": 180,
+  "link_allowance_about": "The wait of a link for its runner once the one before it ends, at least the longest link wait measured (175 s, sonar in run 44207513864). To be measured again on the first runs with the lanes, where links queue behind fewer jobs.",
+  "tests_matrix_wall_s": {
+    "about": "The longest leg of the test matrix, start to end, in each run: the time the matrix holds its last runner.",
+    "44207513864": 3217,
+    "44206498227": 3125
+  },
+  "lane_bound_s": 2083,
+  "lane_bound_about": "Two thirds of the shortest matrix measured, so a lane ends well before the tests and never becomes the critical path."
+}

@@ -89,7 +89,8 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { en as homeEn } from '../src/data/home-en.ts';
+import { es as homeEs } from '../src/data/home-es.ts';
 import { dependencies, extras, requiresPython } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';
@@ -99,7 +100,7 @@ import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
-import { referenceId } from '../src/lib/citations.mjs';
+import { isBodyName, referenceId } from '../src/lib/citations.mjs';
 import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
 import { DATA_COMPONENTS } from '../src/lib/page-markdown.mjs';
 import { readPageReferences } from '../src/lib/page-references.mjs';
@@ -941,6 +942,28 @@ const datasetKeyOf = (id) => {
 const BAND_HEADING = /^\d+(?:[.,]\d+)? k?Hz$/;
 
 /**
+ * What is wrong with who a Dataset says made it: its `creator` and its
+ * `publisher` are the site's Person, by `@id`, and it says it is free to read.
+ *
+ * @param {object} dataset The Dataset node.
+ * @param {object | undefined} person The page's Person node.
+ * @returns {string[]}
+ */
+function datasetMakerDefects(dataset, person) {
+	const id = person?.['@id'];
+	if (typeof id !== 'string') return ['sits on a page with no Person to name as its creator'];
+	const defects = [];
+	for (const field of ['creator', 'publisher']) {
+		const node = dataset[field];
+		if (node?.['@id'] === id) continue;
+		const label = node?.['@id'] ?? node?.name;
+		defects.push(`names ${label === undefined ? `no ${field}` : `${field} ${JSON.stringify(label)}`}, not the site's Person ${id}`);
+	}
+	if (dataset.isAccessibleForFree !== true) defects.push('does not say it is free to read (isAccessibleForFree)');
+	return defects;
+}
+
+/**
  * Fields a dataset of transcribed tables must not carry. The rows are read
  * off works that keep their own rights, so the site grants no licence over
  * them, and it serves them on the page and nowhere else.
@@ -1075,8 +1098,8 @@ const CONFORMANCE = JSON.parse(readFileSync(REPORT_FILE, 'utf8'));
 const REPORT_LIBRARY = CONFORMANCE.library;
 
 /**
- * The day the report page prints as the one its rows last changed: the
- * `<time datetime>` of its `[data-report-provenance]` line, which
+ * The day the report page prints as the one of the commit it was generated
+ * from: the `<time datetime>` of its `[data-report-provenance]` line, which
  * Conformance.astro writes from the last commit of docs/conformance.json.
  */
 const provenanceLine = (html) => /<p\b[^>]*\bdata-report-provenance\b[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1];
@@ -1153,6 +1176,8 @@ const seen = {
 	datasetBasis: 0,
 	datasetDated: 0,
 	datasetUndated: 0,
+	datasetMade: 0,
+	datasetUnmade: 0,
 	datasetShown: 0,
 	datasetUnshown: 0,
 	corrected: 0,
@@ -1960,6 +1985,15 @@ for (const file of files) {
 			if (dataset.inLanguage !== lang) {
 				fail(`${at}: the dataset's inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
 			}
+			// Who made the table: the site's Person transcribed every row, and
+			// a Dataset with no creator names no provider to Dataset Search.
+			const maker = datasetMakerDefects(dataset, nodeOfType(nodes, 'Person'));
+			if (maker.length > 0) {
+				fail(`${at}: the dataset ${maker.join('; ')}`);
+				seen.datasetUnmade += 1;
+			} else {
+				seen.datasetMade += 1;
+			}
 			const claims = DATASET_CLAIMS.filter((field) => dataset[field] !== undefined);
 			if (claims.length > 0) {
 				fail(`${at}: the dataset claims ${claims.join(', ')} over rows other works printed`);
@@ -2124,12 +2158,21 @@ for (const file of files) {
 		} else {
 			if (dataset['@id'] !== `${canonical}#dataset`) problems.push(`its @id is ${dataset['@id']}, not ${canonical}#dataset`);
 			if (dataset.inLanguage !== lang) problems.push(`its inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
+			// One report in two languages, paired as its articles are, and made
+			// and published by the site's Person.
+			const twinKey = lang === 'en' ? 'workTranslation' : 'translationOfWork';
+			const twin = `${ORIGIN}${lang === 'en' ? '/es' : ''}/${REPORT}/#dataset`;
+			if (dataset[twinKey]?.['@id'] !== twin) {
+				problems.push(`its ${twinKey} is ${JSON.stringify(dataset[twinKey]?.['@id'])}, not the other language's report, ${twin}`);
+			}
+			problems.push(...datasetMakerDefects(dataset, nodeOfType(nodes, 'Person')).map((defect) => `it ${defect}`));
 			if (dataset.version !== REPORT_LIBRARY) {
 				problems.push(`its version is ${JSON.stringify(dataset.version)}, and docs/conformance.json was generated for ${REPORT_LIBRARY}`);
 			}
-			// Dated by its data: the day the page prints as the one its rows
-			// last changed, not the page's own date, which a change to how the
-			// rows are drawn or to the page's text moves as well.
+			// Dated by its data: the day the page prints as the one of the
+			// commit the report was generated from, not the page's own date,
+			// which a change to how the rows are drawn or to the page's text
+			// moves as well.
 			const dataDay = provenanceDay(html);
 			if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dataset.dateModified ?? ''))) {
 				problems.push(`its dateModified is ${JSON.stringify(dataset.dateModified)}, not a day`);
@@ -2138,11 +2181,11 @@ for (const file of files) {
 					problems.push(`its data changed on ${dataset.dateModified}, after the page's own last change, ${article.dateModified}`);
 				}
 				if (dataDay !== undefined && dataset.dateModified !== dataDay) {
-					problems.push(`its dateModified is ${dataset.dateModified}, and the page says its rows last changed on ${dataDay}`);
+					problems.push(`its dateModified is ${dataset.dateModified}, and the page says the report was generated from a commit of ${dataDay}`);
 				}
 			}
 			if (dataDay === undefined) {
-				problems.push('the page prints no day its rows last changed ([data-report-provenance] with a <time datetime>)');
+				problems.push('the page prints no day of the commit the report was generated from ([data-report-provenance] with a <time datetime>)');
 			}
 			// Of the commit its rows are of: the files it hands out and the
 			// script it names are read at the commit the banner prints, as the
@@ -2227,6 +2270,29 @@ for (const file of files) {
 			);
 		} else {
 			ok(`${route}: each of the ${standards.length} standards names its publisher by the body's one identity`);
+		}
+		// A body publishes more than standards (an RFC is a report, an AES
+		// paper a convention paper, ECAC Doc 29 a report), and a work of any
+		// kind it publishes names it by the same identity: IETF, AES and ECAC
+		// were left anonymous on every report and paper while their standards
+		// named them, because only a standard looked its body up.
+		const otherWorks = nodes.filter((node) => isCitedWork(node['@id']) && node.genre !== 'Technical standard');
+		const unnamedBodies = new Map();
+		for (const work of otherWorks) {
+			const publisher = work.publisher;
+			if (publisher && typeof publisher === 'object' && !publisher['@id'] && isBodyName(publisher.name)) {
+				unnamedBodies.set(publisher.name, (unnamedBodies.get(publisher.name) ?? 0) + 1);
+			}
+		}
+		if (unnamedBodies.size > 0) {
+			const count = [...unnamedBodies.values()].reduce((sum, n) => sum + n, 0);
+			fail(
+				`${route}: ${count} of the ${otherWorks.length} works that are no standard write out anonymously a ` +
+					`publisher that has an identity of its own under ${BODY_PREFIX}: ` +
+					[...unnamedBodies].map(([name, n]) => `${name} (${n})`).join(', '),
+			);
+		} else if (otherWorks.length > 0) {
+			ok(`${route}: none of the ${otherWorks.length} works that are no standard writes out a standards body anonymously`);
 		}
 		if (siteless.size > 0) {
 			fail(
@@ -2514,6 +2580,9 @@ for (const lang of ['en', 'es']) {
 	}
 	if (seen.datasetDated > 0 && seen.datasetUndated === 0) {
 		ok(`each of the ${seen.datasetDated} datasets is dated as the page that renders it`);
+	}
+	if (seen.datasetMade > 0 && seen.datasetUnmade === 0) {
+		ok(`each of the ${seen.datasetMade} datasets names the site's Person as its creator and publisher, free to read`);
 	}
 	if (seen.datasetShown > 0 && seen.datasetUnshown === 0) {
 		ok(
@@ -2967,7 +3036,7 @@ if (
 		} else if (counted && described && unwritten.length === 0 && en.problems.length === 0 && es.problems.length === 0) {
 			ok(
 				`the conformance report's Dataset is the main entity of both report pages, versioned ${REPORT_LIBRARY}, ` +
-					`dated by the day its rows last changed, based on the ${en.named.size} work${en.named.size === 1 ? '' : 's'} ` +
+					`dated by the day of the commit it was generated from, based on the ${en.named.size} work${en.named.size === 1 ? '' : 's'} ` +
 					`the standards of its checks resolve to, named in each language, and written in each page's language ` +
 					`(${keys.length} texts)`,
 			);

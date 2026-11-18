@@ -81,7 +81,7 @@ export const CONTENT_DIR = resolve(SITE_DIR, 'src', 'content', 'docs');
  * because the copy could only print it by running code it cannot trust or by
  * leaving a blank where the page shows a number.
  */
-export const DATA_MODULES = Object.freeze(['src/data/conformance-stats.mjs', 'src/data/home.ts']);
+export const DATA_MODULES = Object.freeze(['src/data/conformance-stats.mjs', 'src/data/home-en.ts', 'src/data/home-es.ts']);
 
 /**
  * Where the site is published.

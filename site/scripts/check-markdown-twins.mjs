@@ -8,7 +8,8 @@
 //   3. what the page says of it    the <link rel="alternate" type="text/markdown">
 //                                  in its head and the `encoding` of its
 //                                  structured data
-//   4. the sitemap                 the <lastmod> the copy's `Updated:` repeats
+//   4. the sitemap                 the <lastmod> whose day the copy's
+//                                  `Updated:` names
 //
 // The copies used to be cut out of the page source by regular expressions, and
 // that left them short of the page in ways no check saw: the two landing pages
@@ -30,12 +31,17 @@
 // copy's title is the page's <title> without the site's name; `Canonical:`,
 // `Language:`, `Summary:` and `Published:` are the page's canonical link, its
 // language, its meta description and the `datePublished` of the node that
-// declares the copy; `Updated:` is the sitemap's <lastmod>; `Alternate:` is
+// declares the copy; `Updated:` is the moment the last <time datetime> of the
+// page's footer gives, to the second, on the day of the sitemap's <lastmod>
+// (the edge serves the page's Last-Modified from the one and the copy's from
+// the other, and a day alone would read as midnight); `Alternate:` is
 // the copy of the page its hreflang link names; `Verified:` stands exactly
-// where the page states its conformance checks; `License:` stands on every
-// page but a catalogue. Only the release lines are read from the release:
-// `Version:` names the VERSION being built, and every key of
-// `releaseHeaderKeys` and `Author:` are there.
+// where the page states its conformance checks; `Unreleased:` stands exactly
+// where the page shows the notice that it changed after the latest release,
+// and names the release the notice names; `License:` stands on every page but
+// a catalogue. Only the release lines are read from the release: `Version:`
+// names the VERSION being built, and every key of `releaseHeaderKeys` but the
+// two that stand on some pages only, and `Author:`, are there.
 //
 // THE BODY HAS TO BE THERE. A copy of a page that owes one has text between its
 // header and its references, and a catalogue's copy has as many table rows as
@@ -87,15 +93,24 @@ import { preRelease, version } from '../src/data/repo-stats.mjs';
 import { basePath, siteTitle, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { fileOfRoute } from '../src/lib/agent-md/content.mjs';
-import { LEAD_OPENING, PRE_RELEASE } from '../src/lib/agent-md/header.mjs';
+import { LEAD_OPENING, PRE_RELEASE, UNRELEASED } from '../src/lib/agent-md/header.mjs';
 import { REFERENCES_HEADING } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR } from '../src/lib/agent-md/render.mjs';
 import { rewrittenSource } from '../src/lib/agent-md/rewrites.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { codeLines } from '../src/lib/markdown-fences.mjs';
-import { FULL_TEXT_KINDS, VERIFIED_BY_ATTRIBUTE, pageKind, releaseHeaderKeys } from '../src/lib/page-markdown.mjs';
+import {
+  FULL_TEXT_KINDS,
+  NEWER_THAN_RELEASE_ATTRIBUTE,
+  VERIFIED_BY_ATTRIBUTE,
+  pageKind,
+  releaseHeaderKeys,
+} from '../src/lib/page-markdown.mjs';
 import { decode, isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
 import { copyDefects, frontmatterSource, headingText, stripFrontmatter } from './shared/page-twin.mjs';
+
+/** The `Updated:` value src/lib/agent-md/header.mjs writes: a moment in UTC, to the second. */
+const UPDATED_MOMENT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u;
 
 /** The API reference served under /es/, which has no file of its own. */
 const API_FALLBACK = /^\/es\/reference\/api\//u;
@@ -861,7 +876,8 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
       add('header', `${copy} ${said('Canonical')}, and the page's canonical is ${canonical}`);
     }
     if (fields.get('Language') !== lang) add('header', `${copy} ${said('Language')}, not ${lang}`);
-    for (const key of [...releaseHeaderKeys.filter((key) => key !== 'Pre-release' || preRelease), 'Author']) {
+    const sometimes = new Set(['Unreleased', ...(preRelease ? [] : ['Pre-release'])]);
+    for (const key of [...releaseHeaderKeys.filter((key) => !sometimes.has(key)), 'Author']) {
       if (!fields.has(key)) add('header', `${copy} has no "${key}:" line`);
     }
     // Read in the copy's own language, so a copy in the wrong one fails once, on Language:.
@@ -880,9 +896,24 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
       }
     }
     const lastmod = dates.get(route);
+    const updated = fields.get('Updated');
     if (!lastmod) add('header', `${route} has a copy and no <lastmod> in the sitemap: nothing dates it`);
-    else if (fields.get('Updated') !== lastmod) {
+    else if (!UPDATED_MOMENT.test(updated ?? '')) {
+      add(
+        'header',
+        `${copy} ${said('Updated')}${/^\d{4}-\d{2}-\d{2}$/u.test(updated ?? '') ? ', a day with no time' : ''}: ` +
+          "the line states the moment the page's footer gives, as YYYY-MM-DDTHH:MM:SSZ",
+      );
+    } else if (updated?.slice(0, 10) !== lastmod) {
       add('header', `${copy} ${said('Updated')}, and the sitemap dates the page ${lastmod}`);
+    } else {
+      // The footer's last <time datetime> is where the edge reads the page's
+      // Last-Modified, and the copy's Updated: line is where it reads the
+      // copy's: the two name one moment.
+      const footer = tags(html, 'time').map((time) => time.datetime).filter((at) => at !== undefined).at(-1);
+      if (footer === undefined || Date.parse(footer) !== Date.parse(updated ?? '')) {
+        add('header', `${copy} ${said('Updated')}, and the page's footer dates it ${footer ?? 'nowhere'}`);
+      }
     }
     const other = tags(html, 'link').find(
       (link) => link.rel === 'alternate' && link.hreflang && link.hreflang !== 'x-default' && link.hreflang !== lang,
@@ -902,6 +933,23 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
           ? `${route} states the conformance checks that verify it, and ${copy} has no "Verified:" line`
           : `${copy} has a "Verified:" line, and ${route} states no conformance check`,
       );
+    }
+    // The notice under the title of a page changed after the latest release,
+    // and the copy's line that says the same, in the copy's language.
+    const notices = tags(html, 'p').filter((p) => Object.hasOwn(p, NEWER_THAN_RELEASE_ATTRIBUTE));
+    const newerThan = notices.length === 1 ? notices[0][NEWER_THAN_RELEASE_ATTRIBUTE] : undefined;
+    if (notices.length > 1) add('header', `${route} shows ${notices.length} notices that it changed after the release, not one`);
+    const unreleasedLine = newerThan === undefined ? undefined : UNRELEASED[fields.get('Language') === 'es' ? 'es' : 'en'](newerThan);
+    if (fields.get('Unreleased') !== unreleasedLine) {
+      add(
+        'header',
+        newerThan === undefined
+          ? `${copy} ${said('Unreleased')}, and ${route} shows no notice that it changed after the release`
+          : `${copy} ${said('Unreleased')}, and ${route} shows the notice that it changed after phonometry ${newerThan}: "Unreleased: ${unreleasedLine}"`,
+      );
+    }
+    if (newerThan !== undefined && newerThan !== version) {
+      add('header', `${route} says it changed after phonometry ${newerThan}, and the build is of phonometry ${version}`);
     }
     // A catalogue transcribes published tables and carries no licence of its own.
     const licensed = pageClass.id !== 'catalogue';

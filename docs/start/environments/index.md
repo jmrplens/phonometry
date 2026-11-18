@@ -12,6 +12,10 @@ from one place to the next is how its dependencies arrive and which of the
 optional extras can follow them. The pages of this section take one place
 each, with commands that were run there.
 
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI: every page of
+this section says, under its opening paragraph, on which versions its commands
+ran that day.
+
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
 | [pip and uv](pip-and-uv.md) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |

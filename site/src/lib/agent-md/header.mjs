@@ -19,7 +19,8 @@
  *
  * Every value comes from the module that already publishes it on the site:
  * the version and the install line from src/data/repo-stats.mjs, the dates
- * from src/lib/content-dates.mjs (the sitemap's `<lastmod>`) and
+ * from src/lib/content-dates.mjs (the moment the footer's last
+ * `<time datetime>` carries, on the day of the sitemap's `<lastmod>`) and
  * src/lib/page-dates.mjs (the structured data's `datePublished`), the
  * standards from src/lib/reference-chips.ts (the standards the header chips
  * stand for), the author and the repository from src/data/site.mjs. Nothing
@@ -36,6 +37,7 @@
  */
 import { basePath, repositoryUrl, siteUrl } from '../../data/site.mjs';
 import { releaseHeaderKeys } from '../page-markdown.mjs';
+import { UNRELEASED_URL } from '../release-rules.mjs';
 import { line } from './markdown-table.mjs';
 
 /**
@@ -47,10 +49,14 @@ import { line } from './markdown-table.mjs';
  * @property {'en' | 'es'} lang
  * @property {string} canonical  The page's own address.
  * @property {string} [alternate]  The address of the copy in the other language.
- * @property {{ version: string, install: string, preRelease?: boolean }} release
+ * @property {{ version: string, install: string, preRelease?: boolean, changedSince?: boolean }} release
+ *   `changedSince` says the page's content changed after the release
+ *   (src/lib/release-commit.mjs).
  * @property {{ name: string, orcid: string }} [author]
  * @property {string} [published]  `YYYY-MM-DD`.
- * @property {string} [updated]  `YYYY-MM-DD`.
+ * @property {string} [updated]  `YYYY-MM-DDTHH:MM:SSZ`, the moment the content
+ *   last changed: the edge serves the copy's Last-Modified from this line, and
+ *   a day alone would read there as midnight.
  * @property {readonly string[]} [standards]  Designations the page implements.
  * @property {{ checks: number, designations: readonly string[], url: string }} [verified]
  *   What the page's "Verified by" line states: how many conformance checks
@@ -100,7 +106,14 @@ export const LIST_SEPARATOR = '; ';
  * names no version PyPI serves, so it cannot go stale, and it goes at the
  * stamp with nothing to change.
  *
- * @param {{ version: string, install: string, preRelease?: boolean }} release
+ * A page whose content changed after the release adds the `Unreleased:` line,
+ * the copy's form of the notice the page shows under its title
+ * (src/components/ReleaseNotice.astro): the page may describe code the
+ * release does not have, and the changelog lists what is new since. The next
+ * release takes it off every page it stood on, as the stamp takes the
+ * pre-release line.
+ *
+ * @param {{ version: string, install: string, preRelease?: boolean, changedSince?: boolean }} release
  * @param {'en' | 'es'} lang
  * @returns {[string, string][]}
  */
@@ -110,6 +123,7 @@ function releaseLines(release, lang) {
     Version: `phonometry ${release.version}`,
     Install: release.install,
     'Pre-release': release.preRelease ? PRE_RELEASE[lang](release.version) : undefined,
+    Unreleased: release.changedSince ? UNRELEASED[lang](release.version) : undefined,
   };
   for (const key of Object.keys(values)) {
     if (!releaseHeaderKeys.includes(key)) {
@@ -129,6 +143,16 @@ function releaseLines(release, lang) {
 export const PRE_RELEASE = Object.freeze({
   en: (version) => `phonometry ${version} is a pre-release, which pip installs only when it is asked for by version or with --pre`,
   es: (version) => `phonometry ${version} es una versión preliminar, que pip solo instala si se pide por su versión o con --pre`,
+});
+
+/** The `Unreleased:` value in each language. */
+export const UNRELEASED = Object.freeze({
+  en: (version) =>
+    `this page changed after phonometry ${version}, the latest release on PyPI, so it may describe code that ` +
+    `release does not have yet; what is new since then is listed under Unreleased in ${UNRELEASED_URL}`,
+  es: (version) =>
+    `esta página cambió después de phonometry ${version}, la última versión publicada en PyPI, así que puede ` +
+    `describir código que esa versión aún no tiene; lo nuevo desde entonces figura en Unreleased en ${UNRELEASED_URL}`,
 });
 
 /**

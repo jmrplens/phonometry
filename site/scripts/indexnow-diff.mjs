@@ -84,7 +84,10 @@
 // name the release (`Version:` and `Install:`, listed in
 // src/lib/page-markdown.mjs) are left out, so stamping a release does not
 // report every page as changed; the landing pages state the release in their
-// text, and the sitemap dates them by it, so they are reported.
+// text, and the sitemap dates them by it, so they are reported. The
+// `Updated:` line is read as the day it names, as it was written before it
+// carried the moment for the edge's Last-Modified, so that change reported no
+// page either; a change of the text moves a page by itself.
 //
 // Usage:
 //   node scripts/indexnow-diff.mjs manifest [dist]
@@ -97,7 +100,7 @@
 //     deploy handed IndexNow after that record, as `pending-run-id`, leaving
 //     out the list of run <id>, the one a deploy re-run of that run works
 //     out again
-//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--pending <dir>] [--out <dir>]
+//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--pending <dir>] [--out <dir>] [--full]
 //     checks the published manifest against the pages, or reads the manifest
 //     a build handed on (`--current`, where there are no pages: the IndexNow
 //     job of a deploy re-run), compares it with the previous one (a record,
@@ -106,7 +109,13 @@
 //     `--out` wrote), prints the changed, new and removed URLs, and writes
 //     into <dir> the URLs to submit (urls.json: {"urls": [...]} and the
 //     lists behind it) and the manifest they were worked out from, which the
-//     IndexNow job keeps once it has submitted them
+//     IndexNow job keeps once it has submitted them. `--full` sends every URL
+//     whatever the comparison finds, with the removals still: the digest
+//     leaves the release lines out, so a release that takes back a statement
+//     every page made (a banner, the version a page says is on PyPI) changes
+//     no digest, and the engines keep the copies that make it until each page
+//     changes again. The docs workflow passes it when dispatched with
+//     `indexnow_full`
 //   node scripts/indexnow-diff.mjs keep-record --deployed-at <time>
 //     asks the GitHub API (GITHUB_GRAPHQL_URL as well) for the deployments of
 //     the site made after <time>, when this run's pages went out, and writes
@@ -119,7 +128,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { hasMarkdownCopy, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
+import { hasMarkdownCopy, withoutReleaseLines, withUpdatedDay } from '../src/lib/page-markdown.mjs';
 import { attributes, decode, markupOf, tags } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -137,6 +146,8 @@ export const URLS_NAME = 'urls.json';
 export const MANIFEST_FORMAT = 1;
 /** Every URL of the site starts with this and a slash. */
 export const ORIGIN = `${siteUrl}${basePath}`;
+/** Why the list is the full one when `diff --full` asked for it, as urls.json and the log say. */
+export const ASKED_FOR_FULL = 'a full list was asked for';
 /** How long a fetch from another server may take before the full list is sent instead. */
 const FETCH_TIMEOUT_MS = 30_000;
 /**
@@ -274,7 +285,8 @@ export const routeOfUrl = (loc) => decodeURIComponent(loc.slice(ORIGIN.length + 
 /**
  * What one page says, as one string: its title, its meta description, its
  * date and its text. The text is the Markdown copy beside the page without its
- * release lines, or, on a page src/lib/page-markdown.mjs gives no copy, the
+ * release lines and with its `Updated:` line cut to its day, or, on a page
+ * src/lib/page-markdown.mjs gives no copy, the
  * page's own text in its <main> ({@link mainText}). Which pages have a copy
  * is that module's rule, not whatever the build happens to hold: a copy the
  * build should have written and did not fails here, rather than the page
@@ -298,7 +310,7 @@ export function pageRecord(dist, { loc, lastmod }) {
 				`${loc} has a Markdown copy by src/lib/page-markdown.mjs, and the build wrote no ${copy}: scripts/agent-md.mjs --public writes every copy before the build (package.json prebuild).`,
 			);
 		}
-		text = withoutReleaseLines(readFileSync(copy, 'utf8'));
+		text = withUpdatedDay(withoutReleaseLines(readFileSync(copy, 'utf8')));
 	} else {
 		text = mainText(html);
 		if (text === null) {
@@ -391,10 +403,10 @@ export async function loadPrevious(source) {
  * may be the handed list's, a page that list removed or changed and this
  * build puts back as the previous pages had it differs from what IndexNow
  * holds, and a page the list was to send may never have reached IndexNow,
- * its job having kept no record. With no previous pages, every current URL,
- * and the removals still.
+ * its job having kept no record. With no previous pages, or when `full` asks
+ * for every URL, every current URL, and the removals still.
  */
-export function urlsToSubmit(current, previous, pending) {
+export function urlsToSubmit(current, previous, pending, { full = false } = {}) {
 	const urls = Object.keys(current).sort();
 	const handed = pending?.pages ?? {};
 	const handedRemoved = new Set(pending?.removed ?? []);
@@ -402,7 +414,7 @@ export function urlsToSubmit(current, previous, pending) {
 	const handedSent = new Set(pending?.urls ?? []);
 	const named = new Set([...Object.keys(previous ?? {}), ...Object.keys(handed), ...handedRemoved, ...handedSent]);
 	const removed = [...named].filter((url) => !Object.hasOwn(current, url)).sort();
-	if (!previous) return { full: true, changed: [], added: [], removed, urls: [...urls, ...removed].sort() };
+	if (!previous || full) return { full: true, changed: [], added: [], removed, urls: [...urls, ...removed].sort() };
 	const added = urls.filter((url) => !Object.hasOwn(previous, url) || handedRemoved.has(url) || handedNew.has(url));
 	const changed = urls.filter(
 		(url) =>
@@ -804,9 +816,13 @@ async function diff(args) {
 			console.log(`[indexnow] read the list a later deploy handed IndexNow, at ${handed.from} (${Object.keys(handed.pages).length} pages, ${handed.removed.length} removed, ${handed.urls.length} to send).`);
 		}
 	}
-	const result = urlsToSubmit(current.pages, previous.pages, pending);
+	const asked = args.includes('--full');
+	const result = urlsToSubmit(current.pages, previous.pages, pending, { full: asked });
 	const total = Object.keys(current.pages).length;
-	if (result.full) {
+	if (asked) {
+		console.log(`[indexnow] ${ASKED_FOR_FULL}: every URL goes out, whatever changed since ${previous.from}.`);
+		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs, ${result.removed.length} of them removed.`);
+	} else if (result.full) {
 		console.log(`[indexnow] no previous manifest to compare with from ${previous.from}: ${previous.reason}.`);
 		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs, ${result.removed.length} of them removed.`);
 	} else {
@@ -822,10 +838,10 @@ async function diff(args) {
 	const out = option(args, '--out');
 	if (out) {
 		mkdirSync(out, { recursive: true });
-		const reason = result.full ? previous.reason : null;
+		const reason = asked ? ASKED_FOR_FULL : result.full ? previous.reason : null;
 		writeFileSync(
 			join(out, URLS_NAME),
-			`${JSON.stringify({ previous: previous.from, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
+			`${JSON.stringify({ previous: previous.from, reason, full: result.full, asked, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
 		);
 		writeFileSync(join(out, MANIFEST_NAME), serialize(current));
 	}

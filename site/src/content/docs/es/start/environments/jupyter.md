@@ -10,6 +10,11 @@ cuaderno](/phonometry/es/start/getting-started/#en-un-cuaderno), en Primeros
 pasos, recorre una primera celda y la tabla que muestra; esta página es el
 resto de lo que encuentra quien trabaja en un cuaderno.
 
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, en la
+imagen `python:3.13-slim` con Python 3.13.18: JupyterLab 4.6.6, ipykernel
+7.4.0, matplotlib 3.11.2 y el ffmpeg 7.1.5 de Debian, con cada celda de esta
+página ejecutada en el kernel.
+
 ## Instalación
 
 ```bash
@@ -28,8 +33,9 @@ directiva de ejecución predeterminada, así que `Activate.ps1` se ejecuta allí
 cuando `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` ha permitido los
 locales; cmd no necesita ese paso.
 
-Ese único entorno contiene JupyterLab, el kernel de IPython que arranca y
-phonometry con todos los extras salvo `[torch]`.
+Ese único entorno contiene
+[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/), el kernel de
+IPython que arranca y phonometry con todos los extras salvo `[torch]`.
 
 En Windows y Linux de 32 bits numba no tiene soporte, ni lo tiene `[full]`,
 que lo incluye:

@@ -4,10 +4,16 @@ description: "Type-check code that uses phonometry with mypy or pyright: the whe
 ---
 
 phonometry ships its types in the wheel, with the `py.typed` marker that tells
-a type checker to read them, so mypy and pyright check a call into the
+a type checker to read them, so [mypy](https://mypy.readthedocs.io/en/stable/)
+and [pyright](https://microsoft.github.io/pyright/) check a call into the
 library with nothing else installed. Every public module declares what it
 publishes, and the lazy domains of `import phonometry as ph` are visible to a
-checker as well as at run time.
+checker as well as at run time. The types a checker reads are the ones the
+[API reference](/phonometry/reference/api/) prints in each signature.
+
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
+`python:3.12-slim` and `python:3.14-slim` images, on Python 3.12.16 and
+3.14.10 with NumPy 2.5.5: mypy 2.4.1 and pyright 1.1.414.
 
 ## A script under the strict modes
 

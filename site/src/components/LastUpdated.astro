@@ -11,21 +11,35 @@
  *
  * The first date is the commit that added the file (src/lib/page-dates.mjs);
  * the second is the route's `lastUpdated`, which src/routeData.ts sets to the
- * day the page's content last changed (src/lib/content-dates.mjs), the date
- * the structured data and the sitemap give it too. A page published and last
- * changed on the same day shows one date, not the same date twice.
+ * moment the page's content last changed (src/lib/content-dates.mjs), on the
+ * day the structured data and the sitemap give it too. A page published and
+ * last changed on the same day shows one date, not the same date twice.
+ *
+ * What a reader sees is the day; each `<time datetime>` carries the moment,
+ * to the second in UTC (`isoInstant`), and the Markdown copy's `Updated:` line
+ * states the same moment. The edge serves a page's Last-Modified from the last
+ * `<time datetime>` of this footer, and a day alone reads there as midnight, so
+ * a second change on the same day would answer a revalidation with 304. That
+ * is why the one date of a page published and changed on the same day carries
+ * the later of its two moments, the change: it stands for both.
  */
-import { firstPublished } from '../lib/page-dates.mjs';
+import { isoInstant } from '../lib/date-rules.mjs';
+import { firstPublished, firstPublishedAt } from '../lib/page-dates.mjs';
 
 const route = Astro.locals.starlightRoute;
 const { lang, lastUpdated } = route;
 
 const published = firstPublished(route.entry?.filePath ?? '');
+const publishedAt = firstPublishedAt(route.entry?.filePath ?? '');
 const fmt = (date: Date) => date.toLocaleDateString(lang, { dateStyle: 'medium', timeZone: 'UTC' });
 
 const publishedText = published ? fmt(new Date(published)) : undefined;
 const updatedText = lastUpdated ? fmt(lastUpdated) : undefined;
 const showUpdated = updatedText && updatedText !== publishedText;
+const updatedAt = lastUpdated ? isoInstant(lastUpdated) : undefined;
+// The moment of the one date shown when the two fall on one day: the later
+// of the two, so that it never names a moment before the content's last change.
+const sameDayAt = [publishedAt, updatedAt].filter((at) => at !== undefined).sort().at(-1);
 
 const t = lang.startsWith('es')
   ? { published: 'Publicado el', updated: 'actualizado el', updatedOnly: 'Última actualización:' }
@@ -35,18 +49,18 @@ const t = lang.startsWith('es')
 {
   publishedText ? (
     <p>
-      {t.published} <time datetime={published}>{publishedText}</time>
+      {t.published} <time datetime={showUpdated ? publishedAt : sameDayAt}>{publishedText}</time>
       {showUpdated && (
         <>
           {', '}
-          {t.updated} <time datetime={lastUpdated?.toISOString()}>{updatedText}</time>
+          {t.updated} <time datetime={updatedAt}>{updatedText}</time>
         </>
       )}
     </p>
   ) : (
     updatedText && (
       <p>
-        {t.updatedOnly} <time datetime={lastUpdated?.toISOString()}>{updatedText}</time>
+        {t.updatedOnly} <time datetime={updatedAt}>{updatedText}</time>
       </p>
     )
   )

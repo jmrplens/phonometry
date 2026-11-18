@@ -210,6 +210,34 @@ def test_every_page_line_says_what_the_page_is_about(
     assert {r for r in llms._routes() if llms._page(r).kind == "guide"} <= described
 
 
+#: The one section whose lines link pages and say nothing of them: the API
+#: reference, one line per module, which its own index describes.
+_BARE_BY_DESIGN = {"Optional"}
+
+
+def test_no_line_outside_the_api_links_a_page_and_says_nothing_of_it() -> None:
+    # The sections the test above leaves out write words of their own, so it
+    # cannot hold their lines to a page's description; it still holds each
+    # line that links a page of the site to say what is there. The
+    # bibliography and the About page were linked bare under "Evidence and
+    # provenance" while every other page of the index said what it held.
+    section = ""
+    bare = []
+    for line in (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            section = line[3:]
+            continue
+        found = re.match(
+            rf"- \[[^\]]*\]\({re.escape(_SITE)}/[^)]*/\)(?: \([^)]*\))?(?P<rest>.*)$",
+            line,
+        )
+        if found and section not in _BARE_BY_DESIGN:
+            rest = found.group("rest")
+            if not rest.startswith(": ") or not rest[2:].strip():
+                bare.append(f"{section}: {line}")
+    assert not bare, bare
+
+
 def test_an_errata_line_counts_the_entries_the_register_files_under_its_page(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fresh_caches: FreshCaches
 ) -> None:
@@ -562,6 +590,11 @@ def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     monkeypatch.setattr(llms, "PUBLIC", public)
     monkeypatch.setattr(llms, "SHARDS_DIR", public / "llms")
     monkeypatch.setattr(llms, "INDEX", tmp_path / "llms.txt")
+    # The names this dump's shards publish are its own, not the site's; the
+    # run without --build writes them into the record, here a copy of its own.
+    names = tmp_path / "llms-shards.json"
+    names.write_text('{"published": [], "redirects": {}}', encoding="utf-8")
+    monkeypatch.setattr(llms, "SHARD_NAMES", names)
     # main() sets the dump it reads for the module; put it back afterwards.
     monkeypatch.setattr(llms, "PAGES", llms.PAGES)
 
@@ -586,6 +619,8 @@ def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     assert (tmp_path / "llms.txt").read_text(encoding="utf-8") == (
         public / "llms.txt"
     ).read_text(encoding="utf-8")
+    recorded = json.loads(names.read_text(encoding="utf-8"))
+    assert {f"llms-{name}.txt" for name in recorded["published"]} == written
 
 
 def test_the_test_dumps_give_every_route_the_kind_the_site_gives_it() -> None:

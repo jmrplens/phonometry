@@ -161,6 +161,25 @@ test('a page is dated by the commit that added it, on that commit\'s day in UTC'
 	assert.equal(firstPublished(repo.path('late.mdx')), '2024-06-02');
 });
 
+test('the moment a page was first published is that commit\'s, in UTC to the second, beside its day', async (t) => {
+	// The footer writes the moment into its <time datetime>, where the edge
+	// reads a page's Last-Modified: a day alone would read as midnight.
+	const repo = repository(t);
+	repo.write('late.mdx', body('late'));
+	repo.git(['add', '-A']);
+	repo.git(['commit', '-q', '-m', 'late at night'], {
+		GIT_AUTHOR_DATE: '2024-06-01T23:30:07-05:00',
+		GIT_COMMITTER_DATE: '2024-06-01T23:30:07-05:00',
+	});
+	chdir(t, repo.site);
+	loads += 1;
+	const { firstPublished, firstPublishedAt } = await import(`${MODULE}?load=${loads}`);
+	assert.equal(firstPublishedAt(repo.path('late.mdx')), '2024-06-02T04:30:07Z');
+	assert.equal(firstPublished(repo.path('late.mdx')), '2024-06-02');
+	assert.equal(firstPublishedAt(repo.path('none.mdx')), undefined);
+	assert.equal(firstPublishedAt(''), undefined);
+});
+
 test('a page renamed twice keeps the date of the commit that first added it', async (t) => {
 	const repo = repository(t);
 	repo.write('old.mdx', body('moved'));

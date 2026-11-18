@@ -4,10 +4,17 @@ description: "Comprueba con mypy o pyright los tipos del código que usa phonome
 ---
 
 phonometry trae sus tipos dentro del wheel, con la marca `py.typed` que le
-indica a un comprobador de tipos que los lea, así que mypy y pyright
-comprueban una llamada a la biblioteca sin instalar nada más. Cada módulo
-público declara lo que publica, y los dominios perezosos de
-`import phonometry as ph` los ve tanto el comprobador como la ejecución.
+indica a un comprobador de tipos que los lea, así que
+[mypy](https://mypy.readthedocs.io/en/stable/) y
+[pyright](https://microsoft.github.io/pyright/) comprueban una llamada a la
+biblioteca sin instalar nada más. Cada módulo público declara lo que publica,
+y los dominios perezosos de `import phonometry as ph` los ve tanto el
+comprobador como la ejecución. Los tipos que lee un comprobador son los que la
+[referencia de la API](/phonometry/es/reference/api/) imprime en cada firma.
+
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, en las
+imágenes `python:3.12-slim` y `python:3.14-slim`, con Python 3.12.16 y 3.14.10
+y NumPy 2.5.5: mypy 2.4.1 y pyright 1.1.414.
 
 ## Un script en los modos estrictos
 

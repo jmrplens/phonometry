@@ -10,6 +10,11 @@ cell. [In a notebook](../getting-started.md#in-a-notebook), in
 Getting Started, walks through a first cell and the table it displays; this
 page is the rest of what a notebook user meets.
 
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
+`python:3.13-slim` image on Python 3.13.18: JupyterLab 4.6.6, ipykernel 7.4.0,
+matplotlib 3.11.2 and Debian's ffmpeg 7.1.5, with every cell of this page run
+in the kernel.
+
 ## Installing
 
 ```bash
@@ -28,8 +33,9 @@ execution policy, so `Activate.ps1` runs there once
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
 cmd needs no such step.
 
-That one environment holds JupyterLab, the IPython kernel it starts and
-phonometry with every extra but `[torch]`.
+That one environment holds
+[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/), the IPython kernel
+it starts and phonometry with every extra but `[torch]`.
 
 On 32-bit Windows and 32-bit Linux numba is not supported, and neither is
 `[full]`, which holds it:

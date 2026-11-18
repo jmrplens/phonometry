@@ -131,11 +131,24 @@ export const markdownCopyPath = (route, base = '') => `${base}/${route ? `${rout
 export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
 
 /**
+ * The attribute the notice under the title of a page whose content changed
+ * after the latest release carries, with that release's version as its value
+ * (src/components/ReleaseNotice.astro). The copy of such a page says the same
+ * in its `Unreleased:` header line, and a check of the built site finds the
+ * notice by the attribute rather than by its words, which are the page's
+ * language.
+ */
+export const NEWER_THAN_RELEASE_ATTRIBUTE = 'data-newer-than-release';
+
+/**
  * The header lines of a copy that name the release rather than the page: the
- * version it documents, the command that installs it and, while the version
- * is a pre-release, the line that says so. A copy opens with a
- * block of `Key: value` lines, and a release changes these two on every page
- * at once while no page says anything new.
+ * version it documents, the command that installs it, while the version is a
+ * pre-release the line that says so, and, on a page whose content changed
+ * after the release, the line that says it may describe code the release
+ * does not have (src/lib/release-commit.mjs). A copy opens with a block of
+ * `Key: value` lines, and a release changes these on every page at once
+ * while no page says anything new: the first two take the new version, and
+ * the last leaves every page it stood on.
  *
  * scripts/indexnow-diff.mjs tells search engines which pages changed by
  * hashing each copy, and it hashes the copy without these lines, so stamping
@@ -143,7 +156,7 @@ export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
  * writer (src/lib/agent-md/header.mjs) writes its release lines from this
  * list and has no list of its own, so that the two cannot drift apart.
  */
-export const releaseHeaderKeys = Object.freeze(['Version', 'Install', 'Pre-release']);
+export const releaseHeaderKeys = Object.freeze(['Version', 'Install', 'Pre-release', 'Unreleased']);
 
 /** One `Key: value` line of a copy's header. */
 const HEADER_FIELD = /^([A-Z][A-Za-z-]*): /;
@@ -159,14 +172,51 @@ const BEFORE_HEADER = /^(?:\s*$|# |>|<!--)/;
  * content and stay.
  */
 export function withoutReleaseLines(text) {
+  return mapHeader(text, (key, line) => (releaseHeaderKeys.includes(key) ? null : line));
+}
+
+/**
+ * The header line of a copy that states the moment the page's content last
+ * changed, `YYYY-MM-DDTHH:MM:SSZ` (src/lib/agent-md/header.mjs), and the day
+ * it stated alone until the edge came to serve the copy's Last-Modified from
+ * it.
+ */
+const UPDATED_LINE = /^Updated: (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z$/;
+
+/**
+ * A copy's text with its `Updated:` line cut to the day it names, as the line
+ * read when it stated the day alone. scripts/indexnow-diff.mjs hashes the copy
+ * this way, so the line taking its time of day reported no page as changed,
+ * and a change that leaves the text as it was and the day where it was does
+ * not either: the record carries the day from the sitemap as well, and a
+ * change of the text moves the digest by itself. Only the header is read, as
+ * in {@link withoutReleaseLines}.
+ */
+export function withUpdatedDay(text) {
+  return mapHeader(text, (key, line) => (key === 'Updated' ? line.replace(UPDATED_LINE, 'Updated: $1') : line));
+}
+
+/**
+ * The copy with each line of its header passed through `keep(key, line)`,
+ * which returns the line to write, or null to leave it out. The header is the
+ * run of consecutive `Key: value` lines that follows the title, quote and
+ * comment lines a copy opens with; a copy whose first other line is not such
+ * a field has no header and comes back as it is.
+ *
+ * @param {string} text
+ * @param {(key: string, line: string) => string | null} keep
+ * @returns {string}
+ */
+function mapHeader(text, keep) {
   const lines = text.split('\n');
   let start = 0;
   while (start < lines.length && BEFORE_HEADER.test(lines[start])) start += 1;
   if (start === lines.length || !HEADER_FIELD.test(lines[start])) return text;
   let end = start;
   while (end < lines.length && HEADER_FIELD.test(lines[end])) end += 1;
-  const header = lines
-    .slice(start, end)
-    .filter((line) => !releaseHeaderKeys.includes(HEADER_FIELD.exec(line)[1]));
+  const header = lines.slice(start, end).flatMap((line) => {
+    const kept = keep(HEADER_FIELD.exec(line)[1], line);
+    return kept === null ? [] : [kept];
+  });
   return [...lines.slice(0, start), ...header, ...lines.slice(end)].join('\n');
 }

@@ -12,6 +12,10 @@ llegan sus dependencias y cuáles de los extras opcionales pueden seguirlas.
 Cada página de esta sección trata un sitio, con órdenes que se han ejecutado
 allí.
 
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI: cada
+página de esta sección dice, bajo su párrafo de entrada, en qué versiones se
+ejecutaron ese día sus órdenes.
+
 | Dónde | Cómo llega phonometry | Qué funciona | Qué no |
 |---|---|---|---|
 | [pip y uv](/phonometry/es/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` en un entorno virtual, o `uv add "phonometry[full]"` | todo; `[torch]` añade las simulaciones FDTD sobre PyTorch | `[perf]` y `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` instala los otros tres extras |

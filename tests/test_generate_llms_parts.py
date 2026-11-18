@@ -13,9 +13,11 @@ page's own head, so a passage read from any part says where it comes from, and
 the parts joined in order are the copy again; ``llms.txt`` lists every part,
 and a row too long for a part is refused by name.
 
-Where a shard is cut cannot depend on the dates the header carries: the build
-writes the shards from a dump with them, and ``make llms`` writes the index
-that names their files from one without.
+Where a shard is cut cannot depend on the dates the header carries, nor on
+the ``Unreleased:`` line of a page changed after the release, which git
+decides as it decides the dates: the build writes the shards from a dump with
+them, and ``make llms`` writes the index that names their files from one
+without.
 """
 
 from __future__ import annotations
@@ -26,7 +28,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from llms_dump import CONTENT_ROOT, Dump, site_dump
+from llms_dump import CONTENT_ROOT, UNRELEASED_LINE, Dump, site_dump
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -314,8 +316,9 @@ def test_every_part_fits_once_its_head_lists_three_parts_or_more(
     assert len(more) > len(three)
 
 
+@pytest.mark.parametrize("unreleased", [False, True], ids=["released", "unreleased"])
 def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, unreleased: bool
 ) -> None:
     """The cut is decided as if the dated lines were there, whether they are or not.
 
@@ -323,11 +326,13 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
     that names their files is written by ``make llms`` from copies without
     them. Over budgets on both sides of the one where the page stops fitting
     in two parts, the two cut the page at the same places: the dated parts are
-    the undated ones with the two lines added, and still fit.
+    the undated ones with the two lines added, and still fit. A page changed
+    after the release carries the ``Unreleased:`` line too in the dated dump,
+    and none in the undated one, and is cut at the same places all the same.
     """
     body = "\n\n".join(f"## Section {n}\n\n" + "Filler text. " * 700 for n in range(4))
     dated = Dump(tmp_path / "dated")
-    dated.add("page", body, dated=True)
+    dated.add("page", body, dated=True, unreleased=unreleased)
     undated = Dump(tmp_path / "undated")
     undated.add("page", body, dated=False)
 
@@ -337,15 +342,25 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
         return llms._shard_parts("page", "Page", ["page"])
 
     def undate(text: str) -> str:
-        return text.replace("Published: 2026-01-06\n", "").replace(
-            "Updated: 2026-10-20\n", ""
+        return (
+            text.replace("Published: 2026-01-06\n", "")
+            .replace("Updated: 2026-10-20T10:00:00Z\n", "")
+            .replace(f"{UNRELEASED_LINE}\n", "")
         )
+
+    def in_two(limit: int) -> bool:
+        # A budget too small for one section refuses the page outright, which
+        # is no cut into two parts either.
+        try:
+            return len(cut(undated, limit)) <= 2
+        except SystemExit:
+            return False
 
     # The smallest budget that holds the page in two parts, by bisection.
     low, high = 1_000, _bytes(cut(dated, 10**9)[0])
     while low < high:
         middle = (low + high) // 2
-        if len(cut(undated, middle)) <= 2:
+        if in_two(middle):
             high = middle
         else:
             low = middle + 1
@@ -358,6 +373,47 @@ def test_a_dump_with_dates_and_one_without_cut_every_shard_alike(
     assert len(counts) > 1, (
         "the budgets tried do not cross a change in the number of parts"
     )
+
+
+def test_a_copy_with_another_unreleased_line_than_its_dump_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A copy whose ``Unreleased:`` line is not the one routes.json gives is refused.
+
+    Every page is measured as if it held the line routes.json names, so a copy
+    holding another (written for another release, or by another writer) would
+    be measured at a size it does not have, and is refused by name instead.
+    """
+    dump = Dump(tmp_path / "dump")
+    dump.add("page", "The body.", unreleased=True)
+    copy = dump.root / "page" / "index.md"
+    copy.write_text(
+        copy.read_text(encoding="utf-8").replace(
+            "phonometry 4.0.0,", "phonometry 3.3.0,"
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(llms, "PAGES", dump.root)
+    with pytest.raises(SystemExit, match=r"a copy says 'Unreleased: .*3\.3\.0"):
+        llms._shard_parts("page", "Page", ["page"])
+
+
+def test_a_dump_without_its_unreleased_line_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A routes.json that names no ``Unreleased:`` line asks for the dump again."""
+    dump = Dump(tmp_path / "dump")
+    dump.add("page", "The body.")
+    listing = dump.root / "routes.json"
+    listing.write_text(
+        listing.read_text(encoding="utf-8").replace('"unreleasedLine"', '"other"'),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(llms, "PAGES", dump.root)
+    with pytest.raises(
+        SystemExit, match=r"cannot read the Unreleased line .*make llms"
+    ):
+        llms._shard_parts("page", "Page", ["page"])
 
 
 def test_the_conformance_report_is_cut_at_its_domains(

@@ -6,10 +6,19 @@
 // It also holds the one authoring rule that only bites in Spanish: figures come
 // from ThemeImage, because a figure written as markdown gets a zoom control the
 // plugin names in English and nothing translates it. See below.
+//
+// And it holds the landing pages' designations to one scope: each area lists
+// the standards implemented there in each language, the site-wide graph of
+// every page publishes both lists, and a limit one language states and the
+// other leaves out is a claim the site makes in one language only
+// (scripts/shared/designation-scope.mjs).
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { en as homeEn } from "../src/data/home-en.ts";
+import { es as homeEs } from "../src/data/home-es.ts";
+import { scopeDefects } from "./shared/designation-scope.mjs";
 import { authorsFigure } from "./shared/page-prose.mjs";
 
 const docsDir = fileURLToPath(new URL("../src/content/docs", import.meta.url));
@@ -106,7 +115,18 @@ if (figures.length) {
 	process.exit(1);
 }
 
+const scope = scopeDefects(homeEn.coverage.areas, homeEs.coverage.areas);
+if (scope.length) {
+	console.error("i18n parity check FAILED:");
+	for (const defect of scope)
+		console.error(
+			`  The landing pages' designations differ in scope (src/data/home-en.ts, src/data/home-es.ts): ${defect}`,
+		);
+	process.exit(1);
+}
+
 console.log(
 	`i18n parity OK: ${enPages.length} EN pages each have an ES translation,` +
-		` and all ${esPages.length} ES pages take their figures from ThemeImage.`,
+		` all ${esPages.length} ES pages take their figures from ThemeImage,` +
+		` and the ${homeEn.coverage.areas.length} areas of the landing pages name the same designations in both languages.`,
 );

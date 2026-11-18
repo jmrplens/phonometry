@@ -4,6 +4,8 @@ import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 import { topicSchema } from 'starlight-sidebar-topics/schema';
 
+import { refuseUnclassifiedKeys } from './lib/frontmatter-keys.mjs';
+
 // Typed bibliography declared in each page's frontmatter and rendered as a
 // single APA-7 "References" section by src/components/References.astro (wired
 // through the MarkdownContent override). Every entry type shares the base
@@ -321,6 +323,22 @@ export const conformanceSchema = z.object({
   checks: z.array(conformanceCheck),
 });
 
+/**
+ * The page schema, refused while it declares a key that
+ * src/lib/frontmatter-keys.mjs does not class: the class says whether a
+ * change to the key moves the date the page last changed
+ * (src/lib/date-rules.mjs), and a key added here, for the structured data
+ * say, is classed the day it is added rather than the day a commit to its
+ * pages would move their dates without anyone deciding it should.
+ */
+function classified<S extends { shape: Record<string, unknown> }, C>(schema: (context: C) => S) {
+  return (context: C): S => {
+    const built = schema(context);
+    refuseUnclassifiedKeys(Object.keys(built.shape), 'src/content.config.ts, the docs collection');
+    return built;
+  };
+}
+
 export const collections = {
   conformance: defineCollection({
     loader: async () => {
@@ -331,7 +349,7 @@ export const collections = {
   }),
   docs: defineCollection({
     loader: docsLoader(),
-    schema: docsSchema({
+    schema: classified(docsSchema({
       // `topic` is the topics plugin's escape hatch: a page that no topic
       // lists names its own. Nothing uses it today, because every page is
       // listed and the plugin fails the build on one that is not, but the
@@ -364,7 +382,7 @@ export const collections = {
         // bibliography does not define stops the build.
         corrects: z.array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)).optional(),
       }).extend(topicSchema.shape),
-    }),
+    })),
   }),
   i18n: defineCollection({
     loader: i18nLoader(),

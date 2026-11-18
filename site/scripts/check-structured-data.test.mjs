@@ -53,7 +53,8 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { en as homeEn } from '../src/data/home-en.ts';
+import { es as homeEs } from '../src/data/home-es.ts';
 import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { domainIds, topicForSlug, topics } from '../src/data/topics.mjs';
@@ -151,7 +152,7 @@ const stub = (node) =>
 /** The library the committed report was generated for, which the report's Dataset gives as its version. */
 const LIBRARY = JSON.parse(readFileSync(new URL('../../docs/conformance.json', import.meta.url), 'utf8')).library;
 
-/** The day the report's rows last changed, which its banner prints and its Dataset gives. */
+/** The day of the commit the report was generated from, which its banner prints and its Dataset gives. */
 const DATA_DAY = '2026-09-15';
 
 /** The commit the report's rows are of, which its banner names and every repository address of its Dataset is at. */
@@ -165,8 +166,8 @@ const atCommit = (path, host = 'raw') =>
 
 /** The banner line of the report page that names the commit and the day its rows are of (Conformance.astro). */
 const provenance = (day) =>
-	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b>; ' +
-	`its rows last changed in commit <a href="https://github.com/jmrplens/phonometry/commit/${DATA_COMMIT}"><code data-report-commit="${DATA_COMMIT}">${DATA_COMMIT.slice(0, 9)}</code></a>, ` +
+	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b> ' +
+	`from commit <a href="https://github.com/jmrplens/phonometry/commit/${DATA_COMMIT}"><code data-report-commit="${DATA_COMMIT}">${DATA_COMMIT.slice(0, 9)}</code></a>, ` +
 	`on <time datetime="${day}">${day}</time>.</p>`;
 
 /** What the report's Dataset says in each language. */
@@ -191,9 +192,15 @@ function reportPage(lang, work) {
 		name: text.name,
 		description: text.description,
 		inLanguage: lang,
+		[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
+			'@id': `${ORIGIN}${lang === 'en' ? '/es' : ''}/reference/conformance/#dataset`,
+		},
 		version: LIBRARY,
 		dateModified: DATA_DAY,
 		license: 'https://opensource.org/license/MIT',
+		isAccessibleForFree: true,
+		creator: { '@id': SITE.person },
+		publisher: { '@id': SITE.person },
 		measurementTechnique: text.technique,
 		variableMeasured: [{ '@type': 'PropertyValue', name: text.column[0], description: text.column[1] }],
 		distribution: [
@@ -919,6 +926,29 @@ test('a standard whose publisher has no identity of its own fails, anonymous or 
 	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 1 of 3 standards name a publisher with no identity/);
 });
 
+test('a work that is no standard and writes out a standards body anonymously fails, and another publisher passes', (t) => {
+	const passing = check(t, build());
+	assert.equal(passing.status, 0, passing.err);
+	assert.match(
+		passing.out,
+		/ok {3}\/reference\/bibliography\/: none of the 2 works that are no standard writes out a standards body anonymously/,
+	);
+
+	// The book of the fixture published by a body that has an identity of its
+	// own, written out by name as a report or a paper used to be.
+	const built = build();
+	nodeAt(built, 'es/bibliography', `${ES}#doi-10-1000-book`).publisher = {
+		'@type': 'Organization',
+		name: 'Internet Engineering Task Force',
+	};
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/bibliography\/: 1 of the 2 works that are no standard write out anonymously a publisher that has an identity of its own under .*#org-: Internet Engineering Task Force \(1\)/,
+	);
+});
+
 test('a standards body without its official site fails, and only the Spanish state issuers go without', (t) => {
 	const built = build();
 	delete nodeAt(built, 'en/bibliography', ISO['@id']).url;
@@ -1056,6 +1086,9 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 				'@id': `${ORIGIN}${twin}/${pageSlug}/#dataset-${key}`,
 			},
 			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
+			creator: { '@id': SITE.person },
+			publisher: { '@id': SITE.person },
+			isAccessibleForFree: true,
 			isBasedOn: [stub(book(url))],
 			// The day page() says the page was last edited.
 			dateModified: '2026-10-01',
@@ -1101,6 +1134,10 @@ test('a build whose every catalogue is a dataset of its page, listed by the over
 	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets is dated as the page that renders it`));
 	assert.match(
 		ran.out,
+		new RegExp(`each of the ${count * 2} datasets names the site's Person as its creator and publisher, free to read`),
+	);
+	assert.match(
+		ran.out,
 		new RegExp(`each of the ${count * 2} datasets is named by a heading of its page and described by a paragraph of it`),
 	);
 });
@@ -1123,6 +1160,19 @@ test('a dataset that claims a licence or a download over the rows fails', (t) =>
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /solids\/ carpets: the dataset claims license over rows other works printed/);
 	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl over rows other works printed/);
+});
+
+test('a dataset that names no creator, another publisher or no free access fails', (t) => {
+	const built = catalogueBuild();
+	delete datasetOf(built, 'en', 'carpets').creator;
+	datasetOf(built, 'es', 'solids').publisher = { '@type': 'Organization', name: 'A Press' };
+	delete datasetOf(built, 'es', 'gases').isAccessibleForFree;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /solids\/ carpets: the dataset names no creator, not the site's Person https:\/\/jmrp\.io\/#person/);
+	assert.match(ran.err, /solids\/ solids: the dataset names publisher "A Press", not the site's Person/);
+	assert.match(ran.err, /solids\/ gases: the dataset does not say it is free to read \(isAccessibleForFree\)/);
+	assert.doesNotMatch(ran.out, /datasets names the site's Person as its creator/);
 });
 
 test('a dataset whose source is a bare @id, or that names none, fails', (t) => {
@@ -2270,7 +2320,7 @@ test('a report whose Dataset is its main entity, versioned, dated by its data, b
 		ran.out,
 		new RegExp(
 			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${RegExp.escape(LIBRARY)}, ` +
-				'dated by the day its rows last changed, based on the 1 work the standards of its checks resolve to, named in each language, ' +
+				'dated by the day of the commit it was generated from, based on the 1 work the standards of its checks resolve to, named in each language, ' +
 				'and written in each page\'s language \\(5 texts\\)',
 		),
 	);
@@ -2308,6 +2358,25 @@ test("a report Dataset that gives the software's DOI as its own identifier fails
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, new RegExp(`FAIL /reference/conformance/: the conformance report's Dataset: it gives the software's DOI ${RegExp.escape(SOFTWARE_DOI)} as its own identifier`));
+});
+
+test("a report Dataset not paired with the other language's, or made by no one, fails", (t) => {
+	// The two report pages render one report, and their articles were paired
+	// while their Datasets were not.
+	const built = build();
+	delete built['en/report'].article.mainEntity.workTranslation;
+	built['es/report'].article.mainEntity.translationOfWork = { '@id': `${ORIGIN}/reference/conformance/#article` };
+	delete built['es/report'].article.mainEntity.creator;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL /reference/conformance/: the conformance report's Dataset: its workTranslation is undefined, not the other language's report, ${RegExp.escape(`${ORIGIN}/es/reference/conformance/#dataset`)}`,
+		),
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: its translationOfWork is ".*\/reference\/conformance\/#article", not the other language's report/);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: it names no creator, not the site's Person/);
 });
 
 test('a report Dataset with no version, another one, or no day its data changed fails', (t) => {
@@ -2426,7 +2495,7 @@ test('report Datasets that name a different number of works in the two languages
 	assert.match(ran.err, /FAIL the conformance report's Dataset names 2 works in English and 1 in Spanish/);
 });
 
-test('a report Dataset dated by the page and not by the day its rows last changed fails', (t) => {
+test('a report Dataset dated by the page and not by the day of the commit the report was generated from fails', (t) => {
 	const built = build();
 	// The page's own date, 2026-10-01, the variant that would date the data by
 	// a change to how the rows are drawn.
@@ -2435,19 +2504,19 @@ test('a report Dataset dated by the page and not by the day its rows last change
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says its rows last changed on 2026-09-15/,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says the report was generated from a commit of 2026-09-15/,
 	);
 	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
 });
 
-test('a report page that prints no day its rows last changed fails', (t) => {
+test('a report page that prints no day of the commit the report was generated from fails', (t) => {
 	const built = build();
 	built['es/report'].text = '';
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day its rows last changed \(\[data-report-provenance\] with a <time datetime>\)/,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day of the commit the report was generated from \(\[data-report-provenance\] with a <time datetime>\)/,
 	);
 });
 

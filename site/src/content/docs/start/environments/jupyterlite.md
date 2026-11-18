@@ -3,12 +3,20 @@ title: "JupyterLite and Pyodide"
 description: "phonometry in a browser through JupyterLite or Pyodide: the extras micropip can install, what runs there, what cannot, and a JupyterLite site of your own."
 ---
 
-JupyterLite runs a notebook in a browser tab, on Pyodide: CPython compiled to
-WebAssembly, with nothing to install on the machine. phonometry is pure
-Python, so it installs there with micropip and runs on the NumPy, SciPy and
-matplotlib that Pyodide builds for the browser. What cannot follow it is
-anything that needs a compiled package Pyodide does not build, or a program
-of its own.
+[JupyterLite](https://jupyterlite.readthedocs.io/en/stable/) runs a notebook
+in a browser tab, on [Pyodide](https://pyodide.org/en/stable/): CPython
+compiled to WebAssembly, with nothing to install on the machine. phonometry is
+pure Python, so it installs there with
+[micropip](https://micropip.pyodide.org/en/stable/) and runs on the NumPy,
+SciPy and matplotlib that Pyodide builds for the browser. What cannot follow
+it is anything that needs a compiled package Pyodide does not build, or a
+program of its own.
+
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI: the install and
+the examples in Pyodide 314.0.8 under Node.js, with micropip 0.11.1, NumPy
+2.4.6, SciPy 1.18.0 and matplotlib 3.10.8, and the site build with
+jupyterlite-core 0.8.7, jupyterlite-pyodide-kernel 0.8.7 and jupyter-server
+2.21.1.
 
 ## Installing in a notebook
 
@@ -24,7 +32,9 @@ PyPI.
 **Name every extra in the first install.** micropip leaves the extras of a
 package it already installed alone: once phonometry is there, a later
 `%pip install "phonometry[report]"` installs nothing, and prints nothing
-either. To add what a later extra would have brought, name its packages:
+either. To add what a later extra would have brought, name its packages,
+which [Getting Started](/phonometry/start/getting-started/#optional-extras)
+lists extra by extra:
 
 ```py
 %pip install reportlab svglib
@@ -37,8 +47,9 @@ it runs with a `%` in front.
 ## What runs in the browser
 
 Every domain imports, and the record tables, `.plot()` under the cell and
-`.report()` work as in Jupyter. WAV and FLAC files are written and read back
-in the notebook's own folder. The FDTD engines step on NumPy.
+`.report()` work as in [Jupyter](/phonometry/start/environments/jupyter/). WAV
+and FLAC files are written and read back in the notebook's own folder. The
+FDTD engines step on NumPy.
 
 ```python
 import numpy as np

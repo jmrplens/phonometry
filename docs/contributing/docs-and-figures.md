@@ -1625,7 +1625,7 @@ after it reads the map that pass built
 each page runs git log --follow on its own file while it renders its head
 ```
 
-**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `site/scripts/content-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `site/scripts/content-dates.test.mjs`, `site/scripts/release-commit.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
 **Exceptions.** A file whose process does run once per build is listed in `ONCE_PER_BUILD` of the check, with the reason, the number of calls it holds and what it exports; a call the entry does not count, an export it does not name, which would hand the process to every page, and an entry that covers nothing, fail. The check reads what a page can run: everything under `site/src/`, `site/astro.config.mjs` and what those import from elsewhere in the site, found the way Vite finds them. The scripts the build runs before and after it renders start what they need, because each runs once. The check reads text, so that it needs no install: a module name built up at run time is not seen, a call under an alias is not counted, and it does not read the dependencies. The packages it knows to wrap `child_process` are a closed list, `SPAWNER`: a package not on it is not seen, and a new wrapper has to be added to it.
 
@@ -1828,7 +1828,9 @@ dist/<route>/index.md              the copy, each part held to the page:
   Version:, Install:, Author:      present; Version: the release being built
   Published:                       the datePublished of the node that
                                    declares the copy
-  Updated:                         the sitemap's <lastmod>
+  Updated:                         the moment of the footer's last
+                                   <time datetime>, YYYY-MM-DDTHH:MM:SSZ,
+                                   on the day of the sitemap's <lastmod>
   Standards:                       documents separated by "; "
   Verified:                        exactly where it states its checks
   License:                         on every page but a catalogue
@@ -1841,6 +1843,9 @@ dist/llms-full.txt, dist/llms/     every English guide, catalogue and
                                    in llms-full.txt and in one shard, a page
                                    cut into parts whole again in order
 dist/llms.txt                      links every shard file, and no other
+site/src/data/llms-shards.json     every shard name the site has published,
+                                   each written again or redirected to the
+                                   file that carries its first page
 ```
 
 **Don't**
@@ -1848,11 +1853,12 @@ dist/llms.txt                      links every shard file, and no other
 ```text
 a kind of page that publishes no copy, a copy written or edited by hand, a
 header line that says something the page does not (a day other than the
-sitemap's <lastmod>), a copy that lost the body or a row of its tables, or an
-llms file that carries a page other than its copy reads, twice, or not at all
+sitemap's <lastmod>), a copy that lost the body or a row of its tables, an
+llms file that carries a page other than its copy reads, twice, or not at all,
+or a shard name the site published that no file answers
 ```
 
-**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`
+**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py`
 
 **Exceptions.** A page with no copy of its own is a class of the check's table, with its reason: the Spanish API pages, which show the English text and name the English copy, the redirect stubs and the error page. A new kind of page is a new class with its reason, never a page left out of the table.
 

@@ -23,6 +23,7 @@ import { parse } from 'yaml';
 
 import { hasMarkdownCopy, releaseHeaderKeys, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
 import {
+	ASKED_FOR_FULL,
 	DEPLOY_BRANCH,
 	MANIFEST_NAME,
 	ManifestError,
@@ -108,14 +109,14 @@ function manifest(dist) {
  * manifest of `before` (a list of pages, or `null` for no record at all), with
  * the lines the script printed and the folder it handed the IndexNow job.
  */
-function submit(t, before, pages, options = {}) {
+function submit(t, before, pages, { args = [], ...options } = {}) {
 	const previous = join(mkdtempSync(join(tmpdir(), 'indexnow-previous-')), MANIFEST_NAME);
 	t.after(() => rmSync(dirname(previous), { recursive: true, force: true }));
 	if (before !== null) writeFileSync(previous, manifest(build(t, before)));
 	const dist = build(t, pages, options);
 	manifest(dist);
 	const out = join(dirname(previous), 'handed');
-	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out);
+	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out, ...args);
 	assert.equal(ran.status, 0, ran.err);
 	return { ...JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8')), printed: ran.out, out, dist };
 }
@@ -174,6 +175,44 @@ test('with no previous manifest every URL of the sitemap is submitted', (t) => {
 	assert.match(sent.printed, /the full list goes out: 3 URLs/);
 });
 
+test('a full list asked for sends every URL whatever changed, the removed pages still, and says it was asked for', (t) => {
+	const { '/es/signals/levels/': _gone, ...after } = BASE;
+	const sent = submit(t, BASE, after, { args: ['--full'] });
+	assert.equal(sent.full, true);
+	assert.equal(sent.asked, true);
+	assert.equal(sent.reason, ASKED_FOR_FULL);
+	assert.deepEqual(sent.removed, [url('/es/signals/levels/')]);
+	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
+	assert.match(sent.printed, /a full list was asked for: every URL goes out/);
+	assert.match(sent.printed, /the full list goes out: 3 URLs, 1 of them removed/);
+	const unasked = submit(t, BASE, BASE);
+	assert.equal(unasked.asked, false);
+	assert.deepEqual(unasked.urls, []);
+});
+
+test('a release that takes its line off every copy changes no digest, and only a full list sends those pages', (t) => {
+	const stamped = Object.fromEntries(
+		Object.entries(BASE).map(([route]) => [route, guide(route, { header: ['Version: 3.3.0', 'Pre-release: 4.0.0rc1 is the current version.'] })]),
+	);
+	const released = Object.fromEntries(Object.entries(BASE).map(([route]) => [route, guide(route, { header: ['Version: 4.0.0'] })]));
+	assert.deepEqual(submit(t, stamped, released).urls, []);
+	assert.deepEqual(submit(t, stamped, released, { args: ['--full'] }).urls, Object.keys(BASE).map(url).sort());
+});
+
+test('urlsToSubmit asked for the full list sends every current URL and every removal it knows of', () => {
+	const current = { [url('/a/')]: 'a'.repeat(64), [url('/b/')]: 'b'.repeat(64) };
+	const previous = { [url('/a/')]: 'a'.repeat(64), [url('/gone/')]: 'c'.repeat(64) };
+	const pending = { pages: {}, removed: [url('/also-gone/')], new: [], urls: [url('/also-gone/')] };
+	assert.deepEqual(urlsToSubmit(current, previous, pending, { full: true }), {
+		full: true,
+		changed: [],
+		added: [],
+		removed: [url('/also-gone/'), url('/gone/')],
+		urls: [url('/a/'), url('/also-gone/'), url('/b/'), url('/gone/')],
+	});
+	assert.equal(urlsToSubmit(current, previous, pending).full, false);
+});
+
 test('a previous manifest that cannot be compared with sends every URL, and says why', (t) => {
 	const dir = mkdtempSync(join(tmpdir(), 'indexnow-bad-'));
 	t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -216,8 +255,8 @@ test('a previous manifest that cannot be read sends every URL, and says why, whe
 	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
 });
 
-test('a copy that differs only in its release lines (Version:, Install:, Pre-release:) hashes the same', (t) => {
-	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release']);
+test('a copy that differs only in its release lines (Version:, Install:, Pre-release:, Unreleased:) hashes the same', (t) => {
+	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release', 'Unreleased']);
 	const stamped = (version) =>
 		Object.fromEntries(
 			Object.keys(BASE).map((route) => [
@@ -248,6 +287,41 @@ test('the stamp of a pre-release, which takes its Pre-release: line away, moves 
 			]),
 		);
 	assert.deepEqual(submit(t, stamped('4.0.0rc1', true), stamped('4.0.0', false)).urls, []);
+});
+
+test('the release that takes the Unreleased: line off the pages changed since the last one moves none of them', (t) => {
+	// A page changed after 4.0.0 says so in its copy (src/lib/agent-md/header.mjs);
+	// releasing 4.0.1 takes the line away and changes nothing the page says.
+	const stamped = (version, unreleased) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [
+				route,
+				guide(route, {
+					header: [
+						`Version: phonometry ${version}`,
+						'Install: pip install "phonometry[full]"',
+						...(unreleased ? [`Unreleased: this page changed after phonometry ${version}, the latest release on PyPI`] : []),
+						'License: MIT',
+					],
+				}),
+			]),
+		);
+	assert.deepEqual(submit(t, stamped('4.0.0', true), stamped('4.0.1', false)).urls, []);
+});
+
+test('a copy whose Updated: line states the instant hashes as the one that stated its day, and a new day still moves it', (t) => {
+	// The header of a copy states the instant its content last changed, which
+	// the edge serves as its Last-Modified; it stated the day alone before. The
+	// record keeps the day, which the sitemap's date gives it as well, so the
+	// change of shape reports no page as changed, and neither does a later
+	// change of the hour that leaves the text as it was.
+	const dated = (updated) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [route, guide(route, { header: ['Version: phonometry 4.0.0', `Updated: ${updated}`, 'License: MIT'] })]),
+		);
+	assert.deepEqual(submit(t, dated('2026-10-01'), dated('2026-10-01T10:30:31Z')).urls, []);
+	assert.deepEqual(submit(t, dated('2026-10-01T10:30:31Z'), dated('2026-10-01T15:02:00Z')).urls, []);
+	assert.deepEqual(submit(t, dated('2026-10-01T10:30:31Z'), dated('2026-10-02T10:30:31Z')).urls, Object.keys(BASE).map(url).sort());
 });
 
 test('every other header line, and the same words in the body, still move a page', (t) => {
@@ -1494,5 +1568,22 @@ test('a list handed on stays until the next one is uploaded, so a job that fails
 		}
 		const keeping = wrongIn(family, { deletes: false });
 		assert.deepEqual([...keeping.afterC, ...keeping.afterD], [], family);
+	}
+});
+
+test('docs.yml sends the full list only when dispatched with indexnow_full, in the build and in a deploy re-run', () => {
+	const workflow = parse(readFileSync(WORKFLOW, 'utf8'));
+	const input = workflow.on.workflow_dispatch.inputs.indexnow_full;
+	assert.equal(input.type, 'boolean');
+	assert.equal(input.default, false);
+	const diffSteps = [...workflow.jobs.build.steps, ...workflow.jobs.indexnow.steps].filter((step) =>
+		/indexnow-diff\.mjs diff/.test(step.run ?? ''),
+	);
+	assert.equal(diffSteps.length, 2, 'the build and the deploy re-run each work the list out once');
+	for (const step of diffSteps) {
+		assert.equal(step.env?.INDEXNOW_FULL, "${{ github.event_name == 'workflow_dispatch' && inputs.indexnow_full }}", step.name);
+		assert.match(step.run, /if \[ "\$INDEXNOW_FULL" = "true" \]; then full=\(--full\); fi/, step.name);
+		assert.match(step.run, /"\$\{full\[@\]\}"\s*$/, step.name);
+		assert.doesNotMatch(step.run, /\$\{\{/, `${step.name}: the input reaches the command through the environment only`);
 	}
 });

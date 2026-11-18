@@ -50,7 +50,7 @@ const ONCE_PER_BUILD = new Map([
 		'src/lib/page-dates.mjs',
 		{
 			calls: 1,
-			exports: ['firstPublished'],
+			exports: ['firstPublished', 'firstPublishedAt'],
 			why: 'reads the docs tree in one pass on the first page that asks; scripts/page-dates.test.mjs counts the processes',
 		},
 	],
@@ -60,6 +60,14 @@ const ONCE_PER_BUILD = new Map([
 			calls: 1,
 			exports: ['loadContentDates'],
 			why: 'reads the history of the docs tree once per site root, when routeData.ts loads, and every page reads that one result; scripts/content-dates.test.mjs counts the processes',
+		},
+	],
+	[
+		'src/lib/release-commit.mjs',
+		{
+			calls: 1,
+			exports: ['loadRelease'],
+			why: 'reads the latest release, with three git commands at most, once per site root and version, when routeData.ts loads, and every page reads that one result; scripts/release-commit.test.mjs holds the read to one',
 		},
 	],
 ]);

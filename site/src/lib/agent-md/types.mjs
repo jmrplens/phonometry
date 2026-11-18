@@ -107,7 +107,8 @@
  * @property {(node: MdNode) => string} render  One node, written.
  * @property {(markdown: string) => string} markdown
  *   A fragment of Markdown or inline HTML held by a data module, written by
- *   the same rules as a page (for the strings `home.ts` carries).
+ *   the same rules as a page (for the strings `home-en.ts` and `home-es.ts`
+ *   carry).
  * @property {(depth: number, text: string) => string} heading
  *   A heading line, its depth clamped to the six Markdown has.
  * @property {(node: MdNode, message: string) => void} issue

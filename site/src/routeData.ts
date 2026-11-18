@@ -1,6 +1,9 @@
 import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlight/route-data';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { version } from './data/repo-stats.mjs';
 import { loadContentDates } from './lib/content-dates.mjs';
+import { loadRelease } from './lib/release-commit.mjs';
+import { changedAfter } from './lib/release-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from './lib/fallback-routes.mjs';
 import { hasMarkdownCopy, markdownCopyPath, routeOf } from './lib/page-markdown.mjs';
 
@@ -15,6 +18,21 @@ const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
  * site root, which is where the dates are read from.
  */
 const contentDates = await loadContentDates();
+
+/**
+ * The latest release (src/lib/release-commit.mjs), read once: a page whose
+ * content changed after it says so under its title
+ * (src/components/ReleaseNotice.astro), and its Markdown copy in its header.
+ */
+const release = await loadRelease({ version });
+
+/**
+ * What src/components/ReleaseNotice.astro reads off the route: the version of
+ * the release the page's content is newer than, on such a page only.
+ */
+interface ReleaseRoute {
+  newerThanRelease?: string;
+}
 
 /**
  * The routes `scripts/agent-md.mjs --public` publishes a markdown copy for:
@@ -151,7 +169,13 @@ export const onRequest = defineRouteMiddleware(({ locals, url }) => {
   // carries the English page's date.
   const entry = starlightRoute.entry;
   if (entry?.filePath && entry.id !== '404') {
-    starlightRoute.lastUpdated = contentDates.dateOf(entry.filePath);
+    const changed = contentDates.dateOf(entry.filePath);
+    starlightRoute.lastUpdated = changed;
+    // The same date against the release commit: the notice and the copy's
+    // `Unreleased:` line stand on exactly the pages it is later than.
+    (starlightRoute as typeof starlightRoute & ReleaseRoute).newerThanRelease = changedAfter(release, changed)
+      ? release.version
+      : undefined;
   }
 
   // The API reference is generated from the package docstrings, so its pages

@@ -761,11 +761,12 @@ def test_the_pages_a_reader_installs_from_state_the_oldest_python(name: str) -> 
 
 
 #: The site's files that state the oldest Python, each with the module it
-#: reads it from and the name it imports: the landing page writes the floor
-#: into its sentences, and astro.config.mjs hands the requirements to the
+#: reads it from and the name it imports: each landing page's text writes the
+#: floor into its sentences, and astro.config.mjs hands the requirements to the
 #: software node. src/data/repo-stats.mjs reads both from pyproject.toml.
 _SITE_PYTHON_READERS = {
-    "site/src/data/home.ts": ("./repo-stats.mjs", "pythonFloor"),
+    "site/src/data/home-en.ts": ("./repo-stats.mjs", "pythonFloor"),
+    "site/src/data/home-es.ts": ("./repo-stats.mjs", "pythonFloor"),
     "site/astro.config.mjs": ("./src/data/repo-stats.mjs", "softwareRequirements"),
 }
 
@@ -819,12 +820,12 @@ def test_the_site_states_the_oldest_python_it_reads_from_pyproject(
 
 def test_the_landing_page_writes_the_floor_it_imports_in_both_languages() -> None:
     """Each language's install sentence names the floor the page imports."""
-    text = (_ROOT / "site" / "src" / "data" / "home.ts").read_text(encoding="utf-8")
-    for phrase in (
-        "Python ${pythonFloor} or newer",
-        "Python ${pythonFloor} o posterior",
+    data = _ROOT / "site" / "src" / "data"
+    for name, phrase in (
+        ("home-en.ts", "Python ${pythonFloor} or newer"),
+        ("home-es.ts", "Python ${pythonFloor} o posterior"),
     ):
-        assert phrase in text, phrase
+        assert phrase in (data / name).read_text(encoding="utf-8"), (name, phrase)
 
 
 #: How the installation instructions spell each floored distribution.

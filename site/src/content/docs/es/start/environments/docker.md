@@ -4,11 +4,12 @@ description: "Ejecuta phonometry en un contenedor o un servidor: una imagen lige
 ---
 
 phonometry no necesita del sistema operativo nada más que Python en una imagen
-`python:*-slim` para x86-64 o ARM64 (`linux/amd64`, `linux/arm64`): todos los
-extras se instalan allí desde wheels, incluida la libsndfile que va dentro del
-wheel de soundfile. El único paquete del sistema que merece la pena añadir es
-ffmpeg, y solo para los vídeos. La misma etiqueta publica otras seis
-arquitecturas, y Docker descarga la del anfitrión: ARM de 32 bits
+[`python:*-slim`](https://hub.docker.com/_/python) para x86-64 o ARM64
+(`linux/amd64`, `linux/arm64`): todos los extras se instalan allí desde
+wheels, incluida la libsndfile que va dentro del wheel de soundfile. El único
+paquete del sistema que merece la pena añadir es ffmpeg, y solo para los
+vídeos. La misma etiqueta publica otras seis arquitecturas, y
+[Docker](https://docs.docker.com/) descarga la del anfitrión: ARM de 32 bits
 (`linux/arm/v5`, `linux/arm/v7`), x86 de 32 bits (`linux/386`),
 `linux/ppc64le`, `linux/riscv64` y `linux/s390x`. numba ya no da soporte a
 Linux de 32 bits, donde sus últimos wheels, de la 0.56.4, son para Python 3.10
@@ -28,15 +29,21 @@ cada paquete, un compilador de Fortran con BLAS y LAPACK para SciPy, y para
 llvmlite LLVM 22 con `cmake` y `make` en el `PATH`. python-soundfile instala
 allí su wheel de Python puro, que carga la libsndfile del sistema:
 `apt-get install libsndfile1`. En `linux/arm/v5`, cuya ABI de coma flotante
-por software no cubre ningún wheel manylinux, las compilaciones de NumPy, SciPy
-y matplotlib piden además ninja y patchelf, y pip también los compilaría desde
-el código fuente, lo que ejecuta `make` y autoreconf, salvo que
+por software no cubre ningún wheel manylinux, las compilaciones de NumPy,
+SciPy y matplotlib piden además ninja y patchelf, y pip también los compilaría
+desde el código fuente, lo que ejecuta `make` y autoreconf, salvo que
 `apt-get install ninja-build patchelf` haya puesto los de la imagen en el
-`PATH`. Una imagen de Alpine, hecha sobre musl,
-necesita más, porque allí python-soundfile no tiene ningún wheel que lleve
-libsndfile y numba no tiene ninguno; [Primeros
+`PATH`. Una imagen de Alpine, hecha sobre musl, necesita más, porque allí
+python-soundfile no tiene ningún wheel que lleve libsndfile y numba no tiene
+ninguno; [Primeros
 pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada) dice qué
 pide allí cada extra.
+
+Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, con Docker
+29.9.3 y la imagen `python:3.13-slim` fijada por el digest
+`sha256:09a17cad02668ae61ece136b4fd36ac3849e14f670ebedb637ea3e15580525bc`
+(Python 3.13.18): la imagen y el trabajo de abajo, como root, como otro
+identificador de usuario, como `nobody` y con la raíz de solo lectura.
 
 ## Una imagen
 
@@ -101,13 +108,14 @@ como tú, así que los archivos son tuyos y no de root. Crea antes la carpeta:
 la que ese demonio crea para el montaje pertenece a root, y el trabajo, que
 corre como tú, no puede escribir en ella.
 
-Docker y Podman sin root (*rootless*) ya ejecutan el root del contenedor como
-tú, y llevan cualquier otro identificador de usuario del contenedor, el tuyo
-incluido, a un identificador subordinado de tu máquina que no puede escribir
-en tu `out`: ahí `--user` detiene el trabajo con un `PermissionError`.
-Quítalo, o pasa `--userns=keep-id` en Podman, y los archivos son tuyos. La
-carpeta creada antes sirve para los dos: Docker sin root crearía como tú una
-que faltase, y Podman se niega a montar una que no existe.
+Docker y [Podman](https://podman.io/docs) sin root (*rootless*) ya ejecutan el
+root del contenedor como tú, y llevan cualquier otro identificador de usuario
+del contenedor, el tuyo incluido, a un identificador subordinado de tu máquina
+que no puede escribir en tu `out`: ahí `--user` detiene el trabajo con un
+`PermissionError`. Quítalo, o pasa `--userns=keep-id` en Podman, y los
+archivos son tuyos. La carpeta creada antes sirve para los dos: Docker sin
+root crearía como tú una que faltase, y Podman se niega a montar una que no
+existe.
 
 matplotlib elige por sí solo su backend Agg en un contenedor sin pantalla, así
 que nada tiene que fijar `MPLBACKEND`.

@@ -47,6 +47,14 @@
  * transcribed from works that keep their own rights and the site can grant
  * none over them, and no `contentUrl` or `distribution`, because the site
  * serves the rows on the page and nowhere else.
+ *
+ * Who made it is not left out: the catalogue is the maintainer's transcription,
+ * table by table, so the site's Person is its `creator` and its `publisher`,
+ * as on the conformance report's Dataset, and the rows are free to read
+ * (`isAccessibleForFree`). The works the numbers were printed in stay named
+ * through `isBasedOn`, so the creator claims the reading and the table, never
+ * the values; Google's Dataset documentation recommends a creator, and Dataset
+ * Search shows the provider from it.
  */
 
 import { inlineParts, leadingDefinitions, pageDefinitions, pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
@@ -582,6 +590,8 @@ const tableFragment = (key) => `catalogue-${key}`;
  * @param {string} options.bibliographyUrl The bibliography of the page's language.
  * @param {{'@id': string, name: string, url: string}} options.dataCatalog
  *   The overview of the catalogues, in the page's language.
+ * @param {string} options.personId The `@id` of the site's Person, who
+ *   transcribed the rows and publishes them.
  * @param {string} [options.dateModified] The day the page's content last
  *   changed, its article's `dateModified`. A dataset is the page's text and
  *   the rows the page renders, so it changed when its page did; with no day
@@ -597,8 +607,12 @@ export function datasetNode({
   twinUrl,
   bibliographyUrl,
   dataCatalog,
+  personId,
   dateModified,
 }) {
+  if (typeof personId !== 'string' || personId === '') {
+    throw new Error(`the dataset of ${dataset.key} needs the @id of the Person who transcribed it, not ${JSON.stringify(personId)}`);
+  }
   const sources = catalogueSources(references, catalogue);
   return {
     '@type': 'Dataset',
@@ -612,6 +626,9 @@ export function datasetNode({
       '@id': `${twinUrl}#${datasetFragment(dataset.key)}`,
     },
     variableMeasured: variablesMeasured(catalogue.columns, lang),
+    creator: { '@id': personId },
+    publisher: { '@id': personId },
+    isAccessibleForFree: true,
     ...(sources.length > 0 ? { isBasedOn: sources.map((ref) => referenceStub(ref, bibliographyUrl)) } : {}),
     ...(dateModified ? { dateModified } : {}),
   };

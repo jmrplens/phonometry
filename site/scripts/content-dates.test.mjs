@@ -42,6 +42,7 @@ import {
 	DATELESS_KEYS,
 	frontmatterOnly,
 	isoDay,
+	isoInstant,
 	readDateSources,
 	readIgnoreRevs,
 } from '../src/lib/date-rules.mjs';
@@ -150,8 +151,9 @@ const day = (dates, path) => isoDay(dates.dateOf(join('src', 'content', 'docs', 
 
 // --- What counts as a change to the content ------------------------------
 
-test('the dateless keys are title, description and sidebar', () => {
-	assert.deepEqual([...DATELESS_KEYS], ['title', 'description', 'sidebar']);
+test('the dateless keys are the labels of a page and the keys only machines read', () => {
+	assert.deepEqual([...DATELESS_KEYS].sort(), ['corrects', 'description', 'pagefind', 'searchTitle', 'searchWeight', 'sidebar', 'title', 'topic']);
+	for (const key of ['references', 'template', 'hero', 'head']) assert.ok(!DATELESS_KEYS.includes(key), key);
 });
 
 test('a change inside the title, the description or the sidebar entry is frontmatter-only', () => {
@@ -194,6 +196,46 @@ test('a change to any other frontmatter key counts', () => {
 	assert.equal(frontmatterOnly(page(), page({ extra: ['# a note for editors'] })), false);
 });
 
+test('a key added for the structured data alone is frontmatter-only, as one for the site search is', () => {
+	const corrects = ['corrects:', '  - std-iso-3382-1-2009', '  - std-iso-3382-2-2008'];
+	assert.equal(frontmatterOnly(page(), page({ extra: corrects })), true, 'corrects added');
+	assert.equal(frontmatterOnly(page({ extra: corrects }), page({ extra: [...corrects, '  - std-iso-3382-3-2012'] })), true, 'a work added to corrects');
+	assert.equal(frontmatterOnly(page(), page({ extra: ['searchTitle: ""', 'searchWeight: 0.5'] })), true, 'the search keys');
+	assert.equal(frontmatterOnly(page(), page({ extra: corrects, body: 'Corrected.\n' })), false, 'with a change to the body');
+});
+
+test('a frontmatter key in no class is refused, named, on either side and whatever the body did', () => {
+	const unknown = page({ extra: ['sameAs: https://example.org/'] });
+	for (const [before, after] of [[page(), unknown], [unknown, page()], [unknown, page({ body: 'New text.\n' })]]) {
+		assert.throws(() => frontmatterOnly(before, after), /frontmatter key "sameAs" is in no class/);
+	}
+	assert.throws(
+		() => frontmatterOnly(page(), page({ extra: ['sameAs: x', 'isPartOf: y'] })),
+		/frontmatter keys "sameAs", "isPartOf" are in no class/,
+	);
+	assert.equal(frontmatterOnly(page({ extra: ['# a note'] }), page({ extra: ['# a note'] })), true, 'a comment is no key');
+});
+
+test('a key in quotes or with a dot is read as YAML reads it, so it is classed and refused like any other', () => {
+	// The reader once took only a bare key at column 0, and folded any other
+	// line into the key above it: a quoted key after `description` was read as
+	// part of the description, so a change to it moved no date and an unclassed
+	// one was never refused.
+	for (const quoted of ['"sameAs": x', "'sameAs': x"]) {
+		assert.throws(() => frontmatterOnly(page(), page({ extra: [quoted] })), /frontmatter key "sameAs" is in no class/, quoted);
+	}
+	assert.throws(() => frontmatterOnly(page(), page({ extra: ['og.image: a.png'] })), /frontmatter key "og\.image" is in no class/);
+	assert.equal(frontmatterOnly(page({ extra: ['"template": doc'] }), page({ extra: ['"template": splash'] })), false, 'a content key in quotes');
+	assert.equal(frontmatterOnly(page({ extra: ["'template': doc"] }), page({ extra: ["'template': splash"] })), false, 'in single quotes');
+	assert.equal(frontmatterOnly(page({ extra: ['"searchTitle": a'] }), page({ extra: ['"searchTitle": b'] })), true, 'a metadata key in quotes');
+	assert.throws(() => frontmatterOnly(page(), page({ extra: ['weird key here: x'] })), /frontmatter key "weird key here" is in no class/);
+	assert.equal(
+		frontmatterOnly(page({ extra: ['references:', '- a', '- b'] }), page({ extra: ['references:', '- a', '- c'] })),
+		false,
+		'a list at column 0 continues its key',
+	);
+});
+
 test('a frontmatter added to a page or taken from it counts', () => {
 	const bare = 'The text.\n';
 	assert.equal(frontmatterOnly(bare, `---\ntitle: A page\n---\n${bare}`), false);
@@ -214,6 +256,34 @@ test('a description-only commit does not move the date, and a body commit does',
 	repo.commit(4);
 	const dates = await repo.dates();
 	assert.equal(day(dates, 'a.mdx'), '2026-01-02');
+});
+
+test('a commit that only adds the works an errata page corrects does not move its date', async (t) => {
+	const repo = repository(t);
+	repo.write('reference/errata/iso-3382.md', page({ body: 'The entries.\n' }));
+	repo.commit(1);
+	repo.write('reference/errata/iso-3382.md', page({ body: 'The entries, one more.\n' }));
+	repo.commit(2);
+	repo.write('reference/errata/iso-3382.md', page({ extra: ['corrects:', '  - std-iso-3382-1-2009'], body: 'The entries, one more.\n' }));
+	repo.commit(3, 'each errata page names the work it corrects');
+	repo.write('reference/errata/iso-3382.md', page({ extra: ['searchTitle: ""', 'corrects:', '  - std-iso-3382-1-2009'], body: 'The entries, one more.\n' }));
+	repo.commit(4, 'the search ranks it by no title');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'reference/errata/iso-3382.md'), '2026-01-02');
+});
+
+test('a frontmatter key in no class fails the build, naming the key, the page and the commit', async (t) => {
+	const repo = repository(t);
+	repo.write('a.md', page());
+	repo.commit(1);
+	repo.write('a.md', page({ extra: ['sameAs: https://example.org/'] }));
+	const sha = repo.commit(2);
+	await assert.rejects(repo.dates(), (error) => {
+		assert.match(error.message, /frontmatter key "sameAs" is in no class/);
+		assert.match(error.message, /site\/src\/content\/docs\/a\.md/);
+		assert.ok(error.message.includes(sha), error.message);
+		return true;
+	});
 });
 
 test('a run of frontmatter-only commits longer than one request is walked to its end', async (t) => {
@@ -2250,4 +2320,17 @@ test('a build with no sitemap to stamp fails instead of publishing one without d
 	ran = run();
 	assert.equal(ran.status, 1);
 	assert.match(ran.stderr, /FAIL the sitemap index lists .*sitemap-renamed\.xml, which the build did not write/);
+});
+
+test('a content date is stated to the second, so two changes on one day give two dates', () => {
+	// The footer and the Markdown copy state it, and the edge serves it as the
+	// Last-Modified of both: by the day alone, the second change of a day would
+	// look no newer than the first to a client that asks with If-Modified-Since.
+	const morning = new Date('2026-11-14T09:19:00Z');
+	const evening = new Date('2026-11-14T20:17:00Z');
+	assert.equal(isoDay(morning), isoDay(evening));
+	assert.equal(isoInstant(morning), '2026-11-14T09:19:00Z');
+	assert.equal(isoInstant(evening), '2026-11-14T20:17:00Z');
+	assert.equal(isoInstant(new Date('2026-11-14T20:17:00.999Z')), '2026-11-14T20:17:00Z', 'cut to the second, as HTTP dates are');
+	assert.equal(isoDay(new Date(isoInstant(evening))), isoDay(evening), 'on the day the sitemap gives');
 });

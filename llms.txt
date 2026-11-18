@@ -153,7 +153,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://docs.jmrp.io/phonometry/perception/hearing/): Hearing and noise damage: ISO 7029 and ISO 389-7 thresholds, ISO 8253 audiometry, ISO 1999 hearing loss, ISO 9612 exposure and ISO 4869 protectors. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-hearing.txt)
 - [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/): Hearing threshold by age and sex (ISO 7029:2017 median, spread and fractiles) and the ISO 389-7:2005 free- and diffuse-field reference zero.
 - [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/): Audiometric rooms and thresholds: room noise and sound field (ISO 8253-1, -2), four test methods for the hearing threshold level, and its uncertainty.
-- [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/): ISO 9612 task-based, job-based and full-day strategies for LEX,8h, with the Annex C uncertainty budget and the one-sided 95 % upper limit.
+- [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/): ISO 9612 daily noise exposure LEX,8h in Python: task-based, job-based and full-day strategies, the Annex C uncertainty and the one-sided 95 % upper limit.
 - [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/): ISO 1999:2013 noise-induced permanent threshold shift (NIPTS) by level, duration and frequency, combined with ISO 7029 age into HTLAN, 500 to 6000 Hz.
 - [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/): ISO 4869 hearing protectors: attenuation on sixteen subjects (-1), effective A-weighted level (-2), insertion loss (-3) and active earmuffs (-6).
 
@@ -192,7 +192,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ### Sound insulation
 
 - [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-2.txt)
-- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): Field sound insulation by ISO 16283-1/-2: airborne D, DnT and R', impact L'nT and L'n, the Clause 14 test report and the ISO 12999-1 uncertainty.
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): Field sound insulation by ISO 16283-1/-2 in Python: airborne D, DnT and R', impact L'nT and L'n, the Clause 14 test report and the ISO 12999-1 uncertainty.
 - [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/): Corner procedure that ISO 16283 requires below 25 m³: corner level, combination and 63 Hz reverberation time, for airborne, impact and façade.
 - [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/): Rubber ball and bang machine: force exposure level, the ISO 16283-2 and JIS A 1418-2 checks, Fast maximum level and the ISO 717-2 Annex D rating.
 - [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/): ISO 10052 survey method: octave bands, a hand-held meter and the reverberation index, for airborne, impact, façade and service-equipment quantities.
@@ -202,13 +202,13 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
 - [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): ISO 717-1 airborne and ISO 717-2 impact single-number ratings in Python: C, Ctr and CI terms, enlarged-range and one-decimal variants, ISO 717 fiche.
-- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): Façade insulation measured by ISO 16283-3 (loudspeaker and road-traffic methods) and predicted by EN 12354-3, with EN 12354-4 outdoor radiation.
+- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): Façade insulation in Python, measured by ISO 16283-3 (loudspeaker and road-traffic methods) and predicted by EN 12354-3, with EN 12354-4 outdoor radiation.
 - [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/): CTE DB-HR global index: the Annex A formula over eighteen one-third-octave bands, normalized spectra, rounding, requirements and window correction.
 
 ### Insulation design
 
 - [Overview](https://docs.jmrp.io/phonometry/buildings/design/): Sound insulation before it is built: EN/ISO 12354 flanking, panels, resilient layers, and service-equipment sound from EN 15657 to EN 12354-5. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-design-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-design-2.txt)
-- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): EN 12354 prediction of in-situ insulation between rooms from element data: airborne and impact flanking, vibration reduction indices and fiches.
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): EN 12354 prediction in Python of in-situ insulation between rooms from element data: airborne and impact flanking, vibration reduction indices and fiches.
 - [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/): ISO 12354-1/-2:2017 detailed model: in-situ element and junction data, flanking band by band, and the per-path contributions to R'w and L'n,w.
 - [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/): Airborne insulation of panels from their properties: mass law, coincidence, orthotropic sheets, double walls, wall ties, slits, radiation and mobility.
 - [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/): Floor-covering impact improvement on the ISO 16251-1 mock-up: acceleration levels, ISO 717-2 weighted improvement, fiche and ISO 12354-2 estimate.
@@ -443,8 +443,8 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 - [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): defects found in published standards, each re-derived from that standard's own normative clauses
 - [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/): every value this library read off a printed page, with the book, the table and the page it came from, and what the page printed where a number is missing
 - [Report fiches](https://docs.jmrp.io/phonometry/reference/reports/): every PDF fiche the library renders, in the reporting format its standard defines, with the guide that explains the measurement behind each one
-- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/)
-- [About the author and the method](https://docs.jmrp.io/phonometry/start/about/)
+- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): Every work the guides cite, by area, with every page that cites it and, where there is one, its DOI, catalogue record or publisher link.
+- [About the author and the method](https://docs.jmrp.io/phonometry/start/about/): About phonometry: who maintains it, how each metric is built from its governing standard and checked in CI, how to report an error and how to cite it.
 
 ## Source and metadata
 
@@ -592,7 +592,9 @@ Every material, gas and fluid the library reads from a printed page, from elasti
 
 One file per area, each small enough to fetch whole. An area too long for one fetch travels in numbered parts, cut between its pages, and a page too long for one at its own sections. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
-- [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
+- [Start here, the list of its 2 parts](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
+- [Start here, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-1.txt)
+- [Start here, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-start-2.txt)
 - [Upgrading from 3.3 to 4.0, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-1.txt)
 - [Upgrading from 3.3 to 4.0, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-2.txt)
 - [Theory and reference, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-theory-1.txt)

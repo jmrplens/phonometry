@@ -10,8 +10,9 @@
  * and in the sitemap crawlers read to decide what to fetch again.
  *
  * Which commits move a date is src/lib/date-rules.mjs's rule: not one that
- * changed only a page's title, description or sidebar entry, moved it
- * unchanged, or is listed in `site/date-ignore-revs.txt`; and a page
+ * changed only a page's title, description or sidebar entry or a key only
+ * machines read (src/lib/frontmatter-keys.mjs), moved it unchanged, or is
+ * listed in `site/date-ignore-revs.txt`; and a page
  * `site/date-sources.json` lists is dated by what it is built from too.
  * This module reads the history that rule is applied to.
  *
@@ -568,7 +569,12 @@ async function resolveDates({ repo, pathspec, ignore, pages, heads }) {
         }
         return null; // Come back to this commit once its blobs are read.
       }
-      const text = held.find(({ blob }) => frontmatterOnly(texts.get(blob), texts.get(state.blob)));
+      let text;
+      try {
+        text = held.find(({ blob }) => frontmatterOnly(texts.get(blob), texts.get(state.blob)));
+      } catch (error) {
+        throw new Error(`content dates: ${state.page} (as ${state.path} in ${commit.sha}): ${error.message}`);
+      }
       if (text === undefined) return commit.date;
       follow(state, commit, text.index, text);
     }

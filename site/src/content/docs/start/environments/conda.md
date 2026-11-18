@@ -3,10 +3,16 @@ title: "conda and mamba"
 description: "Use phonometry in a conda or mamba environment: its dependencies from conda-forge under their names there, then phonometry itself with pip."
 ---
 
-phonometry installs from PyPI. In a conda environment, take its dependencies
-from conda-forge first, then install phonometry with the environment's own
-pip: pip finds every requirement already there and adds phonometry alone, so
-NumPy, SciPy and the rest stay conda-forge builds.
+phonometry installs from PyPI. In a
+[conda](https://docs.conda.io/projects/conda/en/stable/) environment, take its
+dependencies from [conda-forge](https://conda-forge.org/) first, then install
+phonometry with the environment's own pip: pip finds every requirement already
+there and adds phonometry alone, so NumPy, SciPy and the rest stay conda-forge
+builds.
+
+Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
+`condaforge/miniforge3` image: conda 26.9.4 and mamba 2.9.0, Python 3.13.18
+with NumPy 2.5.5 from conda-forge, and Python 3.14.10 with pytorch 2.14.1.
 
 ## An environment with every extra
 
@@ -18,13 +24,13 @@ python -m pip install "phonometry[full]"
 
 pip reports each requirement as already satisfied and installs phonometry
 only. `conda list` then shows phonometry with the channel `pypi` beside the
-conda-forge packages, and `python -m pip check` reports nothing broken. mamba
-takes the same arguments: `mamba create -n acoustics -c conda-forge ...`
-builds the same environment. Python 3.12, 3.13 and 3.14 all work.
-conda-forge publishes no Python 3.12 or newer for 32-bit Windows or 32-bit
-Linux, so phonometry installs there with pip alone, `[plot,report,audio]` in
-place of `[full]`, as [pip and uv](/phonometry/start/environments/pip-and-uv/)
-says.
+conda-forge packages, and `python -m pip check` reports nothing broken.
+[mamba](https://mamba.readthedocs.io/en/latest/) takes the same arguments:
+`mamba create -n acoustics -c conda-forge ...` builds the same environment.
+Python 3.12, 3.13 and 3.14 all work. conda-forge publishes no Python 3.12 or
+newer for 32-bit Windows or 32-bit Linux, so phonometry installs there with
+pip alone, `[plot,report,audio]` in place of `[full]`, as [pip and
+uv](/phonometry/start/environments/pip-and-uv/) says.
 
 ## The extras under their conda-forge names
 

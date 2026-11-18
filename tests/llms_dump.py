@@ -32,6 +32,16 @@ LEAD = (
     f"Index: {SITE_URL}/llms.txt"
 )
 
+#: The ``Unreleased:`` line an English copy carries when its page changed
+#: after the release (site/src/lib/agent-md/header.mjs ``UNRELEASED``), which
+#: a dump's routes.json gives as ``unreleasedLine``.
+UNRELEASED_LINE = (
+    "Unreleased: this page changed after phonometry 4.0.0, the latest release on "
+    "PyPI, so it may describe code that release does not have yet; what is new "
+    "since then is listed under Unreleased in "
+    "https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md#unreleased"
+)
+
 #: The kinds whose copies a dump holds (site/src/lib/page-markdown.mjs
 #: ``FULL_TEXT_KINDS``).
 FULL_TEXT_KINDS = frozenset({"guide", "catalogue", "errata-family"})
@@ -66,11 +76,14 @@ def copy_text(
     title: str = "A page",
     dated: bool = True,
     license_line: bool = True,
+    unreleased: bool = False,
 ) -> str:
     """A Markdown copy as the site writes one: title, lead, header and body.
 
     ``dated`` writes the two lines git dates (``Published:`` and
-    ``Updated:``), which ``agent-md.mjs --dump --undated`` leaves out.
+    ``Updated:``), which ``agent-md.mjs --dump --undated`` leaves out;
+    ``unreleased`` the line of a page changed after the release, which a
+    dated dump holds on such a page and an undated one never does.
     """
     canonical = f"{SITE_URL}/{route}/" if route else f"{SITE_URL}/"
     lines = [
@@ -82,8 +95,9 @@ def copy_text(
         "Language: en",
         "Version: phonometry 4.0.0",
         'Install: pip install "phonometry[full]"',
+        *([UNRELEASED_LINE] if unreleased else []),
         "Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)",
-        *(["Published: 2026-01-06", "Updated: 2026-10-20"] if dated else []),
+        *(["Published: 2026-01-06", "Updated: 2026-10-20T10:00:00Z"] if dated else []),
         *(
             ["License: MIT (https://github.com/jmrplens/phonometry/blob/main/LICENSE)"]
             if license_line
@@ -113,6 +127,7 @@ class Dump:
         title: str | None = None,
         kind: str | None = None,
         dated: bool = True,
+        unreleased: bool = False,
         description: str = "What the page is about.",
         write: bool = True,
     ) -> str:
@@ -134,6 +149,7 @@ class Dump:
                     title=name,
                     dated=dated,
                     license_line=kind != "catalogue",
+                    unreleased=unreleased,
                 ),
                 encoding="utf-8",
             )
@@ -155,7 +171,11 @@ class Dump:
         """Writes routes.json as the pages stand."""
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "routes.json").write_text(
-            json.dumps({"pages": self.pages}, indent=1) + "\n", encoding="utf-8"
+            json.dumps(
+                {"pages": self.pages, "unreleasedLine": UNRELEASED_LINE}, indent=1
+            )
+            + "\n",
+            encoding="utf-8",
         )
 
 

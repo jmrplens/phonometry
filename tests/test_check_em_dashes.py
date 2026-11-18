@@ -908,6 +908,8 @@ def test_the_site_data_modules_are_read_by_default(
     read = {path.as_posix() for path in ced.iter_files(ced.DEFAULT_ROOTS)}
     for published in (
         "site/src/data/home.ts",
+        "site/src/data/home-en.ts",
+        "site/src/data/home-es.ts",
         "site/src/data/glossary.mjs",
         "site/src/data/catalogue-es.json",
     ):

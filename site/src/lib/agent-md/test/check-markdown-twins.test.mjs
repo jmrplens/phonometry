@@ -30,14 +30,16 @@ import {
   textProblems,
 } from '../../../../scripts/check-markdown-twins.mjs';
 import { preRelease, version } from '../../../data/repo-stats.mjs';
-import { PRE_RELEASE } from '../header.mjs';
-import { VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
+import { PRE_RELEASE, UNRELEASED } from '../header.mjs';
+import { NEWER_THAN_RELEASE_ATTRIBUTE, VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
 
 const CHECK = fileURLToPath(new URL('../../../../scripts/check-markdown-twins.mjs', import.meta.url));
 const ORIGIN = 'https://docs.jmrp.io';
 const BASE = '/phonometry';
 const SITE = `${ORIGIN}${BASE}`;
 const UPDATED = '2026-10-20';
+/** The moment the page's content last changed, which its footer and its copy's `Updated:` line state. */
+const UPDATED_AT = '2026-10-20T10:00:00Z';
 const PUBLISHED = '2026-01-06';
 const SUMMARY = 'A page &amp; its copy.';
 const HOMES = new Set(['/', '/es/']);
@@ -45,15 +47,16 @@ const HOMES = new Set(['/', '/es/']);
 /**
  * A built page as the build writes one: its title, description, canonical,
  * hreflang pair, the head link to its copy and the encoding of its structured
- * data, on a node that gives the day the page was first published.
+ * data, on a node that gives the day the page was first published, and the
+ * footer that dates its content (`footer`, null for none).
  *
  * @param {string} route
- * @param {{ lang?: string, copy?: string | null, encoding?: string | null, other?: string, canonical?: string, body?: string, title?: string, published?: string | null }} [options]
+ * @param {{ lang?: string, copy?: string | null, encoding?: string | null, other?: string, canonical?: string, body?: string, title?: string, published?: string | null, footer?: string | null }} [options]
  *   `copy` and `encoding` are routes of the copy (null for none); `other` is
  *   the route of the page in the other language; `title` is the whole
  *   `<title>`.
  */
-function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', copy = `${route}index.md`, encoding = copy, other, canonical = route, body = '', title = HOMES.has(route) ? `Page ${route}` : `Page ${route} | phonometry`, published = PUBLISHED } = {}) {
+function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', copy = `${route}index.md`, encoding = copy, other, canonical = route, body = '', title = HOMES.has(route) ? `Page ${route}` : `Page ${route} | phonometry`, published = PUBLISHED, footer = UPDATED_AT } = {}) {
   const node = {
     '@type': HOMES.has(route) ? 'WebPage' : 'TechArticle',
     ...(published ? { datePublished: published } : {}),
@@ -74,7 +77,9 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     `<link rel="alternate" type="text/plain" href="${BASE}/llms.txt" title="llms.txt"/>`,
     ...(copy ? [`<link rel="alternate" type="text/markdown" href="${BASE}${copy}">`] : []),
     `<script type="application/ld+json">${JSON.stringify(graph)}</script>`,
-    `</head><body><main><h1>${route}</h1>${body}</main></body></html>`,
+    `</head><body><main><h1>${route}</h1>${body}`,
+    footer ? `<footer><div class="meta sl-flex"><p>Last updated: <time datetime="${footer}">Oct 20, 2026</time></p></div></footer>` : '',
+    '</main></body></html>',
   ].join('');
 }
 
@@ -83,12 +88,14 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
  * left out.
  *
  * @param {string} route
- * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null }} [options]
+ * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null, unreleased?: string | null }} [options]
+ *   `unreleased` is the value of the `Unreleased:` line, which a copy of a
+ *   page changed after the release carries.
  */
 /** The `Pre-release:` value a copy of `lang` carries while VERSION is a pre-release. */
 const preReleaseLine = (lang) => (preRelease ? PRE_RELEASE[lang](version) : undefined);
 
-function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
+function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED_AT, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), unreleased = null, author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
   return [
     `# ${title}`,
     '',
@@ -100,6 +107,7 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     ...(release ? [`Version: ${release}`] : []),
     ...(install ? [`Install: ${install}`] : []),
     ...(pre ? [`Pre-release: ${pre}`] : []),
+    ...(unreleased ? [`Unreleased: ${unreleased}`] : []),
     ...(author ? [`Author: ${author}`] : []),
     ...(published ? [`Published: ${published}`] : []),
     `Updated: ${updated}`,
@@ -468,9 +476,26 @@ describe('the copy and what the page says of it', () => {
 describe('the header and the page', () => {
   test('a date the sitemap does not give the page', (t) => {
     const { found } = check(t, (files) => {
-      files['a/index.md'] = copy('/a/', { other: '/es/a/', updated: '2026-10-19' });
+      files['a/index.html'] = page('/a/', { other: '/es/a/', footer: '2026-10-19T10:00:00Z' });
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', updated: '2026-10-19T10:00:00Z' });
     });
-    assert.deepEqual(found, [`header: /a/index.md says "Updated: 2026-10-19", and the sitemap dates the page ${UPDATED}`]);
+    assert.deepEqual(found, [`header: /a/index.md says "Updated: 2026-10-19T10:00:00Z", and the sitemap dates the page ${UPDATED}`]);
+  });
+
+  test('a date with no time, which the edge would serve as midnight', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', updated: UPDATED });
+    });
+    assert.deepEqual(found, [
+      `header: /a/index.md says "Updated: ${UPDATED}", a day with no time: the line states the moment the page's footer gives, as YYYY-MM-DDTHH:MM:SSZ`,
+    ]);
+  });
+
+  test('a moment other than the one the footer gives', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', updated: '2026-10-20T11:00:00Z' });
+    });
+    assert.deepEqual(found, [`header: /a/index.md says "Updated: 2026-10-20T11:00:00Z", and the page's footer dates it ${UPDATED_AT}`]);
   });
 
   test('a canonical other than the page\'s, and a language other than its own', (t) => {
@@ -507,6 +532,40 @@ describe('the header and the page', () => {
     const both = check(t, (files) => {
       files['a/index.html'] = page('/a/', { other: '/es/a/', body: mark });
       files['a/index.md'] = copy('/a/', { other: '/es/a/', verified: true });
+    });
+    assert.deepEqual(both.found, []);
+  });
+
+  test('an Unreleased line exactly where the page shows the notice that it changed after the release, in its language', (t) => {
+    const notice = (release) => `<p ${NEWER_THAN_RELEASE_ATTRIBUTE}="${release}" data-pagefind-ignore>This page changed after phonometry ${release}</p>`;
+    const missing = check(t, (files) => {
+      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice(version) });
+    });
+    assert.deepEqual(missing.found, [
+      `header: /a/index.md has no "Unreleased:" line, and /a/ shows the notice that it changed after phonometry ${version}: "Unreleased: ${UNRELEASED.en(version)}"`,
+    ]);
+    const extra = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en(version) });
+    });
+    assert.deepEqual(extra.found, [
+      `header: /a/index.md says "Unreleased: ${UNRELEASED.en(version)}", and /a/ shows no notice that it changed after the release`,
+    ]);
+    const wrongLanguage = check(t, (files) => {
+      files['es/a/index.html'] = page('/es/a/', { other: '/a/', body: notice(version) });
+      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', unreleased: UNRELEASED.en(version) });
+    });
+    assert.equal(wrongLanguage.found.length, 1);
+    assert.match(wrongLanguage.found[0], /^header: \/es\/a\/index\.md says "Unreleased: this page changed/u);
+    const otherRelease = check(t, (files) => {
+      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice('0.0.1') });
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en('0.0.1') });
+    });
+    assert.deepEqual(otherRelease.found, [`header: /a/ says it changed after phonometry 0.0.1, and the build is of phonometry ${version}`]);
+    const both = check(t, (files) => {
+      files['a/index.html'] = page('/a/', { other: '/es/a/', body: notice(version) });
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', unreleased: UNRELEASED.en(version) });
+      files['es/a/index.html'] = page('/es/a/', { other: '/a/', body: notice(version) });
+      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', unreleased: UNRELEASED.es(version) });
     });
     assert.deepEqual(both.found, []);
   });
@@ -669,7 +728,7 @@ describe('the llms files, which carry the copies as they read', () => {
 
   test('find llms-full.txt carrying a stale body', (t) => {
     const { found } = check(t, undefined, undefined, (files) => {
-      files['llms-full.txt'] = files['llms-full.txt']?.replace(`Updated: ${UPDATED}`, 'Updated: 2026-10-01');
+      files['llms-full.txt'] = files['llms-full.txt']?.replace(`Updated: ${UPDATED_AT}`, 'Updated: 2026-10-01T10:00:00Z');
     });
     assert.deepEqual(found, ['llms: llms-full.txt carries /a/ other than its copy /a/index.md']);
   });

@@ -295,6 +295,13 @@ function oneStandardTwoDesignations(works, separateStandards, listed) {
  * missing here keeps an anonymous publisher, and check:structured-data fails
  * on it, so a new body is added here rather than left without an identity.
  *
+ * A body publishes more than standards: the IETF its RFCs as reports, the AES
+ * its convention papers, ECAC its Doc 29 and EASA its certification noise
+ * levels. A work of any kind whose publisher is one of these bodies names it
+ * by the same identity (`publisherName` says which field holds it for each
+ * kind), and the check fails on any work that writes a body out anonymously;
+ * a book's or a journal's publisher that is no body here stays a name.
+ *
  * The three Spanish state issuers carry no `url`. They are the authorities the
  * Boletín Oficial del Estado prints on those texts, the two ministries have
  * been renamed since, and none of them publishes the texts: the BOE does, and
@@ -317,6 +324,8 @@ const STANDARDS_BODIES = [
   { id: 'ietf', name: 'Internet Engineering Task Force', alternateName: 'IETF', url: 'https://www.ietf.org/' },
   { id: 'sae', name: 'SAE International', url: 'https://www.sae.org/' },
   { id: 'icao', name: 'International Civil Aviation Organization', alternateName: 'ICAO', url: 'https://www.icao.int/' },
+  { id: 'ecac', name: 'European Civil Aviation Conference', alternateName: 'ECAC', url: 'https://www.ecac-ceac.org/' },
+  { id: 'easa', name: 'European Union Aviation Safety Agency', alternateName: 'EASA', url: 'https://www.easa.europa.eu/' },
   { id: 'vdi', name: 'Verein Deutscher Ingenieure', alternateName: 'VDI', url: 'https://www.vdi.de/' },
   // The Spanish standards body. Its editions before 2017 name it AENOR, the
   // association that then issued the UNE standards and handed that work to
@@ -367,16 +376,53 @@ const BODY_BY_NAME = new Map(
 );
 
 /**
- * The Organization node of the body that issues a standard, or undefined when
- * the reference is not a standard or its body has no identity yet.
+ * Whether `name` is a name the frontmatter spells one of the bodies with: a
+ * publisher of that name has an identity of its own and is never written out
+ * anonymously (check:structured-data holds every work of the bibliography to it).
+ *
+ * @param {unknown} name
+ */
+export function isBodyName(name) {
+  return typeof name === 'string' && BODY_BY_NAME.has(name);
+}
+
+/**
+ * The name of the organization that publishes a work, from the field its kind
+ * writes it in (src/content.config.ts): a standard's publisher, or its issuing
+ * organization when no separate publisher is named; a book's or a data set's
+ * publisher; a report's institution, or its organization; a web page's
+ * organization. A journal article names its journal, which is no publisher.
+ *
+ * @param {object} ref A frontmatter reference.
+ * @returns {string | undefined}
+ */
+export function publisherName(ref) {
+  switch (ref.type) {
+    case 'standard':
+      return ref.publisher ?? ref.organization;
+    case 'book':
+    case 'dataset':
+      return ref.publisher;
+    case 'report':
+      return ref.institution ?? ref.organization;
+    case 'article':
+      return undefined;
+    default:
+      return ref.organization;
+  }
+}
+
+/**
+ * The Organization node of the body that publishes a work, or undefined when
+ * its publisher is no body of `STANDARDS_BODIES` or the work names none.
  *
  * @param {object} ref A frontmatter reference.
  * @param {string} bodiesUrl Absolute URL of the English bibliography page,
  *   where the bodies are defined once for both languages.
  */
 export function standardsBody(ref, bodiesUrl) {
-  if (ref.type !== 'standard') return undefined;
-  const body = BODY_BY_NAME.get(ref.publisher ?? ref.organization);
+  const name = publisherName(ref);
+  const body = name === undefined ? undefined : BODY_BY_NAME.get(name);
   if (!body) return undefined;
   return {
     '@type': 'Organization',
@@ -385,6 +431,18 @@ export function standardsBody(ref, bodiesUrl) {
     ...(body.alternateName ? { alternateName: body.alternateName } : {}),
     ...(body.url ? { url: body.url } : {}),
   };
+}
+
+/**
+ * A work's publisher as its node names it: the body's one identity when the
+ * publisher is a body of `STANDARDS_BODIES`, an Organization of that name
+ * otherwise, and nothing when the work names no publisher.
+ */
+function publisherOf(ref, bodiesUrl) {
+  const body = standardsBody(ref, bodiesUrl);
+  if (body) return { publisher: { '@id': body['@id'] } };
+  const name = publisherName(ref);
+  return name ? { publisher: { '@type': 'Organization', name } } : {};
 }
 
 /** APA-formatted author strings to schema.org Person nodes. */
@@ -452,8 +510,7 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
   };
 
   switch (ref.type) {
-    case 'standard': {
-      const body = standardsBody(ref, bodiesUrl);
+    case 'standard':
       return {
         ...common,
         '@type': 'CreativeWork',
@@ -462,18 +519,15 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
         // the identifier that matters, and standards rarely carry a DOI.
         identifier: ref.designation,
         genre: 'Technical standard',
-        publisher: body
-          ? { '@id': body['@id'] }
-          : { '@type': 'Organization', name: ref.publisher ?? ref.organization },
+        ...publisherOf(ref, bodiesUrl),
       };
-    }
     case 'book':
       return {
         ...common,
         '@type': 'Book',
         author: people(ref.authors),
         ...(ref.edition ? { bookEdition: ref.edition } : {}),
-        publisher: { '@type': 'Organization', name: ref.publisher },
+        ...publisherOf(ref, bodiesUrl),
       };
     case 'article':
       return {
@@ -497,7 +551,7 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
           : ref.organization
             ? { creator: { '@type': 'Organization', name: ref.organization } }
             : {}),
-        publisher: { '@type': 'Organization', name: ref.publisher },
+        ...publisherOf(ref, bodiesUrl),
         license: ref.license,
       };
     case 'report':
@@ -506,17 +560,14 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
         '@type': 'Report',
         ...(ref.authors ? { author: people(ref.authors) } : {}),
         ...(ref.number ? { reportNumber: ref.number } : {}),
-        publisher: {
-          '@type': 'Organization',
-          name: ref.institution ?? ref.organization,
-        },
+        ...publisherOf(ref, bodiesUrl),
       };
     default:
       return {
         ...common,
         '@type': 'WebPage',
         ...(ref.authors ? { author: people(ref.authors) } : {}),
-        ...(ref.organization ? { publisher: { '@type': 'Organization', name: ref.organization } } : {}),
+        ...publisherOf(ref, bodiesUrl),
       };
   }
 }

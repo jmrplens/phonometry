@@ -23,6 +23,7 @@ import io
 import json
 import os
 import pathlib
+import posixpath
 import re
 import shlex
 import shutil
@@ -3100,7 +3101,7 @@ def _llms_outputs(recipe: str) -> list[str]:
             for option in ("--dump", "--docs"):
                 if option in words:
                     path = base / words[words.index(option) + 1]
-                    outputs.append(os.path.normpath(path.as_posix()))
+                    outputs.append(posixpath.normpath(path.as_posix()))
         script = next((word for word in words if word.endswith(".py")), None)
         if script is not None:
             outputs += _written_paths(script)

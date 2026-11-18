@@ -13,10 +13,14 @@
 // Only a mark on the live deployment says whose off state it is: the rule on
 // above a deployment the guard did not mark was not left by the guard, which
 // deploys before it turns the rule on, so the deploy keeps it as an off state
-// set by hand, which only `quota-switch.mjs --mode on` switches back.
+// set by hand, which only `quota-switch.mjs --mode on` switches back. A live
+// deployment the guard made to switch back on (`quota guard: on`) may still
+// have its rule to turn off, which the deploy token cannot see: the deploy is
+// then not held off, and it carries the guard's mark forward so the guard's
+// next run still owns that rule.
 // It prints three lines for $GITHUB_OUTPUT:
 //   tripped=true|false
-//   mark=quota guard|quota switch by hand   (whose off state to keep)
+//   mark=quota guard|quota switch by hand|   (whose state to carry; empty: none)
 //   rule=on|off|absent|unknown
 // A token needs Workers Scripts Read (the deploy token's Workers Scripts
 // Write has it). Exit 0 when read, 1 when the deployment could not be read or
@@ -33,9 +37,11 @@ import { GUARD_MARK, GUARD_RULE_REF, HAND_MARK, SCRIPT } from '../lib/guard.mjs'
  * @returns {{tripped: boolean, mark: string, rule: string}} What a deploy has to keep.
  */
 export function guardState({ message, rule }) {
-	const byGuard = message.startsWith(`${GUARD_MARK}: off`);
-	const tripped = byGuard || message.startsWith(`${HAND_MARK}: off`) || rule === 'on';
-	return { tripped, mark: byGuard ? GUARD_MARK : HAND_MARK, rule };
+	const guardOff = message.startsWith(`${GUARD_MARK}: off`);
+	const guardOn = message.startsWith(`${GUARD_MARK}: on`);
+	const tripped = guardOff || message.startsWith(`${HAND_MARK}: off`) || (rule === 'on' && !guardOn);
+	if (tripped) return { tripped, mark: guardOff ? GUARD_MARK : HAND_MARK, rule };
+	return { tripped, mark: guardOn ? GUARD_MARK : '', rule };
 }
 
 /**

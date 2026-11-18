@@ -120,7 +120,12 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 	};
 	if (desired === 'off') {
 		versionAction('assets');
-		ruleAction(true);
+		// The rule follows an assets-only version, live or being deployed now:
+		// blocked beacons beside a full version that keeps running would save
+		// little, and the rule would stay on after 00:00 above a deploy the
+		// guard never marked.
+		if (half === 'assets' || actions.some((action) => action.kind === 'deploy')) ruleAction(true);
+		else notes.push(`the rule stays as it is: there is no assets-only version to go with it`);
 		return { desired, actions, notes };
 	}
 	// Back on: only what the guard switched off, unless the mode pins it on.

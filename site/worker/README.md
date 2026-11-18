@@ -213,7 +213,18 @@ pnpm exec wrangler deploy --config guard/wrangler.jsonc     # the quota guard, o
 ```
 
 `<k>` names the deploy, and no two deploys share it (CI uses the run id and
-attempt of its own run, so a re-run uploads a new pair). Cron Triggers need the
+attempt of its own run, so a re-run uploads a new pair).
+
+A deploy by hand reads the guard's state first, as site-preview.yml does:
+`node scripts/guard-state.mjs` with the account key prints `tripped`, `mark`
+and `rule`. With `tripped=true` the full half is only uploaded
+(`wrangler versions upload --config wrangler.jsonc --tag full-<k>`) and the
+assets-only half goes live under the off mark it printed
+(`wrangler versions deploy --config wrangler.jsonc --version-tag assets-<k>@100
+--message "<mark>: off, deploy of <k>" --yes`), so whoever switched the code
+paths off still switches this deploy back on. With `tripped=false` and a
+`mark`, the guard may still have its rule to turn off, so the deploy carries
+`--message "<mark>: on, full half of <k>"`. Cron Triggers need the
 account's workers.dev subdomain to exist; both Workers keep workers.dev and
 preview URLs off, so nothing answers there.
 

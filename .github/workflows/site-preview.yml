@@ -174,7 +174,11 @@ jobs:
             pnpm exec wrangler versions deploy --config wrangler.jsonc --version-tag "assets-$PAIR@100" --message "$MARK: off, deploy of $PAIR while the code paths are off" --yes
             echo "::notice::the quota guard holds the code paths off: the assets-only half of $PAIR is live, the full half waits for the switch back" | tee -a "$GITHUB_STEP_SUMMARY"
           else
-            pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "full half of $PAIR"
+            # After a switch back the guard may still have its rule to turn
+            # off; carrying its mark keeps that rule the guard's to clear.
+            message="full half of $PAIR"
+            if [ -n "$MARK" ]; then message="$MARK: on, $message"; fi
+            pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "$message"
           fi
         working-directory: site/worker
       - name: Check what the assets answer

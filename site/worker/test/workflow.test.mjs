@@ -127,7 +127,15 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		assert.match(tripped, /wrangler versions upload --config wrangler\.jsonc --tag "full-\$PAIR"/);
 		assert.match(tripped, /wrangler versions deploy --config wrangler\.jsonc --version-tag "assets-\$PAIR@100" --message "\$MARK: off, /);
 		assert.doesNotMatch(tripped, /wrangler deploy /, 'no full deploy while tripped');
-		assert.match(clear, /wrangler deploy --config wrangler\.jsonc --tag "full-\$PAIR"/);
+		assert.match(clear, /wrangler deploy --config wrangler\.jsonc --tag "full-\$PAIR" --message "\$message"/);
+		assert.match(clear, /if \[ -n "\$MARK" \]; then message="\$MARK: on, \$message"; fi/);
+	});
+
+	test('a deploy over an unfinished switch back carries the guard mark, so the guard still clears its rule', async () => {
+		const { decide } = await import('../lib/guard.mjs');
+		const versions = [{ id: 'f', tag: 'full-301-1', created: '2026-11-19T00:20:00Z' }, { id: 'a', tag: 'assets-301-1', created: '2026-11-19T00:19:00Z' }];
+		const d = decide({ count: 5, threshold: 95000, mode: 'auto', now: new Date('2026-11-19T00:30:00Z'), rule: { enabled: true, lastUpdated: '2026-11-18T22:00:00Z' }, current: { id: 'f', tag: 'full-301-1', message: 'quota guard: on, full half of 301-1' }, versions });
+		assert.deepEqual(d.actions, [{ kind: 'rule', enabled: false }]);
 	});
 
 	test('each run of the workflow names its own pair, so a re-run never uploads a second version under a taken tag', () => {

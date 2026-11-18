@@ -13,8 +13,14 @@ describe('guardState', () => {
 	test('the guard\'s off deploy, a hand switch off, the rule on, and everything on', () => {
 		assert.deepEqual(guardState({ message: 'quota guard: off at 95012 of 95000', rule: 'unknown' }), { tripped: true, mark: 'quota guard', rule: 'unknown' });
 		assert.deepEqual(guardState({ message: 'quota switch by hand: off at 7 of 95000', rule: 'unknown' }), { tripped: true, mark: 'quota switch by hand', rule: 'unknown' });
-		assert.deepEqual(guardState({ message: 'quota guard: on at 3 of 95000', rule: 'off' }), { tripped: false, mark: 'quota switch by hand', rule: 'off' });
-		assert.deepEqual(guardState({ message: '', rule: 'unknown' }), { tripped: false, mark: 'quota switch by hand', rule: 'unknown' });
+		assert.deepEqual(guardState({ message: '', rule: 'unknown' }), { tripped: false, mark: '', rule: 'unknown' });
+		assert.deepEqual(guardState({ message: 'full half of 200-1', rule: 'off' }), { tripped: false, mark: '', rule: 'off' });
+	});
+
+	test('a reset the guard has not finished: not held off, and the guard mark is carried so its next run still owns the rule', () => {
+		for (const rule of ['on', 'off', 'unknown']) {
+			assert.deepEqual(guardState({ message: 'quota guard: on at 3 of 95000', rule }), { tripped: false, mark: 'quota guard', rule });
+		}
 	});
 
 	test('the rule on above a deployment the guard did not mark: kept off as a hand switch, never under the guard mark', () => {

@@ -82,6 +82,15 @@ describe('decide', () => {
 		assert.deepEqual(decide(state({ count: 5, current: half })).actions, [{ kind: 'deploy', versionId: 'v-full-2', tag: 'full-200-1' }]);
 	});
 
+	test('no assets-only version anywhere: the rule is left alone too, said loudly', () => {
+		const fullOnly = versions.filter((v) => !v.tag.startsWith('assets-'));
+		const d = decide(state({ count: 96000, versions: fullOnly }));
+		assert.equal(d.desired, 'off');
+		assert.deepEqual(d.actions, []);
+		assert.match(d.notes.join('\n'), /no assets version to roll to/);
+		assert.match(d.notes.join('\n'), /no assets-only version to go with it/);
+	});
+
 	test('a version with no pair: the newest assets-only version, said loudly', () => {
 		const d = decide(state({ count: 99000, current: { id: 'v-hand', tag: '' } }));
 		assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'v-assets-2', tag: 'assets-200-1' }, { kind: 'rule', enabled: true }]);

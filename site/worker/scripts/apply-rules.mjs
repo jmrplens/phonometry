@@ -49,6 +49,9 @@ export function checkClipBase(clipBase) {
 	if (url.search !== '' || url.hash !== '' || clipBase.includes('?') || clipBase.includes('#')) {
 		throw new Error(`clip base must carry no query or fragment: ${clipBase}`);
 	}
+	// The rule appends the clip name to the string as given, so it must be the
+	// URL a parser writes back: no surrounding space, no case or escape to fix.
+	if (url.href !== clipBase) throw new Error(`clip base must be written the way it parses, ${url.href}; as written it is ${JSON.stringify(clipBase)}`);
 	if (!mediaOrigins.includes(url.origin)) {
 		throw new Error(`clip host ${url.origin} is not in mediaOrigins (site/src/data/site.mjs), so the pages would block its clips`);
 	}

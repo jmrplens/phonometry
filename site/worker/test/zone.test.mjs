@@ -220,6 +220,11 @@ describe('apply-rules', () => {
 		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media'), /path end in \//);
 		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media/?v=1/'), /query or fragment/);
 		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media/#x/'), /query or fragment/);
+		// The rule appends the clip name to the base as written, so the base
+		// must be the URL as a parser would write it back.
+		assert.throws(() => checkClipBase('https://docs.jmrp.io/phonometry/media/ '), /as written/);
+		assert.throws(() => checkClipBase(' https://docs.jmrp.io/phonometry/media/'), /as written/);
+		assert.throws(() => checkClipBase('https://DOCS.jmrp.io/phonometry/media/'), /as written/);
 	});
 
 	test('the rules go to phonometry.dev whatever CLOUDFLARE_ZONE_ID says', async () => {

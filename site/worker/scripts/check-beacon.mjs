@@ -4,15 +4,19 @@
 // Usage:
 //   CLOUDFLARE_API_TOKEN=... node site/worker/scripts/check-beacon.mjs
 //
-// Full code live: 204. Code paths held off (scripts/guard-state.mjs reads
-// tripped): the WAF rule's 403, or, while that rule is not on yet, the
-// assets-only half's 404 (no asset is called _v); a 204 then would mean code
-// is running. The state is read just before and just after the probe, not
-// before the deploy: the guard runs every 15 minutes and quota-switch.mjs at
-// any time, and a switch during the deploy changes the answer to expect.
-// When the live deployment changes during the probe, it probes again with the
-// new state, up to three times. The probe is the page view the deploy checks
-// have always sent (webdriver flag set), so it lands in the dataset as one.
+// The answer to expect comes from the live deployment alone, never from the
+// WAF rule: a deployment marked off (`quota guard: off` or `quota switch by
+// hand: off`) is the assets-only half, held off, and answers the WAF rule's
+// 403 or, while that rule is not on yet, 404 (no asset is called _v); any
+// other runs full code and answers 204, so a rule left on above it fails the
+// check whatever the token can read. The deployment is read just before and
+// just after the probe, not before the deploy: the guard runs every 15
+// minutes and quota-switch.mjs at any time. A deployment that changed during
+// the probe, or an answer that does not fit (a new deployment takes a few
+// seconds to reach every Cloudflare location), is probed again after a
+// pause, up to three attempts; a mismatch on the last one fails. The probe is
+// the page view the deploy checks have always sent (webdriver flag set), so
+// it lands in the dataset as one.
 // Exit 0 when the answer fits, 1 when it does not or the state could not be
 // read, 2 on a usage error.
 import { fileURLToPath } from 'node:url';
@@ -38,49 +42,48 @@ export function beaconFits(tripped, status) {
 /**
  * Runs the check.
  *
- * @param {{env: Record<string, string | undefined>, fetchImpl?: typeof fetch, sink?: {log: string[]}, attempts?: number}} options
+ * @param {{env: Record<string, string | undefined>, fetchImpl?: typeof fetch, sink?: {log: string[]}, attempts?: number, pause?: (ms: number) => Promise<void>, pauseMs?: number}} options
  * @returns {Promise<number>} The exit code.
  */
-export async function runCheckBeacon({ env, fetchImpl = fetch, sink = null, attempts = 3 }) {
+export async function runCheckBeacon({ env, fetchImpl = fetch, sink = null, attempts = 3, pause = (ms) => new Promise((done) => setTimeout(done, ms)), pauseMs = 5000 }) {
 	const log = (line) => (sink ? sink.log.push(line) : console.log(line));
 	if (!(env.CLOUDFLARE_API_TOKEN || (env.CLOUDFLARE_EMAIL && env.CLOUDFLARE_API_KEY))) {
 		log('set CLOUDFLARE_API_TOKEN, or CLOUDFLARE_EMAIL and CLOUDFLARE_API_KEY');
 		return 2;
 	}
 	for (const line of ignoredTargets(env)) log(line);
-	// The deploy token cannot read the WAF rule: that note is printed once.
-	const notes = new Set();
-	const warn = (line) => {
-		if (!notes.has(line)) log(line);
-		notes.add(line);
-	};
+	const warn = (line) => log(line);
+	let last = '';
 	for (let attempt = 1; attempt <= attempts; attempt += 1) {
+		if (attempt > 1) await pause(pauseMs);
 		let before;
 		let after;
 		let status;
 		try {
-			before = await readGuardState({ env, fetchImpl, warn });
+			before = await readGuardState({ env, fetchImpl, warn, readRule: false });
 			const response = await fetchImpl(BEACON, { method: 'POST', headers: { origin: ORIGIN, 'content-type': 'text/plain' }, body: BODY, signal: AbortSignal.timeout(30_000) });
 			status = response.status;
 			await response.body?.cancel();
-			after = await readGuardState({ env, fetchImpl, warn });
+			after = await readGuardState({ env, fetchImpl, warn, readRule: false });
 		} catch (error) {
 			log(`::error::the beacon check could not run: ${error.message}`);
 			return 1;
 		}
-		if (before.deployment !== after.deployment || before.tripped !== after.tripped) {
-			log(`the live deployment changed during the probe (${before.deployment} to ${after.deployment}); probing again`);
+		if (before.deployment !== after.deployment) {
+			last = `the live deployment changed during the probe (${before.deployment} to ${after.deployment})`;
+			log(`${last}; probing again`);
 			continue;
 		}
 		const want = before.tripped ? '403 or 404' : '204';
 		if (!beaconFits(before.tripped, status)) {
-			log(`::error::the beacon answered ${status}, not ${want} (live deployment ${before.message ? `"${before.message}"` : 'with no message'}, code paths ${before.tripped ? 'held off' : 'on'})`);
-			return 1;
+			last = `the beacon answered ${status}, not ${want} (live deployment ${before.message ? `"${before.message}"` : 'with no message'}, code paths ${before.tripped ? 'held off' : 'on'})`;
+			if (attempt < attempts) log(`${last}; probing again`);
+			continue;
 		}
 		log(before.tripped ? `ok   the beacon answers ${status}: the code paths are off until they are switched back` : 'ok   the beacon answers 204');
 		return 0;
 	}
-	log(`::error::the live deployment changed during each of ${attempts} probes of the beacon`);
+	log(`::error::${last} (${attempts} attempts)`);
 	return 1;
 }
 

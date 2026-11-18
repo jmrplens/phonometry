@@ -189,7 +189,19 @@ jobs:
           else
             pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "$(full_message "$MARK")"
           fi
-          after=$(node scripts/guard-state.mjs --since "$DEPLOYMENT" --pair "$PAIR")
+          # A failed read is tried again (the promotion is not repeated): a
+          # read that fails three times stops the job with the deploy as it
+          # is, and the error says to run guard-state.mjs --since by hand.
+          after=""
+          for attempt in 1 2 3; do
+            if after=$(node scripts/guard-state.mjs --since "$DEPLOYMENT" --pair "$PAIR"); then break; fi
+            after=""
+            if [ "$attempt" = 3 ]; then
+              echo "::error::the deployments since $DEPLOYMENT could not be read: $PAIR is live as deployed; run node scripts/guard-state.mjs --since $DEPLOYMENT --pair $PAIR by hand and promote what it says"
+              exit 1
+            fi
+            sleep "${READ_RETRY_SECONDS:-5}"
+          done
           if grep -qx 'switched=true' <<<"$after"; then
             tripped=$(sed -n 's/^tripped=//p' <<<"$after")
             mark=$(sed -n 's/^mark=//p' <<<"$after")

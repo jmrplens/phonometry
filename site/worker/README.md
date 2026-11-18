@@ -209,7 +209,7 @@ rm -rf stage                             # staging refuses a directory that exis
 node stage.mjs --from ../dist --beacon   # or the unpacked github-pages artifact
 export CLOUDFLARE_EMAIL=... CLOUDFLARE_API_KEY=...
 pnpm exec wrangler versions upload --config wrangler.assets-only.jsonc --tag assets-<k>
-pnpm exec wrangler deploy --config wrangler.jsonc --tag full-<k>
+pnpm exec wrangler deploy --config wrangler.jsonc --tag full-<k> --message "full half of <k>"
 pnpm exec wrangler deploy --config guard/wrangler.jsonc     # the quota guard, once
 ```
 
@@ -223,9 +223,10 @@ and `rule`. With `tripped=true` the full half is only uploaded
 assets-only half goes live under the off mark it printed
 (`wrangler versions deploy --config wrangler.jsonc --version-tag assets-<k>@100
 --message "<mark>: off, deploy of <k>" --yes`), so whoever switched the code
-paths off still switches this deploy back on. With `tripped=false` and a
-`mark`, the guard may still have its rule to turn off, so the deploy carries
-`--message "<mark>: on, full half of <k>"`. The guard, or quota-switch.mjs,
+paths off still switches this deploy back on. With `tripped=false` the deploy
+carries `--message "full half of <k>"`, or, with a `mark` (the guard may still
+have its rule to turn off), `--message "<mark>: on, full half of <k>"`: the
+message names the pair, which is how the check below finds this deploy. The guard, or quota-switch.mjs,
 can switch between that read and the deploy: `node scripts/guard-state.mjs
 --since <deployment> --pair <k>`, with the `deployment` the first read
 printed, then says `switched=true` and the `tripped` and `mark` that switch

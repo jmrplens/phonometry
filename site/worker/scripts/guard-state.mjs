@@ -107,11 +107,12 @@ export function switchedDuring(listed, { since, pair }) {
  * The guard's state as the API answers it now: the live deployment and, when
  * the token can read it, the WAF rule.
  *
- * @param {{env: Record<string, string | undefined>, fetchImpl?: typeof fetch, warn: (line: string) => void}} options
+ * @param {{env: Record<string, string | undefined>, fetchImpl?: typeof fetch, warn: (line: string) => void, readRule?: boolean}} options
+ *   With readRule false the rule is not read and counts as unknown: the state is the live deployment's alone.
  * @returns {Promise<{deployment: string, message: string, tripped: boolean, mark: string, rule: string}>} The state.
  * @throws {Error} When the live deployment cannot be read.
  */
-export async function readGuardState({ env, fetchImpl = fetch, warn }) {
+export async function readGuardState({ env, fetchImpl = fetch, warn, readRule = true }) {
 	const api = (path) => cfApi(path, { env, fetchImpl });
 	let live;
 	try {
@@ -120,13 +121,15 @@ export async function readGuardState({ env, fetchImpl = fetch, warn }) {
 		throw new Error(`the live deployment of ${SCRIPT} could not be read: ${error.message}`);
 	}
 	let rule = 'unknown';
-	try {
-		const entry = await api(`/zones/${ZONE_ID}/rulesets/phases/http_request_firewall_custom/entrypoint`);
-		const found = entry?.rules?.find((r) => r.ref === GUARD_RULE_REF);
-		rule = found ? (found.enabled ? 'on' : 'off') : 'absent';
-	} catch (error) {
-		rule = error.status === 404 ? 'absent' : 'unknown';
-		if (rule === 'unknown') warn(`the WAF rule ${GUARD_RULE_REF} could not be read (${error.message}); going by the live deployment`);
+	if (readRule) {
+		try {
+			const entry = await api(`/zones/${ZONE_ID}/rulesets/phases/http_request_firewall_custom/entrypoint`);
+			const found = entry?.rules?.find((r) => r.ref === GUARD_RULE_REF);
+			rule = found ? (found.enabled ? 'on' : 'off') : 'absent';
+		} catch (error) {
+			rule = error.status === 404 ? 'absent' : 'unknown';
+			if (rule === 'unknown') warn(`the WAF rule ${GUARD_RULE_REF} could not be read (${error.message}); going by the live deployment`);
+		}
 	}
 	return { deployment: live.id, message: live.message, ...guardState({ message: live.message, rule }) };
 }

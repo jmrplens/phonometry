@@ -126,26 +126,35 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 
 	/**
 	 * Runs a step's `run: |` block in bash with `pnpm` and `node` stubbed:
-	 * pnpm records its arguments, node prints what guard-state.mjs --since
-	 * would. Returns the pnpm calls, one per line.
+	 * pnpm records each argument on its own (so an argument split by the
+	 * shell shows), node prints what guard-state.mjs --since would, failing
+	 * its first `nodeFails` calls. Returns the pnpm calls, each as its
+	 * arguments joined with " | ".
 	 */
-	function runDeploy(env, after, nodeExit = 0) {
+	function runDeploy(env, after, nodeFails = 0) {
 		const step = named('Deploy the Worker');
 		const block = step.match(/\n(\s+)run: \|\n((?:\1 {2}.*\n|\s*\n)+)/);
 		assert.ok(block, 'the deploy step has no run block');
 		const script = block[2].split('\n').map((line) => line.slice(block[1].length + 2)).join('\n');
 		const dir = mkdtempSync(join(tmpdir(), 'deploy-step-'));
 		try {
-			writeFileSync(join(dir, 'pnpm'), '#!/bin/bash\nprintf "%s\\n" "$*" >> "$CALLS"\n', { mode: 0o755 });
-			writeFileSync(join(dir, 'node'), `#!/bin/bash\n[ "$*" = "scripts/guard-state.mjs --since d0 --pair 300-1" ] || { echo "unexpected node $*" >&2; exit 9; }\ncat "$AFTER"\nexit ${nodeExit}\n`, { mode: 0o755 });
+			writeFileSync(join(dir, 'pnpm'), '#!/bin/bash\n{ for a in "$@"; do printf "%s\\x1f" "$a"; done; printf "\\n"; } >> "$CALLS"\n', { mode: 0o755 });
+			writeFileSync(join(dir, 'node'), `#!/bin/bash\n[ "$*" = "scripts/guard-state.mjs --since d0 --pair 300-1" ] || { echo "unexpected node $*" >&2; exit 9; }\necho x >> "$NODE_CALLS"\n[ "$(wc -l < "$NODE_CALLS")" -gt ${nodeFails} ] || exit 1\ncat "$AFTER"\n`, { mode: 0o755 });
 			writeFileSync(join(dir, 'after'), `${after}\n`);
 			writeFileSync(join(dir, 'calls'), '');
-			execFileSync('bash', ['-c', script], { env: { PATH: `${dir}:/usr/bin:/bin`, CALLS: join(dir, 'calls'), AFTER: join(dir, 'after'), GITHUB_STEP_SUMMARY: '/dev/null', PAIR: '300-1', DEPLOYMENT: 'd0', ...env }, stdio: ['ignore', 'ignore', 'pipe'] });
-			return readFileSync(join(dir, 'calls'), 'utf8').trim().split('\n').filter(Boolean);
+			writeFileSync(join(dir, 'node-calls'), '');
+			execFileSync('bash', ['-c', script], { env: { PATH: `${dir}:/usr/bin:/bin`, CALLS: join(dir, 'calls'), NODE_CALLS: join(dir, 'node-calls'), READ_RETRY_SECONDS: '0', AFTER: join(dir, 'after'), GITHUB_STEP_SUMMARY: '/dev/null', PAIR: '300-1', DEPLOYMENT: 'd0', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+			return readFileSync(join(dir, 'calls'), 'utf8').split('\n').filter(Boolean).map((line) => line.split('\x1f').slice(0, -1).join(' | '));
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
 	}
+
+	/** A wrangler call as runDeploy returns it. */
+	const wrangler = (...args) => ['exec', 'wrangler', ...args].join(' | ');
+	const DEPLOY_FULL = (message) => wrangler('deploy', '--config', 'wrangler.jsonc', '--tag', 'full-300-1', '--message', message);
+	const PROMOTE = (half, message) => wrangler('versions', 'deploy', '--config', 'wrangler.jsonc', '--version-tag', `${half}-300-1@100`, '--message', message, '--yes');
+	const UPLOAD_FULL = wrangler('versions', 'upload', '--config', 'wrangler.jsonc', '--tag', 'full-300-1', '--message', 'full half of 300-1');
 
 	test('the deploy step reads the deployment the guard state named', () => {
 		const step = named('Deploy the Worker');
@@ -156,37 +165,39 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 	});
 
 	test('on: the full half goes live with wrangler deploy, the guard mark carried when the read had one', () => {
-		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false'), ['exec wrangler deploy --config wrangler.jsonc --tag full-300-1 --message full half of 300-1']);
-		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: 'quota guard' }, 'switched=false'), ['exec wrangler deploy --config wrangler.jsonc --tag full-300-1 --message quota guard: on, full half of 300-1']);
+		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false'), [DEPLOY_FULL('full half of 300-1')]);
+		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: 'quota guard' }, 'switched=false'), [DEPLOY_FULL('quota guard: on, full half of 300-1')]);
 	});
 
 	test('tripped: the full half is only uploaded and the assets-only half goes live under the off mark', () => {
-		assert.deepEqual(runDeploy({ TRIPPED: 'true', MARK: 'quota switch by hand' }, 'switched=false'), [
-			'exec wrangler versions upload --config wrangler.jsonc --tag full-300-1 --message full half of 300-1',
-			'exec wrangler versions deploy --config wrangler.jsonc --version-tag assets-300-1@100 --message quota switch by hand: off, deploy of 300-1 while the code paths are off --yes',
-		]);
+		assert.deepEqual(runDeploy({ TRIPPED: 'true', MARK: 'quota switch by hand' }, 'switched=false'), [UPLOAD_FULL, PROMOTE('assets', 'quota switch by hand: off, deploy of 300-1 while the code paths are off')]);
 	});
 
 	test('the guard switched off during the deploy: the assets-only half goes live again under its mark', () => {
 		const calls = runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=true\nmark=quota guard');
-		assert.deepEqual(calls, [
-			'exec wrangler deploy --config wrangler.jsonc --tag full-300-1 --message full half of 300-1',
-			'exec wrangler versions deploy --config wrangler.jsonc --version-tag assets-300-1@100 --message quota guard: off, deploy of 300-1 while the code paths are off --yes',
-		]);
+		assert.deepEqual(calls, [DEPLOY_FULL('full half of 300-1'), PROMOTE('assets', 'quota guard: off, deploy of 300-1 while the code paths are off')]);
 	});
 
 	test('switched back on during a deploy held off: the full half goes live, the guard mark carried', () => {
 		const calls = runDeploy({ TRIPPED: 'true', MARK: 'quota guard' }, 'switched=true\ntripped=false\nmark=quota guard');
 		assert.equal(calls.length, 3);
-		assert.equal(calls[2], 'exec wrangler versions deploy --config wrangler.jsonc --version-tag full-300-1@100 --message quota guard: on, full half of 300-1 --yes');
+		assert.equal(calls[2], PROMOTE('full', 'quota guard: on, full half of 300-1'));
 	});
 
 	test('another deploy in between that changes nothing: no second promotion', () => {
 		assert.equal(runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=false\nmark=').length, 1);
 	});
 
-	test('the deployments since the read cannot be read: the step fails', () => {
-		assert.throws(() => runDeploy({ TRIPPED: 'false', MARK: '' }, '', 1));
+	test('a failed read of the deployments since is tried again, and the promotion is not repeated', () => {
+		const calls = runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=true\nmark=quota guard', 2);
+		assert.deepEqual(calls, [DEPLOY_FULL('full half of 300-1'), PROMOTE('assets', 'quota guard: off, deploy of 300-1 while the code paths are off')]);
+	});
+
+	test('the deployments since the read cannot be read three times: the step fails and says what to run', () => {
+		assert.throws(
+			() => runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false', 3),
+			(error) => /could not be read: 300-1 is live as deployed; run node scripts\/guard-state\.mjs --since d0 --pair 300-1 by hand/.test(String(error.stdout)),
+		);
 	});
 
 	test('a deploy over an unfinished switch back carries the guard mark, so the guard still clears its rule', async () => {

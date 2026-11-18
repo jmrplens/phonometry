@@ -101,6 +101,7 @@ site/.astro/
 # (site/worker/README.md).
 site/worker/stage/
 site/worker/.wrangler/
+site/worker/guard/.wrangler/
 
 # The llms files the site publishes: llms.txt, llms-full.txt and the shards
 # under llms/, written into site/public/ before the build by

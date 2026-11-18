@@ -1,12 +1,14 @@
 // The staging step on small trees made to fail each of its checks.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, test } from 'node:test';
 
 import { twinExclusions } from '../lib/twins.mjs';
-import { MAX_FILE_BYTES, MAX_FILES, buildOrigin, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
+import { beaconScript } from '../lib/beacon.mjs';
+import { MAX_FILE_BYTES, MAX_FILES, agentPathProblems, beaconProblems, buildOrigin, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 const prefix = '/phonometry';
 const exclusions = twinExclusions(prefix);
@@ -188,5 +190,73 @@ describe('stage', () => {
 	test('an existing output directory is refused rather than mixed into', () => {
 		const out = tree({ 'stale.html': 'x' });
 		assert.throws(() => stage({ from: tree(good()), out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false }), /already exists/);
+	});
+});
+
+describe('the beacon in the staged copy', () => {
+	/** good() with every HTML file a page with one body, as the build writes them. */
+	const bodied = () => Object.fromEntries(Object.entries(good()).map(([path, body]) => [path, path.endsWith('.html') ? `${body}<body><main>x</main></body></html>` : body]));
+	/** sha256 of every file under a directory, by relative path. */
+	const hashes = (root) => Object.fromEntries(listTree(root).map(({ path }) => [path, createHash('sha256').update(readFileSync(join(root, path))).digest('hex')]));
+
+	test('withBeacon puts the script right before the one closing body tag', () => {
+		assert.equal(withBeacon('<html><body>x</body></html>', false), `<html><body>x${beaconScript(false)}</body></html>`);
+		assert.equal(withBeacon('<body>x</body>', true), `<body>x${beaconScript(true)}</body>`);
+		assert.throws(() => withBeacon('<body>x</body></body>', false), /closing body tags/);
+		assert.throws(() => withBeacon('<meta http-equiv="refresh">', false), /closing body tags/);
+	});
+
+	test('a page with no closing body tag, or two, stops a staging with the beacon', () => {
+		const root = tree({ ...bodied(), 'signals/index.html': '<html><head></head></html>' });
+		assert.deepEqual(beaconProblems(root, listTree(root)), ['signals/index.html: 0 closing body tags, the beacon needs exactly one']);
+		const report = stage({ from: root, out: join(tree({}), 's'), prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, beacon: true, checkOnly: true });
+		assert.match(report.problems.join('\n'), /signals\/index\.html: 0 closing body tags/);
+	});
+
+	test('without it, every staged file of the build is the build\u2019s file, byte for byte', () => {
+		const from = tree(bodied());
+		const out = join(tree({}), 'stage');
+		stage({ from, out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false });
+		const source = hashes(from);
+		const staged = hashes(join(out, 'phonometry'));
+		assert.deepEqual(staged, source);
+	});
+
+	test('with it, the build is left as it was and each staged page differs by the one script', () => {
+		const from = tree(bodied());
+		const before = hashes(from);
+		const out = join(tree({}), 'stage');
+		const report = stage({ from, out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, beacon: true });
+		assert.equal(report.problems.length, 0, report.problems.join('\n'));
+		assert.equal(report.beaconPages, 7);
+		assert.deepEqual(hashes(from), before, 'the build was not touched');
+		for (const { path } of listTree(from)) {
+			const built = readFileSync(join(from, path), 'utf8');
+			const staged = readFileSync(join(out, 'phonometry', path), 'utf8');
+			if (!path.endsWith('.html')) {
+				assert.equal(staged, built, path);
+				continue;
+			}
+			const script = beaconScript(path === '404.html');
+			assert.equal(staged.replace(script, ''), built, path);
+			assert.equal(staged.split(script).length, 2, path);
+		}
+		assert.equal(readFileSync(join(out, '404.html'), 'utf8'), readFileSync(join(out, 'phonometry', '404.html'), 'utf8'), 'the root 404 is the base one, flag included');
+		assert.match(readFileSync(join(out, '404.html'), 'utf8'), /nf:1/);
+	});
+});
+
+describe('the paths that run the Worker', () => {
+	test('only Markdown copies, llms files, robots.txt and XML files match a pattern', () => {
+		const files = listTree(tree({ ...good(), 'llms.txt': 'x', 'llms/llms-signals.txt': 'x', 'sitemap-index.xml': 'x', 'rss.xml': 'x' }));
+		assert.deepEqual(agentPathProblems(files, prefix, ['404.html', 'robots.txt', 'llms.txt']), []);
+	});
+
+	test('a file a pattern catches that is no agent file is refused', () => {
+		// `*` crosses `/`, so /phonometry/llms*.txt also catches a text file
+		// inside a folder whose name starts with llms.
+		assert.deepEqual(agentPathProblems([{ path: 'llms-notes/readme.txt' }, { path: 'guides/index.md.html' }], prefix), [
+			'/phonometry/llms-notes/readme.txt would run the Worker, and it is no agent file (lib/agent-paths.mjs)',
+		]);
 	});
 });

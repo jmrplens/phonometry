@@ -1,0 +1,23 @@
+// The phonometry.dev Worker with its code taken out: the same assets, served
+// the same way, and nothing that runs a script. Every deploy uploads it as a
+// version beside the full one (tagged assets-<k> and full-<k>), and the quota
+// guard (guard/, lib/guard.mjs) rolls phonometry-docs to it at 95 % of the
+// day's Workers requests, so the agent files are plain assets again and only
+// the WAF answers the beacon. test/wrangler.test.mjs derives it from
+// wrangler.jsonc (that file less main, the assets binding, run_worker_first,
+// the dataset and the limiter), so the two cannot drift.
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "phonometry-docs",
+	"account_id": "4dbfb3b955a0c856bfe066f2a6061dd5",
+	"compatibility_date": "2026-11-17",
+	"assets": {
+		"directory": "./stage",
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "404-page"
+	},
+	"routes": [{ "pattern": "phonometry.dev", "custom_domain": true }],
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": { "enabled": false }
+}

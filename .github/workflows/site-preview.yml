@@ -1,8 +1,9 @@
 # Deploys the documentation docs.yml built to the phonometry.dev preview.
 #
-# The preview is one Cloudflare Worker with Static Assets and no code
-# (site/worker/README.md): requests for its pages, Markdown copies and files
-# run no script, so the daily request quota of Workers Free cannot stop it.
+# The preview is one Cloudflare Worker with Static Assets (site/worker/README.md):
+# pages and files run no script, so the daily request quota of Workers Free
+# cannot stop them; only the visitor beacon and the files agents read run the
+# Worker, which logs them, and the quota guard switches those off at 95 %.
 # docs.jmrp.io stays the canonical site and this workflow never touches it.
 #
 # By hand for now: Actions > Site preview > Run workflow, with the id of a
@@ -129,14 +130,23 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pages"
           tar -xf "$RUNNER_TEMP/pages-artifact/artifact.tar" -C "$RUNNER_TEMP/pages"
           echo "$(find "$RUNNER_TEMP/pages" -type f | wc -l) files in the build"
-      - name: Stage the build (every check runs before anything is written)
-        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage
+      - name: Stage the build with the beacon (every check runs before anything is written)
+        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage --beacon
+      - name: Upload the assets-only version the quota guard rolls to
+        # Same stage, no code: tagged as the other half of this deploy's pair,
+        # so the guard (site/worker/guard) can switch between them.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
+          PAIR: ${{ inputs.run_id }}-${{ inputs.attempt }}
+        run: pnpm exec wrangler versions upload --config wrangler.assets-only.jsonc --tag "assets-$PAIR" --message "assets-only half of $PAIR"
+        working-directory: site/worker
       - name: Deploy the Worker
         # wrangler.jsonc names the account, so the token needs no account
         # listing and no variable can point the deploy elsewhere.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
-        run: pnpm exec wrangler deploy --config wrangler.jsonc
+          PAIR: ${{ inputs.run_id }}-${{ inputs.attempt }}
+        run: pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "full half of $PAIR"
         working-directory: site/worker
       - name: Check what the assets answer
         run: |
@@ -158,6 +168,10 @@ jobs:
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
           expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H 'Origin: https://phonometry.dev' -H 'Content-Type: text/plain' --data '{"p":"/phonometry/signals/","wd":1}' https://phonometry.dev/_v)
+          if [ "$code" != 204 ]; then echo "::error::the beacon answered $code, not 204"; fail=1; else echo "ok   the beacon answers 204"; fi
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 https://phonometry.dev/_v)
+          if [ "$code" != 403 ]; then echo "::error::a GET of the beacon answered $code, not the WAF's 403"; fail=1; else echo "ok   the WAF refuses a GET of the beacon"; fi
           n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')
           if [ "$n" != 1 ]; then echo "::error::the copy carries $n Content-Type headers"; fail=1; else echo "ok   one Content-Type"; fi
           exit "$fail"

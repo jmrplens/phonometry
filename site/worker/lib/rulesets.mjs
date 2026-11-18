@@ -1,7 +1,7 @@
 // Comparing the zone's live rules with the generated ones.
 
 /** The fields of a rule this repository decides; ids, versions and dates are Cloudflare's. */
-const FIELDS = ['description', 'expression', 'action', 'action_parameters', 'enabled'];
+const FIELDS = ['description', 'expression', 'action', 'action_parameters', 'ratelimit', 'enabled'];
 
 /** A JSON value with its object keys sorted, so two equal rules print the same. */
 function canonical(value) {

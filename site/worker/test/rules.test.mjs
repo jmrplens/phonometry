@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { redirectRules, responseHeaderRules, wildcardMatch } from '../lib/rules.mjs';
+import { IMMUTABLE, redirectRules, responseHeaderRules, wildcardMatch } from '../lib/rules.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
 const prefix = '/phonometry';
@@ -102,10 +102,23 @@ describe('redirectRules', () => {
 });
 
 describe('responseHeaderRules', () => {
+	const rules = responseHeaderRules({ host: 'phonometry.dev', prefix });
+	const byRef = Object.fromEntries(rules.map((rule) => [rule.ref, rule]));
+
+	test('three rules in order, all rewrites', () => {
+		assert.deepEqual(
+			rules.map(({ ref }) => ref),
+			['markdown-twin-vary', 'not-found-plain', 'astro-immutable'],
+		);
+		for (const rule of rules) {
+			assert.equal(rule.action, 'rewrite');
+			assert.equal(rule.enabled, true);
+			assert.ok(rule.description.length > 0);
+		}
+	});
+
 	test('the 302 of the Markdown rule varies on Accept and is never stored', () => {
-		const [rule] = responseHeaderRules({ host: 'phonometry.dev' });
-		assert.equal(rule.ref, 'markdown-twin-vary');
-		assert.equal(rule.action, 'rewrite');
+		const rule = byRef['markdown-twin-vary'];
 		assert.equal(
 			rule.expression,
 			'http.host eq "phonometry.dev" and http.response.code eq 302 and ends_with(http.request.uri.path, "/") and any(http.request.headers["accept"][*] wildcard "*text/markdown*")',
@@ -114,6 +127,28 @@ describe('responseHeaderRules', () => {
 			Vary: { operation: 'set', value: 'Accept' },
 			'Cache-Control': { operation: 'set', value: 'no-store' },
 		});
+	});
+
+	test('a 404 names no copy and no canonical, is HTML and varies on encoding only', () => {
+		const rule = byRef['not-found-plain'];
+		assert.equal(rule.expression, 'http.host eq "phonometry.dev" and http.response.code eq 404');
+		assert.deepEqual(rule.action_parameters.headers, {
+			Link: { operation: 'remove' },
+			Vary: { operation: 'set', value: 'Accept-Encoding' },
+			'Content-Type': { operation: 'set', value: 'text/html; charset=utf-8' },
+		});
+	});
+
+	test('a content-hashed file is immutable only when it was found', () => {
+		const rule = byRef['astro-immutable'];
+		assert.equal(
+			rule.expression,
+			'http.host eq "phonometry.dev" and http.response.code in {200 304} and starts_with(http.request.uri.path, "/phonometry/_astro/")',
+		);
+		assert.deepEqual(rule.action_parameters.headers, { 'Cache-Control': { operation: 'set', value: IMMUTABLE } });
+		assert.equal(IMMUTABLE, 'public, max-age=31536000, immutable');
+		const root = responseHeaderRules({ host: 'phonometry.dev', prefix: '' }).at(-1);
+		assert.match(root.expression, /starts_with\(http\.request\.uri\.path, "\/_astro\/"\)$/);
 	});
 });
 

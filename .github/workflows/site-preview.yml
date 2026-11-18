@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: "Id of the docs.yml run on main whose pages artifact is deployed"
+        description: "Id of a successful docs.yml run on main whose pages artifact is deployed (checked before the download)"
         required: true
         type: string
       attempt:
@@ -62,6 +62,37 @@ jobs:
           set -euo pipefail
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::run_id must be a number"; exit 1; }
           [[ "$ATTEMPT" =~ ^[0-9]+$ ]] || { echo "::error::attempt must be a number"; exit 1; }
+      - name: Check the run is a docs.yml build of main in this repository
+        # The environment admits this workflow from main only, which limits
+        # who can read the tokens, not where the deployed pages come from:
+        # docs.yml can be dispatched on any branch and uploads its pages
+        # artifact whenever the event is not a pull request. So the run is
+        # read back, and anything but a successful push or dispatch of
+        # docs.yml on main, here, whose commit main contains, stops the deploy.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")
+          path=$(jq -r .path <<<"$run")
+          branch=$(jq -r .head_branch <<<"$run")
+          event=$(jq -r .event <<<"$run")
+          repo=$(jq -r .head_repository.full_name <<<"$run")
+          conclusion=$(jq -r .conclusion <<<"$run")
+          sha=$(jq -r .head_sha <<<"$run")
+          echo "run $RUN_ID: $path on $branch ($event) from $repo at $sha, $conclusion"
+          fail=0
+          [ "$path" = ".github/workflows/docs.yml" ] || { echo "::error::run $RUN_ID is $path, not docs.yml"; fail=1; }
+          [ "$branch" = "main" ] || { echo "::error::run $RUN_ID built $branch, not main"; fail=1; }
+          [[ "$event" = "push" || "$event" = "workflow_dispatch" ]] || { echo "::error::run $RUN_ID was a $event"; fail=1; }
+          [ "$repo" = "$GITHUB_REPOSITORY" ] || { echo "::error::run $RUN_ID came from $repo"; fail=1; }
+          [ "$conclusion" = "success" ] || { echo "::error::run $RUN_ID concluded $conclusion"; fail=1; }
+          [ "$fail" = 0 ] || exit 1
+          # A commit main contains compares as identical to it or behind it.
+          status=$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$sha" --jq .status)
+          [[ "$status" = "identical" || "$status" = "behind" ]] || { echo "::error::$sha is not on main ($status)"; exit 1; }
+          echo "Deploying the pages docs.yml built from $sha" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -98,9 +129,10 @@ jobs:
       - name: Stage the build (every check runs before anything is written)
         run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage
       - name: Deploy the Worker
+        # wrangler.jsonc names the account, so the token needs no account
+        # listing and no variable can point the deploy elsewhere.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_PHONOMETRY_ACCOUNT_ID }}
         run: pnpm exec wrangler deploy --config wrangler.jsonc
         working-directory: site/worker
       - name: Check what the assets answer
@@ -120,18 +152,21 @@ jobs:
           expect "the copy names its page as canonical" "$base/signals/index.md" 200 '^link: <https://docs.jmrp.io/phonometry/signals/>; rel="canonical"'
           expect "a retired address answers 301" "$base/about/" 301 '^location: /phonometry/start/about/'
           expect "an unknown page answers 404" "$base/no-such-page/" 404
+          expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
+          expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
+          expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
+          n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')
+          if [ "$n" != 1 ]; then echo "::error::the copy carries $n Content-Type headers"; fail=1; else echo "ok   one Content-Type"; fi
           exit "$fail"
       - name: Check the zone rules
         if: ${{ !inputs.apply_rules }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ vars.CF_PHONOMETRY_ZONE_ID }}
         run: node site/worker/scripts/apply-rules.mjs --check
       - name: Put the zone rules, keeping what was there
         if: ${{ inputs.apply_rules }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ vars.CF_PHONOMETRY_ZONE_ID }}
         run: node site/worker/scripts/apply-rules.mjs --apply --backup-dir "$RUNNER_TEMP/rules-backup"
       - name: Keep the rules that were replaced
         if: ${{ inputs.apply_rules && always() }}
@@ -160,4 +195,24 @@ jobs:
           check "the root goes to the base path" 302 'https://phonometry.dev/phonometry/' "https://phonometry.dev/"
           check "a Markdown request gets the copy" 302 '/phonometry/signals/index.md' -H 'Accept: text/markdown' "https://phonometry.dev/phonometry/signals/"
           check "a clip goes where ranges answer 206" 302 'https://docs.jmrp.io/phonometry/media/' "https://phonometry.dev/phonometry/media/$(ls site/worker/stage/phonometry/media | grep -m1 '\.webm$')"
+          # _headers matches a path whatever the status; these three come
+          # from the response rules, which can read it.
+          absent() { # <what> <header-regex> <curl args...>
+            local what=$1 header=$2 got
+            shift 2
+            got=$(curl -sS -o /dev/null -D - --max-time 30 "$@")
+            if grep -qiE "$header" <<<"$got"; then echo "::error::$what: $(grep -iE "$header" <<<"$got" | head -1)"; fail=1; else echo "ok   $what"; fi
+          }
+          absent "an unknown page names no copy" '^link:' "https://phonometry.dev/phonometry/no-such-page/"
+          absent "an unknown copy names no canonical" '^link:' "https://phonometry.dev/phonometry/no-such-page/index.md"
+          absent "a missing build file is not cached for a year" '^cache-control:.*immutable' "https://phonometry.dev/phonometry/_astro/no-such-file.ABCDEF12.css"
           exit "$fail"
+      - name: Install the browser the clip check drives
+        run: pnpm exec puppeteer browsers install chrome
+        working-directory: site/worker
+      - name: Check a clip plays in a browser
+        # curl sees a clip as a 302 and a 206. A browser also holds the
+        # address it is redirected to against the page's
+        # Content-Security-Policy, which curl never reads; this plays two.
+        run: node scripts/check-clip.mjs
+        working-directory: site/worker

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { HEADER_RULE_LIMIT, HEADER_LINE_LIMIT, headersFile, parseHeaders, SECURITY_HEADERS } from '../lib/headers.mjs';
+import { mediaOrigins } from '../../src/data/site.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
 const prefix = '/phonometry';
@@ -109,9 +110,35 @@ describe('headersFile', () => {
 		assert.equal(headersFor(text, '/phonometry/es/index.md').get('link'), '<https://docs.jmrp.io/phonometry/es/>; rel="canonical"');
 	});
 
-	test('content-hashed assets are immutable, the rest keeps the default', () => {
-		assert.equal(headersFor(text, '/phonometry/_astro/x.css').get('cache-control'), 'public, max-age=31536000, immutable');
+	test('no rule touches the cache lifetime: a pattern would match a 404 too', () => {
+		assert.equal(headersFor(text, '/phonometry/_astro/x.css').has('cache-control'), false);
 		assert.equal(headersFor(text, '/phonometry/signals/').has('cache-control'), false);
+		assert.ok(!text.includes('Cache-Control'));
+	});
+
+	test('Markdown and text files say they are UTF-8, and only one Content-Type is left', () => {
+		for (const path of ['/phonometry/signals/index.md', '/phonometry/index.md', '/phonometry/es/reference/api/x/index.md']) {
+			assert.equal(headersFor(text, path).get('content-type'), 'text/markdown; charset=utf-8', path);
+		}
+		for (const path of ['/phonometry/llms.txt', '/phonometry/llms-full.txt', '/phonometry/llms/signals.txt', '/llms.txt', '/robots.txt']) {
+			assert.equal(headersFor(text, path).get('content-type'), 'text/plain; charset=utf-8', path);
+		}
+		assert.equal(headersFor(text, '/phonometry/signals/').has('content-type'), false);
+		for (const { pattern, lines } of parseHeaders(text).filter(({ lines }) => lines.some((line) => line.startsWith('Content-Type:')))) {
+			assert.equal(lines.indexOf('! Content-Type'), lines.findIndex((line) => line.startsWith('Content-Type:')) - 1, pattern);
+		}
+	});
+
+	test('the clip hosts are allowed as media sources, the rest of docs.jmrp.io rule 1 is unchanged', () => {
+		const csp = SECURITY_HEADERS.find(([name]) => name === 'Content-Security-Policy')[1];
+		const media = csp.split('; ').find((part) => part.startsWith('media-src '));
+		assert.deepEqual(media.split(' ').slice(1), ["'self'", ...mediaOrigins]);
+		assert.ok(mediaOrigins.includes('https://docs.jmrp.io'));
+		const rest = csp.split('; ').filter((part) => !part.startsWith('media-src ')).join('; ');
+		assert.equal(
+			rest,
+			"default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.shields.io https://cursor.com https://kiro.dev https://files.lmstudio.ai; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri https://jmrp.io/csp-report",
+		);
 	});
 
 	test('indexable drops the noindex, except on the llms files', () => {
@@ -119,6 +146,12 @@ describe('headersFile', () => {
 		assert.equal(headersFor(open, '/phonometry/signals/').has('x-robots-tag'), false);
 		assert.equal(headersFor(open, '/phonometry/llms.txt').get('x-robots-tag'), 'noindex');
 		assert.equal(headersFor(open, '/phonometry/llms/signals.txt').get('x-robots-tag'), 'noindex');
+		// The staging step copies llms.txt to the host root as well.
+		assert.equal(headersFor(open, '/llms.txt').get('x-robots-tag'), 'noindex');
+		assert.equal(headersFor(open, '/robots.txt').has('x-robots-tag'), false);
+		const root = headersFile({ ...options, prefix: '', origin: 'https://phonometry.dev', exclusions: twinExclusions(''), indexable: true });
+		assert.equal(headersFor(root, '/llms.txt').get('x-robots-tag'), 'noindex');
+		assert.equal(parseHeaders(root).filter(({ pattern }) => pattern === '/llms*').length, 1);
 	});
 
 	test('at the root the patterns lose the prefix', () => {

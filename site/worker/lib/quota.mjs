@@ -4,11 +4,10 @@
 // 00:00 UTC across every script of the account
 // (https://developers.cloudflare.com/workers/platform/limits/). Requests for
 // static assets that no script runs for are free and unlimited and do not
-// count. Cloudflare offers no notification for this count on the Free plan
-// (its usage, budget and spending alerts are for paid usage), so the
-// scheduled job in .github/workflows/workers-quota.yml reads it from the
-// GraphQL Analytics API (dataset workersInvocationsAdaptive) and fails, which
-// mails the maintainer, before the quota runs out.
+// count. The alert lives in the account, as a Cloudflare notification on the
+// same count; this module reads it from the GraphQL Analytics API (dataset
+// workersInvocationsAdaptive) for scripts/check-quota.mjs, a check run by
+// hand.
 
 export const DAILY_LIMIT = 100000;
 /** The fraction of the quota that warns, and the one that fails the job. */
@@ -87,23 +86,21 @@ export function assessQuota({ today, yesterday, now, expected, alertFraction = A
 	const percent = ((100 * total) / DAILY_LIMIT).toFixed(1);
 	const failures = [];
 	const warnings = [];
-	let level = 'ok';
 	if (total >= alertFraction * DAILY_LIMIT) {
-		level = 'alert';
 		failures.push(
 			`${total} of ${DAILY_LIMIT} Worker requests today (${percent} %), at or over ${Math.round(alertFraction * 100)} %; at this pace ${projection} by 00:00 UTC`,
 		);
 	} else if (total >= WARN_FRACTION * DAILY_LIMIT) {
-		level = 'warn';
 		warnings.push(`${total} of ${DAILY_LIMIT} Worker requests today (${percent} %); at this pace ${projection} by 00:00 UTC`);
 	}
 	if (yesterdayTotal >= SPENT_FRACTION * DAILY_LIMIT) {
-		level = 'alert';
 		failures.push(`yesterday: ${yesterdayTotal} of ${DAILY_LIMIT} Worker requests; the quota was probably reached`);
 	}
 	for (const { scriptName, requests } of scripts) {
 		if (!expected.includes(scriptName)) failures.push(`${scriptName} is not an expected script (${requests} requests today)`);
 	}
+	// The level follows from what was found, so a failure can never read as ok.
+	const level = failures.length > 0 ? 'alert' : warnings.length > 0 ? 'warn' : 'ok';
 	return { level, total, yesterdayTotal, projection, scripts, failures, warnings, now };
 }
 
@@ -112,7 +109,7 @@ function toRow(row) {
 }
 
 /**
- * The job summary.
+ * The report check-quota.mjs prints.
  *
  * @param {ReturnType<typeof assessQuota>} report From assessQuota.
  * @returns {string} Markdown.

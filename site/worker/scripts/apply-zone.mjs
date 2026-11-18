@@ -1,7 +1,7 @@
 // Brings the phonometry.dev zone to its DNS records and settings (lib/zone.mjs).
 //
 // Usage, from the maintainer's machine (it is not run by CI):
-//   CLOUDFLARE_EMAIL=... CLOUDFLARE_API_KEY=... CLOUDFLARE_ZONE_ID=... \
+//   CLOUDFLARE_EMAIL=... CLOUDFLARE_API_KEY=... \
 //     node site/worker/scripts/apply-zone.mjs [--apply] [--backup-dir <dir>]
 //
 // Without --apply it reads and prints the plan, and writes nothing. With it,
@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-import { API, authHeaders, cfApi } from '../lib/cloudflare.mjs';
+import { API, ZONE_ID, authHeaders, cfApi, ignoredTargets } from '../lib/cloudflare.mjs';
 import { ZONE_SETTINGS, zonePlan } from '../lib/zone.mjs';
 
 export const ZONE = 'phonometry.dev';
@@ -45,11 +45,8 @@ export async function runApplyZone({ argv, env, fetchImpl = fetch, sink = null }
 		log(error.message);
 		return 2;
 	}
-	const zone = env.CLOUDFLARE_ZONE_ID;
-	if (!zone) {
-		log('set CLOUDFLARE_ZONE_ID');
-		return 2;
-	}
+	const zone = ZONE_ID;
+	for (const line of ignoredTargets(env)) log(line);
 	const api = (path, options = {}) => cfApi(path, { ...options, env, fetchImpl });
 	// The records endpoint pages; cfApi keeps only `result`, so this one call reads the envelope.
 	const fetchPage = async (path) => {

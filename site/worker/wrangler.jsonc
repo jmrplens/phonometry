@@ -11,6 +11,11 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "phonometry-docs",
+	// The Phonometry account. An account id is not a secret, and wrangler reads
+	// it before CLOUDFLARE_ACCOUNT_ID, so a shell that points that variable at
+	// another account (or a token that cannot list accounts) still deploys,
+	// rolls back and lists versions here and nowhere else.
+	"account_id": "4dbfb3b955a0c856bfe066f2a6061dd5",
 	"compatibility_date": "2026-11-17",
 	"assets": {
 		// Written by stage.mjs: the build under its base path, plus _headers,

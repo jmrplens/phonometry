@@ -6,7 +6,8 @@
 // else a domain that serves a site and sends no mail needs: a proxied
 // placeholder so `www` can be redirected by a zone rule, and the records that
 // tell every mail server this domain sends and receives nothing (null MX,
-// RFC 7505; an SPF that authorises no one; DMARC reject; a revoked DKIM key).
+// RFC 7505; an SPF that authorises no one; DMARC reject; a revoked DKIM key),
+// on the apex and on `www`, the two names that resolve.
 // Settings turn off the two features that rewrite the bytes the build wrote
 // (email obfuscation, automatic HTTPS rewrites), so the preview serves the
 // build as built, and turn on HTTPS everywhere with HSTS on every response,
@@ -15,6 +16,11 @@
 /** The records, without the zone apex suffix in `name` ('@' is the apex). */
 export const DNS_RECORDS = Object.freeze([
 	Object.freeze({ type: 'AAAA', name: 'www', content: '100::', proxied: true, comment: 'www-to-apex redirect placeholder' }),
+	// www has an address, so it gets the same refusals as the apex: without
+	// them it would take an implicit MX from its address (RFC 5321 5.1) and
+	// read as SPF "none" to a receiver that does not enforce DMARC.
+	Object.freeze({ type: 'MX', name: 'www', content: '.', priority: 0, proxied: false, comment: 'null MX, RFC 7505' }),
+	Object.freeze({ type: 'TXT', name: 'www', content: '"v=spf1 -all"', proxied: false, comment: 'no sender' }),
 	Object.freeze({ type: 'MX', name: '@', content: '.', priority: 0, proxied: false, comment: 'null MX, RFC 7505' }),
 	Object.freeze({ type: 'TXT', name: '@', content: '"v=spf1 -all"', proxied: false, comment: 'no sender' }),
 	Object.freeze({ type: 'TXT', name: '_dmarc', content: '"v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s"', proxied: false, comment: 'reject all' }),

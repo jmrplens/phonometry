@@ -9,6 +9,8 @@
 // 2,000 characters a line. None of it applies to a response that Worker code
 // builds, which is one more reason the preview has no code.
 
+import { mediaOrigins } from '../../src/data/site.mjs';
+
 /** The documented limits of a `_headers` file. */
 export const HEADER_RULE_LIMIT = 100;
 export const HEADER_LINE_LIMIT = 2000;
@@ -16,13 +18,17 @@ export const HEADER_LINE_LIMIT = 2000;
 /**
  * What every response carries: docs.jmrp.io's response header rule 1 (zone
  * ruleset "Response header transforms", copied verbatim on 2026-11-17), plus
- * the `nosniff` that HSTS settings of that zone send. Order kept.
+ * the `nosniff` that HSTS settings of that zone send. Order kept. The one
+ * change is `media-src`: on docs.jmrp.io a clip is served from the page's own
+ * origin, while here the zone rule clips-to-range-host redirects it to a host
+ * of `mediaOrigins` (site/src/data/site.mjs), and a browser holds the
+ * redirect target to this policy as well as to the page's meta tag.
  */
 export const SECURITY_HEADERS = Object.freeze([
 	['Access-Control-Allow-Origin', '*'],
 	[
 		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.shields.io https://cursor.com https://kiro.dev https://files.lmstudio.ai; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri https://jmrp.io/csp-report",
+		`default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.shields.io https://cursor.com https://kiro.dev https://files.lmstudio.ai; font-src 'self' data:; ${["media-src 'self'", ...mediaOrigins].join(' ')}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri https://jmrp.io/csp-report`,
 	],
 	['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()'],
 	['Referrer-Policy', 'strict-origin-when-cross-origin'],
@@ -30,8 +36,16 @@ export const SECURITY_HEADERS = Object.freeze([
 	['X-Content-Type-Options', 'nosniff'],
 ]);
 
-/** Content-hashed build assets: their name changes when their bytes do. */
-const IMMUTABLE = 'public, max-age=31536000, immutable';
+/**
+ * The text types whose files carry UTF-8 that is not ASCII (Markdown copies,
+ * llms files, robots.txt). The asset server names the type from the
+ * extension with no charset, and a browser then reads the bytes as
+ * windows-1252; docs.jmrp.io says utf-8, and so does this.
+ */
+export const TEXT_TYPES = Object.freeze([
+	['/*.md', 'text/markdown; charset=utf-8'],
+	['/*.txt', 'text/plain; charset=utf-8'],
+]);
 
 /**
  * Refuses a base path or an origin that would write wrong patterns.
@@ -81,8 +95,16 @@ export function headersFile({ prefix, origin, exclusions, indexable }) {
 	// A copy names its page as canonical, on the origin the build was made for.
 	block(`${prefix}/index.md`, `Link: <${origin}${prefix}/>; rel="canonical"`);
 	block(`${prefix}/*/index.md`, `Link: <${origin}${prefix}/:splat/>; rel="canonical"`);
-	if (indexable) block(`${prefix}/llms*`, 'X-Robots-Tag: noindex');
-	block(`${prefix}/_astro/*`, '! Cache-Control', `Cache-Control: ${IMMUTABLE}`);
+	// The llms files stay out of search indexes, as on docs.jmrp.io; the
+	// staging step also copies llms.txt to the host root.
+	if (indexable) {
+		block(`${prefix}/llms*`, 'X-Robots-Tag: noindex');
+		if (prefix !== '') block('/llms*', 'X-Robots-Tag: noindex');
+	}
+	for (const [pattern, type] of TEXT_TYPES) block(pattern, '! Content-Type', `Content-Type: ${type}`);
+	// No rule for the content-hashed `_astro/` files: a pattern matches a 404
+	// as well, and a one-year immutable 404 would outlive the deploy that
+	// fixes it. The zone rule astro-immutable (lib/rules.mjs) sets it on a 200.
 	return `${blocks.join('\n\n')}\n`;
 }
 

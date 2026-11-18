@@ -6,6 +6,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
+import { ACCOUNT_ID } from '../lib/cloudflare.mjs';
+
 /** wrangler.jsonc without its comments and trailing commas. */
 function readConfig() {
 	const text = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8');
@@ -48,4 +50,9 @@ test('the assets are the staged build, served as a static site', () => {
 	assert.deepEqual(routes, [{ pattern: 'phonometry.dev', custom_domain: true }]);
 	assert.equal(workersDev, false);
 	assert.equal(previewUrls, false);
+});
+
+test('the account is pinned, so the ambient CLOUDFLARE_ACCOUNT_ID cannot pick another one', () => {
+	assert.equal(readConfig().account_id, '4dbfb3b955a0c856bfe066f2a6061dd5');
+	assert.equal(readConfig().account_id, ACCOUNT_ID);
 });

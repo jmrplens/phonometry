@@ -1,7 +1,7 @@
 // Checks, or puts, the zone rules of phonometry.dev (lib/rules.mjs).
 //
 // Usage:
-//   CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ZONE_ID=... node site/worker/scripts/apply-rules.mjs
+//   CLOUDFLARE_API_TOKEN=... node site/worker/scripts/apply-rules.mjs
 //       [--check | --apply] [--backup-dir <dir>] [--clip-base <url/>]
 //
 // --check (the default) reads both phase entrypoints and exits 1 when the live
@@ -16,8 +16,8 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-import { basePath } from '../../src/data/site.mjs';
-import { CloudflareError, cfApi } from '../lib/cloudflare.mjs';
+import { basePath, mediaOrigins } from '../../src/data/site.mjs';
+import { CloudflareError, ZONE_ID, cfApi, ignoredTargets } from '../lib/cloudflare.mjs';
 import { redirectRules, responseHeaderRules } from '../lib/rules.mjs';
 import { ruleDrift } from '../lib/rulesets.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
@@ -26,11 +26,36 @@ export const HOST = 'phonometry.dev';
 /** Until the R2 bucket serves the clips, docs.jmrp.io does: it answers ranges with 206. */
 export const CLIP_BASE = 'https://docs.jmrp.io/phonometry/media/';
 
+/**
+ * Refuses a clip host the pages do not allow.
+ *
+ * A browser holds the address a clip is redirected to to the page's
+ * Content-Security-Policy, so a host missing from `media-src` blocks every
+ * clip while curl still sees a 302 and a 206. Both policies list
+ * `mediaOrigins` (site/src/data/site.mjs); a new host goes there first, and a
+ * build with it is deployed before the rule points at it.
+ *
+ * @param {string} clipBase The clip base, ending in `/`.
+ */
+export function checkClipBase(clipBase) {
+	let url;
+	try {
+		url = new URL(clipBase);
+	} catch {
+		throw new Error(`clip base is not a URL: ${clipBase}`);
+	}
+	if (url.protocol !== 'https:' || !clipBase.endsWith('/')) throw new Error(`clip base must be https and end in /: ${clipBase}`);
+	if (!mediaOrigins.includes(url.origin)) {
+		throw new Error(`clip host ${url.origin} is not in mediaOrigins (site/src/data/site.mjs), so the pages would block its clips`);
+	}
+}
+
 /** The two phases and the rules each takes. */
 export function generatedPhases({ clipBase = CLIP_BASE, prefix = basePath } = {}) {
+	checkClipBase(clipBase);
 	return [
 		{ phase: 'http_request_dynamic_redirect', rules: redirectRules({ host: HOST, prefix, exclusions: twinExclusions(prefix), clipBase }) },
-		{ phase: 'http_response_headers_transform', rules: responseHeaderRules({ host: HOST }) },
+		{ phase: 'http_response_headers_transform', rules: responseHeaderRules({ host: HOST, prefix }) },
 	];
 }
 
@@ -63,11 +88,12 @@ export async function runApplyRules({ argv, env, fetchImpl = fetch, sink = null 
 		log(error.message);
 		return 2;
 	}
-	const zone = env.CLOUDFLARE_ZONE_ID;
-	if (!zone || (args.check && args.apply)) {
-		log('set CLOUDFLARE_ZONE_ID, and pass at most one of --check and --apply');
+	if (args.check && args.apply) {
+		log('pass at most one of --check and --apply');
 		return 2;
 	}
+	const zone = ZONE_ID;
+	for (const line of ignoredTargets(env)) log(line);
 	const api = (path, options = {}) => cfApi(path, { ...options, env, fetchImpl });
 	const backupDir = args['backup-dir'] ?? env.RUNNER_TEMP ?? process.cwd();
 	const stamp = new Date().toISOString().replaceAll(':', '-');

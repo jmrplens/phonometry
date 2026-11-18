@@ -9,6 +9,30 @@
 export const API = 'https://api.cloudflare.com/client/v4';
 
 /**
+ * The Phonometry account and its phonometry.dev zone. Neither id is a secret.
+ * They are fixed here, not read from CLOUDFLARE_ACCOUNT_ID or
+ * CLOUDFLARE_ZONE_ID, because a shell can hold those for another account (the
+ * maintainer's does), and a rule apply aimed at another zone would replace
+ * that zone's rules. wrangler.jsonc names the same account (its test holds the
+ * two equal).
+ */
+export const ACCOUNT_ID = '4dbfb3b955a0c856bfe066f2a6061dd5';
+export const ZONE_ID = '594554a63737deee229566971a765fd4';
+
+/**
+ * A note for a CLOUDFLARE_ZONE_ID or CLOUDFLARE_ACCOUNT_ID that names something else, which is ignored.
+ *
+ * @param {Record<string, string | undefined>} env The environment.
+ * @returns {string[]} The lines to print, empty when nothing is set or it matches.
+ */
+export function ignoredTargets(env) {
+	const lines = [];
+	if (env.CLOUDFLARE_ZONE_ID && env.CLOUDFLARE_ZONE_ID !== ZONE_ID) lines.push(`CLOUDFLARE_ZONE_ID names another zone and is ignored: this acts on phonometry.dev (${ZONE_ID}) only`);
+	if (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_ACCOUNT_ID !== ACCOUNT_ID) lines.push(`CLOUDFLARE_ACCOUNT_ID names another account and is ignored: this reads the Phonometry account (${ACCOUNT_ID}) only`);
+	return lines;
+}
+
+/**
  * The authentication headers the environment provides.
  *
  * @param {Record<string, string | undefined>} env The environment.

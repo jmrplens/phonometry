@@ -129,16 +129,29 @@ export function markdownExpression({ host, prefix, exclusions }) {
 	return parts.join(' and ');
 }
 
+/** The cache lifetime of a content-hashed build file: its name changes when its bytes do. */
+export const IMMUTABLE = 'public, max-age=31536000, immutable';
+
 /**
- * The `http_response_headers_transform` rules: the Markdown rule's 302 varies
- * on Accept and is never stored, as docs-edge's own 302 does. Should this rule
- * fail to apply, the 302 still works: a 302 without freshness information is
- * not stored by a shared cache.
+ * The `http_response_headers_transform` rules, which can read the status that
+ * `_headers` cannot (its patterns match a path whatever the answer):
  *
- * @param {{host: string}} options
+ * - the Markdown rule's 302 varies on Accept and is never stored, as
+ *   docs-edge's own 302 does. Should this rule fail to apply, the 302 still
+ *   works: a 302 without freshness information is not stored by a shared cache;
+ * - a 404 announces nothing: `_headers` gives every slash path a `Link` to its
+ *   copy and every `index.md` a canonical `Link`, and on an address that does
+ *   not exist both name another 404. The answer is the site's 404 page, so it
+ *   is labelled HTML whatever its extension, and it varies only on encoding,
+ *   as docs.jmrp.io's 404 does;
+ * - a content-hashed `_astro/` file is cached for a year when it is found, and
+ *   only then: a missing one keeps the asset server's revalidating default.
+ *
+ * @param {{host: string, prefix: string}} options
  * @returns {object[]} The rules.
  */
-export function responseHeaderRules({ host }) {
+export function responseHeaderRules({ host, prefix }) {
+	const h = literal(host, 'host');
 	return [
 		{
 			ref: 'markdown-twin-vary',
@@ -149,6 +162,32 @@ export function responseHeaderRules({ host }) {
 				headers: {
 					Vary: { operation: 'set', value: 'Accept' },
 					'Cache-Control': { operation: 'set', value: 'no-store' },
+				},
+			},
+			enabled: true,
+		},
+		{
+			ref: 'not-found-plain',
+			description: 'a 404 is the site page and names no copy and no canonical',
+			expression: `http.host eq ${h} and http.response.code eq 404`,
+			action: 'rewrite',
+			action_parameters: {
+				headers: {
+					Link: { operation: 'remove' },
+					Vary: { operation: 'set', value: 'Accept-Encoding' },
+					'Content-Type': { operation: 'set', value: 'text/html; charset=utf-8' },
+				},
+			},
+			enabled: true,
+		},
+		{
+			ref: 'astro-immutable',
+			description: 'a content-hashed build file that was found is cached for a year',
+			expression: `http.host eq ${h} and http.response.code in {200 304} and starts_with(http.request.uri.path, ${literal(`${prefix}/_astro/`, 'prefix')})`,
+			action: 'rewrite',
+			action_parameters: {
+				headers: {
+					'Cache-Control': { operation: 'set', value: IMMUTABLE },
 				},
 			},
 			enabled: true,

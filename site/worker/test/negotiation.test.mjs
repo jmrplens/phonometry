@@ -2,8 +2,9 @@
 // against the negotiation docs.jmrp.io runs (docs-edge's prefersMarkdown).
 //
 // A rule expression cannot read q-values, so it approximates: Accept names
-// text/markdown and names no HTML type before it. This file lists every
-// Accept on which the two disagree; a new disagreement fails it.
+// text/markdown and names no HTML type before it. The two disagree in two
+// classes, named below and in README.md; a generated grid of Accepts checks
+// that every disagreement falls in one of them, so a new kind fails here.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
@@ -49,32 +50,106 @@ const MATRIX = new Map([
 	['text/markdown;level=1;q=0', [false, true]], // q=0 again
 ]);
 
-/** The Accepts on which the preview and docs.jmrp.io answer differently. README.md lists the same five. */
-const DIVERGENCES = [
-	'text/html,text/markdown',
-	'application/xhtml+xml, text/markdown',
-	'text/markdown;q=0, text/html',
-	'text/markdown;q=0.5, text/html',
-	'text/markdown;level=1;q=0',
-];
+/** The q of a parsed Accept member: 1 when absent or unreadable, as both sides read it. */
+function members(accept) {
+	return accept.split(',').map((part, at) => {
+		const [type, ...params] = part.trim().split(';');
+		let q = 1;
+		for (const param of params) {
+			const match = /^q\s*=\s*(\d*(?:\.\d+)?)$/i.exec(param.trim());
+			if (match && match[1] !== '') q = Number.parseFloat(match[1]);
+		}
+		return { type: type.trim().toLowerCase(), q, at };
+	});
+}
 
-describe('markdown-twin rule against prefersMarkdown', () => {
-	test('every Accept of the matrix gives the listed pair', () => {
-		for (const [accept, [edge, rule]] of MATRIX) {
-			assert.equal(prefersMarkdown(accept), edge, `prefersMarkdown(${JSON.stringify(accept)})`);
-			assert.equal(page(accept), rule, `rule(${JSON.stringify(accept)})`);
+const EXACT_HTML = new Set(['text/html', 'application/xhtml+xml']);
+
+/**
+ * The class a disagreement belongs to, or null for one nobody named.
+ *
+ * A: the rule answers HTML and docs.jmrp.io Markdown, because an HTML type is
+ *    named before text/markdown (docs.jmrp.io weighs q-values and gives ties
+ *    to Markdown; the rule sees only the order).
+ * B: the rule answers Markdown and docs.jmrp.io HTML, because text/markdown
+ *    carries q=0 (refused), or a lower q than an HTML type named after it.
+ */
+function disagreementClass(accept, edge, rule) {
+	const parts = members(accept);
+	const markdown = parts.filter(({ type }) => type === 'text/markdown');
+	if (markdown.length !== 1) return null;
+	const [md] = markdown;
+	const html = parts.filter(({ type }) => EXACT_HTML.has(type));
+	if (edge && !rule && html.some(({ at }) => at < md.at)) return 'A';
+	if (!edge && rule && (md.q === 0 || html.some(({ at, q }) => at > md.at && q > md.q))) return 'B';
+	return null;
+}
+
+/** Accepts built from text/markdown and up to two other types, every q and every order. */
+function* grid() {
+	const qs = ['', ';q=0', ';q=0.1', ';q=0.5', ';q=0.9', ';q=1'];
+	const others = ['text/html', 'application/xhtml+xml', 'text/*', '*/*', 'text/plain'];
+	const items = others.flatMap((type) => qs.map((q) => `${type}${q}`));
+	for (const q of [...qs, ';level=1;q=0']) {
+		const md = `text/markdown${q}`;
+		for (const a of items) {
+			yield `${md}, ${a}`;
+			yield `${a}, ${md}`;
+			for (const b of items) {
+				if (b === a) continue;
+				yield `${a}, ${md}, ${b}`;
+				yield `${a}, ${b}, ${md}`;
+				yield `${md}, ${a}, ${b}`;
+			}
+		}
+	}
+}
+
+describe('the disagreements with prefersMarkdown', () => {
+	test('every disagreement of the matrix falls in a named class', () => {
+		for (const accept of MATRIX.keys()) {
+			if (accept === null) continue;
+			const edge = prefersMarkdown(accept);
+			const rule = page(accept);
+			if (edge !== rule) assert.notEqual(disagreementClass(accept, edge, rule), null, JSON.stringify(accept));
 		}
 	});
 
-	test('the disagreements are exactly the listed ones', () => {
-		const found = [...MATRIX.keys()].filter((accept) => prefersMarkdown(accept) !== page(accept));
-		assert.deepEqual(found, DIVERGENCES);
+	test('every disagreement over the grid falls in class A or B, and both classes occur', () => {
+		const seen = { A: 0, B: 0 };
+		let total = 0;
+		const unnamed = [];
+		for (const accept of grid()) {
+			total += 1;
+			const edge = prefersMarkdown(accept);
+			const rule = page(accept);
+			if (edge === rule) continue;
+			const kind = disagreementClass(accept, edge, rule);
+			if (kind === null) unnamed.push(accept);
+			else seen[kind] += 1;
+		}
+		assert.deepEqual(unnamed.slice(0, 10), [], `${unnamed.length} disagreements outside the named classes`);
+		assert.ok(seen.A > 0 && seen.B > 0, JSON.stringify(seen));
+		assert.ok(total > 15000, `${total} Accepts`);
 	});
 
-	test('a disagreement never sends a browser to Markdown', () => {
-		for (const accept of DIVERGENCES) assert.match(accept, /text\/markdown/);
+	test('class B needs text/markdown named first or refused: a browser Accept never reaches it', () => {
+		for (const accept of [
+			'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+			'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+			'*/*',
+		]) {
+			assert.equal(page(accept), false, accept);
+		}
 	});
 
+	test('the class model is not vacuous: an agreement is never classed', () => {
+		assert.equal(disagreementClass('text/markdown, text/html', true, true), null);
+		assert.equal(disagreementClass('text/html, text/markdown', false, false), null);
+	});
+});
+
+describe('markdown-twin rule against prefersMarkdown, the verbatim copy', () => {
 	test('the copy of prefersMarkdown is still verbatim', { skip: !existsSync(DOCS_EDGE) && 'no jmrp.io checkout here' }, () => {
 		const fn = /^(function prefersMarkdown\([^)]*\) \{\n[\s\S]*?\n\}\n)/m;
 		const ours = readFileSync(new URL('./fixtures/prefers-markdown.mjs', import.meta.url), 'utf8').match(fn)?.[1];

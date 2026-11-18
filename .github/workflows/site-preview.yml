@@ -146,10 +146,13 @@ jobs:
         working-directory: site/worker
       - name: Upload the assets-only version the quota guard rolls to
         # Same stage, no code: tagged as the other half of this deploy's pair,
-        # so the guard (site/worker/guard) can switch between them.
+        # so the guard (site/worker/guard) can switch between them. The pair
+        # is named after this run and its attempt, not after the docs.yml run
+        # it deploys: a re-run of a deploy that failed halfway uploads a new
+        # pair instead of a second version under a tag already taken.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
-          PAIR: ${{ inputs.run_id }}-${{ inputs.attempt }}
+          PAIR: ${{ github.run_id }}-${{ github.run_attempt }}
         run: pnpm exec wrangler versions upload --config wrangler.assets-only.jsonc --tag "assets-$PAIR" --message "assets-only half of $PAIR"
         working-directory: site/worker
       - name: Deploy the Worker
@@ -161,7 +164,7 @@ jobs:
         # set by hand) switches this deploy back on with the rest.
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
-          PAIR: ${{ inputs.run_id }}-${{ inputs.attempt }}
+          PAIR: ${{ github.run_id }}-${{ github.run_attempt }}
           TRIPPED: ${{ steps.guard.outputs.tripped }}
           MARK: ${{ steps.guard.outputs.mark }}
         run: |

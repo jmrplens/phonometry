@@ -276,19 +276,20 @@ export function firewallRules({ host }) {
  * The `http_ratelimit` rule: one address may send ten beacons in ten seconds,
  * then it is blocked for ten seconds, before any Worker runs. A Free zone
  * takes one such rule, counted per address and data centre, with a period
- * and a timeout of ten seconds
- * (https://developers.cloudflare.com/waf/rate-limiting-rules/#availability).
+ * and a timeout of ten seconds, and its expression may use the path and the
+ * verified-bot field only, so it names the path alone: the zone is
+ * phonometry.dev, whose www host only redirects, and beacon-shape checks the
+ * host (https://developers.cloudflare.com/waf/rate-limiting-rules/#availability).
  * The agent files get none: crawlers fetch copies in bursts.
  *
- * @param {{host: string}} options The zone apex.
  * @returns {object[]} The rule.
  */
-export function rateLimitRules({ host }) {
+export function rateLimitRules() {
 	return [
 		{
 			ref: 'beacon-rate',
 			description: 'At most 10 beacons in 10 seconds from one address, before any Worker runs',
-			expression: `http.host eq ${literal(host, 'host')} and http.request.uri.path eq ${literal(BEACON, 'path')}`,
+			expression: `http.request.uri.path eq ${literal(BEACON, 'path')}`,
 			action: 'block',
 			ratelimit: { characteristics: ['cf.colo.id', 'ip.src'], period: 10, requests_per_period: 10, mitigation_timeout: 10 },
 			enabled: true,

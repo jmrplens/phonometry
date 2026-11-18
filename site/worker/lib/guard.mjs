@@ -3,13 +3,18 @@
 //
 // Workers Free gives the account 100 000 requests a day, reset at 00:00 UTC.
 // Pages never run code and never count; the beacon and the agent files do
-// (lib/agent-paths.mjs). Off means two things, in this order: the zone's WAF
-// rule `quota-guard-beacon` blocks /_v before any Worker runs, and
+// (lib/agent-paths.mjs). Off means two things, in this order:
 // phonometry-docs is rolled to the assets-only version uploaded beside its
 // full one in the same deploy (tagged `assets-<k>` and `full-<k>`), so the
-// agent files are served as plain assets again. Back on is the reverse
-// order: the full version first, then the rule off, so /_v returns only when
-// its Worker is live.
+// agent files are served as plain assets again and /_v, which no asset
+// answers, costs nothing; then the zone's WAF rule `quota-guard-beacon`
+// blocks /_v before any Worker runs, and its last update records the day.
+// The deploy comes first so that a run that fails halfway leaves a state the
+// next run finishes: a marked assets-only deploy without the rule is
+// switched back after 00:00 like a whole trip, while the rule on above a CI
+// deploy would carry no mark the guard could recognise. Back on is the
+// reverse order: the full version first, then the rule off, so /_v returns
+// only when its Worker is live.
 //
 // reconcile() reads the whole state from Cloudflare each time and keeps none
 // of its own. Once tripped, the rule's last_updated carries the day, so the
@@ -25,7 +30,7 @@
 // rollback`, an assets-only version deployed by hand, or `quota-switch.mjs
 // --mode off`, whose message starts with `quota switch by hand:`) is left as
 // it is, and so is the rule, with a note in the log. Switching off does not
-// ask: at the threshold the rule goes on and the version goes to assets only
+// ask: at the threshold the version goes to assets only and the rule goes on
 // whoever deployed it, because that is what keeps the quota.
 
 import { ACCOUNT_ID, ZONE_ID, cfApi, graphql } from './cloudflare.mjs';
@@ -114,8 +119,8 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 		if (to && to.id !== current.id) actions.push({ kind: 'deploy', versionId: to.id, tag: to.tag });
 	};
 	if (desired === 'off') {
-		ruleAction(true);
 		versionAction('assets');
+		ruleAction(true);
 		return { desired, actions, notes };
 	}
 	// Back on: only what the guard switched off, unless the mode pins it on.

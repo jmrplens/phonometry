@@ -9,8 +9,8 @@
 // dry-run (the default) reads the day's count, the WAF rule
 // quota-guard-beacon and the live version of phonometry-docs, and prints what
 // the guard would do. auto does it. off switches the code paths off now (the
-// rule on, the assets-only version live) and on switches them back (the full
-// version, then the rule off), whatever the count. A deploy made with off or
+// assets-only version live, then the rule on) and on switches them back (the
+// full version, then the rule off), whatever the count. A deploy made with off or
 // on says `quota switch by hand` in its message, so the guard's cron leaves
 // it alone: the site stays off until `--mode on`, also after 00:00 UTC (the
 // guard still switches off at the threshold). A token needs Account

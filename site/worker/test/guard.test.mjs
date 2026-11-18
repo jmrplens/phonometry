@@ -45,8 +45,8 @@ describe('decide', () => {
 		assert.deepEqual(decide(state()), { desired: 'on', actions: [], notes: [] });
 	});
 
-	test('at the threshold: the rule on first, then the paired assets-only version', () => {
-		assert.deepEqual(decide(state({ count: 95000 })).actions, [{ kind: 'rule', enabled: true }, { kind: 'deploy', versionId: 'v-assets-2', tag: 'assets-200-1' }]);
+	test('at the threshold: the paired assets-only version first, then the rule on', () => {
+		assert.deepEqual(decide(state({ count: 95000 })).actions, [{ kind: 'deploy', versionId: 'v-assets-2', tag: 'assets-200-1' }, { kind: 'rule', enabled: true }]);
 	});
 
 	test('tripped today: stays off even when the count reads lower', () => {
@@ -76,9 +76,15 @@ describe('decide', () => {
 		assert.deepEqual(d.actions, [{ kind: 'rule', enabled: false }]);
 	});
 
+	test('a run that rolled to assets only but could not turn the rule on: the next run turns it on, and 00:00 switches the deploy back', () => {
+		const half = { id: 'v-assets-2', tag: 'assets-200-1', message: TRIPPED };
+		assert.deepEqual(decide(state({ count: 96000, current: half })).actions, [{ kind: 'rule', enabled: true }]);
+		assert.deepEqual(decide(state({ count: 5, current: half })).actions, [{ kind: 'deploy', versionId: 'v-full-2', tag: 'full-200-1' }]);
+	});
+
 	test('a version with no pair: the newest assets-only version, said loudly', () => {
 		const d = decide(state({ count: 99000, current: { id: 'v-hand', tag: '' } }));
-		assert.deepEqual(d.actions, [{ kind: 'rule', enabled: true }, { kind: 'deploy', versionId: 'v-assets-2', tag: 'assets-200-1' }]);
+		assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'v-assets-2', tag: 'assets-200-1' }, { kind: 'rule', enabled: true }]);
 		assert.match(d.notes.join('\n'), /no paired version/);
 	});
 
@@ -110,7 +116,7 @@ describe('decide', () => {
 
 	test('at the threshold a hand deploy is still switched off: the quota comes first', () => {
 		const d = decide(state({ count: 96000, current: { id: 'v-full-1', tag: 'full-100-1', message: 'by hand' } }));
-		assert.deepEqual(d.actions, [{ kind: 'rule', enabled: true }, { kind: 'deploy', versionId: 'v-assets-1', tag: 'assets-100-1' }]);
+		assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'v-assets-1', tag: 'assets-100-1' }, { kind: 'rule', enabled: true }]);
 	});
 
 	test('mode off and on pin a state whatever the count', () => {
@@ -180,13 +186,13 @@ describe('reconcile', () => {
 		assert.match(report.lines.join('\n'), /dry-run: would turn the rule on/);
 	});
 
-	test('auto at 97 000: the rule patched on, then the assets-only version deployed', async () => {
+	test('auto at 97 000: the assets-only version deployed, then the rule patched on', async () => {
 		const { calls, fetchImpl } = recorded(answers(97000));
 		await reconcile({ env: { CF_GUARD_TOKEN: 't', THRESHOLD: '95000', MODE: 'auto' }, fetchImpl, now: NOW });
 		const writes = calls.filter((c) => c.method !== 'GET' && c.path !== '/graphql');
-		assert.deepEqual(writes.map((c) => `${c.method} ${c.path}`), [`PATCH /zones/${Z}/rulesets/rs1/rules/r1`, `POST /accounts/${A}/workers/scripts/phonometry-docs/deployments`]);
-		assert.deepEqual(writes[0].body, { ref: RULE.ref, description: RULE.description, expression: RULE.expression, action: 'block', enabled: true });
-		assert.deepEqual(writes[1].body, { strategy: 'percentage', versions: [{ version_id: 'v-assets-2', percentage: 100 }], annotations: { 'workers/message': 'quota guard: off at 97000 of 95000' } });
+		assert.deepEqual(writes.map((c) => `${c.method} ${c.path}`), [`POST /accounts/${A}/workers/scripts/phonometry-docs/deployments`, `PATCH /zones/${Z}/rulesets/rs1/rules/r1`]);
+		assert.deepEqual(writes[0].body, { strategy: 'percentage', versions: [{ version_id: 'v-assets-2', percentage: 100 }], annotations: { 'workers/message': 'quota guard: off at 97000 of 95000' } });
+		assert.deepEqual(writes[1].body, { ref: RULE.ref, description: RULE.description, expression: RULE.expression, action: 'block', enabled: true });
 		assert.ok(calls.every((c) => c.auth === 'Bearer t'));
 	});
 

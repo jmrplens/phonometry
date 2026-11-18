@@ -130,6 +130,14 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		assert.match(clear, /wrangler deploy --config wrangler\.jsonc --tag "full-\$PAIR"/);
 	});
 
+	test('each run of the workflow names its own pair, so a re-run never uploads a second version under a taken tag', () => {
+		for (const name of ['Upload the assets-only version', 'Deploy the Worker']) {
+			const step = named(name);
+			assert.match(step, /PAIR: \$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/, name);
+			assert.doesNotMatch(step, /PAIR: \$\{\{ inputs\./, `${name}: the docs.yml run is the same on every re-run`);
+		}
+	});
+
 	test('the beacon check expects the guard rule\'s 403 while tripped and 204 otherwise', () => {
 		const step = named('Check what the assets answer');
 		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);

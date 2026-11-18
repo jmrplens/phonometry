@@ -196,7 +196,10 @@ the apex DNS record and a certificate). Analytics Engine has to be enabled on
 the account once, in the dashboard (Workers > Analytics Engine): until then a
 deploy with the dataset binding answers error 10089. Every deploy uploads two
 versions of the same stage, the assets-only one first, tagged as a pair so the
-quota guard can roll between them:
+quota guard can roll between them. A version can only be uploaded to a Worker
+that exists, so on an account without `phonometry-docs` the first deploy runs
+the `wrangler deploy` line first and the `versions upload` line after it, with
+the same `<k>`; every later deploy runs them in the order shown:
 
 ```bash
 cd site/worker
@@ -209,7 +212,8 @@ pnpm exec wrangler deploy --config wrangler.jsonc --tag full-<k>
 pnpm exec wrangler deploy --config guard/wrangler.jsonc     # the quota guard, once
 ```
 
-`<k>` names the deploy (CI uses `<run_id>-<attempt>`). Cron Triggers need the
+`<k>` names the deploy, and no two deploys share it (CI uses the run id and
+attempt of its own run, so a re-run uploads a new pair). Cron Triggers need the
 account's workers.dev subdomain to exist; both Workers keep workers.dev and
 preview URLs off, so nothing answers there.
 
@@ -261,18 +265,21 @@ docs.jmrp.io's traffic for /phonometry, plus the guard's 96 cron runs, of the
 - 95 %: the Worker `phonometry-quota-guard` (`guard/`, `lib/guard.mjs`) runs
   every 15 minutes from a Cron Trigger. It reads the day's count (GraphQL
   `workersInvocationsAdaptive`), the WAF rule `quota-guard-beacon` and the live
-  version of `phonometry-docs`. At the threshold it turns the rule on (the
-  beacon is blocked before any Worker runs) and deploys the assets-only half of
-  the live version's pair (the agent files become plain assets). After 00:00
-  UTC it deploys the full half first, then turns the rule off. It keeps no
-  state of its own: once tripped, the rule's last update carries the day.
+  version of `phonometry-docs`. At the threshold it deploys the assets-only
+  half of the live version's pair (the agent files become plain assets and
+  `/_v`, which no asset answers, costs nothing), then turns the rule on (the
+  beacon is blocked before any Worker runs). The deploy goes first so that a
+  run that fails between the two leaves a marked deploy the next run
+  finishes, never the rule on above a deploy the guard did not make. After
+  00:00 UTC it deploys the full half first, then turns the rule off. It keeps
+  no state of its own: once tripped, the rule's last update carries the day.
   It switches back on only what it switched off itself: each deploy it makes
   says `quota guard: off|on at <count> of <threshold>`, and back on needs the
   live deployment to say `quota guard: off`. A rollback, an assets-only version
   deployed by hand, or `quota-switch.mjs --mode off` (which says `quota switch
   by hand`) stays as it is after 00:00 UTC, with a note in the log. Switching
-  off does not ask: at the threshold it turns the rule on and rolls whatever
-  is live to assets only.
+  off does not ask: at the threshold it rolls whatever is live to assets only
+  and turns the rule on.
   It has no route, so no visitor request can reach the one Worker holding a
   token able to redeploy the site. Its variable `MODE` is `dry-run` (log the
   decision, change nothing) until the maintainer sets `auto`; without the

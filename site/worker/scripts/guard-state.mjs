@@ -10,13 +10,17 @@
 // it there. It also reads the WAF rule quota-guard-beacon when the token can
 // (the deploy token cannot, and an answer it is refused reads as unknown): a
 // rule that is on also counts as switched off, since the guard reads it so.
+// Only a mark on the live deployment says whose off state it is: the rule on
+// above a deployment the guard did not mark was not left by the guard, which
+// deploys before it turns the rule on, so the deploy keeps it as an off state
+// set by hand, which only `quota-switch.mjs --mode on` switches back.
 // It prints three lines for $GITHUB_OUTPUT:
 //   tripped=true|false
 //   mark=quota guard|quota switch by hand   (whose off state to keep)
 //   rule=on|off|absent|unknown
 // A token needs Workers Scripts Read (the deploy token's Workers Scripts
-// Write has it). Exit 0 when read, 1 when the deployment could not be read,
-// 2 on a usage error.
+// Write has it). Exit 0 when read, 1 when the deployment could not be read or
+// the answer is not a list of deployments, 2 on a usage error.
 import { fileURLToPath } from 'node:url';
 
 import { ACCOUNT_ID, ZONE_ID, cfApi, ignoredTargets } from '../lib/cloudflare.mjs';
@@ -29,9 +33,26 @@ import { GUARD_MARK, GUARD_RULE_REF, HAND_MARK, SCRIPT } from '../lib/guard.mjs'
  * @returns {{tripped: boolean, mark: string, rule: string}} What a deploy has to keep.
  */
 export function guardState({ message, rule }) {
-	const byHand = message.startsWith(`${HAND_MARK}: off`);
-	const tripped = byHand || message.startsWith(`${GUARD_MARK}: off`) || rule === 'on';
-	return { tripped, mark: byHand ? HAND_MARK : GUARD_MARK, rule };
+	const byGuard = message.startsWith(`${GUARD_MARK}: off`);
+	const tripped = byGuard || message.startsWith(`${HAND_MARK}: off`) || rule === 'on';
+	return { tripped, mark: byGuard ? GUARD_MARK : HAND_MARK, rule };
+}
+
+/**
+ * The message of the live deployment, from the deployments the API listed.
+ *
+ * @param {unknown} listed The `result` of GET .../deployments.
+ * @returns {string} Its `workers/message`, '' when it has none.
+ * @throws {Error} When the answer is not a non-empty list of deployments.
+ */
+export function liveMessage(listed) {
+	const deployments = listed !== null && typeof listed === 'object' && !Array.isArray(listed) ? listed.deployments : undefined;
+	if (!Array.isArray(deployments) || deployments.length === 0) throw new Error('the answer lists no deployment');
+	const live = deployments[0];
+	if (live === null || typeof live !== 'object' || Array.isArray(live)) throw new Error('the live deployment is not an object');
+	const message = live.annotations?.['workers/message'] ?? '';
+	if (typeof message !== 'string') throw new Error('the live deployment message is not text');
+	return message;
 }
 
 /**
@@ -51,8 +72,7 @@ export async function runGuardState({ env, fetchImpl = fetch, sink = null }) {
 	const api = (path) => cfApi(path, { env, fetchImpl });
 	let message;
 	try {
-		const listed = await api(`/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}/deployments`);
-		message = (listed?.deployments ?? [])[0]?.annotations?.['workers/message'] ?? '';
+		message = liveMessage(await api(`/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}/deployments`));
 	} catch (error) {
 		warn(`the live deployment of ${SCRIPT} could not be read: ${error.message}`);
 		return 1;

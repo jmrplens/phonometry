@@ -31,12 +31,12 @@ describe('the WAF rules', () => {
 		assert.equal(guard.enabled, false);
 	});
 
-	test('the rate rule: one address, ten beacons in ten seconds, then ten seconds blocked (the Free plan’s values)', () => {
-		assert.deepEqual(rateLimitRules({ host }), [
+	test('the rate rule: one address, ten beacons in ten seconds, then ten seconds blocked, matched on the path alone (the Free plan’s values and fields)', () => {
+		assert.deepEqual(rateLimitRules(), [
 			{
 				ref: 'beacon-rate',
 				description: 'At most 10 beacons in 10 seconds from one address, before any Worker runs',
-				expression: 'http.host eq "phonometry.dev" and http.request.uri.path eq "/_v"',
+				expression: 'http.request.uri.path eq "/_v"',
 				action: 'block',
 				ratelimit: { characteristics: ['cf.colo.id', 'ip.src'], period: 10, requests_per_period: 10, mitigation_timeout: 10 },
 				enabled: true,
@@ -45,8 +45,8 @@ describe('the WAF rules', () => {
 	});
 
 	test('a changed rate limit is drift', () => {
-		const live = rateLimitRules({ host }).map((rule) => ({ ...rule, ratelimit: { ...rule.ratelimit, requests_per_period: 50 } }));
-		assert.match(ruleDrift(live, rateLimitRules({ host })).join('\n'), /beacon-rate: ratelimit is/);
+		const live = rateLimitRules().map((rule) => ({ ...rule, ratelimit: { ...rule.ratelimit, requests_per_period: 50 } }));
+		assert.match(ruleDrift(live, rateLimitRules()).join('\n'), /beacon-rate: ratelimit is/);
 	});
 });
 
@@ -83,24 +83,45 @@ describe('apply-rules --phase waf', () => {
 		assert.ok(calls.every(({ path }) => !path.includes('firewall') && !path.includes('ratelimit')));
 	});
 
-	test('--apply creates the guard rule off, and keeps it as the guard left it afterwards', async () => {
-		for (const live of [false, true]) {
-			const liveRules = live ? firewallRules({ host }).map((rule) => (rule.ref === GUARD_RULE_REF ? { ...rule, enabled: true, id: 'g' } : rule)) : [];
+	test('--apply creates the guard rule off, and keeps the value it finds off', async () => {
+		const stale = firewallRules({ host }).map((rule) => ({ ...rule, description: `${rule.description} (old)` }));
+		for (const liveRules of [[], stale]) {
 			const { calls, fetchImpl } = api({
 				[`GET ${custom}`]: () => ok({ rules: liveRules }),
 				[`PUT ${custom}`]: () => ok({ version: '2' }),
 				[`PUT ${rate}`]: () => ok({ version: '1' }),
 			});
-			const dir = `/tmp/claude-waf-${process.pid}-${live}`;
+			const dir = `/tmp/claude-waf-${process.pid}-${liveRules.length}`;
 			assert.equal(await runApplyRules({ argv: ['--phase', 'waf', '--apply', '--backup-dir', dir], env, fetchImpl, sink: { log: [] } }), 0);
 			const put = calls.find(({ method, path }) => method === 'PUT' && path === custom);
-			assert.equal(put.body.rules.find((rule) => rule.ref === GUARD_RULE_REF).enabled, live);
+			assert.equal(put.body.rules.find((rule) => rule.ref === GUARD_RULE_REF).enabled, false);
 		}
+	});
+
+	test('--apply leaves a phase already as generated untouched, so no rule gets a new last update', async () => {
+		const tripped = firewallRules({ host }).map((rule) => (rule.ref === GUARD_RULE_REF ? { ...rule, enabled: true } : rule));
+		const { calls, fetchImpl } = api({ [`GET ${custom}`]: () => ok({ rules: tripped }), [`GET ${rate}`]: () => ok({ rules: rateLimitRules() }) });
+		const sink = { log: [] };
+		assert.equal(await runApplyRules({ argv: ['--phase', 'waf', '--apply', '--backup-dir', `/tmp/claude-waf-${process.pid}-same`], env, fetchImpl, sink }), 0);
+		assert.deepEqual(calls.filter(({ method }) => method !== 'GET'), []);
+		assert.match(sink.log.join('\n'), /http_request_firewall_custom: as generated \(2 rules\), nothing put/);
+	});
+
+	test('--apply refuses to rewrite the custom rules while the guard holds its rule on, and still puts the rate rule', async () => {
+		const tripped = firewallRules({ host }).map((rule) => (rule.ref === GUARD_RULE_REF ? { ...rule, enabled: true } : { ...rule, description: 'old' }));
+		const { calls, fetchImpl } = api({
+			[`GET ${custom}`]: () => ok({ rules: tripped }),
+			[`PUT ${rate}`]: () => ok({ version: '1' }),
+		});
+		const sink = { log: [] };
+		assert.equal(await runApplyRules({ argv: ['--phase', 'waf', '--apply', '--backup-dir', `/tmp/claude-waf-${process.pid}-held`], env, fetchImpl, sink }), 1);
+		assert.deepEqual(calls.filter(({ method }) => method === 'PUT').map(({ path }) => path), [rate]);
+		assert.match(sink.log.join('\n'), /not put: the quota guard holds quota-guard-beacon on/);
 	});
 
 	test('--check passes while the guard holds its rule on', async () => {
 		const liveRules = firewallRules({ host }).map((rule) => (rule.ref === GUARD_RULE_REF ? { ...rule, enabled: true } : rule));
-		const { fetchImpl } = api({ [`GET ${custom}`]: () => ok({ rules: liveRules }), [`GET ${rate}`]: () => ok({ rules: rateLimitRules({ host }) }) });
+		const { fetchImpl } = api({ [`GET ${custom}`]: () => ok({ rules: liveRules }), [`GET ${rate}`]: () => ok({ rules: rateLimitRules() }) });
 		assert.equal(await runApplyRules({ argv: ['--phase', 'waf', '--check'], env, fetchImpl, sink: { log: [] } }), 0);
 	});
 

@@ -128,6 +128,39 @@ describe('decide', () => {
 		assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'v-assets-1', tag: 'assets-100-1' }, { kind: 'rule', enabled: true }]);
 	});
 
+	// The rule follows only an assets-only version the guard, or quota-switch.mjs,
+	// put there: after 00:00 UTC nothing would turn off a rule turned on beside
+	// a version deployed by hand, and a later full deploy would keep the beacon
+	// blocked.
+	test('at the threshold over an assets-only version deployed by hand: the rule is not turned on, said', () => {
+		const hand = { id: 'v-assets-2', tag: 'assets-200-1', message: 'beacon off while I look at something' };
+		const d = decide(state({ count: 96000, current: hand }));
+		assert.equal(d.desired, 'off');
+		assert.deepEqual(d.actions, []);
+		assert.match(d.notes.join('\n'), /live v-assets-2 \(assets-200-1\) was put there by "beacon off while I look at something", not by the guard or quota-switch\.mjs: the rule is not turned on/);
+		assert.deepEqual(decide(state({ count: 96000, current: { ...hand, message: '' } })).actions, []);
+		const on = decide(state({ count: 96000, rule: { enabled: true, lastUpdated: yesterday }, current: hand }));
+		assert.deepEqual(on.actions, []);
+		assert.match(on.notes.join('\n'), /not by the guard or quota-switch\.mjs: the rule is on and stays as it is/);
+	});
+
+	test('at the threshold over an assets-only version switched off by hand, or with mode off: the rule goes on', () => {
+		const half = { id: 'v-assets-2', tag: 'assets-200-1' };
+		const on = [{ kind: 'rule', enabled: true }];
+		assert.deepEqual(decide(state({ count: 96000, current: { ...half, message: 'quota switch by hand: off at 7 of 95000' } })).actions, on);
+		assert.deepEqual(decide(state({ count: 96000, current: { ...half, message: 'quota switch by hand: off, deploy of 300-1 while the code paths are off' } })).actions, on);
+		assert.deepEqual(decide(state({ mode: 'off', current: { ...half, message: 'by hand' } })).actions, on);
+	});
+
+	test('the day after the threshold over an assets-only version deployed by hand: nothing to clear', () => {
+		const hand = { id: 'v-assets-2', tag: 'assets-200-1', message: '' };
+		const tripped = decide(state({ count: 96000, now: new Date('2026-11-18T20:00:00Z'), current: hand }));
+		assert.deepEqual(tripped.actions, []);
+		const next = decide(state({ count: 200, now: new Date('2026-11-19T00:15:00Z'), current: hand }));
+		assert.deepEqual(next.actions, []);
+		assert.doesNotMatch(next.notes.join('\n'), /the rule is on/);
+	});
+
 	test('mode off and on pin a state whatever the count', () => {
 		assert.equal(decide(state({ mode: 'off' })).desired, 'off');
 		assert.equal(decide(state({ mode: 'on', count: 99999, rule: { enabled: true, lastUpdated: today } })).desired, 'on');

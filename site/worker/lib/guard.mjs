@@ -31,7 +31,11 @@
 // --mode off`, whose message starts with `quota switch by hand:`) is left as
 // it is, and so is the rule, with a note in the log. Switching off does not
 // ask: at the threshold the version goes to assets only and the rule goes on
-// whoever deployed it, because that is what keeps the quota.
+// whoever deployed it, because that is what keeps the quota. The one case
+// left alone is an assets-only version already live that neither the guard
+// nor quota-switch.mjs marked: it runs no code, so the quota is kept without
+// the rule, and a rule turned on beside it would have no owner to turn it
+// off after 00:00 UTC, so a later full deploy would find the beacon blocked.
 
 import { ACCOUNT_ID, ZONE_ID, cfApi, graphql } from './cloudflare.mjs';
 import { quotaQuery, quotaRows } from './quota.mjs';
@@ -118,18 +122,22 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 		const to = target(versions, current, wanted, notes);
 		if (to && to.id !== current.id) actions.push({ kind: 'deploy', versionId: to.id, tag: to.tag });
 	};
+	const by = current.message ? `"${current.message}"` : 'a deployment with no message';
 	if (desired === 'off') {
 		versionAction('assets');
 		// The rule follows an assets-only version, live or being deployed now:
 		// blocked beacons beside a full version that keeps running would save
 		// little, and the rule would stay on after 00:00 above a deploy the
-		// guard never marked.
-		if (half === 'assets' || actions.some((action) => action.kind === 'deploy')) ruleAction(true);
+		// guard never marked. A live one counts only when the guard or
+		// quota-switch.mjs switched it off (or the mode pins off): whoever
+		// switched it off is who switches the rule back.
+		const owned = made.off || (current.message ?? '').startsWith(`${HAND_MARK}: off`) || pinned;
+		if (actions.some((action) => action.kind === 'deploy') || (half === 'assets' && owned)) ruleAction(true);
+		else if (half === 'assets') notes.push(`live ${current.id} (${current.tag}) was put there by ${by}, not by the guard or quota-switch.mjs: ${rule?.enabled ? 'the rule is on and stays as it is' : 'the rule is not turned on, since nothing would turn it off after 00:00 UTC (the assets-only version runs no code)'}`);
 		else notes.push(`the rule stays as it is: there is no assets-only version to go with it`);
 		return { desired, actions, notes };
 	}
 	// Back on: only what the guard switched off, unless the mode pins it on.
-	const by = current.message ? `"${current.message}"` : 'a deployment with no message';
 	if (pinned || made.off) versionAction('full');
 	else if (half !== 'full') notes.push(`live ${current.id} (${current.tag || 'no tag'}) was put there by ${by}, not by the guard: left as it is`);
 	if (pinned || made.guard) ruleAction(false);

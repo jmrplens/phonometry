@@ -7,8 +7,8 @@
 // are written from the same pairs, redirectPairs() in
 // site/scripts/cloudflare-redirects.mjs, so they cannot drift apart. A redirect
 // is followed whether or not an asset matches, so Astro's meta-refresh stubs
-// at those addresses are never served. Limits: 2,000 static redirects and
-// 1,000 characters a line.
+// at those addresses are never served. Limits: 2 000 static redirects and
+// 1 000 characters a line.
 
 export const REDIRECT_STATIC_LIMIT = 2000;
 export const REDIRECT_LINE_LIMIT = 1000;

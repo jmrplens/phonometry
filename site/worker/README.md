@@ -12,7 +12,7 @@ The Worker `phonometry-docs` has Static Assets and no script: no `main`, no
 binding, no `run_worker_first`. Cloudflare documents that requests for static
 assets are free and unlimited and run no Worker
 ([billing and limitations](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)),
-so the 100,000 Worker requests a day of Workers Free cannot stop anything the
+so the 100 000 Worker requests a day of Workers Free cannot stop anything the
 preview serves. It fails open because it has nothing that can fail.
 
 What a script would have done lives elsewhere:
@@ -49,7 +49,7 @@ any policy violation.
 | Situation | Pages | Copies | Retired addresses | Clips |
 |---|---|---|---|---|
 | Normal | served | 302 from the rule, then served | 301 | 302 to a host that answers 206 |
-| The account over 100,000 Worker requests (a script added later) | unchanged | unchanged | unchanged | unchanged |
+| The account over 100 000 Worker requests (a script added later) | unchanged | unchanged | unchanged | unchanged |
 | A zone rule deleted or broken | unchanged | agents get the HTML, which still names the copy in its `Link` | unchanged | Safari cannot seek |
 | docs.jmrp.io down | unchanged | unchanged | unchanged | clips fail until R2 |
 
@@ -73,7 +73,7 @@ both reached only by clients that name `text/markdown`:
 | B: `text/markdown` carries `q=0`, or a lower q than an HTML type named after it | `text/markdown;q=0, */*`, `text/markdown;q=0.1, text/html` | HTML | Markdown |
 
 `test/negotiation.test.mjs` crosses `text/markdown` with the HTML types,
-`text/*`, `*/*` and `text/plain` at every q and in every order (18,690
+`text/*`, `*/*` and `text/plain` at every q and in every order (18 690
 Accepts), and fails on a disagreement outside these two classes. A browser
 names HTML first and never reaches class B. A client that gets the HTML still
 finds the copy in the page's `Link` header and in llms.txt.
@@ -90,7 +90,7 @@ Markdown-preferring request for `/phonometry/nope/` gets a 302 to
 | `wrangler.jsonc` | The Worker: assets only, `phonometry.dev` as its Custom Domain, no workers.dev address |
 | `stage.mjs` | Stages a build into `stage/` and runs every check first |
 | `lib/headers.mjs`, `lib/redirects.mjs`, `lib/twins.mjs` | What `_headers` and `_redirects` say, and which pages have no Markdown copy |
-| `lib/staging.mjs` | The checks: 20,000 files and 25 MiB a file (Workers Free), no `_headers` or `_redirects` in the build, the pages without a copy equal to the exclusions, every redirect target served |
+| `lib/staging.mjs` | The checks: 20 000 files and 25 MiB a file (Workers Free), no `_headers` or `_redirects` in the build, the pages without a copy equal to the exclusions, every redirect target served |
 | `lib/rules.mjs`, `lib/rulesets.mjs`, `scripts/apply-rules.mjs` | The zone rules, their drift check and the script that puts them |
 | `lib/zone.mjs`, `scripts/apply-zone.mjs` | The DNS records and zone settings, and the script that applies them |
 | `lib/cloudflare.mjs` | The API calls, and the account and zone ids every script acts on |
@@ -171,10 +171,10 @@ counts files, and stage.mjs prints that number.
 
 ## The quota alert
 
-The preview runs no script, so it spends none of the 100,000 Worker requests a
+The preview runs no script, so it spends none of the 100 000 Worker requests a
 day of Workers Free; the count matters only once a script is added. The alert
 belongs to the account, as a Cloudflare notification on that count (custom
-analytics over Workers invocations, threshold 80,000 for the UTC day), mailed
+analytics over Workers invocations, threshold 80 000 for the UTC day), mailed
 to the account's address. Nothing in this repository schedules a check.
 
 `scripts/check-quota.mjs` reads the same count by hand from the GraphQL

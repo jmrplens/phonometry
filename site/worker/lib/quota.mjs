@@ -1,6 +1,6 @@
 // How close the account is to the daily Workers request quota.
 //
-// Workers Free gives an account 100,000 Worker requests a day, counted from
+// Workers Free gives an account 100 000 Worker requests a day, counted from
 // 00:00 UTC across every script of the account
 // (https://developers.cloudflare.com/workers/platform/limits/). Requests for
 // static assets that no script runs for are free and unlimited and do not

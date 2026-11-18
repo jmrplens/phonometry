@@ -6,7 +6,7 @@
 // (https://developers.cloudflare.com/workers/static-assets/headers/): one
 // splat per pattern, `:splat` usable in a value, `! Name` removing what an
 // EARLIER rule added, rules applied in file order, at most 100 rules and
-// 2,000 characters a line. None of it applies to a response that Worker code
+// 2 000 characters a line. None of it applies to a response that Worker code
 // builds, which is one more reason the preview has no code.
 
 import { mediaOrigins } from '../../src/data/site.mjs';

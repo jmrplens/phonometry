@@ -9,11 +9,12 @@ name: Publish PyOctaveBand transition stub
 # The preflight can read the Actions API and nothing else, the build job holds
 # no token, and the publish job holds nothing but its OIDC identity.
 #
-# Run from a pull request's branch rather than main, the preflight waits for
-# that pull request's Python CI run, and a push to the branch cancels that
-# run, as Python CI cancels any pull request run a newer push replaces. The
-# preflight then stops on "concluded 'cancelled'": run it again on the new
-# head.
+# Run from a pull request's branch rather than main, the preflight proves the
+# commit it ran on and no other: when the branch moves on, run it again on the
+# new head, whatever the earlier run concluded. A push while the preflight
+# waits also cancels the pull request's Python CI run it waits for, as Python
+# CI cancels any pull request run a newer push replaces, and the preflight
+# then stops on "concluded 'cancelled'".
 
 on:
   workflow_dispatch:

@@ -223,10 +223,19 @@ def test_the_wait_for_ci_ends_before_its_job_is_killed(name: str) -> None:
 #: newer one cancels the older, while a push or a dispatched run, which has no
 #: pull request number, falls back on its own run id and shares its group with
 #: nothing. The group names the workflow because groups span the repository.
+#: A re-run (attempt 2 or later) cancels nothing, so re-running the jobs of an
+#: older commit waits for the newer head's run instead of cancelling it.
 _CI_CONCURRENCY = {
     "group": "python-app-${{ github.event.pull_request.number || github.run_id }}",
-    "cancel-in-progress": "${{ github.event_name == 'pull_request' }}",
+    "cancel-in-progress": (
+        "${{ github.event_name == 'pull_request' && github.run_attempt == 1 }}"
+    ),
 }
+
+#: When the pull request comment is posted: after a red ``quality`` or
+#: ``tests`` job as after a green one, in a pull request run, never in a
+#: cancelled run.
+_PR_COMMENT_CONDITION = "${{ !cancelled() && github.event_name == 'pull_request' }}"
 
 
 def test_only_a_newer_run_of_the_same_pull_request_cancels_python_ci() -> None:
@@ -245,7 +254,8 @@ def test_only_a_newer_run_of_the_same_pull_request_cancels_python_ci() -> None:
     )
     cancels = concurrency.get("cancel-in-progress")
     assert cancels == _CI_CONCURRENCY["cancel-in-progress"], (
-        f"Python CI cancels under {cancels!r}; only a pull request run may be cancelled"
+        f"Python CI cancels under {cancels!r}; only the first attempt of a pull "
+        "request run may cancel another run"
     )
     assert concurrency.get("group") == _CI_CONCURRENCY["group"], (
         f"Python CI groups its runs as {concurrency.get('group')!r}; a push or "
@@ -265,12 +275,15 @@ def test_a_cancelled_run_leaves_the_pull_request_comment_alone() -> None:
     assert "always()" not in condition, (
         f"pr-comment runs under {condition!r}, which includes a cancelled run"
     )
-    assert "!cancelled()" in condition, (
+    assert "success()" not in condition, (
         f"pr-comment runs under {condition!r}, which skips it after a red job, "
         "the run whose comment matters most"
     )
-    assert "github.event_name == 'pull_request'" in condition, (
-        f"pr-comment runs under {condition!r}, outside a pull request"
+    # The whole condition, so that neither half can be loosened: with ``||``
+    # in place of ``&&`` a cancelled pull request run posts again.
+    assert condition == _PR_COMMENT_CONDITION, (
+        f"pr-comment runs under {condition!r}, not {_PR_COMMENT_CONDITION!r}: "
+        "after a red job, only in a pull request run, never in a cancelled one"
     )
 
 

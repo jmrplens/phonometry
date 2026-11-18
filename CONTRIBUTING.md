@@ -854,11 +854,13 @@ Releases are fully automated from the repository-root `VERSION` file:
    built. The job summary shows the notes the release will carry. The build and
    the rebuild on macOS are not new to a rehearsal: Python CI makes them on
    every pull request, so a change to `requirements-release.txt` or to what the
-   sdist carries that breaks them shows on that pull request. A push to the
-   branch while the rehearsal waits cancels the CI run it waits for, since a
-   newer push cancels a PR's run on the commit it replaces, and the rehearsal
-   stops with `Python CI concluded 'cancelled'`: run it again on the new head,
-   which is the commit that will be merged.
+   sdist carries that breaks them shows on that pull request. A rehearsal
+   proves the commit it ran on and no other: when the branch moves on, run it
+   again on the new head, which is the commit that will be merged, whatever
+   the earlier rehearsal concluded. A push while the rehearsal waits also
+   cancels the PR's CI run it waits for, since a newer push cancels a PR's run
+   on the commit it replaces, and the rehearsal stops with
+   `Python CI concluded 'cancelled'`.
 3. When the PR merges to `main`, the same workflow runs for real: it uploads to
    PyPI through trusted publishing (no token is stored; PyPI attaches a signed
    PEP 740 attestation to each file), creates the GitHub Release with its tag,

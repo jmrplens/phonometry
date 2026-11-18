@@ -111,7 +111,11 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		const names = [...steps.keys()];
 		const read = names.findIndex((name) => name.startsWith('Read whether the quota guard'));
 		assert.ok(read !== -1, 'no step reads the guard state');
-		assert.ok(read < names.findIndex((name) => name.startsWith('Upload the assets-only version')));
+		for (const later of ['Upload the assets-only version', 'Deploy the Worker']) {
+			const at = names.findIndex((name) => name.startsWith(later));
+			assert.ok(at !== -1, `no step named ${later}`);
+			assert.ok(read < at, `${later} runs before the guard state is read`);
+		}
 		const step = named('Read whether the quota guard');
 		assert.match(step, /\bid: guard\b/);
 		assert.match(step, /set -euo pipefail/, 'without pipefail a failed read would pass through tee as not tripped');
@@ -146,12 +150,15 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		}
 	});
 
-	test('the beacon check expects the guard rule\'s 403 while tripped and 204 otherwise', () => {
+	test('the beacon check expects 204, or while tripped the WAF\'s 403 or the assets-only 404, never a 204', () => {
 		const step = named('Check what the assets answer');
 		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);
-		assert.match(step, /want=204\n\s+if \[ "\$TRIPPED" = true \]; then want=403; fi/);
-		assert.match(step, /if \[ "\$code" != "\$want" \]/);
+		assert.match(step, /want=204\n\s+if \[ "\$TRIPPED" = true \]; then want="403 404"; fi/);
+		assert.match(step, /if ! grep -qwF -- "\$code" <<<"\$want"; then/);
 		assert.doesNotMatch(step, /"\$code" != 204/, 'a fixed 204 fails every deploy while the guard is tripped');
+		const accepts = (code, want) => want.split(' ').includes(code);
+		assert.ok(accepts('403', '403 404') && accepts('404', '403 404') && !accepts('204', '403 404'));
+		assert.ok(accepts('204', '204') && !accepts('404', '204'));
 	});
 });
 

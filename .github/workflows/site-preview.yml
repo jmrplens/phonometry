@@ -203,16 +203,18 @@ jobs:
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
           expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
-          # While the guard holds the code paths off, its WAF rule answers
-          # every beacon with 403 before any Worker runs.
+          # While the code paths are held off the beacon runs no code: the
+          # guard's WAF rule answers 403 before any Worker runs, or, while
+          # that rule is not on yet, the assets-only half answers 404 (no
+          # asset is called _v). A 204 then would mean code is running.
           want=204
-          if [ "$TRIPPED" = true ]; then want=403; fi
+          if [ "$TRIPPED" = true ]; then want="403 404"; fi
           code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H 'Origin: https://phonometry.dev' -H 'Content-Type: text/plain' --data '{"p":"/phonometry/signals/","wd":1}' https://phonometry.dev/_v)
-          if [ "$code" != "$want" ]; then
+          if ! grep -qwF -- "$code" <<<"$want"; then
             echo "::error::the beacon answered $code, not $want (quota guard tripped: $TRIPPED)"
             fail=1
           elif [ "$TRIPPED" = true ]; then
-            echo "ok   the beacon answers 403: the quota guard has switched it off until 00:00 UTC"
+            echo "ok   the beacon answers $code: the code paths are off until they are switched back"
           else
             echo "ok   the beacon answers 204"
           fi

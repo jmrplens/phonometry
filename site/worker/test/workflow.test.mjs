@@ -52,9 +52,16 @@ function importClosure(entries, root = ROOT) {
 	return [...seen].map((file) => relative(root, file));
 }
 
-/** Whether cone-mode sparse checkout brings a path: a listed directory, or a file at the root. */
+/**
+ * Whether cone-mode sparse checkout brings a path: anything under a listed
+ * directory, and the files directly inside the root or any ancestor of one.
+ */
 function checkedOut(path, directories) {
-	return !path.includes('/') || directories.some((directory) => path === directory || path.startsWith(`${directory}/`));
+	const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+	if (parent === '') return true;
+	return directories.some(
+		(directory) => path === directory || path.startsWith(`${directory}/`) || directory.startsWith(`${parent}/`),
+	);
 }
 
 test('the workflow runs the three scripts it is meant to', () => {
@@ -79,4 +86,8 @@ test('a module outside the listed directories is caught', () => {
 	assert.equal(checkedOut('site/src/lib/fallback-routes.mjs', ['site/worker', 'site/src/data', 'site/scripts']), false);
 	assert.equal(checkedOut('site/src/data/site.mjs', ['site/worker', 'site/src/data', 'site/scripts']), true);
 	assert.equal(checkedOut('package.json', ['site/worker']), true);
+	// Cone mode also brings the files directly inside an ancestor, not its subdirectories.
+	assert.equal(checkedOut('site/package.json', ['site/worker']), true);
+	assert.equal(checkedOut('site/src/env.d.ts', ['site/src/data']), true);
+	assert.equal(checkedOut('site/public/robots.txt', ['site/worker']), false);
 });

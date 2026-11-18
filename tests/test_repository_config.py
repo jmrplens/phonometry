@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+import fnmatch
 import io
 import json
 import os
@@ -2942,22 +2943,56 @@ def _lane_time_problems(record: Mapping[str, object]) -> list[str]:
     return problems
 
 
-def _artifact_stem(name: str) -> str:
-    """The literal head of an artifact name or pattern, before any expression."""
-    return re.split(r"\$\{\{|\*", name, maxsplit=1)[0]
+def _matrix_cells(job: Mapping[str, object]) -> list[dict[str, str]]:
+    """Every cell of the plain list matrix of *job*, one cell when it has none."""
+    strategy = job.get("strategy", {})
+    assert isinstance(strategy, dict)
+    matrix = strategy.get("matrix", {})
+    assert isinstance(matrix, dict)
+    cells: list[dict[str, str]] = [{}]
+    for key, values in matrix.items():
+        if isinstance(values, list):
+            cells = [{**cell, key: str(value)} for cell in cells for value in values]
+    return cells
 
 
-def _artifacts(job: Mapping[str, object], action: str) -> set[str]:
-    """The literal heads of the artifacts *job* moves with the *action* step."""
+def _uploaded_artifacts(job: Mapping[str, object]) -> set[str]:
+    """The name of each artifact *job* uploads, in every cell of its matrix.
+
+    An expression the matrix does not resolve stays as written, and matches
+    nothing a reader names.
+    """
     steps = job.get("steps", [])
     assert isinstance(steps, list)
-    heads = set()
+    names = set()
     for step in steps:
-        if str(step.get("uses", "")).startswith(f"actions/{action}@"):
+        if str(step.get("uses", "")).startswith("actions/upload-artifact@"):
+            name = str(step.get("with", {}).get("name", ""))
+            for cell in _matrix_cells(job):
+                resolved = name
+                for key, value in cell.items():
+                    expression = r"\$\{\{\s*matrix\." + re.escape(key) + r"\s*\}\}"
+                    resolved = re.sub(expression, value.replace("\\", r"\\"), resolved)
+                names.add(resolved)
+    return names - {""}
+
+
+def _downloaded_artifacts(job: Mapping[str, object]) -> list[re.Pattern[str]]:
+    """What each download step of *job* takes, as the action matches it.
+
+    ``name`` is one exact artifact name; ``pattern`` is a glob over the names.
+    """
+    steps = job.get("steps", [])
+    assert isinstance(steps, list)
+    readers = []
+    for step in steps:
+        if str(step.get("uses", "")).startswith("actions/download-artifact@"):
             given = step.get("with", {})
-            name = str(given.get("name") or given.get("pattern") or "")
-            heads.add(_artifact_stem(name))
-    return heads - {""}
+            if given.get("name"):
+                readers.append(re.compile(re.escape(str(given["name"]))))
+            elif given.get("pattern"):
+                readers.append(re.compile(fnmatch.translate(str(given["pattern"]))))
+    return readers
 
 
 def _outside_lane_problems(
@@ -2993,17 +3028,16 @@ def _outside_lane_problems(
                 f"bound ({bound} s), so it belongs in a lane"
             )
     for name in sorted(set(after) & set(jobs)):
-        reads = _artifacts(jobs[name], "download-artifact")
         uploaded = {
-            head
+            artifact
             for need in _needs(dict(jobs[name]))
             if need in jobs
-            for head in _artifacts(jobs[need], "upload-artifact")
+            for artifact in _uploaded_artifacts(jobs[need])
         }
         if not any(
-            read.startswith(head) or head.startswith(read)
-            for read in reads
-            for head in uploaded
+            reader.fullmatch(artifact)
+            for reader in _downloaded_artifacts(jobs[name])
+            for artifact in uploaded
         ):
             problems.append(
                 f"{name}: reads no artifact of the jobs it waits on, so it belongs "
@@ -3145,6 +3179,37 @@ def test_a_short_job_outside_the_lanes_is_reported() -> None:
         "sonar: reads no artifact of the jobs it waits on, so it belongs in a lane "
         "or with the jobs that start with the run"
     ]
+
+    def reading(job: str, given: dict[str, str]) -> dict[str, dict[str, object]]:
+        steps = jobs[job]["steps"]
+        assert isinstance(steps, list)
+        swapped = [
+            {**step, "with": given}
+            if str(step.get("uses", "")).startswith("actions/download-artifact@")
+            else step
+            for step in steps
+        ]
+        return {**jobs, job: {**jobs[job], "steps": swapped}}
+
+    # An exact name is not a prefix: no leg uploads "test-results" itself.
+    assert _outside_lane_problems(
+        reading("sonar", {"name": "test-results"}), record
+    ) == [
+        "sonar: reads no artifact of the jobs it waits on, so it belongs in a lane "
+        "or with the jobs that start with the run"
+    ]
+    assert _outside_lane_problems(
+        reading("pr-comment", {"pattern": "test-results-linux-*"}), record
+    ) == [
+        "pr-comment: reads no artifact of the jobs it waits on, so it belongs in a "
+        "lane or with the jobs that start with the run"
+    ]
+    assert (
+        _outside_lane_problems(
+            reading("sonar", {"name": "test-results-windows-latest-3.12"}), record
+        )
+        == []
+    )
     assert str(jobs["mps"]["runs-on"]).startswith("macos")
     short_mps = {
         **record,

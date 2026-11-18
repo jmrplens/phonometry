@@ -7,9 +7,9 @@ every runner, and the digests were then taken from the refactored engines.
 The copy is gone; the digests stay.
 Their bits depend on the C library's libm and on NumPy's SIMD dispatch, so
 they are compared where they were measured, the environment the file
-records: the ``engine-digests`` CI job, which also wrote the file. Elsewhere
-the comparison skips and says why; that job sets
-``PHONOMETRY_ENGINE_DIGESTS=require``, under which a mismatched environment
+records: the golden-digest steps of the ``baseline-glibc`` CI job, which
+also wrote the file. Elsewhere the comparison skips and says why; those steps
+set ``PHONOMETRY_ENGINE_DIGESTS=require``, under which a mismatched environment
 fails instead. The engines are always stepped on NumPy here, whatever
 ``use()`` or ``PHONOMETRY_COMPUTE`` ask for.
 """

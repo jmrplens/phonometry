@@ -6,10 +6,10 @@ document needs in order to *cite* one. The split is not tidiness, it is a
 constraint: the ``pr-comment`` job in ``.github/workflows/python-app.yml``
 installs nothing at all. It reads two committed JSON files on the standard
 library alone, deliberately, because it used to spend 45 s rebuilding a report
-the ``conformance`` job had already proven current. Drawing a badge needs
-matplotlib, to turn a committed font into glyph outlines; citing one needs a
-filename and a URL. Only the citing half may be imported from that job, so
-only the citing half is here.
+the conformance gate of the ``guards-package`` job had already proven current.
+Drawing a badge needs matplotlib, to turn a committed font into glyph outlines;
+citing one needs a filename and a URL. Only the citing half may be imported
+from that job, so only the citing half is here.
 
 Three documents cite these names and none of them writes one down: the
 Markdown report through :mod:`conformance.render`, the sticky pull-request

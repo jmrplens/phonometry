@@ -420,7 +420,8 @@ known-first-party = ["phonometry"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-# `.github/scripts` holds the PR-comment script CI runs, which no other root
+# `.github/scripts` holds the scripts CI runs itself (the PR comment and the
+# summary that names the failed steps of a grouped job), which no other root
 # reached. `stub/src` is the PyOctaveBand transition shim, outside the package.
 files = ["src", "scripts", "stub/src", "tests/static_typing", ".github/scripts"]
 # The conformance scripts import the oracle tables (`reference_data`) and the

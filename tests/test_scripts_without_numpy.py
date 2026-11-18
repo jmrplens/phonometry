@@ -1,11 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The scripts that run where NumPy is not installed, held to it.
 
-Most CI jobs install the scientific stack, but a good third of them install
-nothing at all: a checker that only reads text has no reason to wait a minute
-for NumPy, SciPy and Matplotlib. Those jobs work only for as long as every
-module their script reaches, sibling helpers included, imports the standard
-library alone.
+Most CI jobs install the scientific stack, but the two that run the guards of
+the published text and of the source, some thirty scripts between them,
+install nothing at all: a checker that only reads text has no reason to wait a
+minute for NumPy, SciPy and Matplotlib. Those jobs work only for as long as
+every module their script reaches, sibling helpers included, imports the
+standard library alone.
 
 That broke once without any job noticing. ``assets_dir.py`` says where the
 published clips are checked out, and it read ``.env`` through the GPU runner,

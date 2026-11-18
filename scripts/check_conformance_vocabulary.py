@@ -43,7 +43,7 @@ Usage::
     python scripts/check_conformance_vocabulary.py
 
 Exit status 0 when the three agree. ``make conformance`` runs it last and CI
-runs it in the conformance job.
+runs it as a step of the guards-package job, on the committed artefact.
 """
 
 from __future__ import annotations

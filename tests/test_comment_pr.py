@@ -157,12 +157,13 @@ def test_the_comment_still_imports_on_the_standard_library_alone() -> None:
     """The ``pr-comment`` job has no pip step, and that is deliberate.
 
     It used to install the whole scientific stack and spend 45 s regenerating
-    a report the ``conformance`` job had already proven current. Now it reads
-    two committed JSON files. Citing a badge must stay inside that budget,
-    which is why the badge *vocabulary* lives in ``conformance.marks`` and the
-    *drawing*, which needs matplotlib for glyph outlines, lives next door in
-    ``conformance.badges``. A stray import across that line fails the job on
-    every pull request; here it fails in one second.
+    a report the conformance gate of ``guards-package`` had already proven
+    current. Now it reads two committed JSON files. Citing a badge must stay
+    inside that budget, which is why the badge *vocabulary* lives in
+    ``conformance.marks`` and the *drawing*, which needs matplotlib for glyph
+    outlines, lives next door in ``conformance.badges``. A stray import across
+    that line fails the job on every pull request; here it fails in one
+    second.
     """
     blocked = ("numpy", "scipy", "matplotlib", "phonometry", "reference_data")
     program = (

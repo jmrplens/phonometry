@@ -93,15 +93,25 @@ _RENAME_IS_ENOUGH = re.compile(
 _UPGRADE_GUIDE = "docs.jmrp.io/phonometry/start/upgrading/"
 
 
-def _gate(tool: str) -> tuple[str, str]:
+#: The one-line keys a step may carry between its ``- name:`` and its
+#: ``run:``, in the order the workflow writes them: the comment of the step
+#: is read past them.
+_STEP_KEYS = ("- name:", "id:", "if:")
+
+
+def _gate(tool: str, text: str | None = None) -> tuple[str, str]:
     """The CI command that invokes *tool*, and the comment introducing its step.
 
     Read as text rather than parsed as YAML: the comments are half of what the
     tests below check, and a YAML parser throws them away. The comment of a
     step is the run of ``#`` lines above it, whether it sits above the step's
-    ``- name:`` or between that name and its ``run:``.
+    ``- name:`` or between that name and its ``run:``, and the step's ``id:``
+    and ``if:`` lines between them do not end it. *text* stands in for the
+    workflow, for the tests of this reader.
     """
-    lines = _WORKFLOW.read_text(encoding="utf-8").splitlines()
+    if text is None:
+        text = _WORKFLOW.read_text(encoding="utf-8")
+    lines = text.splitlines()
     for index, line in enumerate(lines):
         stripped = line.strip()
         if not stripped.startswith("run:"):
@@ -111,14 +121,42 @@ def _gate(tool: str) -> tuple[str, str]:
             continue
         comment: list[str] = []
         for previous in reversed(lines[:index]):
-            text = previous.strip()
-            if text.startswith("#"):
-                comment.append(text.lstrip("#").strip())
-            elif not text.startswith("- name:"):
+            above = previous.strip()
+            if above.startswith("#"):
+                comment.append(above.lstrip("#").strip())
+            elif not above.startswith(_STEP_KEYS):
                 break
         return command, " ".join(reversed(comment))
     msg = f"no step in {_WORKFLOW.name} runs {tool}"
     raise AssertionError(msg)
+
+
+@pytest.mark.parametrize(
+    "step",
+    [
+        "    # Why.\n    - name: Check\n      run: mypy\n",
+        "    - name: Check\n      # Why.\n      run: mypy\n",
+        "    # Why.\n    - name: Check\n      id: mypy\n"
+        "      if: ${{ !cancelled() }}\n      run: mypy\n",
+        "    - name: Check\n      id: mypy\n      # Why.\n"
+        "      if: ${{ !cancelled() }}\n      run: mypy\n",
+    ],
+)
+def test_the_gate_reader_reads_a_comment_past_the_step_keys(step: str) -> None:
+    """A step's ``id:`` and ``if:`` sit between its name and its run.
+
+    The reader stopped at the first line that was neither a comment nor a
+    ``- name:``, so giving the mypy step an id left its comment empty and
+    the test below failing on a comment that was still there.
+    """
+    text = "    - name: Before\n      run: ruff check .\n" + step
+    assert _gate("mypy", text) == ("mypy", "Why.")
+
+
+def test_the_gate_reader_stops_at_the_step_before() -> None:
+    """The comment ends where the step above ends: its run is no step key."""
+    text = "    # Ruff's.\n    - name: Lint\n      run: ruff check .\n    - name: Types\n      run: mypy\n"
+    assert _gate("mypy", text) == ("mypy", "")
 
 
 def _type_checked_paths() -> list[str]:

@@ -8,7 +8,8 @@
 # also transplanted into its Starlight pages, which have their own CI gate.
 #
 # This is a convenience only. The real enforcement is the CI staleness check
-# (the `conformance` job in .github/workflows/python-app.yml). Install with:
+# (the `conformance` step of the guards-package job in
+# .github/workflows/python-app.yml). Install with:
 #
 #     make install-hooks
 #

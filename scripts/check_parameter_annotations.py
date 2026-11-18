@@ -179,7 +179,7 @@ elsewhere (the scratch tree a defect is put into to see the check fail)
 names its files as the repository does, so the exemptions read it the
 same way.
 
-Static and dependency-free, so it runs on its own.
+Static and dependency-free: it imports the standard library alone.
 """
 
 from __future__ import annotations

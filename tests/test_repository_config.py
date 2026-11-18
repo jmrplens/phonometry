@@ -23,6 +23,7 @@ import io
 import json
 import os
 import pathlib
+import posixpath
 import re
 import shlex
 import shutil
@@ -35,7 +36,7 @@ import pytest
 import yaml
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping, Sequence
+    from collections.abc import Callable, Iterator, Mapping, Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -1345,9 +1346,13 @@ def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
 
 
 def _engine_digests_step(steps: list[dict[str, object]], runs: str) -> int:
-    """The index of the one step of the engine-digests job whose script has *runs*."""
+    """The index of the one step of the baseline-glibc job whose script has *runs*.
+
+    The digests are steps of that job, beside the glibc tests, which run no
+    digest script and so never match.
+    """
     found = [i for i, step in enumerate(steps) if runs in str(step.get("run", ""))]
-    assert len(found) == 1, f"{len(found)} engine-digests steps run {runs!r}"
+    assert len(found) == 1, f"{len(found)} baseline-glibc steps run {runs!r}"
     return found[0]
 
 
@@ -1362,7 +1367,7 @@ def test_the_engine_digests_test_names_a_moved_digest_after_the_measurement_fail
     whatever happened.
     """
     workflow = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))
-    steps: list[dict[str, object]] = workflow["jobs"]["engine-digests"]["steps"]
+    steps: list[dict[str, object]] = workflow["jobs"]["baseline-glibc"]["steps"]
     measure = _engine_digests_step(steps, "scripts/engine_digests.py --output")
     test = _engine_digests_step(steps, "tests/simulation/test_engine_golden_digests.py")
     assert measure < test
@@ -1572,11 +1577,12 @@ def test_no_workflow_runs_on_the_moving_ubuntu_label() -> None:
     same bytes twice and the coverage upload to one cell of the matrix, so a
     job that followed the label changed under them on the day it moved, with
     no commit of ours. The jobs name ubuntu-26.04, the image the label names
-    now. Four name ubuntu-24.04, three of them because they hold their
-    numbers to its glibc: the FDTD engines' golden digests, measured there,
-    the remote-node job, which compares its runs with those of the node image
-    built on ``ubuntu:24.04``, and the weighting design on glibc's routines
-    without FMA, which only that release's baseline build of glibc carries.
+    now. Three name ubuntu-24.04, two of them because they hold their numbers
+    to its glibc: the baseline-glibc job, where the FDTD engines' golden
+    digests were measured and the weighting design runs on glibc's routines
+    without FMA, which only that release's baseline build of glibc carries,
+    and the remote-node job, which compares its runs with those of the node
+    image built on ``ubuntu:24.04``.
     A release is moved by an edit to the workflows and to the pair above,
     once the gates pass on it.
     """
@@ -1856,12 +1862,13 @@ def test_the_pyodide_job_keeps_the_packages_pyodide_downloads() -> None:
     The job hands ``smoke.mjs`` a directory of its own instead, which the
     script passes to ``loadPyodide`` as ``packageCacheDir``, and caches that
     directory under the lockfile that pins Pyodide, so a new Pyodide starts
-    from an empty one.
+    from an empty one. The Pyodide steps are those of the built-package job,
+    which builds the wheel they load.
     """
     workflow = yaml.safe_load(
         (_ROOT / ".github" / "workflows" / "python-app.yml").read_text(encoding="utf-8")
     )
-    steps = workflow["jobs"]["pyodide"]["steps"]
+    steps = workflow["jobs"]["built-package"]["steps"]
     caches = [
         step for step in steps if str(step.get("uses", "")).startswith("actions/cache@")
     ]
@@ -2767,3 +2774,405 @@ def test_no_llms_file_the_site_build_writes_is_tracked() -> None:
         "llms-full.txt",
     )
     assert tracked == [], tracked
+
+
+def test_every_python_ci_job_has_a_time_limit() -> None:
+    """A hung job of Python CI ends at its own limit, never at GitHub's six hours.
+
+    Seven jobs had none, so one that hung held a runner for 360 minutes,
+    and the account runs at most forty jobs at a time across its
+    repositories: every runner a hung job holds is one a test leg of the
+    next pull request waits for. Each job states its limit, above the
+    longest run measured for it with room for a slow mirror or a loaded
+    runner.
+    """
+    jobs = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))["jobs"]
+    unlimited = [name for name, job in jobs.items() if "timeout-minutes" not in job]
+    assert unlimited == [], (
+        f"these Python CI jobs have no timeout-minutes, so a hang holds a runner "
+        f"for six hours: {unlimited}"
+    )
+
+
+#: The jobs of Python CI that group several guards or checks, each run as a
+#: step of its own: the five built from jobs that each ran one, and the four
+#: kept apart that carry several verdicts.
+_GROUPED_JOBS = (
+    "guards-prose",
+    "guards-source",
+    "guards-package",
+    "built-package",
+    "baseline-glibc",
+)
+_SEVERAL_VERDICTS = ("quality", "figures", "minimum-versions", "tests-perf")
+#: The jobs that install nothing with pip, so every script they run stays in
+#: the probe of tests/test_scripts_without_numpy.py that imports it bare.
+_INSTALL_NOTHING = ("guards-prose", "guards-source")
+#: The ids of the steps that set a job up, after its checkout.
+_SETUP_IDS = frozenset({"checkout", "python", "install", "tooling"})
+#: A condition that runs a step whatever the steps before it said, unless the
+#: run was cancelled, and names the step it needs.
+_RUNS_UNLESS_CANCELLED = re.compile(r"^\$\{\{ !cancelled\(\) && .*\}\}$")
+_NEEDS_STEP = re.compile(r"steps\.([\w-]+)\.outcome == 'success'")
+#: The two conditions a test holds literally elsewhere: the golden-digest test
+#: runs after a failed measurement and the measured file is kept whatever
+#: happened (test_the_engine_digests_test_names_a_moved_digest_after_the_
+#: measurement_fails).
+_KEPT_CONDITIONS = frozenset(
+    {"(success() || failure()) && steps.avx512.outcome == 'success'", "always()"}
+)
+#: The last step of a grouped job, and the condition it runs on: after a
+#: failure, unless the failure was the checkout, which leaves no script to run
+#: and would fail the job a second time.
+_SUMMARY = "python3 .github/scripts/failed_steps.py"
+_SUMMARY_CONDITION = "${{ failure() && steps.checkout.outcome == 'success' }}"
+#: A guard that only reads: a checker script, or a generator asked to compare.
+_READS_ONLY = re.compile(r"\bscripts/check_\w+\.py\b|\s--check\b")
+#: A step that writes what a drift gate then compares.
+_REGENERATES = re.compile(r"^make [\w-]+$|\bscripts/generate_\w+\.py(?!.*--check)")
+#: The step that puts a checkout back as committed.
+_RESETS = ("git reset --hard", "git clean -fd")
+
+
+def _python_ci_jobs(text: str | None = None) -> dict[str, dict[str, object]]:
+    """The jobs of python-app.yml, or of *text* written in its place."""
+    if text is None:
+        text = _PYTHON_WORKFLOW.read_text(encoding="utf-8")
+    jobs: dict[str, dict[str, object]] = yaml.safe_load(text)["jobs"]
+    return jobs
+
+
+def _steps_of(job: Mapping[str, object]) -> list[dict[str, object]]:
+    steps = job.get("steps")
+    assert isinstance(steps, list)
+    return steps
+
+
+def _is_setup(step: Mapping[str, object]) -> bool:
+    uses = str(step.get("uses", ""))
+    return uses.startswith("actions/checkout@") or step.get("id") in _SETUP_IDS
+
+
+def _step_shape_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why the steps of *job* would let one check hide another, or ``[]``.
+
+    After the steps that set the job up, every step has an id and runs under
+    ``!cancelled()`` and the outcome of a step before it that it needs; none
+    runs under ``always()``, which starts a step in a cancelled run. The
+    summary of a grouped job, its last step, runs on ``failure()`` once the
+    checkout succeeded, and the two conditions of the golden digests are kept
+    as their test holds them.
+    """
+    steps = _steps_of(job)
+    problems = []
+    seen: set[str] = set()
+    setup = True
+    for index, step in enumerate(steps):
+        label = f"{name} step {index} ({step.get('name') or step.get('uses')})"
+        if setup and _is_setup(step):
+            if "id" in step:
+                seen.add(str(step["id"]))
+            continue
+        setup = False
+        condition = str(step.get("if", ""))
+        if _SUMMARY in str(step.get("run", "")):
+            if condition != _SUMMARY_CONDITION:
+                problems.append(
+                    f"{label}: the summary runs on {condition!r}, so a failed "
+                    "checkout fails the job again on a script that is not there"
+                )
+            elif "checkout" not in seen:
+                problems.append(f"{label}: the summary needs a checkout with that id")
+            continue
+        if condition in _KEPT_CONDITIONS:
+            if "id" in step:
+                seen.add(str(step["id"]))
+            continue
+        if "id" not in step:
+            problems.append(f"{label}: no id, so its outcome cannot be named")
+        if "always()" in condition:
+            problems.append(f"{label}: always() starts it in a cancelled run")
+        if not _RUNS_UNLESS_CANCELLED.match(condition):
+            problems.append(
+                f"{label}: runs on {condition or 'the default success()'!r}, so a "
+                "failure before it hides its verdict"
+            )
+        needed = _NEEDS_STEP.findall(condition)
+        if not needed:
+            problems.append(f"{label}: names no step it needs")
+        problems += [
+            f"{label}: needs {other!r}, which is no step before it"
+            for other in needed
+            if other not in seen
+        ]
+        if "id" in step:
+            seen.add(str(step["id"]))
+    return problems
+
+
+def _group_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why a grouped job is not shaped as its guards need, or ``[]``."""
+    steps = _steps_of(job)
+    problems = []
+    env = job.get("env") or {}
+    assert isinstance(env, dict)
+    if str(env.get("PYTHONDONTWRITEBYTECODE")) != "1":
+        problems.append(f"{name}: a guard may write bytecode into the checkout")
+    if "timeout-minutes" not in job:
+        problems.append(f"{name}: no timeout-minutes")
+    summary_env = steps[-1].get("env") if steps else None
+    if not steps or _SUMMARY not in str(steps[-1].get("run", "")):
+        problems.append(f"{name}: the last step does not name the failed steps")
+    elif not isinstance(summary_env, dict) or (
+        summary_env.get("STEPS") != "${{ toJSON(steps) }}"
+    ):
+        problems.append(f"{name}: the summary is not handed the steps context")
+    for index, step in enumerate(steps):
+        run = str(step.get("run", ""))
+        if _READS_ONLY.search(run) and len(run.strip().splitlines()) != 1:
+            problems.append(
+                f"{name} step {index}: a guard shares its run with other lines, "
+                "so a probe that reads it one line at a time misses it"
+            )
+    return problems
+
+
+def _drift_order_problems(name: str, job: Mapping[str, object]) -> list[str]:
+    """Why a guard of *job* reads a checkout a regeneration wrote, or ``[]``.
+
+    The guards that only read come first; then a step fails when one of them
+    wrote into the checkout; then each regeneration starts from a checkout
+    put back as committed since the one before it, so a drift gate says only
+    what is its own. The gates that compare are shell after their
+    regeneration, never a checker script.
+    """
+    problems = []
+    clean_tree_at = None
+    regenerated = False
+    reset_since = False
+    for index, step in enumerate(_steps_of(job)):
+        run = str(step.get("run", "")).strip()
+        if step.get("id") == "clean-tree":
+            clean_tree_at = index
+        if all(command in run for command in _RESETS):
+            if clean_tree_at is None:
+                problems.append(
+                    f"{name} step {index}: resets before the clean-tree step"
+                )
+            reset_since = True
+            continue
+        if _READS_ONLY.search(run) and (regenerated or reset_since):
+            problems.append(
+                f"{name} step {index}: a guard after a reset or a regeneration "
+                "reads a checkout it did not find"
+            )
+        if _REGENERATES.search(run):
+            if not reset_since:
+                problems.append(
+                    f"{name} step {index}: regenerates without first putting the "
+                    "checkout back as committed"
+                )
+            regenerated = True
+            reset_since = False
+    if clean_tree_at is None:
+        problems.append(f"{name}: no step fails when a guard wrote into the checkout")
+    return problems
+
+
+def test_no_check_of_a_grouped_job_hides_another() -> None:
+    """Each guard is a step that runs whatever the others said, and names itself.
+
+    Thirty-five jobs each ran one guard or two; grouped into five, a guard
+    that ran only when every one before it passed would leave its verdict to
+    the next run, one failure at a time. The jobs kept apart that carry
+    several checks are held the same way: a ruff finding used to hide mypy,
+    bandit and zizmor. A grouped job ends on a step that names every step
+    that failed, and writes no bytecode beside what its guards read.
+    """
+    jobs = _python_ci_jobs()
+    problems = []
+    for name in (*_GROUPED_JOBS, *_SEVERAL_VERDICTS):
+        problems += _step_shape_problems(name, jobs[name])
+    for name in _GROUPED_JOBS:
+        problems += _group_problems(name, jobs[name])
+    assert problems == []
+
+
+def test_every_drift_gate_of_the_guard_groups_starts_from_the_committed_checkout() -> (
+    None
+):
+    """A drift gate says what is stale on its own, never what a guard left.
+
+    The conformance gate reads git status over the whole checkout: run after
+    a guard that wrote a file, or after the API reference regeneration, it
+    would call the report stale for a file that is not its own.
+    """
+    jobs = _python_ci_jobs()
+    problems = []
+    for name in ("guards-prose", "guards-source", "guards-package"):
+        problems += _drift_order_problems(name, jobs[name])
+    assert problems == []
+
+
+def test_the_guard_groups_that_install_nothing_stay_so() -> None:
+    """A pip line in either job would take its scripts out of the bare probe.
+
+    tests/test_scripts_without_numpy.py imports every script of a job that
+    installs nothing with no site-packages at all; a job that installs the
+    project is left out of that probe, so one pip line would drop thirty
+    scripts from it without failing anything.
+    """
+    jobs = _python_ci_jobs()
+    installing = [
+        f"{name}: {line.strip()}"
+        for name in _INSTALL_NOTHING
+        for step in _steps_of(jobs[name])
+        for line in str(step.get("run", "")).splitlines()
+        if re.search(r"\bpip3?\s+install\b|-m\s+pip\b", line)
+    ]
+    assert installing == []
+
+
+#: The methods by which a script writes a file named by a path.
+_PATH_WRITES = frozenset({"write_text", "write_bytes"})
+
+
+def _written_paths(script: str) -> list[str]:
+    """Where *script* writes, relative to the root, by its own ``ROOT`` paths.
+
+    Every call of ``write_text`` or ``write_bytes`` is read, and its path is
+    resolved through the module's ``NAME = ROOT / "a" / "b"`` constants; an
+    f-string part stands for one sample name of its pattern, and any other
+    part built at run time ends the path at the directory before it. A write
+    whose path does not resolve is returned as ``?<line>``, so a script that
+    writes somewhere this reader cannot follow fails the test instead of
+    passing it unseen.
+    """
+    tree = ast.parse((_ROOT / script).read_text(encoding="utf-8"))
+    constants: dict[str, list[str]] = {"ROOT": []}
+
+    def resolve(node: ast.expr) -> list[str] | None:
+        if isinstance(node, ast.Name):
+            return constants.get(node.id)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            head = resolve(node.left)
+            if head is None:
+                return None
+            if isinstance(node.right, ast.Constant) and isinstance(
+                node.right.value, str
+            ):
+                return [*head, node.right.value]
+            if isinstance(node.right, ast.JoinedStr):
+                # A name built at run time, as one sample of its pattern.
+                sample = "".join(
+                    str(part.value) if isinstance(part, ast.Constant) else "0"
+                    for part in node.right.values
+                )
+                return [*head, sample]
+            return head
+        return None
+
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
+            target = statement.targets[0]
+            value = resolve(statement.value)
+            if isinstance(target, ast.Name) and value is not None:
+                constants[target.id] = value
+    written = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in _PATH_WRITES
+        ):
+            parts = resolve(node.func.value)
+            written.append("/".join(parts) if parts else f"?{node.lineno}")
+    return sorted(set(written))
+
+
+def _llms_outputs(recipe: str) -> list[str]:
+    """The paths ``make llms`` writes, by the commands of its *recipe*."""
+    outputs = []
+    for line in recipe.splitlines():
+        words = shlex.split(line)
+        if "scripts/agent-md.mjs" in words:
+            # The recipe runs it from site/, so its paths start from there.
+            base = pathlib.PurePosixPath("site")
+            for option in ("--dump", "--docs"):
+                if option in words:
+                    path = base / words[words.index(option) + 1]
+                    outputs.append(posixpath.normpath(path.as_posix()))
+        script = next((word for word in words if word.endswith(".py")), None)
+        if script is not None:
+            outputs += _written_paths(script)
+    return outputs
+
+
+def _llms_gate_problems(
+    recipe: str, gate: str, ignored: Callable[[list[str]], set[str]]
+) -> list[str]:
+    """The committed paths ``make llms`` writes that the llms gate never diffs."""
+    match = re.search(r"git diff --exit-code -- ([^;\n]+?)(?:;|\n|$)", gate)
+    if match is None:
+        return ["the llms gate runs no `git diff --exit-code -- <paths>`"]
+    compared = shlex.split(match.group(1))
+    outputs = _llms_outputs(recipe)
+    unreadable = [path for path in outputs if path.startswith("?")]
+    committed = sorted(set(outputs) - set(unreadable) - ignored(outputs))
+    return [
+        f"scripts/generate_llms.py writes at line {path[1:]} to a path this "
+        "test cannot follow"
+        for path in unreadable
+    ] + [
+        f"make llms writes {path}, which the llms gate does not compare"
+        for path in committed
+        if not any(path == root or path.startswith(f"{root}/") for root in compared)
+    ]
+
+
+def _git_ignored(paths: list[str]) -> set[str]:
+    """The *paths* git ignores, so that no commit ever carries them."""
+    named = [path for path in paths if not path.startswith("?")]
+    listed = child_process.run(
+        ["git", "check-ignore", "--no-index", "--", *named],
+        cwd=_ROOT,
+        capture_output=True,
+        timeout=120,
+    ).stdout.decode("utf-8")
+    return set(listed.splitlines())
+
+
+def _llms_recipe() -> str:
+    text = (_ROOT / "Makefile").read_text(encoding="utf-8")
+    match = re.search(r"^llms:.*\n((?:\t.*\n)+)", text, re.MULTILINE)
+    assert match is not None, "the Makefile has no llms target"
+    return match.group(1)
+
+
+@pytest.mark.git_checkout
+def test_the_llms_gate_compares_every_committed_file_make_llms_writes() -> None:
+    """A file the generator starts writing is held to its commit at once.
+
+    The gate regenerates with `make llms` and then diffs a list of paths
+    typed into the workflow. A new committed output of the generator, left
+    out of that list, would be rewritten on every run and never compared:
+    the gate stays green while the committed file goes stale.
+    """
+    gate = next(
+        str(step.get("run", ""))
+        for step in _steps_of(_python_ci_jobs()["guards-prose"])
+        if step.get("id") == "llms"
+    )
+    assert _llms_gate_problems(_llms_recipe(), gate, _git_ignored) == []
+
+
+def test_the_llms_gate_reader_names_an_output_left_out_of_the_diff() -> None:
+    """The reader above, on a gate that dropped ``docs`` from its list."""
+    gate = "if ! git diff --exit-code -- llms.txt; then\n  exit 1\nfi\n"
+
+    def ignored(paths: list[str]) -> set[str]:
+        return {path for path in paths if path.startswith(("build/", "site/"))}
+
+    assert _llms_gate_problems(_llms_recipe(), gate, ignored) == [
+        "make llms writes docs, which the llms gate does not compare"
+    ]

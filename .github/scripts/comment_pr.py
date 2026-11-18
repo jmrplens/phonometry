@@ -15,9 +15,10 @@ moves - plus, unconditionally, the checks sitting closest to their published
 limit, which is the standing metrology question and the one 554 static rows
 never surfaced.
 
-Two consequences worth stating. This runs no checks: the ``conformance`` job has
-already failed the pull request if the committed artefact is stale, so a
-comment built from committed files cannot be reading numbers nobody verified.
+Two consequences worth stating. This runs no checks: the conformance gate of the
+``guards-package`` job has already failed the pull request if the committed
+artefact is stale, so a comment built from committed files cannot be reading
+numbers nobody verified.
 And it needs the base commit, so the workflow must fetch it - a checkout at the
 default depth has only the merge commit, and a missing baseline degrades to
 totals only rather than failing.

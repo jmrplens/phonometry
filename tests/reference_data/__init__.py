@@ -23,8 +23,8 @@ and ``from reference_data import X`` resolve exactly as they did while this
 was a single module.
 
 These modules are deliberately dependency-free (stdlib only) so they can be
-imported in the ``pr-comment`` CI job, which installs the runtime
-requirements but not ``pytest``.
+imported in the ``pr-comment`` CI job, which installs nothing beyond the
+Python it sets up, not even ``pytest``.
 """
 
 from .absorption import ARAU_6_1_ABSORPTION as ARAU_6_1_ABSORPTION

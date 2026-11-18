@@ -606,6 +606,33 @@ copy (`<address>index.md`) to the copy of the page it moved to, and each retired
 llms shard name to the file that now carries its first page; neither has a stub
 to fall back on. The credentials for that stay with the maintainer, never in
 this repository.
+The phonometry.dev preview (5c) answers the same addresses from a `_redirects`
+file written from the same list (`redirectPairs()` in that script), so the two
+edges cannot drift apart.
+
+### 5c. The phonometry.dev preview
+
+docs.jmrp.io stays the canonical site. The same build is also served as a
+`noindex` preview at <https://phonometry.dev/phonometry/>, from a Cloudflare
+Worker that has Static Assets and no code, so the daily request quota of
+Workers Free cannot stop it. Everything about it lives in `site/worker/`, and
+its README says what is served from where, how it is deployed and how it is
+rolled back. Four things touch the rest of the repository:
+
+- `PHONOMETRY_SITE` picks the host a build is made for, from a closed list in
+  `site/src/data/site.mjs` that `scripts/generate_llms.py` reads too. Unset, the
+  build is byte for byte the one docs.jmrp.io serves; any value outside the list
+  stops the build.
+- The docs job runs the preview's tests (`node --test 'worker/test/*.test.mjs'`
+  in `site/`) and stages every build with `--check`, so a pull request that
+  would break the preview fails there.
+- `.github/workflows/site-preview.yml` deploys a docs.yml build of main by
+  hand, with Cloudflare tokens from secrets the maintainer holds. The quota
+  alert is a Cloudflare notification on the account, not a GitHub job.
+- Every page's Content-Security-Policy, the meta tag in
+  `site/astro.config.mjs` and the preview's header, allows the clip hosts of
+  `mediaOrigins` in `site/src/data/site.mjs`, because the preview redirects
+  each clip to one of them. A new clip host is added there first.
 
 ### 6. Filing an errata entry
 

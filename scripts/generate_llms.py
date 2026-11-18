@@ -77,9 +77,11 @@ import argparse
 import dataclasses
 import functools
 import json
+import os
 import pathlib
 import re
 import tomllib
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from generate_site_reports import family_pages
@@ -118,7 +120,33 @@ PAGES = ROOT / "build" / "agent-md"
 SHARD_NAMES = ROOT / "site" / "src" / "data" / "llms-shards.json"
 #: The committed index ``make llms`` writes.
 INDEX = ROOT / "llms.txt"
-SITE_URL = "https://docs.jmrp.io/phonometry"
+#: The hosts the site can be built for, with the base path under each: the
+#: table of ``SITE_TARGETS`` in site/src/data/site.mjs, which the site build
+#: reads from the same variable, so the llms files a build publishes link the
+#: pages of that build (tests/test_generate_llms.py holds the two equal).
+SITE_TARGETS = MappingProxyType(
+    {
+        "docs.jmrp.io": "https://docs.jmrp.io/phonometry",
+        "phonometry.dev": "https://phonometry.dev/phonometry",
+    }
+)
+
+
+def site_url(name: str | None) -> str:
+    """The site URL ``PHONOMETRY_SITE`` names: unset or empty is docs.jmrp.io.
+
+    :param name: The variable's value, or None when it is not set.
+    :return: The absolute URL of the site, base path included, without a trailing slash.
+    :raises SystemExit: For any other value, as the site build refuses it.
+    """
+    key = name or "docs.jmrp.io"
+    if key not in SITE_TARGETS:
+        msg = f"PHONOMETRY_SITE={name} is not one of {', '.join(SITE_TARGETS)}"
+        raise SystemExit(msg)
+    return SITE_TARGETS[key]
+
+
+SITE_URL = site_url(os.environ.get("PHONOMETRY_SITE"))
 REPO_URL = "https://github.com/jmrplens/phonometry"
 
 #: The hand-written table of every public name, which only docs/ holds.
@@ -1032,7 +1060,7 @@ def _summary(version: str) -> list[str]:
             "installs); 3.x has a different import layout and "
             "`from phonometry import filters` fails on it. Code written for 3.x "
             "needs changes to run on 4.x; the upgrade guide "
-            "(https://docs.jmrp.io/phonometry/start/upgrading/) maps each of them."
+            f"({SITE_URL}/start/upgrading/) maps each of them."
         ),
         "",
         (

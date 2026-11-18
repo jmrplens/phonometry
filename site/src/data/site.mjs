@@ -7,8 +7,60 @@
  * the checks. The repository and the author are read by the head of every page
  * and by the header of every page's Markdown copy (src/lib/agent-md/header.mjs).
  */
-export const siteUrl = 'https://docs.jmrp.io';
-export const basePath = '/phonometry';
+
+/**
+ * The hosts the site can be built for, and the base path under each.
+ *
+ * docs.jmrp.io is the canonical site and the build with nothing set.
+ * phonometry.dev is the preview served from Cloudflare (site/worker/README.md):
+ * `PHONOMETRY_SITE=phonometry.dev pnpm build` names it in every canonical URL,
+ * `og:url`, structured data `@id`, sitemap, Markdown copy and llms file, and in
+ * robots.txt (scripts/site-origin.mjs). It keeps the base
+ * path for now, so every link the pages write is the same in both builds; the
+ * move to the root is a later change.
+ */
+export const SITE_TARGETS = Object.freeze({
+  'docs.jmrp.io': Object.freeze({ siteUrl: 'https://docs.jmrp.io', basePath: '/phonometry' }),
+  'phonometry.dev': Object.freeze({ siteUrl: 'https://phonometry.dev', basePath: '/phonometry' }),
+});
+
+/**
+ * The target a value of PHONOMETRY_SITE names.
+ *
+ * @param {string | undefined} name The variable's value; unset or empty means docs.jmrp.io.
+ * @returns {{siteUrl: string, basePath: string}} The target.
+ * @throws {Error} For any other value, so a typo stops the build instead of publishing it.
+ */
+export function siteTarget(name) {
+  const key = name === undefined || name === '' ? 'docs.jmrp.io' : name;
+  if (!Object.hasOwn(SITE_TARGETS, key)) {
+    throw new Error(`PHONOMETRY_SITE=${name} is not one of ${Object.keys(SITE_TARGETS).join(', ')}`);
+  }
+  return SITE_TARGETS[key];
+}
+
+// globalThis.process, not process: this module is read by the build and the
+// scripts under Node, and nothing else reaches it, but the guard costs nothing.
+const target = siteTarget(globalThis.process?.env?.PHONOMETRY_SITE);
+
+export const siteUrl = target.siteUrl;
+export const basePath = target.basePath;
+
+/**
+ * The origins besides the page's own that may answer a clip (`<video>`).
+ *
+ * The phonometry.dev preview answers a clip with a redirect to docs.jmrp.io,
+ * which serves byte ranges (site/worker/lib/rules.mjs, rule
+ * clips-to-range-host), and a browser checks the Content-Security-Policy of
+ * the page against the address a media load is redirected to. Both policies
+ * every page carries, the meta tag in astro.config.mjs and the header in
+ * site/worker/lib/headers.mjs, list these in `media-src`. On docs.jmrp.io the
+ * entry is the page's own origin, so the build it serves behaves as before.
+ * A new clip host is added here first: the staging step refuses a build whose
+ * pages do not allow every origin listed, and apply-rules.mjs refuses a clip
+ * host that is not listed.
+ */
+export const mediaOrigins = Object.freeze(['https://docs.jmrp.io']);
 
 /**
  * The `@id` of the Person node, which the build fetches from jmrp.io and

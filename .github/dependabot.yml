@@ -68,6 +68,23 @@ updates:
         patterns:
           - "*"
 
+  # wrangler, which deploys the phonometry.dev preview. A project of its own
+  # beside the site's (site/worker/pnpm-workspace.yaml says why), so it has
+  # its own entry.
+  - package-ecosystem: "npm"
+    directory: "/site/worker"
+    cooldown:
+      default-days: 3
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:15"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "javascript"
+    open-pull-requests-limit: 2
+
   # The Pyodide the CI job installs the wheel into, standing in for
   # JupyterLite: a new Pyodide ships new numpy and scipy builds, which is
   # what decides whether the package installs there.

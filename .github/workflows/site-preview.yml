@@ -1,8 +1,9 @@
 # Deploys the documentation docs.yml built to the phonometry.dev preview.
 #
-# The preview is one Cloudflare Worker with Static Assets and no code
-# (site/worker/README.md): requests for its pages, Markdown copies and files
-# run no script, so the daily request quota of Workers Free cannot stop it.
+# The preview is one Cloudflare Worker with Static Assets (site/worker/README.md):
+# pages and files run no script, so the daily request quota of Workers Free
+# cannot stop them; only the visitor beacon and the files agents read run the
+# Worker, which logs them, and the quota guard switches those off at 95 %.
 # docs.jmrp.io stays the canonical site and this workflow never touches it.
 #
 # By hand for now: Actions > Site preview > Run workflow, with the id of a
@@ -129,16 +130,60 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pages"
           tar -xf "$RUNNER_TEMP/pages-artifact/artifact.tar" -C "$RUNNER_TEMP/pages"
           echo "$(find "$RUNNER_TEMP/pages" -type f | wc -l) files in the build"
-      - name: Stage the build (every check runs before anything is written)
-        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage
-      - name: Deploy the Worker
-        # wrangler.jsonc names the account, so the token needs no account
-        # listing and no variable can point the deploy elsewhere.
+      - name: Stage the build with the beacon (every check runs before anything is written)
+        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage --beacon
+      - name: Read whether the quota guard has switched the code paths off
+        # At 95 % of the day's Workers requests the guard blocks the beacon
+        # and rolls the Worker to its assets-only half until 00:00 UTC. A
+        # deploy then has to keep them off, or the agent files would spend
+        # what the guard is keeping (site/worker/README.md, "Quota").
+        id: guard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
-        run: pnpm exec wrangler deploy --config wrangler.jsonc
+        run: |
+          set -euo pipefail
+          node scripts/guard-state.mjs | tee -a "$GITHUB_OUTPUT"
+        working-directory: site/worker
+      - name: Upload the assets-only version the quota guard rolls to
+        # Same stage, no code: tagged as the other half of this deploy's pair,
+        # so the guard (site/worker/guard) can switch between them. The pair
+        # is named after this run and its attempt, not after the docs.yml run
+        # it deploys: a re-run of a deploy that failed halfway uploads a new
+        # pair instead of a second version under a tag already taken.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
+          PAIR: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: pnpm exec wrangler versions upload --config wrangler.assets-only.jsonc --tag "assets-$PAIR" --message "assets-only half of $PAIR"
+        working-directory: site/worker
+      - name: Deploy the Worker
+        # wrangler.jsonc names the account, so the token needs no account
+        # listing and no variable can point the deploy elsewhere. While the
+        # guard holds the code paths off, the full half is only uploaded and
+        # the assets-only half goes live under the same mark the off state
+        # had, so the guard (or quota-switch.mjs --mode on, for an off state
+        # set by hand) switches this deploy back on with the rest.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
+          PAIR: ${{ github.run_id }}-${{ github.run_attempt }}
+          TRIPPED: ${{ steps.guard.outputs.tripped }}
+          MARK: ${{ steps.guard.outputs.mark }}
+        run: |
+          set -euo pipefail
+          if [ "$TRIPPED" = true ]; then
+            pnpm exec wrangler versions upload --config wrangler.jsonc --tag "full-$PAIR" --message "full half of $PAIR"
+            pnpm exec wrangler versions deploy --config wrangler.jsonc --version-tag "assets-$PAIR@100" --message "$MARK: off, deploy of $PAIR while the code paths are off" --yes
+            echo "::notice::the quota guard holds the code paths off: the assets-only half of $PAIR is live, the full half waits for the switch back" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            # After a switch back the guard may still have its rule to turn
+            # off; carrying its mark keeps that rule the guard's to clear.
+            message="full half of $PAIR"
+            if [ -n "$MARK" ]; then message="$MARK: on, $message"; fi
+            pnpm exec wrangler deploy --config wrangler.jsonc --tag "full-$PAIR" --message "$message"
+          fi
         working-directory: site/worker
       - name: Check what the assets answer
+        env:
+          TRIPPED: ${{ steps.guard.outputs.tripped }}
         run: |
           set -euo pipefail
           base=https://phonometry.dev/phonometry
@@ -158,6 +203,23 @@ jobs:
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
           expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
+          # While the code paths are held off the beacon runs no code: the
+          # guard's WAF rule answers 403 before any Worker runs, or, while
+          # that rule is not on yet, the assets-only half answers 404 (no
+          # asset is called _v). A 204 then would mean code is running.
+          want=204
+          if [ "$TRIPPED" = true ]; then want="403 404"; fi
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H 'Origin: https://phonometry.dev' -H 'Content-Type: text/plain' --data '{"p":"/phonometry/signals/","wd":1}' https://phonometry.dev/_v)
+          if ! grep -qwF -- "$code" <<<"$want"; then
+            echo "::error::the beacon answered $code, not $want (quota guard tripped: $TRIPPED)"
+            fail=1
+          elif [ "$TRIPPED" = true ]; then
+            echo "ok   the beacon answers $code: the code paths are off until they are switched back"
+          else
+            echo "ok   the beacon answers 204"
+          fi
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 https://phonometry.dev/_v)
+          if [ "$code" != 403 ]; then echo "::error::a GET of the beacon answered $code, not the WAF's 403"; fail=1; else echo "ok   the WAF refuses a GET of the beacon"; fi
           n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')
           if [ "$n" != 1 ]; then echo "::error::the copy carries $n Content-Type headers"; fail=1; else echo "ok   one Content-Type"; fi
           exit "$fail"

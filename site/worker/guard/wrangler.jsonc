@@ -1,0 +1,29 @@
+// The quota guard of the phonometry.dev preview (lib/guard.mjs,
+// site/worker/README.md, "Quota"): at 95 % of the day's 100 000 Workers
+// requests it blocks the beacon in the zone's WAF and rolls phonometry-docs
+// to its assets-only version, and after 00:00 UTC it switches both back.
+// test/wrangler.test.mjs holds this file to its shape.
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "phonometry-quota-guard",
+	// The Phonometry account, as in ../wrangler.jsonc.
+	"account_id": "4dbfb3b955a0c856bfe066f2a6061dd5",
+	"main": "src/index.mjs",
+	"compatibility_date": "2026-11-17",
+	// Every 15 minutes, UTC: 96 invocations a day of the same quota it watches.
+	"triggers": { "crons": ["*/15 * * * *"] },
+	"vars": {
+		// Workers requests since 00:00 UTC at which the code paths switch off.
+		"THRESHOLD": "95000",
+		// dry-run logs the decision and changes nothing; auto acts; off and on
+		// pin a state by hand. Without the CF_GUARD_TOKEN secret every run is dry.
+		"MODE": "dry-run"
+	},
+	// No route, no workers.dev address and no preview URLs: nothing but the
+	// cron reaches this Worker.
+	"workers_dev": false,
+	"preview_urls": false,
+	// Its own lines only (the decision and each action), no visitor data:
+	// it never answers a visitor request.
+	"observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false } }
+}

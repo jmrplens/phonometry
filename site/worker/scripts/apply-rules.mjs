@@ -2,13 +2,27 @@
 //
 // Usage:
 //   CLOUDFLARE_API_TOKEN=... node site/worker/scripts/apply-rules.mjs
-//       [--check | --apply] [--backup-dir <dir>] [--clip-base <url/>]
+//       [--check | --apply] [--phase edge|waf] [--backup-dir <dir>] [--clip-base <url/>]
+//
+// --phase edge (the default) is the redirect and response-header phases, the
+// two the CI rules token can read and write. --phase waf is the beacon's WAF
+// custom rules and its rate limiting rule (lib/rules.mjs), which that token
+// cannot touch: they are applied by hand with a token that has Zone WAF Edit
+// (or the account key). The quota guard owns the `enabled` bit of the rule
+// quota-guard-beacon: an apply creates it off and otherwise keeps the
+// value it finds, and --check does not count it as drift. While that rule is
+// on, an apply refuses to rewrite the custom rules: a PUT of the entrypoint
+// renews every rule's last update, which the guard reads as the day of its
+// trip, and could put back an `enabled` the guard changed after the read.
+// Apply them once the guard has switched the beacon back on (or after
+// `quota-switch.mjs --mode on`).
 //
 // --check (the default) reads both phase entrypoints and exits 1 when the live
-// rules differ from the generated ones; nothing is written. --apply first
-// saves what each entrypoint holds, one JSON file per phase under
-// --backup-dir ($RUNNER_TEMP or the working directory by default), then
-// replaces the entrypoint's rules with the generated ones. Rolling back is a
+// rules differ from the generated ones; nothing is written. --apply puts only
+// a phase that differs: it first saves what the entrypoint holds, one JSON
+// file per phase under --backup-dir ($RUNNER_TEMP or the working directory by
+// default), then replaces the entrypoint's rules with the generated ones. A
+// phase already as generated is left untouched. Rolling back is a
 // PUT of a saved file's `rules`. The token needs, on the zone, Dynamic URL
 // Redirects Edit and Transform Rules Edit (Read for --check).
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -18,7 +32,8 @@ import { fileURLToPath } from 'node:url';
 
 import { basePath, mediaOrigins } from '../../src/data/site.mjs';
 import { CloudflareError, ZONE_ID, cfApi, ignoredTargets } from '../lib/cloudflare.mjs';
-import { redirectRules, responseHeaderRules } from '../lib/rules.mjs';
+import { GUARD_RULE_REF } from '../lib/guard.mjs';
+import { firewallRules, rateLimitRules, redirectRules, responseHeaderRules } from '../lib/rules.mjs';
 import { ruleDrift } from '../lib/rulesets.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 
@@ -66,6 +81,29 @@ export function generatedPhases({ clipBase = CLIP_BASE, prefix = basePath } = {}
 	];
 }
 
+/** The beacon's WAF phases. */
+export function wafPhases() {
+	return [
+		{ phase: 'http_request_firewall_custom', rules: firewallRules({ host: HOST }) },
+		{ phase: 'http_ratelimit', rules: rateLimitRules() },
+	];
+}
+
+/**
+ * The generated rules with the guard rule's `enabled` as the zone holds it:
+ * the guard switches it, and an apply or a check must neither undo nor
+ * report that.
+ *
+ * @param {object[]} rules The generated rules of a phase.
+ * @param {object[]} live What the entrypoint holds now.
+ * @returns {object[]} The rules to compare and put.
+ */
+export function keepGuardState(rules, live) {
+	const current = live.find((rule) => rule.ref === GUARD_RULE_REF);
+	if (!current) return rules;
+	return rules.map((rule) => (rule.ref === GUARD_RULE_REF ? { ...rule, enabled: Boolean(current.enabled) } : rule));
+}
+
 /** The rules a phase entrypoint holds, [] when the zone has none yet. */
 async function liveRules(zone, phase, api) {
 	try {
@@ -89,7 +127,7 @@ export async function runApplyRules({ argv, env, fetchImpl = fetch, sink = null 
 	try {
 		args = parseArgs({
 			args: argv,
-			options: { check: { type: 'boolean' }, apply: { type: 'boolean' }, 'backup-dir': { type: 'string' }, 'clip-base': { type: 'string' } },
+			options: { check: { type: 'boolean' }, apply: { type: 'boolean' }, phase: { type: 'string' }, 'backup-dir': { type: 'string' }, 'clip-base': { type: 'string' } },
 		}).values;
 	} catch (error) {
 		log(error.message);
@@ -99,6 +137,11 @@ export async function runApplyRules({ argv, env, fetchImpl = fetch, sink = null 
 		log('pass at most one of --check and --apply');
 		return 2;
 	}
+	const which = args.phase ?? 'edge';
+	if (which !== 'edge' && which !== 'waf') {
+		log(`--phase is edge or waf, not ${which}`);
+		return 2;
+	}
 	const zone = ZONE_ID;
 	for (const line of ignoredTargets(env)) log(line);
 	const api = (path, options = {}) => cfApi(path, { ...options, env, fetchImpl });
@@ -106,13 +149,23 @@ export async function runApplyRules({ argv, env, fetchImpl = fetch, sink = null 
 	const stamp = new Date().toISOString().replaceAll(':', '-');
 	let drifted = false;
 	try {
-		for (const { phase, rules } of generatedPhases({ clipBase: args['clip-base'] ?? CLIP_BASE })) {
+		const phases = which === 'waf' ? wafPhases() : generatedPhases({ clipBase: args['clip-base'] ?? CLIP_BASE });
+		for (const { phase, rules: generated } of phases) {
 			const live = await liveRules(zone, phase, api);
+			const rules = keepGuardState(generated, live);
 			const drift = ruleDrift(live, rules);
 			for (const line of drift) log(`${phase}: ${line}`);
+			if (drift.length === 0) {
+				log(`${phase}: as generated (${rules.length} rules)${args.apply ? ', nothing put' : ''}`);
+				continue;
+			}
 			if (!args.apply) {
-				if (drift.length > 0) drifted = true;
-				else log(`${phase}: as generated (${rules.length} rules)`);
+				drifted = true;
+				continue;
+			}
+			if (live.some((rule) => rule.ref === GUARD_RULE_REF && rule.enabled)) {
+				log(`${phase}: not put: the quota guard holds ${GUARD_RULE_REF} on, and a put would renew the date it reads as its trip; apply after it switches the beacon back on`);
+				drifted = true;
 				continue;
 			}
 			mkdirSync(backupDir, { recursive: true });

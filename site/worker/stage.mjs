@@ -2,7 +2,7 @@
 //
 // Usage (site/worker/README.md):
 //   node site/worker/stage.mjs --from <build> [--out <dir>] [--site docs.jmrp.io|phonometry.dev]
-//                               [--indexable] [--check]
+//                               [--indexable] [--beacon] [--check]
 //
 // --from is a build: a local site/dist, or the unpacked github-pages artifact
 // docs.yml uploads. --site names the host that build was made for (its
@@ -10,13 +10,15 @@
 // the base path and the canonical origin of the headers follow from it.
 // --out defaults to site/worker/stage, the directory wrangler.jsonc names.
 // --indexable drops the noindex every response carries while the site is a
-// preview. --check runs every check and writes nothing. Exit 0 when staged
+// preview. --beacon puts the visitor beacon (lib/beacon.mjs) into every
+// staged page, in the staged copy only. --check runs every check and writes
+// nothing. Exit 0 when staged
 // (or the checks pass), 1 when a check fails, 2 on a usage error.
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-const usage = 'usage: node site/worker/stage.mjs --from <build> [--out <dir>] [--site <host>] [--indexable] [--check]';
+const usage = 'usage: node site/worker/stage.mjs --from <build> [--out <dir>] [--site <host>] [--indexable] [--beacon] [--check]';
 
 let args;
 try {
@@ -26,6 +28,7 @@ try {
 			out: { type: 'string' },
 			site: { type: 'string' },
 			indexable: { type: 'boolean' },
+			beacon: { type: 'boolean' },
 			check: { type: 'boolean' },
 		},
 	}).values;
@@ -60,11 +63,12 @@ const report = stage({
 	pairs: redirectPairs(),
 	exclusions: twinExclusions(site.basePath),
 	indexable: Boolean(args.indexable),
+	beacon: Boolean(args.beacon),
 	checkOnly: Boolean(args.check),
 });
 for (const problem of report.problems) console.error(`FAIL ${problem}`);
 if (report.problems.length > 0) process.exit(1);
 console.log(
 	`${args.check ? 'checked' : `staged into ${out}`}: ${report.files} files, ${report.redirects} redirects, ` +
-		`${report.headerRules} header rules, origin ${site.siteUrl}, base ${site.basePath || '/'}${args.indexable ? ', indexable' : ', noindex'}`,
+		`${report.headerRules} header rules, origin ${site.siteUrl}, base ${site.basePath || '/'}${args.indexable ? ', indexable' : ', noindex'}${args.beacon ? `, beacon in ${report.beaconPages} pages` : ''}`,
 );

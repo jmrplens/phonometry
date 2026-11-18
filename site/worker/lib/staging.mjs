@@ -15,6 +15,8 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, wri
 import { join, relative, sep } from 'node:path';
 
 import { mediaOrigins } from '../../src/data/site.mjs';
+import { agentPaths, runsWorker } from './agent-paths.mjs';
+import { beaconScript } from './beacon.mjs';
 import { headersFile, parseHeaders, HEADER_LINE_LIMIT, HEADER_RULE_LIMIT } from './headers.mjs';
 import { redirectProblems, redirectsFile } from './redirects.mjs';
 import { isExcluded } from './twins.mjs';
@@ -184,6 +186,63 @@ export function mediaPolicyProblems(root, files, origins) {
 	return problems;
 }
 
+/** The files the Worker may run for: Markdown copies, llms files, robots.txt and XML. */
+const AGENT_FILE = /(?:\/index\.md|\/llms[^/]*\.txt|\/robots\.txt|\.xml)$/;
+
+/**
+ * The staged files the Worker would run for that are not agent files: a page,
+ * an image or a script there would become an invocation on every request
+ * and a 429 once the quota is spent. Root copies are checked at their root
+ * address too.
+ *
+ * @param {{path: string}[]} files The build's files.
+ * @param {string} prefix The base path.
+ * @param {string[]} rootCopies The files also served at the root.
+ * @returns {string[]} One line per file.
+ */
+export function agentPathProblems(files, prefix, rootCopies = []) {
+	const patterns = agentPaths(prefix);
+	const served = [...files.map(({ path }) => `${prefix}/${path}`), ...rootCopies.map((name) => `/${name}`)];
+	return served.filter((path) => runsWorker(path, patterns) && !AGENT_FILE.test(path)).map((path) => `${path} would run the Worker, and it is no agent file (lib/agent-paths.mjs)`);
+}
+
+/** A closing body tag, in any case. */
+const BODY_END = /<\/body>/gi;
+
+/**
+ * A page with the beacon script put right before its one closing body tag.
+ *
+ * @param {string} html The page.
+ * @param {boolean} notFound Whether it is a 404 page (the beacon reports status 404,
+ *   and sends nothing at an agent path, which the Worker logged already).
+ * @param {string} [prefix] The base path the build was made for.
+ * @returns {string} The page with the script.
+ * @throws {Error} When the page has no closing body tag, or more than one.
+ */
+export function withBeacon(html, notFound, prefix) {
+	const ends = html.match(BODY_END)?.length ?? 0;
+	if (ends !== 1) throw new Error(`${ends} closing body tags, the beacon needs exactly one`);
+	return html.replace(BODY_END, (tag) => `${beaconScript(notFound, prefix)}${tag}`);
+}
+
+/**
+ * The HTML files the beacon cannot go into: every page of the build must have
+ * exactly one closing body tag, or the staging stops before writing.
+ *
+ * @param {string} root The build.
+ * @param {{path: string}[]} files The build's files.
+ * @returns {string[]} One line per file.
+ */
+export function beaconProblems(root, files) {
+	const problems = [];
+	for (const { path } of files) {
+		if (!path.endsWith('.html')) continue;
+		const ends = readFileSync(join(root, path), 'utf8').match(BODY_END)?.length ?? 0;
+		if (ends !== 1) problems.push(`${path}: ${ends} closing body tags, the beacon needs exactly one`);
+	}
+	return problems;
+}
+
 /**
  * Checks a build and, unless checkOnly, writes the asset directory.
  *
@@ -195,10 +254,12 @@ export function mediaPolicyProblems(root, files, origins) {
  * @param {{from: string, to: string}[]} options.pairs The retired addresses (redirectPairs()).
  * @param {{pages: string[], subtrees: string[]}} options.exclusions Pages without a copy.
  * @param {boolean} options.indexable Whether the noindex goes.
+ * @param {boolean} [options.beacon] Put the beacon script into every staged page (the
+ *   staged copy only: the build is read, never written).
  * @param {boolean} [options.checkOnly] Check, and write nothing.
- * @returns {{problems: string[], files: number, redirects: number, headerRules: number}} What was found.
+ * @returns {{problems: string[], files: number, redirects: number, headerRules: number, beaconPages: number}} What was found.
  */
-export function stage({ from, out, prefix, origin, pairs, exclusions, indexable, checkOnly = false }) {
+export function stage({ from, out, prefix, origin, pairs, exclusions, indexable, beacon = false, checkOnly = false }) {
 	if (!checkOnly && existsSync(out)) throw new Error(`${out} already exists; staging writes a fresh directory`);
 	const files = listTree(from);
 	const problems = treeProblems(files);
@@ -219,19 +280,29 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	for (const line of headers.split('\n')) {
 		if (line.length > HEADER_LINE_LIMIT) problems.push(`_headers line over ${HEADER_LINE_LIMIT} characters: ${line.slice(0, 40)}`);
 	}
+	if (beacon) problems.push(...beaconProblems(from, files));
 	const rootCopies = prefix === '' ? [] : ['404.html', ...ROOT_COPIES].filter((name) => have.has(`${prefix}/${name}`));
 	const extra = rootCopies.length;
+	problems.push(...agentPathProblems(files, prefix, rootCopies));
 	if (files.length + extra > MAX_FILES) problems.push(`${files.length + extra} files once staged, over the ${MAX_FILES}`);
-	const report = { problems, files: files.length + extra, redirects: pairs.length, headerRules: rules };
+	const pages = beacon ? files.filter(({ path }) => path.endsWith('.html')) : [];
+	const report = { problems, files: files.length + extra, redirects: pairs.length, headerRules: rules, beaconPages: pages.length };
 	if (checkOnly || problems.length > 0) return report;
 
 	const site = join(out, ...prefix.split('/').filter(Boolean));
 	mkdirSync(site, { recursive: true });
 	cpSync(from, site, { recursive: true });
+	// The beacon goes into the copies, after they are made, so the build
+	// (GitHub Pages' artifact, already deployed to docs.jmrp.io) is never
+	// written; the root copies below are taken from the staged pages.
+	for (const { path } of pages) {
+		const file = join(site, path);
+		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html', prefix));
+	}
 	// Outside the base path the nearest 404.html is the root's, so the site's
 	// own page answers there too (not_found_handling: "404-page"); robots.txt
 	// and llms.txt answer at the root as well.
-	for (const name of rootCopies) cpSync(join(from, name), join(out, name));
+	for (const name of rootCopies) cpSync(join(site, name), join(out, name));
 	writeFileSync(join(out, '_headers'), headers);
 	writeFileSync(join(out, '_redirects'), redirectsFile(pairs));
 	writeFileSync(join(out, '.assetsignore'), '.*\n');

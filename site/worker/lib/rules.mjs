@@ -233,3 +233,66 @@ export function markdownRuleMatches(request, zone) {
 		!zone.exclusions.pages.includes(path)
 	);
 }
+
+/** The path of the visitor beacon (lib/agent-paths.mjs). */
+const BEACON = '/_v';
+
+/**
+ * The `http_request_firewall_custom` rules: they run before any Worker, so a
+ * request they block costs no invocation.
+ *
+ * - `beacon-shape` (on): anything at /_v but a POST whose Origin is the site
+ *   is blocked. A browser's beacon always passes; scanners and crawlers that
+ *   probe the path never reach the Worker.
+ * - `quota-guard-beacon` (created off): blocks every request at /_v. The
+ *   quota guard (lib/guard.mjs) turns it on at 95 % of the day's Workers
+ *   requests and off after 00:00 UTC; it owns the `enabled` bit, which the
+ *   apply script keeps as it finds it.
+ *
+ * @param {{host: string}} options The zone apex.
+ * @returns {object[]} The rules, in order.
+ */
+export function firewallRules({ host }) {
+	const at = `http.host eq ${literal(host, 'host')} and http.request.uri.path eq ${literal(BEACON, 'path')}`;
+	return [
+		{
+			ref: 'beacon-shape',
+			description: 'Only a POST from the site itself reaches the beacon',
+			expression: `${at} and (http.request.method ne "POST" or not any(http.request.headers["origin"][*] eq ${literal(`https://${host}`, 'origin')}))`,
+			action: 'block',
+			enabled: true,
+		},
+		{
+			ref: 'quota-guard-beacon',
+			description: 'Beacon off: the day is at 95 % of the Workers quota (the quota guard switches this)',
+			expression: at,
+			action: 'block',
+			enabled: false,
+		},
+	];
+}
+
+/**
+ * The `http_ratelimit` rule: one address may send ten beacons in ten seconds,
+ * then it is blocked for ten seconds, before any Worker runs. A Free zone
+ * takes one such rule, counted per address and data centre, with a period
+ * and a timeout of ten seconds, and its expression may use the path and the
+ * verified-bot field only, so it names the path alone: the zone is
+ * phonometry.dev, whose www host only redirects, and beacon-shape checks the
+ * host (https://developers.cloudflare.com/waf/rate-limiting-rules/#availability).
+ * The agent files get none: crawlers fetch copies in bursts.
+ *
+ * @returns {object[]} The rule.
+ */
+export function rateLimitRules() {
+	return [
+		{
+			ref: 'beacon-rate',
+			description: 'At most 10 beacons in 10 seconds from one address, before any Worker runs',
+			expression: `http.request.uri.path eq ${literal(BEACON, 'path')}`,
+			action: 'block',
+			ratelimit: { characteristics: ['cf.colo.id', 'ip.src'], period: 10, requests_per_period: 10, mitigation_timeout: 10 },
+			enabled: true,
+		},
+	];
+}

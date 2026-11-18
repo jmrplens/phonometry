@@ -623,10 +623,14 @@ edges cannot drift apart.
 
 docs.jmrp.io stays the canonical site. The same build is also served as a
 `noindex` preview at <https://phonometry.dev/phonometry/>, from a Cloudflare
-Worker that has Static Assets and no code, so the daily request quota of
-Workers Free cannot stop it. Everything about it lives in `site/worker/`, and
-its README says what is served from where, how it is deployed and how it is
-rolled back. Four things touch the rest of the repository:
+Worker whose pages and files are Static Assets that run no code, so the daily
+request quota of Workers Free cannot stop them. Code runs only for the visitor
+beacon and the files agents read (Markdown copies, llms files, robots.txt,
+sitemaps), each request logged to Analytics Engine in the layout docs.jmrp.io's
+edge Worker writes, and a quota guard in the same account switches that code
+off at 95 % of the day. Everything about it lives in `site/worker/`, and its
+README says what is served from where, what is logged, how it is deployed and
+how it is rolled back. Five things touch the rest of the repository:
 
 - `PHONOMETRY_SITE` picks the host a build is made for, from a closed list in
   `site/src/data/site.mjs` that `scripts/generate_llms.py` reads too. Unset, the
@@ -636,8 +640,18 @@ rolled back. Four things touch the rest of the repository:
   in `site/`) and stages every build with `--check`, so a pull request that
   would break the preview fails there.
 - `.github/workflows/site-preview.yml` deploys a docs.yml build of main by
-  hand, with Cloudflare tokens from secrets the maintainer holds. The quota
-  alert is a Cloudflare notification on the account, not a GitHub job.
+  hand, with Cloudflare tokens from secrets the maintainer holds. It stages the
+  build with the beacon (`stage.mjs --beacon`, in the staged copy only, so the
+  build docs.jmrp.io serves is never changed) and uploads the full Worker and
+  its assets-only twin as a tagged pair; while the quota guard holds the code
+  paths off, it puts the assets-only half live instead, under the guard's
+  mark, so the guard switches that deploy back on at 00:00 UTC. The quota
+  alert (80 %) and the quota guard (95 %) live in the Cloudflare account, not
+  in GitHub.
+- The beacon is the one script the preview adds to every page; its size, its
+  fields and what the Worker accepts from it are tested in
+  `site/worker/test/beacon.test.mjs`, and the staging check refuses a page
+  without exactly one closing body tag.
 - Every page's Content-Security-Policy, the meta tag in
   `site/astro.config.mjs` and the preview's header, allows the clip hosts of
   `mediaOrigins` in `site/src/data/site.mjs`, because the preview redirects

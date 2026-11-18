@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
-import { test } from 'node:test';
+import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -90,4 +90,64 @@ test('a module outside the listed directories is caught', () => {
 	assert.equal(checkedOut('site/package.json', ['site/worker']), true);
 	assert.equal(checkedOut('site/src/env.d.ts', ['site/src/data']), true);
 	assert.equal(checkedOut('site/public/robots.txt', ['site/worker']), false);
+});
+
+/** The steps of the workflow, each as its text, by name. */
+function stepsByName(text) {
+	const steps = new Map();
+	for (const step of text.split(/\n(?=\s+- (?:name|uses):)/)) {
+		const name = step.match(/^\s+- name: (.+)$/m)?.[1];
+		if (name) steps.set(name.trim(), step);
+	}
+	return steps;
+}
+
+describe('a deploy while the quota guard holds the code paths off', () => {
+	const text = readFileSync(WORKFLOW, 'utf8');
+	const steps = stepsByName(text);
+	const named = (start) => [...steps.entries()].find(([name]) => name.startsWith(start))?.[1] ?? '';
+
+	test('the guard state is read before anything is uploaded, and a failed read stops the job', () => {
+		const names = [...steps.keys()];
+		const read = names.findIndex((name) => name.startsWith('Read whether the quota guard'));
+		assert.ok(read !== -1, 'no step reads the guard state');
+		assert.ok(read < names.findIndex((name) => name.startsWith('Upload the assets-only version')));
+		const step = named('Read whether the quota guard');
+		assert.match(step, /\bid: guard\b/);
+		assert.match(step, /set -euo pipefail/, 'without pipefail a failed read would pass through tee as not tripped');
+		assert.match(step, /node scripts\/guard-state\.mjs \| tee -a "\$GITHUB_OUTPUT"/);
+	});
+
+	test('tripped: the full half is only uploaded and the assets-only half goes live under the off mark', () => {
+		const step = named('Deploy the Worker');
+		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);
+		assert.match(step, /MARK: \$\{\{ steps\.guard\.outputs\.mark \}\}/);
+		const [tripped, clear] = step.split(/\n\s+else\n/);
+		assert.match(tripped, /if \[ "\$TRIPPED" = true \]/);
+		assert.match(tripped, /wrangler versions upload --config wrangler\.jsonc --tag "full-\$PAIR"/);
+		assert.match(tripped, /wrangler versions deploy --config wrangler\.jsonc --version-tag "assets-\$PAIR@100" --message "\$MARK: off, /);
+		assert.doesNotMatch(tripped, /wrangler deploy /, 'no full deploy while tripped');
+		assert.match(clear, /wrangler deploy --config wrangler\.jsonc --tag "full-\$PAIR"/);
+	});
+
+	test('the beacon check expects the guard rule\'s 403 while tripped and 204 otherwise', () => {
+		const step = named('Check what the assets answer');
+		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);
+		assert.match(step, /want=204\n\s+if \[ "\$TRIPPED" = true \]; then want=403; fi/);
+		assert.match(step, /if \[ "\$code" != "\$want" \]/);
+		assert.doesNotMatch(step, /"\$code" != 204/, 'a fixed 204 fails every deploy while the guard is tripped');
+	});
+});
+
+test('the off mark the workflow writes is the one the guard switches back', async () => {
+	const { decide } = await import('../lib/guard.mjs');
+	const message = 'quota guard: off, deploy of 300-1 while the code paths are off';
+	const versions = [
+		{ id: 'f', tag: 'full-300-1', created: '2026-11-18T10:00:01Z' },
+		{ id: 'a', tag: 'assets-300-1', created: '2026-11-18T10:00:00Z' },
+	];
+	const d = decide({ count: 5, threshold: 95000, mode: 'auto', now: new Date('2026-11-19T00:15:00Z'), rule: { enabled: true, lastUpdated: '2026-11-18T09:00:00Z' }, current: { id: 'a', tag: 'assets-300-1', message }, versions });
+	assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'f', tag: 'full-300-1' }, { kind: 'rule', enabled: false }]);
+	const text = readFileSync(WORKFLOW, 'utf8');
+	assert.ok(text.includes('--message "$MARK: off, deploy of $PAIR while the code paths are off"'));
 });

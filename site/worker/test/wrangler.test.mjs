@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { agentPaths } from '../lib/agent-paths.mjs';
+import { BASE_PATH, agentPaths } from '../lib/agent-paths.mjs';
 import { ACCOUNT_ID } from '../lib/cloudflare.mjs';
 
 /** A wrangler config without its comments and trailing commas. */
@@ -61,7 +61,7 @@ test('the full Worker: one script, the assets, one dataset, one limiter, nothing
 });
 
 test('the Worker runs only for the beacon and the agent files', () => {
-	assert.deepEqual(readConfig('wrangler.jsonc').assets.run_worker_first, agentPaths('/phonometry'));
+	assert.deepEqual(readConfig('wrangler.jsonc').assets.run_worker_first, agentPaths(BASE_PATH));
 });
 
 test('the assets are the staged build, served as a static site, on phonometry.dev only', () => {
@@ -100,4 +100,12 @@ test('the guard: a cron every 15 minutes, no route, no binding, dry run until to
 	assert.equal(guard.preview_urls, false);
 	assert.deepEqual(guard.vars, { THRESHOLD: '95000', MODE: 'dry-run' });
 	for (const key of [...CODE_KEYS.filter((key) => key !== 'triggers' && key !== 'vars'), 'assets', 'analytics_engine_datasets', 'ratelimits']) assert.equal(key in guard, false, `guard sets ${key}`);
+});
+
+test('the base path the Worker and its patterns assume is the site\'s', async () => {
+	// The Worker refuses a 404-page beacon at agentPaths(BASE_PATH), and the
+	// staged 404 page skips the same list built from site.basePath.
+	const site = await import('../../src/data/site.mjs');
+	assert.equal(site.basePath, BASE_PATH);
+	assert.equal(BASE_PATH, '/phonometry');
 });

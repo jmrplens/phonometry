@@ -1,7 +1,7 @@
 // The quota guard: at 95 % of the day's Workers requests it switches off
 // every path that runs code, and after 00:00 UTC it switches them back.
 //
-// Workers Free gives the account 100,000 requests a day, reset at 00:00 UTC.
+// Workers Free gives the account 100 000 requests a day, reset at 00:00 UTC.
 // Pages never run code and never count; the beacon and the agent files do
 // (lib/agent-paths.mjs). Off means two things, in this order: the zone's WAF
 // rule `quota-guard-beacon` blocks /_v before any Worker runs, and
@@ -17,6 +17,16 @@
 // zero and the rule was updated the day before. It runs from the guard
 // Worker's Cron Trigger (guard/src/index.mjs) and by hand from
 // scripts/quota-switch.mjs.
+//
+// The guard switches back on only what it switched off itself. Each deploy it
+// makes carries the message `quota guard: off|on at <count> of <threshold>`,
+// and back on means the live deployment's message starts with
+// `quota guard: off`. Anything else at 100 % (a CI deploy, a `wrangler
+// rollback`, an assets-only version deployed by hand, or `quota-switch.mjs
+// --mode off`, whose message starts with `quota switch by hand:`) is left as
+// it is, and so is the rule, with a note in the log. Switching off does not
+// ask: at the threshold the rule goes on and the version goes to assets only
+// whoever deployed it, because that is what keeps the quota.
 
 import { ACCOUNT_ID, ZONE_ID, cfApi, graphql } from './cloudflare.mjs';
 import { quotaQuery, quotaRows } from './quota.mjs';
@@ -24,6 +34,10 @@ import { quotaQuery, quotaRows } from './quota.mjs';
 export const SCRIPT = 'phonometry-docs';
 export const GUARD_RULE_REF = 'quota-guard-beacon';
 export const DEFAULT_THRESHOLD = 95000;
+/** The start of the message of every deploy the guard makes. */
+export const GUARD_MARK = 'quota guard';
+/** The start of the message of a deploy made by hand with quota-switch.mjs --mode off|on. */
+export const HAND_MARK = 'quota switch by hand';
 const MODES = new Set(['auto', 'dry-run', 'off', 'on']);
 
 /**
@@ -56,25 +70,40 @@ function target(versions, current, half, notes) {
 }
 
 /**
+ * Whether a deployment message says the guard made that deploy, and in which
+ * direction. A deploy made by hand through quota-switch.mjs --mode off|on is
+ * not the guard's.
+ *
+ * @param {string} message The live deployment's `workers/message` annotation.
+ * @returns {{guard: boolean, off: boolean}} Made by the guard; made to switch off.
+ */
+export function guardDeploy(message) {
+	const text = message ?? '';
+	return { guard: text.startsWith(`${GUARD_MARK}: `), off: text.startsWith(`${GUARD_MARK}: off`) };
+}
+
+/**
  * What the guard should do, from what it read.
  *
  * @param {object} state
  * @param {number} state.count The account's Workers requests since 00:00 UTC.
  * @param {number} state.threshold The count that switches off.
- * @param {string} state.mode auto, dry-run (decide, change nothing), off or on (pinned by hand).
+ * @param {string} state.mode auto, dry-run (decide, change nothing), off or on (pinned).
  * @param {Date} state.now The moment of the run.
  * @param {{enabled: boolean, lastUpdated: string} | null} state.rule The WAF rule, null when the zone has none.
- * @param {{id: string, tag: string}} state.current The version at 100 %.
+ * @param {{id: string, tag: string, message?: string}} state.current The version at 100 %, and the message of the deployment that put it there.
  * @param {{id: string, tag: string, created: string}[]} state.versions The Worker's versions.
  * @returns {{desired: 'on' | 'off', actions: object[], notes: string[]}} The decision.
  */
 export function decide({ count, threshold, mode, now, rule, current, versions }) {
 	const notes = [];
 	const trippedToday = Boolean(rule?.enabled) && utcDay(rule.lastUpdated) === utcDay(now);
+	const pinned = mode === 'off' || mode === 'on';
 	let desired = count >= threshold || trippedToday ? 'off' : 'on';
-	if (mode === 'off' || mode === 'on') desired = mode;
+	if (pinned) desired = mode;
 	if (rule === null) notes.push(`no WAF rule ${GUARD_RULE_REF} in the zone: only the version can switch`);
 	const half = pairKey(current.tag)?.half ?? 'unpaired';
+	const made = guardDeploy(current.message);
 	const actions = [];
 	const ruleAction = (enabled) => {
 		if (rule !== null && rule.enabled !== enabled) actions.push({ kind: 'rule', enabled });
@@ -87,10 +116,14 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 	if (desired === 'off') {
 		ruleAction(true);
 		versionAction('assets');
-	} else {
-		versionAction('full');
-		ruleAction(false);
+		return { desired, actions, notes };
 	}
+	// Back on: only what the guard switched off, unless the mode pins it on.
+	const by = current.message ? `"${current.message}"` : 'a deployment with no message';
+	if (pinned || made.off) versionAction('full');
+	else if (half !== 'full') notes.push(`live ${current.id} (${current.tag || 'no tag'}) was put there by ${by}, not by the guard: left as it is`);
+	if (pinned || made.guard) ruleAction(false);
+	else if (rule?.enabled) notes.push(`the rule is on and the live deployment is ${by}, not the guard's: left on`);
 	return { desired, actions, notes };
 }
 
@@ -104,11 +137,12 @@ async function readState(api, env, fetchImpl, now) {
 	});
 	const live = entry?.rules?.find((r) => r.ref === GUARD_RULE_REF) ?? null;
 	const deployments = await api(`/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}/deployments`);
-	const top = (deployments?.deployments ?? [])[0]?.versions?.find((v) => v.percentage === 100);
+	const latest = (deployments?.deployments ?? [])[0];
+	const top = latest?.versions?.find((v) => v.percentage === 100);
 	if (!top) throw new Error(`${SCRIPT} has no version at 100 % (a gradual deployment is left alone)`);
 	const listed = await api(`/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}/versions?deployable=true&per_page=100`);
 	const versions = (listed?.items ?? []).map((v) => ({ id: v.id, tag: v.annotations?.['workers/tag'] ?? '', created: v.metadata?.created_on ?? '' }));
-	const current = { id: top.version_id, tag: versions.find((v) => v.id === top.version_id)?.tag ?? '' };
+	const current = { id: top.version_id, tag: versions.find((v) => v.id === top.version_id)?.tag ?? '', message: latest.annotations?.['workers/message'] ?? '' };
 	const rule = live && { enabled: Boolean(live.enabled), lastUpdated: live.last_updated, raw: live, rulesetId: entry.id };
 	return { count, rule, current, versions };
 }
@@ -124,9 +158,11 @@ async function readState(api, env, fetchImpl, now) {
  * @param {Record<string, string | undefined>} options.env CF_GUARD_TOKEN, THRESHOLD, MODE (or, by hand, CLOUDFLARE_EMAIL and CLOUDFLARE_API_KEY).
  * @param {typeof fetch} [options.fetchImpl] The fetch.
  * @param {Date} [options.now] The moment of the run.
+ * @param {boolean} [options.byHand] Run from quota-switch.mjs: a deploy made in mode off or on
+ *   says so in its message, so the guard never switches it back.
  * @returns {Promise<{dry: boolean, lines: string[], decision?: object, error?: string}>} What happened.
  */
-export async function reconcile({ env, fetchImpl = fetch, now = new Date() }) {
+export async function reconcile({ env, fetchImpl = fetch, now = new Date(), byHand = false }) {
 	const lines = [];
 	const mode = MODES.has(env.MODE) ? env.MODE : 'dry-run';
 	const threshold = Number(env.THRESHOLD) > 0 ? Number(env.THRESHOLD) : DEFAULT_THRESHOLD;
@@ -144,7 +180,10 @@ export async function reconcile({ env, fetchImpl = fetch, now = new Date() }) {
 		return { dry: true, lines, error: error.message };
 	}
 	const decision = decide({ ...state, threshold, mode, now });
-	lines.push(`${state.count} of ${threshold} requests today; rule ${state.rule ? (state.rule.enabled ? 'on' : 'off') : 'absent'}; live ${state.current.id} (${state.current.tag || 'no tag'}); wanted ${decision.desired}; mode ${mode}`);
+	lines.push(
+		`${state.count} of ${threshold} requests today; rule ${state.rule ? (state.rule.enabled ? 'on' : 'off') : 'absent'}; live ${state.current.id} (${state.current.tag || 'no tag'}, deployed with ${state.current.message ? `"${state.current.message}"` : 'no message'}); wanted ${decision.desired}; mode ${mode}`,
+	);
+	const mark = byHand && (mode === 'off' || mode === 'on') ? HAND_MARK : GUARD_MARK;
 	for (const note of decision.notes) lines.push(`note: ${note}`);
 	const dry = mode === 'dry-run';
 	for (const action of decision.actions) {
@@ -166,7 +205,7 @@ export async function reconcile({ env, fetchImpl = fetch, now = new Date() }) {
 					body: {
 						strategy: 'percentage',
 						versions: [{ version_id: action.versionId, percentage: 100 }],
-						annotations: { 'workers/message': `quota guard: ${decision.desired} at ${state.count} of ${threshold}` },
+						annotations: { 'workers/message': `${mark}: ${decision.desired} at ${state.count} of ${threshold}` },
 					},
 				});
 			}

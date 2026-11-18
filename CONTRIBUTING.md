@@ -634,8 +634,11 @@ how it is rolled back. Five things touch the rest of the repository:
   hand, with Cloudflare tokens from secrets the maintainer holds. It stages the
   build with the beacon (`stage.mjs --beacon`, in the staged copy only, so the
   build docs.jmrp.io serves is never changed) and uploads the full Worker and
-  its assets-only twin as a tagged pair. The quota alert (80 %) and the quota
-  guard (95 %) live in the Cloudflare account, not in GitHub.
+  its assets-only twin as a tagged pair; while the quota guard holds the code
+  paths off, it puts the assets-only half live instead, under the guard's
+  mark, so the guard switches that deploy back on at 00:00 UTC. The quota
+  alert (80 %) and the quota guard (95 %) live in the Cloudflare account, not
+  in GitHub.
 - The beacon is the one script the preview adds to every page; its size, its
   fields and what the Worker accepts from it are tested in
   `site/worker/test/beacon.test.mjs`, and the staging check refuses a page

@@ -94,12 +94,17 @@ page path, query, referrer, navigation type, load time, screen, viewport,
 pixel ratio, language, time zone, a webdriver flag (automated browsers are
 counted and flagged, not skipped) and a 404 flag with `navigator.sendBeacon`
 to `/_v` of the page's own origin. A prerendered page reports when it is shown.
+The 404 page sends nothing at an agent path (`/phonometry/nope/index.md`, a
+missing llms or XML file): that request ran the Worker, which logged it with
+its 404, so the miss is counted once and one invocation is saved. The Worker
+also refuses such a beacon (`beacon-rejected-agent-404`), for a 404 page staged
+before it skipped them.
 
 | | Agent file | Page view (beacon) |
 |---|---|---|
-| index1, blobs 1 to 20, doubles 1 to 9 | docs-edge's, from the request and the binding's response | docs-edge's for the page: the page's path, query and referrer, method `GET`, status 200 (404 on the 404 page), Accept empty; visitor facts from the beacon's request |
-| blob 12 (verdict) | `asset` or `redirect` | `beacon`, `beacon-limited` (over 30 a minute from one address, still 204), or `beacon-rejected-method\|origin\|size\|body` (with blob 1 `/_v` and the real status) |
-| blob 20 | docs-edge's 14 fields | the same, then navigation type, 404 flag, webdriver flag, language and time zone |
+| index1, blobs 1 to 20, doubles 1 to 9 | docs-edge's, from the request and the binding's response; double 5 is the bytes of the body (counted after the answer, since the binding sends no Content-Length header; 0 for a HEAD or a 304) | docs-edge's for the page: the page's path, query and referrer, method `GET`, status 200 (404 on the 404 page), Accept empty; visitor facts from the beacon's request |
+| blob 12 (verdict) | `asset`, `redirect` (a `_redirects` 301, 302, 303, 307 or 308) or `not-modified` (a 304 to a conditional request) | `beacon`, `beacon-limited` (over 30 a minute from one address, still 204), or `beacon-rejected-method\|origin\|size\|body\|agent-404` (with blob 1 `/_v` and the real status) |
+| blob 20 | docs-edge's 14 fields | the same, with the page navigation's Sec-Fetch fields (dest `document`, mode `navigate`, site from the referrer: `none`, `same-origin`, `same-site` or `cross-site`) in place of the beacon POST's, then navigation type, 404 flag, webdriver flag, language and time zone |
 | doubles 10 to 15 | absent | load time (ms), screen width and height, viewport width and height, pixel ratio |
 
 Appending is what the docs-edge contract allows; nothing is reordered. A
@@ -216,11 +221,16 @@ contains, and it logs the commit it deploys. It needs the environment
 `phonometry-preview` (deployment branch `main`) with the secrets
 `CF_PHONOMETRY_DEPLOY_TOKEN` (Account: Workers Scripts Edit; zone: Workers
 Routes Edit) and `CF_PHONOMETRY_RULES_TOKEN` (zone: Dynamic URL Redirects Edit,
-Transform Rules Edit, Zone Read). The job stages with the beacon, uploads the
+Transform Rules Edit, Zone Read). The job stages with the beacon, reads whether the
+quota guard holds the code paths off (`scripts/guard-state.mjs`), uploads the
 assets-only version and deploys the full one as a tagged pair, checks what the
 assets answer (and that the beacon answers 204 and the WAF refuses a GET of it), checks the zone rules against `lib/rules.mjs` (or puts them,
 with the `apply_rules` input, saving what was there as an artifact), checks
-what the rules answer, and plays two clips in Chrome.
+what the rules answer, and plays two clips in Chrome. While the guard holds
+the code paths off, the job only uploads the full half, puts the assets-only
+half live under the off mark the live deployment had, so the guard (or
+`quota-switch.mjs --mode on`) switches this deploy back on with the rest, and
+expects the beacon's 403 from the WAF instead of a 204.
 
 The zone itself, from the maintainer's machine:
 
@@ -256,6 +266,13 @@ docs.jmrp.io's traffic for /phonometry, plus the guard's 96 cron runs, of the
   the live version's pair (the agent files become plain assets). After 00:00
   UTC it deploys the full half first, then turns the rule off. It keeps no
   state of its own: once tripped, the rule's last update carries the day.
+  It switches back on only what it switched off itself: each deploy it makes
+  says `quota guard: off|on at <count> of <threshold>`, and back on needs the
+  live deployment to say `quota guard: off`. A rollback, an assets-only version
+  deployed by hand, or `quota-switch.mjs --mode off` (which says `quota switch
+  by hand`) stays as it is after 00:00 UTC, with a note in the log. Switching
+  off does not ask: at the threshold it turns the rule on and rolls whatever
+  is live to assets only.
   It has no route, so no visitor request can reach the one Worker holding a
   token able to redeploy the site. Its variable `MODE` is `dry-run` (log the
   decision, change nothing) until the maintainer sets `auto`; without the
@@ -265,7 +282,8 @@ docs.jmrp.io's traffic for /phonometry, plus the guard's 96 cron runs, of the
   `pnpm exec wrangler secret put CF_GUARD_TOKEN --config guard/wrangler.jsonc`.
 - By hand, when the guard cannot act (no token yet, or a quota spent so fast
   that its cron stopped too): `node scripts/quota-switch.mjs --mode off` (or
-  `on`, `auto`, `dry-run`, the default) with the account key.
+  `on`, `auto`, `dry-run`, the default) with the account key. Off by hand stays
+  off until `--mode on`.
 
 Up to 15 minutes pass between runs, plus a few minutes of GraphQL lag: the 5 000
 requests between 95 % and 100 % hold against any sustained rate under about 4
@@ -279,10 +297,10 @@ projection to 00:00 UTC.
 
 | What | How |
 |---|---|
-| A deploy | `pnpm exec wrangler rollback <version>` from this directory (the account comes from `wrangler.jsonc`), or delete the Custom Domain (phonometry.dev goes offline, nothing else changes) |
+| A deploy | `pnpm exec wrangler rollback <version>` from this directory (the account comes from `wrangler.jsonc`), or delete the Custom Domain (phonometry.dev goes offline, nothing else changes). The guard leaves a rollback alone below the threshold; at the threshold it still rolls it to assets only, so set its `MODE` to `on` (or delete it) first to keep a version with code live whatever the count |
 | Zone rules | PUT the `rules` of the file `apply-rules.mjs --apply` saved |
 | Zone records and settings | delete the records it reports as created; set each value back from the file it saved |
-| The beacon and the agent files | `node scripts/quota-switch.mjs --mode off`, or `pnpm exec wrangler versions deploy <assets-only version>@100` |
+| The beacon and the agent files | `node scripts/quota-switch.mjs --mode off`, or `pnpm exec wrangler versions deploy <assets-only version>@100`; the guard does not switch either back (only `--mode on`, or a deploy by hand, does) |
 | The quota guard | `pnpm exec wrangler delete --config guard/wrangler.jsonc` (its schedule goes with it); delete its token |
 | The WAF and rate rules | PUT the saved entrypoints back, as for the other rules (`--phase waf`) |
 | Tokens and secrets | roll or delete the token; `gh secret delete` |

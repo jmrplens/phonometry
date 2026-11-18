@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import { test, describe } from 'node:test';
 
-import { BEACON_MAX_BYTES, beaconPoint, beaconScript, ipLimitKey, parseBeacon } from '../lib/beacon.mjs';
+import { BEACON_MAX_BYTES, beaconPoint, beaconScript, ipLimitKey, pageFetchSite, parseBeacon } from '../lib/beacon.mjs';
+import { agentPaths, runsWorker } from '../lib/agent-paths.mjs';
 
 describe('beaconScript', () => {
 	test('one inline script under 1 KB, the 404 flag written in', () => {
@@ -11,9 +12,46 @@ describe('beaconScript', () => {
 		const missing = beaconScript(true);
 		assert.match(page, /^<script>\(\(\)=>\{.*\}\)\(\)<\/script>$/s);
 		assert.ok(Buffer.byteLength(page) < 1024, `${Buffer.byteLength(page)} bytes`);
+		assert.ok(Buffer.byteLength(missing) < 1024, `${Buffer.byteLength(missing)} bytes`);
 		assert.match(page, /nf:0\b/);
 		assert.match(missing, /nf:1\b/);
-		assert.equal(page.replace('nf:0', 'nf:1'), missing);
+		assert.doesNotMatch(page, /\.test\(l\.pathname\)/, 'a page never stands at an agent path');
+		assert.equal(missing.indexOf('</'), missing.length - '</script>'.length, 'nothing in it closes the script early');
+	});
+
+	/** Runs a beacon script in a fake page at `pathname` and returns what it sent once loaded. */
+	const run = (script, pathname) => {
+		const sent = [];
+		const listeners = {};
+		const scope = {
+			navigator: { sendBeacon: (url, body) => (sent.push([url, JSON.parse(body)]), true), language: 'en', webdriver: false },
+			document: { readyState: 'loading', referrer: '', prerendering: false, addEventListener() {} },
+			location: { pathname, search: '' },
+			performance: { getEntriesByType: () => [{ type: 'navigate', loadEventStart: 10, activationStart: 0 }] },
+			screen: { width: 1, height: 1 },
+			innerWidth: 1,
+			innerHeight: 1,
+			devicePixelRatio: 1,
+			Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: 'UTC' }) }) },
+			addEventListener: (name, fn) => (listeners[name] = fn),
+			setTimeout: (fn) => fn(),
+			fetch: () => Promise.resolve(),
+		};
+		new Function(...Object.keys(scope), script.slice('<script>'.length, -'</script>'.length))(...Object.values(scope));
+		listeners.load?.();
+		return sent;
+	};
+
+	test('the 404 page sends nothing where the Worker already logged the miss: exactly the agent paths', () => {
+		const patterns = agentPaths('/phonometry');
+		const missing = beaconScript(true, '/phonometry');
+		const paths = ['/phonometry/no-such/index.md', '/phonometry/index.md', '/phonometry/llms-nope.txt', '/llms-x.txt', '/phonometry/no-such.xml', '/sitemap-nope.xml', '/robots.txt', '/phonometry/robots.txt', '/phonometry/no-such-page/', '/no-such-page', '/phonometry/a.md', '/other/x.xml', '/phonometry/INDEX.MD'];
+		for (const path of paths) {
+			const sent = run(missing, path);
+			assert.equal(sent.length, runsWorker(path, patterns) ? 0 : 1, path);
+			if (sent.length) assert.equal(sent[0][1].nf, 1, path);
+		}
+		assert.equal(run(beaconScript(false), '/phonometry/signals/').length, 1, 'a page always sends');
 	});
 
 	test('it posts to the beacon path of its own origin, after load, with every field', () => {
@@ -157,6 +195,30 @@ describe('beaconPoint', () => {
 	test('the 404 page reports status 404', () => {
 		const point = beaconPoint({ request, beacon: { ...beacon, notFound: 1 }, host: 'phonometry.dev', startedAt: 0, verdict: 'beacon' });
 		assert.equal(point.blobs[10], '404');
+	});
+
+	test('the Sec-Fetch fields are the page navigation\'s, not the beacon POST\'s', () => {
+		const misc = (referrer) => beaconPoint({ request, beacon: { ...beacon, referrer }, host: 'phonometry.dev', startedAt: 0, verdict: 'beacon' }).blobs[19].split('|').slice(5, 8);
+		assert.deepEqual(misc('https://www.google.com/'), ['document', 'navigate', 'cross-site']);
+		assert.deepEqual(misc(''), ['document', 'navigate', 'none']);
+		assert.deepEqual(misc('https://phonometry.dev/phonometry/'), ['document', 'navigate', 'same-origin']);
+		assert.deepEqual(misc('https://www.phonometry.dev/x'), ['document', 'navigate', 'same-site']);
+		assert.deepEqual(misc('not a url'), ['document', 'navigate', '']);
+	});
+
+	test('pageFetchSite: the referrer mapped to the value a navigation carries', () => {
+		const cases = [
+			['', 'none'],
+			['https://phonometry.dev/phonometry/signals/', 'same-origin'],
+			['https://phonometry.dev:8443/', 'same-site'],
+			['https://www.phonometry.dev/', 'same-site'],
+			['http://phonometry.dev/', 'cross-site'],
+			['https://docs.jmrp.io/phonometry/', 'cross-site'],
+			['https://evilphonometry.dev/', 'cross-site'],
+			['android-app://com.google.android.gm/', 'cross-site'],
+			['::', ''],
+		];
+		for (const [referrer, site] of cases) assert.equal(pageFetchSite(referrer, 'phonometry.dev'), site, referrer);
 	});
 
 	test('a referrer on the same host leaves the host blob empty, as docs-edge does', () => {

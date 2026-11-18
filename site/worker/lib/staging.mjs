@@ -213,14 +213,16 @@ const BODY_END = /<\/body>/gi;
  * A page with the beacon script put right before its one closing body tag.
  *
  * @param {string} html The page.
- * @param {boolean} notFound Whether it is a 404 page (the beacon reports status 404).
+ * @param {boolean} notFound Whether it is a 404 page (the beacon reports status 404,
+ *   and sends nothing at an agent path, which the Worker logged already).
+ * @param {string} [prefix] The base path the build was made for.
  * @returns {string} The page with the script.
  * @throws {Error} When the page has no closing body tag, or more than one.
  */
-export function withBeacon(html, notFound) {
+export function withBeacon(html, notFound, prefix) {
 	const ends = html.match(BODY_END)?.length ?? 0;
 	if (ends !== 1) throw new Error(`${ends} closing body tags, the beacon needs exactly one`);
-	return html.replace(BODY_END, (tag) => `${beaconScript(notFound)}${tag}`);
+	return html.replace(BODY_END, (tag) => `${beaconScript(notFound, prefix)}${tag}`);
 }
 
 /**
@@ -295,7 +297,7 @@ export function stage({ from, out, prefix, origin, pairs, exclusions, indexable,
 	// written; the root copies below are taken from the staged pages.
 	for (const { path } of pages) {
 		const file = join(site, path);
-		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html'));
+		writeFileSync(file, withBeacon(readFileSync(file, 'utf8'), path.split('/').at(-1) === '404.html', prefix));
 	}
 	// Outside the base path the nearest 404.html is the root's, so the site's
 	// own page answers there too (not_found_handling: "404-page"); robots.txt

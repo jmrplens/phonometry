@@ -19,6 +19,13 @@
 export const BEACON_PATH = '/_v';
 
 /**
+ * The base path the preview serves the site under (site.basePath).
+ * wrangler.jsonc lists agentPaths(BASE_PATH), and the Worker reads the same
+ * list; test/wrangler.test.mjs holds all three equal.
+ */
+export const BASE_PATH = '/phonometry';
+
+/**
  * The run_worker_first patterns for a base path.
  *
  * @param {string} prefix The base path the site is served under (`/phonometry`), or `` at the root.
@@ -52,6 +59,17 @@ export function agentPaths(prefix) {
 export function globRegExp(rule) {
 	const escapeRegex = (str) => str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 	return RegExp(`^${rule.split('*').map(escapeRegex).join('.*')}$`);
+}
+
+/**
+ * One regular expression for all the patterns, as source text a page script
+ * can carry as a literal (every `/` is escaped).
+ *
+ * @param {string[]} patterns The run_worker_first patterns.
+ * @returns {string} The source, anchored at both ends.
+ */
+export function patternsSource(patterns) {
+	return `^(?:${patterns.map((pattern) => globRegExp(pattern).source.slice(1, -1)).join('|')})$`;
 }
 
 /**

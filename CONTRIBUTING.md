@@ -641,15 +641,21 @@ how it is rolled back. Five things touch the rest of the repository:
 - The docs job runs the preview's tests (`node --test 'worker/test/*.test.mjs'`
   in `site/`) and stages every build with `--check`, so a pull request that
   would break the preview fails there.
-- `.github/workflows/site-preview.yml` deploys a docs.yml build of main by
-  hand, with Cloudflare tokens from secrets the maintainer holds. It stages the
+- `.github/workflows/site-deploy.yml` deploys every docs.yml build of main:
+  docs.yml calls it after the build, in the same run (job `deploy-site`), and
+  it can also be run by hand on an earlier docs.yml run to put that build
+  back. The Cloudflare tokens are secrets of the environment it deploys to,
+  which the maintainer holds, and the call passes none. It stages the
   build with the beacon (`stage.mjs --beacon`, in the staged copy only, so the
   build docs.jmrp.io serves is never changed) and uploads the full Worker and
   its assets-only twin as a tagged pair; while the quota guard holds the code
   paths off, it puts the assets-only half live instead, under the guard's
   mark, so the guard switches that deploy back on at 00:00 UTC. The quota
   alert (80 %) and the quota guard (95 %) live in the Cloudflare account, not
-  in GitHub.
+  in GitHub. Since every run on main deploys, a rollback by hand holds only
+  until the next one: the repository variable `SITE_DEPLOY_HOLD` set to
+  `true` skips `deploy-site` until it is cleared, which is done once main
+  carries the fix (the README's "Rolling back").
 - The beacon is the one script the preview adds to every page; its size, its
   fields and what the Worker accepts from it are tested in
   `site/worker/test/beacon.test.mjs`, and the staging check refuses a page

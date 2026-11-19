@@ -125,9 +125,14 @@ concurrency:
   # accepts one in-flight deployment at a time. A pull-request build must not
   # join that queue: cancel-in-progress would let a validation run abort a
   # deploy that is already publishing. Each pull request gets its own group
-  # instead, so a fixup push cancels only that branch's stale build.
+  # instead, so a fixup push cancels only that branch's stale build. A run on
+  # main is never cancelled: the phonometry.dev deploy it calls uploads two
+  # Worker versions as a pair, and a run cancelled between them would leave
+  # the quota guard half a pair (cancelling the run cancels the jobs of the
+  # workflow it calls too). A newer run waits, and of several waiting only
+  # the newest runs.
   group: pages-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -829,6 +834,31 @@ jobs:
       # job writes a moment of its own, since its pages go out again.
       - id: deployed
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+  # The same pages, deployed to phonometry.dev by site-deploy.yml in this run
+  # (noindex while docs.jmrp.io is the canonical site). The run id tells the
+  # called workflow its pages are an artifact of this run; the attempt is the
+  # build's, so a re-run of this job alone deploys the pages that build
+  # uploaded. No secrets are passed: the Cloudflare tokens are secrets of the
+  # environment the called job names. The zone rules are put whenever they
+  # differ from what the code generates, with a backup of what was there.
+  # A rollback of phonometry.dev by hand would last only until the next run
+  # on main deploys again: the repository variable SITE_DEPLOY_HOLD set to
+  # true skips this job until it is cleared (site/worker/README.md, "Rolling
+  # back"). A run dispatched by hand on another branch builds it and stops
+  # there: the called workflow deploys a build of main and nothing else.
+  deploy-site:
+    name: Deploy the site to phonometry.dev
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.SITE_DEPLOY_HOLD != 'true'
+    permissions:
+      contents: read
+      actions: read # the called job reads the pages artifact
+    uses: $/.github/workflows/site-deploy.yml
+    with:
+      run_id: ${{ github.run_id }}
+      attempt: ${{ needs.build.outputs.attempt }}
+      apply_rules: true
 
   indexnow:
     name: Submit URLs to IndexNow

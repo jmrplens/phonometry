@@ -153,6 +153,7 @@ Markdown-preferring request for `/phonometry/nope/` gets a 302 to
 | `lib/beacon.mjs`, `lib/edge-log.mjs` | The beacon script, what the Worker accepts from it, and the data point (docs-edge's logging block, verbatim) |
 | `guard/`, `lib/guard.mjs`, `scripts/quota-switch.mjs` | The quota guard Worker (Cron Trigger, no route), its decision, and the same decision run by hand |
 | `scripts/guard-state.mjs`, `scripts/check-beacon.mjs` | What a deploy reads of the guard before it goes live and after, and the beacon check against the live deployment |
+| `scripts/site-address.mjs` | Where a deploy's checks find the pages: the served host, the base path, the canonical site and the clip host, from `src/data/site-targets.json` |
 | `stage.mjs` | Stages a build into `stage/` and runs every check first |
 | `lib/headers.mjs`, `lib/redirects.mjs`, `lib/twins.mjs` | What `_headers` and `_redirects` say, and which pages have no Markdown copy |
 | `lib/staging.mjs` | The checks: 20 000 files and 25 MiB a file (Workers Free), no `_headers` or `_redirects` in the build, the pages without a copy equal to the exclusions, every redirect target served |
@@ -228,7 +229,7 @@ pnpm exec wrangler deploy --config guard/wrangler.jsonc     # the quota guard, o
 `<k>` names the deploy, and no two deploys share it (CI uses the run id and
 attempt of its own run, so a re-run uploads a new pair).
 
-A deploy by hand reads the guard's state first, as site-preview.yml does:
+A deploy by hand reads the guard's state first, as site-deploy.yml does:
 `node scripts/guard-state.mjs` with the account key prints `tripped`, `mark`
 and `rule`. With `tripped=true` the full half is only uploaded
 (`wrangler versions upload --config wrangler.jsonc --tag full-<k>`) and the
@@ -248,11 +249,25 @@ the way they say (`wrangler versions deploy --version-tag assets-<k>@100` or
 account's workers.dev subdomain to exist; both Workers keep workers.dev and
 preview URLs off, so nothing answers there.
 
-After that, `.github/workflows/site-preview.yml` redeploys: Actions > Site
-preview > Run workflow, with the id of a docs.yml run on main. Before it
-downloads anything it reads that run back and stops unless it is a successful
-push or dispatch of docs.yml on main in this repository whose commit main
-contains, and it logs the commit it deploys. It needs the environment
+After that, `.github/workflows/site-deploy.yml` deploys every build of main:
+docs.yml calls it after the build, in the same run (job `deploy-site`, with
+the run's id, the attempt the build ran in and `apply_rules` on), and it runs
+by hand too, Actions > Site deploy > Run workflow, with the id of an earlier
+docs.yml run on main, to put that build back. Before it downloads anything it
+checks where the pages come from and stops unless they are a push or dispatch
+of docs.yml on main in this repository whose commit main contains, and it logs
+the commit it deploys. It tells the two modes apart by the run id: called, the
+id passed in is its own run's (a called workflow runs inside its caller's run,
+whose event it reports as its own, so the event cannot tell them apart), the
+caller is read from the run's context (`github.workflow_ref` has to be
+docs.yml of this repository, `github.ref` main), because that run has not
+concluded yet, and the pages are an artifact of the same run; by hand, the run
+named is read back through the API and has to have succeeded. Every address
+the checks after the deploy use (the served host, the base path, the canonical
+site, the clip host) comes from `scripts/site-address.mjs`, which reads
+`src/data/site-targets.json`. Runs on main queue rather than cancel each other
+(docs.yml's concurrency), so a deploy is never cut between the two versions of
+its pair. It needs the environment
 `phonometry-preview` (deployment branch `main`) with the secrets
 `CF_PHONOMETRY_DEPLOY_TOKEN` (Account: Workers Scripts Edit; zone: Workers
 Routes Edit) and `CF_PHONOMETRY_RULES_TOKEN` (zone: Dynamic URL Redirects Edit,
@@ -344,10 +359,17 @@ projection to 00:00 UTC.
 
 ## Rolling back
 
+A rollback of the deploy or of the zone rules holds only until the next
+docs.yml run on main: that run deploys its build again and puts the rules as
+the code generates them. Set the repository variable `SITE_DEPLOY_HOLD` to
+`true` first (`gh variable set SITE_DEPLOY_HOLD --body true`), which skips the
+job `deploy-site` of every run, or revert the commit on main; clear it
+(`gh variable delete SITE_DEPLOY_HOLD`) once main carries the fix.
+
 | What | How |
 |---|---|
-| A deploy | `pnpm exec wrangler rollback <version>` from this directory (the account comes from `wrangler.jsonc`), or delete the Custom Domain (phonometry.dev goes offline, nothing else changes). The guard leaves a rollback alone below the threshold; at the threshold it still rolls it to assets only, so set its `MODE` to `on` (or delete it) first to keep a version with code live whatever the count |
-| Zone rules | PUT the `rules` of the file `apply-rules.mjs --apply` saved |
+| A deploy | With `SITE_DEPLOY_HOLD` set (above), `pnpm exec wrangler rollback <version>` from this directory (the account comes from `wrangler.jsonc`), or delete the Custom Domain (phonometry.dev goes offline, nothing else changes). The guard leaves a rollback alone below the threshold; at the threshold it still rolls it to assets only, so set its `MODE` to `on` (or delete it) first to keep a version with code live whatever the count |
+| Zone rules | With `SITE_DEPLOY_HOLD` set (above), PUT the `rules` of the file `apply-rules.mjs --apply` saved (each deploy keeps it as the artifact `zone-rules-before-<run id>`) |
 | Zone records and settings | delete the records it reports as created; set each value back from the file it saved |
 | The beacon and the agent files | `node scripts/quota-switch.mjs --mode off`, or `pnpm exec wrangler versions deploy <assets-only version>@100`; the guard does not switch either back (only `--mode on`, or a deploy by hand, does) |
 | The quota guard | `pnpm exec wrangler delete --config guard/wrangler.jsonc` (its schedule goes with it); delete its token |

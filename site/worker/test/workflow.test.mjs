@@ -1,9 +1,12 @@
-// site-preview.yml checks out only a few directories of the repository, so a
+// site-deploy.yml checks out only a few directories of the repository, so a
 // module a script imports from anywhere else is missing on the runner and the
 // deploy stops at the first step that loads it. This walks every script the
 // workflow runs with node, follows each relative import (and each file read
 // through `new URL(..., import.meta.url)`), and fails on a file the sparse
-// checkout leaves out.
+// checkout leaves out. The checkout is the same whether docs.yml calls the
+// workflow or it is run by hand, so one closure covers both. The rest plays
+// the steps that tell the two apart, and the deploy while the quota guard
+// holds the code paths off, in bash with the commands they call stubbed.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -13,12 +16,12 @@ import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const WORKFLOW = join(ROOT, '.github/workflows/site-preview.yml');
+const WORKFLOW = join(ROOT, '.github/workflows/site-deploy.yml');
 
 /** The directories the checkout step lists under `sparse-checkout`. */
 function sparseDirectories(text) {
 	const block = text.match(/^(\s*)sparse-checkout: \|\n((?:\1 +\S.*\n)+)/m);
-	assert.ok(block, 'site-preview.yml has no sparse-checkout block');
+	assert.ok(block, 'site-deploy.yml has no sparse-checkout block');
 	return block[2]
 		.split('\n')
 		.map((line) => line.trim())
@@ -66,10 +69,10 @@ function checkedOut(path, directories) {
 	);
 }
 
-test('the workflow runs the three scripts it is meant to', () => {
+test('the workflow runs the four scripts it is meant to', () => {
 	const scripts = nodeScripts(readFileSync(WORKFLOW, 'utf8'));
-	for (const script of ['site/worker/stage.mjs', 'site/worker/scripts/apply-rules.mjs', 'site/worker/scripts/check-clip.mjs']) {
-		assert.ok(scripts.includes(script), `site-preview.yml no longer runs ${script}`);
+	for (const script of ['site/worker/scripts/site-address.mjs', 'site/worker/stage.mjs', 'site/worker/scripts/apply-rules.mjs', 'site/worker/scripts/check-clip.mjs']) {
+		assert.ok(scripts.includes(script), `site-deploy.yml no longer runs ${script}`);
 	}
 });
 
@@ -104,6 +107,149 @@ function stepsByName(text) {
 	return steps;
 }
 
+/** The steps of the workflow, each as its text, in order, named or not. */
+function stepTexts(text) {
+	return text.split(/\n(?=\s+- (?:name|uses):)/).slice(1);
+}
+
+/** A step's `run: |` block, as bash reads it. */
+function runBlock(step) {
+	const block = step.match(/\n(\s+)run: \|\n((?:\1 {2}.*\n|\s*\n)+)/);
+	assert.ok(block, 'the step has no run block');
+	return block[2].split('\n').map((line) => line.slice(block[1].length + 2)).join('\n');
+}
+
+describe('called by docs.yml, or run by hand on a docs.yml run', () => {
+	const text = readFileSync(WORKFLOW, 'utf8');
+	const steps = stepsByName(text);
+	const named = (start) => [...steps.entries()].find(([name]) => name.startsWith(start))?.[1] ?? '';
+	// A called workflow runs in its caller's run, so its run id is the one
+	// docs.yml passes; a run by hand is a run of its own and names another.
+	// github.event_name cannot tell the two apart: in a called workflow it
+	// is the caller's event (push).
+	const CALLED = '${{ inputs.run_id == github.run_id }}';
+	const BY_HAND = '${{ inputs.run_id != github.run_id }}';
+	const DOCS = 'jmrplens/phonometry/.github/workflows/docs.yml@refs/heads/main';
+	const SUCCESS = { path: '.github/workflows/docs.yml', head_branch: 'main', event: 'push', head_repository: { full_name: 'jmrplens/phonometry' }, conclusion: 'success', head_sha: 'abc' };
+
+	/**
+	 * Runs the step that checks where the pages come from, with gh stubbed:
+	 * a read of a run answers `run` (or fails when it is null), a comparison
+	 * with main answers `compare`. Returns the exit status, what the step
+	 * printed and the gh calls, each as its arguments joined with spaces.
+	 */
+	function runCheck(env, { run = null, compare = 'identical' } = {}) {
+		const script = runBlock(named('Check the run is a docs.yml build of main'));
+		const dir = mkdtempSync(join(tmpdir(), 'check-step-'));
+		try {
+			writeFileSync(join(dir, 'gh'), '#!/bin/bash\nprintf "%s\\n" "$*" >> "$CALLS"\ncase "$2" in\n*/actions/runs/*) [ -s "$RUN" ] || exit 1; cat "$RUN" ;;\n*/compare/*) echo "$COMPARE" ;;\n*) exit 9 ;;\nesac\n', { mode: 0o755 });
+			writeFileSync(join(dir, 'run'), run === null ? '' : JSON.stringify(run));
+			writeFileSync(join(dir, 'calls'), '');
+			let status = 0;
+			let output = '';
+			try {
+				output = execFileSync('bash', ['-c', script], { env: { PATH: `${dir}:/usr/bin:/bin`, CALLS: join(dir, 'calls'), RUN: join(dir, 'run'), COMPARE: compare, GITHUB_REPOSITORY: 'jmrplens/phonometry', GITHUB_STEP_SUMMARY: '/dev/null', RUN_ID: '300', ...env }, stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+			} catch (error) {
+				status = error.status;
+				output = `${error.stdout}${error.stderr}`;
+			}
+			const calls = readFileSync(join(dir, 'calls'), 'utf8').split('\n').filter(Boolean);
+			return { status, output, calls };
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	}
+
+	const called = (overrides = {}) => ({ CALLED: 'true', WORKFLOW_REF: DOCS, REF: 'refs/heads/main', EVENT: 'push', SHA: 'abc', ...overrides });
+
+	test('the check knows the two modes by the run id, the way the downloads do', () => {
+		const step = named('Check the run is a docs.yml build of main');
+		assert.ok(step.includes(`CALLED: ${CALLED}`), 'the check does not tell a call from docs.yml by the run id');
+		for (const [name, value] of [['WORKFLOW_REF', 'github.workflow_ref'], ['REF', 'github.ref'], ['EVENT', 'github.event_name'], ['SHA', 'github.sha']]) {
+			assert.ok(step.includes(`${name}: \${{ ${value} }}`), `the check reads ${value} through a step variable`);
+		}
+		const downloads = stepTexts(text).filter((step) => /uses: actions\/download-artifact@/.test(step));
+		assert.equal(downloads.length, 2, 'one download for each mode');
+		const [own, other] = [CALLED, BY_HAND].map((condition) => downloads.filter((step) => step.includes(`if: ${condition}`)));
+		assert.equal(own.length, 1, 'no download, or two, for a call from docs.yml');
+		assert.equal(other.length, 1, 'no download, or two, for a run by hand');
+		assert.doesNotMatch(own[0], /run-id:/, 'the pages of the calling run are an artifact of this run, read without naming a run');
+		assert.match(other[0], /run-id: \$\{\{ inputs\.run_id \}\}/);
+		for (const step of downloads) assert.match(step, /name: github-pages-\$\{\{ inputs\.attempt \}\}/);
+	});
+
+	test('called from a push to main: the run is not read back, since it is still running, and main holds the commit', () => {
+		const { status, calls } = runCheck(called());
+		assert.equal(status, 0);
+		assert.deepEqual(calls, ['api repos/jmrplens/phonometry/compare/main...abc --jq .status']);
+	});
+
+	test('called from a dispatch of docs.yml on main: deployed as a push is', () => {
+		assert.equal(runCheck(called({ EVENT: 'workflow_dispatch' })).status, 0);
+	});
+
+	test('called from a docs.yml run on another branch: refused before anything is deployed', () => {
+		const { status, output } = runCheck(called({ REF: 'refs/heads/feature', WORKFLOW_REF: 'jmrplens/phonometry/.github/workflows/docs.yml@refs/heads/feature' }));
+		assert.equal(status, 1);
+		assert.match(output, /built refs\/heads\/feature, not main/);
+	});
+
+	test('called by another workflow, or by docs.yml of another repository: refused', () => {
+		for (const ref of ['jmrplens/phonometry/.github/workflows/python-app.yml@refs/heads/main', 'someone/phonometry/.github/workflows/docs.yml@refs/heads/main']) {
+			const { status, output } = runCheck(called({ WORKFLOW_REF: ref }));
+			assert.equal(status, 1, ref);
+			assert.match(output, /is not docs\.yml of jmrplens\/phonometry/, ref);
+		}
+	});
+
+	test('called from a pull request: refused', () => {
+		assert.equal(runCheck(called({ EVENT: 'pull_request' })).status, 1);
+	});
+
+	test('called at a commit main does not hold: refused', () => {
+		const { status, output } = runCheck(called(), { compare: 'diverged' });
+		assert.equal(status, 1);
+		assert.match(output, /abc is not on main \(diverged\)/);
+	});
+
+	test('by hand: the docs.yml run named is read back and has to have succeeded', () => {
+		const ok = runCheck({ CALLED: 'false' }, { run: SUCCESS });
+		assert.equal(ok.status, 0);
+		assert.deepEqual(ok.calls, ['api repos/jmrplens/phonometry/actions/runs/300', 'api repos/jmrplens/phonometry/compare/main...abc --jq .status']);
+		const running = runCheck({ CALLED: 'false' }, { run: { ...SUCCESS, conclusion: null } });
+		assert.equal(running.status, 1);
+		assert.match(running.output, /concluded null/);
+		assert.equal(runCheck({ CALLED: 'false' }, { run: { ...SUCCESS, path: '.github/workflows/site-deploy.yml' } }).status, 1);
+	});
+
+	test('by hand, the call variables count for nothing: a run that cannot be read stops the deploy', () => {
+		assert.equal(runCheck({ CALLED: 'false', WORKFLOW_REF: DOCS, REF: 'refs/heads/main', EVENT: 'push', SHA: 'abc' }).status, 1);
+	});
+
+	test('no step names the host or the base path of the pages: each comes from site-address.mjs', () => {
+		const P = /(?<![\w.\-/])\/phonometry(?=[/'"`)\s#?]|$)/;
+		const code = text.split('\n').filter((line) => !/^\s*#/.test(line));
+		const spelled = code.filter((line) => P.test(line) || /phonometry\.dev\/phonometry|docs\.jmrp\.io\/phonometry/.test(line));
+		assert.deepEqual(spelled, [], 'these lines spell the host or the base path the build already names');
+		const address = named('Read where the pages are served');
+		assert.match(address, /\bid: site\b/);
+		assert.match(address, /node site\/worker\/scripts\/site-address\.mjs >> "\$GITHUB_OUTPUT"/);
+	});
+
+	test('the browser clip check plays a page of the deployed site, at the address site-address.mjs gives', () => {
+		const step = named('Check a clip plays in a browser');
+		assert.match(step, /PAGE_URL: \$\{\{ steps\.site\.outputs\.page_url \}\}/);
+		const page = step.match(/node scripts\/check-clip\.mjs --page "\$\{PAGE_URL\}([^"$]+)"/);
+		assert.ok(page, 'the clip check runs on its default page, which spells the host and the base path');
+		const route = page[1].replace(/\/$/, '');
+		const docs = join(ROOT, 'site/src/content/docs');
+		assert.ok(
+			['.mdx', '.md', '/index.mdx', '/index.md'].some((ending) => existsSync(join(docs, `${route}${ending}`))),
+			`${page[1]} is no page of site/src/content/docs`,
+		);
+	});
+});
+
 describe('a deploy while the quota guard holds the code paths off', () => {
 	const text = readFileSync(WORKFLOW, 'utf8');
 	const steps = stepsByName(text);
@@ -132,10 +278,7 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 	 * arguments joined with " | ".
 	 */
 	function runDeploy(env, after, nodeFails = 0) {
-		const step = named('Deploy the Worker');
-		const block = step.match(/\n(\s+)run: \|\n((?:\1 {2}.*\n|\s*\n)+)/);
-		assert.ok(block, 'the deploy step has no run block');
-		const script = block[2].split('\n').map((line) => line.slice(block[1].length + 2)).join('\n');
+		const script = runBlock(named('Deploy the Worker'));
 		const dir = mkdtempSync(join(tmpdir(), 'deploy-step-'));
 		try {
 			writeFileSync(join(dir, 'pnpm'), '#!/bin/bash\n{ for a in "$@"; do printf "%s\\x1f" "$a"; done; printf "\\n"; } >> "$CALLS"\n', { mode: 0o755 });

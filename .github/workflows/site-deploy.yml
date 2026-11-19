@@ -1,18 +1,46 @@
-# Deploys the documentation docs.yml built to the phonometry.dev preview.
+# Deploys the documentation docs.yml built to phonometry.dev.
 #
-# The preview is one Cloudflare Worker with Static Assets (site/worker/README.md):
-# pages and files run no script, so the daily request quota of Workers Free
-# cannot stop them; only the visitor beacon and the files agents read run the
-# Worker, which logs them, and the quota guard switches those off at 95 %.
-# docs.jmrp.io stays the canonical site and this workflow never touches it.
+# The site there is one Cloudflare Worker with Static Assets
+# (site/worker/README.md): pages and files run no script, so the daily request
+# quota of Workers Free cannot stop them; only the visitor beacon and the files
+# agents read run the Worker, which logs them, and the quota guard switches
+# those off at 95 %. This workflow never touches docs.jmrp.io.
 #
-# By hand for now: Actions > Site preview > Run workflow, with the id of a
-# docs.yml run on main whose pages artifact has not expired. A later change
-# makes docs.yml dispatch it after each deploy, as release.yml dispatches the
-# GitLab mirror (no workflow_run: zizmor flags it).
-name: Site preview
+# docs.yml calls it on every push to main and every dispatch of docs.yml on
+# main, after the build, with the pages that run uploaded (job deploy-site).
+# By hand, Actions > Site deploy > Run workflow with the id of an earlier
+# docs.yml run on main whose pages artifact has not expired puts that build
+# back. A call, not a workflow_run trigger, which zizmor flags.
+name: Site deploy
 
 on:
+  workflow_call:
+    inputs:
+      run_id:
+        description: "Id of the docs.yml run whose pages artifact is deployed: the calling run itself"
+        required: true
+        type: string
+      attempt:
+        description: "The attempt of that run that built the artifact (github-pages-<attempt>)"
+        required: false
+        default: "1"
+        type: string
+      apply_rules:
+        description: "Put the zone rules (redirects and the Markdown 302) as generated, instead of only checking them"
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      # What the IndexNow job of docs.yml reads of a deploy.
+      page_url:
+        description: "The home page of the deployed site"
+        value: ${{ jobs.deploy.outputs.page_url }}
+      deployed-at:
+        description: "When the Worker with these pages went live (UTC)"
+        value: ${{ jobs.deploy.outputs.deployed-at }}
+      attempt:
+        description: "The attempt of the run the deploy ran in, later than the build's on a re-run of the deploy alone"
+        value: ${{ jobs.deploy.outputs.attempt }}
   workflow_dispatch:
     inputs:
       run_id:
@@ -33,27 +61,34 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  # One deploy at a time, and a deploy is never cancelled halfway.
-  group: site-preview
-  cancel-in-progress: false
-
 env:
   COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
   WRANGLER_SEND_METRICS: "false"
 
 jobs:
   deploy:
-    name: Deploy the preview to phonometry.dev
+    name: Deploy the site to phonometry.dev
     runs-on: ubuntu-26.04
     timeout-minutes: 30
+    # One deploy at a time, whether docs.yml called it or it was run by hand,
+    # and a deploy is never cancelled halfway: it uploads two Worker versions
+    # as a pair. The group is the job's, since a called workflow runs inside
+    # the caller's run.
+    concurrency:
+      group: site-deploy
+      cancel-in-progress: false
     # The environment holds the two Cloudflare tokens and admits main only.
     environment:
       name: phonometry-preview
-      url: https://phonometry.dev/phonometry/
+      url: ${{ steps.site.outputs.page_url }}
     permissions:
       contents: read
-      actions: read # the pages artifact of the docs.yml run
+      actions: read # the pages artifact of an earlier docs.yml run, by hand
+    outputs:
+      page_url: ${{ steps.site.outputs.page_url }}
+      deployed-at: ${{ steps.deployed.outputs.at }}
+      # A later attempt than the build's when this job was re-run alone.
+      attempt: ${{ github.run_attempt }}
     steps:
       - name: Check the inputs
         env:
@@ -67,28 +102,47 @@ jobs:
         # The environment admits this workflow from main only, which limits
         # who can read the tokens, not where the deployed pages come from:
         # docs.yml can be dispatched on any branch and uploads its pages
-        # artifact whenever the event is not a pull request. So the run is
-        # read back, and anything but a successful push or dispatch of
-        # docs.yml on main, here, whose commit main contains, stops the deploy.
+        # artifact whenever the event is not a pull request. Anything but a
+        # push or dispatch of docs.yml on main, here, whose commit main
+        # contains, stops the deploy.
+        # Called, this workflow runs in docs.yml's own run, whose id is the
+        # one passed in (github.event_name is the caller's, push, either
+        # way). That run is still going, with no conclusion yet, so it is
+        # read from this run's context; the build job it needs succeeded or
+        # this job would not run. By hand, the run named is another one and
+        # is read back, and it has to have succeeded.
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ inputs.run_id }}
+          CALLED: ${{ inputs.run_id == github.run_id }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          REF: ${{ github.ref }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")
-          path=$(jq -r .path <<<"$run")
-          branch=$(jq -r .head_branch <<<"$run")
-          event=$(jq -r .event <<<"$run")
-          repo=$(jq -r .head_repository.full_name <<<"$run")
-          conclusion=$(jq -r .conclusion <<<"$run")
-          sha=$(jq -r .head_sha <<<"$run")
-          echo "run $RUN_ID: $path on $branch ($event) from $repo at $sha, $conclusion"
           fail=0
-          [ "$path" = ".github/workflows/docs.yml" ] || { echo "::error::run $RUN_ID is $path, not docs.yml"; fail=1; }
-          [ "$branch" = "main" ] || { echo "::error::run $RUN_ID built $branch, not main"; fail=1; }
-          [[ "$event" = "push" || "$event" = "workflow_dispatch" ]] || { echo "::error::run $RUN_ID was a $event"; fail=1; }
-          [ "$repo" = "$GITHUB_REPOSITORY" ] || { echo "::error::run $RUN_ID came from $repo"; fail=1; }
-          [ "$conclusion" = "success" ] || { echo "::error::run $RUN_ID concluded $conclusion"; fail=1; }
+          if [ "$CALLED" = true ]; then
+            sha=$SHA
+            echo "called by $WORKFLOW_REF ($EVENT) at $sha"
+            [ "${WORKFLOW_REF%%@*}" = "jmrplens/phonometry/.github/workflows/docs.yml" ] || { echo "::error::the caller $WORKFLOW_REF is not docs.yml of jmrplens/phonometry"; fail=1; }
+            [ "$REF" = "refs/heads/main" ] || { echo "::error::the caller built $REF, not main"; fail=1; }
+            [[ "$EVENT" = "push" || "$EVENT" = "workflow_dispatch" ]] || { echo "::error::the caller ran on a $EVENT"; fail=1; }
+          else
+            run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")
+            path=$(jq -r .path <<<"$run")
+            branch=$(jq -r .head_branch <<<"$run")
+            event=$(jq -r .event <<<"$run")
+            repo=$(jq -r .head_repository.full_name <<<"$run")
+            conclusion=$(jq -r .conclusion <<<"$run")
+            sha=$(jq -r .head_sha <<<"$run")
+            echo "run $RUN_ID: $path on $branch ($event) from $repo at $sha, $conclusion"
+            [ "$path" = ".github/workflows/docs.yml" ] || { echo "::error::run $RUN_ID is $path, not docs.yml"; fail=1; }
+            [ "$branch" = "main" ] || { echo "::error::run $RUN_ID built $branch, not main"; fail=1; }
+            [[ "$event" = "push" || "$event" = "workflow_dispatch" ]] || { echo "::error::run $RUN_ID was a $event"; fail=1; }
+            [ "$repo" = "$GITHUB_REPOSITORY" ] || { echo "::error::run $RUN_ID came from $repo"; fail=1; }
+            [ "$conclusion" = "success" ] || { echo "::error::run $RUN_ID concluded $conclusion"; fail=1; }
+          fi
           [ "$fail" = 0 ] || exit 1
           # A commit main contains compares as identical to it or behind it.
           status=$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$sha" --jq .status)
@@ -101,6 +155,7 @@ jobs:
           # site/src/data, site/src/lib and site/scripts; the rest of the
           # repository is not needed. site/worker/test/workflow.test.mjs fails
           # when a script run here loads a module outside these directories.
+          # Called, the checkout is the commit docs.yml built.
           sparse-checkout: |
             site/worker
             site/src/data
@@ -117,7 +172,16 @@ jobs:
       - name: Install wrangler from the Worker project's lockfile
         run: pnpm install --frozen-lockfile
         working-directory: site/worker
+      - name: Fetch the pages artifact the calling run built
+        # An artifact of this very run, so no run is named and no token is
+        # needed: the build job uploaded it before this job started.
+        if: ${{ inputs.run_id == github.run_id }}
+        uses: actions/download-artifact@v8
+        with:
+          name: github-pages-${{ inputs.attempt }}
+          path: ${{ runner.temp }}/pages-artifact
       - name: Fetch the pages artifact of the docs.yml run
+        if: ${{ inputs.run_id != github.run_id }}
         uses: actions/download-artifact@v8
         with:
           name: github-pages-${{ inputs.attempt }}
@@ -130,8 +194,17 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pages"
           tar -xf "$RUNNER_TEMP/pages-artifact/artifact.tar" -C "$RUNNER_TEMP/pages"
           echo "$(find "$RUNNER_TEMP/pages" -type f | wc -l) files in the build"
+      - name: Read where the pages are served
+        # The host the Worker serves, the build's base path and canonical
+        # site, and the clip host, from site/src/data/site-targets.json: every
+        # check below takes its addresses from here. PHONOMETRY_SITE is unset
+        # in docs.yml's build and here, so both read the default target.
+        id: site
+        run: node site/worker/scripts/site-address.mjs >> "$GITHUB_OUTPUT"
       - name: Stage the build with the beacon (every check runs before anything is written)
-        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage --beacon
+        # The target is the one the build was made for, and the noindex
+        # follows from it (stage.mjs): no flag here decides it.
+        run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage --site "${PHONOMETRY_SITE:-}" --beacon
       - name: Read whether the quota guard has switched the code paths off
         # At 95 % of the day's Workers requests the guard blocks the beacon
         # and rolls the Worker to its assets-only half until 00:00 UTC. A
@@ -215,14 +288,22 @@ jobs:
             fi
           fi
         working-directory: site/worker
+      - name: Note when the pages went live
+        # The IndexNow job of docs.yml keeps its record only while no deploy
+        # has gone out after this moment.
+        id: deployed
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
       - name: Check what the assets answer
         env:
           # The beacon check reads the live deployment just before and after
           # its probe (scripts/check-beacon.mjs); the deploy token reads it.
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
+          ORIGIN: ${{ steps.site.outputs.origin }}
+          BASE: ${{ steps.site.outputs.base }}
+          CANONICAL: ${{ steps.site.outputs.canonical }}
         run: |
           set -euo pipefail
-          base=https://phonometry.dev/phonometry
+          base="$ORIGIN$BASE"
           fail=0
           expect() { # <what> <url> <status> [header-regex]
             local got
@@ -232,19 +313,19 @@ jobs:
             echo "ok   $1"
           }
           expect "a page, kept out of search indexes" "$base/signals/" 200 '^x-robots-tag: noindex'
-          expect "a page names its Markdown copy" "$base/signals/" 200 '^link: </phonometry/signals/index.md>'
-          expect "the copy names its page as canonical" "$base/signals/index.md" 200 '^link: <https://docs.jmrp.io/phonometry/signals/>; rel="canonical"'
-          expect "a retired address answers 301" "$base/about/" 301 '^location: /phonometry/start/about/'
+          expect "a page names its Markdown copy" "$base/signals/" 200 "^link: <$BASE/signals/index.md>"
+          expect "the copy names its page as canonical" "$base/signals/index.md" 200 "^link: <$CANONICAL/signals/>; rel=\"canonical\""
+          expect "a retired address answers 301" "$base/about/" 301 "^location: $BASE/start/about/"
           expect "an unknown page answers 404" "$base/no-such-page/" 404
           expect "a copy says it is UTF-8" "$base/signals/index.md" 200 '^content-type: text/markdown; charset=utf-8'
           expect "llms.txt says it is UTF-8" "$base/llms.txt" 200 '^content-type: text/plain; charset=utf-8'
-          expect "robots.txt at the root says it is UTF-8" "https://phonometry.dev/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
+          expect "robots.txt at the root says it is UTF-8" "$ORIGIN/robots.txt" 200 '^content-type: text/plain; charset=utf-8'
           # 204 with full code live; while the code paths are held off, the
           # guard's WAF rule answers 403 before any Worker runs, or, while
           # that rule is not on yet, the assets-only half answers 404 (no
           # asset is called _v). A 204 then would mean code is running.
           node site/worker/scripts/check-beacon.mjs || fail=1
-          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 https://phonometry.dev/_v)
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$ORIGIN/_v")
           if [ "$code" != 403 ]; then echo "::error::a GET of the beacon answered $code, not the WAF's 403"; fail=1; else echo "ok   the WAF refuses a GET of the beacon"; fi
           n=$(curl -sS -o /dev/null -D - --max-time 30 "$base/signals/index.md" | grep -ci '^content-type:')
           if [ "$n" != 1 ]; then echo "::error::the copy carries $n Content-Type headers"; fail=1; else echo "ok   one Content-Type"; fi
@@ -268,6 +349,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 90
       - name: Check what the zone rules answer
+        env:
+          ORIGIN: ${{ steps.site.outputs.origin }}
+          BASE: ${{ steps.site.outputs.base }}
+          CLIP_BASE: ${{ steps.site.outputs.clip_base }}
         run: |
           set -euo pipefail
           fail=0
@@ -283,9 +368,11 @@ jobs:
             fi
           }
           check "www goes to the apex" 301 'https://phonometry.dev/x\?y=1' "https://www.phonometry.dev/x?y=1"
-          check "the root goes to the base path" 302 'https://phonometry.dev/phonometry/' "https://phonometry.dev/"
-          check "a Markdown request gets the copy" 302 '/phonometry/signals/index.md' -H 'Accept: text/markdown' "https://phonometry.dev/phonometry/signals/"
-          check "a clip goes where ranges answer 206" 302 'https://docs.jmrp.io/phonometry/media/' "https://phonometry.dev/phonometry/media/$(ls site/worker/stage/phonometry/media | grep -m1 '\.webm$')"
+          if [ -n "$BASE" ]; then
+            check "the root goes to the base path" 302 "$ORIGIN$BASE/" "$ORIGIN/"
+          fi
+          check "a Markdown request gets the copy" 302 "$BASE/signals/index.md" -H 'Accept: text/markdown' "$ORIGIN$BASE/signals/"
+          check "a clip goes where ranges answer 206" 302 "$CLIP_BASE" "$ORIGIN$BASE/media/$(ls "site/worker/stage$BASE/media" | grep -m1 '\.webm$')"
           # _headers matches a path whatever the status; these three come
           # from the response rules, which can read it.
           absent() { # <what> <header-regex> <curl args...>
@@ -294,9 +381,9 @@ jobs:
             got=$(curl -sS -o /dev/null -D - --max-time 30 "$@")
             if grep -qiE "$header" <<<"$got"; then echo "::error::$what: $(grep -iE "$header" <<<"$got" | head -1)"; fail=1; else echo "ok   $what"; fi
           }
-          absent "an unknown page names no copy" '^link:' "https://phonometry.dev/phonometry/no-such-page/"
-          absent "an unknown copy names no canonical" '^link:' "https://phonometry.dev/phonometry/no-such-page/index.md"
-          absent "a missing build file is not cached for a year" '^cache-control:.*immutable' "https://phonometry.dev/phonometry/_astro/no-such-file.ABCDEF12.css"
+          absent "an unknown page names no copy" '^link:' "$ORIGIN$BASE/no-such-page/"
+          absent "an unknown copy names no canonical" '^link:' "$ORIGIN$BASE/no-such-page/index.md"
+          absent "a missing build file is not cached for a year" '^cache-control:.*immutable' "$ORIGIN$BASE/_astro/no-such-file.ABCDEF12.css"
           exit "$fail"
       - name: Install the browser the clip check drives
         run: pnpm exec puppeteer browsers install chrome
@@ -304,6 +391,9 @@ jobs:
       - name: Check a clip plays in a browser
         # curl sees a clip as a 302 and a 206. A browser also holds the
         # address it is redirected to against the page's
-        # Content-Security-Policy, which curl never reads; this plays two.
-        run: node scripts/check-clip.mjs
+        # Content-Security-Policy, which curl never reads; this plays two,
+        # on a page of the deployed site with clips near the top.
+        env:
+          PAGE_URL: ${{ steps.site.outputs.page_url }}
+        run: node scripts/check-clip.mjs --page "${PAGE_URL}vibration/machinery/machine-diagnostics/"
         working-directory: site/worker

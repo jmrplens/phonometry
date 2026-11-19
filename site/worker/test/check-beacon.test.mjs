@@ -4,7 +4,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { beaconFits, runCheckBeacon } from '../scripts/check-beacon.mjs';
+import { basePath } from '../../src/data/site.mjs';
+import { BODY, beaconFits, runCheckBeacon } from '../scripts/check-beacon.mjs';
 
 const A = '4dbfb3b955a0c856bfe066f2a6061dd5';
 const DEPLOYMENTS = `/accounts/${A}/workers/scripts/phonometry-docs/deployments`;
@@ -59,7 +60,11 @@ describe('check-beacon.mjs', () => {
 		assert.equal(calls.beacon.length, 1);
 		assert.equal(calls.beacon[0].method, 'POST');
 		assert.equal(calls.beacon[0].headers.origin, 'https://phonometry.dev');
-		assert.equal(calls.beacon[0].body, '{"p":"/phonometry/signals/","wd":1}');
+		assert.equal(calls.beacon[0].body, BODY);
+		// The page view lands on a page of the site as served, under its base path.
+		const view = JSON.parse(BODY);
+		assert.ok(view.p.startsWith(`${basePath}/`), view.p);
+		assert.deepEqual(view, { p: `${basePath}/signals/`, wd: 1 });
 		assert.match(sink.log.join('\n'), /ok {3}the beacon answers 204/);
 	});
 

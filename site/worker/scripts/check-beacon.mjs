@@ -1,4 +1,4 @@
-// The deploy's beacon check (site-preview.yml): a POST of /_v answers what
+// The deploy's beacon check (site-deploy.yml): a POST of /_v answers what
 // the live deployment says it should.
 //
 // Usage:
@@ -21,12 +21,14 @@
 // read, 2 on a usage error.
 import { fileURLToPath } from 'node:url';
 
+import { basePath } from '../../src/data/site.mjs';
 import { ignoredTargets } from '../lib/cloudflare.mjs';
 import { readGuardState } from './guard-state.mjs';
 
 export const BEACON = 'https://phonometry.dev/_v';
 const ORIGIN = 'https://phonometry.dev';
-const BODY = '{"p":"/phonometry/signals/","wd":1}';
+/** The page view the probe sends: a page under the base path the deploy stages, from site.mjs. */
+export const BODY = JSON.stringify({ p: `${basePath}/signals/`, wd: 1 });
 
 /**
  * Whether a beacon status fits the state.

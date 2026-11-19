@@ -1,10 +1,13 @@
-# Deploys the documentation docs.yml built to phonometry.dev.
+# Deploys the documentation docs.yml built to phonometry.dev, the canonical
+# site, served at the root.
 #
 # The site there is one Cloudflare Worker with Static Assets
 # (site/worker/README.md): pages and files run no script, so the daily request
 # quota of Workers Free cannot stop them; only the visitor beacon and the files
 # agents read run the Worker, which logs them, and the quota guard switches
-# those off at 95 %. This workflow never touches docs.jmrp.io.
+# those off at 95 %. This workflow never touches docs.jmrp.io, whose old
+# addresses answer permanent redirects to phonometry.dev from the jmrp.io
+# account (CONTRIBUTING.md, 5b).
 #
 # docs.yml calls it on every push to main and every dispatch of docs.yml on
 # main, after the build, with the pages that run uploaded (job deploy-site).
@@ -216,6 +219,28 @@ jobs:
         # The target is the one the build was made for, and the noindex
         # follows from it (stage.mjs): no flag here decides it.
         run: node site/worker/stage.mjs --from "$RUNNER_TEMP/pages" --out site/worker/stage --site "${PHONOMETRY_SITE:-}" --beacon
+      - name: Check robots.txt names a sitemap the stage holds
+        # robots.txt is a hand-written file of public/ that names the sitemap
+        # index by its address; a crawler that reads it is sent there.
+        env:
+          ORIGIN: ${{ steps.site.outputs.origin }}
+        run: |
+          set -euo pipefail
+          sitemap=$(sed -n 's/^Sitemap: //p' site/worker/stage/robots.txt)
+          [ -n "$sitemap" ] || { echo "::error::robots.txt names no sitemap"; exit 1; }
+          path=${sitemap#"$ORIGIN"}
+          [ "$path" != "$sitemap" ] || { echo "::error::robots.txt names $sitemap, not a file of $ORIGIN"; exit 1; }
+          [ -f "site/worker/stage${path}" ] || { echo "::error::robots.txt names $sitemap, which the stage does not hold"; exit 1; }
+          echo "ok   robots.txt names $sitemap, a staged file"
+      - name: Check every staged clip answers at the clip host
+        # The zone rule sends every clip to the clip host, which is filled
+        # apart from this deploy: a clip added or re-rendered in the build and
+        # missing there, or there at another size, would 404 or play the old
+        # file with every check below green. Before anything goes live.
+        env:
+          BASE: ${{ steps.site.outputs.base }}
+          CLIP_BASE: ${{ steps.site.outputs.clip_base }}
+        run: node site/worker/scripts/check-clip-host.mjs --stage "site/worker/stage$BASE" --clip-base "$CLIP_BASE"
       - name: Read whether the quota guard has switched the code paths off
         # At 95 % of the day's Workers requests the guard blocks the beacon
         # and rolls the Worker to its assets-only half until 00:00 UTC. A
@@ -312,6 +337,7 @@ jobs:
           ORIGIN: ${{ steps.site.outputs.origin }}
           BASE: ${{ steps.site.outputs.base }}
           CANONICAL: ${{ steps.site.outputs.canonical }}
+          INDEXABLE: ${{ steps.site.outputs.indexable }}
         run: |
           set -euo pipefail
           base="$ORIGIN$BASE"
@@ -323,7 +349,20 @@ jobs:
             if [ -n "${4:-}" ] && ! grep -qiE "$4" <<<"$got"; then echo "::error::$1: $2 lacks $4"; fail=1; return; fi
             echo "ok   $1"
           }
-          expect "a page, kept out of search indexes" "$base/signals/" 200 '^x-robots-tag: noindex'
+          absent() { # <what> <header-regex> <url>
+            local got
+            got=$(curl -sS -o /dev/null -D - --max-time 30 "$3")
+            if grep -qiE "$2" <<<"$got"; then echo "::error::$1: $(grep -iE "$2" <<<"$got" | head -1)"; fail=1; else echo "ok   $1"; fi
+          }
+          # The noindex follows the build (stage.mjs): gone when the build and
+          # the canonical site are this host, kept on every page otherwise.
+          if [ "$INDEXABLE" = true ]; then
+            absent "a page carries no noindex" '^x-robots-tag:' "$base/signals/"
+          else
+            expect "a page, kept out of search indexes" "$base/signals/" 200 '^x-robots-tag: noindex'
+          fi
+          expect "the home page answers" "$base/" 200
+          expect "llms.txt stays out of search indexes" "$base/llms.txt" 200 '^x-robots-tag: noindex'
           expect "a page names its Markdown copy" "$base/signals/" 200 "^link: <$BASE/signals/index.md>"
           expect "the copy names its page as canonical" "$base/signals/index.md" 200 "^link: <$CANONICAL/signals/>; rel=\"canonical\""
           expect "a retired address answers 301" "$base/about/" 301 "^location: $BASE/start/about/"
@@ -364,6 +403,7 @@ jobs:
           ORIGIN: ${{ steps.site.outputs.origin }}
           BASE: ${{ steps.site.outputs.base }}
           CLIP_BASE: ${{ steps.site.outputs.clip_base }}
+          LEGACY_BASE: ${{ steps.site.outputs.legacy_base }}
         run: |
           set -euo pipefail
           fail=0
@@ -381,6 +421,12 @@ jobs:
           check "www goes to the apex" 301 'https://phonometry.dev/x\?y=1' "https://www.phonometry.dev/x?y=1"
           if [ -n "$BASE" ]; then
             check "the root goes to the base path" 302 "$ORIGIN$BASE/" "$ORIGIN/"
+          fi
+          # The base path the site was served under before (the preview's,
+          # and docs.jmrp.io's) answers at the root, one hop.
+          if [ -n "$LEGACY_BASE" ]; then
+            check "a page under the old base path goes to the root" 301 "$ORIGIN/signals/\?q=1" "$ORIGIN$LEGACY_BASE/signals/?q=1"
+            check "the old base path itself goes to the home page" 301 "$ORIGIN/[[:space:]]*$" "$ORIGIN$LEGACY_BASE"
           fi
           check "a Markdown request gets the copy" 302 "$BASE/signals/index.md" -H 'Accept: text/markdown' "$ORIGIN$BASE/signals/"
           check "a clip goes where ranges answer 206" 302 "$CLIP_BASE" "$ORIGIN$BASE/media/$(ls "site/worker/stage$BASE/media" | grep -m1 '\.webm$')"

@@ -121,12 +121,12 @@ permissions:
   contents: read
 
 concurrency:
-  # Production deploys share a single queue because the Pages environment
-  # accepts one in-flight deployment at a time. A pull-request build must not
-  # join that queue: cancel-in-progress would let a validation run abort a
-  # deploy that is already publishing. Each pull request gets its own group
-  # instead, so a fixup push cancels only that branch's stale build. A run on
-  # main is never cancelled: the phonometry.dev deploy it calls uploads two
+  # Production deploys share a single queue, one deploy in flight at a time.
+  # A pull-request build must not join that queue: cancel-in-progress would
+  # let a validation run abort a deploy that is already publishing. Each pull
+  # request gets its own group instead, so a fixup push cancels only that
+  # branch's stale build. A run on main is never cancelled: the phonometry.dev
+  # deploy it calls uploads two
   # Worker versions as a pair, and a run cancelled between them would leave
   # the quota guard half a pair (cancelling the run cancels the jobs of the
   # workflow it calls too). A newer run waits, and of several waiting only
@@ -333,8 +333,19 @@ jobs:
         # collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
-      - name: Test the phonometry.dev preview's configuration on small trees made to fail it
-        # The preview serves this build from a Cloudflare Worker with no code
+      - name: Refuse a site link written with the old base path or host
+        # The site is served at the root of phonometry.dev. A file of the
+        # site's source (anything under site/src, or astro.config.mjs) that
+        # still writes the base path it had (/phonometry) or the host it was
+        # published on before links an address that answers only through a
+        # redirect (docs/contributing F76). Every shape a link takes is read,
+        # the quoted hrefs and component strings the links validator never
+        # sees.
+        id: base-path-guard
+        run: node scripts/base-path.mjs
+        working-directory: site
+      - name: Test phonometry.dev's configuration on small trees made to fail it
+        # phonometry.dev serves this build from a Cloudflare Worker with no code
         # (site/worker/README.md), so what it adds lives in files written
         # beside the build and in zone rules: the headers, the retired
         # addresses, the Markdown redirect and its agreement with docs.jmrp.io's
@@ -444,15 +455,15 @@ jobs:
         # cannot silence is listed in the check with its reason.
         run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
         working-directory: site
-      - name: Check this build stages for the phonometry.dev preview
-        # The preview deploys this very build. Staging refuses a build over
+      - name: Check this build stages for phonometry.dev
+        # The deploy job below deploys this very build. Staging refuses a build over
         # the Free plan's limits, one that carries its own _headers or
         # _redirects, a page that lost its Markdown copy outside the pages
         # the headers and the redirect rule exclude, and a retired address
         # whose target the build no longer writes. Checked on every build, so
-        # a pull request that breaks the preview fails here and not on the
-        # day of a deploy. Nothing is written.
-        run: node worker/stage.mjs --from dist --check
+        # a pull request that breaks the site fails here and not on the day
+        # of a deploy. Nothing is written.
+        run: node worker/stage.mjs --from dist --site phonometry.dev --check
         working-directory: site
       - name: Check llms.txt names the shard files the build wrote
         # Before the build, this job wrote llms.txt at the repository root from
@@ -804,39 +815,11 @@ jobs:
           name: github-pages-${{ github.run_attempt }}
           path: site/dist
 
-  deploy:
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-26.04
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    outputs:
-      page_url: ${{ steps.deployment.outputs.page_url }}
-      deployed-at: ${{ steps.deployed.outputs.at }}
-      # A later attempt than the build's when this job was re-run: its pages
-      # go out after whatever deploy went out since the build, and the
-      # IndexNow job works their list out again.
-      attempt: ${{ github.run_attempt }}
-    steps:
-      # The pages of the build this job needs, from the attempt it ran in,
-      # which a re-run of this job alone reads too.
-      - id: deployment
-        uses: actions/deploy-pages@v5
-        with:
-          artifact_name: github-pages-${{ needs.build.outputs.attempt }}
-      # When this run's pages went out. The IndexNow job keeps its record
-      # only while no deploy has gone out after this moment. A re-run of that
-      # job alone reads the moment of the deploy it follows; a re-run of this
-      # job writes a moment of its own, since its pages go out again.
-      - id: deployed
-        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
-
-  # The same pages, deployed to phonometry.dev by site-deploy.yml in this run
-  # (noindex while docs.jmrp.io is the canonical site). The run id tells the
+  # The pages of this run, deployed to phonometry.dev, the canonical site, by
+  # site-deploy.yml. Nothing deploys GitHub Pages any more: it served the site
+  # under docs.jmrp.io/phonometry/, and its last deployment stays published
+  # as it was while docs.jmrp.io answers every address there with a permanent
+  # redirect to phonometry.dev. The run id tells the
   # called workflow its pages are an artifact of this run; the attempt is the
   # build's, so a re-run of this job alone deploys the pages that build
   # uploaded. No secrets are passed: the Cloudflare tokens are secrets of the
@@ -867,9 +850,15 @@ jobs:
       CF_PHONOMETRY_DEPLOY_TOKEN: ${{ secrets.CF_PHONOMETRY_DEPLOY_TOKEN }}
       CF_PHONOMETRY_RULES_TOKEN: ${{ secrets.CF_PHONOMETRY_RULES_TOKEN }}
 
+  # IndexNow is told what changed on phonometry.dev once the deploy is live.
+  # The repository variable INDEXNOW_HOLD set to true skips the job: it is
+  # set before a change of host goes out and cleared once the new host is
+  # proven, and a skipped job keeps no record, so the next run sends every
+  # URL of the sitemap once.
   indexnow:
     name: Submit URLs to IndexNow
-    needs: [build, deploy]
+    needs: [build, deploy-site]
+    if: vars.INDEXNOW_HOLD != 'true'
     runs-on: ubuntu-26.04
     permissions:
       contents: read # the script below
@@ -918,7 +907,7 @@ jobs:
       # the build it needs, so another attempt is a later one.
       - name: Find the pages IndexNow was last sent, on a deploy re-run
         id: submitted
-        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        if: needs.deploy-site.outputs.attempt != needs.build.outputs.attempt
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node site/scripts/indexnow-diff.mjs last-submitted --except-run "$GITHUB_RUN_ID"
@@ -959,7 +948,7 @@ jobs:
       - name: Work out the list again against the newest record, on a deploy re-run
         # A re-run keeps the inputs of the run it re-runs, so a run dispatched
         # with indexnow_full sends every URL again here too.
-        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        if: needs.deploy-site.outputs.attempt != needs.build.outputs.attempt
         env:
           INDEXNOW_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.indexnow_full }}
         run: |
@@ -984,7 +973,7 @@ jobs:
         # re-run of this job alone after one that submitted and kept no
         # record, would leave the run with no list of the pages that job
         # sent: no later deploy would send a page it removed from them.
-        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        if: needs.deploy-site.outputs.attempt != needs.build.outputs.attempt
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-urls
@@ -994,7 +983,7 @@ jobs:
       - name: Submit the changed pages to IndexNow
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+          PAGE_URL: ${{ needs.deploy-site.outputs.page_url }}
         run: |
           set -euo pipefail
           if [ -z "${INDEXNOW_KEY:-}" ]; then
@@ -1079,7 +1068,7 @@ jobs:
         id: newest
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DEPLOYED_AT: ${{ needs.deploy.outputs.deployed-at }}
+          DEPLOYED_AT: ${{ needs.deploy-site.outputs.deployed-at }}
         run: node site/scripts/indexnow-diff.mjs keep-record --deployed-at "$DEPLOYED_AT"
       - name: Keep the manifest of the pages IndexNow was sent
         # The record the next build compares with: the manifest the build

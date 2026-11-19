@@ -68,7 +68,7 @@ updates:
         patterns:
           - "*"
 
-  # wrangler, which deploys the phonometry.dev preview. A project of its own
+  # wrangler, which deploys phonometry.dev. A project of its own
   # beside the site's (site/worker/pnpm-workspace.yaml says why), so it has
   # its own entry.
   - package-ecosystem: "npm"

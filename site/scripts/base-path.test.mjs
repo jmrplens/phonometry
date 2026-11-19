@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 
+import { fences } from '../src/lib/markdown-fences.mjs';
 import { ALLOWED, SCANNED, SITE, basePathFindings, basePathReport } from './base-path.mjs';
 
 /** A site folder with every path the check reads, the pages and astro.config.mjs empty. */
@@ -108,4 +109,37 @@ test('an optional allowance is let through where its line is, and not asked for 
 		assert.deepEqual(basePathReport(site), { files: 2, findings: [], stale: [] });
 	}
 	assert.equal(basePathFindings(`  ${entry.line}\n`, 'src/data/home-en.ts').length, 1, 'only in its file');
+});
+test('either clip host the Worker README names is one edit of site-targets.json, which the check lets through', () => {
+	const readme = readFileSync(join(SITE, 'worker/README.md'), 'utf8');
+	const section = readme.slice(readme.indexOf('### Where the clips are served from'));
+	const hosts = fences(section, { kind: 'md' })
+		.filter((block) => block.language === 'json')
+		.slice(0, 2)
+		.map((block) => JSON.parse(`{${block.body.trim()}}`));
+	assert.equal(hosts.length, 2, 'the README names the clip host and the one to fall back on');
+	const [, fallback] = hosts;
+	assert.deepEqual(Object.keys(fallback), Object.keys(hosts[0]));
+	assert.match(fallback.clipBase, /^https:\/\/docs\.jmrp\.io\/phonometry\/media\/$/);
+	const targets = readFileSync(join(SITE, 'src/data/site-targets.json'), 'utf8');
+	const parsed = JSON.parse(targets);
+	assert.ok(
+		hosts.some((host) => Object.entries(host).every(([key, value]) => JSON.stringify(parsed[key]) === JSON.stringify(value))),
+		'site-targets.json carries one of the two the README names',
+	);
+	for (const host of hosts) {
+		// The edit as a maintainer makes it: each value on its own line, the rest of the file as it is.
+		const switched = Object.entries(host).reduce(
+			(text, [key, value]) => text.replace(new RegExp(`"${key}": .*?(,?)$`, 'm'), (_, comma) => `"${key}": ${JSON.stringify(value).replaceAll(',', ', ')}${comma}`),
+			targets,
+		);
+		assert.deepEqual(JSON.parse(switched), { ...parsed, ...host });
+		assert.deepEqual(basePathFindings(switched, 'src/data/site-targets.json'), [], host.clipBase);
+		const site = emptySite();
+		plant(site, 'src/data/site-targets.json', switched);
+		assert.deepEqual(basePathReport(site), { files: 2, findings: [], stale: [] }, `${host.clipBase}: no finding, and no allowance stale`);
+	}
+	const optional = ALLOWED.filter((entry) => entry.optional);
+	assert.equal(optional.length, 1);
+	assert.equal(basePathFindings(`  ${optional[0].line}\n`, 'src/data/home-en.ts').length, 1, 'the fallback is allowed only in its file');
 });

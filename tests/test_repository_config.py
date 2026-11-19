@@ -48,6 +48,7 @@ import github_edition
 
 _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
+_SITE_DEPLOY_WORKFLOW = _ROOT / ".github" / "workflows" / "site-deploy.yml"
 _PYTHON_WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
 _MAKEFILE = _ROOT / "Makefile"
 
@@ -473,6 +474,21 @@ def _needs(job: dict[str, object]) -> set[str]:
     return {str(name) for name in needs} if isinstance(needs, list) else set()
 
 
+#: The job of docs.yml that deploys the pages a run built: a call of
+#: site-deploy.yml, which serves them on phonometry.dev. No other job of the
+#: workflow deploys anything.
+_DEPLOY = "deploy-site"
+
+
+def _site_deploy_job() -> tuple[str, dict[str, object]]:
+    """The one job of site-deploy.yml, by name: the steps the call runs."""
+    deploy = yaml.safe_load(_SITE_DEPLOY_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = deploy["jobs"]
+    assert len(jobs) == 1, "site-deploy.yml deploys in one job"
+    [(name, job)] = jobs.items()
+    return name, job
+
+
 def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     """A deploy dispatched by hand or by jmrp.io is compared like a push.
 
@@ -578,8 +594,10 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     for event in _DEPLOYING_EVENTS:
         for what, step in on_every_event.items():
             assert _runs_on(step.get("if"), event), f"the {what} step skips {event}"
-        for job in ("build", "deploy", "indexnow"):
-            assert _runs_on(jobs[job].get("if"), event), f"the {job} job skips {event}"
+        for job in ("build", _DEPLOY, "indexnow"):
+            assert _runs_on(jobs[job].get("if"), event, {}, "refs/heads/main"), (
+                f"the {job} job skips {event}"
+            )
     assert _runs_on(compare.get("if"), "pull_request"), (
         "a pull request no longer prints what its merge would send"
     )
@@ -592,7 +610,7 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
             f"a failure of the {what} step lets its job go on, "
             "so a record can be kept of pages that were not sent"
         )
-    for job in ("build", "deploy", "indexnow"):
+    for job in ("build", _DEPLOY, "indexnow"):
         assert not jobs[job].get("continue-on-error"), (
             f"a failure of the {job} job lets the run go on, "
             "so a record can be kept of pages that were not sent"
@@ -615,8 +633,8 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert compare_at < hand_at, (
         "the list is handed over before the comparison wrote it"
     )
-    assert "build" in _needs(jobs["deploy"])
-    assert "deploy" in _needs(jobs["indexnow"]), "IndexNow is told before the deploy"
+    assert "build" in _needs(jobs[_DEPLOY])
+    assert _DEPLOY in _needs(jobs["indexnow"]), "IndexNow is told before the deploy"
     assert received_at < sent_at, "the submission runs before the list is taken"
     assert sent_at < checked_at < kept_at, (
         "the record is kept before the submission went through, or unchecked"
@@ -672,15 +690,16 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
 
     # The check places this run's deploy among the deployments of the site:
     # it reads the moment the deploy job wrote once its pages went out, in a
-    # step after the deployment, from the environment the script lists, with
-    # a token that may list the deployments.
-    deploy_job = jobs["deploy"]
-    deploy_steps: list[dict[str, object]] = workflow["jobs"]["deploy"]["steps"]
+    # step after the Worker went live, from the environment the script lists,
+    # with a token that may list the deployments. The deploy is a call of
+    # site-deploy.yml, so its steps and its environment are that job's.
+    _, deploy_job = _site_deploy_job()
+    deploy_steps: list[dict[str, object]] = deploy_job["steps"]  # type: ignore[assignment]
     deployed_at, _ = _the_one(
         [
             (index, step)
             for index, step in enumerate(deploy_steps)
-            if str(step.get("uses", "")).startswith("actions/deploy-pages@")
+            if str(step.get("name", "")).startswith("Deploy the Worker")
         ],
         "deploy the pages",
     )
@@ -712,7 +731,9 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert check_env.get("GITHUB_TOKEN")
     moment = re.search(r'--deployed-at "\$(\w+)"', " ".join(str(check["run"]).split()))
     assert moment, check["run"]
-    assert check_env.get(moment.group(1)) == "${{ needs.deploy.outputs.deployed-at }}"
+    assert check_env.get(moment.group(1)) == (
+        f"${{{{ needs.{_DEPLOY}.outputs.deployed-at }}}}"
+    )
     indexnow_permissions = jobs["indexnow"].get("permissions")
     assert isinstance(indexnow_permissions, dict)
     assert indexnow_permissions.get("deployments") == "read"
@@ -828,7 +849,7 @@ def test_the_build_reads_the_list_a_deploy_after_the_record_handed_indexnow() ->
 #: deploy job ran in another attempt than the build. A re-run runs a job again
 #: with every job that needs it, so the deploy job never runs in an earlier
 #: attempt than the build it needs, and another attempt is a later one.
-_DEPLOY_RE_RUN = "needs.deploy.outputs.attempt != needs.build.outputs.attempt"
+_DEPLOY_RE_RUN = f"needs.{_DEPLOY}.outputs.attempt != needs.build.outputs.attempt"
 
 
 def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() -> None:
@@ -863,13 +884,14 @@ def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() ->
     assert handed_name, "indexnow-diff.mjs names no HANDED_ARTIFACT"
     assert record_name, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
 
-    for job in ("build", "deploy"):
-        outputs = jobs[job].get("outputs")
-        assert isinstance(outputs, dict), f"the {job} job has no outputs"
+    _, deploy_job = _site_deploy_job()
+    for job, where in ((jobs["build"], "build"), (deploy_job, "deploy")):
+        outputs = job.get("outputs")
+        assert isinstance(outputs, dict), f"the {where} job has no outputs"
         assert outputs.get("attempt") == "${{ github.run_attempt }}", (
-            f"the {job} job does not say which attempt it ran in"
+            f"the {where} job does not say which attempt it ran in"
         )
-    assert {"build", "deploy"} <= _needs(jobs["indexnow"]), (
+    assert {"build", _DEPLOY} <= _needs(jobs["indexnow"]), (
         "the IndexNow job cannot read the attempts of the build and the deploy"
     )
     permissions = jobs["indexnow"].get("permissions")
@@ -1224,17 +1246,15 @@ def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
     upload one of a name an earlier attempt used. The pages a build hands the
     deploy went under the one name ``actions/upload-pages-artifact`` gives
     them unless told otherwise, so a build re-run in a later attempt ("Re-run
-    all jobs") uploaded a second artifact of that name, and
-    ``actions/deploy-pages`` refuses a run that holds two of the name it
-    deploys ("Multiple artifacts named ... were unexpectedly found for this
-    workflow run"). The build names its pages after the attempt it ran in,
-    and the deploy takes those of the attempt the build it needs ran in,
-    which a re-run of the deploy job alone reads too.
+    all jobs") uploaded a second artifact of that name, and a download by
+    that name finds two. The build names its pages after the attempt it ran
+    in; the call of the deploy hands site-deploy.yml the attempt the build it
+    needs ran in, which a re-run of the deploy job alone reads too, and
+    every download there takes the pages of that attempt.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     jobs: dict[str, dict[str, object]] = workflow["jobs"]
     build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
-    deploy: list[dict[str, object]] = workflow["jobs"]["deploy"]["steps"]
     _, upload = _the_one(
         [
             (index, step)
@@ -1243,36 +1263,93 @@ def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
         ],
         "hand the pages to the deploy",
     )
-    _, deployment = _the_one(
-        [
-            (index, step)
-            for index, step in enumerate(deploy)
-            if str(step.get("uses", "")).startswith("actions/deploy-pages@")
-        ],
-        "deploy the pages",
-    )
     attempt = "${{ github.run_attempt }}"
     outputs = jobs["build"].get("outputs")
     assert isinstance(outputs, dict)
     assert outputs.get("attempt") == attempt, (
         "the build job does not say which attempt it ran in"
     )
-    assert "build" in _needs(jobs["deploy"])
+    assert "build" in _needs(jobs[_DEPLOY])
     uploaded = _input_of(upload, "name", "github-pages")
-    deployed = _input_of(deployment, "artifact_name", "github-pages")
     assert attempt in uploaded, (
         f"the pages go under {uploaded!r}, a name that does not change with the "
-        "attempt, so a build re-run leaves the run two artifacts of it and the "
-        "deploy refuses both"
+        "attempt, so a build re-run leaves the run two artifacts of it"
     )
-    of_the_build = uploaded.replace(attempt, "${{ needs.build.outputs.attempt }}")
-    assert deployed == of_the_build, (
-        f"the deploy takes {deployed!r}, and the build it needs hands its pages "
-        f"on as {uploaded!r}"
+    given = jobs[_DEPLOY].get("with")
+    assert isinstance(given, dict)
+    assert given.get("attempt") == "${{ needs.build.outputs.attempt }}", (
+        "the deploy is not told the attempt the build it needs ran in"
     )
+    _, deploy_job = _site_deploy_job()
+    steps: list[dict[str, object]] = deploy_job["steps"]  # type: ignore[assignment]
+    downloads = [
+        step
+        for step in steps
+        if str(step.get("uses", "")).startswith("actions/download-artifact@")
+    ]
+    assert downloads, "site-deploy.yml downloads no pages"
+    of_the_build = uploaded.replace(attempt, "${{ inputs.attempt }}")
+    for step in downloads:
+        assert _input_of(step, "name", "") == of_the_build, (
+            f"a download takes {_input_of(step, 'name', '')!r}, and the build "
+            f"hands its pages on as {uploaded!r}"
+        )
 
 
-_SITE_DEPLOY_WORKFLOW = _ROOT / ".github" / "workflows" / "site-deploy.yml"
+def test_only_phonometry_dev_is_deployed_and_indexnow_waits_for_the_hold() -> None:
+    """The run that builds the site deploys it to phonometry.dev and nowhere else.
+
+    GitHub Pages served the build under docs.jmrp.io/phonometry/; a build at
+    the root published there would be served under that base with every
+    link and asset pointing at the root of docs.jmrp.io, so no job of
+    docs.yml deploys Pages any more, and none asks for the permissions a
+    Pages deploy needs. The last Pages deployment stays published as it was.
+    The IndexNow job announces phonometry.dev only while the repository
+    variable ``INDEXNOW_HOLD`` is not ``true``: it is set before the root
+    build is merged and cleared once the site is proven and the old addresses
+    answer their permanent redirects, so nothing is announced that could
+    answer 404 after a rollback.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    for name, job in jobs.items():
+        for step in job.get("steps", []) or []:  # type: ignore[union-attr]
+            uses = str(step.get("uses", ""))
+            assert not uses.startswith("actions/deploy-pages@"), (
+                f"the {name} job deploys GitHub Pages"
+            )
+        permissions = job.get("permissions")
+        if isinstance(permissions, dict):
+            assert "pages" not in permissions, f"the {name} job may write Pages"
+            assert "id-token" not in permissions, (
+                f"the {name} job asks for an OIDC token, which only a Pages deploy needed"
+            )
+        environment = job.get("environment")
+        name_of = (
+            environment.get("name") if isinstance(environment, dict) else environment
+        )
+        assert name_of != "github-pages", f"the {name} job deploys to github-pages"
+    indexnow = jobs["indexnow"]
+    for event in _DEPLOYING_EVENTS:
+        for unheld in ({}, {"INDEXNOW_HOLD": "false"}):
+            assert _runs_on(indexnow.get("if"), event, unheld), (
+                f"IndexNow is not told on {event} with {unheld}"
+            )
+        assert not _runs_on(indexnow.get("if"), event, {"INDEXNOW_HOLD": "true"}), (
+            f"INDEXNOW_HOLD does not hold IndexNow on {event}"
+        )
+    assert _needs(indexnow) == {"build", _DEPLOY}
+    text = _DOCS_WORKFLOW.read_text(encoding="utf-8")
+    assert "needs.deploy.outputs" not in text, (
+        "a step reads the outputs of the Pages deploy, which no longer runs"
+    )
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    environment = re.search(r"export const PAGES_ENVIRONMENT = '([^']+)'", script)
+    assert environment, "indexnow-diff.mjs names no PAGES_ENVIRONMENT"
+    _, deploy_job = _site_deploy_job()
+    deploy_environment = deploy_job.get("environment")
+    assert isinstance(deploy_environment, dict)
+    assert environment.group(1) == deploy_environment.get("name")
 
 
 def test_every_build_that_publishes_is_deployed_to_phonometry_dev_by_its_own_run() -> (

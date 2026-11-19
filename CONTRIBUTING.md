@@ -604,25 +604,34 @@ A page that moves keeps answering at its old address. In `site/`,
 `pnpm run redirects` derives `src/data/redirects.mjs` from the rename history
 of the content tree, and `pnpm run check:redirects` fails the docs job until
 the map is current. The build writes a stub page for every old address, which
-is all GitHub Pages can serve. On docs.jmrp.io the same addresses answer a
-permanent 301 at the edge, from the Cloudflare Bulk Redirects list
-`phonometry_retired`, and that list does not follow the map by itself: when a
-change touches `redirects.mjs` or the `redirects` of `src/data/llms-shards.json`,
-print the list items with `node scripts/cloudflare-redirects.mjs > items.json`
-and replace the items of the list with them, in the dashboard or through the
-API's list items endpoint. The list also leads each retired address's Markdown
-copy (`<address>index.md`) to the copy of the page it moved to, and each retired
-llms shard name to the file that now carries its first page; neither has a stub
-to fall back on. The credentials for that stay with the maintainer, never in
-this repository.
-The phonometry.dev preview (5c) answers the same addresses from a `_redirects`
-file written from the same list (`redirectPairs()` in that script), so the two
-edges cannot drift apart.
+is all a static host without redirects can serve. phonometry.dev answers the
+same addresses with a permanent 301 from a `_redirects` file the deploy writes
+beside the build from the same map (`redirectPairs()` in
+`site/scripts/cloudflare-redirects.mjs`), so a change to `redirects.mjs` or to
+the `redirects` of `src/data/llms-shards.json` reaches the site with the next
+deploy and nothing else to do. That file also leads each retired address's
+Markdown copy (`<address>index.md`) to the copy of the page it moved to, and
+each retired llms shard name to the file that now carries its first page;
+neither has a stub to fall back on.
 
-### 5c. The phonometry.dev preview
+The site was published under `docs.jmrp.io/phonometry/` before it moved to the
+root of phonometry.dev. Every address there answers a permanent 301 to the same
+page on phonometry.dev, from two Cloudflare Bulk Redirects lists in the jmrp.io
+account: `phonometry_retired_v2`, which sends every address the old site had
+retired, its Markdown copy, its retired shard names and every page written
+without its trailing slash straight to the final page here, in one hop, and
+`phonometry_moved`, which sends everything else under `/phonometry` to the same
+path here. `node scripts/cloudflare-redirects.mjs --legacy` prints the items of
+the first from the build in `dist/` and the legacy origin in
+`src/data/site-targets.json`. Both lists are a snapshot taken when the site
+moved, and stay as they are: an address retired after the move never existed on
+docs.jmrp.io, and the catch-all sends it here, where `_redirects` answers it.
+The credentials for that account stay with the maintainer, never in this
+repository.
 
-docs.jmrp.io stays the canonical site. The same build is also served as a
-`noindex` preview at <https://phonometry.dev/phonometry/>, from a Cloudflare
+### 5c. Deploying phonometry.dev
+
+phonometry.dev is the canonical site, served at the root from a Cloudflare
 Worker whose pages and files are Static Assets that run no code, so the daily
 request quota of Workers Free cannot stop them. Code runs only for the visitor
 beacon and the files agents read (Markdown copies, llms files, robots.txt,
@@ -632,39 +641,45 @@ off at 95 % of the day. Everything about it lives in `site/worker/`, and its
 README says what is served from where, what is logged, how it is deployed and
 how it is rolled back. Five things touch the rest of the repository:
 
-- `PHONOMETRY_SITE` picks the host a build is made for, from a closed list in
-  `site/src/data/site-targets.json`, which the build reads through
-  `site/src/data/site.mjs` and the Python generators that write site links
-  (`generate_api_docs.py`, `generate_site_reports.py`, `generate_llms.py`)
-  through `scripts/site_target.py`. Unset, the build is byte for byte the one
-  docs.jmrp.io serves; any value outside the list stops the build.
-- The docs job runs the preview's tests (`node --test 'worker/test/*.test.mjs'`
+- `site/src/data/site-targets.json` names the one host the site is built for,
+  phonometry.dev at the root, and the host it was published on before (its
+  `legacy` origin, read only by the redirect list of 5b). The build reads it
+  through `site/src/data/site.mjs`, and the Python generators that write site
+  links (`generate_api_docs.py`, `generate_site_reports.py`, `generate_llms.py`)
+  through `scripts/site_target.py`. `PHONOMETRY_SITE` may name that host;
+  any other value stops the build. A site link is written root-relative, with
+  no base path and no old host ([F76](docs/contributing/docs-and-figures.md#f76)).
+- The docs job runs the Worker's tests (`node --test 'worker/test/*.test.mjs'`
   in `site/`) and stages every build with `--check`, so a pull request that
-  would break the preview fails there.
+  would break the site fails there.
 - `.github/workflows/site-deploy.yml` deploys every docs.yml build of main:
   docs.yml calls it after the build, in the same run (job `deploy-site`), and
   it can also be run by hand on an earlier docs.yml run to put that build
-  back. The Cloudflare tokens are secrets of the environment it deploys to,
-  which the maintainer holds, and the call passes none. It stages the
-  build with the beacon (`stage.mjs --beacon`, in the staged copy only, so the
-  build docs.jmrp.io serves is never changed) and uploads the full Worker and
-  its assets-only twin as a tagged pair; while the quota guard holds the code
-  paths off, it puts the assets-only half live instead, under the guard's
+  back. Nothing deploys GitHub Pages any more: its last deployment, the old
+  build under `/phonometry/`, stays published as it was. The Cloudflare tokens
+  are secrets of the environment it deploys to, which the maintainer holds,
+  and the call passes none. It stages the build with the beacon
+  (`stage.mjs --beacon`, in the staged copy only) and uploads the full Worker
+  and its assets-only twin as a tagged pair; while the quota guard holds the
+  code paths off, it puts the assets-only half live instead, under the guard's
   mark, so the guard switches that deploy back on at 00:00 UTC. The quota
   alert (80 %) and the quota guard (95 %) live in the Cloudflare account, not
   in GitHub. Since every run on main deploys, a rollback by hand holds only
   until the next one: the repository variable `SITE_DEPLOY_HOLD` set to
   `true` skips `deploy-site` until it is cleared, which is done once main
-  carries the fix (the README's "Rolling back").
-- The beacon is the one script the preview adds to every page; its size, its
+  carries the fix (the README's "Rolling back"). The repository variable
+  `INDEXNOW_HOLD` set to `true` skips the IndexNow job, so a change of host is
+  announced only once it is proven.
+- The beacon is the one script the deploy adds to every page; its size, its
   fields and what the Worker accepts from it are tested in
   `site/worker/test/beacon.test.mjs`, and the staging check refuses a page
   without exactly one closing body tag.
 - Every page's Content-Security-Policy, the meta tag in
-  `site/astro.config.mjs` and the preview's header, allows the clip hosts of
-  `mediaOrigins` in `site/src/data/site-targets.json`, because the preview
-  redirects each clip to one of them (`clipBase` in the same file). A new clip
-  host is added there first.
+  `site/astro.config.mjs` and the Worker's header, allows the clip hosts of
+  `mediaOrigins` in `site/src/data/site-targets.json`, because the site
+  redirects each clip to one of them (`clipBase` in the same file), and the
+  deploy checks that every clip it stages answers there with its size. A new
+  clip host is added there first.
 
 ### 6. Filing an errata entry
 

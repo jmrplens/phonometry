@@ -1,14 +1,18 @@
 // The retired addresses as Cloudflare Bulk Redirects list items.
 //
-// GitHub Pages can only answer a retired address with the stub page Astro
+// A static host can only answer a retired address with the stub page Astro
 // writes for it, a 200 carrying a meta refresh. Search engines ask for a
 // server-side permanent redirect wherever one is possible: Google treats an
 // instant meta refresh as the fallback ("Redirects and Google Search"), and
 // Bing's Webmaster Guidelines say "Use 301 redirects for permanent URL
-// changes". docs.jmrp.io is proxied by Cloudflare, so the 301s are served
-// there, from an account-level Bulk Redirects list built from the same map the
-// stubs come from, src/data/redirects.mjs. The stubs stay in the build as the
-// answer for anyone who reaches GitHub Pages directly.
+// changes". phonometry.dev answers them from the `_redirects` file the
+// Worker's staging writes from the pairs below (site/worker/lib/redirects.mjs).
+// docs.jmrp.io, where the site was published under /phonometry before it
+// moved to the root of phonometry.dev, is proxied by Cloudflare and answers
+// from account-level Bulk Redirects lists: `--legacy` prints the one that
+// sends every address the old site retired, and every page it served, written
+// without its trailing slash, straight to the page here (CONTRIBUTING.md, 5b).
+// The stubs stay in the build as the answer for a host with neither.
 //
 // Each address is listed with and without its trailing slash, so neither form
 // takes a second hop through GitHub's own slash redirect. The query string is
@@ -28,13 +32,17 @@
 // sits under another, so they are listed one by one.
 //
 // Usage: node scripts/cloudflare-redirects.mjs > items.json
+//        node scripts/cloudflare-redirects.mjs --legacy [--dist dist] > items.json
 // The output is the JSON array the list items endpoint takes; CONTRIBUTING.md
-// says how to replace the list with it. No credential is read or needed here.
-import { readFileSync } from 'node:fs';
+// says how to load a list with it. `--legacy` reads the pages from the
+// sitemap of the build in dist/. No credential is read or needed here.
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 
 import { redirects } from '../src/data/redirects.mjs';
-import { basePath, siteUrl } from '../src/data/site.mjs';
+import { LEGACY_ORIGINS, basePath, siteUrl } from '../src/data/site.mjs';
 import { englishTwin, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
 /** Where the record of the llms shard names lives (scripts/generate_llms.py `SHARD_NAMES`). */
@@ -122,7 +130,7 @@ export function retiredAddresses(map = redirects, shards = retiredShards(), { ta
  * Every retired address as a path, with the path it now answers at.
  *
  * The same addresses as the list items below, read without the host: the
- * `_redirects` file of the phonometry.dev preview (site/worker/lib/redirects.mjs)
+ * `_redirects` file of phonometry.dev (site/worker/lib/redirects.mjs)
  * is written from these, so the two edges cannot drift apart.
  *
  * @param {Record<string, string>} [map] Old address without the base path ->
@@ -151,17 +159,28 @@ export function redirectPairs(map = redirects, shards = retiredShards()) {
  *   slash, one for its Markdown copy, and one per retired shard name.
  */
 export function cloudflareItems(map = redirects, shards = retiredShards(), sites = {}) {
-	return [...retiredAddresses(map, shards, sites)].map(([source_url, target_url]) => ({
+	return [...retiredAddresses(map, shards, sites)].map(([source, target]) => listItem(source, target));
+}
+
+/**
+ * One list item: a 301 from exactly *source* to *target*, the query kept.
+ *
+ * @param {string} source The address matched, without the scheme.
+ * @param {string} target The absolute address answered.
+ * @returns {object} The item, as the list items endpoint takes it.
+ */
+function listItem(source, target) {
+	return {
 		redirect: {
-			source_url,
-			target_url,
+			source_url: source,
+			target_url: target,
 			status_code: 301,
 			preserve_query_string: true,
 			include_subdomains: false,
 			subpath_matching: false,
 			preserve_path_suffix: false,
 		},
-	}));
+	};
 }
 
 /**
@@ -180,6 +199,83 @@ export function legacyItems(legacy, map = redirects, shards = retiredShards(), t
 	return cloudflareItems(map, shards, { target, source: legacy });
 }
 
+/**
+ * The pages a build's sitemap lists, as paths on the current site.
+ *
+ * @param {string} dist The build.
+ * @param {{siteUrl: string, basePath: string}} [target] The site the build is made for.
+ * @returns {string[]} Every page, from `/`, each ending in `/`, in sitemap order.
+ * @throws {Error} When the build has no sitemap index, it lists no page, or a
+ *   page is on another site or does not end in `/`.
+ */
+export function sitemapPages(dist, target = CURRENT) {
+	const site = `${target.siteUrl}${target.basePath}`;
+	const locs = (file) => [...readFileSync(file, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+	const index = join(dist, 'sitemap-index.xml');
+	if (!existsSync(index)) throw new Error(`${index}: no sitemap index; build the site first`);
+	const pages = [];
+	for (const shard of locs(index)) {
+		if (!shard.startsWith(`${site}/`)) throw new Error(`the sitemap shard ${shard} is not on ${site}`);
+		for (const page of locs(join(dist, shard.slice(site.length)))) {
+			if (!page.startsWith(`${site}/`)) throw new Error(`the sitemap page ${page} is not on ${site}`);
+			const path = page.slice(site.length);
+			if (!path.endsWith('/')) throw new Error(`the sitemap page ${page} does not end in /`);
+			pages.push(path);
+		}
+	}
+	if (pages.length === 0) throw new Error(`${index}: the sitemap lists no page`);
+	return pages;
+}
+
+/**
+ * The list items that send each page the old site served, written without
+ * its trailing slash, straight to the page here.
+ *
+ * The old host answered such an address with one 301 to the slash form. A
+ * list that sent only the slash form would leave it to a catch-all redirect
+ * to the same path here, and then to the static host's own redirect to the
+ * slash: two hops where there was one. The home page's address without its
+ * slash is the old base path itself.
+ *
+ * @param {string[]} pages The pages, as paths on the current site ending in `/`.
+ * @param {{siteUrl: string, basePath: string}} legacy The old site.
+ * @param {{siteUrl: string, basePath: string}} [target] The current site.
+ * @returns {object[]} One item per page, as cloudflareItems writes them.
+ */
+export function legacyPageItems(pages, legacy, target = CURRENT) {
+	const old = `${new URL(legacy.siteUrl).host}${legacy.basePath}`;
+	return pages.map((path) => listItem(`${old}${path.slice(0, -1)}`, `${target.siteUrl}${target.basePath}${path}`));
+}
+
+/**
+ * The whole list a legacy origin answers from: every address it retired, its
+ * Markdown copy and retired shard names, and every page without its slash.
+ *
+ * @param {{siteUrl: string, basePath: string}} legacy The old site.
+ * @param {string[]} pages The pages of the current build (sitemapPages).
+ * @param {Record<string, string>} [map] The redirect map.
+ * @param {Record<string, string>} [shards] Retired shard name -> current name.
+ * @param {{siteUrl: string, basePath: string}} [target] The current site.
+ * @returns {object[]} The items; a source listed twice stops the list.
+ */
+export function legacyList(legacy, pages, map = redirects, shards = retiredShards(), target = CURRENT) {
+	const items = [...legacyItems(legacy, map, shards, target), ...legacyPageItems(pages, legacy, target)];
+	const seen = new Set();
+	for (const { redirect } of items) {
+		if (seen.has(redirect.source_url)) throw new Error(`${redirect.source_url} is retired twice`);
+		seen.add(redirect.source_url);
+	}
+	return items;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-	process.stdout.write(JSON.stringify(cloudflareItems()));
+	const { values } = parseArgs({ args: process.argv.slice(2), options: { legacy: { type: 'boolean' }, dist: { type: 'string' } } });
+	if (values.legacy) {
+		if (LEGACY_ORIGINS.length === 0) throw new Error('site-targets.json names no legacy origin');
+		// The build beside this script's folder, unless another is named.
+		const pages = sitemapPages(values.dist ?? join(dirname(fileURLToPath(import.meta.url)), '..', 'dist'));
+		process.stdout.write(JSON.stringify(LEGACY_ORIGINS.flatMap((legacy) => legacyList(legacy, pages))));
+	} else {
+		process.stdout.write(JSON.stringify(cloudflareItems()));
+	}
 }

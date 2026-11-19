@@ -17,13 +17,14 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { basePath } from "../src/data/site.mjs";
 import { PREVIEW_HOST, previewArgs, servedLoopback } from "./shared/preview.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
 const RESULTS_DIR = join(siteRoot, "lighthouse-results");
 const PORT = process.env.PORT ?? "4323";
-const BASE = "/phonometry";
+const BASE = basePath;
 
 // A deliberate sample, not the whole site: the two locale homes, the hub and
 // content shapes that exist (splash, guide with math and figures, the

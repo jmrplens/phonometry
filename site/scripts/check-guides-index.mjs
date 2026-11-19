@@ -21,6 +21,8 @@ import { fileURLToPath } from 'node:url';
 // topic except the three carrying no teaching prose. Read from the navigation
 // data rather than listed here, so a new domain is covered the day it is added.
 import { domainIds as DOMAINS } from '../src/data/topics.mjs';
+// The base path the index writes its links under (src/data/site-targets.json).
+import { basePath } from '../src/data/site.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CONTENT = join(here, '..', 'src', 'content', 'docs');
@@ -113,7 +115,7 @@ for (const { lang, root, word } of LOCALES) {
 	// The route has to appear as a link destination, not merely as text: a slug
 	// in a code block or a comment would satisfy a plain substring while giving
 	// the reader nothing to select.
-	const prefix = lang === 'es' ? '/phonometry/es/' : '/phonometry/';
+	const prefix = lang === 'es' ? `${basePath}/es/` : `${basePath}/`;
 	const missing = routes.filter((route) => !index.includes(`](${prefix}${route}/)`));
 	if (missing.length > 0) {
 		fail(`${lang}: ${missing.length} guide(s) the index does not link: ${missing.join(', ')}`);

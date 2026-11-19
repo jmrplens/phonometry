@@ -19,9 +19,15 @@ import { catalogues } from '../../../generated/catalogues.mjs';
 import { loadRegistry } from '../registry.mjs';
 import { CONTENT_DIR, REPO_DIR } from '../render.mjs';
 import { render } from './helpers.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
+
+/** The site's address and base path as a regular expression matches them literally. */
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const SITE_RE = escapeRe(`${SITE_ORIGIN}${SITE_BASE}`);
+
 
 const FIGURES = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images';
-const SITE = 'https://docs.jmrp.io/phonometry';
+const SITE = `${SITE_ORIGIN}${SITE_BASE}`;
 
 /** @type {Map<string, import('../types.mjs').ComponentMarkdown>} */
 let registry;
@@ -40,7 +46,7 @@ describe('Scope and ScopeClaim', () => {
     '</ScopeClaim>',
     '',
     '<ScopeClaim status="not-covered">',
-    'The gallery is [another page](/phonometry/signals/filters/filter-gallery/).',
+    `The gallery is [another page](${SITE_BASE}/signals/filters/filter-gallery/).`,
     '',
     'A second paragraph:',
     '',
@@ -82,17 +88,17 @@ describe('Scope and ScopeClaim', () => {
 
 describe('SeeAlso', () => {
   test('is its authored heading and links', () => {
-    const { markdown, issues } = write('<SeeAlso>\n\n## See also\n\n- [A guide](/phonometry/a/): why.\n\n</SeeAlso>\n');
+    const { markdown, issues } = write(`<SeeAlso>\n\n## See also\n\n- [A guide](${SITE_BASE}/a/): why.\n\n</SeeAlso>\n`);
     assert.equal(markdown, `## See also\n\n- [A guide](${SITE}/a/): why.\n`);
     assert.deepEqual(issues, []);
-    const spanish = write('<SeeAlso>\n\n## Véase también\n\n- [Una guía](/phonometry/es/a/).\n\n</SeeAlso>\n', { lang: 'es' });
+    const spanish = write(`<SeeAlso>\n\n## Véase también\n\n- [Una guía](${SITE_BASE}/es/a/).\n\n</SeeAlso>\n`, { lang: 'es' });
     assert.deepEqual(spanish.issues, []);
   });
 
   test('a panel headed otherwise is reported at its heading, the landmark it names being left without one', () => {
     // Three Spanish guides headed theirs "Ver también": the page looked the
     // same, and the landmark pointed at an id no element carried.
-    const { markdown, issues } = write('<SeeAlso>\n\n## Ver también\n\n- [Una guía](/phonometry/es/a/).\n\n</SeeAlso>\n', { lang: 'es' });
+    const { markdown, issues } = write(`<SeeAlso>\n\n## Ver también\n\n- [Una guía](${SITE_BASE}/es/a/).\n\n</SeeAlso>\n`, { lang: 'es' });
     assert.ok(markdown.startsWith('## Ver también\n'), 'the panel is still written whole');
     assert.equal(issues.length, 1);
     assert.equal(issues[0].kind, 'writer');
@@ -100,7 +106,7 @@ describe('SeeAlso', () => {
     assert.match(issues[0].message, /opens with "## Ver también", not "## Véase también": SeeAlso\.astro names its landmark/u);
     assert.match(write('<SeeAlso>\n\n## See also\n\n- x\n\n</SeeAlso>\n', { lang: 'es' }).issues[0].message, /"## See also", not "## Véase también"/u);
     assert.match(write('<SeeAlso>\n\n### See also\n\n- x\n\n</SeeAlso>\n').issues[0].message, /"### See also", not "## See also"/u);
-    assert.match(write('<SeeAlso>\n\n- [A guide](/phonometry/a/).\n\n</SeeAlso>\n').issues[0].message, /opens with no heading, not "## See also"/u);
+    assert.match(write(`<SeeAlso>\n\n- [A guide](${SITE_BASE}/a/).\n\n</SeeAlso>\n`).issues[0].message, /opens with no heading, not "## See also"/u);
   });
 });
 
@@ -230,7 +236,7 @@ describe('Conformance', () => {
     const reported = [];
     const text = [
       '> The data is [`docs/conformance.json`](conformance.json), read with [the guide](../README.md),',
-      '> as [the site](https://docs.jmrp.io/phonometry/) prints it and [below](#levels); `[x](conformance.json)` is code.',
+      `> as [the site](${SITE_ORIGIN}${SITE_BASE}/) prints it and [below](#levels); \`[x](conformance.json)\` is code.`,
       '',
       '[data]: conformance.json',
       '[^1]: a note, conformance.json',
@@ -241,7 +247,7 @@ describe('Conformance', () => {
       written,
       [
         '> The data is [`docs/conformance.json`](https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json), read with [the guide](https://github.com/jmrplens/phonometry/blob/main/README.md),',
-        '> as [the site](https://docs.jmrp.io/phonometry/) prints it and [below](#levels); `[x](conformance.json)` is code.',
+        `> as [the site](${SITE_ORIGIN}${SITE_BASE}/) prints it and [below](#levels); \`[x](conformance.json)\` is code.`,
         '',
         '[data]: https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json',
         '[^1]: a note, conformance.json',
@@ -265,7 +271,7 @@ describe('Conformance', () => {
 
   test('the Spanish page points to the English copy', () => {
     const { markdown } = write('<Conformance lang="es" />\n', { lang: 'es' });
-    assert.match(markdown, /en texto plano en la copia en Markdown de la página en inglés: https:\/\/docs\.jmrp\.io\/phonometry\/reference\/conformance\/index\.md\.\n$/u);
+    assert.match(markdown, new RegExp(String.raw`en texto plano en la copia en Markdown de la página en inglés: ${SITE_RE}\/reference\/conformance\/index\.md\.\n$`, 'u'));
   });
 });
 
@@ -282,7 +288,7 @@ describe('ReportIndex', () => {
     const { markdown } = write('<ReportIndex lang="es" />\n', { lang: 'es' });
     assert.equal(markdown.match(/^## /gmu).length, Object.keys(reportsByAreaEs).length);
     assert.match(markdown, /^## Ruido de aeronaves \(1 ficha\)$/mu);
-    assert.match(markdown, /Se muestra en \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\//u);
+    assert.match(markdown, new RegExp(String.raw`Se muestra en \[[^\]]+\]\(${SITE_RE}\/es\/`, 'u'));
   });
 });
 
@@ -294,7 +300,7 @@ describe('Home', () => {
       '  tagline: Acoustic measurement in Python.',
       '  actions:',
       '    - text: Start here',
-      '      link: /phonometry/start/getting-started/',
+      `      link: ${SITE_BASE}/start/getting-started/`,
       '---',
       '',
       `<Home content={${name}} />`,
@@ -312,7 +318,7 @@ describe('Home', () => {
     assert.ok(markdown.includes('```bash\n   pip install "phonometry[full]"\n   ```'));
     assert.ok(markdown.includes('`.plot()`'), 'inline HTML of a data string written as Markdown');
     assert.equal(markdown.match(/^\| \[/gmu).length, en.coverage.areas.length);
-    assert.match(markdown, /For language models: \[llms\.txt\]\(https:\/\/docs\.jmrp\.io\/phonometry\/llms\.txt\)/u);
+    assert.match(markdown, new RegExp(String.raw`For language models: \[llms\.txt\]\(${SITE_RE}\/llms\.txt\)`, 'u'));
     assert.doesNotMatch(markdown, /<[a-z]+[ >]/u);
   });
 
@@ -415,13 +421,13 @@ describe('CatalogueIndex', () => {
     assert.deepEqual(issues, []);
     const items = markdown.trim().split('\n');
     assert.equal(items.length, catalogueSlugs.length);
-    assert.match(items[0], /^- \[Solids\]\(https:\/\/docs\.jmrp\.io\/phonometry\/reference\/catalogues\/solids\/\) \(\d+ rows\): \S/u);
+    assert.match(items[0], new RegExp(String.raw`^- \[Solids\]\(${SITE_RE}\/reference\/catalogues\/solids\/\) \(\d+ rows\): \S`, 'u'));
     assert.ok(items[0].includes(`(${catalogues.solids.rows.length} rows)`));
   });
 
   test('the Spanish list links the Spanish pages and counts in filas', () => {
     const { markdown } = write('<CatalogueIndex lang="es" />\n', { lang: 'es' });
-    assert.match(markdown, /^- \[Sólidos\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/reference\/catalogues\/solids\/\) \(\d+ filas\): \S/mu);
+    assert.match(markdown, new RegExp(String.raw`^- \[Sólidos\]\(${SITE_RE}\/es\/reference\/catalogues\/solids\/\) \(\d+ filas\): \S`, 'mu'));
   });
 });
 
@@ -433,7 +439,7 @@ describe('Glossary', () => {
     assert.deepEqual(issues, []);
     assert.equal(markdown.match(/^## /gmu).length, glossary.length);
     assert.equal(markdown.match(/^- \*\*/gmu).length, terms.length);
-    assert.match(markdown, /^- \*\*\$L_p\$\*\*: Sound pressure level: .* Unit: dB re 20 µPa\. Defined in: IEC 61672-1:2013\. Guide: \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/signals\/metrology\/calibration\/\)\.$/mu);
+    assert.match(markdown, new RegExp(String.raw`^- \*\*\$L_p\$\*\*: Sound pressure level: .* Unit: dB re 20 µPa\. Defined in: IEC 61672-1:2013\. Guide: \[[^\]]+\]\(${SITE_RE}\/signals\/metrology\/calibration\/\)\.$`, 'mu'));
   });
 
   test('the TeX of a definition reaches the copy as written, bars included', () => {
@@ -444,7 +450,7 @@ describe('Glossary', () => {
 
   test('the Spanish glossary uses the Spanish words and guides', () => {
     const { markdown } = write('<Glossary lang="es" />\n', { lang: 'es' });
-    assert.match(markdown, /Unidad: dB re 20 µPa\. Definida en: IEC 61672-1:2013\. Guía: \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\//u);
+    assert.match(markdown, new RegExp(String.raw`Unidad: dB re 20 µPa\. Definida en: IEC 61672-1:2013\. Guía: \[[^\]]+\]\(${SITE_RE}\/es\/`, 'u'));
   });
 
   test('a term is written with what its card shows, never with a field kept for the structured data alone', () => {
@@ -479,7 +485,7 @@ describe('ErrataFamily', () => {
     assert.deepEqual(issues, []);
     const page = readFileSync(join(CONTENT_DIR, 'reference', 'errata', 'iso-8041.md'), 'utf8');
     const headings = [...page.matchAll(/^## (.+)$/gmu)].map((match) => match[1]);
-    assert.ok(markdown.startsWith(`### [ISO 8041](https://docs.jmrp.io/phonometry/reference/errata/iso-8041/) (${headings.length} entries)\n\n`));
+    assert.ok(markdown.startsWith(`### [ISO 8041](${SITE_ORIGIN}${SITE_BASE}/reference/errata/iso-8041/) (${headings.length} entries)\n\n`));
     for (const heading of headings) assert.ok(markdown.includes(`\n- ${heading}`), heading);
     assert.ok(markdown.includes('for `Wf`'), 'code in a heading stays code');
   });
@@ -504,7 +510,7 @@ describe('ErrataFamily', () => {
 
   test('the Spanish index lists the Spanish family page', () => {
     const { markdown } = write('<ErrataFamily slug="iso-717" name="ISO 717" />\n', { lang: 'es' });
-    assert.match(markdown, /^### \[ISO 717\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/reference\/errata\/iso-717\/\) \(\d+ entradas?\)$/mu);
+    assert.match(markdown, new RegExp(String.raw`^### \[ISO 717\]\(${SITE_RE}\/es\/reference\/errata\/iso-717\/\) \(\d+ entradas?\)$`, 'mu'));
   });
 
   test('a family without a page is reported', () => {

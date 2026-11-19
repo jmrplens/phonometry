@@ -15,8 +15,13 @@ import { INDEX_URL, LICENSE, header } from '../header.mjs';
 import { isCatalogueRoute, otherLanguage, pageMarkdown, referencesMarkdown, titleOf } from '../page.mjs';
 import { titleMarkdown } from '../markdown-table.mjs';
 import { Box, registryOf } from './helpers.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
 
-const SITE = 'https://docs.jmrp.io/phonometry';
+/** The site's address as a regular expression matches it literally. */
+const SITE_RE = `${SITE_ORIGIN}${SITE_BASE}`.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+
+
+const SITE = `${SITE_ORIGIN}${SITE_BASE}`;
 
 /** Every inline mark in one text, as a page may print it. */
 const MARKED = 'a*wS = SEAT por a*wP, a*_wS, _b_ and __c__, `d`, $e$, ~~f~~, ~2 dB, [0, 1], 20 lg|H|, <g>, <https://x.y>, a\\b, n_1 and n_2';
@@ -97,7 +102,7 @@ describe('the header', () => {
     const verified = { checks: 42, designations: ['IEC 61260-1:2014'], url: `${SITE}/reference/conformance/#filters` };
     assert.match(
       header({ ...FULL, verified }),
-      /^Verified: 42 conformance checks \(IEC 61260-1:2014\) https:\/\/docs\.jmrp\.io\/phonometry\/reference\/conformance\/#filters$/mu,
+      new RegExp(String.raw`^Verified: 42 conformance checks \(IEC 61260-1:2014\) ${SITE_RE}\/reference\/conformance\/#filters$`, 'mu'),
     );
     assert.match(header({ ...FULL, lang: 'es', verified }), /^Verified: 42 comprobaciones de conformidad \(IEC 61260-1:2014\) /mu);
     assert.doesNotMatch(header(FULL), /^Verified:/mu);

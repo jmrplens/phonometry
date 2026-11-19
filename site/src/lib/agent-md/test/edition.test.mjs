@@ -31,10 +31,16 @@ import {
 import { parse } from '../processor.mjs';
 import { REPO_DIR } from '../render.mjs';
 import { render } from './helpers.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
+
+/** The site's address and base path as a regular expression matches them literally. */
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const SITE_RE = escapeRe(`${SITE_ORIGIN}${SITE_BASE}`);
+
 
 const PINNED = JSON.parse(readFileSync(new URL('./edition-routes.json', import.meta.url), 'utf8')).routes;
 const DOCS = join(REPO_DIR, 'docs');
-const SITE = 'https://docs.jmrp.io/phonometry';
+const SITE = `${SITE_ORIGIN}${SITE_BASE}`;
 
 /** A directory made for one test and removed after it. */
 function scratch(t, name) {
@@ -318,7 +324,7 @@ describe('the GitHub flavour of the renderer', () => {
 describe('a run of --docs', () => {
   const TREE = Object.freeze({
     'index.mdx': source('Phonometry', 'Landing.'),
-    'signals/index.mdx': source('Signals', 'The area. Start at [Levels](/phonometry/signals/levels/#weighting).'),
+    'signals/index.mdx': source('Signals', `The area. Start at [Levels](${SITE_BASE}/signals/levels/#weighting).`),
     'signals/levels.mdx': source('Levels', 'Sound levels.\n\n## Weighting\n\nA and C.'),
     'es/signals/levels.mdx': source('Niveles', 'Niveles.'),
   });
@@ -347,7 +353,7 @@ describe('a run of --docs', () => {
     assert.deepEqual(filesUnder(docs), ['ERRATA.md', 'README.md', 'contributing/index.md', 'signals/index.md', 'signals/levels.md']);
     const index = readFileSync(join(docs, 'signals/index.md'), 'utf8');
     assert.ok(index.startsWith(`${EDITION_MARK}site/src/content/docs/signals/index.mdx`), index);
-    assert.match(index, /\n← \[Documentation index\]\(\.\.\/README\.md\) · Published at https:\/\/docs\.jmrp\.io\/phonometry\/signals\/\n\n# Signals\n/u);
+    assert.match(index, new RegExp(String.raw`\n← \[Documentation index\]\(\.\.\/README\.md\) · Published at ${SITE_RE}\/signals\/\n\n# Signals\n`, 'u'));
     assert.match(index, /\[Levels\]\(levels\.md#weighting\)/u);
     assert.ok(isEditionFile(readFileSync(join(docs, 'signals/levels.md'), 'utf8')));
     assert.deepEqual(editionFilesUnder(docs), ['signals/index.md', 'signals/levels.md']);

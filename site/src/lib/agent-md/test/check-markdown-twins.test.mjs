@@ -32,10 +32,16 @@ import {
 import { preRelease, version } from '../../../data/repo-stats.mjs';
 import { PRE_RELEASE, UNRELEASED } from '../header.mjs';
 import { NEWER_THAN_RELEASE_ATTRIBUTE, VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../../../data/site.mjs';
+
+/** The site's address and base path as a regular expression matches them literally. */
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const BASE_RE = escapeRe(SITE_BASE);
+
 
 const CHECK = fileURLToPath(new URL('../../../../scripts/check-markdown-twins.mjs', import.meta.url));
-const ORIGIN = 'https://docs.jmrp.io';
-const BASE = '/phonometry';
+const ORIGIN = `${SITE_ORIGIN}`;
+const BASE = `${SITE_BASE}`;
 const SITE = `${ORIGIN}${BASE}`;
 const UPDATED = '2026-10-20';
 /** The moment the page's content last changed, which its footer and its copy's `Updated:` line state. */
@@ -99,7 +105,7 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
   return [
     `# ${title}`,
     '',
-    '> One page of the phonometry documentation, as Markdown. Index: https://docs.jmrp.io/phonometry/llms.txt',
+    `> One page of the phonometry documentation, as Markdown. Index: ${SITE_ORIGIN}${SITE_BASE}/llms.txt`,
     '',
     `Canonical: ${SITE}${route}`,
     `Language: ${lang}`,
@@ -319,7 +325,7 @@ describe('the copies the old cut-and-paste left short', () => {
       '',
       'A label {t(\'x\')} and {item?.name} and {rows[0]}.',
       '',
-      '![{totalChecks}](https://docs.jmrp.io/phonometry/media/x.svg)',
+      `![{totalChecks}](${SITE_ORIGIN}${SITE_BASE}/media/x.svg)`,
     ].join('\n');
     const problems = textProblems(copy('/a/', { body }));
     assert.deepEqual(
@@ -373,10 +379,10 @@ describe('the copies the old cut-and-paste left short', () => {
 
   test('a link that only resolves on the site', (t) => {
     const { found } = check(t, (files) => {
-      files['a/index.md'] = copy('/a/', { other: '/es/a/', body: 'See [the levels](/phonometry/signals/levels/levels/).' });
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', body: `See [the levels](${SITE_BASE}/signals/levels/levels/).` });
     });
     assert.deepEqual(found.length, 1);
-    assert.match(found[0], /a link that only resolves on the site, "\/phonometry\/signals\/levels\/levels\/"$/u);
+    assert.match(found[0], new RegExp(String.raw`a link that only resolves on the site, "${BASE_RE}\/signals\/levels\/levels\/"$`, 'u'));
   });
 
   test('a link relative to the file its text came from', (t) => {

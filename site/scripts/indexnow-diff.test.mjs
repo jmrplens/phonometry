@@ -40,6 +40,12 @@ import {
 	urlsToSubmit,
 } from './indexnow-diff.mjs';
 import * as indexnow from './indexnow-diff.mjs';
+import { basePath as SITE_BASE, siteUrl as SITE_ORIGIN } from '../src/data/site.mjs';
+
+/** The site's address and base path as a regular expression matches them literally. */
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const SITE_RE = escapeRe(`${SITE_ORIGIN}${SITE_BASE}`);
+
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = join(HERE, 'indexnow-diff.mjs');
@@ -150,7 +156,7 @@ test('a page the previous deploy had and this one does not is submitted as remov
 	const sent = submit(t, BASE, after);
 	assert.deepEqual(sent.removed, [url('/es/signals/levels/')]);
 	assert.deepEqual(sent.urls, [url('/es/signals/levels/')]);
-	assert.match(sent.printed, /removed https:\/\/docs\.jmrp\.io\/phonometry\/es\/signals\/levels\//);
+	assert.match(sent.printed, new RegExp(String.raw`removed ${SITE_RE}\/es\/signals\/levels\/`));
 });
 
 test('the IndexNow job is handed the manifest the URLs were worked out from, to keep once it has submitted them', (t) => {
@@ -221,7 +227,7 @@ test('a previous manifest that cannot be compared with sends every URL, and says
 	const cases = {
 		'not JSON': ['<!DOCTYPE html><title>Not found</title>', /it is not JSON/],
 		'another format': [JSON.stringify({ format: 0, pages: {} }), /it is format 0, and this script writes format 1/],
-		'another site': [JSON.stringify({ format: 1, pages: { 'https://example.org/x/': 'a'.repeat(64) } }), /outside https:\/\/docs\.jmrp\.io\/phonometry\//],
+		'another site': [JSON.stringify({ format: 1, pages: { 'https://example.org/x/': 'a'.repeat(64) } }), new RegExp(String.raw`outside ${SITE_RE}\/`)],
 		'not a digest': [JSON.stringify({ format: 1, pages: { [url('/x/')]: 'abc' } }), /is not a sha256/],
 	};
 	for (const [name, [text, reason]] of Object.entries(cases)) {
@@ -347,7 +353,7 @@ test('a new title, description or date moves a page whose copy did not change', 
 test('the page with no copy is read from its <main>, and its asset links do not move it', (t) => {
 	const landing = (text) => ({ title: 'phonometry', description: 'The library.', lastmod: '2026-10-01', main: `<h1>phonometry</h1><p>${text}</p><script>let x = 1;</script>`, copy: null });
 	const before = { ...BASE, '/404/': landing('1893 conformance checks') };
-	const assets = submit(t, before, before, { head: '<link rel="stylesheet" href="/phonometry/_astro/index.C0ffee12.css">' });
+	const assets = submit(t, before, before, { head: `<link rel="stylesheet" href="${SITE_BASE}/_astro/index.C0ffee12.css">` });
 	assert.deepEqual(assets.urls, []);
 	const text = submit(t, before, { ...BASE, '/404/': landing('1900 conformance checks') });
 	assert.deepEqual(text.urls, [url('/404/')]);
@@ -363,7 +369,7 @@ test('a page with no copy is read from its <main>, whatever copy lies beside it'
 	const data = (row, stray = null) => ({ ...guide(at), main: `<h1>Data</h1><table><tr><td>${row}</td></tr></table>`, copy: stray });
 	const before = { ...BASE, [at]: data('7850 kg/m3') };
 	assert.deepEqual(submit(t, before, { ...BASE, [at]: data('7860 kg/m3') }).urls, [url(at)]);
-	assert.deepEqual(submit(t, before, before, { head: '<link rel="stylesheet" href="/phonometry/_astro/index.C0ffee12.css">' }).urls, []);
+	assert.deepEqual(submit(t, before, before, { head: `<link rel="stylesheet" href="${SITE_BASE}/_astro/index.C0ffee12.css">` }).urls, []);
 	const stray = (text) => ({ ...BASE, [at]: data('7850 kg/m3', copy(at, text)) });
 	assert.deepEqual(submit(t, stray('One copy.'), stray('Another copy.')).urls, []);
 });
@@ -388,11 +394,11 @@ const framed = ({
 	'<div class="content-panel"><div class="sl-container"><div class="sl-markdown-content">' +
 	`<div class="sl-heading-wrapper"><h2 id="data">Data</h2><a class="sl-anchor-link" href="#data"><span aria-hidden="true"><svg><path d="M0 0"/></svg></span><span class="sr-only" data-pagefind-ignore>${anchor}</span></a></div>` +
 	`<table><tr><th>Density</th></tr><tr><td>${cell}</td></tr></table>` +
-	`<article><p>A term.</p><footer><span>${entry}</span> <a href="/phonometry/x/">A guide</a></footer></article><p>${after}</p></div>` +
+	`<article><p>A term.</p><footer><span>${entry}</span> <a href="${SITE_BASE}/x/">A guide</a></footer></article><p>${after}</p></div>` +
 	'<footer class="sl-flex"><div class="meta"><a href="https://github.com/jmrplens/phonometry/edit/main/site/x.mdx">Edit page</a>' +
 	`<p>Published <time datetime="2026-10-28">Oct 28, 2026</time>, updated <time datetime="2026-11-07">${updated}</time></p></div>` +
-	'<div class="pagination-links"><a href="/phonometry/prev/" rel="prev"><span>Previous</span> <span class="link-title">Overview</span></a>' +
-	`<a href="/phonometry/next/" rel="next"><span>Next</span> <span class="link-title">${next}</span></a></div></footer>` +
+	`<div class="pagination-links"><a href="${SITE_BASE}/prev/" rel="prev"><span>Previous</span> <span class="link-title">Overview</span></a>` +
+	`<a href="${SITE_BASE}/next/" rel="next"><span>Next</span> <span class="link-title">${next}</span></a></div></footer>` +
 	`<div class="maintainer"><span class="credit">Created and maintained by <a href="https://jmrp.io">José Manuel Requena Plens</a></span><span class="links"><a href="https://jmrp.io/projects/">${credit}</a></span></div>` +
 	'</div></div>';
 
@@ -850,7 +856,7 @@ test('a page a deploy submitted and kept no record of, and the next deploy remov
 	const sent = JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8'));
 	assert.deepEqual(sent.removed, [url('/signals/weighting/')]);
 	assert.deepEqual(sent.urls, [url('/signals/weighting/')]);
-	assert.match(ran.out, /removed https:\/\/docs\.jmrp\.io\/phonometry\/signals\/weighting\//);
+	assert.match(ran.out, new RegExp(String.raw`removed ${SITE_RE}\/signals\/weighting\/`));
 });
 
 test('the removals a handed list carries, and the pages it names, are each sent until a record is kept', () => {
@@ -955,7 +961,7 @@ test('a handed list that names no pages of the site to send is set aside with a 
 		assert.equal(ran.status, 0, `${what}: ${ran.err}`);
 		assert.match(
 			ran.out,
-			/^::warning::\[indexnow\] the list a deploy handed IndexNow, at .*, cannot be read \(its urls\.json names no pages of https:\/\/docs\.jmrp\.io\/phonometry\/ to send\): /m,
+			new RegExp(String.raw`^::warning::\[indexnow\] the list a deploy handed IndexNow, at .*, cannot be read \(its urls\.json names no pages of ${SITE_RE}\/ to send\): `, 'm'),
 			what,
 		);
 		assert.match(ran.out, /0 changed, 0 new and 0 removed of 3 pages/, what);

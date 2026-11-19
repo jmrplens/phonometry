@@ -266,7 +266,7 @@ describe('the beacon in the staged copy', () => {
 				assert.equal(staged, built, path);
 				continue;
 			}
-			const script = beaconScript(path === '404.html');
+			const script = beaconScript(path === '404.html', prefix);
 			assert.equal(staged.replace(script, ''), built, path);
 			assert.equal(staged.split(script).length, 2, path);
 		}

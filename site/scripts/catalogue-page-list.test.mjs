@@ -19,6 +19,7 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { catalogueIndex, rowCount } from '../src/lib/catalogue-page-list.mjs';
 import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { readReferences } from './shared/narrow-references.mjs';
+import { basePath as SITE_BASE } from '../src/data/site.mjs';
 
 const CONTENT = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'docs');
 
@@ -71,7 +72,7 @@ describe('the catalogue pages', () => {
       for (const page of pages) {
         assert.ok(page.label, page.slug);
         assert.ok(page.description, page.slug);
-        assert.equal(page.href, `/phonometry/${lang === 'es' ? 'es/' : ''}reference/catalogues/${page.slug}/`);
+        assert.equal(page.href, `${SITE_BASE}/${lang === 'es' ? 'es/' : ''}reference/catalogues/${page.slug}/`);
       }
     });
   }

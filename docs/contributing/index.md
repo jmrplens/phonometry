@@ -320,6 +320,7 @@ Each rule on a page has the same parts:
 | [F73](docs-and-figures.md#f73) | Publish beside every page a Markdown copy that carries what the page carries | `site/scripts/check-markdown-twins.mjs`, `CI: docs.yml:build/markdown-twins`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: docs.yml:build/agent-md-tests`, `scripts/generate_llms.py`, `tests/test_generate_llms_names.py` |
 | [F74](docs-and-figures.md#f74) | Leave a file of the GitHub edition to its generator: a check that walks `docs/` tells it by its opening comment | `tests/test_github_edition.py::test_every_script_that_walks_docs_knows_the_edition`, `tests/test_github_edition.py::test_every_module_of_the_site_that_walks_docs_knows_the_edition` |
 | [F75](docs-and-figures.md#f75) | Print on every page that reads a folder of `tests/data/audio` the attribution its README gives that folder | `tests/test_data_attribution.py::test_every_page_that_reads_a_data_folder_prints_its_attribution`, `tests/test_data_attribution.py::test_every_folder_of_measured_data_is_attributed_in_the_readme` |
+| [F76](docs-and-figures.md#f76) | Write a site link root-relative, with no base path and no old host | `site/scripts/base-path.mjs`, `CI: docs.yml:build/base-path-guard`, `site/scripts/base-path.test.mjs`, `CI: docs.yml:build/script-tests` |
 
 ### Prose, commits and pull requests
 

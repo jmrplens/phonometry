@@ -81,9 +81,9 @@ import os
 import pathlib
 import re
 import tomllib
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+import site_target
 from generate_site_reports import family_pages
 from markdown_fences import code_lines
 from markdown_spans import page_markup
@@ -120,30 +120,25 @@ PAGES = ROOT / "build" / "agent-md"
 SHARD_NAMES = ROOT / "site" / "src" / "data" / "llms-shards.json"
 #: The committed index ``make llms`` writes.
 INDEX = ROOT / "llms.txt"
-#: The hosts the site can be built for, with the base path under each: the
-#: table of ``SITE_TARGETS`` in site/src/data/site.mjs, which the site build
-#: reads from the same variable, so the llms files a build publishes link the
-#: pages of that build (tests/test_generate_llms.py holds the two equal).
-SITE_TARGETS = MappingProxyType(
-    {
-        "docs.jmrp.io": "https://docs.jmrp.io/phonometry",
-        "phonometry.dev": "https://phonometry.dev/phonometry",
-    }
-)
 
 
 def site_url(name: str | None) -> str:
-    """The site URL ``PHONOMETRY_SITE`` names: unset or empty is docs.jmrp.io.
+    """The site URL ``PHONOMETRY_SITE`` names, as the site build reads the variable.
 
-    :param name: The variable's value, or None when it is not set.
+    The targets are site/src/data/site-targets.json, which the site build
+    reads too (:mod:`site_target`), so the llms files a build publishes link
+    the pages of that build.
+
+    :param name: The variable's value, or None when it is not set; unset or
+        empty names the default target.
     :return: The absolute URL of the site, base path included, without a trailing slash.
     :raises SystemExit: For any other value, as the site build refuses it.
     """
-    key = name or "docs.jmrp.io"
-    if key not in SITE_TARGETS:
-        msg = f"PHONOMETRY_SITE={name} is not one of {', '.join(SITE_TARGETS)}"
-        raise SystemExit(msg)
-    return SITE_TARGETS[key]
+    try:
+        target = site_target.target(name)
+    except ValueError as error:
+        raise SystemExit(str(error)) from None
+    return f"{target.site_url}{target.base_path}"
 
 
 SITE_URL = site_url(os.environ.get("PHONOMETRY_SITE"))
@@ -628,9 +623,62 @@ def _overview(folder: pathlib.Path) -> pathlib.Path:
     return folder / "index.md"
 
 
-#: A link to a page of the site, in the source (``/phonometry/<route>/``) or in
-#: a copy (``https://docs.jmrp.io/phonometry/<route>/``), capturing the route.
-_SITE_LINK = re.compile(r"/phonometry/([a-z0-9-]+(?:/[a-z0-9-]+)*)/")
+#: The base path the pages write their links under, by hand: that of the
+#: build made with PHONOMETRY_SITE unset.
+SITE_BASE = site_target.base_path(None)
+
+
+def _site_link(site_url: str, base: str) -> re.Pattern[str]:
+    """A Markdown link to a page of the site, capturing the route.
+
+    In the source a link is written under the base the pages write
+    (``](/phonometry/<route>/``); in a copy it is made absolute on the site the
+    run links (``](https://docs.jmrp.io/phonometry/<route>/``). Anchored on the
+    link opener, so a route named in prose or in code is no link, and closed
+    by what may follow a page address (the link's end, a fragment, a query or
+    a title), so a file under a route (``.../a/diagram.svg``) is no link to it.
+
+    :param site_url: The site the run links, with its base path.
+    :param base: The base path the pages write their links under.
+    :return: The pattern, whose one group is the route.
+    """
+    return re.compile(
+        rf"\]\((?:{re.escape(site_url)}|{re.escape(base)})/([a-z0-9-]+(?:/[a-z0-9-]+)*)/"
+        r"""(?=[)#?\s])"""
+    )
+
+
+#: The links the pages of this run write (:func:`_site_link`).
+_SITE_LINK = _site_link(SITE_URL, SITE_BASE)
+
+
+def _require_site_links(overview: pathlib.Path, candidates: Iterable[str]) -> None:
+    """Stop the run when a topic overview links none of its area's pages.
+
+    Every topic overview links the guides and subgroups it teaches, so one
+    whose links name none of them is read by a pattern that no longer reads
+    the links the pages write (a base path it lags), and the reading order of
+    the area would fall back to sorted order without a word. Matching the
+    pattern is not enough: with the pages at the root the base is empty, and a
+    link left under an old base matches it too, naming a route no page has.
+
+    :param overview: The overview page of a topic.
+    :param candidates: The routes of its area a link may name: the guides
+        under the topic's folder, nested ones too, and its subgroup folders. A
+        guide of another area is no candidate: an overview cross-references
+        those, and a link to one says nothing of its own reading order.
+    :raises SystemExit: When none of its links names one of them.
+    """
+    if not _linked(overview.read_text(encoding="utf-8"), candidates):
+        shown = (
+            overview.relative_to(ROOT) if overview.is_relative_to(ROOT) else overview
+        )
+        msg = (
+            f"{shown} links no guide of its area by {_SITE_LINK.pattern}: the "
+            "pattern no longer reads the links the pages write, and the guides "
+            "would be listed in sorted order"
+        )
+        raise SystemExit(msg)
 
 
 def _linked(text: str, candidates: Iterable[str]) -> list[str]:
@@ -690,6 +738,8 @@ def _area_members() -> dict[str, list[str]]:
     members: dict[str, list[str]] = {}
     claimed: set[str] = set()
     for slug, _label in AREAS:
+        own = {route for route in guides if route.startswith(f"{slug}/")}
+        _require_site_links(_overview(CONTENT / slug), own | set(_subgroups(slug)))
         routes = _folder_order(slug, guides)
         for folder in _subgroups(slug):
             routes += _folder_order(folder, guides)

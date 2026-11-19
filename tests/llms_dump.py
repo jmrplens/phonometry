@@ -16,15 +16,24 @@ from __future__ import annotations
 import json
 import pathlib
 import re
+import sys
 
 import yaml
+
+_SCRIPTS = pathlib.Path(__file__).resolve().parents[1] / "scripts"
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import site_target
 
 #: The site's content collection, which a dump of the whole site is read from.
 CONTENT_ROOT = (
     pathlib.Path(__file__).resolve().parents[1] / "site" / "src" / "content" / "docs"
 )
 
-SITE_URL = "https://docs.jmrp.io/phonometry"
+#: The site a dump made with PHONOMETRY_SITE unset names, base path included,
+#: as the copies of that build are made absolute.
+SITE_URL = f"{site_target.site_url(None)}{site_target.base_path(None)}"
 
 #: The sentence under every copy's title (site/src/lib/agent-md/header.mjs).
 LEAD = (

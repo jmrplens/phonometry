@@ -44,6 +44,7 @@ sys.path.insert(0, str(_ROOT / "scripts"))
 from figures import registry  # noqa: E402
 from markdown_fences import cell_spans, page_lines  # noqa: E402
 from markdown_spans import page_markup  # noqa: E402
+from site_target import base_path  # noqa: E402
 
 _DOCS = _ROOT / "site" / "src" / "content" / "docs"
 #: How each language writes a count, capitalised when a sentence opens
@@ -91,9 +92,12 @@ _SOLVER_CLIP = re.compile(r"anim_(?:fdtd|elastic)_[a-z0-9_]+")
 #: The first cell of the header of the overview's table of the guides that
 #: carry the acoustic solver's clips, by language.
 _TABLE_HEAD = {"en": "Guide", "es": "Guía"}
+#: The base path the pages write their site links under (the build made
+#: with PHONOMETRY_SITE unset, site/src/data/site-targets.json).
+_BASE = base_path(None)
 #: The first cell of a row of that table: a link to the guide by its site
 #: address, whose language prefix is caught apart from the guide's route.
-_GUIDE_LINK = re.compile(r"\[[^\]]+\]\(/phonometry/(es/)?([a-z0-9/-]+)/\)")
+_GUIDE_LINK = re.compile(rf"\[[^\]]+\]\({re.escape(_BASE)}/(es/)?([a-z0-9/-]+)/\)")
 #: The prefix each language's pages put before the route of a guide.
 _LANGUAGE_PREFIX = {"en": "", "es": "es/"}
 
@@ -207,7 +211,7 @@ def _table_problems(text: str, language: str, wanted: set[str]) -> list[str]:
     unlinked = [cell for cell, link in found if link is None]
     links = [link.groups() for _, link in found if link is not None]
     foreign = sorted(
-        f"/phonometry/{prefix or ''}{route}/"
+        f"{_BASE}/{prefix or ''}{route}/"
         for prefix, route in links
         if (prefix or "") != _LANGUAGE_PREFIX[language]
     )
@@ -360,12 +364,12 @@ def test_a_clip_named_in_a_frontmatter_behind_its_opening_is_not_embedded(
 
 
 #: An English table of guides, with the rows each check is for.
-_TABLE = """Eighteen of the acoustic solver's nineteen are on these guides:
+_TABLE = f"""Eighteen of the acoustic solver's nineteen are on these guides:
 
 | Guide | What its animations show |
 |---|---|
-| [Room acoustics](/phonometry/buildings/rooms/room-acoustics/) | room modes |
-{row}
+| [Room acoustics]({_BASE}/buildings/rooms/room-acoustics/) | room modes |
+{{row}}
 """
 
 
@@ -388,12 +392,12 @@ _TABLE = """Eighteen of the acoustic solver's nineteen are on these guides:
             id="no link",
         ),
         pytest.param(
-            "| [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) | modos |",
+            f"| [Acústica de salas]({_BASE}/es/buildings/rooms/room-acoustics/) | modos |",
             "links guides of the other language",
             id="the other language by its site address",
         ),
         pytest.param(
-            "| [Room acoustics](/phonometry/buildings/rooms/room-acoustics/) | modes |",
+            f"| [Room acoustics]({_BASE}/buildings/rooms/room-acoustics/) | modes |",
             "more than one row",
             id="a guide twice",
         ),

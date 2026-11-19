@@ -63,6 +63,7 @@ from ast_scan import (
     what_never_runs,
 )
 from markdown_fences import code_lines, page_kind
+from site_target import base_path
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -72,8 +73,11 @@ ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "site" / "src" / "content" / "docs" / "reference" / "api"
 SIDEBAR_PATH = ROOT / "site" / "src" / "generated" / "api-sidebar.mjs"
 
-#: Site base path (GitHub Pages project site); links validator checks against it.
-SITE_BASE = "/phonometry"
+#: The base path of the site the pages are written for: the build made with
+#: PHONOMETRY_SITE unset (site/src/data/site-targets.json, which the build reads
+#: too). Every link these pages carry starts with it, and the links validator
+#: checks each against the base the build serves the pages under.
+SITE_BASE = base_path(None)
 API_BASE = f"{SITE_BASE}/reference/api"
 
 BANNER = (

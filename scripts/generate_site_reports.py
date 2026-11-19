@@ -84,6 +84,7 @@ import unicodedata
 from typing import TYPE_CHECKING, Literal
 
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
+from site_target import base_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
@@ -98,8 +99,10 @@ CONTENT = ROOT / "site" / "src" / "content" / "docs"
 #: point at files (tests, modules) that have no page on the site.
 BLOB = "https://github.com/jmrplens/phonometry/blob/main"
 
-#: The site's base path, which every internal link carries.
-SITE_BASE = "/phonometry"
+#: The site's base path, which every internal link carries: that of the build
+#: made with PHONOMETRY_SITE unset (site/src/data/site-targets.json, which the
+#: build reads too).
+SITE_BASE = base_path(None)
 
 #: Where the errata pages live, under ``site/src/content/docs`` (and under
 #: ``es/`` for the Spanish ones).

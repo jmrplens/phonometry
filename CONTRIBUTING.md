@@ -633,9 +633,11 @@ README says what is served from where, what is logged, how it is deployed and
 how it is rolled back. Five things touch the rest of the repository:
 
 - `PHONOMETRY_SITE` picks the host a build is made for, from a closed list in
-  `site/src/data/site.mjs` that `scripts/generate_llms.py` reads too. Unset, the
-  build is byte for byte the one docs.jmrp.io serves; any value outside the list
-  stops the build.
+  `site/src/data/site-targets.json`, which the build reads through
+  `site/src/data/site.mjs` and the Python generators that write site links
+  (`generate_api_docs.py`, `generate_site_reports.py`, `generate_llms.py`)
+  through `scripts/site_target.py`. Unset, the build is byte for byte the one
+  docs.jmrp.io serves; any value outside the list stops the build.
 - The docs job runs the preview's tests (`node --test 'worker/test/*.test.mjs'`
   in `site/`) and stages every build with `--check`, so a pull request that
   would break the preview fails there.
@@ -654,8 +656,9 @@ how it is rolled back. Five things touch the rest of the repository:
   without exactly one closing body tag.
 - Every page's Content-Security-Policy, the meta tag in
   `site/astro.config.mjs` and the preview's header, allows the clip hosts of
-  `mediaOrigins` in `site/src/data/site.mjs`, because the preview redirects
-  each clip to one of them. A new clip host is added there first.
+  `mediaOrigins` in `site/src/data/site-targets.json`, because the preview
+  redirects each clip to one of them (`clipBase` in the same file). A new clip
+  host is added there first.
 
 ### 6. Filing an errata entry
 

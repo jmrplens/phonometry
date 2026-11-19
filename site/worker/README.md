@@ -52,9 +52,10 @@ rule.
 A browser holds the address a clip is redirected to against the page's
 Content-Security-Policy, and every page carries two: the meta tag the build
 writes (`site/astro.config.mjs`) and the header from `_headers`. Both list the
-clip hosts of `mediaOrigins` (`site/src/data/site.mjs`) in `media-src`. On
-docs.jmrp.io that entry is the page's own origin, so nothing changes there. A
-new clip host (the R2 bucket) goes into `mediaOrigins` first: `stage.mjs`
+clip hosts of `mediaOrigins` (`site/src/data/site-targets.json`) in
+`media-src`. On docs.jmrp.io that entry is the page's own origin, so nothing
+changes there. A new clip host (the R2 bucket) goes into `mediaOrigins` first,
+and `clipBase` beside it names where the rule sends a clip: `stage.mjs`
 refuses a build whose pages do not allow every listed host, and
 `apply-rules.mjs` refuses a clip host that is not listed. curl cannot see this
 kind of failure, so `scripts/check-clip.mjs` plays clips in Chrome and fails on
@@ -167,10 +168,10 @@ check), so the documentation build never downloads either.
 ## Building for phonometry.dev
 
 `PHONOMETRY_SITE` picks the host a build is made for, from a closed list in
-`site/src/data/site.mjs`: unset (or `docs.jmrp.io`) is the build docs.jmrp.io
-serves, byte for byte; `phonometry.dev` names phonometry.dev in every canonical
-URL, `og:url`, structured data `@id`, sitemap, robots.txt, Markdown copy and llms
-file; anything else stops the build. The base path stays `/phonometry` in both
+`site/src/data/site-targets.json`: unset (or `docs.jmrp.io`) is the build
+docs.jmrp.io serves, byte for byte; `phonometry.dev` names phonometry.dev in
+every canonical URL, `og:url`, structured data `@id`, sitemap, robots.txt,
+Markdown copy and llms file; anything else stops the build. The base path stays `/phonometry` in both
 for now, so every link the pages write is the same; moving to the root is a
 later change.
 

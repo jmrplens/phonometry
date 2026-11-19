@@ -270,7 +270,7 @@ The root-sum-square of the eight printed values is 0.0437 dB, and the
 expanded uncertainty 0.087 dB. D.3 prints **0.040 dB** and **0.08 dB**,
 which are not the combination of its own components: 0.040 dB is what the
 sum gives with one of the two 0.017 dB rows left out. The case is in the
-[errata register](/phonometry/reference/errata/). D.3 also notes that a
+[errata register](/reference/errata/). D.3 also notes that a
 strict calculation would convert each component to linear form before
 combining, with essentially the same result, and prints no value for it;
 `linear_combined_uncertainty_db` does it and gives 0.043 614 dB, 0.000 055 dB
@@ -382,7 +382,7 @@ the model gives every row to the thousandth printed. As printed, the paper's
 formulas with its own inputs do not give its own table: the library reads
 the radial sensitivity of its Formula (4) less 1 and the annulus of its
 Formula (2) from the WS3's overall radius, the two readings that do (an
-[erratum](/phonometry/reference/errata/)). A.2 sets the expanded uncertainty
+[erratum](/reference/errata/)). A.2 sets the expanded uncertainty
 of Table A.1 at 10 % of each correction, "which is approximately the change
 observed by doubling the distance between the microphones";
 `separation_change_db` is that change by the model, of the order A.2 states
@@ -594,7 +594,7 @@ sizes the step by the room: 120 Hz is enough in a small anechoic room
 "because the primary reflections all occur before 8 ms", about 30 Hz in a
 large one. (B.2.1 says the increment "will determine the time domain
 resolution"; it is the length it sets, as B.2.2 says, and the
-[errata register](/phonometry/reference/errata/) records the sentence.)
+[errata register](/reference/errata/) records the sentence.)
 `ir_ws2f.plot()` draws the whole record:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response.svg" alt="The WS2F's impulse response from the stepped sine of 0 Hz to 100 kHz in 50 Hz steps, normalised to its peak, over the whole 20 ms record: the direct sound at 2.89 ms with a short ringing, the rig's reflection at 4.28 ms at about a tenth of the peak, and nothing after them up to 20 ms. The title gives the 50 Hz step and the 20.00 ms length" width="88%" />
@@ -670,7 +670,7 @@ $$
 whose first zero, $1/(2b)$, "must be approximately an order of magnitude
 higher than the upper limit of the frequency range of interest". The formula
 and its first zero are those of a pulse lasting $2b$, although the text calls
-$b$ the duration (it is in the [errata register](/phonometry/reference/errata/));
+$b$ the duration (it is in the [errata register](/reference/errata/));
 `metrology.rectangular_pulse` takes the whole duration $T = 2b$:
 
 ```python
@@ -781,7 +781,7 @@ takes the pressure of a common source behind the same series impedance, and
 $V_x$ is the equivalent volume of that impedance, which the circuit of [2]
 gives (below). `metrology.ReciprocityMicrophone`,
 the microphone of
-[the reciprocity calibration](/phonometry/signals/metrology/reciprocity-calibration/),
+[the reciprocity calibration](/signals/metrology/reciprocity-calibration/),
 holds the lumped parameters of IEC 61094-2 E.4, the low-frequency volume, the
 resonance frequency and the loss factor, and its
 `complex_equivalent_volume_m3` gives $V_\mathrm{e}$ from them. Its ratio to
@@ -897,7 +897,7 @@ curves for $P_1/P_2$, the LS2P re the WS2P, so the other way up, with its
 report reproduces them. In the published scan its impedance of the LS2P
 shows no imaginary unit on the mass term, where blank space stands; the
 second microphone's has it, and the graph needs it (an
-[erratum](/phonometry/reference/errata/)).
+[erratum](/reference/errata/)).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap.svg" alt="The pressure ratio of the high sensitivity WS2P re the LS2P of Jarvis (1996) Appendix B in a coupler 2 mm long and 12.7 mm across, from 100 Hz to 20 kHz. Left, its level: nothing up to 1 kHz, rising to +0.0064 dB at 7 kHz, crossing 0 dB near 10 kHz and falling to -0.025 dB at 20 kHz, with its standard uncertainty dashed. Right, its phase: nothing up to 2 kHz, falling to -0.158 degrees at 12.5 kHz and back to -0.09 degrees at 20 kHz" width="100%" />
 
@@ -936,7 +936,7 @@ cover a full frequency range with low uncertainty" (6.7).
 coupler beside another calibration of the same microphone, a comparison made
 elsewhere or, for a laboratory standard microphone, the
 `ReciprocityCalibration` of [the reciprocity
-calibration](/phonometry/signals/metrology/reciprocity-calibration/) with the
+calibration](/signals/metrology/reciprocity-calibration/) with the
 index of that microphone, and compares them at the frequencies they share.
 The clause prints no criterion. The library reads "validated" as the two
 agreeing within the expanded uncertainty of their difference, which for two
@@ -1217,10 +1217,10 @@ and random noise of B.3 to B.5 are `room.impulse_response`,
 `room.mls_impulse_response` and `electroacoustics.transfer_function`, and the
 synchronous averaging of B.6.2 is `signals.time_synchronous_average`, on
 their own pages; the qualification of the free field by ISO 26101 is on
-[its own page](/phonometry/devices/emission/free-field-qualification/). The
+[its own page](/devices/emission/free-field-qualification/). The
 values of IEC/TS 61094-7, which are inputs here; the reciprocity calibration
 of the reference (IEC 61094-2, -3) is the subject of
-[Microphone calibration by reciprocity](/phonometry/signals/metrology/reciprocity-calibration/). The second special case of Table
+[Microphone calibration by reciprocity](/signals/metrology/reciprocity-calibration/). The second special case of Table
 D.1, a microphone calibrated as a system with its preamplifier (0.002 dB,
 and for the polarising voltage and the capacitance "frequency dependent" and
 under 0.02 dB above 200 Hz), is not held as data; a budget that needs it
@@ -1235,21 +1235,21 @@ Formula (7)), is not taken by `verify_jig_or_coupler`.
 
 ## See also
 
-- [Microphone calibration by reciprocity](/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone calibration by reciprocity](/signals/metrology/reciprocity-calibration/):
   IEC 61094-2 and IEC 61094-3, which calibrate the laboratory standard
   microphone a comparison takes as its reference.
-- [Free-field corrections of a sound level meter](/phonometry/signals/metrology/free-field-corrections/):
+- [Free-field corrections of a sound level meter](/signals/metrology/free-field-corrections/):
   IEC 62585, which compares a meter with an LS2P reference in the same way.
-- [Random-incidence and diffuse-field response](/phonometry/signals/metrology/random-incidence/):
+- [Random-incidence and diffuse-field response](/signals/metrology/random-incidence/):
   IEC 61183, whose diffuse-field method is a comparison through the same
   model.
-- [Measurement uncertainty](/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty](/signals/metrology/gum-uncertainty/):
   the GUM law of propagation the budgets are combined by.
-- [Humid air](/phonometry/fluids/humid-air/): the IEC 61094-2 Annex F air
+- [Humid air](/fluids/humid-air/): the IEC 61094-2 Annex F air
   whose speed of sound sets the free-field region.
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): the
+- [Calibration and dBFS](/signals/metrology/calibration/): the
   calibrator tone that turns a recording into pascals once a microphone's
   sensitivity is known.
-- API reference: [`metrology.comparison_calibration`](/phonometry/reference/api/metrology/comparison-calibration/).
+- API reference: [`metrology.comparison_calibration`](/reference/api/metrology/comparison-calibration/).
 
 </SeeAlso>

@@ -105,7 +105,7 @@ and the reverberation time (Formula 5).
 | `frequencies` | Octave-band centre frequencies, in hertz. The built-in `air_condition` profiles require the standard's seven octave bands, 125 Hz to 8 kHz. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The [`ReverberationResult`](/phonometry/reference/api/rooms/enclosed-space-absorption/#reverberationresult).
+**Returns:** The [`ReverberationResult`](/reference/api/rooms/enclosed-space-absorption/#reverberationresult).
 
 **Raises**
 
@@ -131,8 +131,8 @@ Total equivalent sound absorption area (Formula 1).
 | Name | Description |
 | :--- | :--- |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs, one per surface (or object array treated as a surface). The absorption coefficient may be a scalar or a per-band array. |
-| `objects` | Equivalent absorption areas of the objects `Aobj`, m2 (see [`hard_object_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/#hard_object_absorption)): a single value, a 1-D sequence of one value per object, or a 2-D array `(n_objects, n_bands)` for per-band values; summed over the objects. |
-| `air_area` | Air absorption area `Aair`, m2 (see [`air_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#air_absorption_area)); scalar or per-band. |
+| `objects` | Equivalent absorption areas of the objects `Aobj`, m2 (see [`hard_object_absorption`](/reference/api/rooms/enclosed-space-absorption/#hard_object_absorption)): a single value, a 1-D sequence of one value per object, or a 2-D array `(n_objects, n_bands)` for per-band values; summed over the objects. |
+| `air_area` | Air absorption area `Aair`, m2 (see [`air_absorption_area`](/reference/api/rooms/enclosed-space-absorption/#air_absorption_area)); scalar or per-band. |
 
 **Returns:** The total equivalent absorption area `A`, m2; a `float` when the coefficients, an object's entry and `air_area` are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
@@ -328,7 +328,7 @@ quantity.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for parity with the other fiches; the band table already shows both A and T, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

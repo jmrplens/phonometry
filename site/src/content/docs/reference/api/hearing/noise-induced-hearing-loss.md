@@ -59,7 +59,7 @@ and noise. The formula "is applicable only to corresponding percentage
 values of H', H and N", so both components must be taken at the same
 population percentage.
 
-Exposed separately from [`htlan`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#htlan) because clause 6.2 lets the user
+Exposed separately from [`htlan`](/reference/api/hearing/noise-induced-hearing-loss/#htlan) because clause 6.2 lets the user
 supply their own HTLA database: 6.2.3 recommends a database B collected on
 a control population of the country under consideration, and 6.2.4 makes
 the choice between databases A and B depend on the question being answered.
@@ -114,7 +114,7 @@ components.
 | `fractile` | Population fractile in (0, 1) applied to both components. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz to 6000 Hz). |
 
-**Returns:** An [`HTLANResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#htlanresult) with `htla`, `nipts`, `threshold` and `.plot()`.
+**Returns:** An [`HTLANResult`](/reference/api/hearing/noise-induced-hearing-loss/#htlanresult) with `htla`, `nipts`, `threshold` and `.plot()`.
 
 **Raises**
 
@@ -123,9 +123,9 @@ components.
 | ValueError | for an age below 18, an unknown sex, a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
 | TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
-The noise component inherits the validated-domain checks of [`nipts`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#nipts),
+The noise component inherits the validated-domain checks of [`nipts`](/reference/api/hearing/noise-induced-hearing-loss/#nipts),
 so exposure conditions outside the standard's stated ranges raise a
-[`NoiseInducedHearingLossWarning`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) and the `.report()` fiche prints
+[`NoiseInducedHearingLossWarning`](/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) and the `.report()` fiche prints
 the extrapolation caveat.
 
 ## HTLANResult
@@ -216,7 +216,7 @@ individual.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative HTLAN in dB that adds a PASS/FAIL verdict (a lower threshold is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative HTLAN in dB that adds a PASS/FAIL verdict (a lower threshold is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the table adds the compression term `H*N/120`. |
 | `language` | `"en"` (default) or `"es"`. |
@@ -260,7 +260,7 @@ zero.
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. The reliable range of the standard is 0.05-0.95. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz to 6000 Hz). |
 
-**Returns:** A [`NIPTSResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#niptsresult) with the distribution and `.plot()`.
+**Returns:** A [`NIPTSResult`](/reference/api/hearing/noise-induced-hearing-loss/#niptsresult) with the distribution and `.plot()`.
 
 **Raises**
 
@@ -271,7 +271,7 @@ zero.
 
 Outside the standard's validated domain (durations of 1 to 40 years,
 fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still
-runs but a [`NoiseInducedHearingLossWarning`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) marks the result as an
+runs but a [`NoiseInducedHearingLossWarning`](/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) marks the result as an
 extrapolation, and the `.report()` fiche prints the matching caveat.
 
 ## NIPTSResult
@@ -359,7 +359,7 @@ clinical diagnosis of any individual.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative NIPTS in dB that adds a PASS/FAIL verdict (a lower shift is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative NIPTS in dB that adds a PASS/FAIL verdict (a lower shift is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the table adds the upper/lower spread columns (`du`/`dl`). |
 | `language` | `"en"` (default) or `"es"`. |

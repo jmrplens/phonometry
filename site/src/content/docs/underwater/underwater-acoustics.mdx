@@ -117,7 +117,7 @@ for gases and the 1 µPa of Table 2 for liquids, and note b of Table 2 prints
 the step between them as about 26.0 dB. The library publishes them, with the
 rest of the reference values of that standard, as
 `metrology.REFERENCE_VALUES`; the
-[levels guide](/phonometry/signals/levels/levels/#which-reference-value-is-each-level-counted-from) lists them all.
+[levels guide](/signals/levels/levels/#which-reference-value-is-each-level-counted-from) lists them all.
 
 ## 2. Ship radiated noise and source level (ISO 17208-1/-2)
 
@@ -340,7 +340,7 @@ largest for the long drives where the cumulative criterion binds. So: use
 keep `cumulative_sel_identical` for planning estimates, and when it is used,
 state which strike the single-strike value came from. Both forms also assume the
 receiver stays where it is, an assumption the
-[marine-mammal exposure](/phonometry/underwater/marine-mammal-exposure/) guide
+[marine-mammal exposure](/underwater/marine-mammal-exposure/) guide
 returns to.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving.svg" alt="A percussive pile-driving strike pressure waveform with its peak marked, and below it the cumulative sound exposure level growing as SEL_ss plus ten times the logarithm of the number of strikes" width="82%" />
@@ -475,7 +475,7 @@ stated range, which is why `pile_strike_metrics` reports them together and
 Formulae 8-9. Turning those numbers into an assessment (weighting the spectrum
 for a hearing group, accumulating it over the strikes and comparing it against
 the published onset criteria) is
-[Marine-mammal noise exposure](/phonometry/underwater/marine-mammal-exposure/).
+[Marine-mammal noise exposure](/underwater/marine-mammal-exposure/).
 
 ## What this guide covers
 
@@ -517,14 +517,14 @@ phonometry.
 
 ## See also
 
-- [Marine-mammal noise exposure](/phonometry/underwater/marine-mammal-exposure/):
+- [Marine-mammal noise exposure](/underwater/marine-mammal-exposure/):
   the assessment the criteria named in section 3 are applied through: auditory
   weighting, accumulation over the strikes and the margin against the published
   onset criteria.
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   the propagation loss that carries these source levels to a receiver, and the
   sonar equation they feed.
-- API reference: [`underwater.acoustics`](/phonometry/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](/phonometry/reference/api/underwater/ship-radiated-noise/).
-- General underwater propagation modelling (ray, normal mode, parabolic equation) is covered in [Underwater propagation solvers](/phonometry/underwater/underwater-solvers/).
+- API reference: [`underwater.acoustics`](/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](/reference/api/underwater/ship-radiated-noise/).
+- General underwater propagation modelling (ray, normal mode, parabolic equation) is covered in [Underwater propagation solvers](/underwater/underwater-solvers/).
 
 </SeeAlso>

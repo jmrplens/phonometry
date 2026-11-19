@@ -19,10 +19,10 @@ A lining improves or *degrades* the sound insulation depending on where its
 resonance falls, so Annex D predicts the weighted improvement from `fo`
 alone: Formula (D.1) for a layer bonded directly to the wall, Formula (D.2) for
 one on studs over a filled cavity, then Table D.1 for interior linings
-([`weighted_lining_improvement`](/phonometry/reference/api/building/linings/#weighted_lining_improvement)), Formulae (D.3) to (D.6) for exterior
-thermal systems and (D.7) for stud systems ([`lining_improvement`](/phonometry/reference/api/building/linings/#lining_improvement)), and
+([`weighted_lining_improvement`](/reference/api/building/linings/#weighted_lining_improvement)), Formulae (D.3) to (D.6) for exterior
+thermal systems and (D.7) for stud systems ([`lining_improvement`](/reference/api/building/linings/#lining_improvement)), and
 Formula (D.8) to carry a laboratory rating to the field
-([`lining_improvement_in_situ`](/phonometry/reference/api/building/linings/#lining_improvement_in_situ)).
+([`lining_improvement_in_situ`](/reference/api/building/linings/#lining_improvement_in_situ)).
 
 Citations are to ISO 12354-1:2017. One printed defect is relevant here and is
 recorded in `docs/ERRATA.md`: the overlap of the last two rows of Table D.1
@@ -84,12 +84,12 @@ than folded into the fit.
 
 | Name | Description |
 | :--- | :--- |
-| `resonance_frequency` | Resonance frequency `fo`, in Hz ([`lining_resonance_frequency`](/phonometry/reference/api/building/linings/#lining_resonance_frequency)). |
+| `resonance_frequency` | Resonance frequency `fo`, in Hz ([`lining_resonance_frequency`](/reference/api/building/linings/#lining_resonance_frequency)). |
 | `system` | `"mineral_wool"`, `"foam"` or `"studs"`. |
 | `anchors` | Apply the Formula (D.5) anchor/batten correction. |
 | `glued_area` | Glued area `%So` as a percentage of the element area, greater than 0 and at most 100, or `None` to keep the 40 % reference. Formula (D.6) divides by the glued area, so a wholly unglued system is not a case of it: use `anchors` for a mechanically fixed lining. It corrects the glued exterior systems only, so it is rejected for `system="studs"`. |
 
-**Returns:** A [`LiningImprovementResult`](/phonometry/reference/api/building/linings/#liningimprovementresult).
+**Returns:** A [`LiningImprovementResult`](/reference/api/building/linings/#liningimprovementresult).
 
 **Raises**
 
@@ -129,7 +129,7 @@ The same formula applies to `ΔRw`, `ΔRA` and `ΔRA,tr`.
 
 | Name | Description |
 | :--- | :--- |
-| `laboratory_improvement` | Laboratory rating `ΔRlab` measured to ISO 10140-1:2021 Annex G on the heavy basic element and rated to ISO 717-1:2020 Annex D ([`laboratory_lining_improvement`](/phonometry/reference/api/building/laboratory-improvement/#laboratory_lining_improvement)), in dB. |
+| `laboratory_improvement` | Laboratory rating `ΔRlab` measured to ISO 10140-1:2021 Annex G on the heavy basic element and rated to ISO 717-1:2020 Annex D ([`laboratory_lining_improvement`](/reference/api/building/laboratory-improvement/#laboratory_lining_improvement)), in dB. |
 | `resonance_frequency` | Resonance frequency `fo` of the system, in Hz. |
 | `base_rating_in_situ` | Weighted sound reduction index `Rw,situ` of the basic element in the field situation, in dB. |
 
@@ -271,7 +271,7 @@ takes the more conservative −10 dB there (see `docs/ERRATA.md`).
 
 | Name | Description |
 | :--- | :--- |
-| `resonance_frequency` | Resonance frequency `fo` of the lining, in Hz ([`lining_resonance_frequency`](/phonometry/reference/api/building/linings/#lining_resonance_frequency)); must fall in the 30 Hz to 5 000 Hz range Table D.1 covers. |
+| `resonance_frequency` | Resonance frequency `fo` of the lining, in Hz ([`lining_resonance_frequency`](/reference/api/building/linings/#lining_resonance_frequency)); must fall in the 30 Hz to 5 000 Hz range Table D.1 covers. |
 | `base_rating` | Weighted sound reduction index `Rw` of the bare wall or floor, in dB. |
 
 **Returns:** The weighted improvement `ΔRw`, in dB.

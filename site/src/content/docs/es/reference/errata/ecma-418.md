@@ -9,7 +9,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 11 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre ECMA-418-1:2024 y ECMA-418-2:2025, en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 11 entradas del [registro de erratas](/es/reference/errata/) sobre ECMA-418-1:2024 y ECMA-418-2:2025, en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## ECMA-418-1:2024 (3.ª edición), NOTA 2 del apartado 4.1.1 (límite superior del rango de tonos discretos)
 

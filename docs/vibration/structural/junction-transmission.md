@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/junction-transmission.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/junction-transmission/
 
 # Plate junctions: wave approach and experimental SEA
 
@@ -589,7 +589,7 @@ assumption the inversion rests on holds at all.
   the source power that these junction transmissions carry through a building.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](mechanical-mobility.md):
   the plate mobilities behind the wave parameters.
-- API reference: [`vibration`: junction transmission](https://docs.jmrp.io/phonometry/reference/api/vibration/junction-transmission/).
+- API reference: [`vibration`: junction transmission](https://phonometry.dev/reference/api/vibration/junction-transmission/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the mobility picture behind a junction, and the radiation efficiency each element carries.
 
 ## References

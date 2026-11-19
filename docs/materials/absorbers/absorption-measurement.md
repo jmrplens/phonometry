@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/absorption-measurement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/absorption-measurement/
 
 # Sound Absorption Measurement and Rating
 
@@ -902,9 +902,9 @@ EN 12354-6 budget systematically underpredicts the installed absorption.
   the EN 12354-6 absorption budget these coefficients feed.
 - [Field Insulation Measurement (ISO 16283)](../../buildings/insulation/insulation-field.md):
   the sound-insulation companion uncertainty standard, ISO 12999-1.
-- API reference: [`materials.absorbers.sound_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](https://docs.jmrp.io/phonometry/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/materials/uncertainty/).
+- API reference: [`materials.absorbers.sound_absorption`](https://phonometry.dev/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](https://phonometry.dev/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](https://phonometry.dev/reference/api/materials/uncertainty/).
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the ISO 354 decay difference, the ISO 11654 rating and where the practical coefficients come from.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 

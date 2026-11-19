@@ -55,10 +55,10 @@ $f_\mathrm{m} = 1000 \cdot 10^{k/10}$, `k` integer. Pass
 `exact_midband=True` to snap the requested frequencies onto that grid and
 reproduce Table 1 exactly.
 
-This module closes the loop with [`sound_absorption`](/phonometry/reference/api/materials/sound-absorption/) (ISO 354),
+This module closes the loop with [`sound_absorption`](/reference/api/materials/sound-absorption/) (ISO 354),
 whose air power-attenuation coefficient `m` (1/m) is defined only through
 the ISO 9613-1 `alpha` via $m = \alpha / (10 \log_{10} e)$.
-[`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m) returns that `m` directly.
+[`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m) returns that `m` directly.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -106,9 +106,9 @@ vibrational absorption terms (Eq. (5)). Fully vectorized over
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
-| `temperature_c` | Ambient air temperature, in degrees Celsius (default 20 degC, i.e. the reference `T0`). A value outside the -20..+50 degC tabulated range emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); a value at or below absolute zero raises `ValueError`. |
-| `relative_humidity_percent` | Relative humidity, in percent, with respect to saturation over liquid water (default 50 %). Outside 10..100 % emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); outside [0, 100] % raises `ValueError`. |
-| `static_pressure_kpa` | Ambient atmospheric pressure `pa`, in kilopascals (default 101.325 kPa = one standard atmosphere = `pr`). Above 200 kPa emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); non-positive raises `ValueError`. |
+| `temperature_c` | Ambient air temperature, in degrees Celsius (default 20 degC, i.e. the reference `T0`). A value outside the -20..+50 degC tabulated range emits an [`AtmosphericAbsorptionWarning`](/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); a value at or below absolute zero raises `ValueError`. |
+| `relative_humidity_percent` | Relative humidity, in percent, with respect to saturation over liquid water (default 50 %). Outside 10..100 % emits an [`AtmosphericAbsorptionWarning`](/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); outside [0, 100] % raises `ValueError`. |
+| `static_pressure_kpa` | Ambient atmospheric pressure `pa`, in kilopascals (default 101.325 kPa = one standard atmosphere = `pr`). Above 200 kPa emits an [`AtmosphericAbsorptionWarning`](/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); non-positive raises `ValueError`. |
 | `exact_midband` | When `True`, each requested frequency is snapped to the nearest exact one-third-octave midband $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation, reproducing the frequencies used for Table 1 (Note 5). Default `False` (use `frequencies` verbatim). |
 
 **Returns:** Attenuation coefficient `alpha`, in dB/m, with the shape of `frequencies`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -122,9 +122,9 @@ vibrational absorption terms (Eq. (5)). Fully vectorized over
 :::note
 ISO 354:2003 defers its air power-attenuation coefficient `m` (1/m)
 entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use
-[`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m) to obtain that `m` for
-[`absorption_area`](/phonometry/reference/api/materials/sound-absorption/#absorption_area) /
-[`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient).
+[`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m) to obtain that `m` for
+[`absorption_area`](/reference/api/materials/sound-absorption/#absorption_area) /
+[`absorption_coefficient`](/reference/api/materials/sound-absorption/#absorption_coefficient).
 :::
 
 ## air_power_attenuation_per_m
@@ -160,13 +160,13 @@ air_power_attenuation_per_m(
 
 ISO 354 air power-attenuation coefficient `m` (1/m) from conditions.
 
-Convenience composition of [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation) (ISO 9613-1 `alpha` in
+Convenience composition of [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation) (ISO 9613-1 `alpha` in
 dB/m) with the ISO 354:2003 (8.1.2.1) conversion
 $m = \alpha / (10 \log_{10} e)$
-(via [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)). It lets an
+(via [`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)). It lets an
 ISO 354 caller feed real atmospheric conditions into
-[`absorption_area`](/phonometry/reference/api/materials/sound-absorption/#absorption_area) /
-[`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient) instead of
+[`absorption_area`](/reference/api/materials/sound-absorption/#absorption_area) /
+[`absorption_coefficient`](/reference/api/materials/sound-absorption/#absorption_coefficient) instead of
 hand-entering `m`.
 
 **Parameters**
@@ -177,7 +177,7 @@ hand-entering `m`.
 | `temperature_c` | Ambient air temperature, in degrees Celsius (default 20). |
 | `relative_humidity_percent` | Relative humidity, in percent (default 50). |
 | `static_pressure_kpa` | Ambient atmospheric pressure, in kilopascals (default 101.325). |
-| `exact_midband` | Snap frequencies to exact midbands; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). |
+| `exact_midband` | Snap frequencies to exact midbands; see [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation). |
 
 **Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `frequencies`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -197,9 +197,9 @@ atmospheric_attenuation(
 
 Build a plottable ISO 9613-1 atmospheric-attenuation curve.
 
-Evaluates [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation) at `frequencies` for the given
+Evaluates [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation) at `frequencies` for the given
 atmospheric conditions and bundles the result into an
-[`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) that exposes `.plot()`. The maths is
+[`AtmosphericAttenuation`](/reference/api/environment/air-absorption/#atmosphericattenuation) that exposes `.plot()`. The maths is
 unchanged; this is a thin, plottable wrapper around the existing function
 (the same warnings and the same `ValueError` cases apply).
 
@@ -211,16 +211,16 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | `temperature_c` | Ambient air temperature, in degrees Celsius (default 20). |
 | `relative_humidity_percent` | Relative humidity, in percent (default 50). |
 | `static_pressure_kpa` | Ambient atmospheric pressure, in kilopascals (default 101.325 kPa, one standard atmosphere). |
-| `exact_midband` | Snap the frequencies to the exact one-third-octave midbands $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
-| `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation $A = \alpha d$ over that distance (ISO 9613-2 Eq. (8)). Must be finite and non-negative. |
+| `exact_midband` | Snap the frequencies to the exact one-third-octave midbands $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation; see [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
+| `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation $A = \alpha d$ over that distance (ISO 9613-2 Eq. (8)). Must be finite and non-negative. |
 
-**Returns:** A frozen [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation).
+**Returns:** A frozen [`AtmosphericAttenuation`](/reference/api/environment/air-absorption/#atmosphericattenuation).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `distance` is negative or non-finite (NaN/inf); the check lives on [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) so it also guards direct construction. |
+| ValueError | If `distance` is negative or non-finite (NaN/inf); the check lives on [`AtmosphericAttenuation`](/reference/api/environment/air-absorption/#atmosphericattenuation) so it also guards direct construction. |
 | TypeError | if `frequencies` holds a text or a value that is not a real number. `distance` is refused the same way when it is not one real number. |
 
 ## AtmosphericAbsorptionWarning
@@ -245,7 +245,7 @@ A pure-tone atmospheric attenuation curve (ISO 9613-1:1993).
 Bundles the ISO 9613-1 attenuation coefficient `alpha` (Eq. (5)) over a
 frequency grid with the atmospheric conditions it was evaluated for, so the
 classic `alpha` versus frequency curve can be drawn with `plot`.
-Build it with [`atmospheric_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmospheric_attenuation); the frozen instance is a thin,
+Build it with [`atmospheric_attenuation`](/reference/api/environment/air-absorption/#atmospheric_attenuation); the frozen instance is a thin,
 plottable wrapper and re-runs none of the maths.
 
 **Attributes**

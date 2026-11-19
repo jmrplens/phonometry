@@ -232,7 +232,7 @@ and the method needs no absolute calibration (E.1, E.2), so that difference
 carries the two channels' absolute sensitivities and is there at every
 frequency; only when both channels read sound pressure level does it shrink to
 twice the difference of the two pressure responses. The defect is in the
-[errata register](/phonometry/reference/errata/).
+[errata register](/reference/errata/).
 
 **Annex F, an electrostatic actuator.** An actuator is not an absolute source,
 so its correction is **normalised** to the calibration check frequency
@@ -312,7 +312,7 @@ Student factor for 29.98 is 2.042; 2.11 is the one for about 17. The expanded
 uncertainty the page's numbers give is $2.042 \times 0.059\,03 = 0.121$
 dB, printed 0.12 either way, but the table's guard digit, 0.12(4), is the
 misprinted $k$ at work; the case is in the [errata
-register](/phonometry/reference/errata/). Below 97 kPa,
+register](/reference/errata/). Below 97 kPa,
 `static_pressure_kpa=` adds the component of clause 6 (0.15 dB up to 3 kHz,
 0.25 dB above, $k = 2$), and `additional_components=` takes any component a
 laboratory's own method needs, such as the drive of an actuator.
@@ -496,7 +496,7 @@ acceptance limits of IEC 61672-1, which clause 15 p) asks for separately, and
 the periodic test of IEC 61672-3 that uses the corrections, are not
 implemented on this page; the verdict on that periodic test is in [Periodic
 tests of a sound level
-meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/).
+meter](/signals/metrology/sound-level-meter-periodic-tests/).
 </ScopeClaim>
 </Scope>
 
@@ -504,18 +504,18 @@ meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/).
 
 ## See also
 
-- [Random-incidence and diffuse-field response](/phonometry/signals/metrology/random-incidence/):
+- [Random-incidence and diffuse-field response](/signals/metrology/random-incidence/):
   IEC 61183, the response of the meter to sound from every direction, which
   this standard leaves to it for a random-incidence microphone.
-- [Measurement uncertainty](/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty](/signals/metrology/gum-uncertainty/):
   the GUM law of propagation and the Welch-Satterthwaite degrees of freedom
   the budget is built on.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](/signals/metrology/compliance-verification/):
   what the IEC 61672-1 class of a meter asserts, and which of its tests the
   library runs.
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): the
+- [Calibration and dBFS](/signals/metrology/calibration/): the
   calibrator tone that sets the pressure sensitivity every level of a meter
   starts from.
-- API reference: [`metrology.free_field_corrections`](/phonometry/reference/api/metrology/free-field-corrections/).
+- API reference: [`metrology.free_field_corrections`](/reference/api/metrology/free-field-corrections/).
 
 </SeeAlso>

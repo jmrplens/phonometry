@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/calibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/calibration/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/calibration/
 
 # Calibration and dBFS
 
@@ -830,7 +830,7 @@ anything else.
 - [Multichannel and Performance](../filters/multichannel.md): one sensitivity per channel when the channels differ.
 - [GUM uncertainty](gum-uncertainty.md): propagating the calibrator tolerance and drift bound into a level's uncertainty.
 - [Compliance and verification](compliance-verification.md): the conformance rule of IEC TC 29 the calibrator verdict is reached by, on the examples IEC 60942 and IEC 61672-1 print.
-- API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://docs.jmrp.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/).
+- API reference: [`metrology.calibration`](https://phonometry.dev/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://phonometry.dev/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://phonometry.dev/reference/api/metrology/conformance/) and [`phonometry`](https://phonometry.dev/reference/api/filters/phonometry/).
 
 ## Quick answers
 

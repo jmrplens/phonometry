@@ -70,7 +70,7 @@ normalised to unit area: equal bins across the range of the stretch.
 | `velocity_mm_s` | The velocity of the stretch, in millimetres per second (1-D). |
 | `n_bins` | How many equal bins span the range of the stretch (default 101, odd so that zero sits in the middle of one). |
 
-**Returns:** The density and its cumulative function, as an [`AmplitudeDistribution`](/phonometry/reference/api/vibration/railway/#amplitudedistribution).
+**Returns:** The density and its cumulative function, as an [`AmplitudeDistribution`](/reference/api/vibration/railway/#amplitudedistribution).
 
 **Raises**
 
@@ -266,7 +266,7 @@ severity DIN 4150-2 reads, and the third-octave levels of Figure 6.
 | `t3_s` | $T_3$; `None` (default) takes the whole record. |
 | `upper_band_hz` | The highest third octave, a nominal centre in hertz: 315 (default) or down to 80, the special case of DIN 45672-1. |
 
-**Returns:** The reduced passage, as a [`TrainPassage`](/phonometry/reference/api/vibration/railway/#trainpassage).
+**Returns:** The reduced passage, as a [`TrainPassage`](/reference/api/vibration/railway/#trainpassage).
 
 **Raises**
 
@@ -320,8 +320,8 @@ event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float
 The event level $L_{v\mathrm{E}}$ of Formula (9), in dB.
 
 $20 \lg(\tilde v_3 / v_0) + 10 \lg(T_3 / 3600\,\mathrm{s})$, which
-is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocity) as a level against
-[`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s).
+is [`event_velocity`](/reference/api/vibration/railway/#event_velocity) as a level against
+[`VELOCITY_LEVEL_REFERENCE_MM_S`](/reference/api/vibration/railway/#velocity_level_reference_mm_s).
 
 **Parameters**
 
@@ -353,7 +353,7 @@ interval_rms(
 The interval r.m.s. of Formula (4), or of Formula (5).
 
 Formula (4) averages the square of the velocity over the stretch. Handed
-the running r.m.s. of [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms) instead, the same
+the running r.m.s. of [`running_velocity_rms`](/reference/api/vibration/railway/#running_velocity_rms) instead, the same
 average is Formula (5), which Clause 6.1 calls a good approximation of
 Formula (4) and which is what a meter reading its display produces.
 
@@ -390,7 +390,7 @@ The one-sided power spectral density of Formula (12), in (mm/s)²/Hz.
 Clause 7.3.1 asks for blocks of $1/\Delta f$, a Hanning window
 (Formula (18)), at least half a block of overlap and a linear average of
 the blocks, which is the Welch estimate
-[`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density) makes. Its lines add
+[`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density) makes. Its lines add
 back to the mean square of the stretch, which is Formula (14).
 
 **Parameters**
@@ -401,7 +401,7 @@ back to the mean square of the stretch, which is Formula (14).
 | `fs` | Sampling frequency, in hertz. |
 | `resolution_hz` | The line spacing $\Delta f$, in hertz (default 1.25 Hz). The block holds `round(fs / resolution)` samples, so the spacing actually used is `fs` over that count. |
 
-**Returns:** The spectrum, as a [`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult).
+**Returns:** The spectrum, as a [`SpectralDensityResult`](/reference/api/signals/spectra/#spectraldensityresult).
 
 **Raises**
 
@@ -437,7 +437,7 @@ passage_average_level(
 The energy average of levels over repeated passages (Clause 9), in dB.
 
 $10 \lg \langle 10^{L/10} \rangle$, the level of
-[`passage_average_velocity`](/phonometry/reference/api/vibration/railway/#passage_average_velocity).
+[`passage_average_velocity`](/reference/api/vibration/railway/#passage_average_velocity).
 
 **Parameters**
 
@@ -521,7 +521,7 @@ all of its mean square. This returns the formula as printed.
 
 | Name | Description |
 | :--- | :--- |
-| `psd` | $G_2$, the power spectral density of the stretch, in (mm/s)²/Hz, as [`narrowband_psd`](/phonometry/reference/api/vibration/railway/#narrowband_psd) gives it. |
+| `psd` | $G_2$, the power spectral density of the stretch, in (mm/s)²/Hz, as [`narrowband_psd`](/reference/api/vibration/railway/#narrowband_psd) gives it. |
 | `duration_s` | $T_2$, in seconds. |
 
 **Returns:** $e_2$ at the same lines, in (mm/s)²/Hz². A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -552,7 +552,7 @@ The running acceleration level $L_{aF}(t)$ of Formula (3), in dB.
 | :--- | :--- |
 | `acceleration_m_s2` | The acceleration, in metres per second squared (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `time_constant_s` | See [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms). |
+| `time_constant_s` | See [`running_velocity_rms`](/reference/api/vibration/railway/#running_velocity_rms). |
 
 **Returns:** $20 \lg(\tilde a_F / a_0)$ with $a_0 = 10^{-6}$ m/s², the reference DIN EN 21683 gives and the one the rest of this package's acceleration levels use.
 
@@ -581,9 +581,9 @@ The running velocity level $L_{v\mathrm{F}}(t)$ of Formula (2), in dB.
 | :--- | :--- |
 | `velocity_mm_s` | The velocity, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `time_constant_s` | See [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms). |
+| `time_constant_s` | See [`running_velocity_rms`](/reference/api/vibration/railway/#running_velocity_rms). |
 
-**Returns:** $20 \lg(\tilde v_\mathrm{F} / v_0)$ with $v_0$ = [`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s), one value per sample. A sample whose running r.m.s. is still exactly zero, before the first nonzero sample, is `-inf`.
+**Returns:** $20 \lg(\tilde v_\mathrm{F} / v_0)$ with $v_0$ = [`VELOCITY_LEVEL_REFERENCE_MM_S`](/reference/api/vibration/railway/#velocity_level_reference_mm_s), one value per sample. A sample whose running r.m.s. is still exactly zero, before the first nonzero sample, is `-inf`.
 
 **Raises**
 
@@ -643,7 +643,7 @@ spectral_density_level(psd: NumericArrayLike) -> float | NDArray[np.float64]
 
 The level of a power spectral density, as Figure 7 draws it, in dB.
 
-$10 \lg(G / G_0)$ with $G_0 = (5 \cdot 10^{-8}\,\mathrm{m/s})^2 /\mathrm{Hz}$, the square of [`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s) per
+$10 \lg(G / G_0)$ with $G_0 = (5 \cdot 10^{-8}\,\mathrm{m/s})^2 /\mathrm{Hz}$, the square of [`VELOCITY_LEVEL_REFERENCE_MM_S`](/reference/api/vibration/railway/#velocity_level_reference_mm_s) per
 hertz.
 
 **Parameters**
@@ -715,7 +715,7 @@ bands out rather than filling them with the lines of a neighbour.
 | `frequencies` | The line frequencies of the spectrum, in hertz, evenly spaced at 1.25 Hz. |
 | `psd` | The one-sided power spectral density at those lines, in (mm/s)²/Hz. |
 
-**Returns:** The nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/phonometry/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s, as a [`ThirdOctaveVelocities`](/phonometry/reference/api/vibration/railway/#thirdoctavevelocities).
+**Returns:** The nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s, as a [`ThirdOctaveVelocities`](/reference/api/vibration/railway/#thirdoctavevelocities).
 
 **Raises**
 
@@ -735,7 +735,7 @@ ThirdOctaveVelocities(
 
 Band r.m.s. velocities added back from a narrow-band spectrum (Formula (23)).
 
-What [`third_octaves_from_narrowband`](/phonometry/reference/api/vibration/railway/#third_octaves_from_narrowband) returns: the band centres and
+What [`third_octaves_from_narrowband`](/reference/api/vibration/railway/#third_octaves_from_narrowband) returns: the band centres and
 the band r.m.s. values, named, where a `(centres, rms)` tuple used to be
 unpacked by position.
 

@@ -28,12 +28,12 @@ turned away from everything, the ground included.
 In front of the device the direct sound and the reflection overlap in the
 first milliseconds. The free-field record *is* the direct sound, so it is
 aligned onto the other record to a fiftieth of a sample, scaled to its peak and
-subtracted (5.5.4, [`subtract_direct_sound`](/phonometry/reference/api/environment/barrier-reflection/#subtract_direct_sound)). What is left is the
+subtracted (5.5.4, [`subtract_direct_sound`](/reference/api/environment/barrier-reflection/#subtract_direct_sound)). What is left is the
 reflection, and what cannot be removed is measured by the reduction factor
 $R_\mathrm{sub}$ of Formula (6).
 
 The two components are then cut out with the **Adrienne temporal window**
-(5.5.5, [`adrienne_reflection_window`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_reflection_window)): a 0.5 ms left half of a
+(5.5.5, [`adrienne_reflection_window`](/reference/api/environment/barrier-reflection/#adrienne_reflection_window)): a 0.5 ms left half of a
 four-term Blackman-Harris window, a flat part, and a right half whose length is
 3/7 of the flat part. The marker point where the flat part begins is placed
 0.2 ms before the peak of each component (5.5.6).
@@ -53,7 +53,7 @@ $$
   the longer reflected path (Formula (2), Table 2).
 * $C_{\mathrm{dir},k}$ puts back the loudspeaker directivity: the reflection left
   the loudspeaker at another angle than the direct sound (Formula (3),
-  [`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)).
+  [`source_directivity_corrections`](/reference/api/environment/barrier-reflection/#source_directivity_corrections)).
 * $C_{\mathrm{gain},k}$ takes out a change of amplifier or microphone gain
   between the free-field and the in-front configurations (Formula (4)).
 
@@ -66,7 +66,7 @@ In the bands of 100 Hz, 125 Hz and 160 Hz the average is over microphones 1 to
 6 with the 7.9 ms window; from 200 Hz over all nine with the 6.0 ms window
 (5.5.5). A device measured at several grid positions averages every
 microphone of every position (5.6.2.3); Annex B reports the positions one by
-one and their mean, which [`reflection_index_from_positions`](/phonometry/reference/api/environment/barrier-reflection/#reflection_index_from_positions) recomputes.
+one and their mean, which [`reflection_index_from_positions`](/reference/api/environment/barrier-reflection/#reflection_index_from_positions) recomputes.
 
 The single number
 -----------------
@@ -74,7 +74,7 @@ The single number
 $DL_{RI}$ weights $RI$ with the normalised traffic noise spectrum
 of EN 1793-3 from the lowest reliable band upward (Formula (12)); it lives
 with the other EN 1793 ratings as
-[`sound_reflection_rating`](/phonometry/reference/api/environment/noise-reducing-devices/#sound_reflection_rating).
+[`sound_reflection_rating`](/reference/api/environment/noise-reducing-devices/#sound_reflection_rating).
 
 The low frequency limit
 -----------------------
@@ -83,11 +83,11 @@ The window has to end before the ground reflection on the source side and the
 waves diffracted by the edges of the device arrive, so a smaller device allows
 a shorter window and a higher low frequency limit (5.5.7). The standard gives
 the limit as three curves (Figure 14) without the formula behind them.
-[`reflection_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#reflection_low_frequency_limit) computes it by the construction of the
+[`reflection_low_frequency_limit`](/reference/api/environment/barrier-reflection/#reflection_low_frequency_limit) computes it by the construction of the
 method's authors (Garai and Guidorzi, J. Acoust. Soc. Am. 108 (2000) 1054,
 section III.D): the window ends where the first unwanted component arrives,
 and its low frequency limit is the first notch of its spectrum
-([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit), 162.5 Hz for 7.9 ms, which the
+([`adrienne_low_frequency_limit`](/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit), 162.5 Hz for 7.9 ms, which the
 paper gives as about 160 Hz). Against the curves read off Figure 14 it
 follows microphone 5 within 5 % from 2.75 m up (5.5 % below at 2.5 m). At
 microphone 2 it comes out about 3 % to 10 % above the printed curve, set by
@@ -163,7 +163,7 @@ first half of a Blackman-Harris window twice its length, taken at
 point; the trailing edge is the second half of one twice its length, from
 the sample after the flat part down to its last sample. The ISO 13472-1
 window of
-[`adrienne_window`](/phonometry/reference/api/materials/road-absorption/#adrienne_window)
+[`adrienne_window`](/reference/api/materials/road-absorption/#adrienne_window)
 is left free by its standard and rescales its halves instead; this one is
 the formula EN 1793-5 prints.
 
@@ -237,7 +237,7 @@ $\pm 25$ mm of Table 3.
 | `speed_of_sound` | Speed of sound at the air temperature, in metres per second. |
 | `check` | `"relative"` or `"grid"`. |
 
-**Returns:** The [`ReflectionGridCheck`](/phonometry/reference/api/environment/barrier-reflection/#reflectiongridcheck) verdict.
+**Returns:** The [`ReflectionGridCheck`](/reference/api/environment/barrier-reflection/#reflectiongridcheck) verdict.
 
 **Raises**
 
@@ -277,7 +277,7 @@ The direct sound taken out of an impulse response, 5.5.4.
 | `reduction` | $R_\mathrm{sub}$, Formula (6): the energy of the free-field record within 0.5 ms of the peak over that of the residual in the same interval, in decibels. Below 10 dB the subtraction is not perfect; `inf` when nothing is left at all. |
 
 The three records come back in the type they arrived as: a
-[`Signal`](/phonometry/reference/api/io/io/#signal) when the record was one (in pascals and
+[`Signal`](/reference/api/io/io/#signal) when the record was one (in pascals and
 carrying `calibration_factor=1.0` when it was calibrated), a bare array
 otherwise.
 
@@ -322,7 +322,7 @@ $C_{\mathrm{geo},k} = (d_{\mathrm{r},k}/d_{\mathrm{i},k})^2$, Formula (2).
 The reflection travels further than the direct sound and spreads over a
 larger sphere; this puts that energy back. At microphone 5 it is
 $(1.75/1.25)^2 = 1.96$; Table 2 prints all nine to two
-decimals ([`REFLECTION_GRID_DISTANCES`](/phonometry/reference/api/environment/barrier-reflection/#reflection_grid_distances)).
+decimals ([`REFLECTION_GRID_DISTANCES`](/reference/api/environment/barrier-reflection/#reflection_grid_distances)).
 
 **Parameters**
 
@@ -338,7 +338,7 @@ decimals ([`REFLECTION_GRID_DISTANCES`](/phonometry/reference/api/environment/ba
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As [`reflection_grid_paths_m`](/phonometry/reference/api/environment/barrier-reflection/#reflection_grid_paths_m). |
+| ValueError | As [`reflection_grid_paths_m`](/reference/api/environment/barrier-reflection/#reflection_grid_paths_m). |
 
 ## REFLECTION_GRID_DISTANCES
 
@@ -413,7 +413,7 @@ reflection_index(
 The sound reflection index $RI_j$, Formula (1).
 
 For every microphone of every grid position: the direct sound is
-subtracted ([`subtract_direct_sound`](/phonometry/reference/api/environment/barrier-reflection/#subtract_direct_sound)); the free-field record is
+subtracted ([`subtract_direct_sound`](/reference/api/environment/barrier-reflection/#subtract_direct_sound)); the free-field record is
 windowed on its own peak and the residual on the specular arrival of the
 reflection, both with the marker point 0.2 ms before the peak (5.5.6);
 the band energies of the two are divided and corrected by
@@ -433,17 +433,17 @@ within 5 % of 1; the value computed is always used here.
 
 | Name | Description |
 | :--- | :--- |
-| `in_front_irs` | Impulse responses in front of the device, `(9, N)` for one grid position or `(positions, 9, N)`, microphones in the order of Figure 3.b. A nine-channel [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) is one grid position, and a sequence of them (or of `(9, N)` arrays) one per position; a Signal's calibration is applied. |
+| `in_front_irs` | Impulse responses in front of the device, `(9, N)` for one grid position or `(positions, 9, N)`, microphones in the order of Figure 3.b. A nine-channel [`phonometry.io.Signal`](/reference/api/io/io/#signal) is one grid position, and a sequence of them (or of `(9, N)` arrays) one per position; a Signal's calibration is applied. |
 | `free_field_irs` | The free-field impulse responses of the same microphones, in the same form and shape. |
 | `fs` | Sample rate, in hertz. Required when every record is a bare array; a Signal supplies it, and a Signal that disagrees with it or with another Signal is refused rather than arbitrated. |
 | `speed_of_sound` | Speed of sound at the air temperature of the test (5.5.6, 5.7.3), in metres per second; it places the reflected window, and the standard asks for its temperature-dependent value. |
 | `window_length_s` | $T_\mathrm{W,ADR}$ from the 200 Hz band upward, one length or nine (one per microphone); 6.0 ms by 5.5.5. |
 | `low_band_window_length_s` | $T_\mathrm{W,ADR}$ of the 100 Hz to 160 Hz bands; 7.9 ms by 5.5.5. |
 | `low_band_microphones` | The microphones averaged below 200 Hz; 1 to 6 by 5.5.5. |
-| `directivity_corrections` | $C_{\mathrm{dir},k}(\Delta f_j)$ as a `(9, 18)` array ([`source_directivity_corrections`](/phonometry/reference/api/environment/barrier-reflection/#source_directivity_corrections)), or `None` for none, which is what a report states as "none". |
+| `directivity_corrections` | $C_{\mathrm{dir},k}(\Delta f_j)$ as a `(9, 18)` array ([`source_directivity_corrections`](/reference/api/environment/barrier-reflection/#source_directivity_corrections)), or `None` for none, which is what a report states as "none". |
 | `lowest_band_hz` | The lowest reliable band, where $DL_{RI}$ starts; 200 Hz for the qualification sample of 5.3. |
 
-**Returns:** The [`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult), with `.plot()`.
+**Returns:** The [`ReflectionIndexResult`](/reference/api/environment/barrier-reflection/#reflectionindexresult), with `.plot()`.
 
 **Raises**
 
@@ -475,7 +475,7 @@ the combined standard uncertainty. Annex B.5 takes the high column and
 $k_p$ = 1.96 for 95 % coverage, which is the default. The
 reproducibility is the standard's, not the measurement's, so the answer
 depends on the column and the factor alone: one call serves every
-[`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult).
+[`ReflectionIndexResult`](/reference/api/environment/barrier-reflection/#reflectionindexresult).
 
 **Parameters**
 
@@ -484,7 +484,7 @@ depends on the column and the factor alone: one call serves every
 | `estimate` | The column of Table A.1, `"median"`, `"low"` or `"high"`. |
 | `coverage_factor` | $k_p$. |
 
-**Returns:** A [`ReflectionIndexUncertainty`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexuncertainty), the eighteen $U_j$ aligned with the bands, in units of the index, and the $U$ of $DL_{RI}$, in decibels.
+**Returns:** A [`ReflectionIndexUncertainty`](/reference/api/environment/barrier-reflection/#reflectionindexuncertainty), the eighteen $U_j$ aligned with the bands, in units of the index, and the $U$ of $DL_{RI}$, in decibels.
 
 **Raises**
 
@@ -518,7 +518,7 @@ be `nan`; it is left out of that band's mean.
 | `position_values` | `(positions, 18)` or `(18,)` indices. |
 | `lowest_band_hz` | The lowest reliable band for $DL_{RI}$, one of the eighteen centres; 200 Hz is the qualification sample of 5.3. |
 
-**Returns:** The [`ReflectionIndexResult`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult) (without microphone detail).
+**Returns:** The [`ReflectionIndexResult`](/reference/api/environment/barrier-reflection/#reflectionindexresult) (without microphone detail).
 
 **Raises**
 
@@ -580,7 +580,7 @@ curves.
 | `device_length_m` | The length of the sample, in metres, to include its two side edges; `None` considers the ground and the top edge, which is the case 5.5.7 treats for a device longer than it is high. |
 | `source_height_m` | $h_S$, in metres; `None` for $h_B/2$. 3.11 allows 2 m above a 4 m device. |
 
-**Returns:** The [`ReflectionFrequencyLimit`](/phonometry/reference/api/environment/barrier-reflection/#reflectionfrequencylimit), with `.plot()`.
+**Returns:** The [`ReflectionFrequencyLimit`](/reference/api/environment/barrier-reflection/#reflectionfrequencylimit), with `.plot()`.
 
 **Raises**
 
@@ -637,7 +637,7 @@ The circle on the reference plane, centred at the point of incidence,
 within which a reflecting object would still fall inside the reflected
 window. It is the ISO 13472-1 construction with the loudspeaker 1.50 m and
 the microphone 0.25 m from the plane, and it reuses
-[`max_sampled_area_radius`](/phonometry/reference/api/materials/road-absorption/#max_sampled_area_radius).
+[`max_sampled_area_radius`](/reference/api/materials/road-absorption/#max_sampled_area_radius).
 NOTE 1 of 5.6.1 gives 1.96 m for the 7.9 ms window at 340 m/s.
 
 **Parameters**
@@ -687,7 +687,7 @@ How far down a device of a given size can be measured, 5.5.7.
 | `device_length_m` | The length of the sample, or `None` when its side edges were not considered. |
 | `source_height_m` | $h_S$, the height of the loudspeaker and of microphone 5. |
 | `window_length_s` | Per microphone, the longest Adrienne window whose tail ends before the first unwanted component: the flat part and the trailing edge last as long as the delay between the reflection and that component, plus the 0.5 ms leading edge. |
-| `low_frequency_limit_hz` | Per microphone, the first notch of that window's spectrum ([`adrienne_low_frequency_limit`](/phonometry/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit)). |
+| `low_frequency_limit_hz` | Per microphone, the first notch of that window's spectrum ([`adrienne_low_frequency_limit`](/reference/api/environment/barrier-reflection/#adrienne_low_frequency_limit)). |
 | `limiting_component` | Per microphone, `"ground"` for the ground reflection on the source side, `"top edge"` or `"side edge"` for a diffraction by an edge of the device. |
 
 ### ReflectionFrequencyLimit.plot()
@@ -793,7 +793,7 @@ Requires matplotlib (the `[plot]` extra).
 
 Per microphone, whether the deviation is within $\pm\varepsilon_k$.
 
-**Returns:** `True` where the deviation is within the 25 mm of Table 3 ([`REFLECTION_PATH_TOLERANCE_M`](/phonometry/reference/api/environment/barrier-reflection/#reflection_path_tolerance_m)).
+**Returns:** `True` where the deviation is within the 25 mm of Table 3 ([`REFLECTION_PATH_TOLERANCE_M`](/reference/api/environment/barrier-reflection/#reflection_path_tolerance_m)).
 
 ## ReflectionIndexResult
 
@@ -820,7 +820,7 @@ The sound reflection index of a device, per one-third octave band.
 | `reflection_index` | $RI_j$, the average over every microphone of every grid position (5.6.2.3); `nan` in a band nothing measured. |
 | `position_values` | `(positions, 18)`: the average of each grid position, the "particular values" of Table B.1. |
 | `lowest_band_hz` | The lowest reliable band, where the single number starts (the $m$ of Formula (12)). |
-| `rating` | $DL_{RI}$ over the bands from `lowest_band_hz`, a [`RoadDeviceRating`](/phonometry/reference/api/environment/noise-reducing-devices/#roaddevicerating). |
+| `rating` | $DL_{RI}$ over the bands from `lowest_band_hz`, a [`RoadDeviceRating`](/reference/api/environment/noise-reducing-devices/#roaddevicerating). |
 | `microphone_values` | `(positions, 9, 18)`: the index of each microphone, `nan` where 5.5.5 leaves it out (microphones 7 to 9 below 200 Hz by default); `None` for a result built from position values. |
 | `gain_corrections` | `(positions, 9)`: $C_{\mathrm{gain},k}$ of Formula (4), or `None`. |
 | `subtraction_reductions` | `(positions, 9)`: $R_\mathrm{sub}$ of each subtraction, in decibels, or `None`. |
@@ -871,7 +871,7 @@ deviation of Table A.1 taken as the combined standard uncertainty.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | The eighteen band centres, 100 Hz to 5 kHz, the bands of [`ReflectionIndexResult.frequencies`](/phonometry/reference/api/environment/barrier-reflection/#reflectionindexresult). |
+| `frequencies` | The eighteen band centres, 100 Hz to 5 kHz, the bands of [`ReflectionIndexResult.frequencies`](/reference/api/environment/barrier-reflection/#reflectionindexresult). |
 | `expanded_uncertainty` | $U_j$ per band, aligned with `frequencies`, in units of the index itself: $RI$ is a ratio, and Table B.2 prints its $U_j$ beside it as one (0.62 at 100 Hz against an $RI$ of 0.58). |
 | `rating_expanded_uncertainty_db` | $U$ of the single-number rating $DL_{RI}$, in decibels, the one row of Table A.1 that is a level. |
 | `estimate` | The column of Table A.1 read: `"median"`, `"low"` or `"high"`. |
@@ -927,13 +927,13 @@ placed on its own record's peak (5.5.6).
 
 | Name | Description |
 | :--- | :--- |
-| `microphone_irs` | `(9, N)` free-field impulse responses at the nine microphone positions (angle $\alpha_k$). Accepts a nine-channel [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied. |
+| `microphone_irs` | `(9, N)` free-field impulse responses at the nine microphone positions (angle $\alpha_k$). Accepts a nine-channel [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied. |
 | `specular_irs` | `(9, N)` free-field impulse responses at the nine points on the specular paths (angle $\beta_k$); same treatment. |
 | `fs` | Sample rate, in hertz. Required when both sets are bare arrays; either may be a Signal and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `window_length_s` | Window from the 200 Hz band upward, one length or nine, in seconds. |
 | `low_band_window_length_s` | Window of the 100 Hz to 160 Hz bands, one length or nine, in seconds. |
 
-**Returns:** A read-only `(9, 18)` array, microphones by the bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz), to pass as `directivity_corrections` to [`reflection_index`](/phonometry/reference/api/environment/barrier-reflection/#reflection_index).
+**Returns:** A read-only `(9, 18)` array, microphones by the bands of [`TRAFFIC_NOISE_BANDS_HZ`](/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz), to pass as `directivity_corrections` to [`reflection_index`](/reference/api/environment/barrier-reflection/#reflection_index).
 
 **Raises**
 
@@ -967,11 +967,11 @@ the direct sound.
 
 | Name | Description |
 | :--- | :--- |
-| `in_front_ir` | The impulse response in front of the device. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the records come back in pascals, and as Signals. |
+| `in_front_ir` | The impulse response in front of the device. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the records come back in pascals, and as Signals. |
 | `free_field_ir` | The free-field impulse response of the same microphone, same length and sample rate; same treatment. |
 | `fs` | Sample rate, in hertz. Required when both records are bare arrays; either may be a Signal and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 
-**Returns:** The [`DirectSoundSubtraction`](/phonometry/reference/api/environment/barrier-reflection/#directsoundsubtraction), with `.plot()`.
+**Returns:** The [`DirectSoundSubtraction`](/reference/api/environment/barrier-reflection/#directsoundsubtraction), with `.plot()`.
 
 **Raises**
 

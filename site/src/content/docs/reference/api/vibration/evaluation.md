@@ -8,7 +8,7 @@ sidebar:
 Evaluation of machine vibration by measurement (ISO 20816-1:2016).
 
 Condition monitoring answers two questions, and they are not the same one.
-[`diagnostics`](/phonometry/reference/api/vibration/diagnostics/) answers *where a fault
+[`diagnostics`](/reference/api/vibration/diagnostics/) answers *where a fault
 would show*, by turning the geometry of a bearing or a gear pair into the
 frequencies it excites. This module answers the prior question a plant
 actually asks: **is this machine acceptable at all**, from one broad-band
@@ -24,7 +24,7 @@ is acceptable for unrestricted long-term operation; zone **C** is
 unsatisfactory for long-term continuous running, though the machine may run a
 limited period until remedial action can be arranged; zone **D** is severe
 enough to cause damage. Three boundaries separate them, and
-[`evaluation_zone`](/phonometry/reference/api/vibration/evaluation/#evaluation_zone) is the comparison itself, blind to the quantity: the
+[`evaluation_zone`](/reference/api/vibration/evaluation/#evaluation_zone) is the comparison itself, blind to the quantity: the
 specific parts set boundaries on shaft displacement, housing velocity or
 housing acceleration, and the grading is the same in all three.
 
@@ -51,7 +51,7 @@ zone B and **6.4** for zone C.
 change is a vector. Annex D makes the point with a machine whose magnitude
 fell from 3 mm/s to 2.5 mm/s while its phase swung from 40° to 180°: the
 magnitude moved by half a millimetre per second, and the vibration itself
-moved by **5.2 mm/s**, ten times as much. [`vibration_vector_change`](/phonometry/reference/api/vibration/evaluation/#vibration_vector_change) is
+moved by **5.2 mm/s**, ten times as much. [`vibration_vector_change`](/reference/api/vibration/evaluation/#vibration_vector_change) is
 that subtraction.
 
 Where no part of the series covers a machine and no experience is available,
@@ -147,7 +147,7 @@ fastest, and flat in between. A machine-specific part that states its own
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `constant_velocity_mm_s` | The constant r.m.s. velocity `vA` that applies between the corners for zone A, in millimetres per second. |
-| `zone_factor` | `Zbound`, the factor that moves the curve onto a zone limit; see [`ZONE_LIMIT_FACTORS`](/phonometry/reference/api/vibration/evaluation/#zone_limit_factors) for the 1 / 2.56 / 6.4 of Annex C.2. |
+| `zone_factor` | `Zbound`, the factor that moves the curve onto a zone limit; see [`ZONE_LIMIT_FACTORS`](/reference/api/vibration/evaluation/#zone_limit_factors) for the 1 / 2.56 / 6.4 of Annex C.2. |
 | `corner_low_hz` | The lower corner `fx`, in hertz. |
 | `corner_high_hz` | The upper corner `fy`, in hertz; must exceed `corner_low_hz`. |
 | `exponent_low` | `k`, the slope below the lower corner. |
@@ -186,7 +186,7 @@ magnitude.
 | `change` | The change from the established baseline, in the unit the boundaries are in; the sign is ignored. |
 | `zone_b_upper` | The upper limit of zone B, which is the B/C boundary. |
 
-**Returns:** The answer, as an [`OperationalChange`](/phonometry/reference/api/vibration/evaluation/#operationalchange).
+**Returns:** The answer, as an [`OperationalChange`](/reference/api/vibration/evaluation/#operationalchange).
 
 **Raises**
 
@@ -285,7 +285,7 @@ gear_housing_velocity_limit(
 The housing velocity rating curve of Figure A.2.
 
 Flat between 45 Hz and 1590 Hz and falling outside both corners at 14 dB
-per decade, which is the shape [`allowable_velocity`](/phonometry/reference/api/vibration/evaluation/#allowable_velocity) already draws
+per decade, which is the shape [`allowable_velocity`](/reference/api/vibration/evaluation/#allowable_velocity) already draws
 for ISO 20816-1 Formula (C.1); this is that formula with the corners and
 the exponents Part 9 states, so the two parts of the series share one
 curve rather than two implementations of it.
@@ -727,7 +727,7 @@ vibration moves by 5.2.
 | `final_magnitude` | Magnitude of the later state, in the same unit. |
 | `final_phase_deg` | Phase of the later state, in degrees. |
 
-**Returns:** The [`VectorChangeResult`](/phonometry/reference/api/vibration/evaluation/#vectorchangeresult).
+**Returns:** The [`VectorChangeResult`](/reference/api/vibration/evaluation/#vectorchangeresult).
 
 **Raises**
 

@@ -56,7 +56,7 @@ nights matter more, a source whose tones or impulses annoy beyond their
 energy, and a measurement taken over a residual background with a finite
 confidence. The tonal half of that sentence is this page; the impulsive half
 belongs to
-[Impulsive sound prominence](/phonometry/environment/assessment/impulsive-sound/),
+[Impulsive sound prominence](/environment/assessment/impulsive-sound/),
 which measures the adjustment ISO 1996-1 Table A.1 only tabulates. This page is the regulatory assessment chain built on top of
 the measured period levels: the whole-day descriptors $L_\mathrm{den}$/$L_\mathrm{dn}$
 and the composite rating levels of ISO 1996-1, and the ISO 1996-2
@@ -67,7 +67,7 @@ uncertainty budget.
 The level computation itself, the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$ integrals,
 the percentile levels $L_N$, SEL and the noise dose that produce the period
 levels this page consumes, is
-[Integrated and Statistical Levels](/phonometry/signals/levels/levels/); everything
+[Integrated and Statistical Levels](/signals/levels/levels/); everything
 here assumes those per-period values are already in hand.
 
 ## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
@@ -276,9 +276,9 @@ corrected at all.
 Combine with `laeq()` per time period to go from recordings to $L_\mathrm{den}$. The
 tonal adjustment itself is justified by the tonal audibility route of the next
 section (fed, for the ISO/PAS 20065 method, by
-[Objective audibility of tones in noise](/phonometry/perception/psychoacoustics/tone-audibility/));
+[Objective audibility of tones in noise](/perception/psychoacoustics/tone-audibility/));
 the `tone_to_noise_ratio()` / `prominence_ratio()` verdicts of
-[Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/) are
+[Prominent Discrete Tones](/perception/psychoacoustics/tone-prominence/) are
 complementary emission screening, not the $K_\mathrm{t}$ basis.
 
 ## Determining levels: tonal adjustment, residual noise and uncertainty (ISO 1996-2)
@@ -433,7 +433,7 @@ that sets the minimum.
 
 The 2017
 edition dropped the self-contained algorithm and refers to ISO/PAS 20065
-instead ([Objective audibility of tones in noise](/phonometry/perception/psychoacoustics/tone-audibility/));
+instead ([Objective audibility of tones in noise](/perception/psychoacoustics/tone-audibility/));
 what it keeps is the Annex J table that converts a *mean* audibility into an
 integer adjustment. The 2007 algorithm is the one implemented here, because it
 runs on a single spectrum. From the energy-summed tone
@@ -453,8 +453,8 @@ $\Delta L_\mathrm{ta}$ from Formula (C.3), `tonal_adjustment(dLta)` maps it to $
 through Formulae (C.4)-(C.6), and `assess_tonal_audibility(...)` combines both
 with `critical_bandwidth` into the plottable result the snippets below use.
 The two lower-level functions are the ones the
-[Spanish regulation guide](/phonometry/environment/assessment/spanish-noise-regulation/)
-and the [wind-turbine guide](/phonometry/environment/sources/wind-turbine-noise/)
+[Spanish regulation guide](/environment/assessment/spanish-noise-regulation/)
+and the [wind-turbine guide](/environment/sources/wind-turbine-noise/)
 refer to by name, so they are worth calling directly when only one step is
 wanted.
 
@@ -579,14 +579,14 @@ curvature of Annex A.
 
 ## See also
 
-- [Integrated and Statistical Levels](/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, percentile and event levels the indicators of this page are assembled from.
-- [Impulsive sound prominence (NT ACOU 112)](/phonometry/environment/assessment/impulsive-sound/): the measured impulsive adjustment $K_\mathrm{I}$, and `rating_level`, which combines impulse-adjusted sub-intervals over a reference time, the sub-daily counterpart of `composite_rating_level` here, which combines whole periods with their time-of-day and character adjustments (ISO 1996-1 clause 6.5).
-- [Spanish noise regulation (RD 1367/2007)](/phonometry/environment/assessment/spanish-noise-regulation/): one national application of exactly this chain, with its own tonal, low-frequency and impulsive corrections.
-- [Objective audibility of tones in noise (ISO/PAS 20065)](/phonometry/perception/psychoacoustics/tone-audibility/): the tonal audibility whose mean value maps to the $K_\mathrm{t}$ adjustment (Table J.1).
-- [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/): the ECMA-418-1 tone-to-noise and prominence-ratio verdicts, complementary emission screening for the tonal question.
-- [Occupational exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/): the workplace counterpart, from task samples to the daily exposure level with its uncertainty budget.
-- API reference: [`environment.assessment.measurement`](/phonometry/reference/api/environment/measurement/) and [`environment.assessment.rating`](/phonometry/reference/api/environment/rating/).
-- Theory: [Environmental descriptors (ISO 1996-1)](/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1): the ISO 1996-1 definitions of the rating level and the day-evening-night indicators, and what the adjustments do to them.
+- [Integrated and Statistical Levels](/signals/levels/levels/): the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, percentile and event levels the indicators of this page are assembled from.
+- [Impulsive sound prominence (NT ACOU 112)](/environment/assessment/impulsive-sound/): the measured impulsive adjustment $K_\mathrm{I}$, and `rating_level`, which combines impulse-adjusted sub-intervals over a reference time, the sub-daily counterpart of `composite_rating_level` here, which combines whole periods with their time-of-day and character adjustments (ISO 1996-1 clause 6.5).
+- [Spanish noise regulation (RD 1367/2007)](/environment/assessment/spanish-noise-regulation/): one national application of exactly this chain, with its own tonal, low-frequency and impulsive corrections.
+- [Objective audibility of tones in noise (ISO/PAS 20065)](/perception/psychoacoustics/tone-audibility/): the tonal audibility whose mean value maps to the $K_\mathrm{t}$ adjustment (Table J.1).
+- [Prominent Discrete Tones](/perception/psychoacoustics/tone-prominence/): the ECMA-418-1 tone-to-noise and prominence-ratio verdicts, complementary emission screening for the tonal question.
+- [Occupational exposure (ISO 9612)](/perception/hearing/occupational-exposure/): the workplace counterpart, from task samples to the daily exposure level with its uncertainty budget.
+- API reference: [`environment.assessment.measurement`](/reference/api/environment/measurement/) and [`environment.assessment.rating`](/reference/api/environment/rating/).
+- Theory: [Environmental descriptors (ISO 1996-1)](/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1): the ISO 1996-1 definitions of the rating level and the day-evening-night indicators, and what the adjustments do to them.
 
 </SeeAlso>
 

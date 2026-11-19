@@ -33,7 +33,8 @@ const SPANISH_API_SLUG = /^es\/reference\/api(?:\/|$)/;
 
 /**
  * A route as these predicates read it: no base path, no leading or trailing
- * slash. `/phonometry/es/reference/api/` and `es/reference/api` are the same.
+ * slash. `/es/reference/api/` and `es/reference/api` are the same; under a
+ * base path (`base`) the base comes off first.
  *
  * @param {string} route A slug, an entry id or a pathname.
  * @param {string} [base] The site's base path, stripped when the route has it.

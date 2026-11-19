@@ -12,23 +12,23 @@ one-third-octave-band spectra, and correcting a measured flyover to reference
 atmospheric conditions requires the band attenuation over the propagation path.
 Two SAE practices give it.
 
-* [`band_attenuation_arp5534`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534): SAE ARP 5534, the current practice. Its
+* [`band_attenuation_arp5534`](/reference/api/aeroacoustics/atmospheric-absorption/#band_attenuation_arp5534): SAE ARP 5534, the current practice. Its
   pure-tone coefficient (Eqs. 1-6) is the ISO 9613-1 one, Eqs. 1-3 repeating
-  [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation)
+  [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation)
   term for term, except for the saturation vapour pressure: Eqs. 5-6 write it
   in the longer form of ANSI S1.26, which gives a molar concentration of water
   vapour 4.5 parts in 100 000 below the ISO 9613-1 Annex B formula at
   10 °C. The **SAE Method** (§3.2.2) then turns the pure-tone mid-band
   path-length attenuation into the one-third-octave-band attenuation and stays
   consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
-  older Approximate Method. The result is an [`AircraftBandAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation)
+  older Approximate Method. The result is an [`AircraftBandAttenuation`](/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation)
   with a `.plot()`.
-* [`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a): SAE ARP 866A (1975), the legacy practice that
+* [`attenuation_arp866a`](/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a): SAE ARP 866A (1975), the legacy practice that
   ECAC Doc 29 Vol. 2 Appendix D still offers for recalculating NPD data, in the
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
   the band centre up to 4 kHz and at the lower band edge above. The result is an
-  [`ARP866AAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation) with a `.plot()`.
+  [`ARP866AAttenuation`](/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation) with a `.plot()`.
 
 Sources (clean-room, implemented from the documents): SAE ARP 5534 (2021),
 *Application of Pure-Tone Atmospheric Absorption Losses to One-Third-Octave-Band
@@ -117,7 +117,7 @@ Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 | `coefficient_db_per_100m` | The attenuation coefficient `α` per band, in decibels per 100 m. |
 | `temperature_c` | Air temperature `θ`, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity `RH`, in percent. |
-| `eta_interpolation` | How `η` was read between the entries of Table 1, `"quadratic"` or `"linear"` (see [`attenuation_arp866a`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)). |
+| `eta_interpolation` | How `η` was read between the entries of Table 1, `"quadratic"` or `"linear"` (see [`attenuation_arp866a`](/reference/api/aeroacoustics/atmospheric-absorption/#attenuation_arp866a)). |
 
 ### ARP866AAttenuation.path_attenuation()
 
@@ -202,7 +202,7 @@ misses 11 of the 264. `"linear"` reproduces ECAC Doc 29 Vol. 2 Table
 D-3b (10 °C, 80 %, over the ten NPD distances): 208 of its 240 cells to the
 printed digit and all 240 within half a unit of that digit plus 7 parts per
 million, where the quadratic leaves up to 1.2 dB at 25000 ft; it is the
-form [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment)
+form [`npd_atmosphere_increment`](/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment)
 uses. The two part only where `δ` falls in the curved part of Table 1,
 below 6.50; from there on both hold `η` at 0.200. ISO 3891 Table 9
 (70 %) is not reproduced as closely as Table 10: the quadratic misses 15
@@ -224,7 +224,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 | `relative_humidity_percent` | Relative humidity `RH`, in percent (0 to 100). |
 | `eta_interpolation` | `"quadratic"` (default, ISO 3891) or `"linear"` (ECAC Doc 29 Appendix D). |
 
-**Returns:** An [`ARP866AAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation).
+**Returns:** An [`ARP866AAttenuation`](/reference/api/aeroacoustics/atmospheric-absorption/#arp866aattenuation).
 
 **Raises**
 
@@ -267,7 +267,7 @@ Annex B form leaves 57 of them up to 0.036 dB off.
 | `relative_humidity_percent` | Relative humidity, in percent (SAE window ~20-95 %; default 70 %). |
 | `static_pressure_kpa` | Ambient atmospheric pressure, in kPa (default 101.325). |
 
-**Returns:** An [`AircraftBandAttenuation`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation).
+**Returns:** An [`AircraftBandAttenuation`](/reference/api/aeroacoustics/atmospheric-absorption/#aircraftbandattenuation).
 
 **Raises**
 

@@ -38,7 +38,7 @@ $$
 
 with the ordinary coherence $\gamma^2$ of 9.1 beside it. The FRF comes
 out in the kind of the response channel (accelerance, mobility or dynamic
-compliance) and is converted to mobility with [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
+compliance) and is converted to mobility with [`.convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf).
 
 **Windows (8.5).** The *force window* has unity gain over the part of the
 record that holds the force pulse and its filter response and sets the rest to
@@ -58,18 +58,18 @@ $\omega_r$ the damped natural frequency in rad/s. The corrected mobility
 is synthesized from the corrected modes, and for a lightly damped, well
 separated mode the measured peak is multiplied by
 $\hat\zeta_r / \zeta_r$. Annex A leaves the damping estimator open;
-[`single_mode_fit`](/phonometry/reference/api/vibration/impact-mobility/#single_mode_fit) is the one this library offers, a rational-fraction
+[`single_mode_fit`](/reference/api/vibration/impact-mobility/#single_mode_fit) is the one this library offers, a rational-fraction
 fit of one mode over a band.
 
 Formula (A.3) is the first-order form of the pole shift the annex states in
 words. The synthesis here moves the pole itself, which is exact, and the
-correction reports both: [`ExponentialWindowCorrection.damping_ratio`](/phonometry/reference/api/vibration/impact-mobility/#exponentialwindowcorrectiondamping_ratio) is
-(A.3) as printed and [`ExponentialWindowCorrection.exact_damping_ratio`](/phonometry/reference/api/vibration/impact-mobility/#exponentialwindowcorrectionexact_damping_ratio)
+correction reports both: [`ExponentialWindowCorrection.damping_ratio`](/reference/api/vibration/impact-mobility/#exponentialwindowcorrectiondamping_ratio) is
+(A.3) as printed and [`ExponentialWindowCorrection.exact_damping_ratio`](/reference/api/vibration/impact-mobility/#exponentialwindowcorrectionexact_damping_ratio)
 is the damping of the shifted pole; they differ by about
 $(\hat\zeta_r^3 - \zeta_r^3)/2$.
 
 **Records.** Every function that takes a record takes a bare array with its
-sample rate, or a [`Signal`](/phonometry/reference/api/io/io/#signal), which brings its own rate
+sample rate, or a [`Signal`](/reference/api/io/io/#signal), which brings its own rate
 (an explicit `fs` that disagrees is refused). A calibration factor the
 Signal carries is deliberately not applied: the records of this part are
 forces in newtons and motions in m/s², m/s or m, not pressures. The checks
@@ -77,12 +77,12 @@ hand the samples they judged back as bare arrays, in the unit they arrived
 in.
 
 **Checks.** Every record check returns a verdict object with `passes`:
-[`check_double_hit`](/phonometry/reference/api/vibration/impact-mobility/#check_double_hit) (6.4), [`check_force_spectrum`](/phonometry/reference/api/vibration/impact-mobility/#check_force_spectrum) (6.2, 6.3),
-[`check_overload`](/phonometry/reference/api/vibration/impact-mobility/#check_overload) (8.4), [`check_response_decay`](/phonometry/reference/api/vibration/impact-mobility/#check_response_decay) (8.3, 8.5.2) and
-[`check_coherence`](/phonometry/reference/api/vibration/impact-mobility/#check_coherence) (9.1); [`verify_channel_match`](/phonometry/reference/api/vibration/impact-mobility/#verify_channel_match) judges the
+[`check_double_hit`](/reference/api/vibration/impact-mobility/#check_double_hit) (6.4), [`check_force_spectrum`](/reference/api/vibration/impact-mobility/#check_force_spectrum) (6.2, 6.3),
+[`check_overload`](/reference/api/vibration/impact-mobility/#check_overload) (8.4), [`check_response_decay`](/reference/api/vibration/impact-mobility/#check_response_decay) (8.3, 8.5.2) and
+[`check_coherence`](/reference/api/vibration/impact-mobility/#check_coherence) (9.1); [`verify_channel_match`](/reference/api/vibration/impact-mobility/#verify_channel_match) judges the
 channel-to-channel match of the analyser (8.1). The operational calibration of
 7.2 is the rigid-mass check of ISO 7626-2:2015, 7.5.2, which 7.2 calls
-essentially the same procedure: [`.verify_rigid_mass_calibration`](/phonometry/reference/api/vibration/mechanical-mobility/#verify_rigid_mass_calibration).
+essentially the same procedure: [`.verify_rigid_mass_calibration`](/reference/api/vibration/mechanical-mobility/#verify_rigid_mass_calibration).
 
 The part prints no worked example, so the implementation is anchored in closed
 form: a single-degree-of-freedom structure struck by a smooth pulse gives its
@@ -230,13 +230,13 @@ lower `min_n_records` states that fewer were judged enough.
 
 | Name | Description |
 | :--- | :--- |
-| `result` | The averaged estimate, from [`impact_mobility`](/phonometry/reference/api/vibration/impact-mobility/#impact_mobility). |
+| `result` | The averaged estimate, from [`impact_mobility`](/reference/api/vibration/impact-mobility/#impact_mobility). |
 | `frequency_range_hz` | `(f_low, f_high)`, in hertz. |
 | `exclude_hz` | Bands `(f_low, f_high)` to leave out of the verdict, such as anti-resonances (9.1, NOTE 1) (Default: none). |
 | `min_coherence` | The coherence to exceed (Default: 0.9). |
 | `min_n_records` | The fewest impacts to accept, a whole number of at least 1 (Default: 5). |
 
-**Returns:** A [`CoherenceCheck`](/phonometry/reference/api/vibration/impact-mobility/#coherencecheck).
+**Returns:** A [`CoherenceCheck`](/reference/api/vibration/impact-mobility/#coherencecheck).
 
 **Raises**
 
@@ -271,11 +271,11 @@ small second impact shows as a slight ripple and that moderate dips may be
 tolerated. At the default of 0.1 an undetected second pulse of the same
 shape as the first ripples the force spectrum by at most
 $20 \log_{10}(1.1/0.9) = 1.74$ dB peak to notch
-([`DoubleHitCheck.ripple_db`](/phonometry/reference/api/vibration/impact-mobility/#doublehitcheckripple_db)). A softer, longer rebound, the usual
+([`DoubleHitCheck.ripple_db`](/reference/api/vibration/impact-mobility/#doublehitcheckripple_db)). A softer, longer rebound, the usual
 hammer bounce, carries more of the low-frequency spectrum than its peak
 says: it can stay under the threshold and still ripple the spectrum by
 several decibels. That is why 6.4 finds multiple impacts most easily in
-the frequency domain, which [`check_force_spectrum`](/phonometry/reference/api/vibration/impact-mobility/#check_force_spectrum) reads.
+the frequency domain, which [`check_force_spectrum`](/reference/api/vibration/impact-mobility/#check_force_spectrum) reads.
 
 A filtered record has a limit of its own. When the spectrum of the pulse
 reaches the cut-off of the anti-aliasing filter, the ringing the filter
@@ -287,11 +287,11 @@ as several. The unfiltered force avoids both effects.
 
 | Name | Description |
 | :--- | :--- |
-| `force_n` | One force record, 1-D, in N. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `force_n` | One force record, 1-D, in N. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `threshold_ratio` | Fraction of the largest force an excursion must exceed to count as an impact, in (0, 1) (Default: 0.1). |
 
-**Returns:** A [`DoubleHitCheck`](/phonometry/reference/api/vibration/impact-mobility/#doublehitcheck).
+**Returns:** A [`DoubleHitCheck`](/reference/api/vibration/impact-mobility/#doublehitcheck).
 
 **Raises**
 
@@ -319,18 +319,18 @@ reads how far it falls between its highest and lowest value inside the
 range. The check passes when that fall is at most `max_drop_db`. The part
 gives no number for it, so the caller states the one their practice uses;
 the share of force energy above the range, which 6.3 asks to keep small, is
-reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/reference/api/vibration/impact-mobility/#forcespectrumcheckenergy_fraction_above).
+reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/reference/api/vibration/impact-mobility/#forcespectrumcheckenergy_fraction_above).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `force_n` | One force record, 1-D, in N (windowed or not, as it will be processed). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `force_n` | One force record, 1-D, in N (windowed or not, as it will be processed). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `frequency_range_hz` | `(f_low, f_high)`, the frequency range of interest, in hertz. |
 | `max_drop_db` | The largest fall across the range to accept, in dB. |
 
-**Returns:** A [`ForceSpectrumCheck`](/phonometry/reference/api/vibration/impact-mobility/#forcespectrumcheck).
+**Returns:** A [`ForceSpectrumCheck`](/reference/api/vibration/impact-mobility/#forcespectrumcheck).
 
 **Raises**
 
@@ -356,11 +356,11 @@ Did one channel of the record stay below its full scale? (8.4)
 
 | Name | Description |
 | :--- | :--- |
-| `x` | One record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, so the samples stay in the unit the channel recorded them in, the unit of its full scale. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | One record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, so the samples stay in the unit the channel recorded them in, the unit of its full scale. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `full_scale` | The manufacturer's maximum for linear operation, in the unit of the record. |
 
-**Returns:** An [`OverloadCheck`](/phonometry/reference/api/vibration/impact-mobility/#overloadcheck), which passes when every sample stays strictly below the full scale.
+**Returns:** An [`OverloadCheck`](/reference/api/vibration/impact-mobility/#overloadcheck), which passes when every sample stays strictly below the full scale.
 
 **Raises**
 
@@ -389,7 +389,7 @@ Without an exponential window the response should end at about 1 % of its
 highest peak (8.3, 8.5.2); with one, its natural decay should reach 25 % or
 less, the general guideline of 8.5.2. The level at the end is read at the
 last sample and compared with the figure to a whole per cent, so any
-level below 1.5 % passes "about 1 %" (see [`ResponseDecayCheck`](/phonometry/reference/api/vibration/impact-mobility/#responsedecaycheck)).
+level below 1.5 % passes "about 1 %" (see [`ResponseDecayCheck`](/reference/api/vibration/impact-mobility/#responsedecaycheck)).
 8.3 calls the 1 % a compromise, and the check is one-sided: it asks
 whether the response has decayed far enough, not whether it decayed too
 far. Pass the response as recorded, before any window.
@@ -398,14 +398,14 @@ far. Pass the response as recorded, before any window.
 
 | Name | Description |
 | :--- | :--- |
-| `response` | One response record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a motion and not a pressure. |
-| `fs` | Sample rate, in Hz. Required when the records are bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value, or a force Signal, that disagrees with it raises instead of silently winning. |
+| `response` | One response record, 1-D, in any unit. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a motion and not a pressure. |
+| `fs` | Sample rate, in Hz. Required when the records are bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value, or a force Signal, that disagrees with it raises instead of silently winning. |
 | `exponential_window` | Whether the record is to be processed with an exponential window (Default: `False`). |
 | `segment_s` | Length of the segments the levels are read over, in seconds; make it at least one period of the lowest mode (Default: `None`, one tenth of the record). |
 | `start_s` | Time from which the highest peak is sought, in seconds (Default: 0, the whole record, as the clause reads). |
 | `force_n` | The force record of the same impact, same length (Default: `None`). When given, the highest peak is sought only after the force pulse, where the force has fallen back to 1 % of its peak, so a driving-point acceleration is judged on its free decay and not on the impact it follows (the mass line). The later of this and `start_s` is used. A Signal likewise, its factor not applied. |
 
-**Returns:** A [`ResponseDecayCheck`](/phonometry/reference/api/vibration/impact-mobility/#responsedecaycheck).
+**Returns:** A [`ResponseDecayCheck`](/reference/api/vibration/impact-mobility/#responsedecaycheck).
 
 **Raises**
 
@@ -538,7 +538,7 @@ be tolerated".
 
 | Name | Description |
 | :--- | :--- |
-| `force_n` | The force record judged, in N, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `force_n` | The force record judged, in N, as a bare array (a [`Signal`](/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `impact_indices` | Sample index of the peak of every impact found, in time order; the first entry is not necessarily the largest. |
 | `threshold_ratio` | The fraction of the largest peak an excursion had to exceed to count as an impact. |
@@ -665,10 +665,10 @@ The DC bin and, for an even record, the Nyquist bin are not doubled.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | One record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is not applied. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | One record, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is not applied. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
-**Returns:** The DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz, and the density at each, in the record's unit squared times s/Hz, as an [`EnergySpectralDensity`](/phonometry/reference/api/vibration/impact-mobility/#energyspectraldensity).
+**Returns:** The DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz, and the density at each, in the record's unit squared times s/Hz, as an [`EnergySpectralDensity`](/reference/api/vibration/impact-mobility/#energyspectraldensity).
 
 **Raises**
 
@@ -687,7 +687,7 @@ EnergySpectralDensity(
 
 The one-sided energy spectral density of a transient record (3.3, 3.4).
 
-What [`energy_spectral_density`](/phonometry/reference/api/vibration/impact-mobility/#energy_spectral_density) returns: the bins and the density,
+What [`energy_spectral_density`](/reference/api/vibration/impact-mobility/#energy_spectral_density) returns: the bins and the density,
 named, where a `(frequencies, esd)` tuple used to be unpacked by
 position.
 
@@ -775,7 +775,7 @@ The window has an initial value of unity at the start of the record and
 decreases exponentially towards its end, adding a known amount of
 artificial decay to the data (8.3 a), 8.5.2). Applied to force and response
 alike it moves every pole of the impulse response by `-a` (Annex A,
-Formula (A.2)); [`exponential_window_correction`](/phonometry/reference/api/vibration/impact-mobility/#exponential_window_correction) takes the added
+Formula (A.2)); [`exponential_window_correction`](/reference/api/vibration/impact-mobility/#exponential_window_correction) takes the added
 damping away again.
 
 **Parameters**
@@ -784,7 +784,7 @@ damping away again.
 | :--- | :--- |
 | `n_samples` | Record length `N`, in samples. |
 | `fs` | Sample rate, in Hz. |
-| `decay_rate_per_s` | Decay rate `a`, in 1/s (>= 0; 0 is no window). [`exponential_decay_rate`](/phonometry/reference/api/vibration/impact-mobility/#exponential_decay_rate) finds the rate that ends the record at a stated value. |
+| `decay_rate_per_s` | Decay rate `a`, in 1/s (>= 0; 0 is no window). [`exponential_decay_rate`](/reference/api/vibration/impact-mobility/#exponential_decay_rate) finds the rate that ends the record at a stated value. |
 
 **Returns:** The window, one value per sample, $\mathrm{e}^{-a n / f_s}$.
 
@@ -811,7 +811,7 @@ Remove an exponential window's damping from estimated modes (Formula (A.3)).
 $\zeta_r = \hat\zeta_r - a/\omega_r$ for each mode, with
 $\omega_r = 2\pi f_r$ the damped natural frequency. Estimate
 $\hat\zeta_r$ from the windowed data with any curve fitter (Annex A
-leaves the method open; [`single_mode_fit`](/phonometry/reference/api/vibration/impact-mobility/#single_mode_fit) is one).
+leaves the method open; [`single_mode_fit`](/reference/api/vibration/impact-mobility/#single_mode_fit) is one).
 
 **Parameters**
 
@@ -821,7 +821,7 @@ leaves the method open; [`single_mode_fit`](/phonometry/reference/api/vibration/
 | `damped_natural_frequency_hz` | Damped natural frequency of each mode, in hertz (scalar or 1-D, the shape of `apparent_damping_ratio`). |
 | `exponential_decay_rate_per_s` | Decay rate `a` of the window, in 1/s. |
 
-**Returns:** An [`ExponentialWindowCorrection`](/phonometry/reference/api/vibration/impact-mobility/#exponentialwindowcorrection).
+**Returns:** An [`ExponentialWindowCorrection`](/reference/api/vibration/impact-mobility/#exponentialwindowcorrection).
 
 **Raises**
 
@@ -941,7 +941,7 @@ outside it, so the pulse itself is never attenuated. The shape of the ramp
 is this library's choice; the part does not prescribe one.
 
 Never use a force window to cut a second impact out of the record (6.4):
-the response still carries it. [`check_double_hit`](/phonometry/reference/api/vibration/impact-mobility/#check_double_hit) finds one.
+the response still carries it. [`check_double_hit`](/reference/api/vibration/impact-mobility/#check_double_hit) finds one.
 
 **Parameters**
 
@@ -1103,16 +1103,16 @@ window's value at the instant of its peak, the approximation Annex A
 describes for the common practice of windowing the response alone.
 
 A force window that zeroes an impact the record holds raises
-[`ImpactExcitationWarning`](/phonometry/reference/api/vibration/impact-mobility/#impactexcitationwarning): 6.4 forbids removing a second impact
+[`ImpactExcitationWarning`](/reference/api/vibration/impact-mobility/#impactexcitationwarning): 6.4 forbids removing a second impact
 that way.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `force_n` | Force records, in N: one record (1-D) or one per row (2-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), one channel per impact, for its rate; a calibration factor it carries is deliberately not applied, because this record is a force and not a pressure. |
+| `force_n` | Force records, in N: one record (1-D) or one per row (2-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), one channel per impact, for its rate; a calibration factor it carries is deliberately not applied, because this record is a force and not a pressure. |
 | `response` | Response records, same shape, in m/s², m/s or m as `response_quantity` says; a Signal likewise, its factor not applied. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value, or a second Signal, that disagrees with it raises. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value, or a second Signal, that disagrees with it raises. |
 | `response_quantity` | `"acceleration"` (default), `"velocity"` or `"displacement"`. |
 | `force_window_s` | Width of the unity part of the force window, in seconds (Default: `None`, no force window). |
 | `force_window_start_s` | Where the unity part begins, in seconds (Default: 0). |
@@ -1122,7 +1122,7 @@ that way.
 | `driving_point` | Whether force and response are co-located (Default: `True`). |
 | `frequency_range_hz` | `(f_low, f_high)`, the frequency range of interest in hertz, inside the Nyquist frequency (Default: `None`, every bin above 0 Hz). |
 
-**Returns:** An [`ImpactMobilityResult`](/phonometry/reference/api/vibration/impact-mobility/#impactmobilityresult).
+**Returns:** An [`ImpactMobilityResult`](/reference/api/vibration/impact-mobility/#impactmobilityresult).
 
 **Raises**
 
@@ -1185,7 +1185,7 @@ Fit the mode in a band, knowing the window this estimate carries.
 The fit runs on the FRF kind the response channel measured, because
 that is the record the exponential window multiplied, and the result
 carries the window's decay rate so that
-[`SingleModeFitResult.correction`](/phonometry/reference/api/vibration/impact-mobility/#singlemodefitresultcorrection) applies Annex A.
+[`SingleModeFitResult.correction`](/reference/api/vibration/impact-mobility/#singlemodefitresultcorrection) applies Annex A.
 
 **Parameters**
 
@@ -1193,7 +1193,7 @@ carries the window's decay rate so that
 | :--- | :--- |
 | `band_hz` | `(f_low, f_high)` around one resonance, in hertz. |
 
-**Returns:** A [`SingleModeFitResult`](/phonometry/reference/api/vibration/impact-mobility/#singlemodefitresult).
+**Returns:** A [`SingleModeFitResult`](/reference/api/vibration/impact-mobility/#singlemodefitresult).
 
 ### ImpactMobilityResult.magnitude
 
@@ -1211,7 +1211,7 @@ The FRF kind the response channel gives: accelerance, mobility or receptance.
 
 *property*
 
-The estimate as a [`.MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (ISO 7626-1 vocabulary).
+The estimate as a [`.MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult) (ISO 7626-1 vocabulary).
 
 ### ImpactMobilityResult.phase_rad
 
@@ -1279,7 +1279,7 @@ window and the coherence at the mobility peak.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the fiche has a single body layout, so it has no effect. |
 | `language` | `"en"` (default) or `"es"`. |
@@ -1301,7 +1301,7 @@ ImpactMobilityResult.to(
 ) -> NDArray[np.complex128]
 ```
 
-Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
+Convert the mobility to another FRF kind (see [`.convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf)).
 
 **Raises**
 
@@ -1329,7 +1329,7 @@ not sufficient.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | The record judged, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `x` | The record judged, in its own unit, as a bare array (a [`Signal`](/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `full_scale` | The largest magnitude the channel handles linearly, in the unit of the record. |
 
@@ -1442,13 +1442,13 @@ any level below 25.5 %.
 A driving-point acceleration follows the force itself during the impact
 (the mass line of the structure), so its highest peak can be the impact
 rather than the decay. `start_s` just after the force pulse, or the force
-record passed to [`check_response_decay`](/phonometry/reference/api/vibration/impact-mobility/#check_response_decay), judges the free decay alone.
+record passed to [`check_response_decay`](/reference/api/vibration/impact-mobility/#check_response_decay), judges the free decay alone.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `response` | The response record judged, unwindowed, in its own unit, as a bare array (a [`Signal`](/phonometry/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
+| `response` | The response record judged, unwindowed, in its own unit, as a bare array (a [`Signal`](/reference/api/io/io/#signal) passed in is read without its calibration factor, and its samples are what is kept). |
 | `fs` | Its sample rate, in Hz. |
 | `segment_s` | Length of the segments the end and midpoint levels are read over, in seconds. |
 | `exponential_window` | Whether the record is to be processed with an exponential window (25 % limit) or without (1 %). |
@@ -1550,7 +1550,7 @@ fit of one mode: the FRF over the band is fitted by
 $(b_0 + b_1 s + b_2 s^2)/(s^2 + a_1 s + a_0)$ in linear least
 squares, reweighted by the previous denominator until it settles
 (Sanathanan and Koerner), and the result is written as a pole, its residue
-and a direct term ([`SingleModeFitResult`](/phonometry/reference/api/vibration/impact-mobility/#singlemodefitresult)). The model is exact for a
+and a direct term ([`SingleModeFitResult`](/reference/api/vibration/impact-mobility/#singlemodefitresult)). The model is exact for a
 single-degree-of-freedom structure; on a real one, choose a band that
 holds one resonance and little else.
 
@@ -1564,7 +1564,7 @@ fraction of the band's centre frequency.
 
 Fit the FRF in the kind the response channel measured, because that is
 the record the exponential window multiplied:
-[`ImpactMobilityResult.fit_mode`](/phonometry/reference/api/vibration/impact-mobility/#impactmobilityresultfit_mode) does so.
+[`ImpactMobilityResult.fit_mode`](/reference/api/vibration/impact-mobility/#impactmobilityresultfit_mode) does so.
 
 **Parameters**
 
@@ -1576,7 +1576,7 @@ the record the exponential window multiplied:
 | `kind` | `"accelerance"`, `"mobility"` (default) or `"receptance"`. |
 | `exponential_decay_rate_per_s` | Decay rate of the exponential window the data carry, in 1/s (Default: 0). |
 
-**Returns:** A [`SingleModeFitResult`](/phonometry/reference/api/vibration/impact-mobility/#singlemodefitresult).
+**Returns:** A [`SingleModeFitResult`](/reference/api/vibration/impact-mobility/#singlemodefitresult).
 
 **Raises**
 
@@ -1766,7 +1766,7 @@ Is the analyser's channel-to-channel match inside 8.1's tolerances?
 
 Feed the same broad-band signal to both channels, estimate the frequency
 response between them (for instance with
-[`phonometry.electroacoustics.frequency_response.transfer_function`](/phonometry/reference/api/electroacoustics/frequency-response/#transfer_function)),
+[`phonometry.electroacoustics.frequency_response.transfer_function`](/reference/api/electroacoustics/frequency-response/#transfer_function)),
 and pass it here. The verification passes when its magnitude is unity
 within +/- 5 % and its phase zero within +/- 5 degrees at every frequency
 of the range of interest.
@@ -1779,7 +1779,7 @@ of the range of interest.
 | `response` | Complex frequency response between the channels. |
 | `frequency_range_hz` | `(f_low, f_high)`, in hertz. |
 
-**Returns:** A [`ChannelMatchVerification`](/phonometry/reference/api/vibration/impact-mobility/#channelmatchverification) over the range.
+**Returns:** A [`ChannelMatchVerification`](/reference/api/vibration/impact-mobility/#channelmatchverification) over the range.
 
 **Raises**
 

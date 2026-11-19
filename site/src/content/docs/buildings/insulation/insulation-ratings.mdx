@@ -44,13 +44,13 @@ because a higher impact level is worse. This guide covers the engines
 themselves: the shifting rule, the spectrum adaptation terms $C$, $C_\mathrm{tr}$
 and $C_\mathrm{I}$, the enlarged-range and one-decimal variants, and the ISO 717
 fiche. The measurements that produce the spectra live in the
-[field](/phonometry/buildings/insulation/insulation-field/),
-[laboratory](/phonometry/buildings/insulation/insulation-lab/),
-[intensity](/phonometry/buildings/insulation/insulation-intensity/),
-[survey](/phonometry/buildings/insulation/insulation-survey/) and
-[flanking](/phonometry/buildings/insulation/flanking-lab/) guides; the prediction that
+[field](/buildings/insulation/insulation-field/),
+[laboratory](/buildings/insulation/insulation-lab/),
+[intensity](/buildings/insulation/insulation-intensity/),
+[survey](/buildings/insulation/insulation-survey/) and
+[flanking](/buildings/insulation/flanking-lab/) guides; the prediction that
 consumes the ratings is
-[EN 12354](/phonometry/buildings/design/insulation-prediction/).
+[EN 12354](/buildings/design/insulation-prediction/).
 
 ## How do I compute Rw from third-octave sound reduction data in Python?
 
@@ -128,7 +128,7 @@ living activities (speech, music, radio, television), gives $C$; No. 2,
 A-weighted urban road traffic, whose energy sits at low frequency, gives
 $C_\mathrm{tr}$. So the rating plus the term ($R_\mathrm{w} + C$ for a laboratory index,
 $R'_\mathrm{w} + C$ or $D_{\mathrm{n}T,\mathrm{w}} + C$ for the quantities of the
-[field guide](/phonometry/buildings/insulation/insulation-field/), and likewise
+[field guide](/buildings/insulation/insulation-field/), and likewise
 with $C_\mathrm{tr}$) is the A-weighted level difference the construction achieves
 against that source, which is what makes the sum, and not the rating alone,
 the thing worth specifying. Reading them:
@@ -392,7 +392,7 @@ Annex C rating (thirds $L_\mathrm{n,w} = 79$; octave 54, $C_\mathrm{I} = 0$)
 and, reading $C_\mathrm{I}$ over the 100–2500 Hz sum that A.2.1 specifies,
 $C_\mathrm{I} = -11$ for the thirds. The 2020 print of Table C.1 sums all
 sixteen bands in that cell and gives $-10$ instead; the registry entry is in
-[Errata](/phonometry/reference/errata/).
+[Errata](/reference/errata/).
 
 ### `weighted_impact_rating()` parameters
 
@@ -427,7 +427,7 @@ those three bands by several decibels, which can move
 $C_{50\text{–}3150}$ by a whole one. So a requirement written as
 $D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ is judged on the corner procedure
 whether the report mentions it or not. See
-[Small Rooms: the ISO 16283 Low-Frequency Procedure](/phonometry/buildings/insulation/low-frequency-procedure/).
+[Small Rooms: the ISO 16283 Low-Frequency Procedure](/buildings/insulation/low-frequency-procedure/).
 
 ```python
 from phonometry import building
@@ -510,7 +510,7 @@ disclaimer. `WeightedRatingResult.report()` labels the airborne ISO 717-1 fiche
 `SoundReductionResult.report()` is a convenience that rates the predicted
 $R(f)$ and writes its fiche in one call; that result comes from the EN 12354
 panel models of
-[Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/),
+[Panel sound insulation](/buildings/design/panel-sound-insulation/),
 so it is the one entry point here whose input was never measured.
 
 The report metadata is supplied as a `ReportMetadata` frozen dataclass (every
@@ -618,11 +618,11 @@ anchored on the standards' own Annex C worked examples.
 <ScopeClaim status="not-covered" label="Not covered">
 Nothing on this page measures: every function takes an already-measured (or
 predicted) band spectrum from the
-[field](/phonometry/buildings/insulation/insulation-field/),
-[laboratory](/phonometry/buildings/insulation/insulation-lab/),
-[intensity](/phonometry/buildings/insulation/insulation-intensity/),
-[survey](/phonometry/buildings/insulation/insulation-survey/) or
-[flanking](/phonometry/buildings/insulation/flanking-lab/) guides. The façade
+[field](/buildings/insulation/insulation-field/),
+[laboratory](/buildings/insulation/insulation-lab/),
+[intensity](/buildings/insulation/insulation-intensity/),
+[survey](/buildings/insulation/insulation-survey/) or
+[flanking](/buildings/insulation/flanking-lab/) guides. The façade
 single number of ISO 16283-3 Annex F and the flanking $D_\mathrm{n,f,w}$ reuse these
 engines from their own guides rather than duplicating them. One member of the
 ISO 717 family is deliberately absent: the A-weighted maximum impact level of
@@ -630,7 +630,7 @@ ISO 717 family is deliberately absent: the A-weighted maximum impact level of
 It shifts no curve at all (it is an energy sum of A-weighted band levels), so
 it is not produced by either engine on this page and lives with the sources it
 rates, in [Heavy and Soft Impact
-Sources](/phonometry/buildings/insulation/heavy-impact-sources/).
+Sources](/buildings/insulation/heavy-impact-sources/).
 </ScopeClaim>
 </Scope>
 
@@ -638,27 +638,27 @@ Sources](/phonometry/buildings/insulation/heavy-impact-sources/).
 
 ## See also
 
-- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](/buildings/insulation/lab-application-rules/):
   the improvements $\Delta R_\mathrm{w}$ and $\Delta L_\mathrm{w}$ rated on
   the reference curves of ISO 717-1 Table E.1 and ISO 717-2 Table 4.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the airborne, impact and façade spectra these engines rate in the field.
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
   the laboratory $R$ and $L_\mathrm{n}$ behind $R_\mathrm{w}$ and $L_\mathrm{n,w}$.
-- [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
+- [Sound Insulation by Intensity (ISO 15186)](/buildings/insulation/insulation-intensity/):
   the intensity indices rated with the same airborne engine.
-- [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/):
+- [Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/):
   the survey quantities and their automatic ratings.
-- [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/):
+- [Laboratory Flanking Transmission (ISO 10848)](/buildings/insulation/flanking-lab/):
   the flanking descriptors $D_\mathrm{n,f,w}$ and $L_\mathrm{n,f,w}$.
-- [Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](/buildings/design/impact-improvement/):
   the weighted improvement $\Delta L_\mathrm{w}$ built on the ISO 717-2 reference
   floor.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the single-number model that consumes these ratings.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the
+- [Theory](/reference/theory/rooms-buildings/): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](/phonometry/reference/api/building/insulation/).
+- API reference: [`building.measurement.insulation`](/reference/api/building/insulation/).
 
 </SeeAlso>
 

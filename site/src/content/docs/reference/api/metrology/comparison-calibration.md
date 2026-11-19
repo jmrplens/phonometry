@@ -43,7 +43,7 @@ L_\mathrm{ref} - L_\mathrm{test} = \tfrac12\left(L_\mathrm{C12} - L_\mathrm{C21}
 $$
 
 IEC 61094-5 requires the interchange in a coupler or a jig ("shall be used",
-5.1.2); [`simultaneous_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneous_comparison) refuses a pressure calibration without
+5.1.2); [`simultaneous_comparison`](/reference/api/metrology/comparison-calibration/#simultaneous_comparison) refuses a pressure calibration without
 it. IEC 61094-8 does not, and without it the channel difference is taken as
 read.
 
@@ -53,7 +53,7 @@ does not change the sound pressure significantly, or any change is detected
 and corrected, for example with a monitor microphone near the source: the
 ratio of each microphone's output to the monitor's, and the quotient of the
 two ratios, is the output ratio corrected for the drift (IEC 61094-8 A.2).
-[`sequential_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#sequential_comparison) computes it, with the [`MonitorReadings`](/phonometry/reference/api/metrology/comparison-calibration/#monitorreadings)
+[`sequential_comparison`](/reference/api/metrology/comparison-calibration/#sequential_comparison) computes it, with the [`MonitorReadings`](/reference/api/metrology/comparison-calibration/#monitorreadings)
 of the monitor or without.
 
 **Corrections.** IEC 61094-8 7.6 always corrects the reference's sensitivity
@@ -63,19 +63,19 @@ result to be referred instead to the conditions at which the reference's
 calibration is valid. Both parts allow the result to be referred to the
 reference conditions of clause 4 (23.0 °C, 101.325 kPa, 50 %) when reliable
 correction data are available.
-[`environmental_sensitivity_correction`](/phonometry/reference/api/metrology/comparison-calibration/#environmental_sensitivity_correction) writes that correction to first
+[`environmental_sensitivity_correction`](/reference/api/metrology/comparison-calibration/#environmental_sensitivity_correction) writes that correction to first
 order from the coefficients of the microphone, in the units IEC 61094-2
-Annex D gives them. [`jig_diameter_correction`](/phonometry/reference/api/metrology/comparison-calibration/#jig_diameter_correction) returns the corrections of
+Annex D gives them. [`jig_diameter_correction`](/reference/api/metrology/comparison-calibration/#jig_diameter_correction) returns the corrections of
 IEC 61094-5 Table A.1 for a type WS3 microphone calibrated against an LS2aP in
-the jig of Figure A.4, and [`diameter_sound_field_correction`](/phonometry/reference/api/metrology/comparison-calibration/#diameter_sound_field_correction) computes
+the jig of Figure A.4, and [`diameter_sound_field_correction`](/reference/api/metrology/comparison-calibration/#diameter_sound_field_correction) computes
 them for any test microphone smaller than its reference by the model 6.5
 refers to, Barham, Barrera-Figueroa and Avison (2014), from which Table A.1
 was calculated. A free-field calibration against a reference calibrated
 in a pressure field takes the reference's free-field to pressure sensitivity
 level difference of IEC/TS 61094-7 (IEC 61094-8 Table 1 and 8.2).
 
-**Uncertainty.** [`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) combines, on
-[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation), the components of IEC
+**Uncertainty.** [`comparison_uncertainty_budget`](/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) combines, on
+[`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation), the components of IEC
 61094-5 Table D.1 or IEC 61094-8 Table 2, each with a sensitivity of 1 in the
 level model above, and multiplies the combined standard uncertainty by the
 coverage factor $k = 2$ both parts report with (IEC 61094-5 7.9 and D.2,
@@ -83,7 +83,7 @@ IEC 61094-8 8.8). The expanded uncertainty is then passed to the calibration,
 which draws it as a band.
 
 **The effective free-field region** (IEC 61094-8 B.1).
-[`free_field_region`](/phonometry/reference/api/metrology/comparison-calibration/#free_field_region) gives the prolate spheroid inside which a time
+[`free_field_region`](/reference/api/metrology/comparison-calibration/#free_field_region) gives the prolate spheroid inside which a time
 window of length $\tau$ simulates a free field, with the source and the
 microphone at its foci and the major diameter
 
@@ -92,8 +92,8 @@ A = d + \tau c
 $$
 
 at the speed of sound $c$ of IEC 61094-2 Annex F for the conditions of
-the test ([`air`](/phonometry/reference/api/fluids/air/#air)). Turned round,
-[`reflection_free_window_s`](/phonometry/reference/api/metrology/comparison-calibration/#reflection_free_window_s) gives the longest window that keeps a
+the test ([`air`](/reference/api/fluids/air/#air)). Turned round,
+[`reflection_free_window_s`](/reference/api/metrology/comparison-calibration/#reflection_free_window_s) gives the longest window that keeps a
 reflection of a known path outside it.
 
 **The phase of the sensitivity** (IEC 61094-5 5.1.1, IEC 61094-8 5.1). Both
@@ -114,13 +114,13 @@ have to be referred to the acoustic centres of the microphones (5.1 of the
 second part), which 7.3 positions "at the measurement points"; in a
 sequential substitution both centres go to the same point in turn, and the
 pressures on the two microphones have the same phase there. The phase inputs
-of a calibration travel together, as a [`SimultaneousComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase)
-or a [`SequentialComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase).
+of a calibration travel together, as a [`SimultaneousComparisonPhase`](/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase)
+or a [`SequentialComparisonPhase`](/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase).
 
 **Different acoustic impedances** (IEC 61094-5 7.4 and 7.5). Two microphones
 of different acoustic impedance do not see the same sound pressure; neither
 clause prints a model, and both ask for the effect to be assessed and taken
-into the budget. [`impedance_pressure_ratio`](/phonometry/reference/api/metrology/comparison-calibration/#impedance_pressure_ratio) writes it in one form, each
+into the budget. [`impedance_pressure_ratio`](/reference/api/metrology/comparison-calibration/#impedance_pressure_ratio) writes it in one form, each
 microphone's equivalent volume $V_\mathrm{e}$ (IEC 61094-1 6.2.2)
 against the equivalent volume $V_x$ of what it works into,
 
@@ -133,15 +133,15 @@ for a sequential substitution; and, for a simultaneous excitation, each
 microphone in series with the air between the two, as the "Microphone
 impedance" row of Table D.1 has it, by the circuit of its reference [2],
 Jarvis (1996), whose series impedance
-[`air_gap_series_impedance_pa_s_m3`](/phonometry/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) gives.
-[`ReciprocityMicrophone.complex_equivalent_volume_m3`](/phonometry/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophonecomplex_equivalent_volume_m3) gives
+[`air_gap_series_impedance_pa_s_m3`](/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) gives.
+[`ReciprocityMicrophone.complex_equivalent_volume_m3`](/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophonecomplex_equivalent_volume_m3) gives
 $V_\mathrm{e}$ from the lumped parameters of IEC 61094-2 E.4.
 
 **Validation** (IEC 61094-5 6.7). Calibrations made in a jig or a coupler
 "shall be validated by comparison with calibrations performed in other jigs
 and couplers and alternative sound sources", or, for a laboratory standard
 microphone, with its reciprocity calibration.
-[`verify_jig_or_coupler`](/phonometry/reference/api/metrology/comparison-calibration/#verify_jig_or_coupler) sets the two calibrations side by side; the
+[`verify_jig_or_coupler`](/reference/api/metrology/comparison-calibration/#verify_jig_or_coupler) sets the two calibrations side by side; the
 clause prints no criterion, and the library reads it as their agreeing
 within the expanded uncertainty of their difference. Two calibrations that
 share a component entering both levels alike, the same reference microphone
@@ -159,15 +159,15 @@ which `shared_standard_uncertainty_db` passes to it.
 
 **Time-selective processing** (IEC 61094-8 Annex B). A free field can be
 simulated by keeping only the direct sound of an impulse response:
-[`time_selective_response`](/phonometry/reference/api/metrology/comparison-calibration/#time_selective_response) weights the response with a time window
+[`time_selective_response`](/reference/api/metrology/comparison-calibration/#time_selective_response) weights the response with a time window
 (B.1.3), with the "'tapered' edges" B.1.2 says it "normally has", and
 transforms what is left by Formula (B.2), at any frequency. The impulse response comes from any of the methods of B.2 to B.6:
-[`stepped_sine_impulse_response`](/phonometry/reference/api/metrology/comparison-calibration/#stepped_sine_impulse_response) takes a stepped-sine measurement to
+[`stepped_sine_impulse_response`](/reference/api/metrology/comparison-calibration/#stepped_sine_impulse_response) takes a stepped-sine measurement to
 the time domain by Formula (B.3), and the sweeps, the maximum length
 sequences and the random noise of B.3 to B.5 are those of
 `phonometry.room` and `phonometry.electroacoustics`. For the direct
-impulse method of B.6, [`rectangular_pulse`](/phonometry/reference/api/metrology/comparison-calibration/#rectangular_pulse) is the pulse of Formula
-(B.10) and [`rectangular_pulse_duration_s`](/phonometry/reference/api/metrology/comparison-calibration/#rectangular_pulse_duration_s) the duration whose first
+impulse method of B.6, [`rectangular_pulse`](/reference/api/metrology/comparison-calibration/#rectangular_pulse) is the pulse of Formula
+(B.10) and [`rectangular_pulse_duration_s`](/reference/api/metrology/comparison-calibration/#rectangular_pulse_duration_s) the duration whose first
 spectral zero lies an order of magnitude above the frequencies of interest.
 
 Printed values the library does not follow
@@ -175,14 +175,14 @@ Printed values the library does not follow
 
 **IEC 61094-5 D.3.** The root-sum-square of the eight components Table D.1
 prints is 0.0437 dB, not the 0.040 dB D.3 states; with $k = 2$ it is
-0.087 dB rather than 0.08 dB. [`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) gives the
+0.087 dB rather than 0.08 dB. [`comparison_uncertainty_budget`](/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) gives the
 sum of the printed components, and the defect is in `docs/ERRATA.md`.
 
 **IEC 61094-8 B.10.** The spectrum of Formula (B.10) is that of a rectangular
 pulse of duration $2b$, although the text calls $b$ the duration.
 The formula and the first zero it puts at $1/(2b)$ agree, so the library
 follows them and reads $b$ as the half-duration:
-[`rectangular_pulse`](/phonometry/reference/api/metrology/comparison-calibration/#rectangular_pulse) takes the whole duration $T = 2b$. The defect
+[`rectangular_pulse`](/reference/api/metrology/comparison-calibration/#rectangular_pulse) takes the whole duration $T = 2b$. The defect
 is in `docs/ERRATA.md`.
 
 **Barham et al. (2014), Formulas (1), (2) and (4).** With the inputs of its
@@ -191,7 +191,7 @@ its Table 2 (Table A.1 of IEC 61094-5) prints -1.443 dB. Read with the radial
 sensitivity of Formula (4) less 1, the deflection of a membrane under a
 uniform pressure, the annulus of Formula (2) from the test microphone's
 overall radius, and $k_n r/a$ in Formula (1) as in (2) and (3), it
-gives every row of the table; [`diameter_sound_field_correction`](/phonometry/reference/api/metrology/comparison-calibration/#diameter_sound_field_correction)
+gives every row of the table; [`diameter_sound_field_correction`](/reference/api/metrology/comparison-calibration/#diameter_sound_field_correction)
 follows that reading. The defects are in `docs/ERRATA.md`.
 
 **Jarvis (1996), Appendix B.** In the published scan the impedance of the
@@ -199,11 +199,11 @@ first microphone reads $r_1 + w\,m + 1/(\mathrm{i}\,w c_1)$, its mass
 term without the imaginary unit the second microphone's carries: blank space
 stands where the glyphs belong, as it does for others the scan loses on the
 same folio. Only $\mathrm{i}\,w\,m_1$ gives the graphs computed from
-it, and [`air_gap_series_impedance_pa_s_m3`](/phonometry/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) is checked against that. The
+it, and [`air_gap_series_impedance_pa_s_m3`](/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) is checked against that. The
 defect is in `docs/ERRATA.md`.
 
 The IEC 61183 diffuse-field comparison of clause 5
-([`diffuse_field_sensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffuse_field_sensitivity)) is the same
+([`diffuse_field_sensitivity`](/reference/api/metrology/random-incidence/#diffuse_field_sensitivity)) is the same
 sequential comparison without a monitor, and computes its level difference and
 its sensitivity level through this module.
 
@@ -276,7 +276,7 @@ Z_x = Z_L + \frac{Z_L Z_c}{Z_L + Z_c}
 $$
 
 so each diaphragm takes that pressure times $Z_m/(Z_m + Z_x)$, and
-the printed ratio is the divider of [`impedance_pressure_ratio`](/phonometry/reference/api/metrology/comparison-calibration/#impedance_pressure_ratio)
+the printed ratio is the divider of [`impedance_pressure_ratio`](/reference/api/metrology/comparison-calibration/#impedance_pressure_ratio)
 given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 
 **Parameters**
@@ -289,7 +289,7 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 | `temperature_c` | The air temperature, in °C (Default: 23.0, the reference conditions of clause 4). |
 | `static_pressure_kpa` | The static pressure $p_0$, in kPa (Default: 101.325). |
 | `relative_humidity_percent` | The relative humidity, in % (Default: 50). |
-| `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) whose density and ratio of specific heats are used instead of those of the IEC 61094-2 Annex F air at the three conditions, at the same static pressure (Default: None). Appendix B takes 1.21 kg/m³, 1.4 and 101 325 Pa. |
+| `gas` | A [`Fluid`](/reference/api/fluids/fluids/#fluid) whose density and ratio of specific heats are used instead of those of the IEC 61094-2 Annex F air at the three conditions, at the same static pressure (Default: None). Appendix B takes 1.21 kg/m³, 1.4 and 101 325 Pa. |
 
 **Returns:** $Z_x$ at each frequency, complex, in Pa·s/m³, read-only. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -335,15 +335,15 @@ The uncertainty budget of a comparison calibration at one frequency
 (IEC 61094-5:2016 Annex D; IEC 61094-8:2012 8.8 and Table 2).
 
 Each component is given as a standard uncertainty in dB, the column
-Table D.1 prints, or as a [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) whose
+Table D.1 prints, or as a [`Quantity`](/reference/api/metrology/uncertainty/#quantity) whose
 standard uncertainty it takes: `metrology.rectangular(0, 0.03)` for a
 semi-range of 0.03 dB, say. They are keyed by the names of
-[`IEC61094_5_TABLE_D1`](/phonometry/reference/api/metrology/comparison-calibration/#iec61094_5_table_d1) for a pressure calibration and of
-[`IEC61094_8_TABLE_2`](/phonometry/reference/api/metrology/comparison-calibration/#iec61094_8_table_2) for a free-field one; neither table is
+[`IEC61094_5_TABLE_D1`](/reference/api/metrology/comparison-calibration/#iec61094_5_table_d1) for a pressure calibration and of
+[`IEC61094_8_TABLE_2`](/reference/api/metrology/comparison-calibration/#iec61094_8_table_2) for a free-field one; neither table is
 exhaustive (D.1, 8.1), so a component may be left out and
 `additional_components` adds the ones a set-up needs, such as the
 diameter correction of a WS3 microphone in the jig (Table D.1, special
-cases). The combination is [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation)
+cases). The combination is [`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation)
 on the level model, every component with a sensitivity of 1, which is the
 root-sum-square of D.3; the expanded uncertainty is $k = 2$ times
 it, the coverage factor 7.9 and D.2 of the first part and 8.8 of the
@@ -358,13 +358,13 @@ components (an erratum; see `docs/ERRATA.md`).
 
 | Name | Description |
 | :--- | :--- |
-| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB or a [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity). A type checker pairs the keys with `field`: those of Table D.1 with `"pressure"`, those of Table 2 with `"free"`, and only the ones both tables list with a field held in a variable. Keyed by any of `"reference"`, `"capacitance"`, `"non_linearity"`, `"impedance"`, `"polarizing_voltage"`, `"repeatability"`, `"drift"`, `"rounding"`, `"source_stability"`, `"positioning"`, `"alignment"`, `"free_field"`, `"non_plane_wave"` or `"environment"`. |
+| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB or a [`Quantity`](/reference/api/metrology/uncertainty/#quantity). A type checker pairs the keys with `field`: those of Table D.1 with `"pressure"`, those of Table 2 with `"free"`, and only the ones both tables list with a field held in a variable. Keyed by any of `"reference"`, `"capacitance"`, `"non_linearity"`, `"impedance"`, `"polarizing_voltage"`, `"repeatability"`, `"drift"`, `"rounding"`, `"source_stability"`, `"positioning"`, `"alignment"`, `"free_field"`, `"non_plane_wave"` or `"environment"`. |
 | `frequency_hz` | The frequency the budget is for, in Hz. |
 | `field` | `"pressure"` (Table D.1, default) or `"free"` (Table 2). |
-| `additional_components` | Further components, as named [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects (Default: none). |
+| `additional_components` | Further components, as named [`Quantity`](/reference/api/metrology/uncertainty/#quantity) objects (Default: none). |
 | `coverage_factor` | $k$ (Default: 2). |
 
-**Returns:** The [`ComparisonUncertaintyBudget`](/phonometry/reference/api/metrology/comparison-calibration/#comparisonuncertaintybudget).
+**Returns:** The [`ComparisonUncertaintyBudget`](/reference/api/metrology/comparison-calibration/#comparisonuncertaintybudget).
 
 **Raises**
 
@@ -536,7 +536,7 @@ times it (7.9 of the first part, 8.8 of the second).
 | `names` | The key of each component, then the names of any additional ones. |
 | `components` | The component as the table prints it, or the name of an additional one. |
 | `standard_uncertainties_db` | $u_i$, in dB. |
-| `uncertainty` | The [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of `standard_uncertainties_db`. |
+| `uncertainty` | The [`UncertaintyResult`](/reference/api/metrology/uncertainty/#uncertaintyresult) of the combination, which has to be the combination of `standard_uncertainties_db`. |
 | `coverage_factor` | $k$, 2 by both parts. |
 
 ### ComparisonUncertaintyBudget.combined_uncertainty_db
@@ -709,9 +709,9 @@ $R_P = -1$ at $c/2L$.
 | `temperature_c` | The air temperature, in °C (Default: 23.0, the reference conditions of clause 4). |
 | `static_pressure_kpa` | The static pressure, in kPa (Default: 101.325). |
 | `relative_humidity_percent` | The relative humidity, in % (Default: 50). |
-| `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) whose speed of sound is used instead of that of the IEC 61094-2 Annex F air at the three conditions, at the same static pressure (Default: None). |
+| `gas` | A [`Fluid`](/reference/api/fluids/fluids/#fluid) whose speed of sound is used instead of that of the IEC 61094-2 Annex F air at the three conditions, at the same static pressure (Default: None). |
 
-**Returns:** The [`DiameterSoundFieldCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#diametersoundfieldcorrection).
+**Returns:** The [`DiameterSoundFieldCorrection`](/reference/api/metrology/comparison-calibration/#diametersoundfieldcorrection).
 
 **Raises**
 
@@ -868,7 +868,7 @@ microphone, hence the default of 0 for its coefficient.
 The reference conditions default to clause 4 of IEC 61094-5 and IEC
 61094-8, 101.325 kPa, 23.0 °C and 50 %. The correction adds to a level
 known at the reference conditions to give it at the conditions of the
-test; [`simultaneous_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneous_comparison) and [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#sequential_comparison)
+test; [`simultaneous_comparison`](/reference/api/metrology/comparison-calibration/#simultaneous_comparison) and [`sequential_comparison`](/reference/api/metrology/comparison-calibration/#sequential_comparison)
 add it to the reference microphone's level (`reference_environment=`)
 or subtract it from the result (`test_environment=`).
 
@@ -887,7 +887,7 @@ or subtract it from the result (`test_environment=`).
 | `reference_temperature_c` | $t_0$, in °C (Default: 23.0). |
 | `reference_relative_humidity_percent` | $H_0$, in % (Default: 50). |
 
-**Returns:** The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection).
+**Returns:** The [`EnvironmentalSensitivityCorrection`](/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection).
 
 **Raises**
 
@@ -1007,7 +1007,7 @@ B.1).
 
 Formula (B.1), $A = d + \tau c$, with $c$ "the speed of sound
 at the prevailing environmental conditions", which is taken from the
-IEC 61094-2:2009 Annex F air of [`air`](/phonometry/reference/api/fluids/air/#air). The
+IEC 61094-2:2009 Annex F air of [`air`](/reference/api/fluids/air/#air). The
 conditions default to the reference conditions of clause 4, 23.0 °C,
 101.325 kPa and 50 %.
 
@@ -1021,7 +1021,7 @@ conditions default to the reference conditions of clause 4, 23.0 °C,
 | `static_pressure_kpa` | The static pressure, in kPa (Default: 101.325). |
 | `relative_humidity_percent` | The relative humidity, in % (Default: 50). |
 
-**Returns:** The [`FreeFieldRegion`](/phonometry/reference/api/metrology/comparison-calibration/#freefieldregion).
+**Returns:** The [`FreeFieldRegion`](/reference/api/metrology/comparison-calibration/#freefieldregion).
 
 **Raises**
 
@@ -1186,7 +1186,7 @@ and $p_{s,\mathrm{r}}$ = 101.325 kPa):
   volumes this is the same ratio, $V_x$ being the equivalent volume
   of $Z_x$, $\kappa_\mathrm{r} p_{s,\mathrm{r}}/(\mathrm{j}\omega Z_x)$. Pass
   `coupling_impedance_pa_s_m3`, which
-  [`air_gap_series_impedance_pa_s_m3`](/phonometry/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) gives for a coupler of known
+  [`air_gap_series_impedance_pa_s_m3`](/reference/api/metrology/comparison-calibration/#air_gap_series_impedance_pa_s_m3) gives for a coupler of known
   length and radius; Table D.1 still asks for the effect to be
   "established experimentally" when the impedances differ significantly.
 
@@ -1195,12 +1195,12 @@ and $p_{s,\mathrm{r}}$ = 101.325 kPa):
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `reference_equivalent_volume_m3` | $V_\mathrm{e,ref}$, complex, in m³, one value or one per frequency, such as [`ReciprocityMicrophone.complex_equivalent_volume_m3`](/phonometry/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophonecomplex_equivalent_volume_m3) gives it from the lumped parameters of IEC 61094-2 E.4. Its ratio to $V_\mathrm{eq}$ holds no $\kappa_\mathrm{r}$, so the volume keeps the definition $V_\mathrm{eq}$ was given in, the $\kappa_\mathrm{r} = 1.40$ of IEC 61094-1 for the values of its Table 3; a series impedance is turned into $V_x$ with that same 1.40. |
+| `reference_equivalent_volume_m3` | $V_\mathrm{e,ref}$, complex, in m³, one value or one per frequency, such as [`ReciprocityMicrophone.complex_equivalent_volume_m3`](/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophonecomplex_equivalent_volume_m3) gives it from the lumped parameters of IEC 61094-2 E.4. Its ratio to $V_\mathrm{eq}$ holds no $\kappa_\mathrm{r}$, so the volume keeps the definition $V_\mathrm{eq}$ was given in, the $\kappa_\mathrm{r} = 1.40$ of IEC 61094-1 for the values of its Table 3; a series impedance is turned into $V_x$ with that same 1.40. |
 | `test_equivalent_volume_m3` | $V_\mathrm{e,test}$, in m³. |
 | `coupling_equivalent_volume_m3` | $V_x$ of a closed coupler, in m³ at the reference conditions (Default: None). |
 | `coupling_impedance_pa_s_m3` | $Z_x$, the acoustic impedance in series with each microphone, in Pa·s/m³ (Default: None; give exactly one of the two). |
 
-**Returns:** The [`ImpedancePressureRatio`](/phonometry/reference/api/metrology/comparison-calibration/#impedancepressureratio).
+**Returns:** The [`ImpedancePressureRatio`](/reference/api/metrology/comparison-calibration/#impedancepressureratio).
 
 **Raises**
 
@@ -1301,7 +1301,7 @@ of 0.005 dB at 2 kHz giving 0.003 dB, and how 7.5 asks for it when no
 reference of similar impedance is available: "the size of the error
 caused should be estimated and added to the uncertainty budget". It
 is the `"impedance"` component of
-[`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget); a calibration that corrects for
+[`comparison_uncertainty_budget`](/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget); a calibration that corrects for
 $R_P$ instead takes only what is left of it. The same row of
 Table D.1 warns that "when microphones have significantly differing
 impedances (for example WS2F microphone compared against LS2P at
@@ -1336,7 +1336,7 @@ budget as an additional component.
 | :--- | :--- |
 | `frequencies` | Frequencies of the table, in Hz, increasing (Default: None, the 14 rows). |
 
-**Returns:** The [`JigDiameterCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#jigdiametercorrection).
+**Returns:** The [`JigDiameterCorrection`](/reference/api/metrology/comparison-calibration/#jigdiametercorrection).
 
 **Raises**
 
@@ -1572,7 +1572,7 @@ read in the measurement of each microphone, and each microphone's output
 is taken re the monitor reading taken with it, so a source that drifts
 between the two measurements cancels in the quotient of the two ratios.
 Its phases are read with its levels when the calibration carries the
-phase. Pass one to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#sequential_comparison) as `monitor`.
+phase. Pass one to [`sequential_comparison`](/reference/api/metrology/comparison-calibration/#sequential_comparison) as `monitor`.
 
 **Parameters**
 
@@ -1607,7 +1607,7 @@ can be directly applied to the sound source", and "in order to have a
 flat spectrum in the frequency range of interest [...] the duration of
 the input signal needs to be sufficiently short": its spectrum is Formula
 (B.10). Give the whole duration $T$; Formula (B.10) writes it as
-$2b$ (`docs/ERRATA.md`). [`rectangular_pulse_duration_s`](/phonometry/reference/api/metrology/comparison-calibration/#rectangular_pulse_duration_s)
+$2b$ (`docs/ERRATA.md`). [`rectangular_pulse_duration_s`](/reference/api/metrology/comparison-calibration/#rectangular_pulse_duration_s)
 gives the duration for an upper limit of frequency.
 
 **Parameters**
@@ -1617,7 +1617,7 @@ gives the duration for an upper limit of frequency.
 | `duration_s` | $T = 2b$, in s. |
 | `amplitude_v` | $a$, in V (Default: 1). |
 
-**Returns:** The [`RectangularPulse`](/phonometry/reference/api/metrology/comparison-calibration/#rectangularpulse).
+**Returns:** The [`RectangularPulse`](/reference/api/metrology/comparison-calibration/#rectangularpulse).
 
 **Raises**
 
@@ -1934,8 +1934,8 @@ determination; the calibration averages the determinations.
 
 **Phase** (IEC 61094-5 5.1.1, IEC 61094-8 5.1). With the phase of the
 reference's sensitivity and the phases of the two outputs, given together
-as a [`SequentialComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase) and read against the monitor's
-output (its phases in the [`MonitorReadings`](/phonometry/reference/api/metrology/comparison-calibration/#monitorreadings)) or against the signal
+as a [`SequentialComparisonPhase`](/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase) and read against the monitor's
+output (its phases in the [`MonitorReadings`](/reference/api/metrology/comparison-calibration/#monitorreadings)) or against the signal
 driving the source, the calibration carries the phase of the test
 microphone too, the quotient of the ratios written for their phases:
 
@@ -1955,17 +1955,17 @@ same measurement point (7.3), $\arg R_P$ is 0.
 | `reference_sensitivity_level` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa. |
 | `reference_output_level` | $20\lg V_\mathrm{ref}$, the reference microphone's output level, in dB re any voltage the test microphone is read against too. |
 | `test_output_level` | $20\lg V_\mathrm{test}$, the test microphone's output level, in dB re the same voltage. |
-| `monitor` | The [`MonitorReadings`](/phonometry/reference/api/metrology/comparison-calibration/#monitorreadings) of a monitor microphone, $20\lg V_\mathrm{mon,1}$ and $20\lg V_\mathrm{mon,2}$ in the measurements of the reference and of the test microphone, with their phases when the calibration carries the phase (Default: None, no monitor). |
+| `monitor` | The [`MonitorReadings`](/reference/api/metrology/comparison-calibration/#monitorreadings) of a monitor microphone, $20\lg V_\mathrm{mon,1}$ and $20\lg V_\mathrm{mon,2}$ in the measurements of the reference and of the test microphone, with their phases when the calibration carries the phase (Default: None, no monitor). |
 | `field` | `"pressure"` (IEC 61094-5, default) or `"free"` (IEC 61094-8). |
 | `pressure_level_difference` | $20\lg R_P$, in dB (Default: 0). |
 | `corrections` | Further corrections added to the level, by name, in dB (Default: none). |
-| `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the reference, added (Default: None). |
-| `test_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone, subtracted (Default: None). |
+| `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the reference, added (Default: None). |
+| `test_environment` | The [`EnvironmentalSensitivityCorrection`](/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone, subtracted (Default: None). |
 | `reference_free_field_difference` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), free field only, in dB; carried in `corrections` as `"reference free-field difference"` (Default: None). |
 | `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the result at each frequency, in dB (Default: None). |
-| `phase` | The [`SequentialComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase) of the calibration: the reference's phase, the output phases and $\arg R_P$ (Default: None, a calibration of the level alone). |
+| `phase` | The [`SequentialComparisonPhase`](/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase) of the calibration: the reference's phase, the output phases and $\arg R_P$ (Default: None, a calibration of the level alone). |
 
-**Returns:** The [`ComparisonCalibration`](/phonometry/reference/api/metrology/comparison-calibration/#comparisoncalibration).
+**Returns:** The [`ComparisonCalibration`](/reference/api/metrology/comparison-calibration/#comparisoncalibration).
 
 **Raises**
 
@@ -1994,8 +1994,8 @@ them at once: the phase of the reference's sensitivity it is carried over
 from, and the phases of the two outputs, read against the monitor's output
 or against the signal driving the source; $\arg R_P$ completes them
 where the pressures on the two microphones differ in phase. The monitor's
-own phases are read with its levels, in [`MonitorReadings`](/phonometry/reference/api/metrology/comparison-calibration/#monitorreadings). Pass one
-to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#sequential_comparison) as `phase`.
+own phases are read with its levels, in [`MonitorReadings`](/reference/api/metrology/comparison-calibration/#monitorreadings). Pass one
+to [`sequential_comparison`](/reference/api/metrology/comparison-calibration/#sequential_comparison) as `phase`.
 
 **Parameters**
 
@@ -2060,7 +2060,7 @@ the determinations.
 
 **Phase** (IEC 61094-5 5.1.1, IEC 61094-8 5.1). With the phase of the
 reference's sensitivity and the phase readings of the two channels, given
-together as a [`SimultaneousComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase), the calibration
+together as a [`SimultaneousComparisonPhase`](/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase), the calibration
 carries the phase of the test microphone too. The phase of
 each channel's reading re the other's adds up as its level does in (C.1)
 and (C.2), so their difference cancels the phase shifts of the channels
@@ -2087,13 +2087,13 @@ the complex ratio the sensitivity "both modulus and phase" is.
 | `field` | `"pressure"` (IEC 61094-5, default) or `"free"` (IEC 61094-8). |
 | `pressure_level_difference` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB (Default: 0, the ratio reduced to unity). |
 | `corrections` | Further corrections added to the level, by name, in dB, such as `jig_diameter_correction(f).correction` (Default: none). |
-| `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) that takes the reference's level from the conditions of its calibration to those of the test, added (Default: None). |
-| `test_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone from the reference conditions to those of the test, subtracted to refer the result to the reference conditions (Default: None, the result is at the conditions of the test). |
+| `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) that takes the reference's level from the conditions of its calibration to those of the test, added (Default: None). |
+| `test_environment` | The [`EnvironmentalSensitivityCorrection`](/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone from the reference conditions to those of the test, subtracted to refer the result to the reference conditions (Default: None, the result is at the conditions of the test). |
 | `reference_free_field_difference` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), added to a pressure-calibrated reference in a free-field calibration only, in dB; the result carries it in `corrections` as `"reference free-field difference"` (Default: None). |
-| `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the result at each frequency, in dB, as [`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) gives it (Default: None). |
-| `phase` | The [`SimultaneousComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase) of the calibration: the reference's phase, the phase readings and $\arg R_P$ (Default: None, a calibration of the level alone). |
+| `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the result at each frequency, in dB, as [`comparison_uncertainty_budget`](/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) gives it (Default: None). |
+| `phase` | The [`SimultaneousComparisonPhase`](/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase) of the calibration: the reference's phase, the phase readings and $\arg R_P$ (Default: None, a calibration of the level alone). |
 
-**Returns:** The [`ComparisonCalibration`](/phonometry/reference/api/metrology/comparison-calibration/#comparisoncalibration).
+**Returns:** The [`ComparisonCalibration`](/reference/api/metrology/comparison-calibration/#comparisoncalibration).
 
 **Raises**
 
@@ -2122,7 +2122,7 @@ them at once: the phase of the reference's sensitivity it is carried over
 from, and the phase readings of the two channels that carry it, given as
 the level readings are; $\arg R_P$ completes them where the pressures
 on the two microphones differ in phase. Pass one to
-[`simultaneous_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneous_comparison) as `phase`.
+[`simultaneous_comparison`](/reference/api/metrology/comparison-calibration/#simultaneous_comparison) as `phase`.
 
 **Parameters**
 
@@ -2177,7 +2177,7 @@ one.
 | `frequencies` | $k\,\Delta f$, from 0 Hz, in Hz, equally spaced. |
 | `response` | $H(k\,\Delta f)$, complex, one value per frequency. |
 
-**Returns:** The [`SteppedSineImpulseResponse`](/phonometry/reference/api/metrology/comparison-calibration/#steppedsineimpulseresponse); pass its `impulse_response` and `fs` to [`time_selective_response`](/phonometry/reference/api/metrology/comparison-calibration/#time_selective_response).
+**Returns:** The [`SteppedSineImpulseResponse`](/reference/api/metrology/comparison-calibration/#steppedsineimpulseresponse); pass its `impulse_response` and `fs` to [`time_selective_response`](/reference/api/metrology/comparison-calibration/#time_selective_response).
 
 **Raises**
 
@@ -2276,18 +2276,18 @@ chosen interval (B.1.3); a rectangular one "is not recommended because it
 usually leads to spectral leakage", so the default is a Tukey window, flat
 in the middle with cosine-tapered edges. Its placement and duration are
 the user's, by the three criteria of B.1.3: the distances from the source
-to the microphone and to the reflectors (see [`reflection_free_window_s`](/phonometry/reference/api/metrology/comparison-calibration/#reflection_free_window_s)),
+to the microphone and to the reflectors (see [`reflection_free_window_s`](/reference/api/metrology/comparison-calibration/#reflection_free_window_s)),
 the supporting structure beyond the rod, and a look at the impulse
 response.
 
 The impulse response may come from any method of Annex B: a stepped sine
-by [`stepped_sine_impulse_response`](/phonometry/reference/api/metrology/comparison-calibration/#stepped_sine_impulse_response), a sweep or a maximum length
-sequence by [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) and
-[`phonometry.room.mls_impulse_response`](/phonometry/reference/api/rooms/impulse-response/#mls_impulse_response), or a direct impulse (B.6), in
+by [`stepped_sine_impulse_response`](/reference/api/metrology/comparison-calibration/#stepped_sine_impulse_response), a sweep or a maximum length
+sequence by [`phonometry.room.impulse_response`](/reference/api/rooms/impulse-response/#impulse_response) and
+[`phonometry.room.mls_impulse_response`](/reference/api/rooms/impulse-response/#mls_impulse_response), or a direct impulse (B.6), in
 which case `excitation` divides the spectrum of the pulse out. The
 reference and the test microphone are windowed alike, and the levels of
 their responses at the calibration frequencies go to
-[`sequential_comparison`](/phonometry/reference/api/metrology/comparison-calibration/#sequential_comparison) as the two output levels.
+[`sequential_comparison`](/reference/api/metrology/comparison-calibration/#sequential_comparison) as the two output levels.
 
 **Parameters**
 
@@ -2299,15 +2299,15 @@ their responses at the calibration frequencies go to
 | `window_end_s` | Where it ends, in s: before the first reflection. |
 | `window_shape` | `"tukey"` (default), `"hann"`, `"hamming"` or `"rectangular"`. |
 | `taper_fraction` | The fraction of a Tukey window that is taper, half at each edge (Default: 0.25). |
-| `excitation` | The [`RectangularPulse`](/phonometry/reference/api/metrology/comparison-calibration/#rectangularpulse) of a direct impulse measurement, divided out of the response (Default: None). |
+| `excitation` | The [`RectangularPulse`](/reference/api/metrology/comparison-calibration/#rectangularpulse) of a direct impulse measurement, divided out of the response (Default: None). |
 
-**Returns:** The [`TimeSelectiveResponse`](/phonometry/reference/api/metrology/comparison-calibration/#timeselectiveresponse).
+**Returns:** The [`TimeSelectiveResponse`](/reference/api/metrology/comparison-calibration/#timeselectiveresponse).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for what [`TimeSelectiveResponse`](/phonometry/reference/api/metrology/comparison-calibration/#timeselectiveresponse) refuses. |
+| ValueError | for what [`TimeSelectiveResponse`](/reference/api/metrology/comparison-calibration/#timeselectiveresponse) refuses. |
 | TypeError | if `window_shape` is not a text, or `impulse_response` holds a text or a value that is not a real number. |
 
 ## TimeSelectiveResponse
@@ -2345,7 +2345,7 @@ the pulse's, as a pulse that begins at the start of the record.
 | `window_end_s` | Where it ends, in s. |
 | `window_shape` | `"tukey"`, `"hann"`, `"hamming"` or `"rectangular"`. |
 | `taper_fraction` | The fraction of a Tukey window that is taper, half at each edge. |
-| `excitation` | The [`RectangularPulse`](/phonometry/reference/api/metrology/comparison-calibration/#rectangularpulse) the response was taken with, divided out, or `None`. |
+| `excitation` | The [`RectangularPulse`](/reference/api/metrology/comparison-calibration/#rectangularpulse) the response was taken with, divided out, or `None`. |
 
 ### TimeSelectiveResponse.free_field_region()
 
@@ -2374,13 +2374,13 @@ the microphone under test, to the end of the time window".
 | `static_pressure_kpa` | The static pressure, in kPa (Default: 101.325). |
 | `relative_humidity_percent` | The relative humidity, in % (Default: 50). |
 
-**Returns:** The [`FreeFieldRegion`](/phonometry/reference/api/metrology/comparison-calibration/#freefieldregion).
+**Returns:** The [`FreeFieldRegion`](/reference/api/metrology/comparison-calibration/#freefieldregion).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an arrival at or after the end of the window, or what [`free_field_region`](/phonometry/reference/api/metrology/comparison-calibration/#free_field_region) refuses. |
+| ValueError | for an arrival at or after the end of the window, or what [`free_field_region`](/reference/api/metrology/comparison-calibration/#free_field_region) refuses. |
 | TypeError | if `arrival_time_s` is not a single number. |
 
 ### TimeSelectiveResponse.frequency_resolution_hz
@@ -2632,11 +2632,11 @@ common to both levels, with the same sign, may be given here.
 | Name | Description |
 | :--- | :--- |
 | `calibration` | The pressure calibration by comparison made in the jig or coupler, with its expanded uncertainty. |
-| `validation` | The calibration it is validated against: a [`ComparisonCalibration`](/phonometry/reference/api/metrology/comparison-calibration/#comparisoncalibration) or a [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), in a pressure field, with its expanded uncertainty. |
+| `validation` | The calibration it is validated against: a [`ComparisonCalibration`](/reference/api/metrology/comparison-calibration/#comparisoncalibration) or a [`ReciprocityCalibration`](/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), in a pressure field, with its expanded uncertainty. |
 | `microphone` | For a reciprocity calibration, the index of the microphone that was compared (Default: None). |
 | `shared_standard_uncertainty_db` | $u_\mathrm{sh}$, the standard uncertainty of what the two calibrations share, in dB: one value, or one per frequency of `calibration` (Default: 0 dB, two independent calibrations). |
 
-**Returns:** The [`JigCouplerVerification`](/phonometry/reference/api/metrology/comparison-calibration/#jigcouplerverification).
+**Returns:** The [`JigCouplerVerification`](/reference/api/metrology/comparison-calibration/#jigcouplerverification).
 
 **Raises**
 

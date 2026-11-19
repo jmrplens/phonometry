@@ -50,7 +50,7 @@ closes that gap, and it is one of only two measures in ISO 3382-1 Table A.1
 that a calibrated source is needed for, the other being the late lateral
 sound level, which is referred to the same free field. Everything else on
 the
-[room acoustic parameters page](/phonometry/buildings/rooms/room-acoustics/)
+[room acoustic parameters page](/buildings/rooms/room-acoustics/)
 (EDT, T20, T30, C50, C80, D50, $T_\mathrm{S}$) is a decay time, a ratio of
 energies or a centre time read from one recording alone, and survives any
 gain you put in front of it. $G$ does not.
@@ -127,7 +127,7 @@ compensating denominator to absorb it the way C80 and D50 do. The integral
 is therefore truncated where the fitted decay meets the noise floor and the
 missing tail compensated with the fitted rate, which is the treatment 5.3.3
 Equation (3) prints for this same integral and which
-[`decay_curve`](/phonometry/buildings/rooms/room-acoustics/) already gives
+[`decay_curve`](/buildings/rooms/room-acoustics/) already gives
 the same response. A synthetic response with no measurable noise floor is
 integrated whole, so nothing moves for one.
 
@@ -223,10 +223,10 @@ print(round(room.sound_strength_from_power(80.0, 100.0), 4))   # 11.0
 ```
 
 A.2.1 asks for $L_W$ to be measured to ISO 3741, which lives in
-[Sound Power](/phonometry/devices/emission/sound-power/).
+[Sound Power](/devices/emission/sound-power/).
 
 The printed A.2.1 carries two defects, both in
-the [errata registry](/phonometry/reference/errata/). The same symbol
+the [errata registry](/reference/errata/). The same symbol
 $L_{pE}$ names the hall's exposure level under (A.2) and the
 reverberation-room level under (A.5), so substituting one into the other as
 printed makes the hall vanish from $G$; the library keeps the two apart, the
@@ -255,7 +255,7 @@ sound-power route describe the same physical situation and **cannot** agree
 to better than 0.0206 dB, whatever a library does. That is 2 % of the 1 dB
 just-noticeable difference of Table A.1, so it never matters in a hall; it
 matters when a test suite compares the two routes, which is why the
-[conformance report](/phonometry/reference/conformance/) pins the gap
+[conformance report](/reference/conformance/) pins the gap
 rather than tolerating it.
 
 The library prints what the standard prints. A version that quietly used
@@ -368,7 +368,7 @@ is applied to **both** recordings. `sound_strength` computes both exposure
 levels from the responses it is given, so:
 
 - a common calibration factor on the pair cancels exactly, and the
-  [conformance report](/phonometry/reference/conformance/) has a row holding
+  [conformance report](/reference/conformance/) has a row holding
   it to that;
 - a factor on one of them does not cancel, and shows up as a straight
   offset in every band of $G$;
@@ -376,17 +376,17 @@ levels from the responses it is given, so:
   hall recording carries the calibration alone and must be an absolute one.
 
 A bare NumPy array is read as pascals. A
-[`Signal`](/phonometry/io/audio-files/) brings its own calibration factor and
+[`Signal`](/io/audio-files/) brings its own calibration factor and
 it is applied before the integral.
 
 ## 6. Where this sits
 
 $G$ belongs to the group of Table A.1 quantities the library measures from
 an impulse response. The decay times and energy ratios are in
-[Room Acoustic Parameters](/phonometry/buildings/rooms/room-acoustics/);
+[Room Acoustic Parameters](/buildings/rooms/room-acoustics/);
 acquiring the response itself, with the source and microphone positions
 ISO 3382-1 asks for, is in
-[Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/).
+[Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/).
 
 ## What this guide covers
 
@@ -404,7 +404,7 @@ The rest of Annex A and its neighbours: the stage support of Annex C, the
 measurement uncertainty of Clause 7, and the source directivity qualification
 of Table 1. The lateral energy measures of A.2.4 and A.2.5 and the interaural
 cross correlation of Annex B have a guide of their own,
-[Spatial impression](/phonometry/buildings/rooms/spatial-impression/).
+[Spatial impression](/buildings/rooms/spatial-impression/).
 </ScopeClaim>
 </Scope>
 
@@ -412,14 +412,14 @@ cross correlation of Annex B have a guide of their own,
 
 ## See also
 
-- [Room Acoustic Parameters](/phonometry/buildings/rooms/room-acoustics/): the
+- [Room Acoustic Parameters](/buildings/rooms/room-acoustics/): the
   decay times and energy ratios read from the same impulse response.
-- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/):
   the ISO 18233 acquisition of the responses this page compares.
-- [Sound Power](/phonometry/devices/emission/sound-power/): the $L_W$ that
+- [Sound Power](/devices/emission/sound-power/): the $L_W$ that
   Equation (A.9) subtracts, measured to ISO 3741.
-- [Absorption and Reverberation Time](/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Absorption and Reverberation Time](/buildings/rooms/enclosed-space-absorption/):
   the absorption area Equation (A.5) converts a diffuse-field reading through.
-- API reference: [`room.auditorium`](/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](/reference/api/rooms/auditorium/).
 
 </SeeAlso>

@@ -14,25 +14,25 @@ $r(x)$, is the height of the running surface along the rail (3.1). EN
 the record into a one-third octave band spectrum of wavelength, which is how
 a test track is shown to be smooth enough for a vehicle type test (ISO 3095,
 6.2.5, whose limit lives in
-[`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db)).
+[`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db)).
 
 **Clause 7, the processing.** A record goes through three stages before its
 spectrum is taken (7.1): the data of joints, welds and rail defects are edited
 out by the operator (Annex A shows what is and is not a defect); narrow upward
 spikes from particles on the rail are removed (7.2,
-[`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)); and every point is raised to where a wheel
+[`remove_roughness_spikes`](/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)); and every point is raised to where a wheel
 of 0.375 m radius would stand on it, because the probe tip is far smaller than
 a wheel and reaches into pits a wheel rolls over (7.3,
-[`curvature_processed_roughness`](/phonometry/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)).
+[`curvature_processed_roughness`](/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)).
 
-**The spectrum.** Method A of 7.4.2 ([`acoustic_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum))
+**The spectrum.** Method A of 7.4.2 ([`acoustic_roughness_spectrum`](/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum))
 cuts the record into segments at least 1 m long overlapping by half, removes
 the mean and the linear trend of each, applies a Hanning window and averages
 the squared magnitudes of their discrete Fourier transforms into a narrow band
 spectrum. The one-third octave band value is the energy sum of the narrow
 band lines, the two lines that straddle a band edge counted only for the
 portion of their width inside the band (Annex C,
-[`redistributed_band_energies`](/phonometry/reference/api/environment/acoustic-roughness/#redistributed_band_energies)). The level is
+[`redistributed_band_energies`](/reference/api/environment/acoustic-roughness/#redistributed_band_energies)). The level is
 
 $$
 L_r = 10 \lg \frac{r_\mathrm{RMS}^2}{r_0^2}\ \mathrm{dB}, \qquad r_0 = 1\ \mathrm{\mu m}
@@ -41,29 +41,29 @@ $$
 (3.3, Formula 1). A record of a given length only resolves wavelengths up to
 a quarter of it (7.5), so a 1 m segment reports down to the 0.25 m band.
 
-Method B of 7.4.3 ([`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum)) runs digital one-third
+Method B of 7.4.3 ([`filtered_roughness_spectrum`](/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum)) runs digital one-third
 octave filters along the record itself and takes the mean square of each
 band's output, once 2 m at either end have been discarded for the filter
 transients; a record therefore needs at least 5 m (NOTE 1), and the records
 of a line at least 15 m once those ends are gone. The filters "shall comply
 with EN 61260", the 1995 edition the normative references date. The bank is
-the library's own ([`roughness_filter_bank`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_filter_bank), an
-[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank) running at so many samples per
+the library's own ([`roughness_filter_bank`](/reference/api/environment/acoustic-roughness/#roughness_filter_bank), an
+[`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank) running at so many samples per
 metre): base-ten bands, the same ones Method A reports, of order 4
 Butterworth sections, every band run at the record's own sampling rate, class
 0 of EN 61260:1995 on its Table 1
-([`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) with `edition="1995"`, up
+([`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) with `edition="1995"`, up
 to the Nyquist wavenumber of the record), on the filter integrated response
 of 4.5.3 and on the summation of outputs of 4.9.
 
 **7.6, the average.** The spectra of the records of one line are averaged on
 their mean squares, without weighting by where along the test section they
-were taken ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra)), and 6.4.3 sets how many lines
+were taken ([`average_roughness_spectra`](/reference/api/environment/acoustic-roughness/#average_roughness_spectra)), and 6.4.3 sets how many lines
 a rail needs by the width of its reference surface
-([`roughness_measurement_lines`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_measurement_lines)). Clause 8 compares every average with the
+([`roughness_measurement_lines`](/reference/api/environment/acoustic-roughness/#roughness_measurement_lines)). Clause 8 compares every average with the
 limit and allows no band above it; that verdict, with the flexibility of ISO
 3095 Annex C, is
-[`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track).
+[`check_reference_track`](/reference/api/environment/rolling-stock-noise/#check_reference_track).
 
 **Readings of the library.** The spike height $h$ of 7.2 is not
 defined by the clause; it is read here, as the Annex B listing computes it, as
@@ -100,15 +100,15 @@ acoustic_roughness_spectrum(
 The one-third octave band acoustic roughness of a record (7.2 to 7.4, Method A).
 
 The record is processed as 7.1 asks, spikes first
-([`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)) and curvature next
-([`curvature_processed_roughness`](/phonometry/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)), then cut into segments of
+([`remove_roughness_spikes`](/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)) and curvature next
+([`curvature_processed_roughness`](/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)), then cut into segments of
 `segment_length_m` overlapping by half. Each has its mean and linear
 trend removed and a Hanning window applied; the squared magnitudes of
 their discrete Fourier transforms are averaged into a one-sided spectral
 density normalised by the window's energy, so that its sum over the lines
 is the mean square of the roughness. Each one-third octave band of
 wavenumber then collects the lines within it and the portions of the two
-straddling its edges (Annex C, [`redistributed_band_energies`](/phonometry/reference/api/environment/acoustic-roughness/#redistributed_band_energies)), and
+straddling its edges (Annex C, [`redistributed_band_energies`](/reference/api/environment/acoustic-roughness/#redistributed_band_energies)), and
 the level is $10 \lg (r^2_\mathrm{RMS} / r_0^2)$ with
 $r_0 = 1\ \mathrm{\mu m}$ (Formula 1).
 
@@ -150,9 +150,9 @@ AcousticRoughnessSpectrum(
 
 A one-third octave band spectrum of acoustic rail roughness (EN 15610).
 
-Built by [`acoustic_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum) (Method A) or
-[`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum) (Method B) from a record, by
-[`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra) from several, or directly from the band
+Built by [`acoustic_roughness_spectrum`](/reference/api/environment/acoustic-roughness/#acoustic_roughness_spectrum) (Method A) or
+[`filtered_roughness_spectrum`](/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum) (Method B) from a record, by
+[`average_roughness_spectra`](/reference/api/environment/acoustic-roughness/#average_roughness_spectra) from several, or directly from the band
 levels of a report, which is all the ISO 3095 checks need.
 
 **Parameters**
@@ -216,7 +216,7 @@ a limit curve when one is given.
 | Name | Description |
 | :--- | :--- |
 | `ax` | Axes to draw on; a new figure is made when omitted. |
-| `limit_db` | A limit spectrum to draw with it, nominal wavelength in metres to level, such as [`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db). |
+| `limit_db` | A limit spectrum to draw with it, nominal wavelength in metres to level, such as [`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db). |
 | `language` | `"en"` or `"es"`. |
 | `kwargs` | Passed to the spectrum line. |
 
@@ -292,7 +292,7 @@ of the record can win the maximum, so the search is limited to them.
 
 | Name | Description |
 | :--- | :--- |
-| `roughness_um` | The roughness record, in micrometres, usually after [`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes). |
+| `roughness_um` | The roughness record, in micrometres, usually after [`remove_roughness_spikes`](/reference/api/environment/acoustic-roughness/#remove_roughness_spikes). |
 | `sample_spacing_m` | The sampling interval, in metres. |
 | `curve_radius_m` | The radius $R$ of the circle, in metres; the 0.375 m of 7.3 by default. |
 
@@ -320,11 +320,11 @@ filtered_roughness_spectrum(
 The one-third octave band acoustic roughness of a record by digital filters (7.4.3, Method B).
 
 The record is processed as 7.1 asks, spikes first
-([`remove_roughness_spikes`](/phonometry/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)) and curvature next
-([`curvature_processed_roughness`](/phonometry/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)), and its mean and linear trend
+([`remove_roughness_spikes`](/reference/api/environment/acoustic-roughness/#remove_roughness_spikes)) and curvature next
+([`curvature_processed_roughness`](/reference/api/environment/acoustic-roughness/#curvature_processed_roughness)), and its mean and linear trend
 are removed, as the Annex B listing does before either analysis. It then
 runs through the one-third octave filters of
-[`roughness_filter_bank`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_filter_bank), and 2 m of every band's output are
+[`roughness_filter_bank`](/reference/api/environment/acoustic-roughness/#roughness_filter_bank), and 2 m of every band's output are
 discarded at either end "to remove the effects of filter transients"
 (7.4.3). The band level is the mean square of what is left,
 $L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)$ with
@@ -348,7 +348,7 @@ whose upper edge lies below the Nyquist wavenumber.
 | `spike_removal` | Whether to apply 7.2 first. |
 | `curvature_processing` | Whether to apply 7.3 next. |
 
-**Returns:** The spectrum, longest wavelength first, with the length analysed (the record less 2 m at either end) as its record length and `"B"` as its method. The records of one line need at least 15 m analysed in total (7.4.3), which [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) judges on their average.
+**Returns:** The spectrum, longest wavelength first, with the length analysed (the record less 2 m at either end) as its record length and `"B"` as its method. The records of one line need at least 15 m analysed in total (7.4.3), which [`check_reference_track`](/reference/api/environment/rolling-stock-noise/#check_reference_track) judges on their average.
 
 **Raises**
 
@@ -498,12 +498,12 @@ The one-third octave filters Method B runs along a record (7.4.3).
 7.4.3 asks for digital one-third octave band filters that "shall comply
 with EN 61260", the 1995 edition (IEC 61260:1995) the normative
 references of EN 15610:2009 date. This is the library's own bank,
-[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank), run with the record's
+[`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank), run with the record's
 samples per metre for a sample rate, so that its frequencies are
 wavenumbers in cycles per metre: base-ten bands centred on
 $10^{k/10}$ per metre, the bands Method A reports, of order 4
 Butterworth sections, every band run at the record's own rate.
-Passed to [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) with
+Passed to [`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) with
 `edition="1995"` it grades class 0 on Table 1 of EN 61260:1995 in every
 band, from the lowest wavenumbers up to the Nyquist wavenumber of the
 record, and its filter integrated response (4.5.3) and summation of
@@ -553,7 +553,7 @@ acceptance criteria follow this rule (6.4.3 NOTE).
 | :--- | :--- |
 | `reference_width_mm` | The width $w_\mathrm{ref}$ of the reference surface, in millimetres. |
 
-**Returns:** The number of lines and the distance between neighbouring lines, in millimetres (0 for a single line), as a [`RoughnessMeasurementLines`](/phonometry/reference/api/environment/acoustic-roughness/#roughnessmeasurementlines).
+**Returns:** The number of lines and the distance between neighbouring lines, in millimetres (0 for a single line), as a [`RoughnessMeasurementLines`](/reference/api/environment/acoustic-roughness/#roughnessmeasurementlines).
 
 **Raises**
 
@@ -570,7 +570,7 @@ RoughnessMeasurementLines(n_lines: int, spacing_mm: float)
 
 The parallel lines a rail's reference surface is measured on (6.4.3).
 
-What [`roughness_measurement_lines`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_measurement_lines) returns: the count and the
+What [`roughness_measurement_lines`](/reference/api/environment/acoustic-roughness/#roughness_measurement_lines) returns: the count and the
 spacing, named, where an `(n, spacing)` tuple used to be unpacked by
 position.
 

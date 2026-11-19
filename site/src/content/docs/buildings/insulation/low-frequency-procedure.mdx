@@ -56,10 +56,10 @@ line, which is the case a field engineer opens this library for.
 This page is the whole of it: the trigger, the corner level, the combination,
 the reverberation time that changes with them, and the differences between the
 three parts that are real. The two-room measurement it sits inside is
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/), the envelope
-version is [Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/), and the
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/), the envelope
+version is [Façade Sound Insulation](/buildings/insulation/facade-insulation/), and the
 single-number ratings these bands feed are in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/).
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/).
 
 ## When it applies: the 25 m³ trigger
 
@@ -74,7 +74,7 @@ the other side: they give the full 50 Hz to 5000 Hz default range to a room
 "larger than **or equal to** 25 m³". (ISO 16283-2 Clause 10.3 drops the "or
 equal to" and leaves a room of exactly 25 m³ in neither branch. That is a
 defect of the print, recorded in the
-[errata registry](/phonometry/reference/errata/); the intended reading is not
+[errata registry](/reference/errata/); the intended reading is not
 in doubt.)
 
 **The rounding is half away from zero**, `floor(V + 0.5)`, which is how the
@@ -173,7 +173,7 @@ is headed "Reverberation time in the receiving room" and names that room again
 in 10.1, 10.3 and 10.4. ISO 16283-1 measures no source-room reverberation time
 at all, and Parts 2 and 3 print the same sentence with one room. That is a
 defect of the print, recorded in the
-[errata registry](/phonometry/reference/errata/).)
+[errata registry](/reference/errata/).)
 Second, Part 3 Clause 6 says that "for the element and global road
 traffic methods, only the default procedure shall be used", and its NOTE 1
 gives the reason: "at present, there is no experience using the low-frequency
@@ -537,7 +537,7 @@ Part 1 and Annex C of Part 2 are blank recording forms, and the "Examples" of
 Annexes D and E are loudspeaker-position drawings. So this module joins the
 register of quantities anchored in closed form rather than in a tabulated
 result. It carries nine rows in the
-[conformance report](/phonometry/reference/conformance/), and every one of them
+[conformance report](/reference/conformance/), and every one of them
 judges a printed number or a closed form rather than a published result. What
 stands in for an oracle:
 
@@ -652,20 +652,20 @@ procedure by Clause 6.
 
 ## See also
 
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/): the
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/): the
   two-room airborne and impact measurement this procedure sits inside.
-- [Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/): the third part of
+- [Façade Sound Insulation](/buildings/insulation/facade-insulation/): the third part of
   ISO 16283, whose Clause 7.3 is the same procedure under the loudspeaker
   methods.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/): the reference-curve
   engine, and the enlarged-range adaptation terms these three bands feed.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the reverberation-time
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the reverberation-time
   machinery the 63 Hz octave value comes out of.
-- [Errata found in published sources](/phonometry/reference/errata/): the two
+- [Errata found in published sources](/reference/errata/): the two
   defects of ISO 16283-2 that this procedure runs into.
 - API reference:
-  [`building.measurement.low_frequency`](/phonometry/reference/api/building/low-frequency/)
+  [`building.measurement.low_frequency`](/reference/api/building/low-frequency/)
   and
-  [`building.measurement.insulation`](/phonometry/reference/api/building/insulation/).
+  [`building.measurement.insulation`](/reference/api/building/insulation/).
 
 </SeeAlso>

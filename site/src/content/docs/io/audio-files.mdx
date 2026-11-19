@@ -231,7 +231,7 @@ print(f"{chained:.2f} dB", chained == nested)   # 57.25 dB True
 
 ## Calibrating from the calibrator take
 
-The [calibration guide](/phonometry/signals/metrology/calibration/) derives
+The [calibration guide](/signals/metrology/calibration/) derives
 the sensitivity factor from a recording of the calibrator tone; the only
 new rule here is that **both files go through the same reader**. Then the
 factor rides on the `Signal` and the level functions use it on their own:
@@ -306,7 +306,7 @@ licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), recorded
 with an NTi Audio XL2. Changes: 4-second extracts cut bit-exactly and
 recontainered. The provenance and licence of every file are in
 `tests/data/audio/README.md`, and the
-[loudness guide](/phonometry/perception/psychoacoustics/loudness/) runs the
+[loudness guide](/perception/psychoacoustics/loudness/) runs the
 excerpts themselves against the levels and the loudness the deposit publishes.
 
 ```python
@@ -437,7 +437,7 @@ calibration, channel labels and provenance riding along. The calibration
 follows the rule `read()` follows, so a factor passed here or found in the
 sidecar makes every block present its samples in pascals to the filters and
 the level functions, and no factor is applied by hand. The stateful filters
-of [block processing](/phonometry/signals/filters/block-processing/) consume the
+of [block processing](/signals/filters/block-processing/) consume the
 stream unchanged, and the arithmetic below takes `np.asarray` of what they
 return, as it would of any `Signal`:
 
@@ -463,7 +463,7 @@ The two numbers are not close: they are identical, to the last bit,
 because a stateful filter carries its state across block boundaries and the
 stream contributes every sample exactly once. Both sides run the same default
 design, since block processing no longer costs the weighting filter anything
-(the [weighting guide](/phonometry/signals/levels/weighting/) has the
+(the [weighting guide](/signals/levels/weighting/) has the
 detail). The same construction drives an `OctaveFilterBank` with
 `BlockProcessing(stateful=True)`, band by band.
 
@@ -485,7 +485,7 @@ when it has one; a `BroadcastMetadata` you build is written field by field
 at its EBU Tech 3285 offsets; and `bext="loudness"` additionally measures
 the five version-2 loudness values (programme loudness, loudness range,
 maximum true peak, momentary and short-term maxima) with the library's own
-[ITU-R BS.1770 implementation](/phonometry/devices/broadcast/program-loudness/)
+[ITU-R BS.1770 implementation](/devices/broadcast/program-loudness/)
 on the samples being written. Every written chunk's `CodingHistory` is
 extended, never replaced, with the EBU R98-formatted line describing this
 coding step.
@@ -601,11 +601,11 @@ libsndfile under the LGPL, which the base install deliberately avoids.
 
 ## See also
 
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): where the sensitivity factor comes from, and the field discipline around it.
-- [Integrated and statistical levels](/phonometry/signals/levels/levels/): the level functions that accept the `Signal` directly.
-- [Block processing](/phonometry/signals/filters/block-processing/): the stateful machinery `read_blocks` feeds.
-- [Programme loudness](/phonometry/devices/broadcast/program-loudness/): the BS.1770 implementation behind `bext="loudness"`.
-- [Build a sound level meter](/phonometry/signals/sound-level-meter/): the whole chain this page's files enter and leave.
-- API reference: [`phonometry.io`](/phonometry/reference/api/io/io/).
+- [Calibration and dBFS](/signals/metrology/calibration/): where the sensitivity factor comes from, and the field discipline around it.
+- [Integrated and statistical levels](/signals/levels/levels/): the level functions that accept the `Signal` directly.
+- [Block processing](/signals/filters/block-processing/): the stateful machinery `read_blocks` feeds.
+- [Programme loudness](/devices/broadcast/program-loudness/): the BS.1770 implementation behind `bext="loudness"`.
+- [Build a sound level meter](/signals/sound-level-meter/): the whole chain this page's files enter and leave.
+- API reference: [`phonometry.io`](/reference/api/io/io/).
 
 </SeeAlso>

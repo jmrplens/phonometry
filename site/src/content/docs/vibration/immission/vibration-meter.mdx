@@ -37,7 +37,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 German immission control judges vibration in buildings with two standards that
 print thresholds and say almost nothing about how the number reaching them was
 formed. DIN 4150-2 sets what people in buildings may be exposed to and
-[DIN 4150-3](/phonometry/vibration/structural/structural-damage/) sets what
+[DIN 4150-3](/vibration/structural/structural-damage/) sets what
 the buildings themselves may take. Both are tables of values for a quantity
 that has to come from somewhere, and DIN 45669-1 is where it comes from: the
 specification of the **vibration meter**, which is also the definition of the
@@ -59,7 +59,7 @@ stages, each printed as an exact transfer function or an exact average.
 two-pole high pass at $0.8\,f_\mathrm{u}$ and a two-pole low pass at $f_\mathrm{o}/0.8$. The
 working range is 1 Hz to 80 Hz for buildings, so those corners are 0.8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
-[DIN 45672](/phonometry/vibration/immission/railway-vibration/) works, and
+[DIN 45672](/vibration/immission/railway-vibration/) works, and
 blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
@@ -206,7 +206,7 @@ a second of quiet in front of the event removes it.
 Two tables make the chain checkable rather than merely specified. Table 9 (on
 printed folio 35) says what a 1 mm/s sine has to show at five frequencies, and
 Table 8, in the redraft [Corrigendum
-1](/phonometry/reference/errata/) gives it, says the same for a burst train.
+1](/reference/errata/) gives it, says the same for a burst train.
 They are published here as data, and the conformance report runs them:
 
 ```python
@@ -501,17 +501,17 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
-- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](/vibration/structural/structural-damage/):
   the guideline values the Annex E weightings invert, and the assessment this
   chain feeds.
-- [Verifying a human-vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](/vibration/human/meter-verification/):
   the same kind of instrument standard, for the other kind of meter, with its
   own tolerance tables.
-- [Human vibration exposure](/phonometry/vibration/human/human-vibration/): the
+- [Human vibration exposure](/vibration/human/human-vibration/): the
   people side of the same measurement, weighted differently and judged by
   other documents.
 - API reference:
-  [`vibration.immission.vibration_meter`](/phonometry/reference/api/vibration/vibration-meter/)
-  and [`vibration.immission.coupling`](/phonometry/reference/api/vibration/coupling/).
+  [`vibration.immission.vibration_meter`](/reference/api/vibration/vibration-meter/)
+  and [`vibration.immission.coupling`](/reference/api/vibration/coupling/).
 
 </SeeAlso>

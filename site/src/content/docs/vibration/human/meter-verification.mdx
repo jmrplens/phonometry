@@ -37,7 +37,7 @@ the spine, what a seat passes on. This one computes something about the
 specification a general-purpose human-vibration meter is designed and tested
 against, and the rest of the section has been quoting one clause of it all
 along, because the nine frequency weightings that [human vibration
-exposure](/phonometry/vibration/human/human-vibration/) applies are defined
+exposure](/vibration/human/human-vibration/) applies are defined
 here and nowhere else.
 
 The **human** in that name is load-bearing. The standard specifies instruments
@@ -144,7 +144,7 @@ The design goal is not a table of numbers, it is a transfer function. Clause
 high-pass and low-pass pair that band-limits, an acceleration-velocity
 transition carrying the overall gain and an upward step, multiplied together
 as $H(s) = H_\mathrm{h}(s)\,H_\mathrm{l}(s)\,H_\mathrm{t}(s)\,H_\mathrm{s}(s)$
-(Formula (5)). [Human vibration](/phonometry/vibration/human/human-vibration/) covers that cascade and
+(Formula (5)). [Human vibration](/vibration/human/human-vibration/) covers that cascade and
 the Table 3 parameter set that specialises it into the nine weightings `Wb`,
 `Wc`, `Wd`, `We`, `Wf`, `Wh`, `Wj`, `Wk` and `Wm`. `weighting_factors`
 evaluates it at any frequency, and that value, not a tabulated one, is what a
@@ -1422,7 +1422,7 @@ still prints 0.388 8 for `Wf`, so the caveat of section 6 applies to a PVEM
 word for word: `band_limited_weighting_factor` is the factor that makes the row
 satisfiable. And the paragraph after it still grades "each time weighting"
 against "the tolerance limits of Table 2", whose time-weighting row Part 2 no
-longer prints. Both are in the [errata registry](/phonometry/reference/errata/).
+longer prints. Both are in the [errata registry](/reference/errata/).
 
 **Its own uncertainties.** Part 2 prints the maximum expanded uncertainty each
 of its test clauses allows a laboratory, and in clause 12, pattern evaluation,
@@ -1472,7 +1472,7 @@ hardware.
 A sound level meter gets exactly this treatment, from a different committee
 and in a different unit. IEC 61672-1 prints design goals for the A, C and Z
 weightings and acceptance limits around them, and
-[`verify_weighting_class`](/phonometry/signals/levels/weighting/) turns a response
+[`verify_weighting_class`](/signals/levels/weighting/) turns a response
 into a verdict against them. The two verifiers are the same idea applied on
 either side of the acoustics-vibration fence:
 
@@ -1511,7 +1511,7 @@ mask, so any measurement made in software inherits the verdict.
 that *measurement of that instrument*, on the day it was made. Neither is a
 pattern evaluation, a periodic verification or an in situ check, and neither
 has a microphone, a transducer or a serial number.
-[Compliance and verification](/phonometry/signals/metrology/compliance-verification/)
+[Compliance and verification](/signals/metrology/compliance-verification/)
 is the map of every verifier in the library and of where each one's claim
 ends.
 
@@ -1583,18 +1583,18 @@ clauses are not implemented.
 
 ## See also
 
-- [Human vibration exposure (ISO 2631, ISO 5349)](/phonometry/vibration/human/human-vibration/): the
+- [Human vibration exposure (ISO 2631, ISO 5349)](/vibration/human/human-vibration/): the
   weightings this page grades an instrument against, and the exposure chain
   that consumes them.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](/signals/metrology/compliance-verification/):
   the other verifiers, and what only a laboratory can attest.
-- [Frequency Weighting (A, C, Z)](/phonometry/signals/levels/weighting/): the
+- [Frequency Weighting (A, C, Z)](/signals/levels/weighting/): the
   sound level meter's weightings and the IEC 61672-1 acceptance limits of
   section 12.
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): the
+- [Calibration and dBFS](/signals/metrology/calibration/): the
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.
 - API reference:
-  [`vibration.human.instrumentation`](/phonometry/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](/reference/api/vibration/instrumentation/).
 
 </SeeAlso>

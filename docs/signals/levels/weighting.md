@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/levels/weighting.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/weighting/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/levels/weighting/
 
 # Frequency Weighting (A, C, Z)
 
@@ -575,7 +575,7 @@ plt.show()
   designed filter is byte-identical whatever the C library, the BLAS, the
   processor or the thread count, with no library step left on the design
   path, and the measured evidence.
-- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`filters.weighting`](https://phonometry.dev/reference/api/filters/weighting/) and [`filters.compliance`](https://phonometry.dev/reference/api/filters/compliance/).
 - Theory: [Weighting Curves (IEC 61672-1)](../../reference/theory/signal-analysis.md#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 
 ## Quick answers

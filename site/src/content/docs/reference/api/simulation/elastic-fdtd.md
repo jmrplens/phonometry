@@ -17,7 +17,7 @@ finite-difference method", *Geophysics* 51(4), 889-901 (1986):
   explicit interface treatment;
 * the fully staggered discretisation of Fig. 1 / Eq. 5, second order in
   space and time, arranged here so that the normal stresses share the cell
-  centres of the acoustic solver ([`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d))
+  centres of the acoustic solver ([`FDTD2D`](/reference/api/simulation/fdtd/#fdtd2d))
   and the velocities live on the cell faces;
 * the Courant stability condition
   $c_\mathrm{P} \Delta t \sqrt{1/\Delta x^2 + 1/\Delta y^2} < 1$
@@ -38,12 +38,12 @@ Eq. 9.9): zero normal stress on the surface plane and an antisymmetric
 image of the shear stress above it.
 
 Two API levels are exposed, mirroring the acoustic module.
-[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) takes an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), the record of
+[`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) takes an [`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun), the record of
 a simulation that checks every argument when it is built, steps it
-deterministically and returns a frozen [`ElasticFDTDResult`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtdresult) with
+deterministically and returns a frozen [`ElasticFDTDResult`](/reference/api/simulation/elastic-fdtd/#elasticfdtdresult) with
 per-probe signal histories, optional field snapshots and a `.plot()`
 method.
-[`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) is the underlying stepping engine for callers that
+[`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) is the underlying stepping engine for callers that
 need frame-by-frame access to the five field arrays.
 
 The solver is deliberately deterministic: no random numbers, and every
@@ -79,7 +79,7 @@ everywhere. The fluid-solid coupling is further pinned to the oblique
 plane-wave reflection coefficient of Brekhovskikh & Godin, *Acoustics of
 Layered Media I* (Springer 1990), Eqs. 4.2.22-4.2.26 (with the shear-wave
 mode conversion active), to the Scholte interface-wave speed from the exact
-characteristic equation of Eq. 4.4.20 (see [`scholte_speed`](/phonometry/reference/api/simulation/elastic-fdtd/#scholte_speed)), and to
+characteristic equation of Eq. 4.4.20 (see [`scholte_speed`](/reference/api/simulation/elastic-fdtd/#scholte_speed)), and to
 the exact three-media transmission of an immersed plate (B&G Eqs. 2.4.10,
 2.4.14) including its first thickness resonance $f_1 = c_\mathrm{P} / (2 h)$
 (Eq. 2.4.19), following the fluid-solid finite-difference benchmark of
@@ -134,16 +134,16 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Name | Description |
 | :--- | :--- |
-| `run` | The simulation ([`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun)): the domain, its sources and what it records, every argument checked when the run was built. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
+| `run` | The simulation ([`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun)): the domain, its sources and what it records, every argument checked when the run was built. |
+| `compute` | Where the run steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
 
-**Returns:** An [`ElasticFDTDResult`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtdresult).
+**Returns:** An [`ElasticFDTDResult`](/reference/api/simulation/elastic-fdtd/#elasticfdtdresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for a waveform that returns anything but one real number. |
+| TypeError | For a `run` that is not an [`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for a waveform that returns anything but one real number. |
 | ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, a hosts file that cannot be read or is malformed, or snapshots that would take more bytes than a NumPy array can hold in the run's dtype, refused before the run steps; and, as the run steps, for a waveform that returns a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
@@ -154,7 +154,7 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Warning | When |
 | :--- | :--- |
-| ComputeFallbackWarning | When `fallback=True` turns a [`ComputeImportError`](/phonometry/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/phonometry/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/phonometry/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy here. |
+| ComputeFallbackWarning | When `fallback=True` turns a [`ComputeImportError`](/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy here. |
 
 ## ElasticBoundaries
 
@@ -209,7 +209,7 @@ ElasticFDTD2D(
 2D elastic (P-SV) FDTD stepping engine on a staggered grid.
 
 The Virieux (1986) cell is shifted half a cell so it lands on the layout
-of the acoustic [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d): the normal
+of the acoustic [`FDTD2D`](/reference/api/simulation/fdtd/#fdtd2d): the normal
 stresses `txx` and `tyy` share the cell centres, shape `(ny, nx)`
 (row = y, column = x, the `imshow` convention; Virieux's downward z is
 the growing row here); `vx` lives at interior x-faces, shape
@@ -253,14 +253,14 @@ array of floats, on every device.
 | `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar; beside a map it must be the map's own shape. |
 | `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: none). The surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity) and every touching corner shear stress is zeroed, i.e. a shear-free rigid inclusion, rasterising arbitrary interior geometry. |
-| `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
+| `compute` | Where the engine steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c_p`, `c_s`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c_p` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation) run on a node. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c_p`, `c_s`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c_p` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and [`write_elastic_fdtd_animation`](/reference/api/simulation/video/#write_elastic_fdtd_animation) run on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
 
@@ -276,7 +276,7 @@ array of floats, on every device.
 ElasticFDTD2D.add_source(source: ExplosionSource | ForceSource) -> None
 ```
 
-Register an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource).
+Register an [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource).
 
 Explosions inject additively at one cell centre; forces at one
 staggered velocity node. Positions are validated against the grid
@@ -370,16 +370,16 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | :--- | :--- |
 | `shape` | Grid shape `(ny, nx)`, a pair of whole numbers of at least two cells each. |
 | `dx` | Grid spacing [m] (square cells). |
-| `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
+| `background` | The material filling the whole grid first: a [`Material`](/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/reference/api/io/io/#cataloguerowprinted). |
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
-| `cfl` | Courant number, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes it. |
+| `cfl` | Courant number, as [`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes it. |
 | `absorbing_layer_cells` | Thickness of the absorbing (sponge) layer, in cells (default 0, no layer). |
-| `absorbing_sides` | Which sides absorb, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes them. One of `"left"`, `"right"`, `"top"` or `"bottom"`. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
+| `absorbing_sides` | Which sides absorb, as [`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes them. One of `"left"`, `"right"`, `"top"` or `"bottom"`. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer. |
 | `damping` | Bulk amplitude decay rate [1/s], a scalar or an `(ny, nx)` map. |
 | `free_sides` | Sides carrying a traction-free surface. One of `"left"`, `"right"`, `"top"` or `"bottom"`. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `obstacle_mask` | Boolean `(ny, nx)` map of rigid cells. |
-| `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)). |
+| `compute` | Where the engine steps ([`Compute`](/reference/api/simulation/compute/#compute)). |
 
 **Returns:** The configured stepping engine.
 
@@ -387,8 +387,8 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, an option out of the range [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes, or `compute` names a host: the engine steps in this process. |
-| TypeError | For a `shape` that is not a pair or holds a count that is not a number (a text, a `bytes` or a `bytearray` among them), a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, an option of a type [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) refuses (`cfl`, `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`, `damping`, `free_sides`), or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, an option out of the range [`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes, or `compute` names a host: the engine steps in this process. |
+| TypeError | For a `shape` that is not a pair or holds a count that is not a number (a text, a `bytes` or a `bytearray` among them), a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, an option of a type [`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) refuses (`cfl`, `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`, `damping`, `free_sides`), or a `compute` that is neither a [`Compute`](/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation, unless `fallback=True`. |
 
@@ -460,13 +460,13 @@ axis; the stacked `(n_frames, ny', nx')` array plugs straight into
 a `FuncAnimation` `imshow` update. Without `snapshot_every` an
 empty array is returned and only the final state is kept (read it
 with `numpy_field`). The two counts are taken by name, as
-[`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) takes them.
+[`ElasticRecording`](/reference/api/simulation/elastic-fdtd/#elasticrecording) takes them.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of an [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
 | ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, the frames would take more bytes than a NumPy array can hold, or such a waveform returns a number too large for a float. |
 
 ### ElasticFDTD2D.step()
@@ -481,7 +481,7 @@ Advance the leapfrog scheme by one time step (Virieux Eq. 5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
+| TypeError | if the waveform of an [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
 | ValueError | if such a waveform returns a number too large for a float. |
 
 ### ElasticFDTD2D.time
@@ -513,7 +513,7 @@ ElasticFDTDResult(
 )
 ```
 
-Frozen result of an [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run.
+Frozen result of an [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run.
 
 **Attributes**
 
@@ -534,7 +534,7 @@ Frozen result of an [`elastic_fdtd_simulation`](/phonometry/reference/api/simula
 | `obstacle_mask` | Boolean map of rigid cells, or `None`. |
 | `free_sides` | Sides carrying a traction-free surface. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `snapshot_decimation` | Every how many cells a snapshot keeps along each axis (1 keeps every cell). |
-| `provenance` | Where the run stepped ([`RunProvenance`](/phonometry/reference/api/simulation/compute/#runprovenance)). |
+| `provenance` | Where the run stepped ([`RunProvenance`](/reference/api/simulation/compute/#runprovenance)). |
 
 ### ElasticFDTDResult.plot()
 
@@ -635,8 +635,8 @@ ElasticRun(
 
 One elastic (P-SV) FDTD simulation: the domain, its sources and what it records.
 
-As [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), for
-[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation): every argument is checked when the run
+As [`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun), for
+[`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation): every argument is checked when the run
 is built, the grid's included (the time step, the shear speed against
 the P-wave speed, the density, the sponge and the damping, the free and
 absorbing sides, the obstacle, and the sources and the probes on the
@@ -650,12 +650,12 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | `c_s` | S-wave speed map [m/s]; `c_s = 0` marks fluid cells. |
 | `dx` | Grid spacing [m] (square cells). |
 | `duration_s` | Physical time to simulate [s]. |
-| `sources` | One or more of [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource). |
+| `sources` | One or more of [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar; beside a map it must be the map's own shape. |
 | `cfl` | Courant number in `(0, 1)` (Virieux Eqs. 6-7); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})$. Default 0.6. |
-| `recording` | What the run records ([`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording)): the probe cells and their fields, and the snapshot cadence and field. `None` records nothing but the time axis. |
-| `boundaries` | How the domain edges are terminated ([`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries)); `None` is rigid on all four sides. |
+| `recording` | What the run records ([`ElasticRecording`](/reference/api/simulation/elastic-fdtd/#elasticrecording)): the probe cells and their fields, and the snapshot cadence and field. `None` records nothing but the time axis. |
+| `boundaries` | How the domain edges are terminated ([`ElasticBoundaries`](/reference/api/simulation/elastic-fdtd/#elasticboundaries)); `None` is rigid on all four sides. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
 
@@ -663,7 +663,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
+| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
 | ValueError | If an argument is out of its range, a `dx`, a `cfl` and a fastest speed of `c_p` give a time step past a float's range (zero or infinite), a `shape` is not two whole numbers of two cells or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
 
 ## ExplosionSource
@@ -691,9 +691,9 @@ waveform, sample by sample).
 
 `waveform` maps time in seconds to the injected pressure in pascals:
 any callable, typically the `value` method of a
-[`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse),
-[`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or
-[`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) (their own `ix`/`iy`
+[`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse),
+[`CWSource`](/reference/api/simulation/fdtd/#cwsource) or
+[`SignalSource`](/reference/api/simulation/fdtd/#signalsource) (their own `ix`/`iy`
 are not used here).
 
 **Attributes**
@@ -760,18 +760,18 @@ marks a fluid (the acoustic `mu = 0` limit of the elastic scheme,
 Virieux 1986), so the same dataclass names both fluids and solids.
 Every material must satisfy $c_\mathrm{P}^2 \ge 2 c_\mathrm{S}^2$
 (non-negative first
-Lame parameter), the constructor bound of [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d).
+Lame parameter), the constructor bound of [`ElasticFDTD2D`](/reference/api/simulation/elastic-fdtd/#elasticfdtd2d).
 
-The module constants [`AIR`](/phonometry/reference/api/simulation/elastic-fdtd/#air), [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), [`STEEL`](/phonometry/reference/api/simulation/elastic-fdtd/#steel),
-[`ALUMINUM`](/phonometry/reference/api/simulation/elastic-fdtd/#aluminum) and [`CONCRETE`](/phonometry/reference/api/simulation/elastic-fdtd/#concrete) carry the nominal round-number
+The module constants [`AIR`](/reference/api/simulation/elastic-fdtd/#air), [`WATER`](/reference/api/simulation/elastic-fdtd/#water), [`STEEL`](/reference/api/simulation/elastic-fdtd/#steel),
+[`ALUMINUM`](/reference/api/simulation/elastic-fdtd/#aluminum) and [`CONCRETE`](/reference/api/simulation/elastic-fdtd/#concrete) carry the nominal round-number
 properties used throughout the documentation and the validation suite,
 mirroring the documented default media of the acoustic solver.
 
-Wherever a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) is taken, a solid's catalogue row is taken
-too, one of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids) or one read from
+Wherever a [`Material`](/reference/api/simulation/elastic-fdtd/#material) is taken, a solid's catalogue row is taken
+too, one of [`PUBLISHED_SOLIDS`](/reference/api/solids/catalogue/#published_solids) or one read from
 a catalogue file of your own: its bulk longitudinal speed, its transverse
 speed and its density are read through
-[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), which refuses a cell the
+[`printed`](/reference/api/io/io/#cataloguerowprinted), which refuses a cell the
 page does not print, in the page's own terms. The plate and bar speeds a
 table prints beside them are never read, because they are not the bulk
 speed this solver integrates.
@@ -828,8 +828,8 @@ measured seabed interface waves probe the sediment shear speed
 
 | Name | Description |
 | :--- | :--- |
-| `fluid` | Fluid half-space: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) with `c_s = 0` (or a `(c_p, 0.0, rho)` triple). |
-| `solid` | Elastic half-space: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) with `c_s > 0`, a `(c_p, c_s, rho)` triple or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
+| `fluid` | Fluid half-space: a [`Material`](/reference/api/simulation/elastic-fdtd/#material) with `c_s = 0` (or a `(c_p, 0.0, rho)` triple). |
+| `solid` | Elastic half-space: a [`Material`](/reference/api/simulation/elastic-fdtd/#material) with `c_s > 0`, a `(c_p, c_s, rho)` triple or a solid's catalogue row ([`SolidMaterial`](/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/reference/api/io/io/#cataloguerowprinted). |
 
 **Returns:** The Scholte-wave phase speed [m/s].
 

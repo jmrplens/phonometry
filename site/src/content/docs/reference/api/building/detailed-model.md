@@ -9,7 +9,7 @@ Detailed per-band building prediction (EN/ISO 12354-1/-2:2017).
 
 This is the **detailed model** of the building-prediction chain, the per-band
 counterpart of the simplified single-number model implemented in
-[`phonometry.building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/). Where the simplified model
+[`phonometry.building.prediction.simplified_model`](/reference/api/building/simplified-model/). Where the simplified model
 combines the weighted ratings of the elements (`Rw`, `ΔRw`, `Kij`) into a
 single `R'w` / `L'n,w`, the detailed model carries every quantity through
 the one-third-octave (or octave) bands, converts the laboratory element data to
@@ -22,10 +22,10 @@ spectra are known and the dominant path per band matters.
 1. Element data per band. For homogeneous elements the sound reduction index
    follows from the material properties with the Annex B model: the radiation
    factor for free bending waves `σ` (Formulae B.4 to B.6,
-   [`bending_radiation_factor`](/phonometry/reference/api/building/detailed-model/#bending_radiation_factor)), the radiation factor for forced waves `σf`
-   (Formula B.3, [`forced_radiation_factor`](/phonometry/reference/api/building/detailed-model/#forced_radiation_factor)) and the three-branch
+   [`bending_radiation_factor`](/reference/api/building/detailed-model/#bending_radiation_factor)), the radiation factor for forced waves `σf`
+   (Formula B.3, [`forced_radiation_factor`](/reference/api/building/detailed-model/#forced_radiation_factor)) and the three-branch
    transmission factor of Formula (B.2)
-   ([`calculated_sound_reduction_index`](/phonometry/reference/api/building/detailed-model/#calculated_sound_reduction_index)).
+   ([`calculated_sound_reduction_index`](/reference/api/building/detailed-model/#calculated_sound_reduction_index)).
 2. In-situ conversion (Clause 4.2.2). The total loss factor in situ follows
    from Annex C Formula (C.1),
 
@@ -33,56 +33,56 @@ spectra are known and the dominant path per band matters.
    \eta_\mathrm{tot} = \eta_\mathrm{int} + \frac{2 \rho_\mathrm{o} c_\mathrm{o} \sigma}{2 \pi f m'} + \frac{c_\mathrm{o}}{\pi^2 S \sqrt{f f_\mathrm{c}}} \sum_k l_k \alpha_k
    $$
 
-   ([`in_situ_total_loss_factor`](/phonometry/reference/api/building/detailed-model/#in_situ_total_loss_factor)), with the perimeter absorption
+   ([`in_situ_total_loss_factor`](/reference/api/building/detailed-model/#in_situ_total_loss_factor)), with the perimeter absorption
    coefficients deduced from the junctions' vibration reduction indices
-   (Formula C.4, [`perimeter_absorption_coefficient`](/phonometry/reference/api/building/detailed-model/#perimeter_absorption_coefficient)). From it come the
+   (Formula C.4, [`perimeter_absorption_coefficient`](/reference/api/building/detailed-model/#perimeter_absorption_coefficient)). From it come the
    structural reverberation time $T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})$
-   ([`structural_reverberation_time`](/phonometry/reference/api/building/detailed-model/#structural_reverberation_time)), the in-situ index
+   ([`structural_reverberation_time`](/reference/api/building/detailed-model/#structural_reverberation_time)), the in-situ index
    $R_\mathrm{situ} = R - 10 \log_{10}(T_\mathrm{s,situ}/T_\mathrm{s,lab})$ (Formula 9,
-   [`in_situ_reduction_index`](/phonometry/reference/api/building/detailed-model/#in_situ_reduction_index)) and the equivalent absorption length
+   [`in_situ_reduction_index`](/reference/api/building/detailed-model/#in_situ_reduction_index)) and the equivalent absorption length
    $a_\mathrm{situ} = 2.2\,\pi^2 S \sqrt{f_\mathrm{ref}/f}/(c_\mathrm{o} T_\mathrm{s,situ})$
    (Formula 11).
 3. Junctions (Formula 10).
    $D_{\mathrm{v},ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}} a_{j,\mathrm{situ}}})$,
-   floored at 0 dB ([`in_situ_velocity_level_difference`](/phonometry/reference/api/building/detailed-model/#in_situ_velocity_level_difference)).
+   floored at 0 dB ([`in_situ_velocity_level_difference`](/reference/api/building/detailed-model/#in_situ_velocity_level_difference)).
 4. Paths. The direct path is
    $R_\mathrm{Dd} = R_\mathrm{s,situ} + \Delta R_\mathrm{D,situ} + \Delta R_\mathrm{d,situ}$
    (Formula 14) and each flanking path (Formula 15) is
    $R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2 + \Delta R_{j,\mathrm{situ}} + D_{\mathrm{v},ij,\mathrm{situ}} + T$
    with the geometry term $T = 10 \log_{10}(S_\mathrm{s}/\sqrt{S_i S_j})$
-   ([`flanking_reduction_index`](/phonometry/reference/api/building/detailed-model/#flanking_reduction_index)).
+   ([`flanking_reduction_index`](/reference/api/building/detailed-model/#flanking_reduction_index)).
 5. Assembly. $R' = -10 \log_{10}(\sum 10^{-R/10})$ over the direct path and
    all flanking paths (Formulae 1 to 4), then `R'w (C; Ctr)` per ISO 717-1
-   ([`detailed_airborne_prediction`](/phonometry/reference/api/building/detailed-model/#detailed_airborne_prediction)).
+   ([`detailed_airborne_prediction`](/reference/api/building/detailed-model/#detailed_airborne_prediction)).
 
 **Chain, impact (ISO 12354-2:2017, Clause 4.2).** The bare floor's normalized
 impact sound pressure level per band follows from Annex B Formula (B.2),
 $L_\mathrm{n} = 155 - 30 \log_{10}(m') + 10 \log_{10}(T_\mathrm{s}) + 10 \log_{10}(\sigma) + 10 \log_{10}(f/f_\mathrm{ref})$
-([`bare_floor_impact_level`](/phonometry/reference/api/building/detailed-model/#bare_floor_impact_level)); the direct path is
+([`bare_floor_impact_level`](/reference/api/building/detailed-model/#bare_floor_impact_level)); the direct path is
 $L_\mathrm{n,d} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} - \Delta L_\mathrm{d,situ}$
 (Formula 11) and each flanking path (Formula 12) is
 $L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} + (R_{i,\mathrm{situ}} - R_{j,\mathrm{situ}})/2 - \Delta R_{j,\mathrm{situ}} - D_{\mathrm{v},ij,\mathrm{situ}} - 10 \log_{10}(S_i/\sqrt{S_i S_j})$
-([`flanking_impact_level`](/phonometry/reference/api/building/detailed-model/#flanking_impact_level)), combined
+([`flanking_impact_level`](/reference/api/building/detailed-model/#flanking_impact_level)), combined
 energetically into `L'n` and rated `L'n,w (CI)` per ISO 717-2
-([`detailed_impact_prediction`](/phonometry/reference/api/building/detailed-model/#detailed_impact_prediction)).
+([`detailed_impact_prediction`](/reference/api/building/detailed-model/#detailed_impact_prediction)).
 
 The two parts share the same in-situ machinery, so a building is described once
-([`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement) per element, [`in_situ_element`](/phonometry/reference/api/building/detailed-model/#in_situ_element) per band) and
+([`HomogeneousElement`](/reference/api/building/detailed-model/#homogeneouselement) per element, [`in_situ_element`](/reference/api/building/detailed-model/#in_situ_element) per band) and
 both the airborne and the impact chain read the same
-[`InSituElementResult`](/phonometry/reference/api/building/detailed-model/#insituelementresult).
+[`InSituElementResult`](/reference/api/building/detailed-model/#insituelementresult).
 
-**Type A and Type B elements.** [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement) and
-[`in_situ_element`](/phonometry/reference/api/building/detailed-model/#in_situ_element) describe a **Type A** element, one whose structural
+**Type A and Type B elements.** [`HomogeneousElement`](/reference/api/building/detailed-model/#homogeneouselement) and
+[`in_situ_element`](/reference/api/building/detailed-model/#in_situ_element) describe a **Type A** element, one whose structural
 reverberation time is set by the elements connected to it. For a **Type B**
 element the standard takes $T_\mathrm{s,situ} = T_\mathrm{s,lab}$ (so no in-situ
 transfer is
 needed) and describes the junction with the normalized direction-averaged
 velocity level difference `Dv,ij,n` instead of `Kij`, or with a laboratory
 measurement of the flanking level difference `Dn,f`. Those branches are
-[`flanking_reduction_index_from_normalized_difference`](/phonometry/reference/api/building/detailed-model/#flanking_reduction_index_from_normalized_difference) (Formula 17),
-[`flanking_impact_level_from_normalized_difference`](/phonometry/reference/api/building/detailed-model/#flanking_impact_level_from_normalized_difference) (Part 2, Formula 14)
-and [`flanking_reduction_index_from_flanking_level`](/phonometry/reference/api/building/detailed-model/#flanking_reduction_index_from_flanking_level) (Formula 16), with
-[`resonant_sound_reduction_index`](/phonometry/reference/api/building/detailed-model/#resonant_sound_reduction_index) for the Annex B.1 correction their
+[`flanking_reduction_index_from_normalized_difference`](/reference/api/building/detailed-model/#flanking_reduction_index_from_normalized_difference) (Formula 17),
+[`flanking_impact_level_from_normalized_difference`](/reference/api/building/detailed-model/#flanking_impact_level_from_normalized_difference) (Part 2, Formula 14)
+and [`flanking_reduction_index_from_flanking_level`](/reference/api/building/detailed-model/#flanking_reduction_index_from_flanking_level) (Formula 16), with
+[`resonant_sound_reduction_index`](/reference/api/building/detailed-model/#resonant_sound_reduction_index) for the Annex B.1 correction their
 element indices need below `fc`.
 
 Clause and formula citations refer to ISO 12354-1:2017 (airborne) or
@@ -130,7 +130,7 @@ equivalent absorption lengths with Formula (10), then Formula (15) gives
 | `delta_r_i` | `ΔRi,situ` on element `i`, per band, in dB. |
 | `delta_r_j` | `ΔRj,situ` on element `j`, per band, in dB. |
 
-**Returns:** The [`BandPath`](/phonometry/reference/api/building/detailed-model/#bandpath) carrying `Rij`.
+**Returns:** The [`BandPath`](/reference/api/building/detailed-model/#bandpath) carrying `Rij`.
 
 **Raises**
 
@@ -387,13 +387,13 @@ upwards on its lightweight blockwork.
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `total_loss_factor` | Total loss factor `ηtot` per band (laboratory or in situ, matching the situation being described). |
-| `radiation_factor` | Radiation factor for free bending waves `σ` per band (see [`bending_radiation_factor`](/phonometry/reference/api/building/detailed-model/#bending_radiation_factor)). |
-| `forced_radiation_factor` | Radiation factor for forced waves `σf` per band (see [`forced_radiation_factor`](/phonometry/reference/api/building/detailed-model/#forced_radiation_factor)); ignored when `resonant_only` is set. |
+| `radiation_factor` | Radiation factor for free bending waves `σ` per band (see [`bending_radiation_factor`](/reference/api/building/detailed-model/#bending_radiation_factor)). |
+| `forced_radiation_factor` | Radiation factor for forced waves `σf` per band (see [`forced_radiation_factor`](/reference/api/building/detailed-model/#forced_radiation_factor)); ignored when `resonant_only` is set. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, setting the band limits used to locate the $f \approx f_\mathrm{c}$ branch. One of `1` or `3`. |
 | `resonant_only` | Drop the forced-transmission term below `fc`. |
 | `density` | Density `ρ` of the material, in kg/m³; with `longitudinal_velocity` it enables the Formula (B.10) plateau. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
 **Returns:** The sound reduction index `R` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -432,12 +432,12 @@ the bands cover the rating range (100 Hz to 3150 Hz in one-third octaves,
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `direct_index` | `RDd` per band, in dB (see [`direct_reduction_index`](/phonometry/reference/api/building/detailed-model/#direct_reduction_index)). |
-| `flanking_paths` | The flanking paths (see [`airborne_flanking_path`](/phonometry/reference/api/building/detailed-model/#airborne_flanking_path)); may be empty. |
+| `direct_index` | `RDd` per band, in dB (see [`direct_reduction_index`](/reference/api/building/detailed-model/#direct_reduction_index)). |
+| `flanking_paths` | The flanking paths (see [`airborne_flanking_path`](/reference/api/building/detailed-model/#airborne_flanking_path)); may be empty. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-1 rating range. One of `1` or `3`. |
 
-**Returns:** The [`DetailedAirborneResult`](/phonometry/reference/api/building/detailed-model/#detailedairborneresult).
+**Returns:** The [`DetailedAirborneResult`](/reference/api/building/detailed-model/#detailedairborneresult).
 
 **Raises**
 
@@ -474,12 +474,12 @@ carries no direct path at all.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `direct_level` | `Ln,d` per band, in dB (see [`direct_impact_level`](/phonometry/reference/api/building/detailed-model/#direct_impact_level)), or `None` for the Formula (2) case of two rooms next to each other, which has no direct path. |
-| `flanking_paths` | The flanking paths (see [`impact_flanking_path`](/phonometry/reference/api/building/detailed-model/#impact_flanking_path)); may be empty when `direct_level` is given. |
+| `direct_level` | `Ln,d` per band, in dB (see [`direct_impact_level`](/reference/api/building/detailed-model/#direct_impact_level)), or `None` for the Formula (2) case of two rooms next to each other, which has no direct path. |
+| `flanking_paths` | The flanking paths (see [`impact_flanking_path`](/reference/api/building/detailed-model/#impact_flanking_path)); may be empty when `direct_level` is given. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-2 rating range. One of `1` or `3`. |
 
-**Returns:** The [`DetailedImpactResult`](/phonometry/reference/api/building/detailed-model/#detailedimpactresult).
+**Returns:** The [`DetailedImpactResult`](/reference/api/building/detailed-model/#detailedimpactresult).
 
 **Raises**
 
@@ -577,7 +577,7 @@ a PASS/FAIL verdict, followed by the footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the path table also gives the band in which each path contributes most. |
 | `language` | `"en"` (default) or `"es"`. |
@@ -668,7 +668,7 @@ DetailedImpactResult.report(
 
 Render a detailed impact prediction fiche (EN/ISO 12354-2).
 
-The impact counterpart of [`DetailedAirborneResult.report`](/phonometry/reference/api/building/detailed-model/#detailedairborneresultreport): the
+The impact counterpart of [`DetailedAirborneResult.report`](/reference/api/building/detailed-model/#detailedairborneresultreport): the
 per-band detailed model of ISO 12354-2:2017 Clause 4.2, with the boxed
 predicted `L'n,w` and a PASS/FAIL verdict against a requirement (a
 lower level passing).
@@ -678,7 +678,7 @@ lower level passing).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the path table also gives the band in which each path contributes most. |
 | `language` | `"en"` (default) or `"es"`. |
@@ -900,7 +900,7 @@ flanking_impact_level_from_flanking_level(
 Flanking impact level from a measured `Ln,f` (Part 2, Formula 13).
 
 $L_{\mathrm{n},ij} = L_{\mathrm{n,f},ij,\mathrm{situ}} - 10 \log_{10}(S_i l_\mathrm{lab}/(S_{i,\mathrm{lab}} l_{ij}))$, the impact twin of
-the airborne [`flanking_reduction_index_from_flanking_level`](/phonometry/reference/api/building/detailed-model/#flanking_reduction_index_from_flanking_level): the
+the airborne [`flanking_reduction_index_from_flanking_level`](/reference/api/building/detailed-model/#flanking_reduction_index_from_flanking_level): the
 route used when the flanking construction is characterised as a whole by a
 laboratory measurement of the normalized flanking impact sound pressure
 level (ISO 10848) instead of by the properties of its elements. The
@@ -1006,7 +1006,7 @@ flanking element as `j`.
 | :--- | :--- |
 | `index_i` | `Ri,situ` of the element excited in the source room, in dB per band. |
 | `index_j` | `Rj,situ` of the radiating element in the receiving room, per band, in dB. |
-| `velocity_level_difference` | `Dv,ij,situ` per band, in dB (see [`in_situ_velocity_level_difference`](/phonometry/reference/api/building/detailed-model/#in_situ_velocity_level_difference); for a Type B junction pass the Formula (12) value derived from `Dv,ij,n`). |
+| `velocity_level_difference` | `Dv,ij,situ` per band, in dB (see [`in_situ_velocity_level_difference`](/reference/api/building/detailed-model/#in_situ_velocity_level_difference); for a Type B junction pass the Formula (12) value derived from `Dv,ij,n`). |
 | `separating_area` | Separating-element area `Ss`, in m². |
 | `area_i` | Area `Si` of element `i`, in m². |
 | `area_j` | Area `Sj` of element `j`, in m². |
@@ -1107,7 +1107,7 @@ the *normalized* direction-averaged velocity level difference `Dv,ij,n`
 (ISO 12354-1 Annex F) rather than by `Kij`: the form used for lightweight
 double-leaf constructions, where the indices refer either to the double
 element as a whole or to its inner leaf and should relate to resonant
-transmission only (see [`resonant_sound_reduction_index`](/phonometry/reference/api/building/detailed-model/#resonant_sound_reduction_index)).
+transmission only (see [`resonant_sound_reduction_index`](/reference/api/building/detailed-model/#resonant_sound_reduction_index)).
 
 **Parameters**
 
@@ -1277,7 +1277,7 @@ A Type A homogeneous element of the detailed model.
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `internal_loss_factor` | Internal loss factor `ηint` of the material (about 0.01 for common homogeneous building materials; ISO 12354-1 Table B.3 tabulates it per material). |
-| `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Formula C.1; build it from [`perimeter_absorption_coefficient`](/phonometry/reference/api/building/detailed-model/#perimeter_absorption_coefficient) times the border lengths). |
+| `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Formula C.1; build it from [`perimeter_absorption_coefficient`](/reference/api/building/detailed-model/#perimeter_absorption_coefficient) times the border lengths). |
 | `density` | Density `ρ` of the material, in kg/m³; supplied together with `longitudinal_velocity` it enables the high-frequency plateau of Formula (B.10). `None` (the default) leaves the plateau off. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s (ISO 12354-1 Table B.3). |
 
@@ -1311,7 +1311,7 @@ phase velocity $c_\mathrm{L}$ of a plate, and by its thickness
 $t$: the mass per unit area is $m' = \rho t$ and the
 critical frequency $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$ (ISO 12354-1:2017, the symbols of Formula (B.2)).
 A row's plate speed is that $c_\mathrm{L}$, read with its
-density through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so a
+density through [`printed`](/reference/api/io/io/#cataloguerowprinted), so a
 cell the page leaves empty or prints as a range is refused in the
 page's terms; a row whose page prints a modulus and a Poisson ratio
 instead holds the plate speed its completion works out of them,
@@ -1329,23 +1329,23 @@ measured one.
 
 | Name | Description |
 | :--- | :--- |
-| `row` | A [`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial), one of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids) or one read from a catalogue file of your own. |
+| `row` | A [`SolidMaterial`](/reference/api/solids/catalogue/#solidmaterial), one of [`PUBLISHED_SOLIDS`](/reference/api/solids/catalogue/#published_solids) or one read from a catalogue file of your own. |
 | `thickness_m` | Element thickness `t`, in metres. |
 | `internal_loss_factor` | Internal loss factor `ηint`. |
 | `area` | Element area `S`, in m². |
 | `length1` | One side length of the rectangular element, in m. |
 | `length2` | The other side length, in m. |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Default: 0). |
-| `label` | The element's name (Default: the row's [`name`](/phonometry/reference/api/io/io/#cataloguerow)). |
-| `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the 340 m/s of Annex A). |
+| `label` | The element's name (Default: the row's [`name`](/reference/api/io/io/#cataloguerow)). |
+| `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN12354_AIR`](/reference/api/building/detailed-model/#en12354_air), the 340 m/s of Annex A). |
 
-**Returns:** The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement).
+**Returns:** The [`HomogeneousElement`](/reference/api/building/detailed-model/#homogeneouselement).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a row that is not a [`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial), or a `thickness_m` or `internal_loss_factor` that is not one number. |
+| TypeError | for a row that is not a [`SolidMaterial`](/reference/api/solids/catalogue/#solidmaterial), or a `thickness_m` or `internal_loss_factor` that is not one number. |
 | ValueError | for a thickness or a loss factor that is not positive and finite, or for a density or a plate speed the row holds no number for, in the row's own terms. |
 
 ## impact_flanking_path
@@ -1377,7 +1377,7 @@ Build one impact flanking path `Df` (Part 2, Formula 12).
 | `delta_l` | Improvement of the floor covering `ΔLsitu`, in dB. |
 | `delta_r_j` | `ΔRj,situ` of a lining on the flanking element, in dB. |
 
-**Returns:** The [`BandPath`](/phonometry/reference/api/building/detailed-model/#bandpath) carrying `Ln,ij`.
+**Returns:** The [`BandPath`](/reference/api/building/detailed-model/#bandpath) carrying `Ln,ij`.
 
 **Raises**
 
@@ -1408,20 +1408,20 @@ index and, for a floor, the calculated in-situ normalized impact level.
 Because the element performance is *calculated from material properties*,
 the in-situ loss factor enters Formula (B.2) directly and no
 $10 \log_{10}(T_\mathrm{s,situ}/T_\mathrm{s,lab})$ transfer is needed
-(Annex B.3). Use [`in_situ_reduction_index`](/phonometry/reference/api/building/detailed-model/#in_situ_reduction_index) instead when the element
+(Annex B.3). Use [`in_situ_reduction_index`](/reference/api/building/detailed-model/#in_situ_reduction_index) instead when the element
 data come from a laboratory measurement.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `element` | The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement) description. |
+| `element` | The [`HomogeneousElement`](/reference/api/building/detailed-model/#homogeneouselement) description. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 | `resonant_only` | Drop the forced-transmission term of Formula (B.2) below `fc` (Annex B.1, flanking paths). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
-**Returns:** The [`InSituElementResult`](/phonometry/reference/api/building/detailed-model/#insituelementresult).
+**Returns:** The [`InSituElementResult`](/reference/api/building/detailed-model/#insituelementresult).
 
 **Raises**
 
@@ -1468,7 +1468,7 @@ rings shorter at high frequency. For a Type B element the standard
 replaces it by the element area, $a_\mathrm{situ} = S/l_o$ (Formula 13).
 
 This is the ISO 10848 Formula (12) quantity
-([`phonometry.building.equivalent_absorption_length`](/phonometry/reference/api/building/flanking-transmission/#equivalent_absorption_length)) evaluated with
+([`phonometry.building.equivalent_absorption_length`](/reference/api/building/flanking-transmission/#equivalent_absorption_length)) evaluated with
 the ISO 12354 value $c_\mathrm{o} = 340$ m/s.
 
 **Parameters**
@@ -1527,7 +1527,7 @@ In-situ normalized impact level `Ln,situ` (Part 2, Formula 5).
 
 $L_\mathrm{n,situ} = L_\mathrm{n} + 10 \log_{10}(T_\mathrm{s,situ}/T_\mathrm{s,lab})$, the sign
 opposite to
-[`in_situ_reduction_index`](/phonometry/reference/api/building/detailed-model/#in_situ_reduction_index): a floor that rings longer in the building
+[`in_situ_reduction_index`](/reference/api/building/detailed-model/#in_situ_reduction_index): a floor that rings longer in the building
 than in the laboratory radiates more impact sound.
 
 **Parameters**
@@ -1654,7 +1654,7 @@ internal losses of the material, the losses by radiation into the air
 and the losses at the perimeter of the element.
 $\sum l_k \alpha_k$ is the junction-length-weighted sum of the
 Formula (C.4) absorption coefficients (see
-[`perimeter_absorption_coefficient`](/phonometry/reference/api/building/detailed-model/#perimeter_absorption_coefficient)).
+[`perimeter_absorption_coefficient`](/reference/api/building/detailed-model/#perimeter_absorption_coefficient)).
 
 **Parameters**
 
@@ -1667,7 +1667,7 @@ Formula (C.4) absorption coefficients (see
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `radiation_factor` | Radiation factor `σ` per band. |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (may be zero for a free-edged element). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1.29 kg/m3). |
 
 **Returns:** The total loss factor `ηtot,situ` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -1862,7 +1862,7 @@ summed over the elements `j`
 connected to the considered element at border `k` (the standard sums
 over at most three). Multiplied by the border length and summed over the
 perimeter it gives the $\sum l_k \alpha_k$ that
-[`in_situ_total_loss_factor`](/phonometry/reference/api/building/detailed-model/#in_situ_total_loss_factor) takes. Annex C.3 places the in-situ
+[`in_situ_total_loss_factor`](/reference/api/building/detailed-model/#in_situ_total_loss_factor) takes. Annex C.3 places the in-situ
 coefficients between 0.05 and 0.5.
 
 **Parameters**

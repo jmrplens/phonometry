@@ -237,7 +237,7 @@ print(f"{chained:.2f} dB", chained == nested)   # 57.25 dB True
 
 ## Calibrar desde la toma del calibrador
 
-La [guía de calibración](/phonometry/es/signals/metrology/calibration/)
+La [guía de calibración](/es/signals/metrology/calibration/)
 deriva el factor de sensibilidad de una grabación del tono del calibrador;
 la única regla nueva aquí es que **los dos archivos pasan por el mismo
 lector**. El factor viaja entonces en el `Signal` y las funciones de nivel
@@ -316,7 +316,7 @@ indicators of pass-by road traffic noise», Zenodo, 2023, DOI
 sonómetro NTi Audio XL2. Cambios: extractos de 4 segundos cortados bit a bit y
 guardados en un contenedor nuevo. La procedencia y la licencia de cada archivo
 están en `tests/data/audio/README.md`, y la
-[guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) pasa
+[guía de sonoridad](/es/perception/psychoacoustics/loudness/) pasa
 los propios extractos frente a los niveles y la sonoridad que publica el
 depósito.
 
@@ -455,7 +455,7 @@ calibración sigue la regla de `read()`, así que un factor pasado aquí o
 encontrado en el sidecar hace que cada bloque presente sus muestras en
 pascales a los filtros y a las funciones de nivel, y no se aplica ningún
 factor a mano. Los filtros con estado de la guía de
-[proceso por bloques](/phonometry/es/signals/filters/block-processing/)
+[proceso por bloques](/es/signals/filters/block-processing/)
 consumen el flujo sin cambios, y la aritmética de abajo toma `np.asarray` de
 lo que devuelven, como haría con cualquier `Signal`:
 
@@ -482,7 +482,7 @@ un filtro con estado arrastra su estado a través de las fronteras de bloque
 y el flujo aporta cada muestra exactamente una vez. Ambos lados usan el mismo
 diseño por defecto, ya que el procesado por bloques ya no le cuesta nada al
 filtro de ponderación (la
-[guía de ponderación](/phonometry/es/signals/levels/weighting/) tiene el
+[guía de ponderación](/es/signals/levels/weighting/) tiene el
 detalle). La misma construcción alimenta un `OctaveFilterBank` con
 `BlockProcessing(stateful=True)`, banda a banda.
 
@@ -506,7 +506,7 @@ construyas se escribe campo a campo en sus posiciones de la EBU Tech 3285;
 y `bext="loudness"` mide además los cinco valores de sonoridad de la
 versión 2 (sonoridad de programa, rango de sonoridad, pico verdadero
 máximo, y los máximos momentáneo y a corto plazo) con la
-[implementación propia de la ITU-R BS.1770](/phonometry/es/devices/broadcast/program-loudness/)
+[implementación propia de la ITU-R BS.1770](/es/devices/broadcast/program-loudness/)
 sobre las muestras que se están escribiendo. El `CodingHistory` de todo
 chunk escrito se extiende, nunca se sustituye, con la línea en formato
 EBU R98 que describe este paso de codificación.
@@ -626,11 +626,11 @@ instalación base evita a propósito.
 
 ## Véase también
 
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): de dónde sale el factor de sensibilidad, y la disciplina de campo a su alrededor.
-- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/): las funciones de nivel que aceptan el `Signal` directamente.
-- [Proceso por bloques](/phonometry/es/signals/filters/block-processing/): la maquinaria con estado que alimenta `read_blocks`.
-- [Sonoridad de programa](/phonometry/es/devices/broadcast/program-loudness/): la implementación de la BS.1770 tras `bext="loudness"`.
-- [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): la cadena completa en la que entran y de la que salen los archivos de esta página.
-- Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/).
+- [Calibración y dBFS](/es/signals/metrology/calibration/): de dónde sale el factor de sensibilidad, y la disciplina de campo a su alrededor.
+- [Niveles integrados y estadísticos](/es/signals/levels/levels/): las funciones de nivel que aceptan el `Signal` directamente.
+- [Proceso por bloques](/es/signals/filters/block-processing/): la maquinaria con estado que alimenta `read_blocks`.
+- [Sonoridad de programa](/es/devices/broadcast/program-loudness/): la implementación de la BS.1770 tras `bext="loudness"`.
+- [Construye un sonómetro](/es/signals/sound-level-meter/): la cadena completa en la que entran y de la que salen los archivos de esta página.
+- Referencia de la API: [`phonometry.io`](/es/reference/api/io/io/).
 
 </SeeAlso>

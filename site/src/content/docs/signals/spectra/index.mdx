@@ -18,19 +18,19 @@ with a confidence interval.
 
 Eight pages sit under that discipline, in six families: the frequency-domain
 estimators ([spectral
-analysis](/phonometry/signals/spectra/spectral-analysis/), [multiple and
-partial coherence](/phonometry/signals/spectra/miso-coherence/)), the
+analysis](/signals/spectra/spectral-analysis/), [multiple and
+partial coherence](/signals/spectra/miso-coherence/)), the
 time-frequency middle ground
-([spectrograms](/phonometry/signals/spectra/time-frequency/)), the
+([spectrograms](/signals/spectra/time-frequency/)), the
 spectrum-shape methods
-([cepstrum](/phonometry/signals/spectra/cepstrum-echoes/)), the period-domain
+([cepstrum](/signals/spectra/cepstrum-echoes/)), the period-domain
 methods ([synchronous
-averaging](/phonometry/signals/spectra/synchronous-averaging/)), the
+averaging](/signals/spectra/synchronous-averaging/)), the
 time-domain estimators ([correlation and
-delay](/phonometry/signals/spectra/correlation-delay/)), and the stimulus and
+delay](/signals/spectra/correlation-delay/)), and the stimulus and
 system toolbox ([test
-signals](/phonometry/signals/spectra/test-signals/), [system
-measurement](/phonometry/signals/spectra/system-measurement/)).
+signals](/signals/spectra/test-signals/), [system
+measurement](/signals/spectra/system-measurement/)).
 
 They differ in what they estimate and share two decisions. The first is the
 **segment length**. It fixes the resolution bandwidth of a PSD, the cell shape
@@ -41,11 +41,11 @@ it is what makes a PSD, a coherence and a delay computed from the same record
 mutually consistent. The second is **stationarity**. Every average on these
 pages, and every error formula quoted beside it, assumes the process did not
 drift while it was being recorded, which is exactly what the [data
-qualification](/phonometry/signals/metrology/data-qualification/) tests decide;
+qualification](/signals/metrology/data-qualification/) tests decide;
 when a record fails them, the honest tools are the short-time views rather than
 the averaged ones.
 
-[Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/) is where
+[Calibrated spectral analysis](/signals/spectra/spectral-analysis/) is where
 the frequency-domain family starts. The Welch power and cross-spectral density estimators
 report their effective number of averages, normalized random errors and
 chi-square confidence intervals; the coherent output spectrum splits a
@@ -53,32 +53,32 @@ measured output into the part explained by an input and the part that is
 noise, with a spectral signal-to-noise ratio; fractional-octave smoothing
 bridges back to the banded world; and the colored-noise generators synthesize
 white, pink, red, blue and violet test signals with an exact power-law slope.
-[Multiple and partial coherence](/phonometry/signals/spectra/miso-coherence/) carries
+[Multiple and partial coherence](/signals/spectra/miso-coherence/) carries
 that same cross-spectral machinery to several correlated sources at once: from
 multiple inputs and one output it separates the coherence a source
 genuinely contributes from the part it merely shares with another, and its
 partial coherent output spectra say which source dominates each band.
 
-[Time-frequency analysis](/phonometry/signals/spectra/time-frequency/) is the view in
+[Time-frequency analysis](/signals/spectra/time-frequency/) is the view in
 between: the calibrated STFT spectrogram shows what happens *when* - a
 passing siren, an impact, a run-up - with every cell reading an absolute
 level in the same scaling as the Welch estimators, and the zoom FFT computes
 the spectrum of a narrow band on an arbitrarily fine grid to separate tones
 closer than a practical FFT bin.
-[Cepstrum, echoes and the envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/)
+[Cepstrum, echoes and the envelope spectrum](/signals/spectra/cepstrum-echoes/)
 works on the *shape* of the spectrum. The power, real and complex cepstrum
 collapse periodic spectral ripple onto quefrency spikes, echo detection reads
 a reflection's delay and coefficient off the cepstral peak, liftering splits
 a log spectrum into smooth envelope and fine structure, and the envelope
 spectrum turns amplitude modulations into discrete lines at the modulation
 frequency.
-[Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/)
+[Time synchronous averaging](/signals/spectra/synchronous-averaging/)
 extracts a repetitive waveform of known period from asynchronous noise by
 ensemble-averaging successive periods: the residual noise falls as the square
 root of the number of averages, and choosing that number to place a comb node
 on an interfering order rejects it far better than the habitual power of two.
 
-[Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/)
+[Correlation, time delay and envelope](/signals/spectra/correlation-delay/)
 is where its time-domain counterpart starts. Auto- and cross-correlation come with the
 Bendat & Piersol normalizations and random errors; time-delay estimation
 offers the direct correlator, the cross-spectrum phase slope and the
@@ -87,7 +87,7 @@ maximum likelihood); impulse responses can be delayed and aligned with
 sub-sample precision; and the Hilbert transform yields the envelope with
 instantaneous phase and frequency.
 
-[Test signals and sample-rate tools](/phonometry/signals/spectra/test-signals/) is
+[Test signals and sample-rate tools](/signals/spectra/test-signals/) is
 the toolbox underneath the rest: tone bursts with the exact gating of
 IEC 60268-1 (zero-crossing start, integral full periods, repetitive trains)
 that exercise detector ballistics, polyphase resampling behind an explicit
@@ -95,11 +95,11 @@ anti-alias specification whose designed filter travels with the result and
 which every cross-rate comparison needs, and band-limited fractional delay
 with a linear or circular boundary, whose kernel is shared by the
 impulse-response alignment of
-[Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/)
+[Correlation, time delay and envelope](/signals/spectra/correlation-delay/)
 and the non-integer period alignment of
-[Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/).
+[Time synchronous averaging](/signals/spectra/synchronous-averaging/).
 
-[System measurement](/phonometry/signals/spectra/system-measurement/) turns the
+[System measurement](/signals/spectra/system-measurement/) turns the
 toolbox toward measuring systems themselves: complementary Golay pairs
 deconvolve a time-invariant system with zero correlation noise, the
 Mueller & Massarani shaped sweeps put the excitation energy where a target
@@ -110,43 +110,43 @@ equalizer with an analytic bound on flatness and out-of-band gain.
 These estimators feed the rest of the library: transfer functions and
 distortion analysis build on the cross-spectral machinery, room impulse
 response work leans on delay estimation and alignment, and the
-[uncertainty pages](/phonometry/signals/metrology/)
+[uncertainty pages](/signals/metrology/)
 supply the error-analysis vocabulary the estimates are stated in.
 
 ## Pages in this section
 
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/):
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/):
   Welch PSD/CSD with chi-square confidence intervals, the coherent output
   spectrum and spectral SNR, 1/n-octave smoothing and exact-slope
   colored-noise generators.
-- [Multiple and partial coherence](/phonometry/signals/spectra/miso-coherence/):
+- [Multiple and partial coherence](/signals/spectra/miso-coherence/):
   the Bendat & Piersol multiple-input/output coherence functions for
   multiple correlated sources and one output, with the Gaussian-elimination
   conditioning that tells a genuine cause from a source that merely
   correlates with it, and the partial coherent output spectra that say which
   source dominates each band.
-- [Time-frequency analysis](/phonometry/signals/spectra/time-frequency/): the
+- [Time-frequency analysis](/signals/spectra/time-frequency/): the
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) with
   the time-versus-frequency resolution trade-off, and the zoom FFT that
   resolves tones closer than a practical FFT bin.
-- [Cepstrum, echoes and the envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/):
+- [Cepstrum, echoes and the envelope spectrum](/signals/spectra/cepstrum-echoes/):
   the power/real/complex cepstrum with quefrency analysis, echo detection
   with the reflection coefficient read off the peak, lowpass/highpass
   liftering, the homomorphic round trip and the envelope spectrum of
   amplitude modulations.
-- [Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/):
+- [Time synchronous averaging](/signals/spectra/synchronous-averaging/):
   extraction of a periodic waveform of known period by time domain averaging,
   the comb filter that describes the operation in the frequency domain, the
   square-root noise-reduction law, and the choice of the number of averages
   that places a comb node on an interfering order (McFadden 1987).
-- [Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/):
+- [Correlation, time delay and envelope](/signals/spectra/correlation-delay/):
   correlation estimates with their random errors, time-delay estimation by
   direct correlation, phase slope and GCC weightings, sub-sample
   impulse-response alignment, and the Hilbert envelope.
-- [Test signals and sample-rate tools](/phonometry/signals/spectra/test-signals/):
+- [Test signals and sample-rate tools](/signals/spectra/test-signals/):
   IEC 60268-1 tone bursts with exact gating, resampling with a stated
   anti-alias specification, and band-limited fractional delay.
-- [System measurement](/phonometry/signals/spectra/system-measurement/):
+- [System measurement](/signals/spectra/system-measurement/):
   complementary Golay pairs with exactly noise-free deconvolution to an
   impulse response, sweeps that follow an arbitrary target magnitude
   spectrum by group-delay shaping, and the Kirkeby-regularized inversion
@@ -158,7 +158,7 @@ supply the error-analysis vocabulary the estimates are stated in.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/):
+- [Machine fault frequencies](/vibration/machinery/machine-diagnostics/):
   the kinematic fault-frequency families of rotating machinery (Norton &
   Karczub Section 8.4) drawn on top of a measured envelope spectrum: bearing
   BPFO, BPFI, BSF and cage frequencies, gear-mesh sidebands, induction-motor
@@ -191,9 +191,9 @@ multiple-output system needs one `miso_coherence` call per output.
 linear-frequency one, with no mel warping and no MFCC variant. Two estimators
 that share this section's Welch core are documented where they are used
 instead: the transfer function and ordinary coherence on
-[Electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/),
+[Electroacoustics](/devices/electroacoustics/electroacoustics/),
 and the two-microphone intensity probe on [Sound
-intensity](/phonometry/devices/emission/intensity/).
+intensity](/devices/emission/intensity/).
 </ScopeClaim>
 </Scope>
 

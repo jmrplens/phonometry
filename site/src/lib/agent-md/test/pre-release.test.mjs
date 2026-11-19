@@ -21,7 +21,7 @@ test('a version is a pre-release by PEP 440, as the shared table says', () => {
 
 const fields = (lang, version) => ({
   lang,
-  canonical: 'https://docs.jmrp.io/phonometry/signals/levels/',
+  canonical: 'https://phonometry.dev/signals/levels/',
   release: { version, install: 'pip install "phonometry[full]"', preRelease: isPreRelease(version) },
 });
 

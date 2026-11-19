@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/aircraft/anp-fleet.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/anp-fleet/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/aircraft/anp-fleet/
 
 # The ANP fleet database
 
@@ -267,7 +267,7 @@ than from a cold one at the coast. There is nothing to tabulate, which is why
 the database ships the steps and not the points.
 
 `flight_profile` flies them, through the [ECAC Doc 29 Vol. 2 Appendix
-B](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/flight-performance/) flight
+B](https://phonometry.dev/reference/api/aeroacoustics/flight-performance/) flight
 performance model. It requires an `aerodrome`, because it computes the
 trajectory and the trajectory depends on the field, where `profile` returns an
 already tabulated fixed-point one and needs no such argument. It works in the
@@ -478,7 +478,7 @@ Pages elsewhere on the site that this section leans on:
 - [Aircraft noise: Effective Perceived Noise Level](aircraft-noise.md):
   the certification metric, which is measured rather than tabulated.
 - API reference:
-  [`aircraft.anp_fleet`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/anp-fleet/).
+  [`aircraft.anp_fleet`](https://phonometry.dev/reference/api/aeroacoustics/anp-fleet/).
 
 ## References
 

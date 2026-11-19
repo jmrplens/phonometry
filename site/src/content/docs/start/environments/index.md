@@ -17,12 +17,12 @@ ran that day.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
-| [pip and uv](/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
-| [conda and mamba](/phonometry/start/environments/conda/) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
-| [Jupyter and JupyterLab](/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
-| [JupyterLite and Pyodide](/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
-| [Docker and servers](/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |
-| [Type checking](/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
+| [pip and uv](/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
+| [conda and mamba](/start/environments/conda/) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
+| [Jupyter and JupyterLab](/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
+| [JupyterLite and Pyodide](/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
+| [Docker and servers](/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |
+| [Type checking](/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
 
@@ -58,15 +58,15 @@ deprecation warning of its own while it draws, which a blanket
 ## A GPU
 
 None of these pages covers one. [Where a simulation
-runs](/phonometry/simulation/compute/) says what each device of the FDTD
+runs](/simulation/compute/) says what each device of the FDTD
 engines needs, from the PyTorch wheels to CuPy's for an NVIDIA GPU, and how a
 run falls back to NumPy when its device is missing.
 
 ## The pages
 
-- [pip and uv](/phonometry/start/environments/pip-and-uv/): a virtual environment, each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
-- [conda and mamba](/phonometry/start/environments/conda/): the dependencies under their conda-forge names, then phonometry with pip in the same environment.
-- [Jupyter and JupyterLab](/phonometry/start/environments/jupyter/): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
-- [JupyterLite and Pyodide](/phonometry/start/environments/jupyterlite/): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
-- [Docker and servers](/phonometry/start/environments/docker/): a slim image, any user id, a read-only root file system and ffmpeg for videos.
-- [Type checking](/phonometry/start/environments/type-checking/): what mypy and pyright see on every NumPy the library accepts, the choices they check and where a type is wider than its value.
+- [pip and uv](/start/environments/pip-and-uv/): a virtual environment, each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
+- [conda and mamba](/start/environments/conda/): the dependencies under their conda-forge names, then phonometry with pip in the same environment.
+- [Jupyter and JupyterLab](/start/environments/jupyter/): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
+- [JupyterLite and Pyodide](/start/environments/jupyterlite/): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
+- [Docker and servers](/start/environments/docker/): a slim image, any user id, a read-only root file system and ffmpeg for videos.
+- [Type checking](/start/environments/type-checking/): what mypy and pyright see on every NumPy the library accepts, the choices they check and where a type is wider than its value.

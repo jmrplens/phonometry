@@ -32,10 +32,10 @@ tabulated by the standard (0.0617 sone/Cam); a 1 kHz tone at 40 dB SPL
 presented binaurally in a free field yields 1.000 sone by definition of the
 sone (clause 3.17), which this implementation reproduces without tuning.
 
-The stationary method is spectrum-based.  [`loudness_moore_glasberg_from_spectrum`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum)
+The stationary method is spectrum-based.  [`loudness_moore_glasberg_from_spectrum`](/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum)
 takes the exact sinusoidal-component representation of clauses 5.2/5.4,
-[`loudness_moore_glasberg_from_third_octave`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_third_octave) takes the 29 one-third-octave
-band levels of clause 5.5, and [`loudness_moore_glasberg`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg) forms the
+[`loudness_moore_glasberg_from_third_octave`](/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_third_octave) takes the 29 one-third-octave
+band levels of clause 5.5, and [`loudness_moore_glasberg`](/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg) forms the
 narrowband (FFT) line spectrum of a calibrated pressure signal and feeds it to
 the exact sinusoidal-component method.
 
@@ -56,25 +56,25 @@ loudness_moore_glasberg(
 Moore-Glasberg loudness of a calibrated stationary pressure signal.
 
 Convenience wrapper around
-[`loudness_moore_glasberg_from_spectrum`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum): the signal's narrowband
+[`loudness_moore_glasberg_from_spectrum`](/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum): the signal's narrowband
 (FFT) line spectrum is formed and each bin is passed to the exact
 sinusoidal-component method of ISO 532-2:2017 (clauses 5.2/5.4).  Because
 the model computes the excitation pattern per spectral component
 (Formula 5), a pure tone enters as a single line, so a calibrated 1 kHz
 tone at 40 dB SPL yields 1.000 sone / 40 phon (the definitional anchor),
-matching [`loudness_moore_glasberg_from_spectrum`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum).  The signal must be
+matching [`loudness_moore_glasberg_from_spectrum`](/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum).  The signal must be
 calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Single-channel calibrated pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
-| `fs` | Sampling rate in Hz (positive). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Single-channel calibrated pressure signal in pascals. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), which is where "calibrated" comes from without arithmetic: this model reads absolute levels, so an uncalibrated record is taken as if one digital unit were one pascal and the answer is wrong by however far that is from true. |
+| `fs` | Sampling rate in Hz (positive). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | `"free"` (default), `"diffuse"` or `"eardrum"`. |
 | `presentation` | `"binaural"` (default; alias `"diotic"`) or `"monaural"`. |
 
-**Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
+**Returns:** A [`MooreGlasbergLoudness`](/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
 
 **Raises**
 
@@ -109,7 +109,7 @@ closely spaced components of clause 5.3.
 | `field` | Listening condition setting the outer-ear transfer: `"free"` (frontal free field, default), `"diffuse"` (diffuse field) or `"eardrum"` (levels already specified at the tympanic membrane, e.g. a flat earphone). |
 | `presentation` | `"binaural"` (default; `"diotic"` is an equivalent alias: the same sound at both ears) or `"monaural"` (one ear only). |
 
-**Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
+**Returns:** A [`MooreGlasbergLoudness`](/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
 
 **Raises**
 
@@ -147,7 +147,7 @@ sinusoidal components and the exact method is applied.
 | `field` | `"free"` (default), `"diffuse"` or `"eardrum"`. |
 | `presentation` | `"binaural"` (default; alias `"diotic"`) or `"monaural"`. |
 
-**Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
+**Returns:** A [`MooreGlasbergLoudness`](/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
 
 **Raises**
 

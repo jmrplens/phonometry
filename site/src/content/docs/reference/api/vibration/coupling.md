@@ -74,7 +74,7 @@ names.
 | `direction` | `"vertical"` or `"horizontal"`. |
 | `surface` | `"hard"` (default: masonry, a raw slab, a hard floor) or `"soft"` (a carpet or any elastic floor covering). |
 
-**Returns:** The verdict and the limits it was read against, as a [`MountingCheck`](/phonometry/reference/api/vibration/coupling/#mountingcheck).
+**Returns:** The verdict and the limits it was read against, as a [`MountingCheck`](/reference/api/vibration/coupling/#mountingcheck).
 
 **Raises**
 
@@ -171,7 +171,7 @@ mass_loading_ratio(
 The mass the transducer adds to the object, as a fraction (7.2.4).
 
 The transducer and its coupling device together should add at most
-[`MASS_LOADING_RATIO_LIMIT`](/phonometry/reference/api/vibration/coupling/#mass_loading_ratio_limit) of the mass the object vibrates with,
+[`MASS_LOADING_RATIO_LIMIT`](/reference/api/vibration/coupling/#mass_loading_ratio_limit) of the mass the object vibrates with,
 which for a floor is the mass of the slab that moves at the highest
 frequency of the signal, not the mass of the building. Where that cannot
 be estimated, 7.2.4 says to add a second, uncoupled mass of the same order
@@ -184,7 +184,7 @@ beside the transducer and see whether the reading moves.
 | `coupled_mass_kg` | The transducer and its device, in kilograms. |
 | `vibrating_mass_kg` | The mass of the object that vibrates with it, in kilograms. |
 
-**Returns:** The ratio of the two, dimensionless; compare it with [`MASS_LOADING_RATIO_LIMIT`](/phonometry/reference/api/vibration/coupling/#mass_loading_ratio_limit).
+**Returns:** The ratio of the two, dimensionless; compare it with [`MASS_LOADING_RATIO_LIMIT`](/reference/api/vibration/coupling/#mass_loading_ratio_limit).
 
 **Raises**
 

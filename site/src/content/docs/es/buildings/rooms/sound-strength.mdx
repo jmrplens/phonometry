@@ -49,7 +49,7 @@ T30 pueden estar a 20 dB de distancia en la misma butaca. La fuerza sonora,
 $G$, es la magnitud que cierra ese hueco, y es una de las dos únicas de la
 Tabla A.1 de la ISO 3382-1 que necesitan una fuente calibrada; la otra es el
 nivel lateral tardío, referido al mismo campo libre. Todo lo demás de la
-[página de parámetros acústicos de salas](/phonometry/es/buildings/rooms/room-acoustics/)
+[página de parámetros acústicos de salas](/es/buildings/rooms/room-acoustics/)
 (EDT, T20, T30, C50, C80, D50, $T_\mathrm{S}$) es un tiempo de caída, un
 cociente de energías o un tiempo central leído de un solo registro, y
 sobrevive a cualquier ganancia que se le ponga delante. $G$ no.
@@ -128,7 +128,7 @@ como sí lo tienen C80 y D50. Por eso la integral se trunca donde la recta
 ajustada del decaimiento se cruza con el suelo de ruido y la cola que falta
 se compensa con la pendiente ajustada, que es el tratamiento que la 5.3.3
 Ecuación (3) imprime para esta misma integral y que
-[`decay_curve`](/phonometry/es/buildings/rooms/room-acoustics/) ya le da a la
+[`decay_curve`](/es/buildings/rooms/room-acoustics/) ya le da a la
 misma respuesta. Una respuesta sintética sin suelo de ruido medible se
 integra entera, así que para ella no se mueve nada.
 
@@ -228,10 +228,10 @@ print(round(room.sound_strength_from_power(80.0, 100.0), 4))   # 11.0
 ```
 
 A.2.1 pide medir $L_W$ según la ISO 3741, que vive en
-[Potencia sonora](/phonometry/es/devices/emission/sound-power/).
+[Potencia sonora](/es/devices/emission/sound-power/).
 
 El A.2.1 impreso tiene dos defectos, ambos en
-[el registro de erratas](/phonometry/es/reference/errata/). El mismo símbolo
+[el registro de erratas](/es/reference/errata/). El mismo símbolo
 $L_{pE}$ nombra el nivel de exposición de la sala en (A.2) y el nivel de la
 cámara reverberante en (A.5), de modo que sustituir uno en el otro tal como
 están impresos hace desaparecer la sala de $G$; la biblioteca mantiene los dos
@@ -261,7 +261,7 @@ y **no pueden** coincidir mejor que en 0,0206 dB, haga lo que haga una
 biblioteca. Eso es el 2 % de la diferencia apenas perceptible de 1 dB de la
 Tabla A.1, así que nunca importa en una sala; importa cuando un banco de
 pruebas compara las dos rutas, y por eso el
-[informe de conformidad](/phonometry/es/reference/conformance/) fija el
+[informe de conformidad](/es/reference/conformance/) fija el
 hueco en lugar de tolerarlo.
 
 La biblioteca imprime lo que imprime la norma. Una versión que usara
@@ -377,7 +377,7 @@ los dos niveles de exposición a partir de las respuestas que recibe, de modo
 que:
 
 - un factor de calibración común al par se cancela exactamente, y el
-  [informe de conformidad](/phonometry/es/reference/conformance/) tiene una
+  [informe de conformidad](/es/reference/conformance/) tiene una
   fila que lo exige;
 - un factor sobre una sola de ellas no se cancela, y aparece como un
   desplazamiento fijo en todas las bandas de $G$;
@@ -385,7 +385,7 @@ que:
   de la sala lleva sola la calibración y tiene que ser absoluta.
 
 Un array de NumPy pelado se lee como pascales. Una
-[`Signal`](/phonometry/es/io/audio-files/) trae su propio factor de calibración y
+[`Signal`](/es/io/audio-files/) trae su propio factor de calibración y
 se aplica antes de la integral.
 
 ## 6. Dónde encaja esto
@@ -393,10 +393,10 @@ se aplica antes de la integral.
 $G$ pertenece al grupo de magnitudes de la Tabla A.1 que la biblioteca mide
 desde una respuesta al impulso. Los tiempos de caída y los cocientes de
 energía están en
-[Parámetros acústicos de salas](/phonometry/es/buildings/rooms/room-acoustics/);
+[Parámetros acústicos de salas](/es/buildings/rooms/room-acoustics/);
 la adquisición de la propia respuesta, con las posiciones de fuente y
 micrófono que pide la ISO 3382-1, en
-[Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/).
+[Medición de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/).
 
 ## Qué cubre esta guía
 
@@ -415,7 +415,7 @@ El resto del Anexo A y sus vecinos: el soporte de escenario del Anexo C, la
 incertidumbre de medición del Capítulo 7 y la cualificación de la directividad
 de la fuente de la Tabla 1. Las medidas de energía lateral de A.2.4 y A.2.5 y
 la correlación cruzada interaural del Anexo B tienen guía propia,
-[Impresión espacial](/phonometry/es/buildings/rooms/spatial-impression/).
+[Impresión espacial](/es/buildings/rooms/spatial-impression/).
 </ScopeClaim>
 </Scope>
 
@@ -423,16 +423,16 @@ la correlación cruzada interaural del Anexo B tienen guía propia,
 
 ## Véase también
 
-- [Parámetros acústicos de salas](/phonometry/es/buildings/rooms/room-acoustics/):
+- [Parámetros acústicos de salas](/es/buildings/rooms/room-acoustics/):
   los tiempos de decaimiento y los cocientes de energía que se leen de la misma
   respuesta al impulso.
-- [Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/):
+- [Medición de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/):
   la adquisición ISO 18233 de las respuestas que esta página compara.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): el $L_W$ que
+- [Potencia acústica](/es/devices/emission/sound-power/): el $L_W$ que
   resta la Ecuación (A.9), medido según la ISO 3741.
-- [Absorción y tiempo de reverberación](/phonometry/es/buildings/rooms/enclosed-space-absorption/):
+- [Absorción y tiempo de reverberación](/es/buildings/rooms/enclosed-space-absorption/):
   el área de absorción con la que la Ecuación (A.5) convierte una lectura en
   campo difuso.
-- Referencia de la API: [`room.auditorium`](/phonometry/es/reference/api/rooms/auditorium/).
+- Referencia de la API: [`room.auditorium`](/es/reference/api/rooms/auditorium/).
 
 </SeeAlso>

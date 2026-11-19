@@ -119,8 +119,8 @@
  * Where the site is published, for the absolute URLs the copy carries.
  *
  * @typedef {object} SiteAddress
- * @property {string} origin  `https://docs.jmrp.io`
- * @property {string} base  `/phonometry`
+ * @property {string} origin  `https://phonometry.dev`
+ * @property {string} base  `''` at the root, or a path such as `/docs`
  * @property {(path: string) => string} url
  *   An absolute URL for a path under the base, or for a root-relative path
  *   that already starts with it.

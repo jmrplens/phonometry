@@ -16,7 +16,7 @@ where the surface is, and they pay for it with a geometry problem: the
 microphone hears the direct sound and the surface reflection together, so the
 method is built around separating them in **time** rather than in space.
 
-[In-situ road-surface absorption](/phonometry/materials/surfaces/road-absorption/)
+[In-situ road-surface absorption](/materials/surfaces/road-absorption/)
 implements both parts of ISO 13472 and, more usefully, states which one a given
 pavement allows. The **subtraction technique** of Part 1 puts a source and a
 microphone above the surface, subtracts a free-field reference measurement and
@@ -43,7 +43,7 @@ outdoor propagation model consumes.
 
 ## Pages in this section
 
-- [In-situ road-surface absorption](/phonometry/materials/surfaces/road-absorption/):
+- [In-situ road-surface absorption](/materials/surfaces/road-absorption/):
   the ISO 13472-1 subtraction technique with the Adrienne window and its
   geometry and validity helpers, the ISO 13472-2 spot tube with its
   applicability limits, and the comparison that decides between them.
@@ -54,11 +54,11 @@ outdoor propagation model consumes.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/): the
+- [Impedance Tube](/materials/absorbers/impedance-tube/): the
   ISO 10534-2 two-microphone reduction the spot method reuses unchanged.
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   the laboratory route, for materials that can be brought indoors.
-- [Environment and transport](/phonometry/environment/): where a road's
+- [Environment and transport](/environment/): where a road's
   absorption is consumed, as the ground term of an outdoor prediction.
 
 </SeeAlso>
@@ -74,10 +74,10 @@ implemented, so a report that cites the current edition cannot cite these
 functions without qualification. The spot method's own signal processing is
 not duplicated either: only its geometry, validity and correction helpers live
 here, and the two-microphone transfer-function reduction is the ISO 10534-2
-routine of [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/).
+routine of [Impedance Tube](/materials/absorbers/impedance-tube/).
 Nothing in this subsection measures the noise a surface *generates*: the
 tyre-road source term is CNOSSOS territory, in [Environmental
-sources](/phonometry/environment/sources/), and no in-situ method is provided
+sources](/environment/sources/), and no in-situ method is provided
 for any surface other than a road: a wall or a ceiling measured in place is
 outside both parts of ISO 13472.
 </ScopeClaim>

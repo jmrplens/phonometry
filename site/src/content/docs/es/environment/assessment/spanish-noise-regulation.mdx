@@ -41,9 +41,9 @@ valor anual y se compara con tres criterios distintos de la misma tabla de
 valores límite de inmisión. Esta página implementa esa cadena completa.
 
 Los niveles por periodo que la alimentan salen de
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/), y los
+[Niveles integrados y estadísticos](/es/signals/levels/levels/), y los
 indicadores europeos $L_\mathrm{den}$/$L_\mathrm{dn}$ con los que conviven, de
-[Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/).
+[Niveles ambientales (ISO 1996-1/-2)](/es/environment/assessment/environmental-levels/).
 
 ## Cómo se hace la medida de inspección (anexo IV)
 
@@ -154,7 +154,7 @@ inspección debería hacer lo mismo: con un margen por debajo de 3 dB no se perm
 corrección alguna y lo honrado es declarar el nivel **sin corregir** como cota
 superior. `residual_sound_correction()` y el `gaussian_residual_level()` basado
 en percentiles de
-[Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/)
+[Niveles ambientales](/es/environment/assessment/environmental-levels/)
 hacen la aritmética y llevan esa regla (`reportable_upper_bound`,
 `reliable=False`); el procedimiento propio del anexo IV del RD para la serie de
 mediciones (cuántas, de qué duración, qué las invalida) es el descrito arriba,
@@ -250,17 +250,17 @@ Las correcciones del reglamento se parecen a procedimientos de ISO 1996 que la
 biblioteca ya implementa, pero **no son intercambiables**, y por eso este
 módulo implementa las variantes propias del RD en lugar de delegar en aquellas:
 
-- [`tonal_audibility()` / `tonal_adjustment()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) son el método de ingeniería del
+- [`tonal_audibility()` / `tonal_adjustment()`](/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) son el método de ingeniería del
   anexo C de ISO 1996-2, basado en la audibilidad $\Delta L_\mathrm{ta}$ dentro de la
   banda crítica del tono, y devuelven un $K_\mathrm{t}$ **continuo** entre 0 y 6 dB. El
   RD trabaja sobre diferencias entre bandas de tercio de octava y solo produce
   0, 3 o 6 dB.
-- [`assess_tonal_survey()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
+- [`assess_tonal_survey()`](/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
   el pariente más cercano, porque también parte el espectro en 125 y 400 Hz,
   pero exige que la banda supere a **ambas** vecinas en 15/8/5 dB y solo
   dice qué bandas son prominentes; el RD compara con la **media** de
   las vecinas con umbrales 8/5/3 dB y gradúa el resultado.
-- [`impulsive_sound_adjustment()`](/phonometry/es/environment/assessment/impulsive-sound/) es el método de tasa de crecimiento de
+- [`impulsive_sound_adjustment()`](/es/environment/assessment/impulsive-sound/) es el método de tasa de crecimiento de
   ISO/PAS 1996-3 sobre una señal calibrada. El $K_\mathrm{i}$ del RD es la diferencia
   clásica $L_\mathrm{AIeq} - L_\mathrm{Aeq}$ leída en el sonómetro, no la misma magnitud.
 - $K_\mathrm{f}$ no tiene ninguna contraparte en ISO 1996: la diferencia
@@ -545,12 +545,12 @@ empieza donde termina el sonómetro.
 
 ## Véase también
 
-- [Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/): los indicadores $L_\mathrm{den}$ y $L_\mathrm{dn}$ y los ajustes de ISO 1996-2 con los que conviven las correcciones del reglamento.
-- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/): los niveles $L_\mathrm{Aeq}$, $L_\mathrm{Ceq}$ y $L_\mathrm{AIeq}$ por fase que alimentan las tres correcciones.
-- [Código Técnico de la Edificación (CTE DB-HR)](/phonometry/es/buildings/insulation/spanish-building-code/): la otra mitad de la normativa española, que comparte con esta el índice de ruido día $L_\mathrm{d}$ del emplazamiento.
-- [Prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/): el ajuste por impulsividad de ISO/PAS 1996-3, el pariente del $K_\mathrm{i}$ que no es intercambiable con él.
-- Referencia de la API: [`environment.assessment.spain`](/phonometry/es/reference/api/environment/spain/).
-- Teoría: [Descriptores ambientales (ISO 1996-1)](/phonometry/es/reference/theory/environment-transport/#descriptores-ambientales-iso-1996-1): los indicadores de ISO 1996-1 sobre los que se construyen los índices nacionales.
+- [Niveles ambientales (ISO 1996-1/-2)](/es/environment/assessment/environmental-levels/): los indicadores $L_\mathrm{den}$ y $L_\mathrm{dn}$ y los ajustes de ISO 1996-2 con los que conviven las correcciones del reglamento.
+- [Niveles integrados y estadísticos](/es/signals/levels/levels/): los niveles $L_\mathrm{Aeq}$, $L_\mathrm{Ceq}$ y $L_\mathrm{AIeq}$ por fase que alimentan las tres correcciones.
+- [Código Técnico de la Edificación (CTE DB-HR)](/es/buildings/insulation/spanish-building-code/): la otra mitad de la normativa española, que comparte con esta el índice de ruido día $L_\mathrm{d}$ del emplazamiento.
+- [Prominencia de sonidos impulsivos](/es/environment/assessment/impulsive-sound/): el ajuste por impulsividad de ISO/PAS 1996-3, el pariente del $K_\mathrm{i}$ que no es intercambiable con él.
+- Referencia de la API: [`environment.assessment.spain`](/es/reference/api/environment/spain/).
+- Teoría: [Descriptores ambientales (ISO 1996-1)](/es/reference/theory/environment-transport/#descriptores-ambientales-iso-1996-1): los indicadores de ISO 1996-1 sobre los que se construyen los índices nacionales.
 
 </SeeAlso>
 

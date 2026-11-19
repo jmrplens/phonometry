@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/tasks.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/tasks/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/start/tasks/
 
 # What do you need to measure?
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/aircraft/npd-atmosphere.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/aircraft/npd-atmosphere/
 
 # NPD data for the air at the airport
 
@@ -375,9 +375,9 @@ Pages elsewhere on the site that this section leans on:
 - [Aircraft noise: Effective Perceived Noise Level](aircraft-noise.md):
   SAE ARP 5534 on its own, as certification uses it.
 - API reference:
-  [`aircraft.npd_atmosphere`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/npd-atmosphere/)
+  [`aircraft.npd_atmosphere`](https://phonometry.dev/reference/api/aeroacoustics/npd-atmosphere/)
   and
-  [`aircraft.atmospheric_absorption`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
+  [`aircraft.atmospheric_absorption`](https://phonometry.dev/reference/api/aeroacoustics/atmospheric-absorption/).
 
 ## References
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/reporting-and-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/reporting-and-qualification/
 
 # Reporting and source qualification (ISO 3382-1)
 
@@ -271,7 +271,7 @@ fills in.
   [Spatial Impression](spatial-impression.md) and
   [Stage Support and Uncertainty](stage-and-uncertainty.md):
   the quantities Table A.1 averages.
-- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://phonometry.dev/reference/api/rooms/auditorium/).
 
 ## References
 

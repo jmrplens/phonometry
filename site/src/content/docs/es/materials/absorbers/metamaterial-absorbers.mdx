@@ -68,7 +68,7 @@ import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
 Una manta porosa solo absorbe las bajas frecuencias engordando: los
-[modelos porosos](/phonometry/es/materials/absorbers/porous-absorbers/) sitúan la
+[modelos porosos](/es/materials/absorbers/porous-absorbers/) sitúan la
 absorción útil donde la capa es una fracción apreciable de la longitud de
 onda, lo que a 300 Hz significa decenas de centímetros. Los absorbentes de
 metamaterial acústico rompen esa regla con resonancia en lugar de volumen. Un
@@ -463,7 +463,7 @@ profundidad fija de 30 mm un cuarto de longitud de onda a 308 Hz, donde resuena
 el panel. Esos mismos 30 mm de aire simple serían un cuarto de onda a 2858 Hz,
 y esa relación es todo el argumento de que el panel sea delgado. La misma curva
 explica el panel metadifusor de 2 cm de la
-[guía de metadifusores](/phonometry/es/materials/diffusers/metadiffusers/).*
+[guía de metadifusores](/es/materials/diffusers/metadiffusers/).*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -542,14 +542,14 @@ imprimen Jiménez et al. (2017) en sus Ecs. (7) y (8): su constante inicial de
 4 da dieciséis veces $\rho_0$, y solo 64 alcanza ambos. Esa constante, y un
 término de radiación de la ranura impreso en el convenio temporal opuesto, que
 subiría la resonancia que una masa añadida debe bajar, son las dos entradas
-del [registro de erratas](/phonometry/es/reference/errata/) sobre estos
+del [registro de erratas](/es/reference/errata/) sobre estos
 artículos; la biblioteca implementa 64 y el signo de masa añadida.
 
 ## 4. Los absorbentes resonantes clásicos bajo la misma óptica
 
 El acoplamiento crítico no es exclusivo de los metamateriales; es el
 principio organizador escondido dentro de los absorbentes resonantes clásicos
-de la [guía de porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+de la [guía de porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
 
 - **El panel microperforado es un absorbente con acoplamiento crítico avant
   la lettre.** El pico de absorción de Maa, $4r/(1+r)^2$, vale exactamente
@@ -656,12 +656,12 @@ lado mayor, y no sobre un diámetro nominal.
 la cara del panel, no la boca de la ranura ni el frente del marco; un milímetro
 de error ahí rota la impedancia medida sin tocar la absorción, exactamente como
 describe la
-[guía del tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/#3-metodo-de-la-funcion-de-transferencia-iso-10534-2).
+[guía del tubo de impedancia](/es/materials/absorbers/impedance-tube/#3-metodo-de-la-funcion-de-transferencia-iso-10534-2).
 
 **O medirlo como superficie.** Si el panel está pensado para una sala y no para
 un conducto, la verificación honesta es una probeta de 10 a 12 m² en cámara
 reverberante según
-[ISO 354](/phonometry/es/materials/absorbers/absorption-measurement/), y el
+[ISO 354](/es/materials/absorbers/absorption-measurement/), y el
 resultado será el coeficiente de incidencia aleatoria, y no el $\alpha = 1$ que
 promete el diseño a incidencia normal, por la razón expuesta arriba en el
 apartado de incidencia fuera de la normal.
@@ -689,19 +689,19 @@ graduada de la sección 4.
 <ScopeClaim status="not-covered" label="No cubierto">
 Ninguna norma de medida rige estos modelos de predicción; la sección 5 expone
 la vía por la que se verificaría un panel construido, en el [tubo de
-impedancia](/phonometry/es/materials/absorbers/impedance-tube/) (ISO 10534-2)
+impedancia](/es/materials/absorbers/impedance-tube/) (ISO 10534-2)
 o en la [cámara
-reverberante](/phonometry/es/materials/absorbers/absorption-measurement/) (ISO
+reverberante](/es/materials/absorbers/absorption-measurement/) (ISO
 354), pero nada de aquí ejecuta nada de eso: las cifras de tolerancia y de
 ángulo citadas son evaluaciones del modelo, y la rugosidad de una ranura
 impresa, el marco, el montaje y el tamaño finito del panel quedan todos fuera
 del modelo. Los absorbentes de membrana y membrana decorada de la sección 4 se
 tratan solo como contexto; las capas clásicas perforadas, microperforadas y de
 membrana están implementadas en [Absorbentes porosos y
-multicapa](/phonometry/es/materials/absorbers/porous-absorbers/), y la ranura
+multicapa](/es/materials/absorbers/porous-absorbers/), y la ranura
 cargada con resonadores usada como elemento de fase en vez de como absorbente
 es el tema de
-[Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/).
+[Metadifusores](/es/materials/diffusers/metadiffusers/).
 </ScopeClaim>
 </Scope>
 
@@ -709,20 +709,20 @@ es el tema de
 
 ## Véase también
 
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/):
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/):
   las capas de fluido equivalente y resonantes de la familia clásica,
   incluido el panel microperforado de Maa que relee la sección 4.
-- [Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/): la misma celda de
+- [Metadifusores](/es/materials/diffusers/metadiffusers/): la misma celda de
   ranura y resonador sintonizada para fase de reflexión controlada en lugar
   de absorción perfecta; sus diseños ternarios toman prestada la ranura con
   acoplamiento crítico como estado `0`.
-- [Tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/): la medición a
+- [Tubo de impedancia](/es/materials/absorbers/impedance-tube/): la medición a
   incidencia normal en la que se verificaría un panel construido, y el tubo
   FDTD virtual tras la animación de arriba.
-- [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/):
+- [Resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/):
   la física viscosa de los canales estrechos, medida sobre el material a
   granel.
-- Referencia de la API: [`materials.absorbers.slow_sound`](/phonometry/es/reference/api/materials/slow-sound/).
-- Teoría: [Caracterización de materiales acústicos](/phonometry/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): las definiciones de impedancia superficial y de absorción con las que se evalúan los modelos de resonador.
+- Referencia de la API: [`materials.absorbers.slow_sound`](/es/reference/api/materials/slow-sound/).
+- Teoría: [Caracterización de materiales acústicos](/es/reference/theory/materials-surfaces/#caracterizacion-de-materiales-acusticos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): las definiciones de impedancia superficial y de absorción con las que se evalúan los modelos de resonador.
 
 </SeeAlso>

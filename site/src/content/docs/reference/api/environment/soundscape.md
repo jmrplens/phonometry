@@ -21,32 +21,32 @@ What is implemented, in the order a study runs:
   Method A (clause C.3.1, Figures C.2 to C.6), four parts on five-category
   scales, and the continuous-category scales of Method B (clause C.3.2,
   Figure C.7), with every question, item and response category as printed,
-  in [`METHOD_A_SCALES`](/phonometry/reference/api/environment/soundscape/#method_a_scales), [`METHOD_A_ALTERNATIVE_PART_1`](/phonometry/reference/api/environment/soundscape/#method_a_alternative_part_1) and
-  [`METHOD_B_SCALES`](/phonometry/reference/api/environment/soundscape/#method_b_scales); the eight attributes of the perceived affective
-  quality in [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/phonometry/reference/api/environment/soundscape/#perceived_affective_quality_attributes);
+  in [`METHOD_A_SCALES`](/reference/api/environment/soundscape/#method_a_scales), [`METHOD_A_ALTERNATIVE_PART_1`](/reference/api/environment/soundscape/#method_a_alternative_part_1) and
+  [`METHOD_B_SCALES`](/reference/api/environment/soundscape/#method_b_scales); the eight attributes of the perceived affective
+  quality in [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/reference/api/environment/soundscape/#perceived_affective_quality_attributes);
 * the **scale values** of Method A (ISO/TS 12913-3 A.2, Table A.1): parts 1
   and 4 run 1 to 5 from the left-hand box to the right-hand one, parts 2 and 3
-  run 5 to 1, [`method_a_scale_values`](/phonometry/reference/api/environment/soundscape/#method_a_scale_values); and their median and range per
-  site and item, [`method_a_summary`](/phonometry/reference/api/environment/soundscape/#method_a_summary);
+  run 5 to 1, [`method_a_scale_values`](/reference/api/environment/soundscape/#method_a_scale_values); and their median and range per
+  site and item, [`method_a_summary`](/reference/api/environment/soundscape/#method_a_summary);
 * the **pleasantness and eventfulness** coordinates of Formulas (A.1) and
   (A.2), per respondent and per site, raw and normalised to $\pm 1$,
   with the two-dimensional model of Figure A.1 as the plot,
-  [`pleasantness_eventfulness`](/phonometry/reference/api/environment/soundscape/#pleasantness_eventfulness);
+  [`pleasantness_eventfulness`](/reference/api/environment/soundscape/#pleasantness_eventfulness);
 * the **correlations** that link ratings to acoustic data: Spearman's rank
   correlation with the untied Formula (A.3) and the tied Formula (A.4),
-  [`spearman_rank_correlation`](/phonometry/reference/api/environment/soundscape/#spearman_rank_correlation), and Pearson's of Formulas (B.1) and
-  (B.2), [`pearson_correlation`](/phonometry/reference/api/environment/soundscape/#pearson_correlation), each with its probability value;
+  [`spearman_rank_correlation`](/reference/api/environment/soundscape/#spearman_rank_correlation), and Pearson's of Formulas (B.1) and
+  (B.2), [`pearson_correlation`](/reference/api/environment/soundscape/#pearson_correlation), each with its probability value;
 * **Method B** (Annex B): the scale value of a mark on a continuous-category
-  scale with one decimal, [`method_b_scale_values`](/phonometry/reference/api/environment/soundscape/#method_b_scale_values); the arithmetic mean,
+  scale with one decimal, [`method_b_scale_values`](/reference/api/environment/soundscape/#method_b_scale_values); the arithmetic mean,
   standard deviation and 95 % confidence interval per site,
-  [`method_b_summary`](/phonometry/reference/api/environment/soundscape/#method_b_summary); and the median and range of the rank each
-  recognised sound source was given, [`method_b_source_ranking`](/phonometry/reference/api/environment/soundscape/#method_b_source_ranking);
+  [`method_b_summary`](/reference/api/environment/soundscape/#method_b_summary); and the median and range of the rank each
+  recognised sound source was given, [`method_b_source_ranking`](/reference/api/environment/soundscape/#method_b_source_ranking);
 * the **minimum reporting requirements** of ISO/TS 12913-2 Annex A
   (normative), as a record that checks itself when it is built,
-  [`SoundscapeReport`](/phonometry/reference/api/environment/soundscape/#soundscapereport).
+  [`SoundscapeReport`](/reference/api/environment/soundscape/#soundscapereport).
 
 The binaural analysis of ISO/TS 12913-3 Annex D is
-[`phonometry.environment.assessment.soundscape_binaural`](/phonometry/reference/api/environment/soundscape-binaural/).
+[`phonometry.environment.assessment.soundscape_binaural`](/reference/api/environment/soundscape-binaural/).
 
 Edition
 -------
@@ -178,11 +178,11 @@ Median and range of the Method A scale values per site and item
 
 | Name | Description |
 | :--- | :--- |
-| `scale_values` | The scale values of Table A.1, 1 to 5, `NaN` for a blank answer: a mapping from item name to one value per response; or, for a part with a single scale (3, 4), a 1-D array; or a 2-D array `(responses, items)` in the order of the part's figure (part 1: four columns for Figure C.2 or three for Figure C.3; part 2: the eight attributes of Figure C.4). Box positions are converted with [`method_a_scale_values`](/phonometry/reference/api/environment/soundscape/#method_a_scale_values) first. |
+| `scale_values` | The scale values of Table A.1, 1 to 5, `NaN` for a blank answer: a mapping from item name to one value per response; or, for a part with a single scale (3, 4), a 1-D array; or a 2-D array `(responses, items)` in the order of the part's figure (part 1: four columns for Figure C.2 or three for Figure C.3; part 2: the eight attributes of Figure C.4). Box positions are converted with [`method_a_scale_values`](/reference/api/environment/soundscape/#method_a_scale_values) first. |
 | `part` | The part of the questionnaire, 1 to 4. |
 | `sites` | The site of each response, any labels; `None` puts every response at one site named `"all"`. |
 
-**Returns:** A [`MethodASummary`](/phonometry/reference/api/environment/soundscape/#methodasummary).
+**Returns:** A [`MethodASummary`](/reference/api/environment/soundscape/#methodasummary).
 
 **Raises**
 
@@ -268,7 +268,7 @@ Median and range of the rank of each recognised sound source per site
 | `rankings` | For each participant, the sources they listed, the most noticeable first, at most eight and none twice. The names are compared as given, so a study should code them to one vocabulary first (for instance the taxonomy of ISO/TS 12913-2 Figure C.1). |
 | `sites` | The site of each participant; `None` puts every participant at one site named `"all"`. |
 
-**Returns:** A [`SourceRanking`](/phonometry/reference/api/environment/soundscape/#sourceranking).
+**Returns:** A [`SourceRanking`](/reference/api/environment/soundscape/#sourceranking).
 
 **Raises**
 
@@ -300,11 +300,11 @@ the sample standard deviation and $\gamma$ the confidence level,
 
 | Name | Description |
 | :--- | :--- |
-| `scale_values` | The scale values from 1 to 5, read to one decimal by [`method_b_scale_values`](/phonometry/reference/api/environment/soundscape/#method_b_scale_values), `NaN` for a blank: a mapping from scale name to one value per response, a 1-D array for one scale, or a 2-D array `(responses, scales)` whose three or four columns are the scales of Figure C.7 in their printed order. |
+| `scale_values` | The scale values from 1 to 5, read to one decimal by [`method_b_scale_values`](/reference/api/environment/soundscape/#method_b_scale_values), `NaN` for a blank: a mapping from scale name to one value per response, a 1-D array for one scale, or a 2-D array `(responses, scales)` whose three or four columns are the scales of Figure C.7 in their printed order. |
 | `sites` | The site of each response; `None` puts every response at one site named `"all"`. |
 | `confidence` | The level of the interval, `0.95` by default. |
 
-**Returns:** A [`MethodBSummary`](/phonometry/reference/api/environment/soundscape/#methodbsummary).
+**Returns:** A [`MethodBSummary`](/reference/api/environment/soundscape/#methodbsummary).
 
 **Raises**
 
@@ -469,7 +469,7 @@ exact for bivariate normal data.
 | `y` | The second, for instance an acoustic indicator of each site. |
 | `alternative` | The alternative hypothesis: `"two-sided"` (default), `"greater"` or `"less"`. |
 
-**Returns:** A [`SoundscapeCorrelation`](/phonometry/reference/api/environment/soundscape/#soundscapecorrelation).
+**Returns:** A [`SoundscapeCorrelation`](/reference/api/environment/soundscape/#soundscapecorrelation).
 
 **Raises**
 
@@ -501,7 +501,7 @@ Pleasantness and eventfulness of a soundscape from its perceived
 affective quality (ISO/TS 12913-3 A.3, Formulas (A.1) and (A.2)).
 
 The scale values are those of part 2 of Method A, 5 for "strongly agree"
-down to 1 for "strongly disagree" (Table A.1); [`method_a_scale_values`](/phonometry/reference/api/environment/soundscape/#method_a_scale_values)
+down to 1 for "strongly disagree" (Table A.1); [`method_a_scale_values`](/reference/api/environment/soundscape/#method_a_scale_values)
 converts box positions, which run the other way. Every respondent who
 answered all eight attributes gets a coordinate pair. Each site gets the
 pair of Formulas (A.1) and (A.2) applied to the site's median of each
@@ -520,11 +520,11 @@ attributes they name are part 2, and that is what they are applied to
 
 | Name | Description |
 | :--- | :--- |
-| `scale_values` | The eight attributes: a mapping from each name of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/phonometry/reference/api/environment/soundscape/#perceived_affective_quality_attributes) to one scale value per respondent, or a 2-D array `(respondents, 8)` in that order. `NaN` marks a blank answer. A row may also be a statistic of a group of answers, such as a site's medians, which is why a value between two boxes is accepted here; anything outside 1 to 5 is not a scale value. Keyed by any of `"pleasant"`, `"chaotic"`, `"vibrant"`, `"uneventful"`, `"calm"`, `"annoying"`, `"eventful"` or `"monotonous"`. |
+| `scale_values` | The eight attributes: a mapping from each name of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/reference/api/environment/soundscape/#perceived_affective_quality_attributes) to one scale value per respondent, or a 2-D array `(respondents, 8)` in that order. `NaN` marks a blank answer. A row may also be a statistic of a group of answers, such as a site's medians, which is why a value between two boxes is accepted here; anything outside 1 to 5 is not a scale value. Keyed by any of `"pleasant"`, `"chaotic"`, `"vibrant"`, `"uneventful"`, `"calm"`, `"annoying"`, `"eventful"` or `"monotonous"`. |
 | `sites` | The site of each respondent, any labels; `None` puts every respondent at one site named `"all"`. |
 | `central_tendency` | `"median"` (default) or `"mean"`. |
 
-**Returns:** A [`PleasantnessEventfulness`](/phonometry/reference/api/environment/soundscape/#pleasantnesseventfulness).
+**Returns:** A [`PleasantnessEventfulness`](/reference/api/environment/soundscape/#pleasantnesseventfulness).
 
 **Raises**
 
@@ -578,7 +578,7 @@ range over $\pm (4 + \sqrt{32}) \approx \pm 9.66$; the
 | :--- | :--- |
 | `sites` | The sites, in the order they first appear. |
 | `central_tendency` | `"median"` or `"mean"`, the statistic of each attribute per site that the site coordinates are computed from. |
-| `attribute_values` | That statistic, shape `(sites, 8)` in the order of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/phonometry/reference/api/environment/soundscape/#perceived_affective_quality_attributes). |
+| `attribute_values` | That statistic, shape `(sites, 8)` in the order of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/reference/api/environment/soundscape/#perceived_affective_quality_attributes). |
 | `pleasantness` | $P$ of each site. |
 | `eventfulness` | $E$ of each site. |
 | `respondent_sites` | The site of each respondent. |
@@ -694,7 +694,7 @@ The studied acoustic environment (ISO/TS 12913-2 A.3 a) to h)).
 | `weather_and_wind` | A.3 c). |
 | `time_of_year_and_day` | A.3 d). |
 | `measurement_points` | A.3 e), the measurement points, including the height and orientation of the binaural measurement system, and what acoustic measurements were taken. |
-| `measurement_results` | A.3 f), the results of the measurements, keyed by the symbols A.3 f) prints: `"LAeq,T"`, `"LCeq,T"`, `"LAF5,T"`, `"LAF95,T"` (dB), `"N5"`, `"N95"` and `"Nrmc"` (sone), all seven required, others allowed. [`BinauralIndicators.reporting_results`](/phonometry/reference/api/environment/soundscape-binaural/#binauralindicatorsreporting_results) builds it from a binaural analysis. |
+| `measurement_results` | A.3 f), the results of the measurements, keyed by the symbols A.3 f) prints: `"LAeq,T"`, `"LCeq,T"`, `"LAF5,T"`, `"LAF95,T"` (dB), `"N5"`, `"N95"` and `"Nrmc"` (sone), all seven required, others allowed. [`BinauralIndicators.reporting_results`](/reference/api/environment/soundscape-binaural/#binauralindicatorsreporting_results) builds it from a binaural analysis. |
 | `site_description` | A.3 g), required for a field study or a study based on audio recordings (`"real"` or `"recorded"`): the study site, including its type. |
 | `recording_and_reproduction` | A.3 h), required for a recorded or virtual environment: how it was recorded or created and how it was reproduced. |
 
@@ -835,7 +835,7 @@ A.1 lists three things a report shall comprise, and each is one record:
 the selection and classification of the participants (A.2), the
 characterization of the studied acoustic environment (A.3), and the data
 collection on how people perceived it (A.4). Each record refuses to be
-built with a required item missing, so a [`SoundscapeReport`](/phonometry/reference/api/environment/soundscape/#soundscapereport) that
+built with a required item missing, so a [`SoundscapeReport`](/reference/api/environment/soundscape/#soundscapereport) that
 exists meets the minimum of Annex A as far as a record can tell; whether
 what is written is true and sufficient stays with the author.
 
@@ -954,7 +954,7 @@ reported without naming a test.
 | `y` | The second, for instance an acoustic indicator of each site. |
 | `alternative` | The alternative hypothesis: `"two-sided"` (default), `"greater"` (positive correlation) or `"less"`. |
 
-**Returns:** A [`SoundscapeCorrelation`](/phonometry/reference/api/environment/soundscape/#soundscapecorrelation).
+**Returns:** A [`SoundscapeCorrelation`](/reference/api/environment/soundscape/#soundscapecorrelation).
 
 **Raises**
 

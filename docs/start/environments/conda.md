@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/environments/conda.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/conda/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/start/environments/conda/
 
 # conda and mamba
 

@@ -10,7 +10,7 @@ Declarative layer stacks and the transfer-matrix absorber solver.
 An absorber is declared as a list of layers ordered from the sound-incidence
 side towards the termination and solved at one angle, in the same
 $\mathrm{e}^{+j \omega t}$ time convention as the element models of
-[`porous`](/phonometry/reference/api/materials/porous/), with the forward wave carried
+[`porous`](/reference/api/materials/porous/), with the forward wave carried
 by $\mathrm{e}^{-j k x}$ (so a passive medium has
 $\operatorname{Im}(k) < 0$):
 
@@ -35,15 +35,15 @@ $\operatorname{Im}(k) < 0$):
 
 * **Random incidence**: the random-incidence (Paris) integral follows Mechel
   Sect. D.5 Eqs. (9)-(10), with the closed form for locally reacting surfaces
-  implemented in [`statistical_absorption`](/phonometry/reference/api/materials/layered/#statistical_absorption) (its maximum over passive
+  implemented in [`statistical_absorption`](/reference/api/materials/layered/#statistical_absorption) (its maximum over passive
   impedances is the published 0.951).
 
 The elements a stack is built from live elsewhere: the equivalent fluid a
-[`PorousLayer`](/phonometry/reference/api/materials/layered/#porouslayer) carries and the sheet impedances the plate and membrane
+[`PorousLayer`](/reference/api/materials/layered/#porouslayer) carries and the sheet impedances the plate and membrane
 layers evaluate come from
-[`porous`](/phonometry/reference/api/materials/porous/), and the three Biot waves a
-[`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer) carries come from
-[`biot`](/phonometry/reference/api/materials/biot/).
+[`porous`](/reference/api/materials/porous/), and the three Biot waves a
+[`PoroelasticLayer`](/reference/api/materials/layered/#poroelasticlayer) carries come from
+[`biot`](/reference/api/materials/biot/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -77,7 +77,7 @@ $$
 
 (Mechel 2e Sect. D.5 Eq. (9)), evaluated
 with fixed-order Gauss-Legendre quadrature over the bulk-reacting
-$\alpha(\theta)$ of [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber) (Sect. D.6 notes the
+$\alpha(\theta)$ of [`layered_absorber`](/reference/api/materials/layered/#layered_absorber) (Sect. D.6 notes the
 bulk integral generally must be evaluated numerically). Some references
 truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 `angle_limit_rad` accordingly.
@@ -87,13 +87,13 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `layers` | Layer stack, as in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
+| `layers` | Layer stack, as in [`layered_absorber`](/reference/api/materials/layered/#layered_absorber). |
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 | `n_quadrature_points` | Gauss-Legendre order (default 64). |
-| `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). One of `"rigid"` or `"free"`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `termination` | As in [`layered_absorber`](/reference/api/materials/layered/#layered_absorber). One of `"rigid"` or `"free"`. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`DiffuseFieldAbsorptionResult`](/phonometry/reference/api/materials/layered/#diffusefieldabsorptionresult).
+**Returns:** A [`DiffuseFieldAbsorptionResult`](/reference/api/materials/layered/#diffusefieldabsorptionresult).
 
 **Raises**
 
@@ -157,12 +157,12 @@ layered_absorber(
 Transfer-matrix prediction of a layered absorber at one angle.
 
 The *layers* list is ordered from the sound-incidence side towards the
-*termination*. Fluid layers ([`AirLayer`](/phonometry/reference/api/materials/layered/#airlayer), [`PorousLayer`](/phonometry/reference/api/materials/layered/#porouslayer))
+*termination*. Fluid layers ([`AirLayer`](/reference/api/materials/layered/#airlayer), [`PorousLayer`](/reference/api/materials/layered/#porouslayer))
 contribute the oblique chain matrix of Cox & D'Antonio 3e Eq. (2.29)
 (equivalently the impedance recursion of Bies 5e Eq. (D.95) and the
-scheme of Mechel 2e Sect. D.4); sheet layers ([`PerforatedPlateLayer`](/phonometry/reference/api/materials/layered/#perforatedplatelayer),
-[`MicroperforatedPlateLayer`](/phonometry/reference/api/materials/layered/#microperforatedplatelayer), [`MembraneLayer`](/phonometry/reference/api/materials/layered/#membranelayer)) enter as
-locally reacting series impedances; a [`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer) carries the
+scheme of Mechel 2e Sect. D.4); sheet layers ([`PerforatedPlateLayer`](/reference/api/materials/layered/#perforatedplatelayer),
+[`MicroperforatedPlateLayer`](/reference/api/materials/layered/#microperforatedplatelayer), [`MembraneLayer`](/reference/api/materials/layered/#membranelayer)) enter as
+locally reacting series impedances; a [`PoroelasticLayer`](/reference/api/materials/layered/#poroelasticlayer) carries the
 three Biot waves of its elastic frame and switches the whole stack to the
 six-variable global-matrix assembly of Allard & Atalla 2e Sect. 11.5, with
 the coupling matrices of Sect. 11.4. The chain is closed by a rigid wall
@@ -188,9 +188,9 @@ extremely attenuating layers); the raw chain matrix is still returned in
 | `layers` | Layer stack from the incidence side to the termination. |
 | `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$; grazing incidence is excluded). |
 | `termination` | `"rigid"` (default), `"free"`, or a non-zero complex impedance (scalar or per-frequency array), in Pa s/m. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`LayeredAbsorberResult`](/phonometry/reference/api/materials/layered/#layeredabsorberresult).
+**Returns:** A [`LayeredAbsorberResult`](/reference/api/materials/layered/#layeredabsorberresult).
 
 **Raises**
 
@@ -278,7 +278,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 MembraneLayer(*, surface_density: float, resistance: float = 0.0)
 ```
 
-A limp impervious membrane (see [`membrane_impedance`](/phonometry/reference/api/materials/porous/#membrane_impedance)).
+A limp impervious membrane (see [`membrane_impedance`](/reference/api/materials/porous/#membrane_impedance)).
 
 ## MicroperforatedPlateLayer
 
@@ -292,7 +292,7 @@ MicroperforatedPlateLayer(
 )
 ```
 
-A microperforated plate (see [`microperforated_plate_impedance`](/phonometry/reference/api/materials/porous/#microperforated_plate_impedance)).
+A microperforated plate (see [`microperforated_plate_impedance`](/reference/api/materials/porous/#microperforated_plate_impedance)).
 
 ## PerforatedPlateLayer
 
@@ -306,7 +306,7 @@ PerforatedPlateLayer(
 )
 ```
 
-A rigid perforated plate (see [`perforated_plate_impedance`](/phonometry/reference/api/materials/porous/#perforated_plate_impedance)).
+A rigid perforated plate (see [`perforated_plate_impedance`](/reference/api/materials/porous/#perforated_plate_impedance)).
 
 ## PoroelasticLayer
 
@@ -325,20 +325,20 @@ PoroelasticLayer(
 
 A porous layer whose frame is elastic (full Biot theory).
 
-Where [`PorousLayer`](/phonometry/reference/api/materials/layered/#porouslayer) collapses the material into a single wave in an
+Where [`PorousLayer`](/reference/api/materials/layered/#porouslayer) collapses the material into a single wave in an
 equivalent fluid, this layer carries the three Biot waves of Allard &
 Atalla 2e chapter 6 (two compressional and one shear), so the frame can
 resonate. It is the only layer type that reproduces the quarter-wavelength
-frame resonance of [`frame_quarter_wave_resonance`](/phonometry/reference/api/materials/biot/#frame_quarter_wave_resonance),
+frame resonance of [`frame_quarter_wave_resonance`](/reference/api/materials/biot/#frame_quarter_wave_resonance),
 and the only one for which an air gap behind the layer, a bonded backing or
 an oblique angle change the frame motion rather than only the pore fluid.
 
 `medium` is the **rigid-frame** equivalent fluid of the pores (normally a
-[`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) result on the solver's frequency vector):
+[`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard) result on the solver's frequency vector):
 the frame inertia is added by the Biot model itself, so a limp-corrected
 medium would count it twice. The remaining fields describe the frame.
 
-Adding one of these to a stack switches [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber) to the
+Adding one of these to a stack switches [`layered_absorber`](/reference/api/materials/layered/#layered_absorber) to the
 global-matrix assembly of Allard & Atalla Sect. 11.5. Two adjacent
 poroelastic layers are coupled as *bonded* frames (their Eq. (11.67)); a
 sheet layer next to a poroelastic layer is coupled as a free, mechanically
@@ -352,10 +352,10 @@ PorousLayer(*, thickness_m: float, medium: PorousMediumResult)
 
 A porous layer of `thickness_m` metres described by *medium*.
 
-`medium` is a [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) (from [`delany_bazley`](/phonometry/reference/api/materials/porous/#delany_bazley),
-[`miki`](/phonometry/reference/api/materials/porous/#miki), [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard), or built directly from
+`medium` is a [`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) (from [`delany_bazley`](/reference/api/materials/porous/#delany_bazley),
+[`miki`](/reference/api/materials/porous/#miki), [`johnson_champoux_allard`](/reference/api/materials/porous/#johnson_champoux_allard), or built directly from
 measured `Zc`/`k` data) evaluated on the same frequency vector that
-is passed to [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber).
+is passed to [`layered_absorber`](/reference/api/materials/layered/#layered_absorber).
 
 ## statistical_absorption
 

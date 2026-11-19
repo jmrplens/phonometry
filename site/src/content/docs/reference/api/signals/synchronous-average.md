@@ -68,7 +68,7 @@ averages is not, in general, optimal.
 **Non-integer samples per period.** When $f_\mathrm{s} T$ is not an integer
 the period boundaries fall between samples. Each block is then aligned to
 a common integer grid by the band-limited fractional delay of
-[`phonometry.signals.fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay) before averaging, so
+[`phonometry.signals.fractional_delay`](/reference/api/signals/test-signals/#fractional_delay) before averaging, so
 the periodic waveform is recovered within the interpolation error of that
 band-limited shift. An integer $f_\mathrm{s} T$ needs no interpolation and
 the waveform is recovered to machine precision. The averaged samples stay
@@ -153,9 +153,9 @@ Time synchronous average of a periodic waveform in noise.
 
 | Name | Description |
 | :--- | :--- |
-| `period_waveform` | The averaged periodic waveform, one period of `samples_per_period` samples on the input's sampling grid, in the type the input arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when it was one (in pascals and carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
+| `period_waveform` | The averaged periodic waveform, one period of `samples_per_period` samples on the input's sampling grid, in the type the input arrived as: a [`Signal`](/reference/api/io/io/#signal) when it was one (in pascals and carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `times` | Time axis of `period_waveform`, in seconds: the sampling grid $m/f_\mathrm{s}$, $m = 0 \ldots M-1$ (the averaged samples stay on the $1/f_\mathrm{s}$ grid; see the module note). The axis spans one period exactly when $f_\mathrm{s} T$ is an integer, and to within half a sample otherwise. |
-| `residual` | Input minus the periodic reconstruction, over the analysed span (`n_averages * samples_per_period` samples, aligned to the integer period grid): what is left after the synchronous component is removed. Always a bare array: when `fs * T` is not an integer each period is shifted onto the grid before the blocks are joined, so the joined record is not one uniformly sampled recording and a [`Signal`](/phonometry/reference/api/io/io/#signal) would claim that it is. |
+| `residual` | Input minus the periodic reconstruction, over the analysed span (`n_averages * samples_per_period` samples, aligned to the integer period grid): what is left after the synchronous component is removed. Always a bare array: when `fs * T` is not an integer each period is shifted onto the grid before the blocks are joined, so the joined record is not one uniformly sampled recording and a [`Signal`](/reference/api/io/io/#signal) would claim that it is. |
 | `n_averages` | Number of periods averaged, `N`. |
 | `samples_per_period` | Integer samples per period `M` after any alignment. |
 | `period_s` | Repetition period `T`, in seconds. |
@@ -236,20 +236,20 @@ $1/\sqrt{N}$. When `fs * period` is an integer the periods are
 sliced
 directly and a noiseless periodic signal is recovered exactly; otherwise
 each period is aligned to a common integer grid by the band-limited
-fractional delay of [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay)
+fractional delay of [`fractional_delay`](/reference/api/signals/test-signals/#fractional_delay)
 and recovered within that interpolation error.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D, containing the periodic component plus noise. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the period waveform, the residual and its RMS come out in Pa, and the period waveform comes back as a Signal. The noise reduction in dB is a ratio and does not move. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D, containing the periodic component plus noise. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the period waveform, the residual and its RMS come out in Pa, and the period waveform comes back as a Signal. The noise reduction in dB is a ratio and does not move. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `period_s` | Known repetition period `T`, in seconds (e.g. one revolution of a rotating machine). |
 | `n_averages` | Number of whole periods to average (default: as many as the record holds). Choosing `N` so that $N q$ is an integer places a comb node on an interfering tone at order `q` and maximises its rejection (McFadden's revised-model result). |
 | `n_harmonics` | Number of harmonics of `1/T` spanned by the returned comb-filter response (default 8). |
 
-**Returns:** A [`SynchronousAverageResult`](/phonometry/reference/api/signals/synchronous-average/#synchronousaverageresult).
+**Returns:** A [`SynchronousAverageResult`](/reference/api/signals/synchronous-average/#synchronousaverageresult).
 
 **Raises**
 

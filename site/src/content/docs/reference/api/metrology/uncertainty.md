@@ -23,16 +23,16 @@ Uncertainty in Measurement*:
   estimate, its standard uncertainty and a probabilistically symmetric coverage
   interval (clause 7.7).
 
-Input quantities are described by [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity); [`rectangular`](/phonometry/reference/api/metrology/uncertainty/#rectangular),
-[`triangular`](/phonometry/reference/api/metrology/uncertainty/#triangular) and [`u_shaped`](/phonometry/reference/api/metrology/uncertainty/#u_shaped) build Type B quantities from a
+Input quantities are described by [`Quantity`](/reference/api/metrology/uncertainty/#quantity); [`rectangular`](/reference/api/metrology/uncertainty/#rectangular),
+[`triangular`](/reference/api/metrology/uncertainty/#triangular) and [`u_shaped`](/reference/api/metrology/uncertainty/#u_shaped) build Type B quantities from a
 half-width (clause 4.3).
 
-Scope notes: [`monte_carlo`](/phonometry/reference/api/metrology/uncertainty/#monte_carlo) runs a **fixed** number of trials and reports
+Scope notes: [`monte_carlo`](/reference/api/metrology/uncertainty/#monte_carlo) runs a **fixed** number of trials and reports
 the probabilistically symmetric interval only: the adaptive procedure of
 Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
 implemented; its inputs are sampled independently (the multivariate-Gaussian
 path of 6.4.8 for non-independent quantities is not implemented; use
-[`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for correlated budgets).
+[`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for correlated budgets).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -54,7 +54,7 @@ Formula (2) for an environmental noise level and ISO 12999-1:2020 as
 Formula (C.2) for building acoustics, where Formula (A.2) adds the
 model-to-reality term to a predicted value the same way. Every domain
 that adds independent contributions in quadrature calls this one
-function; [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) is the full budget, with
+function; [`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation) is the full budget, with
 sensitivity coefficients from a model, correlations and degrees of
 freedom.
 
@@ -105,7 +105,7 @@ ExpandedUncertainty(coverage_factor: float, expanded_uncertainty: float)
 
 An expanded uncertainty and the coverage factor it was formed with.
 
-What [`UncertaintyResult.expanded`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresultexpanded) returns: `k` and
+What [`UncertaintyResult.expanded`](/reference/api/metrology/uncertainty/#uncertaintyresultexpanded) returns: `k` and
 $U = k u_\mathrm{c}$, named, where a `(k, U)` tuple used to be
 unpacked by position (GUM clause 6, Annex G).
 
@@ -138,7 +138,7 @@ probabilistically symmetric coverage interval (clause 7.7).
 
 The inputs are sampled **independently**: the Supplement's
 multivariate-Gaussian path for non-independent quantities (6.4.8) is not
-implemented (use [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for a
+implemented (use [`uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for a
 correlated budget). The number of trials is fixed (the adaptive procedure
 of clause 7.9 is not implemented) and the reported interval is the
 probabilistically symmetric one (not the 5.3.4 shortest interval).
@@ -148,13 +148,13 @@ probabilistically symmetric one (not the 5.3.4 shortest interval).
 | Name | Description |
 | :--- | :--- |
 | `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`; it must accept array arguments (vectorised over the trials). |
-| `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in argument order. |
+| `quantities` | The input [`Quantity`](/reference/api/metrology/uncertainty/#quantity) objects, in argument order. |
 | `n_trials` | Number of Monte Carlo trials `M` (at least 2; the sample standard deviation needs two values). |
 | `coverage` | Coverage probability of the reported interval. |
 | `seed` | Optional seed for the random generator (reproducibility). |
-| `keep_samples` | Retain the raw output sample on the result (one float per trial) so [`MonteCarloResult.plot`](/phonometry/reference/api/metrology/uncertainty/#montecarloresultplot) can draw the output-distribution histogram. |
+| `keep_samples` | Retain the raw output sample on the result (one float per trial) so [`MonteCarloResult.plot`](/reference/api/metrology/uncertainty/#montecarloresultplot) can draw the output-distribution histogram. |
 
-**Returns:** A [`MonteCarloResult`](/phonometry/reference/api/metrology/uncertainty/#montecarloresult).
+**Returns:** A [`MonteCarloResult`](/reference/api/metrology/uncertainty/#montecarloresult).
 
 **Raises**
 
@@ -187,7 +187,7 @@ Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 | `interval` | Probabilistically symmetric coverage interval `(low, high)` (clause 7.7). |
 | `coverage` | The coverage probability of `interval`. |
 | `n_trials` | Number of Monte Carlo trials. |
-| `samples` | The raw model-output sample (one value per trial), kept only when [`monte_carlo`](/phonometry/reference/api/metrology/uncertainty/#monte_carlo) is called with `keep_samples=True` (it feeds the output-distribution histogram of `plot`). |
+| `samples` | The raw model-output sample (one value per trial), kept only when [`monte_carlo`](/reference/api/metrology/uncertainty/#monte_carlo) is called with `keep_samples=True` (it feeds the output-distribution histogram of `plot`). |
 
 ### MonteCarloResult.plot()
 
@@ -303,10 +303,10 @@ Combined standard uncertainty by the GUM law of propagation (clause 5).
 | Name | Description |
 | :--- | :--- |
 | `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`. |
-| `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in the order the model takes its arguments. |
-| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback: Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/phonometry/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
+| `quantities` | The input [`Quantity`](/reference/api/metrology/uncertainty/#quantity) objects, in the order the model takes its arguments. |
+| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback: Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
 
-**Returns:** An [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) with $u_\mathrm{c}(y)$, the sensitivity coefficients, the contributions and the effective degrees of freedom.
+**Returns:** An [`UncertaintyResult`](/reference/api/metrology/uncertainty/#uncertaintyresult) with $u_\mathrm{c}(y)$, the sensitivity coefficients, the contributions and the effective degrees of freedom.
 
 **Raises**
 
@@ -360,7 +360,7 @@ Coverage factor `k` and expanded uncertainty $U = k u_\mathrm{c}$.
 | `coverage` | Coverage probability in (0, 1); `0.95` by default. |
 | `coverage_factor_override` | Explicit `k`. Required for a correlated budget with finite input degrees of freedom, where the GUM defines no effective-dof formula (`effective_dof` is NaN). |
 
-**Returns:** The coverage factor `k` and `U`, as an [`ExpandedUncertainty`](/phonometry/reference/api/metrology/uncertainty/#expandeduncertainty) (GUM clause 6, Annex G).
+**Returns:** The coverage factor `k` and `U`, as an [`ExpandedUncertainty`](/reference/api/metrology/uncertainty/#expandeduncertainty) (GUM clause 6, Annex G).
 
 **Raises**
 

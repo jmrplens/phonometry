@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/swept-sine-distortion.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/swept-sine-distortion/
 
 # Swept-sine distortion and phase utilities
 
@@ -529,8 +529,8 @@ grids.
   rated-characteristics report.
 - [Room acoustics](../../buildings/rooms/room-acoustics.md): `impulse_response`,
   which is the linear half of the same recording.
-- API reference: [`electroacoustics.swept_sine`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/swept-sine/)
-  and [`signals.phase`](https://docs.jmrp.io/phonometry/reference/api/signals/phase/).
+- API reference: [`electroacoustics.swept_sine`](https://phonometry.dev/reference/api/electroacoustics/swept-sine/)
+  and [`signals.phase`](https://phonometry.dev/reference/api/signals/phase/).
 
 ## References
 

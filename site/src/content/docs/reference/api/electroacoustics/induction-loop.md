@@ -13,20 +13,20 @@ clauses 9 and 10), says what field an induction loop has to produce for a
 hearing aid switched to its telecoil, and how an installer shows that it
 does. The loop's components, the amplifier, the loop as a load and the neck
 loop, are the subject of IEC 62489-1 and of
-[`phonometry.electroacoustics.induction_loop_components`](/phonometry/reference/api/electroacoustics/induction-loop-components/).
+[`phonometry.electroacoustics.induction_loop_components`](/reference/api/electroacoustics/induction-loop-components/).
 
 The reference and the level
 ---------------------------
 
 Everything is a level in decibels referred to a magnetic field strength of
-400 mA/m (3.1), [`REFERENCE_FIELD_STRENGTH_A_PER_M`](/phonometry/reference/api/electroacoustics/induction-loop/#reference_field_strength_a_per_m):
-$L = 20\lg(H / 0.4\ \mathrm{A/m})$ ([`field_strength_level`](/phonometry/reference/api/electroacoustics/induction-loop/#field_strength_level)).
+400 mA/m (3.1), [`REFERENCE_FIELD_STRENGTH_A_PER_M`](/reference/api/electroacoustics/induction-loop/#reference_field_strength_a_per_m):
+$L = 20\lg(H / 0.4\ \mathrm{A/m})$ ([`field_strength_level`](/reference/api/electroacoustics/induction-loop/#field_strength_level)).
 A long-term average of -12 dB, 100 mA/m, at the telecoil gives the same
 acoustic output from the hearing aid as a sound pressure level of 70 dB at
 its microphone (4.3). The meter is either a true-RMS meter with the 125 ms
 "F" averaging of a sound level meter or a peak programme meter (6.1); in case
 of doubt the true-RMS one is definitive, and it is the one
-[`field_strength_meter`](/phonometry/reference/api/electroacoustics/induction-loop/#field_strength_meter) implements, flat or A-weighted.
+[`field_strength_meter`](/reference/api/electroacoustics/induction-loop/#field_strength_meter) implements, flat or A-weighted.
 
 The requirements
 ----------------
@@ -47,9 +47,9 @@ requirements are met (8.4). They are:
   sentence covers a ratio of exactly 47 dB; the 1 dB rule is applied there
   (see `docs/ERRATA.md`).
 
-[`verify_induction_loop_system`](/phonometry/reference/api/electroacoustics/induction-loop/#verify_induction_loop_system) judges the three. The magnetic background
+[`verify_induction_loop_system`](/reference/api/electroacoustics/induction-loop/#verify_induction_loop_system) judges the three. The magnetic background
 noise of the site, 7.2, is a recommendation, not a requirement, and
-[`assess_background_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#assess_background_noise) classes it: a reference signal-to-noise ratio
+[`assess_background_noise`](/reference/api/electroacoustics/induction-loop/#assess_background_noise) classes it: a reference signal-to-noise ratio
 above 47 dB is the ideal, 32 dB the recommended minimum below which the
 shortfall "shall be reported and agreed with the system operator", and 22 dB
 tolerable for short periods when the noise has no significant undesirable
@@ -61,13 +61,13 @@ Small systems
 For a disabled refuge or call point and for a counter, Amendment 1 rewrites
 clause 9. The field is measured at fixed points (Figures 2 and 3), six at
 heights of 1.2 m and 1.7 m for a refuge and three at 1.2 m, 1.45 m and 1.7 m
-for a counter ([`small_volume_measurement_points`](/phonometry/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points)), or, by contract, at
+for a counter ([`small_volume_measurement_points`](/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points)), or, by contract, at
 representative points spread through a useful magnetic field volume which, at
 the minimum, meets the requirements at one position at least at each of the
 heights of 9.2 or 9.3 (9.4). At every point the level shall be within plus or
 minus 6 dB of 400 mA/m and meet 8.3.7, at one point at least it shall reach
 0 dB, and nowhere where people are expected to stand shall it exceed +8 dB
-(9.5, [`verify_small_volume_system`](/phonometry/reference/api/electroacoustics/induction-loop/#verify_small_volume_system)).
+(9.5, [`verify_small_volume_system`](/reference/api/electroacoustics/induction-loop/#verify_small_volume_system)).
 
 Two informative passages disagree with 9.5 and are not followed: Annex A.4
 allows "up to, but not greater than, +12 dB" at 1.45 m for a counter, and
@@ -78,14 +78,14 @@ Commissioning and the amplifier
 -------------------------------
 
 Amendment 1 replaces the 1.6 kHz overload test with one tied to the programme
-(10.3, Table 4, [`OVERLOAD_TEST_FREQUENCIES`](/phonometry/reference/api/electroacoustics/induction-loop/#overload_test_frequencies)): with a 1 kHz sine giving a
+(10.3, Table 4, [`OVERLOAD_TEST_FREQUENCIES`](/reference/api/electroacoustics/induction-loop/#overload_test_frequencies)): with a 1 kHz sine giving a
 field 7 dB below the required one, the frequency is raised at constant input
 until the loop voltage doubles or the frequency of Table 4 is reached,
 whichever is higher, and no clipping may appear at the frequency of Table 4
 (10.3.3). One of the three ways the
 amendment offers to detect clipping is the comparison of the loop voltage
 with the amplifier's compliance voltage of IEC 62489-1, and that one is
-computable from the loop's impedance: [`verify_amplifier_overload`](/phonometry/reference/api/electroacoustics/induction-loop/#verify_amplifier_overload).
+computable from the loop's impedance: [`verify_amplifier_overload`](/reference/api/electroacoustics/induction-loop/#verify_amplifier_overload).
 
 The metal in a building lowers the field inside the loop, more at high
 frequencies (Annex F), which is why 8.3.3 recommends starting the frequency
@@ -97,13 +97,13 @@ Test signals
 ------------
 
 The pink noise of 6.4, band-limited by third-order Butterworth filters at
-75 Hz and 6.5 kHz with a crest factor of 4 ([`loop_test_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#loop_test_noise), also the
+75 Hz and 6.5 kHz with a crest factor of 4 ([`loop_test_noise`](/reference/api/electroacoustics/induction-loop/#loop_test_noise), also the
 signal of IEC 62489-1 5.4.8.2 b), and the combi signal of 6.6 and Table 2,
 1 kHz tone bursts of at least 1 s interleaved with at least four times as
-much of that noise 6 dB lower ([`combi_signal`](/phonometry/reference/api/electroacoustics/induction-loop/#combi_signal)). 6.4 NOTE 2 prints the
+much of that noise 6 dB lower ([`combi_signal`](/reference/api/electroacoustics/induction-loop/#combi_signal)). 6.4 NOTE 2 prints the
 theoretical responses of the band-limiting filters as -0.8 dB at 100 Hz and
 -0.7 dB at 5 kHz; they are -0.71 dB and -0.82 dB, the other way round
-([`band_limit_response`](/phonometry/reference/api/electroacoustics/induction-loop/#band_limit_response), `docs/ERRATA.md`).
+([`band_limit_response`](/reference/api/electroacoustics/induction-loop/#band_limit_response), `docs/ERRATA.md`).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -223,7 +223,7 @@ does not, and withholds that relaxation.
 | `noise_levels` | A-weighted noise level at each point, in dB re 400 mA/m. |
 | `noise_is_tonal` | The noise has a significant undesirable tonal quality and is not mostly at low frequencies. |
 
-**Returns:** A [`BackgroundNoiseAssessment`](/phonometry/reference/api/electroacoustics/induction-loop/#backgroundnoiseassessment).
+**Returns:** A [`BackgroundNoiseAssessment`](/reference/api/electroacoustics/induction-loop/#backgroundnoiseassessment).
 
 **Raises**
 
@@ -410,7 +410,7 @@ field_strength(level: NumericArrayLike) -> float | NDArray[np.float64]
 
 The magnetic field strength of a level in dB re 400 mA/m, in A/m.
 
-The inverse of [`field_strength_level`](/phonometry/reference/api/electroacoustics/induction-loop/#field_strength_level): -12 dB is the 100 mA/m of
+The inverse of [`field_strength_level`](/reference/api/electroacoustics/induction-loop/#field_strength_level): -12 dB is the 100 mA/m of
 4.3, and plus or minus 3 dB span 283 mA/m to 565 mA/m (10.2 as amended
 prints 566 mA/m, which is $400\sqrt{2}$).
 
@@ -492,7 +492,7 @@ peak programme meter of 6.1.4, is definitive (6.1.1).
 | `fs` | Sample rate, in hertz. |
 | `weighting` | `"Z"` for the flat response of 6.1.2, `"A"` for the A-weighted noise measurements of 7.1 and 10.4.6. |
 
-**Returns:** A [`FieldStrengthReading`](/phonometry/reference/api/electroacoustics/induction-loop/#fieldstrengthreading).
+**Returns:** A [`FieldStrengthReading`](/reference/api/electroacoustics/induction-loop/#fieldstrengthreading).
 
 **Raises**
 
@@ -569,7 +569,7 @@ The IEC 60118-4:2014 verdict on an installed induction-loop system.
 | :--- | :--- |
 | `clause` | `"8"` for a system judged on its useful magnetic field volume, `"9"` for a small-volume system as amended. |
 | `layout` | `"useful_volume"` for clause 8, or the small-volume layout (`"refuge_small"`, `"refuge_large"`, `"counter"`, `"refuge_useful_volume"`, `"counter_useful_volume"`). |
-| `requirements` | One [`LoopRequirement`](/phonometry/reference/api/electroacoustics/induction-loop/#looprequirement) per requirement measured. |
+| `requirements` | One [`LoopRequirement`](/reference/api/electroacoustics/induction-loop/#looprequirement) per requirement measured. |
 | `background_noise` | The 7.2 assessment of the site, when the noise with the loop off was given; a recommendation, so not part of `passes`. |
 
 ### InductionLoopVerification.failed
@@ -622,9 +622,9 @@ The verdict on one requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Its [`LoopRequirement.name`](/phonometry/reference/api/electroacoustics/induction-loop/#looprequirement). |
+| `name` | Its [`LoopRequirement.name`](/reference/api/electroacoustics/induction-loop/#looprequirement). |
 
-**Returns:** The [`LoopRequirement`](/phonometry/reference/api/electroacoustics/induction-loop/#looprequirement).
+**Returns:** The [`LoopRequirement`](/reference/api/electroacoustics/induction-loop/#looprequirement).
 
 **Raises**
 
@@ -661,7 +661,7 @@ the record is long enough to reach 4 times its RMS both ways: some tens of
 seconds make that certain, which is the length both measurements run for.
 The filters are the bilinear transforms of the Butterworth prototypes at
 `fs`, so the response at 5 kHz differs from the analog one of
-[`band_limit_response`](/phonometry/reference/api/electroacoustics/induction-loop/#band_limit_response) by a tenth of a decibel at 48 kHz; 6.4
+[`band_limit_response`](/reference/api/electroacoustics/induction-loop/#band_limit_response) by a tenth of a decibel at 48 kHz; 6.4
 allows plus or minus 1 dB for exactly that.
 
 **Parameters**
@@ -963,12 +963,12 @@ first doubling.
 | Name | Description |
 | :--- | :--- |
 | `required_current_a` | The RMS loop current at 1 kHz that gives the required field strength at the chosen point, in amperes. |
-| `impedance` | The loop's [`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance) ([`loop_impedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_impedance)). |
-| `compliance_voltage_v` | The amplifier's compliance voltage, in volts ([`compliance_voltage`](/phonometry/reference/api/electroacoustics/induction-loop-components/#compliance_voltage)). |
-| `program` | The row of [`OVERLOAD_TEST_FREQUENCIES`](/phonometry/reference/api/electroacoustics/induction-loop/#overload_test_frequencies): `"transient_speech"`, `"speech"` (the default of Table 4) or `"music"`. |
-| `current_response` | The amplifier's current response into the loop, relative to 1 kHz ([`amplifier_frequency_response`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifier_frequency_response)); `None` for a flat current, which is what a current-drive amplifier delivers (E.3). |
+| `impedance` | The loop's [`LoopImpedance`](/reference/api/electroacoustics/induction-loop-components/#loopimpedance) ([`loop_impedance`](/reference/api/electroacoustics/induction-loop-components/#loop_impedance)). |
+| `compliance_voltage_v` | The amplifier's compliance voltage, in volts ([`compliance_voltage`](/reference/api/electroacoustics/induction-loop-components/#compliance_voltage)). |
+| `program` | The row of [`OVERLOAD_TEST_FREQUENCIES`](/reference/api/electroacoustics/induction-loop/#overload_test_frequencies): `"transient_speech"`, `"speech"` (the default of Table 4) or `"music"`. |
+| `current_response` | The amplifier's current response into the loop, relative to 1 kHz ([`amplifier_frequency_response`](/reference/api/electroacoustics/induction-loop-components/#amplifier_frequency_response)); `None` for a flat current, which is what a current-drive amplifier delivers (E.3). |
 
-**Returns:** An [`AmplifierOverloadVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#amplifieroverloadverification).
+**Returns:** An [`AmplifierOverloadVerification`](/reference/api/electroacoustics/induction-loop/#amplifieroverloadverification).
 
 **Raises**
 
@@ -1025,7 +1025,7 @@ normally at 1.2 m for seated and 1.7 m for standing listeners (8.4.2):
 Every requirement is judged on what was given; one not measured is not
 judged, and a verdict with none fails. The background noise with the loop
 off is also assessed against the recommendations of 7.2
-([`assess_background_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#assess_background_noise)), which are not requirements.
+([`assess_background_noise`](/reference/api/electroacoustics/induction-loop/#assess_background_noise)), which are not requirements.
 
 **Parameters**
 
@@ -1037,9 +1037,9 @@ off is also assessed against the recommendations of 7.2
 | `response_db` | The response at each frequency, in dB on any fixed reference, for one point or one row per point. |
 | `background_noise_levels` | The A-weighted level at each point with the loop switched off, in dB re 400 mA/m. |
 | `system_noise_levels` | The A-weighted level at the same points with the system on and every input muted, in dB re 400 mA/m. |
-| `noise_is_tonal` | The background noise has a significant undesirable tonal quality and is not mostly at low frequencies, which withholds the 22 dB relaxation of 7.2 ([`assess_background_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#assess_background_noise)). |
+| `noise_is_tonal` | The background noise has a significant undesirable tonal quality and is not mostly at low frequencies, which withholds the 22 dB relaxation of 7.2 ([`assess_background_noise`](/reference/api/electroacoustics/induction-loop/#assess_background_noise)). |
 
-**Returns:** An [`InductionLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#inductionloopverification).
+**Returns:** An [`InductionLoopVerification`](/reference/api/electroacoustics/induction-loop/#inductionloopverification).
 
 **Raises**
 
@@ -1091,14 +1091,14 @@ The informative Annex A.4 allows up to +12 dB at 1.45 m for a counter;
 
 | Name | Description |
 | :--- | :--- |
-| `field_strength_levels` | The level at each measurement point, in dB re 400 mA/m: shape `(heights, points)` for a layout of Figures 2 and 3, `(2, 6)` for a refuge and `(3, 3)` for a counter, in the order of [`small_volume_measurement_points`](/phonometry/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points); any shape for a useful volume. |
+| `field_strength_levels` | The level at each measurement point, in dB re 400 mA/m: shape `(heights, points)` for a layout of Figures 2 and 3, `(2, 6)` for a refuge and `(3, 3)` for a counter, in the order of [`small_volume_measurement_points`](/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points); any shape for a useful volume. |
 | `layout` | `"refuge_small"`, `"refuge_large"` or `"counter"` for the points of Figures 2 and 3; `"refuge_useful_volume"` or `"counter_useful_volume"` for a useful volume of 9.4 in their place. |
 | `heights_m` | The height of each point of a useful volume above the floor, in metres, in the shape of `field_strength_levels`; required for a useful volume, and refused for the fixed layouts, whose heights are those of Figures 2 and 3. |
 | `standing_area_levels` | Levels surveyed elsewhere in the area where people are expected to stand, in dB re 400 mA/m. |
 | `frequencies` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
 | `response_db` | The response at each frequency, one row per point. |
 
-**Returns:** An [`InductionLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#inductionloopverification).
+**Returns:** An [`InductionLoopVerification`](/reference/api/electroacoustics/induction-loop/#inductionloopverification).
 
 **Raises**
 

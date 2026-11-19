@@ -22,14 +22,14 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-[DIN 45672-1](/phonometry/vibration/immission/railway-vibration/) measures
+[DIN 45672-1](/vibration/immission/railway-vibration/) measures
 next to a line and Part 2 reduces what was measured. Part 3, which has only
 ever existed as the draft of February 2023, answers the question that comes
 before both: a line is planned, or a building next to one, and someone has to
 say how much the floors will move before there is anything to measure. The
 answer is a third-octave velocity spectrum on a floor, built by adding what
 is known about the source, the ground and the building, and from it the two
-numbers [DIN 4150-2](/phonometry/vibration/immission/people-in-buildings/)
+numbers [DIN 4150-2](/vibration/immission/people-in-buildings/)
 judges.
 
 ## 1. A spectrum is a sum of what is known
@@ -193,7 +193,7 @@ reduction and goes in with its sign changed.
 ## 3. From the spectrum to the numbers DIN 4150-2 judges
 
 Clause 7 turns the spectrum into the assessment quantities. The KB
-weighting of [DIN 45669-1](/phonometry/vibration/immission/vibration-meter/)
+weighting of [DIN 45669-1](/vibration/immission/vibration-meter/)
 is printed as a table of third-octave corrections, Table 2, from 4 Hz to
 80 Hz, and added to each band (Formula (8)); the weighted bands are summed;
 and the sum level gives the clock maximum r.m.s. of the kind of train
@@ -201,7 +201,7 @@ and the sum level gives the clock maximum r.m.s. of the kind of train
 Hold spectra and `v₀` = 5·10⁻⁵ mm/s, the reference of the level. The value
 is the KB quantity itself, because KB is the velocity in millimetres per
 second. Then 1.5 times it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)) and 3 times that
-the peak velocity a [DIN 4150-3](/phonometry/vibration/structural/structural-damage/)
+the peak velocity a [DIN 4150-3](/vibration/structural/structural-damage/)
 comparison wants (Formula (12)).
 
 ```python
@@ -223,7 +223,7 @@ print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
 ```
 
 The assessment vibration severity over a day's timetable is Formula (11),
-the sum of Formula (6) of the [draft of DIN 4150-2](/phonometry/vibration/immission/railway-categories/)
+the sum of Formula (6) of the [draft of DIN 4150-2](/vibration/immission/railway-categories/)
 with the same weighting factors, 0.7 for a tram on the surface, printed
 without that formula's sentence that a category at or below 0.1 counts as
 zero; the library applies the sentence, since the assessment is the one the
@@ -302,7 +302,7 @@ example finds $A_\mathrm{r}$ = 0.1 exceeded, the formula finds it met. And its f
 transfer column comes from no table of Annex A, and cites Figure 3 for it
 where the concrete floor is Figure 4. The conformance rows hold the chain
 from the printed 78.1 dB and the formula for the printed inputs, and the
-[errata page](/phonometry/reference/errata/) has the readings, together with
+[errata page](/reference/errata/) has the readings, together with
 a timber floor table whose lower deviation is printed above its mean, three
 figure legends that name the wrong table or quantity, the sentence on a
 category at or below 0.1 that Formula (11) leaves out, and an Annex A called
@@ -353,14 +353,14 @@ library carries none. The spectrum is the user's.
 
 ## See also
 
-- [Railway vibration by category of train (E DIN 4150-2)](/phonometry/vibration/immission/railway-categories/):
+- [Railway vibration by category of train (E DIN 4150-2)](/vibration/immission/railway-categories/):
   the assessment this prediction feeds, with the same Formula (11) and the
   same factors.
-- [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](/vibration/immission/railway-vibration/):
   the measurement the emission spectra and the ground decay come from.
-- [Predicting vibration before measuring (DIN 4150-1)](/phonometry/vibration/immission/vibration-prediction/):
+- [Predicting vibration before measuring (DIN 4150-1)](/vibration/immission/vibration-prediction/):
   the general decay law this method's Formula (5) is a case of.
 - API reference:
-  [`vibration.immission.railway_prediction`](/phonometry/reference/api/vibration/railway-prediction/).
+  [`vibration.immission.railway_prediction`](/reference/api/vibration/railway-prediction/).
 
 </SeeAlso>

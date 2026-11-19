@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/cnossos-rail-emission.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/cnossos-rail-emission/
 
 # CNOSSOS-EU railway source emission
 
@@ -589,7 +589,7 @@ scope.
 
 ## See also
 
-- API reference: [`environment.sources.cnossos_rail`](https://docs.jmrp.io/phonometry/reference/api/environment/cnossos-rail/).
+- API reference: [`environment.sources.cnossos_rail`](https://phonometry.dev/reference/api/environment/cnossos-rail/).
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the
   ISO 9613-2 chain that carries a source power to a receiver.
 - [Environmental noise levels](../assessment/environmental-levels.md): the

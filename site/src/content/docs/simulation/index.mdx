@@ -40,18 +40,18 @@ page, common to both, says where a run steps: NumPy, CuPy or torch, chosen
 per call, per block of code or per process, with what is promised about the
 numbers on each device. A run can go three ways beyond NumPy on this
 machine: onto another device, onto a node reached over SSH, and straight into
-a video. [Where heavy work runs](/phonometry/simulation/where-it-runs/) maps
+a video. [Where heavy work runs](/simulation/where-it-runs/) maps
 the devices, the nodes and the encoders in one place.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
 the in-plane modal frequencies of the
-[mode ladder](/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
+[mode ladder](/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
 of the image-sources guide, those of zero order along the dimension the
 cross-section leaves out, reappear as peaks in a simulated room spectrum,
 the barrier insertion loss of
-[ground effect and barriers](/phonometry/environment/propagation/ground-barriers/) can be
+[ground effect and barriers](/environment/propagation/ground-barriers/) can be
 re-derived by placing an obstacle in the domain, and the ray bending of
-[atmospheric refraction](/phonometry/environment/propagation/atmospheric-refraction/) emerges
+[atmospheric refraction](/environment/propagation/atmospheric-refraction/) emerges
 from a height-dependent sound-speed profile. When a geometry is too irregular
 for those models (odd-shaped rooms, multiple barriers, mixed impedance
 ground), the simulation is the fallback, and what it gives holds for its
@@ -67,32 +67,32 @@ acoustic solver's twenty-two are on these guides:
 
 | Guide | What its animations show |
 |---|---|
-| [Room acoustics](/phonometry/buildings/rooms/room-acoustics/) | room modes growing on and off resonance |
-| [Reverberation prediction](/phonometry/buildings/rooms/reverberation-prediction/) | the same room modes, the hall of columns that turns one wavefront into a mixed field, and the same absorption placed two ways |
-| [Outdoor propagation](/phonometry/environment/propagation/outdoor-propagation/) | barrier diffraction at two wavelengths, and the ground-effect lobe pattern |
-| [Ground effect and barriers](/phonometry/environment/propagation/ground-barriers/) | barrier diffraction at two wavelengths |
-| [Sound reflection of a noise barrier in situ](/phonometry/environment/propagation/barrier-reflection/) | the EN 1793-5 pulse in front of a 4 m and a 2.5 m sample, and the Adrienne window of each closing before the ground reflection and the top edge arrive |
-| [Atmospheric refraction](/phonometry/environment/propagation/atmospheric-refraction/) | downwind and upwind refraction |
-| [Airport noise](/phonometry/aircraft/airport-noise/) | the ground-effect lobe pattern |
-| [Impedance tube](/phonometry/materials/absorbers/impedance-tube/) | the virtual impedance tube and the virtual transmission tube |
-| [Measuring a silencer](/phonometry/devices/noise-control/silencer-measurement/) | the open duct end radiating at two frequencies |
-| [Duct-borne noise](/phonometry/devices/noise-control/duct-path/) | a duct driven below and above its first cut-on |
-| [Diffusers](/phonometry/materials/diffusers/diffusers/) | a flat panel beside a QRD |
-| [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/) | the metadiffuser beside the QRD it mimics |
-| [Metamaterial absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/) | the slit absorber |
-| [Silencers](/phonometry/devices/noise-control/silencers/) | the expansion chamber and the quarter-wave side branch |
-| [Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/) | the wall aperture |
-| [Underwater propagation](/phonometry/underwater/underwater-propagation/) | the SOFAR duct, and the critical grazing angle over two seabeds |
-| [Underwater acoustics](/phonometry/underwater/underwater-acoustics/) | Lloyd's mirror: a source under a pressure-release surface at 31.5 Hz and at 315 Hz, with its inverted image |
+| [Room acoustics](/buildings/rooms/room-acoustics/) | room modes growing on and off resonance |
+| [Reverberation prediction](/buildings/rooms/reverberation-prediction/) | the same room modes, the hall of columns that turns one wavefront into a mixed field, and the same absorption placed two ways |
+| [Outdoor propagation](/environment/propagation/outdoor-propagation/) | barrier diffraction at two wavelengths, and the ground-effect lobe pattern |
+| [Ground effect and barriers](/environment/propagation/ground-barriers/) | barrier diffraction at two wavelengths |
+| [Sound reflection of a noise barrier in situ](/environment/propagation/barrier-reflection/) | the EN 1793-5 pulse in front of a 4 m and a 2.5 m sample, and the Adrienne window of each closing before the ground reflection and the top edge arrive |
+| [Atmospheric refraction](/environment/propagation/atmospheric-refraction/) | downwind and upwind refraction |
+| [Airport noise](/aircraft/airport-noise/) | the ground-effect lobe pattern |
+| [Impedance tube](/materials/absorbers/impedance-tube/) | the virtual impedance tube and the virtual transmission tube |
+| [Measuring a silencer](/devices/noise-control/silencer-measurement/) | the open duct end radiating at two frequencies |
+| [Duct-borne noise](/devices/noise-control/duct-path/) | a duct driven below and above its first cut-on |
+| [Diffusers](/materials/diffusers/diffusers/) | a flat panel beside a QRD |
+| [Metadiffusers](/materials/diffusers/metadiffusers/) | the metadiffuser beside the QRD it mimics |
+| [Metamaterial absorbers](/materials/absorbers/metamaterial-absorbers/) | the slit absorber |
+| [Silencers](/devices/noise-control/silencers/) | the expansion chamber and the quarter-wave side branch |
+| [Panel sound insulation](/buildings/design/panel-sound-insulation/) | the wall aperture |
+| [Underwater propagation](/underwater/underwater-propagation/) | the SOFAR duct, and the critical grazing angle over two seabeds |
+| [Underwater acoustics](/underwater/underwater-acoustics/) | Lloyd's mirror: a source under a pressure-release surface at 31.5 Hz and at 315 Hz, with its inverted image |
 
 Four of the elastic solver's six are on guides too: the bending packet
 entering an L-junction, on
-[junction transmission](/phonometry/vibration/structural/junction-transmission/),
+[junction transmission](/vibration/structural/junction-transmission/),
 the coincidence plate, on panel sound insulation, a plate driven below and
 above coincidence, on
-[sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/),
+[sound power from surface vibration](/devices/emission/vibration-sound-power/),
 and the hit on a half-space that leaves a Rayleigh train on its surface, on
-[predicting vibration](/phonometry/vibration/immission/vibration-prediction/).
+[predicting vibration](/vibration/immission/vibration-prediction/).
 The first two and the last also appear on the elastic page below, where the
 solver that produced them is explained.
 
@@ -129,33 +129,33 @@ extra sampling that free surfaces and interface waves demand.
 Read the acoustic page first: the elastic page assumes its vocabulary and says
 so in its own opening.
 
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   staggered-grid pressure-velocity FDTD method following Attenborough & Van
   Renterghem (2021) chapter 4, its sources, probes, obstacles and boundary
   conditions, the near-to-far-field chain, the 2D limits and the numerical
   dispersion rule.
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the P-SV velocity-stress companion solver (Virieux 1986) on the same
   grid, with stress-imaging free surfaces, Rayleigh waves, mode conversion,
   Scholte interface waves and immersed-plate transmission, each validated
   against its exact closed form.
-- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+- [Where a simulation runs: NumPy, CuPy and torch](/simulation/compute/):
   both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, the
   `Compute` request, `use()` and `PHONOMETRY_COMPUTE`, the fallback to
   NumPy, the provenance a result records, the bit-identical CuPy fields and
   the published torch bounds, and decimated snapshots.
-- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+- [Sending a simulation to a remote node](/simulation/remote-node/):
   either solver's run on another machine over SSH, on a Docker node running
   the image built from the repository's Dockerfile or in a Python
   environment, with or without a GPU: the hosts file that names a node,
   what each side checks, the errors
   and the fallback to NumPy, progress and timeouts, security in both
   directions, and when a run there gives the numbers of a run here.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/)
+- [Writing animations and FDTD runs to video](/io/videos/)
   (in the Files section): either solver's run written straight to a WebM,
   an MP4 or a GIF as it is
   computed, here or on a node, without storing its snapshots.
-- [Where heavy work runs: CPU or GPU, here or on a node](/phonometry/simulation/where-it-runs/):
+- [Where heavy work runs: CPU or GPU, here or on a node](/simulation/where-it-runs/):
   the map of where a run steps and where its video is encoded, on this
   machine or on a node, on a CPU or a GPU, with the page that explains each.
 
@@ -183,7 +183,7 @@ And nothing here is a room-acoustics package. There is no geometry importer,
 no ray tracer, no auralisation and no 3D solver: obstacles are rasterised onto
 the grid from shapes you define, a medium is the numbers or maps you give it
 (the elastic solver also takes one of the materials it ships or a solid's
-[catalogue row](/phonometry/simulation/elastic-waves/#a-solid-from-a-catalogue)),
+[catalogue row](/simulation/elastic-waves/#a-solid-from-a-catalogue)),
 and the output is a field you analyse yourself.
 </ScopeClaim>
 </Scope>
@@ -192,13 +192,13 @@ and the output is a field you analyse yourself.
 
 The fields these solvers produce are read back with the same tools as a
 measurement: the filtering, weighting and level functions of [Signal
-analysis](/phonometry/signals/), with [Build a sound level
-meter](/phonometry/signals/sound-level-meter/) running that chain end to end on
+analysis](/signals/), with [Build a sound level
+meter](/signals/sound-level-meter/) running that chain end to end on
 one runnable page. There is no theory-reference page for the solvers; the
 derivations, the stability conditions and the analytic oracles stay inside the
 acoustic and elastic guides above.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](/phonometry/start/tasks/) indexes it by the job
-and [All guides](/phonometry/start/guides/) lists every page with a line on
+[What do you need to measure?](/start/tasks/) indexes it by the job
+and [All guides](/start/guides/) lists every page with a line on
 each.

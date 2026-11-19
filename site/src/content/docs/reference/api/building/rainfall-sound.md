@@ -19,14 +19,14 @@ $10^{-12}$ W/m² (K.1). Per unit area, because only part of a large roof
 is wetted and the power scales with the area the rain actually excites.
 
 **The rain.** Real rain is classed by rate, drop size and fall velocity
-(Table K.1, after IEC 60721-2-2:1988, [`RAINFALL_CLASSIFICATION`](/phonometry/reference/api/building/rainfall-sound/#rainfall_classification)). The
+(Table K.1, after IEC 60721-2-2:1988, [`RAINFALL_CLASSIFICATION`](/reference/api/building/rainfall-sound/#rainfall_classification)). The
 laboratory reproduces two of the classes at their upper limits, "since larger
 drops produce most of the sound generated": heavy rain, 40 mm/h of 5 mm drops
 at 7 m/s, which is mandatory and the one products are compared with, and
 intense rain, 15 mm/h of 2 mm drops at 4 m/s (ISO 10140-5:2021 Table H.1,
-[`ARTIFICIAL_RAIN`](/phonometry/reference/api/building/rainfall-sound/#artificial_rain)). The generator is checked by its rainfall rate, which
-has to stay within 2 mm/h of the nominal value ([`verify_rain_generator`](/phonometry/reference/api/building/rainfall-sound/#verify_rain_generator),
-[`rainfall_rate`](/phonometry/reference/api/building/rainfall-sound/#rainfall_rate)).
+[`ARTIFICIAL_RAIN`](/reference/api/building/rainfall-sound/#artificial_rain)). The generator is checked by its rainfall rate, which
+has to stay within 2 mm/h of the nominal value ([`verify_rain_generator`](/reference/api/building/rainfall-sound/#verify_rain_generator),
+[`rainfall_rate`](/reference/api/building/rainfall-sound/#rainfall_rate)).
 
 **The level.** From the room-averaged sound pressure level $L_\mathrm{pr}$,
 the reverberation time $T$ and the volume $V$ of the test room and
@@ -45,7 +45,7 @@ of the tank (K.4.2). The alternative of K.4.3 measures the intensity directly,
 $L_I = L_{I\mathrm{m}} + 10 \log_{10}(S_\mathrm{m}/S_\mathrm{e})$
 (Formula (K.4)). The 18 bands 100 Hz to 5 000 Hz combine into the A-weighted
 level $L_{I\mathrm{A}} = 10 \log_{10} \sum 10^{0.1(L_{Ij} + C_j)}$
-(Formula (K.2)) with the $C_j$ of Table K.2 ([`RAINFALL_A_WEIGHTING`](/phonometry/reference/api/building/rainfall-sound/#rainfall_a_weighting)),
+(Formula (K.2)) with the $C_j$ of Table K.2 ([`RAINFALL_A_WEIGHTING`](/reference/api/building/rainfall-sound/#rainfall_a_weighting)),
 and three bands into an octave by Formula (K.3).
 
 **The reference specimen.** For comparison between laboratories, the levels
@@ -190,7 +190,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 | `structural_reverberation_time` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
 | `frequencies` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
 
-**Returns:** A [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection).
+**Returns:** A [`RainfallReferenceCorrection`](/reference/api/building/rainfall-sound/#rainfallreferencecorrection).
 
 **Raises**
 
@@ -248,7 +248,7 @@ area of the tank. The 18 bands 100 Hz to 5 000 Hz give the A-weighted
 level $L_{I\mathrm{A}}$ of Formula (K.2).
 
 With the correction of the laboratory's reference specimen
-([`rainfall_reference_correction`](/phonometry/reference/api/building/rainfall-sound/#rainfall_reference_correction)), the levels are also normalized,
+([`rainfall_reference_correction`](/reference/api/building/rainfall-sound/#rainfall_reference_correction)), the levels are also normalized,
 $L_{I\mathrm{norm}} = L_I - \Delta L_{I\mathrm{c}}$ (Formula (K.5)),
 for comparison between laboratories.
 
@@ -261,10 +261,10 @@ for comparison between laboratories.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `volume` | Volume of the test room, in m³. |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
-| `background_levels` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)) before the sum. |
-| `reference_correction` | The laboratory correction: a [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection) covering every band, or $\Delta L_{I\mathrm{c}}$ per band in dB, or `None`. |
+| `background_levels` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/reference/api/building/laboratory-insulation/#background_correction)) before the sum. |
+| `reference_correction` | The laboratory correction: a [`RainfallReferenceCorrection`](/reference/api/building/rainfall-sound/#rainfallreferencecorrection) covering every band, or $\Delta L_{I\mathrm{c}}$ per band in dB, or `None`. |
 
-**Returns:** A [`RainfallSoundResult`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresult).
+**Returns:** A [`RainfallSoundResult`](/reference/api/building/rainfall-sound/#rainfallsoundresult).
 
 **Raises**
 
@@ -304,9 +304,9 @@ then follow as in K.4.2.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `measuring_area_m2` | Area of the measuring surface $S_\mathrm{m}$, in m². |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
-| `reference_correction` | The laboratory correction, as for [`rainfall_sound`](/phonometry/reference/api/building/rainfall-sound/#rainfall_sound), or `None`. |
+| `reference_correction` | The laboratory correction, as for [`rainfall_sound`](/reference/api/building/rainfall-sound/#rainfall_sound), or `None`. |
 
-**Returns:** A [`RainfallSoundResult`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresult) with `method="intensity"`.
+**Returns:** A [`RainfallSoundResult`](/reference/api/building/rainfall-sound/#rainfallsoundresult) with `method="intensity"`.
 
 **Raises**
 
@@ -340,7 +340,7 @@ The normalization correction from the reference glass pane (Annex I).
 | `l_i_reference` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
 | `structural_reverberation_time` | Its structural reverberation time $T_\mathrm{s}$, in s. |
 | `loss_factor` | Its total loss factor $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), a linear ratio. |
-| `reference_loss_factor` | The reference loss factor $\eta_\mathrm{ref}$ of Table I.1 as a linear ratio, like `loss_factor`: $10^{x/10}$ of the decibel value $x$ the table prints ([`RAINFALL_REFERENCE_LOSS_FACTOR_DB`](/phonometry/reference/api/building/rainfall-sound/#rainfall_reference_loss_factor_db)). |
+| `reference_loss_factor` | The reference loss factor $\eta_\mathrm{ref}$ of Table I.1 as a linear ratio, like `loss_factor`: $10^{x/10}$ of the decibel value $x$ the table prints ([`RAINFALL_REFERENCE_LOSS_FACTOR_DB`](/reference/api/building/rainfall-sound/#rainfall_reference_loss_factor_db)). |
 | `l_i_m_reference` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |
 | `l_ic_reference` | The reference level $L_{I\mathrm{c,ref}}$ of Table I.1, in dB. |
 | `correction` | $\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} - L_{I\mathrm{c,ref}}$, in dB (Formula (I.3)). |
@@ -539,7 +539,7 @@ Whether at least half of the drops are within it ("should"), or `None`.
 
 *property*
 
-The row of [`ARTIFICIAL_RAIN`](/phonometry/reference/api/building/rainfall-sound/#artificial_rain) the generator was verified against.
+The row of [`ARTIFICIAL_RAIN`](/reference/api/building/rainfall-sound/#artificial_rain) the generator was verified against.
 
 ### RainGeneratorVerification.passes
 
@@ -613,11 +613,11 @@ H.1 sets three tolerances on the generated rain: the rainfall rate
 "shall be within ±2 mm/h" of the nominal rate, and half of the drops
 "should be within ±0,5 mm" of the volume median drop diameter and
 "within ±1 m/s" of the fall velocity. A tank built to Table H.2 needs only
-the rate checked (H.2.3), by collecting the water ([`rainfall_rate`](/phonometry/reference/api/building/rainfall-sound/#rainfall_rate));
+the rate checked (H.2.3), by collecting the water ([`rainfall_rate`](/reference/api/building/rainfall-sound/#rainfall_rate));
 another generator needs the drops measured as well, and the drop criteria
 are judged when their samples are given. The three windows include their
 bounds: a rate exactly 2 mm/h from the nominal one passes, also when
-[`rainfall_rate`](/phonometry/reference/api/building/rainfall-sound/#rainfall_rate) returns it a rounding error beyond.
+[`rainfall_rate`](/reference/api/building/rainfall-sound/#rainfall_rate) returns it a rounding error beyond.
 
 **Parameters**
 
@@ -628,7 +628,7 @@ bounds: a rate exactly 2 mm/h from the nominal one passes, also when
 | `drop_diameters_mm` | Diameters of individual measured drops, in mm, or `None` to leave the drop size unjudged. |
 | `fall_velocities_m_s` | Fall velocities of individual measured drops, in m/s, or `None` to leave the velocity unjudged. |
 
-**Returns:** A [`RainGeneratorVerification`](/phonometry/reference/api/building/rainfall-sound/#raingeneratorverification).
+**Returns:** A [`RainGeneratorVerification`](/reference/api/building/rainfall-sound/#raingeneratorverification).
 
 **Raises**
 

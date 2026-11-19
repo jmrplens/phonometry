@@ -45,14 +45,14 @@ measured. A correction derived from mean-square pressures has no meaning for a
 single largest excursion. Nothing here can tell a peak level from any other,
 since both arrive as a number of decibels, so this is a rule for the caller and
 not a guard: do not put a peak level through
-[`emission_sound_pressure_level`](/phonometry/reference/api/power/workstation/#emission_sound_pressure_level).
+[`emission_sound_pressure_level`](/reference/api/power/workstation/#emission_sound_pressure_level).
 
 **The background correction** is the same expression the sound-power side
 already uses, ISO 3744:2010 Equation (16), but this group sets its own
 thresholds: 15 dB of margin makes it negligible, and 6 dB (grade 2) or 3 dB
 (grade 3) is as far down as a result may be claimed. Below that the correction
 is clamped and the level becomes an upper bound, which is why
-[`background_noise_correction_at_workstation`](/phonometry/reference/api/power/workstation/#background_noise_correction_at_workstation) reports the clamp rather than
+[`background_noise_correction_at_workstation`](/reference/api/power/workstation/#background_noise_correction_at_workstation) reports the clamp rather than
 raising: the reading is still worth reporting, it just stops being a
 determination.
 
@@ -82,7 +82,7 @@ from repeated measurements by Equation (C.1).
 
 :::note
 Equation (C.1) prints the **sample** standard deviation, with
-$1/(N-1)$, and that is what [`operating_standard_deviation`](/phonometry/reference/api/power/workstation/#operating_standard_deviation)
+$1/(N-1)$, and that is what [`operating_standard_deviation`](/reference/api/power/workstation/#operating_standard_deviation)
 computes. The two worked examples of ISO 11200:2014 Annex B do not agree
 with each other on this: Table B.1 divides by $N$ and Table B.3 by
 $N-1$. See `docs/ERRATA.md`.
@@ -111,8 +111,8 @@ ISO 11201:2010 Equation (5), ISO 11202:2010 Equation (8) and
 ISO 11204:2010 Equation (7), one expression printed three times. It is the
 same closed form as ISO 3744:2010 Equation (16) on the sound-power side, and
 this group puts its own thresholds around it, which
-[`WorkstationBackgroundCorrection`](/phonometry/reference/api/power/workstation/#workstationbackgroundcorrection) applies. A held correction emits
-a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning).
+[`WorkstationBackgroundCorrection`](/reference/api/power/workstation/#workstationbackgroundcorrection) applies. A held correction emits
+a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning).
 
 **Parameters**
 
@@ -122,7 +122,7 @@ a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerw
 | `background_level` | The reading with it stopped, $L_p(B)$, in decibels, of the same shape. |
 | `grade` | `'engineering'` (grade 2, 6 dB) or `'survey'` (grade 3, 3 dB), which sets how far down a determination may be claimed. |
 
-**Returns:** The correction, as a [`WorkstationBackgroundCorrection`](/phonometry/reference/api/power/workstation/#workstationbackgroundcorrection): $K_1$ in its `correction`, and in its `upper_bound` whether the background held it anywhere.
+**Returns:** The correction, as a [`WorkstationBackgroundCorrection`](/reference/api/power/workstation/#workstationbackgroundcorrection): $K_1$ in its `correction`, and in its `upper_bound` whether the background held it anywhere.
 
 **Raises**
 
@@ -162,7 +162,7 @@ compared with a limit value, and is this function's default.
 | Name | Description |
 | :--- | :--- |
 | `total_standard_deviation_db` | $\sigma_\mathrm{tot}$ in decibels. |
-| `coverage_factor` | $k$ (default [`DEFAULT_COVERAGE_FACTOR`](/phonometry/reference/api/power/workstation/#default_coverage_factor)). |
+| `coverage_factor` | $k$ (default [`DEFAULT_COVERAGE_FACTOR`](/reference/api/power/workstation/#default_coverage_factor)). |
 
 **Returns:** $U$ in decibels.
 
@@ -310,7 +310,7 @@ Plot the reading, the two corrections and what is left of them.
 Whether the background margin fell below the grade's minimum.
 
 The level is then an upper bound rather than a determination
-([`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db): 6 dB for grade 2, 3 dB for
+([`MIN_BACKGROUND_MARGIN_DB`](/reference/api/power/workstation/#min_background_margin_db): 6 dB for grade 2, 3 dB for
 grade 3), judged on the settled margin as $K_1$ is.
 
 ## environmental_ratio_from_absorption
@@ -348,7 +348,7 @@ z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0.1 D^*_{I,\mathrm{op}}}
 $$
 
 ISO 11204:2010 Equation (A.6). It is the same quantity
-[`environmental_ratio_from_k2`](/phonometry/reference/api/power/workstation/#environmental_ratio_from_k2) returns, reached without going through
+[`environmental_ratio_from_k2`](/reference/api/power/workstation/#environmental_ratio_from_k2) returns, reached without going through
 $K_2$: under the ISO 3744 definition
 $K_2 = 10 \lg (1 + 4 S_M / A)$ the two are identically equal, which is
 why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
@@ -402,7 +402,7 @@ $$
 
 ISO 11202:2010 Equation (A.4) and ISO 11204:2010 Equation (A.3). $K_2$
 is the average environmental correction of the reference measurement
-surface, the quantity [`environmental_correction`](/phonometry/reference/api/power/sound-power/#environmental_correction)
+surface, the quantity [`environmental_correction`](/reference/api/power/sound-power/#environmental_correction)
 computes for the sound-power methods, and $D^*_{I,\mathrm{op}}$ is the
 apparent directivity index the work station sees.
 
@@ -411,8 +411,8 @@ $z = 10^{-0.1 K_2}$, so $K_3 = K_2$: a work station that sees
 the machine no more strongly than the measurement surface does needs the
 same correction the surface needed. That holds until the cap bites, at
 $K_2 = 7$ dB; above it the local correction stays at
-[`MAX_K3`](/phonometry/reference/api/power/workstation/#max_k3) however large the environmental one grows, which is the
-piecewise function of [`local_environmental_correction`](/phonometry/reference/api/power/workstation/#local_environmental_correction) and not a
+[`MAX_K3`](/reference/api/power/workstation/#max_k3) however large the environmental one grows, which is the
+piecewise function of [`local_environmental_correction`](/reference/api/power/workstation/#local_environmental_correction) and not a
 limitation here.
 
 **Parameters**
@@ -451,7 +451,7 @@ grade_from_local_correction(
 The accuracy grade a local environmental correction earns.
 
 ISO 11202:2010 A.1.3 puts the boundary at
-[`GRADE_2_MAX_K3`](/phonometry/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
+[`GRADE_2_MAX_K3`](/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
 is grade 2 (engineering), and more than that is grade 3 (survey). That is
 the boundary applied when `largest_dimension_m` is not given, and the one
 ISO 11204 5.6 applies too.
@@ -513,8 +513,8 @@ $$
 
 ISO 11202:2010 Equation (A.5) and ISO 11204:2010 Equations (A.2) and (A.5),
 the same three lines printed three times; only the route to $z$
-differs between them, and that is [`environmental_ratio_from_k2`](/phonometry/reference/api/power/workstation/#environmental_ratio_from_k2) and
-[`environmental_ratio_from_absorption`](/phonometry/reference/api/power/workstation/#environmental_ratio_from_absorption).
+differs between them, and that is [`environmental_ratio_from_k2`](/reference/api/power/workstation/#environmental_ratio_from_k2) and
+[`environmental_ratio_from_absorption`](/reference/api/power/workstation/#environmental_ratio_from_absorption).
 
 The cap is the curve's own value, not a separate rule:
 $-10 \lg 0.2 = 6.99$ dB, so the function is continuous where the
@@ -685,8 +685,8 @@ $$
 K_1 = -10 \lg \left( 1 - 10^{-0.1 \Delta L} \right)\ \mathrm{dB}, \qquad \Delta L = L'_p - L_p(B)
 $$
 
-Above [`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as
-zero, and below the grade's entry in [`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db) it
+Above [`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as
+zero, and below the grade's entry in [`MIN_BACKGROUND_MARGIN_DB`](/reference/api/power/workstation/#min_background_margin_db) it
 is held at the value it has there. The correction and whether it was held
 are read from the margin and the grade, so they are not fields: a record
 cannot be built to hold a correction its margin does not give.

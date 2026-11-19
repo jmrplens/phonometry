@@ -13,14 +13,14 @@ is set by how fast those waves decay. The **track decay rate** is that
 attenuation in decibels per metre, one value per one-third octave band (3.6),
 and a vehicle type test by ISO 3095 needs a track whose decay rates are at
 least the lower limits of its Figure 3
-([`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m)).
+([`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m)).
 
 **The measurement (clause 6).** An accelerometer is fixed to the rail at the
 middle of a sleeper bay, and an instrumented hammer strikes the rail at a grid
 of positions measured in sleeper bays from it: every quarter bay out to bay 2
 and a half, then every half bay to bay 4, every bay to bay 8, and then at bays
 10, 12, 16, 20, 24, 30, 36, 42, 48, 54 and 66 (6.7 and Figure 2,
-[`TRACK_DECAY_EXCITATION_INDICES`](/phonometry/reference/api/environment/track-decay/#track_decay_excitation_indices)). The frequency response between force
+[`TRACK_DECAY_EXCITATION_INDICES`](/reference/api/environment/track-decay/#track_decay_excitation_indices)). The frequency response between force
 and response at each position, in mobility or accelerance, is reduced to its
 one-third octave band magnitude $A(x_n)$; the one at the accelerometer
 itself is the direct response $A(x_0)$.
@@ -38,7 +38,7 @@ $$
 (Formula 1, A.3), where $\Delta x_n$ is the length of rail each
 position stands for: from halfway to the position before it to halfway to the
 one after it, from 0 to halfway for the direct response and symmetrical about
-the last position (A.2) ([`track_decay_rate`](/phonometry/reference/api/environment/track-decay/#track_decay_rate)). The summation is dominated
+the last position (A.2) ([`track_decay_rate`](/reference/api/environment/track-decay/#track_decay_rate)). The summation is dominated
 by the first 10 dB of decay, which is what radiates.
 
 **Formula 2, the floor.** A grid that stops at $x_\mathrm{max}$ cannot
@@ -85,7 +85,7 @@ The hammer positions of Figure 2, in metres from the accelerometer.
 | :--- | :--- |
 | `sleeper_spacing_m` | The distance between sleepers, in metres; the 0.6 m 6.7 prescribes for a rail without periodic supports by default. |
 
-**Returns:** The 29 distances of [`TRACK_DECAY_EXCITATION_INDICES`](/phonometry/reference/api/environment/track-decay/#track_decay_excitation_indices) times the sleeper spacing, read-only.
+**Returns:** The 29 distances of [`TRACK_DECAY_EXCITATION_INDICES`](/reference/api/environment/track-decay/#track_decay_excitation_indices) times the sleeper spacing, read-only.
 
 **Raises**
 
@@ -151,7 +151,7 @@ TrackDecayRate(
 
 The decay rates of a rail in one direction, by one-third octave band (EN 15461).
 
-Built by [`track_decay_rate`](/phonometry/reference/api/environment/track-decay/#track_decay_rate) from a set of frequency responses, or
+Built by [`track_decay_rate`](/reference/api/environment/track-decay/#track_decay_rate) from a set of frequency responses, or
 directly from the rates of a report, which is all the ISO 3095 check
 needs.
 
@@ -206,7 +206,7 @@ unsuitable marked and a lower limit drawn when one is given.
 | Name | Description |
 | :--- | :--- |
 | `ax` | Axes to draw on; a new figure is made when omitted. |
-| `limit_db_per_m` | A lower limit, nominal frequency to rate, such as one direction of [`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m). |
+| `limit_db_per_m` | A lower limit, nominal frequency to rate, such as one direction of [`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m). |
 | `language` | `"en"` or `"es"`. |
 | `kwargs` | Passed to the rate line. |
 

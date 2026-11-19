@@ -40,7 +40,7 @@ decimator for general records, or plain subsampling (`antialias=False`)
 matching the ECMA-internal convention when the input is already
 narrowband.
 
-The **envelope spectrum** ([`envelope_spectrum`](/phonometry/reference/api/signals/envelope/#envelope_spectrum)) transforms the
+The **envelope spectrum** ([`envelope_spectrum`](/reference/api/signals/envelope/#envelope_spectrum)) transforms the
 detected envelope itself: Section 13.3 of the book runs a band-pass
 filter and a square-law envelope detector into a DC remover before
 correlating (Figure 13.11), because the spectral content of the envelope,
@@ -91,12 +91,12 @@ same time axis.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope and the carried waveform come out in Pa, and the carried waveform comes back as a Signal. The phase and the instantaneous frequency do not move. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope and the carried waveform come out in Pa, and the carried waveform comes back as a Signal. The phase and the instantaneous frequency do not move. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `decimation_factor` | Integer output decimation (default 1: off). |
 | `antialias` | Anti-alias filter the decimated envelope (default `True`). |
 
-**Returns:** An [`EnvelopeResult`](/phonometry/reference/api/signals/envelope/#enveloperesult).
+**Returns:** An [`EnvelopeResult`](/reference/api/signals/envelope/#enveloperesult).
 
 **Raises**
 
@@ -130,7 +130,7 @@ Hilbert envelope $A(t) = \lvert z(t) \rvert$
 square-law detector
 $A^2(t) = x^2 + \tilde{x}^2$ (`kind="squared"`); its mean is
 removed
-(kept in [`EnvelopeSpectrumResult.mean_level`](/phonometry/reference/api/signals/envelope/#envelopespectrumresult)) and the remainder
+(kept in [`EnvelopeSpectrumResult.mean_level`](/reference/api/signals/envelope/#envelopespectrumresult)) and the remainder
 is tapered and transformed once, scaled by the taper's coherent gain
 so a sinusoidal modulation whose frequency falls on an analysis bin
 reads out as a line at its exact amplitude. An off-bin modulation
@@ -161,15 +161,15 @@ untouched) before the detector, the Figure 13.11 front end.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope, its spectral amplitude and the mean level come out in Pa under the default `kind='magnitude'`, and in Pa² under `'squared'`, which squares the envelope before transforming it. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope, its spectral amplitude and the mean level come out in Pa under the default `kind='magnitude'`, and in Pa² under `'squared'`, which squares the envelope before transforming it. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `kind` | `"magnitude"` (default) or `"squared"`. |
 | `window` | Taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). The amplitude is corrected for the taper's coherent gain. |
 | `nfft` | FFT length, at least `x.size` (default: the record length). |
 | `remove_dc` | Remove the envelope mean before the transform (default `True`, the Figure 13.11 DC remover); the mean is reported either way. |
 | `band` | Optional `(low, high)` band-pass edges, in Hz ($0 < \text{low} < \text{high} < f_\mathrm{s}/2$), applied to the record before envelope detection as a zero-phase 4th-order Butterworth (`scipy.signal.sosfiltfilt`, giving an 8th-order magnitude roll-off). Default `None`: detect on the record as given. |
 
-**Returns:** An [`EnvelopeSpectrumResult`](/phonometry/reference/api/signals/envelope/#envelopespectrumresult). A finite record whose transform or squared envelope leaves the floating-point range gives an envelope, a mean level and a spectrum that are not finite; a squared envelope whose samples are finite but whose sum leaves the range gives a mean level that is not, and a spectrum bin the one-sided doubling takes past the range an amplitude that is not.
+**Returns:** An [`EnvelopeSpectrumResult`](/reference/api/signals/envelope/#envelopespectrumresult). A finite record whose transform or squared envelope leaves the floating-point range gives an envelope, a mean level and a spectrum that are not finite; a squared envelope whose samples are finite but whose sum leaves the range gives a mean level that is not, and a spectrum bin the one-sided doubling takes past the range an amplitude that is not.
 
 **Raises**
 
@@ -209,7 +209,7 @@ All output arrays share the (possibly decimated) time axis
 | `phase_rad` | Unwrapped instantaneous phase $\theta(t)$, in radians (Eq. 13.18). |
 | `instantaneous_frequency` | $f(t) = (1/2\pi) \, d\theta/dt$, in Hz (Eq. 13.19), differentiated at full rate before any decimation. |
 | `fs` | Sample rate of the outputs, in Hz (`signal_fs` divided by `decimation_factor`). |
-| `signal` | The analysed record, at full rate, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (in pascals and carrying `calibration_factor=1.0` when the input was calibrated), a bare array otherwise. |
+| `signal` | The analysed record, at full rate, in the type it arrived as: a [`Signal`](/reference/api/io/io/#signal) when the input was one (in pascals and carrying `calibration_factor=1.0` when the input was calibrated), a bare array otherwise. |
 | `signal_fs` | Sample rate of `signal`, in Hz. |
 | `decimation_factor` | Integer decimation applied to the outputs (1: none). |
 | `antialias` | Whether the decimation was anti-alias filtered. |
@@ -266,10 +266,10 @@ Amplitude spectrum of a signal's envelope (B&P Section 13.3).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency axis of the spectrum, in Hz. |
-| `amplitude` | One-sided amplitude spectrum of the (mean-removed) envelope: the height of a discrete modulation line in the units of the envelope itself, exact when the modulation frequency falls on an analysis bin (off-bin lines read low by the taper's scalloping loss; see [`envelope_spectrum`](/phonometry/reference/api/signals/envelope/#envelope_spectrum)). The zero-frequency bin is not doubled. |
+| `amplitude` | One-sided amplitude spectrum of the (mean-removed) envelope: the height of a discrete modulation line in the units of the envelope itself, exact when the modulation frequency falls on an analysis bin (off-bin lines read low by the taper's scalloping loss; see [`envelope_spectrum`](/reference/api/signals/envelope/#envelope_spectrum)). The zero-frequency bin is not doubled. |
 | `mean_level` | Mean of the detected envelope (the DC the remover of Figure 13.11 takes out): the carrier amplitude for `kind="magnitude"`, its mean square for `kind="squared"`. |
 | `kind` | `"magnitude"` (Hilbert envelope $A(t)$) or `"squared"` (the book's square-law detector, $A^2(t)$). |
-| `times` | Time axis of [`envelope`](/phonometry/reference/api/signals/envelope/#envelope), in seconds. |
+| `times` | Time axis of [`envelope`](/reference/api/signals/envelope/#envelope), in seconds. |
 | `envelope` | The detector output that was transformed, at full rate (before mean removal and tapering). |
 | `window` | The taper applied before the transform, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `remove_dc` | Whether the envelope mean was removed first. |

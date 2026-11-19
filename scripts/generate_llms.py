@@ -631,12 +631,12 @@ SITE_BASE = site_target.base_path(None)
 def _site_link(site_url: str, base: str) -> re.Pattern[str]:
     """A Markdown link to a page of the site, capturing the route.
 
-    In the source a link is written under the base the pages write
-    (``](/phonometry/<route>/``); in a copy it is made absolute on the site the
-    run links (``](https://docs.jmrp.io/phonometry/<route>/``). Anchored on the
-    link opener, so a route named in prose or in code is no link, and closed
-    by what may follow a page address (the link's end, a fragment, a query or
-    a title), so a file under a route (``.../a/diagram.svg``) is no link to it.
+    In the source a link is written under the base the pages write, none at
+    the root (``](/<route>/``); in a copy it is made absolute on the site the
+    run links (``](https://phonometry.dev/<route>/``). Anchored on the link
+    opener, so a route named in prose or in code is no link, and closed by
+    what may follow a page address (the link's end, a fragment, a query or a
+    title), so a file under a route (``.../a/diagram.svg``) is no link to it.
 
     :param site_url: The site the run links, with its base path.
     :param base: The base path the pages write their links under.
@@ -2399,7 +2399,7 @@ def _write_shard_names(written: Iterable[str], record: ShardNames) -> None:
     text = json.dumps(
         {
             "about": (
-                "Every shard name docs.jmrp.io/phonometry/llms/ has published. "
+                "Every shard name the site has published under /llms/. "
                 "scripts/generate_llms.py writes each name under published "
                 "again on every run, and make llms adds the names it writes; "
                 "a name is never taken out. A name under redirects was retired "

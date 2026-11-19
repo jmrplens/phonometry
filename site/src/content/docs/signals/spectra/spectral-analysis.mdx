@@ -88,7 +88,7 @@ the record explicitly before the call (that is a change to the *signal*, not a
 setting on the estimator), and note that the same offset is invisible in a
 fractional-octave display, because no band reaches DC. The same condition
 returns in
-[Data qualification](/phonometry/signals/metrology/data-qualification/), whose
+[Data qualification](/signals/metrology/data-qualification/), whose
 level-crossing and peak statistics are written for a zero-mean process.
 
 The estimator is a fixed pipeline: the window sets the resolution bandwidth,
@@ -195,7 +195,7 @@ feature that matters, the record length by the precision you want.** Lengthening
 the segments without lengthening the record trades one error for the other and
 buys nothing. And 150 s of record is 150 s over which the process has to stay
 stationary, which is a claim, not an assumption, and the one
-[Data qualification](/phonometry/signals/metrology/data-qualification/) decides.
+[Data qualification](/signals/metrology/data-qualification/) decides.
 When the record simply cannot be that long, the multitaper estimator of section
 7 is the escape.
 
@@ -217,7 +217,7 @@ report contains, integrate the density over the band, sum the bins and multiply
 by the bin spacing, and divide by $p_0^2$; `fractional_octave_smoothing` in
 section 4 is a display smoother and not a substitute for that integration, as
 that section spells out. The factor itself comes from
-[Calibration and dBFS](/phonometry/signals/metrology/calibration/).
+[Calibration and dBFS](/signals/metrology/calibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing.svg" alt="Welch power spectral density of pink noise in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band shaded around the estimate, the 1/3-octave smoothed curve on top and the exact -3.01 dB per octave power law as a dashed reference line" width="82%" loading="eager" />
 
@@ -462,10 +462,10 @@ Bendat & Piersol name five causes with different fixes:
 | What you see | The cause | The fix |
 | :--- | :--- | :--- |
 | Coherence flat across the band, consistent with $\gamma^2 = \mathrm{SNR}/(1+\mathrm{SNR})$ | uncorrelated noise at either sensor (the modelled case of section 3) | average more, raise the level, get closer |
-| Coherence falling progressively with frequency, worse as the record is segmented shorter | a bulk propagation delay comparable with the segment length | align the records first, or raise `nperseg` well above the delay; see [Correlation and delay](/phonometry/signals/spectra/correlation-delay/) |
+| Coherence falling progressively with frequency, worse as the record is segmented shorter | a bulk propagation delay comparable with the segment length | align the records first, or raise `nperseg` well above the delay; see [Correlation and delay](/signals/spectra/correlation-delay/) |
 | Sharp dips exactly at the resonances | resolution bias: the analysis bandwidth smears the peak differently in the two channels | lengthen the segment; the $\varepsilon_\mathrm{b}$ formula of section 1 says by how much |
 | Low at the harmonics of a strong tone while broadband coherence stays high | non-linearity, a rattle or a clipped channel | fix the path, or work below the level at which it appears |
-| Low over a band with no obvious structure | a second, uncorrelated source is also driving the output | the [MISO page](/phonometry/signals/spectra/miso-coherence/): one input cannot explain two sources |
+| Low over a band with no obvious structure | a second, uncorrelated source is also driving the output | the [MISO page](/signals/spectra/miso-coherence/): one input cannot explain two sources |
 
 Two closing cautions. The coherence estimate is biased **high** by
 $(1-\gamma^2)^2/n_\mathrm{d}$, so a low coherence read from a handful of averages is even
@@ -536,7 +536,7 @@ Which presentation belongs where: the **smoothed density** for comparing
 loudspeaker and room magnitude responses, where the eye wants a curve at
 constant relative resolution; the **band level** for anything that faces a
 criterion, or that has to agree with `octave_filter` and `OctaveFilterBank`:
-see [Levels](/phonometry/signals/levels/levels/).
+see [Levels](/signals/levels/levels/).
 
 ## 5. Colored-noise generators
 
@@ -581,7 +581,7 @@ room and loudspeaker work, and why an octave-band spectrum of white noise
 sloping upward is not a bug. Red noise falls 3 dB per octave in a band display
 and blue rises 6. The same +3 dB per octave applies to any density-versus-band
 comparison in this library; section 4 above gives the exact conversion, and
-[Levels](/phonometry/signals/levels/levels/) is where the band side lives.
+[Levels](/signals/levels/levels/) is where the band side lives.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_colors.svg" alt="Welch spectral densities of the five noise colours over 20 hertz to 20 kilohertz, each normalised to its own 1 kilohertz level so the five straight lines fan out from a single point: violet rising at 6 dB per octave, blue at 3, white flat, pink falling at 3 and red at 6, each with its exact power law dashed underneath and the measured regression slope in the legend" width="88%" />
 
@@ -799,17 +799,17 @@ the two estimators agree.
 
 ## Consistency with the frequency-response and intensity estimators
 
-The [frequency-response estimators](/phonometry/devices/electroacoustics/electroacoustics/)
+The [frequency-response estimators](/devices/electroacoustics/electroacoustics/)
 form the same cross-spectra into transfer functions: $H_1 = G_{xy}/G_{xx}$,
 unbiased when the noise is on the output, and $H_2 = G_{yy}/G_{yx}$, unbiased
 when it is on the input. The two-microphone
-[sound intensity](/phonometry/devices/emission/intensity/) probe forms the
+[sound intensity](/devices/emission/intensity/) probe forms the
 imaginary part of $G_{xy}$. Those estimators,
 `transfer_function` and `coherence`, the intensity probe and these estimators
 all share one Welch core (same taper, overlap policy and detrend-off
 calibration), so a PSD, a coherence and an $H_1$ computed with the same segment
 length are mutually consistent bin by bin. The same cross-spectral matrix
-underlies [multiple and partial coherence](/phonometry/signals/spectra/miso-coherence/),
+underlies [multiple and partial coherence](/signals/spectra/miso-coherence/),
 which extends the ordinary coherence to several correlated inputs and one
 output.
 
@@ -830,10 +830,10 @@ spectrum and spectral SNR; the Harris (1978) window figures of merit of
 <ScopeClaim status="not-covered" label="Not covered">
 The frequency-response estimators `transfer_function` and `coherence`, and the
 sound-intensity probe, share this page's Welch core but are documented on the
-[electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/) and
-[sound intensity](/phonometry/devices/emission/intensity/) pages, not here. So
+[electroacoustics](/devices/electroacoustics/electroacoustics/) and
+[sound intensity](/devices/emission/intensity/) pages, not here. So
 is multiple and partial coherence, on the [MISO
-coherence](/phonometry/signals/spectra/miso-coherence/) page. This page
+coherence](/signals/spectra/miso-coherence/) page. This page
 implements Bendat & Piersol's textbook estimators, not a certification
 standard, so it carries no clause numbers or compliance limits to check
 against.
@@ -844,12 +844,12 @@ against.
 
 ## See also
 
-- [Data qualification](/phonometry/signals/metrology/data-qualification/): the stationarity every chi-square interval on this page assumes.
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): where the factor that turns this page's densities into Pa²/Hz comes from.
-- [MISO coherence](/phonometry/signals/spectra/miso-coherence/): the same cross-spectral matrix with several correlated inputs.
-- [Time-frequency analysis](/phonometry/signals/spectra/time-frequency/): the same Welch segmentation displayed instead of averaged.
-- [Levels](/phonometry/signals/levels/levels/): the band-level side of the density/band conversion of section 4.
-- API reference: [`signals.spectra`](/phonometry/reference/api/signals/spectra/), [`signals.windows`](/phonometry/reference/api/signals/windows/) and [`signals.multitaper`](/phonometry/reference/api/signals/multitaper/).
-- Theory: [Frequency Resolution vs FFT Bin Spacing](/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing): why the bin spacing of an FFT is not the resolution of the estimate, and what the window does to both.
+- [Data qualification](/signals/metrology/data-qualification/): the stationarity every chi-square interval on this page assumes.
+- [Calibration and dBFS](/signals/metrology/calibration/): where the factor that turns this page's densities into Pa²/Hz comes from.
+- [MISO coherence](/signals/spectra/miso-coherence/): the same cross-spectral matrix with several correlated inputs.
+- [Time-frequency analysis](/signals/spectra/time-frequency/): the same Welch segmentation displayed instead of averaged.
+- [Levels](/signals/levels/levels/): the band-level side of the density/band conversion of section 4.
+- API reference: [`signals.spectra`](/reference/api/signals/spectra/), [`signals.windows`](/reference/api/signals/windows/) and [`signals.multitaper`](/reference/api/signals/multitaper/).
+- Theory: [Frequency Resolution vs FFT Bin Spacing](/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing): why the bin spacing of an FFT is not the resolution of the estimate, and what the window does to both.
 
 </SeeAlso>

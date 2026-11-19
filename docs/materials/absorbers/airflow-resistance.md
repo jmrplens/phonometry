@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/airflow-resistance.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/airflow-resistance/
 
 # Airflow Resistance
 
@@ -555,9 +555,9 @@ the model, is $\sigma$.
 - [Sound Absorption Measurement and Rating](absorption-measurement.md):
   the reverberation-room measurement and the ISO 11654 rating of the finished
   absorber.
-- API reference: [`materials`: airflow resistance](https://docs.jmrp.io/phonometry/reference/api/materials/airflow-resistance/).
+- API reference: [`materials`: airflow resistance](https://phonometry.dev/reference/api/materials/airflow-resistance/).
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the ISO 9053 definitions of resistance, resistivity and the flow regime they assume.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 

@@ -100,8 +100,8 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
   "book-beranek-2019-acoustics-sound-fields-transducers-and-vibration": Object.freeze({
     section: "general-acoustics",
     note: Object.freeze({
-      en: "ISBN 978-0-12-815227-0. The edition the conformance report reads for the baffled-piston radiation impedance and directivity (Eqs. 13.117, 13.118, 4.151, 13.102, numbered as in the first edition), and the one whose Table 7.1 gives the Delany-Bazley amplitudes discussed in [Source properties that are not errata](/phonometry/reference/errata/not-errata/).",
-      es: "ISBN 978-0-12-815227-0. La edición en la que el informe de conformidad lee la impedancia de radiación y la directividad del pistón en pantalla (Ecs. 13.117, 13.118, 4.151, 13.102, con la misma numeración que en la primera edición), y aquella cuya Tabla 7.1 da las amplitudes de Delany-Bazley que trata [Propiedades de las fuentes que no son erratas](/phonometry/es/reference/errata/not-errata/).",
+      en: "ISBN 978-0-12-815227-0. The edition the conformance report reads for the baffled-piston radiation impedance and directivity (Eqs. 13.117, 13.118, 4.151, 13.102, numbered as in the first edition), and the one whose Table 7.1 gives the Delany-Bazley amplitudes discussed in [Source properties that are not errata](/reference/errata/not-errata/).",
+      es: "ISBN 978-0-12-815227-0. La edición en la que el informe de conformidad lee la impedancia de radiación y la directividad del pistón en pantalla (Ecs. 13.117, 13.118, 4.151, 13.102, con la misma numeración que en la primera edición), y aquella cuya Tabla 7.1 da las amplitudes de Delany-Bazley que trata [Propiedades de las fuentes que no son erratas](/es/reference/errata/not-errata/).",
     }),
   }),
   "doi-10-1201-9781351228152": Object.freeze({

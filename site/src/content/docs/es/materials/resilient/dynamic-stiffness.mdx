@@ -32,7 +32,7 @@ ISO 9052-1:1989) mide la **rigidez dinámica por unidad de superficie** $s'$ de 
 elástica a partir de la resonancia de una placa de carga normalizada sobre una
 probeta de 200 mm × 200 mm. $s'$ es la entrada al término de suelo flotante del
 modelo de impacto de EN 12354-2 tratado en
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/). (La
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/). (La
 ISO 16251-1 no aplica aquí: su alcance se limita a revestimientos blandos de
 reacción local y excluye expresamente los suelos flotantes.)
 
@@ -322,7 +322,7 @@ del argumento, `airflow_resistivity_kpa_s_m2`, el único argumento de las
 funciones de la EN 29052-1 que no está en SI puro, y solo lo acepta por
 nombre, para que la unidad quede escrita en la línea que lo pasa. Una lana mineral medida en 50 000 Pa·s/m² entra
 como `50.0`, no como `50000.0`; un
-[resultado de ISO 9053](/phonometry/es/materials/absorbers/airflow-resistance/)
+[resultado de ISO 9053](/es/materials/absorbers/airflow-resistance/)
 se convierte con `sigma / 1000`. Pasar el número en Pa·s/m² caería en la
 rama $r \ge 100$, que descarta el término del gas encerrado: para la
 determinación de abajo eso convierte $s' = 10{,}49$ MN/m³ en 4,93 MN/m³ y la
@@ -574,7 +574,7 @@ plt.show()
 
 Cuánta mejora compra eso realmente banda a banda, y en qué se convierte como
 número único ponderado, es
-[Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/).
+[Predicción del comportamiento de capas elásticas](/es/buildings/design/resilient-layers/).
 
 ## Qué cubre esta guía
 
@@ -615,17 +615,17 @@ señal solo si se aportan en los metadatos.
 
 ## Véase también
 
-- [Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/):
+- [Predicción del comportamiento de capas elásticas](/es/buildings/design/resilient-layers/):
   qué hace el lado del diseño con $s'$, desde la resonancia masa-resorte hasta
   las leyes de mejora por encima de ella y su número único ponderado.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el término de suelo flotante que alimenta esta medición.
-- [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/):
+- [Resistencia al flujo de aire](/es/materials/absorbers/airflow-resistance/):
   la determinación ISO 9053 de la resistividad lateral $r$ que necesita el
   apartado 8.2, declarada allí como $\sigma$ en Pa·s/m².
-- [Capas elásticas: visión general](/phonometry/es/materials/resilient/): dónde
+- [Capas elásticas: visión general](/es/materials/resilient/): dónde
   encaja esta medición entre las guías de materiales.
-- Referencia de la API: [`materials.resilient.dynamic_stiffness`](/phonometry/es/reference/api/materials/dynamic-stiffness/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la resonancia masa-resorte que mide el banco de EN 29052-1, vista como una movilidad.
+- Referencia de la API: [`materials.resilient.dynamic_stiffness`](/es/reference/api/materials/dynamic-stiffness/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la resonancia masa-resorte que mide el banco de EN 29052-1, vista como una movilidad.
 
 </SeeAlso>

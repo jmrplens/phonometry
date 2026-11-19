@@ -25,15 +25,15 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
-The [ISO 9613-2 method](/phonometry/environment/propagation/outdoor-propagation/) and the
-[spherical-wave ground effect](/phonometry/environment/propagation/ground-barriers/) both assume
+The [ISO 9613-2 method](/environment/propagation/outdoor-propagation/) and the
+[spherical-wave ground effect](/environment/propagation/ground-barriers/) both assume
 a **homogeneous** atmosphere. In reality the sound speed changes with height,
 because temperature and wind change with height, and this **refracts** sound:
 rays curve, and over a few hundred metres the received level can swing by tens
 of decibels. This page covers
 `phonometry.environment.propagation.refraction`, the refracting-atmosphere
 counterpart of the ocean solvers in
-[`phonometry.underwater.propagation.numerical`](/phonometry/underwater/underwater-solvers/):
+[`phonometry.underwater.propagation.numerical`](/underwater/underwater-solvers/):
 a **ray model** and a **parabolic-equation (PE)** solver.
 
 Whether refraction matters is mostly a question of range. A representative
@@ -155,7 +155,7 @@ wind, two atmospheres, which is the whole upwind/downwind asymmetry in one line
 of arithmetic. It is also the physics behind the ISO 9613-2 favourable-condition
 window (wind within ±45° of the source-receiver line at 1 to 5 m/s measured 3 to
 11 m above ground), quoted in full on
-[Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/#what-favourable-propagation-conditions-means).
+[Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/#what-favourable-propagation-conditions-means).
 
 Temperature has no direction, which is why a clear calm night refracts downward
 in *every* direction. Near 10 °C the sound speed changes by about 0.6 m/s per
@@ -326,7 +326,7 @@ equation valid within a limiting elevation angle, and marches it in range on a
 range-height grid. `atmospheric_parabolic_equation` implements the **Green's
 Function PE** (GFPE, Salomons Appendix H), the atmospheric member of the same
 split-step Fourier family as the ocean
-[`parabolic_equation`](/phonometry/underwater/underwater-solvers/). Each range
+[`parabolic_equation`](/underwater/underwater-solvers/). Each range
 step transforms the field to the vertical-wavenumber domain (an FFT),
 applies the free-space propagator
 $\exp(i\,\Delta r\,(\sqrt{k_a^2 - k_z^2} - k_a))$ together with the
@@ -406,7 +406,7 @@ The ground impedance is supplied directly (`impedance=`, a normalized complex
 value in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, with
 $\operatorname{Im}(Z) > 0$ for a passive ground), as a `PorousMediumResult`,
 or from an effective `flow_resistivity_pa_s_m2` via
-the [porous models](/phonometry/materials/absorbers/porous-absorbers/) of the materials
+the [porous models](/materials/absorbers/porous-absorbers/) of the materials
 domain; the porous models work in the opposite $\mathrm{e}^{+j\omega t}$ convention, so
 their impedance is conjugated internally.
 
@@ -428,12 +428,12 @@ quiet beyond the ray-model shadow boundary.
 ## 4. Validation
 
 The models are anchored by independent oracles, pinned numerically in the
-[conformance report](/phonometry/reference/conformance/) (section "Atmospheric
+[conformance report](/reference/conformance/) (section "Atmospheric
 refraction"):
 
 - **Homogeneous limit → spherical ground effect.** With a zero gradient the
   GFPE field reproduces the exact Weyl-Van der Pol
-  [`ground_effect`](/phonometry/environment/propagation/ground-barriers/) at every range, to a
+  [`ground_effect`](/environment/propagation/ground-barriers/) at every range, to a
   few tenths of a dB over grassland on the default grid, and to the coherent
   **+6 dB** two-ray enhancement over a rigid ground.
 - **Exact ray geometry.** For a linear profile the traced ray is a circular arc
@@ -524,6 +524,6 @@ $z = 0$; neither takes a terrain elevation profile.
 
 ## See also
 
-- Theory: [Outdoor propagation](/phonometry/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the meteorological assumptions ISO 9613-2 makes, which is what refraction takes apart.
+- Theory: [Outdoor propagation](/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the meteorological assumptions ISO 9613-2 makes, which is what refraction takes apart.
 
 </SeeAlso>

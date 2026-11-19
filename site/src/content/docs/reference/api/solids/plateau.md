@@ -24,13 +24,13 @@ line whose height is obtained from Table 3.1"; the plateau starts where that
 line meets the mass law, at a frequency A, ends at B, which the frequency
 ratio places relative to A, and above B the curve rises at 10 dB per octave.
 This module holds those three numbers, for the eight materials the table
-lists, and [`phonometry.building.plateau_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#plateau_transmission_loss) draws the
+lists, and [`phonometry.building.plateau_transmission_loss`](/reference/api/building/panel-transmission/#plateau_transmission_loss) draws the
 curve from them: its `building.PLATEAU_MATERIALS` is built from the rows
 here, so the table is typed once.
 
 Why the first column is not a density
 -------------------------------------
-[`PlateauMaterial.surface_density_per_mm_kg_m2`](/phonometry/reference/api/solids/plateau/#plateaumaterial) is kilograms per square
+[`PlateauMaterial.surface_density_per_mm_kg_m2`](/reference/api/solids/plateau/#plateaumaterial) is kilograms per square
 metre per millimetre of thickness, which is the material's density divided by
 a thousand. Aluminium's 2.66 is 2660 kg/m3. It is held in the unit the page
 prints rather than converted to a density, because the method is applied with
@@ -42,12 +42,12 @@ a unit nobody uses it in has made the reader's work harder to look tidier.
 What this is not
 ----------------
 It is not a transmission loss spectrum. One of the three numbers is a
-transmission loss, [`PlateauMaterial.coincidence_height_db`](/phonometry/reference/api/solids/plateau/#plateaumaterial), the level of
+transmission loss, [`PlateauMaterial.coincidence_height_db`](/reference/api/solids/plateau/#plateaumaterial), the level of
 the plateau in decibels, and it holds only over the plateau and only as the
 method's approximation to it. The measured and tabulated insulation of real
 constructions lives in
-[`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss), and the duct walls
-in [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss).
+[`PUBLISHED_TRANSMISSION_LOSS`](/reference/api/building/catalogue/#published_transmission_loss), and the duct walls
+in [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/reference/api/noise_control/duct-walls/#published_duct_transmission_loss).
 
 Where the rows live
 -------------------
@@ -74,7 +74,7 @@ Every row whose printed name contains *name*, case insensitively.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a material name, as the page prints it. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_PLATEAU_DATA \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_PLATEAU_DATA`](/reference/api/solids/plateau/#published_plateau_data): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_PLATEAU_DATA \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_PLATEAU_DATA`](/reference/api/solids/plateau/#published_plateau_data)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error: a caller asking whether a material is tabulated gets an empty answer rather than an exception.
 
@@ -82,7 +82,7 @@ Every row whose printed name contains *name*, case insensitively.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PlateauMaterial`](/reference/api/solids/plateau/#plateaumaterial), naming its key. |
 
 ## PlateauMaterial
 
@@ -129,7 +129,7 @@ One material's plateau-method constants, as a page printed them.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -153,7 +153,7 @@ One material's plateau-method constants, as a page printed them.
 PlateauMaterial.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -183,7 +183,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a

@@ -7,28 +7,28 @@ sidebar:
 
 Writing an FDTD run straight to a video file.
 
-[`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) steps the run
-[`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) steps, an
-[`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun) checked when it was built, and draws
+[`write_fdtd_animation`](/reference/api/simulation/video/#write_fdtd_animation) steps the run
+[`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) steps, an
+[`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun) checked when it was built, and draws
 the pressure into a video as it is computed, through the encoders of
-[`phonometry.io.write_video`](/phonometry/reference/api/io/io/#write_video), and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation)
-does the same for [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and
-an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), drawing the field
+[`phonometry.io.write_video`](/reference/api/io/io/#write_video), and [`write_elastic_fdtd_animation`](/reference/api/simulation/video/#write_elastic_fdtd_animation)
+does the same for [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and
+an [`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun), drawing the field
 `ElasticRecording.snapshot_field` names, with the colour limit of
-[`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe) in that field's unit. No snapshot is stored: a long run on a
+[`AnimationFrame`](/reference/api/simulation/video/#animationframe) in that field's unit. No snapshot is stored: a long run on a
 large grid writes a long video in the memory one frame takes here (a GIF
 apart, whose palette ffmpeg computes from every frame it holds). The run's
 result comes back with its probes and times and without snapshots.
 
-How each frame is drawn is one record, [`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe) (the labels'
+How each frame is drawn is one record, [`AnimationFrame`](/reference/api/simulation/video/#animationframe) (the labels'
 language, the size in pixels, the colour limit); how the video is encoded is
-another, [`phonometry.io.VideoOptions`](/phonometry/reference/api/io/io/#videooptions), the one
-[`phonometry.io.write_video`](/phonometry/reference/api/io/io/#write_video) takes. Before the first step ffmpeg is
+another, [`phonometry.io.VideoOptions`](/reference/api/io/io/#videooptions), the one
+[`phonometry.io.write_video`](/reference/api/io/io/#write_video) takes. Before the first step ffmpeg is
 found and run, and the encoder of a WebM or an MP4 is chosen by a real
 one-frame encode at the frame's size (a GIF has no encoder to choose), so
 neither a missing ffmpeg nor an encoder that cannot write the video costs a
 run. A raw `ffmpeg_encoder` is only looked for in that ffmpeg's list of
-encoders, with no trial, as [`phonometry.io.VideoOptions`](/phonometry/reference/api/io/io/#videooptions) says.
+encoders, with no trial, as [`phonometry.io.VideoOptions`](/reference/api/io/io/#videooptions) says.
 
 The frames show what the snapshot plot of the simulation function's result
 (`plot` with `kind="snapshot"`)
@@ -101,7 +101,7 @@ How each frame of a simulation video is drawn: in which language, at what size, 
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `size` | `(width, height)` of a frame in pixels, a tuple, a list, a NumPy array or any other sequence of the two whole numbers, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin and the field still shows (for a grid up to ten times longer one way than the other), on every matplotlib version the library is tested with (default `(960, 540)`). That is for a run whose last frame comes before ten seconds: a later one needs a wider frame for the time its last title writes, which the writers ask for before the run starts. |
-| `color_limit` | The value at either end of the colour scale, fixed for the whole video, in the unit of the field drawn: pascals for an acoustic run ([`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation)), and for an elastic one ([`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation)) the unit of `ElasticRecording.snapshot_field`, pascals for `"p"` and metres per second for `"vx"` and `"vy"`. `None` (default) finds it in a first pass over the run. |
+| `color_limit` | The value at either end of the colour scale, fixed for the whole video, in the unit of the field drawn: pascals for an acoustic run ([`write_fdtd_animation`](/reference/api/simulation/video/#write_fdtd_animation)), and for an elastic one ([`write_elastic_fdtd_animation`](/reference/api/simulation/video/#write_elastic_fdtd_animation)) the unit of `ElasticRecording.snapshot_field`, pascals for `"p"` and metres per second for `"vx"` and `"vy"`. `None` (default) finds it in a first pass over the run. |
 
 **Raises**
 
@@ -125,15 +125,15 @@ write_elastic_fdtd_animation(
 
 Step an elastic FDTD run and write one of its fields to a video.
 
-The run is the one [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation)
-steps, checked when the [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun) was
+The run is the one [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation)
+steps, checked when the [`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun) was
 built; a frame or video record of another type, a path whose container
 rules out the options, an option ffmpeg could not honour, or a missing
 ffmpeg is refused before the first step. The video draws the field
 `run.recording.snapshot_field` names at the cell centres (the
 synthetic pressure, or one velocity component), one frame at t = 0 and
 one every `run.recording.snapshot_every` steps, as the snapshot plot
-of [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation)'s result draws
+of [`elastic_fdtd_simulation`](/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation)'s result draws
 it, laid out once for the whole run. See the module
 documentation for how the frame is laid out and the colour scale fixed.
 
@@ -142,18 +142,18 @@ documentation for how the frame is laid out and the colour scale fixed.
 | Name | Description |
 | :--- | :--- |
 | `path` | Where to write the video; `.webm`, `.mp4` or `.gif`. |
-| `run` | The run ([`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun)). Its recording's `snapshot_every` is required and is the frame cadence, its `snapshot_field` the field drawn, its `snapshot_decimation` the cells a frame keeps, and its probes are recorded in the result. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy; with a `host` the run is computed, drawn and encoded on that node, named in the hosts file (see the guide on remote nodes), and only the result and the video's bytes come back. |
-| `frame` | How each frame is drawn ([`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe)); `None` (default) is `AnimationFrame()`: 960 by 540 pixels, English labels and a colour limit found in a first pass. Its `color_limit` is in the unit of the field drawn: pascals for `"p"`, metres per second for `"vx"` and `"vy"`. |
-| `video` | How the video is encoded ([`phonometry.io.VideoOptions`](/phonometry/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`, which plays at 30 frames per second unless its `fps` says otherwise. |
+| `run` | The run ([`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun)). Its recording's `snapshot_every` is required and is the frame cadence, its `snapshot_field` the field drawn, its `snapshot_decimation` the cells a frame keeps, and its probes are recorded in the result. |
+| `compute` | Where the run steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy; with a `host` the run is computed, drawn and encoded on that node, named in the hosts file (see the guide on remote nodes), and only the result and the video's bytes come back. |
+| `frame` | How each frame is drawn ([`AnimationFrame`](/reference/api/simulation/video/#animationframe)); `None` (default) is `AnimationFrame()`: 960 by 540 pixels, English labels and a colour limit found in a first pass. Its `color_limit` is in the unit of the field drawn: pascals for `"p"`, metres per second for `"vx"` and `"vy"`. |
+| `video` | How the video is encoded ([`phonometry.io.VideoOptions`](/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`, which plays at 30 frames per second unless its `fps` says otherwise. |
 
-**Returns:** The run's [`ElasticFDTDResult`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtdresult), with its probes and times and no snapshots.
+**Returns:** The run's [`ElasticFDTDResult`](/reference/api/simulation/elastic-fdtd/#elasticfdtdresult), with its probes and times and no snapshots.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `run` is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), `frame` not an [`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe), `video` not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `compute` not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute), or `path` neither a text nor a path; or, when `compute` names a host, a part of the run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; or, as a run written here steps, a waveform that returns anything but one real number. |
+| TypeError | If `run` is not an [`ElasticRun`](/reference/api/simulation/elastic-fdtd/#elasticrun), `frame` not an [`AnimationFrame`](/reference/api/simulation/video/#animationframe), `video` not a [`VideoOptions`](/reference/api/io/io/#videooptions), `compute` not a [`Compute`](/reference/api/simulation/compute/#compute), or `path` neither a text nor a path; or, when `compute` names a host, a part of the run that cannot travel to a node: an [`ExplosionSource`](/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; or, as a run written here steps, a waveform that returns anything but one real number. |
 | ValueError | If the run records no snapshots (`run.recording` is `None`, or its `snapshot_every` is), the frame is narrower than the title of the run's last frame needs (a run whose last frame comes at ten seconds or later; the message gives the width), the path's suffix is not one of the three, the path names a directory, or its container rules out the options, `PHONOMETRY_COMPUTE` is malformed, there is nothing to find the colour scale by (the message asks for `AnimationFrame(color_limit=...)`), or the hosts file is malformed; or, as a run written here steps, a waveform returns a number too large for a float. |
 | FileNotFoundError | If the directory of `path` does not exist or cannot be reached (it sits inside a directory this process cannot search); before any step, and before ssh starts. |
 | FFmpegNotFoundError | For a video written here (no `host`, or a node that failed with `fallback=True`), if ffmpeg is not found, or on Windows is found only in the working directory; before any step. |
@@ -168,7 +168,7 @@ documentation for how the frame is laid out and the colour scale fixed.
 
 | Warning | When |
 | :--- | :--- |
-| ComputeFallbackWarning | Once, when `fallback=True` turns a [`ComputeImportError`](/phonometry/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/phonometry/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/phonometry/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy that writes the video here. |
+| ComputeFallbackWarning | Once, when `fallback=True` turns a [`ComputeImportError`](/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy that writes the video here. |
 
 ## write_fdtd_animation
 
@@ -185,14 +185,14 @@ write_fdtd_animation(
 
 Step an acoustic FDTD run and write its pressure field to a video.
 
-The run is the one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) steps,
-checked when the [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun) was built. A
+The run is the one [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation) steps,
+checked when the [`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun) was built. A
 frame or video record of another type, a path whose container rules out
 the options, an option ffmpeg could not honour (an encoder that does not
 run here, a raw encoder this ffmpeg lacks), or a missing ffmpeg is
 refused before the first step. One frame is drawn at t = 0 and one every
 `run.recording.snapshot_every` steps; the video shows what the
-snapshot plot of [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation)'s result
+snapshot plot of [`fdtd_simulation`](/reference/api/simulation/fdtd/#fdtd_simulation)'s result
 shows, laid out once for the whole run and updated in place, under
 matplotlib's default style. See the module documentation for how
 the frame is laid out and the colour scale fixed.
@@ -201,19 +201,19 @@ the frame is laid out and the colour scale fixed.
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Where to write the video; `.webm`, `.mp4` or `.gif`, as [`phonometry.io.write_video`](/phonometry/reference/api/io/io/#write_video) writes them. |
-| `run` | The run ([`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun)). Its recording's `snapshot_every` is required and is the frame cadence, its `snapshot_decimation` the cells a frame keeps, and its probes are recorded in the result. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy; with a `host` the run is computed, drawn and encoded on that node, named in the hosts file (see the guide on remote nodes), and only the result and the video's bytes come back. |
-| `frame` | How each frame is drawn ([`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe)); `None` (default) is `AnimationFrame()`: 960 by 540 pixels, English labels and a colour limit, in pascals, found in a first pass. |
-| `video` | How the video is encoded ([`phonometry.io.VideoOptions`](/phonometry/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`, which plays at 30 frames per second unless its `fps` says otherwise. |
+| `path` | Where to write the video; `.webm`, `.mp4` or `.gif`, as [`phonometry.io.write_video`](/reference/api/io/io/#write_video) writes them. |
+| `run` | The run ([`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun)). Its recording's `snapshot_every` is required and is the frame cadence, its `snapshot_decimation` the cells a frame keeps, and its probes are recorded in the result. |
+| `compute` | Where the run steps ([`Compute`](/reference/api/simulation/compute/#compute)); `None` follows [`use`](/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy; with a `host` the run is computed, drawn and encoded on that node, named in the hosts file (see the guide on remote nodes), and only the result and the video's bytes come back. |
+| `frame` | How each frame is drawn ([`AnimationFrame`](/reference/api/simulation/video/#animationframe)); `None` (default) is `AnimationFrame()`: 960 by 540 pixels, English labels and a colour limit, in pascals, found in a first pass. |
+| `video` | How the video is encoded ([`phonometry.io.VideoOptions`](/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`, which plays at 30 frames per second unless its `fps` says otherwise. |
 
-**Returns:** The run's [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult), with its probes and times and no snapshots.
+**Returns:** The run's [`FDTDResult`](/reference/api/simulation/fdtd/#fdtdresult), with its probes and times and no snapshots.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `run` is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), `frame` not an [`AnimationFrame`](/phonometry/reference/api/simulation/video/#animationframe), `video` not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `compute` not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute), or `path` neither a text nor a path; or, when `compute` names a host, a part of the run that cannot travel to a node: a waveform other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; or, as a run written here steps, the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
+| TypeError | If `run` is not an [`FDTDRun`](/reference/api/simulation/fdtd/#fdtdrun), `frame` not an [`AnimationFrame`](/reference/api/simulation/video/#animationframe), `video` not a [`VideoOptions`](/reference/api/io/io/#videooptions), `compute` not a [`Compute`](/reference/api/simulation/compute/#compute), or `path` neither a text nor a path; or, when `compute` names a host, a part of the run that cannot travel to a node: a waveform other than the `value` of a [`GaussianPulse`](/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; or, as a run written here steps, the waveform of a [`PlaneWaveSource`](/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
 | ValueError | If the run records no snapshots (`run.recording` is `None`, or its `snapshot_every` is), the frame is narrower than the title of the run's last frame needs (a run whose last frame comes at ten seconds or later; the message gives the width), the path's suffix is not one of the three, the path names a directory, or its container rules out the options, `PHONOMETRY_COMPUTE` is malformed, there is nothing to find the colour scale by (the message asks for `AnimationFrame(color_limit=...)`), or the hosts file is malformed; or, as a run written here steps, a waveform returns a number too large for a float. |
 | FileNotFoundError | If the directory of `path` does not exist or cannot be reached (it sits inside a directory this process cannot search); before any step, and before ssh starts. |
 | FFmpegNotFoundError | For a video written here (no `host`, or a node that failed with `fallback=True`), if ffmpeg is not found, or on Windows is found only in the working directory; before any step. |
@@ -228,4 +228,4 @@ the frame is laid out and the colour scale fixed.
 
 | Warning | When |
 | :--- | :--- |
-| ComputeFallbackWarning | Once, when `fallback=True` turns a [`ComputeImportError`](/phonometry/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/phonometry/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/phonometry/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy that writes the video here. |
+| ComputeFallbackWarning | Once, when `fallback=True` turns a [`ComputeImportError`](/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy that writes the video here. |

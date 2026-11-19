@@ -36,7 +36,7 @@ flattens out but direct measurements show `ERB_N` continuing to shrink.
 
 This module states the constants to the precision used by the ISO 532-2
 implementation of the Moore-Glasberg loudness model
-([`phonometry.psychoacoustics.loudness.moore_glasberg`](/phonometry/reference/api/psychoacoustics/moore-glasberg/)), which shares
+([`phonometry.psychoacoustics.loudness.moore_glasberg`](/reference/api/psychoacoustics/moore-glasberg/)), which shares
 them:
 
 $$
@@ -49,7 +49,7 @@ $$
 
 They are the same fit written with one more digit: the two forms agree to
 better than 0.2 % over the whole audible range. The extra digits matter for
-the round trip through [`frequency_from_cam`](/phonometry/reference/api/psychoacoustics/erb-scale/#frequency_from_cam), and they are what reproduce
+the round trip through [`frequency_from_cam`](/reference/api/psychoacoustics/erb-scale/#frequency_from_cam), and they are what reproduce
 the check value Moore prints on p. 77, that 1000 Hz corresponds to 15.59 Cam
 (the two-significant-digit constants give 15.62).
 
@@ -165,7 +165,7 @@ frequency_from_cam(
 frequency_from_cam(cam: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
-Frequency of an ERB_N number, the inverse of [`cam_from_frequency`](/phonometry/reference/api/psychoacoustics/erb-scale/#cam_from_frequency).
+Frequency of an ERB_N number, the inverse of [`cam_from_frequency`](/reference/api/psychoacoustics/erb-scale/#cam_from_frequency).
 
 $f = (10^{i / 21.366} - 1) / 0.004368$.
 

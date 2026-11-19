@@ -24,7 +24,7 @@ to say so: $D'_p$. Equation (3) is the A-weighted difference
 $D'_{p\mathrm{A}}$, and the standard defines it only for the third of its three
 methods, the one that drives the room with the noise that is actually there.
 There is no unprimed $D_{p\mathrm{A}}$ in this document, and
-[`cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) refuses to compute one.
+[`cabin_insulation`](/reference/api/noise_control/cabin-insulation/#cabin_insulation) refuses to compute one.
 
 The three methods
 -----------------
@@ -33,13 +33,13 @@ The three methods
   two loudspeaker positions;
 * **in situ with a loudspeaker**, 7.2.1, in any room at all, where the number
   of source positions is not fixed in advance but read off the spread of the
-  answer itself ([`check_source_positions`](/phonometry/reference/api/noise_control/cabin-insulation/#check_source_positions));
+  answer itself ([`check_source_positions`](/reference/api/noise_control/cabin-insulation/#check_source_positions));
 * **in situ with the actual noise**, 7.2.2, where the machinery of the
   workplace is the source, which is the only method that yields
   $D'_{p\mathrm{A}}$.
 
 Only results from the same method may be compared, which is why the method is
-a field of [`CabinInsulationResult`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresult) and not a remark in a docstring.
+a field of [`CabinInsulationResult`](/reference/api/noise_control/cabin-insulation/#cabininsulationresult) and not a remark in a docstring.
 
 What is here and what is not
 ----------------------------
@@ -48,15 +48,15 @@ Every equation of clauses 6 to 9 is implemented, plus the numeric acceptance
 rules the clauses state: the source-position criterion of 7.2.1, the flatness
 of the driving spectrum of 6.4, the clearance of 6.2, the background margins,
 and the volume ratio clause 10 attaches its uncertainty to. The single-number
-rating of clause 8 is handed to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating),
+rating of clause 8 is handed to [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating),
 which is ISO 717-1 with $D_p$ written where that standard writes
 $R$, and the background correction is handed to
-[`phonometry.emission.reverberation_background_correction`](/phonometry/reference/api/power/sound-power-reverberation/#reverberation_background_correction), which is the
+[`phonometry.emission.reverberation_background_correction`](/reference/api/power/sound-power-reverberation/#reverberation_background_correction), which is the
 ISO 3741 the clauses point at.
 
 The leak ratio of definition 3.14 and the seal ratio of its note are printed
 word for word as in ISO 11546, and so are the band ranges, so they are written
-once and published by [`phonometry.noise_control.enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/),
+once and published by [`phonometry.noise_control.enclosure_insulation`](/reference/api/noise_control/enclosure-insulation/),
 the module of the older document, rather than a second time here.
 The scope is tighter here: ISO 11546 only prefers a leak ratio under 2 %, while
 clause 1 of ISO 11957 makes it a condition of applicability.
@@ -64,11 +64,11 @@ clause 1 of ISO 11957 makes it a condition of applicability.
 Instrumentation, mounting, the ten operations of every movable part and the
 report template are procedure, and procedure is not arithmetic. The one piece
 of clause 11 that computes is the rounding of 11.4 e), which is
-[`CabinInsulationResult.rounded`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresultrounded).
+[`CabinInsulationResult.rounded`](/reference/api/noise_control/cabin-insulation/#cabininsulationresultrounded).
 
 The document prints no worked example, so the tests are anchored on the
 algebraic identities of the subtraction, on the printed thresholds, and on the
-identity that makes [`estimated_cabin_noise_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#estimated_cabin_noise_insulation) agree with its own
+identity that makes [`estimated_cabin_noise_insulation`](/reference/api/noise_control/cabin-insulation/#estimated_cabin_noise_insulation) agree with its own
 inputs.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -161,7 +161,7 @@ renamed.
 
 Where a background spectrum is supplied it is taken off first, by the
 ISO 3741 correction 6.4 asks for, and a margin under
-[`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db) is reported.
+[`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db) is reported.
 
 **Parameters**
 
@@ -178,7 +178,7 @@ ISO 3741 correction 6.4 asks for, and a margin under
 | `a_weighted_cabin_level` | $(L_{pA})_{\text{cabin}}$, in decibels. |
 | `internal_noise_level` | $L_{pA}$ of 6.7, in decibels, carried into the result because 11.4 reports it beside the insulation. |
 
-**Returns:** The insulation, as a [`CabinInsulationResult`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresult).
+**Returns:** The insulation, as a [`CabinInsulationResult`](/reference/api/noise_control/cabin-insulation/#cabininsulationresult).
 
 **Raises**
 
@@ -308,7 +308,7 @@ The range where a larger uncertainty is expected, in hertz, or `None`.
 
 *property*
 
-Whether the volume ratio reaches [`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/phonometry/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio), judged settled.
+Whether the volume ratio reaches [`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio), judged settled.
 
 ### CabinUncertainty.stateable
 
@@ -351,7 +351,7 @@ for the octaves below 125 Hz, so nothing is claimed for them here.
 | `third_octave_levels` | The one-third-octave levels of the sound in the room, in decibels. |
 | `frequencies` | Their nominal centre frequencies, in hertz. |
 
-**Returns:** One row per octave, as a [`BandFlatnessCheck`](/phonometry/reference/api/noise_control/cabin-insulation/#bandflatnesscheck).
+**Returns:** One row per octave, as a [`BandFlatnessCheck`](/reference/api/noise_control/cabin-insulation/#bandflatnesscheck).
 
 **Raises**
 
@@ -389,13 +389,13 @@ $D'_p$ already formed and does not pretend to do that conversion.
 | :--- | :--- |
 | `insulation_by_position` | $D'_p$ in octave bands, one row per source position and one column per band, in decibels. |
 
-**Returns:** The verdict, as a [`SourcePositionCheck`](/phonometry/reference/api/noise_control/cabin-insulation/#sourcepositioncheck).
+**Returns:** The verdict, as a [`SourcePositionCheck`](/reference/api/noise_control/cabin-insulation/#sourcepositioncheck).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For fewer than [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) positions, or an array that is not rectangular. |
+| ValueError | For fewer than [`MIN_SOURCE_POSITIONS_IN_SITU`](/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) positions, or an array that is not rectangular. |
 | TypeError | if `insulation_by_position` holds a text or a value that is not a real number. |
 
 ## DEFAULT_BAND_FLATNESS_LIMIT_DB
@@ -511,14 +511,14 @@ or over the inclined circular path, averaged on a mean-square basis with
 the external sources switched off.
 
 The background rule of 6.7 is not the one of 6.4. The margin over the
-background must reach [`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db), and the
+background must reach [`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db), and the
 correction is made **only** while the margin stays inside
-[`INTERNAL_NOISE_CORRECTION_WINDOW_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#internal_noise_correction_window_db): past the top of that window
+[`INTERNAL_NOISE_CORRECTION_WINDOW_DB`](/reference/api/noise_control/cabin-insulation/#internal_noise_correction_window_db): past the top of that window
 the correction is under a tenth of a decibel and the clause does not ask
 for it. The correction itself is the $K_1$ of ISO 3741,
 $-10 \lg (1 - 10^{-0.1 \Delta L})$, applied to the A-weighted total
 rather than band by band, which is what makes it a separate line here from
-[`phonometry.emission.reverberation_background_correction`](/phonometry/reference/api/power/sound-power-reverberation/#reverberation_background_correction).
+[`phonometry.emission.reverberation_background_correction`](/reference/api/power/sound-power-reverberation/#reverberation_background_correction).
 
 **Parameters**
 
@@ -607,7 +607,7 @@ How far the cabin stands from the room, 6.2.
 Half a wavelength at the centre of the lowest band of interest, between the
 cabin and the walls, the ceiling and any diffusing element alike. Below
 100 Hz the clause stops computing and fixes a flat
-[`LOW_BAND_CLEARANCE_M`](/phonometry/reference/api/noise_control/cabin-insulation/#low_band_clearance_m), which at 50 Hz is less than the half
+[`LOW_BAND_CLEARANCE_M`](/reference/api/noise_control/cabin-insulation/#low_band_clearance_m), which at 50 Hz is less than the half
 wavelength the rule above it would have asked for: the low-frequency
 sentence relaxes the requirement rather than tightening it, and it is
 written here exactly as printed.
@@ -740,7 +740,7 @@ check cannot be built against another rule.
 
 *property*
 
-Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
+Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
 
 7.2.1 says so shall be stated in the report.
 
@@ -750,7 +750,7 @@ Whether the spread runs past [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/refere
 
 The fewest positions the spread calls for, 7.2.1.
 
-**Returns:** The spread in decibels rounded up, never below [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) nor above [`MAX_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
+**Returns:** The spread in decibels rounded up, never below [`MIN_SOURCE_POSITIONS_IN_SITU`](/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) nor above [`MAX_SOURCE_POSITIONS_IN_SITU`](/reference/api/noise_control/cabin-insulation/#max_source_positions_in_situ).
 
 ### SourcePositionCheck.passes
 
@@ -781,10 +781,10 @@ What clause 10 is willing to say about this measurement.
 
 In the laboratory the uncertainty of ISO 3741 carries over from 250 Hz to
 10 kHz, but only while the room is at least
-[`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/phonometry/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio) times the volume of the cabin; below
+[`MIN_ROOM_TO_CABIN_VOLUME_RATIO`](/reference/api/noise_control/cabin-insulation/#min_room_to_cabin_volume_ratio) times the volume of the cabin; below
 that ratio, and from 50 Hz to 200 Hz in any case, a larger uncertainty is
 expected. The loudspeaker method in situ adds about
-[`IN_SITU_EXCESS_STANDARD_DEVIATION_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#in_situ_excess_standard_deviation_db) to the standard deviation. For
+[`IN_SITU_EXCESS_STANDARD_DEVIATION_DB`](/reference/api/noise_control/cabin-insulation/#in_situ_excess_standard_deviation_db) to the standard deviation. For
 the actual-noise method the clause states nothing at all and sends a
 declared value to ISO 4871.
 
@@ -796,7 +796,7 @@ declared value to ISO 4871.
 | `cabin_volume_m3` | $V_{\text{cabin}}$, in cubic metres. |
 | `method` | `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
 
-**Returns:** The statement, as a [`CabinUncertainty`](/phonometry/reference/api/noise_control/cabin-insulation/#cabinuncertainty).
+**Returns:** The statement, as a [`CabinUncertainty`](/reference/api/noise_control/cabin-insulation/#cabinuncertainty).
 
 **Raises**
 
@@ -828,12 +828,12 @@ The single-number rating of a cabin, clause 8.
 
 ISO 717-1 with $D_p$ or $D'_p$ written where that standard
 writes the sound reduction index: the reference curve, the shift and the
-adaptation terms come from [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), and
+adaptation terms come from [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating), and
 what is done here is the trim to the rating bands and the prime.
 
 Clause 4 calls this the preferred single number and then warns against
 reading too much into it, because what a cabin is worth depends on the
-spectrum it stands in. [`estimated_cabin_noise_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#estimated_cabin_noise_insulation) is the
+spectrum it stands in. [`estimated_cabin_noise_insulation`](/reference/api/noise_control/cabin-insulation/#estimated_cabin_noise_insulation) is the
 answer to that objection.
 
 **Parameters**
@@ -841,10 +841,10 @@ answer to that objection.
 | Name | Description |
 | :--- | :--- |
 | `insulation` | $D_p$ or $D'_p$ over the 16 one-third-octave rating bands or the 5 octave ones, in decibels. |
-| `method` | The method the spectrum was measured by, `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`, as [`cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) takes it. It decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
+| `method` | The method the spectrum was measured by, `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`, as [`cabin_insulation`](/reference/api/noise_control/cabin-insulation/#cabin_insulation) takes it. It decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** The rating, as a [`WeightedCabinInsulation`](/phonometry/reference/api/noise_control/cabin-insulation/#weightedcabininsulation).
+**Returns:** The rating, as a [`WeightedCabinInsulation`](/reference/api/noise_control/cabin-insulation/#weightedcabininsulation).
 
 **Raises**
 
@@ -880,7 +880,7 @@ The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 | `method` | The method the spectrum was measured by: `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
 
 Whether the rating carries the prime of 3.9 (`apparent`) is read
-from the method, as on [`CabinInsulationResult`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresult), so it is not a
+from the method, as on [`CabinInsulationResult`](/reference/api/noise_control/cabin-insulation/#cabininsulationresult), so it is not a
 field.
 
 ### WeightedCabinInsulation.apparent
@@ -889,6 +889,6 @@ field.
 
 Whether the rating carries the prime of 3.9.
 
-Read from the method as [`CabinInsulationResult.apparent`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresultapparent) reads
+Read from the method as [`CabinInsulationResult.apparent`](/reference/api/noise_control/cabin-insulation/#cabininsulationresultapparent) reads
 it: both in-situ methods give $D'_{p,\mathrm{w}}$, the laboratory
 method $D_{p,\mathrm{w}}$.

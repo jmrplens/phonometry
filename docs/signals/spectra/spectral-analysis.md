@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/spectral-analysis.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/spectral-analysis/
 
 # Calibrated spectral analysis
 
@@ -791,7 +791,7 @@ output.
 - [MISO coherence](miso-coherence.md): the same cross-spectral matrix with several correlated inputs.
 - [Time-frequency analysis](time-frequency.md): the same Welch segmentation displayed instead of averaged.
 - [Levels](../levels/levels.md): the band-level side of the density/band conversion of section 4.
-- API reference: [`signals.spectra`](https://docs.jmrp.io/phonometry/reference/api/signals/spectra/), [`signals.windows`](https://docs.jmrp.io/phonometry/reference/api/signals/windows/) and [`signals.multitaper`](https://docs.jmrp.io/phonometry/reference/api/signals/multitaper/).
+- API reference: [`signals.spectra`](https://phonometry.dev/reference/api/signals/spectra/), [`signals.windows`](https://phonometry.dev/reference/api/signals/windows/) and [`signals.multitaper`](https://phonometry.dev/reference/api/signals/multitaper/).
 - Theory: [Frequency Resolution vs FFT Bin Spacing](../../reference/theory/signal-analysis.md#frequency-resolution-vs-fft-bin-spacing): why the bin spacing of an FFT is not the resolution of the estimate, and what the window does to both.
 
 ## References

@@ -8,13 +8,13 @@ sidebar:
 Type-testing a human-vibration meter against ISO 8041-1:2017.
 
 A sound level meter can be given a class: IEC 61672-1 prints design goals and
-tolerance limits, and [`verify_weighting_class`](/phonometry/reference/api/filters/weighting-compliance/#verify_weighting_class)
+tolerance limits, and [`verify_weighting_class`](/reference/api/filters/weighting-compliance/#verify_weighting_class)
 turns a measured response into a verdict against them. A human-vibration
 meter is checked the same way and by the same kind of table, and this module
 is that check.
 
 **What the standard grades.** ISO 8041-1 defines the nine frequency
-weightings ([`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) as exact transfer
+weightings ([`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)) as exact transfer
 functions, and then says how far a real instrument may sit from them. The
 allowance is not one number: it is a band that widens away from the middle of
 the working range, keyed to four transition frequencies per weighting
@@ -41,14 +41,14 @@ what the page prints and what the acceptance test in Annex B is written in.
 standard talk about expanded uncertainty and they are not the same sentence.
 5.6.6 (printed folio 14) says the Table 5 limits already "include the
 applicable maximum expanded uncertainties of measurement", which is why
-[`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent) returns the printed numbers and never
+[`weighting_tolerance_percent`](/reference/api/vibration/instrumentation/#weighting_tolerance_percent) returns the printed numbers and never
 adds to them. 13.1 (folio 42) and 14.1 (folio 48) say something else, word
 for word in both: compliance is demonstrated when the measured deviation,
 "extended by the actual expanded uncertainty of measurement of the testing
 laboratory", does not exceed those limits. That second rule is about the
 laboratory's own uncertainty, it moves the deviation rather than the band,
 and it is what `expanded_uncertainty_percent` does in
-[`verify_weighting`](/phonometry/reference/api/vibration/instrumentation/#verify_weighting).
+[`verify_weighting`](/reference/api/vibration/instrumentation/#verify_weighting).
 
 **Phase is graded on a slope, not on an angle.** Footnote a of Table 5 limits
 the phase criterion to instruments reporting a parameter not based on r.m.s.
@@ -56,7 +56,7 @@ values, and 5.6.6 explains why the criterion is not the phase error itself:
 a constant group delay is a large phase error that changes no measured
 quantity. Formula (6) (folio 15) turns a pair of adjacent phase errors into
 the characteristic phase deviation the table actually grades, and
-[`verify_phase_response`](/phonometry/reference/api/vibration/instrumentation/#verify_phase_response) is that comparison.
+[`verify_phase_response`](/reference/api/vibration/instrumentation/#verify_phase_response) is that comparison.
 
 **The personal meter of Part 2.** ISO 8041-2:2021 specifies the personal
 vibration exposure meter (PVEM), the instrument left unattended to log a
@@ -68,10 +68,10 @@ Tables 6 to 9 are printed again unchanged, which is why every function here
 serves both parts. Two things differ, and each has a table of its own. Its
 Table 2 (folio 8) keeps the first two rows of the Part 1 table and drops the
 third, because its 5.13 (folio 15) declares the running r.m.s. "Not
-applicable for PVEM": [`PVEM_INDICATION_TOLERANCES_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#pvem_indication_tolerances_percent). And its
+applicable for PVEM": [`PVEM_INDICATION_TOLERANCES_PERCENT`](/reference/api/vibration/instrumentation/#pvem_indication_tolerances_percent). And its
 clauses 12 and 13 print their own maximum expanded uncertainties, the same
 figures as Part 1 on a shorter list of clauses:
-[`PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#pvem_max_expanded_uncertainty_percent).
+[`PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`](/reference/api/vibration/instrumentation/#pvem_max_expanded_uncertainty_percent).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -131,7 +131,7 @@ the ambiguity is registered in `docs/ERRATA.md`.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** `|H(f_ref)| / |H_BL(f_ref)|`, dimensionless.
 
@@ -227,7 +227,7 @@ The Table 2 indication tolerance at the reference frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The permitted deviation of the indication, in per cent.
 
@@ -312,7 +312,7 @@ angles of two frequency components in the most unfavourable manner."
 
 | Name | Description |
 | :--- | :--- |
-| `characteristic_phase_deviation_deg` | One or more characteristic phase deviations, in degrees, as [`characteristic_phase_deviation`](/phonometry/reference/api/vibration/instrumentation/#characteristic_phase_deviation) returns them. |
+| `characteristic_phase_deviation_deg` | One or more characteristic phase deviations, in degrees, as [`characteristic_phase_deviation`](/reference/api/vibration/instrumentation/#characteristic_phase_deviation) returns them. |
 
 **Returns:** The likely maximum peak-value deviation, in per cent. The printed `±` is the sign of the deviation, not part of the size, so the number returned is the magnitude.
 
@@ -359,7 +359,7 @@ r.m.s.-only meter is not graded on phase at all.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
 **Returns:** The permitted deviation, in degrees, infinite in the two tails. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -368,7 +368,7 @@ r.m.s.-only meter is not graded on phase at all.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As for [`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent). |
+| ValueError | As for [`weighting_tolerance_percent`](/reference/api/vibration/instrumentation/#weighting_tolerance_percent). |
 | TypeError | if `name` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## PhaseVerification
@@ -459,7 +459,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 The Table 5 limit at each characteristic frequency, in degrees.
 
-**Returns:** [`phase_tolerance_deg`](/phonometry/reference/api/vibration/instrumentation/#phase_tolerance_deg) of the weighting, infinite in the two tails.
+**Returns:** [`phase_tolerance_deg`](/reference/api/vibration/instrumentation/#phase_tolerance_deg) of the weighting, infinite in the two tails.
 
 ### PhaseVerification.within_tolerance
 
@@ -517,7 +517,7 @@ expected indication is the product of the two.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The weighted acceleration, in metres per second squared.
 
@@ -569,7 +569,7 @@ indicated value falls as $\sqrt{(\tau - t)/\tau}$, reaching 10 % at
 $\mathrm{e}^{-t/\tau}$, so the indication falls as $\mathrm{e}^{-t/2\tau}$ and
 reaches 10 % at $t = 2\tau\ln 10 = 4.605\,2\,\tau$.
 
-Both land inside the printed bands of [`RUNNING_RMS_DECAY_TIME_S`](/phonometry/reference/api/vibration/instrumentation/#running_rms_decay_time_s)
+Both land inside the printed bands of [`RUNNING_RMS_DECAY_TIME_S`](/reference/api/vibration/instrumentation/#running_rms_decay_time_s)
 for the three time constants the standard tabulates.
 
 **Parameters**
@@ -577,7 +577,7 @@ for the three time constants the standard tabulates.
 | Name | Description |
 | :--- | :--- |
 | `integration_time` | The averaging time `tau`, in seconds (> 0). |
-| `method` | `"linear"` (Table 10) or `"exponential"` (Table 11), the two averages of [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms). |
+| `method` | `"linear"` (Table 10) or `"exponential"` (Table 11), the two averages of [`running_rms`](/reference/api/vibration/exposure/#running_rms). |
 
 **Returns:** The time to 10 % of the initial indicated value, in seconds.
 
@@ -737,13 +737,13 @@ Table 5 (folio 15) prints a characteristic phase deviation limit beside
 every magnitude limit: `±6°` in the central region, `±12°` in the two
 skirts and `±∞` in the two tails. The quantity those grade is not the
 phase error but Formula (6) of it, which is why this is a separate entry
-point from [`verify_weighting`](/phonometry/reference/api/vibration/instrumentation/#verify_weighting) rather than a third array inside it:
+point from [`verify_weighting`](/reference/api/vibration/instrumentation/#verify_weighting) rather than a third array inside it:
 footnote a of the table applies the phase criterion only to instruments
 "that provide measurement parameters that are not based on r.m.s. values",
 so an r.m.s.-only meter is never handed this verdict.
 
 The design goal comes from Formula (H.1), which is the argument of the
-same `H(s)` [`frequency_weighting`](/phonometry/reference/api/vibration/exposure/#frequency_weighting) evaluates,
+same `H(s)` [`frequency_weighting`](/reference/api/vibration/exposure/#frequency_weighting) evaluates,
 and it is put on the branch Tables B.1 to B.9 print, so the measurement
 has to arrive on a continuous branch too. That is not a convenience: the
 two invariances the standard prints for this criterion hold on the
@@ -774,11 +774,11 @@ this function does not perform.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies the phase was measured at, in hertz, strictly ascending and at least two of them. |
 | `measured_phase_deg` | The measured phase at each frequency, in degrees, on the continuous branch Tables B.1 to B.9 print. |
 
-**Returns:** The verdict, as a [`PhaseVerification`](/phonometry/reference/api/vibration/instrumentation/#phaseverification).
+**Returns:** The verdict, as a [`PhaseVerification`](/reference/api/vibration/instrumentation/#phaseverification).
 
 **Raises**
 
@@ -809,7 +809,7 @@ Verify a measured decay time against Table 10 or Table 11.
 The verdict is one printed row: the measured time to 10 % of the initial
 value has to sit inside the printed interval for that time constant and
 that average. The rate column of Table 11 is deliberately not the
-criterion, for the reason [`RUNNING_RMS_DECAY_RATE_DB_PER_S`](/phonometry/reference/api/vibration/instrumentation/#running_rms_decay_rate_db_per_s)
+criterion, for the reason [`RUNNING_RMS_DECAY_RATE_DB_PER_S`](/reference/api/vibration/instrumentation/#running_rms_decay_rate_db_per_s)
 explains.
 
 Only the three time constants the two tables print can be checked, so an
@@ -824,7 +824,7 @@ against a band the standard does not give.
 | `integration_time` | The averaging time it was measured at, which has to be one of the printed 0.125 s, 1 s and 8 s. Keyword-only, and so is the method: two times in seconds side by side are the kind of pair a positional call gets the wrong way round in silence. |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
 
-**Returns:** The verdict, as a [`RunningRMSDecayVerification`](/phonometry/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.
+**Returns:** The verdict, as a [`RunningRMSDecayVerification`](/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.
 
 **Raises**
 
@@ -857,25 +857,25 @@ result of a measurement of a deviation from a design goal, "extended by
 the actual expanded uncertainty of measurement of the testing laboratory",
 does not exceed the specified tolerance limits, the uncertainty being
 calculated with the coverage factor `k = 2`
-([`ISO8041_COVERAGE_FACTOR`](/phonometry/reference/api/vibration/instrumentation/#iso8041_coverage_factor)). So the comparison is
+([`ISO8041_COVERAGE_FACTOR`](/reference/api/vibration/instrumentation/#iso8041_coverage_factor)). So the comparison is
 `deviation + U <= upper` and `deviation - U >= lower`: the band stays
 where Table 5 prints it and the measurement is what widens. That is not in
 conflict with 5.6.6 (folio 14), which says the Table 5 limits already
 include the applicable *maximum permitted* expanded uncertainties: the
 band is not widened by either sentence, and what 13.1 adds is the
 laboratory's *actual* uncertainty, which is its own number and is bounded
-by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#max_expanded_uncertainty_percent).
+by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/reference/api/vibration/instrumentation/#max_expanded_uncertainty_percent).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies the response was measured at, in hertz. |
 | `measured_factors` | The measured weighting factors, linear and not in decibels, one per frequency. |
 | `expanded_uncertainty_percent` | The testing laboratory's actual expanded uncertainty of the deviation measurement, in per cent and already expanded with `k = 2`. `None` (the default) compares the bare deviation, which is the right reading only for a measurement whose uncertainty has been shown to be negligible. |
 
-**Returns:** The verdict, as a [`WeightingVerification`](/phonometry/reference/api/vibration/instrumentation/#weightingverification).
+**Returns:** The verdict, as a [`WeightingVerification`](/reference/api/vibration/instrumentation/#weightingverification).
 
 **Raises**
 
@@ -907,10 +907,10 @@ The Table 5 band around a weighting, region by region.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | One of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
-**Returns:** `(lower, upper)` percentages, elementwise, lower first and signed as Table 5 prints them: `lower` is negative (`-11.0` in the central region) and `upper` positive (`12.0`). `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below_percent) (`-100.0`) outside the two outer transition frequencies, where the standard sets no lower limit at all.
+**Returns:** `(lower, upper)` percentages, elementwise, lower first and signed as Table 5 prints them: `lower` is negative (`-11.0` in the central region) and `upper` positive (`12.0`). `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/reference/api/vibration/instrumentation/#unconstrained_below_percent) (`-100.0`) outside the two outer transition frequencies, where the standard sets no lower limit at all.
 
 **Raises**
 
@@ -946,7 +946,7 @@ One measured weighting response against its ISO 8041-1 tolerances.
 | `deviation_percent` | `(measured / design - 1) * 100` elementwise, which is the quantity the standard's acceptance test is written in. |
 | `expanded_uncertainty_percent` | The testing laboratory's own expanded uncertainty, in per cent, that the verdict was reached with. `0,0` when the caller supplied none, which compares the bare deviation. |
 
-The Table 5 band ([`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent)) and the verdict it
+The Table 5 band ([`weighting_tolerance_percent`](/reference/api/vibration/instrumentation/#weighting_tolerance_percent)) and the verdict it
 gives (`within_tolerance`) are read from the weighting and the
 frequencies, so a verification cannot be built against another band.
 

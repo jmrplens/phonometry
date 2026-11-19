@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/spatial-impression.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/spatial-impression/
 
 # Spatial impression (ISO 3382-1)
 
@@ -256,7 +256,7 @@ that was lost was.
 - [Conformance report](../../CONFORMANCE.md):
   the closed-form reflection geometries the lateral measures and the
   interaural correlation are validated against.
-- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
+- API reference: [`room.auditorium`](https://phonometry.dev/reference/api/rooms/auditorium/).
 
 ## References
 

@@ -28,7 +28,7 @@ implement names another:
   also used for structure-borne sound, against which the velocity level comes
   out close to the associated sound pressure and intensity levels.
 
-[`REFERENCE_VALUES`](/phonometry/reference/api/metrology/reference-values/#reference_values) holds all of them, keyed by medium and then
+[`REFERENCE_VALUES`](/reference/api/metrology/reference-values/#reference_values) holds all of them, keyed by medium and then
 by quantity, and every value is in the coherent SI unit its row names, so the
 20 µPa of air is `2e-05` Pa:
 
@@ -41,7 +41,7 @@ p0.value, p0.unit, p0.printed  # (2e-05, 'Pa', '20 µPa')
 
 Note b of Table 2 gives the offset between the two pressure references, a
 level re 1 µPa being $10 \lg(20^2/1^2) \approx 26.0$ dB above the same
-pressure re 20 µPa; [`phonometry.underwater.in_air_to_underwater_spl`](/phonometry/reference/api/underwater/acoustics/#in_air_to_underwater_spl)
+pressure re 20 µPa; [`phonometry.underwater.in_air_to_underwater_spl`](/reference/api/underwater/acoustics/#in_air_to_underwater_spl)
 applies it.
 
 The values were transcribed from the Spanish text UNE-EN ISO 1683:2016, which

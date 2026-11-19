@@ -99,7 +99,7 @@ clase 1 puede desviarse de la respuesta objetivo en 1 kHz como mucho
 octava de clase 1 lee un tono centrado en la banda a menos de ±0,4 dB de su
 nivel verdadero. La cota es lo que se encadena: una medición de clase 1
 necesita que todas las etapas sostengan la clase 1, desde el
-[calibrador](/phonometry/es/signals/metrology/calibration/) pasando por la
+[calibrador](/es/signals/metrology/calibration/) pasando por la
 ponderación hasta el filtro de banda, porque la tolerancia de cada etapa
 entra en el nivel que entrega a la siguiente. Una sola etapa de clase 2
 acota la cadena en clase 2, atestigüe lo que atestigüe el resto.
@@ -110,7 +110,7 @@ Dos bordes del vocabulario conviene fijarlos antes de verificar nada:
   pertenece a las máscaras retiradas de IEC 61260:1995 / ANSI S1.11-2004;
   IEC 61260-1:2014 define solo las clases 1 y 2. Los verificadores mantienen
   viva la máscara antigua tras `edition="1995"`, y
-  [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#2-clase-0-iec-612601995--ansi-s111-2004)
+  [Verificación de clase de filtros](/es/signals/filters/filter-compliance/#2-clase-0-iec-612601995--ansi-s111-2004)
   cubre cuándo es honesta una afirmación de clase 0 y cómo citarla.
 - **Una clase pertenece a una especificación, no a un número.** «Clase 1» a
   secas no dice nada; la afirmación es «clase 1 según la Tabla 3 de
@@ -131,10 +131,10 @@ demostrarse a tu frecuencia de muestreo.
 
 | Etapa | Verificador | Límites de aceptación | En detalle |
 | :--- | :--- | :--- | :--- |
-| Ponderación frecuencial (A, C, Z) | `verify_weighting_class` | IEC 61672-1:2013, Tabla 3 | [Ponderación frecuencial, sección 6](/phonometry/es/signals/levels/weighting/#6-verificacion-frente-a-las-tablas-de-tolerancias-iec-61672-1) |
-| Ponderaciones B y AU | `verify_weighting_class` | ANSI S1.4-1983, Tablas IV/V; IEC 61012:1990, Tabla 1 | [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/) |
-| Banco de filtros de fracción de octava | `verify_filter_class`; `verify_time_invariance` | IEC 61260-1:2014, Tabla 1, 5.12 y 5.16 tal como los calcula IEC 61260-2 (máscara de 1995 vía `edition="1995"`); 5.14 con un barrido exponencial | [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/) |
-| Espectro de instrumento de intensidad | `verify_intensity_class` | IEC 61043:1993, Tabla 2 | [Intensidad acústica](/phonometry/es/devices/emission/intensity/) |
+| Ponderación frecuencial (A, C, Z) | `verify_weighting_class` | IEC 61672-1:2013, Tabla 3 | [Ponderación frecuencial, sección 6](/es/signals/levels/weighting/#6-verificacion-frente-a-las-tablas-de-tolerancias-iec-61672-1) |
+| Ponderaciones B y AU | `verify_weighting_class` | ANSI S1.4-1983, Tablas IV/V; IEC 61012:1990, Tabla 1 | [Ponderaciones especiales](/es/signals/levels/special-weightings/) |
+| Banco de filtros de fracción de octava | `verify_filter_class`; `verify_time_invariance` | IEC 61260-1:2014, Tabla 1, 5.12 y 5.16 tal como los calcula IEC 61260-2 (máscara de 1995 vía `edition="1995"`); 5.14 con un barrido exponencial | [Verificación de clase de filtros](/es/signals/filters/filter-compliance/) |
+| Espectro de instrumento de intensidad | `verify_intensity_class` | IEC 61043:1993, Tabla 2 | [Intensidad acústica](/es/devices/emission/intensity/) |
 
 Las propias máscaras también son públicas: `weighting_class_limits(1)`
 devuelve las 34 frecuencias nominales de la Tabla 3 con los límites de
@@ -185,11 +185,11 @@ todos de clase 1. Un banco todavía puede separarse de su veredicto de la
 Tabla 1: a 48 kHz, un banco de tercios de octava de orden 4 es clase 1 en la
 Tabla 1 y se queda a 0,002 dB de la clase 1 en la suma, en su banda de
 16 kHz, y
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#1b-ancho-de-banda-efectivo-y-suma-de-las-salidas-iec-61260-2)
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/#1b-ancho-de-banda-efectivo-y-suma-de-las-salidas-iec-61260-2)
 explica cómo se califica la suma. Un margen de +0,400 dB en un banco Butterworth que cumple es la propia
 semianchura del corredor de banda de paso, lo mejor que puede informar un
 diseño conforme, no un resultado que mejorar;
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#1-verificar-la-clase-frente-a-iec-61260-12014)
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/#1-verificar-la-clase-frente-a-iec-61260-12014)
 explica qué restricción manda y por qué subir el orden deja de ayudar en
 cuanto el veredicto se vuelve positivo.
 
@@ -200,7 +200,7 @@ la desviación de la respuesta diseñada respecto del objetivo de diseño
 (marcadores) debe quedarse dentro del corredor de clase 1 (sombreado) en
 cada frecuencia nominal. El equivalente para bancos de filtros, un corredor
 de atenuación relativa alrededor de cada frecuencia central, está dibujado
-en [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).*
+en [Verificación de clase de filtros](/es/signals/filters/filter-compliance/).*
 
 <details>
 <summary>Muestra el código de esta figura</summary>
@@ -275,7 +275,7 @@ El verificador de intensidad sigue el mismo patrón un dominio más allá:
 intensidad residual de presión frente a los límites de clase de IEC 61043 y
 devuelve un resultado con `.plot()` y su propia ficha, con la física del
 índice residual explicada en
-[Intensidad acústica](/phonometry/es/devices/emission/intensity/).
+[Intensidad acústica](/es/devices/emission/intensity/).
 
 ### Los verificadores que califican una medición, no un diseño
 
@@ -292,14 +292,14 @@ veredicto lo dice y cuyos demás campos dicen dónde y por cuánto, incluida
 
 | Qué se califica | Verificador | Límites de aceptación | En detalle |
 | :--- | :--- | :--- | :--- |
-| Sistema de medida de ruido de aeronaves | `verify_aircraft_noise_system` | IEC 61265:1995, Tabla 1, y los límites escalares que la acompañan | [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/#verificacion-del-sistema-de-medida-iec-61265) |
-| Ponderación frecuencial de vibración en humanos | `verify_weighting` | ISO 8041-1:2017, Tablas 4 y 5 | [Verificación del vibrómetro de vibración en humanos](/phonometry/es/vibration/human/meter-verification/) |
-| Respuesta de fase de vibración en humanos | `verify_phase_response` | ISO 8041-1:2017, Tabla 5 y Fórmula (6) | [Verificación del vibrómetro de vibración en humanos](/phonometry/es/vibration/human/meter-verification/) |
-| Indicaciones de la ráfaga en diente de sierra | `verify_signal_burst_response` | ISO 8041-1:2017, Tablas 7 a 9 (la señal, en la Tabla 6) | [Verificación del vibrómetro de vibración en humanos](/phonometry/es/vibration/human/meter-verification/) |
-| Tiempo de decaimiento del valor eficaz móvil | `verify_running_rms_decay` | ISO 8041-1:2017, Tablas 10 y 11 | [Verificación del vibrómetro de vibración en humanos](/phonometry/es/vibration/human/meter-verification/) |
-| Calibrador acústico | `verify_sound_calibrator` | IEC 60942:2017, Tablas 2 a 7 y A.1 a A.5 | [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017) |
-| Ensayo periódico de un sonómetro | `verify_sound_level_meter_periodic` | IEC 61672-3:2013, apartados 12 a 21, con los límites de IEC 61672-1:2013 (Tablas 3 a 5 y su texto) y los máximos de su Tabla B.1 | [Ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/) |
-| Ensayo periódico de filtros de banda | `verify_filter_periodic` | IEC 61260-3:2016, apartados 10, 11 y 13 y Tabla 1, con los máximos del Anexo B de IEC 61260-1:2014 | [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#3b-verificar-un-instrumento-no-un-diseno) |
+| Sistema de medida de ruido de aeronaves | `verify_aircraft_noise_system` | IEC 61265:1995, Tabla 1, y los límites escalares que la acompañan | [Ruido de aeronaves](/es/aircraft/aircraft-noise/#verificacion-del-sistema-de-medida-iec-61265) |
+| Ponderación frecuencial de vibración en humanos | `verify_weighting` | ISO 8041-1:2017, Tablas 4 y 5 | [Verificación del vibrómetro de vibración en humanos](/es/vibration/human/meter-verification/) |
+| Respuesta de fase de vibración en humanos | `verify_phase_response` | ISO 8041-1:2017, Tabla 5 y Fórmula (6) | [Verificación del vibrómetro de vibración en humanos](/es/vibration/human/meter-verification/) |
+| Indicaciones de la ráfaga en diente de sierra | `verify_signal_burst_response` | ISO 8041-1:2017, Tablas 7 a 9 (la señal, en la Tabla 6) | [Verificación del vibrómetro de vibración en humanos](/es/vibration/human/meter-verification/) |
+| Tiempo de decaimiento del valor eficaz móvil | `verify_running_rms_decay` | ISO 8041-1:2017, Tablas 10 y 11 | [Verificación del vibrómetro de vibración en humanos](/es/vibration/human/meter-verification/) |
+| Calibrador acústico | `verify_sound_calibrator` | IEC 60942:2017, Tablas 2 a 7 y A.1 a A.5 | [Calibración y dBFS](/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017) |
+| Ensayo periódico de un sonómetro | `verify_sound_level_meter_periodic` | IEC 61672-3:2013, apartados 12 a 21, con los límites de IEC 61672-1:2013 (Tablas 3 a 5 y su texto) y los máximos de su Tabla B.1 | [Ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/) |
+| Ensayo periódico de filtros de banda | `verify_filter_periodic` | IEC 61260-3:2016, apartados 10, 11 y 13 y Tabla 1, con los máximos del Anexo B de IEC 61260-1:2014 | [Verificación de clase de filtros](/es/signals/filters/filter-compliance/#3b-verificar-un-instrumento-no-un-diseno) |
 
 Hay una cláusula de la ISO 8041-1 que hace a esas cuatro distintas en
 naturaleza de todo lo demás de esta página. La desviación que informa un
@@ -405,7 +405,7 @@ plt.show()
 
 Los dieciocho ejemplos, los ocho de la Tabla E.1 de IEC 60942 y los diez de la
 Tabla C.1 de IEC 61672-1, son filas del
-[informe de conformidad](/phonometry/es/reference/conformance/), veredicto y
+[informe de conformidad](/es/reference/conformance/), veredicto y
 motivo cada una. La IEC 60942 escribe sus límites sobre la desviación
 absoluta, así que una desviación con signo toma un solo número
 (`acceptance_limits=0.25` es ±0,25 dB). La Tabla E.1 ya imprime la desviación
@@ -418,18 +418,18 @@ atenuada tiene un mínimo y ningún máximo, así que un extremo del intervalo p
 quedar abierto: `acceptance_limits=(70.0, math.inf)`. `verify_sound_calibrator`
 aplica la regla a cada requisito de la
 IEC 60942:2017 con los límites que eligen la clase y la frecuencia nominal,
-como muestra [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017),
+como muestra [Calibración y dBFS](/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017),
 `verify_sound_level_meter_periodic` a cada resultado de un ensayo periódico
 IEC 61672-3:2013, como muestra
-[Ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/),
+[Ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/),
 y `verify_filter_periodic` a cada resultado de un ensayo periódico
 IEC 61260-3:2016, como muestra
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#3b-verificar-un-instrumento-no-un-diseno).
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/#3b-verificar-un-instrumento-no-un-diseno).
 
 ## 3. Leer el informe de conformidad
 
 Los verificadores califican *tu* configuración. El
-[informe de conformidad](/phonometry/es/reference/conformance/) es la
+[informe de conformidad](/es/reference/conformance/) es la
 evidencia complementaria: {totalChecks} comprobaciones numéricas sobre
 {domains} dominios, frente a {designations} designaciones normativas y
 {sources} fuentes publicadas adicionales, cada fila anclando una magnitud
@@ -450,7 +450,7 @@ Tres hábitos lo vuelven útil en lugar de decorativo:
   informe.
 - **Fíjate en la configuración de las filas de clase.** La sección de
   filtros y ponderaciones recorre las
-  [cinco arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/)
+  [cinco arquitecturas de filtro](/es/signals/filters/filter-gallery/)
   y las curvas de ponderación con los mismos verificadores que documenta
   esta página, en una configuración anclada: orden 6, tercio de octava, 100 Hz a
   10 kHz, 48 kHz. El informe demuestra la implementación; para cualquier
@@ -459,11 +459,11 @@ Tres hábitos lo vuelven útil en lugar de decorativo:
 - **Cita la versión que se ejecutó.** El informe describe la versión exacta
   de la biblioteca que lo generó, así que una cita defendible fija la
   versión y cita el informe de esa versión, como detalla
-  [Sobre este proyecto](/phonometry/es/start/about/).
+  [Sobre este proyecto](/es/start/about/).
 
 Donde rederivar una norma tan de cerca ha destapado defectos en los propios
 documentos publicados, la evidencia vive en el
-[registro de erratas](/phonometry/es/reference/errata/), que el informe
+[registro de erratas](/es/reference/errata/), que el informe
 enlaza fila a fila donde aplica.
 
 ## 4. Qué solo puede atestiguar un laboratorio
@@ -537,7 +537,7 @@ La misma honestidad se aplica a esta biblioteca, en las dos direcciones:
   aceptación de la Parte 1, con los márgenes informados, sobre el rango de
   frecuencias comprobado. Toda medición hecha íntegramente en software lo
   hereda, y por eso el
-  [recorrido del sonómetro](/phonometry/es/signals/sound-level-meter/)
+  [recorrido del sonómetro](/es/signals/sound-level-meter/)
   termina ejecutando los verificadores sobre la cadena que acaba de montar.
 - **Qué es un veredicto de medición.** Todavía más estrecho. A los ocho
   verificadores de la segunda tabla se les entregan números que alguien leyó
@@ -554,9 +554,9 @@ La misma honestidad se aplica a esta biblioteca, en las dos direcciones:
   `verify_sound_level_meter_periodic` y `verify_sound_calibrator` califican
   pero no pueden producir (como `verify_filter_periodic` califica los
   resultados IEC 61260-3 de un juego de filtros), tratados en
-  [Ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/) y, con el ritual de campo,
+  [Ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/) y, con el ritual de campo,
   en
-  [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
+  [Calibración y dBFS](/es/signals/metrology/calibration/).
 - **Nombra los dos veredictos en un informe.** «Niveles de banda calculados
   con filtros verificados clase 1 según la Tabla 1 de IEC 61260-1:2014
   (versión X de la biblioteca, véase su informe de conformidad); cadena de
@@ -585,11 +585,11 @@ ensayos periódicos.
 
 <ScopeClaim status="not-covered" label="No cubierto">
 Las matemáticas de verificación de cada etapa, que pertenecen a la guía de esa
-etapa ([Ponderación frecuencial](/phonometry/es/signals/levels/weighting/),
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/),
+etapa ([Ponderación frecuencial](/es/signals/levels/weighting/),
+[Ponderaciones especiales](/es/signals/levels/special-weightings/),
 [Verificación de clase de
-filtros](/phonometry/es/signals/filters/filter-compliance/), [Intensidad
-acústica](/phonometry/es/devices/emission/intensity/)); y todos los ensayos de
+filtros](/es/signals/filters/filter-compliance/), [Intensidad
+acústica](/es/devices/emission/intensity/)); y todos los ensayos de
 las propias Partes 2 y 3, que esta página delimita pero la biblioteca no
 realiza: no se ejecuta ningún ensayo ambiental, de inmunidad, acústico ni de
 linealidad, y a ningún instrumento físico se le asigna una clase.
@@ -603,30 +603,30 @@ no los producen.
 
 ## Véase también
 
-- [Ponderación frecuencial](/phonometry/es/signals/levels/weighting/): las
+- [Ponderación frecuencial](/es/signals/levels/weighting/): las
   curvas A/C/Z y la verificación de la sección 6 frente a la Tabla 3 de
   IEC 61672-1.
-- [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/):
+- [Verificación de clase de filtros](/es/signals/filters/filter-compliance/):
   la máscara de IEC 61260-1 banda a banda, la clase 0 y la ficha de
   conformidad en detalle.
-- [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): la cadena
+- [Construye un sonómetro](/es/signals/sound-level-meter/): la cadena
   completa montada y después verificada en clase con los verificadores de
   esta página.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): el lado
+- [Calibración y dBFS](/es/signals/metrology/calibration/): el lado
   del calibrador en la cadena de clase, y la práctica de laboratorio
   IEC 60942 / IEC 61672-3 a su alrededor.
-- [Ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/): el dictamen de la
+- [Ensayos periódicos de un sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/): el dictamen de la
   IEC 61672-3 sobre los resultados de un laboratorio, apartado por apartado.
-- [Informe de conformidad](/phonometry/es/reference/conformance/): la tabla
+- [Informe de conformidad](/es/reference/conformance/): la tabla
   publicada que esta página enseña a leer.
 - Referencia de la API:
-  [`filters.compliance`](/phonometry/es/reference/api/filters/compliance/),
-  [`filters.periodic_tests`](/phonometry/es/reference/api/filters/periodic-tests/),
-  [`filters.weighting_compliance`](/phonometry/es/reference/api/filters/weighting-compliance/),
-  [`emission.intensity_compliance`](/phonometry/es/reference/api/power/intensity-compliance/),
-  [`metrology.conformance`](/phonometry/es/reference/api/metrology/conformance/),
-  [`metrology.sound_calibrator`](/phonometry/es/reference/api/metrology/sound-calibrator/)
-  y [`metrology.sound_level_meter`](/phonometry/es/reference/api/metrology/sound-level-meter/).
+  [`filters.compliance`](/es/reference/api/filters/compliance/),
+  [`filters.periodic_tests`](/es/reference/api/filters/periodic-tests/),
+  [`filters.weighting_compliance`](/es/reference/api/filters/weighting-compliance/),
+  [`emission.intensity_compliance`](/es/reference/api/power/intensity-compliance/),
+  [`metrology.conformance`](/es/reference/api/metrology/conformance/),
+  [`metrology.sound_calibrator`](/es/reference/api/metrology/sound-calibrator/)
+  y [`metrology.sound_level_meter`](/es/reference/api/metrology/sound-level-meter/).
 
 </SeeAlso>
 

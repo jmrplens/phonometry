@@ -6,7 +6,7 @@ searchWeight: 0.8
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-The [errata registry](/phonometry/reference/errata/) also records properties of the published sources that look like defects and are not: a difference the source discloses itself, a rounding it shares with its family, a value that is right for a form of the material the other books do not describe. They are kept here so that a future reader does not "fix" the library to match them.
+The [errata registry](/reference/errata/) also records properties of the published sources that look like defects and are not: a difference the source discloses itself, a rounding it shares with its family, a value that is right for a form of the material the other books do not describe. They are kept here so that a future reader does not "fix" the library to match them.
 
 ## Related source properties that are not errata
 

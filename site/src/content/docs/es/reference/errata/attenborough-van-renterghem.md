@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 3 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Attenborough & Van Renterghem (2021), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 3 entradas del [registro de erratas](/es/reference/errata/) sobre Attenborough & Van Renterghem (2021), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Ec. (4.35)
 

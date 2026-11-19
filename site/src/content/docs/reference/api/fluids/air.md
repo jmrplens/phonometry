@@ -49,11 +49,11 @@ specific heat capacity Clause F.6 gives expressions for.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Air temperature `t`, in **degrees Celsius**. Required: there is no defensible default for the one condition the caller actually measured. |
-| `static_pressure_pa` | Absolute static pressure `p_s`, in **pascals**. `None` assumes [`DEFAULT_STATIC_PRESSURE_PA`](/phonometry/reference/api/fluids/air/#default_static_pressure_pa) and warns. |
-| `relative_humidity_percent` | Relative humidity `H`, in **per cent**. `None` assumes [`DEFAULT_RELATIVE_HUMIDITY_PERCENT`](/phonometry/reference/api/fluids/air/#default_relative_humidity_percent) and warns. |
-| `co2_mole_fraction` | Carbon dioxide mole fraction `x_c`. `None` takes [`DEFAULT_CO2_MOLE_FRACTION`](/phonometry/reference/api/fluids/air/#default_co2_mole_fraction), the value Clause F.2 recommends for laboratory conditions, and does **not** warn: unlike the other two it is a value the annex names, and it reaches the fifth figure of the density at most. |
+| `static_pressure_pa` | Absolute static pressure `p_s`, in **pascals**. `None` assumes [`DEFAULT_STATIC_PRESSURE_PA`](/reference/api/fluids/air/#default_static_pressure_pa) and warns. |
+| `relative_humidity_percent` | Relative humidity `H`, in **per cent**. `None` assumes [`DEFAULT_RELATIVE_HUMIDITY_PERCENT`](/reference/api/fluids/air/#default_relative_humidity_percent) and warns. |
+| `co2_mole_fraction` | Carbon dioxide mole fraction `x_c`. `None` takes [`DEFAULT_CO2_MOLE_FRACTION`](/reference/api/fluids/air/#default_co2_mole_fraction), the value Clause F.2 recommends for laboratory conditions, and does **not** warn: unlike the other two it is a value the annex names, and it reaches the fifth figure of the density at most. |
 
-**Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that state.
+**Returns:** The [`Fluid`](/reference/api/fluids/fluids/#fluid) at that state.
 
 **Raises**
 

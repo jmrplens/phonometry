@@ -84,8 +84,8 @@ de coincidencia en lugar de un valle (Vigran 6.5.3); y el **puente de las
 llaves**, que limita a un muro de fábrica con cámara valgan lo que valgan sus
 hojas (Hopkins 4.3.5.4). Las magnitudes medidas
 que estas predicciones alimentan están en
-[Predicción del aislamiento (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/)
-y [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/).
+[Predicción del aislamiento (EN 12354)](/es/buildings/design/insulation-prediction/)
+y [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/).
 
 **Una nota sobre dos símbolos antes de que empiecen las fórmulas.** El índice de
 reducción acústica $R$ de las normas europeas y la pérdida por transmisión $TL$
@@ -229,8 +229,8 @@ de la biblioteca como `laboratory_total_loss_factor`. Para este vidrio de
 interno; para un forjado de hormigón de 484 kg/m² vale 0,055, cinco veces la
 cifra del material. La vía medida es el tiempo de reverberación estructural y
 $\eta = 2{,}2/(fT_\mathrm{s})$, la misma magnitud que miden las guías de
-[ISO 10848](/phonometry/es/buildings/insulation/flanking-lab/) y de
-[EN 15657](/phonometry/es/buildings/design/structure-borne-power/).
+[ISO 10848](/es/buildings/insulation/flanking-lab/) y de
+[EN 15657](/es/buildings/design/structure-borne-power/).
 Conviene saber qué hay en juego: la profundidad del valle lleva $10\lg\eta$, así
 que un factor de tres en $\eta$ mueve la región de coincidencia 4,8 dB y no
 cambia nada por debajo de $f_\mathrm{c}/2$.
@@ -285,7 +285,7 @@ plt.show()
 </details>
 
 El clip de abajo mira la coincidencia mientras ocurre en un
-[campo FDTD elástico 2D](/phonometry/es/simulation/elastic-waves/): una placa de
+[campo FDTD elástico 2D](/es/simulation/elastic-waves/): una placa de
 acero de 10 mm inmersa en aire, excitada por una onda plana sostenida a 45
 grados, con las dos frecuencias elegidas con la
 `coincidence_frequency` de la biblioteca. A `fc/2` = 602 Hz la transmisión
@@ -402,7 +402,7 @@ El material no tiene por qué ser un nombre. `material=` también admite una
 fila `PlateauMaterial`: una de `solids.PUBLISHED_PLATEAU_DATA`, que dibuja la
 misma curva que su nombre, o una fila tuya que `io.read_catalogue` haya leído
 de una hoja de características
-([Tus propios catálogos](/phonometry/es/io/material-catalogues/)). Una fila
+([Tus propios catálogos](/es/io/material-catalogues/)). Una fila
 entrega sus tres números solo a través de `printed()`, así que una hoja que declara la altura de la meseta
 como una cota («no más de 30 dB») se rechaza con lo que imprime en lugar de
 dibujarse a 30 dB, y un `plateau_height_db` que pases sustituye al de la fila
@@ -617,7 +617,7 @@ el conjunto se mueve como uno y sigue la ley de masas de la masa *combinada*;
 por encima, las dos leyes de masas se suman, reforzadas por la cámara, hasta la
 frecuencia límite $f_\mathrm{l} = c_0/(2\pi d)$ donde el refuerzo satura en 6 dB
 (Ec. 7.64). Un relleno poroso (cualquier
-[`PorousMediumResult`](/phonometry/es/materials/absorbers/porous-absorbers/)) ablanda la
+[`PorousMediumResult`](/es/materials/absorbers/porous-absorbers/)) ablanda la
 cámara y baja $f_0$.
 
 ```python
@@ -866,7 +866,7 @@ su velocidad cuadrática media $\langle v^2 \rangle$ promediada en el tiempo y e
 la superficie, es su **eficiencia de radiación**
 $\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$ (Hopkins Ec. 2.198): el factor
 de radiación $\varepsilon$ que [Potencia acústica a partir de la
-vibración](/phonometry/es/devices/emission/vibration-sound-power/) (ISO 7849)
+vibración](/es/devices/emission/vibration-sound-power/) (ISO 7849)
 toma en otro caso como entrada medida. El divisor es la potencia que radiaría un
 pistón grande montado en pantalla, de la misma superficie y la misma velocidad
 cuadrática media, de manera que $\sigma = 1$ significa «tan eficiente como un
@@ -970,7 +970,7 @@ Aportan la movilidad de receptor que EN 12354-5 necesita cuando no hay medida.
 `infinite_plate_point_mobility` e `infinite_beam_point_mobility` devuelven esas
 mismas magnitudes empaquetadas como un `MobilityResult` de ISO 7626, así que se
 representan, se convierten y se informan igual que cualquier FRF medida; la
-[guía de movilidad mecánica](/phonometry/es/vibration/structural/mechanical-mobility/#5-movilidades-de-referencia-cuando-no-se-ha-medido-nada)
+[guía de movilidad mecánica](/es/vibration/structural/mechanical-mobility/#5-movilidades-de-referencia-cuando-no-se-ha-medido-nada)
 las lee frente al resonador SDOF y añade los casos de momento y de barra
 longitudinal.
 
@@ -1081,15 +1081,15 @@ sala-placa-cámara-placa-sala.
 
 ## Véase también
 
-- [Predicción del aislamiento (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento (EN 12354)](/es/buildings/design/insulation-prediction/):
   ensambla el $R$ de elemento predicho o medido en el $R'_\mathrm{w}$ in situ.
-- [Potencia acústica a partir de la vibración (ISO 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
+- [Potencia acústica a partir de la vibración (ISO 7849)](/es/devices/emission/vibration-sound-power/):
   consume la eficiencia de radiación predicha como su factor de radiación.
-- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/es/vibration/structural/mechanical-mobility/):
   la contraparte medida de las movilidades puntuales teóricas.
-- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los
+- [Absorbentes porosos y multicapa](/es/materials/absorbers/porous-absorbers/): los
   modelos de relleno de cámara que consume una pared doble.
-- Referencia de la API: [`building.prediction.panel_transmission`](/phonometry/es/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](/phonometry/es/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](/phonometry/es/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](/phonometry/es/reference/api/vibration/radiation-efficiency/) y [`vibration.structural.point_mobility`](/phonometry/es/reference/api/vibration/point-mobility/).
-- Teoría: [Aislamiento acústico y absorción, predichos](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la ley de masas, la caída del aislamiento en la coincidencia y el coeficiente de transmisión que devuelven los modelos de panel.
+- Referencia de la API: [`building.prediction.panel_transmission`](/es/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](/es/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](/es/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](/es/reference/api/vibration/radiation-efficiency/) y [`vibration.structural.point_mobility`](/es/reference/api/vibration/point-mobility/).
+- Teoría: [Aislamiento acústico y absorción, predichos](/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la ley de masas, la caída del aislamiento en la coincidencia y el coeficiente de transmisión que devuelven los modelos de panel.
 
 </SeeAlso>

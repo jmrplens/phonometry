@@ -21,7 +21,7 @@ performance specification is demonstrated when **both** of the following hold,
     the standard prints for that test.
 
 Two things set this rule apart from the older one, which ISO 8041-1:2017 still
-uses (13.1 and 14.1) and [`phonometry.vibration.verify_weighting`](/phonometry/reference/api/vibration/instrumentation/#verify_weighting)
+uses (13.1 and 14.1) and [`phonometry.vibration.verify_weighting`](/reference/api/vibration/instrumentation/#verify_weighting)
 implements: the uncertainty is not added to the deviation, and the limits are
 inclusive. Annex D of IEC 60942 (Figure D.1) shows where the first comes
 from: the tolerance limits are not stated, but lie outside the acceptance
@@ -48,8 +48,8 @@ same way (IEC 60942 E.2.2, IEC 61672-1 C.2.2):
    non-conformance;
 4. both criteria failed.
 
-[`ConformanceVerification.outcome`](/phonometry/reference/api/metrology/conformance/#conformanceverificationoutcome) is that number and
-[`ConformanceVerification.reason`](/phonometry/reference/api/metrology/conformance/#conformanceverificationreason) the wording the "Reasons" column of
+[`ConformanceVerification.outcome`](/reference/api/metrology/conformance/#conformanceverificationoutcome) is that number and
+[`ConformanceVerification.reason`](/reference/api/metrology/conformance/#conformanceverificationreason) the wording the "Reasons" column of
 Table E.1 and Table C.1 gives it, so the eighteen printed examples of the two
 tables are reproduced to the letter as well as to the verdict.
 
@@ -218,7 +218,7 @@ verdict of IEC 60942:2017 Table E.1 and IEC 61672-1:2013 Table C.1.
 
 It is the rule, not a standard: the limits and the maximum uncertainty are
 what the standard prints for the test at hand, read off its own tables.
-[`phonometry.metrology.verify_sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) does that for IEC
+[`phonometry.metrology.verify_sound_calibrator`](/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) does that for IEC
 60942.
 
 **Parameters**
@@ -231,7 +231,7 @@ what the standard prints for the test at hand, read off its own tables.
 | `max_uncertainty` | The maximum-permitted expanded uncertainty for a coverage probability of 95 %, in the same unit. |
 | `unit` | The unit of the numbers, used to label the figure (default `"dB"`). |
 
-**Returns:** The [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification), whose `passes` is the verdict and whose `outcome` and `reason` say which of the four outcomes it is.
+**Returns:** The [`ConformanceVerification`](/reference/api/metrology/conformance/#conformanceverification), whose `passes` is the verdict and whose `outcome` and `reason` say which of the four outcomes it is.
 
 **Raises**
 

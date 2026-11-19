@@ -28,7 +28,7 @@ GIF on the CPU. `simulation.write_fdtd_animation` and
 `simulation.write_elastic_fdtd_animation` write an acoustic or elastic FDTD
 run straight to a video as it is computed, here or on a node, without storing
 its snapshots (sections 4 and 5).
-[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+[Where heavy work runs](/simulation/where-it-runs/) maps the
 devices, the nodes and the encoders in one place.
 
 ffmpeg is a program, not a Python package, so it is installed apart from
@@ -376,7 +376,7 @@ surface is not driven, and stays in.
 Both writers take the `compute=` of the simulation functions, so a run can
 step on a GPU; with no `compute=`, a writer takes its placement from the
 innermost `simulation.use()` block it runs in, else from `PHONOMETRY_COMPUTE`,
-else NumPy, as [Where a simulation runs](/phonometry/simulation/compute/)
+else NumPy, as [Where a simulation runs](/simulation/compute/)
 explains. On a GPU, only the cells a frame keeps come to this machine to be
 drawn, one frame at a time. With `fallback=True` and no GPU there, the run
 warns once and steps on NumPy, both passes included:
@@ -391,14 +391,14 @@ res = simulation.write_fdtd_animation(
 The result's `provenance` records where the run stepped and with which
 versions: after a fallback its `device` reads `"cpu"` and its `host` `None`,
 so a run that fell back cannot pass for one on a GPU or a node.
-[Where a simulation runs](/phonometry/simulation/compute/) lists its fields.
+[Where a simulation runs](/simulation/compute/) lists its fields.
 
 ## 5. On a node
 
 With a `host` in its placement, whether from `compute=`, a `simulation.use()`
 block or `PHONOMETRY_COMPUTE` (`cupy@nas`), a writer sends the whole job to a
 node, a machine named in your hosts file as
-[Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+[Sending a simulation to a remote node](/simulation/remote-node/)
 explains; `nas` is the node of that guide's hosts file:
 
 ```py
@@ -499,18 +499,18 @@ the next.
 
 ## See also
 
-- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+- [Where a simulation runs: NumPy, CuPy and torch](/simulation/compute/):
   the devices the FDTD engines step on.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   acoustic engine and the field snapshots it records.
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the elastic engine and its snapshots.
-- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+- [Sending a simulation to a remote node](/simulation/remote-node/):
   the hosts file that names a node, and how to set one up.
-- [Reading and writing measurement audio](/phonometry/io/audio-files/): the
+- [Reading and writing measurement audio](/io/audio-files/): the
   audio files `phonometry.io` reads and writes.
-- API reference: [`phonometry.io`](/phonometry/reference/api/io/io/),
-  [`simulation.video`](/phonometry/reference/api/simulation/video/).
+- API reference: [`phonometry.io`](/reference/api/io/io/),
+  [`simulation.video`](/reference/api/simulation/video/).
 
 </SeeAlso>
 

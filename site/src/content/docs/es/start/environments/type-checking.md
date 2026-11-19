@@ -10,7 +10,7 @@ indica a un comprobador de tipos que los lea, así que
 biblioteca sin instalar nada más. Cada módulo público declara lo que publica,
 y los dominios perezosos de `import phonometry as ph` los ve tanto el
 comprobador como la ejecución. Los tipos que lee un comprobador son los que la
-[referencia de la API](/phonometry/es/reference/api/) imprime en cada firma.
+[referencia de la API](/es/reference/api/) imprime en cada firma.
 
 Comprobado el 17 de noviembre de 2026 con phonometry 4.0.0 de PyPI, en las
 imágenes `python:3.12-slim` y `python:3.14-slim`, con Python 3.12.16 y 3.14.10

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/diffusers/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/diffusers/
 
 # Diffusers and surfaces
 
@@ -56,10 +56,10 @@ Pages elsewhere on the site that this section leans on:
   [In-situ Road-Surface Absorption](../surfaces/road-absorption.md):
   the ISO 13472-1 subtraction technique and the ISO 13472-2 spot method.
 - Published catalogues: the
-  [measured](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/) and the
-  [computed](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/)
+  [measured](https://phonometry.dev/reference/catalogues/scattering-coefficients/) and the
+  [computed](https://phonometry.dev/reference/catalogues/predicted-scattering-coefficients/)
   scattering coefficients and the
-  [diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/)
+  [diffusion coefficients](https://phonometry.dev/reference/catalogues/diffusion-coefficients/)
   of the appendices, surface by surface.
 
 ## What this section does not cover

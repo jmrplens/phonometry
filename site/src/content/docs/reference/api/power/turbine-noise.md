@@ -34,7 +34,7 @@ measurement surface as Figure 2 draws them. The sum is the tops and the long
 sides; $2 h_\mathrm{max} b_\mathrm{max}$ stands for every transverse
 face, the two ends and the steps between neighbouring boxes. It is exact when
 each cross-section contains the next one out towards both ends, as in both
-drawings of Figure 2, and [`TurbineMeasurementSurface.enveloping_area_m2`](/phonometry/reference/api/power/turbine-noise/#turbinemeasurementsurfaceenveloping_area_m2)
+drawings of Figure 2, and [`TurbineMeasurementSurface.enveloping_area_m2`](/reference/api/power/turbine-noise/#turbinemeasurementsurfaceenveloping_area_m2)
 gives the exact area of the stepped surface for the case it is not.
 
 **The microphone positions** (clause 7.2, Figure 2). Five *key* positions are
@@ -136,7 +136,7 @@ above 1 m/s (4.3).
 
 | Name | Description |
 | :--- | :--- |
-| `correction` | The environmental correction, from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction); or give `environmental_correction` instead. |
+| `correction` | The environmental correction, from [`turbine_environmental_correction`](/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/reference/api/power/turbine-noise/#turbine_reference_source_correction); or give `environmental_correction` instead. |
 | `environmental_correction` | $K$ in dB, when it was found some other way, `0.0` outdoors (A.4). |
 | `wind_speed_m_s` | The wind speed for a measurement outdoors, in metres per second; `None` indoors. |
 
@@ -146,7 +146,7 @@ above 1 m/s (4.3).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `correction` that is not a [`TurbineEnvironmentalCorrection`](/phonometry/reference/api/power/turbine-noise/#turbineenvironmentalcorrection), or an `environmental_correction` or `wind_speed_m_s` that is not one number. |
+| TypeError | for a `correction` that is not a [`TurbineEnvironmentalCorrection`](/reference/api/power/turbine-noise/#turbineenvironmentalcorrection), or an `environmental_correction` or `wind_speed_m_s` that is not one number. |
 | ValueError | unless exactly one of `correction` and `environmental_correction` is given, for a non-finite correction or for a negative wind speed. |
 
 ## turbine_background_correction
@@ -185,7 +185,7 @@ cannot be made": there the 3 dB of the first row is returned. The level
 it leaves is still an upper limit, because the exact correction for a
 smaller difference is larger, which is how the NOTE of 4.2 lets such a
 result be used, and it is the value ISO 3746:2010 8.3.3 prints for the
-same case. [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#turbine_sound_power) marks such a determination as an
+same case. [`turbine_sound_power`](/reference/api/power/turbine-noise/#turbine_sound_power) marks such a determination as an
 upper limit.
 
 This is not the $K_{1\mathrm{A}} = -10 \lg(1 - 10^{-0.1 \Delta L})$
@@ -232,8 +232,8 @@ with $A$ the equivalent sound absorption area of the room, either
 given or from its reverberation time, $A = 0.16\,V/T$ (A.3.1),
 and $S$ the area of the measurement surface from Equation (1). It is
 the $K_2$ of ISO 3744 and ISO 3746. The result is not refused above
-the 7 dB the standard allows; [`check_turbine_test_environment`](/phonometry/reference/api/power/turbine-noise/#check_turbine_test_environment) is
-the judgement, and [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#turbine_sound_power) warns.
+the 7 dB the standard allows; [`check_turbine_test_environment`](/reference/api/power/turbine-noise/#check_turbine_test_environment) is
+the judgement, and [`turbine_sound_power`](/reference/api/power/turbine-noise/#turbine_sound_power) warns.
 
 **Parameters**
 
@@ -279,7 +279,7 @@ $l b + 2 l h + 2 b h$.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_boxes` | The reference boxes in order along the shaft, from the turbine end (Figure 2): one [`TurbineReferenceBox`](/phonometry/reference/api/power/turbine-noise/#turbinereferencebox) per part. |
+| `reference_boxes` | The reference boxes in order along the shaft, from the turbine end (Figure 2): one [`TurbineReferenceBox`](/reference/api/power/turbine-noise/#turbinereferencebox) per part. |
 
 **Returns:** The surface, its parallelepipeds and its area.
 
@@ -288,7 +288,7 @@ $l b + 2 l h + 2 b h$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if no box is given. |
-| TypeError | if an entry is not a [`TurbineReferenceBox`](/phonometry/reference/api/power/turbine-noise/#turbinereferencebox). |
+| TypeError | if an entry is not a [`TurbineReferenceBox`](/reference/api/power/turbine-noise/#turbinereferencebox). |
 
 ## turbine_microphone_positions
 
@@ -326,8 +326,8 @@ transverse sections the drawings of Figure 2 show; 7.2.2 asks only for
 equal distances. The distance has to be short enough to put "at least one
 measurement section at each casing"; the library judges it per
 parallelepiped, and when a spacing leaves one with no position on its
-long sides a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) is emitted
-and [`TurbineMicrophoneArray.every_box_sampled`](/phonometry/reference/api/power/turbine-noise/#turbinemicrophonearrayevery_box_sampled) is `False`.
+long sides a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) is emitted
+and [`TurbineMicrophoneArray.every_box_sampled`](/reference/api/power/turbine-noise/#turbinemicrophonearrayevery_box_sampled) is `False`.
 
 Figure 2 draws the positions round the sides on one horizontal row
 without dimensioning its height, so the height is the caller's, and it has
@@ -337,11 +337,11 @@ to lie on the sides of every parallelepiped.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | The measurement surface, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface). |
+| `surface` | The measurement surface, from [`turbine_measurement_surface`](/reference/api/power/turbine-noise/#turbine_measurement_surface). |
 | `microphone_height_m` | Height of the row round the sides, in metres, above the reflecting plane and no higher than the lowest parallelepiped. |
 | `spacing_m` | The largest distance between neighbouring positions along the path, in metres. |
 | `n_turbine_boxes` | How many reference boxes, from the front, enclose the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP casings share one box and the LP turbine has its own). Ignored for a set in a single box. |
-| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1.0 dB (see [`TurbineSoundPowerResult.overhead_level_difference`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_level_difference)). |
+| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1.0 dB (see [`TurbineSoundPowerResult.overhead_level_difference`](/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_level_difference)). |
 
 **Returns:** The positions, their labels and the overhead mask.
 
@@ -349,7 +349,7 @@ to lie on the sides of every parallelepiped.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `surface` that is not a [`TurbineMeasurementSurface`](/phonometry/reference/api/power/turbine-noise/#turbinemeasurementsurface), a `spacing_m` or `microphone_height_m` that is not one number, or a `n_turbine_boxes` that is a bool, a text or an array. |
+| TypeError | for a `surface` that is not a [`TurbineMeasurementSurface`](/reference/api/power/turbine-noise/#turbinemeasurementsurface), a `spacing_m` or `microphone_height_m` that is not one number, or a `n_turbine_boxes` that is a bool, a text or an array. |
 | ValueError | for a height outside the sides, a non-positive spacing, or a `n_turbine_boxes` that leaves no driven machinery. |
 
 ## turbine_noise_declaration
@@ -387,7 +387,7 @@ $K$ above 7 dB) cannot carry the statement, and is refused.
 
 | Name | Description |
 | :--- | :--- |
-| `determinations` | One [`TurbineSoundPowerResult`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresult) per operating condition, keyed by its description (`"100 % rated load"`). |
+| `determinations` | One [`TurbineSoundPowerResult`](/reference/api/power/turbine-noise/#turbinesoundpowerresult) per operating condition, keyed by its description (`"100 % rated load"`). |
 | `turbine` | Description of the turbine set, clause 10 a). |
 | `noise_control` | The noise control screens and enclosures fitted, or `"none"`, clause 10 a). |
 | `measured_at` | Date and time of the measurements, clause 10 f). |
@@ -399,7 +399,7 @@ $K$ above 7 dB) cannot carry the statement, and is refused.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a determination that is not a [`TurbineSoundPowerResult`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresult), or a description that is not a text. |
+| TypeError | for a determination that is not a [`TurbineSoundPowerResult`](/reference/api/power/turbine-noise/#turbinesoundpowerresult), or a description that is not a text. |
 | ValueError | for no determination, a determination that does not conform, or an empty description. |
 
 ## turbine_reference_source_correction
@@ -459,7 +459,7 @@ turbine_sound_power(
 Surface sound pressure level and sound power level of a turbine set (8.1 to 8.4).
 
 Each position's level is first corrected for the background by Table 2
-(8.1, [`turbine_background_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_background_correction)); the corrected levels are
+(8.1, [`turbine_background_correction`](/reference/api/power/turbine-noise/#turbine_background_correction)); the corrected levels are
 energy-averaged and the environmental correction subtracted, Equation (2),
 
 $$
@@ -471,18 +471,18 @@ $L_{W\mathrm{A}} = \overline{L_{p\mathrm{A}}} + 10 \lg(S/S_0)$.
 
 A background less than 3 dB below at any position makes the result an
 upper limit (4.2) and a $K$ above 7 dB puts the room outside the
-standard (8.3); both emit a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning)
-and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultconforms) `False`.
+standard (8.3); both emit a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning)
+and leave [`TurbineSoundPowerResult.conforms`](/reference/api/power/turbine-noise/#turbinesoundpowerresultconforms) `False`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `pressure_levels` | $L_{p\mathrm{A}i}$ with the turbine set operating, one per position, in dB re 20 µPa: at least the four key positions that remain once the overhead one is deleted. |
-| `surface_area` | $S$, from [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface), in square metres. |
+| `surface_area` | $S$, from [`turbine_measurement_surface`](/reference/api/power/turbine-noise/#turbine_measurement_surface), in square metres. |
 | `background_levels` | The A-weighted background level at each position, in dB. It is often impossible to measure with the turbine stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation instead. `None` states that no background was determined, and no correction is applied. |
-| `environmental_correction` | $K$, in dB: from [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction), or `0.0` outdoors (A.4). |
-| `overhead_mask` | Which positions are overhead ([`TurbineMicrophoneArray.overhead_mask`](/phonometry/reference/api/power/turbine-noise/#turbinemicrophonearray)), for the effect of deleting them (NOTE of 7.2.2); `None` if not needed. |
+| `environmental_correction` | $K$, in dB: from [`turbine_environmental_correction`](/reference/api/power/turbine-noise/#turbine_environmental_correction) or [`turbine_reference_source_correction`](/reference/api/power/turbine-noise/#turbine_reference_source_correction), or `0.0` outdoors (A.4). |
+| `overhead_mask` | Which positions are overhead ([`TurbineMicrophoneArray.overhead_mask`](/reference/api/power/turbine-noise/#turbinemicrophonearray)), for the effect of deleting them (NOTE of 7.2.2); `None` if not needed. |
 
 **Returns:** The per-position levels, the surface level and the sound power level.
 
@@ -509,8 +509,8 @@ TurbineEnvironmentalCorrection(
 
 The environmental correction `K` of a test room (clause 8.2, Annex A).
 
-Built by [`turbine_environmental_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_environmental_correction) (A.3.1, Figure A.3) or
-by [`turbine_reference_source_correction`](/phonometry/reference/api/power/turbine-noise/#turbine_reference_source_correction) (A.3.2).
+Built by [`turbine_environmental_correction`](/reference/api/power/turbine-noise/#turbine_environmental_correction) (A.3.1, Figure A.3) or
+by [`turbine_reference_source_correction`](/reference/api/power/turbine-noise/#turbine_reference_source_correction) (A.3.2).
 
 **Attributes**
 
@@ -568,7 +568,7 @@ TurbineMeasurementSurface(
 
 The measurement surface of a turbine set and its area (clause 7.1).
 
-Built by [`turbine_measurement_surface`](/phonometry/reference/api/power/turbine-noise/#turbine_measurement_surface). The parallelepipeds are the
+Built by [`turbine_measurement_surface`](/reference/api/power/turbine-noise/#turbine_measurement_surface). The parallelepipeds are the
 reference boxes grown by the measurement distance on every side except the
 floor: 1 m wider on each side, 1 m taller, and 1 m longer at each end of
 the set.
@@ -670,7 +670,7 @@ TurbineMicrophoneArray(
 
 The key and additional microphone positions of Figure 2 (clause 7.2).
 
-Built by [`turbine_microphone_positions`](/phonometry/reference/api/power/turbine-noise/#turbine_microphone_positions). Coordinates are in metres:
+Built by [`turbine_microphone_positions`](/reference/api/power/turbine-noise/#turbine_microphone_positions). Coordinates are in metres:
 `x` along the shaft from the front end of the measurement surface, `y`
 across it from the shaft line (key position 2 on the positive side) and
 `z` above the reflecting plane. The positions run once round the surface
@@ -768,7 +768,7 @@ TurbineNoiseDeclaration(
 
 The minimum report of clause 10, one row per operating condition.
 
-Built by [`turbine_noise_declaration`](/phonometry/reference/api/power/turbine-noise/#turbine_noise_declaration).
+Built by [`turbine_noise_declaration`](/reference/api/power/turbine-noise/#turbine_noise_declaration).
 
 **Attributes**
 
@@ -898,7 +898,7 @@ TurbineSoundPowerResult(
 
 A-weighted surface sound pressure level and sound power level (8.3, 8.4).
 
-Built by [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#turbine_sound_power).
+Built by [`turbine_sound_power`](/reference/api/power/turbine-noise/#turbine_sound_power).
 
 **Attributes**
 
@@ -994,7 +994,7 @@ TurbineSoundPowerResult.plot(
 Draw the corrected level at each position with the surface level.
 
 The bars stand in the order the levels were given. Pass the
-[`TurbineMicrophoneArray.labels`](/phonometry/reference/api/power/turbine-noise/#turbinemicrophonearray) of the array they were measured
+[`TurbineMicrophoneArray.labels`](/reference/api/power/turbine-noise/#turbinemicrophonearray) of the array they were measured
 on and the axis names the key positions as Figure 2 numbers them;
 without them it counts the bars from 1.
 
@@ -1043,7 +1043,7 @@ TurbineTestEnvironmentCheck(
 
 Whether the test environment qualifies for IEC 61063 (A.3.3, 4.3).
 
-Built by [`check_turbine_test_environment`](/phonometry/reference/api/power/turbine-noise/#check_turbine_test_environment). The verdicts are read
+Built by [`check_turbine_test_environment`](/reference/api/power/turbine-noise/#check_turbine_test_environment). The verdicts are read
 from the correction and the wind speed against the 7 dB, 6 m/s and
 1 m/s the standard prints, so they are not fields.
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/rolling-stock-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/rolling-stock-noise/
 
 # Railway rolling-stock noise: the ISO 3095 type test
 
@@ -664,7 +664,7 @@ The library's bank is class 0 on both.
 - [Vibration next to a railway (DIN 45672)](../../vibration/immission/railway-vibration.md): what the same trains put into the ground and the buildings beside the track.
 - [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md): the road's counterpart, where the surface is measured through the traffic on it.
 - [Errata in published sources](../../ERRATA.md): the three ISO 3095 entries of Tables G.1 and G.2, and the two EN 15610 entries on the listing of Annex B, its spike-removal loop and its filters run forward and back.
-- API reference: [`environment.sources.rolling_stock_noise`](https://docs.jmrp.io/phonometry/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](https://docs.jmrp.io/phonometry/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](https://docs.jmrp.io/phonometry/reference/api/environment/track-decay/).
+- API reference: [`environment.sources.rolling_stock_noise`](https://phonometry.dev/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](https://phonometry.dev/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](https://phonometry.dev/reference/api/environment/track-decay/).
 
 ## References
 

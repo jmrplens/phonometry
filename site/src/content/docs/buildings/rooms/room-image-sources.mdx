@@ -59,11 +59,11 @@ source), while the **steady-state** model gives the statistical level a source
 of known power settles to, split into a direct and a reverberant field. This
 page covers both in `phonometry.room`: the first complements the *measured*
 impulse response of the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/) with a synthetic
+[Room Acoustics guide](/buildings/rooms/room-acoustics/) with a synthetic
 one, and the second complements the single decay rate of the
-[Reverberation-time prediction guide](/phonometry/buildings/rooms/reverberation-prediction/)
+[Reverberation-time prediction guide](/buildings/rooms/reverberation-prediction/)
 with a level-versus-distance prediction, bridging the
-[sound power](/phonometry/devices/emission/sound-power/) of a source and the level it
+[sound power](/devices/emission/sound-power/) of a source and the level it
 produces indoors.
 
 ## 1. Image-source room impulse response
@@ -88,8 +88,8 @@ the number of reflections $k_{w,n}$ that image made off wall $w$, and the air
 pressure loss $\mathrm{e}^{-m r_n/2}$ over the path ($m$ the power (intensity)
 attenuation coefficient in reciprocal metres of ISO 354 8.1.2.1, so intensity falls as $\mathrm{e}^{-m r}$ and
 pressure as $\mathrm{e}^{-m r/2}$: the same $m$ the
-[reverberation-time](/phonometry/buildings/rooms/reverberation-prediction/) and
-[EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) guides feed
+[reverberation-time](/buildings/rooms/reverberation-prediction/) and
+[EN 12354-6](/buildings/rooms/enclosed-space-absorption/) guides feed
 to their $4mV$ terms). Along one axis the reflection count off the two walls of
 an image at lattice index $n$ and mirror parity $p$ is $|n - p|$ (wall at 0) and
 $|n|$ (wall at $L$), so the image's total reflection order is
@@ -260,7 +260,7 @@ fan out because the wall absorption rises with frequency, from T30 = 1.06 s at
 here: it takes 0.4 % off the 250 Hz decay and 4.4 % off the 4 kHz decay. That is
 the honest size of the effect in a 105 m³ room (the reflections simply do not
 travel far enough), and it is why air absorption is a
-[volume effect](/phonometry/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)
+[volume effect](/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)
 rather than a frequency effect: put the same walls around 2 000 m³ and the same
 argument takes tens of per cent off the top band.*
 
@@ -298,7 +298,7 @@ $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only in
 the near-cubic limit: an elongated room sustains energy along its long axis, so
 its pure *specular* decay runs slower than the diffuse-field Eyring estimate:
 exactly the anisotropy the
-[Fitzroy and Arau-Puchades models](/phonometry/buildings/rooms/reverberation-prediction/)
+[Fitzroy and Arau-Puchades models](/buildings/rooms/reverberation-prediction/)
 were built to correct. The model captures specular reflections only (no
 diffraction, no diffuse scattering) and is exact for real, angle-independent
 wall reflection factors.
@@ -460,7 +460,7 @@ Finally, the honest boundary: if the order needed to cover the reverberation
 time makes the run impractical (a large room with a small $L_\text{min}$, or a
 long tail), the pure image method is being asked to do a job that belongs to a
 hybrid model with a statistical late tail, or to the
-[FDTD solver](/phonometry/simulation/fdtd-simulation/).
+[FDTD solver](/simulation/fdtd-simulation/).
 
 ## 2. Steady-state room field
 
@@ -663,7 +663,7 @@ module uses $R$ so that $r_\mathrm{c}$ is exactly the crossover of its own
 $10\log_{10}(\rho c / 400)$ term, which corrects the level for a characteristic
 impedance other than 400 Pa·s/m (0.13 dB in air at 20 °C and 50 % relative
 humidity, as the
-[theory page computes](/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56));
+[theory page computes](/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56));
 by default it is left out.
 
 **Where the statistics fade.** The **Schroeder frequency**
@@ -892,20 +892,20 @@ same reason. The source matters as much as the receiver: a source sitting on a
 mode's nodal plane cannot drive that mode at all. What the rigid-wall model
 cannot tell you is how strongly each resonance rings, since that is set by the
 damping it omits; for that, mesh the room and run the
-[2D FDTD solver](/phonometry/simulation/fdtd-simulation/).
+[2D FDTD solver](/simulation/fdtd-simulation/).
 
 ## Validation
 
 The implementations are checked against the closed forms and the source
 texts' own numeric anchors (see the
-[conformance report](/phonometry/reference/conformance/)):
+[conformance report](/reference/conformance/)):
 
 - the direct-sound amplitude $1/(4\pi r)$ and delay $r/c$ (exact geometry),
   the audible image count (Kuttruff 6e, Eq. (9.23)) and the reflection
   density (Eq. (4.6));
 - the Eyring reverberation time recovered from the decay of the synthetic
   RIR in the near-cubic limit (documented ≈ 10 % tolerance), and an
-  independent [2D FDTD solver](/phonometry/simulation/fdtd-simulation/)
+  independent [2D FDTD solver](/simulation/fdtd-simulation/)
   reproducing the rigid-wall echo delay and the uniform-damping $T_{60}$;
 - the room constant, the critical distance as the exact direct/reverberant
   crossover, the Schroeder frequency (Kuttruff's classroom example,
@@ -942,7 +942,7 @@ The image-source model captures specular reflections only: no diffraction and
 no diffuse scattering, so an elongated room's true decay runs slower than the
 diffuse-field Eyring estimate it is checked against (the anisotropy the
 Fitzroy and Arau-Puchades models of the [reverberation-prediction
-guide](/phonometry/buildings/rooms/reverberation-prediction/) were built to
+guide](/buildings/rooms/reverberation-prediction/) were built to
 correct). Kuttruff's alternative reverberation distance (using the Sabine
 absorption area in place of the room constant) is cited for comparison but not
 implemented: `steady_state_field` and `critical_distance` always use the Bies
@@ -950,7 +950,7 @@ room-constant formulation. The mode calculator assumes rigid walls and a
 rectangular plan: it gives the eigen*frequencies*, not the pressure amplitude
 at a listening position, and it says nothing about damping, mode shape or a
 non-shoebox geometry. For those, mesh the room and run the [2D FDTD
-solver](/phonometry/simulation/fdtd-simulation/). Bolt's preferred dimension
+solver](/simulation/fdtd-simulation/). Bolt's preferred dimension
 ratios are discussed but not tabulated.
 </ScopeClaim>
 </Scope>
@@ -959,24 +959,24 @@ ratios are discussed but not tabulated.
 
 ## See also
 
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the *measured* impulse
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the *measured* impulse
   response (ISO 18233) and the ISO 3382 parameters the synthetic RIR feeds.
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](/buildings/rooms/reverberation-prediction/):
   the statistical decay rate the image-source model reproduces, and the
   anisotropy models beyond it.
-- [Sound absorption in enclosed spaces (EN 12354-6)](/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](/buildings/rooms/enclosed-space-absorption/):
   the equivalent absorption area behind the mean absorption `alpha_bar`.
-- [Sound Power](/phonometry/devices/emission/sound-power/): the `Lw` that drives the
+- [Sound Power](/devices/emission/sound-power/): the `Lw` that drives the
   steady-state level.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   independent wave solver used to cross-check the rigid-wall echo and the decay.
-- [Theory: Rooms and buildings](/phonometry/reference/theory/rooms-buildings/#room-sound-field-predicted-kuttruff-vorlander-bies):
+- [Theory: Rooms and buildings](/reference/theory/rooms-buildings/#room-sound-field-predicted-kuttruff-vorlander-bies):
   the image-lattice and steady-state derivations, and how the specular decay
   relates to Eyring's statistical one.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the closed forms and worked anchors these implementations are validated
   against.
-- API reference: [`room.image_source`](/phonometry/reference/api/rooms/image-source/)
-  and [`room.steady_field`](/phonometry/reference/api/rooms/steady-field/).
+- API reference: [`room.image_source`](/reference/api/rooms/image-source/)
+  and [`room.steady_field`](/reference/api/rooms/steady-field/).
 
 </SeeAlso>

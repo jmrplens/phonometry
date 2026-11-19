@@ -35,17 +35,17 @@ and impulsive character. Each is 0, 3 or 6 dB and their sum is capped at 9 dB
 *relatives, not the same procedure*, so this module implements the RD's own
 variants rather than delegating:
 
-* [`tonal_audibility`](/phonometry/reference/api/environment/measurement/#tonal_audibility) /
-  [`tonal_adjustment`](/phonometry/reference/api/environment/measurement/#tonal_adjustment) are the
+* [`tonal_audibility`](/reference/api/environment/measurement/#tonal_audibility) /
+  [`tonal_adjustment`](/reference/api/environment/measurement/#tonal_adjustment) are the
   ISO 1996-2 Annex C engineering method: a critical-band audibility
   `ΔLta` mapped to a *continuous* `Kt` in 0 to 6 dB. The RD works on
   one-third-octave band differences and yields 0/3/6 dB only.
-  [`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey) is the
+  [`assess_tonal_survey`](/reference/api/environment/measurement/#assess_tonal_survey) is the
   closest relative (ISO 1996-2:2017 Annex K also splits the spectrum at
   125/400 Hz), but it requires the band to exceed *both* neighbours by
   15/8/5 dB and only says which bands are prominent, whereas the RD compares against the
   *mean* of the neighbours with 8/5/3 dB thresholds and grades the result.
-* [`impulsive_sound_adjustment`](/phonometry/reference/api/environment/impulsive-sound/#impulsive_sound_adjustment)
+* [`impulsive_sound_adjustment`](/reference/api/environment/impulsive-sound/#impulsive_sound_adjustment)
   is the ISO/PAS 1996-3 onset-rate method on a calibrated time signal. The
   RD's `Ki` is the classic $L_\mathrm{AIeq} - L_\mathrm{Aeq}$ impulse-vs-fast
   difference read
@@ -112,7 +112,7 @@ area they sit in (Article 24.1).
 | :--- | :--- |
 | `area_type` | Acoustic area type letter, or an alias. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 
-**Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `LK,x`.
+**Returns:** The applicable [`RegulationLimits`](/reference/api/environment/spain/#regulationlimits) for the index `LK,x`.
 
 **Raises**
 
@@ -197,7 +197,7 @@ assessment against the applicable limits and the boxed verdict.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header and footer identity fields. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header and footer identity fields. |
 | `verbose` | Add the per-phase duration and correction breakdown columns. |
 | `language` | Fiche language: `"es"` (default, the language of the regulation) or `"en"`. |
 
@@ -232,7 +232,7 @@ the street is not.
 | `building_use` | `"residential"`, `"office"` (alias `"administrative"`), `"sanitary"` or `"educational"`. |
 | `room_type` | `"living"`, `"bedrooms"`, `"professional_offices"`, `"offices"`, `"classrooms"` or `"reading_rooms"`. |
 
-**Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `LK,x`.
+**Returns:** The applicable [`RegulationLimits`](/reference/api/environment/spain/#regulationlimits) for the index `LK,x`.
 
 **Raises**
 
@@ -277,15 +277,15 @@ derived from `operating_days`: the reported daily level then represents
 | Name | Description |
 | :--- | :--- |
 | `measurements` | Noise phases keyed by evaluation period (`"day"`, `"evening"`, `"night"`). Periods that are absent are not assessed. |
-| `limits` | The applicable limit row, from [`activity_limits`](/phonometry/reference/api/environment/spain/#activity_limits) or [`adjacent_premises_limits`](/phonometry/reference/api/environment/spain/#adjacent_premises_limits). |
+| `limits` | The applicable limit row, from [`activity_limits`](/reference/api/environment/spain/#activity_limits) or [`adjacent_premises_limits`](/reference/api/environment/spain/#adjacent_premises_limits). |
 | `long_term_levels` | Annual `LK,x` per period, in dB, when known. Keyed by any of `"day"`, `"evening"` or `"night"`. |
 | `operating_days` | Number of days a year the activity operates; used to derive `LK,x` from the daily `LKeq,x` when `long_term_levels` is not given. |
 | `year_days` | Days in the year considered (default 365). |
 | `closed_level` | Level, in dB, representing a day on which the activity does not operate (default 0 dB, as in the Spanish worked literature). |
 | `new_activity` | Whether the annual criterion applies. |
-| `period_hours` | Period durations `T`, in hours, overriding [`RD1367_PERIOD_HOURS`](/phonometry/reference/api/environment/spain/#rd1367_period_hours). Keyed by any of `"day"`, `"evening"` or `"night"`. |
+| `period_hours` | Period durations `T`, in hours, overriding [`RD1367_PERIOD_HOURS`](/reference/api/environment/spain/#rd1367_period_hours). Keyed by any of `"day"`, `"evening"` or `"night"`. |
 
-**Returns:** An [`ActivityAssessment`](/phonometry/reference/api/environment/spain/#activityassessment).
+**Returns:** An [`ActivityAssessment`](/reference/api/environment/spain/#activityassessment).
 
 **Raises**
 
@@ -345,7 +345,7 @@ Evaluation-period level `LKeq,T` from its noise phases.
 
 $L_{\mathrm{Keq},T} = 10 \log_{10}\left[ (1/T) \sum_i T_i \cdot 10^{L_{\mathrm{Keq},Ti}/10} \right]$ (Annex IV
 A.3.4.2 b): the duration-weighted energy mean of the phase levels. The
-returned value is **not** rounded; apply [`round_reported_level`](/phonometry/reference/api/environment/spain/#round_reported_level) for the value
+returned value is **not** rounded; apply [`round_reported_level`](/reference/api/environment/spain/#round_reported_level) for the value
 the regulation asks to report.
 
 **Parameters**
@@ -380,10 +380,10 @@ $K_\mathrm{i} = 3$ for $10 < L_\mathrm{i} \le 15$ dB and $K_\mathrm{i} = 6$ abov
 
 :::note
 This is the classic sound-level-meter route. The onset-rate method of
-[`impulsive_sound_adjustment`](/phonometry/reference/api/environment/impulsive-sound/#impulsive_sound_adjustment)
+[`impulsive_sound_adjustment`](/reference/api/environment/impulsive-sound/#impulsive_sound_adjustment)
 (ISO/PAS 1996-3) is a different, signal-based procedure and its `KI`
 is not interchangeable with this `Ki`. The same misprint as in
-[`low_frequency_correction`](/phonometry/reference/api/environment/spain/#low_frequency_correction) affects the 3 dB row of the printed
+[`low_frequency_correction`](/reference/api/environment/spain/#low_frequency_correction) affects the 3 dB row of the printed
 table.
 :::
 
@@ -425,7 +425,7 @@ cultural buildings.
 | `building_use` | `"residential"`, `"sanitary"` (alias `"hospital"`) or `"educational"`. One of `"residential"`, `"sanitary"`, `"educational"`, `"cultural"`, `"dwelling"`, `"health"`, `"hospital"`, `"hospitalario"` or `"housing"`. |
 | `room_type` | `"living"` (living areas), `"bedrooms"`, `"classrooms"` or `"reading_rooms"`. |
 
-**Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
+**Returns:** The applicable [`RegulationLimits`](/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
 
 **Raises**
 
@@ -454,7 +454,7 @@ values (Article 23.1).
 | :--- | :--- |
 | `area_type` | Acoustic area type letter, or an alias. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 
-**Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
+**Returns:** The applicable [`RegulationLimits`](/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
 
 **Raises**
 
@@ -643,7 +643,7 @@ numeric objective: footnote (2) refers it to the adjoining areas.
 | `area_type` | Acoustic area type: the letter `"e"`, `"a"`, `"d"`, `"c"` or `"b"`, or an alias such as `"residential"`. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 | `urbanization` | `"existing"` (default) for areas already urbanised on 24 October 2007, or `"new"` for the rest (5 dB stricter). |
 
-**Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
+**Returns:** The applicable [`RegulationLimits`](/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
 
 **Raises**
 
@@ -689,7 +689,7 @@ not fields: a period cannot be built to pass levels the article fails.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `period` is not one of [`RD1367_EVALUATION_PERIODS`](/phonometry/reference/api/environment/spain/#rd1367_evaluation_periods). |
+| ValueError | If `period` is not one of [`RD1367_EVALUATION_PERIODS`](/reference/api/environment/spain/#rd1367_evaluation_periods). |
 
 ### PeriodAssessment.daily_limit
 
@@ -877,7 +877,7 @@ emergent tone the largest `Kt` governs (step d).
 :::note
 This is *not* the ISO 1996-2 tonal adjustment. The closest ISO relative
 is the Annex K survey method
-([`assess_tonal_survey`](/phonometry/reference/api/environment/measurement/#assess_tonal_survey)),
+([`assess_tonal_survey`](/reference/api/environment/measurement/#assess_tonal_survey)),
 which compares the band against *both* neighbours with 15/8/5 dB
 thresholds and only flags prominence; the RD compares against their
 arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.
@@ -890,7 +890,7 @@ arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.
 | `levels` | Unweighted one-third-octave band levels, in dB. |
 | `frequencies` | Band centre frequencies, in Hz, in ascending order (one per level). |
 
-**Returns:** A [`TonalCorrectionResult`](/phonometry/reference/api/environment/spain/#tonalcorrectionresult).
+**Returns:** A [`TonalCorrectionResult`](/reference/api/environment/spain/#tonalcorrectionresult).
 
 **Raises**
 
@@ -965,7 +965,7 @@ correction of, say, 4.5 dB is not a reading the regulation can produce.
 | `kf` | Low-frequency correction, in dB (0, 3 or 6). |
 | `ki` | Impulsive correction, in dB (0, 3 or 6). |
 
-**Returns:** The summed correction, in dB, never above [`RD1367_MAX_CORRECTION`](/phonometry/reference/api/environment/spain/#rd1367_max_correction).
+**Returns:** The summed correction, in dB, never above [`RD1367_MAX_CORRECTION`](/reference/api/environment/spain/#rd1367_max_correction).
 
 **Raises**
 

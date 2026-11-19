@@ -99,7 +99,7 @@ can be requested with `frequencies=`.
 **What $L_\mathrm{EX,8h}$ must be.** The first argument is the A-weighted noise
 exposure level normalised to a nominal eight-hour day, in practice the result
 of an
-[ISO 9612 survey](/phonometry/perception/hearing/occupational-exposure/) of the
+[ISO 9612 survey](/perception/hearing/occupational-exposure/) of the
 homogeneous exposure group, which is the standard ISO 1999 references
 normatively for it. It is the level **at the unprotected ear**: the Scope says
 in as many words that none of its levels account for hearing protectors, which
@@ -329,7 +329,7 @@ symbol means, because they are easy to conflate:
   loss the noise causes, and nothing else. It is what an ideal hearing-
   conservation programme would prevent. On its own it is not an audiogram.
 - **HTLA** ($H$) is the *age* threshold alone (the ISO 7029 component of the
-  [hearing-threshold](/phonometry/perception/hearing/hearing-threshold/) guide), the loss
+  [hearing-threshold](/perception/hearing/hearing-threshold/) guide), the loss
   the same person would have with no occupational noise.
 - **HTLAN** ($H'$) is the *total* threshold: age **and** noise combined by
   Formula (1). This is what an audiometer measures, and the only one of the
@@ -440,7 +440,7 @@ The `NIPTSResult` carries the `median` ($N_{50}$), the
 and the `value` at the requested fractile; the `HTLANResult` carries `htla`,
 `nipts` and the combined `threshold`. Both expose `.plot()`. The age component
 alone is the subject of the
-[hearing-threshold](/phonometry/perception/hearing/hearing-threshold/) guide.
+[hearing-threshold](/perception/hearing/hearing-threshold/) guide.
 
 ### HTLAN report (`.report()`)
 
@@ -512,16 +512,16 @@ supply and check it yourself.
 
 ## See also
 
-- [Occupational noise exposure](/phonometry/perception/hearing/occupational-exposure/): the
+- [Occupational noise exposure](/perception/hearing/occupational-exposure/): the
   ISO 9612 survey that produces the $L_\mathrm{EX,8h}$ this model consumes, and the
   uncertainty that comes with it.
-- [Hearing threshold](/phonometry/perception/hearing/hearing-threshold/): the ISO 7029 age
+- [Hearing threshold](/perception/hearing/hearing-threshold/): the ISO 7029 age
   component $H$ this model adds the noise component to, and the ISO 389-7 zero
   the dB HL scale is referred to.
-- [Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/): what a
+- [Speech Intelligibility Index](/perception/speech/speech-intelligibility/): what a
   shifted threshold costs in speech audibility, which is the consequence a
   worker actually notices.
-- API reference: [`hearing.noise_induced_hearing_loss`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/).
-- Theory: [Noise-induced hearing loss (ISO 1999)](/phonometry/reference/theory/perception/#noise-induced-hearing-loss-iso-1999): the ISO 1999 threshold-shift model, its median and its percentile spread.
+- API reference: [`hearing.noise_induced_hearing_loss`](/reference/api/hearing/noise-induced-hearing-loss/).
+- Theory: [Noise-induced hearing loss (ISO 1999)](/reference/theory/perception/#noise-induced-hearing-loss-iso-1999): the ISO 1999 threshold-shift model, its median and its percentile spread.
 
 </SeeAlso>

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/environments/docker.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/docker/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/start/environments/docker/
 
 # Docker and servers
 

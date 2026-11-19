@@ -15,7 +15,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
   time-frequency plane (Eq. 12.173 defines the unweighted magnitude
   version; this module computes the power version with the exact
   `'density'`/`'spectrum'` calibration of
-  [`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density), so a
+  [`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density), so a
   signal in pascals reads directly in Pa²/Hz or Pa² and averaging the
   columns reproduces the Welch estimate bin by bin). Each cell trades the
   time resolution $T_B = \text{nperseg}/f_\mathrm{s}$ against the frequency
@@ -38,7 +38,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
   $d = k_2/(k_2 - k_1)$ and an FFT of the
   decimated record, Eqs. 11.123-11.130) is realized here in its exact
   single-pass digital equivalent, the chirp-Z evaluation of the DFT on
-  the zoom grid ([`scipy.signal.zoom_fft`](/phonometry/reference/api/signals/time-frequency/#zoom_fft)): both compute the same
+  the zoom grid ([`scipy.signal.zoom_fft`](/reference/api/signals/time-frequency/#zoom_fft)): both compute the same
   DFT samples of the record, which the test suite verifies to machine
   precision against the demodulate-decimate-DFT chain. The bin spacing
   can be made arbitrarily fine, but the true resolution stays set by the
@@ -72,7 +72,7 @@ Calibrated STFT power spectrogram (Bendat & Piersol 12.6.4.2).
 
 The record is split into tapered (Hann by default), overlapped
 segments, exactly the segmentation of
-[`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density), and
+[`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density), and
 each segment's one-sided periodogram becomes one column of the
 time-frequency display, without the averaging that the Welch
 estimate applies (averaging the columns reproduces it bin by bin).
@@ -98,14 +98,14 @@ structure
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so every frame's power come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so every frame's power come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the Welch-module default). |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units²). |
 
-**Returns:** A [`SpectrogramResult`](/phonometry/reference/api/signals/time-frequency/#spectrogramresult).
+**Returns:** A [`SpectrogramResult`](/reference/api/signals/time-frequency/#spectrogramresult).
 
 **Raises**
 
@@ -141,7 +141,7 @@ Calibrated STFT power spectrogram (B&P Section 12.6.4.2).
 | :--- | :--- |
 | `times` | Segment-centre times, in seconds (one per column). |
 | `frequencies` | One-sided frequency axis, in Hz (one per row). |
-| `power` | Power spectrogram, shape `(frequencies, times)` (units²/Hz for `'density'` scaling, units² for `'spectrum'`). Each column is the tapered periodogram of one segment, with the exact calibration of [`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density): the column mean over time reproduces the Welch spectrum bin by bin. Integrating a `'density'` column over frequency gives that segment's taper-weighted mean square $\sum (x w)^2 / \sum w^2$; summing those over time *and multiplying by the hop duration* `hop/fs` recovers the record energy $\sum x^2 / f_\mathrm{s}$ when the squared taper overlap-adds to a constant (e.g. Hann at 75 % overlap), up to the taper roll-off at the record edges (the first and last segments are under-weighted: about 1-2 % low for typical records). |
+| `power` | Power spectrogram, shape `(frequencies, times)` (units²/Hz for `'density'` scaling, units² for `'spectrum'`). Each column is the tapered periodogram of one segment, with the exact calibration of [`power_spectral_density`](/reference/api/signals/spectra/#power_spectral_density): the column mean over time reproduces the Welch spectrum bin by bin. Integrating a `'density'` column over frequency gives that segment's taper-weighted mean square $\sum (x w)^2 / \sum w^2$; summing those over time *and multiplying by the hop duration* `hop/fs` recovers the record energy $\sum x^2 / f_\mathrm{s}$ when the squared taper overlap-adds to a constant (e.g. Hann at 75 % overlap), up to the taper roll-off at the record edges (the first and last segments are under-weighted: about 1-2 % low for typical records). |
 | `time_resolution` | Segment duration $T_B = \text{nperseg}/f_\mathrm{s}$, in seconds, the time resolution of the display. |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$ of the tapered segment, in Hz, the frequency resolution ($\approx 1/T_B$ for a light taper; the $B_\mathrm{e} T_B$ product per cell is close to 1). |
 | `random_error` | Normalized random error of each (unaveraged) power cell for random data, $1/\sqrt{n_\mathrm{d}} = 1$ with $n_\mathrm{d} = 1$ (Eq. 8.158); Bendat & Piersol quote $\sqrt{2}/1.25 \approx 1.13$ for the magnitude display (Section 12.6.4.2). Deterministic components are unaffected. |
@@ -194,7 +194,7 @@ procedure (bandpass, complex demodulation to shift `f_min` to zero,
 decimation by the bandwidth ratio, FFT of the decimated record;
 Eqs. 11.123-11.130) is computed here in its exact single-pass digital
 equivalent: the chirp-Z evaluation of the tapered record's DFT on the
-zoom grid ([`scipy.signal.zoom_fft`](/phonometry/reference/api/signals/time-frequency/#zoom_fft)), which yields the same DFT
+zoom grid ([`scipy.signal.zoom_fft`](/reference/api/signals/time-frequency/#zoom_fft)), which yields the same DFT
 samples to machine precision.
 
 Amplitudes are calibrated per taper coherent gain
@@ -211,14 +211,14 @@ tones closer than $B_\mathrm{e}$ (Eq. 11.127).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the spectrum and its amplitude come out in Pa and the power in Pa². |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the spectrum and its amplitude come out in Pa and the power in Pa². |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_min` | Lower edge of the zoom band, in Hz ($\ge 0$). |
 | `f_max` | Upper edge of the zoom band, in Hz ($\le f_\mathrm{s}/2$). |
 | `n_points` | Grid points across `[f_min, f_max]` (endpoints included); `None` places one point per record-length resolution $f_\mathrm{s}/N$. |
 | `window` | Record taper, a scipy window name or a tuple of a name and its parameters (default Hann; `'boxcar'` for none). |
 
-**Returns:** A [`ZoomFFTResult`](/phonometry/reference/api/signals/time-frequency/#zoomfftresult).
+**Returns:** A [`ZoomFFTResult`](/reference/api/signals/time-frequency/#zoomfftresult).
 
 **Raises**
 

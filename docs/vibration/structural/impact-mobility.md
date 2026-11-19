@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/impact-mobility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/impact-mobility/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/impact-mobility/
 
 # Mobility by impact excitation (ISO 7626-5)
 
@@ -656,7 +656,7 @@ Impact-mobility fiche (ImpactMobilityResult.report): the averaged estimate, the 
   the `transfer_function` estimator for the channel-match test of 8.1.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   a force-per-motion FRF measured on a laboratory rig.
-- API reference: [`vibration`: impact mobility](https://docs.jmrp.io/phonometry/reference/api/vibration/impact-mobility/).
+- API reference: [`vibration`: impact mobility](https://phonometry.dev/reference/api/vibration/impact-mobility/).
 
 ## References
 

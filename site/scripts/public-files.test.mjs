@@ -2,9 +2,8 @@
 // target they are written for (src/data/site-targets.json).
 //
 // public/ is copied into dist/ verbatim, so nothing Astro does moves the
-// addresses robots.txt, sitemap.xml and manifest.json write; site-origin.mjs
-// moves only the origin of the first two, for a build made for another host.
-// They are written for the build made with nothing set. .pa11yci.json lists
+// addresses robots.txt, sitemap.xml and manifest.json write: they are written
+// for the build made with nothing set, the one target. .pa11yci.json lists
 // the pages the accessibility audit opens on the local preview, which serves
 // the build under its base path.
 import assert from 'node:assert/strict';

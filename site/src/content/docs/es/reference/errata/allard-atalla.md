@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 8 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Allard & Atalla (2009), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 8 entradas del [registro de erratas](/es/reference/errata/) sobre Allard & Atalla (2009), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Allard & Atalla, Propagation of Sound in Porous Media 2e (2009), Ec. (6.85)
 

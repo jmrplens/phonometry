@@ -66,7 +66,7 @@ the distraction distance `rD` (STI = 0.50) and privacy distance
 | `spl_a_speech` | A-weighted speech level `Lp,A,S,n` at each position, in dB (Clause 6.2, Equation (4)). |
 | `sti_values` | Speech transmission index at each position (full IEC 60268-16 method with spatially averaged background noise, Clause 6.3). |
 
-**Returns:** [`OpenPlanResult`](/phonometry/reference/api/rooms/open-plan/#openplanresult) with `d2s`, `lp_as_4m`, `rd` and `rp`.
+**Returns:** [`OpenPlanResult`](/reference/api/rooms/open-plan/#openplanresult) with `d2s`, `lp_as_4m`, `rd` and `rp`.
 
 **Raises**
 
@@ -184,7 +184,7 @@ above it).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (metrics, plot and result only). The open-plan-specific fields `area` (floor area), `n_source_positions` and `n_receiver_positions` (the number of measurement positions) populate the header, alongside `client`, `test_room` (the office or zone), `specimen` (the description and furnishing state), `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `test_date`, `laboratory`, `operator`, `report_id` and `notes`; `requirement` is read as the minimum acceptable `D2,S`. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (metrics, plot and result only). The open-plan-specific fields `area` (floor area), `n_source_positions` and `n_receiver_positions` (the number of measurement positions) populate the header, alongside `client`, `test_room` (the office or zone), `specimen` (the description and furnishing state), `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `test_date`, `laboratory`, `operator`, `report_id` and `notes`; `requirement` is read as the minimum acceptable `D2,S`. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for parity with the other fiches; the fiche has a single stacked body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

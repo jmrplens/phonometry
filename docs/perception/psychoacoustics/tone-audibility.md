@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/tone-audibility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/tone-audibility/
 
 # Objective audibility of tones in noise (ISO/PAS 20065)
 
@@ -550,7 +550,7 @@ Tonal audibility fiche (ToneAudibilityResult.report), decisive ΔL_ta in dB with
 - [Theory](../../reference/theory/perception.md#tone-prominence-tnr-and-pr-ecma-418-1):
   the neighbouring family of tone metrics, TNR and PR, derived from the same
   critical-band picture.
-- API reference: [`psychoacoustics`: tone audibility](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tone-audibility/).
+- API reference: [`psychoacoustics`: tone audibility](https://phonometry.dev/reference/api/psychoacoustics/tone-audibility/).
 
 ## References
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/detailed-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/detailed-prediction/
 
 # Detailed Per-Band Prediction (ISO 12354)
 
@@ -684,7 +684,7 @@ Detailed impact prediction fiche (DetailedImpactResult.report), the same buildin
   result the prediction is checked against.
 - [Dynamic stiffness of resilient materials (EN 29052-1)](../../materials/resilient/dynamic-stiffness.md):
   the $s'$ behind the floating floor's resonance frequency.
-- API reference: [`building.prediction.detailed_model`](https://docs.jmrp.io/phonometry/reference/api/building/detailed-model/).
+- API reference: [`building.prediction.detailed_model`](https://phonometry.dev/reference/api/building/detailed-model/).
 - Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the direct and flanking path algebra the detailed model itemises.
 
 ## References

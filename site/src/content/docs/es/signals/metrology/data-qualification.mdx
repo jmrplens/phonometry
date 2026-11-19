@@ -37,9 +37,9 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-Todo promedio de esta documentación - una [PSD](/phonometry/es/signals/spectra/spectral-analysis/), un
-[Leq](/phonometry/es/signals/levels/levels/), un
-[balance GUM](/phonometry/es/signals/metrology/gum-uncertainty/) - supone que el registro es
+Todo promedio de esta documentación - una [PSD](/es/signals/spectra/spectral-analysis/), un
+[Leq](/es/signals/levels/levels/), un
+[balance GUM](/es/signals/metrology/gum-uncertainty/) - supone que el registro es
 **estacionario**: que el proceso que lo genera no derivó mientras se medía.
 Bendat y Piersol dedican la Sección 10.3 de *Random Data* a cualificar los
 registros antes del análisis, y `phonometry.metrology` implementa su núcleo
@@ -86,7 +86,7 @@ print(clipped, dead, round(offset, 4), spikes, round(kurtosis, 2))
 | Caídas, canal muerto | la racha más larga de muestras consecutivas idénticas | cualquier racha de más de unos pocos milisegundos es un fallo de transmisión, no una señal |
 | Desplazamiento de continua, deriva infrasónica | la media del registro frente a su desviación típica, y la parte de la PSD por debajo de 20 Hz frente a la banda de interés | elimina la media y filtra en paso alto antes del §4, cuyas fórmulas suponen un proceso de media nula |
 | Picos, contaminación transitoria | muestras más allá de 5σ, o una curtosis muy por encima de 3 en un registro supuestamente gaussiano | edítalos y dilo, o cualifica el registro por trozos |
-| Zumbido de red | picos a 50 o 60 Hz y sus armónicos en una [PSD de Welch](/phonometry/es/signals/spectra/spectral-analysis/) | un fallo de la cadena, no de la fuente; arregla las masas, no los datos |
+| Zumbido de red | picos a 50 o 60 Hz y sus armónicos en una [PSD de Welch](/es/signals/spectra/spectral-analysis/) | un fallo de la cadena, no de la fuente; arregla las masas, no los datos |
 
 El registro sintético de arriba imprime `0 1 0.0024 0 3.02`, que es el aspecto de
 lo limpio: ninguna muestra recortada, ninguna muestra repetida, un desplazamiento
@@ -96,7 +96,7 @@ una curtosis de 3,0, como debe tener un registro gaussiano.
 Junto a los números, los metadatos de adquisición tienen que viajar con el
 fichero o nada de esto se puede reconstruir después: frecuencia de muestreo,
 profundidad de bits, ajuste de ganancia, el
-[factor de calibración](/phonometry/es/signals/metrology/calibration/) y la toma de
+[factor de calibración](/es/signals/metrology/calibration/) y la toma de
 la que salió, micrófono y pantalla antiviento, y, en exteriores, velocidad del
 viento y temperatura. La regla es sencillamente que la validación precede a la
 cualificación: primero editar o rechazar, después probar la estacionariedad.
@@ -469,7 +469,7 @@ $N_0 = 2B/\sqrt{3}$ (una frecuencia aparente de $0{,}58B$, Ejemplo 5.12) y
 una banda centrada en $f_\mathrm{c}$ da $N_0 = 2\sqrt{f_\mathrm{c}^2 + B^2/12}$
 (Ejemplo 5.13). `level_crossing_rate` cuenta los cruces reales de cada
 nivel y pone al lado la curva de Rice, tomando los momentos del propio
-[autoespectro de Welch](/phonometry/es/signals/spectra/spectral-analysis/) del registro:
+[autoespectro de Welch](/es/signals/spectra/spectral-analysis/) del registro:
 
 ```python
 import numpy as np
@@ -664,19 +664,19 @@ banda físicamente significativa.
 
 La cualificación va *antes* de las estadísticas que calculan las demás
 páginas de esta sección: el intervalo de confianza chi-cuadrado de una
-[PSD de Welch](/phonometry/es/signals/spectra/spectral-analysis/) y las
+[PSD de Welch](/es/signals/spectra/spectral-analysis/) y las
 fórmulas de error
 aleatorio de los [estimadores de
-correlación](/phonometry/es/signals/spectra/correlation-delay/)
+correlación](/es/signals/spectra/correlation-delay/)
 suponen que el registro es estacionario, igual que la idea misma de *el*
-$L_\mathrm{eq}$ de una medición en [Niveles](/phonometry/es/signals/levels/levels/). Cuando un
+$L_\mathrm{eq}$ de una medición en [Niveles](/es/signals/levels/levels/). Cuando un
 registro no pasa el test, divídelo en el cambio (la secuencia
 `segment_values` muestra dónde), analiza los trozos, o pasa a las
 vistas de tiempo corto - el
-[espectrograma calibrado](/phonometry/es/signals/spectra/time-frequency/) -
+[espectrograma calibrado](/es/signals/spectra/time-frequency/) -
 que no suponen
 estacionariedad. Y cuando pasa, la
-[maquinaria GUM](/phonometry/es/signals/metrology/gum-uncertainty/) puede
+[maquinaria GUM](/es/signals/metrology/gum-uncertainty/) puede
 propagar el error
 aleatorio *restante* de cada estimación promediada con la conciencia
 tranquila.
@@ -711,11 +711,11 @@ módulo.
 
 ## Véase también
 
-- [Análisis espectral](/phonometry/es/signals/spectra/spectral-analysis/): el intervalo de confianza chi-cuadrado que da por supuesta la estacionariedad que esta página comprueba.
-- [Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/): la vista de corto plazo para los registros que suspenden el test, y para los barridos que su valor cuadrático medio no ve.
-- [Incertidumbre GUM](/phonometry/es/signals/metrology/gum-uncertainty/): propagar el error aleatorio que le queda a un promedio ya cualificado.
-- [Niveles](/phonometry/es/signals/levels/levels/): el $L_\mathrm{eq}$ cuya definición supone una única medición estacionaria.
-- Referencia de la API: [`metrology.data_qualification`](/phonometry/es/reference/api/metrology/data-qualification/).
-- Teoría: [Incertidumbre de medida (GUM)](/phonometry/es/reference/theory/signal-analysis/#incertidumbre-de-medida-isoiec-guide-98-3-gum-y-suplemento-1): el marco de incertidumbre que alimentan los criterios de cualificación de esta página.
+- [Análisis espectral](/es/signals/spectra/spectral-analysis/): el intervalo de confianza chi-cuadrado que da por supuesta la estacionariedad que esta página comprueba.
+- [Análisis tiempo-frecuencia](/es/signals/spectra/time-frequency/): la vista de corto plazo para los registros que suspenden el test, y para los barridos que su valor cuadrático medio no ve.
+- [Incertidumbre GUM](/es/signals/metrology/gum-uncertainty/): propagar el error aleatorio que le queda a un promedio ya cualificado.
+- [Niveles](/es/signals/levels/levels/): el $L_\mathrm{eq}$ cuya definición supone una única medición estacionaria.
+- Referencia de la API: [`metrology.data_qualification`](/es/reference/api/metrology/data-qualification/).
+- Teoría: [Incertidumbre de medida (GUM)](/es/reference/theory/signal-analysis/#incertidumbre-de-medida-isoiec-guide-98-3-gum-y-suplemento-1): el marco de incertidumbre que alimentan los criterios de cualificación de esta página.
 
 </SeeAlso>

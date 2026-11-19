@@ -128,7 +128,7 @@ $$
 
 with references $f_0 = 1\ \text{Hz}$, $m_0 = 1\ \text{kg}$ (printed as 1 kg; the
 quantity it normalises is a mass per unit area, so the reference is
-$1\ \text{kg/m}^2$; see the [errata registry](/phonometry/reference/errata/)),
+$1\ \text{kg/m}^2$; see the [errata registry](/reference/errata/)),
 $S_0 = 1\ \text{m}^2$; the $-60\ \text{dB}$ term is $10\log_{10}(v_0^2/P_0)$ for
 the EN 15657 velocity reference $v_0 = 10^{-9}\ \text{m/s}$ and
 $P_0 = 1\ \text{pW}$. The plate
@@ -210,7 +210,7 @@ source attached. The pair brackets the installation: a real building element sit
 between the two, and the gap between the two determinations is what says whether
 the machine behaves as a force source or as a velocity source. The plate-injected
 power plus the plate's point mobility (see
-[mechanical mobility](/phonometry/vibration/structural/mechanical-mobility/)) yield the
+[mechanical mobility](/vibration/structural/mechanical-mobility/)) yield the
 source description for the EN 12354-5 model through the conversion chain below.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_rigs.svg" alt="EN 15657 reception plates: the low-mobility concrete plate in plan with its velocity positions and clearances, the high-mobility perforated steel sheet in its frame, and the three-plate bench for a source touching several building elements" width="92%" />
@@ -320,7 +320,7 @@ injects a different power into a different receiver. EN 15657 derives the
 plate-independent quantities: the **equivalent blocked force level**
 (Formula 15, re $F_0 = 10^{-6}\ \text{N}$, not the 1 N reference of the
 ISO 16283-2
-[impact force exposure level](/phonometry/buildings/insulation/heavy-impact-sources/),
+[impact force exposure level](/buildings/insulation/heavy-impact-sources/),
 120 dB away) from the low-mobility plate,
 
 $$
@@ -341,7 +341,7 @@ and, from the high-mobility plate, the **equivalent free velocity level**
 $|Y_\mathrm{S,eq}|$
 (Formula 19). The EN 12354-5 Annex I mobility correction
 (`installed_power_from_reception_plate`, see
-[installed structure-borne sound](/phonometry/buildings/design/installed-structure-borne/))
+[installed structure-borne sound](/buildings/design/installed-structure-borne/))
 then refers $L_\mathrm{Wsn}$ to the actual receiving element.
 
 ```python
@@ -421,7 +421,7 @@ plt.show()
 With the *receiver* mobility it gives the installed power level
 $L_\mathrm{Ws,inst} = 68.2$ dB. With the *source* mobility it gives the
 plate-independent characteristic power level $L_\mathrm{Ws,c} = 84.4$ dB, and that is
-what [EN 12354-5](/phonometry/buildings/design/installed-structure-borne/) takes
+what [EN 12354-5](/buildings/design/installed-structure-borne/) takes
 as its input, from which it subtracts the coupling term $D_\mathrm{C} = 16.2$ dB to
 arrive back at the same 68.2 dB. Feed EN 12354-5 the 84.4, never the 68.2:
 carrying 68.2 forward as the characteristic power level subtracts $D_\mathrm{C}$ a
@@ -532,7 +532,7 @@ of the standard is cited as the source-side counterpart, not implemented.
 
 ## See also
 
-- API reference: [`building.measurement.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/).
-- Theory: [Point mobilities and radiation efficiency](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the point mobility, the source-receiver mismatch and the injected power they define.
+- API reference: [`building.measurement.structure_borne_power`](/reference/api/building/structure-borne-power/).
+- Theory: [Point mobilities and radiation efficiency](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the point mobility, the source-receiver mismatch and the injected power they define.
 
 </SeeAlso>

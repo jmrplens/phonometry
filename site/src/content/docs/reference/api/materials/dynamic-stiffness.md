@@ -63,8 +63,8 @@ applies when $s'_\mathrm{t} \gg s'_\mathrm{a}$, otherwise `s'` cannot be resolve
 
 This module is the resilient-layer characterisation feeding the floating-floor
 term of the EN 12354-2 impact model
-([`phonometry.building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/)). It does **not** feed
-ISO 16251-1 ([`phonometry.building.measurement.floor_covering_improvement`](/phonometry/reference/api/building/floor-covering-improvement/)), whose
+([`phonometry.building.prediction.simplified_model`](/reference/api/building/simplified-model/)). It does **not** feed
+ISO 16251-1 ([`phonometry.building.measurement.floor_covering_improvement`](/reference/api/building/floor-covering-improvement/)), whose
 scope is limited to soft, locally-reacting floor coverings; floating floors
 are explicitly excluded there.
 
@@ -196,7 +196,7 @@ frequencies are shown to 0.1 Hz.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness_m` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness_m` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the dynamic-stiffness fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -300,7 +300,7 @@ frequency (Formula 2).
 | `porosity` | Specimen porosity `epsilon`, required with `thickness_m` (see above). |
 | `static_pressure_pa` | Atmospheric pressure `p0`, in pascals. |
 
-**Returns:** The [`DynamicStiffnessResult`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnessresult).
+**Returns:** The [`DynamicStiffnessResult`](/reference/api/materials/dynamic-stiffness/#dynamicstiffnessresult).
 
 **Raises**
 
@@ -330,7 +330,7 @@ lateral airflow resistivity `r`:
 * $r < 10$ kPa.s/m2 -> the standard only requires the qualitative
   criterion $s'_\mathrm{t} \gg s'_\mathrm{a}$ (clause 8.2). This implementation
   applies its own engineering threshold: `s'a` below 10 % of `s't` is treated as
-  negligible and $s' = s'_\mathrm{t}$ (a [`DynamicStiffnessWarning`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnesswarning) is
+  negligible and $s' = s'_\mathrm{t}$ (a [`DynamicStiffnessWarning`](/reference/api/materials/dynamic-stiffness/#dynamicstiffnesswarning) is
   emitted; clause 8.2 requires the error caused by disregarding `s'a` to
   be stated in the test report); above it the result is `nan`, as the
   method cannot resolve `s'`.
@@ -347,7 +347,7 @@ in pascal seconds per square metre, a thousand times smaller a unit.
 | :--- | :--- |
 | `apparent_stiffness_n_m3` | Apparent dynamic stiffness `s't`, in N/m3. |
 | `airflow_resistivity_kpa_s_m2` | Lateral airflow resistivity `r`, in kPa.s/m2 (ISO 9053). |
-| `gas_stiffness_n_m3` | Enclosed-gas dynamic stiffness `s'a`, in N/m3 (see [`enclosed_gas_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/#enclosed_gas_stiffness)). Required below 100 kPa.s/m2, where Formula 6 adds it and case c) weighs it against `s't`; above, Formula 5 does not use it. |
+| `gas_stiffness_n_m3` | Enclosed-gas dynamic stiffness `s'a`, in N/m3 (see [`enclosed_gas_stiffness`](/reference/api/materials/dynamic-stiffness/#enclosed_gas_stiffness)). Required below 100 kPa.s/m2, where Formula 6 adds it and case c) weighs it against `s't`; above, Formula 5 does not use it. |
 
 **Returns:** The installed dynamic stiffness per unit area `s'`, in N/m3 (`nan` when the method cannot resolve it).
 
@@ -385,7 +385,7 @@ $f_0 = (1/2\pi)\sqrt{s'/m'}$.
 
 | Name | Description |
 | :--- | :--- |
-| `dynamic_stiffness_n_m3` | Dynamic stiffness per unit area `s'` of the installed layer, in N/m3 (scalar or array). The apparent `s't` of a test specimen is not it; [`installed_dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/#installed_dynamic_stiffness) turns one into the other. |
+| `dynamic_stiffness_n_m3` | Dynamic stiffness per unit area `s'` of the installed layer, in N/m3 (scalar or array). The apparent `s't` of a test specimen is not it; [`installed_dynamic_stiffness`](/reference/api/materials/dynamic-stiffness/#installed_dynamic_stiffness) turns one into the other. |
 | `mass_per_area_kg_m2` | Mass per unit area of the supported floor `m'`, in kg/m2. |
 
 **Returns:** The natural frequency `f0`, in hertz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
@@ -453,9 +453,9 @@ Look up a published resilient layer, or pass one through.
 
 | Name | Description |
 | :--- | :--- |
-| `layer` | A key of [`PUBLISHED_RESILIENT_LAYERS`](/phonometry/reference/api/materials/dynamic-stiffness/#published_resilient_layers), spelled `"<table>/<row>"` like every catalogue key, as `"hopkins-2007-table-a3/mineral_wool_rock_60_30"`, or a [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer) already in hand, such as one built from a product's test report. |
+| `layer` | A key of [`PUBLISHED_RESILIENT_LAYERS`](/reference/api/materials/dynamic-stiffness/#published_resilient_layers), spelled `"<table>/<row>"` like every catalogue key, as `"hopkins-2007-table-a3/mineral_wool_rock_60_30"`, or a [`ResilientLayer`](/reference/api/materials/dynamic-stiffness/#resilientlayer) already in hand, such as one built from a product's test report. |
 
-**Returns:** The [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer).
+**Returns:** The [`ResilientLayer`](/reference/api/materials/dynamic-stiffness/#resilientlayer).
 
 **Raises**
 
@@ -498,7 +498,7 @@ ResilientLayer(
 
 A resilient layer under a floating floor, as its source prints it.
 
-A row of a catalogue like every other ([`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow)):
+A row of a catalogue like every other ([`CatalogueRow`](/reference/api/io/io/#cataloguerow)):
 every quantity is optional, because a source prints some columns and not
 others, and a cell that holds something other than a number, such as the
 bound `s' <= 9 MN/m3` a product declaration prints, is held by the row's
@@ -513,7 +513,7 @@ the lateral airflow resistivity `r` and the enclosed-gas stiffness
 `dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does. A test
 report gives `s't` and `s'a`, and `s'` only "if possible" (clause
 9 e)); one that leaves `s'` out, like a sheet that gives `s't` alone,
-fills `apparent_dynamic_stiffness_n_m3`, and [`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency)
+fills `apparent_dynamic_stiffness_n_m3`, and [`natural_frequency`](/reference/api/materials/dynamic-stiffness/#natural_frequency)
 then needs `r`, and below 100 kPa.s/m2 the report's `s'a`, to go on.
 
 **Attributes**
@@ -528,7 +528,7 @@ then needs `r`, and below 100 kPa.s/m2 the report's `s'a`, to go on.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -552,7 +552,7 @@ then needs `r`, and below 100 kPa.s/m2 the report's `s'a`, to go on.
 ResilientLayer.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -582,7 +582,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -675,15 +675,15 @@ ResilientLayer.natural_frequency(
 `f0` of a floor of this mass per unit area on this layer.
 
 $f_0 = (1/2\pi)\sqrt{s'/m'}$ (Formula 2), through the module's
-[`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency).
+[`natural_frequency`](/reference/api/materials/dynamic-stiffness/#natural_frequency).
 
 A row that gives `s'` is used as it is, and the two keywords are
 refused, because nothing would read them. A row that gives only the
-apparent `s't` goes through [`installed_dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/#installed_dynamic_stiffness)
+apparent `s't` goes through [`installed_dynamic_stiffness`](/reference/api/materials/dynamic-stiffness/#installed_dynamic_stiffness)
 first, which is clause 8.2: `s' = s't` at or above 100 kPa.s/m2,
 `s' = s't + s'a` from 10 up to 100, and below 10 `s' = s't` only
 while `s'a` is negligible (`nan`, with a
-[`DynamicStiffnessWarning`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnesswarning), when it is not).
+[`DynamicStiffnessWarning`](/reference/api/materials/dynamic-stiffness/#dynamicstiffnesswarning), when it is not).
 
 The resistivity is taken in pascal seconds per square metre, the unit
 every flow resistivity of this library's catalogues is held in, and
@@ -700,7 +700,7 @@ resistivity passed picks.
 | :--- | :--- |
 | `mass_per_area_kg_m2` | Mass per unit area of the supported floor `m'`, in kg/m2. |
 | `airflow_resistivity_pa_s_m2` | Lateral airflow resistivity `r` of the layer (ISO 9053), in Pa.s/m2, for a row that gives only `s't`. |
-| `gas_stiffness_n_m3` | Enclosed-gas stiffness `s'a` of the layer (Formula 7, [`enclosed_gas_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/#enclosed_gas_stiffness)), in N/m3, for a row that gives only `s't` and a resistivity below 100 kPa.s/m2. |
+| `gas_stiffness_n_m3` | Enclosed-gas stiffness `s'a` of the layer (Formula 7, [`enclosed_gas_stiffness`](/reference/api/materials/dynamic-stiffness/#enclosed_gas_stiffness)), in N/m3, for a row that gives only `s't` and a resistivity below 100 kPa.s/m2. |
 
 **Returns:** The natural frequency `f0`, in hertz.
 
@@ -708,7 +708,7 @@ resistivity passed picks.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names; for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. A cell the computation needs and the row does not hold is refused as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted) refuses it. |
+| ValueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names; for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. A cell the computation needs and the row does not hold is refused as [`printed`](/reference/api/io/io/#cataloguerowprinted) refuses it. |
 | TypeError | if `mass_per_area_kg_m2` is not a single number. |
 
 ### ResilientLayer.printed()

@@ -47,7 +47,7 @@ la cadena de vibroacústica estructural: la fuente se describe por su nivel de
 potencia acústica estructural característica $L_\mathrm{Ws,c}$, derivado de la medición
 sobre placa receptora de EN 15657 mediante la conversión de las Fórmulas
 (15)/(17) y una corrección de movilidad (**no** el nivel bruto inyectado en la
-placa; véase [EN 15657](/phonometry/es/buildings/design/structure-borne-power/)); las
+placa; véase [EN 15657](/es/buildings/design/structure-borne-power/)); las
 movilidades puntuales de fuente y receptor fijan cuánta potencia se acopla
 realmente a la estructura, y la transmisión del edificio la lleva al recinto
 receptor. La corrección de movilidad del Anexo I,
@@ -144,7 +144,7 @@ $L_\mathrm{Ws,n} + 10\log_{10}(Y_{\infty,i}/Y_{\infty,\mathrm{rec}})$ cuando no.
 la cisterna del Anexo I.3 las dos dan 68,2 dB a 63 Hz, a partir de
 $L_\mathrm{Ws,c} = 84,4$ dB y $D_\mathrm{C} = 16,2$ dB. Fíjate en qué magnitud te entregan:
 $L_\mathrm{Ws,c}$ es la entrada que toma esta página, y *no* es los 68,2 dB que la
-[página de EN 15657](/phonometry/es/buildings/design/structure-borne-power/)
+[página de EN 15657](/es/buildings/design/structure-borne-power/)
 imprime como su nivel instalado porque meter ese valor aquí resta $D_\mathrm{C}$ dos veces.
 
 La física detrás de $D_\mathrm{C}$ es la clásica potencia de entrada de una placa
@@ -152,9 +152,9 @@ excitada en un punto: solo la parte real de la movilidad en el punto de
 excitación del receptor absorbe potencia, y el desajuste entre $Y_\mathrm{s}$ e $Y_i$
 decide cuánta de la capacidad de la fuente entra realmente en la estructura
 (Hopkins 2007, Sección 2.8). Las propias movilidades vienen de la
-[cadena de movilidad mecánica](/phonometry/es/vibration/structural/mechanical-mobility/):
+[cadena de movilidad mecánica](/es/vibration/structural/mechanical-mobility/):
 medidas según ISO 7626, o de las formas cerradas de placa infinita de la
-[teoría de paneles](/phonometry/es/buildings/design/panel-sound-insulation/) cuando no
+[teoría de paneles](/es/buildings/design/panel-sound-insulation/) cuando no
 hay medición. Una bomba sobre una losa de hormigón es la fuente de fuerza de
 libro: la movilidad de su carcasa queda órdenes de magnitud por encima de la
 de la losa, así que $D_\mathrm{C}$ se reduce a la Fórmula 19c y la potencia inyectada
@@ -341,7 +341,7 @@ print(round(float(-10 * np.log10(1 - j0(2 * k_b * a))), 1))    # 11.9 dB menos
 
 La movilidad de transferencia $Y_k$ de la Fórmula (19e) no es una magnitud de
 placa en absoluto: es la rigidez dinámica de transferencia del soporte, medida en
-el [banco de ISO 10846](/phonometry/es/vibration/structural/transfer-stiffness/).
+el [banco de ISO 10846](/es/vibration/structural/transfer-stiffness/).
 La posición de fijación y la hoja de características del soporte van las dos en el `notes`
 del informe, porque son las dos cosas que hacen reproducible una predicción
 repetida.
@@ -366,7 +366,7 @@ $10\log_{10}(0{,}8f/10^{-12})$ en tercios de octava
 156 dB, así que lee la tabla donde la tabla existe y la forma cerrada solo para
 los tercios de octava que no tabula. Y los niveles están referidos a
 $10^{-6}$ N pese al «re 1 pN» que imprime el pie; véase el
-[registro de erratas](/phonometry/es/reference/errata/).
+[registro de erratas](/es/reference/errata/).
 
 El apartado D.1.3 trata entonces la máquina como fuente de fuerza con la
 movilidad tipo masa de sus martillos de 0,5 kg, lo que convierte la tabla en las
@@ -511,7 +511,7 @@ todo el espectro, y sin que se levante ningún error.
 :::
 
 Todas las entradas de la Fórmula (F.3) están ya disponibles:
-[`in_situ_element`](/phonometry/es/buildings/design/detailed-prediction/#parametros-de-in_situ_element)
+[`in_situ_element`](/es/buildings/design/detailed-prediction/#parametros-de-in_situ_element)
 devuelve el tiempo de reverberación estructural in situ, el factor de radiación
 y la $R$ del elemento, y `structure_to_airborne_adjustment` es la propia
 Fórmula (F.3).
@@ -610,7 +610,7 @@ Dos números del fragmento de código de abajo son de la norma, no inventados:
 `16.2` es el término de acoplamiento de la cisterna del Anexo I.3 en su contacto
 con la pared, y el array `lwc` es el nivel de potencia característico de esa
 cisterna, los 84,4 dB que la
-[página de EN 15657](/phonometry/es/buildings/design/structure-borne-power/)
+[página de EN 15657](/es/buildings/design/structure-borne-power/)
 deriva a 63 Hz. `requirement` se compara con `overall_level`, así que los 45 dB
 de abajo son un límite de suma de bandas *sin ponderar*; un reglamento enunciado
 en dB(A) hay que comprobarlo, en cambio, contra la suma ponderada A del apartado
@@ -694,17 +694,17 @@ edición de 2009, no la revisión de 2023.
 
 ## Véase también
 
-- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/buildings/design/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/es/buildings/design/structure-borne-power/):
   la caracterización sobre placa receptora que aporta $L_\mathrm{Ws,c}$ y la movilidad
   de fuente que consume esta predicción.
-- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/es/vibration/structural/mechanical-mobility/):
   las $Y_\mathrm{s}$ e $Y_i$ medidas tras el término de acoplamiento.
-- [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/):
+- [Transmisión de onda de flexión en uniones de placas](/es/vibration/structural/junction-transmission/):
   la física de unión que lleva la potencia instalada a los radiadores por
   flancos.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   los miembros aéreo y de impactos de la misma familia de predicción.
-- Referencia de la API: [`building.prediction.installed_structure_borne`](/phonometry/es/reference/api/building/installed-structure-borne/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la teoría de movilidad y eficiencia de radiación desde la que se predice el nivel instalado.
+- Referencia de la API: [`building.prediction.installed_structure_borne`](/es/reference/api/building/installed-structure-borne/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la teoría de movilidad y eficiencia de radiación desde la que se predice el nivel instalado.
 
 </SeeAlso>

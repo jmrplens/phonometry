@@ -20,7 +20,7 @@ power of `phonometry.emission` and the received level indoors.
 **Room constant** $R = S \bar{\alpha} / (1 - \bar{\alpha})$ (Bies
 Equation (6.44)), with the total boundary area `S` and its area-weighted
 mean Sabine absorption `alpha_bar`
-([`phonometry.room.mean_absorption`](/phonometry/reference/api/rooms/reverberation-prediction/#mean_absorption)). `R` has units of
+([`phonometry.room.mean_absorption`](/reference/api/rooms/reverberation-prediction/#mean_absorption)). `R` has units of
 area and measures how much reverberant field a given power builds up: a live
 room (small `alpha_bar`) has a small `R` and a loud reverberant field, a
 dead room a large `R`.
@@ -39,7 +39,7 @@ Dropping the direct term (`distance=None`) leaves
 $L_p = L_W + 10 \log_{10}(4/R)$,
 the reverberant field alone: the level far from the source, and the one a
 diffuse-field calculation such as a room-to-room transmission
-([`phonometry.noise_control.room_to_room`](/phonometry/reference/api/noise_control/room-to-room/)) works from.
+([`phonometry.noise_control.room_to_room`](/reference/api/noise_control/room-to-room/)) works from.
 The optional $10 \log_{10}(\rho c / 400)$ term corrects for a
 characteristic impedance `rho c` differing from the reference 400 Pa s/m; it
 is about `+0.14 dB` at 20 degC and is omitted by default (Bies notes the
@@ -55,7 +55,7 @@ absorption area $A = S \bar{\alpha}$ in place of the room constant
 $R = A / (1 - \bar{\alpha})$;
 the two coincide for a small `alpha_bar` and differ by the factor
 $1 - \bar{\alpha}$ otherwise. This module uses the room constant, so
-`rc` is exactly the crossover of its own [`steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl).
+`rc` is exactly the crossover of its own [`steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl).
 
 **Sound power model.** Both relations above assume the radiated power itself is
 a property of the machine. Norton & Karczub, *Fundamentals of Noise and
@@ -68,7 +68,7 @@ a corner, the conservative upper bound a design estimate uses), and a
 $\Pi_0 / Q$. Real machines sit
 between the first two whenever the source is closer to the boundary than a
 wavelength. `source_model` selects which of the three
-[`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models) is applied.
+[`SOURCE_POWER_MODELS`](/reference/api/rooms/steady-field/#source_power_models) is applied.
 
 **Schroeder frequency** $f_\mathrm{s} = 2000 \sqrt{T / V}$ (Kuttruff Equation
 (3.44),
@@ -135,7 +135,7 @@ Critical (reverberation) distance
 $r_\mathrm{c} = \sqrt{Q R / (16 \pi)}$.
 
 The distance at which the direct and reverberant fields of
-[`steady_state_spl`](/phonometry/reference/api/rooms/steady-field/#steady_state_spl) are equal (Bies Equation (6.43) crossover;
+[`steady_state_spl`](/reference/api/rooms/steady-field/#steady_state_spl) are equal (Bies Equation (6.43) crossover;
 Kuttruff Equation (5.44) states the $Q = 1$ form with the Sabine
 absorption area $A = S \bar{\alpha}$ instead of the room constant
 `R`, the two differing by $1 - \bar{\alpha}$).
@@ -149,8 +149,8 @@ ventilation opening begins.
 
 | Name | Description |
 | :--- | :--- |
-| `room_constant` | Room constant `R`, m2 (scalar or per-band); from [`room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant). Give this or `absorption_area`, not both. |
-| `absorption_area` | Equivalent absorption area `A`, m2 (scalar or per-band); from [`sabine_absorption_area`](/phonometry/reference/api/rooms/steady-field/#sabine_absorption_area). Give this or `room_constant`, not both. |
+| `room_constant` | Room constant `R`, m2 (scalar or per-band); from [`room_constant`](/reference/api/rooms/steady-field/#room_constant). Give this or `absorption_area`, not both. |
+| `absorption_area` | Equivalent absorption area `A`, m2 (scalar or per-band); from [`sabine_absorption_area`](/reference/api/rooms/steady-field/#sabine_absorption_area). Give this or `room_constant`, not both. |
 | `directivity` | Source directivity factor `Q` (`1` omnidirectional, `2` on one reflecting plane, `4` in an edge, `8` in a corner), scalar or per-band. |
 
 **Returns:** The critical distance `rc`, m; a `float` when the absorption measure and `directivity` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
@@ -189,7 +189,7 @@ Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
 | Name | Description |
 | :--- | :--- |
 | `surface_area` | Total boundary area `S` of the room, m2. |
-| `mean_absorption` | Area-weighted mean Sabine absorption `alpha_bar` in `(0, 1)` (scalar or per-band); e.g. from [`phonometry.room.mean_absorption`](/phonometry/reference/api/rooms/reverberation-prediction/#mean_absorption). |
+| `mean_absorption` | Area-weighted mean Sabine absorption `alpha_bar` in `(0, 1)` (scalar or per-band); e.g. from [`phonometry.room.mean_absorption`](/reference/api/rooms/reverberation-prediction/#mean_absorption). |
 
 **Returns:** The room constant `R`, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
@@ -230,7 +230,7 @@ $$
 A = \frac{24 \ln 10}{c_0} \frac{V}{T}
 $$
 
-which is [`phonometry.room.sabine_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time) read the other
+which is [`phonometry.room.sabine_reverberation_time`](/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time) read the other
 way about: the absorption a measured or assumed `T` implies, which is
 what a level calculation needs and what a room survey actually delivers.
 
@@ -337,7 +337,7 @@ distance (crossover of the two fields).
 | `directivity` | Source directivity factor `Q` (default 1). |
 | `characteristic_impedance` | Optional `rho c` for the Bies $10 \log_{10}(\rho c / 400)$ term (`None` omits it). |
 
-**Returns:** A [`SteadyFieldResult`](/phonometry/reference/api/rooms/steady-field/#steadyfieldresult).
+**Returns:** A [`SteadyFieldResult`](/reference/api/rooms/steady-field/#steadyfieldresult).
 
 **Raises**
 
@@ -390,10 +390,10 @@ such as a room-to-room transmission uses.
 | :--- | :--- |
 | `sound_power_level` | Source sound power level `Lw`, dB re 1 pW (scalar or per-band); e.g. from `phonometry.emission`. |
 | `distance` | Source-receiver distance `r`, m (scalar or array), or `None` for the reverberant field alone. |
-| `room_constant` | Room constant `R`, m2 (scalar or per-band); from [`room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant). Give this or `absorption_area`, not both. |
-| `absorption_area` | Equivalent absorption area `A`, m2 (scalar or per-band); from [`sabine_absorption_area`](/phonometry/reference/api/rooms/steady-field/#sabine_absorption_area). Give this or `room_constant`, not both. Written in `A`, the expression is VDI 2081 Blatt 1 Equation (36) for the level a ventilation outlet produces in a room. |
+| `room_constant` | Room constant `R`, m2 (scalar or per-band); from [`room_constant`](/reference/api/rooms/steady-field/#room_constant). Give this or `absorption_area`, not both. |
+| `absorption_area` | Equivalent absorption area `A`, m2 (scalar or per-band); from [`sabine_absorption_area`](/reference/api/rooms/steady-field/#sabine_absorption_area). Give this or `room_constant`, not both. Written in `A`, the expression is VDI 2081 Blatt 1 Equation (36) for the level a ventilation outlet produces in a room. |
 | `directivity` | Source directivity factor `Q` (default 1; `2` on one reflecting plane, `4` in an edge, `8` in a corner), scalar or per-band. A diffuser is more directional the shorter the wavelength, which is why the factor is allowed to vary across the bands. |
-| `source_model` | Sound power model of Norton & Karczub 2e Table 4.5: `"constant_power"` (default, $\Pi = \Pi_0$, the position of the source does not change its radiated power), `"constant_volume"` ($\Pi = \Pi_0 Q$, reflecting boundaries raise the radiated power by $10 \log_{10} Q$; the conservative upper bound) or `"constant_pressure"` ($\Pi = \Pi_0 / Q$, the theoretical lower bound). See [`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models). |
+| `source_model` | Sound power model of Norton & Karczub 2e Table 4.5: `"constant_power"` (default, $\Pi = \Pi_0$, the position of the source does not change its radiated power), `"constant_volume"` ($\Pi = \Pi_0 Q$, reflecting boundaries raise the radiated power by $10 \log_{10} Q$; the conservative upper bound) or `"constant_pressure"` ($\Pi = \Pi_0 / Q$, the theoretical lower bound). See [`SOURCE_POWER_MODELS`](/reference/api/rooms/steady-field/#source_power_models). |
 | `characteristic_impedance` | Air characteristic impedance `rho c`, Pa s/m. When given, the $10 \log_{10}(\rho c / 400)$ term is added (about `+0.14 dB` at 20 degC where $\rho c = 413$); `None` (default) omits it, matching the common textbook form. |
 
 **Returns:** The steady-state SPL `Lp`, dB; a `float` when `sound_power_level`, `distance`, the absorption measure and `directivity` are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
@@ -402,7 +402,7 @@ such as a room-to-room transmission uses.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | unless exactly one absorption measure is given; if `distance`, the measure or `directivity` is not positive and finite; or if `source_model` is not one of [`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models). |
+| ValueError | unless exactly one absorption measure is given; if `distance`, the measure or `directivity` is not positive and finite; or if `source_model` is not one of [`SOURCE_POWER_MODELS`](/reference/api/rooms/steady-field/#source_power_models). |
 | TypeError | if `source_model` is not a text, or `characteristic_impedance` is not a single number, or `absorption_area`, `directivity`, `distance`, `room_constant` or `sound_power_level` holds a text or a value that is not a real number. |
 
 ## SteadyFieldResult

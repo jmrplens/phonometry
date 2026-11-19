@@ -56,7 +56,7 @@ steadily at all, the noise burst whose descriptor is the sound energy level
 $L_J$ of clause 8.3. That route is theirs alone: ISO 3745 defines no sound
 energy level. Which
 route fits which job, and the reverberation-room and intensity alternatives,
-are weighed in [Sound Power](/phonometry/devices/emission/sound-power/).
+are weighed in [Sound Power](/devices/emission/sound-power/).
 
 ## 1. Enveloping surface, sound pressure (ISO 3744 / ISO 3746)
 
@@ -169,7 +169,7 @@ no adjustment in between, the two readings shall differ by no more than
 system's own compliance is verified in a traceable laboratory at intervals not
 exceeding two years, the calibrator's at intervals not exceeding one year. The
 mechanics of that check are on
-[Calibration](/phonometry/signals/metrology/calibration/).
+[Calibration](/signals/metrology/calibration/).
 
 Each microphone is oriented with its reference direction normal to the
 measurement surface, and at a corner of a box surface pointing at the origin $O$
@@ -495,7 +495,7 @@ the level falls with distance and the array has to sample a whole surface,
 which is why the only geometry the method needs, once the room is qualified, is
 the surface term $10\log_{10}(S/S_0)$. The right-hand panel is the
 reverberation-room alternative of
-[ISO 3741](/phonometry/devices/emission/sound-power-reverberation/), and both
+[ISO 3741](/devices/emission/sound-power-reverberation/), and both
 end on the same $L_W$.
 
 <Video
@@ -1108,7 +1108,7 @@ and the Annex G correction to reference meteorological conditions
 Neither determination performs the facility qualification it rests on: the
 free-field qualification of the anechoic or hemi-anechoic room is its own
 step, by ISO 26101 against the amended ISO 3745 Annex A, in
-[Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/),
+[Free Field and Reference Sources](/devices/emission/free-field-qualification/),
 whose verdict `sound_power_anechoic` takes as `room_qualification` and warns
 on, and ISO 3744's $K_2$ validity only warns. ISO
 3744's **Annex G** correction to reference meteorological conditions, required
@@ -1122,7 +1122,7 @@ meteorological correction of ISO 3745 needs an air-absorption coefficient the
 caller supplies (`air_absorption_db_per_m=`); this module does not compute
 it from ISO 9613-1 itself. Choosing among the seven routes, and the ISO 4871
 declaration a result feeds, live in [Sound
-Power](/phonometry/devices/emission/sound-power/).
+Power](/devices/emission/sound-power/).
 </ScopeClaim>
 </Scope>
 
@@ -1130,22 +1130,22 @@ Power](/phonometry/devices/emission/sound-power/).
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the seven
+- [Sound Power](/devices/emission/sound-power/): choosing among the seven
   determination routes, the accuracy grades and the ISO 4871 noise-emission
   declaration.
-- [Sound Power in the Reverberation Room (ISO 3741)](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](/devices/emission/sound-power-reverberation/):
   the precision-grade diffuse-field alternative when the source can travel
   to a qualified room.
-- [Sound Power by Intensity Scanning (ISO 9614)](/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614)](/devices/emission/sound-power-intensity/):
   the routes that tolerate the steady background noise a pressure method
   cannot subtract.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the reverberation
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the reverberation
   time and equivalent absorption area that feed $K_2$.
-- [Levels](/phonometry/signals/levels/levels/): energy averaging and the A-weighting
+- [Levels](/signals/levels/levels/): energy averaging and the A-weighting
   behind $L_{W\mathrm{A}}$.
-- [Theory](/phonometry/reference/theory/environment-transport/): the $K_1$/$K_2$
+- [Theory](/reference/theory/environment-transport/): the $K_1$/$K_2$
   and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](/phonometry/reference/api/power/sound-power/).
-- Theory: [Sound power determination](/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface derivation of ISO 3744/3746 and the environmental correction it needs.
+- API reference: [`emission.sound_power`](/reference/api/power/sound-power/).
+- Theory: [Sound power determination](/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface derivation of ISO 3744/3746 and the environmental correction it needs.
 
 </SeeAlso>

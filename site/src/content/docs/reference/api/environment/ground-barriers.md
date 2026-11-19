@@ -8,7 +8,7 @@ sidebar:
 Spherical-wave ground effect and advanced barrier diffraction.
 
 This module extends the tabulated ground and barrier terms of ISO 9613-2 (see
-[`phonometry.environment.propagation.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/)) with the underlying wave
+[`phonometry.environment.propagation.outdoor_propagation`](/reference/api/environment/outdoor-propagation/)) with the underlying wave
 acoustics: the spherical-wave reflection coefficient of a finite-impedance
 ground and the wave-theoretic diffraction of a screen, both in a homogeneous
 (non-refracting, non-turbulent) atmosphere.
@@ -68,7 +68,7 @@ $F \to 0$. The ground impedance is taken in
 the $\mathrm{e}^{-i \omega t}$ time convention of Salomons, in which a passive
 ground has $\operatorname{Im}(Z) > 0$; it may be supplied directly or
 derived from the porous models of `phonometry.materials`
-([`delany_bazley`](/phonometry/reference/api/materials/porous/#delany_bazley) / [`miki`](/phonometry/reference/api/materials/porous/#miki)),
+([`delany_bazley`](/reference/api/materials/porous/#delany_bazley) / [`miki`](/reference/api/materials/porous/#miki)),
 which model a semi-infinite porous ground whose surface impedance equals the
 characteristic impedance of the medium. The materials domain works in the
 opposite $\mathrm{e}^{+j \omega t}$ convention ($\operatorname{Im}(Z) < 0$
@@ -131,8 +131,8 @@ diffraction edge at `(barrier_distance, barrier_height)` and the receiver
 at `(receiver_distance, receiver_height)`. Three models are available:
 
 * `method="kurze_anderson"`: the closed form
-  [`kurze_anderson_attenuation`](/phonometry/reference/api/environment/ground-barriers/#kurze_anderson_attenuation) of the Fresnel number
-  [`fresnel_number`](/phonometry/reference/api/environment/ground-barriers/#fresnel_number) (Bies Eqs. (5.134)/(5.138)); with `thickness_m` the
+  [`kurze_anderson_attenuation`](/reference/api/environment/ground-barriers/#kurze_anderson_attenuation) of the Fresnel number
+  [`fresnel_number`](/reference/api/environment/ground-barriers/#fresnel_number) (Bies Eqs. (5.134)/(5.138)); with `thickness_m` the
   double-edge Fresnel number $N = (2/\lambda)(A + B + e - d)$ of
   Bies Eq. (5.157) is used, `e` being the top width.
 * `method="exact"` without ground: the wave-theoretic insertion loss of the
@@ -142,7 +142,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
   `ground_flow_resistivity_pa_s_m2`): the coherent four-path model. The field with
   the barrier sums the four source-image / receiver-image diffracted paths,
   each ground reflection weighted by the spherical-wave coefficient `Q`
-  ([`spherical_reflection_coefficient`](/phonometry/reference/api/environment/ground-barriers/#spherical_reflection_coefficient)); the field without the barrier
+  ([`spherical_reflection_coefficient`](/reference/api/environment/ground-barriers/#spherical_reflection_coefficient)); the field without the barrier
   is the two-ray ground field. This exposes the ground-barrier interference
   structure (Attenborough Ch. 9; Bies Sec. 5.3.5). As a first-order
   simplification a single `Q` (evaluated over the overall
@@ -165,9 +165,9 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | `ground_impedance` | Normalized ground impedance for the coherent ground model (`"exact"` only), in the $\mathrm{e}^{-i \omega t}$ convention ($\operatorname{Im}(Z) > 0$ for a passive ground); a `PorousMediumResult` is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention. |
 | `ground_flow_resistivity_pa_s_m2` | Effective flow resistivity `sigma` (Pa s/m2) for the ground model, as an alternative to `ground_impedance`. |
 | `ground_model` | Porous model for `ground_flow_resistivity_pa_s_m2`. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`BarrierInsertionLoss`](/phonometry/reference/api/environment/ground-barriers/#barrierinsertionloss).
+**Returns:** A [`BarrierInsertionLoss`](/reference/api/environment/ground-barriers/#barrierinsertionloss).
 
 **Raises**
 
@@ -290,7 +290,7 @@ loss is better) and a footer identity/disclaimer block.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position) and the footer identity. A supplied `requirement` is read as the minimum required mean insertion loss in dB. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position) and the footer identity. A supplied `requirement` is read as the minimum required mean insertion loss in dB. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the per-band table adds the Fresnel number `N` column. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -392,14 +392,14 @@ Spherical-wave ground effect above a finite-impedance ground.
 Assembles the two-ray field
 $p = \mathrm{e}^{ikR_1}/(4 \pi R_1) + Q \, \mathrm{e}^{ikR_2}/(4 \pi R_2)$
 with the spherical-wave reflection coefficient `Q` of
-[`spherical_reflection_coefficient`](/phonometry/reference/api/environment/ground-barriers/#spherical_reflection_coefficient) and reports the relative sound
+[`spherical_reflection_coefficient`](/reference/api/environment/ground-barriers/#spherical_reflection_coefficient) and reports the relative sound
 level
 $\Delta L = 20 \log_{10}\left| 1 + Q (R_1/R_2) \mathrm{e}^{i k (R_2 - R_1)} \right|$ (Salomons Eq. (3.4)),
 i.e. the level re the free field.
 
 The ground surface impedance is either supplied through `impedance` (a
 normalized complex array/scalar, or a
-[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) or derived from an
+[`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult)) or derived from an
 effective `flow_resistivity_pa_s_m2` (in Pa s/m2) via the `model` porous model
 of the materials domain. Exactly one of the two must be given.
 
@@ -412,11 +412,11 @@ of the materials domain. Exactly one of the two must be given.
 | `receiver_height_m` | Receiver height `hr`, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |
 | `impedance` | Normalized ground impedance ($\mathrm{e}^{-i \omega t}$ convention, $\operatorname{Im}(Z) > 0$ for a passive ground), or a `PorousMediumResult` (which is conjugated internally from the materials' $\mathrm{e}^{+j \omega t}$ convention). |
-| `flow_resistivity_pa_s_m2` | Effective flow resistivity `sigma` (Pa s/m2); grassland is about `2e5` (Salomons Sec. 3.1). The porous model raises a [`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) when the lowest bands fall below its published fit range $0.01 < \rho f / \sigma < 1$ (it still extrapolates a value there). |
+| `flow_resistivity_pa_s_m2` | Effective flow resistivity `sigma` (Pa s/m2); grassland is about `2e5` (Salomons Sec. 3.1). The porous model raises a [`PorousAbsorberWarning`](/reference/api/materials/porous/#porousabsorberwarning) when the lowest bands fall below its published fit range $0.01 < \rho f / \sigma < 1$ (it still extrapolates a value there). |
 | `model` | Porous model for `flow_resistivity_pa_s_m2` (`"delany_bazley"` or `"miki"`). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** A [`SphericalGroundResult`](/phonometry/reference/api/environment/ground-barriers/#sphericalgroundresult).
+**Returns:** A [`SphericalGroundResult`](/reference/api/environment/ground-barriers/#sphericalgroundresult).
 
 **Raises**
 
@@ -494,7 +494,7 @@ Draw the source-barrier-receiver section to scale.
 Ground line, thin (or thick) screen, the direct path cut by the screen
 and the diffracted path over the top edge(s), with the path-length
 difference annotated. Distances follow
-[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss):
+[`barrier_insertion_loss`](/reference/api/environment/ground-barriers/#barrier_insertion_loss):
 `receiver_distance` is horizontal from the source.
 
 **Parameters**

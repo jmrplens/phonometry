@@ -14,13 +14,13 @@ grades what it measured, clause by clause, and writes the statement Clause 22
 prescribes for the outcome.
 
 **The rule.** Every result is judged by the conformance rule of IEC TC 29
-that 4.1 states ([`phonometry.metrology.verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance)): the
+that 4.1 states ([`phonometry.metrology.verify_conformance`](/reference/api/metrology/conformance/#verify_conformance)): the
 measured deviation from the design goal within the acceptance limits **and**
 the laboratory's actual expanded uncertainty, for a coverage probability of
 95 %, within the maximum permitted by Table B.1 of IEC 61672-1, both limits
 inclusive. A result whose uncertainty exceeds its maximum "shall not be used
 to evaluate conformance" (4.3): it is neither a pass nor, by itself, a
-failure of the meter, [`SoundLevelMeterPeriodicVerification.unusable`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationunusable)
+failure of the meter, [`SoundLevelMeterPeriodicVerification.unusable`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationunusable)
 lists it and the verdict does not pass while it is there.
 
 **The manufacturer's correction data (4.4).** The acoustical test of the
@@ -32,10 +32,10 @@ maximum; when the total exceeds the maximum only because of it, "testing may
 proceed", and the result is one that did not conform, with the reason the
 NOTE to 22 t) gives in the statement. The record takes that uncertainty
 beside the total,
-[`SoundLevelMeterPeriodicMeasurements.acoustic_weighting_uncertainties_without_correction_data_db`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicmeasurements)
+[`SoundLevelMeterPeriodicMeasurements.acoustic_weighting_uncertainties_without_correction_data_db`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicmeasurements)
 and its Clause 13 twin, and a result it clears is listed under
-[`SoundLevelMeterPeriodicVerification.over_max_by_correction_data`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationover_max_by_correction_data)
-and [`SoundLevelMeterPeriodicVerification.failed`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationfailed) rather than under
+[`SoundLevelMeterPeriodicVerification.over_max_by_correction_data`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationover_max_by_correction_data)
+and [`SoundLevelMeterPeriodicVerification.failed`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationfailed) rather than under
 `unusable`. Without it the total is all the verdict knows, and 4.3 applies.
 
 **What is graded**, with the acceptance limits of IEC 61672-1:2013 each clause
@@ -87,7 +87,7 @@ statement says so before anything its results would say.
 
 **What a complete test covers.** 8.1 asks for every test of a design feature
 IEC 61672-1 requires and the meter provides. A record shows a feature through
-the results it holds, and [`SoundLevelMeterFeatures`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures) declares the
+the results it holds, and [`SoundLevelMeterFeatures`](/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures) declares the
 optional ones the meter has or lacks, as its instruction manual states them;
 the verdict holds the record to both: frequency weighting A always and C for
 class 1 (5.1.9, 5.1.10), C as well for a meter that measures C-weighted peak
@@ -118,26 +118,26 @@ no C-weighted peak sound level (5.1.10), one without the F time weighting has
 no S either (5.1.9), and one without F, a time-averaged display or sound
 exposure level indicates nothing 5.1.9 asks of a sound level meter and is
 refused.
-[`SoundLevelMeterPeriodicVerification.missing`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationmissing) names the clauses a
-complete test lacks, [`SoundLevelMeterPeriodicVerification.incomplete`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationincomplete)
+[`SoundLevelMeterPeriodicVerification.missing`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationmissing) names the clauses a
+complete test lacks, [`SoundLevelMeterPeriodicVerification.incomplete`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationincomplete)
 what a measured clause is short of,
-[`SoundLevelMeterPeriodicVerification.not_applicable`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationnot_applicable) the clauses a
+[`SoundLevelMeterPeriodicVerification.not_applicable`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationnot_applicable) the clauses a
 feature declared absent takes out, and
-[`SoundLevelMeterPeriodicVerification.undeclared`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationundeclared) the features the
+[`SoundLevelMeterPeriodicVerification.undeclared`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationundeclared) the features the
 record neither shows nor declares, which a record that left their tests out
 cannot be told from: the verdict does not pass while one is open.
 
 **The tables.** The acceptance limits of Table 3 are read through
-[`phonometry.filters.weighting_class_limits`](/phonometry/reference/api/filters/weighting-compliance/#weighting_class_limits), which already publishes
+[`phonometry.filters.weighting_class_limits`](/reference/api/filters/weighting-compliance/#weighting_class_limits), which already publishes
 them. Table 4 (the reference toneburst responses), Table 5 (the reference
 differences of the C-weighted peak) and Table B.1 (the maximum-permitted
-uncertainties) are published here, read-only, as [`IEC61672_TABLE_4`](/phonometry/reference/api/metrology/sound-level-meter/#iec61672_table_4),
-[`IEC61672_TABLE_5`](/phonometry/reference/api/metrology/sound-level-meter/#iec61672_table_5) and [`IEC61672_TABLE_B1`](/phonometry/reference/api/metrology/sound-level-meter/#iec61672_table_b1).
+uncertainties) are published here, read-only, as [`IEC61672_TABLE_4`](/reference/api/metrology/sound-level-meter/#iec61672_table_4),
+[`IEC61672_TABLE_5`](/reference/api/metrology/sound-level-meter/#iec61672_table_5) and [`IEC61672_TABLE_B1`](/reference/api/metrology/sound-level-meter/#iec61672_table_b1).
 
 **What a pass here is, and is not.** It is a verdict on the numbers put in:
 the preliminary inspection (Clause 5), the power supply (Clause 6), the
 calibrator's own conformance to IEC 60942 (Clause 9, which
-[`phonometry.metrology.verify_sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) grades), the general
+[`phonometry.metrology.verify_sound_calibrator`](/reference/api/metrology/sound-calibrator/#verify_sound_calibrator) grades), the general
 test requirements of 8.2 to 8.5 (among them the confirmation of 8.4 that an
 electrical output used for the tests reads as the display does) and the
 source of the correction data (12.2 to 12.6) are the laboratory's record. And
@@ -337,10 +337,10 @@ meter has the feature, `False` it has not, `None` (the default) not
 declared, and for the level ranges their number. The verdict owes the
 tests of every feature declared or shown, lists the clauses a feature
 declared absent takes out of the test under
-[`SoundLevelMeterPeriodicVerification.not_applicable`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationnot_applicable), and holds a
+[`SoundLevelMeterPeriodicVerification.not_applicable`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationnot_applicable), and holds a
 feature neither declared nor shown as an open question that keeps the
 test incomplete, under
-[`SoundLevelMeterPeriodicVerification.undeclared`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationundeclared), as it holds the
+[`SoundLevelMeterPeriodicVerification.undeclared`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationundeclared), as it holds the
 number of level ranges of a meter Clause 17 shows to have several, which
 17.3 and 17.4 cover. A feature declared absent takes with it the one IEC
 61672-1 makes depend on it: without frequency weighting C the meter
@@ -426,10 +426,10 @@ keyword-only, so the unit in its name is written at the call site.
 | `calibration_check_adjusted_level` | The indication after adjustment (the same number when none was needed). |
 | `microphone_self_noise_level` | 11.1: the A-weighted self-generated noise with the microphone installed, on the most-sensitive level range; reported for information only, without an uncertainty. |
 | `electrical_self_noise_levels` | 11.2: the self-generated noise with the electrical input-signal device, keyed by frequency weighting (`"A"`, `"C"`, `"Z"`), every weighting the meter provides. |
-| `acoustic_weighting_deviations_db` | 12.16: the deviations of the relative frequency weighting from its design goal at 125 Hz and 8 kHz, in that order ([`ACOUSTIC_TEST_FREQUENCIES_HZ`](/phonometry/reference/api/metrology/sound-level-meter/#acoustic_test_frequencies_hz)), after the corrections of 12.14. |
+| `acoustic_weighting_deviations_db` | 12.16: the deviations of the relative frequency weighting from its design goal at 125 Hz and 8 kHz, in that order ([`ACOUSTIC_TEST_FREQUENCIES_HZ`](/reference/api/metrology/sound-level-meter/#acoustic_test_frequencies_hz)), after the corrections of 12.14. |
 | `acoustic_weighting_uncertainties_db` | Their uncertainties. |
 | `acoustic_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same uncertainties without the uncertainty of the manufacturer's free-field or random-incidence correction data, never more than the totals. A result whose total exceeds its maximum and whose uncertainty without that data does not is a result that did not conform, for that reason, rather than one 4.3 forbids using. |
-| `electrical_weighting_deviations_db` | 13.9: for every frequency weighting the meter provides, keyed `"A"`, `"C"`, `"Z"`, the corrected relative frequency weightings, which are the deviations from the design goal, at [`ELECTRICAL_TEST_FREQUENCIES_HZ`](/phonometry/reference/api/metrology/sound-level-meter/#electrical_test_frequencies_hz) for the class in order, NaN at a frequency not measured. |
+| `electrical_weighting_deviations_db` | 13.9: for every frequency weighting the meter provides, keyed `"A"`, `"C"`, `"Z"`, the corrected relative frequency weightings, which are the deviations from the design goal, at [`ELECTRICAL_TEST_FREQUENCIES_HZ`](/reference/api/metrology/sound-level-meter/#electrical_test_frequencies_hz) for the class in order, NaN at a frequency not measured. |
 | `electrical_weighting_uncertainties_db` | The same keys and shape. Keyed by any of `"A"`, `"C"` or `"Z"`. |
 | `electrical_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same without the uncertainty of the manufacturer's correction data, which 13.7 applies too; the same keys, shape and gaps. Keyed by any of `"A"`, `"C"` or `"Z"`. |
 | `weighting_at_1khz_deviations_db` | 14.2: the C-weighted and Z-weighted indications at 1 kHz less the A-weighted one, keyed `"C"` and `"Z"`. |
@@ -447,7 +447,7 @@ keyword-only, so the unit in its name is written at the call site.
 | `linearity_under_range_level` | The anticipated level of the step that first caused an indication of under-range, which the falling steps of 16.3 stop short of. |
 | `range_linearity_deviations_db` | 17.5: the level linearity deviations including the level range control, at 1 kHz, keyed `"17.3"` (the reference sound level of 17.2 held on each level range besides the reference one, NaN where it is not displayed) and `"17.4"` (5 dB above the first indication of under-range on each level range, NaN where not measured). `"17.4"` starts with the reference level range, which 17.4 tests "for each level range" as well, and then takes the other ranges in the order of `"17.3"`, so it holds one value more; 17.3 has no reading on the reference range, where the reference sound level of 17.2 deviates by zero by construction (IEC 61672-1 5.6.3). |
 | `range_linearity_uncertainties_db` | The same keys, shape and gaps. Keyed by any of `"17.3"` or `"17.4"`. |
-| `toneburst_responses_db` | 18: the toneburst responses relative to the steady level, keyed `"F"` ($L_\mathrm{AFmax} - L_\mathrm{A}$), `"S"` ($L_\mathrm{ASmax} - L_\mathrm{A}$) and `"E"` ($L_\mathrm{AE} - L_\mathrm{A}$), each at [`TONEBURST_TEST_DURATIONS_MS`](/phonometry/reference/api/metrology/sound-level-meter/#toneburst_test_durations_ms) in order, NaN where not measured. The deviation from Table 4 is taken by the verdict. |
+| `toneburst_responses_db` | 18: the toneburst responses relative to the steady level, keyed `"F"` ($L_\mathrm{AFmax} - L_\mathrm{A}$), `"S"` ($L_\mathrm{ASmax} - L_\mathrm{A}$) and `"E"` ($L_\mathrm{AE} - L_\mathrm{A}$), each at [`TONEBURST_TEST_DURATIONS_MS`](/reference/api/metrology/sound-level-meter/#toneburst_test_durations_ms) in order, NaN where not measured. The deviation from Table 4 is taken by the verdict. |
 | `toneburst_uncertainties_db` | The same keys and shape. Keyed by any of `"F"`, `"S"` or `"E"`. |
 | `c_peak_differences` | 19.6: $L_\mathrm{Cpeak} - L_\mathrm{C}$ for one cycle at 8 kHz, a positive half cycle at 500 Hz and a negative half cycle at 500 Hz, in that order, NaN where not measured. The deviation from Table 5 is taken by the verdict. |
 | `c_peak_uncertainties_db` | Their uncertainties. |
@@ -478,11 +478,11 @@ The verdict on one requirement of IEC 61672-3:2013.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | The requirement, one of [`SLM_PERIODIC_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). One of `"acoustic_weighting"`, `"electrical_weighting"`, `"weighting_at_1khz"`, `"time_weighting_at_1khz"`, `"long_term_stability"`, `"level_linearity"`, `"range_linearity"`, `"toneburst"`, `"c_peak"`, `"overload"` or `"high_level_stability"`. |
+| `name` | The requirement, one of [`SLM_PERIODIC_REQUIREMENTS`](/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). One of `"acoustic_weighting"`, `"electrical_weighting"`, `"weighting_at_1khz"`, `"time_weighting_at_1khz"`, `"long_term_stability"`, `"level_linearity"`, `"range_linearity"`, `"toneburst"`, `"c_peak"`, `"overload"` or `"high_level_stability"`. |
 | `clause` | The clause of IEC 61672-3:2013 that tests it. One of `"12"`, `"13"`, `"14.2"`, `"14.3"`, `"15"`, `"16"`, `"17"`, `"18"`, `"19"`, `"20"` or `"21"`. |
 | `tables` | Where IEC 61672-1:2013 prints its acceptance limits and maximum-permitted uncertainty. |
 | `labels` | What each result is (the frequency, the weighting, the toneburst or the signal), in the order given. |
-| `verifications` | One [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification) per result, on the deviation from the design goal. |
+| `verifications` | One [`ConformanceVerification`](/reference/api/metrology/conformance/#conformanceverification) per result, on the deviation from the design goal. |
 | `checks` | The yes/no requirements of the clause, each `(what, held)`: no overload or under-range indication within the linear operating range (16.4), no overload indication during the C-weighted peak test (19.3, 19.5) and the latching of the overload indicator (20.5). |
 | `over_max_by_correction_data` | The results whose actual uncertainty exceeds its maximum only because it includes the uncertainty of the manufacturer's free-field or random-incidence correction data (4.4): results that did not conform, for that reason, and not results 4.3 forbids using. |
 
@@ -604,7 +604,7 @@ The IEC 61672-3:2013 verdict on the periodic tests of a sound level meter.
 | `pattern_approval_public` | Whether evidence is publicly available that the model passed the pattern evaluation of IEC 61672-2 (22 c). |
 | `corrections_in_manual` | Whether the correction data for the acoustical test of the frequency weighting came from the instruction manual (12.3) rather than from another manufacturer (12.4). |
 | `measurements` | The record the verdict was reached on. |
-| `requirements` | One [`SoundLevelMeterPeriodicRequirement`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirement) per requirement measured, in the order of the standard. |
+| `requirements` | One [`SoundLevelMeterPeriodicRequirement`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirement) per requirement measured, in the order of the standard. |
 | `features` | The optional features declared for the meter (8.1); every one left at `None` when none were declared. |
 
 ### SoundLevelMeterPeriodicVerification.conditions_outside
@@ -717,7 +717,7 @@ within its limits. The mark is a cross for a result that did not
 conform, one over its maximum only by the manufacturer's correction
 data included (4.4), hollow for one 4.3 forbids using, and otherwise
 a diamond at the result nearest its limit. Each requirement's own
-[`SoundLevelMeterPeriodicRequirement.plot`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirementplot) draws its results one
+[`SoundLevelMeterPeriodicRequirement.plot`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirementplot) draws its results one
 by one.
 
 Requires matplotlib (the `[plot]` extra); returns the
@@ -751,9 +751,9 @@ The verdict on one requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`SLM_PERIODIC_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). |
+| `name` | One of [`SLM_PERIODIC_REQUIREMENTS`](/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). |
 
-**Returns:** Its [`SoundLevelMeterPeriodicRequirement`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirement).
+**Returns:** Its [`SoundLevelMeterPeriodicRequirement`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirement).
 
 **Raises**
 
@@ -790,7 +790,7 @@ without either, which carries the caveat of Clause 1.
 A feature the record shows through a result is the meter's; one the
 record holds no result of may be absent from the meter or left out of
 the test, and only `features` can tell the two apart (8.1). Each
-such feature, a field of [`SoundLevelMeterFeatures`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures), keeps the
+such feature, a field of [`SoundLevelMeterFeatures`](/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures), keeps the
 test from passing until it is declared. The sound exposure level is
 not asked for when the meter displays time-averaged sound level, from
 which 18.2 calculates it anyway. The number of level ranges stays open
@@ -880,7 +880,7 @@ prints for it and the maximum-permitted uncertainties of its Table B.1;
 see the module docstring for which clause reads which. The verdict passes
 when the record is complete, the tests were performed within the
 conditions of 7.1 and every result conforms; its
-[`statement`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationstatement) is the text
+[`statement`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverificationstatement) is the text
 Clause 22 prescribes for the case. A frequency-weighting result whose
 uncertainty exceeds its maximum only because of the manufacturer's
 correction data is a result that did not conform, by 4.4, when the record
@@ -898,9 +898,9 @@ feature.
 | `measurements` | The laboratory's results and uncertainties. |
 | `pattern_approval_public` | Whether evidence is publicly available, from an independent testing organization, that the model passed the pattern evaluation of IEC 61672-2. Without it a passing meter still supports no general conclusion about IEC 61672-1 (Clause 1), and the statement is 22 s) rather than 22 r). |
 | `corrections_in_manual` | Whether the correction data for the acoustical test of the frequency weighting were provided in the instruction manual (12.3). Data from another source (12.4) lead to 22 s) as well, and so does a source not declared: 12.5 has the laboratory state it, and 22 r) is written only on both declarations. |
-| `features` | Which optional design features of IEC 61672-1 the meter has, and how many level ranges, as its instruction manual states them: a [`SoundLevelMeterFeatures`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures), or `None` for none declared. A feature declared present owes its tests, and one declared absent takes its clauses out of the test. |
+| `features` | Which optional design features of IEC 61672-1 the meter has, and how many level ranges, as its instruction manual states them: a [`SoundLevelMeterFeatures`](/reference/api/metrology/sound-level-meter/#soundlevelmeterfeatures), or `None` for none declared. A feature declared present owes its tests, and one declared absent takes its clauses out of the test. |
 
-**Returns:** A [`SoundLevelMeterPeriodicVerification`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverification).
+**Returns:** A [`SoundLevelMeterPeriodicVerification`](/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicverification).
 
 **Raises**
 

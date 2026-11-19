@@ -34,11 +34,11 @@ combined form is verified when $L_1 \le L_\mathrm{d}$ and the dual-number form
 when $L_1 \le (L + K)$, the sum of the separately rounded declared
 values (clause 6.2).
 
-This module models a declaration as [`NoiseEmissionDeclaration`](/phonometry/reference/api/power/declaration/#noiseemissiondeclaration), a set of
-[`OperatingModeDeclaration`](/phonometry/reference/api/power/declaration/#operatingmodedeclaration) values (one per operating mode, clause 4), and
+This module models a declaration as [`NoiseEmissionDeclaration`](/reference/api/power/declaration/#noiseemissiondeclaration), a set of
+[`OperatingModeDeclaration`](/reference/api/power/declaration/#operatingmodedeclaration) values (one per operating mode, clause 4), and
 renders it as an ISO 4871 declaration fiche through `.report`. A
 declaration is most often built from a measured sound power via
-[`declare`](/phonometry/reference/api/power/sound-power/#soundpowerresultdeclare).
+[`declare`](/reference/api/power/sound-power/#soundpowerresultdeclare).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -57,7 +57,7 @@ NoiseEmissionDeclaration(
 
 An ISO 4871:1996 declaration of noise emission values (clauses 4 to 6).
 
-A declaration is one or more [`OperatingModeDeclaration`](/phonometry/reference/api/power/declaration/#operatingmodedeclaration) values (one
+A declaration is one or more [`OperatingModeDeclaration`](/reference/api/power/declaration/#operatingmodedeclaration) values (one
 per operating mode, clause 4) plus the accompanying information required by
 clause 5: identification of the machinery (clause 5 a), the noise test code
 and basic standards used (clause 5 b) and the operating conditions
@@ -115,7 +115,7 @@ identity/disclaimer block.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the laboratory identity (footer) and, through `measurement_standard`, the basic emission standard shown in the standard-basis line when `basic_standards` is empty. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the laboratory identity (footer) and, through `measurement_standard`, the basic emission standard shown in the standard-basis line when `basic_standards` is empty. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the declaration fiche has a single table layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

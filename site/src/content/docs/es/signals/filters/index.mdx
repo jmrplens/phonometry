@@ -20,7 +20,7 @@ de decibelio de más en todas las bandas, y por eso conviene que una campaña
 fije una arquitectura y la mantenga.
 
 La página fundacional es
-[Bancos de filtros](/phonometry/es/signals/filters/filter-banks/). Cubre la matemática
+[Bancos de filtros](/es/signals/filters/filter-banks/). Cubre la matemática
 de las bandas, cómo se descompone una señal en bandas de 1/1, 1/3 o 1/b
 arbitrario, el ecualizador paramétrico y el modo offline de fase cero para
 análisis donde el retardo del filtro no debe emborronar el resultado.
@@ -28,12 +28,12 @@ Por dentro, cada banco es una cascada de secciones de segundo orden con
 diezmado multitasa, que es lo que mantiene numéricamente estables las bandas
 de baja frecuencia. Elegir entre las cinco arquitecturas (Butterworth,
 Chebyshev I/II, elíptica y Bessel) es el trabajo de la
-[Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/):
+[Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/):
 qué intercambian sus respuestas en frecuencia entre sí, la galería completa
 de respuestas y el uso de cada arquitectura, más el crossover Linkwitz-Riley.
 
 Demostrar que un banco diseñado cumple esas tolerancias es el trabajo de
-[Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
+[Verificación de clase de filtros (IEC 61260-1)](/es/signals/filters/filter-compliance/):
 la máscara de aceptación de la Tabla 1 banda a banda, el ancho de banda
 efectivo y la suma de salidas tal como los ensaya IEC 61260-2, el ensayo de
 invariancia en el tiempo con barrido, la clase 0 más estricta de la edición
@@ -42,7 +42,7 @@ de conformidad acreditada de una página. La misma guía califica los resultados
 de los ensayos periódicos de IEC 61260-3 de un laboratorio.
 
 Las otras dos páginas escalan esa base por dos ejes independientes.
-[Procesado por bloques](/phonometry/es/signals/filters/block-processing/) la escala en
+[Procesado por bloques](/es/signals/filters/block-processing/) la escala en
 *tiempo*: las señales que no caben en memoria (grabaciones de horas,
 monitorización en vivo, registradores embebidos) se procesan búfer a búfer
 arrastrando el estado de los filtros, de modo que el resultado es idéntico
@@ -50,7 +50,7 @@ bit a bit a una única pasada *por ese mismo banco*: el streaming descarta
 tanto el diezmado multitasa como la eliminación de tendencia por bloque que
 un banco offline usa por defecto, así que la pasada offline contra la que se
 compara un resultado en streaming hay que construirla igual.
-[Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/) la escala en
+[Multicanal y rendimiento](/es/signals/filters/multichannel/) la escala en
 *canales*: los arrays de micrófonos y las grabaciones multicanal se analizan
 vectorizados, una llamada para todos los canales, con notas sobre dónde se va
 realmente el tiempo de cálculo.
@@ -61,19 +61,19 @@ páginas producen.
 
 ## Páginas de esta sección
 
-- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): la matemática de
+- [Bancos de filtros](/es/signals/filters/filter-banks/): la matemática de
   las bandas, los parámetros del banco, el ecualizador paramétrico, la
   descomposición en bandas y el filtrado de fase cero.
-- [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/):
+- [Galería de arquitecturas de filtro](/es/signals/filters/filter-gallery/):
   las cinco arquitecturas comparadas, la galería de respuestas y el uso de
   cada arquitectura.
-- [Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
+- [Verificación de clase de filtros (IEC 61260-1)](/es/signals/filters/filter-compliance/):
   la máscara de aceptación de la Tabla 1, el ancho de banda efectivo, la suma
   y el ensayo con barrido, la calificación de los ensayos periódicos, la
   clase 0 y la ficha de conformidad.
-- [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): flujos en
+- [Procesado por bloques](/es/signals/filters/block-processing/): flujos en
   streaming con estado de filtro arrastrado.
-- [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): análisis
+- [Multicanal y rendimiento](/es/signals/filters/multichannel/): análisis
   multicanal vectorizado y notas de rendimiento.
 
 ## Qué no cubre esta sección
@@ -102,8 +102,8 @@ estadísticos de rango como L90 hay que calcularlos una sola vez sobre la
 envolvente conjunta. Y la ruta por canal nunca mezcla canales: el retardo
 entre dos micrófonos, o cuánto de un canal explica un segundo, son
 [Correlación, retardo y
-envolvente](/phonometry/es/signals/spectra/correlation-delay/) y [Coherencia
-múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/).
+envolvente](/es/signals/spectra/correlation-delay/) y [Coherencia
+múltiple y parcial](/es/signals/spectra/miso-coherence/).
 </ScopeClaim>
 </Scope>
 

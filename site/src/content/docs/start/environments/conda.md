@@ -30,7 +30,7 @@ conda-forge packages, and `python -m pip check` reports nothing broken.
 Python 3.12, 3.13 and 3.14 all work. conda-forge publishes no Python 3.12 or
 newer for 32-bit Windows or 32-bit Linux, so phonometry installs there with
 pip alone, `[plot,report,audio]` in place of `[full]`, as [pip and
-uv](/phonometry/start/environments/pip-and-uv/) says.
+uv](/start/environments/pip-and-uv/) says.
 
 ## The extras under their conda-forge names
 

@@ -59,11 +59,11 @@ especulares de la fuente), mientras que el modelo **estacionario** da el nivel
 estadístico al que se asienta una fuente de potencia conocida, separado en un
 campo directo y otro reverberante. Esta página cubre ambos en
 `phonometry.room`: el primero complementa la respuesta al impulso *medida* de la
-[guía de Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) con una
+[guía de Acústica de salas](/es/buildings/rooms/room-acoustics/) con una
 sintética, y el segundo complementa la tasa de decaimiento única de la
-[guía de Predicción del tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/)
+[guía de Predicción del tiempo de reverberación](/es/buildings/rooms/reverberation-prediction/)
 con una predicción de nivel frente a distancia, uniendo la
-[potencia acústica](/phonometry/es/devices/emission/sound-power/) de una fuente con el nivel
+[potencia acústica](/es/devices/emission/sound-power/) de una fuente con el nivel
 que produce en el interior.
 
 ## 1. Respuesta al impulso por fuentes imagen
@@ -89,8 +89,8 @@ $w$, y la pérdida de presión del aire $\mathrm{e}^{-m r_n/2}$ a lo largo del c
 el coeficiente de atenuación de potencia (intensidad) de la ISO 354 8.1.2.1, en 1/m, de modo
 que la intensidad cae como $\mathrm{e}^{-m r}$ y la presión como $\mathrm{e}^{-m r/2}$: el mismo $m$
 que las guías de
-[tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/)
-y de [EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/)
+[tiempo de reverberación](/es/buildings/rooms/reverberation-prediction/)
+y de [EN 12354-6](/es/buildings/rooms/enclosed-space-absorption/)
 entregan a sus términos $4mV$). A lo largo de un eje, el número de reflexiones
 en las dos paredes de una imagen de índice de retícula $n$ y paridad especular
 $p$ es $|n - p|$ (pared en 0) y $|n|$ (pared en $L$), de modo que el orden total
@@ -267,7 +267,7 @@ el segundo mecanismo, mucho menor: quita un 0,4 % al decaimiento de 250 Hz y un
 4,4 % al de 4 kHz. Ese es el tamaño honesto del efecto en una sala de 105 m³ (las
 reflexiones sencillamente no recorren distancia suficiente), y es la razón de que
 la absorción del aire sea un
-[efecto de volumen](/phonometry/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)
+[efecto de volumen](/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)
 más que un efecto de frecuencia: pon esas mismas paredes alrededor de 2 000 m³ y
 el mismo argumento le quita decenas de por ciento a la banda más alta.*
 
@@ -306,7 +306,7 @@ coincidencia solo es estrecha en el límite casi cúbico: una sala alargada
 sostiene la energía a lo largo de su eje largo, así que su decaimiento
 *especular* puro es más lento que la estimación difusa de Eyring: exactamente
 la anisotropía que los
-[modelos de Fitzroy y Arau-Puchades](/phonometry/es/buildings/rooms/reverberation-prediction/)
+[modelos de Fitzroy y Arau-Puchades](/es/buildings/rooms/reverberation-prediction/)
 se construyeron para corregir. El modelo capta solo reflexiones especulares (sin
 difracción ni difusión) y es exacto para factores de reflexión de pared reales e
 independientes del ángulo.
@@ -474,7 +474,7 @@ tiempo de reverberación vuelve impracticable la ejecución (una sala grande con
 un $L_\text{min}$ pequeño, o una cola larga), al método de imágenes puro se le
 está pidiendo un trabajo que corresponde a un modelo híbrido con cola tardía
 estadística, o a la
-[simulación FDTD](/phonometry/es/simulation/fdtd-simulation/).
+[simulación FDTD](/es/simulation/fdtd-simulation/).
 
 ## 2. Campo estacionario de sala
 
@@ -678,7 +678,7 @@ módulo usa $R$ de modo que $r_\mathrm{c}$ es exactamente el cruce de su propio
 $10\log_{10}(\rho c / 400)$ de Bies, que corrige el nivel para una impedancia
 característica distinta de 400 Pa·s/m (0,13 dB en aire a 20 °C y 50 % de
 humedad relativa, como
-[calcula la página de teoría](/phonometry/es/reference/theory/rooms-buildings/#campo-estacionario-de-sala-bies-64-kuttruff-56));
+[calcula la página de teoría](/es/reference/theory/rooms-buildings/#campo-estacionario-de-sala-bies-64-kuttruff-56));
 por defecto no se aplica.
 
 **Dónde se difumina la estadística.** La **frecuencia de Schroeder**
@@ -914,20 +914,20 @@ misma razón. La fuente importa tanto como el receptor: una fuente situada en el
 plano nodal de un modo no puede excitarlo en absoluto. Lo que el modelo de paredes
 rígidas no puede decirte es con cuánta fuerza resuena cada resonancia, porque eso
 lo fija el amortiguamiento que omite: para eso, malla la sala y ejecuta la
-[simulación FDTD 2D](/phonometry/es/simulation/fdtd-simulation/).
+[simulación FDTD 2D](/es/simulation/fdtd-simulation/).
 
 ## Validación
 
 Las implementaciones se comprueban contra las formas cerradas y los anclajes
 numéricos de los propios textos fuente (ver el
-[informe de conformidad](/phonometry/es/reference/conformance/)):
+[informe de conformidad](/es/reference/conformance/)):
 
 - la amplitud del sonido directo $1/(4\pi r)$ y su retardo $r/c$ (geometría
   exacta), el recuento de imágenes audibles (Kuttruff 6.ª ed., ec. (9.23)) y
   la densidad de reflexiones (ec. (4.6));
 - el tiempo de reverberación de Eyring recuperado del decaimiento de la RIR
   sintética en el límite casi cúbico (tolerancia documentada ≈ 10 %), y un
-  [esquema FDTD 2D](/phonometry/es/simulation/fdtd-simulation/)
+  [esquema FDTD 2D](/es/simulation/fdtd-simulation/)
   independiente que reproduce el retardo del eco de pared rígida y el
   $T_{60}$ con amortiguamiento uniforme;
 - la constante de sala, la distancia crítica como cruce exacto
@@ -968,7 +968,7 @@ y sin dispersión difusa, de modo que el decaimiento real de una sala alargada
 es más lento que la estimación de Eyring de campo difuso frente a la que se
 comprueba (la anisotropía que los modelos de Fitzroy y Arau-Puchades de la
 [guía de predicción del tiempo de
-reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/) se
+reverberación](/es/buildings/rooms/reverberation-prediction/) se
 diseñaron para corregir). La distancia de reverberación alternativa de
 Kuttruff (que usa el área de absorción de Sabine en lugar de la constante de
 sala) se cita como comparación pero no está implementada: `steady_state_field`
@@ -977,7 +977,7 @@ sala. El cálculo de modos supone paredes rígidas y planta rectangular: da las
 *frecuencias* propias, no la amplitud de presión en un punto de escucha, y no
 dice nada del amortiguamiento, la forma modal ni una geometría que no sea una
 caja. Para eso, malla la sala y ejecuta el [esquema FDTD
-2D](/phonometry/es/simulation/fdtd-simulation/). Las proporciones preferentes
+2D](/es/simulation/fdtd-simulation/). Las proporciones preferentes
 de Bolt se comentan pero no se tabulan.
 </ScopeClaim>
 </Scope>
@@ -986,26 +986,26 @@ de Bolt se comentan pero no se tabulan.
 
 ## Véase también
 
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): la respuesta al
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): la respuesta al
   impulso *medida* (ISO 18233) y los parámetros de ISO 3382 que alimenta la RIR
   sintética.
-- [Predicción del tiempo de reverberación (Sabine, Arau)](/phonometry/es/buildings/rooms/reverberation-prediction/):
+- [Predicción del tiempo de reverberación (Sabine, Arau)](/es/buildings/rooms/reverberation-prediction/):
   la tasa de decaimiento estadística que reproduce el modelo de fuentes imagen y
   los modelos de anisotropía más allá de ella.
-- [Absorción acústica en recintos (EN 12354-6)](/phonometry/es/buildings/rooms/enclosed-space-absorption/):
+- [Absorción acústica en recintos (EN 12354-6)](/es/buildings/rooms/enclosed-space-absorption/):
   el área de absorción equivalente tras la absorción media `alpha_bar`.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): el `Lw` que impulsa el
+- [Potencia acústica](/es/devices/emission/sound-power/): el `Lw` que impulsa el
   nivel estacionario.
-- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/): el
+- [Simulación de ondas FDTD 2D](/es/simulation/fdtd-simulation/): el
   esquema de ondas independiente usado para contrastar el eco de pared rígida y
   el decaimiento.
-- [Teoría: Salas y edificación](/phonometry/es/reference/theory/rooms-buildings/#campo-acustico-de-la-sala-predicho-kuttruff-vorlander-bies):
+- [Teoría: Salas y edificación](/es/reference/theory/rooms-buildings/#campo-acustico-de-la-sala-predicho-kuttruff-vorlander-bies):
   las derivaciones de la retícula de imágenes y del campo estacionario, y la relación
   del decaimiento especular con el estadístico de Eyring.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   las formas cerradas y anclas resueltas contra las que se validan estas
   implementaciones.
-- Referencia de la API: [`room.image_source`](/phonometry/es/reference/api/rooms/image-source/)
-  y [`room.steady_field`](/phonometry/es/reference/api/rooms/steady-field/).
+- Referencia de la API: [`room.image_source`](/es/reference/api/rooms/image-source/)
+  y [`room.steady_field`](/es/reference/api/rooms/steady-field/).
 
 </SeeAlso>

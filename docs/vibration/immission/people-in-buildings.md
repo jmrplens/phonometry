@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/people-in-buildings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/people-in-buildings/
 
 # Vibration and people in buildings (DIN 4150-2)
 
@@ -376,7 +376,7 @@ print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
 - [Vibration damage to structures (DIN 4150-3)](../structural/structural-damage.md):
   the other half of DIN 4150, what the building itself may take.
 - API reference:
-  [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.people`](https://phonometry.dev/reference/api/vibration/people/).
 
 ## References
 

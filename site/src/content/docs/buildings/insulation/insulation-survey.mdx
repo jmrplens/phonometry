@@ -47,14 +47,14 @@ reverberation times. This guide covers the survey (control) method: the
 reverberation index and its room-class estimate, the airborne, impact,
 façade and service-equipment quantities, and the survey fiches. The
 engineering-grade methods live in
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/);
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/);
 the single-number engines behind the survey ratings in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/).
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/).
 
 ## Octave bands and the reverberation index
 
 One number replaces the whole receiving-room correction. Where the
-[engineering methods](/phonometry/buildings/insulation/insulation-field/)
+[engineering methods](/buildings/insulation/insulation-field/)
 carry a measured reverberation time per band into every quantity, ISO 10052
 collapses that correction into the **reverberation index**
 $k = 10\log_{10}(T/T_0)$ ($T_0 = 0.5\ \text{s}$), which may be measured but is
@@ -212,7 +212,7 @@ plt.show()
 ## Running the survey (Clauses 5 and 6)
 
 Everything above consumes band levels. What separates ISO 10052 from
-[ISO 16283](/phonometry/buildings/insulation/insulation-field/) is not the
+[ISO 16283](/buildings/insulation/insulation-field/) is not the
 arithmetic, which is simpler, but *how those levels are obtained*: a body
 posture, a sweep and a stopwatch instead of five fixed microphone positions
 per room. The procedure is short enough to quote in full.
@@ -263,7 +263,7 @@ at a different height), separated by more than 0.7 m, at least 0.5 m from any
 boundary and at least 1.0 m from the impact position, averaged over positions
 band by band. Its single number is the ISO 717-2:2020 Annex D A-weighted sum,
 not a shifted reference curve; see
-[Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/).
+[Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/).
 Wear hearing protection when measuring in the source room.
 
 **The façade (Clauses 6.2.4 and 6.3.3).** With a loudspeaker, place it outside
@@ -324,7 +324,7 @@ survey results and the corresponding engineering method are estimated to agree
 procedure to be checked from time to time in accordance with ISO 12999-1,
 particularly after any change of procedure or instrumentation: the same
 standard the
-[field guide's uncertainty section](/phonometry/buildings/insulation/insulation-field/#measurement-uncertainty-iso-12999-1)
+[field guide's uncertainty section](/buildings/insulation/insulation-field/#measurement-uncertainty-iso-12999-1)
 runs on. An *estimated* reverberation index adds to that: the tabulated
 indices of Table 4 carry a standard deviation of about 1 dB (Table 4 NOTE 1),
 and that spread enters every quantity on this page directly, band for band.
@@ -453,7 +453,7 @@ an omission. The ± 2 dB agreement with the engineering method is the
 standard's own estimate (Clause 6.6 NOTE), not something this library models
 or propagates: no survey result carries an uncertainty. When the stakes rise,
 step up to [Field Insulation Measurement (ISO
-16283)](/phonometry/buildings/insulation/insulation-field/), whose ISO 12999-1
+16283)](/buildings/insulation/insulation-field/), whose ISO 12999-1
 machinery does produce one. Annex A's report form and Annex B's operating
 cycles for service equipment are also outside the library.
 </ScopeClaim>
@@ -463,23 +463,23 @@ cycles for service equipment are also outside the library.
 
 ## See also
 
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the engineering-grade airborne, impact and façade measurements this method
   approximates, and their ISO 12999-1 uncertainty.
-- [Service-Equipment and Activity Noise (ISO 16032)](/phonometry/buildings/insulation/service-equipment-noise/):
+- [Service-Equipment and Activity Noise (ISO 16032)](/buildings/insulation/service-equipment-noise/):
   the engineering method for the service-equipment sound this survey
   measures quickly: band spectra and a measured reverberation time.
-- [Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/):
+- [Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/):
   the rubber ball of Clause 6.3.2, its impact force exposure level and the
   ISO 717-2 Annex D single number the survey heavy/soft branch reports.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/):
   the reference-curve engines behind the survey ratings.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the measured
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the measured
   reverberation times behind the reverberation index.
-- [Levels](/phonometry/signals/levels/levels/): the energy averaging behind the
+- [Levels](/signals/levels/levels/): the energy averaging behind the
   octave-band levels.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the
+- [Theory](/reference/theory/rooms-buildings/): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.survey_insulation`](/phonometry/reference/api/building/survey-insulation/).
+- API reference: [`building.measurement.survey_insulation`](/reference/api/building/survey-insulation/).
 
 </SeeAlso>

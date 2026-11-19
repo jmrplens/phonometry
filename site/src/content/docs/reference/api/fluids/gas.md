@@ -15,7 +15,7 @@ c = \sqrt{\frac{\gamma R T}{M}} \qquad \rho = \frac{p\,M}{R\,T}
 $$
 
 so a caller who has a gas that is not air or water can still have a
-[`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) for it, computed rather than typed.
+[`Fluid`](/reference/api/fluids/fluids/#fluid) for it, computed rather than typed.
 
 How far the closure goes
 ------------------------
@@ -30,14 +30,14 @@ factor: a real gas has `rho = p M / (Z R T)`, so the ideal density is `Z`
 times the real one and the fraction missing is `1 - Z`. It grows with the
 molecule, and SF6, a heavy one whose attraction is not negligible at room
 conditions, is exactly the gas a demonstration reaches for. The model says so
-in [`IDEAL_GAS_VALIDITY`](/phonometry/reference/api/fluids/gas/#ideal_gas_validity) rather than pretending otherwise.
+in [`IDEAL_GAS_VALIDITY`](/reference/api/fluids/gas/#ideal_gas_validity) rather than pretending otherwise.
 
 What it does not give
 ---------------------
 Viscosity, thermal conductivity and the Prandtl number are transport
 properties. Nothing in the ideal-gas closure determines them, so the returned
 fluid does not carry them and reading one raises
-[`FluidPropertyUnavailableError`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailableerror) naming the model, which is
+[`FluidPropertyUnavailableError`](/reference/api/fluids/fluids/#fluidpropertyunavailableerror) naming the model, which is
 what every other fluid here does with a quantity its model did not fix.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -68,9 +68,9 @@ out.
 | `temperature_c` | Temperature `t`, in degrees Celsius (above absolute zero). |
 | `heat_capacity_ratio` | Ratio of specific heats `gamma` (> 1). It is 1.67 for a monatomic gas, about 1.4 for a diatomic one and lower for a polyatomic one, and it is above 1 for every gas, because `gamma` is `c_p/c_v` and `c_p - c_v` is the gas constant. |
 | `molar_mass_kg_mol` | Molar mass `M`, in kg/mol (> 0). The tables print kg/mol, so 0.028 95 for dry air and not 28.95. |
-| `static_pressure_pa` | Static pressure `p`, in pascals (> 0). When omitted, one standard atmosphere is assumed and a [`FluidAssumptionWarning`](/phonometry/reference/api/fluids/fluids/#fluidassumptionwarning) says so, because the density is proportional to it. |
+| `static_pressure_pa` | Static pressure `p`, in pascals (> 0). When omitted, one standard atmosphere is assumed and a [`FluidAssumptionWarning`](/reference/api/fluids/fluids/#fluidassumptionwarning) says so, because the density is proportional to it. |
 
-**Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that state, carrying a density, a speed of sound and the ratio of specific heats it was given.
+**Returns:** The [`Fluid`](/reference/api/fluids/fluids/#fluid) at that state, carrying a density, a speed of sound and the ratio of specific heats it was given.
 
 **Raises**
 

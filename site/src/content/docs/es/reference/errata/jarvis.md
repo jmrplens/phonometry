@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Esta es la entrada del [registro de erratas](/phonometry/es/reference/errata/) sobre Jarvis (1996). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Esta es la entrada del [registro de erratas](/es/reference/errata/) sobre Jarvis (1996). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Jarvis (1996), NPL Report CIRA(EXT) 010, apéndice B (la unidad imaginaria de la masa del primer micrófono, perdida en el escaneo publicado)
 

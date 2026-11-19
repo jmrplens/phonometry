@@ -34,7 +34,7 @@ which reading reproduces the page:
    does not start at the Table 6 start time. Read from zero, the band-limiting
    continuous cell of Table 7 comes out 0.564 9 against the 0.565 printed;
    started at 0.2 s it comes out 0.560 1.
-2. *The filtering is zero state.* [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting)
+2. *The filtering is zero state.* [`apply_weighting`](/reference/api/vibration/exposure/#apply_weighting)
    multiplies in the frequency domain without padding, which is a circular
    convolution, and its own docstring says so. In the continuous row that
    wraps the tail of the record onto its front and erases the switch-on
@@ -44,7 +44,7 @@ which reading reproduces the page:
    -0.52 %. This module therefore pads the record with zeros before applying
    the response and keeps the first samples back, which is a filter switched
    on at t = 0 with nothing stored in it. The default behaviour of
-   [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting) is deliberately left alone:
+   [`apply_weighting`](/reference/api/vibration/exposure/#apply_weighting) is deliberately left alone:
    the choice belongs to this test, not to every weighted signal.
 3. *The MTVV integration time is 1 s* (ISO 2631-1 6.3.1, and the constant
    Annex D of this standard is written around). With any other constant the
@@ -77,7 +77,7 @@ this clause for personal vibration exposure meters, and its 12.13 (folio 31)
 repeats the acceptance test with the same maximum expanded uncertainty of
 3 %. Its Table 6 (folio 12) is this Table 6 row for row, and its Tables 7, 8
 and 9 (folios 12 to 14) are these tables cell for cell: read off the Part 2
-pages and compared with [`SIGNAL_BURST_RESPONSE`](/phonometry/reference/api/vibration/signal-burst/#signal_burst_response), all 228 indications
+pages and compared with [`SIGNAL_BURST_RESPONSE`](/reference/api/vibration/signal-burst/#signal_burst_response), all 228 indications
 and all 228 tolerances beside them are the same numbers. One implementation
 therefore covers both parts, and a verdict here is a verdict against either.
 
@@ -130,14 +130,14 @@ it comes out 0.560 1.
 
 The fall is vertical, as Figure 3 draws it. 12.13 (folio 36) allows a real
 generator a fall time of up to `1/(5 f2)`, which is
-[`SawtoothBurstTest.max_fall_time_s`](/phonometry/reference/api/vibration/signal-burst/#sawtoothbursttest), and that allowance describes
+[`SawtoothBurstTest.max_fall_time_s`](/reference/api/vibration/signal-burst/#sawtoothbursttest), and that allowance describes
 the laboratory rig, not this record.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
 | `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 | `amplitude_m_s2` | Zero-to-peak amplitude, in m/s2. The printed responses are for 1 m/s2 and scale with it. |
@@ -182,7 +182,7 @@ One application's row of ISO 8041-1 Table 6 (folio 17).
 
 | Name | Description |
 | :--- | :--- |
-| `application` | The application key, as [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests) files it. One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `application` | The application key, as [`SAWTOOTH_BURST_TESTS`](/reference/api/vibration/signal-burst/#sawtooth_burst_tests) files it. One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
 | `weightings` | The frequency weightings the application is tested with, in Table 6 order. Each one of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `band_limiting_weighting` | The weighting whose Table 3 corners are the band-limiting response of this application's band-limiting row. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `angular_frequency_rad_s` | The saw-tooth angular frequency, in radians per second, which is what the table prints. |
@@ -190,8 +190,8 @@ One application's row of ISO 8041-1 Table 6 (folio 17).
 | `cycle_counts` | The printed burst lengths, in saw-tooth cycles. |
 | `repeat_time_s` | The interval between burst starts, in seconds. |
 | `duration_s` | The measurement duration, in seconds. |
-| `max_fall_time_s` | The largest fall time 12.13 allows a real generator, in seconds. The record [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst) synthesises has the ideal vertical fall of Figure 3; this is the laboratory limit, not a property of the synthesised signal. |
-| `recommended_sampling_rate_hz` | The rate [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst) uses when the caller names none. Chosen so that the printed cells are reproduced to a few tenths of a per cent, which is not a normative figure: nothing in the standard prescribes a sampling rate. |
+| `max_fall_time_s` | The largest fall time 12.13 allows a real generator, in seconds. The record [`sawtooth_burst`](/reference/api/vibration/signal-burst/#sawtooth_burst) synthesises has the ideal vertical fall of Figure 3; this is the laboratory limit, not a property of the synthesised signal. |
+| `recommended_sampling_rate_hz` | The rate [`sawtooth_burst`](/reference/api/vibration/signal-burst/#sawtooth_burst) uses when the caller names none. Chosen so that the printed cells are reproduced to a few tenths of a per cent, which is not a normative figure: nothing in the standard prescribes a sampling rate. |
 
 ### SawtoothBurstTest.frequency_hz
 
@@ -223,7 +223,7 @@ signal_burst_indications(
 What a conforming meter indicates for one row of Tables 7 to 9.
 
 Runs the library chain the standard describes: the burst of
-[`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst), the weighting (or the band-limiting response) of
+[`sawtooth_burst`](/reference/api/vibration/signal-burst/#sawtooth_burst), the weighting (or the band-limiting response) of
 ISO 8041-1 Table 3 applied from rest, and then the indication quantities
 the table for that application prints, over the whole measurement
 duration. The MTVV columns are the maximum of the running r.m.s. of
@@ -234,8 +234,8 @@ the linear and the exponential average of Annex D.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
-| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `name` | A weighting of that application, or [`BAND_LIMITING`](/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 
@@ -245,7 +245,7 @@ the linear and the exponential average of Annex D.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | As for [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst), and if the weighting belongs to another application. |
+| ValueError | As for [`sawtooth_burst`](/reference/api/vibration/signal-burst/#sawtooth_burst), and if the weighting belongs to another application. |
 | TypeError | If `n_cycles` is neither an integer nor `None`, or `fs` is not one number, or `application` or `name` is not a text. |
 
 ## SIGNAL_BURST_RESPONSE
@@ -272,7 +272,7 @@ A meter's signal-burst indications against ISO 8041-1 Tables 7 to 9.
 | Name | Description |
 | :--- | :--- |
 | `application` | The application whose table was used. One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
-| `weighting` | The row that was graded, a weighting name or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
+| `weighting` | The row that was graded, a weighting name or [`BAND_LIMITING`](/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `amplitude_m_s2` | The zero-to-peak amplitude of the test signal the printed responses were scaled by. |
 | `cycle_counts` | The burst lengths that were graded, in printed order, with `None` for the continuous row. |
 | `quantities` | The columns that were graded, in printed order. Each one of `"rms"`, `"vdv"`, `"mtvv_linear"`, `"mtvv_exponential"` or `"msdv"`. |
@@ -335,7 +335,7 @@ The Table 7, 8 or 9 cells, scaled by `amplitude_m_s2`.
 
 *property*
 
-The printed tolerance of each column, from [`BURST_TOLERANCE_PERCENT`](/phonometry/reference/api/vibration/signal-burst/#burst_tolerance_percent).
+The printed tolerance of each column, from [`BURST_TOLERANCE_PERCENT`](/reference/api/vibration/signal-burst/#burst_tolerance_percent).
 
 ### SignalBurstVerification.within_tolerance
 
@@ -397,12 +397,12 @@ exactly.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
-| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `name` | A weighting of that application, or [`BAND_LIMITING`](/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `measured` | The indications, keyed by burst length (`None` for the continuous row) and then by printed column name. Every row has to report the same columns, so that the verdict is a rectangle rather than a ragged set. |
 | `amplitude_m_s2` | The zero-to-peak amplitude of the test signal, in m/s2. |
 
-**Returns:** The verdict, as a [`SignalBurstVerification`](/phonometry/reference/api/vibration/signal-burst/#signalburstverification).
+**Returns:** The verdict, as a [`SignalBurstVerification`](/reference/api/vibration/signal-burst/#signalburstverification).
 
 **Raises**
 

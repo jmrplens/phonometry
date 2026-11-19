@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/valve-cavitation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/valve-cavitation/
 
 # Hydrodynamic Valve Noise (IEC 60534-8-4)
 
@@ -347,7 +347,7 @@ by a thousand before handing it to Equation (12).
 - [Errata in published sources](../../ERRATA.md): the seven
   entries this page rests on, from a sign to an equation printed two ways.
 - API reference:
-  [`noise_control.valves_hydrodynamic`](https://docs.jmrp.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
+  [`noise_control.valves_hydrodynamic`](https://phonometry.dev/reference/api/noise_control/valves-hydrodynamic/).
 
 ## References
 

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Esta es la entrada del [registro de erratas](/phonometry/es/reference/errata/) sobre el Anexo 16 de la OACI. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Esta es la entrada del [registro de erratas](/es/reference/errata/) sobre el Anexo 16 de la OACI. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Anexo 16 de la OACI, volumen I, 8.ª edición (2017), Apéndice 2, 4.4.2 (falta el signo menos del ajuste por compartición de banda)
 

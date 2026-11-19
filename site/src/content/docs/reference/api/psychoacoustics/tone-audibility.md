@@ -11,7 +11,7 @@ Objective audibility of tones in noise by the engineering method of ISO/PAS 2006
 
 ISO/PAS 20065 is the detailed engineering method that ISO 1996-2:2017 defers to
 for the audibility of prominent tones; the simplified 2007/2009 Annex C method
-lives in [`phonometry.environment.assessment.measurement`](/phonometry/reference/api/environment/measurement/). The audibility of a tone
+lives in [`phonometry.environment.assessment.measurement`](/reference/api/environment/measurement/). The audibility of a tone
 is the amount, in decibels, by which its tone level rises above the masking
 threshold of the surrounding noise.
 
@@ -39,21 +39,21 @@ $\Delta L = 10 \log_{10}[(1/J) \sum_j 10^{\Delta L_j/10}]$ dB (Formula (20));
 a spectrum in which no tone is found contributes $\Delta L_j = -10$ dB
 (Formula (21)).
 
-**From a critical-band spectrum.** [`mean_narrowband_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level) determines
+**From a critical-band spectrum.** [`mean_narrowband_level`](/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level) determines
 `LS` from the lines of the critical band by the iterative procedure of
 Formula (6)/Annex D (energy average, dropping any line more than 6 dB above the
 running mean, with the −1.76 dB Hanning bandwidth correction), and
-[`tone_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#tone_level) sums the tonal lines contiguous with the peak for `LT`
+[`tone_level`](/reference/api/psychoacoustics/tone-audibility/#tone_level) sums the tonal lines contiguous with the peak for `LT`
 (Formula (8)). Both reproduce the ISO/PAS 20065 Annex E worked example
 ($L_\mathrm{S} = 49.22$ dB, $L_\mathrm{T} = 67.96$ dB for the 137.3 Hz tone) and
 are confirmed against the parent standard DIN 45681:2005-03.
 
-**Whole-spectrum detection.** [`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum) runs the full front-end
+**Whole-spectrum detection.** [`analyze_spectrum`](/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum) runs the full front-end
 over a spectrum (mean narrow-band level per line, peak detection (Clause 5.3.8
 Step 1), tone level, the distinctness test (Clause 5.3.4) and audibility) and
 returns the distinct, audible tones. It then applies Step 3: tones sharing a
 critical band have their tone levels energy-summed (Formula (17), via
-[`combined_tone_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#combined_tone_level), shared lines counted once) into an "FG" entry
+[`combined_tone_level`](/reference/api/psychoacoustics/tone-audibility/#combined_tone_level), shared lines counted once) into an "FG" entry
 rated at the most audible member, unless the exactly-two-tones-below-1000-Hz
 exception (Formulae (18)/(19)) keeps them separate. On the Annex E example
 this recovers the three tones, their combined tone level
@@ -67,18 +67,18 @@ tones near its edges.
 both lie below 1000 Hz, the ear can still resolve them if their spacing exceeds
 $f_\mathrm{D} = 21 \cdot 10^{1.2 |\log_{10}(f_\mathrm{T}/212)|^{1.8}}$ Hz
 (Formulae (18)/(19)); they are then
-rated separately instead of combined. [`two_tone_separation_frequency`](/phonometry/reference/api/psychoacoustics/tone-audibility/#two_tone_separation_frequency) and
-[`resolve_tones_separately`](/phonometry/reference/api/psychoacoustics/tone-audibility/#resolve_tones_separately) implement this branch (Clause 5.3.8), which no
+rated separately instead of combined. [`two_tone_separation_frequency`](/reference/api/psychoacoustics/tone-audibility/#two_tone_separation_frequency) and
+[`resolve_tones_separately`](/reference/api/psychoacoustics/tone-audibility/#resolve_tones_separately) implement this branch (Clause 5.3.8), which no
 ISO/PAS 20065 worked example exercises; it is verified against the DIN 45681
 Annex J reference program rather than a numeric oracle.
 
-**Uncertainty (Clauses 5.4/6).** [`audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty) propagates the
+**Uncertainty (Clauses 5.4/6).** [`audibility_uncertainty`](/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty) propagates the
 uniform 3 dB narrow-band level uncertainty through the audibility chain to the
 extended uncertainty `U` (90 % bilateral coverage), and
-[`mean_audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#mean_audibility_uncertainty) combines the per-spectrum values through
+[`mean_audibility_uncertainty`](/reference/api/psychoacoustics/tone-audibility/#mean_audibility_uncertainty) combines the per-spectrum values through
 the Formula (20) mean. Clause 6: when fewer than 12 spectra have been
 averaged, the extended uncertainty **shall** be taken into consideration.
-[`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum) reports the per-tone `U` on its result.
+[`analyze_spectrum`](/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum) reports the per-tone `U` on its result.
 
 **A-weighting.** Clause 5.3.2: unweighted narrow-band spectra "shall" be
 A-weighted per IEC 61672-1 before the analysis. This module is
@@ -117,7 +117,7 @@ Detect and rate the audible tones of a narrow-band spectrum (Clause 5.3.8).
 Runs the full front-end: the mean narrow-band level (Formula (6)) per line,
 peak detection (Step 1), the tone level (Formulae (7)/(8)), the distinctness
 test (Clause 5.3.4) and the audibility (Formula (14)). Only distinct tones
-with a positive audibility are returned, bundled by [`assess_tones`](/phonometry/reference/api/psychoacoustics/tone-audibility/#assess_tones).
+with a positive audibility are returned, bundled by [`assess_tones`](/reference/api/psychoacoustics/tone-audibility/#assess_tones).
 
 **Same-band combination (Step 3).** When several audible tones fall in one
 critical band, the clause *requires* their tone levels to be energy-summed
@@ -127,7 +127,7 @@ the frequency of the most audible member, unless *exactly two* tones below
 (Formulae (18)/(19)), in which case they stay rated separately. The result
 therefore contains the individual audible tones *plus* one combined "FG"
 entry per multi-tone critical band, mirroring the DIN 45681 Annex I tables;
-[`ToneAudibilityResult.group_sizes`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult) tells them apart (1 = single tone,
+[`ToneAudibilityResult.group_sizes`](/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult) tells them apart (1 = single tone,
 $N \ge 2$ = FG entry combining `N` tones). The decisive audibility
 (Step 4) is the maximum over all entries, FG entries included.
 
@@ -144,7 +144,7 @@ the wrong mean narrow-band level for tones near its edges.
 | `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 | `effective_bandwidth_factor` | $\Delta f_\mathrm{e}/\Delta f$; 1.5 for a Hanning window (the default), 1.0 for a rectangular window. |
 
-**Returns:** A [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult) of the detected audible tones and their same-band FG combinations.
+**Returns:** A [`ToneAudibilityResult`](/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult) of the detected audible tones and their same-band FG combinations.
 
 **Raises**
 
@@ -170,7 +170,7 @@ Assess the audibility of the tones of a narrow-band spectrum.
 
 Applies the critical band (Formulae (2)-(5)), critical-band level
 (Formula (12)), masking index (Formula (13)) and audibility (Formula (14))
-to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
+to every tone and bundles them into a plottable [`ToneAudibilityResult`](/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
 
 **Parameters**
 
@@ -180,9 +180,9 @@ to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonom
 | `mean_narrowband_levels` | Mean narrow-band levels `LS` of the masking noise, in dB (Formula (6)). |
 | `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
 | `tone_frequencies` | Tone frequencies `fT`, in Hz. |
-| `extended_uncertainties` | Optional per-tone extended uncertainties `U`, in dB (see [`audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty); computed automatically by [`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum), which has the per-line levels this level-based entry point lacks). |
+| `extended_uncertainties` | Optional per-tone extended uncertainties `U`, in dB (see [`audibility_uncertainty`](/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty); computed automatically by [`analyze_spectrum`](/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum), which has the per-line levels this level-based entry point lacks). |
 
-**Returns:** A [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
+**Returns:** A [`ToneAudibilityResult`](/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
 
 **Raises**
 
@@ -263,7 +263,7 @@ under 0.01 dB on the Annex E example.
 
 Clause 5.4 / Clause 6: if fewer than 12 spectra have been averaged, the
 extended uncertainty of the (mean) audibility **shall** be taken into
-consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#mean_audibility_uncertainty).
+consideration; see [`mean_audibility_uncertainty`](/reference/api/psychoacoustics/tone-audibility/#mean_audibility_uncertainty).
 
 **Parameters**
 
@@ -397,7 +397,7 @@ Width `Δfc` of the critical band about a tone (Formula (2)).
 $\Delta f_\mathrm{c} = 25.0 + 75.0 (1.0 + 1.4 (f_\mathrm{T}/1000)^2)^{0.69}$ Hz.
 This is the
 continuous ISO/PAS 20065 engineering-method bandwidth, distinct from the
-stepped ISO 1996-2 Annex C [`critical_bandwidth`](/phonometry/reference/api/environment/measurement/#critical_bandwidth) (100 Hz / 20 %).
+stepped ISO 1996-2 Annex C [`critical_bandwidth`](/reference/api/environment/measurement/#critical_bandwidth) (100 Hz / 20 %).
 
 **Parameters**
 
@@ -438,8 +438,8 @@ rectangular window
 program applies the same split
 (`If l = 1 Then LT = 10*Log(LT)/Log(10)` with no `−1.76`).
 (The mean narrow-band level `LS` of Formula (6) is the analogous *energy
-average* and always carries the correction; [`mean_narrowband_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level)
-and [`tone_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#tone_level) derive `LS` and `LT` from a critical-band
+average* and always carries the correction; [`mean_narrowband_level`](/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level)
+and [`tone_level`](/reference/api/psychoacoustics/tone-audibility/#tone_level) derive `LS` and `LT` from a critical-band
 spectrum.)
 
 **Parameters**
@@ -635,7 +635,7 @@ frequency `fD`
 (Formula (19)) evaluated at the more prominent tone (the larger audibility
 `ΔL`). Otherwise the tones are combined. This mirrors the DIN 45681 Annex J
 reference program (`If l = 2 And fT1 < 1000 And fT2 < 1000` … `If |fT1 −
-fT2| > fD Then auflösen`); see [`two_tone_separation_frequency`](/phonometry/reference/api/psychoacoustics/tone-audibility/#two_tone_separation_frequency) for the
+fT2| > fD Then auflösen`); see [`two_tone_separation_frequency`](/reference/api/psychoacoustics/tone-audibility/#two_tone_separation_frequency) for the
 verification status.
 
 **Parameters**
@@ -709,7 +709,7 @@ Tone level `LT` from the tonal lines about a tone (Formula (8)).
 The tone energy is carried by the run of lines contiguous with the peak at
 `tone_frequency` whose level stays above both $L_\mathrm{S} + 6$ dB and
 $L_\mathrm{peak} - 10$ dB (Clause 5.3.3); their energy sum with the window
-correction is `LT` (via [`energy_sum_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#energy_sum_level)). A single-line run
+correction is `LT` (via [`energy_sum_level`](/reference/api/psychoacoustics/tone-audibility/#energy_sum_level)). A single-line run
 takes its level unchanged (Formula (7), no bandwidth correction).
 
 **Parameters**
@@ -719,7 +719,7 @@ takes its level unchanged (Formula (7), no bandwidth correction).
 | `levels` | Narrow-band levels `Li` of the spectrum, in dB. |
 | `frequencies` | The line frequencies, in Hz (strictly increasing). |
 | `tone_frequency` | Tone frequency `fT` (the peak), in Hz. |
-| `mean_narrowband_level` | Mean narrow-band level `LS` of the masking noise, in dB (see [`mean_narrowband_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level)). |
+| `mean_narrowband_level` | Mean narrow-band level `LS` of the masking noise, in dB (see [`mean_narrowband_level`](/reference/api/psychoacoustics/tone-audibility/#mean_narrowband_level)). |
 | `effective_bandwidth_factor` | $\Delta f_\mathrm{e}/\Delta f$; 1.5 for a Hanning window (the default), 1.0 for a rectangular window. |
 
 **Returns:** Tone level `LT`, in dB.
@@ -766,8 +766,8 @@ Audibility of the tones of a narrow-band spectrum (ISO/PAS 20065).
 | `critical_band_levels` | Critical-band levels `LG` of the masking noise, in dB (Formula (12)). |
 | `masking_indices` | Masking indices `av`, in dB (Formula (13)). |
 | `audibilities` | Audibilities `ΔL`, in dB (Formula (14)). |
-| `extended_uncertainties` | Extended uncertainties `U` of the audibilities, in dB (Clause 6, 90 % bilateral coverage), or `None` when the per-line levels needed to compute them were not available ([`assess_tones`](/phonometry/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). Clause 6: **shall** be taken into consideration when fewer than 12 spectra have been averaged. |
-| `group_sizes` | Number of tones behind each entry, or `None` when the Step 3 combination was not performed ([`assess_tones`](/phonometry/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). `1` marks an individual tone; $N \ge 2$ marks a combined "FG" entry whose tone level energy-sums `N` tones sharing a critical band (Clause 5.3.8 Step 3, Formula (17)), rated at the most audible member's frequency. |
+| `extended_uncertainties` | Extended uncertainties `U` of the audibilities, in dB (Clause 6, 90 % bilateral coverage), or `None` when the per-line levels needed to compute them were not available ([`assess_tones`](/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). Clause 6: **shall** be taken into consideration when fewer than 12 spectra have been averaged. |
+| `group_sizes` | Number of tones behind each entry, or `None` when the Step 3 combination was not performed ([`assess_tones`](/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). `1` marks an individual tone; $N \ge 2$ marks a combined "FG" entry whose tone level energy-sums `N` tones sharing a critical band (Clause 5.3.8 Step 3, Formula (17)), rated at the most audible member's frequency. |
 
 ### ToneAudibilityResult.audible
 
@@ -853,7 +853,7 @@ note, and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable decisive audibility `ΔL_ta` in dB (a lower audibility passes). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable decisive audibility `ΔL_ta` in dB (a lower audibility passes). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the key-quantity table adds the per-tone extended-uncertainty column (when the result carries it). |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-These are the 8 entries of the [errata registry](/phonometry/reference/errata/) on Allard & Atalla (2009), in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+These are the 8 entries of the [errata registry](/reference/errata/) on Allard & Atalla (2009), in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## Allard & Atalla, Propagation of Sound in Porous Media 2e (2009), Eq. (6.85)
 

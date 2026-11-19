@@ -239,7 +239,7 @@ sidebar:
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
-Esta página reúne la teoría de salas y edificación: la medición de respuestas al impulso y los parámetros de acústica de salas, los modelos de fuentes imagen y de campo estacionario del campo acústico de una sala, los criterios de ruido de fondo, el aislamiento a ruido aéreo y a impactos con sus índices globales y su incertidumbre, y la predicción de flancos y de absorción. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/); la dispersión superficial y la caracterización de materiales acústicos están en [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
+Esta página reúne la teoría de salas y edificación: la medición de respuestas al impulso y los parámetros de acústica de salas, los modelos de fuentes imagen y de campo estacionario del campo acústico de una sala, los criterios de ruido de fondo, el aislamiento a ruido aéreo y a impactos con sus índices globales y su incertidumbre, y la predicción de flancos y de absorción. Forma parte de la [referencia de teoría](/es/reference/theory/); la dispersión superficial y la caracterización de materiales acústicos están en [Materiales y superficies](/es/reference/theory/materials-surfaces/).
 
 Cada sección conserva la notación de su propia norma, y cinco letras llevan más
 de un significado entre ellas:
@@ -289,7 +289,7 @@ espectro cuyas bandas más bajas nunca se midieron de verdad no es comparable co
 otro en el que sí, porque esas bandas fijan tanto la etiqueta como, a menudo, el
 punto de tangencia.
 
-Consulta la [guía de criterios de ruido de salas](/phonometry/es/buildings/rooms/room-noise/) para su uso.
+Consulta la [guía de criterios de ruido de salas](/es/buildings/rooms/room-noise/) para su uso.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Dos paneles para el mismo espectro de sala dominado por la ventilación. Izquierda: los niveles medidos por banda de octava sobre la familia de curvas NC, con un rombo rojo que marca el punto de tangencia a 250 Hz que fija la valoración NC-42,5. Derecha: el mismo espectro sobre la curva de referencia RC-35, con las bandas de baja frecuencia atravesando la tolerancia de retumbo sombreada (más 5 dB por debajo de 500 Hz) de modo que el ruido se clasifica como RC-35(R), y la tolerancia de siseo (más 3 dB a 1000 Hz y por encima) sombreada para comparar" width="96%" />
 
@@ -536,7 +536,7 @@ print(round(rho_c, 1), round(corrected - plain, 2))  # 412.5 0.13
 
 La **distancia crítica** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ es donde se cruzan los dos campos; la distancia de reverberación de Kuttruff (Ec. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ para $Q=1$) usa el área de Sabine $A = S\bar\alpha$ en lugar de $R = A/(1-\bar\alpha)$, y ambas coinciden para $\bar\alpha$ pequeño. La **frecuencia de Schroeder** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Ec. 3.44) marca aproximadamente la transición del régimen modal al difuso, un cruce heurístico y no un corte abrupto: bastante por debajo dominan los modos discretos de la sala y estas relaciones de campo difuso pierden fiabilidad; bastante por encima los modos se solapan y las relaciones se cumplen. En salas límite conviene comprobar banda a banda.
 
-Consulta la guía [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/) para su uso.
+Consulta la guía [Fuentes imagen y campo estacionario de sala](/es/buildings/rooms/room-image-sources/) para su uso.
 
 <span id="aislamiento-acustico-y-absorcion-medidos-iso-16283-iso-10140-iso-717-iso-354"></span>
 
@@ -860,7 +860,7 @@ arriba es esta misma aritmética sobre una sala más pequeña ($A$ de 2,26 a
 5,03 m² y $T$ de 2,1 a 0,9 s a 1 kHz), y la figura muestra por qué las dos se
 mueven en sentidos opuestos y no de forma proporcional.*
 
-Consulta la [guía de absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/) para su uso.
+Consulta la [guía de absorción acústica en recintos](/es/buildings/rooms/enclosed-space-absorption/) para su uso.
 
 <span id="prediccion-del-aislamiento-de-paneles-bies-72-hopkins-294310-cremer-5"></span>
 
@@ -904,7 +904,7 @@ $R = -10\log_{10}[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Ec. 4.92), de modo que un
 abertura desnuda de área relativa $S_\mathrm{a}/S$ limita la composición a
 $10\log_{10}(S/S_\mathrm{a})$. La trayectoria de transmisión resonante y la radiación de la pared
 doble se apoyan en la eficiencia de radiación de placa y las movilidades
-puntuales de la [teoría de vibración](/phonometry/es/reference/theory/vibration/).
+puntuales de la [teoría de vibración](/es/reference/theory/vibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept.svg" alt="Cuatro paneles: la ley de masas de una hoja simple con su caída de aislamiento en la coincidencia, la pared doble con la resonancia masa-muelle-masa y la ganancia de cámara, la eficiencia de radiación de la placa subiendo a la unidad por encima de la frecuencia crítica, y una pared compuesta cuya rendija abierta del 1 % limita R al tope del área abierta" width="92%" />
 
@@ -944,7 +944,7 @@ para que el campo transmitido se vea.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="Sección a escala de una rendija de 2 mm a través de una pared de 100 mm: la pared rayada dibujada en sección con la estrecha ranura de aire horizontal a media altura, una flecha de sonido incidente que apunta a la ranura desde la izquierda, las cotas de los 100 mm de espesor de pared y los 2 mm de ancho de rendija, y frentes de onda circulares transmitidos esbozados expandiéndose desde la salida de la rendija a la derecha" width="80%" />
 
-Consulta la guía [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/)
+Consulta la guía [Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/)
 para su uso.
 
 <span id="incertidumbre-de-medicion-iso-12999-1"></span>
@@ -973,5 +973,5 @@ a $u/\sqrt{m}$ (Fórmula A.7), y la incertidumbre de un solo número no
 correlacionada es la suma en cuadratura ponderada en energía de las
 incertidumbres por banda (Fórmula B.2).
 
-Consulta las guías de [acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) y de
-[medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/) para su uso.
+Consulta las guías de [acústica de salas](/es/buildings/rooms/room-acoustics/) y de
+[medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/) para su uso.

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/aircraft/aircraft-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/aircraft/aircraft-noise/
 
 # Aircraft noise: Effective Perceived Noise Level
 
@@ -543,7 +543,7 @@ the ECAC Doc 29 method of
 - [The ANP fleet database](anp-fleet.md): the measured
   noise-power-distance tables for real types, which is where the certification
   data ends up for modelling work.
-- API reference: [`aircraft.certification`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
+- API reference: [`aircraft.certification`](https://phonometry.dev/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](https://phonometry.dev/reference/api/aeroacoustics/atmospheric-absorption/).
 
 ## Quick answers
 

@@ -57,11 +57,11 @@ how loud a listener actually *perceives* it. This page covers the reference
 method, loudness in sones by Zwicker (ISO 532-1), plus the equal-loudness
 contours of pure tones (ISO 226); the newer model families, Moore-Glasberg
 (ISO 532-2/-3) and the Sottek Hearing Model loudness (ECMA-418-2), are
-[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced Loudness](/perception/psychoacoustics/advanced-loudness/).
 Sharpness, tonality and roughness live in
-[Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/); speech metrics in
-[Speech Transmission Index](/phonometry/perception/speech/speech-transmission/) and
-[Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/).
+[Sound Quality Metrics](/perception/psychoacoustics/sound-quality/); speech metrics in
+[Speech Transmission Index](/perception/speech/speech-transmission/) and
+[Speech Intelligibility Index](/perception/speech/speech-intelligibility/).
 
 ## How do I compute ISO 532-1 Zwicker loudness in Python?
 
@@ -108,7 +108,7 @@ input before it specifies the model.
 **The chain.** A microphone, preamplifier and amplifier meeting
 IEC 61672-1:2013 class 1, and a field calibration that turns digital units into
 pascals: that factor is what `calibration_factor` expects, and
-[Calibration](/phonometry/signals/metrology/calibration/) is where it comes
+[Calibration](/signals/metrology/calibration/) is where it comes
 from. Clause 4 fixes the sampling rate of the reference implementation at
 48 kHz; other rates are resampled to it, which the library does internally.
 For the band-level entry point, the 28 one-third-octave levels must come from
@@ -329,7 +329,7 @@ the ISO 532-1 loudness trace, the percentile beside $N_5$ above. An excerpt is
 a cut, not a file the meter wrote, so it carries no `bext` of its own: each one
 is calibrated by the digital full scale its session's meter declared in the
 recording it was cut from, 129.4 or 129.5 dB SPL;
-[Reading and writing measurement audio](/phonometry/io/audio-files/) reads a
+[Reading and writing measurement audio](/io/audio-files/) reads a
 declaration of the same kind, 129.3 dB SPL, off the meter's own calibration
 take.
 
@@ -409,7 +409,7 @@ beside the specific-loudness pattern $N'(z)$ (the result's own `.plot()`), the
 boxed $N = X\ \text{sone}$ ($L_\mathrm{N} = Y\ \text{phon}$) single number, an optional
 verdict row and a
 footer with the fixed disclaimer. It uses the same `ReportMetadata` container
-and rendering engine as the [ISO 717 insulation fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report);
+and rendering engine as the [ISO 717 insulation fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report);
 a supplied `requirement` is read as the maximum permitted loudness in sone (a
 lower loudness passes). Rendering needs reportlab and, for the figure the fiche
 embeds, matplotlib (`pip install "phonometry[report,plot]"`); only
@@ -504,13 +504,13 @@ Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
 *pure tones*; the loudness of arbitrary signals in sones is what the ISO 532
 models compute, the Zwicker method above and the newer families of
-[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced Loudness](/perception/psychoacoustics/advanced-loudness/).
 
 Zwicker is the reference model, not the only one. The **Moore-Glasberg**
 loudness of ISO 532-2, its time-varying ISO 532-3 extension and the
 **Sottek Hearing Model** loudness of ECMA-418-2, together with the
 model-choice table that says when to prefer each, are
-[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced Loudness](/perception/psychoacoustics/advanced-loudness/).
 
 ## What this guide covers
 
@@ -530,7 +530,7 @@ parameters, via `equal_loudness_contour()`, `loudness_level()`,
 <ScopeClaim status="not-covered" label="Not covered">
 The Moore-Glasberg loudness of ISO 532-2, the time-varying ISO 532-3 method
 and the Sottek Hearing Model loudness of ECMA-418-2 have moved to [Advanced
-Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/). The ISO
+Loudness](/perception/psychoacoustics/advanced-loudness/). The ISO
 226:2023 contours describe pure tones only, and the standard defines no
 interpolation between the 29 tabulated frequencies, so `loudness_level()`
 expects one of the Table 1 frequencies.
@@ -541,15 +541,15 @@ expects one of the Table 1 frequencies.
 
 ## See also
 
-- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](/phonometry/perception/psychoacoustics/advanced-loudness/):
+- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](/perception/psychoacoustics/advanced-loudness/):
   the Moore-Glasberg and Sottek loudness models and the model-choice table.
-- [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): sharpness,
+- [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): sharpness,
   tonality and roughness, the other half of the sound-quality story.
-- [Psychoacoustic annoyance and fluctuation strength](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
+- [Psychoacoustic annoyance and fluctuation strength](/perception/psychoacoustics/psychoacoustic-annoyance/):
   the Zwicker and Fastl model that consumes the percentile loudness $N_5$.
-- [Theory](/phonometry/reference/theory/perception/): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.zwicker`](/phonometry/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](/phonometry/reference/api/psychoacoustics/contours/).
-- Theory: [Zwicker loudness (ISO 532-1)](/phonometry/reference/theory/perception/#zwicker-loudness-iso-532-1): the specific-loudness integral of ISO 532-1 and the excitation pattern it runs over.
+- [Theory](/reference/theory/perception/): the equations behind the loudness models.
+- API reference: [`psychoacoustics.loudness.zwicker`](/reference/api/psychoacoustics/zwicker/) and [`psychoacoustics.loudness.contours`](/reference/api/psychoacoustics/contours/).
+- Theory: [Zwicker loudness (ISO 532-1)](/reference/theory/perception/#zwicker-loudness-iso-532-1): the specific-loudness integral of ISO 532-1 and the excitation pattern it runs over.
 
 </SeeAlso>
 

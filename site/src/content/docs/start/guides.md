@@ -9,7 +9,7 @@ head:
       {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "@id": "https://docs.jmrp.io/phonometry/start/guides/#areas",
+        "@id": "https://phonometry.dev/start/guides/#areas",
         "name": "phonometry documentation areas",
         "description": "The thirteen documented areas of the phonometry guides, each with the standards it implements.",
         "numberOfItems": 13,
@@ -20,91 +20,91 @@ head:
             "position": 1,
             "name": "Signal analysis",
             "description": "Filter banks, weighting, levels, spectra, calibration and uncertainty.",
-            "url": "https://docs.jmrp.io/phonometry/signals/"
+            "url": "https://phonometry.dev/signals/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "The medium",
             "description": "The fluid a sound travels through, computed from the measured conditions: humid air from IEC 61094-2:2009 Annex F.",
-            "url": "https://docs.jmrp.io/phonometry/fluids/"
+            "url": "https://phonometry.dev/fluids/"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": "Elastic solids",
             "description": "The elastic constants of a solid and the three longitudinal wave speeds that follow from them, each named after the shape it belongs to.",
-            "url": "https://docs.jmrp.io/phonometry/solids/"
+            "url": "https://phonometry.dev/solids/"
           },
           {
             "@type": "ListItem",
             "position": 4,
             "name": "Files",
             "description": "Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing and lossless conversion; catalogues of materials of your own.",
-            "url": "https://docs.jmrp.io/phonometry/io/"
+            "url": "https://phonometry.dev/io/"
           },
           {
             "@type": "ListItem",
             "position": 5,
             "name": "Hearing and perception",
             "description": "Loudness, sound quality, speech intelligibility, hearing and exposure.",
-            "url": "https://docs.jmrp.io/phonometry/perception/"
+            "url": "https://phonometry.dev/perception/"
           },
           {
             "@type": "ListItem",
             "position": 6,
             "name": "Rooms and buildings",
             "description": "Room parameters, background noise, field and laboratory insulation, prediction.",
-            "url": "https://docs.jmrp.io/phonometry/buildings/"
+            "url": "https://phonometry.dev/buildings/"
           },
           {
             "@type": "ListItem",
             "position": 7,
             "name": "Materials and surfaces",
             "description": "Absorption, airflow resistance, impedance tube, porous and metamaterial models, diffusers, scattering.",
-            "url": "https://docs.jmrp.io/phonometry/materials/"
+            "url": "https://phonometry.dev/materials/"
           },
           {
             "@type": "ListItem",
             "position": 8,
             "name": "Vibration and structure-borne sound",
             "description": "Mobility and FRFs, isolators, radiated power, junctions, human vibration.",
-            "url": "https://docs.jmrp.io/phonometry/vibration/"
+            "url": "https://phonometry.dev/vibration/"
           },
           {
             "@type": "ListItem",
             "position": 9,
             "name": "Environment and transport",
             "description": "Outdoor propagation, barriers, refraction, road, rail and wind-turbine sources, and the assessment built on them.",
-            "url": "https://docs.jmrp.io/phonometry/environment/"
+            "url": "https://phonometry.dev/environment/"
           },
           {
             "@type": "ListItem",
             "position": 10,
             "name": "Aircraft noise",
             "description": "Certification levels, airport contours and the rotorcraft hemisphere method.",
-            "url": "https://docs.jmrp.io/phonometry/aircraft/"
+            "url": "https://phonometry.dev/aircraft/"
           },
           {
             "@type": "ListItem",
             "position": 11,
             "name": "Underwater acoustics",
             "description": "Levels re 1 microPa, ship radiated noise, pile driving, ambient noise, propagation loss.",
-            "url": "https://docs.jmrp.io/phonometry/underwater/"
+            "url": "https://phonometry.dev/underwater/"
           },
           {
             "@type": "ListItem",
             "position": 12,
             "name": "Sources and devices",
             "description": "Sound power, intensity, emission declarations, electroacoustics, programme loudness.",
-            "url": "https://docs.jmrp.io/phonometry/devices/"
+            "url": "https://phonometry.dev/devices/"
           },
           {
             "@type": "ListItem",
             "position": 13,
             "name": "Wave simulation",
             "description": "Deterministic 2D FDTD solvers, acoustic and elastic P-SV, validated against analytic oracles rather than a standard.",
-            "url": "https://docs.jmrp.io/phonometry/simulation/"
+            "url": "https://phonometry.dev/simulation/"
           }
         ]
       }
@@ -119,16 +119,16 @@ a result can be defended clause by clause rather than trusted.
 This page is the map. A hundred and sixty-eight guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
-[Getting Started](/phonometry/start/getting-started/) first: it runs one signal
+[Getting Started](/start/getting-started/) first: it runs one signal
 through the whole processing chain and gives the vocabulary the rest of the
 guides assume. If you already know the quantity you need, the
-[glossary](/phonometry/reference/glossary/) lists every symbol with its unit,
+[glossary](/reference/glossary/) lists every symbol with its unit,
 its defining standard and the guide that implements it.
 
 Two pointers before the list. Function signatures live in the
-[API reference](/phonometry/reference/api/), which is generated from the
+[API reference](/reference/api/), which is generated from the
 docstrings and is not repeated here. Derivations, design decisions and the
-numerical evidence live in [Reference](/phonometry/reference/): the theory
+numerical evidence live in [Reference](/reference/): the theory
 pages explain why a formula is the one it is, and the conformance report shows
 the standard's own expected value next to the computed one.
 
@@ -136,16 +136,16 @@ A third pointer, for anyone arriving with a measurement to make rather than a
 number to compute. Where a method needs a physical arrangement, its guide
 carries an engineering setup diagram with the geometry the standard prescribes:
 source and microphone positions, separations, mounting, and the specimen or the
-enclosing surface. [Field Insulation Measurement](/phonometry/buildings/insulation/insulation-field/)
+enclosing surface. [Field Insulation Measurement](/buildings/insulation/insulation-field/)
 draws the ISO 16283-1 room pair that way, and
-[Impedance Tube](/phonometry/materials/absorbers/impedance-tube/) draws the
+[Impedance Tube](/materials/absorbers/impedance-tube/) draws the
 ISO 10534-2 tube with both microphone spacings. The prediction and rating
 guides take element or material data as their input instead and need no
 facility, which is usually the fastest way to tell the two kinds of page apart.
-[What do you need to measure?](/phonometry/start/tasks/) sorts the same guides
+[What do you need to measure?](/start/tasks/) sorts the same guides
 by the job rather than by the topic.
 
-## [Signal analysis](/phonometry/signals/)
+## [Signal analysis](/signals/)
 
 Filter banks, weighting, levels, spectra, calibration and uncertainty. This is
 the chain that turns a digital signal into a standards-compliant number, and
@@ -156,125 +156,125 @@ IEC 61672-1, IEC 61672-3, ISO 7196, IEC 61252, ISO 1996-1, IEC 60942,
 IEC 61183, IEC 62585, IEC 61094-2, IEC 61094-3, IEC 61094-5, IEC 61094-8
 and the GUM.
 
-- [Build a sound level meter](/phonometry/signals/sound-level-meter/):
+- [Build a sound level meter](/signals/sound-level-meter/):
   the whole area assembled end to end on one runnable page, from the
   calibrator tone to the reported levels.
 
-**[Octave filtering](/phonometry/signals/filters/)**
+**[Octave filtering](/signals/filters/)**
 
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the fractional-octave band
+- [Filter Banks](/signals/filters/filter-banks/): the fractional-octave band
   mathematics, the bank parameters, the parametric EQ, band decomposition and
   zero-phase offline filtering.
-- [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/): the five
+- [Filter Architecture Gallery](/signals/filters/filter-gallery/): the five
   filter architectures compared at the band edges, the full response gallery
   and per-architecture usage, with the Linkwitz-Riley crossover.
-- [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
+- [Filter Class Verification (IEC 61260-1)](/signals/filters/filter-compliance/):
   the Table 1 acceptance mask band by band, the effective bandwidth and the
   summation of outputs of IEC 61260-2, the swept time-invariance test, the
   grading of IEC 61260-3 periodic tests, the class 0 of the withdrawn 1995
   edition and the compliance fiche.
-- [Block Processing](/phonometry/signals/filters/block-processing/): stateful streaming
+- [Block Processing](/signals/filters/block-processing/): stateful streaming
   analysis that carries filter state across buffers, for signals that never fit
   in memory.
-- [Multichannel and Performance](/phonometry/signals/filters/multichannel/): vectorized
+- [Multichannel and Performance](/signals/filters/multichannel/): vectorized
   analysis of many channels at once, with the (channels, samples) convention
   and performance notes.
 
-**[Levels and weighting](/phonometry/signals/levels/)**
+**[Levels and weighting](/signals/levels/)**
 
-- [Frequency Weighting (A, C, Z)](/phonometry/signals/levels/weighting/):
+- [Frequency Weighting (A, C, Z)](/signals/levels/weighting/):
   the IEC 61672-1 ear-response curves, the high-frequency accuracy mode and
   the Table 3 class verification.
-- [Special Weightings (G, B, D, AU)](/phonometry/signals/levels/special-weightings/):
+- [Special Weightings (G, B, D, AU)](/signals/levels/special-weightings/):
   ISO 7196 G-weighting for infrasound, the historical B and D curves and AU
   for audible sound in the presence of ultrasound.
-- [Time Weighting](/phonometry/signals/levels/time-weighting/): the Fast, Slow and
+- [Time Weighting](/signals/levels/time-weighting/): the Fast, Slow and
   Impulse exponential ballistics of IEC 61672-1.
-- [Integrated and Statistical Levels](/phonometry/signals/levels/levels/): $L_\mathrm{eq}$ and
+- [Integrated and Statistical Levels](/signals/levels/levels/): $L_\mathrm{eq}$ and
   $L_\mathrm{Aeq}$, the percentile levels $L_{10}$/$L_{50}$/$L_{90}$, $L_\mathrm{Cpeak}$ and
   SEL, and the noise dose.
-- [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels (ISO 1996-1/-2)](/environment/assessment/environmental-levels/):
   $L_\mathrm{den}$, $L_\mathrm{dn}$ and the composite rating levels, the tonal adjustment, the
   residual-noise correction and the uncertainty budget. It lives under
   Environment and transport, and is repeated here because it is the level
   definitions above aggregated over a day.
-- [Spanish Noise Regulation (RD 1367/2007)](/phonometry/environment/assessment/spanish-noise-regulation/):
+- [Spanish Noise Regulation (RD 1367/2007)](/environment/assessment/spanish-noise-regulation/):
   the corrected level $L_\mathrm{Keq}$ with its $K_\mathrm{t}$, $K_\mathrm{f}$ and $K_\mathrm{i}$ corrections, the
   evaluation periods and noise phases, the limit tables and the Article 25
   compliance check. It lives under Environment and transport too.
 
-**[Signals and spectra](/phonometry/signals/spectra/)**
+**[Signals and spectra](/signals/spectra/)**
 
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/): the
   Welch power and cross-spectral estimators with their random errors,
   chi-square confidence intervals and fractional-octave smoothing.
-- [Multiple and partial coherence](/phonometry/signals/spectra/miso-coherence/): the
+- [Multiple and partial coherence](/signals/spectra/miso-coherence/): the
   ordinary, multiple and partial coherence of several correlated sources
   driving one response, and which source dominates each band.
-- [Time-frequency analysis](/phonometry/signals/spectra/time-frequency/): the calibrated
+- [Time-frequency analysis](/signals/spectra/time-frequency/): the calibrated
   STFT spectrogram in absolute dB SPL, and the zoom FFT that resolves tones
   closer than a practical FFT bin.
-- [Cepstrum, echoes and the envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/):
+- [Cepstrum, echoes and the envelope spectrum](/signals/spectra/cepstrum-echoes/):
   quefrency analysis, echo detection with the reflection coefficient read off
   the cepstral peak, liftering and the envelope spectrum.
-- [Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/):
+- [Time synchronous averaging](/signals/spectra/synchronous-averaging/):
   extraction of a periodic waveform of known period, the comb filter that
   describes it and the choice of the number of averages.
-- [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/):
+- [Machine fault frequencies](/vibration/machinery/machine-diagnostics/):
   the kinematic fault-frequency families of rotating machinery (Norton &
   Karczub Section 8.4) drawn on top of a measured envelope spectrum: bearing
   BPFO, BPFI, BSF and cage frequencies, gear-mesh sidebands, induction-motor
   slip, pole-pass and rotor-slot harmonics, and blade-passing tones. It lives
   under Vibration and structure-borne sound, and is repeated here because it is
   the envelope spectrum above put to work.
-- [Correlation, time delay and envelope](/phonometry/signals/spectra/correlation-delay/):
+- [Correlation, time delay and envelope](/signals/spectra/correlation-delay/):
   correlation with its random errors, time-delay estimation by direct
   correlation and the GCC weightings, and the Hilbert envelope.
-- [Test signals and sample-rate tools](/phonometry/signals/spectra/test-signals/):
+- [Test signals and sample-rate tools](/signals/spectra/test-signals/):
   IEC 60268-1 tone bursts with exact gating, colored noise with an exact
   slope, resampling with a stated anti-alias specification and fractional
   delay.
-- [System measurement](/phonometry/signals/spectra/system-measurement/): complementary
+- [System measurement](/signals/spectra/system-measurement/): complementary
   Golay pairs, sweeps shaped to an arbitrary target magnitude spectrum, and
   Kirkeby-regularized inversion of a measured response.
 
-**[Calibration and uncertainty](/phonometry/signals/metrology/)**
+**[Calibration and uncertainty](/signals/metrology/)**
 
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): physical SPL
+- [Calibration and dBFS](/signals/metrology/calibration/): physical SPL
   calibration from a calibrator tone or a known sensitivity, and the digital
   full-scale mode.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](/signals/metrology/compliance-verification/):
   what a performance class asserts, the verifiers per stage, the conformance
   report, and the scope of the pattern-evaluation and periodic-test parts.
-- [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](/signals/metrology/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, with
   expanded uncertainty and coverage intervals.
-- [Data qualification](/phonometry/signals/metrology/data-qualification/): the reverse
+- [Data qualification](/signals/metrology/data-qualification/): the reverse
   arrangement and runs tests for stationarity, and the Rice level-crossing and
   peak statistics with the irregularity factor.
-- [Random-Incidence and Diffuse-Field Response (IEC 61183)](/phonometry/signals/metrology/random-incidence/):
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](/signals/metrology/random-incidence/):
   the directivity factor of a sound level meter from readings in two planes,
   one plane or 38 equal-area elements, and its random-incidence and
   diffuse-field sensitivity levels.
-- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](/phonometry/signals/metrology/free-field-corrections/):
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](/signals/metrology/free-field-corrections/):
   the adjustment value at the calibration check frequency, the corrections
   for a calibrator, a coupler and an actuator, their uncertainty budget and
   the maxima of clauses 9 to 14 as a verdict and a fiche.
-- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](/signals/metrology/sound-level-meter-periodic-tests/):
   the verdict on a laboratory's periodic-test results, clause by clause
   against the limits of IEC 61672-1 and the maxima of its Table B.1, and the
   statement of Clause 22.
-- [Microphone Calibration by Comparison (IEC 61094-5/-8)](/phonometry/signals/metrology/comparison-calibration/):
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](/signals/metrology/comparison-calibration/):
   a working standard microphone calibrated against a reference in a coupler
   or a free field, with the interchange of Annex C, the monitor of a
   substitution, the corrections, the validation of a jig or coupler and the
   budgets of Table D.1 and Table 2.
-- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](/signals/metrology/reciprocity-calibration/):
   laboratory standard microphones calibrated in pairs with no reference, in a
   coupler with its heat-conduction and capillary corrections or in a free
   field with its attenuation and acoustic centres, and the budgets of Table 1.
 
-## [The medium](/phonometry/fluids/)
+## [The medium](/fluids/)
 
 The fluid the sound travels through, computed from the conditions that were
 measured rather than assumed. A density and a speed of sound stand behind
@@ -284,25 +284,25 @@ metrology in the transverse toolbox, because a medium is not a subject some
 domains have and others do not. Implements IEC 61094-2:2009 Annex F
 (CIPM-2007).
 
-- [Humid air](/phonometry/fluids/humid-air/): the density, speed of sound,
+- [Humid air](/fluids/humid-air/): the density, speed of sound,
   ratio of specific heats, viscosity and thermal diffusivity of air from the
   measured temperature, pressure and humidity, what each condition is worth,
   the domain the annex states for itself, and what the model refuses to
   guess.
 
-## [Elastic solids](/phonometry/solids/)
+## [Elastic solids](/solids/)
 
 The elastic constants of a solid and the three longitudinal wave speeds that
 follow from them, named after the shape the wave travels in. A plate table and
 a solver table print different numbers for the same steel, and the conversion
 between them is written here once instead of in each caller's head.
 
-- [Wave speeds](/phonometry/solids/wave-speeds/): the beam, plate and
+- [Wave speeds](/solids/wave-speeds/): the beam, plate and
   unbounded longitudinal speeds, the inverse that turns each back into a
   Young's modulus, and the thickness-critical-frequency product that lets two
   books be checked against each other for free.
 
-## [Files](/phonometry/io/)
+## [Files](/io/)
 
 Measurement audio in and out. The file layer of the signal chain: every
 linear WAV a sound level meter or field recorder writes comes back as a
@@ -315,20 +315,20 @@ is read from a JSON file, or from a spreadsheet saved as CSV, into the rows
 every published catalogue hands out. Any matplotlib animation, and an FDTD
 run as it is computed, is written to a WebM, an MP4 or a GIF through ffmpeg.
 
-- [Reading and writing measurement audio](/phonometry/io/audio-files/): the
+- [Reading and writing measurement audio](/io/audio-files/): the
   whole workflow on one runnable page, from the meter's WAV to the
   calibrated level, the lossy warning, streaming, BWF writing, the sidecar
   and lossless conversion.
-- [Your own catalogues](/phonometry/io/material-catalogues/): a data sheet,
+- [Your own catalogues](/io/material-catalogues/): a data sheet,
   a test report or a measurement of yours as a catalogue file, read into
   the rows every published catalogue hands out, searched with the same
   lookups, handed to the same models and completed in your editor with its
   JSON Schema.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/): any
+- [Writing animations and FDTD runs to video](/io/videos/): any
   matplotlib animation to WebM, MP4 or GIF through ffmpeg, and an FDTD run
   straight to a video.
 
-## [Hearing and perception](/phonometry/perception/)
+## [Hearing and perception](/perception/)
 
 Loudness, sound quality, speech intelligibility, hearing and exposure. Where
 the core area asks how much sound there is, this one asks what a listener makes
@@ -338,59 +338,59 @@ Implements ISO 532-1/-2/-3, ECMA-418-1/-2, ISO 226, DIN 45692, IEC 60268-16,
 ANSI S3.5, DIN 45681, ISO/PAS 20065, ISO 7029, ISO 389-7, ISO 8253-1/-2,
 ISO 1999, ISO 9612 and ISO 4869-1/-2/-3/-6.
 
-**[Psychoacoustics](/phonometry/perception/psychoacoustics/)**
+**[Psychoacoustics](/perception/psychoacoustics/)**
 
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/): loudness in sones by the ISO 532-1
+- [Loudness](/perception/psychoacoustics/loudness/): loudness in sones by the ISO 532-1
   Zwicker method with its one-page fiche, plus the ISO 226 equal-loudness
   contours.
-- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](/phonometry/perception/psychoacoustics/advanced-loudness/):
+- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](/perception/psychoacoustics/advanced-loudness/):
   the Moore-Glasberg stationary and time-varying methods and the Sottek
   Hearing Model loudness, with the model-choice table.
-- [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): sharpness in
+- [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): sharpness in
   acum, and the ECMA-418-2 tonality, roughness and fluctuation strength.
-- [Prominent Discrete Tones (ECMA-418-1)](/phonometry/perception/psychoacoustics/tone-prominence/):
+- [Prominent Discrete Tones (ECMA-418-1)](/perception/psychoacoustics/tone-prominence/):
   the tone-to-noise ratio and prominence ratio, with their frequency-dependent
   prominence criteria.
-- [Objective audibility of tones in noise (ISO/PAS 20065)](/phonometry/perception/psychoacoustics/tone-audibility/):
+- [Objective audibility of tones in noise (ISO/PAS 20065)](/perception/psychoacoustics/tone-audibility/):
   the critical-band masking level, the masking index and the audibility of a
   tone above the masking threshold.
-- [Psychoacoustic annoyance and fluctuation strength](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/):
+- [Psychoacoustic annoyance and fluctuation strength](/perception/psychoacoustics/psychoacoustic-annoyance/):
   the Fastl and Zwicker annoyance model built from loudness, sharpness,
   roughness and fluctuation strength.
 
-**[Speech](/phonometry/perception/speech/)**
+**[Speech](/perception/speech/)**
 
-- [Speech Transmission Index (STI)](/phonometry/perception/speech/speech-transmission/):
+- [Speech Transmission Index (STI)](/perception/speech/speech-transmission/):
   the modulation transfer function, the indirect method from an impulse
   response and the direct STIPA measurement.
-- [Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/):
+- [Speech Intelligibility Index](/perception/speech/speech-intelligibility/):
   the SII in all four of the standard's band procedures, with the
   band-importance functions, self-masking and upward spread of masking.
-- [Objective Intelligibility (STOI and ESTOI)](/phonometry/perception/speech/objective-intelligibility/):
+- [Objective Intelligibility (STOI and ESTOI)](/perception/speech/objective-intelligibility/):
   the two correlation-based measures for time-frequency weighted noisy speech.
 
-**[Hearing and exposure](/phonometry/perception/hearing/)**
+**[Hearing and exposure](/perception/hearing/)**
 
-- [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
+- [Hearing threshold (age and reference zero)](/perception/hearing/hearing-threshold/):
   the age-related threshold distribution of ISO 7029 and the ISO 389-7
   reference threshold of hearing.
-- [Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/):
+- [Audiometric Test Methods (ISO 8253-1 and -2)](/perception/hearing/audiometry/):
   whether the test room is quiet enough and its sound field free, quasi-free or
   diffuse, the rules that turn responses into a hearing threshold level, and
   its uncertainty.
-- [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
+- [Noise-induced hearing loss (ISO 1999)](/perception/hearing/noise-induced-hearing-loss/):
   the permanent threshold shift as a function of level, duration and frequency,
   combined with the age component.
-- [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
+- [Occupational Noise Exposure (ISO 9612)](/perception/hearing/occupational-exposure/):
   the task-based, job-based and full-day strategies for $L_\mathrm{EX,8h}$, with the
   uncertainty budget and the upper limit.
-- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](/phonometry/perception/hearing/hearing-protectors/):
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](/perception/hearing/hearing-protectors/):
   the attenuation measured on sixteen subjects with its uncertainty and its
   significance test, the octave-band, HML and SNR methods that say what a
   protector leaves at the ear, what an active noise reduction earmuff adds, and
   the insertion loss that screens an earmuff on a test fixture.
 
-## [Rooms and buildings](/phonometry/buildings/)
+## [Rooms and buildings](/buildings/)
 
 Room parameters, background noise, field and laboratory insulation, and
 prediction from element data. Two questions run through the area: how a room
@@ -401,119 +401,119 @@ ISO 717-1/-2, EN 12354-1 to -6, ISO 18233, ISO 12999-1, ISO 10052,
 ISO 16032 (from the ISO/DIS 16032:2023 draft), ANSI/ASA S12.2 and
 ASTM E413.
 
-**[Room acoustics](/phonometry/buildings/rooms/)**
+**[Room acoustics](/buildings/rooms/)**
 
-- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/):
   the ISO 18233 deterministic acquisition, exponential sweeps with their
   deconvolution, and MLS.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the room parameters
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the room parameters
   EDT, $T_{20}$, $T_{30}$, $C_{50}$, $C_{80}$, $D_{50}$ and $T_\mathrm{s}$ derived from
   that impulse response.
-- [Sound strength G (ISO 3382-1)](/phonometry/buildings/rooms/sound-strength/): one
+- [Sound strength G (ISO 3382-1)](/buildings/rooms/sound-strength/): one
   of the two auditorium measures that need a calibrated source, and the three
   printed routes to its free-field reference at 10 m.
-- [Spatial impression (ISO 3382-1)](/phonometry/buildings/rooms/spatial-impression/):
+- [Spatial impression (ISO 3382-1)](/buildings/rooms/spatial-impression/):
   the early lateral energy fraction, the late lateral sound level and the
   interaural cross correlation, measured with a second microphone.
-- [Stage support and uncertainty (ISO 3382-1)](/phonometry/buildings/rooms/stage-and-uncertainty/):
+- [Stage support and uncertainty (ISO 3382-1)](/buildings/rooms/stage-and-uncertainty/):
   what a player hears of their own instrument on the platform, and what the
   randomness of the excitation costs a reverberation time.
-- [Reporting and source qualification (ISO 3382-1)](/phonometry/buildings/rooms/reporting-and-qualification/):
+- [Reporting and source qualification (ISO 3382-1)](/buildings/rooms/reporting-and-qualification/):
   the printed tables, from the directivity a source must clear to the fifteen
   items a test report shall carry.
-- [Open-Plan Office Acoustics (ISO 3382-3)](/phonometry/buildings/rooms/open-plan-acoustics/):
+- [Open-Plan Office Acoustics (ISO 3382-3)](/buildings/rooms/open-plan-acoustics/):
   the spatial decay rate of speech and the distraction and privacy distances
   of an open-plan floor.
-- [Image sources and the steady-state room field](/phonometry/buildings/rooms/room-image-sources/):
+- [Image sources and the steady-state room field](/buildings/rooms/room-image-sources/):
   the deterministic image-source impulse response of a rectangular room, the
   room constant, critical distance and Schroeder frequency.
-- [Spatial Sound Decay in Workrooms](/phonometry/buildings/rooms/workroom-sound-decay/):
+- [Spatial Sound Decay in Workrooms](/buildings/rooms/workroom-sound-decay/):
   how far the level falls as you walk away from a machine, the excess over a
   free field, and the prediction categories that match the data you have.
-- [Room-noise criteria (NC / RC Mark II)](/phonometry/buildings/rooms/room-noise/): the
+- [Room-noise criteria (NC / RC Mark II)](/buildings/rooms/room-noise/): the
   ANSI/ASA S12.2 Noise Criteria rating by tangency, and the Room Criteria
   Mark II rating with its rumble, hiss or neutral tag.
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](/buildings/rooms/reverberation-prediction/):
   five statistical-acoustics models from volume, boundary areas and surface
   absorption, including the air term.
-- [Sound absorption in enclosed spaces (EN 12354-6)](/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](/buildings/rooms/enclosed-space-absorption/):
   the total equivalent absorption area of a room from its surfaces, objects and
   air, and the reverberation time that follows.
 
-**[Sound insulation](/phonometry/buildings/insulation/)**
+**[Sound insulation](/buildings/insulation/)**
 
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   airborne and impact insulation measured in the building, its test report and
   the ISO 12999-1 uncertainty that qualifies it.
-- [Small Rooms: the ISO 16283 Low-Frequency Procedure](/phonometry/buildings/insulation/low-frequency-procedure/):
+- [Small Rooms: the ISO 16283 Low-Frequency Procedure](/buildings/insulation/low-frequency-procedure/):
   the corner measurement ISO 16283 makes mandatory below 25 m³, and the 63 Hz
   octave reverberation time that comes with it.
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
   the ISO 10140 characterisation of an element with flanking suppressed.
-- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](/phonometry/buildings/insulation/lab-application-rules/):
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](/buildings/insulation/lab-application-rules/):
   the improvement a lining or a floor covering gives the element it is laid
   on, rated on the ISO 717 reference curves, the sound reduction index of a
   sealed joint per metre, the forms of Figures H.4 and J.7, and the sound of
   artificial rain on a roof or a rooflight.
-- [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
+- [Sound Insulation by Intensity (ISO 15186)](/buildings/insulation/insulation-intensity/):
   the transmitted power read off the radiating face, for the whole element or
   element by element.
-- [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/):
+- [Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/):
   the octave-band control method with its reverberation index and its
   airborne, impact, façade and service-equipment quantities.
-- [Service-Equipment and Activity Noise (ISO 16032)](/phonometry/buildings/insulation/service-equipment-noise/):
+- [Service-Equipment and Activity Noise (ISO 16032)](/buildings/insulation/service-equipment-noise/):
   the engineering method for the sound of a building's equipment and of
   activities in or near it, from the ISO/DIS 16032:2023 draft.
-- [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/):
+- [Laboratory Flanking Transmission (ISO 10848)](/buildings/insulation/flanking-lab/):
   the junction vibration reduction index and the flanking level differences
   measured on a test facility.
-- [Heavy and Soft Impact Sources (ISO 16283-2)](/phonometry/buildings/insulation/heavy-impact-sources/):
+- [Heavy and Soft Impact Sources (ISO 16283-2)](/buildings/insulation/heavy-impact-sources/):
   the rubber ball and the bang machine: the impact force exposure level that
   specifies them, the laboratory check they have to pass, and the single number
   of ISO 717-2 Annex D.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/):
   the airborne and impact reference-curve engines with $C$, $C_\mathrm{tr}$ and $C_\mathrm{I}$,
   the enlarged-range terms and the ISO 717 fiche.
-- [Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/): the
+- [Façade Sound Insulation](/buildings/insulation/facade-insulation/): the
   building envelope measured per ISO 16283-3, predicted per EN 12354-3 and
   radiating outwards per EN 12354-4.
-- [Spanish Building Code (CTE DB-HR)](/phonometry/buildings/insulation/spanish-building-code/):
+- [Spanish Building Code (CTE DB-HR)](/buildings/insulation/spanish-building-code/):
   the DB-HR global indices $R_\mathrm{A}$, $R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ and $D_{2\mathrm{m,n}T,\mathrm{Atr}}$,
   the clause 2 requirement tables and the window-size correction.
 
-**[Insulation design](/phonometry/buildings/design/)**
+**[Insulation design](/buildings/design/)**
 
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   in-situ airborne and impact insulation between rooms from element data, with
   their flanking paths.
-- [Detailed Per-Band Prediction (ISO 12354)](/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](/buildings/design/detailed-prediction/):
   the same prediction band by band rather than as one number: in-situ element and
   junction data, the flanking index and impact level, and the per-path
   contributions behind R'w and L'n,w.
-- [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](/buildings/design/panel-sound-insulation/):
   the mass law and coincidence dip, double walls, slits and apertures, plate
   radiation efficiency and point mobilities.
-- [Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/):
+- [Floor-Covering Impact Improvement (ISO 16251-1)](/buildings/design/impact-improvement/):
   the weighted improvement of a soft floor covering measured on a small
   heavyweight mock-up.
-- [Predicting Resilient-Layer Performance](/phonometry/buildings/design/resilient-layers/):
+- [Predicting Resilient-Layer Performance](/buildings/design/resilient-layers/):
   the tapping-machine force model, the cut-off frequency of a soft covering,
   the floating-floor improvement laws and the ISO 12354-1 Annex D rating of a
   wall lining.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](/materials/resilient/dynamic-stiffness/):
   the stiffness per unit area under a floating floor from the load-plate
   resonance, with the enclosed-gas term. It lives under Materials and surfaces,
   and is repeated here because it is the input the layer models above ask for.
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   the reception-plate method and the plate-independent source quantities:
   equivalent blocked force, free velocity and source mobility. Also listed under
   Vibration, beside the mobilities it is built from.
-- [Installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](/buildings/design/installed-structure-borne/):
   the coupling term from source and receiver mobilities, the installed power and
   the per-path sound pressure level in the receiving room. Also listed under
   Vibration.
 
-## [Materials and surfaces](/phonometry/materials/)
+## [Materials and surfaces](/materials/)
 
 Absorption, airflow resistance, the impedance tube, porous and metamaterial
 models, diffusers and scattering. What a surface does to the sound that
@@ -521,55 +521,55 @@ reaches it, measured in a laboratory or predicted from the material
 parameters. Implements ISO 354, ISO 11654, EN 16487, ISO 10534-1/-2,
 ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
 
-- [Reading a material datasheet](/phonometry/materials/reading-a-datasheet/):
+- [Reading a material datasheet](/materials/reading-a-datasheet/):
   what the numbers on a data sheet or a test report are before you type them:
   the practical against the one-third-octave coefficient, a declared level,
   the mounting and the revision, and the sound reduction index and impact
   improvement of a laboratory report, each rated again from its bands.
 
-**[Absorbers](/phonometry/materials/absorbers/)**
+**[Absorbers](/materials/absorbers/)**
 
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   the ISO 354 reverberation-room measurement, the weighted rating and its
   class, and the measurement uncertainty of both.
-- [Suspended Ceilings: the EN 16487 Test Code](/phonometry/materials/absorbers/suspended-ceilings/):
+- [Suspended Ceilings: the EN 16487 Test Code](/materials/absorbers/suspended-ceilings/):
   the specimen size, the mounting depth and the air-absorption cap that make one
   ceiling measurement comparable with another.
-- [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the static
+- [Airflow Resistance](/materials/absorbers/airflow-resistance/): the static
   and alternating determination of airflow resistance and resistivity.
-- [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/): the normal-incidence
+- [Impedance Tube](/materials/absorbers/impedance-tube/): the normal-incidence
   surface impedance, absorption and transmission loss, plus the virtual
   FDTD tube.
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/): the
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/): the
   Delany-Bazley, Miki and Johnson-Champoux-Allard models, the transfer-matrix
   multilayer solver with perforated, microperforated and membrane layers, and
   the random-incidence integral.
-- [Metamaterial Absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/): the
+- [Metamaterial Absorbers](/materials/absorbers/metamaterial-absorbers/): the
   critical-coupling condition for perfect absorption and the slow-sound slit
   panel loaded by Helmholtz resonators, with its design solver.
 
-**[Diffusers and surfaces](/phonometry/materials/diffusers/)**
+**[Diffusers and surfaces](/materials/diffusers/)**
 
-- [Diffusers and Their Coefficients](/phonometry/materials/diffusers/diffusers/): the
+- [Diffusers and Their Coefficients](/materials/diffusers/diffusers/): the
   random-incidence scattering coefficient, the autocorrelation diffusion
   coefficient, and Schroeder design with its far-field prediction.
-- [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/): deep-subwavelength
+- [Metadiffusers](/materials/diffusers/metadiffusers/): deep-subwavelength
   Schroeder diffusers from resonator-loaded slits, slow sound and ternary
   sequences.
-- [In-situ Road-Surface Absorption](/phonometry/materials/surfaces/road-absorption/):
+- [In-situ Road-Surface Absorption](/materials/surfaces/road-absorption/):
   in-situ road-surface absorption by the subtraction technique and the spot
   method. It is the only guide of the [surfaces measured in
-  place](/phonometry/materials/surfaces/) overview, which the sidebar files in
+  place](/materials/surfaces/) overview, which the sidebar files in
   this same group.
 
-**[Resilient layers](/phonometry/materials/resilient/)**
+**[Resilient layers](/materials/resilient/)**
 
-- [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](/materials/resilient/dynamic-stiffness/):
   the stiffness per unit area under a floating floor from the load-plate
   resonance, with the enclosed-gas term. Also listed under Rooms and buildings,
   beside the floating-floor prediction that consumes it.
 
-## [Vibration and structure-borne sound](/phonometry/vibration/)
+## [Vibration and structure-borne sound](/vibration/)
 
 Mobility and frequency-response functions, isolators, radiated power,
 junctions and human vibration. The area covers the path a machine takes into a
@@ -578,109 +578,109 @@ vibration does to the person exposed to it. Implements ISO 7626-1/-2/-5,
 ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
 ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
 
-**[Structure-borne sources](/phonometry/vibration/structural/)**
+**[Structure-borne sources](/vibration/structural/)**
 
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   receptance, mobility and accelerance with their reciprocals, conversion
   between them, and the closed-form single-degree-of-freedom resonator.
-- [Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/):
+- [Mobility by impact excitation (ISO 7626-5)](/vibration/structural/impact-mobility/):
   the mobility measured with an impact hammer: the force and exponential
   windows, the average over impacts with its coherence, the damping the window
   adds taken away by Annex A, and verdicts on double hits, the force spectrum,
   overload and the response decay.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   the wave-approach transmission coefficients for rigid X, T, L and in-line
   junctions, their diffuse-field average, and the coupling loss factor and
   vibration reduction index.
-- [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
+- [Transfer stiffness of resilient elements (ISO 10846)](/vibration/structural/transfer-stiffness/):
   the dynamic transfer stiffness and loss factor of an isolator by the direct,
   indirect and driving-point methods, averaged into one-third-octave bands,
   with the adequacy checks of the rig and the Annex B uncertainty budget.
-- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](/vibration/structural/structural-damage/):
   the guideline peak particle velocities a foundation, a topmost floor plane and
   a buried pipe are judged by, and the bending stress a velocity implies.
-- [Predicting a building's own frequency (ISO 4866)](/phonometry/vibration/structural/building-response/):
+- [Predicting a building's own frequency (ISO 4866)](/vibration/structural/building-response/):
   the empirical predictors of Annex D, the ± 50 % they admit, and the damping
   range the annex reports without a way to predict it.
-- [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
+- [Sound power from surface vibration (ISO/TS 7849)](/devices/emission/vibration-sound-power/):
   the radiated power from the surface-averaged velocity level and the radiation
   factor, with the Part 1 upper limit and the Part 2 engineering value. It lives
   under Sources and devices, and is repeated here because its input is a
   measured surface velocity.
-- [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):
+- [Structure-borne sound power of equipment (EN 15657)](/buildings/design/structure-borne-power/):
   the reception-plate method and the plate-independent source quantities,
   equivalent blocked force, free velocity and source mobility. It lives under
   Rooms and buildings, and is repeated here because the source quantities are
   mobilities.
-- [Installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/):
+- [Installed structure-borne sound (EN 12354-5)](/buildings/design/installed-structure-borne/):
   the coupling term from source and receiver mobilities, the installed power
   and the per-path sound pressure level in the receiving room. It lives under
   Rooms and buildings, for the same reason.
 
-**[Human vibration](/phonometry/vibration/human/)**
+**[Human vibration](/vibration/human/)**
 
-- [Human Vibration](/phonometry/vibration/human/human-vibration/): whole-body and
+- [Human Vibration](/vibration/human/human-vibration/): whole-body and
   hand-arm exposure with the ISO 8041-1 weightings, the weighted r.m.s. and
   dose measures, and the daily exposure $A(8)$.
-- [Multiple-shock whole-body vibration (ISO 2631-5)](/phonometry/vibration/human/multiple-shock-vibration/):
+- [Multiple-shock whole-body vibration (ISO 2631-5)](/vibration/human/multiple-shock-vibration/):
   the seat-to-spine transfer function, the acceleration dose, and the
   cumulative stress variable behind the lumbar injury probability.
-- [What a seat does to the vibration (ISO 10326-1)](/phonometry/vibration/human/seat-vibration/):
+- [What a seat does to the vibration (ISO 10326-1)](/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the intended
   input and the transmissibility at resonance.
-- [Verifying a human-vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](/vibration/human/meter-verification/):
   the tolerance band on each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications,
   and the personal vibration exposure meter of ISO 8041-2 graded with the
   same burst tables.
 
-**[Machinery](/phonometry/vibration/machinery/)**
+**[Machinery](/vibration/machinery/)**
 
-- [Evaluating machine vibration](/phonometry/vibration/machinery/machine-vibration-evaluation/):
+- [Evaluating machine vibration](/vibration/machinery/machine-vibration-evaluation/):
   grading a machine from one broad-band measurement into the four evaluation
   zones of ISO 20816-1, with the frequency-shaped velocity criterion, the
   vector reading of a change that a magnitude comparison misses, and the
   printed boundaries and ALARM and TRIP settings ISO 10816-3 gives for
   industrial machines.
-- [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/):
+- [Machine fault frequencies](/vibration/machinery/machine-diagnostics/):
   the characteristic bearing, gear and shaft frequencies and the envelope
   analysis that finds them under the broadband noise of a running machine.
   Also listed under Signal analysis, beside the spectral estimators it uses.
 
-**[Vibration immission](/phonometry/vibration/immission/)**
+**[Vibration immission](/vibration/immission/)**
 
-- [Measuring vibration immission (DIN 45669-1)](/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](/vibration/immission/vibration-meter/):
   the vibration meter DIN 4150-2 and DIN 4150-3 presuppose, with the KB
   weighting, the weighted vibration severity and the clock maximum r.m.s. a
   measurement is reported in, the tolerance bands a meter is graded by, and
   the Annex E assessment velocity that judges a building without a dominant
   frequency.
-- [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
+- [Vibration next to a railway (DIN 45672)](/vibration/immission/railway-vibration/):
   one train passage reduced the way DIN 45672-2 reduces it, from the event
   value of an hour of traffic to the third-octave spectra and the narrow-band
   density behind them, and the ground constants of DIN 45672-1 from two wave
   speeds.
-- [Vibration and people in buildings (DIN 4150-2)](/phonometry/vibration/immission/people-in-buildings/):
+- [Vibration and people in buildings (DIN 4150-2)](/vibration/immission/people-in-buildings/):
   the guide values of Table 1 by area and time of day, the order DIN 4150-2
   reads them in, the assessment vibration severity that sums a day of
   exposure into one number, the rules for blasting, roads, railways and
   construction sites, and the estimate from a peak velocity where nothing
   weighted was recorded.
-- [Railway vibration by category of train (E DIN 4150-2)](/phonometry/vibration/immission/railway-categories/):
+- [Railway vibration by category of train (E DIN 4150-2)](/vibration/immission/railway-categories/):
   the draft that is to replace DIN 4150-2, one clock interval per passage, a
   weighting factor per kind of train, the night-time upper value of a new
   line and the 25 % rule of an altered one, with the rest of its changes
   behind an edition switch.
-- [Predicting railway vibration (E DIN 45672-3)](/phonometry/vibration/immission/railway-prediction/):
+- [Predicting railway vibration (E DIN 45672-3)](/vibration/immission/railway-prediction/):
   the additive chain from an emission spectrum through the ground and the
   building to a third-octave spectrum on a floor, the six transfer tables of
   Annex A, and the KB values formed from the spectrum.
-- [Predicting vibration before measuring (DIN 4150-1)](/phonometry/vibration/immission/vibration-prediction/):
+- [Predicting vibration before measuring (DIN 4150-1)](/vibration/immission/vibration-prediction/):
   the decay with distance beyond the far field with an exponent by kind of
   source and wave, what a foundation and a floor do, a blast, a falling mass
   and a hall of machines, and what a track excites at.
 
-## [Environment and transport](/phonometry/environment/)
+## [Environment and transport](/environment/)
 
 Outdoor propagation, barriers, refraction, road, rail and wind-turbine
 sources, and the assessment built on them. Everything here concerns sound that
@@ -701,98 +701,98 @@ implemented; outdoor attenuation here goes through the ISO 9613-2 chain
 instead, which is a different model and not interchangeable with it for
 regulatory mapping.
 
-**[Outdoor sound](/phonometry/environment/propagation/)**
+**[Outdoor sound](/environment/propagation/)**
 
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/):
   atmospheric absorption and the ISO 9613-2 general method, with a per-term
   octave-band attenuation breakdown.
-- [Spherical ground effect and advanced barriers](/phonometry/environment/propagation/ground-barriers/):
+- [Spherical ground effect and advanced barriers](/environment/propagation/ground-barriers/):
   the Weyl-Van der Pol reflection coefficient over finite-impedance ground, and
   wave-theoretic barrier diffraction.
-- [Atmospheric refraction: rays and the GFPE](/phonometry/environment/propagation/atmospheric-refraction/):
+- [Atmospheric refraction: rays and the GFPE](/environment/propagation/atmospheric-refraction/):
   effective sound-speed profiles, curved rays with a closed-form shadow-zone
   distance, and the GFPE relative-level field.
-- [Sound reflection of a noise barrier in situ](/phonometry/environment/propagation/barrier-reflection/):
+- [Sound reflection of a noise barrier in situ](/environment/propagation/barrier-reflection/):
   the sound reflection index of EN 1793-5 from the impulse responses of the
   nine-microphone grid, its single number DL_RI and the low frequency limit a
   sample's size sets.
-- [Quality of Outdoor Sound Software (ISO 17534-1)](/phonometry/environment/propagation/software-quality/):
+- [Quality of Outdoor Sound Software (ISO 17534-1)](/environment/propagation/software-quality/):
   a program's results against its certified test-case results, and the 0.1-
   and 0.9-quantiles of what a faster modified configuration costs.
 
-**[Sources](/phonometry/environment/sources/)**
+**[Sources](/environment/sources/)**
 
-- [CNOSSOS-EU road traffic source emission](/phonometry/environment/sources/cnossos-road-emission/):
+- [CNOSSOS-EU road traffic source emission](/environment/sources/cnossos-road-emission/):
   the common EU road source of Annex II 2.2: rolling and propulsion sound power
   per vehicle category and the directional power per metre of source line.
-- [Road-surface noise: the statistical pass-by method](/phonometry/environment/sources/road-surface-pass-by/):
+- [Road-surface noise: the statistical pass-by method](/environment/sources/road-surface-pass-by/):
   what a road surface adds to the traffic on it, from the maximum level of each
   passing vehicle against its speed to the Statistical Pass-By Index of
   ISO 11819-1 and its difference from a reference surface.
-- [CNOSSOS-EU railway source emission](/phonometry/environment/sources/cnossos-rail-emission/):
+- [CNOSSOS-EU railway source emission](/environment/sources/cnossos-rail-emission/):
   the rail source of Annex II 2.3: roughness and the contact filter, impact
   noise, curve squeal, traction and aerodynamic noise, and the two equivalent
   source lines.
-- [Railway rolling-stock noise: the ISO 3095 type test](/phonometry/environment/sources/rolling-stock-noise/):
+- [Railway rolling-stock noise: the ISO 3095 type test](/environment/sources/rolling-stock-noise/):
   the stationary, constant-speed, starting and braking tests of a railway
   vehicle, the pass-by level and the transit exposure level, and the reference
   track judged by the rail roughness of EN 15610 and the decay rates of
   EN 15461.
-- [Wind-turbine noise: sound power and tonal audibility](/phonometry/environment/sources/wind-turbine-noise/):
+- [Wind-turbine noise: sound power and tonal audibility](/environment/sources/wind-turbine-noise/):
   the apparent sound power level referred to the rotor centre, and the tonal
   audibility chain that decides whether a tone is audible.
-- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](/phonometry/environment/sources/wind-turbine-receptor/):
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](/environment/sources/wind-turbine-receptor/):
   what arrives at the receptor: the wind speed between heights, the bin
   averages and the background correction, the low frequency level indoors, the
   emergence, the amplitude modulation rating checked against the IOA code, and
   the rating level.
 
-**[Assessment and regulation](/phonometry/environment/assessment/)**
+**[Assessment and regulation](/environment/assessment/)**
 
-- [Impulsive-sound prominence (NT ACOU 112)](/phonometry/environment/assessment/impulsive-sound/):
+- [Impulsive-sound prominence (NT ACOU 112)](/environment/assessment/impulsive-sound/):
   the predicted prominence of each impulse from its onset rate and level
   difference, and the adjustment added to $L_\mathrm{Aeq}$.
-- [Impulsive Sound Exposure Statistics (ISO 13474)](/phonometry/environment/assessment/sel-distribution/):
+- [Impulsive Sound Exposure Statistics (ISO 13474)](/environment/assessment/sel-distribution/):
   how often a distant blast is how loud: the long-term and rating levels,
   the ordered classes, the spread for turbulence and the exceedance levels.
-- [Soundscape Analysis (ISO/TS 12913)](/phonometry/environment/assessment/soundscape/):
+- [Soundscape Analysis (ISO/TS 12913)](/environment/assessment/soundscape/):
   how people hear a place: the questionnaire and its scale values, the
   pleasantness and eventfulness of Figure A.1, the correlations with the
   acoustic data and the binaural metrics of Table D.1 at both ears.
 
-- [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels (ISO 1996-1/-2)](/environment/assessment/environmental-levels/):
   $L_\mathrm{den}$, $L_\mathrm{dn}$ and the composite rating levels, the tonal adjustment, the
   residual-noise correction and the uncertainty budget. Also listed under
   Signal analysis, beside the level definitions it builds on.
-- [Spanish Noise Regulation (RD 1367/2007)](/phonometry/environment/assessment/spanish-noise-regulation/):
+- [Spanish Noise Regulation (RD 1367/2007)](/environment/assessment/spanish-noise-regulation/):
   the corrected level $L_\mathrm{Keq}$ with its $K_\mathrm{t}$, $K_\mathrm{f}$ and $K_\mathrm{i}$ corrections, the
   evaluation periods and noise phases, the limit tables and the Article 25
   compliance check. Also listed under Signal analysis, for the same reason.
 
-## [Aircraft noise](/phonometry/aircraft/)
+## [Aircraft noise](/aircraft/)
 
 Certification levels, airport contours and the rotorcraft hemisphere
 method: the noise of flight measured the way the certification and
 airport-planning documents prescribe. Implements ICAO Annex 16, IEC 61265,
 SAE ARP 866A/5534, ISO 3891 and ECAC Doc 29/32.
 
-- [Aircraft noise: Effective Perceived Noise Level](/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](/aircraft/aircraft-noise/):
   perceived noisiness and PNL, the tone correction, the duration correction and
   the measurement-system verifier.
-- [Airport Noise (ECAC Doc 29)](/phonometry/aircraft/airport-noise/): the
+- [Airport Noise (ECAC Doc 29)](/aircraft/airport-noise/): the
   noise-power-distance engine, the per-segment single-event chain and the
   ground-grid SEL contour.
-- [Rotorcraft noise: the hemisphere method](/phonometry/aircraft/rotorcraft-noise/):
+- [Rotorcraft noise: the hemisphere method](/aircraft/rotorcraft-noise/):
   the hemisphere source model with its propagation adjustments, flight-condition
   interpolation, and the single-event contours.
-- [The ANP fleet database](/phonometry/aircraft/anp-fleet/): the EASA tables of
+- [The ANP fleet database](/aircraft/anp-fleet/): the EASA tables of
   noise-power-distance curves and default trajectories, and the Doc 29 chain run
   from an aircraft identifier.
-- [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/):
+- [NPD data for the air at the airport](/aircraft/npd-atmosphere/):
   the ANP curves recalculated for the temperature, humidity and pressure of a
   study by Doc 29 Appendix D, with SAE ARP 5534 or SAE ARP 866A absorption.
 
-## [Underwater acoustics](/phonometry/underwater/)
+## [Underwater acoustics](/underwater/)
 
 Levels referenced to 1 micropascal, ship radiated noise, pile driving, ambient
 noise and propagation loss. The reference quantities differ from the airborne
@@ -800,22 +800,22 @@ ones, so this is the one area where a level cannot be read across without
 conversion. Implements ISO 18405, ISO 17208-1/-2, ISO 18406 and
 JOMOPANS-ECHO.
 
-- [Underwater acoustics: radiated noise and pile driving](/phonometry/underwater/underwater-acoustics/):
+- [Underwater acoustics: radiated noise and pile driving](/underwater/underwater-acoustics/):
   the ISO 18405 reference levels, the ship radiated noise level and equivalent
   monopole source level, and single-strike and cumulative pile-driving
   exposure.
-- [Underwater sound propagation](/phonometry/underwater/underwater-propagation/):
+- [Underwater sound propagation](/underwater/underwater-propagation/):
   spreading plus volume absorption, the speed of sound in sea water, the sonar
   equation, seabed reflection loss and the ambient-noise spectrum.
-- [Underwater propagation solvers](/phonometry/underwater/underwater-solvers/):
+- [Underwater propagation solvers](/underwater/underwater-solvers/):
   the normal-mode, ray-tracing, Gaussian beam and parabolic-equation solvers
   of the stratified waveguide, and how to choose a propagation model.
-- [Marine-mammal noise exposure](/phonometry/underwater/marine-mammal-exposure/):
+- [Marine-mammal noise exposure](/underwater/marine-mammal-exposure/):
   the hearing side of that noise: the group audiograms, the regulatory weighting
   functions with their guidance version, and the exposure of a pile-driving
   campaign against the injury criteria.
 
-## [Sources and devices](/phonometry/devices/)
+## [Sources and devices](/devices/)
 
 Sound power, intensity, emission declarations, electroacoustics and programme
 loudness. What a source emits rather than what a receiver gets, plus the
@@ -824,148 +824,148 @@ ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
 IEC 61043, ISO 4871, IEC 60268-1/-3/-4/-5/-7, IEC 60118-4, IEC 62489-1, ITU-R BS.1770-5
 and EBU R 128.
 
-**[Sound power and intensity](/phonometry/devices/emission/)**
+**[Sound power and intensity](/devices/emission/)**
 
-- [Sound Intensity (p-p)](/phonometry/devices/emission/intensity/): two-microphone
+- [Sound Intensity (p-p)](/devices/emission/intensity/): two-microphone
   intensity with the field indicators that qualify the measurement.
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing the determination
+- [Sound Power](/devices/emission/sound-power/): choosing the determination
   method and declaring the noise emission per ISO 4871.
-- [Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods](/devices/emission/sound-power-pressure/):
   the enveloping surface of ISO 3744/3746 and the precision anechoic grade of
   ISO 3745.
-- [Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/):
+- [Free Field and Reference Sources](/devices/emission/free-field-qualification/):
   the ISO 26101 inverse-square-law qualification of an anechoic or
   hemi-anechoic room against the Annex A that Amendment 1:2017 wrote into
   ISO 3745, and the calibration and requirements of an ISO 6926 reference
   sound source.
-- [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room](/devices/emission/sound-power-reverberation/):
   the direct and comparison methods of ISO 3741.
-- [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/):
+- [Sound Power in Small Test Rooms](/devices/emission/sound-power-test-rooms/):
   the ISO 3743 methods for small movable sources, a comparison in a
   hard-walled room and a special reverberation room read directly or against
   a reference source.
-- [Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison](/devices/emission/sound-power-in-situ/):
   the ISO 3747 comparison against a reference sound source where the machine
   works, with the sound energy level of an impulsive source.
 
-- [Sound Power in a Duct](/phonometry/devices/emission/sound-power-in-duct/):
+- [Sound Power in a Duct](/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans, with the sampling-tube flow and modal
   correction of Annex A and the plane-wave relation of clause 8.
-- [Sound Power of Multisource Industrial Plants](/phonometry/devices/emission/sound-power-plant/):
+- [Sound Power of Multisource Industrial Plants](/devices/emission/sound-power-plant/):
   the ISO 8297 contour round a whole industrial plant, with the area,
   proximity and air absorption terms of clause 10 and the uncertainty of
   Table 1.
-- [Sound Power in the 16 kHz Octave](/phonometry/devices/emission/sound-power-high-frequency/):
+- [Sound Power in the 16 kHz Octave](/devices/emission/sound-power-high-frequency/):
   the four ISO 9295 methods above the range of ISO 3741 and ISO 3744, with the
   room constant from the reverberation time or from the air absorption, and
   the comparison for tones.
-- [Sound Power of Steam Turbine Sets](/phonometry/devices/emission/sound-power-turbines/):
+- [Sound Power of Steam Turbine Sets](/devices/emission/sound-power-turbines/):
   the IEC 61063 test code for a turbine set in its hall, with the stepped
   surface 1 m out, the key positions of Figure 2, the stepped background
   correction of Table 2 and the report of clause 10.
-- [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning](/devices/emission/sound-power-intensity/):
   the on-site scanning of ISO 9614-2 and the ISO 9614-3 precision grade.
-- [Emission Sound Pressure at a Work Station](/phonometry/devices/emission/workstation-emission/):
+- [Emission Sound Pressure at a Work Station](/devices/emission/workstation-emission/):
   the ISO 11200 group, which turns a reading at the operator's position into
   what the machine alone puts there: the background correction with this
   group's own thresholds, the piecewise local environmental correction and its
   two routes, and the 4 dB boundary between grade 2 and grade 3.
-- [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
+- [Sound power from surface vibration (ISO/TS 7849)](/devices/emission/vibration-sound-power/):
   the surface-velocity route, for the machine that cannot be moved into a
   qualified room: the radiated power from the surface-averaged velocity level
   and the radiation factor, with the Part 1 upper limit and the Part 2
   engineering value. Also listed under Vibration.
 
-**[Electroacoustics](/phonometry/devices/electroacoustics/)**
+**[Electroacoustics](/devices/electroacoustics/)**
 
-- [Electroacoustics: distortion and frequency response](/phonometry/devices/electroacoustics/electroacoustics/):
+- [Electroacoustics: distortion and frequency response](/devices/electroacoustics/electroacoustics/):
   harmonic and intermodulation distortion, THD+N and SINAD, dynamic range and
   the $H_1$/$H_2$ frequency-response estimators.
-- [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/):
   the sensitivity conventions, the radiating piston and the characteristics
   fiche.
-- [Microphone Characterisation (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/):
+- [Microphone Characterisation (IEC 60268-4)](/devices/electroacoustics/microphones/):
   the sensitivity references, the directional patterns and the inherent noise.
-- [Swept-sine distortion and phase utilities](/phonometry/devices/electroacoustics/swept-sine-distortion/):
+- [Swept-sine distortion and phase utilities](/devices/electroacoustics/swept-sine-distortion/):
   harmonic separation from one exponential sweep, THD against excitation
   frequency, and minimum phase, group delay and excess phase.
-- [Audio-Frequency Induction Loops (IEC 60118-4)](/phonometry/devices/electroacoustics/induction-loops/):
+- [Audio-Frequency Induction Loops (IEC 60118-4)](/devices/electroacoustics/induction-loops/):
   hearing loops for telecoil listeners: the 400 mA/m reference, the field of a
   loop by Biot-Savart, the loop as a load, the verdicts on a room, a refuge and
   a counter, the overload test, the amplifier and the neck loop.
-- [Headphones and Earphones (IEC 60268-7)](/phonometry/devices/electroacoustics/headphones/):
+- [Headphones and Earphones (IEC 60268-7)](/devices/electroacoustics/headphones/):
   the simulated programme signal of IEC 60268-1, the classification code, the
   rated impedance, the characteristic voltages and working levels, the
   protective device, the coupler, comparison and ear canal responses, and the
   probe microphone of Annex B.
 
-**[Broadcast](/phonometry/devices/broadcast/)**
+**[Broadcast](/devices/broadcast/)**
 
-- [Programme loudness and true peak](/phonometry/devices/broadcast/program-loudness/):
+- [Programme loudness and true peak](/devices/broadcast/program-loudness/):
   K-weighting and gated integrated loudness in LUFS, the momentary and
   short-term meters, the loudness range and the true-peak level. The sidebar
   files it inside Electroacoustics; it has its own section overview.
-- [Quasi-peak programme meter](/phonometry/devices/broadcast/quasi-peak/): the
+- [Quasi-peak programme meter](/devices/broadcast/quasi-peak/): the
   ITU-R BS.468-4 psophometric noise meter, whose clause 2 prints no time
   constant at all and specifies the detector through eleven tone-burst
   acceptance windows, the 0.775 V calibration that makes a reading dBqps, and
   three fitted time scales the windows pin only to within a factor of three.
 
-**[Noise control](/phonometry/devices/noise-control/)**
+**[Noise control](/devices/noise-control/)**
 
-- [Silencers](/phonometry/devices/noise-control/silencers/): reactive silencers by the
+- [Silencers](/devices/noise-control/silencers/): reactive silencers by the
   four-pole transmission-matrix method and the reactive-versus-dissipative
   choice.
-- [Measuring a Silencer (ISO 7235 and ISO 11691)](/phonometry/devices/noise-control/silencer-measurement/):
+- [Measuring a Silencer (ISO 7235 and ISO 11691)](/devices/noise-control/silencer-measurement/):
   the substitution measurement a catalogue insertion loss comes from, its
   reverberation correction, and the reproducibility both standards publish.
-- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](/phonometry/devices/noise-control/enclosure-cabin-insulation/):
+- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](/devices/noise-control/enclosure-cabin-insulation/):
   the difference of two determinations that says what a built enclosure is
   worth, the annex that asks whether the room is good enough, and the cabin
   whose source-position count is read off its own answer.
-- [Silencers, Screens and Barriers In Situ](/phonometry/devices/noise-control/in-situ-noise-control/):
+- [Silencers, Screens and Barriers In Situ](/devices/noise-control/in-situ-noise-control/):
   three standards that measure a device where it already stands, and the three
   different corrections for background noise that must never be merged.
-- [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
+- [Duct-Borne Noise: Fan to Room](/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.
-- [HVAC Noise the German Way (VDI 2081)](/phonometry/devices/noise-control/vdi2081-air-systems/):
+- [HVAC Noise the German Way (VDI 2081)](/devices/noise-control/vdi2081-air-systems/):
   the same chain by the German guideline, from the assembly-type fan model to
   the room step, against the worked sheet of its own Part 2.
-- [Control Valve Noise (IEC 60534-8-3)](/phonometry/devices/noise-control/control-valve-noise/):
+- [Control Valve Noise (IEC 60534-8-3)](/devices/noise-control/control-valve-noise/):
   the five flow regimes of a throttling valve, the jet that sets the peak
   frequency, and the pipe wall that is what actually radiates.
-- [Hydrodynamic Valve Noise (IEC 60534-8-4)](/phonometry/devices/noise-control/valve-cavitation/):
+- [Hydrodynamic Valve Noise (IEC 60534-8-4)](/devices/noise-control/valve-cavitation/):
   the same valve on a liquid line, where one threshold decides whether it
   cavitates and 0.1 in that threshold is worth 14 dB.
-- [Room to Room: Partition, Receiving Room, Criterion](/phonometry/devices/noise-control/room-to-room/):
+- [Room to Room: Partition, Receiving Room, Criterion](/devices/noise-control/room-to-room/):
   the source-room level through a partition into the receiving room, the noise
   criterion verdict and the transmission loss a partition or an enclosure needs.
-- [Industrial Noise Control: HVAC and Enclosures](/phonometry/devices/noise-control/noise-control/):
+- [Industrial Noise Control: HVAC and Enclosures](/devices/noise-control/noise-control/):
   duct attenuation and flow noise, and enclosure insertion loss.
 
-## [Wave simulation](/phonometry/simulation/)
+## [Wave simulation](/simulation/)
 
 Deterministic 2D finite-difference time-domain solvers, acoustic and elastic
 P-SV, validated against analytic oracles rather than a standard. It is the one
 area with no governing document, so its evidence is the closed-form solution it
 reproduces.
 
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): a staggered
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): a staggered
   pressure-velocity grid with Gaussian, tone and arbitrary-signal sources,
   rasterised obstacles, rigid, impedance and absorbing boundaries, and a frozen
   result carrying probe histories and field snapshots.
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the P-SV companion solver on the same grid, with Rayleigh waves on free
   surfaces, mode conversion, Scholte interface waves and immersed-plate
   transmission.
-- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+- [Where a simulation runs: NumPy, CuPy and torch](/simulation/compute/):
   both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, with
   the fallback to NumPy, the provenance every result records and what is
   promised about the numbers on each device.
-- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+- [Sending a simulation to a remote node](/simulation/remote-node/):
   run either FDTD simulation on another machine over SSH, in Docker or a
   Python environment, with or without a GPU, and get the same record back.
-- [Where heavy work runs: CPU or GPU, here or on a node](/phonometry/simulation/where-it-runs/):
+- [Where heavy work runs: CPU or GPU, here or on a node](/simulation/where-it-runs/):
   the map of devices, nodes and video encoders for simulations and videos,
   and the page that explains each.

@@ -70,7 +70,7 @@ Annex A carries either level to the reference meteorological conditions of
 $C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10} [(273.15 + \theta)/\theta_1]$, $\theta_1$ = 296 K, the expression
 ISO 3741:2010 and ISO 3747:2010 print digit for digit; the static pressure
 follows from the altitude by Eq. (A.2), which is ISO 3747:2010 Eq. (C.2)
-([`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). The correction
+([`static_pressure_from_altitude`](/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). The correction
 is required above 500 m (8.1.4). Annex B forms the A-weighted totals from the
 octave bands with the Table B.1 corrections, which are ISO 3744:2010 Table E.2
 digit for digit, 63 Hz row included under its footnote.
@@ -84,14 +84,14 @@ one-third-octave range; the library reads it as the four octaves it spans
 (see `docs/ERRATA.md`).
 
 The room itself is qualified in three steps, which
-[`check_hard_walled_room`](/phonometry/reference/api/power/sound-power-hard-walled/#check_hard_walled_room) evaluates together: its volume against the
+[`check_hard_walled_room`](/reference/api/power/sound-power-hard-walled/#check_hard_walled_room) evaluates together: its volume against the
 reference box (4.2), the absorption of its surfaces (4.3), and the acoustic
 adequacy of 4.4, eight mean octave levels of a highly directional source
 turned through four horizontal and four vertical orientations, whose largest
 spread in each band from 125 Hz to 8 kHz may not exceed the Table 3 value.
 The preliminary survey of 7.4, six microphone positions whose standard
 deviation decides how many source locations the determination needs
-(Table 2), is [`hard_walled_source_locations`](/phonometry/reference/api/power/sound-power-hard-walled/#hard_walled_source_locations).
+(Table 2), is [`hard_walled_source_locations`](/reference/api/power/sound-power-hard-walled/#hard_walled_source_locations).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -135,7 +135,7 @@ that meet it in words, and the coefficients are optional here.
 | `reference_box_m` | The three dimensions of the reference box, in metres (4.1). |
 | `absorption_coefficients` | Sound absorption coefficients of the boundary surfaces, any shape (per surface and per band, say); only the largest is read. `None` leaves 4.3 unevaluated. |
 
-**Returns:** The verdict, as a [`HardWalledRoomCheck`](/phonometry/reference/api/power/sound-power-hard-walled/#hardwalledroomcheck).
+**Returns:** The verdict, as a [`HardWalledRoomCheck`](/reference/api/power/sound-power-hard-walled/#hardwalledroomcheck).
 
 **Raises**
 
@@ -177,7 +177,7 @@ dimensions that still complies with 4.4.
 | `levels` | Preliminary levels, `(NM, bands)` with at least six rows, in decibels. |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 
-**Returns:** The [`SourceLocationPlan`](/phonometry/reference/api/power/sound-power-hard-walled/#sourcelocationplan).
+**Returns:** The [`SourceLocationPlan`](/reference/api/power/sound-power-hard-walled/#sourcelocationplan).
 
 **Raises**
 
@@ -471,7 +471,7 @@ marked `†` and named as not fulfilling it.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) for the header (`client`, `specimen` the noise source, `test_room`, `instrumentation`, the climate and `test_date`), the footer identity and, via `requirement`, a declared A-weighted limit the result is checked against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) for the header (`client`, `specimen` the noise source, `test_room`, `instrumentation`, the climate and `test_date`), the footer identity and, via `requirement`, a declared A-weighted limit the result is checked against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the table adds the mean background level and the background corrections `K1` and `K1(RSS)`. |
 | `language` | Sheet language: `"en"` (default) or `"es"`. |
@@ -629,8 +629,8 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | Name | Description |
 | :--- | :--- |
 | `event_levels` | Measured (uncorrected) octave-band single event levels, in decibels. With `n_events` `None`: `(Ne, bands)` for a traverse, `(Ne, NM, bands)` or `(Ne, NS, NM, bands)`, one entry per event on the first axis (Eq. 15). With `n_events`: `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, one measurement encompassing `n_events` events (Eq. 16). |
-| `reference_levels` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
-| `reference_sound_power_levels` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| `reference_levels` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| `reference_sound_power_levels` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `n_events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
 | `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
@@ -641,13 +641,13 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | `sigma_omc_db` | Operating-and-mounting standard deviation, in decibels. |
 | `coverage_factor` | `k` of Eq. (23), 2 by default. |
 
-**Returns:** [`HardWalledSoundPowerResult`](/phonometry/reference/api/power/sound-power-hard-walled/#hardwalledsoundpowerresult) with `quantity='energy'`.
+**Returns:** [`HardWalledSoundPowerResult`](/reference/api/power/sound-power-hard-walled/#hardwalledsoundpowerresult) with `quantity='energy'`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `n_events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `n_events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes, or `background_levels` or `event_levels` holds a text or a value that is not a real number. |
 
 ## sound_power_hard_walled
@@ -693,16 +693,16 @@ total.
 | :--- | :--- |
 | `levels` | Measured (uncorrected) octave-band time-averaged levels of the source under test, in decibels: `(bands,)` for one microphone traverse (NOTE to 8.1.2), `(NM, bands)` for fixed positions, or `(NS, NM, bands)` for several source locations (Eq. 9). |
 | `reference_levels` | The same for the reference sound source at the same microphone positions, `(NM, bands)`, or its traverse level `(bands,)`. |
-| `reference_sound_power_levels` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels, under the meteorological conditions of the test, since Eq. (14) gives `LW` there (Annex A); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
+| `reference_sound_power_levels` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels, under the meteorological conditions of the test, since Eq. (14) gives `LW` there (Annex A); or the [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band, ascending, from 125 Hz to 8 kHz; 63 Hz is accepted where the room and the instrumentation are satisfactory there (3.11, Table B.1 footnote). |
 | `background_levels` | Octave-band background levels `Lpi(B)`, `(NM, bands)` or one averaged `(bands,)` spectrum, in decibels. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout (4.5, 7.5). |
 | `reference_background_levels` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
-| `static_pressure_kpa` | Static pressure at the test, in kilopascals (Eq. A.2 gives it from the altitude, [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). |
+| `static_pressure_kpa` | Static pressure at the test, in kilopascals (Eq. A.2 gives it from the altitude, [`static_pressure_from_altitude`](/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). |
 | `sigma_omc_db` | Standard deviation of the operating and mounting conditions of the source (9.2, Eq. C.1), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
 | `coverage_factor` | `k` of Eq. (23), 2 by default as 9.5 prescribes; 1.6 for a one-sided comparison with a limit (9.1). |
 
-**Returns:** [`HardWalledSoundPowerResult`](/phonometry/reference/api/power/sound-power-hard-walled/#hardwalledsoundpowerresult) with `quantity='power'`.
+**Returns:** [`HardWalledSoundPowerResult`](/reference/api/power/sound-power-hard-walled/#hardwalledsoundpowerresult) with `quantity='power'`.
 
 **Raises**
 

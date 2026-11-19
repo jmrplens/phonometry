@@ -2,10 +2,11 @@
 // read from src/data/site-targets.json (scripts/site_target.py reads the same
 // file for the Python generators, tests/test_site_target.py holds that side).
 //
-// Unset, the build is the one docs.jmrp.io serves, byte for byte; the
-// phonometry.dev preview builds with PHONOMETRY_SITE=phonometry.dev; anything
-// else stops the build before it starts, so a typo cannot publish a site
-// whose canonical URLs name a host nobody serves.
+// There is one target, phonometry.dev at the root: unset, empty or naming it,
+// the build is the same; anything else stops the build before it starts, so a
+// typo cannot publish a site whose canonical URLs name a host nobody serves.
+// The host the site was published on before is a legacy origin, read only by
+// the redirect map (scripts/cloudflare-redirects.mjs --legacy).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -35,31 +36,37 @@ function readWith(value) {
 	return JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', script], { env, encoding: 'utf8' }));
 }
 
-test('unset, the build is docs.jmrp.io under /phonometry, as it always was', () => {
-	assert.deepEqual(readWith(undefined), ['https://docs.jmrp.io', '/phonometry']);
-	assert.deepEqual(readWith(''), ['https://docs.jmrp.io', '/phonometry']);
+test('unset or empty, the build is phonometry.dev at the root', () => {
+	assert.deepEqual(readWith(undefined), ['https://phonometry.dev', '']);
+	assert.deepEqual(readWith(''), ['https://phonometry.dev', '']);
+	assert.equal(DEFAULT_SITE, 'phonometry.dev');
 });
 
-test('naming docs.jmrp.io gives the same build', () => {
-	assert.deepEqual(readWith('docs.jmrp.io'), ['https://docs.jmrp.io', '/phonometry']);
+test('naming phonometry.dev gives the same build', () => {
+	assert.deepEqual(readWith('phonometry.dev'), ['https://phonometry.dev', '']);
 });
 
-test('phonometry.dev moves the origin and keeps the base path for now', () => {
-	assert.deepEqual(readWith('phonometry.dev'), ['https://phonometry.dev', '/phonometry']);
-});
-
-test('any other value is refused, by name', () => {
-	for (const value of ['phonometry.org', 'https://phonometry.dev', 'PHONOMETRY.DEV', 'toString', '__proto__']) {
-		assert.throws(() => siteTarget(value), new RegExp(`PHONOMETRY_SITE=${value.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')} is not one of`), value);
+test('any other value is refused, by name, the old host among them', () => {
+	for (const value of ['docs.jmrp.io', 'phonometry.org', 'https://phonometry.dev', 'PHONOMETRY.DEV', 'toString', '__proto__']) {
+		// The message is matched as text, not as a pattern built from the
+		// value: a host is no regular expression.
+		assert.throws(() => siteTarget(value), (error) => error instanceof Error && error.message.includes(`PHONOMETRY_SITE=${value} is not one of`), value);
 	}
-	assert.throws(() => readWith('phonometry.org'), /PHONOMETRY_SITE=phonometry\.org is not one of docs\.jmrp\.io, phonometry\.dev/);
+	assert.throws(() => readWith('docs.jmrp.io'), /PHONOMETRY_SITE=docs\.jmrp\.io is not one of phonometry\.dev$/m);
 });
 
 test('the table is closed and frozen, and this process reads it like the others', () => {
-	assert.deepEqual(Object.keys(SITE_TARGETS), ['docs.jmrp.io', 'phonometry.dev']);
+	assert.deepEqual(Object.keys(SITE_TARGETS), ['phonometry.dev']);
 	assert.ok(Object.isFrozen(SITE_TARGETS));
 	for (const target of Object.values(SITE_TARGETS)) assert.ok(Object.isFrozen(target));
 	assert.deepEqual([siteUrl, basePath], readWith(process.env.PHONOMETRY_SITE));
+});
+
+test('the site was published before on docs.jmrp.io under /phonometry, and nothing builds for it', () => {
+	assert.deepEqual(LEGACY_ORIGINS, [{ siteUrl: 'https://docs.jmrp.io', basePath: '/phonometry' }]);
+	for (const legacy of LEGACY_ORIGINS) {
+		assert.ok(!Object.values(SITE_TARGETS).some((target) => target.siteUrl === legacy.siteUrl), `${legacy.siteUrl} is still a target`);
+	}
 });
 
 test('every value comes from site-targets.json, the file the Python generators read too', () => {

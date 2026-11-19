@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/reference/theory/environment-transport.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/environment-transport/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/reference/theory/environment-transport/
 
 # Theory: Environment and Transport
 

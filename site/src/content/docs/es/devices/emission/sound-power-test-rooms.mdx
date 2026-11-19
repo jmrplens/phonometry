@@ -43,7 +43,7 @@ comparación. Esta guía cubre la cualificación de la sala de ambas partes, las
 correcciones por ruido de fondo, los sondeos de ubicaciones de la fuente, las
 determinaciones, la reproducibilidad de las Tablas 3 y 5 y las condiciones
 meteorológicas de referencia. Qué vía encaja con qué trabajo se sopesa en
-[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+[Potencia acústica](/es/devices/emission/sound-power/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms.svg" alt="Dos planos de sala uno al lado del otro. A la izquierda, la sala de paredes rígidas de ISO 3743-1, de 5,0 m por 4,0 m: el paralelepípedo de referencia de la fuente girado respecto a los ejes de las paredes y a al menos 1 m de la pared, rotulado como la fuente bajo ensayo y luego la fuente de referencia en su lugar, cuatro posiciones de micrófono numeradas a su alrededor y una quinta sobre el paralelepípedo, marcada como situada encima, una unida a la fuente por una línea discontinua marcada al menos 0,3 V elevado a un tercio, dos unidas por una línea marcada al menos media longitud de onda, y una a al menos 0,5 m de la pared. A la derecha, la sala reverberante especial de ISO 3743-2, de 5,4 m por 4,4 m, con parches absorbentes de como mucho 1,5 metros cuadrados a lo largo de las paredes y un suelo de hormigón pintado que absorbe menos de 0,06: una primera ubicación de la fuente a al menos 1 m de la pared, una segunda ubicación discontinua 1,2 m al lado, y seis posiciones de micrófono numeradas, con al menos 0,3 V elevado a un tercio desde la segunda ubicación, media longitud de onda entre dos posiciones y un cuarto de longitud de onda hasta la pared. Un pie recoge los criterios de sala de las dos partes, las distancias resueltas para 60 y 72 metros cúbicos, la Ec. 14 sobre las medias con los dos márgenes de al menos 6 dB, los límites del tiempo de reverberación con R, la fórmula 9 y la fórmula 10 con la fuente de referencia a al menos 1,5 m de las paredes" width="96%" />
 
@@ -98,7 +98,7 @@ print(round(room.min_microphone_distance_m, 2))  # 1.17 m desde la fuente (7.3)
 La Tabla 3 imprime su fila central de octavas como «400 to 5 000», un
 intervalo de tercios de octava que conservó de la tabla de ISO 3744 de la que
 se convirtió; la biblioteca lee la fila como las octavas que abarca, de
-500 Hz a 4 kHz (véanse las [erratas](/phonometry/es/reference/errata/)). La
+500 Hz a 4 kHz (véanse las [erratas](/es/reference/errata/)). La
 última línea es la $d_\mathrm{min} = 0{,}3\,V^{1/3}$ de 7.3 que mantiene cada
 micrófono en el campo reverberante, declarada para el montaje y no juzgada.
 
@@ -237,7 +237,7 @@ plt.show()
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos: un recorrido (NOTA de 8.1.2), una fila por posición fija (al menos tres, 7.3) o una rejilla por ubicación de la fuente (Ec. 9) |
 | `reference_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | La fuente de referencia en las mismas posiciones, o en el mismo recorrido |
-| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado en las condiciones del ensayo; una [`ReferenceSourceCalibration`](/phonometry/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` y se lee allí, menos su propio $C_2$ |
+| `reference_sound_power_levels` | array 1D o `ReferenceSourceCalibration` | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado en las condiciones del ensayo; una [`ReferenceSourceCalibration`](/es/devices/emission/free-field-qualification/) se suma de sus bandas de tercio de octava a las octavas de `frequencies` y se lee allí, menos su propio $C_2$ |
 | `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes (3.11); se acepta 63 Hz donde la sala y la instrumentación son satisfactorias en esa banda (nota de la Tabla B.1) |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | $L_{pi(\mathrm{B})}$, promediados con la Ec. 12. `None` avisa y deja `background_requirement_met` en `False` en todas las bandas |
 | `reference_background_levels` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` |
@@ -273,7 +273,7 @@ suceso *integrado en el tiempo*, como hace ISO 3744; la biblioteca compara el
 ruido de fondo como su exposición sobre el mismo intervalo $T$,
 $\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, y por eso pide
 `integration_time` cuando hay ruido de fondo (véanse las
-[erratas](/phonometry/es/reference/errata/)).
+[erratas](/es/reference/errata/)).
 
 ```python
 # Una grapadora eléctrica de escritorio en la misma sala: cinco grapados medidos
@@ -347,7 +347,7 @@ El 1,09 es el punto medio de las razones extremas tomadas solo frente a 0,9 y
 límites entre los que el ejemplo dice que la curva queda centrada, así que la
 biblioteca mantiene su regla; un $T_\mathrm{nom}$ dado en
 `nominal_reverberation_time_s`, los 0,73 s impresos entre ellos, se comprueba
-tal cual (véanse las [erratas](/phonometry/es/reference/errata/)). Después, 6.6 pide que el clima se
+tal cual (véanse las [erratas](/es/reference/errata/)). Después, 6.6 pide que el clima se
 mantenga: $H(\theta + 5\ ^\circ\mathrm{C})$ durante el ensayo dentro de ±10 %
 de su valor cuando se midió el tiempo de reverberación. El apartado 5 añade
 una recomendación sobre la fuente: su volumen no debería superar el 1 % del de
@@ -383,7 +383,7 @@ print(np.round(emission.reverberation_parameter([100.0, 1000.0], 72.0), 3))  # [
 de las curvas límite de esta sala de 72 m³, con el $T_\mathrm{nom}$ centrado en
 el título. Las curvas se ensanchan por encima de la banda de 6,3 kHz, como dice
 el texto de 6.3; la Figura B.3 ya las dibuja anchas en 6,3 kHz (véanse las
-[erratas](/phonometry/es/reference/errata/)).*
+[erratas](/es/reference/errata/)).*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -682,7 +682,7 @@ la elimina, y no debe usarse con $\sigma'_\mathrm{omc}$ por encima de
 $\sigma'_\mathrm{tot}/\sqrt{2}$. La Parte 2 imprime la misma relación como su
 fórmula (14) con un signo más, que su propio párrafo siguiente contradice; la
 biblioteca toma la diferencia en ambas (véanse las
-[erratas](/phonometry/es/reference/errata/)).
+[erratas](/es/reference/errata/)).
 
 **Condiciones de referencia (Anexo A de la Parte 1, Anexo E de la Parte 2).**
 Por encima de 500 m los niveles se llevan a 101,325 kPa y 23,0 °C con
@@ -820,7 +820,7 @@ calibración, el Anexo A de la Parte 2 (A.1 y la Tabla A.1: ±1 dB de 100 Hz a
 160 Hz, ±0,5 dB de 200 Hz a 4 kHz, ±1 dB de 5 kHz a 10 kHz) y la ISO 6926
 para la Parte 1, son cosa de su certificado de calibración y no se juzgan
 aquí. Una calibración ISO 6926 hecha en
-[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/), que juzga los requisitos de
+[Campo libre y fuente de referencia](/es/devices/emission/free-field-qualification/), que juzga los requisitos de
 ISO 6926, la toman ambas comparaciones como `reference_sound_power_levels`, y la evaluación de
 idoneidad de 6.7 como `calibrated_power_levels`, y la leen en las
 condiciones del ensayo.
@@ -831,19 +831,19 @@ condiciones del ensayo.
 
 ## Véase también
 
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): elegir
+- [Potencia acústica](/es/devices/emission/sound-power/): elegir
   entre las vías de determinación, los grados de precisión y la declaración
   de emisión de ruido de ISO 4871.
-- [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
+- [Potencia acústica en cámara reverberante](/es/devices/emission/sound-power-reverberation/):
   el grado de precisión de ISO 3741, cuyo término de Waterhouse incorpora la
   sala especial a su curva de reverberación.
-- [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+- [Potencia acústica in situ por comparación](/es/devices/emission/sound-power-in-situ/):
   la misma comparación con una fuente de referencia, llevada a la sala en la
   que trabaja la máquina.
-- [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/):
+- [Potencia acústica por métodos de presión](/es/devices/emission/sound-power-pressure/):
   la superficie envolvente de ISO 3744, ISO 3745 e ISO 3746 para una fuente
   medida en su campo directo.
-- Referencia de la API: [`emission`: sound power in a hard-walled room](/phonometry/es/reference/api/power/sound-power-hard-walled/),
-  [`emission`: sound power in a special reverberation room](/phonometry/es/reference/api/power/sound-power-special-room/).
+- Referencia de la API: [`emission`: sound power in a hard-walled room](/es/reference/api/power/sound-power-hard-walled/),
+  [`emission`: sound power in a special reverberation room](/es/reference/api/power/sound-power-special-room/).
 
 </SeeAlso>

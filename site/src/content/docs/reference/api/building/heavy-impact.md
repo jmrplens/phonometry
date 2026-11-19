@@ -32,10 +32,10 @@ $t_2 - t_1$ the duration of the impact
 force. The specification is stated **per octave band**, so the force record is
 band-filtered before the integral (JIS A 1418-2:2019 Annex C puts the filter
 between the force transducer and the analyser).
-[`impact_force_exposure_level`](/phonometry/reference/api/building/heavy-impact/#impact_force_exposure_level) evaluates the integral over whatever record
+[`impact_force_exposure_level`](/reference/api/building/heavy-impact/#impact_force_exposure_level) evaluates the integral over whatever record
 it is given, i.e. one band at a time;
-[`heavy_impact_source_limits`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_source_limits) returns the printed octave-band tolerance
-table and [`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source) verifies the five band results
+[`heavy_impact_source_limits`](/reference/api/building/heavy-impact/#heavy_impact_source_limits) returns the printed octave-band tolerance
+table and [`check_heavy_impact_source`](/reference/api/building/heavy-impact/#check_heavy_impact_source) verifies the five band results
 against it.
 
 The two source specifications are printed identically in ISO 16283-2:2020
@@ -79,8 +79,8 @@ $$
 `g` is the peak of the Fast-weighted response to an exponentially decaying
 burst; for $T = T_0$ the bracket collapses to 1 and the correction
 reduces to the pure volume term $10 \log_{10}(V/V_0)$, as it must. See
-[`standardized_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#standardized_max_impact_level) and
-[`fast_reverberation_correction`](/phonometry/reference/api/building/heavy-impact/#fast_reverberation_correction).
+[`standardized_max_impact_level`](/reference/api/building/heavy-impact/#standardized_max_impact_level) and
+[`fast_reverberation_correction`](/reference/api/building/heavy-impact/#fast_reverberation_correction).
 
 **A-weighted rating (ISO 717-2:2020 Annex D, normative).** The single number is
 not a shifted reference curve but an A-weighted sum (Formula (D.1)):
@@ -93,7 +93,7 @@ over the one-third-octave bands 50 Hz to 630 Hz **or** the octave bands 63 Hz to
 500 Hz, with the Table D.3 A-weighting corrections, rounded half-up to an
 integer. One-third-octave measurements are rated in one-third octaves, never by
 first summing them into octaves. See
-[`a_weighted_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_max_impact_level); [`heavy_impact_octave_levels`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_octave_levels)
+[`a_weighted_max_impact_level`](/reference/api/building/heavy-impact/#a_weighted_max_impact_level); [`heavy_impact_octave_levels`](/reference/api/building/heavy-impact/#heavy_impact_octave_levels)
 implements the separate octave-band conversion of ISO 16283-2 Formula (20),
 used when the *measurement* is reported in octaves.
 
@@ -127,7 +127,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band set. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves; inferred from the number of values (12 one-third octaves, 4 octaves) when omitted. One of `1` or `3`. |
 
-**Returns:** An [`AWeightedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximpactresult).
+**Returns:** An [`AWeightedMaxImpactResult`](/reference/api/building/heavy-impact/#aweightedmaximpactresult).
 
 **Raises**
 
@@ -209,7 +209,7 @@ Table A.1 (bang machine).
 | `force_exposure_level` | Measured `LFE` in the five octave bands 31.5 Hz to 500 Hz, in dB re 1 N. |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
 
-**Returns:** A [`HeavyImpactSourceCheck`](/phonometry/reference/api/building/heavy-impact/#heavyimpactsourcecheck).
+**Returns:** A [`HeavyImpactSourceCheck`](/reference/api/building/heavy-impact/#heavyimpactsourcecheck).
 
 **Raises**
 
@@ -301,7 +301,7 @@ three and the bands must be in ascending order, three per octave.
 
 Note that ISO 717-2:2020 Annex D forbids using this conversion as a route
 to the single number: a one-third-octave measurement is rated in one-third
-octaves with [`a_weighted_max_impact_level`](/phonometry/reference/api/building/heavy-impact/#a_weighted_max_impact_level).
+octaves with [`a_weighted_max_impact_level`](/reference/api/building/heavy-impact/#a_weighted_max_impact_level).
 
 **Parameters**
 
@@ -334,7 +334,7 @@ Octave-band `LFE` tolerance band of a heavy impact source.
 | :--- | :--- |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
 
-**Returns:** The five octave-band centre frequencies in Hz and the `LFE` tolerance limits in dB re 1 N, lower first, as a [`HeavyImpactSourceLimits`](/phonometry/reference/api/building/heavy-impact/#heavyimpactsourcelimits).
+**Returns:** The five octave-band centre frequencies in Hz and the `LFE` tolerance limits in dB re 1 N, lower first, as a [`HeavyImpactSourceLimits`](/reference/api/building/heavy-impact/#heavyimpactsourcelimits).
 
 **Raises**
 
@@ -359,7 +359,7 @@ Printed specification of a standard heavy and soft impact source.
 | :--- | :--- |
 | `source` | `"rubber_ball"` (ISO 16283-2 Annex A.2, ISO 10140-5 Annex F.2, JIS A 1418-2 impact force characteristic 2) or `"bang_machine"` (JIS A 1418-2 impact force characteristic 1). |
 
-**Returns:** The [`HeavyImpactSourceSpec`](/phonometry/reference/api/building/heavy-impact/#heavyimpactsourcespec).
+**Returns:** The [`HeavyImpactSourceSpec`](/reference/api/building/heavy-impact/#heavyimpactsourcespec).
 
 **Raises**
 
@@ -389,7 +389,7 @@ Conformance of a measured heavy impact source to its printed spectrum.
 
 Only the source and the measurement are fields. The printed spectrum, its
 tolerance and the verdict are read from the source's specification
-([`heavy_impact_source_specification`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_source_specification)), so a check cannot be built
+([`heavy_impact_source_specification`](/reference/api/building/heavy-impact/#heavy_impact_source_specification)), so a check cannot be built
 against another tolerance band.
 
 **Attributes**
@@ -469,7 +469,7 @@ HeavyImpactSourceLimits(
 
 The octave-band `LFE` tolerance band of a heavy impact source.
 
-What [`heavy_impact_source_limits`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_source_limits) returns: the bands and the two
+What [`heavy_impact_source_limits`](/reference/api/building/heavy-impact/#heavy_impact_source_limits) returns: the bands and the two
 limits, named, lower first, where a `(frequencies, lower, upper)` tuple
 used to be unpacked by position.
 
@@ -559,10 +559,10 @@ record it is given, so feeding it an unfiltered pulse returns the
 *broadband* level, which is several decibels above any single band value
 and must not be compared with the table. Band-filter the force record
 first (for example with
-[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank)) and call this once
+[`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank)) and call this once
 per band, then hand the five results to
-[`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source). A bank that carries no calibration
-of its own filters a [`Signal`](/phonometry/reference/api/io/io/#signal) in pascals, its
+[`check_heavy_impact_source`](/reference/api/building/heavy-impact/#check_heavy_impact_source). A bank that carries no calibration
+of its own filters a [`Signal`](/reference/api/io/io/#signal) in pascals, its
 samples multiplied by the calibration factor it carries, which this
 function leaves off. Hand the bank the samples in newtons,
 `np.asarray(force_n)`, and this function each band it hands back
@@ -577,7 +577,7 @@ the impact as well and reads the bands lower. Keep its mean
 (`detrend=False`), the impact's own, and take off instead the offset
 the transducer reads at rest, the mean of the samples before the
 impact. In the octave bands of
-[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank) (`fraction=1`),
+[`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank) (`fraction=1`),
 filtered forward with `detrend=False`, a 20 ms half-sine sampled at
 48 kHz and cut at its end reads 41 dB low at 31.5 Hz against the same
 pulse followed by a second of silence.
@@ -587,8 +587,8 @@ pulse followed by a second of silence.
 
 | Name | Description |
 | :--- | :--- |
-| `force_n` | Sampled instantaneous force `F(t)`, in newtons (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
-| `fs` | Sampling rate of *force_n*, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `force_n` | Sampled instantaneous force `F(t)`, in newtons (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `fs` | Sampling rate of *force_n*, in hertz (> 0). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `reference_force` | Reference force `F0`, in newtons (Default: 1 N). |
 | `reference_time` | Reference time interval `Tref`, in seconds (Default: 1 s). |
 
@@ -620,7 +620,7 @@ Standardized maximum impact level `L'i,Fmax,V,T` (Formulae (4)-(6)).
 $L'_{\mathrm{i,Fmax},V,T} = L_\mathrm{i,Fmax} + 10 \log_{10}(V/V_0) - 10 \log_{10}[g(C)/g(C_0)]$
 (ISO 16283-2:2020, definition 3.16), the field quantity used to rate a
 floor excited by the rubber ball. The reverberation term is
-[`fast_reverberation_correction`](/phonometry/reference/api/building/heavy-impact/#fast_reverberation_correction).
+[`fast_reverberation_correction`](/reference/api/building/heavy-impact/#fast_reverberation_correction).
 
 **Parameters**
 
@@ -633,7 +633,7 @@ floor excited by the rubber ball. The reverberation term is
 | `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0.5 s). |
 | `reference_volume` | Reference volume `V0`, in m3 (Default: 50 m3 for dwellings). |
 
-**Returns:** A [`StandardizedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#standardizedmaximpactresult).
+**Returns:** A [`StandardizedMaxImpactResult`](/reference/api/building/heavy-impact/#standardizedmaximpactresult).
 
 **Raises**
 

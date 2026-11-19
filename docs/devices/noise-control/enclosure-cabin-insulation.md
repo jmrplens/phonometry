@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/enclosure-cabin-insulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/enclosure-cabin-insulation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/enclosure-cabin-insulation/
 
 # Enclosures and Cabins Measured (ISO 11546, ISO 11957)
 
@@ -363,8 +363,8 @@ one anyway is quoting a clause that excluded it.
   headed with a standard that does not exist, a definition that points at the
   wrong annex, and a clearance rule that relaxes the one above it.
 - API reference:
-  [`noise_control.enclosure_insulation`](https://docs.jmrp.io/phonometry/reference/api/noise_control/enclosure-insulation/)
-  and [`noise_control`: cabin insulation](https://docs.jmrp.io/phonometry/reference/api/noise_control/cabin-insulation/).
+  [`noise_control.enclosure_insulation`](https://phonometry.dev/reference/api/noise_control/enclosure-insulation/)
+  and [`noise_control`: cabin insulation](https://phonometry.dev/reference/api/noise_control/cabin-insulation/).
 
 ## References
 

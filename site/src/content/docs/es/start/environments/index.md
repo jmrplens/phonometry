@@ -18,12 +18,12 @@ ejecutaron ese día sus órdenes.
 
 | Dónde | Cómo llega phonometry | Qué funciona | Qué no |
 |---|---|---|---|
-| [pip y uv](/phonometry/es/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` en un entorno virtual, o `uv add "phonometry[full]"` | todo; `[torch]` añade las simulaciones FDTD sobre PyTorch | `[perf]` y `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` instala los otros tres extras |
-| [conda y mamba](/phonometry/es/start/environments/conda/) | las dependencias desde conda-forge y después `python -m pip install "phonometry[full]"` | todo, también pytorch de conda-forge | no se queda nada fuera |
-| [Jupyter y JupyterLab](/phonometry/es/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | tablas de los resultados, figuras en línea, fichas y vídeos en cuanto está ffmpeg | un kernel arrancado con `PYTHONWARNINGS=error`; `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` ocupa su lugar |
-| [JupyterLite y Pyodide](/phonometry/es/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` en la primera celda | métricas, tablas, figuras, fichas, WAV y FLAC, FDTD con NumPy | `[perf]`, `[torch]` y `[full]`, el vídeo y cualquier dispositivo de cálculo que no sea `"cpu"` |
-| [Docker y servidores](/phonometry/es/start/environments/docker/) | un entorno virtual dentro de una imagen `python:3.13-slim` | todo, con cualquier usuario y sobre una raíz de solo lectura con un `/tmp` escribible, desde wheels en x86-64 y ARM64 | los wheels en las otras seis arquitecturas de la imagen, donde pip compila NumPy, SciPy y casi todos los extras desde el código fuente; `[perf]` y `[full]` en sus tres de 32 bits, donde `[plot,report,audio]` instala los otros tres extras; `[torch]` en las seis |
-| [Comprobación de tipos](/phonometry/es/start/environments/type-checking/) | nada que añadir: el wheel trae `py.typed` | `mypy --strict` y el modo estricto de pyright, con cualquier NumPy que acepte la biblioteca | los campos de las simulaciones FDTD y los argumentos de palabra clave que `.plot()` pasa a matplotlib, con tipo `Any` |
+| [pip y uv](/es/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` en un entorno virtual, o `uv add "phonometry[full]"` | todo; `[torch]` añade las simulaciones FDTD sobre PyTorch | `[perf]` y `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` instala los otros tres extras |
+| [conda y mamba](/es/start/environments/conda/) | las dependencias desde conda-forge y después `python -m pip install "phonometry[full]"` | todo, también pytorch de conda-forge | no se queda nada fuera |
+| [Jupyter y JupyterLab](/es/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | tablas de los resultados, figuras en línea, fichas y vídeos en cuanto está ffmpeg | un kernel arrancado con `PYTHONWARNINGS=error`; `[full]` en Windows y Linux de 32 bits, donde `[plot,report,audio]` ocupa su lugar |
+| [JupyterLite y Pyodide](/es/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` en la primera celda | métricas, tablas, figuras, fichas, WAV y FLAC, FDTD con NumPy | `[perf]`, `[torch]` y `[full]`, el vídeo y cualquier dispositivo de cálculo que no sea `"cpu"` |
+| [Docker y servidores](/es/start/environments/docker/) | un entorno virtual dentro de una imagen `python:3.13-slim` | todo, con cualquier usuario y sobre una raíz de solo lectura con un `/tmp` escribible, desde wheels en x86-64 y ARM64 | los wheels en las otras seis arquitecturas de la imagen, donde pip compila NumPy, SciPy y casi todos los extras desde el código fuente; `[perf]` y `[full]` en sus tres de 32 bits, donde `[plot,report,audio]` instala los otros tres extras; `[torch]` en las seis |
+| [Comprobación de tipos](/es/start/environments/type-checking/) | nada que añadir: el wheel trae `py.typed` | `mypy --strict` y el modo estricto de pyright, con cualquier NumPy que acepte la biblioteca | los campos de las simulaciones FDTD y los argumentos de palabra clave que `.plot()` pasa a matplotlib, con tipo `Any` |
 
 ## Avisos convertidos en errores
 
@@ -59,16 +59,16 @@ trae Pyodide emite al dibujar un aviso de obsolescencia propio que un
 ## Una GPU
 
 Ninguna de estas páginas la trata. [Dónde se calcula una
-simulación](/phonometry/es/simulation/compute/) explica qué necesita cada
+simulación](/es/simulation/compute/) explica qué necesita cada
 dispositivo de las simulaciones FDTD, desde los wheels de PyTorch hasta el de
 CuPy para una GPU de NVIDIA, y cómo una simulación vuelve a NumPy cuando falta
 su dispositivo.
 
 ## Las páginas
 
-- [pip y uv](/phonometry/es/start/environments/pip-and-uv/): un entorno virtual, cada extra y lo que trae, torch sin CUDA, un proyecto de uv y la instalación desde un clon.
-- [conda y mamba](/phonometry/es/start/environments/conda/): las dependencias con sus nombres de conda-forge y después phonometry con pip en el mismo entorno.
-- [Jupyter y JupyterLab](/phonometry/es/start/environments/jupyter/): el kernel, las tablas de los resultados, las figuras en línea y en SVG, los vídeos, las fichas y cómo se ven los avisos en una celda.
-- [JupyterLite y Pyodide](/phonometry/es/start/environments/jupyterlite/): qué se instala con micropip, qué funciona en el navegador y qué no, y cómo se construye un sitio de JupyterLite.
-- [Docker y servidores](/phonometry/es/start/environments/docker/): una imagen ligera, cualquier identificador de usuario, una raíz de solo lectura y ffmpeg para los vídeos.
-- [Comprobación de tipos](/phonometry/es/start/environments/type-checking/): qué ven mypy y pyright con cualquier NumPy que acepte la biblioteca, las opciones que comprueban y dónde el tipo es más amplio que el valor.
+- [pip y uv](/es/start/environments/pip-and-uv/): un entorno virtual, cada extra y lo que trae, torch sin CUDA, un proyecto de uv y la instalación desde un clon.
+- [conda y mamba](/es/start/environments/conda/): las dependencias con sus nombres de conda-forge y después phonometry con pip en el mismo entorno.
+- [Jupyter y JupyterLab](/es/start/environments/jupyter/): el kernel, las tablas de los resultados, las figuras en línea y en SVG, los vídeos, las fichas y cómo se ven los avisos en una celda.
+- [JupyterLite y Pyodide](/es/start/environments/jupyterlite/): qué se instala con micropip, qué funciona en el navegador y qué no, y cómo se construye un sitio de JupyterLite.
+- [Docker y servidores](/es/start/environments/docker/): una imagen ligera, cualquier identificador de usuario, una raíz de solo lectura y ffmpeg para los vídeos.
+- [Comprobación de tipos](/es/start/environments/type-checking/): qué ven mypy y pyright con cualquier NumPy que acepte la biblioteca, las opciones que comprueban y dónde el tipo es más amplio que el valor.

@@ -13,8 +13,8 @@ velocity response at a driving point to the point force that produces it, and
 its reciprocal is the **point impedance** $Z = 1/Y$ (the same
 motion-per-force / force-per-motion pair as ISO 7626-1 mechanical mobility, so
 these theoretical values slot straight into
-[`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) and
-[`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)). For an *infinite* structure the
+[`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult) and
+[`convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf)). For an *infinite* structure the
 driving point never sees a reflected wave, so the mobility is the free-field
 value that sets the vibrational power a source injects (Cremer 5.5): with a
 point force of amplitude `F` the time-averaged injected power, in watts, is
@@ -141,7 +141,7 @@ Point impedance of an infinite beam in bending (Cremer Table 5.1).
 $Z = 2 m' c_\mathrm{B} (1 + j)$ for a force at the centre of the beam and
 $Z = (m' c_\mathrm{B} / 2)(1 + j)$ for a force at a free end, with the
 bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
-([`beam_bending_wave_speed`](/phonometry/reference/api/vibration/point-mobility/#beam_bending_wave_speed)).
+([`beam_bending_wave_speed`](/reference/api/vibration/point-mobility/#beam_bending_wave_speed)).
 
 **Parameters**
 
@@ -193,7 +193,7 @@ Point mobility of an infinite beam in bending (Cremer Table 5.1).
 
 $Y = (1 - j) / (4 m' c_\mathrm{B})$ for a force at the centre and
 $Y = (1 - j) / (m' c_\mathrm{B})$ for a force at a free end, the reciprocal
-of [`infinite_beam_impedance`](/phonometry/reference/api/vibration/point-mobility/#infinite_beam_impedance). The mobility falls as
+of [`infinite_beam_impedance`](/reference/api/vibration/point-mobility/#infinite_beam_impedance). The mobility falls as
 $\omega^{-1/2}$.
 
 **Parameters**
@@ -271,7 +271,7 @@ infinite_beam_point_mobility(
 ) -> MobilityResult
 ```
 
-Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult).
+Infinite-beam point mobility bundled as a [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult).
 
 **Parameters**
 
@@ -282,7 +282,7 @@ Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/referen
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 | `location` | `"center"` or `"end"`. |
 
-**Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
+**Returns:** The [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
 **Raises**
 
@@ -313,7 +313,7 @@ point force.
 
 | Name | Description |
 | :--- | :--- |
-| `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m (see [`plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness)). |
+| `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m (see [`plate_bending_stiffness`](/reference/api/vibration/point-mobility/#plate_bending_stiffness)). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
 | `location` | `"center"` ($C = 8$) or `"edge"` ($C = 3.5$). |
 
@@ -340,7 +340,7 @@ infinite_plate_mobility(
 Point mobility of an infinite thin plate
 $Y = 1 / (C \sqrt{B' m''})$.
 
-The reciprocal of [`infinite_plate_impedance`](/phonometry/reference/api/vibration/point-mobility/#infinite_plate_impedance) (real, frequency
+The reciprocal of [`infinite_plate_impedance`](/reference/api/vibration/point-mobility/#infinite_plate_impedance) (real, frequency
 independent).
 
 **Parameters**
@@ -372,7 +372,7 @@ infinite_plate_point_mobility(
 ) -> MobilityResult
 ```
 
-Infinite-plate point mobility bundled as a [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult).
+Infinite-plate point mobility bundled as a [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult).
 
 The plate mobility is frequency independent, so the returned spectrum is
 constant across *frequency*; bundling it lets it be plotted and converted
@@ -387,7 +387,7 @@ with the ISO 7626 mobility machinery.
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
 | `location` | `"center"` or `"edge"`. |
 
-**Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
+**Returns:** The [`MobilityResult`](/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
 **Raises**
 
@@ -514,7 +514,7 @@ Bending stiffness of a thin plate per unit width (Cremer Eq. 4.22).
 
 $B' = E h^3 / (12 (1 - \nu^2))$, the plate bending stiffness `B'`
 in N.m used throughout this module and by the coincidence frequency of
-[`phonometry.vibration.structural.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
+[`phonometry.vibration.structural.coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
 
 **Parameters**
 

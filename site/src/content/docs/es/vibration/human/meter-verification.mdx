@@ -38,7 +38,7 @@ medir vibración; es la especificación frente a la que se diseña y se ensaya u
 vibrómetro de uso general para vibración en humanos, y el resto de la sección
 lleva todo este tiempo citando uno de sus apartados, porque las nueve
 ponderaciones frecuenciales que aplica la [exposición humana a
-vibración](/phonometry/es/vibration/human/human-vibration/) se definen aquí y en ningún otro sitio.
+vibración](/es/vibration/human/human-vibration/) se definen aquí y en ningún otro sitio.
 
 Ese «en humanos» sostiene el resto. La norma especifica instrumentos
 «diseñados para medir valores de vibración con el fin de evaluar la respuesta
@@ -153,7 +153,7 @@ etapas analógicas, un par paso alto y paso bajo Butterworth de segundo orden qu
 limita la banda, una transición aceleración-velocidad que porta la ganancia
 global y un escalón ascendente, multiplicadas entre sí como
 $H(s) = H_\mathrm{h}(s)\,H_\mathrm{l}(s)\,H_\mathrm{t}(s)\,H_\mathrm{s}(s)$
-(Fórmula (5)). [Vibración en humanos](/phonometry/es/vibration/human/human-vibration/) cubre esa cascada y el
+(Fórmula (5)). [Vibración en humanos](/es/vibration/human/human-vibration/) cubre esa cascada y el
 conjunto de parámetros de la Tabla 3 que la especializa en las nueve
 ponderaciones `Wb`, `Wc`, `Wd`, `We`, `Wf`, `Wh`, `Wj`, `Wk` y `Wm`.
 `weighting_factors` evalúa esa función a cualquier frecuencia, y es ese valor, y
@@ -1478,7 +1478,7 @@ que la advertencia de la sección 6 vale para un PVEM palabra por palabra:
 cumplir. Y el párrafo siguiente sigue juzgando «each time weighting» frente a
 «the tolerance limits of Table 2», cuya fila de ponderación temporal la parte 2
 ya no imprime. Los dos están en el
-[registro de erratas](/phonometry/es/reference/errata/).
+[registro de erratas](/es/reference/errata/).
 
 **Sus propias incertidumbres.** La parte 2 imprime la incertidumbre expandida
 máxima que cada uno de sus apartados de ensayo le permite a un laboratorio, y
@@ -1532,7 +1532,7 @@ hardware.
 Un sonómetro recibe exactamente este trato, de otro comité y en otra unidad.
 La IEC 61672-1 imprime objetivos de diseño para las ponderaciones A, C y Z y
 límites de aceptación a su alrededor, y
-[`verify_weighting_class`](/phonometry/es/signals/levels/weighting/) convierte una
+[`verify_weighting_class`](/es/signals/levels/weighting/) convierte una
 respuesta en un veredicto frente a ellos. Los dos verificadores son la misma
 idea aplicada a uno y otro lado de la frontera entre acústica y vibración:
 
@@ -1573,7 +1573,7 @@ pertenece a *esa medición de ese instrumento*, el día en que se hizo. Ninguno 
 los dos es un ensayo de tipo, una verificación periódica ni una comprobación in
 situ, y ninguno de los dos tiene un micrófono, un transductor ni un número de
 serie.
-[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/)
+[Conformidad y verificación](/es/signals/metrology/compliance-verification/)
 es el mapa de todos los verificadores de la biblioteca y de dónde termina la
 afirmación de cada uno.
 
@@ -1650,18 +1650,18 @@ apartados de registro, detección del operario, detección de artefactos
 
 ## Véase también
 
-- [Exposición humana a vibración (ISO 2631, ISO 5349)](/phonometry/es/vibration/human/human-vibration/): las
+- [Exposición humana a vibración (ISO 2631, ISO 5349)](/es/vibration/human/human-vibration/): las
   ponderaciones frente a las que esta página califica un instrumento, y la
   cadena de exposición que las consume.
-- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
+- [Conformidad y verificación](/es/signals/metrology/compliance-verification/):
   los demás verificadores, y qué solo puede atestiguar un laboratorio.
-- [Ponderación frecuencial (A, C, Z)](/phonometry/es/signals/levels/weighting/): las
+- [Ponderación frecuencial (A, C, Z)](/es/signals/levels/weighting/): las
   ponderaciones del sonómetro y los límites de aceptación de IEC 61672-1 de la
   sección 12.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): la comprobación
+- [Calibración y dBFS](/es/signals/metrology/calibration/): la comprobación
   de antes y después sobre la que se construye una verificación in situ, y la
   trazabilidad con la que se informa un ensayo de tipo.
 - Referencia de la API:
-  [`vibration.human.instrumentation`](https://docs.jmrp.io/phonometry/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](https://phonometry.dev/reference/api/vibration/instrumentation/).
 
 </SeeAlso>

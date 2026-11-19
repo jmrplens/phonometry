@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/
 
 # Sound insulation
 

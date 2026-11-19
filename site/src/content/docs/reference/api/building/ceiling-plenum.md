@@ -80,13 +80,13 @@ ASTM E1414, uses $A_0 = 12$ m2, so an ASTM value runs about
 $10 \log_{10}(12/10) = 0.79$ dB higher than the ISO one.
 
 **Single number.** ISO rates $D_\mathrm{n,c}$ with the ISO 717-1 curve
-([`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), giving `Dn,c,w`); ASTM E1414
+([`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating), giving `Dn,c,w`); ASTM E1414
 rates it through ASTM E413 as the **ceiling attenuation class** (CAC). E413
 rounds the data to the nearest integer (clause 5.2), shifts its reference
 contour upward in 1 dB steps while the sum of the deficiencies stays at or
 below 32 dB and no single deficiency exceeds 8 dB (clauses 5.3 and 5.4), and
 reads the rating off the shifted contour at 500 Hz (clause 5.5). See
-[`ceiling_attenuation_class`](/phonometry/reference/api/building/ceiling-plenum/#ceiling_attenuation_class).
+[`ceiling_attenuation_class`](/reference/api/building/ceiling-plenum/#ceiling_attenuation_class).
 
 :::note
 The one-dimensional plenum model has **no published numeric output**: every
@@ -98,7 +98,7 @@ $\tau_\mathrm{cl} \le 1$, a bare plenum no worse than the undamped
 Eq. (9.20) value, and the small-attenuation limit taken where it applies
 rather than only where the Eq. (9.17) leakage term happens to vanish.
 The measurement chain
-([`normalized_ceiling_attenuation`](/phonometry/reference/api/building/ceiling-plenum/#normalized_ceiling_attenuation), [`ceiling_attenuation_class`](/phonometry/reference/api/building/ceiling-plenum/#ceiling_attenuation_class))
+([`normalized_ceiling_attenuation`](/reference/api/building/ceiling-plenum/#normalized_ceiling_attenuation), [`ceiling_attenuation_class`](/reference/api/building/ceiling-plenum/#ceiling_attenuation_class))
 *is* anchored on accredited ASTM E1414 laboratory reports.
 :::
 
@@ -117,7 +117,7 @@ ceiling_attenuation_class(
 Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).
 
 Rounds the data to the nearest integer (clause 5.2), then raises the
-[`CEILING_ATTENUATION_CONTOUR`](/phonometry/reference/api/building/ceiling-plenum/#ceiling_attenuation_contour) in 1 dB steps to the highest position
+[`CEILING_ATTENUATION_CONTOUR`](/reference/api/building/ceiling-plenum/#ceiling_attenuation_contour) in 1 dB steps to the highest position
 at which the sum of the deficiencies is at most 32 dB (clause 5.4.1) and no
 single deficiency exceeds 8 dB (clause 5.4.2). The rating is the shifted
 contour read at 500 Hz (clause 5.5).
@@ -129,7 +129,7 @@ contour read at 500 Hz (clause 5.5).
 | `attenuation` | Normalized ceiling attenuation `Dn,c` in the 16 one-third-octave bands 125 Hz to 4000 Hz, in dB. |
 | `frequencies` | Optional band centre frequencies, in Hz; when given they must be exactly the 16 contour bands. |
 
-**Returns:** A [`CeilingAttenuationResult`](/phonometry/reference/api/building/ceiling-plenum/#ceilingattenuationresult).
+**Returns:** A [`CeilingAttenuationResult`](/reference/api/building/ceiling-plenum/#ceilingattenuationresult).
 
 **Raises**
 
@@ -391,7 +391,7 @@ about 0.24 dB.
 | `split_source` | Power split `sS` towards the partition, in `(0, 1]` (Default: 0.5). |
 | `split_receiving` | Power split `sR` on the receiving side, in `(0, 1]` (Default: 0.5). |
 
-**Returns:** A [`PlenumFlankingResult`](/phonometry/reference/api/building/ceiling-plenum/#plenumflankingresult).
+**Returns:** A [`PlenumFlankingResult`](/reference/api/building/ceiling-plenum/#plenumflankingresult).
 
 **Raises**
 

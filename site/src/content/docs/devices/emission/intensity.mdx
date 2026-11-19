@@ -441,7 +441,7 @@ accuracy of every intensity measurement.
 ### Measuring the residual index, and checking the probe
 
 $\delta_{pI0}$ is the number every criterion on this page and the whole
-[scanning page](/phonometry/devices/emission/sound-power-intensity/) rests on,
+[scanning page](/devices/emission/sound-power-intensity/) rests on,
 and the library does not compute it: it is measured, once per
 probe-spacer-analyser chain, on a bench.
 
@@ -1070,7 +1070,7 @@ the microphones alone.
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
 | `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
-See [Theory](/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](/phonometry/signals/metrology/calibration/)
+See [Theory](/reference/theory/signal-analysis/) for the derivations and [Calibration](/signals/metrology/calibration/)
 for absolute scaling of the two channels.
 
 ## What this guide covers
@@ -1114,12 +1114,12 @@ is grade it against Table 2. The before-use check of clause 14 and the ISO
 
 ## See also
 
-- [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing between the intensity, pressure and reverberation-room routes.
-- [Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
-- [Calibration](/phonometry/signals/metrology/calibration/): the absolute scaling of the two channels the estimator assumes.
-- [Theory: signal analysis](/phonometry/reference/theory/signal-analysis/): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
-- API reference: [`emission.intensity`](/phonometry/reference/api/power/intensity/).
-- Theory: [Sound intensity (IEC 61043)](/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
+- [Sound Power by Intensity Scanning](/devices/emission/sound-power-intensity/): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
+- [Sound Power](/devices/emission/sound-power/): choosing between the intensity, pressure and reverberation-room routes.
+- [Sound power from surface vibration](/devices/emission/vibration-sound-power/): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
+- [Calibration](/signals/metrology/calibration/): the absolute scaling of the two channels the estimator assumes.
+- [Theory: signal analysis](/reference/theory/signal-analysis/): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- API reference: [`emission.intensity`](/reference/api/power/intensity/).
+- Theory: [Sound intensity (IEC 61043)](/reference/theory/signal-analysis/#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
 
 </SeeAlso>

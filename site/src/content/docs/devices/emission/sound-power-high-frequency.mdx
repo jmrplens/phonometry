@@ -43,7 +43,7 @@ the comparison with a reference sound source for broadband noise and for
 tones, the free-field alternative, what Table 3 asks a report to determine
 for each type of noise, and the misprints of the tables the standard prints
 for the air absorption. Which route fits which job below
-10 kHz is weighed in [Sound Power](/phonometry/devices/emission/sound-power/).
+10 kHz is weighed in [Sound Power](/devices/emission/sound-power/).
 
 ## 1. The 16 kHz octave band (ISO 9295)
 
@@ -208,7 +208,7 @@ zeros are printed 10 % high: "0,033 0" for 0.030 0, "0,04 4" for 0.040 0
 and "0,05 50" for 0.050 0. The last of them, at 21 500 Hz, 27 °C and 60 %,
 is the largest error in the tables, 0.005 0 Np/m, and read into Formula (7)
 any of the three raises the level by at least 0.41 dB. The whole list, cell by cell, is in the
-[errata registry](/phonometry/reference/errata/). The 581 correct cells hold a
+[errata registry](/reference/errata/). The 581 correct cells hold a
 smaller surprise: they reproduce digit for digit only with the temperature
 converted as $\theta + 273.16$ K, the triple point of water, where the
 Celsius scale puts 273.15 K. The library converts with 273.15 K, which moves
@@ -367,7 +367,7 @@ plt.show()
 
 The fourth method is ISO 3744 in a hemi-anechoic room, with the three
 one-third-octave bands of the 16 kHz octave, and
-[`sound_power_pressure`](/phonometry/devices/emission/sound-power-pressure/)
+[`sound_power_pressure`](/devices/emission/sound-power-pressure/)
 takes it as it stands (without `frequencies`, since the A-weighting table of
 ISO 3744 stops at 10 kHz). What ISO 9295 adds is Formula (10): beyond a
 measurement radius of 2 m the air absorbs enough over the path that the
@@ -442,7 +442,7 @@ The room, the boom and the instruments are assumed qualified: the ISO 3741
 qualification of the room and the flatness of the chain are checks the
 laboratory makes, the reference source comes calibrated (for broadband noise
 as the ISO 6926 calibration of
-[Free Field and Reference Sources](/phonometry/devices/emission/free-field-qualification/)
+[Free Field and Reference Sources](/devices/emission/free-field-qualification/)
 if the laboratory made it here), and the $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
 monitored. The background correction is ISO 3741's, applied to the levels
 before they are passed (`reverberation_background_correction`). The
@@ -456,17 +456,17 @@ deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](/devices/emission/sound-power/): choosing among the
   determination routes below 10 kHz and the ISO 4871 declaration.
-- [Sound Power in the Reverberation Room (ISO 3741)](/phonometry/devices/emission/sound-power-reverberation/):
+- [Sound Power in the Reverberation Room (ISO 3741)](/devices/emission/sound-power-reverberation/):
   the room technique this standard extends, and the $C_1$ and $C_2$ it borrows.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the enveloping surface of the free-field method.
-- [Outdoor propagation (ISO 9613-1 / ISO 9613-2)](/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor propagation (ISO 9613-1 / ISO 9613-2)](/environment/propagation/outdoor-propagation/):
   the attenuation coefficient Annex A is written from.
-- [Errata](/phonometry/reference/errata/): the 43 misprinted cells of
+- [Errata](/reference/errata/): the 43 misprinted cells of
   Tables 1 and 2, and the oxygen relaxation frequency that Formula (A.5)
   sets with a digit zero.
-- API reference: [`emission.sound_power_high_frequency`](/phonometry/reference/api/power/sound-power-high-frequency/).
+- API reference: [`emission.sound_power_high_frequency`](/reference/api/power/sound-power-high-frequency/).
 
 </SeeAlso>

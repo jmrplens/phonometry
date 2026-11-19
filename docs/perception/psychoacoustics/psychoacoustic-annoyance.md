@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/psychoacoustic-annoyance.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/psychoacoustics/psychoacoustic-annoyance/
 
 # Psychoacoustic annoyance and fluctuation strength
 
@@ -436,7 +436,7 @@ print(round(steady_noise.fluctuation_strength, 2))  # 0.15 vacil
   community annoyance, the other thing the word means, and the rating levels it
   is assessed with.
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
-- API reference: [`psychoacoustics.quality.annoyance`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics`: fluctuation strength](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
+- API reference: [`psychoacoustics.quality.annoyance`](https://phonometry.dev/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics`: fluctuation strength](https://phonometry.dev/reference/api/psychoacoustics/fluctuation-strength/).
 
 ## References
 

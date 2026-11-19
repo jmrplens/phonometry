@@ -32,7 +32,7 @@ source too, which runs `make` and autoreconf, unless
 `apt-get install ninja-build patchelf` has put the image's own on `PATH`. An
 Alpine image, built on musl, needs more, since python-soundfile has no wheel
 there that carries libsndfile and numba none at all; [Getting
-Started](/phonometry/start/getting-started/#from-pypi-recommended) says what
+Started](/start/getting-started/#from-pypi-recommended) says what
 each extra takes there.
 
 Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, with Docker
@@ -154,12 +154,12 @@ ENV PATH=/opt/venv/bin:$PATH MPLCONFIGDIR=/tmp/matplotlib
 ```
 
 WebM and MP4 then encode on the CPU, as `nobody` and on a read-only root
-with a writable `/tmp` alike. [Writing videos](/phonometry/io/videos/) covers
+with a writable `/tmp` alike. [Writing videos](/io/videos/) covers
 the encoders and a node that has a GPU.
 
 ## Servers and threads
 
 A server that handles requests in a thread pool may import the domains it
 needs from those threads, several at once. [Sending a simulation to a remote
-node](/phonometry/simulation/remote-node/) covers an FDTD run the server
+node](/simulation/remote-node/) covers an FDTD run the server
 should not step itself.

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/free-field-corrections.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/free-field-corrections/
 
 # Free-Field Corrections of a Sound Level Meter (IEC 62585)
 
@@ -466,7 +466,7 @@ plt.show()
 - [Calibration and dBFS](calibration.md): the
   calibrator tone that sets the pressure sensitivity every level of a meter
   starts from.
-- API reference: [`metrology.free_field_corrections`](https://docs.jmrp.io/phonometry/reference/api/metrology/free-field-corrections/).
+- API reference: [`metrology.free_field_corrections`](https://phonometry.dev/reference/api/metrology/free-field-corrections/).
 
 ## References
 

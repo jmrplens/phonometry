@@ -19,19 +19,19 @@ con su intervalo de confianza.
 
 Bajo esa disciplina hay ocho páginas, en seis familias: los estimadores del
 dominio de la frecuencia ([análisis
-espectral](/phonometry/es/signals/spectra/spectral-analysis/), [coherencia
-múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/)), el
+espectral](/es/signals/spectra/spectral-analysis/), [coherencia
+múltiple y parcial](/es/signals/spectra/miso-coherence/)), el
 terreno intermedio tiempo-frecuencia
-([espectrogramas](/phonometry/es/signals/spectra/time-frequency/)), los métodos
+([espectrogramas](/es/signals/spectra/time-frequency/)), los métodos
 sobre la forma del espectro
-([cepstrum](/phonometry/es/signals/spectra/cepstrum-echoes/)), los métodos del
+([cepstrum](/es/signals/spectra/cepstrum-echoes/)), los métodos del
 dominio del periodo ([promediado
-síncrono](/phonometry/es/signals/spectra/synchronous-averaging/)), los
+síncrono](/es/signals/spectra/synchronous-averaging/)), los
 estimadores del dominio del tiempo ([correlación y
-retardo](/phonometry/es/signals/spectra/correlation-delay/)), y la caja de
+retardo](/es/signals/spectra/correlation-delay/)), y la caja de
 herramientas de estímulo y de sistema ([señales de
-prueba](/phonometry/es/signals/spectra/test-signals/), [medición de
-sistemas](/phonometry/es/signals/spectra/system-measurement/)).
+prueba](/es/signals/spectra/test-signals/), [medición de
+sistemas](/es/signals/spectra/system-measurement/)).
 
 Se diferencian en lo que estiman y comparten dos decisiones. La primera es la
 **longitud de segmento**. Fija el ancho de banda de resolución de una PSD, la
@@ -44,11 +44,11 @@ sobre el mismo registro. La segunda es la **estacionariedad**. Todo promedio
 de estas páginas, y toda fórmula de error citada a su lado, supone que el
 proceso no derivó mientras se grababa, que es exactamente lo que deciden los
 tests de [cualificación de
-datos](/phonometry/es/signals/metrology/data-qualification/); cuando un
+datos](/es/signals/metrology/data-qualification/); cuando un
 registro no los pasa, las herramientas honestas son las vistas de tiempo corto
 y no las promediadas.
 
-[Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/) es
+[Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/) es
 donde empieza la familia del dominio de la frecuencia. Los estimadores de
 Welch de densidad
 espectral de potencia y cruzada declaran su número efectivo de promedios, sus
@@ -59,13 +59,13 @@ señal-ruido espectral; el suavizado en fracciones de octava tiende el puente
 de vuelta al mundo de bandas; y los generadores de ruido de colores
 sintetizan señales de prueba blancas, rosas, rojas, azules y violetas con
 pendiente exacta en ley de potencias.
-[La coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/) lleva
+[La coherencia múltiple y parcial](/es/signals/spectra/miso-coherence/) lleva
 esa misma maquinaria del espectro cruzado a varias fuentes correlacionadas a la vez:
 a partir de varias entradas correlacionadas y una salida separa la coherencia que una
 fuente aporta de verdad de la parte que solo comparte con otra, y sus espectros
 de salida coherente parciales indican qué fuente domina cada banda.
 
-[Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/) es la
+[Análisis tiempo-frecuencia](/es/signals/spectra/time-frequency/) es la
 vista intermedia: el espectrograma STFT calibrado muestra qué ocurre
 *cuándo* - una sirena que pasa, un impacto, un arranque - con cada celda
 leyendo un nivel absoluto en el mismo escalado que los estimadores de
@@ -73,7 +73,7 @@ Welch, y la FFT con zoom calcula el espectro de una banda estrecha en una
 malla arbitrariamente fina para separar tonos más próximos que un bin
 práctico de FFT.
 [Cepstrum, ecos y espectro de la
-envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/)
+envolvente](/es/signals/spectra/cepstrum-echoes/)
 trabaja sobre la *forma* del espectro. El cepstrum de potencia, real y
 complejo colapsa el rizado espectral periódico en picos de quefrencia, la
 detección de ecos lee el retardo y el coeficiente de una reflexión en el
@@ -81,14 +81,14 @@ pico cepstral, el liftering separa un espectro logarítmico en envolvente
 suave y estructura fina, y el espectro de la envolvente convierte las
 modulaciones de amplitud en líneas discretas en la frecuencia de modulación.
 [El promediado síncrono en el
-tiempo](/phonometry/es/signals/spectra/synchronous-averaging/)
+tiempo](/es/signals/spectra/synchronous-averaging/)
 extrae una forma de onda repetitiva de periodo conocido del ruido asíncrono
 promediando periodos sucesivos: el ruido residual cae como la raíz cuadrada
 del número de promedios, y elegir ese número para situar un nodo del filtro
 peine sobre un orden interferente lo rechaza mucho mejor que la potencia de
 dos habitual.
 
-[Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/)
+[Correlación, retardo y envolvente](/es/signals/spectra/correlation-delay/)
 es donde empieza su contrapartida en el dominio del tiempo. La autocorrelación y la correlación
 cruzada vienen con las normalizaciones y los errores aleatorios de Bendat y
 Piersol; la estimación del retardo ofrece el correlador directo, la pendiente
@@ -99,7 +99,7 @@ submuestral; y la transformada de Hilbert produce la envolvente con fase y
 frecuencia instantáneas.
 
 [Señales de prueba y herramientas de
-muestreo](/phonometry/es/signals/spectra/test-signals/)
+muestreo](/es/signals/spectra/test-signals/)
 es la caja de herramientas que hay debajo de todo lo demás: ráfagas tonales
 con la conmutación exacta de IEC 60268-1 (inicio en el paso por cero, número
 entero de periodos completos, trenes repetitivos) que ejercitan las balísticas
@@ -108,12 +108,12 @@ explícita cuyo filtro diseñado viaja con el resultado y que necesita toda
 comparación entre frecuencias de muestreo distintas, y retardo fraccionario de
 banda limitada con frontera lineal o circular, cuyo núcleo comparten la
 alineación de respuestas al impulso de
-[Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/)
+[Correlación, retardo y envolvente](/es/signals/spectra/correlation-delay/)
 y la alineación de periodos no enteros de
 [Promediado síncrono en el
-tiempo](/phonometry/es/signals/spectra/synchronous-averaging/).
+tiempo](/es/signals/spectra/synchronous-averaging/).
 
-[Medición de sistemas](/phonometry/es/signals/spectra/system-measurement/) orienta la
+[Medición de sistemas](/es/signals/spectra/system-measurement/) orienta la
 caja de herramientas hacia la medición de los propios sistemas: los pares
 complementarios de Golay deconvolucionan un sistema invariante en el tiempo
 con ruido de correlación nulo, los barridos conformados de Mueller y
@@ -126,47 +126,47 @@ Estos estimadores alimentan al resto de la biblioteca: las funciones de
 transferencia y el análisis de distorsión se apoyan en la maquinaria
 espectral cruzada, el trabajo con respuestas al impulso de sala descansa en
 la estimación de retardo y la alineación, y las
-[páginas de incertidumbre](/phonometry/es/signals/metrology/)
+[páginas de incertidumbre](/es/signals/metrology/)
 aportan el vocabulario de análisis de error en el que se expresan las
 estimaciones.
 
 ## Páginas de esta sección
 
-- [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/):
+- [Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/):
   PSD/CSD de Welch con intervalos de confianza chi-cuadrado, el espectro de
   salida coherente y la SNR espectral, suavizado en 1/n de octava y
   generadores de ruido de colores con pendiente exacta.
-- [Coherencia múltiple y parcial](/phonometry/es/signals/spectra/miso-coherence/):
+- [Coherencia múltiple y parcial](/es/signals/spectra/miso-coherence/):
   las funciones de coherencia de entradas múltiples de Bendat y Piersol para
   varias fuentes correlacionadas y una salida, con el condicionamiento por
   eliminación de Gauss que distingue una causa real de una fuente que solo
   se correlaciona con ella, y los espectros de salida coherente parciales que indican
   qué fuente domina cada banda.
-- [Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/): el
+- [Análisis tiempo-frecuencia](/es/signals/spectra/time-frequency/): el
   espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
   con el compromiso de resolución tiempo-frecuencia, y la FFT con zoom que
   resuelve tonos más próximos que un bin práctico de FFT.
-- [Cepstrum, ecos y espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/):
+- [Cepstrum, ecos y espectro de la envolvente](/es/signals/spectra/cepstrum-echoes/):
   el cepstrum de potencia/real/complejo con análisis de quefrencia, detección
   de ecos con el coeficiente de reflexión leído en el pico, liftering paso
   bajo/paso alto, la ida y vuelta homomórfica y el espectro de la envolvente
   de las modulaciones de amplitud.
-- [Promediado síncrono en el tiempo](/phonometry/es/signals/spectra/synchronous-averaging/):
+- [Promediado síncrono en el tiempo](/es/signals/spectra/synchronous-averaging/):
   extracción de una forma de onda periódica de periodo conocido por promediado
   en el dominio del tiempo, el filtro peine que describe la operación en el
   dominio de la frecuencia, la ley de reducción de ruido en raíz cuadrada, y la
   elección del número de promedios que sitúa un nodo del peine sobre un orden
   interferente (McFadden 1987).
-- [Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/):
+- [Correlación, retardo y envolvente](/es/signals/spectra/correlation-delay/):
   estimaciones de correlación con sus errores aleatorios, estimación del
   retardo por correlación directa, pendiente de fase y ponderaciones GCC,
   alineación submuestral de respuestas al impulso, y la envolvente de
   Hilbert.
-- [Señales de prueba y herramientas de muestreo](/phonometry/es/signals/spectra/test-signals/):
+- [Señales de prueba y herramientas de muestreo](/es/signals/spectra/test-signals/):
   ráfagas tonales IEC 60268-1 con conmutación exacta, remuestreo con
   especificación antialias declarada y retardo fraccionario de banda
   limitada.
-- [Medición de sistemas](/phonometry/es/signals/spectra/system-measurement/):
+- [Medición de sistemas](/es/signals/spectra/system-measurement/):
   pares complementarios de Golay con deconvolución exactamente libre de
   ruido hacia una respuesta al impulso, barridos que siguen un espectro de
   magnitud objetivo arbitrario conformando el retardo de grupo, y la
@@ -178,7 +178,7 @@ estimaciones.
 
 Páginas de otras áreas del sitio en las que se apoya esta sección:
 
-- [Frecuencias de fallo de máquinas](/phonometry/es/vibration/machinery/machine-diagnostics/):
+- [Frecuencias de fallo de máquinas](/es/vibration/machinery/machine-diagnostics/):
   las familias cinemáticas de frecuencias de fallo de la maquinaria rotativa
   (Norton y Karczub, sección 8.4) dibujadas sobre un espectro de envolvente
   medido: frecuencias BPFO, BPFI, BSF y de jaula de los rodamientos, bandas
@@ -214,9 +214,9 @@ fuentes, y un sistema de varias salidas necesita una llamada a
 escala mel ni variante MFCC. Dos estimadores que comparten el núcleo de Welch
 de esta sección se documentan allí donde se usan: la función de transferencia
 y la coherencia ordinaria en
-[Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
+[Electroacústica](/es/devices/electroacoustics/electroacoustics/),
 y la sonda de intensidad de dos micrófonos en [Intensidad
-acústica](/phonometry/es/devices/emission/intensity/).
+acústica](/es/devices/emission/intensity/).
 </ScopeClaim>
 </Scope>
 

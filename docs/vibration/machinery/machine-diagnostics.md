@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/machinery/machine-diagnostics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/machinery/machine-diagnostics/
 
 # Machine fault frequencies
 
@@ -621,7 +621,7 @@ above the useful part of this envelope spectrum.
   finding the structural resonances a defect impact excites.
 - [Bending-wave transmission at plate junctions](../structural/junction-transmission.md): what
   happens to the vibration once it leaves the machine.
-- API reference: [`vibration.machinery.diagnostics`](https://docs.jmrp.io/phonometry/reference/api/vibration/diagnostics/).
+- API reference: [`vibration.machinery.diagnostics`](https://phonometry.dev/reference/api/vibration/diagnostics/).
 
 ## References
 

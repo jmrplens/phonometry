@@ -16,7 +16,7 @@ subject:
 
 - the **passive** attenuation, the real-ear attenuation at threshold of
   ISO 4869-1 with the circuit off, in octave bands
-  ([`real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation));
+  ([`real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation));
 - the **active insertion loss** (3.4), measured with a microphone in each
   closed ear canal (MIRE, ISO 11904-1) as the difference between the level at
   the ear in the passive and in the active mode, in one-third-octave bands of a
@@ -45,7 +45,7 @@ e) the sixteen octave-band data sets go into ISO 4869-2 at a protection
    performance of 84 %: the mean, the standard deviation, the APV, the H, M
    and L values and the SNR.
 
-[`anr_total_attenuation`](/phonometry/reference/api/hearing/active-noise-reduction/#anr_total_attenuation) runs the whole chain. Clause 5.5 says the
+[`anr_total_attenuation`](/reference/api/hearing/active-noise-reduction/#anr_total_attenuation) runs the whole chain. Clause 5.5 says the
 detailed computations are given in the calculation example ISO publishes with
 the standard, and that workbook interpolates **linearly in frequency, in
 hertz**, between the nominal centre frequencies, not on a logarithmic axis:
@@ -59,15 +59,15 @@ octave-band total by less than 0.1 dB.
 applied to the active insertion loss, and within one laboratory the combined
 standard uncertainty is again the standard deviation of the mean over the
 sixteen lower-ear values, $u = s/\sqrt{N}$ and $U_{95} = 2u$, which
-[`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) returns. Table A.2 prints a typical budget,
-[`ANR_WITHIN_LABORATORY_UNCERTAINTY`](/phonometry/reference/api/hearing/active-noise-reduction/#anr_within_laboratory_uncertainty).
+[`active_insertion_loss`](/reference/api/hearing/active-noise-reduction/#active_insertion_loss) returns. Table A.2 prints a typical budget,
+[`ANR_WITHIN_LABORATORY_UNCERTAINTY`](/reference/api/hearing/active-noise-reduction/#anr_within_laboratory_uncertainty).
 
 **Linear operation (5.4.4).** A cancellation circuit saturates, so the active
 insertion loss only holds up to some external level. With red noise, the level
 at each ear in the 125 Hz octave band is followed while the external level
 rises in 5 dB steps from the level of the insertion-loss measurement to at
 most 110 dB, and each step at the ear shall also be 5 dB, within ±1 dB.
-[`assess_anr_linearity`](/phonometry/reference/api/hearing/active-noise-reduction/#assess_anr_linearity) finds the highest external level up to which that
+[`assess_anr_linearity`](/reference/api/hearing/active-noise-reduction/#assess_anr_linearity) finds the highest external level up to which that
 holds for every sample, subject and ear, which is what 5.6 i) reports.
 
 Clause, formula and table numbers refer to ISO 4869-6:2019(E).
@@ -117,7 +117,7 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 | `active_levels` | The MIRE levels in the active mode, on the same grid. |
 | `frequencies` | The centre frequencies in hertz, or `None` for the one-third-octave bands 50 Hz to 10 kHz (24 bands) or 100 Hz to 10 kHz (21), or the octave bands 63 Hz to 8 kHz (8) or 125 Hz to 8 kHz (7), by the number of bands. |
 
-**Returns:** [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult).
+**Returns:** [`ActiveInsertionLossResult`](/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult).
 
 **Raises**
 
@@ -212,10 +212,10 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 
 | Name | Description |
 | :--- | :--- |
-| `reat` | The passive attenuation, a [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult) or its `(subjects, octaves)` grid in dB on the octave bands 63 Hz or 125 Hz to 8 kHz. |
-| `insertion_loss` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
+| `reat` | The passive attenuation, a [`RealEarAttenuationResult`](/reference/api/hearing/real-ear-attenuation/#realearattenuationresult) or its `(subjects, octaves)` grid in dB on the octave bands 63 Hz or 125 Hz to 8 kHz. |
+| `insertion_loss` | The active insertion loss, an [`ActiveInsertionLossResult`](/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
 
-**Returns:** [`ANRTotalAttenuationResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
+**Returns:** [`ANRTotalAttenuationResult`](/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
 
 **Raises**
 
@@ -392,7 +392,7 @@ and if it holds up to 110 dB, that is stated.
 | `ear_levels` | The 125 Hz octave-band level at the ear, in dB, with the external levels on the last axis and any number of leading axes (sample, subject, ear). |
 | `ear_third_octave_levels` | Instead, the 100 Hz, 125 Hz and 160 Hz one-third-octave levels at the ear, with those three on the last axis and the external levels on the one before. |
 
-**Returns:** [`ANRLinearityResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrlinearityresult).
+**Returns:** [`ANRLinearityResult`](/reference/api/hearing/active-noise-reduction/#anrlinearityresult).
 
 **Raises**
 

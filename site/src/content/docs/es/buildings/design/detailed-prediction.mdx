@@ -39,7 +39,7 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 El modelo simplificado de
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/)
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/)
 devuelve un solo número, $R'_\mathrm{w}$ o $L'_\mathrm{n,w}$, y oculta todo lo que ocurre
 dentro del espectro. El **modelo detallado** (ISO 12354-1:2017 apartado 4.2 a
 ruido aéreo, ISO 12354-2:2017 apartado 4.2 a ruido de impactos) lleva en cambio
@@ -250,8 +250,8 @@ r_flanking = building.resonant_sound_reduction_index(r_situ, frequencies=bands,
 | :--- | :--- |
 | $R$, $L_\mathrm{n}$ por banda | Informe de ensayo ISO 10140-2 / ISO 10140-3 (**con el tiempo de reverberación estructural de laboratorio del mismo informe**) |
 | $\Delta R$ de un trasdosado | Anexo G de ISO 10140-1, o Anexo D de ISO 12354-1 |
-| $\Delta L$ de un revestimiento | [ISO 16251-1](/phonometry/es/buildings/design/impact-improvement/) o ISO 10140-3 |
-| $K_{ij}$ por unión | ISO 10848-1/-4, o el [catálogo del Anexo E](/phonometry/es/buildings/design/insulation-prediction/) |
+| $\Delta L$ de un revestimiento | [ISO 16251-1](/es/buildings/design/impact-improvement/) o ISO 10140-3 |
+| $K_{ij}$ por unión | ISO 10848-1/-4, o el [catálogo del Anexo E](/es/buildings/design/insulation-prediction/) |
 | $m'$, $f_\mathrm{c}$, $\eta_\mathrm{int}$, $c_\mathrm{L}$ | La hoja de características del material, o la tabla B.1 del Anexo B |
 | Superficies y longitudes de acoplamiento | Los planos, medidas **de superficie a superficie** |
 
@@ -272,7 +272,7 @@ y dos particiones interiores de silicocalcáreo de 200 mm, que se encuentran en
 uniones rígidas en T y en cruz. Entre ambos imprimen cerca de veinte tablas por
 bandas, una por magnitud intermedia, lo que convierte el ejemplo en un oráculo
 completo del modelo. Ocho defectos de esas tablas impresas están registrados en
-[Erratas](/phonometry/es/reference/errata/), y el conjunto de datos de abajo
+[Erratas](/es/reference/errata/), y el conjunto de datos de abajo
 toma las lecturas corregidas.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12354_annexl.svg" alt="El edificio resuelto del Anexo L de ISO 12354-1: una sección de dos viviendas superpuestas que muestra el forjado separador de 220 mm con su losa flotante, las dos fachadas y las dos particiones interiores con sus masas y sus frecuencias críticas y el Kij de cada unión, y una planta del forjado separador con las cuatro longitudes de acoplamiento acotadas y las trece trayectorias de transmisión contadas" width="92%" />
@@ -330,7 +330,7 @@ Los $m'$ y $f_\mathrm{c}$ del elemento salen de su material y de su
 espesor, $m' = \rho t$ y $f_\mathrm{c} = c_\mathrm{o}^2 / (1{,}8\, c_\mathrm{L} t)$
 con la densidad y la velocidad de fase cuasilongitudinal de la tabla B.3, y
 `HomogeneousElement.from_solid` calcula los dos a partir de la fila de
-catálogo de un sólido, publicada o de [tus propios catálogos](/phonometry/es/io/material-catalogues/).
+catálogo de un sólido, publicada o de [tus propios catálogos](/es/io/material-catalogues/).
 El factor de pérdidas interno nunca se lee de la fila, que puede guardar
 cuatro, así que aquí se da como lo da la especificación del elemento. La
 $f_\mathrm{c}$ sin redondear es la que, según la nota de la norma, usó su
@@ -601,7 +601,7 @@ frecuencia crítica a transmisión resonante únicamente porque una trayectoria 
 flancos solo lleva ondas de flexión libres. `dv_n` es la diferencia de niveles de
 velocidad de la unión promediada en las dos direcciones y **normalizada**, en dB,
 medida según
-[ISO 10848-2](/phonometry/es/buildings/insulation/flanking-lab/) y referida a una
+[ISO 10848-2](/es/buildings/insulation/flanking-lab/) y referida a una
 longitud de referencia de 1 m. `dnf_13` es la diferencia de niveles por flancos
 normalizada $D_\mathrm{n,f}$ de una unión medida en laboratorio, en dB, que la llamada
 reescala por el cociente entre las longitudes de acoplamiento de obra y de
@@ -741,12 +741,12 @@ el tiempo de reverberación estructural.
 Aquí solo se calculan elementos homogéneos del Anexo B; el espectro de un
 elemento ligero, doble o compuesto es un dato de entrada, que sale de
 [Predicción del aislamiento de
-paneles](/phonometry/es/buildings/design/panel-sound-insulation/) o de un
+paneles](/es/buildings/design/panel-sound-insulation/) o de un
 informe de ensayo. El propio catálogo de uniones del Anexo E vive en
 [Predicción del aislamiento acústico (EN
-12354)](/phonometry/es/buildings/design/insulation-prediction/), y la mejora
+12354)](/es/buildings/design/insulation-prediction/), y la mejora
 por trasdosado del Anexo D de la Parte 1 en [Predicción del comportamiento de
-capas elásticas](/phonometry/es/buildings/design/resilient-layers/); las tablas
+capas elásticas](/es/buildings/design/resilient-layers/); las tablas
 por defecto de los anexos D y F de EN 12354-5 no están implementadas en
 ninguna parte. La rama de Tipo B se muestra a partir de sus entradas
 normativas en lugar de resolverse de principio a fin. La transmisión aérea a través de cámaras y de techos
@@ -761,19 +761,19 @@ necesita el espectro entero: de 100 Hz a 3150 Hz en tercios de octava, o de
 
 ## Véase también
 
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el modelo simplificado de número único y el catálogo de uniones del Anexo E
   sobre el que se apoya esta página.
-- [Transmisión por flancos en laboratorio (ISO 10848)](/phonometry/es/buildings/insulation/flanking-lab/):
+- [Transmisión por flancos en laboratorio (ISO 10848)](/es/buildings/insulation/flanking-lab/):
   de dónde salen el $K_{ij}$ medido y la longitud de absorción equivalente.
-- [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   el motor de curva de referencia que convierte el espectro previsto en
   $R'_\mathrm{w}$ / $L'_\mathrm{n,w}$.
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   el resultado construido frente al que se contrasta la predicción.
-- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/phonometry/es/materials/resilient/dynamic-stiffness/):
+- [Rigidez dinámica de materiales resilientes (EN 29052-1)](/es/materials/resilient/dynamic-stiffness/):
   la $s'$ que hay detrás de la frecuencia de resonancia del suelo flotante.
-- Referencia de la API: [`building.prediction.detailed_model`](/phonometry/es/reference/api/building/detailed-model/).
-- Teoría: [Aislamiento acústico y absorción, predichos](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): el álgebra de trayectos directos y de flancos que el modelo detallado desglosa.
+- Referencia de la API: [`building.prediction.detailed_model`](/es/reference/api/building/detailed-model/).
+- Teoría: [Aislamiento acústico y absorción, predichos](/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): el álgebra de trayectos directos y de flancos que el modelo detallado desglosa.
 
 </SeeAlso>

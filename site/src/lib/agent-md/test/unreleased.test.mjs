@@ -24,7 +24,7 @@ import { UNRELEASED, header } from '../header.mjs';
 import { pageMarkdown } from '../page.mjs';
 import { Box, registryOf } from './helpers.mjs';
 
-const SITE = 'https://docs.jmrp.io/phonometry';
+const SITE = 'https://phonometry.dev';
 
 /** The release the fixtures are newer or older than, committed on 2026-11-17 at 10:30 UTC. */
 const RELEASE = Object.freeze({ version, sha: 'f'.repeat(40), date: new Date('2026-11-17T10:30:31Z'), from: 'tag' });

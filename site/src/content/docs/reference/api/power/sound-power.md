@@ -120,7 +120,7 @@ $6 \le \Delta L_p \le 15$ dB; ISO 3746:2010, 8.3.3:
 $3 \le \Delta L_p \le 10$ dB). For $\Delta L_p$ below the
 lower criterion (6 dB engineering, 3 dB survey) the accuracy is reduced:
 `K1` is clamped to its value at that criterion and a
-[`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) is emitted, the result then being an upper
+[`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) is emitted, the result then being an upper
 bound (clause 8.2.3).
 
 **Parameters**
@@ -267,7 +267,7 @@ $$
 
 ISO 3746:2010 Eq. (16)/(17) and ISO 3741:2010 Eq. (22)/(23) print the
 same pair. Both modes require at least five events (clause 8.3.1); fewer
-are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning).
+are accepted with a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning).
 
 **Parameters**
 
@@ -318,7 +318,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | `"hemisphere"`, the one measurement surface with a coordinate table. A box, the `"box"` that [`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure) and [`sound_energy_pressure`](/phonometry/reference/api/power/sound-power/#sound_energy_pressure) take, is not offered: ISO 3744:2010 Annex C places its key positions by subdividing its faces, and no table gives them. |
+| `surface` | `"hemisphere"`, the one measurement surface with a coordinate table. A box, the `"box"` that [`sound_power_pressure`](/reference/api/power/sound-power/#sound_power_pressure) and [`sound_energy_pressure`](/reference/api/power/sound-power/#sound_energy_pressure) take, is not offered: ISO 3744:2010 Annex C places its key positions by subdividing its faces, and no table gives them. |
 | `radius` | Hemisphere radius `r`, in metres. |
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `tones` | Engineering grade over one plane only: True reads Table B.1 of ISO 3744, False its Table B.2. The survey grade and the arrays for two and three planes have one table each and do not read it. |
@@ -351,8 +351,8 @@ Draw a microphone position array on its measurement surface, in 3-D.
 Numbered microphone points with a wireframe of the hemisphere (or full
 sphere when positions dip below the reflecting plane) of the given
 `radius`; pairs with
-[`measurement_positions`](/phonometry/reference/api/power/sound-power/#measurement_positions) and
-[`precision_positions`](/phonometry/reference/api/power/sound-power-anechoic/#precision_positions), whose `(N, 3)`
+[`measurement_positions`](/reference/api/power/sound-power/#measurement_positions) and
+[`precision_positions`](/reference/api/power/sound-power-anechoic/#precision_positions), whose `(N, 3)`
 arrays it accepts directly.
 
 **Parameters**
@@ -416,7 +416,7 @@ $a = 2.2560 \times 10^{-5}$ m^-1 and $b = 5.2553$.
 | `static_pressure_kpa` | Static pressure `ps` at the test, in kilopascals; give this or `altitude`. |
 | `altitude` | Altitude `Ha` of the test site, in metres, from which `ps` is estimated by Eq. (G.2) when it was not measured. |
 
-**Returns:** [`ReferenceAtmosphereCorrection`](/phonometry/reference/api/power/sound-power/#referenceatmospherecorrection) with `c1`, `c2`, their `total` and the static pressure used.
+**Returns:** [`ReferenceAtmosphereCorrection`](/reference/api/power/sound-power/#referenceatmospherecorrection) with `c1`, `c2`, their `total` and the static pressure used.
 
 **Raises**
 
@@ -468,7 +468,7 @@ RoomEnvironment(
 Room data behind the environmental correction `K2` (ISO 3744 Annex A).
 
 The three routes the standard offers to the equivalent sound absorption area
-`A` of the test room, in the order [`environmental_correction`](/phonometry/reference/api/power/sound-power/#environmental_correction) tries
+`A` of the test room, in the order [`environmental_correction`](/reference/api/power/sound-power/#environmental_correction) tries
 them: `A` itself, the Sabine reverberation time with the room volume
 ($A = 0.16 V / T$, Eq. A.3) and the mean absorption coefficient with
 the area of the room boundaries ($A = \alpha S_v$, Eq. A.7). Each
@@ -529,9 +529,9 @@ L_J = 10 \log_{10}\!\left[ \frac{1}{N_\mathrm{M}} \sum_i 10^{0.1 L'_{Ei(\mathrm{
 $$
 
 $K_1$ follows Eq. (21) with the same criteria as the time-averaged
-path ([`background_noise_correction`](/phonometry/reference/api/power/sound-power/#background_noise_correction): 6 dB to 15 dB engineering, 3 dB
+path ([`background_noise_correction`](/reference/api/power/sound-power/#background_noise_correction): 6 dB to 15 dB engineering, 3 dB
 to 10 dB survey, clamped below the lower criterion with a
-[`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning)), and $K_2$ the room data in `room`
+[`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning)), and $K_2$ the room data in `room`
 (Annex A). The background is the time-averaged level the standard has
 measured over the same integration time $T$ as the events, and it
 is compared as its exposure over that $T$,
@@ -539,14 +539,14 @@ $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$ (clause 3.4 NOTE 1), so
 that the energies Eq. (21) subtracts share one reference; this is why
 `integration_time` is required whenever `background_levels` is given.
 The surface area `S` comes from the geometry exactly as in
-[`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure), and so do the minimum number of positions,
+[`sound_power_pressure`](/reference/api/power/sound-power/#sound_power_pressure), and so do the minimum number of positions,
 the A-weighted total (Annex E, Eq. E.2) and the expanded uncertainty,
 which clause 9.1 Eq. (24) makes the same for $L_J$ as for
 $L_W$.
 
 The level holds for the meteorological conditions of the test; above
 500 m of altitude or below 10 degrees C add the Annex G correction of
-[`reference_atmosphere_correction`](/phonometry/reference/api/power/sound-power/#reference_atmosphere_correction) (Eq. G.3).
+[`reference_atmosphere_correction`](/reference/api/power/sound-power/#reference_atmosphere_correction) (Eq. G.3).
 
 **Parameters**
 
@@ -562,11 +562,11 @@ The level holds for the meteorological conditions of the test; above
 | `background_levels` | `(NM, NB)` time-averaged background levels for `K1`, or a single spectrum `(NB,)` / `(1, NB)` broadcast to every position; measured over the same interval as the events. |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
-| `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/phonometry/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
+| `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
 | `grade` | `'engineering'` (ISO 3744) or `'survey'` (ISO 3746). |
 | `sigma_omc_db` | `sigma_omc` (dB), operating/mounting instability. |
 
-**Returns:** [`SoundEnergyResult`](/phonometry/reference/api/power/sound-power/#soundenergyresult).
+**Returns:** [`SoundEnergyResult`](/reference/api/power/sound-power/#soundenergyresult).
 
 **Raises**
 
@@ -624,11 +624,11 @@ sound power level is combined via ISO 3744 Annex E.
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `background_levels` | `(NM, NB)` background levels for `K1`, or a single spectrum `(NB,)` / `(1, NB)` broadcast to every position. |
 | `frequencies` | Band mid-band frequencies (Hz) for the A-weighted total. |
-| `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/phonometry/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
+| `room` | Room absorption data behind `K2` ([`RoomEnvironment`](/reference/api/power/sound-power/#roomenvironment)); `None` is a room with no data at all, i.e. a free field ($K_2 = 0$). |
 | `grade` | `'engineering'` (ISO 3744) or `'survey'` (ISO 3746). |
 | `sigma_omc_db` | `sigma_omc` (dB), operating/mounting instability. |
 
-**Returns:** [`SoundPowerResult`](/phonometry/reference/api/power/sound-power/#soundpowerresult).
+**Returns:** [`SoundPowerResult`](/reference/api/power/sound-power/#soundpowerresult).
 
 **Raises**
 
@@ -790,7 +790,7 @@ $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ (ISO 4871 clause 3.15).
 | `basic_standards` | Basic emission standard(s) used (clause 5 b). |
 | `form` | `"dual-number"` (default) or `"single-number"`. |
 
-**Returns:** A single-mode [`NoiseEmissionDeclaration`](/phonometry/reference/api/power/declaration/#noiseemissiondeclaration).
+**Returns:** A single-mode [`NoiseEmissionDeclaration`](/reference/api/power/declaration/#noiseemissiondeclaration).
 
 **Raises**
 
@@ -853,7 +853,7 @@ applied background (`K1`) and environmental (`K2`) corrections.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the energy-averaged level `Lp'` and the background (`K1`) and environmental (`K2`) corrections. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

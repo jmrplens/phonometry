@@ -192,9 +192,9 @@ geometry, balance a passive or active sonar equation and invert it for a
 detection range, evaluate the seabed reflection loss that sets those regimes,
 and build an ambient-noise spectrum from wind, thermal and ship-traffic terms.
 The reference levels every result is expressed in are on the
-[Underwater acoustics](/phonometry/underwater/underwater-acoustics/) page; when
+[Underwater acoustics](/underwater/underwater-acoustics/) page; when
 refraction and boundaries decide the answer, the
-[solvers](/phonometry/underwater/underwater-solvers/) take over.
+[solvers](/underwater/underwater-solvers/) take over.
 
 ## Propagation loss
 
@@ -415,7 +415,7 @@ gradient grows in proportion to frequency (Eq. 9.53) and
 
 Because the flux result is *incoherent* it describes the range-averaged field,
 which is exactly what makes it a reference for the numerical solvers of
-[Underwater propagation solvers](/phonometry/underwater/underwater-solvers/). Set
+[Underwater propagation solvers](/underwater/underwater-solvers/). Set
 the critical angle to 90° and the loss gradient to zero and the cylindrical
 branch reduces to $F = \pi/(rH)$, the exact many-mode limit of an ideal
 waveguide; the depth- and range-averaged normal-mode loss lands on it to within
@@ -446,7 +446,7 @@ Ainslie's printed Equation (9.57) for $r_\mathrm{MS}$ reads $k^2H_\mathrm{e}^3/(
 own derivation rule, equating Equations (9.47) and (9.56) exactly as printed,
 gives $k^2H_\mathrm{e}^2H/(9\pi\eta)$, smaller by $\pi H_\mathrm{e}/H$. The library implements
 the derivation-consistent form; see
-[Errata found in published sources](/phonometry/reference/errata/).
+[Errata found in published sources](/reference/errata/).
 :::
 
 ## Speed of sound in sea water
@@ -1162,7 +1162,7 @@ the choice of spreading law. At that point the field has to be computed,
 and the normal-mode, ray-tracing, Gaussian-beam and parabolic-equation
 solvers of the module, together with the guidance for choosing between them
 and these closed forms, have their own guide:
-[Underwater propagation solvers](/phonometry/underwater/underwater-solvers/).
+[Underwater propagation solvers](/underwater/underwater-solvers/).
 
 ## What this guide covers
 
@@ -1197,7 +1197,7 @@ turbulence band and any built-in distant-shipping model; supply a shipping
 spectrum yourself, for instance from `ship_source_spectrum` above. The
 numerical field solvers (`normal_modes`, `ray_trace`, `gaussian_beams`,
 `parabolic_equation`) are covered in [Underwater propagation
-solvers](/phonometry/underwater/underwater-solvers/).
+solvers](/underwater/underwater-solvers/).
 </ScopeClaim>
 </Scope>
 
@@ -1205,10 +1205,10 @@ solvers](/phonometry/underwater/underwater-solvers/).
 
 ## See also
 
-- [Underwater propagation solvers](/phonometry/underwater/underwater-solvers/):
+- [Underwater propagation solvers](/underwater/underwater-solvers/):
   the normal-mode, ray-tracing, Gaussian-beam and parabolic-equation solvers
   for the cases where these closed forms are not enough, and the
   model-selection guidance.
-- API reference: [`underwater.propagation.closed_form`](/phonometry/reference/api/underwater/closed-form/) and [`underwater.propagation.sound_speed`](/phonometry/reference/api/underwater/sound-speed/).
+- API reference: [`underwater.propagation.closed_form`](/reference/api/underwater/closed-form/) and [`underwater.propagation.sound_speed`](/reference/api/underwater/sound-speed/).
 
 </SeeAlso>

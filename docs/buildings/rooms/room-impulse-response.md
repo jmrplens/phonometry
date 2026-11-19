@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/room-impulse-response.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/room-impulse-response/
 
 # Measuring the Room Impulse Response
 
@@ -711,7 +711,7 @@ analysis of the
 - [Conformance report](../../CONFORMANCE.md):
   the closed-form deconvolution check this acquisition is validated against, a
   sweep that recovers a known response.
-- API reference: [`room`: impulse response](https://docs.jmrp.io/phonometry/reference/api/rooms/impulse-response/).
+- API reference: [`room`: impulse response](https://phonometry.dev/reference/api/rooms/impulse-response/).
 - Theory: [Impulse response and room-acoustic parameters](../../reference/theory/rooms-buildings.md#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the Schroeder backward integration and the deconvolution the sweep method rests on.
 
 ## Quick answers

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/metrology/compliance-verification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/metrology/compliance-verification/
 
 # Compliance and verification
 
@@ -503,13 +503,13 @@ The same honesty applies to this library, in both directions:
   IEC 61672-3 verdict on a laboratory's results, clause by clause.
 - [Conformance report](../../CONFORMANCE.md): the published table
   this page teaches how to read.
-- API reference: [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/),
-  [`filters.periodic_tests`](https://docs.jmrp.io/phonometry/reference/api/filters/periodic-tests/),
-  [`filters.weighting_compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting-compliance/),
-  [`emission.intensity_compliance`](https://docs.jmrp.io/phonometry/reference/api/power/intensity-compliance/),
-  [`metrology.conformance`](https://docs.jmrp.io/phonometry/reference/api/metrology/conformance/),
-  [`metrology.sound_calibrator`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-calibrator/)
-  and [`metrology.sound_level_meter`](https://docs.jmrp.io/phonometry/reference/api/metrology/sound-level-meter/).
+- API reference: [`filters.compliance`](https://phonometry.dev/reference/api/filters/compliance/),
+  [`filters.periodic_tests`](https://phonometry.dev/reference/api/filters/periodic-tests/),
+  [`filters.weighting_compliance`](https://phonometry.dev/reference/api/filters/weighting-compliance/),
+  [`emission.intensity_compliance`](https://phonometry.dev/reference/api/power/intensity-compliance/),
+  [`metrology.conformance`](https://phonometry.dev/reference/api/metrology/conformance/),
+  [`metrology.sound_calibrator`](https://phonometry.dev/reference/api/metrology/sound-calibrator/)
+  and [`metrology.sound_level_meter`](https://phonometry.dev/reference/api/metrology/sound-level-meter/).
 
 ## Quick answers
 

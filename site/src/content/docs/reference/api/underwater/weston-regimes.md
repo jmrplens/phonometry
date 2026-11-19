@@ -25,14 +25,14 @@ reference for any numerical propagation model:
 Everything here is implemented clean-room from Ainslie, *Principles of Sonar
 Performance Modelling* (Springer 2010), §9.1.1.2 (printed pp. 452-458):
 Equations (9.42) to (9.61) and the seabed properties of Table 9.1
-([`WESTON_SEABEDS`](/phonometry/reference/api/underwater/weston-regimes/#weston_seabeds)). The quantity computed is Ainslie's **propagation
+([`WESTON_SEABEDS`](/reference/api/underwater/weston-regimes/#weston_seabeds)). The quantity computed is Ainslie's **propagation
 factor** `F` (units m⁻²), reported as the propagation loss
 $\mathrm{PL} = -10 \log_{10} F$ dB re 1 m², which reduces to spherical
 spreading for a point source in free water.
 
 The regime formulae are energy-flux (incoherent) results: they describe the
 range-averaged field, not its modal interference. That is exactly what makes
-them a usable cross-check for [`phonometry.underwater.propagation.numerical`](/phonometry/reference/api/underwater/numerical/):
+them a usable cross-check for [`phonometry.underwater.propagation.numerical`](/reference/api/underwater/numerical/):
 the range average of a normal-mode or parabolic-equation field over many
 interference cycles converges on the cylindrical-spreading law, with
 $\psi_\mathrm{c} = \pi/2$ for a totally reflecting (pressure-release) bottom.
@@ -68,7 +68,7 @@ $\psi_\mathrm{c} = \arccos(c_\mathrm{w}/c_{\mathrm{sed}})$, in radians.
 A seabed slower than the water ($c_{\mathrm{sed}} \le c_\mathrm{w}$, e.g.
 mud) has **no** critical angle; the function then returns `0`, which
 correctly switches the reflection-loss gradient to the
-refracting-sediment branch of [`reflection_loss_gradient`](/phonometry/reference/api/underwater/weston-regimes/#reflection_loss_gradient).
+refracting-sediment branch of [`reflection_loss_gradient`](/reference/api/underwater/weston-regimes/#reflection_loss_gradient).
 
 **Parameters**
 
@@ -109,7 +109,7 @@ seabed. Only meaningful for a seabed with a critical angle.
 | :--- | :--- |
 | `water_depth` | Water-column depth `H`, in metres. |
 | `frequency_hz` | Acoustic frequency, in Hz. |
-| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
+| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/reference/api/underwater/weston-regimes/#westonseabed). |
 | `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 
 **Returns:** The effective depth `He`, in metres.
@@ -172,7 +172,7 @@ Eq. 9.45). Two branches:
 
 | Name | Description |
 | :--- | :--- |
-| `seabed` | `"sand"`, `"mud"` or an explicit [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
+| `seabed` | `"sand"`, `"mud"` or an explicit [`WestonSeabed`](/reference/api/underwater/weston-regimes/#westonseabed). |
 | `frequency_hz` | Acoustic frequency, in Hz; required only for the refracting branch ($c' > 0$). |
 
 **Returns:** The reflection loss gradient $\eta$, in Np/rad.
@@ -206,7 +206,7 @@ and ducted propagation does not occur.
 | Name | Description |
 | :--- | :--- |
 | `water_depth` | Water-column depth `H`, in metres. |
-| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
+| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/reference/api/underwater/weston-regimes/#westonseabed). |
 | `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 
 **Returns:** The cut-off frequency, in Hz.
@@ -239,7 +239,7 @@ Propagation loss across Weston's four shallow-water regimes.
 
 Assembles the piecewise loss from Ainslie's Equations (9.42), (9.49) and
 (9.54), switching regime at the boundaries of
-[`weston_regime_boundaries`](/phonometry/reference/api/underwater/weston-regimes/#weston_regime_boundaries), and returns each regime's own law over the
+[`weston_regime_boundaries`](/reference/api/underwater/weston-regimes/#weston_regime_boundaries), and returns each regime's own law over the
 whole range grid so the transitions can be drawn.
 
 **Parameters**
@@ -249,14 +249,14 @@ whole range grid so the transitions can be drawn.
 | `range_m` | Range(s) from the source, in metres (scalar or array, strictly positive). |
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `water_depth` | Water-column depth `H`, in metres. |
-| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
+| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/reference/api/underwater/weston-regimes/#westonseabed). |
 | `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 | `source_depth` | Source depth `z0`, in metres; defaults to `H/2` (used only by the single-mode formula). |
 | `receiver_depth` | Receiver depth `z`, in metres; defaults to `H/2`. |
 | `critical_angle_deg` | Override $\psi_\mathrm{c}$, in degrees (`90` for an ideal totally reflecting waveguide). |
 | `reflection_loss_gradient_value_np_per_rad` | Override $\eta$, in Np/rad (`0` for a lossless bottom: no mode stripping, no single-mode regime). |
 
-**Returns:** A [`WestonPropagationResult`](/phonometry/reference/api/underwater/weston-regimes/#westonpropagationresult).
+**Returns:** A [`WestonPropagationResult`](/reference/api/underwater/weston-regimes/#westonpropagationresult).
 
 **Raises**
 
@@ -287,12 +287,12 @@ Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 | :--- | :--- |
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `water_depth` | Water-column depth `H`, in metres. |
-| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
+| `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/reference/api/underwater/weston-regimes/#westonseabed). |
 | `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 | `critical_angle_deg` | Override the seabed critical angle $\psi_\mathrm{c}$, in degrees. Use `90` for the ideal totally reflecting waveguide. |
 | `reflection_loss_gradient_value_np_per_rad` | Override $\eta$, in Np/rad. Use `0` for a lossless bottom (no mode stripping, no single-mode regime). |
 
-**Returns:** A [`WestonRegimeBoundaries`](/phonometry/reference/api/underwater/weston-regimes/#westonregimeboundaries).
+**Returns:** A [`WestonRegimeBoundaries`](/reference/api/underwater/weston-regimes/#westonregimeboundaries).
 
 **Raises**
 
@@ -362,7 +362,7 @@ Weston regime propagation loss versus range.
 | `mode_stripping` | Mode-stripping loss (Eq. 9.49) at every range, dB (`nan` when the bottom is lossless: without reflection loss there is nothing to strip). |
 | `single_mode` | Single-mode loss (Eq. 9.54) at every range, in dB. |
 | `multipath` | Loss from the continuous multipath integral (Eq. 9.46), which joins the cylindrical and mode-stripping regimes smoothly, in dB. |
-| `boundaries` | The [`WestonRegimeBoundaries`](/phonometry/reference/api/underwater/weston-regimes/#westonregimeboundaries) in force. |
+| `boundaries` | The [`WestonRegimeBoundaries`](/reference/api/underwater/weston-regimes/#westonregimeboundaries) in force. |
 | `frequency` | Acoustic frequency, in Hz. |
 | `water_depth` | Water-column depth `H`, in metres. |
 | `source_depth` | Source depth `z0`, in metres. |
@@ -395,7 +395,7 @@ Plot the composite loss with each regime's law and the boundaries.
 
 *property*
 
-The regime in force at each range, one of [`WESTON_REGIMES`](/phonometry/reference/api/underwater/weston-regimes/#weston_regimes).
+The regime in force at each range, one of [`WESTON_REGIMES`](/reference/api/underwater/weston-regimes/#weston_regimes).
 
 Read from `range_m` and `boundaries`: each regime holds
 from its own boundary onwards, the boundary itself included.

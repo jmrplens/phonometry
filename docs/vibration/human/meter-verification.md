@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/human/meter-verification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/meter-verification/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/human/meter-verification/
 
 # Verifying a human-vibration meter
 
@@ -1548,7 +1548,7 @@ ends.
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.
 - API reference:
-  [`vibration.human.instrumentation`](https://docs.jmrp.io/phonometry/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](https://phonometry.dev/reference/api/vibration/instrumentation/).
 
 ## References
 

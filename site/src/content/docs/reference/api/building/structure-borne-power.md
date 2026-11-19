@@ -63,14 +63,14 @@ source):
 - the **equivalent free velocity level** (Formula 18, dB re `1e-9 m/s`)
   from the high-mobility plate, and the **source mobility** from both
   (Formula 19). `L_Wsn` plus the mobility corrections of EN 12354-5
-  Annex I (see [`phonometry.building.prediction.installed_structure_borne`](/phonometry/reference/api/building/installed-structure-borne/)) close
+  Annex I (see [`phonometry.building.prediction.installed_structure_borne`](/reference/api/building/installed-structure-borne/)) close
   the EN 15657 -> EN 12354-5 chain.
 
 The source-side free velocity of ISO 9611:1996 is the direct-measurement
 counterpart: velocity levels re $v_0 = 5 \cdot 10^{-8}$ m/s
 (clause 7), averaged over
 positions with the energy mean of its equation (9), implemented by
-[`mean_free_velocity_level`](/phonometry/reference/api/building/structure-borne-power/#mean_free_velocity_level).
+[`mean_free_velocity_level`](/reference/api/building/structure-borne-power/#mean_free_velocity_level).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -103,14 +103,14 @@ with the characteristic mobility of the standard 10 cm concrete reception
 plate $Y_{\mathrm{R},\infty,\mathrm{low}} = 5 \cdot 10^{-6}$ m/(N.s) (clause 7.2.4) and
 $Y_0 = 1$ m/(N.s). This is the plate-independent source power level
 `L_Ws,n` that EN 12354-5 consumes (its Annex I mobility correction
-[`phonometry.building.installed_power_from_reception_plate`](/phonometry/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate) then
+[`phonometry.building.installed_power_from_reception_plate`](/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate) then
 refers it to the actual receiver).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `blocked_force_level` | Equivalent blocked force level `L_Fb,eq` (per band), in dB re 1e-6 N (see [`equivalent_blocked_force_level`](/phonometry/reference/api/building/structure-borne-power/#equivalent_blocked_force_level)). |
+| `blocked_force_level` | Equivalent blocked force level `L_Fb,eq` (per band), in dB re 1e-6 N (see [`equivalent_blocked_force_level`](/reference/api/building/structure-borne-power/#equivalent_blocked_force_level)). |
 | `characteristic_mobility` | `Y_R,inf,low`, in m/(N.s) (Default: 5e-6, clause 7.2.4). |
 
 **Returns:** The characteristic power level `L_Wsn`, in dB re 1 pW. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -158,7 +158,7 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 
 | Name | Description |
 | :--- | :--- |
-| `power_level` | Injected power level `L_Ws,low` (per band), in dB re 1 pW (see [`structure_borne_power_level`](/phonometry/reference/api/building/structure-borne-power/#structure_borne_power_level)). |
+| `power_level` | Injected power level `L_Ws,low` (per band), in dB re 1 pW (see [`structure_borne_power_level`](/reference/api/building/structure-borne-power/#structure_borne_power_level)). |
 | `plate_mobility` | Equivalent plate mobility `Y_R,low,eq` (per band), in m/(N.s); complex values use their real part (Formula 16). |
 
 **Returns:** The equivalent blocked force level `L_Fb,eq`, in dB re 1e-6 N. A `float` when `power_level` and `plate_mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
@@ -233,7 +233,7 @@ free-velocity levels measured at the `N` contact/attachment points of
 one direction `x`, each in dB re the ISO 9611 free-velocity reference
 $v_0 = 5 \cdot 10^{-8}$ m/s (clause 7). The arithmetic is the
 energetic average
-(identical to EN 15657 Formula 12, [`spatial_mean_velocity_level`](/phonometry/reference/api/building/structure-borne-power/#spatial_mean_velocity_level));
+(identical to EN 15657 Formula 12, [`spatial_mean_velocity_level`](/reference/api/building/structure-borne-power/#spatial_mean_velocity_level));
 only the reference differs.
 
 **Parameters**
@@ -319,14 +319,14 @@ quantities.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_level` | Spatial mean plate velocity level `L_v` (per band), in dB re 1e-9 m/s (see [`spatial_mean_velocity_level`](/phonometry/reference/api/building/structure-borne-power/#spatial_mean_velocity_level)). |
+| `velocity_level` | Spatial mean plate velocity level `L_v` (per band), in dB re 1e-9 m/s (see [`spatial_mean_velocity_level`](/reference/api/building/structure-borne-power/#spatial_mean_velocity_level)). |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or per band). |
 | `mass_per_area` | Plate mass per unit area `m`, in kg/m^2 (> 0). |
 | `area` | Plate area `S`, in m^2 (> 0). |
 | `loss_factor` | Plate loss factor `eta` (per band), or `None` to derive it from `reverberation_time`. |
 | `reverberation_time` | Structural reverberation time `Ts`, in s, used when `loss_factor` is `None`. |
 
-**Returns:** The [`StructureBornePowerResult`](/phonometry/reference/api/building/structure-borne-power/#structurebornepowerresult).
+**Returns:** The [`StructureBornePowerResult`](/reference/api/building/structure-borne-power/#structurebornepowerresult).
 
 **Raises**
 
@@ -479,10 +479,10 @@ With the EN 15657 reference $v_0 = 10^{-9}$ m/s the last term is
 This is the power injected into *this particular plate*, not a source
 descriptor: do **not** feed it into EN 12354-5 as the characteristic
 level `L_Ws,c`. Convert it first via
-[`equivalent_blocked_force_level`](/phonometry/reference/api/building/structure-borne-power/#equivalent_blocked_force_level) (Formula 15) and
-[`characteristic_reception_plate_power`](/phonometry/reference/api/building/structure-borne-power/#characteristic_reception_plate_power) (Formula 17), then apply
+[`equivalent_blocked_force_level`](/reference/api/building/structure-borne-power/#equivalent_blocked_force_level) (Formula 15) and
+[`characteristic_reception_plate_power`](/reference/api/building/structure-borne-power/#characteristic_reception_plate_power) (Formula 17), then apply
 the EN 12354-5 Annex I mobility correction
-([`phonometry.building.installed_power_from_reception_plate`](/phonometry/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)).
+([`phonometry.building.installed_power_from_reception_plate`](/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)).
 :::
 
 **Parameters**
@@ -522,8 +522,8 @@ Structure-borne sound power injected into a reception plate (EN 15657).
 
 The power level is specific to the measured plate; derive the
 plate-independent source quantities with
-[`equivalent_blocked_force_level`](/phonometry/reference/api/building/structure-borne-power/#equivalent_blocked_force_level) and
-[`characteristic_reception_plate_power`](/phonometry/reference/api/building/structure-borne-power/#characteristic_reception_plate_power) before using EN 12354-5.
+[`equivalent_blocked_force_level`](/reference/api/building/structure-borne-power/#equivalent_blocked_force_level) and
+[`characteristic_reception_plate_power`](/reference/api/building/structure-borne-power/#characteristic_reception_plate_power) before using EN 12354-5.
 
 **Attributes**
 
@@ -591,7 +591,7 @@ EN 12354-5.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the source equipment, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared upper limit on the total `L_Ws` (lower is better). The plate mass and area come from the result itself. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the source equipment, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared upper limit on the total `L_Ws` (lower is better). The plate mass and area come from the result itself. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the plate loss factor `eta` column. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

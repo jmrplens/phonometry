@@ -48,7 +48,7 @@ standardized test signal.
 the speech modulation a room or sound system preserves) while the SII
 predicts intelligibility from *audibility*: how much of the speech spectrum
 clears the noise and the hearing threshold at the listener's ear. For the
-latter, see the [Speech Intelligibility Index guide](/phonometry/perception/speech/speech-intelligibility/).
+latter, see the [Speech Intelligibility Index guide](/perception/speech/speech-intelligibility/).
 :::
 
 ## How do I compute the IEC 60268-16 Speech Transmission Index in Python?
@@ -556,7 +556,7 @@ transfer index table beside the per-band MTI bars (the result's own `.plot()`),
 the boxed `STI = X` single number with the Annex F qualification band, an
 optional verdict row and a footer with the fixed disclaimer. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report);
+[ISO 717 insulation fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report);
 a supplied `requirement` is read as the minimum required STI (a higher STI
 passes). Rendering needs reportlab and, for the figure the fiche embeds,
 matplotlib (`pip install "phonometry[report,plot]"`); only `engine="reportlab"`
@@ -840,17 +840,17 @@ nor ruled out, because that text could not be obtained.
 
 ## See also
 
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the measured impulse response the
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the measured impulse response the
   indirect method consumes, and the open-plan metrics (ISO 3382-3) built on
   per-position STI.
-- [Speech Intelligibility Index](/phonometry/perception/speech/speech-intelligibility/): the
+- [Speech Intelligibility Index](/perception/speech/speech-intelligibility/): the
   audibility-based ANSI S3.5 index that complements the STI.
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/) and
-  [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): loudness, sharpness, tonality and
+- [Loudness](/perception/psychoacoustics/loudness/) and
+  [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): loudness, sharpness, tonality and
   roughness of the received sound.
-- [Theory](/phonometry/reference/theory/perception/): the modulation-transfer derivation and the $m$ ↔ STI
+- [Theory](/reference/theory/perception/): the modulation-transfer derivation and the $m$ ↔ STI
   mapping.
-- API reference: [`speech.sti`](/phonometry/reference/api/speech/sti/).
-- Theory: [Modulation transfer and STI](/phonometry/reference/theory/perception/#modulation-transfer-and-sti-iec-60268-16): the modulation transfer function, why m is a ratio of modulation depths, and how the octave-band m matrix collapses to one index.
+- API reference: [`speech.sti`](/reference/api/speech/sti/).
+- Theory: [Modulation transfer and STI](/reference/theory/perception/#modulation-transfer-and-sti-iec-60268-16): the modulation transfer function, why m is a ratio of modulation depths, and how the octave-band m matrix collapses to one index.
 
 </SeeAlso>

@@ -198,7 +198,7 @@ print(round(e.directivity_index, 2))   # 2.66
 The note prints 77.9° and 282.1° where the construction gives 77.85° and
 282.15°. All the other pairs of the printed list sum to 180.0° about the grazing
 direction, and 77.9° + 102.2° is 180.1°: the two are in the [errata
-register](/phonometry/reference/errata/). A tenth of a degree does not move a
+register](/reference/errata/). A tenth of a degree does not move a
 directivity factor, but the list is not symmetric as printed.
 
 ## 4. The random-incidence sensitivity level, band by band
@@ -361,7 +361,7 @@ within a one-third-octave band of 4.11 is left to the caller, who passes the
 averaged level of each band. The corrections of IEC 62585 that bring a
 measurement made with a sound calibrator, a comparison coupler or an
 electrostatic actuator to the meter's free-field response are on [their own
-page](/phonometry/signals/metrology/free-field-corrections/); its corrections
+page](/signals/metrology/free-field-corrections/); its corrections
 for the case, the microphone and the windscreen (clauses 9 to 11) are not
 implemented.
 </ScopeClaim>
@@ -371,21 +371,21 @@ implemented.
 
 ## See also
 
-- [Free-field corrections](/phonometry/signals/metrology/free-field-corrections/):
+- [Free-field corrections](/signals/metrology/free-field-corrections/):
   IEC 62585, the corrections that bring a meter on a calibrator, a coupler or
   an actuator to its free-field response, for a meter with a free-field
   microphone.
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): the
+- [Calibration and dBFS](/signals/metrology/calibration/): the
   calibrator tone that sets the pressure sensitivity every level of a meter
   starts from.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](/signals/metrology/compliance-verification/):
   what the IEC 61672-1 class of a meter asserts, and which of its tests the
   library runs.
-- [Microphone characterisation](/phonometry/devices/electroacoustics/microphones/):
+- [Microphone characterisation](/devices/electroacoustics/microphones/):
   the IEC 60268-4 directivity index of a microphone, the same $10\lg\gamma$ for
   a transducer on its own.
-- [Build a sound level meter](/phonometry/signals/sound-level-meter/): the
+- [Build a sound level meter](/signals/sound-level-meter/): the
   whole measurement chain on one runnable page.
-- API reference: [`metrology.random_incidence`](/phonometry/reference/api/metrology/random-incidence/).
+- API reference: [`metrology.random_incidence`](/reference/api/metrology/random-incidence/).
 
 </SeeAlso>

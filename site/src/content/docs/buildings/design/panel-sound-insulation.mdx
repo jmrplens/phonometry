@@ -82,8 +82,8 @@ where a corrugated or ribbed sheet has two critical frequencies and therefore a
 coincidence *range* instead of a dip (Vigran 6.5.3); and the **wall-tie bridge**
 that limits a masonry cavity wall whatever its leaves are worth (Hopkins
 4.3.5.4). The measured counterparts these predictions feed live in
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/)
-and [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/).
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/)
+and [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/).
 
 **A note on two symbols before the formulae start.** The sound reduction index
 $R$ of the European standards and the transmission loss $TL$ of the North
@@ -222,8 +222,8 @@ library as `laboratory_total_loss_factor`. For this 15 kg/m² pane that estimate
 is 0.011 at 500 Hz, barely above the internal value; for a 484 kg/m² concrete
 floor it is 0.055, five times the material figure. The measured route is the
 structural reverberation time and $\eta = 2.2/(fT_\mathrm{s})$, the same quantity the
-[ISO 10848](/phonometry/buildings/insulation/flanking-lab/) and
-[EN 15657](/phonometry/buildings/design/structure-borne-power/) guides measure.
+[ISO 10848](/buildings/insulation/flanking-lab/) and
+[EN 15657](/buildings/design/structure-borne-power/) guides measure.
 The stake is worth knowing: the dip depth carries $10\lg\eta$, so a factor of
 three in $\eta$ moves the coincidence region by 4.8 dB and changes nothing below
 $f_\mathrm{c}/2$.
@@ -277,7 +277,7 @@ plt.show()
 </details>
 
 The clip below watches coincidence happen in a 2D
-[elastic FDTD field](/phonometry/simulation/elastic-waves/): a 10 mm
+[elastic FDTD field](/simulation/elastic-waves/): a 10 mm
 steel plate immersed in air, driven by a sustained plane wave at 45 degrees,
 with both frequencies picked from the library's `coincidence_frequency`. At
 `fc/2` = 602 Hz the measured transmission lands on the oblique mass law; at
@@ -390,7 +390,7 @@ print(res.transmission_loss.round(1))
 The material does not have to be a name. `material=` also takes a
 `PlateauMaterial` row: one of `solids.PUBLISHED_PLATEAU_DATA`, which draws
 the same curve as its name, or a row of your own that `io.read_catalogue`
-read from a data sheet ([Your own catalogues](/phonometry/io/material-catalogues/)).
+read from a data sheet ([Your own catalogues](/io/material-catalogues/)).
 A row gives its three numbers only through
 `printed()`, so a sheet that declares its plateau height as a bound ("no
 more than 30 dB") is refused with what it prints rather than drawn at
@@ -602,7 +602,7 @@ $$
 the pair moves as one and follows the mass law of the *combined* mass; above it
 the two mass laws add, boosted by the cavity, until the limiting frequency
 $f_\mathrm{l} = c_0/(2\pi d)$ where the boost saturates at 6 dB (Eq. 7.64). A porous
-fill (any [`PorousMediumResult`](/phonometry/materials/absorbers/porous-absorbers/)) softens
+fill (any [`PorousMediumResult`](/materials/absorbers/porous-absorbers/)) softens
 the cavity and lowers $f_0$.
 
 ```python
@@ -843,7 +843,7 @@ characteristic impedance of air $\rho_0 c_0$, the plate area $S$ and its
 mean-square velocity $\langle v^2 \rangle$ averaged over time and surface, is
 its **radiation efficiency** $\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$
 (Hopkins Eq. 2.198), the radiation factor $\varepsilon$ that [Sound Power from
-Surface Vibration](/phonometry/devices/emission/vibration-sound-power/)
+Surface Vibration](/devices/emission/vibration-sound-power/)
 (ISO 7849) otherwise takes as a measured input. The divisor is the power a large
 baffled piston of the same area and the same mean-square velocity would radiate,
 so $\sigma = 1$ means "as efficient as a piston". And, as the numbers below
@@ -940,7 +940,7 @@ supply the receiver mobility EN 12354-5 needs when no measurement exists.
 `infinite_plate_point_mobility` and `infinite_beam_point_mobility` return the
 same quantities bundled as an ISO 7626 `MobilityResult`, so they plot, convert
 and report like any measured FRF; the
-[mechanical mobility guide](/phonometry/vibration/structural/mechanical-mobility/#5-reference-mobilities-when-nothing-has-been-measured)
+[mechanical mobility guide](/vibration/structural/mechanical-mobility/#5-reference-mobilities-when-nothing-has-been-measured)
 reads them against the SDOF resonator and adds the moment and longitudinal-rod
 cases.
 
@@ -1045,15 +1045,15 @@ need the whole room-plate-cavity-plate-room chain.
 
 ## See also
 
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   assembles predicted or measured element $R$ into the in-situ $R'_\mathrm{w}$.
-- [Sound Power from Surface Vibration (ISO 7849)](/phonometry/devices/emission/vibration-sound-power/):
+- [Sound Power from Surface Vibration (ISO 7849)](/devices/emission/vibration-sound-power/):
   consumes the predicted radiation efficiency as its radiation factor.
-- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/vibration/structural/mechanical-mobility/):
   the measured counterpart of the theoretical point mobilities.
-- [Porous and multilayer absorbers](/phonometry/materials/absorbers/porous-absorbers/): the
+- [Porous and multilayer absorbers](/materials/absorbers/porous-absorbers/): the
   cavity-fill models a double wall consumes.
-- API reference: [`building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](/phonometry/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](/phonometry/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](/phonometry/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](/phonometry/reference/api/vibration/point-mobility/).
-- Theory: [Sound insulation and absorption, predicted](/phonometry/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the mass law, the coincidence dip and the transmission coefficient the panel models return.
+- API reference: [`building.prediction.panel_transmission`](/reference/api/building/panel-transmission/), [`building.prediction.masonry_cavity_wall`](/reference/api/building/masonry-cavity-wall/), [`building.prediction.aperture_transmission`](/reference/api/building/aperture-transmission/), [`vibration`: radiation efficiency](/reference/api/vibration/radiation-efficiency/) and [`vibration.structural.point_mobility`](/reference/api/vibration/point-mobility/).
+- Theory: [Sound insulation and absorption, predicted](/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the mass law, the coincidence dip and the transmission coefficient the panel models return.
 
 </SeeAlso>

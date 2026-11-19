@@ -113,9 +113,9 @@ point.
 | `cavity_length_bounds_m` | Search bounds for the cavity length, in metres. |
 | `end_correction` | Include the resonator radiation end corrections. |
 | `slit_radiation` | Include the slit-to-free-air radiation correction. |
-| `fluid` | State of the air the panel is designed for ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
+| `fluid` | State of the air the panel is designed for ([`Fluid`](/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
 
-**Returns:** A [`CriticalCouplingResult`](/phonometry/reference/api/materials/slow-sound/#criticalcouplingresult). A [`SlowSoundAbsorberWarning`](/phonometry/reference/api/materials/slow-sound/#slowsoundabsorberwarning) is emitted (via `warnings.warn`) if the solver does not reach perfect absorption within tolerance.
+**Returns:** A [`CriticalCouplingResult`](/reference/api/materials/slow-sound/#criticalcouplingresult). A [`SlowSoundAbsorberWarning`](/reference/api/materials/slow-sound/#slowsoundabsorberwarning) is emitted (via `warnings.warn`) if the solver does not reach perfect absorption within tolerance.
 
 **Raises**
 
@@ -162,11 +162,11 @@ EffectiveFluidProperties(
 
 The visco-thermal equivalent fluid of a narrow channel.
 
-What [`slit_effective_properties`](/phonometry/reference/api/materials/slow-sound/#slit_effective_properties) and
-[`rectangular_duct_properties`](/phonometry/reference/api/materials/slow-sound/#rectangular_duct_properties) return: the effective density and the
+What [`slit_effective_properties`](/reference/api/materials/slow-sound/#slit_effective_properties) and
+[`rectangular_duct_properties`](/reference/api/materials/slow-sound/#rectangular_duct_properties) return: the effective density and the
 effective bulk modulus, named, where a `(rho, kappa)` tuple used to be
 unpacked by position, with the names
-[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) gives the same pair.
+[`PorousMediumResult`](/reference/api/materials/porous/#porousmediumresult) gives the same pair.
 
 **Attributes**
 
@@ -219,7 +219,7 @@ Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
 
 With the default `geometry="square"` the neck and cavity are square
 ducts using the effective parameters of
-[`rectangular_duct_properties`](/phonometry/reference/api/materials/slow-sound/#rectangular_duct_properties); the impedance is Appl. Phys. Lett. 2016
+[`rectangular_duct_properties`](/reference/api/materials/slow-sound/#rectangular_duct_properties); the impedance is Appl. Phys. Lett. 2016
 Eq. (A23) with the neck-to-cavity radiation correction of Eq. (A24) and,
 when `slit_height_m` and `lattice_step_m` are supplied, the neck-to-slit
 correction of Eqs. (A25)-(A26) added to the total neck length correction:
@@ -234,7 +234,7 @@ cavity), reducing to Eq. (A22) when `dl = 0`.
 
 With `geometry="slit"` the resonator is two-dimensional (the neck and
 cavity are slit-like ducts spanning the lattice step): the effective
-parameters come from [`slit_effective_properties`](/phonometry/reference/api/materials/slow-sound/#slit_effective_properties) with the neck and
+parameters come from [`slit_effective_properties`](/reference/api/materials/slow-sound/#slit_effective_properties) with the neck and
 cavity widths, the duct sections are `w_n a` and `w_c a`, and the end
 corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 `slit_height_m` and `lattice_step_m` are then required.
@@ -244,12 +244,12 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `resonator` | The [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) geometry. |
+| `resonator` | The [`HelmholtzResonator`](/reference/api/materials/slow-sound/#helmholtzresonator) geometry. |
 | `slit_height_m` | Slit height `h` for the neck-to-slit correction; if `None` that correction is omitted (`"square"` only). |
 | `lattice_step_m` | Lattice step `a` for the neck-to-slit correction. |
 | `end_correction` | Include the radiation end corrections (default True). |
 | `geometry` | `"square"` (default) for square-duct necks and cavities, `"slit"` for the two-dimensional resonator model. |
-| `fluid` | State of the air in the neck and cavity ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
+| `fluid` | State of the air in the neck and cavity ([`Fluid`](/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 | `n_sum_terms` | Transverse modes kept per axis in the duct series. |
 
 **Returns:** Complex acoustic impedance `Z_HR`, in Pa s/m3, shaped like `frequency`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -321,7 +321,7 @@ dimensions (neck side and length, cavity side and length) dimensioned.
 
 | Name | Description |
 | :--- | :--- |
-| `resonator` | A [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator). |
+| `resonator` | A [`HelmholtzResonator`](/reference/api/materials/slow-sound/#helmholtzresonator). |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the cavity rectangle. |
@@ -354,7 +354,7 @@ with `period_m` `d`; rigid back wall at the right.
 
 | Name | Description |
 | :--- | :--- |
-| `resonators` | The resonator chain of [`slit_helmholtz_absorber`](/phonometry/reference/api/materials/slow-sound/#slit_helmholtz_absorber) (one per lattice step, or a single resonator reused for all steps). |
+| `resonators` | The resonator chain of [`slit_helmholtz_absorber`](/reference/api/materials/slow-sound/#slit_helmholtz_absorber) (one per lattice step, or a single resonator reused for all steps). |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `slit_height_m` | Slit height `h`, in metres. |
 | `lattice_step_m` | Lattice step `a`, in metres. |
@@ -414,10 +414,10 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `side_m` | Square-duct side length, in metres. |
-| `fluid` | State of the air in the duct ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
+| `fluid` | State of the air in the duct ([`Fluid`](/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 | `n_sum_terms` | Transverse modes kept per axis (default 40). |
 
-**Returns:** `rho` and `kappa`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/phonometry/reference/api/materials/slow-sound/#effectivefluidproperties).
+**Returns:** `rho` and `kappa`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/reference/api/materials/slow-sound/#effectivefluidproperties).
 
 **Raises**
 
@@ -457,9 +457,9 @@ $\kappa_0 = \gamma P_0$.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `slit_height_m` | Slit height `h`, in metres. |
-| `fluid` | State of the air in the slit ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
+| `fluid` | State of the air in the slit ([`Fluid`](/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 
-**Returns:** `rho_s` and `kappa_s`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/phonometry/reference/api/materials/slow-sound/#effectivefluidproperties).
+**Returns:** `rho_s` and `kappa_s`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/reference/api/materials/slow-sound/#effectivefluidproperties).
 
 **Raises**
 
@@ -505,7 +505,7 @@ only the front air impedance carries `cos(theta)`.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `resonators` | One [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) or a sequence of them, ordered from the panel face towards the rigid backing. |
+| `resonators` | One [`HelmholtzResonator`](/reference/api/materials/slow-sound/#helmholtzresonator) or a sequence of them, ordered from the panel face towards the rigid backing. |
 | `slit_height_m` | Slit height `h`, in metres. |
 | `lattice_step_m` | Resonator lattice step `a` along the slit, in metres; the slit depth is $L = N a$. |
 | `period_m` | Slit array period `d` along the face, in metres ($d \ge h$). |
@@ -513,9 +513,9 @@ only the front air impedance carries `cos(theta)`.
 | `end_correction` | Include the resonator radiation end corrections. |
 | `slit_radiation` | Include the slit-to-free-air radiation correction. |
 | `resonator_geometry` | One of `"square"` or `"slit"`. |
-| `fluid` | State of the air the panel radiates into and the slit and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
+| `fluid` | State of the air the panel radiates into and the slit and resonators are filled with ([`Fluid`](/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
 
-**Returns:** A [`SlitResonatorAbsorberResult`](/phonometry/reference/api/materials/slow-sound/#slitresonatorabsorberresult).
+**Returns:** A [`SlitResonatorAbsorberResult`](/reference/api/materials/slow-sound/#slitresonatorabsorberresult).
 
 **Raises**
 

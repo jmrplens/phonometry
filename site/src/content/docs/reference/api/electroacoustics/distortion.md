@@ -20,7 +20,7 @@ captured signal:
   20 kHz by default).
 * **Weighted THD** (14.12.11), the harmonic residual weighted by the
   IEC 60268-1 / ITU-R BS.468-4 network (A/C optional), whose nominal
-  response [`weighting_bs468`](/phonometry/reference/api/electroacoustics/distortion/#weighting_bs468) exposes on its own.
+  response [`weighting_bs468`](/reference/api/electroacoustics/distortion/#weighting_bs468) exposes on its own.
 
 All metrics have an exact analytic oracle: a signal synthesised with known
 harmonic amplitudes reproduces the closed-form ratio. The functions assume
@@ -29,8 +29,8 @@ integer number of periods) or supply a low-leakage window, as audio
 analysers do.
 
 The two-tone metrics of IEC 60268-3 14.12.7-10 live in
-[`phonometry.electroacoustics.intermodulation`](/phonometry/reference/api/electroacoustics/intermodulation/), and the AES17-2015 6.4
-noise levels in [`phonometry.electroacoustics.noise_measurements`](/phonometry/reference/api/electroacoustics/noise-measurements/); both
+[`phonometry.electroacoustics.intermodulation`](/reference/api/electroacoustics/intermodulation/), and the AES17-2015 6.4
+noise levels in [`phonometry.electroacoustics.noise_measurements`](/reference/api/electroacoustics/noise-measurements/); both
 are built on the spectrum, notch and weighting helpers of this module.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -59,15 +59,15 @@ conventions), THD+N and SINAD into a plottable result.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: the three distortion ratios come out unchanged, and so does `sinad_db`, which is the decibel form of one such ratio rather than a level. Only `harmonic_amplitudes` carries the unit, and so lands in pascals when the record is calibrated. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: the three distortion ratios come out unchanged, and so does `sinad_db`, which is the decibel form of one such ratio rather than a level. Only `harmonic_amplitudes` carries the unit, and so lands in pascals when the record is calibrated. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `n_harmonics` | Highest harmonic order (default 10). |
 | `notch_q` | Effective notch quality factor for THD+N (default 2.0). |
 | `bandwidth` | AES17 measurement bandwidth for THD+N/SINAD, in Hz (default 20 kHz; `None` measures the full Nyquist band). |
 | `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
-**Returns:** A [`HarmonicDistortionResult`](/phonometry/reference/api/electroacoustics/distortion/#harmonicdistortionresult).
+**Returns:** A [`HarmonicDistortionResult`](/reference/api/electroacoustics/distortion/#harmonicdistortionresult).
 
 **Raises**
 
@@ -99,8 +99,8 @@ amplitude relative to the total RMS.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency $f_1$, in Hz. |
 | `order` | Harmonic order `n` (an integer >= 2; an integral float such as `3.0` is accepted as its integer). |
 | `n_harmonics` | Highest harmonic order used for the total RMS. |
@@ -190,8 +190,8 @@ measurement (same notch, same measurement bandwidth).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: SINAD is the decibel form of a ratio of amplitudes drawn from the same record rather than a level, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: SINAD is the decibel form of a ratio of amplitudes drawn from the same record rather than a level, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (AES17: 1.2..3; default 2.0). |
 | `bandwidth` | Upper band-edge frequency of the AES17 chain, in Hz (default 20 kHz); `None` measures the full Nyquist band. |
@@ -243,8 +243,8 @@ datasheets; the two agree to first order for small distortion.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. Coherent sampling (integer periods) or a low-leakage window gives the exact value. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. Coherent sampling (integer periods) or a low-leakage window gives the exact value. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency $f_1$ in Hz, or `None` to take the largest spectral peak. |
 | `kind` | `'F'` (relative to the fundamental, the default) or `'R'` (relative to the total RMS, the 14.12.3.2 quantity). |
 | `n_harmonics` | Highest harmonic order summed (default 10). |
@@ -289,8 +289,8 @@ and out-of-band noise do not inflate the result.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (AES17: 1.2..3; default 2.0). |
 | `bandwidth` | Upper band-edge frequency of the AES17 chain, in Hz (default 20 kHz, the 5.2.5 standard value; capped at Nyquist). `None` disables the chain and measures the full Nyquist band (20 Hz high-pass included only when the chain is active). |
@@ -339,8 +339,8 @@ between 31.5 Hz and 400 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Captured signal (1-D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: this is a ratio of amplitudes drawn from the same record, so the factor divides out and the answer is the same calibrated or not. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (default 2.0). |
 | `weighting` | Frequency weighting applied to the residual: `'468'` (ITU-R BS.468-4 / IEC 60268-1, the 14.12.11 default), `'A'` or `'C'`. |
@@ -378,7 +378,7 @@ of the passive network of Fig. 1a and prints Table 1 as "the values of
 this response at various frequencies", so the curve exists at every
 frequency and the 21 printed rows are that curve rounded to 0.1 dB. This
 is the closed-form evaluation of the same analog prototype the `'468'`
-branch of [`WeightingFilter`](/phonometry/reference/api/filters/weighting/#weightingfilter) discretises,
+branch of [`WeightingFilter`](/reference/api/filters/weighting/#weightingfilter) discretises,
 
 $$
 20 \lg \left| \frac{K\,s}{D(s)} \right|_{s = 2 \pi j f},

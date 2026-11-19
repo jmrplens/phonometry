@@ -33,7 +33,7 @@ PyPI.
 package it already installed alone: once phonometry is there, a later
 `%pip install "phonometry[report]"` installs nothing, and prints nothing
 either. To add what a later extra would have brought, name its packages,
-which [Getting Started](/phonometry/start/getting-started/#optional-extras)
+which [Getting Started](/start/getting-started/#optional-extras)
 lists extra by extra:
 
 ```py
@@ -47,7 +47,7 @@ it runs with a `%` in front.
 ## What runs in the browser
 
 Every domain imports, and the record tables, `.plot()` under the cell and
-`.report()` work as in [Jupyter](/phonometry/start/environments/jupyter/). WAV
+`.report()` work as in [Jupyter](/start/environments/jupyter/). WAV
 and FLAC files are written and read back in the notebook's own folder. The
 FDTD engines step on NumPy.
 

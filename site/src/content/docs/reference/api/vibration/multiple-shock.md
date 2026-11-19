@@ -17,8 +17,8 @@ response, and the Annex C stress conversion $m_\mathrm{z}$ is the vertical one.
 The horizontal spinal model of the withdrawn 2004 edition is not reproduced.
 Assess horizontal whole-body exposure with the ISO 2631-1 metrics in this
 domain instead: the weighted r.m.s. acceleration
-([`weighted_acceleration`](/phonometry/reference/api/vibration/exposure/#weighted_acceleration)) and the vibration dose
-value ([`vibration_dose_value`](/phonometry/reference/api/vibration/exposure/#vibration_dose_value)).
+([`weighted_acceleration`](/reference/api/vibration/exposure/#weighted_acceleration)) and the vibration dose
+value ([`vibration_dose_value`](/reference/api/vibration/exposure/#vibration_dose_value)).
 
 A seat-to-spine transfer function $H(\omega)$ (clause 5.2, Formula 1)
 maps the measured seat acceleration $a_\mathrm{z}(t)$ to the spinal response
@@ -88,14 +88,14 @@ Acceleration dose $D_\mathrm{z}$ from a seat acceleration time history.
 Filters the acceleration through the seat-to-spine transfer function
 (Formula 2), takes the positive response peaks and combines them by
 Formula 3. The input must be conditioned as clause 5.1.3 sets out; see
-[`spinal_response`](/phonometry/reference/api/vibration/multiple-shock/#spinal_response).
+[`spinal_response`](/reference/api/vibration/multiple-shock/#spinal_response).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The acceleration dose $D_\mathrm{z}$, m/s2.
 
@@ -229,7 +229,7 @@ Probability of lumbar injury $P(R)$ (Annex C, Formula C.5).
 
 | Name | Description |
 | :--- | :--- |
-| `risk` | The stress variable $R$ (see [`injury_risk`](/phonometry/reference/api/vibration/multiple-shock/#injury_risk)); scalar or array-like. |
+| `risk` | The stress variable $R$ (see [`injury_risk`](/reference/api/vibration/multiple-shock/#injury_risk)); scalar or array-like. |
 | `sex` | `"male"` or `"female"` (sets the Weibull coefficients). |
 
 **Returns:** The injury probability $P = 1 - \exp(-(R/\alpha)^\beta)$ in 0-1; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included. Negative $R$ gives 0.
@@ -314,19 +314,19 @@ Chains the Clause 5 dose and the Annex C risk: spinal response
 (Formula 2), acceleration dose (Formula 3), daily dose (Formula 4),
 compressive stress (C.1), stress variable $R$ (C.3) and injury
 probability (C.5). The input must be conditioned as clause 5.1.3 sets
-out; see [`spinal_response`](/phonometry/reference/api/vibration/multiple-shock/#spinal_response).
+out; see [`spinal_response`](/reference/api/vibration/multiple-shock/#spinal_response).
 
 The model is vertical-axis only (clause 4a of the 2018 edition); for
 horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
-([`weighted_acceleration`](/phonometry/reference/api/vibration/exposure/#weighted_acceleration),
-[`vibration_dose_value`](/phonometry/reference/api/vibration/exposure/#vibration_dose_value)).
+([`weighted_acceleration`](/reference/api/vibration/exposure/#weighted_acceleration),
+[`vibration_dose_value`](/reference/api/vibration/exposure/#vibration_dose_value)).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `start_age` | Age `b` at which the exposure started, in years. |
 | `exposure_duration_years` | Number of exposure years `n`. |
 | `days_per_year` | Number of exposure days per year `N`. |
@@ -335,7 +335,7 @@ horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
 | `sex` | `"male"` or `"female"`. |
 | `mz` | Stress conversion $m_\mathrm{z}$ (MPa per m/s2); defaults to the sex-specific value. |
 
-**Returns:** The [`MultipleShockResult`](/phonometry/reference/api/vibration/multiple-shock/#multipleshockresult).
+**Returns:** The [`MultipleShockResult`](/reference/api/vibration/multiple-shock/#multipleshockresult).
 
 **Raises**
 
@@ -448,7 +448,7 @@ moderate band matching the Annex C worked example.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client`, `specimen` the subject, `test_room` the workplace or vehicle) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client`, `specimen` the subject, `test_room` the workplace or vehicle) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the fiche has one stacked body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -562,8 +562,8 @@ zero before the impact and offsets the impact peak by up to +1 g.
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The spinal response acceleration $A_\mathrm{z}(t)$, m/s2, same length.
 

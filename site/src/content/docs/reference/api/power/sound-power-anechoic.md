@@ -92,7 +92,7 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 | `air_absorption_db_per_m` | `a(f)` (dB/m), scalar or per band, for C3; `None` leaves $C_3 = 0$. |
 | `radius` | Measurement radius `r` (m), used only in $A_0 = \alpha(f)\,r$. |
 
-**Returns:** [`MeteorologicalCorrection`](/phonometry/reference/api/power/sound-power-anechoic/#meteorologicalcorrection).
+**Returns:** [`MeteorologicalCorrection`](/reference/api/power/sound-power-anechoic/#meteorologicalcorrection).
 
 **Raises**
 
@@ -140,7 +140,7 @@ and $K_{1i} = 0$. The lower criterion is frequency dependent:
 for bands $\le 200$ Hz and $\ge 6300$ Hz. Below it,
 $K_{1i}$ is clamped to its value
 at the criterion (`0.46 dB` and `1.26 dB` respectively), a
-[`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) is emitted and those band results are upper
+[`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) is emitted and those band results are upper
 bounds (clause 9.4.2).
 
 **Parameters**
@@ -330,7 +330,7 @@ PrecisionSoundPowerResult.report(
 Render an ISO 3745:2012 precision sound-power fiche to a PDF.
 
 Writes the same one-page sound-power test sheet as
-[`SoundPowerResult.report`](/phonometry/reference/api/power/sound-power/#soundpowerresultreport), with the standard-basis line naming the
+[`SoundPowerResult.report`](/reference/api/power/sound-power/#soundpowerresultreport), with the standard-basis line naming the
 precision method in an anechoic or hemi-anechoic room (ISO 3745:2012,
 accuracy grade 1) and the measurement-basis strip stating the applied
 meteorological corrections `C1`/`C2`/`C3` instead of the ISO 3744
@@ -343,7 +343,7 @@ energy-averaged level `Lp'`.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header and footer identity and, via `requirement`, a declared A-weighted sound-power limit (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header and footer identity and, via `requirement`, a declared A-weighted sound-power limit (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the energy-averaged level `Lp'`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -427,9 +427,9 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | `air_absorption_db_per_m` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
 | `sigma_omc_db` | Operating/mounting standard deviation, dB. |
 | `coverage_factor` | `k` (2 two-sided, 1.6 one-sided). |
-| `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room type must match `surface`; a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) says when the room is not qualified, when `radius` lies beyond the qualified radius, or when a band lies outside the qualified frequency range. |
+| `room_qualification` | The [`check_free_field`](/reference/api/power/free-field-qualification/#check_free_field) verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room type must match `surface`; a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) says when the room is not qualified, when `radius` lies beyond the qualified radius, or when a band lies outside the qualified frequency range. |
 
-**Returns:** [`PrecisionSoundPowerResult`](/phonometry/reference/api/power/sound-power-anechoic/#precisionsoundpowerresult).
+**Returns:** [`PrecisionSoundPowerResult`](/reference/api/power/sound-power-anechoic/#precisionsoundpowerresult).
 
 **Raises**
 

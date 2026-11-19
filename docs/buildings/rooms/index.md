@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/
 
 # Room acoustics
 

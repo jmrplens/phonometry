@@ -83,7 +83,7 @@ followed by a compass search that halves its step down to 1 mm; it is
 deterministic, stays inside the box by construction and never returns a
 worse origin than the best lattice point.
 
-**What the verdict judges.** [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) holds the qualification
+**What the verdict judges.** [`check_free_field`](/reference/api/power/free-field-qualification/#check_free_field) holds the qualification
 to the amended ISO 3745 Annex A and to the clauses of ISO 26101 it defers to:
 the deviations of A.2.2 and the radius of A.2.4; the frequencies of A.2.3
 (100 Hz to 10 000 Hz, one-third octave bands below 125 Hz and above 4 000 Hz
@@ -95,9 +95,9 @@ spaced at each frequency, and spaced at most a tenth of a wavelength below
 250 Hz and 100 mm above (A.4.3); the spatial resolution of ISO 26101 A.4.3
 and the traverse length of ISO 26101 5.1.4.3, which A.2.4 cites; the 6 dB
 above background of ISO 26101 5.1.2.2 c); the directionality of the test
-source (ISO 26101 Annex B, [`verify_source_directionality`](/phonometry/reference/api/power/free-field-qualification/#verify_source_directionality)); and, in a
+source (ISO 26101 Annex B, [`verify_source_directionality`](/reference/api/power/free-field-qualification/#verify_source_directionality)); and, in a
 hemi-anechoic room, the reflecting plane of A.2.5. A requirement whose data
-were not given is listed in [`FreeFieldCheck.not_judged`](/phonometry/reference/api/power/free-field-qualification/#freefieldchecknot_judged), and the
+were not given is listed in [`FreeFieldCheck.not_judged`](/reference/api/power/free-field-qualification/#freefieldchecknot_judged), and the
 verdict does not pass until it is judged.
 
 Two readings are this module's, since no source settles them. The spacing
@@ -133,7 +133,7 @@ check_free_field(
 Is this room anechoic or hemi-anechoic enough for ISO 3745? (Annex A as amended).
 
 Judges the inverse-square-law analysis of one or more test sources
-([`inverse_square_law_deviations`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_deviations)) against the amended ISO 3745:2012
+([`inverse_square_law_deviations`](/reference/api/power/free-field-qualification/#inverse_square_law_deviations)) against the amended ISO 3745:2012
 Annex A and the ISO 26101:2017 clauses it defers to (see the module
 notes). The radius of A.2.4 is the smallest qualified distance over every
 traverse and every evaluated frequency; the per-band requirements are
@@ -145,16 +145,16 @@ allows, "in conformity" but not "in full conformity".
 
 | Name | Description |
 | :--- | :--- |
-| `results` | One [`InverseSquareLawResult`](/phonometry/reference/api/power/free-field-qualification/#inversesquarelawresult) per test source, their frequencies disjoint, all for the same room. |
+| `results` | One [`InverseSquareLawResult`](/reference/api/power/free-field-qualification/#inversesquarelawresult) per test source, their frequencies disjoint, all for the same room. |
 | `bandwidth` | `"discrete-frequency"` (the default of A.4.1, tones or a narrow-band analysis) or `"broadband"` (noise in one-third octave bands, sufficient only for sources that radiate broadband noise). |
-| `source_directionality` | The [`verify_source_directionality`](/phonometry/reference/api/power/free-field-qualification/#verify_source_directionality) result of each test source (one, or a sequence aligned with `results`); `None` leaves ISO 26101 Annex B unjudged. |
+| `source_directionality` | The [`verify_source_directionality`](/reference/api/power/free-field-qualification/#verify_source_directionality) result of each test source (one, or a sequence aligned with `results`); `None` leaves ISO 26101 Annex B unjudged. |
 | `measurement_radius_m` | The radius of the measurement surface to be used, in metres; the room must be qualified at least that far. |
 | `reflecting_plane_absorption_coefficient` | The largest sound absorption coefficient of the reflecting plane over the frequency range (A.2.5), hemi-anechoic only. |
 | `reflecting_plane_margin_m` | How far the reflecting plane extends beyond the projection of the measurement surface, in metres (A.2.5), hemi-anechoic only. |
-| `paths_in_working_area` | Whether the traverse paths lie in the working area of the room, the part normally used for measurements (A.3.3); a declaration, since the positions cannot tell. `None` leaves it unjudged. The targets of A.3.3 a) to e) are read from [`MicrophoneTraverse.targets`](/phonometry/reference/api/power/free-field-qualification/#microphonetraverse). |
+| `paths_in_working_area` | Whether the traverse paths lie in the working area of the room, the part normally used for measurements (A.3.3); a declaration, since the positions cannot tell. `None` leaves it unjudged. The targets of A.3.3 a) to e) are read from [`MicrophoneTraverse.targets`](/reference/api/power/free-field-qualification/#microphonetraverse). |
 | `speed_of_sound` | Speed of sound, in m/s, for the wavelengths of A.4.3, ISO 26101 5.1.4.3 and A.2.5 (default 343). |
 
-**Returns:** [`FreeFieldCheck`](/phonometry/reference/api/power/free-field-qualification/#freefieldcheck).
+**Returns:** [`FreeFieldCheck`](/reference/api/power/free-field-qualification/#freefieldcheck).
 
 **Raises**
 
@@ -272,7 +272,7 @@ when the check is built.
 | :--- | :--- |
 | `bandwidth` | `"discrete-frequency"` or `"broadband"` (A.4.1): a room qualified with broadband noise is qualified only for sources that radiate broadband noise. |
 | `results` | The inverse-square-law analysis of each test source. |
-| `source_directionality` | The [`verify_source_directionality`](/phonometry/reference/api/power/free-field-qualification/#verify_source_directionality) result of each test source, aligned with `results`, `None` for a source whose directionality was not judged. |
+| `source_directionality` | The [`verify_source_directionality`](/reference/api/power/free-field-qualification/#verify_source_directionality) result of each test source, aligned with `results`, `None` for a source whose directionality was not judged. |
 | `measurement_radius_m` | The measurement radius to be used, if given. |
 | `reflecting_plane_absorption_coefficient` | The largest sound absorption coefficient of the reflecting plane (A.2.5), or `None`; always `None` in an anechoic room. |
 | `reflecting_plane_margin_m` | How far the reflecting plane extends beyond the projection of the measurement surface (A.2.5), in metres, or `None`; always `None` in an anechoic room. |
@@ -500,7 +500,7 @@ reports the starting value of Formula (3) beside it.
 
 One call covers one test source: ISO 26101 5.1.2.2 allows two or more to
 span the frequency range, each with its own mathematical origin, and
-[`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) takes one result per source.
+[`check_free_field`](/reference/api/power/free-field-qualification/#check_free_field) takes one result per source.
 
 **Parameters**
 
@@ -512,7 +512,7 @@ span the frequency range, each with its own mathematical origin, and
 | `origin_m` | The mathematical origin of every traverse, `(x, y, z)` in metres; `None` with no `source_box_m` takes the room frame's origin. |
 | `source_box_m` | The box the test source physically occupies, as `((x_min, y_min, z_min), (x_max, y_max, z_max))` in metres; the origin is then searched inside it (ISO 26101 5.1.3.2, ISO 3745 A.3.3). A zero extent on an axis holds the origin on that coordinate. |
 
-**Returns:** [`InverseSquareLawResult`](/phonometry/reference/api/power/free-field-qualification/#inversesquarelawresult).
+**Returns:** [`InverseSquareLawResult`](/reference/api/power/free-field-qualification/#inversesquarelawresult).
 
 **Raises**
 
@@ -666,7 +666,7 @@ Draw the deviations along every traverse at one frequency.
 
 The Table A.1 limit of each frequency, in dB, read from the room.
 
-**Returns:** [`inverse_square_law_tolerance`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance) of `frequencies` in `room`.
+**Returns:** [`inverse_square_law_tolerance`](/reference/api/power/free-field-qualification/#inverse_square_law_tolerance) of `frequencies` in `room`.
 
 ## MicrophoneTraverse
 
@@ -688,7 +688,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 
 | Name | Description |
 | :--- | :--- |
-| `positions_m` | The measurement points, one row per point, as `(x, y, z)` coordinates in metres in the room frame: `z` points up and, in a hemi-anechoic room, the reflecting plane is `z = 0`. The mathematical origin of the traverse is given to [`inverse_square_law_deviations`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_deviations) in the same frame. |
+| `positions_m` | The measurement points, one row per point, as `(x, y, z)` coordinates in metres in the room frame: `z` points up and, in a hemi-anechoic room, the reflecting plane is `z = 0`. The mathematical origin of the traverse is given to [`inverse_square_law_deviations`](/reference/api/power/free-field-qualification/#inverse_square_law_deviations) in the same frame. |
 | `levels` | The measured sound pressure level $L'_{pi}$ at each point, one row per point and one column per test frequency, in dB. A `nan` marks a point not measured at that frequency, which is how a spacing that changes with frequency is written (ISO 3745 A.4.3 asks for equally spaced points *at each frequency*). Every other level is finite. |
 | `monitor_levels` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
 | `background_levels` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
@@ -831,7 +831,7 @@ Draw the extreme deviations per band against Table B.1.
 
 The Table B.1 limit per band, in dB, read from the room.
 
-**Returns:** [`directionality_tolerance`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance) of `frequencies` in `room`.
+**Returns:** [`directionality_tolerance`](/reference/api/power/free-field-qualification/#directionality_tolerance) of `frequencies` in `room`.
 
 ### SourceDirectionalityResult.within_tolerance
 
@@ -856,7 +856,7 @@ May this source qualify an anechoic or hemi-anechoic room? (ISO 26101 Annex B).
 
 The one-third octave band levels are measured at the 32 positions of a
 hemisphere or the 64 of a sphere of radius 1.5 m
-([`directionality_positions`](/phonometry/reference/api/power/free-field-qualification/#directionality_positions)). Per band, the arithmetic mean of the
+([`directionality_positions`](/reference/api/power/free-field-qualification/#directionality_positions)). Per band, the arithmetic mean of the
 decibel levels and the largest positive and negative deviations from it
 are computed (B.3.2); the source is suitable when every deviation is within
 Table B.1 (B.4). The amended ISO 3745 A.3.1 lets the measurement be made in
@@ -870,7 +870,7 @@ the room being qualified.
 | `frequencies` | The one-third octave mid-band frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
-**Returns:** [`SourceDirectionalityResult`](/phonometry/reference/api/power/free-field-qualification/#sourcedirectionalityresult).
+**Returns:** [`SourceDirectionalityResult`](/reference/api/power/free-field-qualification/#sourcedirectionalityresult).
 
 **Raises**
 

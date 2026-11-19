@@ -132,7 +132,7 @@ $$
 con las referencias $f_0 = 1\ \text{Hz}$, $m_0 = 1\ \text{kg}$ (impresa como
 1 kg; la magnitud que normaliza es una masa por unidad de superficie, así que la
 referencia es $1\ \text{kg/m}^2$: véase el
-[registro de erratas](/phonometry/es/reference/errata/)),
+[registro de erratas](/es/reference/errata/)),
 $S_0 = 1\ \text{m}^2$; el término $-60\ \text{dB}$ es $10\log_{10}(v_0^2/P_0)$ para
 la velocidad de referencia de EN 15657 $v_0 = 10^{-9}\ \text{m/s}$ y
 $P_0 = 1\ \text{pW}$. La
@@ -220,7 +220,7 @@ elemento de edificio real queda entre las dos, y la distancia entre las dos
 determinaciones es lo que dice si la máquina se comporta como fuente de fuerza o
 como fuente de velocidad. La potencia
 inyectada en la placa junto con su movilidad puntual (véase la
-[movilidad mecánica](/phonometry/es/vibration/structural/mechanical-mobility/)) proporcionan
+[movilidad mecánica](/es/vibration/structural/mechanical-mobility/)) proporcionan
 la descripción de la fuente para el modelo de EN 12354-5 a través de la cadena
 de conversión siguiente.
 
@@ -338,7 +338,7 @@ fuente inyecta una potencia distinta en un receptor distinto. La EN 15657
 deriva las magnitudes independientes de la placa: el **nivel de fuerza
 bloqueada equivalente** (Fórmula 15, re $F_0 = 10^{-6}\ \text{N}$, no la
 referencia de 1 N del
-[nivel de exposición a la fuerza de impacto](/phonometry/es/buildings/insulation/heavy-impact-sources/)
+[nivel de exposición a la fuerza de impacto](/es/buildings/insulation/heavy-impact-sources/)
 de ISO 16283-2, a 120 dB de distancia) desde la
 placa de baja movilidad,
 
@@ -361,7 +361,7 @@ fuente**
 $|Y_\mathrm{S,eq}|$ (Fórmula 19). La corrección de movilidad del Anexo I de EN 12354-5
 (`installed_power_from_reception_plate`, véase el
 [ruido estructural
-instalado](/phonometry/es/buildings/design/installed-structure-borne/))
+instalado](/es/buildings/design/installed-structure-borne/))
 refiere después $L_\mathrm{Wsn}$ al elemento receptor real.
 
 ```python
@@ -444,7 +444,7 @@ plt.show()
 Con la movilidad del *receptor* da el nivel de potencia instalada
 $L_\mathrm{Ws,inst} = 68,2$ dB. Con la movilidad de la *fuente* da el nivel de
 potencia característico independiente de la placa $L_\mathrm{Ws,c} = 84,4$ dB, y eso es
-lo que [EN 12354-5](/phonometry/es/buildings/design/installed-structure-borne/)
+lo que [EN 12354-5](/es/buildings/design/installed-structure-borne/)
 toma como entrada, del que resta el término de acoplamiento $D_\mathrm{C} = 16,2$ dB para
 volver a los mismos 68,2 dB. Alimenta EN 12354-5 con los 84,4, nunca con los
 68,2: arrastrar 68,2 como nivel de potencia característico resta $D_\mathrm{C}$ una
@@ -564,7 +564,7 @@ homólogo del lado de la fuente, sin implementar.
 
 ## Véase también
 
-- Referencia de la API: [`building.measurement.structure_borne_power`](/phonometry/es/reference/api/building/structure-borne-power/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la movilidad puntual, el desajuste fuente-receptor y la potencia inyectada que definen.
+- Referencia de la API: [`building.measurement.structure_borne_power`](/es/reference/api/building/structure-borne-power/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): la movilidad puntual, el desajuste fuente-receptor y la potencia inyectada que definen.
 
 </SeeAlso>

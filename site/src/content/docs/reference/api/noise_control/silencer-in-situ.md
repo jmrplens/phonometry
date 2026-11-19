@@ -7,7 +7,7 @@ sidebar:
 
 What a silencer does where it was installed (ISO 11820:1996).
 
-[`phonometry.noise_control.silencer_measurement`](/phonometry/reference/api/noise_control/silencer-measurement/) is the laboratory
+[`phonometry.noise_control.silencer_measurement`](/reference/api/noise_control/silencer-measurement/) is the laboratory
 measurement a catalogue figure comes from: a qualified rig, a substitution
 duct, a stated uncertainty. This is the other one. The silencer is in the
 plant, the plant is running, and the question is what the thing is doing
@@ -46,7 +46,7 @@ installations, sixteen for transmission and four for insertion, by what stands
 on each side of the silencer, and clause 9.1.3 gives each of them its own rule
 for $S_1$ and $S_2$: a measurement surface in the duct, a quarter
 or a half of the silencer intake, a quarter of the room absorption, or a
-surface enveloping the open end. [`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case) is that figure and
+surface enveloping the open end. [`installation_case`](/reference/api/noise_control/silencer-in-situ/#installation_case) is that figure and
 those rules as data, so that a measurement says which case it is and the areas
 follow.
 
@@ -56,21 +56,21 @@ The corrections that are not a correction
 Clause 4 corrects for background noise from a **printed table**, not from the
 usual logarithmic subtraction, and the two do not agree: at a margin of 5 dB
 the table takes off 2 dB where the formula takes off 1.7, and at 8 dB it takes
-off 1 where the formula takes off 0.7. [`silencer_background_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencer_background_correction)
+off 1 where the formula takes off 0.7. [`silencer_background_correction`](/reference/api/noise_control/silencer-in-situ/#silencer_background_correction)
 implements the table as printed, and says so.
 
 Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
 the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
-an inequality. [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) says whether the
+an inequality. [`extraneous_corrected_mean_level`](/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) says whether the
 correction went past the cap, so that a capped value cannot be reported as a
 determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
 one-third-octave data to octave data is permissible **for measured sound
 pressure levels only, but not for level differences**.
-[`octave_levels_from_third_octave`](/phonometry/reference/api/noise_control/silencer-in-situ/#octave_levels_from_third_octave) does the permitted conversion, and
+[`octave_levels_from_third_octave`](/reference/api/noise_control/silencer-in-situ/#octave_levels_from_third_octave) does the permitted conversion, and
 the docstring names the function in this library that does the forbidden one
 for a different standard.
 
@@ -127,7 +127,7 @@ standard in agreement at their shared boundary.
 The result's `capped` says whether the correction went past the cap, a
 margin more than $10^{-9}$ dB under 3 dB, so that a capped number
 cannot be written down as a determination, and a capped measurement also
-emits a [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning); a margin of exactly 3 dB emits
+emits a [`SilencerInSituWarning`](/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning); a margin of exactly 3 dB emits
 nothing. The corrected level itself is given either way.
 
 **Parameters**
@@ -137,7 +137,7 @@ nothing. The corrected level itself is given either way.
 | `levels` | The levels with everything running, in decibels. |
 | `extraneous_levels` | The extraneous levels at the same positions, in decibels. |
 
-**Returns:** The corrected mean level and the margin it was read at, as an [`ExtraneousCorrectionResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresult).
+**Returns:** The corrected mean level and the margin it was read at, as an [`ExtraneousCorrectionResult`](/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresult).
 
 **Raises**
 
@@ -180,8 +180,8 @@ more than $10^{-9}$ dB under 3 dB: one closer than that counts
 as 3 dB, on the side Table 1 accepts, since levels written 3.0 dB
 apart come out of the two energy means up to
 $1.4 \cdot 10^{-14}$ dB either side of it. That is when
-[`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) emits a
-[`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning).
+[`extraneous_corrected_mean_level`](/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) emits a
+[`SilencerInSituWarning`](/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning).
 
 ## flow_velocity_m_s
 
@@ -252,7 +252,7 @@ kmol K, and $M$ the molar mass. The standard adds that
 $R/M = 287$ N m per kg K for air, and that is what is used when no
 molar mass is given.
 
-[`phonometry.noise_control.normal_air_density`](/phonometry/reference/api/noise_control/silencer-measurement/#normal_air_density) computes the same
+[`phonometry.noise_control.normal_air_density`](/reference/api/noise_control/silencer-measurement/#normal_air_density) computes the same
 quantity for ISO 7235, from a gauge pressure and with that standard's own
 two constants; this one takes the absolute ambient pressure the way
 Equation (29) prints it and admits any gas through its molar mass.
@@ -309,7 +309,7 @@ As in Equation (19), the terms are band quantities (3.4, printed folio 3,
 PDF page 11). Where the receiver side is a diffuse room, case 18 of
 Figure 1, both areas are a quarter of the room absorption, Equations (10)
 and (12), and move band by band with the reverberation time of each run:
-pass the two arrays [`reverberant_surface_area_m2`](/phonometry/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns. Each area
+pass the two arrays [`reverberant_surface_area_m2`](/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns. Each area
 and the field correction may be one value, applied to every band, or one
 value per band.
 
@@ -325,7 +325,7 @@ value per band.
 | `field_correction_difference` | $K_\mathrm{II} - K_\mathrm{I}$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 17 to 20, carried into the result. |
 
-**Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
+**Returns:** The loss, as a [`SilencerInSituResult`](/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
 
 **Raises**
 
@@ -357,15 +357,15 @@ $$
 
 The level difference of Equation (1), the ratio of the two measurement
 areas, and the difference of the two field corrections.
-[`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case) says which areas the installation calls for;
-[`temperature_field_correction`](/phonometry/reference/api/noise_control/silencer-in-situ/#temperature_field_correction) is the correction difference two
+[`installation_case`](/reference/api/noise_control/silencer-in-situ/#installation_case) says which areas the installation calls for;
+[`temperature_field_correction`](/reference/api/noise_control/silencer-in-situ/#temperature_field_correction) is the correction difference two
 temperatures make.
 
 Every term is a band quantity (3.3, printed folio 3, PDF page 11). A
 measurement surface in a duct is one area for all bands, but where a side
 is a room with a diffuse field its area is a quarter of the absorption,
 $(6 \ln 10) V / (c T)$, and moves with the reverberation time from
-band to band: pass the array [`reverberant_surface_area_m2`](/phonometry/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns.
+band to band: pass the array [`reverberant_surface_area_m2`](/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns.
 Each area and the field correction may be one value, applied to every
 band, or one value per band.
 
@@ -381,7 +381,7 @@ band, or one value per band.
 | `field_correction_difference` | $K_2 - K_1$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 1 to 16, carried into the result. |
 
-**Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
+**Returns:** The loss, as a [`SilencerInSituResult`](/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
 
 **Raises**
 
@@ -457,7 +457,7 @@ side is not part of what is measured.
 | :--- | :--- |
 | `number` | The case number Figure 1 prints, 1 to 20. |
 
-**Returns:** The case, as an [`InstallationCase`](/phonometry/reference/api/noise_control/silencer-in-situ/#installationcase).
+**Returns:** The case, as an [`InstallationCase`](/reference/api/noise_control/silencer-in-situ/#installationcase).
 
 **Raises**
 
@@ -670,7 +670,7 @@ level differences**, and that sentence is the whole of the clause.
 
 The prohibition is worth stating twice, because this library does perform
 the forbidden operation for a different standard:
-[`phonometry.noise_control.octave_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#octave_insertion_loss) folds a
+[`phonometry.noise_control.octave_insertion_loss`](/reference/api/noise_control/silencer-measurement/#octave_insertion_loss) folds a
 one-third-octave insertion loss into octaves, which is Equation (2) of
 ISO 11691 and is exactly what ISO 11820 forbids. The two are not
 interchangeable: one is a fold of a measured level, the other a fold of a
@@ -786,7 +786,7 @@ The table gives no row between its integers. A difference that falls
 between two rows is read at the lower one, which is the larger correction
 and therefore the lower source level; the standard does not decide this,
 and the choice is stated here rather than smoothed away. Above
-[`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_negligible_background_margin_db) there is no row to read
+[`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/reference/api/noise_control/silencer-in-situ/#iso11820_negligible_background_margin_db) there is no row to read
 at all: 10 dB is the last one the table prints, and anything over it takes
 nothing off, so 10.5 dB is corrected by zero rather than by the 0.5 dB of
 the 10 dB row.
@@ -803,7 +803,7 @@ the 10 dB row.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a margin under [`ISO11820_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_min_background_margin_db), which Table 1 calls invalid. |
+| ValueError | For a margin under [`ISO11820_MIN_BACKGROUND_MARGIN_DB`](/reference/api/noise_control/silencer-in-situ/#iso11820_min_background_margin_db), which Table 1 calls invalid. |
 | TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## silencer_flow_velocity_m_s
@@ -918,9 +918,9 @@ $$
 
 The four equations differ only in which side of the silencer and which run
 they belong to. $S$ is whichever area the case calls for, from
-[`installation_case`](/phonometry/reference/api/noise_control/silencer-in-situ/#installation_case), and $K$ the field correction of Annex A,
+[`installation_case`](/reference/api/noise_control/silencer-in-situ/#installation_case), and $K$ the field correction of Annex A,
 which NOTE 4 expects to stay under
-[`TYPICAL_FIELD_CORRECTION_LIMIT_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#typical_field_correction_limit_db) in absolute value once the areas
+[`TYPICAL_FIELD_CORRECTION_LIMIT_DB`](/reference/api/noise_control/silencer-in-situ/#typical_field_correction_limit_db) in absolute value once the areas
 have been chosen as 3.3 and 3.4 define them.
 
 **Parameters**
@@ -1008,7 +1008,7 @@ Emitted for three conditions:
 - an extraneous-sound correction past the 3 dB cap of 9.1.1 and 9.1.2,
   where clause 4 leaves only an inequality to state: a margin of the two
   energy means more than $10^{-9}$ dB under 3 dB
-  ([`ExtraneousCorrectionResult.capped`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresultcapped)). A margin of exactly 3 dB
+  ([`ExtraneousCorrectionResult.capped`](/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresultcapped)). A margin of exactly 3 dB
   takes off 3.02 dB, the printed 3 dB unrounded, and emits nothing;
 - a field correction over the 3 dB in absolute value NOTE 4 of 3.3
   expects;

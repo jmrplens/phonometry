@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/propagation/software-quality.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/software-quality/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/propagation/software-quality/
 
 # Quality of Outdoor Sound Software (ISO 17534-1)
 
@@ -435,7 +435,7 @@ $R(q_{0.9}) = 361$ by Formula (C.2).
 - [Integrated and statistical levels](../../signals/levels/levels.md): the
   percentile levels $L_{10}$ and $L_{90}$ whose sense the quantiles of Annex C
   reverse.
-- API reference: [`environment.propagation.software_quality`](https://docs.jmrp.io/phonometry/reference/api/environment/software-quality/).
+- API reference: [`environment.propagation.software_quality`](https://phonometry.dev/reference/api/environment/software-quality/).
 
 ## References
 

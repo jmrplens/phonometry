@@ -49,8 +49,8 @@ tolerance and is a known DIN 45692 implementation property.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D), in Pa after `calibration_factor`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal); the rate and the factor are resolved by [`loudness_zwicker`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker), which this is a weighted moment of, so both arrive here on exactly the terms they have there. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
+| `x` | Input signal (1D), in Pa after `calibration_factor`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal); the rate and the factor are resolved by [`loudness_zwicker`](/reference/api/psychoacoustics/zwicker/#loudness_zwicker), which this is a weighted moment of, so both arrive here on exactly the terms they have there. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
 | `field` | `'free'` (default) or `'diffuse'`. |
 | `method` | `'din'` (default), `'aures'` or `'bismarck'`. |
 | `calibration_factor` | Digital-units-to-Pa factor. An explicit value wins over the one a Signal carries. |

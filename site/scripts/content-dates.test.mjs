@@ -42,6 +42,7 @@ import {
 	DATELESS_KEYS,
 	frontmatterOnly,
 	isoDay,
+	linksMovedOnly,
 	isoInstant,
 	readDateSources,
 	readIgnoreRevs,
@@ -242,6 +243,21 @@ test('a frontmatter added to a page or taken from it counts', () => {
 	assert.equal(frontmatterOnly(`---\ntitle: A page\n---\n${bare}`, bare), false);
 });
 
+test('a commit that took the old base path or host out of every link moves no date, and any other change counts', () => {
+	const old = (link) => page({ extra: ['hero:', `  link: ${link}/start/`], body: `See [levels](${link}/signals/levels/) and <a href="${link}/es/">inicio</a>.\n` });
+	assert.equal(linksMovedOnly(old('/phonometry'), old('')), true, 'the base path taken out');
+	const host = (origin) => page({ body: `The [report](${origin}/reference/conformance/).\n` });
+	assert.equal(linksMovedOnly(host('https://docs.jmrp.io/phonometry'), host('https://phonometry.dev')), true, 'the old host');
+	assert.equal(linksMovedOnly(old('/phonometry'), page({ description: 'New.', extra: ['hero:', '  link: /start/'], body: 'See [levels](/signals/levels/) and <a href="/es/">inicio</a>.\n' })), true, 'with a label edit');
+	assert.equal(linksMovedOnly(page(), page({ description: 'New.' })), true, 'a frontmatter-only commit stays one');
+	assert.equal(linksMovedOnly(old('/phonometry'), page({ body: 'See [levels](/signals/levels/), corrected.\n' })), false, 'with a change to the text');
+	assert.equal(linksMovedOnly(old('/phonometry'), old('/phonometry').replace('/signals/levels/', '/signals/spectra/')), false, 'a link sent elsewhere under the old base');
+	assert.equal(linksMovedOnly(old(''), old('/phonometry')), false, 'a link given the base path it lacked fixed what a reader reached');
+	for (const name of ['https://github.com/jmrplens/phonometry/', '`src/phonometry/levels.py`', '/phonometry-assets/']) {
+		assert.equal(linksMovedOnly(page({ body: `${name}\n` }), page({ body: `${name.replace('phonometry', '')}\n` })), false, name);
+	}
+});
+
 // --- Dates read from a history --------------------------------------------
 
 test('a description-only commit does not move the date, and a body commit does', async (t) => {
@@ -315,6 +331,24 @@ test('a listed commit does not move the date, and a page it created is dated by 
 	const dates = await repo.dates();
 	assert.equal(day(dates, 'a.mdx'), '2026-01-01');
 	assert.equal(day(dates, 'b.mdx'), '2026-01-02');
+});
+
+test('the commit that moved the site to the root of its new host moves no page, and later edits do', async (t) => {
+	const repo = repository(t);
+	const linked = (base, origin, body = 'The text.') => page({ body: `${body} See [b](${base}/b/) and the [report](${origin}/reference/conformance/).\n` });
+	repo.write('a.mdx', linked('/phonometry', 'https://docs.jmrp.io/phonometry'));
+	repo.write('b.mdx', linked('/phonometry', 'https://docs.jmrp.io/phonometry'));
+	repo.commit(1);
+	repo.write('a.mdx', linked('/phonometry', 'https://docs.jmrp.io/phonometry', 'The text, corrected.'));
+	repo.commit(2);
+	repo.write('a.mdx', linked('', 'https://phonometry.dev', 'The text, corrected.'));
+	repo.write('b.mdx', linked('', 'https://phonometry.dev'));
+	repo.commit(3, 'the site is served at the root');
+	repo.write('b.mdx', linked('', 'https://phonometry.dev', 'The text, extended.'));
+	repo.commit(4);
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-04');
 });
 
 test('a page moved unchanged keeps its date, and one moved with an edit is dated by the move', async (t) => {

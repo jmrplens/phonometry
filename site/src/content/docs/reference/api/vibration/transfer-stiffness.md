@@ -39,7 +39,7 @@ Three laboratory methods determine $k_{2,1}$, in four parts:
   displacement `u1` directly: $k_{2,1} = F_{2,\mathrm{b}} / u_1$. The
   mass between the element and the output force transducers biases the
   measured force; ISO 10846-4 Inequality (3) (ISO 10846-2 Inequality (2))
-  bounds it, see [`check_output_mass`](/phonometry/reference/api/vibration/transfer-stiffness/#check_output_mass).
+  bounds it, see [`check_output_mass`](/reference/api/vibration/transfer-stiffness/#check_output_mass).
 * **Indirect method** (ISO 10846-3, and ISO 10846-4 for other elements): load
   the output with a compact blocking mass `m2` and measure the vibration
   transmissibility $T = u_2/u_1$; the blocking force is the mass's
@@ -51,27 +51,27 @@ Three laboratory methods determine $k_{2,1}$, in four parts:
   behaves rigidly,
   $|10 \log_{10}(m_{2,\mathrm{eff}}^2/m_2^2)| \le 1$ dB (ISO 10846-3
   Inequality (3), ISO 10846-4 Inequality (5)); see
-  [`transfer_stiffness_indirect`](/phonometry/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) and [`effective_blocking_mass`](/phonometry/reference/api/vibration/transfer-stiffness/#effective_blocking_mass).
+  [`transfer_stiffness_indirect`](/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) and [`effective_blocking_mass`](/reference/api/vibration/transfer-stiffness/#effective_blocking_mass).
 * **Driving-point method** (ISO 10846-5): measure the input force and the
   input acceleration with the output blocked, which gives the driving-point
   stiffness $k_{1,1}$ (Formula (3)). Below the upper limiting frequency
   $f_\mathrm{UL}$ of clause 6.2 its band averages stand for those of
   $k_{2,1}$ within 2 dB (Formula (7)); see
-  [`driving_point_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#driving_point_stiffness).
+  [`driving_point_stiffness`](/reference/api/vibration/transfer-stiffness/#driving_point_stiffness).
 
 Every part reports the result as one-third-octave-band averages of the squared
 magnitude over at least five narrow-band frequencies (ISO 10846-2 Formula (6),
--3 Formula (7), -4 Formula (11), -5 Formula (6)): [`band_averaged_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#band_averaged_stiffness).
+-3 Formula (7), -4 Formula (11), -5 Formula (6)): [`band_averaged_stiffness`](/reference/api/vibration/transfer-stiffness/#band_averaged_stiffness).
 The adequacy conditions the parts share, the output blocked by 20 dB and the
-unwanted input directions 15 dB down, are [`check_blocked_output`](/phonometry/reference/api/vibration/transfer-stiffness/#check_blocked_output) and
-[`check_unwanted_input`](/phonometry/reference/api/vibration/transfer-stiffness/#check_unwanted_input), and the Annex B uncertainty budget of
-ISO 10846-5 is [`driving_point_uncertainty`](/phonometry/reference/api/vibration/transfer-stiffness/#driving_point_uncertainty).
+unwanted input directions 15 dB down, are [`check_blocked_output`](/reference/api/vibration/transfer-stiffness/#check_blocked_output) and
+[`check_unwanted_input`](/reference/api/vibration/transfer-stiffness/#check_unwanted_input), and the Annex B uncertainty budget of
+ISO 10846-5 is [`driving_point_uncertainty`](/reference/api/vibration/transfer-stiffness/#driving_point_uncertainty).
 
 The dynamic transfer stiffness is a member of the frequency-response-function
 family (ISO 10846-1, Annex A / Table A.2):
 $k = j\omega Z = -\omega^2 m_{\mathrm{eff}}$, so it converts to
 mechanical impedance and effective mass through
-[`phonometry.vibration.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf) (`"dynamic_stiffness"` \<->
+[`phonometry.vibration.convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf) (`"dynamic_stiffness"` \<->
 `"impedance"` \<-> `"apparent_mass"`). This module feeds the structure-borne
 source and building prediction standards (ISO 9611, EN 15657, EN 12354-5).
 
@@ -109,7 +109,7 @@ holds fewer: the analyser shall resolve "at least five distinct
 frequencies per one-third-octave band", and a stepped or swept sine shall
 put at least five frequencies in "each one-third-octave band for which
 stiffness data are determined". Such a band is returned undetermined (NaN)
-and a [`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning) names it. Lines `valid` marks
+and a [`TransferStiffnessWarning`](/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning) names it. Lines `valid` marks
 `False` are left out first, as the parts exclude results that fail their
 adequacy conditions; bands beyond the outermost valid line are not listed,
 and a band inside the range with no valid line at all is undetermined
@@ -123,7 +123,7 @@ without a warning, since its lines were excluded rather than missing.
 | `stiffness` | Dynamic stiffness $k(f_i)$ at each frequency (complex or real, finite), in N/m: a transfer stiffness $k_{2,1}$ or a driving-point stiffness $k_{1,1}$. |
 | `valid` | Per frequency, whether the line enters the average (Default: `None`, every line). |
 
-**Returns:** The [`BandAveragedStiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
+**Returns:** The [`BandAveragedStiffness`](/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
 
 **Raises**
 
@@ -163,7 +163,7 @@ $$
 and reports it as the level
 $L_{k,\mathrm{av}} = 10 \lg(k_\mathrm{av}^2/k_0^2)$ re
 $k_0 = 1$ N/m (ISO 10846-2, -3 and -4 3.18, ISO 10846-5 3.17). A band
-holding fewer than [`MIN_FREQUENCIES_PER_BAND`](/phonometry/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) lines has no value:
+holding fewer than [`MIN_FREQUENCIES_PER_BAND`](/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) lines has no value:
 its stiffness is NaN and `determined` is `False`.
 
 **Attributes**
@@ -253,7 +253,7 @@ $$
 
 This ideal-element model is the counterpart of the indirect-method test
 arrangement (ISO 10846-3): feeding `T` into
-[`transfer_stiffness_indirect`](/phonometry/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) with the same mass recovers the
+[`transfer_stiffness_indirect`](/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) with the same mass recovers the
 element's transfer stiffness $k + j\omega c$ in the high-frequency
 limit $T \ll 1$.
 
@@ -358,7 +358,7 @@ acceleration of the blocking mass, -4:2003 Inequality (2), -5:2008
 Inequality (1)): a smaller difference means too little stiffness
 mismatch between the element and the foundation, or flanking transmission.
 For the indirect method the same 20 dB is the $|T| \le 0.1$ of
-[`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit).
+[`TRANSMISSIBILITY_LIMIT`](/reference/api/vibration/transfer-stiffness/#transmissibility_limit).
 
 **Parameters**
 
@@ -368,7 +368,7 @@ For the indirect method the same 20 dB is the $|T| \le 0.1$ of
 | `input_acceleration_level` | Input acceleration level $L_{a1}$, in dB, one per frequency. |
 | `output_acceleration_level` | Output acceleration level $L_{a2}$, in dB re the same reference, one per frequency; `-inf` for an output that does not move. |
 
-**Returns:** The [`LevelDifferenceCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="blocked_output"`).
+**Returns:** The [`LevelDifferenceCheck`](/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="blocked_output"`).
 
 **Raises**
 
@@ -408,7 +408,7 @@ with $L_{F2}$ the force level re 1 µN and $L_{a2}$ the
 acceleration level re 1 µm/s² of the output side (ISO 10846-4 3.15 and
 3.16, the references of ISO 1683). If it fails, NOTE 2 says what to do: a
 lighter `m0`, or stiffer (more, or larger) force transducers. See
-[`OutputMassCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#outputmasscheck) for the bias it bounds.
+[`OutputMassCheck`](/reference/api/vibration/transfer-stiffness/#outputmasscheck) for the bias it bounds.
 
 **Parameters**
 
@@ -419,7 +419,7 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 | `output_force_level` | Measured output force level $L_{F2}$, in dB re 1 µN, one per frequency. |
 | `output_acceleration_level` | Output acceleration level $L_{a2}$, in dB re 1 µm/s², one per frequency. |
 
-**Returns:** The [`OutputMassCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#outputmasscheck).
+**Returns:** The [`OutputMassCheck`](/reference/api/vibration/transfer-stiffness/#outputmasscheck).
 
 **Raises**
 
@@ -473,7 +473,7 @@ errata register.)
 | `excitation_level` | Acceleration level in the excitation direction, in dB, one per frequency. |
 | `unwanted_level` | Acceleration level in a perpendicular direction, in dB re the same reference, one per frequency; or one row per direction, shape `(directions, frequencies)`. |
 
-**Returns:** The [`LevelDifferenceCheck`](/phonometry/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="unwanted_input"`).
+**Returns:** The [`LevelDifferenceCheck`](/reference/api/vibration/transfer-stiffness/#leveldifferencecheck) (`condition="unwanted_input"`).
 
 **Raises**
 
@@ -507,9 +507,9 @@ $k_{1,1}(f) = -(2\pi f)^2 F_1 / a_1$, from the input force and the
 input acceleration measured with the output side of the element blocked.
 With the output acceleration given, Inequality (1),
 $\Delta L_{1,2} \ge 20$ dB, is checked line by line
-([`check_blocked_output`](/phonometry/reference/api/vibration/transfer-stiffness/#check_blocked_output)); with the unwanted accelerations given,
-Inequality (2), 15 dB ([`check_unwanted_input`](/phonometry/reference/api/vibration/transfer-stiffness/#check_unwanted_input)). A line that fails
-either raises a [`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning) and is excluded from the
+([`check_blocked_output`](/reference/api/vibration/transfer-stiffness/#check_blocked_output)); with the unwanted accelerations given,
+Inequality (2), 15 dB ([`check_unwanted_input`](/reference/api/vibration/transfer-stiffness/#check_unwanted_input)). A line that fails
+either raises a [`TransferStiffnessWarning`](/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning) and is excluded from the
 evaluation. The result finds $f_\mathrm{UL}$ (6.2) and averages the
 valid lines into bands (Formulas (6), (7)).
 
@@ -523,7 +523,7 @@ valid lines into bands (Formulas (6), (7)).
 | `output_acceleration_m_s2` | Output-flange acceleration phasor `a2`, in m/s² (Default: `None`, Inequality (1) not checked). |
 | `unwanted_acceleration_m_s2` | Input acceleration phasor in a direction perpendicular to the excitation, in m/s², or one row per direction (Default: `None`, Inequality (2) not checked). |
 
-**Returns:** The [`DrivingPointStiffnessResult`](/phonometry/reference/api/vibration/transfer-stiffness/#drivingpointstiffnessresult).
+**Returns:** The [`DrivingPointStiffnessResult`](/reference/api/vibration/transfer-stiffness/#drivingpointstiffnessresult).
 
 **Raises**
 
@@ -555,7 +555,7 @@ driving_point_uncertainty(
 
 Uncertainty of a band level measured by the driving-point method (ISO 10846-5 Annex B).
 
-Table B.1, built on [`phonometry.metrology.uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation):
+Table B.1, built on [`phonometry.metrology.uncertainty_propagation`](/reference/api/metrology/uncertainty/#uncertainty_propagation):
 
 - $\hat{L}_{k,\mathrm{av}}$, signal processing and background
   noise, normal, 0.3 dB (B.3.1);
@@ -594,7 +594,7 @@ encourages, and the note to (B.3) allows doing so band by band.
 | `discrepancy_uncertainty_db` | Standard uncertainty $u_\mathrm{dps}$, in dB (Default: $2/\sqrt{3}$). |
 | `linearity_uncertainty_db` | Standard uncertainty $u_\mathrm{lin}$, in dB (Default: $1.5/(2\sqrt{3})$). |
 
-**Returns:** The [`DrivingPointUncertainty`](/phonometry/reference/api/vibration/transfer-stiffness/#drivingpointuncertainty).
+**Returns:** The [`DrivingPointUncertainty`](/reference/api/vibration/transfer-stiffness/#drivingpointuncertainty).
 
 **Raises**
 
@@ -683,13 +683,13 @@ with fewer than five lines; the NOTE to clause 9 m) accepts
 narrow-band data there, so those bands are left undetermined without
 a warning.
 
-**Returns:** The [`BandAveragedStiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
+**Returns:** The [`BandAveragedStiffness`](/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
 
 **Warns**
 
 | Warning | When |
 | :--- | :--- |
-| TransferStiffnessWarning | when a band above 20 Hz holds fewer than [`MIN_FREQUENCIES_PER_BAND`](/phonometry/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) valid lines. |
+| TransferStiffnessWarning | when a band above 20 Hz holds fewer than [`MIN_FREQUENCIES_PER_BAND`](/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) valid lines. |
 
 ### DrivingPointStiffnessResult.levels
 
@@ -868,7 +868,7 @@ supported on soft springs (a mass-spring resonance below 10 Hz), the
 force `F2` applied along the axis through its centre of mass, and the
 two accelerometers placed symmetrically inside the contact area `S` a
 distance $\sqrt{S}$ apart; the force and acceleration measurements
-follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/reference/api/vibration/transfer-stiffness/#effectiveblockingmass) for
+follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/reference/api/vibration/transfer-stiffness/#effectiveblockingmass) for
 `f3`.
 
 **Parameters**
@@ -881,7 +881,7 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 | `second_acceleration_m_s2` | Acceleration phasor $a''_1$, in m/s², one per frequency. |
 | `blocking_mass` | The mass `m2` of the block, in kg. |
 
-**Returns:** The [`EffectiveBlockingMass`](/phonometry/reference/api/vibration/transfer-stiffness/#effectiveblockingmass).
+**Returns:** The [`EffectiveBlockingMass`](/reference/api/vibration/transfer-stiffness/#effectiveblockingmass).
 
 **Raises**
 
@@ -1002,13 +1002,13 @@ indirect_transfer_stiffness_result(
 ) -> TransferStiffnessResult
 ```
 
-Indirect-method transfer stiffness bundled as a [`TransferStiffnessResult`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresult).
+Indirect-method transfer stiffness bundled as a [`TransferStiffnessResult`](/reference/api/vibration/transfer-stiffness/#transferstiffnessresult).
 
-See [`transfer_stiffness_indirect`](/phonometry/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) for the ISO 10846-3 validity
+See [`transfer_stiffness_indirect`](/reference/api/vibration/transfer-stiffness/#transfer_stiffness_indirect) for the ISO 10846-3 validity
 conditions (Inequalities (2) and (3)); bands with $|T| > 0.1$
-trigger a [`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning), and the result marks them
-not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresultvalid), so that
-[`band_average`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresultband_average) leaves them out.
+trigger a [`TransferStiffnessWarning`](/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning), and the result marks them
+not [`valid`](/reference/api/vibration/transfer-stiffness/#transferstiffnessresultvalid), so that
+[`band_average`](/reference/api/vibration/transfer-stiffness/#transferstiffnessresultband_average) leaves them out.
 
 **Parameters**
 
@@ -1019,7 +1019,7 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 | `blocking_mass` | Blocking mass `m2`, in kg (> 0). |
 | `flange_mass` | Output-flange mass `mf`, in kg (Default: 0.0). |
 
-**Returns:** The [`TransferStiffnessResult`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnessresult) (indirect method).
+**Returns:** The [`TransferStiffnessResult`](/reference/api/vibration/transfer-stiffness/#transferstiffnessresult) (indirect method).
 
 **Raises**
 
@@ -1373,10 +1373,10 @@ mass/spring resonance).
 of Formula (1) is required accurate within 1 dB, i.e. within 12 % of the
 calculated stiffness magnitude. This holds only where Inequality (2) is
 met: $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20$ dB, i.e.
-$|T| \le 0.1$ ([`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Lines with
+$|T| \le 0.1$ ([`TRANSMISSIBILITY_LIMIT`](/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Lines with
 `|T|` above that limit
 (routine near or below the mass/spring resonance) trigger a
-[`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning); the result marks each of them as not
+[`TransferStiffnessWarning`](/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning); the result marks each of them as not
 valid, and its band average leaves them out. The upper frequency limit
 `f3` additionally requires the blocking mass to vibrate as a rigid
 body: results are valid only while its effective mass `m2,eff`,
@@ -1385,7 +1385,7 @@ $m_{2,\mathrm{eff}} = 2 F_2 / (a'_1 + a''_1)$ (two accelerometers
 spaced $D = \sqrt{S}$ across the contact area), stays within 1 dB
 of the rigid mass,
 $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
-(Inequality (3), 6.2.3); [`effective_blocking_mass`](/phonometry/reference/api/vibration/transfer-stiffness/#effective_blocking_mass) finds `f3`.
+(Inequality (3), 6.2.3); [`effective_blocking_mass`](/reference/api/vibration/transfer-stiffness/#effective_blocking_mass) finds `f3`.
 
 **Parameters**
 
@@ -1486,17 +1486,17 @@ One-third-octave-band averages of $k_{2,1}$ (every part's band average).
 
 ISO 10846-2:2008 Formula (6), ISO 10846-3:2002 Formula (7) and
 ISO 10846-4:2003 Formula (11) average the squared magnitude over the
-narrow-band lines of each band; see [`band_averaged_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#band_averaged_stiffness).
+narrow-band lines of each band; see [`band_averaged_stiffness`](/reference/api/vibration/transfer-stiffness/#band_averaged_stiffness).
 Lines `valid` marks as failing their adequacy conditions are
 left out, as the parts require.
 
-**Returns:** The [`BandAveragedStiffness`](/phonometry/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
+**Returns:** The [`BandAveragedStiffness`](/reference/api/vibration/transfer-stiffness/#bandaveragedstiffness).
 
 **Warns**
 
 | Warning | When |
 | :--- | :--- |
-| TransferStiffnessWarning | when a band holds fewer than [`MIN_FREQUENCIES_PER_BAND`](/phonometry/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) valid lines. |
+| TransferStiffnessWarning | when a band holds fewer than [`MIN_FREQUENCIES_PER_BAND`](/reference/api/vibration/transfer-stiffness/#min_frequencies_per_band) valid lines. |
 
 ### TransferStiffnessResult.levels
 
@@ -1581,7 +1581,7 @@ no pass/fail verdict.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested resilient element) and the footer identity; the `requirement` field is ignored. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested resilient element) and the footer identity; the `requirement` field is ignored. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the transfer-stiffness fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -1607,7 +1607,7 @@ Convert $k_{2,1}$ to an FRF (ISO 10846-1 Annex A / Table A.2).
 
 `target` is `"impedance"` ($Z = k/(j\omega)$) or
 `"apparent_mass"` ($m_{\mathrm{eff}} = -k/\omega^2$); see
-[`phonometry.vibration.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
+[`phonometry.vibration.convert_frf`](/reference/api/vibration/mechanical-mobility/#convert_frf).
 
 **Raises**
 
@@ -1626,7 +1626,7 @@ fail "shall be excluded from the evaluation of the dynamic stiffness
 function", ISO 10846-2, -4 and -5 7.6.1, ISO 10846-3 7.5.1). The
 indirect method reads it from Inequality (2), $|T| \le 0.1$;
 `None` for the direct method, whose conditions are judged by
-[`check_blocked_output`](/phonometry/reference/api/vibration/transfer-stiffness/#check_blocked_output) and [`check_unwanted_input`](/phonometry/reference/api/vibration/transfer-stiffness/#check_unwanted_input).
+[`check_blocked_output`](/reference/api/vibration/transfer-stiffness/#check_blocked_output) and [`check_unwanted_input`](/reference/api/vibration/transfer-stiffness/#check_unwanted_input).
 
 ## TransferStiffnessWarning
 

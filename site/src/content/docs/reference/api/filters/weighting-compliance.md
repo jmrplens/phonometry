@@ -39,7 +39,7 @@ One subject: the weighting network a sound level meter applies to the whole
 signal, whose acceptance limits qualify the deviation of its measured relative
 response from a design goal at the nominal frequencies. The band-filter class
 limits of IEC 61260-1, which qualify a relative attenuation against a mask
-around each mid-band frequency, live in [`phonometry.filters.compliance`](/phonometry/reference/api/filters/compliance/).
+around each mid-band frequency, live in [`phonometry.filters.compliance`](/reference/api/filters/compliance/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -111,7 +111,7 @@ samples, so raise `n_sweep_points` for higher-Q suspects (the verdict
 attests the sampled grid, not a continuous proof).
 
 The response is taken over the whole path a signal travels through
-[`filter`](/phonometry/reference/api/filters/weighting/#weightingfilterfilter), which is one cascade of
+[`filter`](/reference/api/filters/weighting/#weightingfilterfilter), which is one cascade of
 second-order sections at the input rate for every curve and in both
 stateful and single-shot use. It used to be more than that: the sections
 were reached through an interpolation and a decimation stage whose
@@ -138,7 +138,7 @@ over the standard's full frequency range.
 | `n_sweep_points` | Number of points of the 5.5.7 between-nominals sweep (>= 64). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 
-**Returns:** A [`WeightingComplianceResult`](/phonometry/reference/api/filters/weighting-compliance/#weightingcomplianceresult), which carries the class together with the per-frequency verdicts it rests on, the between-nominals sweep and the filter it was measured on.
+**Returns:** A [`WeightingComplianceResult`](/reference/api/filters/weighting-compliance/#weightingcomplianceresult), which carries the class together with the per-frequency verdicts it rests on, the between-nominals sweep and the filter it was measured on.
 
 **Raises**
 
@@ -175,7 +175,7 @@ footnote makes one mask govern every weighting characteristic, B included.
 | `weighting_class` | Performance class: 1 or 2 for `edition="2013"`; 0, 1, 2 or 3 for `edition="1979"`, where class N is the standard's instrument Type N. |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, which adds the stricter Type 0 and a Type 3). |
 
-**Returns:** The 34 nominal frequencies (Hz) and the lower and upper deviation limits in dB, as a [`WeightingClassLimits`](/phonometry/reference/api/filters/weighting-compliance/#weightingclasslimits). A lower limit of `-inf` means only the upper limit applies.
+**Returns:** The 34 nominal frequencies (Hz) and the lower and upper deviation limits in dB, as a [`WeightingClassLimits`](/reference/api/filters/weighting-compliance/#weightingclasslimits). A lower limit of `-inf` means only the upper limit applies.
 
 **Raises**
 
@@ -196,7 +196,7 @@ WeightingClassLimits(
 
 The acceptance limits of one performance class of a weighting standard.
 
-What [`weighting_class_limits`](/phonometry/reference/api/filters/weighting-compliance/#weighting_class_limits) returns: the nominal frequencies and
+What [`weighting_class_limits`](/reference/api/filters/weighting-compliance/#weighting_class_limits) returns: the nominal frequencies and
 the two limits on the deviation from the design goal, named, lower first,
 where a `(frequencies, lower, upper)` tuple used to be unpacked by
 position.
@@ -222,9 +222,9 @@ WeightingComplianceResult(
 )
 ```
 
-Class verdict of a [`WeightingFilter`](/phonometry/reference/api/filters/weighting/#weightingfilter).
+Class verdict of a [`WeightingFilter`](/reference/api/filters/weighting/#weightingfilter).
 
-What [`verify_weighting_class`](/phonometry/reference/api/filters/weighting-compliance/#verify_weighting_class) returns: the two readings the verdict
+What [`verify_weighting_class`](/reference/api/filters/weighting-compliance/#verify_weighting_class) returns: the two readings the verdict
 rests on, the tabulated frequencies and the sweep between them, and the
 filter it was measured on. The classes and the range are read from them
 and the edition's table, so they are not fields: a verdict cannot be

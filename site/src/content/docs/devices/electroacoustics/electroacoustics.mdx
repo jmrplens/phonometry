@@ -52,13 +52,13 @@ path), so the numbers are verifiable rather than tuned.
 
 Everything here is measured on a captured signal. What a transducer datasheet
 then makes of those curves is the subject of the two type-test guides,
-[Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/)
-and [Microphone Characterisation (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/),
+[Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/)
+and [Microphone Characterisation (IEC 60268-4)](/devices/electroacoustics/microphones/),
 which own the sensitivity conventions, the polar patterns and the
 rated-characteristics fiches. The one-sweep alternative to the steady-tone
 tests of sections 1 and 2, with THD as a continuous function of the excitation
 frequency, is
-[Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/).
 
 ## 0. What is captured, and under what conditions
 
@@ -395,7 +395,7 @@ of the second, and the bullets run in clause order:
   that fall below $f_\text{sine}$ (IEC 60268-3 Table 2), relative to the 15 kHz
   sine amplitude
   (the 14.12.9.1 definition; the 14.12.9.2 f) print of the denominator is an
-  editorial defect, see the [errata registry](/phonometry/reference/errata/)).
+  editorial defect, see the [errata registry](/reference/errata/)).
 - **Total difference-frequency distortion** (14.12.10): the 14.12.8 test with
   its tones fixed ($f_1 = 2f_0$, $f_2 = 3f_0 - \delta$; the standard tones
   8 kHz and 11.95 kHz are the defaults) and only the two in-band products at
@@ -479,7 +479,7 @@ test keeps only the two products that the fixed tone pair drops near $f_0$; DIM
 counts every $|k f_\text{square} \pm f_\text{sine}|$ that lands below the sine.
 The denominator differs too: $a_{f_1} + a_{f_2}$ for the first two, the sine
 amplitude alone for DIM, which is the quantity the
-[errata registry](/phonometry/reference/errata/) entry is about.*
+[errata registry](/reference/errata/) entry is about.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -551,7 +551,7 @@ several times longer than it, because an uncompensated delay both tilts the
 $H_1$ phase and depresses $\gamma^2$ band by band. `transfer_function` picks
 `nperseg` for about 4 Hz resolution when you do not give it one; the physical
 arrangement is the one drawn on
-[Two-channel system measurement](/phonometry/signals/spectra/system-measurement/).
+[Two-channel system measurement](/signals/spectra/system-measurement/).
 
 **Reading the coherence.** A value below one has three physically distinct
 causes and they are told apart by experiment: extraneous noise on either
@@ -651,12 +651,12 @@ captured array and compute the ratio the clause defines, so the bench, the
 operating point and the three acceptance checks are the reader's to keep.
 Other parts of the IEC 60268 series sit outside this page: Part 16 (objective
 speech intelligibility) is implemented as the speech transmission index in
-[Speech Transmission](/phonometry/perception/speech/speech-transmission/), and
+[Speech Transmission](/perception/speech/speech-transmission/), and
 the Part 4 microphone and Part 5 loudspeaker rated-characteristics reports
 have moved to [Microphone
-Characterisation](/phonometry/devices/electroacoustics/microphones/) and
+Characterisation](/devices/electroacoustics/microphones/) and
 [Loudspeaker
-Characterisation](/phonometry/devices/electroacoustics/loudspeakers/). The
+Characterisation](/devices/electroacoustics/loudspeakers/). The
 implemented editions are frozen at AES17-2015; the superseding AES17-2020
 revision is not the one checked.
 </ScopeClaim>
@@ -666,20 +666,20 @@ revision is not the one checked.
 
 ## See also
 
-- [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
+- [Loudspeaker Characterisation (IEC 60268-5)](/devices/electroacoustics/loudspeakers/):
   the sensitivity conventions, the radiating piston and the
   rated-characteristics report these measurements feed.
-- [Microphone Characterisation (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/):
+- [Microphone Characterisation (IEC 60268-4)](/devices/electroacoustics/microphones/):
   the microphone sensitivity references, directional patterns, noise
   weightings and rated-characteristics report.
-- [Industrial noise control](/phonometry/devices/noise-control/noise-control/): HVAC duct
+- [Industrial noise control](/devices/noise-control/noise-control/): HVAC duct
   methods and machine enclosures on the receiving end of a noisy device.
-- [Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/): the
+- [Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/): the
   Farina/Novak harmonic separation whose THD(f) feeds the loudspeaker
   distortion panel.
-- [Two-channel system measurement](/phonometry/signals/spectra/system-measurement/):
+- [Two-channel system measurement](/signals/spectra/system-measurement/):
   the physical arrangement behind the $H_1$ estimate of section 5, with the
   reference tap and the two synchronous channels drawn.
-- API reference: [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](/phonometry/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](/phonometry/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/).
+- API reference: [`electroacoustics.distortion`](/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](/reference/api/electroacoustics/noise-measurements/) and [`electroacoustics.frequency_response`](/reference/api/electroacoustics/frequency-response/).
 
 </SeeAlso>

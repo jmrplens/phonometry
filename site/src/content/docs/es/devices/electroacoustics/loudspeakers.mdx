@@ -65,8 +65,8 @@ criterio de Long de **ganancia antes de la realimentación**
 realimentación, el margen de estabilidad de 10 dB y la corrección por número de
 micrófonos abiertos. Las mediciones de distorsión y respuesta en
 frecuencia que lo alimentan viven en
-[Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/); el homólogo de
-micrófono tiene [su propia guía](/phonometry/es/devices/electroacoustics/microphones/).
+[Electroacústica](/es/devices/electroacoustics/electroacoustics/); el homólogo de
+micrófono tiene [su propia guía](/es/devices/electroacoustics/microphones/).
 
 ## 1. Convenciones de sensibilidad (IEC 60268-5)
 
@@ -76,7 +76,7 @@ detrás, y la del altavoz es la que hace tropezar a cualquiera: una normalizaci�
 de potencia y distancia con dos trampas independientes en una sola frase del
 apartado 20.3.
 (La trampa del micrófono es el *valor de referencia*, y tiene
-[su propia sección](/phonometry/es/devices/electroacoustics/microphones/#1-la-sensibilidad-y-sus-referencias-iec-60268-4-apartado-11).)
+[su propia sección](/es/devices/electroacoustics/microphones/#1-la-sensibilidad-y-sus-referencias-iec-60268-4-apartado-11).)
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield.svg" alt="Medición de la sensibilidad de un altavoz en campo libre según IEC 60268-5: un altavoz sobre un soporte en una cámara anecoica, alimentado por un amplificador a 2,83 V, con un micrófono de medición a la distancia de referencia r = 1 m sobre el eje de referencia, y las relaciones que gobiernan: la sensibilidad característica como Lp a 1 m para 1 W en la impedancia nominal, la tensión de excitación Up = raíz de (R por 1 W), la referencia por distancia inversa Lp(1 m) = Lp(r) + 20 lg(r / 1 m), y la sensibilidad de micrófono de IEC 60268-4 en mV/Pa o dB re 1 V/Pa" width="92%" />
 
@@ -150,7 +150,7 @@ añade un paso de preacondicionamiento antes de todo esto: una señal de program
 simulada a la tensión de ruido nominal durante al menos 1 h, y después al
 menos 1 h desconectado. La señal es la del capítulo 7 de IEC 60268-1, que
 genera `electroacoustics.simulated_program_signal`; la guía de
-[Auriculares (IEC 60268-7)](/phonometry/es/devices/electroacoustics/headphones/)
+[Auriculares (IEC 60268-7)](/es/devices/electroacoustics/headphones/)
 la construye a partir de su tabla y de su filtro.
 
 **La excitación, que no es una sinusoide.** Una sensibilidad característica se mide
@@ -187,7 +187,7 @@ tiene que venir empalmado de una medición en campo cercano o en semiespacio.
 Esa es también la razón de que una curva enventanada y una curva anecoica
 discrepen por debajo de unos pocos cientos de hercios. La maquinaria de
 enventanado es la misma que la de
-[Respuesta al impulso de una sala](/phonometry/es/buildings/rooms/room-impulse-response/).
+[Respuesta al impulso de una sala](/es/buildings/rooms/room-impulse-response/).
 
 <span id="piston-radiante"></span>
 
@@ -267,7 +267,7 @@ mecánicas, la `radiation_mass`, el `directivity_index`, el patrón de campo lej
 `plot_piston_geometry` también son invocables directamente, el último de ellos
 sin objeto de resultado ninguno. El pistón es el modelo de radiador
 complementario de los
-[silenciadores reactivos](/phonometry/es/devices/noise-control/silencers/).
+[silenciadores reactivos](/es/devices/noise-control/silencers/).
 
 :::note[Hasta dónde llega el modelo]
 Cada palabra de «pistón circular rígido en pantalla infinita» es una hipótesis
@@ -474,7 +474,7 @@ sobre el círculo de referencia de 25 dB de IEC 60263. El módulo de impedancia
 la directividad alimentan los paneles secundarios, reutilizando la directividad
 del [pistón radiante](#piston-radiante)
 de la sección 2 y un resultado de
-[distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/)
+[distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/)
 para la curva de distorsión.
 
 Las características nominales también están disponibles de forma interactiva
@@ -786,7 +786,7 @@ mediciones, no suposiciones. Tómalos en este orden.
    $Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}}$.
 5. **Lee $D_\mathrm{M}(\theta)$** en los propios datos polares del micrófono, en la
    dirección en que queda el altavoz *respecto al* hablante (véase la
-   [familia de patrones](/phonometry/es/devices/electroacoustics/microphones/#patron-direccional))
+   [familia de patrones](/es/devices/electroacoustics/microphones/#patron-direccional))
    en vez de suponerlo. Vale cero para una cápsula omnidireccional apunte a
    donde apunte.
 
@@ -809,7 +809,7 @@ $-D_\mathrm{M}(\theta)$, lo que convertiría la ventaja de un micrófono direcci
 penalización. `feedback_stability` implementa el signo de la ec. (18.20), de
 modo que con $N_\mathrm{m} = 1$ reproduce exactamente los casos particulares del propio
 Long. El defecto queda recogido en el
-[registro de erratas](/phonometry/es/reference/errata/).
+[registro de erratas](/es/reference/errata/).
 :::
 
 ### Parámetros de `feedback_stability()`
@@ -869,7 +869,7 @@ implementada: el
 panel de impedancia presenta el módulo medido frente a las líneas de
 impedancia nominal. La propia curva de distorsión procede de una medición, por
 ejemplo de la cadena de [distorsión con barrido
-sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/).
 El criterio de realimentación es una contabilidad de niveles, no un modelo
 acústico: consume los dos niveles de campo directo que produce el altavoz y no
 los calcula a partir de un patrón de cobertura, ni predice la frecuencia de
@@ -884,25 +884,25 @@ directo-reverberante entra en el diseño por separado.
 
 ## Véase también
 
-- [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/): el conjunto de
+- [Electroacústica](/es/devices/electroacoustics/electroacoustics/): el conjunto de
   distorsión de IEC 60268-3, THD+N y SINAD, la intermodulación y los
   estimadores de respuesta en frecuencia $H_1$/$H_2$ que producen las curvas
   que esta guía presenta.
-- [Caracterización de micrófonos (IEC 60268-4)](/phonometry/es/devices/electroacoustics/microphones/):
+- [Caracterización de micrófonos (IEC 60268-4)](/es/devices/electroacoustics/microphones/):
   el informe de características nominales homólogo para el lado de medición
   de la cadena.
-- [Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/):
+- [Distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/):
   la separación de armónicos de Farina/Novak cuya THD(f) alimenta el panel
   de distorsión.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): el descriptor de
+- [Potencia acústica](/es/devices/emission/sound-power/): el descriptor de
   potencia radiada, para cuando la pregunta es cuánta potencia acústica emite
   la fuente y no cómo responde en el eje.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   los resultados analíticos exactos frente a los que se comprueba el pistón (la
   resistencia y la reactancia de radiación, su límite de baja frecuencia, la
   masa de radiación, el primer nulo de directividad y el índice de directividad
   de 3,01 dB del semiespacio), y los dos casos particulares de Long del
   criterio de realimentación.
-- Referencia de la API: [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/es/reference/api/electroacoustics/loudspeaker/) y [`electroacoustics.sound_reinforcement`](/phonometry/es/reference/api/electroacoustics/sound-reinforcement/).
+- Referencia de la API: [`electroacoustics.piston`](/es/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/es/reference/api/electroacoustics/loudspeaker/) y [`electroacoustics.sound_reinforcement`](/es/reference/api/electroacoustics/sound-reinforcement/).
 
 </SeeAlso>

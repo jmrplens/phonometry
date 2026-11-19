@@ -13,7 +13,7 @@ coherence of each source with the output is misleading: a source that only
 Bendat & Piersol, *Random Data: Analysis and Measurement Procedures*
 (4th ed., 2010, Chapter 7), resolve this with the multiple-input/output
 (MISO) coherence functions, computed here from the Welch cross-spectral
-machinery of [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/):
+machinery of [`phonometry.signals.spectra`](/reference/api/signals/spectra/):
 
 * the **ordinary coherence**
   $\gamma^2_{iy} = \lvert G_{iy} \rvert^2 / (G_{ii} G_{yy})$
@@ -74,7 +74,7 @@ Multiple and partial coherence of a MISO system (Bendat & Piersol 7).
 
 Estimates every auto- and cross-spectrum of the `q` inputs and the
 output by the shared Welch core of
-[`cross_spectral_density`](/phonometry/reference/api/signals/spectra/#cross_spectral_density) (Hann taper
+[`cross_spectral_density`](/reference/api/signals/spectra/#cross_spectral_density) (Hann taper
 and 50 % overlap by default, no detrending), then:
 
 * reports the **ordinary coherence** of each input with the output
@@ -97,16 +97,16 @@ ordering the inputs by descending ordinary coherence with the output.
 
 | Name | Description |
 | :--- | :--- |
-| `inputs` | The `q` input records (`q >= 2`), a sequence (or any iterable, a generator included) of equal-length 1-D arrays or a 2-D `(q, n)` array. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) whose channels are the records, or a sequence with Signals among its elements; their calibration is applied to the samples, and Signals recorded at different rates are refused rather than arbitrated. |
-| `output` | The output record, 1-D, same length as the inputs. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the output autospectrum and the coherent output spectra come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. Every coherence is a ratio and does not move. |
-| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `inputs` | The `q` input records (`q >= 2`), a sequence (or any iterable, a generator included) of equal-length 1-D arrays or a 2-D `(q, n)` array. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) whose channels are the records, or a sequence with Signals among its elements; their calibration is applied to the samples, and Signals recorded at different rates are refused rather than arbitrated. |
+| `output` | The output record, 1-D, same length as the inputs. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the output autospectrum and the coherent output spectra come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. Every coherence is a ratio and does not move. |
+| `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `order` | Conditioning order as input indices (default `0..q-1`). |
 | `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units²). |
 
-**Returns:** A [`MISOCoherenceResult`](/phonometry/reference/api/signals/miso/#misocoherenceresult).
+**Returns:** A [`MISOCoherenceResult`](/reference/api/signals/miso/#misocoherenceresult).
 
 **Raises**
 

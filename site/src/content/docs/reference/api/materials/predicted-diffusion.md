@@ -29,8 +29,8 @@ against without something like this.
 The angle is a row, not a column
 ---------------------------------
 The page prints three lines per surface, headed 0, 57 and Random, so a surface
-is three rows here and [`variant`](/phonometry/reference/api/io/io/#cataloguerow)
-says which. The first two carry [`NormalizedDiffusionSpectrum.angle_of_incidence_deg`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum);
+is three rows here and [`variant`](/reference/api/io/io/#cataloguerow)
+says which. The first two carry [`NormalizedDiffusionSpectrum.angle_of_incidence_deg`](/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum);
 the random one has none to carry, because it is an arithmetic mean over ten
 angles and belongs to no single one, and asking it for the field gets that
 sentence rather than a number.
@@ -72,7 +72,7 @@ Every row whose description or section heading contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description or of the numbered heading above it, matched without case. The heading is where the geometry is, so `"semiellipse"` and `"Schroeder"` find their sections and `"6 periods"` finds the rows that say so. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DIFFUSION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DIFFUSION`](/reference/api/materials/predicted-diffusion/#published_diffusion): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DIFFUSION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DIFFUSION`](/reference/api/materials/predicted-diffusion/#published_diffusion)). |
 
 **Returns:** The rows that match, in catalogue order, which is empty when no row has one. A surface answers with its three angles.
 
@@ -80,7 +80,7 @@ Every row whose description or section heading contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NormalizedDiffusionSpectrum`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NormalizedDiffusionSpectrum`](/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum), naming its key. |
 
 ## NormalizedDiffusionSpectrum
 
@@ -154,12 +154,12 @@ One surface at one angle of incidence, with its coefficient in each band.
 | `diffusion_coefficient_3150` | The same in the 3.15 kHz band. |
 | `diffusion_coefficient_4000` | The same in the 4 kHz band. |
 | `diffusion_coefficient_5000` | The same in the 5 kHz band. |
-| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says so rather than leaving the caller to guess at a zero. |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) says so rather than leaving the caller to guess at a zero. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -191,7 +191,7 @@ The bands this row prints a value for, in hertz.
 NormalizedDiffusionSpectrum.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -216,7 +216,7 @@ The coefficient in one band, or a refusal that says what the page had.
 
 | Name | Description |
 | :--- | :--- |
-| `band_hz` | A one-third octave centre frequency from [`DIFFUSION_BANDS_HZ`](/phonometry/reference/api/materials/predicted-diffusion/#diffusion_bands_hz). |
+| `band_hz` | A one-third octave centre frequency from [`DIFFUSION_BANDS_HZ`](/reference/api/materials/predicted-diffusion/#diffusion_bands_hz). |
 
 **Returns:** The printed normalized diffusion coefficient, dimensionless.
 
@@ -243,7 +243,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -395,7 +395,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### NormalizedDiffusionSpectrum.values_at()
@@ -427,7 +427,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 

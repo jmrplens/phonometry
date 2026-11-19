@@ -543,7 +543,7 @@ dos micrófonos de ISO 10534-2. La biblioteca aporta la geometría del método p
 y las funciones auxiliares de validez; el propio DSP de la función de
 transferencia es la
 rutina de tubo de impedancia `two_microphone_impedance` (véase la
-[guía del Tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/)).
+[guía del Tubo de impedancia](/es/materials/absorbers/impedance-tube/)).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube.svg" alt="Método puntual de ISO 13472-2: un tubo circular corto sellado sobre la superficie del pavimento con un altavoz en la parte superior y dos micrófonos enrasados en la pared del tubo con espaciado s, midiendo la absorción de 250 a 1600 Hz mediante el método de la función de transferencia de dos micrófonos de ISO 10534-2" width="92%" />
 
@@ -763,7 +763,7 @@ arriba. El procesado de función de transferencia propio de la ISO 13472-2
 tampoco está implementado en este módulo: solo se proporcionan la geometría,
 las funciones de validación y las correcciones, y el DSP de dos micrófonos
 real es la rutina ISO 10534-2 de la [guía del Tubo de
-impedancia](/phonometry/es/materials/absorbers/impedance-tube/). Tampoco se
+impedancia](/es/materials/absorbers/impedance-tube/). Tampoco se
 hacen cumplir en ningún sitio del código ni la adquisición en sí ni los
 filtros de campo: el promediado, la referencia de campo libre, las
 comprobaciones de señal-ruido, la verificación del sellado y los límites
@@ -776,21 +776,21 @@ biblioteca solo ve los dos arrays que salen de ellos.
 
 ## Véase también
 
-- [Tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/): el método de
+- [Tubo de impedancia](/es/materials/absorbers/impedance-tube/): el método de
   dos micrófonos ISO 10534-2 al que el tubo puntual confía sus matemáticas, y
   el instrumento de laboratorio que el método puntual miniaturiza.
-- [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/): la otra
+- [Difusores y sus coeficientes](/es/materials/diffusers/diffusers/): la otra
   familia de medidas de superficie, que valora adónde envía una superficie
   su reflexión en lugar de cuánto absorbe.
-- [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
+- [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/):
   la medición de absorción de laboratorio (cámara reverberante) y su
   clasificación, para materiales que sí pueden llevarse a cubierto.
-- [Propagación en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):
+- [Propagación en exteriores](/es/environment/propagation/outdoor-propagation/):
   donde la absorción de la superficie del suelo entra en los modelos de
   propagación.
-- Referencia de la API: [`materials.surfaces.road_absorption`](/phonometry/es/reference/api/materials/road-absorption/).
-- Teoría: [Absorción in situ de pavimentos de carretera](/phonometry/es/reference/theory/materials-surfaces/#absorcion-in-situ-de-pavimentos-de-carretera-iso-13472-1-iso-13472-2): la sustracción de ISO 13472 y la geometría que hace posible una medición in situ.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/ground-surfaces/): la
+- Referencia de la API: [`materials.surfaces.road_absorption`](/es/reference/api/materials/road-absorption/).
+- Teoría: [Absorción in situ de pavimentos de carretera](/es/reference/theory/materials-surfaces/#absorcion-in-situ-de-pavimentos-de-carretera-iso-13472-1-iso-13472-2): la sustracción de ISO 13472 y la geometría que hace posible una medición in situ.
+- [Catálogos publicados](/es/reference/catalogues/ground-surfaces/): la
   resistividad al flujo y los parámetros de modelo que imprimen los libros
   para hierba, nieve, asfalto y el resto de superficies de suelo.
 

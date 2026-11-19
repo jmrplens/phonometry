@@ -161,10 +161,10 @@ procedimiento de arriba.*
 
 - Si necesitas **envolventes Fast/Slow/Impulse conformes con la norma**
   (comportamiento de sonómetro, un nivel por muestra), usa
-  [`time_weighting`](/phonometry/es/signals/levels/time-weighting/) de phonometry.
+  [`time_weighting`](/es/signals/levels/time-weighting/) de phonometry.
 - Si necesitas un **$L_\mathrm{eq}$ promediado por bloques para cada intervalo**, esa
   es una métrica distinta e igualmente válida; puedes calcularla con
-  [`leq`](/phonometry/es/signals/levels/levels/) sobre segmentos consecutivos.
+  [`leq`](/es/signals/levels/levels/) sobre segmentos consecutivos.
 - Ambos enfoques son útiles; simplemente responden a preguntas distintas. La
   discrepancia descrita en la issue #38 proviene de comparar una
   envolvente continua con un integrador por bloques, no de un error de
@@ -215,7 +215,7 @@ electroacústica, la sonoridad de programa, el control de ruido industrial, el
 análisis espectral calibrado y la simulación FDTD de ondas. El informe numérico
 completo (el valor esperado y el valor que calcula la biblioteca para cada
 comprobación, regenerado en cada pull request) está publicado como
-[informe de conformidad](/phonometry/es/reference/conformance/).
+[informe de conformidad](/es/reference/conformance/).
 
 La misma costumbre de «primero la norma» aparece por debajo del nivel de las
 métricas completas, en la parte numérica. Los bancos de filtros sitúan sus
@@ -224,7 +224,7 @@ tres arquitecturas cuya parametrización lo permite, Butterworth, Chebyshev II y
 Bessel, las dos últimas mediante correcciones que la parametrización en bruto de
 scipy no aplicaría; Chebyshev I y el elíptico leen esos mismos bordes como su
 borde de banda de paso con rizado constante, algo que se declara con su coste
-medido en [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/). El
+medido en [Bancos de filtros](/es/signals/filters/filter-banks/). El
 banco Butterworth por defecto se verifica también frente a la clase 0, más
 estricta, de la edición retirada IEC 61260:1995 / ANSI S1.11-2004 además de
 frente a la clase 1 vigente. Y la ponderación A/C obtiene la
@@ -233,7 +233,7 @@ la califica, de 8 a 192 kHz, en todas las frecuencias de la Tabla 3 por
 debajo del Nyquist de cada una, porque el prototipo analógico se ajusta a la
 frecuencia de muestreo en lugar de transformarse a ciegas
 (consulta [Ponderación
-frecuencial](/phonometry/es/signals/levels/weighting/)).
+frecuencial](/es/signals/levels/weighting/)).
 
 ## Cuando lo que está mal es la fuente
 
@@ -245,7 +245,7 @@ una constante a la que la composición tipográfica le comió un dígito, una
 referencia cruzada que apunta a la ecuación equivocada.
 
 Esos casos no se parchean en silencio. Cada caso confirmado queda registrado en
-las [erratas de las fuentes publicadas](/phonometry/es/reference/errata/) con
+las [erratas de las fuentes publicadas](/es/reference/errata/) con
 la edición impresa y el punto exacto, lo que dice el documento, por qué no
 puede ser correcto, la evidencia independiente y la lectura que implementa la
 biblioteca. Cuando esa lectura cambia algún número que la biblioteca da, la
@@ -317,5 +317,5 @@ resultado, el propio objeto de resultado renderiza esa ficha de una página con
 `.report()`, en inglés o en español, de modo que el documento que entregas
 lleva los mismos números que la comprobación. Las fuentes que sustentan todo
 ello están reunidas en la
-[Bibliografía](/phonometry/es/reference/bibliography/), cada entrada con las
+[Bibliografía](/es/reference/bibliography/), cada entrada con las
 páginas que la citan y, cuando lo tiene, su DOI o el enlace oficial del editor.

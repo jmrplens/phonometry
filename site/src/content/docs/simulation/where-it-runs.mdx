@@ -56,7 +56,7 @@ On Linux the CPU line takes torch from PyTorch's CPU index first, because the
 torch that PyPI serves there brings gigabytes of CUDA libraries a CPU never
 uses.
 
-[Where a simulation runs](/phonometry/simulation/compute/) explains each
+[Where a simulation runs](/simulation/compute/) explains each
 device, the `use()` block and the `PHONOMETRY_COMPUTE` variable, the fallback
 to NumPy, what `provenance` records beside the device and the host (the
 dtype, the versions it ran with, the GPU and the package a node ran), and the
@@ -81,7 +81,7 @@ the phonometry you have here, sent once per version, and its answer is
 checked before it is trusted. An engine built directly (`FDTD2D`,
 `ElasticFDTD2D`) steps in this process: your own code drives it, step by
 step, and that cannot travel.
-[Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+[Sending a simulation to a remote node](/simulation/remote-node/)
 explains the hosts file, the node image and what each side trusts.
 
 ## Where a video is encoded
@@ -134,7 +134,7 @@ GIF is always written on the CPU.
 
 An animation you draw yourself is encoded here only: what travels to a node
 is what the library can draw again there, the two simulation writers.
-[Writing animations and FDTD runs to video](/phonometry/io/videos/) explains
+[Writing animations and FDTD runs to video](/io/videos/) explains
 the containers, the codecs, the encoders and the quality presets.
 
 ## Which to choose
@@ -171,15 +171,15 @@ are tried and used, and not tested in CI.
 
 ## See also
 
-- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+- [Where a simulation runs: NumPy, CuPy and torch](/simulation/compute/):
   every device, the `use()` block, `PHONOMETRY_COMPUTE`, `provenance` and what
   is promised on each.
-- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+- [Sending a simulation to a remote node](/simulation/remote-node/):
   the hosts file, the node image and what each side trusts.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/): the
+- [Writing animations and FDTD runs to video](/io/videos/): the
   containers, codecs, encoders and quality presets.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/) and
-  [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/) and
+  [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the two engines.
 
 </SeeAlso>

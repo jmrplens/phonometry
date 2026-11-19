@@ -45,12 +45,12 @@ cubre los propios motores: la regla de desplazamiento, los términos de
 adaptación espectral $C$, $C_\mathrm{tr}$ y $C_\mathrm{I}$, las variantes de rango ampliado
 y con un decimal, y la ficha ISO 717. Las mediciones que producen los
 espectros viven en las guías de
-[campo](/phonometry/es/buildings/insulation/insulation-field/),
-[laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
-[intensidad](/phonometry/es/buildings/insulation/insulation-intensity/),
-[método de control](/phonometry/es/buildings/insulation/insulation-survey/) y
-[flancos](/phonometry/es/buildings/insulation/flanking-lab/); la predicción que consume
-los índices es [EN 12354](/phonometry/es/buildings/design/insulation-prediction/).
+[campo](/es/buildings/insulation/insulation-field/),
+[laboratorio](/es/buildings/insulation/insulation-lab/),
+[intensidad](/es/buildings/insulation/insulation-intensity/),
+[método de control](/es/buildings/insulation/insulation-survey/) y
+[flancos](/es/buildings/insulation/flanking-lab/); la predicción que consume
+los índices es [EN 12354](/es/buildings/design/insulation-prediction/).
 
 ## ¿Cómo calculo Rw a partir de datos de reducción acústica en tercios de octava con Python?
 
@@ -132,7 +132,7 @@ radio, televisión), da $C$; el n.º 2, tráfico rodado urbano ponderado A, cuya
 energía se concentra en baja frecuencia, da $C_\mathrm{tr}$. De modo que el
 índice más el término ($R_\mathrm{w} + C$ para un índice de laboratorio, $R'_\mathrm{w} + C$ o
 $D_{\mathrm{n}T,\mathrm{w}} + C$ para las magnitudes de la
-[guía de campo](/phonometry/es/buildings/insulation/insulation-field/), e igual
+[guía de campo](/es/buildings/insulation/insulation-field/), e igual
 con $C_\mathrm{tr}$) es la diferencia de nivel ponderada A que la construcción
 consigue frente a esa fuente, que es lo que hace que lo que merece la pena
 especificar sea la suma y no el índice a secas. Para leerlos:
@@ -404,7 +404,7 @@ de ISO 717-2 (tercios $L_\mathrm{n,w} = 79$; octavas 54, $C_\mathrm{I} = 0$) y,
 leyendo $C_\mathrm{I}$ sobre la suma de 100–2500 Hz que fija A.2.1,
 $C_\mathrm{I} = -11$ en tercios. La edición de 2020 de la Tabla C.1 suma en esa
 celda las dieciséis bandas y da $-10$; la entrada del registro está en
-[Erratas](/phonometry/es/reference/errata/).
+[Erratas](/es/reference/errata/).
 
 ### Parámetros de `weighted_impact_rating()`
 
@@ -441,7 +441,7 @@ para poder mover
 $C_{50\text{–}3150}$ un decibelio entero. Así que una exigencia escrita como
 $D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ se juzga con el procedimiento en
 esquinas lo mencione o no el informe. Véase
-[Recintos pequeños: procedimiento de baja frecuencia](/phonometry/es/buildings/insulation/low-frequency-procedure/).
+[Recintos pequeños: procedimiento de baja frecuencia](/es/buildings/insulation/low-frequency-procedure/).
 
 ```python
 from phonometry import building
@@ -525,7 +525,7 @@ un recuadro, una fila de veredicto opcional y un pie con el descargo fijo.
 ($L_\mathrm{n,w}(C_\mathrm{I})$, con el signo contrario). `SoundReductionResult.report()` es
 una utilidad que valora el $R(f)$ predicho y escribe su ficha en una sola
 llamada; ese resultado sale de los modelos de panel EN 12354 de
-[Aislamiento acústico de paneles](/phonometry/es/buildings/design/panel-sound-insulation/),
+[Aislamiento acústico de paneles](/es/buildings/design/panel-sound-insulation/),
 así que es el único punto de entrada de aquí cuyo espectro de partida nunca se
 midió.
 
@@ -638,11 +638,11 @@ propios ejemplos resueltos del Anexo C de las normas.
 <ScopeClaim status="not-covered" label="No cubierto">
 Nada en esta página mide: cada función toma un espectro por bandas ya medido
 (o predicho) de las guías de
-[campo](/phonometry/es/buildings/insulation/insulation-field/),
-[laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
-[intensidad](/phonometry/es/buildings/insulation/insulation-intensity/),
-[método de control](/phonometry/es/buildings/insulation/insulation-survey/) o
-[flancos](/phonometry/es/buildings/insulation/flanking-lab/). El número único
+[campo](/es/buildings/insulation/insulation-field/),
+[laboratorio](/es/buildings/insulation/insulation-lab/),
+[intensidad](/es/buildings/insulation/insulation-intensity/),
+[método de control](/es/buildings/insulation/insulation-survey/) o
+[flancos](/es/buildings/insulation/flanking-lab/). El número único
 de fachada del Anexo F de ISO 16283-3 y el $D_\mathrm{n,f,w}$ de flancos reutilizan
 estos motores desde sus propias guías en lugar de duplicarlos. Un miembro de
 la familia ISO 717 falta a propósito: el nivel máximo de impactos ponderado A
@@ -650,7 +650,7 @@ del **Anexo D de ISO 717-2:2020**, que valora la pelota de caucho y la máquina
 de neumático. No desplaza curva alguna, es una suma energética de niveles de
 banda ponderados A, así que no lo produce ninguno de los dos motores de esta
 página y vive con las fuentes que valora, en [Fuentes de impacto pesadas y
-blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/).
+blandas](/es/buildings/insulation/heavy-impact-sources/).
 </ScopeClaim>
 </Scope>
 
@@ -658,29 +658,29 @@ blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/).
 
 ## Véase también
 
-- [Trasdosados, revestimientos, juntas, lluvia (ISO 10140-1)](/phonometry/es/buildings/insulation/lab-application-rules/):
+- [Trasdosados, revestimientos, juntas, lluvia (ISO 10140-1)](/es/buildings/insulation/lab-application-rules/):
   las mejoras $\Delta R_\mathrm{w}$ y $\Delta L_\mathrm{w}$ valoradas sobre
   las curvas de referencia de la Tabla E.1 de ISO 717-1 y la Tabla 4 de
   ISO 717-2.
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   los espectros aéreos, de impacto y de fachada que estos motores valoran en
   campo.
-- [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+- [Medición del aislamiento en laboratorio](/es/buildings/insulation/insulation-lab/):
   los $R$ y $L_\mathrm{n}$ de laboratorio tras $R_\mathrm{w}$ y $L_\mathrm{n,w}$.
-- [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
+- [Aislamiento acústico por intensidad (ISO 15186)](/es/buildings/insulation/insulation-intensity/):
   los índices por intensidad valorados con el mismo motor aéreo.
-- [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
+- [Método de control del aislamiento (ISO 10052)](/es/buildings/insulation/insulation-survey/):
   las magnitudes del método de control y sus índices automáticos.
-- [Transmisión por flancos en laboratorio (ISO 10848)](/phonometry/es/buildings/insulation/flanking-lab/):
+- [Transmisión por flancos en laboratorio (ISO 10848)](/es/buildings/insulation/flanking-lab/):
   los descriptores de flanco $D_\mathrm{n,f,w}$ y $L_\mathrm{n,f,w}$.
-- [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/):
+- [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/es/buildings/design/impact-improvement/):
   la mejora ponderada $\Delta L_\mathrm{w}$ construida sobre el suelo de referencia de
   ISO 717-2.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   el modelo de número único que consume estos índices.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la derivación
+- [Teoría](/es/reference/theory/rooms-buildings/): la derivación
   de la curva de referencia tras los índices globales ponderados.
-- Referencia de la API: [`building.measurement.insulation`](/phonometry/es/reference/api/building/insulation/).
+- Referencia de la API: [`building.measurement.insulation`](/es/reference/api/building/insulation/).
 
 </SeeAlso>
 

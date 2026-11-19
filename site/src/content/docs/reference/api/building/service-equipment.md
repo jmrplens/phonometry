@@ -14,7 +14,7 @@ pumps, car-park doors and, new in the revision, *activities*, the sources whose
 operation nobody on site controls (a restaurant's coolers, amplified music next
 door, a sports hall). It is the method a dispute over a noisy installation ends
 in; the survey method for the same quantities is ISO 10052
-([`survey_service_equipment_level`](/phonometry/reference/api/building/survey-insulation/#survey_service_equipment_level)).
+([`survey_service_equipment_level`](/reference/api/building/survey-insulation/#survey_service_equipment_level)).
 
 **Which text.** The implementation follows the draft of the second edition,
 ISO/DIS 16032:2023, in its German publication E DIN EN ISO 16032:2023-05
@@ -39,7 +39,7 @@ in the loudest corner of the room (7.2) and two in the reverberant field
 (7.3). When the three A-weighted readings differ by more than 3.0 dB the
 corner is measured again together with two new room positions, and a third
 time with two more if the spread of the six still reaches 6.0 dB (7.4.1,
-[`check_position_spread`](/phonometry/reference/api/building/service-equipment/#check_position_spread)). Every reading enters the band average of
+[`check_position_spread`](/reference/api/building/service-equipment/#check_position_spread)). Every reading enters the band average of
 Formula (1), rounded to one decimal (7.5):
 
 $$
@@ -48,7 +48,7 @@ $$
 
 A sound source in the room itself, a ventilation outlet for example, gets one
 additional position of its own (7.9,
-[`additional_microphone_position`](/phonometry/reference/api/building/service-equipment/#additional_microphone_position)), whose reading is reported separately,
+[`additional_microphone_position`](/reference/api/building/service-equipment/#additional_microphone_position)), whose reading is reported separately,
 never standardized and never averaged with the others.
 
 **Background (Clause 9).** With the background band level $L_2$ and the
@@ -63,7 +63,7 @@ $$
 and below 4 dB the correction is held at the 2.2 dB that a 4 dB difference
 gives, the band is reported as influenced by the background and the result is
 an upper limit of the equipment level
-([`service_equipment_background_correction`](/phonometry/reference/api/building/service-equipment/#service_equipment_background_correction)).
+([`service_equipment_background_correction`](/reference/api/building/service-equipment/#service_equipment_background_correction)).
 
 **Standardization and normalization (4.8, 7.7).** If a regulation asks for it,
 the corrected bands are referred to a reference reverberation time
@@ -94,31 +94,31 @@ range is refused.
 of a room-average band level, 1.9 dB at the lowest bands down to 1.0 dB from
 800 Hz up, and 0.8 dB and 1.2 dB for the A- and C-weighted values of a steady,
 flat sound at least 10 dB above the background. A result carries them as
-[`ServiceEquipmentResult.reproducibility_db`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult) and
-[`ServiceEquipmentResult.weighted_reproducibility_db`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresultweighted_reproducibility_db); the draft states no
+[`ServiceEquipmentResult.reproducibility_db`](/reference/api/building/service-equipment/#serviceequipmentresult) and
+[`ServiceEquipmentResult.weighted_reproducibility_db`](/reference/api/building/service-equipment/#serviceequipmentresultweighted_reproducibility_db); the draft states no
 coverage factor, so no expanded uncertainty is formed.
 
 **On-site checks.** The draft also sets numbers the operator meets while
 measuring, and each is a verdict here. The corner microphone keeps at least
 0.2 m from any obstacle (7.2), judged from the distance measured on site by
-[`check_service_equipment_positions`](/phonometry/reference/api/building/service-equipment/#check_service_equipment_positions). A calibration that deviates from
+[`check_service_equipment_positions`](/reference/api/building/service-equipment/#check_service_equipment_positions). A calibration that deviates from
 previous calibrations by more than 0.5 dB takes the equipment out of use
-(Clause 5, [`verify_calibration_deviation`](/phonometry/reference/api/building/service-equipment/#verify_calibration_deviation)). The background is measured
-over approximately 30 s (7.6, [`check_background_duration`](/phonometry/reference/api/building/service-equipment/#check_background_duration), which
+(Clause 5, [`verify_calibration_deviation`](/reference/api/building/service-equipment/#verify_calibration_deviation)). The background is measured
+over approximately 30 s (7.6, [`check_background_duration`](/reference/api/building/service-equipment/#check_background_duration), which
 reports each departure from 30 s and judges it against the tolerance the
 operator names, because the draft prints none). Where
 the background varies in time, its maximum watched for 10 min to 15 min at the
 corner and 10 dB or more below the equipment lets the result stand without
-correction (NOTE to Clause 9, [`check_varying_background`](/phonometry/reference/api/building/service-equipment/#check_varying_background)). A maximum
+correction (NOTE to Clause 9, [`check_varying_background`](/reference/api/building/service-equipment/#check_varying_background)). A maximum
 less than 5 dB above the equivalent level in the middle of the frequency range
 says a period was not disturbed by doors or footsteps (Clause 9,
-[`check_measurement_disturbance`](/phonometry/reference/api/building/service-equipment/#check_measurement_disturbance)), and calculated single numbers more
+[`check_measurement_disturbance`](/reference/api/building/service-equipment/#check_measurement_disturbance)), and calculated single numbers more
 than 2 dB from the instrument's reading send the calculation back for a check
-(NOTE to 7.8, [`check_instrument_agreement`](/phonometry/reference/api/building/service-equipment/#check_instrument_agreement)).
+(NOTE to 7.8, [`check_instrument_agreement`](/reference/api/building/service-equipment/#check_instrument_agreement)).
 
 **Operating conditions (Annex B).** How each kind of equipment is to be run
 while it is measured, and for how long the equivalent level is integrated, is
-the data of [`SERVICE_EQUIPMENT_OPERATING_CONDITIONS`](/phonometry/reference/api/building/service-equipment/#service_equipment_operating_conditions), including the
+the data of [`SERVICE_EQUIPMENT_OPERATING_CONDITIONS`](/reference/api/building/service-equipment/#service_equipment_operating_conditions), including the
 activity sources of B.10.
 
 **Printed defects.** Table A.1 prints a C-weighting of 0 dB for every
@@ -157,10 +157,10 @@ ceiling for example, gets one additional microphone position of its own:
 1 m in front of a wall source at 1.5 m above the floor, or 1.5 m above the
 floor directly below a ceiling source. The reading there is reported
 separately, is neither standardized nor normalized, and is not averaged
-with positions 1, 2 and 3: pass it to [`service_equipment_level`](/phonometry/reference/api/building/service-equipment/#service_equipment_level) on
+with positions 1, 2 and 3: pass it to [`service_equipment_level`](/reference/api/building/service-equipment/#service_equipment_level) on
 its own, without a reverberation time.
 
-Coordinates are those of [`check_service_equipment_positions`](/phonometry/reference/api/building/service-equipment/#check_service_equipment_positions): a
+Coordinates are those of [`check_service_equipment_positions`](/reference/api/building/service-equipment/#check_service_equipment_positions): a
 rectangular room with one corner at the origin, `x` along the length,
 `y` along the width and `z` the height above the floor. A wall source
 belongs to the wall it is nearest to, and the position is 1 m from the
@@ -363,7 +363,7 @@ sets none: the operator names the departure from 30 s, either way, that
 their report accepts as approximate, and each duration is held to it. A
 departure of exactly the tolerance is within it, and `tolerance_s=0`
 holds every background to 30 s exactly. Each departure is reported
-([`BackgroundDurationCheck.departures_s`](/phonometry/reference/api/building/service-equipment/#backgrounddurationcheckdepartures_s)) whatever the verdict.
+([`BackgroundDurationCheck.departures_s`](/reference/api/building/service-equipment/#backgrounddurationcheckdepartures_s)) whatever the verdict.
 Whether the background was taken just before or after each set, and at
 the same positions, is not a number and is left to the operator.
 
@@ -374,7 +374,7 @@ the same positions, is not a number and is left to the operator.
 | `durations_s` | The measurement time of each background equivalent level, one per position or per set, in s. |
 | `tolerance_s` | The departure from 30 s, either way, accepted as "approximately", in s. Required: the draft prints none. |
 
-**Returns:** [`BackgroundDurationCheck`](/phonometry/reference/api/building/service-equipment/#backgrounddurationcheck).
+**Returns:** [`BackgroundDurationCheck`](/reference/api/building/service-equipment/#backgrounddurationcheck).
 
 **Raises**
 
@@ -412,16 +412,16 @@ case.
 
 | Name | Description |
 | :--- | :--- |
-| `result` | The [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult) whose single numbers are compared. |
+| `result` | The [`ServiceEquipmentResult`](/reference/api/building/service-equipment/#serviceequipmentresult) whose single numbers are compared. |
 | `instrument_levels` | The instrument's value for each single number compared, keyed by its notation in `result.ratings` (`"LA,eq"`, `"LC,Fmax"`...), in dB: one value, or the reading at each position, which is energy-averaged by Formula (1). |
 
-**Returns:** [`InstrumentAgreementCheck`](/phonometry/reference/api/building/service-equipment/#instrumentagreementcheck).
+**Returns:** [`InstrumentAgreementCheck`](/reference/api/building/service-equipment/#instrumentagreementcheck).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `result` is not a [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult). |
+| TypeError | If `result` is not a [`ServiceEquipmentResult`](/reference/api/building/service-equipment/#serviceequipmentresult). |
 | ValueError | If `instrument_levels` is empty, names a single number the result does not carry, or holds a level that is not finite. |
 
 ## check_measurement_disturbance
@@ -452,7 +452,7 @@ the frequency range", which the operator chooses. A difference of exactly
 | `max_levels` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
 | `equivalent_levels` | The equivalent level of the same band over the same period, one per period, in dB. |
 
-**Returns:** [`MeasurementDisturbanceCheck`](/phonometry/reference/api/building/service-equipment/#measurementdisturbancecheck).
+**Returns:** [`MeasurementDisturbanceCheck`](/reference/api/building/service-equipment/#measurementdisturbancecheck).
 
 **Raises**
 
@@ -502,7 +502,7 @@ while a later one can still pass, and a spread at a limit does not pass it
 | :--- | :--- |
 | `levels` | The 3, 6 or 9 A-weighted levels in the order of 7.4.1: `[corner, 2, 3]`, then `[corner, 4, 5]` and `[corner, 6, 7]` appended, in dB. |
 
-**Returns:** [`PositionSpreadCheck`](/phonometry/reference/api/building/service-equipment/#positionspreadcheck).
+**Returns:** [`PositionSpreadCheck`](/reference/api/building/service-equipment/#positionspreadcheck).
 
 **Raises**
 
@@ -540,8 +540,8 @@ The verdict holds the corner position to its height of 0.5 m to 1.5 m and
 the reverberant-field positions to every distance and height of 7.3. The
 two preferences, 0.5 m from the walls of the corner and 1.5 m between
 positions, are reported beside it and do not decide it
-([`preferred_corner_wall_distance`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_corner_wall_distance),
-[`preferred_separation`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_separation)).
+([`preferred_corner_wall_distance`](/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_corner_wall_distance),
+[`preferred_separation`](/reference/api/building/service-equipment/#serviceequipmentpositioncheckpreferred_separation)).
 
 A room outline cannot show furniture, so the 0.2 m that 7.2 asks between
 the corner microphone and any obstacle is judged from the distance
@@ -561,7 +561,7 @@ positions, whose 0.50 m from the room surfaces 7.3 sets instead.
 | `small_room` | Whether the room is too small for 0.50 m from the surfaces, so 0.30 m applies. |
 | `corner_obstacle_distance_m` | The distance from the corner microphone to the nearest obstacle, or one distance per obstacle near it, in m, measured on site; `None` (default) leaves the 0.2 m of 7.2 unjudged. |
 
-**Returns:** [`ServiceEquipmentPositionCheck`](/phonometry/reference/api/building/service-equipment/#serviceequipmentpositioncheck).
+**Returns:** [`ServiceEquipmentPositionCheck`](/reference/api/building/service-equipment/#serviceequipmentpositioncheck).
 
 **Raises**
 
@@ -609,7 +609,7 @@ of the microphone positions"; the draft names the corner.
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
 
-**Returns:** [`VaryingBackgroundCheck`](/phonometry/reference/api/building/service-equipment/#varyingbackgroundcheck).
+**Returns:** [`VaryingBackgroundCheck`](/reference/api/building/service-equipment/#varyingbackgroundcheck).
 
 **Raises**
 
@@ -973,7 +973,7 @@ The method assumes a background roughly constant in time. Where it is not,
 the NOTE to Clause 9 suggests the maximum level of the background over 10
 to 15 minutes at the corner position instead: if it is 10 dB or more below
 the equipment, the result stands without correction
-([`check_varying_background`](/phonometry/reference/api/building/service-equipment/#check_varying_background)).
+([`check_varying_background`](/reference/api/building/service-equipment/#check_varying_background)).
 
 **Parameters**
 
@@ -983,7 +983,7 @@ the equipment, the result stands without correction
 | `background_levels` | Background band levels $L_2$, in dB, the same shape. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
 
-**Returns:** [`ServiceEquipmentBackgroundResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentbackgroundresult).
+**Returns:** [`ServiceEquipmentBackgroundResult`](/reference/api/building/service-equipment/#serviceequipmentbackgroundresult).
 
 **Raises**
 
@@ -1020,7 +1020,7 @@ the Annex A corrections, rounded to whole decibels (7.8).
 
 The readings are the linear band spectra of the measurements of 7.4:
 positions 1, 2 and 3 at least, with the corner reading repeated in each
-further stage that [`check_position_spread`](/phonometry/reference/api/building/service-equipment/#check_position_spread) asks for. Take them at the
+further stage that [`check_position_spread`](/reference/api/building/service-equipment/#check_position_spread) asks for. Take them at the
 instant the A- or C-weighted level peaks for a maximum level (Clause 6), or
 over the integration time of Annex B for an equivalent level.
 
@@ -1038,7 +1038,7 @@ over the integration time of Annex B for an equivalent level.
 | `reference_reverberation_time_s` | $T_0$ of Formula (5), in s (0.5 s unless a regulation specifies another value). |
 | `a_weighting_range` | `"restricted"` (default: 50 Hz to 5 000 Hz, octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz, octave 31.5 Hz to 8 000 Hz) for the A-weighted values; the report must say which. The C-weighted values always use the extended range. |
 
-**Returns:** [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult).
+**Returns:** [`ServiceEquipmentResult`](/reference/api/building/service-equipment/#serviceequipmentresult).
 
 **Raises**
 
@@ -1379,7 +1379,7 @@ ServiceEquipmentResult(
 
 Service-equipment sound pressure level, engineering method.
 
-Produced by [`service_equipment_level`](/phonometry/reference/api/building/service-equipment/#service_equipment_level). Every band array runs over
+Produced by [`service_equipment_level`](/reference/api/building/service-equipment/#service_equipment_level). Every band array runs over
 `frequencies`.
 
 **Attributes**
@@ -1622,7 +1622,7 @@ levels are passed instead as each one's departure from its stated level.
 | `calibration_levels` | The calibrator readings of this measurement in the order taken, the one at the beginning and the one at the end, in dB. One reading alone is judged against `previous_levels`, which lets the beginning be checked before measuring. |
 | `previous_levels` | Readings of earlier calibrations of the same instrumentation, in dB; `None` (default) to compare the end with the beginning only. |
 
-**Returns:** [`CalibrationDeviationResult`](/phonometry/reference/api/building/service-equipment/#calibrationdeviationresult).
+**Returns:** [`CalibrationDeviationResult`](/reference/api/building/service-equipment/#calibrationdeviationresult).
 
 **Raises**
 

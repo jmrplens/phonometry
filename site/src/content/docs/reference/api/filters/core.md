@@ -54,10 +54,10 @@ sections, evaluated band by band on a decimated sample rate.
 
 | Name | Description |
 | :--- | :--- |
-| `filter_type` | Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel'). Only `butter` meets the class 1 mask of IEC 61260-1:2014 Table 1 with the default parameters (`cheby2` also does once `attenuation` >= 70 dB, see below); `cheby1`/`ellip`/`bessel` fail on passband ripple or roll-off regardless of parameters (default 'butter'). On the whole of that edition, as [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) grades it, see `resample`. |
+| `filter_type` | Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel'). Only `butter` meets the class 1 mask of IEC 61260-1:2014 Table 1 with the default parameters (`cheby2` also does once `attenuation` >= 70 dB, see below); `cheby1`/`ellip`/`bessel` fail on passband ripple or roll-off regardless of parameters (default 'butter'). On the whole of that edition, as [`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) grades it, see `resample`. |
 | `ripple` | Passband ripple in dB, for cheby1 and ellip (default 0.1). |
 | `attenuation` | Stopband attenuation in dB (default 72.0). For the `cheby2` filter scipy pins the equiripple deep-stopband floor at exactly this value, so it must be >= 70 dB for the bank to meet the IEC 61260-1:2014 class 1 deep-stopband limit (Omega >= G^4). The 72 dB default clears class 1 with the same +0.400 dB passband margin as `butter`. |
-| `resample` | If True, resampling is performed: each band is filtered on a decimated sample rate whose Nyquist frequency is at least sixteen times its upper band edge (default True). The order 6 `butter` octave and one-third-octave banks are class 1 on every requirement either way, decimated or at the full rate (`False`); the decimation moves the summation of adjacent outputs by at most 0.005 dB. A decimated band runs its input through a linear-phase anti-aliasing filter sized for a 120 dB stopband, which keeps every alias image the decimation folds onto the band more than 125 dB below it, and [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) grades those images. |
+| `resample` | If True, resampling is performed: each band is filtered on a decimated sample rate whose Nyquist frequency is at least sixteen times its upper band edge (default True). The order 6 `butter` octave and one-third-octave banks are class 1 on every requirement either way, decimated or at the full rate (`False`); the decimation moves the summation of adjacent outputs by at most 0.005 dB. A decimated band runs its input through a linear-phase anti-aliasing filter sized for a 120 dB stopband, which keeps every alias image the decimation folds onto the band more than 125 dB below it, and [`verify_filter_class`](/reference/api/filters/compliance/#verify_filter_class) grades those images. |
 
 ## LevelCalibration
 
@@ -106,8 +106,8 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal) read from a measurement file. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fraction` | Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1. |
 | `order` | Order of the filter. Default: 6. |
 | `limits` | Minimum and maximum limit frequencies [f_min, f_max], a sequence or an array of the two. Default [12, 20000], trimmed to the bands `fs` holds: at 44.1 kHz the third octaves stop at 16 kHz. |
@@ -115,11 +115,11 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 | `detrend` | If True, remove DC offset before filtering. Default: True. |
 | `mode` | 'rms' or 'peak'. Default: 'rms'. |
 | `nominal` | If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats. |
-| `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/phonometry/reference/api/filters/core/#filterdesign)). The default 'butter' family is the only one that meets the class 1 mask of IEC 61260-1 Table 1 with the default parameters; for `cheby2` scipy pins the deep-stopband floor at exactly `attenuation`, so it must be >= 70 dB to clear the class 1 limit (matches [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank), which also says how the decimated banks grade on the summation of outputs). |
-| `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/phonometry/reference/api/filters/core/#levelcalibration)). This is the explicit knob: when its `factor` is left at 1.0, a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal) supplies its own and the band levels come out in dB SPL; when it carries a factor, the object's is not applied on top (that would square it). `dbfs=True` ignores both the object and the factor, being referenced to digital full scale. |
-| `response_plot` | Whether to show or save the filter response plot ([`ResponsePlot`](/phonometry/reference/api/filters/core/#responseplot)). Plotting bypasses the design cache. |
+| `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/reference/api/filters/core/#filterdesign)). The default 'butter' family is the only one that meets the class 1 mask of IEC 61260-1 Table 1 with the default parameters; for `cheby2` scipy pins the deep-stopband floor at exactly `attenuation`, so it must be >= 70 dB to clear the class 1 limit (matches [`OctaveFilterBank`](/reference/api/filters/core/#octavefilterbank), which also says how the decimated banks grade on the summation of outputs). |
+| `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/reference/api/filters/core/#levelcalibration)). This is the explicit knob: when its `factor` is left at 1.0, a calibrated [`Signal`](/reference/api/io/io/#signal) supplies its own and the band levels come out in dB SPL; when it carries a factor, the object's is not applied on top (that would square it). `dbfs=True` ignores both the object and the factor, being referenced to digital full scale. |
+| `response_plot` | Whether to show or save the filter response plot ([`ResponsePlot`](/reference/api/filters/core/#responseplot)). Plotting bypasses the design cache. |
 
-**Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`. With *nominal=True* the frequencies are IEC 61260-1 labels instead of floats.
+**Returns:** An [`OctaveFilterResult`](/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`. With *nominal=True* the frequencies are IEC 61260-1 labels instead of floats.
 
 **Raises**
 
@@ -163,10 +163,10 @@ Initialize the Octave Filter Bank.
 | `fraction` | Bandwidth fraction (e.g., 1 for octave, 3 for 1/3 octave). |
 | `order` | Filter order. |
 | `limits` | Frequency limits [f_min, f_max], a sequence or an array of the two. |
-| `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/phonometry/reference/api/filters/core/#filterdesign)). Only `butter` meets the class 1 mask of IEC 61260-1:2014 Table 1 with the default parameters (`cheby2` also does once `attenuation` >= 70 dB); `cheby1`/`ellip`/`bessel` fail on passband ripple or roll-off regardless of parameters. The octave and one-third-octave banks are class 1 on every requirement, decimated or filtered at the full rate (`FilterDesign(resample=False)`). |
-| `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/phonometry/reference/api/filters/core/#levelcalibration)). |
-| `block_processing` | Whether the bank carries its filter state between calls, and how that state starts ([`BlockProcessing`](/phonometry/reference/api/filters/core/#blockprocessing)). |
-| `response_plot` | Whether to show or save the filter response plot drawn while designing the bank ([`ResponsePlot`](/phonometry/reference/api/filters/core/#responseplot)). |
+| `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/reference/api/filters/core/#filterdesign)). Only `butter` meets the class 1 mask of IEC 61260-1:2014 Table 1 with the default parameters (`cheby2` also does once `attenuation` >= 70 dB); `cheby1`/`ellip`/`bessel` fail on passband ripple or roll-off regardless of parameters. The octave and one-third-octave banks are class 1 on every requirement, decimated or filtered at the full rate (`FilterDesign(resample=False)`). |
+| `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/reference/api/filters/core/#levelcalibration)). |
+| `block_processing` | Whether the bank carries its filter state between calls, and how that state starts ([`BlockProcessing`](/reference/api/filters/core/#blockprocessing)). |
+| `response_plot` | Whether to show or save the filter response plot drawn while designing the bank ([`ResponsePlot`](/reference/api/filters/core/#responseplot)). |
 
 **Raises**
 
@@ -202,7 +202,7 @@ Apply the pre-designed filter bank to a signal.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). A Signal recorded at another rate than the one this bank was designed for is refused rather than filtered; a calibrated one is filtered in pascals unless the bank carries a calibration factor of its own, or reads in dBFS. |
+| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). A Signal recorded at another rate than the one this bank was designed for is refused rather than filtered; a calibrated one is filtered in pascals unless the bank carries a calibration factor of its own, or reads in dBFS. |
 | `sigbands` | If True, also return the signal in the time domain divided into bands. |
 | `mode` | 'rms' for energy-based level, 'peak' for peak-holding level. Note: 'peak' includes the filter's onset transient; a tone that starts abruptly can overshoot by ~1 dB. For steady signals, discard the first ~5/f_low seconds or use longer signals. |
 | `detrend` | If True, remove DC offset from signal before filtering (Default: True). |
@@ -210,7 +210,7 @@ Apply the pre-designed filter bank to a signal.
 | `nominal` | If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats. |
 | `zero_phase` | If True, filter with `sosfiltfilt` (forward-backward): no group delay, but the effective stopband attenuation doubles and the effective passband narrows. The narrowing lowers the measured broadband band level by about 0.2 to 0.3 dB per band relative to forward filtering (a pure in-band tone is unaffected, since it sits where both passes are ~0 dB). Prefer forward filtering when the absolute band SPL must match single-pass conventions; use zero-phase when preserving the temporal envelope matters (e.g. reverberation decay, ISO 3382-2 Clause 7.3). Offline analysis only; incompatible with stateful mode. |
 
-**Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`.
+**Returns:** An [`OctaveFilterResult`](/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`.
 
 **Raises**
 
@@ -262,14 +262,14 @@ Short-time fractional-octave analysis: level per band over time.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). It follows the same rate and calibration rules as `filter`: a Signal at another rate is refused, and a calibrated one is analysed in pascals unless this bank carries a calibration factor of its own or reads in dBFS. The two methods must not report different levels for the same recording. |
+| `x` | Input signal (1D array or 2D array [channels, samples]), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). It follows the same rate and calibration rules as `filter`: a Signal at another rate is refused, and a calibrated one is analysed in pascals unless this bank carries a calibration factor of its own or reads in dBFS. The two methods must not report different levels for the same recording. |
 | `window_time` | Analysis window length in seconds. |
 | `overlap` | Window overlap fraction in [0, 1). |
 | `mode` | 'rms' or 'peak' (per window). |
 | `detrend` | If True, remove DC offset before filtering. |
 | `zero_phase` | If True, filter bands forward-backward so their group delays don't skew the frames (offline analysis only). |
 
-**Returns:** An [`OctaveSpectrogramResult`](/phonometry/reference/api/filters/core/#octavespectrogramresult). Its `levels` are shaped `(bands, frames)` for 1D input and `(channels, bands, frames)` for 2D input, `frequencies` holds the exact mid-band frequencies and `times` each window's centre in seconds.
+**Returns:** An [`OctaveSpectrogramResult`](/reference/api/filters/core/#octavespectrogramresult). Its `levels` are shaped `(bands, frames)` for 1D input and `(channels, bands, frames)` for 2D input, `frequencies` holds the exact mid-band frequencies and `times` each window's centre in seconds.
 
 **Raises**
 
@@ -308,7 +308,7 @@ first two were. They have names now.
 | :--- | :--- |
 | `levels` | Band levels, in decibels, shaped `(bands,)` for a single-channel input and `(channels, bands)` for a multichannel one. `None` when the call asked for no level. |
 | `frequencies` | One band centre per level: exact midband frequencies, or IEC 61260-1 nominal labels when the call asked for `nominal`. |
-| `bands` | The input split into one waveform per band, in the same order, or `None` when the call did not ask for `sigbands`. They come back in the type they went in as: a [`Signal`](/phonometry/reference/api/io/io/#signal) input gives Signals and a bare array gives arrays. What that Signal says about its units is a separate question, and it answers it itself: a calibrated input yields bands in pascals carrying `calibration_factor=1.0`, meaning the conversion is already done, and an uncalibrated one yields bands in digital units carrying `None`, because the object never invents a calibration. A bank filtering in dBFS, or one carrying a factor of its own, filtered digital units, so its bands are handed back as plain arrays rather than labelled pascals. |
+| `bands` | The input split into one waveform per band, in the same order, or `None` when the call did not ask for `sigbands`. They come back in the type they went in as: a [`Signal`](/reference/api/io/io/#signal) input gives Signals and a bare array gives arrays. What that Signal says about its units is a separate question, and it answers it itself: a calibrated input yields bands in pascals carrying `calibration_factor=1.0`, meaning the conversion is already done, and an uncalibrated one yields bands in digital units carrying `None`, because the object never invents a calibration. A bank filtering in dBFS, or one carrying a factor of its own, filtered digital units, so its bands are handed back as plain arrays rather than labelled pascals. |
 
 The band centres and the waveforms are tuples, as every other frozen
 result holds a sequence: a list inside a frozen record is one a caller
@@ -395,7 +395,7 @@ OctaveSpectrogramResult(
 )
 ```
 
-Band levels over time: what [`OctaveFilterBank.spectrogram`](/phonometry/reference/api/filters/core/#octavefilterbankspectrogram) returns.
+Band levels over time: what [`OctaveFilterBank.spectrogram`](/reference/api/filters/core/#octavefilterbankspectrogram) returns.
 
 A record with named fields rather than a `(levels, frequencies, times)`
 tuple, so it cannot be unpacked by position: read `.levels`,

@@ -50,7 +50,7 @@ ASHRAE y las formas cerradas de codos, reflexión de extremo, plenums y ruido de
 flujo, y un modelo de cerramiento que combina una pérdida de transmisión del
 panel que aportas tú con la acumulación reverberante en el interior. La primera,
 el silenciador reactivo de cuatro polos, tiene guía propia,
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/), que cubre la
+[Silenciadores](/es/devices/noise-control/silencers/), que cubre la
 cámara de expansión en forma cerrada, los resonadores de Helmholtz, de cuarto
 de onda y de tubo extendido, el contraste con la simulación FDTD independiente
 y el compromiso frente a los revestimientos disipativos.
@@ -219,7 +219,7 @@ de un local ocupado), y de ahí la regla de que sobredimensionar el conducto es
 el silenciador más barato que existe. Lo que devuelve el modelo es un **nivel de
 potencia acústica de un solo elemento**: hay que meterlo en un cálculo de
 trayecto y combinarlo en energía con todo lo demás, que es lo que hace
-[Ruido por conductos](/phonometry/es/devices/noise-control/duct-path/).
+[Ruido por conductos](/es/devices/noise-control/duct-path/).
 
 La fórmula de plenum de Wells toma solo dos entradas de verdad geométricas,
 la línea de visión entrada-salida $r$ y el área de salida, más el área de
@@ -236,7 +236,7 @@ predicha.*
 La fórmula, la ecuación (8.275) de Bies, es una suma de dos términos dentro de
 un mismo logaritmo, uno directo $\cos\theta/\pi r^2$ y otro reverberante
 $(1-\alpha)/S_\mathrm{w}\alpha$, que es el inverso de la
-[constante de sala](/phonometry/es/buildings/rooms/room-image-sources/) del
+[constante de sala](/es/buildings/rooms/room-image-sources/) del
 plenum, y cuál de los dos domina decide qué movimiento de diseño merece la pena. Para el plenum
 dibujado arriba ($r = 1{,}2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0{,}2$) valen 0,221 y 0,667,
 así que manda el término reverberante: duplicar la línea de visión hasta 2,4 m
@@ -346,7 +346,7 @@ $$
 
 con el área externa $S_\mathrm{E}$ y la **constante de sala** interior
 $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i}/(1-\alpha_\mathrm{i})$ (la misma
-[`room_constant`](/phonometry/es/buildings/rooms/room-image-sources/) del campo estacionario
+[`room_constant`](/es/buildings/rooms/room-image-sources/) del campo estacionario
 de sala).
 
 $C$ no es un factor de ajuste: es la acumulación reverberante. Encierra una
@@ -528,10 +528,10 @@ de refrigeración tampoco se pueden sellar sin más: una máquina encerrada tien
 que respirar, así que la entrada y la salida se convierten en conductos
 revestidos cortos o en silenciadores de láminas paralelas cuya propia pérdida por inserción
 debe superar la del panel; los modelos están en el apartado 1 y en
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/). Los modelos de
+[Silenciadores](/es/devices/noise-control/silencers/). Los modelos de
 transmisión por rendija y por orificio circular, que dan a un hueco su propio
 $R$ dependiente de la frecuencia, están en
-[Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/).
+[Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/).
 
 El último cortocircuito no es aéreo en absoluto. Una máquina atornillada a la
 envolvente, o apoyada sobre la misma solera, excita el cerramiento como una
@@ -554,7 +554,7 @@ banda: $D_W = L_W(\text{sin}) - L_W(\text{con})$, ISO 11546-1 Fórmula (1), al
 menos de 100 Hz a 5 kHz en tercios de octava o de 125 Hz a 4 kHz en octavas,
 siendo preferibles de 50 Hz a 10 kHz y de 63 Hz a 8 kHz (apartado 6.2). La
 biblioteca calcula también esa medición:
-[Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/)
+[Encapsulados y cabinas medidos](/es/devices/noise-control/enclosure-cabin-insulation/)
 pasa las dos series de niveles por `enclosure_sound_power_insulation` y sus
 hermanas, comprueba el entorno de ensayo contra la Tabla C.1 y dice, paso a
 paso, cómo se hace la medida.
@@ -618,7 +618,7 @@ interior, y el compuesto de paneles, puertas y aberturas que la alimenta
 <ScopeClaim status="not-covered" label="No cubierto">
 Los elementos de silenciador reactivo (cámaras de expansión, ramas laterales,
 tubos extendidos) se han trasladado a
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/), y los
+[Silenciadores](/es/devices/noise-control/silencers/), y los
 silenciadores disipativos con revestimiento interior no se modelan a partir de
 las propiedades del revestimiento en ninguna parte: la cifra de codo revestido
 de esta página es una lectura de tabla (la Tabla 8.11 de Bies) y el plenum es
@@ -629,7 +629,7 @@ $R$; se aporta medida o de otro modelo, y el módulo solo la combina con la
 corrección interior. Nada de lo que hay en esta página es una medición: el
 procedimiento de ISO 11546 del apartado 2.2 se describe aquí para poder leer
 un valor declarado, y se calcula en
-[Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/)
+[Encapsulados y cabinas medidos](/es/devices/noise-control/enclosure-cabin-insulation/)
 (`enclosure_sound_power_insulation` y sus hermanas). La transmisión
 estructural de una máquina a su cerramiento o a su solera queda fuera de
 todos los modelos de la página.
@@ -640,30 +640,30 @@ todos los modelos de la página.
 
 ## Véase también
 
-- [Silenciadores](/phonometry/es/devices/noise-control/silencers/): los elementos reactivos
+- [Silenciadores](/es/devices/noise-control/silencers/): los elementos reactivos
   de cuatro polos y la elección entre reactivo y disipativo.
-- [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/):
+- [Ruido por conductos: del ventilador a la sala](/es/devices/noise-control/duct-path/):
   el cálculo completo que encadena estos modelos de elemento desde el
   ventilador hasta el criterio de ruido de fondo.
-- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+- [Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/):
   el pistón radiante (impedancia de radiación y directividad), el modelo de
   radiador complementario.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): la $L_W$ de fuente que
+- [Potencia acústica](/es/devices/emission/sound-power/): la $L_W$ de fuente que
   alimenta un conducto o un cerramiento.
-- [Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/):
+- [Encapsulados y cabinas medidos](/es/devices/noise-control/enclosure-cabin-insulation/):
   la medición por sustitución de ISO 11546 del apartado 2.2 calculada, con la
   comprobación de su entorno de ensayo y su montaje dibujado.
-- [Fuentes imagen y campo estacionario](/phonometry/es/buildings/rooms/room-image-sources/):
+- [Fuentes imagen y campo estacionario](/es/buildings/rooms/room-image-sources/):
   la `room_constant` reutilizada por la corrección interior del cerramiento.
-- [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/):
+- [Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/):
   la pérdida de transmisión del panel que esta página te pide que aportes, y los
   modelos de rendija y de orificio circular que hay detrás del compuesto del
   apartado 2.1.
-- [Informe de conformidad](/phonometry/es/reference/conformance/):
+- [Informe de conformidad](/es/reference/conformance/):
   las formas cerradas y los anclajes resueltos con los que se validan estas
   implementaciones.
 - Referencia de la API:
-  [`noise_control.hvac`](/phonometry/es/reference/api/noise_control/hvac/) y
-  [`noise_control.enclosures`](/phonometry/es/reference/api/noise_control/enclosures/).
+  [`noise_control.hvac`](/es/reference/api/noise_control/hvac/) y
+  [`noise_control.enclosures`](/es/reference/api/noise_control/enclosures/).
 
 </SeeAlso>

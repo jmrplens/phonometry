@@ -99,7 +99,7 @@ of analog filters; **ISO 2631-1** applies them to whole-body vibration,
 and **ISO 5349-1/-2** to hand-transmitted vibration. This page covers the whole
 chain. Only the weighting definitions are taken from ISO 8041-1 here; what
 that standard says about the instrument measuring them is [meter
-verification](/phonometry/vibration/human/meter-verification/).
+verification](/vibration/human/meter-verification/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration, with y pointing into the page, to the left side of the body; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%" loading="eager" />
 
@@ -128,7 +128,7 @@ On a **resilient** surface (a seat cushion, a couch), the transducer is
 interposed between the person and the surface in a suitably formed mount that
 does not greatly alter the pressure distribution (5.3.2); the commonly used
 design for that mount is the semi-rigid disc of **ISO 10326-1**, drawn to size
-on [Multiple Shock Vibration](/phonometry/vibration/human/multiple-shock-vibration/).
+on [Multiple Shock Vibration](/vibration/human/multiple-shock-vibration/).
 The person adopts the posture that is normal for the environment.
 
 The three translational transducers at one location are positioned orthogonally
@@ -995,11 +995,11 @@ action and limit values close the assessment, written up by
 <ScopeClaim status="not-covered" label="Not covered">
 The design and type-testing clauses of ISO 8041-1 are not implemented: of that
 standard this page takes the frequency-weighting definitions, and [meter
-verification](/phonometry/vibration/human/meter-verification/) takes the
+verification](/vibration/human/meter-verification/) takes the
 tolerances they are graded against. ISO 2631-5:2018, the multiple-shock spinal-response and
 injury-risk model for whole-body vibration, is a separate standard with its
 own module: see [Multiple Shock
-Vibration](/phonometry/vibration/human/multiple-shock-vibration/) for records
+Vibration](/vibration/human/multiple-shock-vibration/) for records
 containing repeated shocks, which the r.m.s. and VDV measures on this page do
 not substitute for.
 </ScopeClaim>
@@ -1009,11 +1009,11 @@ not substitute for.
 
 ## See also
 
-- [Multiple Shock Vibration](/phonometry/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it: the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
-- [Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/): the other thing a surface acceleration is used for, when the question is what the machine radiates rather than what the operator receives.
-- [Calibration](/phonometry/signals/metrology/calibration/): the before-and-after check of clause 6.3.1 and the traceability the fiche's `calibration` field records.
-- API reference: [`vibration.human.exposure`](/phonometry/reference/api/vibration/exposure/).
-- Theory: [Human vibration](/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec): the frequency weightings of ISO 2631-1 and ISO 5349-1, and the running r.m.s., VDV and MTVV definitions.
+- [Multiple Shock Vibration](/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it: the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
+- [Sound power from surface vibration](/devices/emission/vibration-sound-power/): the other thing a surface acceleration is used for, when the question is what the machine radiates rather than what the operator receives.
+- [Calibration](/signals/metrology/calibration/): the before-and-after check of clause 6.3.1 and the traceability the fiche's `calibration` field records.
+- API reference: [`vibration.human.exposure`](/reference/api/vibration/exposure/).
+- Theory: [Human vibration](/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec): the frequency weightings of ISO 2631-1 and ISO 5349-1, and the running r.m.s., VDV and MTVV definitions.
 
 </SeeAlso>
 

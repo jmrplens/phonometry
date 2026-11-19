@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/railway-categories.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/railway-categories/
 
 # Railway vibration by category of train (E DIN 4150-2)
 
@@ -336,8 +336,8 @@ print(vibration.guide_values("residential", time_of_day="night", source="induced
   the two parts a railway measurement is carried out with particular regard
   to.
 - API reference:
-  [`vibration.immission.train_categories`](https://docs.jmrp.io/phonometry/reference/api/vibration/train-categories/)
-  and [`vibration.immission.people`](https://docs.jmrp.io/phonometry/reference/api/vibration/people/).
+  [`vibration.immission.train_categories`](https://phonometry.dev/reference/api/vibration/train-categories/)
+  and [`vibration.immission.people`](https://phonometry.dev/reference/api/vibration/people/).
 
 ## References
 

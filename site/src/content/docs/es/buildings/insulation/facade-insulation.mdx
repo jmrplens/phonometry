@@ -57,11 +57,11 @@ entrada de aire antes de instalar ninguno de ellos, y la EN 12354-4 le da la
 vuelta al cerramiento para radiar al exterior una fuente interior. Una sección
 final pone lado a lado la $D_{2\mathrm{m,n}T}$ medida y la prevista y muestra qué las
 separa y qué no. Las curvas de referencia tras cada número único están en
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/);
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/);
 los cerramientos interiores del mismo edificio, en
-[Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/)
+[Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/)
 y en
-[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/).
+[Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/).
 
 ## ¿Cómo calculo el aislamiento acústico de fachada D2m,nT,w con Python?
 
@@ -164,7 +164,7 @@ nacional disponga otra cosa, el apartado 4.3 recomienda calibrar el calibrador
 cada año como máximo y verificar el sonómetro y el conjunto de filtros cada
 dos. Las mismas clases y la misma regla de 0,5 dB abren las otras dos partes
 de ISO 16283, en
-[Medición del aislamiento en campo](/phonometry/es/buildings/insulation/insulation-field/#la-medicion-iso-16283-1).
+[Medición del aislamiento en campo](/es/buildings/insulation/insulation-field/#la-medicion-iso-16283-1).
 
 **Global o de elemento.** Responden a preguntas distintas, y la Tabla 1 de
 ISO 16283-3 dice cuál se prefiere para cada una. Los métodos **globales** dan
@@ -637,7 +637,7 @@ plt.show()
 | `radiated_sound_power(r_prime_cap)` | float | dB | por defecto `None` (sin tope) | Tope de campo opcional sobre $R'$, nota al pie del ejemplo del Anexo G (usa 40 dB), no parte de la Fórmula (2)/(3) |
 | `radiated_sound_power(octave_bands)` | sec. de int | Hz | por defecto `None` | Centros de octava que casan con las bandas; habilita el $L_{W\mathrm{A}}$ ponderado A |
 | `facade_sound_reduction(frequencies)` | secuencia | Hz | por defecto `None`; longitud = nº de bandas | Centros de banda que se conservan en el resultado para las gráficas |
-| `facade_sound_reduction(fraction)` | int o `None` | — | `1` (octavas) / `3` (tercios de octava) / `None` | En qué conjunto de bandas están los datos; `None` lo infiere del número, como en la [página de índices](/phonometry/es/buildings/insulation/insulation-ratings/) |
+| `facade_sound_reduction(fraction)` | int o `None` | — | `1` (octavas) / `3` (tercios de octava) / `None` | En qué conjunto de bandas están los datos; `None` lo infiere del número, como en la [página de índices](/es/buildings/insulation/insulation-ratings/) |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Lado radiante finito y distancia de recepción (Anexo E) |
 | `outdoor_level(l_w, attenuation)` | float o sec. | dB | compatibles por difusión | $L_p$ exterior de uno o varios lados (Fórmula E.1) |
 
@@ -733,7 +733,7 @@ La lectura práctica: dimensiona el acristalamiento y las entradas de aire con
 la predicción, acepta la fachada terminada con la medición y no interpretes un
 par de decibelios entre ambas como un error de ninguna de las dos. Una
 predicción construida sobre índices de laboratorio y una medición en campo del
-cerramiento terminado llevan cada una su propia incertidumbre de ese orden; la [sección de incertidumbre de ISO 12999-1](/phonometry/es/buildings/insulation/insulation-field/#incertidumbre-de-medicion-iso-12999-1)
+cerramiento terminado llevan cada una su propia incertidumbre de ese orden; la [sección de incertidumbre de ISO 12999-1](/es/buildings/insulation/insulation-field/#incertidumbre-de-medicion-iso-12999-1)
 pone número a la mitad de medición. Y cuando ambas discrepen en mucho más que
 eso, la fracción de energía transmitida por elemento del informe de predicción
 es el primer sitio donde mirar: en esta fachada quien decide el resultado es la
@@ -770,7 +770,7 @@ del retranqueo, los 50 pasos de vehículo ni la simultaneidad de una medición
 con tráfico, ni que el método elegido corresponda a la pregunta planteada. El
 procedimiento de esquina en baja frecuencia del apartado 7.3 (la contraparte de
 fachada del [procedimiento de ISO
-16283-1](/phonometry/es/buildings/insulation/low-frequency-procedure/),
+16283-1](/es/buildings/insulation/low-frequency-procedure/),
 activado por el mismo umbral de 25 m³ del recinto receptor) sí está
 implementado y se alcanza con el argumento `low_frequency=` de
 `facade_insulation`, para los métodos de altavoz a los que lo limita el
@@ -785,25 +785,25 @@ no las filas impresas.
 
 ## Véase también
 
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   las mediciones aéreas y de impacto en campo de los cerramientos interiores y
   la incertidumbre de ISO 12999-1 que cualifica cada índice de campo.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/):
+- [Predicción del aislamiento acústico (EN 12354)](/es/buildings/design/insulation-prediction/):
   los modelos de flancos aéreos y de impacto de EN 12354-1/2, que comparten la
   suma de factores de transmisión usada aquí.
-- [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   el motor de curva de referencia tras los números únicos $D_{2\mathrm{m,n}T,\mathrm{w}}$,
   $R'_{45,\mathrm{w}}$ y $R'_\mathrm{tr,s,w}$.
-- [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/):
+- [Método de control del aislamiento (ISO 10052)](/es/buildings/insulation/insulation-survey/):
   la magnitud de fachada en bandas de octava del método rápido de control.
-- [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/):
+- [Predicción del aislamiento de paneles](/es/buildings/design/panel-sound-insulation/):
   la ley de masas, la coincidencia y los modelos de aberturas tras los valores
   de $R$ de elemento que consume la predicción.
-- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):
+- [Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/):
   la propagación desde la fuente hasta la posición a 2 m frente a la fachada y,
   hacia fuera, desde el lado radiante de EN 12354-4.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la derivación de
+- [Teoría](/es/reference/theory/rooms-buildings/): la derivación de
   la curva de referencia que sustenta los índices ponderados de un solo número.
-- Referencia de la API: [`building.prediction.facade`](/phonometry/es/reference/api/building/facade/) y [`building.measurement.insulation`](/phonometry/es/reference/api/building/insulation/).
+- Referencia de la API: [`building.prediction.facade`](/es/reference/api/building/facade/) y [`building.measurement.insulation`](/es/reference/api/building/insulation/).
 
 </SeeAlso>

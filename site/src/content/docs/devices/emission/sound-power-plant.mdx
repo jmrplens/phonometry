@@ -406,7 +406,7 @@ returns the table as printed when no weather is given. Given a temperature
 and a relative humidity, it evaluates the attenuation coefficient of ISO 3891
 Annex A, the SAE ARP 866A formula, at the one-third-octave band centred on
 each octave, through the same implementation the
-[NPD curves for the air at the airport](/phonometry/aircraft/npd-atmosphere/)
+[NPD curves for the air at the airport](/aircraft/npd-atmosphere/)
 use; ISO 3891 gives no evaluation frequency below 50 Hz, so the 31.5 Hz band
 keeps the 0 of Table 3. Since the formula does not return Table 3 at 15 °C and
 70 % (see the figure), passing those very conditions is not the same as
@@ -585,17 +585,17 @@ from the ISO 3891 coefficient it cites.
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the
+- [Sound Power](/devices/emission/sound-power/): choosing among the
   determination routes and the accuracy grades.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the enveloping surface whose area term 10.4 borrows, and the route for a
   source raised above the plant.
-- [Sound Power in Situ by Comparison (ISO 3747)](/phonometry/devices/emission/sound-power-in-situ/):
+- [Sound Power in Situ by Comparison (ISO 3747)](/devices/emission/sound-power-in-situ/):
   a single machine that cannot leave its room.
-- [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/):
+- [NPD data for the air at the airport](/aircraft/npd-atmosphere/):
   the SAE ARP 866A coefficient of ISO 3891 that the weather path evaluates.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/):
   what the plant's $L_W$ is for, the level at a neighbour.
-- API reference: [`emission.plant_sound_power`](/phonometry/reference/api/power/sound-power-plant/).
+- API reference: [`emission.plant_sound_power`](/reference/api/power/sound-power-plant/).
 
 </SeeAlso>

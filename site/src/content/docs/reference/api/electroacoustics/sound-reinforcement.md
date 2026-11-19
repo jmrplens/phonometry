@@ -122,7 +122,7 @@ $G_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{M}} - L_{\mathrm{H}\text{-}\mathrm{
 | :--- | :--- |
 | `level_loudspeaker_at_microphone` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{M}}$ the loudspeaker produces at the microphone, dB. |
 | `level_loudspeaker_at_listener` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{L}}$ the loudspeaker produces at an average listener, dB. |
-| `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB (0 for an omnidirectional microphone, about [`CARDIOID_RELATIVE_DIRECTIVITY_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#cardioid_relative_directivity_db) for a cardioid). |
+| `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB (0 for an omnidirectional microphone, about [`CARDIOID_RELATIVE_DIRECTIVITY_DB`](/reference/api/electroacoustics/sound-reinforcement/#cardioid_relative_directivity_db) for a cardioid). |
 
 **Returns:** The feedback-loop gain $G_\mathrm{S}$, dB.
 
@@ -163,9 +163,9 @@ Equation (18.20) (see the module docstring).
 | `level_loudspeaker_at_listener` | Direct-field level $L_{\mathrm{H}\text{-}\mathrm{L}}$ produced by the loudspeaker system at an average listener, dB. |
 | `microphone_directivity` | Directivity index $D_\mathrm{M}(\theta)$ of the microphone toward the loudspeaker relative to the talker, dB. |
 | `n_open_microphones` | Number $N_\mathrm{m}$ of microphones open at once. |
-| `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN_DB`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin_db), Long's equalised-system value). |
+| `stability_margin` | Required margin below oscillation, dB (default [`DEFAULT_STABILITY_MARGIN_DB`](/reference/api/electroacoustics/sound-reinforcement/#default_stability_margin_db), Long's equalised-system value). |
 
-**Returns:** A [`FeedbackStabilityResult`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#feedbackstabilityresult).
+**Returns:** A [`FeedbackStabilityResult`](/reference/api/electroacoustics/sound-reinforcement/#feedbackstabilityresult).
 
 **Raises**
 
@@ -300,7 +300,7 @@ average listener `L` out in the audience. The signal path
 `T -> M` and `H -> L` is solid, the feedback path `H -> M` dashed.
 The two loudspeaker paths are the direct-field levels `L_H-M` and
 `L_H-L` that drive
-[`phonometry.electroacoustics.feedback_stability`](/phonometry/reference/api/electroacoustics/sound-reinforcement/#feedback_stability); the drawing is
+[`phonometry.electroacoustics.feedback_stability`](/reference/api/electroacoustics/sound-reinforcement/#feedback_stability); the drawing is
 deliberately *not* to scale, because a talker 0.3 m from the microphone
 and a listener 20 m from the loudspeaker cannot share one usable scale.
 

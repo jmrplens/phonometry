@@ -14,9 +14,9 @@ Modulation Working Group (the AMWG Final Report, 2016), which the TS
 implements (13.2) with more specific outputs and the worst case band in each
 bin. The input is a series of A-weighted 100 ms `Leq` values summed over
 seven one-third-octave bands (13.6.2.1.1):
-[`amplitude_modulation_band_levels`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels) forms it from logged band levels.
+[`amplitude_modulation_band_levels`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels) forms it from logged band levels.
 
-**The 10 s block** (13.6.2.3), [`amplitude_modulation_block`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). The 100
+**The 10 s block** (13.6.2.3), [`amplitude_modulation_block`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). The 100
 values are de-trended with a cubic least-squares fit, transformed with a
 rectangular-window DFT of 0.1 Hz resolution and turned into the power
 spectrum
@@ -42,12 +42,12 @@ kept component, with their negative-frequency mirrors, are transformed back,
 and the modulation depth is the 95th percentile of the reconstructed series
 minus its 5th percentile (`L5 - L95`).
 
-**The 10 min period** (13.6.3), [`amplitude_modulation_period`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_period): the AM
+**The 10 min period** (13.6.3), [`amplitude_modulation_period`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_period): the AM
 rating is the 90th percentile of the valid 10 s depths when at least 30 of the
 60 blocks are valid, and 0 dB otherwise, with the mean and the mode of the
 valid fundamental frequencies.
 
-**The bins** (13.6.4), [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation): the 10 min ratings
+**The bins** (13.6.4), [`bin_amplitude_modulation`](/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation): the 10 min ratings
 of each band are averaged per 1 m/s wind speed bin and 30 degree sector, the
 zeros included, and each bin reports the band with the highest mean.
 
@@ -62,7 +62,7 @@ periods 13.6.3 rates 0 dB (their blocks failed the prominence test), and the
 "including 0 values" of the same sentence, with the count of non-zero values
 13.6.4 asks for, would mean nothing. It is read as the periods the
 practitioner excludes, the `excluded` flags of
-[`bin_amplitude_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation). The TS says both "at least 50 %" (13.6.2.2)
+[`bin_amplitude_modulation`](/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation). The TS says both "at least 50 %" (13.6.2.2)
 and "greater than 50 % (30 valid 10 s blocks)" (13.6.3) of a period's blocks;
 a period of exactly 30 valid blocks is rated, as 13.6.2.2 and the AMWG (4.4.4,
 "at least 50 % (i.e. 30)") both say.
@@ -173,7 +173,7 @@ value at each nominal centre frequency.
 | :--- | :--- |
 | `band_levels` | The logged band levels, in dB: one row per 100 ms sample and one column per one-third-octave band (a single sample may be given as one row). |
 | `frequencies` | Nominal centre frequency of each column, in Hz; it must include the seven centres of `band`. |
-| `band` | The AM band number, 1 to 3 (13.6.2.1.1) or 4 to 6 (Annex G.3), as an integer; see [`AM_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_frequency_bands_hz). |
+| `band` | The AM band number, 1 to 3 (13.6.2.1.1) or 4 to 6 (Annex G.3), as an integer; see [`AM_FREQUENCY_BANDS_HZ`](/reference/api/environment/wind-turbine-modulation/#am_frequency_bands_hz). |
 | `weighting` | `"A"` when the band levels are already A-weighted, `"Z"` when the A-weighting is still to be applied. Required: a wrong guess is a 20 dB to 30 dB error at the lowest bands. |
 
 **Returns:** The band-limited `LAeq,100ms` series, in dB, one value per sample.
@@ -211,17 +211,17 @@ $(10^{-9} L)^2$, $L$ the largest absolute level of the block.
 A steady block, or one that follows a cubic, then has no local maximum
 and is `NO_PEAK` rather than a verdict drawn from the last bits of its
 levels, and a peak whose masking lines hold only rounding has an infinite
-prominence. [`ModulationBlock.power_spectrum`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblock) keeps every line as
+prominence. [`ModulationBlock.power_spectrum`](/reference/api/environment/wind-turbine-modulation/#modulationblock) keeps every line as
 Equation (12) gives it.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `levels` | The 100 band-limited A-weighted `Leq,100ms` values of the block, in dB (see [`amplitude_modulation_band_levels`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels)). |
+| `levels` | The 100 band-limited A-weighted `Leq,100ms` values of the block, in dB (see [`amplitude_modulation_band_levels`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_band_levels)). |
 | `modulation_frequency_range_hz` | `(low, high)` range, in Hz, where the fundamental modulation frequency is expected: the blade passage frequencies of the turbines with some tolerance (13.6.2.1.2), within 0.3 Hz to 1.6 Hz (13.2). |
 
-**Returns:** A [`ModulationBlock`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblock).
+**Returns:** A [`ModulationBlock`](/reference/api/environment/wind-turbine-modulation/#modulationblock).
 
 **Raises**
 
@@ -244,11 +244,11 @@ amplitude_modulation_period(
 Rate one 10 min period of 100 ms levels (IEC TS 61400-11-2, 13.6.3).
 
 The 6 000 values are cut into sixty consecutive 10 s blocks, each analysed
-by [`amplitude_modulation_block`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). With at least 30 valid blocks the
+by [`amplitude_modulation_block`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). With at least 30 valid blocks the
 rating is the 90th percentile of their depths and the mean and mode of
 their fundamentals are reported; otherwise the rating is 0 dB and no
 modulation frequency is given. That 0 dB period is kept, and counted in
-its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation), as the TS says (13.6.3,
+its bin by [`bin_amplitude_modulation`](/reference/api/environment/wind-turbine-modulation/#bin_amplitude_modulation), as the TS says (13.6.3,
 13.6.4); the AMWG Final Report discards it instead.
 
 **Parameters**
@@ -256,10 +256,10 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 | Name | Description |
 | :--- | :--- |
 | `levels` | The 6 000 band-limited `LAeq,100ms` values of the period, in dB, synchronised to the hour (13.6.3). |
-| `modulation_frequency_range_hz` | `(low, high)` range of the fundamental, in Hz, as for [`amplitude_modulation_block`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). |
+| `modulation_frequency_range_hz` | `(low, high)` range of the fundamental, in Hz, as for [`amplitude_modulation_block`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_block). |
 | `excluded_blocks` | Optional sixty flags, `True` for a block the practitioner excludes by hand (13.6.2.2); those blocks are not analysed and do not count as valid. The TS notes that standard practice excludes whole 10 min periods, so excluding single blocks is an adaptation to be justified. |
 
-**Returns:** A [`ModulationPeriod`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationperiod).
+**Returns:** A [`ModulationPeriod`](/reference/api/environment/wind-turbine-modulation/#modulationperiod).
 
 **Raises**
 
@@ -297,14 +297,14 @@ highest mean.
 
 | Name | Description |
 | :--- | :--- |
-| `ratings_db` | The 10 min ratings, in dB, one row per period and one column per band of `bands` (see [`ModulationPeriod.rating_db`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationperiodrating_db)). |
+| `ratings_db` | The 10 min ratings, in dB, one row per period and one column per band of `bands` (see [`ModulationPeriod.rating_db`](/reference/api/environment/wind-turbine-modulation/#modulationperiodrating_db)). |
 | `wind_speeds_m_s` | The reference wind speed of each period, in m/s. |
 | `wind_directions_deg` | The wind direction of each period, in degrees from north, or `None` to bin by wind speed alone. |
 | `bands` | The AM band numbers of the columns, as integers. |
 | `excluded` | Optional flags, `True` for a period the practitioner excluded; 13.6.4 leaves excluded periods out of the bin mean, whatever the reason. A period rated 0 dB for having fewer than 30 valid blocks is not excluded: it counts, at 0 dB, since 13.6.4 averages "including 0 values" and 13.6.3 assigns that 0 to such a period (the "excluded periods due to pf" of 13.6.4 are read as periods excluded by hand). |
 | `sector_width_deg` | Width of the direction sectors, in degrees; it must divide 360. Wider sectors (downwind, crosswind) are reached by rotating the directions so that the sector of interest is centred on zero. |
 
-**Returns:** A [`BinnedModulation`](/phonometry/reference/api/environment/wind-turbine-modulation/#binnedmodulation).
+**Returns:** A [`BinnedModulation`](/reference/api/environment/wind-turbine-modulation/#binnedmodulation).
 
 **Raises**
 
@@ -347,7 +347,7 @@ speed; one column per band in `bands`.
 | `nonzero_counts` | Number of those with a non-zero rating, per band. |
 | `mean_ratings_db` | Mean 10 min rating per bin and band, the zeros of unrated periods included (13.6.4), in dB. |
 | `type_a_uncertainty_db` | Standard deviation of that mean, Equation (9) of 10.3.3 (13.6.5); NaN for a bin of one data point. |
-| `exceedance_percent` | Percentage of the bin's data points rated above 3 dB, 6 dB and 9 dB ([`AM_EXCEEDANCE_DEPTHS_DB`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_exceedance_depths_db)), shape `(bins, bands, 3)`. |
+| `exceedance_percent` | Percentage of the bin's data points rated above 3 dB, 6 dB and 9 dB ([`AM_EXCEEDANCE_DEPTHS_DB`](/reference/api/environment/wind-turbine-modulation/#am_exceedance_depths_db)), shape `(bins, bands, 3)`. |
 | `selected_bands` | The band with the highest mean rating in each bin, the lowest-numbered of equally high ones. |
 | `selected_ratings_db` | The mean rating of that band, in dB. |
 
@@ -466,11 +466,11 @@ of the reconstruction.
 
 *property*
 
-[`ModulationBlockStatus`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblockstatus-1) of the block (13.6.2.2 and 13.6.2.3).
+[`ModulationBlockStatus`](/reference/api/environment/wind-turbine-modulation/#modulationblockstatus-1) of the block (13.6.2.2 and 13.6.2.3).
 
 `EXCLUDED` when the practitioner excluded it, `NO_PEAK` without a
 local maximum in the range, `LOW_PROMINENCE` for a prominence under
-[`AM_PROMINENCE_THRESHOLD`](/phonometry/reference/api/environment/wind-turbine-modulation/#am_prominence_threshold), `VALID` otherwise.
+[`AM_PROMINENCE_THRESHOLD`](/reference/api/environment/wind-turbine-modulation/#am_prominence_threshold), `VALID` otherwise.
 
 ### ModulationBlock.valid
 
@@ -511,7 +511,7 @@ built to rate blocks the TS does not count.
 
 | Name | Description |
 | :--- | :--- |
-| `blocks` | The sixty [`ModulationBlock`](/phonometry/reference/api/environment/wind-turbine-modulation/#modulationblock) analyses, in time order. |
+| `blocks` | The sixty [`ModulationBlock`](/reference/api/environment/wind-turbine-modulation/#modulationblock) analyses, in time order. |
 
 ### ModulationPeriod.fundamental_frequencies_hz
 

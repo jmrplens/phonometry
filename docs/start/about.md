@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/about.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/about/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/start/about/
 
 # About
 
@@ -155,7 +155,7 @@ BibTeX:
   year    = {2026},
   version = {4.0.0},
   doi     = {10.5281/zenodo.21215280},
-  url     = {https://docs.jmrp.io/phonometry/},
+  url     = {https://phonometry.dev/},
   license = {MIT}
 }
 ```

@@ -197,7 +197,7 @@ function derivedSection(citing, prefixes, sections) {
  *   What is written by hand of each work, by its fragment on the English bibliography.
  * @param {readonly string[]} options.navigation Every page route in the order the
  *   sidebar lists them; a "Cited by" list follows it.
- * @param {string} options.base The site's base path, `/phonometry`.
+ * @param {string} options.base The site's base path, `''` at the root.
  * @returns {{key: string, entries: {id: string, fragment: string, ref: object, note?: string,
  *   citedBy: {id: string, title: string, href: string}[]}[]}[]}
  * @throws {Error} Listing every work the data describes that no page of the

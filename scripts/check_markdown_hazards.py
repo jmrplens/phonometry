@@ -36,7 +36,7 @@ source that looks right and renders wrong.
    A browser resolves it; the accessibility audit compares the raw attribute
    against the ids and reports a dangling anchor, and it only samples 66 URLs,
    so five of the six the corpus had went unreported. The same holds for a
-   link into another page of the site, ``(/phonometry/es/...#la-medición)``,
+   link into another page of the site, ``(/es/...#la-medición)``,
    and a search engine audit of the published site reported 150 of those as
    broken. The fix the corpus already used is an ASCII ``<span id=...>``
    above the heading. A link to another site is its own business and is not

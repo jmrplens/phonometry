@@ -240,7 +240,7 @@ la corrección convierte el cuadrado de una presión en una potencia acústica, 
 que al lado más caliente le toca la mayor, y lo impreso da la inversa.
 `temperature_field_correction` devuelve las ecuaciones tal como están impresas,
 para que su número sea el que da la norma, y
-[el registro de erratas](/phonometry/es/reference/errata/) recoge la evidencia y
+[el registro de erratas](/es/reference/errata/) recoge la evidencia y
 la lectura que pide la impedancia característica. Después mida el flujo, la
 pérdida de presión total del silenciador y las velocidades de flujo en el
 conducto. Las dos condiciones de 9.2 marcan lo que va al informe, no lo que
@@ -365,7 +365,7 @@ dan a la campaña "después", así que leído al pie de la letra ataría cada ca
 a un tipo de posición; la NOTA que cierra el apartado pide posiciones en las que las dos
 correcciones sean prácticamente iguales, lo que sólo tiene sentido si cada campaña
 toma la suya. `measured_insertion_loss_indirect` recibe un tipo de receptor para
-cada campaña, y [el registro de erratas](/phonometry/es/reference/errata/) da la
+cada campaña, y [el registro de erratas](/es/reference/errata/) da la
 lectura.
 
 El micrófono de referencia se pone al menos 1,5 m por encima del borde superior
@@ -400,7 +400,7 @@ clase a contraviento sólo para distancias cortas. Esa fila a contraviento está
 impresa como «+ 1 to − 5», un intervalo cuyos extremos van al revés y cuyo extremo
 inferior es donde empieza la clase a favor; `wind_class` la lee como de −5 m/s a
 −1 m/s, el reflejo de la fila a favor, y
-[el registro de erratas](/phonometry/es/reference/errata/) da la evidencia.
+[el registro de erratas](/es/reference/errata/) da la evidencia.
 
 ```python
 print(environment.wind_class(2.5))                        # downwind
@@ -512,7 +512,7 @@ la tabla 1 y las de nubosidad de la tabla 2; el ensayo de distancia corta de
 angular de su NOTA pide más; la distancia de campo semilibre de 8.1.2; y la geometría del
 emplazamiento equivalente de 6.1. Un defecto de la edición impresa de la
 ISO 11820 y dos de la edición impresa de la ISO 10847 están recogidos en el
-[registro de erratas](/phonometry/es/reference/errata/), junto con una nota: las
+[registro de erratas](/es/reference/errata/), junto con una nota: las
 dos tablas escalonadas de fondo son una diferencia y no una errata.
 </ScopeClaim>
 
@@ -535,28 +535,28 @@ no se reproduce ninguno.
 
 ## Véase también
 
-- [Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/):
+- [Encapsulados y cabinas medidos](/es/devices/noise-control/enclosure-cabin-insulation/):
   la misma forma de mirar aplicada a una caja alrededor de una máquina y a una
   cabina alrededor de un operario.
-- [Medir un silenciador](/phonometry/es/devices/noise-control/silencer-measurement/):
+- [Medir un silenciador](/es/devices/noise-control/silencer-measurement/):
   el método de laboratorio de la ISO 7235, con el conducto de ensayo y la medida
   por sustitución de los que la ISO 11820 prescinde.
-- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/):
+- [Control de ruido industrial](/es/devices/noise-control/noise-control/):
   la pérdida por inserción que se predice para una pantalla o un encapsulado, que
   es la magnitud que estas normas miden en vez de calcular.
-- [Propagación del sonido al aire libre](/phonometry/es/environment/propagation/outdoor-propagation/):
+- [Propagación del sonido al aire libre](/es/environment/propagation/outdoor-propagation/):
   el término de atenuación por barrera de la ISO 9613-2 que calcula una
   predicción para la barrera que mide la ISO 10847.
-- [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+- [Potencia acústica in situ por comparación](/es/devices/emission/sound-power-in-situ/):
   la otra forma de determinar una magnitud en una sala que nunca se construyó
   para eso.
-- [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/): un
+- [Erratas de las fuentes publicadas](/es/reference/errata/): un
   cociente de temperaturas de las ecuaciones (20) y (22) de la ISO 11820
   impreso al revés, una clase de viento a contraviento impresa con el extremo
   inferior positivo, y una prima a la que se le piden dos significados.
 - Referencia de la API:
-  [`noise_control.silencer_in_situ`](/phonometry/es/reference/api/noise_control/silencer-in-situ/),
-  [`noise_control.screen_in_situ`](/phonometry/es/reference/api/noise_control/screen-in-situ/)
-  y [`environment.propagation.barrier_in_situ`](/phonometry/es/reference/api/environment/barrier-in-situ/).
+  [`noise_control.silencer_in_situ`](/es/reference/api/noise_control/silencer-in-situ/),
+  [`noise_control.screen_in_situ`](/es/reference/api/noise_control/screen-in-situ/)
+  y [`environment.propagation.barrier_in_situ`](/es/reference/api/environment/barrier-in-situ/).
 
 </SeeAlso>

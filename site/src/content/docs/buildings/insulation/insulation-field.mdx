@@ -59,7 +59,7 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-This guide continues from the [Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/):
+This guide continues from the [Room Acoustics guide](/buildings/rooms/room-acoustics/):
 the same impulse response, measured either side of a partition, yields its
 sound insulation. This page covers the engineering-grade measurement of
 ISO 16283 in the finished building: the airborne level differences $D$,
@@ -67,15 +67,15 @@ $D_{\mathrm{n}T}$ and $R'$, the impact levels $L'_{\mathrm{n}T}$ and $L'_\mathrm
 report, and the ISO 12999-1 uncertainty that qualifies every field value.
 Three close relatives have guides of their own: the reference-curve engine
 behind every single number in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/), the
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/), the
 building envelope in
-[Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/), and the
+[Façade Sound Insulation](/buildings/insulation/facade-insulation/), and the
 quick octave-band route in
-[Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/).
+[Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/).
 The laboratory characterisation of an element lives in
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/) and the
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/) and the
 prediction of in-situ performance in
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/).
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/).
 
 ## How do I compute DnT and R' from a field measurement in Python?
 
@@ -119,9 +119,9 @@ $L'_\mathrm{n}$, $L'_{\mathrm{n}T}$) are measured **in the building** and includ
 flanking path, while the unprimed $R$ and $L_\mathrm{n}$ are laboratory properties of
 the element alone, measured with flanking suppressed. The full lab-to-field
 map lives in
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/); the
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/); the
 prediction that bridges the two is
-[EN 12354](/phonometry/buildings/design/insulation-prediction/).
+[EN 12354](/buildings/design/insulation-prediction/).
 
 One measurement yields all three quantities, so **which one goes on the report
 is a regulatory question, not a measurement one.** $D_{\mathrm{n}T}$ describes the room
@@ -132,7 +132,7 @@ prediction needs. Measure once, then report the quantity the requirement is
 written in and say which it is: an $R'_\mathrm{A}$ cannot be checked against a
 $D_{\mathrm{n}T,\mathrm{A}}$ limit without converting through the room's $T$ and the partition
 area first; see
-[Spanish Building Code (CTE DB-HR)](/phonometry/buildings/insulation/spanish-building-code/),
+[Spanish Building Code (CTE DB-HR)](/buildings/insulation/spanish-building-code/),
 which states its between-rooms requirement in $D_{\mathrm{n}T,\mathrm{A}}$ and its
 partition-wall requirement in $R_\mathrm{A}$.
 
@@ -186,7 +186,7 @@ between a construction that works and one that generates complaints.
 `r_prime` or `None`). The reference-curve engine that turns any of those
 spectra into $R_\mathrm{w}$, $R'_\mathrm{w}$ or $D_{\mathrm{n}T,\mathrm{w}}$, its spectrum adaptation terms and its
 enlarged-range variants are in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/).
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/).
 
 ## Taking the measurement (ISO 16283-1 Clauses 7 and 9)
 
@@ -304,7 +304,7 @@ print(np.round(l2_corr, 2))     # [44.   40.25 38.84 36.7 ]  <- last band flagge
 
 `building.background_correction` exists, but it implements the **ISO 10140-4
 laboratory** rule used on
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/),
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/),
 whose upper threshold is 15 dB rather than 10 dB. Applied to field data it
 subtracts energy in the 10-15 dB margin band where ISO 16283-1 asks for
 nothing (up to 0.458 dB at a 10 dB margin), and since it acts on the
@@ -378,9 +378,9 @@ it for the reverberation time too, at least an arm's length from the
 microphone (Clause 10.1).
 `room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20` evaluates that
 20 dB range on one impulse response; the acquisition is in
-[Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/)
+[Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/)
 and the decay analysis in
-[Room Acoustics](/phonometry/buildings/rooms/room-acoustics/). A receiving
+[Room Acoustics](/buildings/rooms/room-acoustics/). A receiving
 room under 25 m³ changes the three lowest bands, as the next section says.
 
 ### Small rooms: the low-frequency procedure (Clause 8)
@@ -493,7 +493,7 @@ with no procedure to run it says so with a
 one. The corner geometry, the
 sampling requirements, the differences between the three parts and a worked
 measurement with its rating are all in a guide of their own:
-[Small Rooms: the ISO 16283 Low-Frequency Procedure](/phonometry/buildings/insulation/low-frequency-procedure/).
+[Small Rooms: the ISO 16283 Low-Frequency Procedure](/buildings/insulation/low-frequency-procedure/).
 
 ## Field impact insulation (ISO 16283-2)
 
@@ -523,7 +523,7 @@ actually complain about: a child jumping, an adult walking barefoot. For those,
 the same standard specifies a **rubber ball** (Annex A), rated through a
 different engine entirely: a Fast-weighted maximum level and the A-weighted sum
 of ISO 717-2 Annex D, not a shifted reference curve. It has its own guide,
-[Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/).
+[Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Field impact insulation setup in section: a standardized tapping machine on the floor of the source room above, three microphone positions at different heights in the receiving room below with the minimum distances of Clause 7.6 (0.7 m between fixed positions, 0.5 m to the room boundaries, 1.0 m to the ceiling the machine excites), and the formulas that standardize or normalize the energy-averaged level" width="92%" />
 
@@ -560,9 +560,9 @@ $L'_{\mathrm{n}T,\mathrm{w}} = 79$ dB is a bare structural floor with no coverin
 layer, failing by roughly 20 dB. The Annex C example is a worst case, not a
 typical one. What it takes to close a gap of that size is a floating floor on a
 resilient layer or a decoupled ceiling, not a carpet; see
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/)
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/)
 and
-[Predicting resilient-layer performance](/phonometry/buildings/design/resilient-layers/).
+[Predicting resilient-layer performance](/buildings/design/resilient-layers/).
 
 ### Taking the impact measurement (ISO 16283-2:2020 Clauses 4, 7, 9 and 10)
 
@@ -593,7 +593,7 @@ it.
 
 **Fixed microphones (Clauses 7.3.1, 7.3.2, 7.6).** The rules are the ones the
 rubber ball follows in
-[Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/#measuring-in-the-field-iso-16283-22020-clauses-6-to-9):
+[Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/#measuring-in-the-field-iso-16283-22020-clauses-6-to-9):
 a tripod with nobody in the room, or an operator whose trunk stays at least an
 arm's length from the microphone; positions spread through the permitted
 space, no two in the same plane relative to the room boundaries and no regular
@@ -630,7 +630,7 @@ change its foreword lists against the previous edition, while ISO 16283-1:2014
 still prints "no more than 0,5 m from the ceiling" for the same path
 (Clause 7.5.3), a maximum that its own Clause 7.6 answers with a minimum of
 0.5 m to every room boundary; the comparison is in the
-[errata registry](/phonometry/reference/errata/). End the helix at least 0.5 m
+[errata registry](/reference/errata/). End the helix at least 0.5 m
 below the ceiling in either part. In case of dispute the result measured with nobody in the
 receiving room is the reference one (Clause 6).
 
@@ -681,7 +681,7 @@ describes, with a loudspeaker that meets Annex B of this part.
 
 `impact_insulation()` returns an `ImpactInsulationResult` (`l_n_t`, `l_n` or
 `None`); the ISO 717-2 side of the chain is in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/).
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/).
 
 ## ISO 16283 field test report (`.report()`)
 
@@ -934,15 +934,15 @@ plt.show()
 Three neighbouring measurements have guides of their own,
 and a fourth sits alongside them. The building envelope, measured against the
 level 2 m in front of it and predicted from its elements, is
-[Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/). When a full
+[Façade Sound Insulation](/buildings/insulation/facade-insulation/). When a full
 engineering measurement is more than the question deserves, the octave-band
 control method is
-[Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/).
+[Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/).
 Every single number quoted above comes from the reference curves of
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/). And the
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/). And the
 sound-intensity route to the same quantities, which reads the transmitted
 power off the radiating face instead of the receiving-room level, is
-[Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/).
+[Sound Insulation by Intensity (ISO 15186)](/buildings/insulation/insulation-intensity/).
 
 ## What this guide covers
 
@@ -980,19 +980,19 @@ documented here and checked nowhere: energy-averaging happens once positions
 are supplied, but nothing verifies how many were taken, where or for how long,
 and the reverberation times are taken as given. The
 low-frequency procedure of [Small
-rooms](/phonometry/buildings/insulation/low-frequency-procedure/) *is* implemented:
+rooms](/buildings/insulation/low-frequency-procedure/) *is* implemented:
 the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
 reverberation time of Clause 10.4, but it too is fed corner levels the
 operator measured, and the only sampling requirement it enforces is a warning
 below the four corners per source position Clause 8.3 asks for. The other members of the family are covered by their own guides: the
 façade part ISO 16283-3 ([Façade Sound
-Insulation](/phonometry/buildings/insulation/facade-insulation/)), the survey
+Insulation](/buildings/insulation/facade-insulation/)), the survey
 method ISO 10052 ([Sound Insulation Survey
-Method](/phonometry/buildings/insulation/insulation-survey/)), the rating
+Method](/buildings/insulation/insulation-survey/)), the rating
 engines ISO 717-1/-2 ([Insulation
-Ratings](/phonometry/buildings/insulation/insulation-ratings/)) and the
+Ratings](/buildings/insulation/insulation-ratings/)) and the
 sound-intensity route ISO 15186-1/-2 ([Sound Insulation by
-Intensity](/phonometry/buildings/insulation/insulation-intensity/)).
+Intensity](/buildings/insulation/insulation-intensity/)).
 </ScopeClaim>
 </Scope>
 
@@ -1000,30 +1000,30 @@ Intensity](/phonometry/buildings/insulation/insulation-intensity/)).
 
 ## See also
 
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/): the
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/): the
   reference-curve engine behind every weighted single number on this page.
-- [Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/): the third
+- [Façade Sound Insulation](/buildings/insulation/facade-insulation/): the third
   part of ISO 16283, measured and predicted.
-- [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/):
+- [Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/):
   the octave-band control method these engineering methods are the reference for.
-- [Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/):
+- [Heavy and Soft Impact Sources](/buildings/insulation/heavy-impact-sources/):
   the rubber ball and the bang machine, the other impact sources of ISO 16283-2,
   and the ISO 717-2 Annex D rating that goes with them.
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/): the
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/): the
   ISO 10140 element characterisation these field quantities are compared against.
-- [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
+- [Sound Insulation by Intensity (ISO 15186)](/buildings/insulation/insulation-intensity/):
   the direct-power route to the same field and laboratory indices.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the in-situ performance predicted from laboratory element data.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the room parameters and
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the room parameters and
   reverberation times this guide's insulation chain builds on.
-- [Levels](/phonometry/signals/levels/levels/): energy averaging and the level metrics behind
+- [Levels](/signals/levels/levels/): energy averaging and the level metrics behind
   source/receiving-room levels.
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
+- [Filter Banks](/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
   used for the insulation spectra.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the reference-curve derivation behind the
+- [Theory](/reference/theory/rooms-buildings/): the reference-curve derivation behind the
   weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](/phonometry/reference/api/building/insulation/) and [`building.measurement.uncertainty`](/phonometry/reference/api/building/uncertainty/).
+- API reference: [`building.measurement.insulation`](/reference/api/building/insulation/) and [`building.measurement.uncertainty`](/reference/api/building/uncertainty/).
 
 </SeeAlso>
 

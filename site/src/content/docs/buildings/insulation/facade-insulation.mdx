@@ -57,11 +57,11 @@ is installed, and EN 12354-4 turns the envelope round to radiate an indoor
 source outwards. A closing section puts the measured and the predicted
 $D_{2\mathrm{m,n}T}$ side by side and shows what does, and does not, separate them. The
 reference curves behind every single number live in
-[Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/); the
+[Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/); the
 internal partitions of the same building in
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/)
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/)
 and
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/).
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/).
 
 ## How do I compute the façade sound insulation D2m,nT,w in Python?
 
@@ -157,7 +157,7 @@ everything measured since the last satisfactory check is discarded
 recommends having the calibrator calibrated every year at most, and the meter
 and the filter set verified every two. The same classes and the same 0.5 dB
 rule open the other two parts of ISO 16283, in
-[Field Insulation Measurement](/phonometry/buildings/insulation/insulation-field/#taking-the-measurement-iso-16283-1-clauses-7-and-9).
+[Field Insulation Measurement](/buildings/insulation/insulation-field/#taking-the-measurement-iso-16283-1-clauses-7-and-9).
 
 **Global or element.** They answer different questions and ISO 16283-3
 Table 1 says which is preferred for which. The **global** methods give
@@ -617,7 +617,7 @@ plt.show()
 | `radiated_sound_power(r_prime_cap)` | float | dB | default `None` (off) | Optional field cap on $R'$, an Annex G example footnote (it uses 40 dB), not part of Formula (2)/(3) |
 | `radiated_sound_power(octave_bands)` | seq of int | Hz | default `None` | Octave centres matching the bands; enables the A-weighted $L_{W\mathrm{A}}$ |
 | `facade_sound_reduction(frequencies)` | seq | Hz | default `None`; length = band count | Band centres carried on the result for plotting |
-| `facade_sound_reduction(fraction)` | int or `None` | — | `1` (octaves) / `3` (one-third octaves) / `None` | Which band set the input is in; `None` infers it from the count, as on the [ratings page](/phonometry/buildings/insulation/insulation-ratings/) |
+| `facade_sound_reduction(fraction)` | int or `None` | — | `1` (octaves) / `3` (one-third octaves) / `None` | Which band set the input is in; `None` infers it from the count, as on the [ratings page](/buildings/insulation/insulation-ratings/) |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Finite radiating side and reception distance (Annex E) |
 | `outdoor_level(l_w, attenuation)` | float or seq | dB | broadcast-compatible | Exterior $L_p$ from one or more sides (Formula E.1) |
 
@@ -710,7 +710,7 @@ The practical reading: size the glazing and the air inlets with the
 prediction, accept the finished façade with the measurement, and do not treat
 a couple of decibels between the two as an error in either. A prediction built
 on laboratory indices and a field measurement of the finished envelope each
-carry an uncertainty of that order on their own; the [ISO 12999-1 uncertainty section](/phonometry/buildings/insulation/insulation-field/#measurement-uncertainty-iso-12999-1) puts a number on the
+carry an uncertainty of that order on their own; the [ISO 12999-1 uncertainty section](/buildings/insulation/insulation-field/#measurement-uncertainty-iso-12999-1) puts a number on the
 measurement half. And when the two disagree by much more than that, the
 per-element share of the transmitted energy in the prediction report is the
 place to look first: on this façade it is the air inlet, not the wall, that
@@ -745,7 +745,7 @@ distances, the 3→10 microphone escalation and its recess special case, the 50
 pass-bys and the simultaneity of a traffic measurement, or that the method
 chosen matches the question asked. The low-frequency corner procedure of
 Clause 7.3 (the façade counterpart of the [ISO 16283-1
-procedure](/phonometry/buildings/insulation/low-frequency-procedure/),
+procedure](/buildings/insulation/low-frequency-procedure/),
 triggered by the same 25 m³ receiving-room threshold) is implemented and
 reached through `facade_insulation`'s `low_frequency=` argument, for the
 loudspeaker methods Clause 6 confines it to; the railway and aircraft methods
@@ -760,25 +760,25 @@ appear: the implementation follows the formulas rather than the printed rows.
 
 ## See also
 
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the airborne and impact field measurements of the internal partitions, and
   the ISO 12999-1 uncertainty that qualifies every field rating.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the airborne and impact flanking models of EN 12354-1/2 that share the
   transmission-factor summation used here.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/): the
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/): the
   reference-curve engine behind the $D_{2\mathrm{m,n}T,\mathrm{w}}$, $R'_{45,\mathrm{w}}$ and
   $R'_\mathrm{tr,s,w}$ single numbers.
-- [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/):
+- [Sound Insulation Survey Method (ISO 10052)](/buildings/insulation/insulation-survey/):
   the octave-band façade quantity of the quick survey method.
-- [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Predicting Panel Sound Insulation](/buildings/design/panel-sound-insulation/):
   the mass law, coincidence dip and aperture models behind the element $R$
   values the prediction consumes.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/): the
   propagation from the source to the 2 m position in front of the façade, and
   onwards from the radiating side of EN 12354-4.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the reference-curve
+- [Theory](/reference/theory/rooms-buildings/): the reference-curve
   derivation behind the weighted single-number ratings.
-- API reference: [`building.prediction.facade`](/phonometry/reference/api/building/facade/) and [`building.measurement.insulation`](/phonometry/reference/api/building/insulation/).
+- API reference: [`building.prediction.facade`](/reference/api/building/facade/) and [`building.measurement.insulation`](/reference/api/building/insulation/).
 
 </SeeAlso>

@@ -48,8 +48,8 @@ ponderación no le cuestan nada: su diseño exacto `high_accuracy` es una
 cascada simple de secciones de segundo orden a la frecuencia de entrada, así
 que una ponderación A en streaming es el mismo filtro que ejecuta una llamada
 offline, a cualquier frecuencia de muestreo (ver
-[Ponderación frecuencial](/phonometry/es/signals/levels/weighting/) y
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/)).
+[Ponderación frecuencial](/es/signals/levels/weighting/) y
+[Ponderaciones especiales](/es/signals/levels/special-weightings/)).
 Antes llegaba a sus secciones a través de una etapa de interpolación y otra de
 diezmado, que no se pueden partir en bloques, así que el streaming tenía que
 recurrir al diseño bilineal simple.
@@ -180,7 +180,7 @@ acumula la
 suma y el recuento por separado, como arriba, y de eso se encarga la
 aritmética. Y nunca promedies las lecturas en *decibelios* de cada bloque: ese
 es el error de la media aritmética de
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/), es
+[Niveles integrados y estadísticos](/es/signals/levels/levels/), es
 unilateral y siempre subestima.
 
 La versión por bandas es el mismo acumulador con un vector a la izquierda:
@@ -212,7 +212,7 @@ for block in audio_blocks:
 ```
 
 O gestiona el estado tú mismo con la API funcional; consulta
-[Ponderación temporal](/phonometry/es/signals/levels/time-weighting/#6-procesado-por-bloques).
+[Ponderación temporal](/es/signals/levels/time-weighting/#6-procesado-por-bloques).
 
 ## Estado multicanal
 
@@ -241,7 +241,7 @@ la de una sola pasada exactamente, no de forma aproximada. El detector
 `TimeWeighting` transporta aún menos, solo su último valor de envolvente
 $y[n-1]$, que es el mismo valor que la API funcional devuelve como
 `initial_state` (ver
-[Ponderación temporal](/phonometry/es/signals/levels/time-weighting/#6-procesado-por-bloques)).
+[Ponderación temporal](/es/signals/levels/time-weighting/#6-procesado-por-bloques)).
 
 ### Trampas del streaming
 
@@ -262,7 +262,7 @@ $y[n-1]$, que es el mismo valor que la API funcional devuelve como
   $B = 0{,}231\,f_\mathrm{m}$ para tercios de octava eso es alrededor de un segundo a
   12,5 Hz, una décima de segundo a 125 Hz y trece milisegundos a 1 kHz (la
   regla de duración del registro de [Bancos de
-  filtros](/phonometry/es/signals/filters/filter-banks/#cuanto-tiene-que-durar-el-registro)).
+  filtros](/es/signals/filters/filter-banks/#cuanto-tiene-que-durar-el-registro)).
   Un detector exponencial suma encima sus propios $5\tau$: 0,6 s en Fast y 5 s
   en Slow. `steady_ic=True` arranca las secciones en el régimen permanente de un
   *escalón*, lo que elimina el transitorio ligado a la componente continua pero
@@ -385,7 +385,7 @@ si se pasaba `True`, y ahora significa lo mismo en ambos modos.
 | `detrend` | debe ser `False` | La eliminación de tendencia por bloque crea discontinuidades en las fronteras |
 | `resample` | debe ser `False` | El remuestreador no conserva estado |
 | `zero_phase` | no admitido | El filtrado bidireccional necesita la señal completa |
-| `high_accuracy` (ponderación) | sin restricción: por defecto `True` como en todas partes (consulta [Ponderación frecuencial](/phonometry/es/signals/levels/weighting/)) | El diseño exacto es una cascada simple de secciones de segundo orden a la frecuencia de entrada, así que conserva estado como cualquier otro |
+| `high_accuracy` (ponderación) | sin restricción: por defecto `True` como en todas partes (consulta [Ponderación frecuencial](/es/signals/levels/weighting/)) | El diseño exacto es una cascada simple de secciones de segundo orden a la frecuencia de entrada, así que conserva estado como cualquier otro |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
 
 ## Qué cubre esta guía
@@ -394,9 +394,9 @@ si se pasaba `True`, y ahora significa lo mismo en ambos modos.
 <ScopeClaim status="covered" label="Cubierto">
 La IEC 61260-1:2014 y la IEC 61672-1:2013 exactamente en la medida en que ya
 las implementan [Bancos de
-filtros](/phonometry/es/signals/filters/filter-banks/), [Ponderación
-frecuencial](/phonometry/es/signals/levels/weighting/) y [Ponderación
-temporal](/phonometry/es/signals/levels/time-weighting/): `stateful=True` en
+filtros](/es/signals/filters/filter-banks/), [Ponderación
+frecuencial](/es/signals/levels/weighting/) y [Ponderación
+temporal](/es/signals/levels/time-weighting/): `stateful=True` en
 `OctaveFilterBank`, `WeightingFilter` y `TimeWeighting` conserva el estado de
 sección en forma directa II transpuesta ($z_1$, $z_2$), o el último valor de
 la envolvente en `TimeWeighting`, entre fronteras de bloque, de modo que la
@@ -408,15 +408,15 @@ propio; solo demuestra y documenta esa equivalencia.
 <ScopeClaim status="not-covered" label="No cubierto">
 El filtrado bidireccional `zero_phase` necesita la señal completa, así que no
 se admite en modo con estado; usa la vía offline de [Bancos de
-filtros](/phonometry/es/signals/filters/filter-banks/) en su lugar. Lo que
+filtros](/es/signals/filters/filter-banks/) en su lugar. Lo que
 cuesta el propio diseño exacto de ponderación, y la banda sobre la que se
 ajusta, corresponden a [Ponderación
-frecuencial](/phonometry/es/signals/levels/weighting/) y no a esta página, que
+frecuencial](/es/signals/levels/weighting/) y no a esta página, que
 solo demuestra que el streaming lo reproduce. Los estadísticos de rango como
 $L_{90}$ tampoco admiten
 streaming: procesa la envolvente en streaming y calcula los percentiles una
 vez sobre el resultado conjunto, como describe [Niveles integrados y
-estadísticos](/phonometry/es/signals/levels/levels/).
+estadísticos](/es/signals/levels/levels/).
 </ScopeClaim>
 </Scope>
 
@@ -424,11 +424,11 @@ estadísticos](/phonometry/es/signals/levels/levels/).
 
 ## Véase también
 
-- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): el banco offline que el streaming reproduce bit a bit, y el modo `zero_phase` que el streaming no puede usar.
-- [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): un estado por canal, y dónde se va realmente el tiempo de cálculo.
-- [Ponderación temporal](/phonometry/es/signals/levels/time-weighting/#6-procesado-por-bloques): la API funcional del detector, con el estado pasado a mano.
-- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/): qué métricas se acumulan entre bloques y cuáles hay que recalcular sobre la envolvente conjunta.
-- Referencia de la API: [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/) y [`filters.core`](/phonometry/es/reference/api/filters/core/).
-- Teoría: [Diseño del banco y estabilidad numérica](/phonometry/es/reference/theory/signal-analysis/#diseno-del-banco-y-estabilidad-numerica): por qué un banco se diseña como secciones de segundo orden y se diezma por banda, que es lo que hace posible el estado en streaming.
+- [Bancos de filtros](/es/signals/filters/filter-banks/): el banco offline que el streaming reproduce bit a bit, y el modo `zero_phase` que el streaming no puede usar.
+- [Multicanal y rendimiento](/es/signals/filters/multichannel/): un estado por canal, y dónde se va realmente el tiempo de cálculo.
+- [Ponderación temporal](/es/signals/levels/time-weighting/#6-procesado-por-bloques): la API funcional del detector, con el estado pasado a mano.
+- [Niveles integrados y estadísticos](/es/signals/levels/levels/): qué métricas se acumulan entre bloques y cuáles hay que recalcular sobre la envolvente conjunta.
+- Referencia de la API: [`filters.weighting`](/es/reference/api/filters/weighting/) y [`filters.core`](/es/reference/api/filters/core/).
+- Teoría: [Diseño del banco y estabilidad numérica](/es/reference/theory/signal-analysis/#diseno-del-banco-y-estabilidad-numerica): por qué un banco se diseña como secciones de segundo orden y se diezma por banda, que es lo que hace posible el estado en streaming.
 
 </SeeAlso>

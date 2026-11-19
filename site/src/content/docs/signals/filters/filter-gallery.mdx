@@ -47,9 +47,9 @@ bands.
 
 The design mathematics behind these banks (band edges, poles and zeros,
 multirate decimation) and the parameter reference live in
-[Filter Banks](/phonometry/signals/filters/filter-banks/); proving that a designed
+[Filter Banks](/signals/filters/filter-banks/); proving that a designed
 bank meets a performance class of IEC 61260-1 is
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+[Filter Class Verification](/signals/filters/filter-compliance/).
 
 ## 1. The five architectures at the band edges
 
@@ -108,7 +108,7 @@ plt.show()
 | `cheby1` | **Chebyshev I** | `octave_filter(x, fs, design=FilterDesign(filter_type='cheby1', ripple=0.1))` | Sharper roll-off at the cost of ripple. |
 | `cheby2` | **Chebyshev II** | `octave_filter(x, fs, design=FilterDesign(filter_type='cheby2'))` | Flat passband with stopband zeros. |
 | `ellip` | **Elliptic** | `octave_filter(x, fs, design=FilterDesign(filter_type='ellip', ripple=0.1))` | Maximum selectivity. |
-| `bessel` | **Bessel** | `octave_filter(x, fs, design=FilterDesign(filter_type='bessel'))` | Preserving transient waveform shapes (see the group-delay figure of [Filter Banks](/phonometry/signals/filters/filter-banks/#group-delay-quantified)). |
+| `bessel` | **Bessel** | `octave_filter(x, fs, design=FilterDesign(filter_type='bessel'))` | Preserving transient waveform shapes (see the group-delay figure of [Filter Banks](/signals/filters/filter-banks/#group-delay-quantified)). |
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/architecture_tradeoff.svg" alt="Two panels for the 1 kHz octave band at 48 kHz, order 6. Left, grouped bars of the relative attenuation one and two octaves above the band mid frequency for each of the five architectures: Bessel is the shallowest at minus 16 and minus 60 decibels, Butterworth minus 40 and minus 88, Chebyshev I minus 50 and minus 102, Chebyshev II minus 55 and minus 73, Elliptic the steepest at minus 72 and minus 81. Right, the group delay at the band mid frequency in milliseconds: Bessel 1.22, Chebyshev II 1.58, Butterworth 1.74, Elliptic 1.75 and Chebyshev I 1.97" width="92%" />
 
@@ -127,7 +127,7 @@ may actually use for a standards-compliant band measurement.*
 Read the last column first: **three of the five cannot be used for a
 standards-compliant band measurement at all with the default parameters: the
 equiripple pair because their band edges are not their −3 dB points (see
-[Filter Banks](/phonometry/signals/filters/filter-banks/)), Bessel because it
+[Filter Banks](/signals/filters/filter-banks/)), Bessel because it
 rolls off too slowly for the mask. That is a hard constraint, not a preference,
 and it comes before any of the other columns. Among the two that pass, the
 choice is a real trade: `cheby2` buys 15 dB more rejection one octave out and
@@ -297,7 +297,7 @@ raises `ValueError`). Note that the default of 72 dB is set by conformance and
 not by realizability: SciPy pins the equiripple floor at exactly `attenuation`,
 and IEC 61260-1 class 1 demands 70 dB far from the band, so an `attenuation`
 of, say, 6 dB is arithmetically legal and silently loses the class: see
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+[Filter Class Verification](/signals/filters/filter-compliance/).
 
 ```python
 import numpy as np
@@ -372,7 +372,7 @@ delay. They preserve the shape of filtered waveforms (transients) better than
 any other type, but have the slowest roll-off. That claim is temporal, so the
 evidence for it is temporal too, and it lives on the sibling page: the
 group-delay figure of
-[Filter Banks](/phonometry/signals/filters/filter-banks/#group-delay-quantified)
+[Filter Banks](/signals/filters/filter-banks/#group-delay-quantified)
 shows Bessel staying nearly flat across the passband while Chebyshev I and
 Elliptic peak at the band edges, and the band-decomposition figure of the same
 page shows what a longer ring does to a transient.
@@ -489,7 +489,7 @@ woofer/tweeter acoustic-centre offset of a few centimetres is enough phase
 rotation at 1 kHz to notch the summation, and the remedy is a delay on the
 forward driver, not a different filter order. Verify by measuring the summed
 on-axis response with the swept-sine method of
-[System measurement](/phonometry/signals/spectra/system-measurement/).
+[System measurement](/signals/spectra/system-measurement/).
 
 ## What this guide covers
 
@@ -507,10 +507,10 @@ difference, depending on the parity of `order/2`.
 <ScopeClaim status="not-covered" label="Not covered">
 The band mathematics, the pole-zero, stability and multirate design and the
 `octave_filter()` / `OctaveFilterBank` parameter reference stay in [Filter
-Banks](/phonometry/signals/filters/filter-banks/). The IEC 61260-1 Table 1
+Banks](/signals/filters/filter-banks/). The IEC 61260-1 Table 1
 class acceptance masks, which decide the class each of these architectures
 actually reaches, are [Filter Class
-Verification](/phonometry/signals/filters/filter-compliance/).
+Verification](/signals/filters/filter-compliance/).
 </ScopeClaim>
 </Scope>
 
@@ -518,14 +518,14 @@ Verification](/phonometry/signals/filters/filter-compliance/).
 
 ## See also
 
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the band mathematics,
+- [Filter Banks](/signals/filters/filter-banks/): the band mathematics,
   the design machinery and the parameter reference behind every bank shown
   here.
-- [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
+- [Filter Class Verification (IEC 61260-1)](/signals/filters/filter-compliance/):
   the Table 1 acceptance mask, class 0 and the compliance fiche of these
   architectures.
-- API reference: [`phonometry`](/phonometry/reference/api/filters/phonometry/) and [`filters.core`](/phonometry/reference/api/filters/core/).
-- Theory: [Magnitude Responses](/phonometry/reference/theory/signal-analysis/#magnitude-responses): what a magnitude response is as a complex transfer function, and how the five architectures differ before any band is filtered.
+- API reference: [`phonometry`](/reference/api/filters/phonometry/) and [`filters.core`](/reference/api/filters/core/).
+- Theory: [Magnitude Responses](/reference/theory/signal-analysis/#magnitude-responses): what a magnitude response is as a complex transfer function, and how the five architectures differ before any band is filtered.
 
 </SeeAlso>
 

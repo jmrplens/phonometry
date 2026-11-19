@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-This is the entry of the [errata registry](/phonometry/reference/errata/) on Jarvis (1996). The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+This is the entry of the [errata registry](/reference/errata/) on Jarvis (1996). The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## Jarvis (1996), NPL Report CIRA(EXT) 010, Appendix B (the imaginary unit of the first microphone's mass missing from the published scan)
 

@@ -21,7 +21,7 @@ indices -> band MTI -> weighted STI) is numerically identical between
 Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5, which moves them to A.2 and A.3;
 the only Ed.5 numeric change is the male test-signal spectrum (A.6.1).
 
-The level adjustment of [`sti_adjusted_for_levels`](/phonometry/reference/api/speech/sti/#sti_adjusted_for_levels) is the four-step
+The level adjustment of [`sti_adjusted_for_levels`](/reference/api/speech/sti/#sti_adjusted_for_levels) is the four-step
 procedure of Ed.4 (2011) Annex M, verified against the printed
 intermediates of its Table M.1. The Ed.5 foreword (item g) says greater
 information is given in Annex M about these adjustments, and its table of
@@ -79,10 +79,10 @@ here.
 :::note
 `mtf` is the matrix *as measured*, with the noise, masking
 and threshold of the measurement still in it, which is what
-[`STIResult.mtf`](/phonometry/reference/api/speech/sti/#stiresult) holds after a measurement run
+[`STIResult.mtf`](/reference/api/speech/sti/#stiresult) holds after a measurement run
 with `levels` and `ambient`. Feeding a matrix that never had them
 applied removes what was never added and lowers the result.
-[`STIResult.adjusted_for_levels`](/phonometry/reference/api/speech/sti/#stiresultadjusted_for_levels) takes the measurement levels
+[`STIResult.adjusted_for_levels`](/reference/api/speech/sti/#stiresultadjusted_for_levels) takes the measurement levels
 from the result itself and is the safe route.
 :::
 
@@ -96,7 +96,7 @@ from the result itself and is the safe route.
 | `operational_levels` | Speech octave-band levels of the condition being simulated, dB SPL (7 values). |
 | `operational_ambient` | Occupancy-noise octave-band levels of that condition, dB SPL (7 values); `None` simulates a silent room. |
 
-**Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) at the operational levels, carrying them in `band_levels` and `ambient_levels`.
+**Returns:** [`STIResult`](/reference/api/speech/sti/#stiresult) at the operational levels, carrying them in `band_levels` and `ambient_levels`.
 
 **Raises**
 
@@ -171,13 +171,13 @@ STI itself stays within ~0.001.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
-| `fs` | Sample rate in Hz (>= 22.5 kHz so the 8 kHz band fits). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `ir` | Impulse response (1D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
+| `fs` | Sample rate in Hz (>= 22.5 kHz so the 8 kHz band fits). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `snr` | Optional signal-to-noise ratio in dB, scalar or one value per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined with `levels` it is interpreted as ambient levels `levels - snr` so noise is not applied twice. Mutually exclusive with `ambient`. |
 | `levels` | Optional speech octave-band levels in dB SPL (7 values) at the listener position; enables the auditory masking (Ed.5 Table A.2) and reception threshold (Ed.5 Table A.3) corrections. |
 | `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
 
-**Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 14).
+**Returns:** [`STIResult`](/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 14).
 
 **Raises**
 
@@ -229,7 +229,7 @@ Physical background noise is already contained in the recording; use
 `levels` (and optionally `ambient`) only to enable the absolute
 level-dependent corrections, which are otherwise skipped.
 
-An [`STIWarning`](/phonometry/reference/api/speech/sti/#stiwarning) is emitted when the recording is shorter than
+An [`STIWarning`](/reference/api/speech/sti/#stiwarning) is emitted when the recording is shorter than
 the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
 because the slow modulation components are then averaged over too few
 periods and the recovered modulation depths, and hence the STI, are
@@ -239,13 +239,13 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
-| `fs` | Sample rate in Hz (>= 22.5 kHz). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0.55 as normalization (useful for non-conformant sources). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). It is a second recording of the same test signal, so it has to share the rate: two Signals that disagree are refused rather than arbitrated, and measuring the reference on a rate that is not its own would return a perfect STI for a mismatch. Its calibration is applied like any other record's, and then cancels, because what is taken from it is a modulation depth and those are normalised. |
+| `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
+| `fs` | Sample rate in Hz (>= 22.5 kHz). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0.55 as normalization (useful for non-conformant sources). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal). It is a second recording of the same test signal, so it has to share the rate: two Signals that disagree are refused rather than arbitrated, and measuring the reference on a rate that is not its own would return a perfect STI for a mismatch. Its calibration is applied like any other record's, and then cancels, because what is taken from it is a modulation depth and those are normalised. |
 | `levels` | Optional speech octave-band levels in dB SPL (7 values) enabling auditory masking and reception threshold corrections. |
 | `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
 
-**Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 2).
+**Returns:** [`STIResult`](/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 2).
 
 **Raises**
 
@@ -343,7 +343,7 @@ The measurement condition is the one this result already carries in
 `band_levels` and `ambient_levels`, so only the target condition
 is passed: what the room would have scored occupied, or with the
 talker raised to the operational level. See
-[`sti_adjusted_for_levels`](/phonometry/reference/api/speech/sti/#sti_adjusted_for_levels), which does the work and states the
+[`sti_adjusted_for_levels`](/reference/api/speech/sti/#sti_adjusted_for_levels), which does the work and states the
 edition the procedure comes from.
 
 **Parameters**
@@ -353,7 +353,7 @@ edition the procedure comes from.
 | `operational_levels` | Speech octave-band levels of the condition being simulated, in dB SPL (7 values). |
 | `operational_ambient` | Occupancy-noise octave-band levels of that condition, in dB SPL (7 values); `None` simulates a silent room. |
 
-**Returns:** A new [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) at the operational levels.
+**Returns:** A new [`STIResult`](/reference/api/speech/sti/#stiresult) at the operational levels.
 
 **Raises**
 
@@ -412,7 +412,7 @@ optional verdict row and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum required STI (a higher STI passes). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum required STI (a higher STI passes). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout STI fiche. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

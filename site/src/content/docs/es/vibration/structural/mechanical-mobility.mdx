@@ -159,7 +159,7 @@ uno de ellos.
   **fuente de fuerza** y entrega su **fuerza bloqueada**. Esa es la
   idealización en torno a la que están escritas la ISO 10846 y la EN 15657, y
   es la razón de que la
-  [rigidez de transferencia](/phonometry/es/vibration/structural/transfer-stiffness/)
+  [rigidez de transferencia](/es/vibration/structural/transfer-stiffness/)
   pueda caracterizar un aislador por una fuerza de bloqueo.
 - La transferencia máxima de potencia queda entre ambos, con movilidades
   adaptadas. Y esa es la manera útil de leer un soporte elástico: funciona
@@ -223,7 +223,7 @@ con un excitador no unido a la estructura, en la práctica casi siempre un
 martillo instrumentado: cambia el espectro controlado del excitador acoplado
 por rapidez, con un espectro de excitación fijado por la masa del impactador
 y la rigidez de la punta, y tiene [página
-propia](/phonometry/es/vibration/structural/impact-mobility/).
+propia](/es/vibration/structural/impact-mobility/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una varilla de arrastre y una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa. Debajo, un recuadro de tres paneles muestra el acelerómetro conectado a través de la varilla de arrastre marcado como no válido, el transductor de fuerza en la estructura marcado como válido y el transductor de fuerza en el extremo del excitador marcado con precaución, con los criterios de movilidad de diez veces para el acoplo del excitador y para la suspensión enunciados debajo." width="92%" />
 
@@ -366,7 +366,7 @@ $\hat{H} = G(\text{respuesta}, \text{fuerza})/G(\text{fuerza}, \text{fuerza})$)
 y la coherencia ordinaria $\gamma^2 = |G_{xy}|^2/(G_{xx}\,G_{yy})$ de sus
 comprobaciones de calidad son los estimadores
 espectrales ya existentes de la biblioteca, [`transfer_function` y
-`coherence`](/phonometry/es/devices/electroacoustics/electroacoustics/) (H1 es su valor por
+`coherence`](/es/devices/electroacoustics/electroacoustics/) (H1 es su valor por
 defecto).
 
 ### Leer la coherencia, y el único sesgo que tiene H1 (Anexo A.1)
@@ -677,10 +677,10 @@ beam.plot(language="es")
 ```
 
 ¿A dónde van estos números? Al
-[aislamiento acústico de paneles](/phonometry/es/buildings/design/panel-sound-insulation/),
+[aislamiento acústico de paneles](/es/buildings/design/panel-sound-insulation/),
 que usa las mismas funciones para poner precio a la radiación de un panel, y a
 la movilidad de receptor de EN 12354-5 del
-[ruido estructural instalado](/phonometry/es/buildings/design/installed-structure-borne/).
+[ruido estructural instalado](/es/buildings/design/installed-structure-borne/).
 
 ### Ficha de informe
 
@@ -743,7 +743,7 @@ calibración operacional con masa rígida del 7.5.2
 
 <ScopeClaim status="not-covered" label="No cubierto">
 La excitación por martillo de impacto (ISO 7626-5) no se procesa en esta
-página sino en [la suya](/phonometry/es/vibration/structural/impact-mobility/).
+página sino en [la suya](/es/vibration/structural/impact-mobility/).
 Las magnitudes matriciales *bloqueadas* de la Tabla 1, necesarias para
 sistemas de varias coordenadas, no están implementadas. `convert_frf` devuelve solo las
 recíprocas *libres* elemento a elemento de la ISO 7626-1, 3.1.4, correctas
@@ -755,7 +755,7 @@ los ensayos de linealidad, reciprocidad y punto de excitación de A.2 a A.4 se
 describen aquí y se dejan al operador, igual que el ensayo de linealidad de la
 ISO 10846 (apartado 7.7 de las Partes 2, 4 y 5, apartado 7.6 de la Parte 3) se
 describe pero no se calcula en la [página de rigidez de
-transferencia](/phonometry/es/vibration/structural/transfer-stiffness/).
+transferencia](/es/vibration/structural/transfer-stiffness/).
 </ScopeClaim>
 </Scope>
 
@@ -763,24 +763,24 @@ transferencia](/phonometry/es/vibration/structural/transfer-stiffness/).
 
 ## Véase también
 
-- [Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/):
+- [Movilidad por excitación con impacto (ISO 7626-5)](/es/vibration/structural/impact-mobility/):
   las mismas FRF medidas con un martillo de impacto, con las ventanas, el
   promedio sobre impactos y la corrección del anexo A que esa medida necesita.
-- [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
+- [Rigidez dinámica de transferencia (ISO 10846)](/es/vibration/structural/transfer-stiffness/):
   el límite de fuerza bloqueada de la sección 1, aplicado a caracterizar un
   aislador.
-- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/buildings/design/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/es/buildings/design/structure-borne-power/):
   donde la movilidad y la velocidad libre de una fuente se convierten en una
   potencia instalada.
-- [Ruido estructural instalado (EN 12354-5)](/phonometry/es/buildings/design/installed-structure-borne/):
+- [Ruido estructural instalado (EN 12354-5)](/es/buildings/design/installed-structure-borne/):
   la predicción que consume una movilidad de receptor, medida o tomada de la
   sección 5.
-- [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/):
+- [Transmisión de onda de flexión en uniones de placas](/es/vibration/structural/junction-transmission/):
   en qué se convierten en una unión entre dos de ellas las movilidades de placa
   de la sección 5.
-- [Respuesta en frecuencia y coherencia](/phonometry/es/devices/electroacoustics/electroacoustics/):
+- [Respuesta en frecuencia y coherencia](/es/devices/electroacoustics/electroacoustics/):
   los estimadores `transfer_function` y `coherence` que ejecuta la sección 3.
-- Referencia de la API: [`vibration.structural.mechanical_mobility`](/phonometry/es/reference/api/vibration/mechanical-mobility/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): las movilidades puntuales de estructura infinita y la eficiencia de radiación, y por qué son promedios en torno a los que oscila una estructura finita.
+- Referencia de la API: [`vibration.structural.mechanical_mobility`](/es/reference/api/vibration/mechanical-mobility/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): las movilidades puntuales de estructura infinita y la eficiencia de radiación, y por qué son promedios en torno a los que oscila una estructura finita.
 
 </SeeAlso>

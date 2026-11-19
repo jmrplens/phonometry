@@ -48,9 +48,9 @@ medir bandas.
 
 Las matemáticas de diseño de estos bancos (bordes de banda, polos y ceros,
 diezmado multitasa) y la referencia de parámetros viven en
-[Bancos de filtros](/phonometry/es/signals/filters/filter-banks/); demostrar que un
+[Bancos de filtros](/es/signals/filters/filter-banks/); demostrar que un
 banco diseñado cumple una clase de prestaciones de IEC 61260-1 es
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/).
 
 ## 1. Las cinco arquitecturas en los bordes de banda
 
@@ -109,7 +109,7 @@ plt.show()
 | `cheby1` | **Chebyshev I** | `octave_filter(x, fs, design=FilterDesign(filter_type='cheby1', ripple=0.1))` | Caída más abrupta a costa de rizado. |
 | `cheby2` | **Chebyshev II** | `octave_filter(x, fs, design=FilterDesign(filter_type='cheby2'))` | Banda de paso plana con ceros en la banda atenuada. |
 | `ellip` | **Elíptico** | `octave_filter(x, fs, design=FilterDesign(filter_type='ellip', ripple=0.1))` | Máxima selectividad. |
-| `bessel` | **Bessel** | `octave_filter(x, fs, design=FilterDesign(filter_type='bessel'))` | Preservar la forma de los transitorios (ver la figura de retardo de grupo de [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/#el-retardo-de-grupo-cuantificado)). |
+| `bessel` | **Bessel** | `octave_filter(x, fs, design=FilterDesign(filter_type='bessel'))` | Preservar la forma de los transitorios (ver la figura de retardo de grupo de [Bancos de filtros](/es/signals/filters/filter-banks/#el-retardo-de-grupo-cuantificado)). |
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/architecture_tradeoff.svg" alt="Dos paneles para la banda de octava de 1 kHz a 48 kHz, orden 6. A la izquierda, barras agrupadas con la atenuación relativa una y dos octavas por encima de la frecuencia central de banda para cada una de las cinco arquitecturas: Bessel es la más suave, con menos 16 y menos 60 decibelios; Butterworth, menos 40 y menos 88; Chebyshev I, menos 50 y menos 102; Chebyshev II, menos 55 y menos 73; y el elíptico es el más abrupto, con menos 72 y menos 81. A la derecha, el retardo de grupo en la frecuencia central de banda en milisegundos: Bessel 1,22; Chebyshev II 1,58; Butterworth 1,74; elíptico 1,75 y Chebyshev I 1,97" width="92%" />
 
@@ -128,7 +128,7 @@ las cinco puedes usar de verdad para una medida de banda conforme a norma.*
 Lee primero la última columna: **tres de las cinco no sirven en absoluto para
 una medida de banda conforme a norma** con los parámetros por defecto; las dos
 de rizado constante porque sus bordes de banda no son sus puntos de −3 dB (ver
-[Bancos de filtros](/phonometry/es/signals/filters/filter-banks/)), y Bessel
+[Bancos de filtros](/es/signals/filters/filter-banks/)), y Bessel
 porque cae demasiado despacio para la máscara. Eso es una restricción dura, no
 una preferencia, y va antes que cualquiera de las demás columnas. Entre las dos
 que sí pasan, la elección es un compromiso real: `cheby2` compra 15 dB más de
@@ -301,7 +301,7 @@ valor por defecto de 72 dB lo fija la conformidad y no la realizabilidad: SciPy
 clava el suelo de rizado constante en exactamente `attenuation`, y la clase 1 de
 IEC 61260-1 exige 70 dB lejos de la banda, así que una `attenuation` de, pongamos,
 6 dB es aritméticamente legal y pierde la clase en silencio; ver
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/).
 
 ```python
 import numpy as np
@@ -377,7 +377,7 @@ retardo de grupo mínimo. Preservan la forma de las ondas filtradas (transitorio
 mejor que ningún otro tipo, pero tienen la caída más lenta. Esa afirmación es
 temporal, así que la prueba también lo es, y vive en la página hermana: la
 figura de retardo de grupo de
-[Bancos de filtros](/phonometry/es/signals/filters/filter-banks/#el-retardo-de-grupo-cuantificado)
+[Bancos de filtros](/es/signals/filters/filter-banks/#el-retardo-de-grupo-cuantificado)
 enseña a Bessel manteniéndose casi plano en toda la banda de paso mientras
 Chebyshev I y el elíptico hacen pico en los bordes de banda, y la figura de
 descomposición por bandas de esa misma página enseña qué le hace a un
@@ -496,7 +496,7 @@ los centros acústicos del woofer y el tweeter para que la rotación de fase a
 1 kHz hunda la suma en una muesca, y el remedio es un retardo en el altavoz
 adelantado, no otro orden de filtro. Se comprueba midiendo la respuesta sumada
 en eje con el método de barrido sinusoidal de
-[Medición de sistemas](/phonometry/es/signals/spectra/system-measurement/).
+[Medición de sistemas](/es/signals/spectra/system-measurement/).
 
 ## Qué cubre esta guía
 
@@ -516,10 +516,10 @@ según la paridad de `order/2`.
 Las matemáticas de banda, el diseño de polos y ceros, estabilidad y multitasa
 y la referencia de parámetros de `octave_filter()` / `OctaveFilterBank`
 permanecen en [Bancos de
-filtros](/phonometry/es/signals/filters/filter-banks/). Las máscaras de
+filtros](/es/signals/filters/filter-banks/). Las máscaras de
 aceptación de clase de la Tabla 1 de IEC 61260-1, que deciden la clase que
 alcanza realmente cada una de estas arquitecturas, son [Verificación de clase
-de filtros](/phonometry/es/signals/filters/filter-compliance/).
+de filtros](/es/signals/filters/filter-compliance/).
 </ScopeClaim>
 </Scope>
 
@@ -527,14 +527,14 @@ de filtros](/phonometry/es/signals/filters/filter-compliance/).
 
 ## Véase también
 
-- [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/): las matemáticas
+- [Bancos de filtros](/es/signals/filters/filter-banks/): las matemáticas
   de banda, la maquinaria de diseño y la referencia de parámetros detrás de
   cada banco mostrado aquí.
-- [Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
+- [Verificación de clase de filtros (IEC 61260-1)](/es/signals/filters/filter-compliance/):
   la máscara de aceptación de la Tabla 1, la clase 0 y la ficha de
   conformidad de estas arquitecturas.
-- Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y [`filters.core`](/phonometry/es/reference/api/filters/core/).
-- Teoría: [Respuestas en magnitud](/phonometry/es/reference/theory/signal-analysis/#respuestas-en-magnitud): qué es una respuesta en magnitud como función de transferencia compleja, y en qué se diferencian las cinco arquitecturas antes de filtrar ninguna banda.
+- Referencia de la API: [`phonometry`](/es/reference/api/filters/phonometry/) y [`filters.core`](/es/reference/api/filters/core/).
+- Teoría: [Respuestas en magnitud](/es/reference/theory/signal-analysis/#respuestas-en-magnitud): qué es una respuesta en magnitud como función de transferencia compleja, y en qué se diferencian las cinco arquitecturas antes de filtrar ninguna banda.
 
 </SeeAlso>
 

@@ -66,9 +66,9 @@ $$
 
 with $c$ the speed of sound, which clause 5.3.4.3 prints as 340 m/s
 "under normal conditions". A whole determination knows the duct air, so
-[`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) evaluates Eq. (8) with the $c$ its
+[`sound_power_in_duct`](/reference/api/power/sound-power-in-duct/#sound_power_in_duct) evaluates Eq. (8) with the $c$ its
 `temperature_c` gives, the "speed of sound in the test duct" of Table 1;
-the 340 m/s is the default of [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) called on its own.
+the 340 m/s is the default of [`flow_modal_correction`](/reference/api/power/sound-power-in-duct/#flow_modal_correction) called on its own.
 
 The A-weighted sound power level is the energy sum of the band levels with the
 $C_j$ of Table C.1 (Annex C, equation (C.1)), and the uncertainty to
@@ -142,7 +142,7 @@ correction on the two sides of the fan.
 
 One cell of Annex A is not legible, the $a_3$ of the 5 000 Hz row of
 the table that serves 0.8 m to 1.25 m, and asking for that band and that
-diameter emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) saying the coefficient is a
+diameter emits a [`SoundPowerWarning`](/reference/api/power/sound-power/#soundpowerwarning) saying the coefficient is a
 reading rather than a transcription (see `docs/ERRATA.md`). Every other
 coefficient in the annex is transcribed and none of them warns.
 
@@ -154,7 +154,7 @@ coefficient in the annex is transcribed and none of them warns.
 | `flow_velocity` | Mean flow velocity $U$ at the microphone position, in metres per second, negative on the inlet side. |
 | `duct_diameter_m` | Test-duct diameter $d$, in metres, 0.15 m to 2 m; it selects the Annex A table for the sampling tube and is checked against the scope for the other shields. |
 | `shield` | `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
-| `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
+| `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
 
 **Returns:** $C_{3,4}$ per band, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -327,7 +327,7 @@ averaged by Eq. (9), or a `(bands,)` spectrum already averaged by
 multiplexing or a continuous traverse (Eq. (11)). The combined correction
 $C = C_1 + C_2 + C_{3,4}$ of Eq. (10) is added to the average, with
 $C_1$ and $C_2$ supplied per band or as a scalar and
-$C_{3,4}$ from [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction), and the plane-wave
+$C_{3,4}$ from [`flow_modal_correction`](/reference/api/power/sound-power-in-duct/#flow_modal_correction), and the plane-wave
 relation of Eq. (12) gives the sound power in each band:
 
 $$
@@ -349,10 +349,10 @@ Table 2, is carried per band.
 | `shield` | Microphone shield, `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `microphone_correction` | $C_1$, the manufacturer's free-field correction of the microphone, in decibels, per band or scalar. |
 | `shield_correction` | $C_2$, the frequency response correction of the shield determined per clause 5.3.3.2 c) or 5.3.4.2, in decibels, per band or scalar. |
-| `temperature_c` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0.08 dB against the 340 m/s [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
+| `temperature_c` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0.08 dB against the 340 m/s [`flow_modal_correction`](/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
 | `static_pressure_kpa` | Static pressure in the duct, in kilopascals; sets $\rho$. |
 
-**Returns:** [`InDuctSoundPowerResult`](/phonometry/reference/api/power/sound-power-in-duct/#inductsoundpowerresult).
+**Returns:** [`InDuctSoundPowerResult`](/reference/api/power/sound-power-in-duct/#inductsoundpowerresult).
 
 **Raises**
 

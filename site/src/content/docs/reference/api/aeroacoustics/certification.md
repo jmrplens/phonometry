@@ -12,14 +12,14 @@ is built from a half-second spectral time history (24 one-third-octave bands,
 50 Hz-10 kHz) in five steps, implementing **ICAO Annex 16 Vol. I, Appendix 2**
 (the analytic formulation):
 
-* [`perceived_noisiness`](/phonometry/reference/api/aeroacoustics/certification/#perceived_noisiness): per-band perceived noisiness `n` (noys),
+* [`perceived_noisiness`](/reference/api/aeroacoustics/certification/#perceived_noisiness): per-band perceived noisiness `n` (noys),
   the analytic piecewise noy law with the Table A2-3 constants.
-* [`perceived_noise_level`](/phonometry/reference/api/aeroacoustics/certification/#perceived_noise_level):
+* [`perceived_noise_level`](/reference/api/aeroacoustics/certification/#perceived_noise_level):
   $\mathrm{PNL} = 40 + (10/\log_{10} 2) \cdot \log_{10} N$ from the total
   noisiness $N = 0.85 \cdot n_{\mathrm{max}} + 0.15 \cdot \sum n$.
-* [`tone_correction`](/phonometry/reference/api/aeroacoustics/certification/#tone_correction): the tone-correction factor `C` (the slope /
+* [`tone_correction`](/reference/api/aeroacoustics/certification/#tone_correction): the tone-correction factor `C` (the slope /
   "encircling" method) that penalises spectral irregularities.
-* [`effective_perceived_noise_level`](/phonometry/reference/api/aeroacoustics/certification/#effective_perceived_noise_level): the end-to-end metric, from the
+* [`effective_perceived_noise_level`](/reference/api/aeroacoustics/certification/#effective_perceived_noise_level): the end-to-end metric, from the
   per-record $\mathrm{PNLT} = \mathrm{PNL} + C$, the maximum `PNLTM`, the
   10 dB-down integration limits
   and the duration correction, giving
@@ -56,7 +56,7 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 | `reference_time` | Normalising time `T0`, in s (default 10). |
 | `procedure` | Tone-correction procedure of App. 2 §4.3.1 Step 1: `"airplane"` (default) starts the slope analysis at the 80 Hz band (band 3), `"helicopter"` (helicopters and tilt-rotors) at the 50 Hz band (band 1), so rotor tones in the 50-80 Hz bands are not missed. |
 
-**Returns:** An [`EPNLResult`](/phonometry/reference/api/aeroacoustics/certification/#epnlresult).
+**Returns:** An [`EPNLResult`](/reference/api/aeroacoustics/certification/#epnlresult).
 
 **Raises**
 
@@ -106,7 +106,7 @@ included in the reported EPNL.
 | `reference_time` | Normalising time `T0`, in s (default 10). |
 | `tone_corrections` | Optional tone corrections `C(k)`, in dB, one per `pnlt` record; enables the bandsharing adjustment `ΔB` described above. Default `None` (no adjustment). |
 
-**Returns:** An [`EPNLIntegration`](/phonometry/reference/api/aeroacoustics/certification/#epnlintegration): `.epnl` in EPNdB, the peak `.pnltm`, the `.bandsharing_adjustment` and the 0-based 10 dB-down record indices `.band_limits` (inclusive), with the duration correction as `.duration_correction`.
+**Returns:** An [`EPNLIntegration`](/reference/api/aeroacoustics/certification/#epnlintegration): `.epnl` in EPNdB, the peak `.pnltm`, the `.bandsharing_adjustment` and the 0-based 10 dB-down record indices `.band_limits` (inclusive), with the duration correction as `.duration_correction`.
 
 **Raises**
 
@@ -128,9 +128,9 @@ EPNLIntegration(
 
 The integration of a PNLT history into EPNL (ICAO Annex 16 App. 2 §4.5-4.6).
 
-What [`epnl_from_pnlt`](/phonometry/reference/api/aeroacoustics/certification/#epnl_from_pnlt) returns: the integral and the window it was
+What [`epnl_from_pnlt`](/reference/api/aeroacoustics/certification/#epnl_from_pnlt) returns: the integral and the window it was
 taken over, named, where a `(epnl, pnltm, kF, kL)` tuple used to be
-unpacked by position. [`EPNLResult`](/phonometry/reference/api/aeroacoustics/certification/#epnlresult) carries the same four numbers
+unpacked by position. [`EPNLResult`](/reference/api/aeroacoustics/certification/#epnlresult) carries the same four numbers
 beside the record histories they were integrated from.
 
 **Attributes**
@@ -232,7 +232,7 @@ strip and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (metrics, plot and result only, no verdict). A supplied `requirement` is read as the certification EPNL limit in EPNdB (the EPNL passes at or below it). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (metrics, plot and result only, no verdict). A supplied `requirement` is read as the certification EPNL limit in EPNdB (the EPNL passes at or below it). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout EPNL fiche. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

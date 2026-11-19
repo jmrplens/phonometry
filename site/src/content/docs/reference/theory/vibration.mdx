@@ -60,7 +60,7 @@ sidebar:
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
-This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It then turns from people to structures: the driving-point mobilities that govern how much power a point force injects into a plate, beam or rod, and the radiation efficiency that turns that vibration back into airborne sound (the pair EN 12354-5 and ISO 7849 rest on). It is part of the [theory reference](/phonometry/reference/theory/).
+This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It then turns from people to structures: the driving-point mobilities that govern how much power a point force injects into a plate, beam or rod, and the radiation efficiency that turns that vibration back into airborne sound (the pair EN 12354-5 and ISO 7849 rest on). It is part of the [theory reference](/reference/theory/).
 
 ## Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)
 
@@ -94,7 +94,7 @@ from 8 Hz to 1 kHz, and the whole-body set is band-limited at 0.4 Hz and 100 Hz
 and tabulated from 0.5 Hz to 80 Hz. Which weighting goes on which axis with
 which multiplying factor is a posture question, answered by the posture map of
 ISO 2631-1 Tables 1 and 2 reproduced in the
-[Human Vibration guide](/phonometry/vibration/human/human-vibration/#which-weighting-on-which-axis).
+[Human Vibration guide](/vibration/human/human-vibration/#which-weighting-on-which-axis).
 All nine are implemented from the exact cascade: the filter is applied as the
 exact complex response via FFT, magnitude *and* phase, not a bilinear-warped
 digital approximation, and the ISO 8041-1 Annex B design-goal tables (B.1–B.9)
@@ -140,7 +140,7 @@ distortion contaminates the whole spectrum and deleting the low-frequency bands
 does not rescue it. Magnitudes are averaged over complete operations or work
 cycles, with at least three samples per operation, a total measuring time of at
 least one minute, and samples shorter than about 8 s avoided (5.4.1). The
-[Human Vibration guide](/phonometry/vibration/human/human-vibration/#0-getting-the-numbers)
+[Human Vibration guide](/vibration/human/human-vibration/#0-getting-the-numbers)
 carries the mass, attachment and grip-force constraints and the rest of the
 fault list.
 
@@ -265,8 +265,8 @@ the Table C.1 Weibull law $\Pi(R)$ with the Annex C worked example marked at
 $R = 1.22$, $\Pi = 0.37$: the risk rises steeply over a narrow band of $R$, so
 a dose that doubles does not double the probability.*
 
-See the [Human Vibration guide](/phonometry/vibration/human/human-vibration/) and the
-[Multiple-Shock Vibration guide](/phonometry/vibration/human/multiple-shock-vibration/) for usage.
+See the [Human Vibration guide](/vibration/human/human-vibration/) and the
+[Multiple-Shock Vibration guide](/vibration/human/multiple-shock-vibration/) for usage.
 
 ## Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)
 
@@ -336,10 +336,10 @@ slab), set by the plate's size and damping. Because $\sigma$ is exactly the
 radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
 from-vibration chain without a power measurement, and it drives the resonant
 transmission path of the
-[panel sound insulation theory](/phonometry/reference/theory/rooms-buildings/#predicted-panel-sound-insulation-bies-72-hopkins-294310-cremer-5),
+[panel sound insulation theory](/reference/theory/rooms-buildings/#predicted-panel-sound-insulation-bies-72-hopkins-294310-cremer-5),
 where $f_\mathrm{c}$ itself is defined.
 
-The clip from the [Sound Power from Vibration guide](/phonometry/devices/emission/vibration-sound-power/) runs the two regimes on one 10 mm steel plate in air ($f_\mathrm{c} = 1205$ Hz), driven along its whole length, once at $f_\mathrm{c}/2$ and once at $2f_\mathrm{c}$.
+The clip from the [Sound Power from Vibration guide](/devices/emission/vibration-sound-power/) runs the two regimes on one 10 mm steel plate in air ($f_\mathrm{c} = 1205$ Hz), driven along its whole length, once at $f_\mathrm{c}/2$ and once at $2f_\mathrm{c}$.
 
 <Video
   name="anim_elastic_radiation_efficiency"
@@ -351,7 +351,7 @@ The clip from the [Sound Power from Vibration guide](/phonometry/devices/emissio
 
 *What the clip shows is the infinite-plate mechanism alone (Hopkins 2.9.2). At 602 Hz the bending wavelength, 0.40 m, is shorter than the 0.57 m of sound in air, no angle satisfies $\sin\theta = \lambda/\lambda_\mathrm{B}$, and the air carries only a skin of alternating lobes that decays with a height of $1/\sqrt{k_\mathrm{B}^2 - k_0^2} = 0.091$ m and takes no power away (Eq. 2.216); at 2410 Hz the bending wavelength, 0.20 m, is longer than the 0.14 m in air and a plane beam leaves at 45° (Eq. 2.203). It does not show the other half of the paragraph above: the scene is an effectively infinite plate, with no edge that radiates, so the sub-critical radiation that survives at the edges and corners of a finite plate, the part that makes a real $\sigma$ small and not zero, is not in it.*
 
-See the [Predicting Panel Sound Insulation guide](/phonometry/buildings/design/panel-sound-insulation/)
+See the [Predicting Panel Sound Insulation guide](/buildings/design/panel-sound-insulation/)
 for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance" width="82%" />

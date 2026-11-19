@@ -22,7 +22,7 @@ reduction in the tube goes through. The quantities are the same
 normal-incidence quantities the two-microphone method reports
 ($\alpha = 1 - \lvert r\rvert^2$ is Eq. (9) here and Eq. (18) there),
 measured one frequency at a time; see
-[`impedance_tube`](/phonometry/reference/api/materials/impedance-tube/).
+[`impedance_tube`](/reference/api/materials/impedance-tube/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

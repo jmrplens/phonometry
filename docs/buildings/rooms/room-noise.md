@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/room-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/room-noise/
 
 # Room-noise criteria (NC / RC Mark II)
 
@@ -526,7 +526,7 @@ Room Criteria fiche (RCResult.report), the RC rating and its spectral tag.
   measurement that produces the input spectrum.
 - [Field Insulation Measurement (ISO 16283)](../insulation/insulation-field.md):
   when the source is next door rather than overhead.
-- API reference: [`room.noise_criteria`](https://docs.jmrp.io/phonometry/reference/api/rooms/noise-criteria/).
+- API reference: [`room.noise_criteria`](https://phonometry.dev/reference/api/rooms/noise-criteria/).
 - Theory: [Room noise criteria (ANSI S12.2)](../../reference/theory/rooms-buildings.md#room-noise-criteria-ansi-s122): how the NC, RC Mark II and NR families are constructed and what each was designed to penalise.
 
 ## References

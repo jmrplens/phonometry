@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-turbines.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-turbines/
 
 # Sound Power of Steam Turbine Sets (IEC 61063)
 
@@ -431,7 +431,7 @@ report.plot()
   $K_1$ and $K_2$.
 - [Sound Power in Situ by Comparison (ISO 3747)](sound-power-in-situ.md):
   the other route for a machine that cannot leave its installation.
-- API reference: [`emission.turbine_noise`](https://docs.jmrp.io/phonometry/reference/api/power/turbine-noise/).
+- API reference: [`emission.turbine_noise`](https://phonometry.dev/reference/api/power/turbine-noise/).
 
 ## References
 

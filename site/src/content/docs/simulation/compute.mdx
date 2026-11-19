@@ -30,9 +30,9 @@ whole script or a worker picks its device, what happens when the device is
 not there, how a result records where it ran, and what the library promises
 about the numbers on each device. The physics, the sources and the
 boundaries are the same everywhere; they are explained in
-[2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/) and
-[Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/).
-[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+[2D FDTD wave simulation](/simulation/fdtd-simulation/) and
+[Elastic waves and fluid-solid coupling](/simulation/elastic-waves/).
+[Where heavy work runs](/simulation/where-it-runs/) maps the
 devices, the nodes and the encoders in one place.
 
 ## 1. Asking for a device: `Compute`
@@ -46,7 +46,7 @@ the run may fall back to NumPy:
 | `device_index` | which GPU, for `"cupy"` and `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` or `"float32"` | `"float64"` |
 | `fallback` | step on NumPy here with a warning when the device is not available or, with a `host`, when the node or the connection fails, instead of raising | `False` |
-| `host` | the node the run goes to, by its name in the hosts file; see [Sending a simulation to a remote node](/phonometry/simulation/remote-node/) | `None` (this machine) |
+| `host` | the node the run goes to, by its name in the hosts file; see [Sending a simulation to a remote node](/simulation/remote-node/) | `None` (this machine) |
 | `timeout_s` | the longest a run on a node may take, in seconds; only with a `host` | the hosts file's, else no limit |
 
 The record is a request. Building one imports and probes nothing, so a script
@@ -186,7 +186,7 @@ writers take one: `fdtd_simulation(run, compute=...)` and
 run here returns, and the writers bring back the video too. An engine built
 directly steps in this process, and it raises `ValueError` for a placement
 that names a host, wherever the placement came from.
-[Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+[Sending a simulation to a remote node](/simulation/remote-node/)
 says how to name a node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
@@ -233,7 +233,7 @@ sending a run to a node that fails, raises, and the message says why:
   build a kernel;
 - `ComputeRemoteError`, a subclass of `RuntimeError`, for a run sent to a
   node with a `host`, when the connection or the node fails, the device
-  there included; [Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+  there included; [Sending a simulation to a remote node](/simulation/remote-node/)
   says what each failure means.
 
 With `fallback=True` none of them is raised. The run warns with
@@ -412,7 +412,7 @@ GPU measures one. Like every float32 run, it rounds each step to float32,
 about seven significant digits.
 
 **The contour probe's sums.** The running DFT sums of a contour probe
-([section 4 of the acoustic guide](/phonometry/simulation/fdtd-simulation/#4-from-the-near-field-to-the-far-field))
+([section 4 of the acoustic guide](/simulation/fdtd-simulation/#4-from-the-near-field-to-the-far-field))
 add one term per step for thousands of steps, and the rounding of a sum grows
 with its number of terms. They are accumulated in float64 on every device
 that has float64, also when the fields step in float32; on MPS, which has
@@ -483,18 +483,18 @@ of phonometry computes on NumPy only.
 
 ## See also
 
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the
   acoustic engine, its sources, probes and boundaries, and how to size a run.
-- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+- [Elastic waves and fluid-solid coupling](/simulation/elastic-waves/):
   the elastic engine, which takes the same `compute=`.
-- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+- [Sending a simulation to a remote node](/simulation/remote-node/):
   the same run on another machine over SSH, with a `host` in the request.
-- [Writing animations and FDTD runs to video](/phonometry/io/videos/): the two
+- [Writing animations and FDTD runs to video](/io/videos/): the two
   writers that take the same `compute=` and write a run straight to a video.
-- API reference: [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
-  [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/),
-  [`simulation.video`](/phonometry/reference/api/simulation/video/).
+- API reference: [`simulation.compute`](/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/reference/api/simulation/video/).
 
 </SeeAlso>
 

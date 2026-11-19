@@ -46,7 +46,7 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-The [room-acoustics guide](/phonometry/buildings/rooms/room-acoustics/) recovers
+The [room-acoustics guide](/buildings/rooms/room-acoustics/) recovers
 impulse responses with the two ISO 18233 work-horses - the exponential sweep
 and the MLS. This page adds the measurement-engineering layer around them,
 from the transfer-function literature rather than a standard: **complementary
@@ -67,7 +67,7 @@ They differ only in the excitation and the deconvolution. The Golay pair of
 section 1 recovers the response by correlation with the codes; the shaped sweep
 of section 2 by spectral division; and the broadband-noise route the diagram
 itself annotates, which belongs to the
-[electroacoustics guide](/phonometry/devices/electroacoustics/electroacoustics/),
+[electroacoustics guide](/devices/electroacoustics/electroacoustics/),
 by the $H_1 = G_{xy}/G_{xx}$ estimator with a coherence that polices it. The
 regularized inversion of section 3 then works on whichever measured response
 comes out.
@@ -95,7 +95,7 @@ each code in turn - play $a$ periodically, record one steady-state period,
 then the same with $b$ - and sums the two circular cross-correlations
 (Eq. (4)): for a noiseless linear time-invariant system the impulse response
 comes back to machine precision, a closed-form identity the tests and the
-[conformance report](/phonometry/reference/conformance/) pin at `1e-13`.
+[conformance report](/reference/conformance/) pin at `1e-13`.
 
 ```python
 import numpy as np
@@ -165,10 +165,10 @@ plt.show()
 </details>
 
 The result is the same
-[`ImpulseResponseResult`](/phonometry/reference/api/rooms/impulse-response/) the sweep
+[`ImpulseResponseResult`](/reference/api/rooms/impulse-response/) the sweep
 and MLS front ends return, so everything downstream -
-[room parameters](/phonometry/buildings/rooms/room-acoustics/), decay curves,
-[STI](/phonometry/perception/speech/speech-transmission/) - consumes it unchanged.
+[room parameters](/buildings/rooms/room-acoustics/), decay curves,
+[STI](/perception/speech/speech-transmission/) - consumes it unchanged.
 Recordings spanning several periods are synchronously averaged, so
 uncorrelated background noise falls by 3 dB per doubling while the
 deterministic part stays exact. The trade-offs mirror the MLS: the recovery
@@ -198,7 +198,7 @@ each other to the sample, and a one-sample discrepancy destroys the sidelobe
 cancellation the whole method rests on, leaving a raised floor that looks like
 noise. Get the offset once with a loopback channel: record the electrical drive
 alongside the microphone and measure it with `time_delay` from the
-[delay estimation](/phonometry/signals/spectra/correlation-delay/) page, then
+[delay estimation](/signals/spectra/correlation-delay/) page, then
 apply the same cut to both.
 
 **Level and background.** Set the amplifier so the code's peak leaves headroom
@@ -300,7 +300,7 @@ loudspeaker's power-handling limits) buys a frequency-independent SNR that no
 post-processing can recover (Müller & Massarani Sec. 3).
 
 Deconvolution needs nothing new - the result acts as its own reference array
-for the [spectral method](/phonometry/buildings/rooms/room-acoustics/) of
+for the [spectral method](/buildings/rooms/room-acoustics/) of
 `impulse_response`, which divides the sweep's coloration out again:
 
 ```python
@@ -359,7 +359,7 @@ measurement. Five decisions turn it into one.
   to times before the linear response. Shaping only changes how far before,
   because a target that dwells longer at low frequencies spreads the harmonic
   packets differently from the exponential sweep's constant per-octave dwell.
-  [Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+  [Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/)
   is where those separated packets are read.
 
 ## 3. Regularized spectral inversion
@@ -369,7 +369,7 @@ measurement. Five decisions turn it into one.
 The inversion is only as good as its input, and a measured loudspeaker response
 is not a synthetic band-pass. Measure on the reference axis at a stated distance
 (1 m is the IEC 60268-5 convention the
-[loudspeakers guide](/phonometry/devices/electroacoustics/loudspeakers/) uses)
+[loudspeakers guide](/devices/electroacoustics/loudspeakers/) uses)
 with a measurement microphone, in an anechoic room if you have one. If you do
 not, put source and microphone as far from every surface as the room allows and
 **time-gate the impulse response before the first reflection**. That gate sets
@@ -391,7 +391,7 @@ floor arrives $1.60/343 = 4.7$ ms late. The gate has to close before that, and a
 4.7 ms window resolves nothing below about 210 Hz. Panel (a) is the electrical
 counterpart, where a loopback channel fixes $t = 0$; the strip under both is the
 harmonic time budget of the sweep that
-[swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/)
+[swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/)
 plays, and takes no part in the inversion.*
 
 Equalizing with a measured response means inverting it, and a plain
@@ -561,7 +561,7 @@ sweep.plot()   # waveform and spectrum against the inverted-response target
 ## Relation to the other tools
 
 The Golay pair joins `sweep_signal` and `mls_signal` in the
-[ISO 18233 acquisition family](/phonometry/buildings/rooms/room-acoustics/), and
+[ISO 18233 acquisition family](/buildings/rooms/room-acoustics/), and
 the three differ on four axes that decide a real measurement:
 
 | | Golay pair | Exponential sweep | MLS |
@@ -575,11 +575,11 @@ So: the sweep for distortion rejection, the MLS for legacy hardware, and the
 pair when exact, correlation-noise-free deconvolution of a *stationary fixture*
 matters (HRTF rigs, calibration fixtures): where 3 dB of signal-to-noise ratio
 is cheap and the last decimal of the impulse response is what you came for. Harmonic analysis of what sweeps *discard* lives in
-[swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/). The Welch
+[swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/). The Welch
 machinery used to verify the shaped sweep is the
-[calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/) page,
+[calibrated spectral analysis](/signals/spectra/spectral-analysis/) page,
 and the equalized responses feed the same downstream chain as every
-[impulse response](/phonometry/buildings/rooms/room-acoustics/).
+[impulse response](/buildings/rooms/room-acoustics/).
 
 ## What this guide covers
 
@@ -609,11 +609,11 @@ single-channel, scalar case of their Eq. 17.
 
 ## See also
 
-- [Room acoustics](/phonometry/buildings/rooms/room-acoustics/): the ISO 18233 sweep and MLS excitations the Golay pair sits beside.
-- [Swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/): reading the harmonic packets a sweep separates out.
-- [Loudspeakers](/phonometry/devices/electroacoustics/loudspeakers/): the reference axis, distance and free-field conditions the measured response needs.
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the Welch machinery that verifies the shaped sweep, and the smoothing the inversion wants first.
-- [Correlation and delay](/phonometry/signals/spectra/correlation-delay/): the loopback measurement that aligns the two Golay records.
-- API reference: [`signals.inversion`](/phonometry/reference/api/signals/inversion/).
+- [Room acoustics](/buildings/rooms/room-acoustics/): the ISO 18233 sweep and MLS excitations the Golay pair sits beside.
+- [Swept-sine distortion](/devices/electroacoustics/swept-sine-distortion/): reading the harmonic packets a sweep separates out.
+- [Loudspeakers](/devices/electroacoustics/loudspeakers/): the reference axis, distance and free-field conditions the measured response needs.
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/): the Welch machinery that verifies the shaped sweep, and the smoothing the inversion wants first.
+- [Correlation and delay](/signals/spectra/correlation-delay/): the loopback measurement that aligns the two Golay records.
+- API reference: [`signals.inversion`](/reference/api/signals/inversion/).
 
 </SeeAlso>

@@ -45,7 +45,7 @@ Esta guía cubre **A**, **C** y **Z**, las curvas especificadas en
 **IEC 61672-1:2013**: de dónde vienen, cómo aplicarlas, el diseño
 `high_accuracy` y la verificación de clase frente a la Tabla 3. El resto de
 la familia, la curva G de infrasonido, las históricas B y D y la curva AU, es
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).
+[Ponderaciones especiales](/es/signals/levels/special-weightings/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="Curvas de ponderación A, C y Z de IEC 61672-1 con zoom de la región positiva de la curva A (+1,27 dB a 2,5 kHz)" width="80%" loading="eager" />
 
@@ -53,7 +53,7 @@ la familia, la curva G de infrasonido, las históricas B y D y la curva AU, es
 biblioteca a 48 kHz: A, que descarta los graves; C, que los conserva; y Z,
 que no pondera nada. El recuadro amplía la pequeña región positiva de A en
 torno a 2,5 kHz. Las curvas especiales B, D y AU tienen su propia gráfica en
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/), junto
+[Ponderaciones especiales](/es/signals/levels/special-weightings/), junto
 con la curva G de infrasonido.*
 
 <details>
@@ -98,7 +98,7 @@ plt.show()
 
 El argumento `weighting` acepta además las cuatro ponderaciones especiales, con
 gráfica y documentación en
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/): `'G'`
+[Ponderaciones especiales](/es/signals/levels/special-weightings/): `'G'`
 para infrasonido (ISO 7196), las históricas `'B'` (ANSI S1.4-1983) y `'D'`
 (IEC 537), y `'AU'` para sonido audible en presencia de ultrasonidos
 (IEC 61012).
@@ -153,7 +153,7 @@ medios-graves. Ambas se normalizan a exactamente 0 dB a 1 kHz. Z no aplica
 ningún conformado dentro de la banda especificada; su objetivo de diseño es
 0 dB en todo el rango de 10 Hz a 20 kHz. La derivación completa de polos y
 ceros está en la
-página de [Teoría](/phonometry/es/reference/theory/signal-analysis/).
+página de [Teoría](/es/reference/theory/signal-analysis/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la línea isofónica de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la línea isofónica de 40 fonios invertida, mostrando que A es la línea isofónica volteada congelada en un filtro realizable" width="92%" />
 
@@ -176,7 +176,7 @@ se conservaron con tolerancias más estrictas y **Z** se introdujo para
 sustituir el «lineal» mal especificado de los sonómetros antiguos, que
 variaba según el fabricante. La curva B (y la curva D de ruido de aeronaves,
 que corrió la misma suerte) sigue disponible para datos históricos; véase
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).
+[Ponderaciones especiales](/es/signals/levels/special-weightings/).
 
 ### Cuándo importa C − A
 
@@ -253,12 +253,12 @@ misma energía reciben idéntico trato.
 
 Cada uno de esos tres tiene su instrumento propio. Para la sonoridad percibida,
 usa los modelos de ISO 532 de
-[Sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) en vez de otra
+[Sonoridad](/es/perception/psychoacoustics/loudness/) en vez de otra
 curva de ponderación. Para el contenido por debajo de 20 Hz, usa la curva G de
 ISO 7196 ([Ponderaciones
-especiales](/phonometry/es/signals/levels/special-weightings/)). Para el
+especiales](/es/signals/levels/special-weightings/)). Para el
 carácter tonal o impulsivo, usa las correcciones de ISO 1996-1 ([Niveles
-ambientales](/phonometry/es/environment/assessment/environmental-levels/)). Nada
+ambientales](/es/environment/assessment/environmental-levels/)). Nada
 de esto hace que usar A esté mal: los niveles ponderados A son la magnitud en la
 que están escritos los límites, así que un informe da el nivel ponderado A y
 añade las demás métricas como prueba de apoyo, nunca como sustituto.
@@ -282,7 +282,7 @@ c_weighted_signal = filters.weighting_filter(recording, fs, weighting='C')
 
 Las ponderaciones especiales usan el mismo argumento `weighting`; cada una está
 documentada, con su propia gráfica de respuesta, en
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).
+[Ponderaciones especiales](/es/signals/levels/special-weightings/).
 
 ### Ponderar un espectro, no una forma de onda
 
@@ -328,7 +328,7 @@ C y para G.
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D o 2D, o `Signal` | cualquiera | no vacío | 2D es `[channels, samples]` |
 | `fs` | int | Hz | > 0; tomada de `x` cuando `x` es un `Signal` | |
-| `weighting` | str | — | `'A'` (por defecto), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` según ISO 7196 (infrasonido), `'B'`/`'D'` históricas y `'AU'` según IEC 61012 se tratan en [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/); `'Z'` se implementa como un paso directo de una respuesta que la norma especifica plana; `'468'` es la curva de nivel de programa de ITU-R BS.468-4, y su falda es tan pronunciada que exige el diseño ajustado y rechaza `high_accuracy=False` |
+| `weighting` | str | — | `'A'` (por defecto), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` según ISO 7196 (infrasonido), `'B'`/`'D'` históricas y `'AU'` según IEC 61012 se tratan en [Ponderaciones especiales](/es/signals/levels/special-weightings/); `'Z'` se implementa como un paso directo de una respuesta que la norma especifica plana; `'468'` es la curva de nivel de programa de ITU-R BS.468-4, y su falda es tan pronunciada que exige el diseño ajustado y rechaza `high_accuracy=False` |
 | `high_accuracy` | bool | — | por defecto `True` | Ajusta el prototipo analógico a $f_\mathrm{s}$ en vez de transformarlo a ciegas; mantiene A/C en clase 1 a cualquier frecuencia de muestreo. Detalles en el §5 |
 | `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
 | `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
@@ -479,8 +479,8 @@ for block in blocks:
     weighted = wf.filter(block)
 ```
 
-Consulta [Procesado por bloques](/phonometry/es/signals/filters/block-processing/) para
-el flujo en streaming y [Teoría](/phonometry/es/reference/theory/signal-analysis/) para las
+Consulta [Procesado por bloques](/es/signals/filters/block-processing/) para
+el flujo en streaming y [Teoría](/es/reference/theory/signal-analysis/) para las
 definiciones analíticas de las curvas.
 
 :::note[Por encima de unos pocos kilohercios el filtro es el término más pequeño]
@@ -500,7 +500,7 @@ cualquier nivel ponderado A cerca del extremo superior del rango. Y el operador
 es un reflector: usa trípode y apártate.
 
 La cadena de clases de la
-[guía de calibración](/phonometry/es/signals/metrology/calibration/) dice el
+[guía de calibración](/es/signals/metrology/calibration/) dice el
 resto: un veredicto de clase 1 para el filtro es un eslabón, y es el eslabón más
 débil el que fija la exactitud de la lectura.
 :::
@@ -627,7 +627,7 @@ los límites de aceptación de clase 1/clase 2 de la Tabla 3 que comprueba
 Las curvas especiales, la G de infrasonido de ISO 7196, las históricas B (ANSI
 S1.4-1983) y D (IEC 537) y la AU de IEC 61012, junto con la verificación de B
 y AU frente a sus tablas de tolerancias, tienen su propia guía: [Ponderaciones
-especiales](/phonometry/es/signals/levels/special-weightings/).
+especiales](/es/signals/levels/special-weightings/).
 </ScopeClaim>
 </Scope>
 
@@ -635,15 +635,15 @@ especiales](/phonometry/es/signals/levels/special-weightings/).
 
 ## Véase también
 
-- [Ponderaciones especiales (G, B, D, AU)](/phonometry/es/signals/levels/special-weightings/):
+- [Ponderaciones especiales (G, B, D, AU)](/es/signals/levels/special-weightings/):
   la curva G de infrasonido, las históricas B y D, y la AU para sonido
   audible en presencia de ultrasonidos.
-- [Los mismos bits en cualquier máquina](/phonometry/es/reference/determinism/):
+- [Los mismos bits en cualquier máquina](/es/reference/determinism/):
   por qué el filtro diseñado es byte-idéntico sean cuales sean la
   biblioteca C, el BLAS, el procesador o el número de hilos, sin ningún
   paso de biblioteca en el camino de diseño, y la evidencia medida.
-- Referencia de la API: [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/) y [`filters.compliance`](/phonometry/es/reference/api/filters/compliance/).
-- Teoría: [Curvas de ponderación (IEC 61672-1)](/phonometry/es/reference/theory/signal-analysis/#curvas-de-ponderacion-iec-61672-1): la definición en polos y ceros de las curvas A, C y Z, y la deformación bilineal que el diseño ajustado cancela.
+- Referencia de la API: [`filters.weighting`](/es/reference/api/filters/weighting/) y [`filters.compliance`](/es/reference/api/filters/compliance/).
+- Teoría: [Curvas de ponderación (IEC 61672-1)](/es/reference/theory/signal-analysis/#curvas-de-ponderacion-iec-61672-1): la definición en polos y ceros de las curvas A, C y Z, y la deformación bilineal que el diseño ajustado cancela.
 
 </SeeAlso>
 

@@ -9,7 +9,7 @@ Wall ties in masonry cavity walls: the structural bridge across the cavity
 (Hopkins 2007, Sections 3.11.3.2 and 4.3.5.4.1).
 
 A masonry cavity wall is a double leaf, and the textbook double-leaf prediction
-([`phonometry.building.double_wall_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#double_wall_transmission_loss)) treats the cavity
+([`phonometry.building.double_wall_transmission_loss`](/reference/api/building/panel-transmission/#double_wall_transmission_loss)) treats the cavity
 as pure air. Real cavity walls are stitched together by **wall ties** every few
 courses. Those ties do two things the air-only model cannot see: they add a
 mechanical spring in parallel with the air spring, which pushes the
@@ -21,7 +21,7 @@ single number `sX mm`, its dynamic stiffness at a cavity width `X`,
 measured on two nominally identical 100 mm concrete cubes from the
 mass-spring-mass resonance of the pair,
 $s_{X\,\mathrm{mm}} = 2 \pi^2 f_\mathrm{msm}^2 m_\mathrm{av}$ (Eq. 3.202).
-[`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness) carries Hopkins' Table A4, whose 50 mm
+[`WALL_TIE_STIFFNESS`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness) carries Hopkins' Table A4, whose 50 mm
 rows come from Hopkins, Wilson & Craik (1999) and whose 100 mm row comes from
 Hall & Hopkins (2001).
 
@@ -35,10 +35,10 @@ $$
 
 Below `fmsm` the two leaves move as one plate of the combined mass. Stiff ties
 are therefore doubly bad: they raise the resonance into the rating range *and*
-bridge the cavity. Use [`wall_tie_stiffness_per_area`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area) and pass the result
+bridge the cavity. Use [`wall_tie_stiffness_per_area`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness_per_area) and pass the result
 as `tie_stiffness_per_area` to
-[`phonometry.building.mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance) or
-[`phonometry.building.double_wall_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#double_wall_transmission_loss).
+[`phonometry.building.mass_spring_mass_resonance`](/reference/api/building/panel-transmission/#mass_spring_mass_resonance) or
+[`phonometry.building.double_wall_transmission_loss`](/reference/api/building/panel-transmission/#double_wall_transmission_loss).
 
 **The structure-borne path (Eqs. 4.84 to 4.88).** Each tie is a point
 connection between two plates. With the driving-point mobilities `Yi`,
@@ -52,7 +52,7 @@ $$
 $$
 
 The plate area cancels ($N/m_i = n/\rho_{\mathrm{s}1}$ with `n` ties per m2),
-so [`wall_tie_coupling_loss_factor`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_coupling_loss_factor) needs only the tie density. A rigid
+so [`wall_tie_coupling_loss_factor`](/reference/api/building/masonry-cavity-wall/#wall_tie_coupling_loss_factor) needs only the tie density. A rigid
 connection (screw, nail, bolt, or a tie so stiff it never yields) is the
 limit $Y_\mathrm{c} = 0$, where the only frequency dependence left is the
 $1/\omega$ and $\eta_{ij}$ falls as $1/f$. Once
@@ -114,12 +114,12 @@ area cancels and only the tie density `n` enters.
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `mass1` | Surface density `rho_s1` of the excited leaf, in kg/m^2 (> 0). |
 | `mass2` | Surface density `rho_s2` of the receiving leaf, in kg/m^2 (> 0). |
-| `bending_stiffness1` | Bending stiffness per unit width `B'` of leaf 1, in N.m (> 0); see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness). |
+| `bending_stiffness1` | Bending stiffness per unit width `B'` of leaf 1, in N.m (> 0); see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/reference/api/vibration/point-mobility/#plate_bending_stiffness). |
 | `bending_stiffness2` | Bending stiffness per unit width of leaf 2, in N.m. |
 | `ties_per_area` | Number of ties per unit area `n`, in 1/m^2 (> 0). |
-| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), an explicit dynamic stiffness `k` in N/m, or `None` for a rigid connection ($Y_\mathrm{c} = 0$, the screw/nail/bolt limit). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
+| `tie` | A name from [`WALL_TIE_STIFFNESS`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), an explicit dynamic stiffness `k` in N/m, or `None` for a rigid connection ($Y_\mathrm{c} = 0$, the screw/nail/bolt limit). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
 
-**Returns:** A [`WallTieCouplingResult`](/phonometry/reference/api/building/masonry-cavity-wall/#walltiecouplingresult).
+**Returns:** A [`WallTieCouplingResult`](/reference/api/building/masonry-cavity-wall/#walltiecouplingresult).
 
 **Raises**
 
@@ -152,7 +152,7 @@ Look up a wall tie in Hopkins Table A4.
 | :--- | :--- |
 | `tie` | One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` (all at a 50 mm cavity) or `"vertical_twist_100mm"`. |
 
-**Returns:** The row, as a [`WallTieStiffness`](/phonometry/reference/api/building/masonry-cavity-wall/#walltiestiffness): the cavity width in m at which the tie was measured (`cavity_width_m`) and its dynamic stiffness `sX mm` in N/m (`stiffness`).
+**Returns:** The row, as a [`WallTieStiffness`](/reference/api/building/masonry-cavity-wall/#walltiestiffness): the cavity width in m at which the tie was measured (`cavity_width_m`) and its dynamic stiffness `sX mm` in N/m (`stiffness`).
 
 **Raises**
 
@@ -175,8 +175,8 @@ Eq. 4.89).
 
 The term that acts in parallel with the cavity air stiffness `s_a` in the
 mass-spring-mass resonance. Feed it to
-[`phonometry.building.mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance) or
-[`phonometry.building.double_wall_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#double_wall_transmission_loss) as
+[`phonometry.building.mass_spring_mass_resonance`](/reference/api/building/panel-transmission/#mass_spring_mass_resonance) or
+[`phonometry.building.double_wall_transmission_loss`](/reference/api/building/panel-transmission/#double_wall_transmission_loss) as
 `tie_stiffness_per_area`.
 
 **Parameters**
@@ -184,7 +184,7 @@ mass-spring-mass resonance. Feed it to
 | Name | Description |
 | :--- | :--- |
 | `ties_per_area` | Number of ties per unit area $n = N/S$, in 1/m^2 (> 0). |
-| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), or an explicit dynamic stiffness `k` of one tie, in N/m (> 0). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
+| `tie` | A name from [`WALL_TIE_STIFFNESS`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), or an explicit dynamic stiffness `k` of one tie, in N/m (> 0). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
 
 **Returns:** The stiffness per unit area $n k$, in N/m^3.
 
@@ -255,8 +255,8 @@ WallTieStiffness(cavity_width_m: float, stiffness: float)
 
 The dynamic stiffness of a wall tie and the cavity it was measured at.
 
-A row of [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness) (Hopkins Table A4), and what
-[`wall_tie_stiffness`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness-1) returns, named, where a `(cavity width,
+A row of [`WALL_TIE_STIFFNESS`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness) (Hopkins Table A4), and what
+[`wall_tie_stiffness`](/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness-1) returns, named, where a `(cavity width,
 stiffness)` tuple used to be unpacked by position.
 
 **Attributes**

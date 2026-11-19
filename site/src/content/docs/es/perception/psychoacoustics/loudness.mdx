@@ -58,15 +58,15 @@ método de referencia, la sonoridad en sonios de Zwicker (ISO 532-1), además
 de las líneas isofónicas de tonos puros (ISO 226); las familias de modelos
 más nuevas, Moore-Glasberg (ISO 532-2/-3) y la sonoridad del modelo de
 Sottek (ECMA-418-2), están en
-[Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/).
+[Sonoridad avanzada](/es/perception/psychoacoustics/advanced-loudness/).
 La agudeza, la tonalidad y la aspereza están en
 [Métricas de calidad
-sonora](/phonometry/es/perception/psychoacoustics/sound-quality/); las
+sonora](/es/perception/psychoacoustics/sound-quality/); las
 métricas de habla en el
 [índice de transmisión del
-habla](/phonometry/es/perception/speech/speech-transmission/) y
+habla](/es/perception/speech/speech-transmission/) y
 el [índice de inteligibilidad del
-habla](/phonometry/es/perception/speech/speech-intelligibility/).
+habla](/es/perception/speech/speech-intelligibility/).
 
 ## ¿Cómo calculo la sonoridad de Zwicker de ISO 532-1 con Python?
 
@@ -117,7 +117,7 @@ ISO 532-1 especifica la entrada antes de especificar el modelo.
 la clase 1 de IEC 61672-1:2013, y una calibración de campo que convierta las
 unidades digitales en pascales: ese factor es lo que espera
 `calibration_factor`, y sale de la
-[calibración](/phonometry/es/signals/metrology/calibration/). El apartado 4
+[calibración](/es/signals/metrology/calibration/). El apartado 4
 fija la frecuencia de muestreo de la implementación de referencia en 48 kHz;
 las demás se remuestrean a ella, cosa que la biblioteca hace internamente. Para
 la entrada por niveles de banda, los 28 niveles de tercio de octava deben salir
@@ -350,7 +350,7 @@ el percentil vecino del $N_5$ de arriba. Un extracto es un corte, no un
 archivo que escribiera el sonómetro, así que no lleva `bext` propio: cada uno
 se calibra con el fondo de escala digital que el sonómetro de su sesión
 declaró en la grabación de la que se cortó, 129,4 o 129,5 dB SPL;
-[Leer y escribir audio de medición](/phonometry/es/io/audio-files/) lee una
+[Leer y escribir audio de medición](/es/io/audio-files/) lee una
 declaración del mismo tipo, 129,3 dB SPL, en la toma de calibración del
 propio sonómetro.
 
@@ -435,7 +435,7 @@ fila opcional de
 veredicto y un pie con el descargo fijo. Usa el mismo contenedor
 `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de aislamiento de ISO
-717](/phonometry/es/buildings/insulation/insulation-ratings/#informe-de-iso-717-report);
+717](/es/buildings/insulation/insulation-ratings/#informe-de-iso-717-report);
 un `requirement` aportado se lee como la sonoridad máxima admisible en sonios
 (una sonoridad menor cumple). La generación necesita reportlab y, para la
 figura que incrusta la ficha, matplotlib (`pip install
@@ -532,13 +532,13 @@ implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
 sonoridad de *tonos puros*; la sonoridad de señales arbitrarias en sonios es lo
 que calculan los modelos ISO 532, el método de Zwicker de arriba y las
 familias más nuevas de
-[Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/).
+[Sonoridad avanzada](/es/perception/psychoacoustics/advanced-loudness/).
 
 Zwicker es el modelo de referencia, no el único. La sonoridad de
 **Moore-Glasberg** de ISO 532-2, su extensión variable en el tiempo de
 ISO 532-3 y la sonoridad del **modelo de Sottek** de ECMA-418-2, junto con
 la tabla de elección de modelo que dice cuándo preferir cada uno, están en
-[Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/).
+[Sonoridad avanzada](/es/perception/psychoacoustics/advanced-loudness/).
 
 ## Qué cubre esta guía
 
@@ -560,7 +560,7 @@ los parámetros de curva de la Tabla 1, mediante `equal_loudness_contour()`,
 La sonoridad de Moore-Glasberg de ISO 532-2, el método variable en el tiempo
 de ISO 532-3 y la sonoridad del modelo de Sottek de ECMA-418-2 se han mudado a
 [Sonoridad
-avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/). Las
+avanzada](/es/perception/psychoacoustics/advanced-loudness/). Las
 curvas de ISO 226:2023 describen solo tonos puros, y la norma no define
 interpolación entre las 29 frecuencias tabuladas, así que `loudness_level()`
 espera una de las frecuencias de la Tabla 1.
@@ -571,16 +571,16 @@ espera una de las frecuencias de la Tabla 1.
 
 ## Véase también
 
-- [Sonoridad avanzada (ISO 532-2/-3, ECMA-418-2)](/phonometry/es/perception/psychoacoustics/advanced-loudness/):
+- [Sonoridad avanzada (ISO 532-2/-3, ECMA-418-2)](/es/perception/psychoacoustics/advanced-loudness/):
   los modelos de sonoridad de Moore-Glasberg y Sottek y la tabla de elección
   de modelo.
-- [Métricas de calidad sonora](/phonometry/es/perception/psychoacoustics/sound-quality/): agudeza,
+- [Métricas de calidad sonora](/es/perception/psychoacoustics/sound-quality/): agudeza,
   tonalidad y aspereza, la otra mitad de la calidad sonora.
-- [Molestia psicoacústica e intensidad de fluctuación](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyance/):
+- [Molestia psicoacústica e intensidad de fluctuación](/es/perception/psychoacoustics/psychoacoustic-annoyance/):
   el modelo de Zwicker y Fastl que consume la sonoridad percentil $N_5$.
-- [Teoría](/phonometry/es/reference/theory/perception/): las ecuaciones que sustentan los modelos de sonoridad.
-- Referencia de la API: [`psychoacoustics.loudness.zwicker`](/phonometry/es/reference/api/psychoacoustics/zwicker/) y [`psychoacoustics.loudness.contours`](/phonometry/es/reference/api/psychoacoustics/contours/).
-- Teoría: [Sonoridad de Zwicker (ISO 532-1)](/phonometry/es/reference/theory/perception/#sonoridad-de-zwicker-iso-532-1): la integral de sonoridad específica de ISO 532-1 y el patrón de excitación sobre el que se calcula.
+- [Teoría](/es/reference/theory/perception/): las ecuaciones que sustentan los modelos de sonoridad.
+- Referencia de la API: [`psychoacoustics.loudness.zwicker`](/es/reference/api/psychoacoustics/zwicker/) y [`psychoacoustics.loudness.contours`](/es/reference/api/psychoacoustics/contours/).
+- Teoría: [Sonoridad de Zwicker (ISO 532-1)](/es/reference/theory/perception/#sonoridad-de-zwicker-iso-532-1): la integral de sonoridad específica de ISO 532-1 y el patrón de excitación sobre el que se calcula.
 
 </SeeAlso>
 

@@ -21,12 +21,12 @@ critical coupling adds the perfectly absorbing `0` state that ternary
 sequences require.
 
 Each slit is modelled with the transfer-matrix chain of
-[`slit_helmholtz_absorber`](/phonometry/reference/api/materials/slow-sound/#slit_helmholtz_absorber)
+[`slit_helmholtz_absorber`](/reference/api/materials/slow-sound/#slit_helmholtz_absorber)
 (visco-thermal effective parameters, resonator end corrections and slit
 radiation correction); the panel is locally reacting, so the wells do not
 couple internally and the far field follows from the Fraunhofer integral of
 the per-well reflection sequence
-([`predict_diffuser_polar_response`](/phonometry/reference/api/materials/design/#predict_diffuser_polar_response))
+([`predict_diffuser_polar_response`](/reference/api/materials/design/#predict_diffuser_polar_response))
 reduced to the ISO 17497-2 directional diffusion coefficient.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -51,10 +51,10 @@ metadiffuser_diffusion_spectrum(
 Normalized diffusion-coefficient spectrum `d_n(f)` of a metadiffuser.
 
 Evaluates the far-field polar response at each frequency with
-[`metadiffuser_polar_response`](/phonometry/reference/api/materials/metadiffuser/#metadiffuser_polar_response), forms the ISO 17497-2 directional
+[`metadiffuser_polar_response`](/reference/api/materials/metadiffuser/#metadiffuser_polar_response), forms the ISO 17497-2 directional
 diffusion coefficient band by band and normalises it against a flat
 rigid reference of the same footprint (all wells $R = 1$) with
-[`normalized_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient),
+[`normalized_diffusion_coefficient`](/reference/api/materials/scattering-diffusion/#normalized_diffusion_coefficient),
 exactly as the paper reports `delta_n`.
 
 **Parameters**
@@ -62,16 +62,16 @@ exactly as the paper reports `delta_n`.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies of the spectrum, in hertz (1-D). |
-| `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
+| `wells` | Sequence of [`MetadiffuserWell`](/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
 | `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi`, in degrees. |
 | `n_repetitions` | Number of repetitions `N_p` of the single period. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
-| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
+| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
 
-**Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) carrying the raw `d(f)` and the normalised `d_n(f)`.
+**Returns:** A [`DiffusionSpectrum`](/reference/api/materials/scattering-diffusion/#diffusionspectrum) carrying the raw `d(f)` and the normalised `d_n(f)`.
 
 **Raises**
 
@@ -99,27 +99,27 @@ metadiffuser_polar_response(
 Far-field polar response of a metadiffuser at one frequency.
 
 Computes the per-well complex reflection sequence at `frequency` with
-[`metadiffuser_reflection`](/phonometry/reference/api/materials/metadiffuser/#metadiffuser_reflection) (the panel is locally reacting, so the
+[`metadiffuser_reflection`](/reference/api/materials/metadiffuser/#metadiffuser_reflection) (the panel is locally reacting, so the
 slit chains see the incidence angle `source_angle_deg`) and evaluates the
 Fraunhofer far field and ISO 17497-2 directional diffusion coefficient
 with
-[`predict_diffuser_polar_response`](/phonometry/reference/api/materials/design/#predict_diffuser_polar_response).
+[`predict_diffuser_polar_response`](/reference/api/materials/design/#predict_diffuser_polar_response).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency of the prediction `f`, in hertz. |
-| `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
+| `wells` | Sequence of [`MetadiffuserWell`](/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
 | `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres; it is the `well_width` of the far-field model. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees; also applied to the local slit reflection. |
 | `n_repetitions` | Number of repetitions `N_p` of the single period; the grating lobes of a Schroeder-like design require `periods >= 2`. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
-| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
+| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
 
-**Returns:** A [`DiffuserPolarResponse`](/phonometry/reference/api/materials/design/#diffuserpolarresponse).
+**Returns:** A [`DiffuserPolarResponse`](/reference/api/materials/design/#diffuserpolarresponse).
 
 **Raises**
 
@@ -145,8 +145,8 @@ metadiffuser_reflection(
 Per-well reflection spectra of a metadiffuser panel (Sci. Rep. Eq. (6)).
 
 Runs the rigidly backed slit transfer-matrix chain of
-[`slit_helmholtz_absorber`](/phonometry/reference/api/materials/slow-sound/#slit_helmholtz_absorber)
-once per well: each [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) becomes a slit of height
+[`slit_helmholtz_absorber`](/reference/api/materials/slow-sound/#slit_helmholtz_absorber)
+once per well: each [`MetadiffuserWell`](/reference/api/materials/metadiffuser/#metadiffuserwell) becomes a slit of height
 `h_n` and depth `L` loaded by its `M` resonators on the lattice
 $a = L / M$, and `None` wells are flat rigid strips with
 $R = 1$.
@@ -159,14 +159,14 @@ air impedance.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `wells` | Sequence of [`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
+| `wells` | Sequence of [`MetadiffuserWell`](/reference/api/materials/metadiffuser/#metadiffuserwell) (or `None` for a flat rigid strip) describing one period of the panel face. |
 | `depth_m` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angle_rad` | Polar angle of incidence `theta`, in radians. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
-| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
+| `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
 
-**Returns:** A [`MetadiffuserResult`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserresult) with one reflection row per well.
+**Returns:** A [`MetadiffuserResult`](/reference/api/materials/metadiffuser/#metadiffuserresult) with one reflection row per well.
 
 **Raises**
 
@@ -291,7 +291,7 @@ at the lattice step `a = L / M` shelved sideways into the septum;
 
 | Name | Description |
 | :--- | :--- |
-| `wells` | The well sequence of [`metadiffuser_reflection`](/phonometry/reference/api/materials/metadiffuser/#metadiffuser_reflection) ([`MetadiffuserWell`](/phonometry/reference/api/materials/metadiffuser/#metadiffuserwell) or `None` per well). |
+| `wells` | The well sequence of [`metadiffuser_reflection`](/reference/api/materials/metadiffuser/#metadiffuser_reflection) ([`MetadiffuserWell`](/reference/api/materials/metadiffuser/#metadiffuserwell) or `None` per well). |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `depth_m` | Panel depth `L`, in metres. |
 | `period_m` | Well pitch `d`, in metres. |

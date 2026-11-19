@@ -70,7 +70,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
 A Schroeder diffuser earns its diffusion with depth: the
-[design equations](/phonometry/materials/diffusers/diffusers/) turn a phase sequence into
+[design equations](/materials/diffusers/diffusers/) turn a phase sequence into
 wells whose maximum depth approaches half the design wavelength, so a diffuser for the
 low hundreds of hertz is tens of centimetres thick, and that thickness is what
 keeps phase-grating diffusers out of small rooms, studios and vehicles. A
@@ -85,7 +85,7 @@ recipe that maps any Schroeder sequence onto a deep-subwavelength panel.
 ## 1. Slow sound in a loaded slit
 
 The unit cell is the same one the
-[slow-sound absorber](/phonometry/materials/absorbers/metamaterial-absorbers/) is built
+[slow-sound absorber](/materials/absorbers/metamaterial-absorbers/) is built
 from: a slit of height $h_n$ runs the depth $L$ of the panel and is loaded,
 along its upper wall, by an array of Helmholtz resonators on a lattice step
 $a$. The slit chain is evaluated with the transfer-matrix method,
@@ -115,7 +115,7 @@ absorbers:
   one. A phase profile that a classical grating writes with depth, the
   metadiffuser writes with resonator tuning.
 - **Critical coupling adds a third state.** Driving one slit to
-  [critical coupling](/phonometry/materials/absorbers/metamaterial-absorbers/) balances
+  [critical coupling](/materials/absorbers/metamaterial-absorbers/) balances
   its visco-thermal loss against its leakage and produces a reflection zero:
   $R_n \approx 0$. Ternary sequences (reflection values $+1$, $-1$, $0$) need
   exactly that perfectly absorbing state, which no rigid well can provide.
@@ -125,7 +125,7 @@ resonators, visco-thermal losses and end corrections included) and returns the
 per-well complex reflection $R_n(f)$; `metadiffuser_polar_response` and
 `metadiffuser_diffusion_spectrum` reduce that spatial profile through the same
 Fraunhofer far field and ISO 17497-2 coefficient used for the
-[classical designs](/phonometry/materials/diffusers/diffusers/). A `None` entry in the well
+[classical designs](/materials/diffusers/diffusers/). A `None` entry in the well
 sequence stands for a flat rigid strip ($R = 1$), the $+1$ state of ternary
 designs.
 
@@ -141,7 +141,7 @@ where they still reflect 0.97 of the incident pressure. The critically coupled
 slit that a
 *ternary* sequence needs as its `0` state is the same kind of cell driven
 deliberately onto resonance at the working frequency, which is what
-[`critical_coupling_design`](/phonometry/materials/absorbers/metamaterial-absorbers/)
+[`critical_coupling_design`](/materials/absorbers/metamaterial-absorbers/)
 solves for. This published panel is the QRD case, and at 2 kHz it scatters
 like the 27.4 cm deep diffuser it mimics.
 
@@ -320,7 +320,7 @@ The two panels at the top share one scale: 27.4 cm of wells against 2 cm of
 slits.*
 
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
-sequence exactly as for a [classical design](/phonometry/materials/diffusers/diffusers/):
+sequence exactly as for a [classical design](/materials/diffusers/diffusers/):
 the quadratic residues $s_n = n^2 \bmod N$ give the target well depths
 $d_n = s_n \lambda_0/(2N)$ and hence the target reflection phases
 $\varphi_n = -2 k d_n$ at the evaluation frequency. Second, tune each slit
@@ -534,11 +534,11 @@ returns exactly what a two-microphone measurement of that cell in a
 rectangular impedance tube one period wide would give, including
 `well_absorption`, so a single slit can be checked before the panel is
 committed. That is the
-[impedance tube](/phonometry/materials/absorbers/impedance-tube/) method
+[impedance tube](/materials/absorbers/impedance-tube/) method
 unchanged. The whole panel is graded on an ISO 17497-2 goniometer, which needs
 the six-period 2.1 m array and a flat reference panel of the same footprint
 measured under the identical chain; the
-[diffusers guide](/phonometry/materials/diffusers/diffusers/) gives that
+[diffusers guide](/materials/diffusers/diffusers/) gives that
 procedure. Because the design is tuned at one frequency, the band-by-band
 $d_\mathrm{n}$ from that measurement, not the coefficient at 2 kHz, is the
 honest grade.
@@ -568,7 +568,7 @@ rather than replacing an ISO 17497-2 measurement. The inverse problem (solving
 resonator geometries for a target phase profile) is not automated; the
 workflow of section 3 matches phases by evaluation. The critical-coupling
 design solver for a single slit lives in [Metamaterial
-Absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/).
+Absorbers](/materials/absorbers/metamaterial-absorbers/).
 </ScopeClaim>
 </Scope>
 
@@ -576,20 +576,20 @@ Absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/).
 
 ## See also
 
-- [Diffusers and Their Coefficients](/phonometry/materials/diffusers/diffusers/): the
+- [Diffusers and Their Coefficients](/materials/diffusers/diffusers/): the
   ISO 17497-1/-2 coefficients this panel is graded by, and the classical
   Schroeder designs whose phase sequences it borrows.
-- [Metamaterial Absorbers](/phonometry/materials/absorbers/metamaterial-absorbers/): the
+- [Metamaterial Absorbers](/materials/absorbers/metamaterial-absorbers/): the
   same slit and resonator cell tuned for perfect absorption instead of
   controlled phase, with the critical-coupling theory behind the ternary `0`
   state.
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/):
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/):
   the classical equivalent-fluid and resonant layers the metamaterial cells
   are built from.
-- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the wave
+- [2D FDTD wave simulation](/simulation/fdtd-simulation/): the wave
   solver behind the animation above, meshing the real slit and resonator
   geometry.
-- API reference: [`materials.diffusers.metadiffuser`](/phonometry/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](/phonometry/reference/api/materials/design/).
-- Theory: [Surface scattering and diffusion](/phonometry/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the scattering and diffusion coefficients the deep-subwavelength designs are judged by.
+- API reference: [`materials.diffusers.metadiffuser`](/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](/reference/api/materials/design/).
+- Theory: [Surface scattering and diffusion](/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the scattering and diffusion coefficients the deep-subwavelength designs are judged by.
 
 </SeeAlso>

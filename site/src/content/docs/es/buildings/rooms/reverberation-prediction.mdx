@@ -110,10 +110,10 @@ sonora en caer 60 dB tras detenerse la fuente, se predice aquí a partir del
 **volumen** de una sala, sus **áreas de contorno** y los **coeficientes de
 absorción** de sus superficies, mediante las fórmulas clásicas de la acústica
 estadística. Es la contraparte de diseño del tiempo de reverberación *medido* de
-[Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) (ISO 3382) y
+[Acústica de salas](/es/buildings/rooms/room-acoustics/) (ISO 3382) y
 complementa el modelo de EN 12354-6 de
 [Absorción acústica en
-recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/),
+recintos](/es/buildings/rooms/enclosed-space-absorption/),
 que especializa la misma física al apartado 4 de esa norma.
 
 phonometry ofrece cinco modelos, ordenados según cuánto tienen en cuenta una
@@ -138,7 +138,7 @@ entradas son tiempos de reverberación y no pueden sustituirse en ese denominado
 La EN 12354-6 fija la misma constante de otra forma. Redondea $24\ln 10$ a 55,3 y
 fija $c_0 = 345{,}6\ \mathrm{m/s}$ para que el factor sea exactamente el
 tradicional 0,16, lo que hace que el
-[modelo de recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/)
+[modelo de recintos](/es/buildings/rooms/enclosed-space-absorption/)
 devuelva tiempos de reverberación un 0,7 % más cortos que
 `sabine_reverberation_time` para la misma sala (0,608 s frente a 0,612 s) para la
 sala rectangular de 8 × 5 × 3 m del §1. Es una convención de redondeo, no un
@@ -197,14 +197,14 @@ promediar antes cambia el resultado.
 
 **Coeficientes.** Son valores de incidencia aleatoria medidos según la ISO 354
 sobre una probeta de 10-12 m² en un montaje declarado, no constantes del material
-([Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/)).
+([Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/)).
 La profundidad del montaje y la condición del borde los cambian sustancialmente,
 así que un coeficiente declarado para un producto adherido directamente al
 soporte no describe al mismo producto sobre un plenum de 200 mm. La ISO 354
 entrega datos en tercios de octava y un cálculo en bandas de octava toma la media
 aritmética de los tres tercios. La valoración de número único de una hoja de
 características ($\alpha_\mathrm{w}$, NRC, SAA) *no* sustituye a la tabla por bandas (ver la
-[guía de la EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/#3-de-donde-salen-los-datos-de-entrada),
+[guía de la EN 12354-6](/es/buildings/rooms/enclosed-space-absorption/#3-de-donde-salen-los-datos-de-entrada),
 que enuncia la prohibición de forma normativa). El público y los asientos se
 valoran por metro cuadrado de la superficie de suelo que ocupan, no por persona.
 Reintroducir en Sabine los datos de cámara reverberante es autoconsistente porque
@@ -326,7 +326,7 @@ fuerza al subir la frecuencia y baja con la humedad, así que la condición más
 es el caso más desfavorable, y un auditorio que mide bien en un verano húmedo
 puede sonar notablemente más brillante en invierno. El coeficiente en sí sale del
 modelo de
-[absorción atmosférica](/phonometry/es/environment/propagation/outdoor-propagation/)
+[absorción atmosférica](/es/environment/propagation/outdoor-propagation/)
 de la ISO 9613-1, evaluado a la temperatura y la humedad de la propia sala.
 
 Todos los modelos estadísticos suponen además un **campo difuso**, y las
@@ -335,7 +335,7 @@ bajas frecuencias son las primeras en romper esa suposición: por debajo de la
 141 Hz para un aula de 200 m³ con $T$ = 1 s) la sala responde como un conjunto
 de modos discretos, no como una mezcla reverberante.
 `room.schroeder_frequency(T, V)` la calcula, y
-[los modos de una sala rectangular](/phonometry/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular)
+[los modos de una sala rectangular](/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular)
 enumeran lo que hay ahí abajo. La simulación FDTD 2D siguiente
 excita una sala rígida de 5 m por 3,5 m exactamente en su modo (2,1) y
 después entre dos modos; el patrón de onda estacionaria que se forma en
@@ -554,7 +554,7 @@ su dominio de validez:
   iguales o superiores a 1,0 son un resultado documentado de la ISO 354: la
   difracción de borde dispersa hacia la probeta más energía de la que intercepta
   su área plana (ver
-  [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/))
+  [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/))
   y quedan fuera del dominio del término logarítmico. Para usar
   Millington-Sette de todos modos hay que llevar el coeficiente a $[0, 1)$, y esa
   es una decisión de modelado que la fórmula no prescribe: el ajuste que elijas
@@ -587,7 +587,7 @@ un campo difuso, con sonido llegando por igual desde todas las direcciones
 en todos los puntos, que permanece difuso mientras decae. Las formas
 habituales en que se rompe:
 
-- [**Por debajo de la frecuencia de Schroeder**](/phonometry/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular)
+- [**Por debajo de la frecuencia de Schroeder**](/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular)
   la banda contiene un puñado
   de modos discretos (la animación del §1) y un tiempo de reverberación
   estadístico ni siquiera está definido; cada modo decae a su propio ritmo,
@@ -595,14 +595,14 @@ habituales en que se rompe:
 - **Los volúmenes acoplados** (una sala con la caja escénica abierta, dos
   recintos a través de una puerta) producen decaimientos de doble
   pendiente; no existe un único $T$, y los T20 y T30 medidos discrepan (el
-  [diagnóstico de curvatura](/phonometry/es/buildings/rooms/room-acoustics/#leer-edt-t20-y-t30-unos-frente-a-otros)
+  [diagnóstico de curvatura](/es/buildings/rooms/room-acoustics/#leer-edt-t20-y-t30-unos-frente-a-otros)
   de la guía de parámetros de sala).
 - **Las salas desproporcionadas** (pasillos, salas bajas y extensas) con la
   absorción en un solo par de superficies mantienen un campo rasante
   paralelo a las superficies duras que el absorbente apenas toca; el tiempo
   medido puede llegar a duplicar cualquier predicción estadística, la
   experiencia práctica recogida en la EN 12354-6 (ver
-  [Absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/)).
+  [Absorción acústica en recintos](/es/buildings/rooms/enclosed-space-absorption/)).
   Ese campo rasante es el superviviente a franjas del clip del §2, que lo
   mide viviendo más que toda la banda de Sabine-Eyring de su propia
   sección.
@@ -662,7 +662,7 @@ a mano:
   de absorción y no por tiempo de reverberación, porque su campo está demasiado
   lejos de ser difuso para que un único $T$ lo describa (este es el propio consejo
   del apartado 4.5 de la EN 12354-6, y las magnitudes de la ISO 3382-3 de
-  [Acústica de oficinas diáfanas](/phonometry/es/buildings/rooms/open-plan-acoustics/)
+  [Acústica de oficinas diáfanas](/es/buildings/rooms/open-plan-acoustics/)
   sustituyen por completo a $T$).
 - Los **espacios de ensayo e interpretación musical** necesitan más de 1 s y
   suben con el volumen; la Tabla A.1 de la ISO 3382-1 da de 1,0 s a 3,0 s como
@@ -755,13 +755,13 @@ El propio modelo del apartado 4 de la EN 12354-6 (un cálculo de Sabine con un
 término de objetos añadido y el término de aire de la ISO 9613-1) es un
 cálculo distinto, definido por esa norma, que vive en la [guía de absorción
 acústica en
-recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/), no aquí.
+recintos](/es/buildings/rooms/enclosed-space-absorption/), no aquí.
 Ninguna de las cinco fórmulas modela volúmenes acoplados, salas
 desproporcionadas o geometrías focalizantes: sus decaimientos de doble
 pendiente o dependientes de la posición quedan fuera de toda hipótesis de
 campo difuso (apartado 4). Para un decaimiento medido que muestre esos
 síntomas, usa el diagnóstico de curvatura T20/T30 de la [guía de Acústica de
-salas](/phonometry/es/buildings/rooms/room-acoustics/) en lugar de una
+salas](/es/buildings/rooms/room-acoustics/) en lugar de una
 predicción estadística.
 </ScopeClaim>
 </Scope>
@@ -770,19 +770,19 @@ predicción estadística.
 
 ## Véase también
 
-- [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
+- [Medida y clasificación de la absorción sonora](/es/materials/absorbers/absorption-measurement/):
   la medición ISO 354 de la que sale cada $\alpha_\mathrm{s}$ de esta página, su
   dependencia del montaje y la valoración ISO 11654 que *no* debe sustituir a la
   tabla por bandas (§0).
-- [Parámetros acústicos de salas (ISO 3382-1/2)](/phonometry/es/buildings/rooms/room-acoustics/#cuanto-rango-de-decaimiento-permite-el-suelo-de-ruido):
+- [Parámetros acústicos de salas (ISO 3382-1/2)](/es/buildings/rooms/room-acoustics/#cuanto-rango-de-decaimiento-permite-el-suelo-de-ruido):
   la contraparte medida, y el diagnóstico de curvatura que avisa de que la
   hipótesis de campo difuso de una predicción ha fallado.
-- [Modos de una sala rectangular](/phonometry/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular):
+- [Modos de una sala rectangular](/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular):
   qué hay por debajo de la frecuencia de Schroeder, donde no se aplica ninguna de
   estas cinco fórmulas.
-- Referencia de la API: [`room.reverberation_prediction`](/phonometry/es/reference/api/rooms/reverberation-prediction/) y [`environment.propagation.air_absorption`](/phonometry/es/reference/api/environment/air-absorption/).
-- Teoría: [Aislamiento acústico y absorción, predichos](/phonometry/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la hipótesis de campo difuso que supone toda fórmula de la familia Sabine, y dónde deja de cumplirse.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/absorption-coefficients/): los
+- Referencia de la API: [`room.reverberation_prediction`](/es/reference/api/rooms/reverberation-prediction/) y [`environment.propagation.air_absorption`](/es/reference/api/environment/air-absorption/).
+- Teoría: [Aislamiento acústico y absorción, predichos](/es/reference/theory/rooms-buildings/#aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins): la hipótesis de campo difuso que supone toda fórmula de la familia Sabine, y dónde deja de cumplirse.
+- [Catálogos publicados](/es/reference/catalogues/absorption-coefficients/): los
   coeficientes de absorción banda a banda que imprimen los libros, con el
   montaje sobre el que se midió cada uno.
 

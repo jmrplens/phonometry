@@ -324,7 +324,7 @@ previo de fondo y el resto se dejan al operador.
   `check_unwanted_input` las juzga. (El apartado 7.6.1 remite esta exclusión
   al «6.1, Inequality (1)», los 20 dB de la salida bloqueada; la condición a
   la que se refiere es la Desigualdad (3) del 6.4, como muestran las partes
-  hermanas. Véanse las [erratas](/phonometry/es/reference/errata/).)
+  hermanas. Véanse las [erratas](/es/reference/errata/).)
 * **Transductores** (6.5, 6.6). Los acelerómetros y los transductores de fuerza
   deben tener un nivel de sensibilidad independiente de la frecuencia dentro de
   **0,5 dB**, estar calibrados a la temperatura del laboratorio y tener una
@@ -339,7 +339,7 @@ previo de fondo y el resto se dejan al operador.
 * **La coherencia** entre las señales de entrada y de salida es el indicador
   recomendado durante la medida (7.6.2): delata mala relación señal-ruido y no
   linealidad, y se lee exactamente como la lee la
-  [lista del Anexo A.1 de la guía de movilidad](/phonometry/es/vibration/structural/mechanical-mobility/).
+  [lista del Anexo A.1 de la guía de movilidad](/es/vibration/structural/mechanical-mobility/).
 
 El Anexo B de la Parte 2 dice cuánto vale cada una de estas cosas. Su balance
 de incertidumbre asigna 0,3 dB al procesado de señal y al ruido de fondo,
@@ -509,7 +509,7 @@ no se cumple.
   $20 \lg 1{,}06 = 0{,}51$ dB cuando la fuerza de inercia está en fase con la
   medida y en $-20 \lg 0{,}94 = 0{,}54$ dB cuando se le opone: los 0,5 dB de la
   NOTA 1 (que la ISO 10846-4 imprime como «05 dB»; véanse las
-  [erratas](/phonometry/es/reference/errata/)). `check_output_mass` devuelve el
+  [erratas](/es/reference/errata/)). `check_output_mass` devuelve el
   límite y ese sesgo en el peor caso, `bias_bound_db`.
 
 En el método indirecto la pregunta es hasta dónde sigue siendo rígida la masa
@@ -723,11 +723,11 @@ aislador (un receptor más móvil se lleva *menos* fuerza, así que la instalaci
 real es más silenciosa que la estimación por fuerza bloqueada), sino un fallo de
 la *descripción con un solo número*, y la salida es una predicción que lleve las
 dos movilidades:
-[ruido estructural instalado (EN 12354-5)](/phonometry/es/buildings/design/installed-structure-borne/),
+[ruido estructural instalado (EN 12354-5)](/es/buildings/design/installed-structure-borne/),
 alimentada por una fuente caracterizada según
-[EN 15657](/phonometry/es/buildings/design/structure-borne-power/). La regla que
+[EN 15657](/es/buildings/design/structure-borne-power/). La regla que
 hay detrás de las dos es la regla de las movilidades de fuente y receptor de la
-[guía de movilidad](/phonometry/es/vibration/structural/mechanical-mobility/#por-que-la-potencia-la-deciden-dos-movilidades).
+[guía de movilidad](/es/vibration/structural/mechanical-mobility/#por-que-la-potencia-la-deciden-dos-movilidades).
 
 ## 8. Relación con la familia de FRF
 
@@ -736,7 +736,7 @@ frecuencia (ISO 10846-1, Anexo A / Tabla A.2): es la recíproca de la receptanci
 y se relaciona con la impedancia mecánica $Z$ y la masa efectiva $m_\text{eff}$
 por $k = j\omega Z = -\omega^2 m_\text{eff}$. Estas conversiones son el mismo
 pivote `convert_frf` de la
-[movilidad mecánica](/phonometry/es/vibration/structural/mechanical-mobility/):
+[movilidad mecánica](/es/vibration/structural/mechanical-mobility/):
 
 ```python
 from phonometry import vibration
@@ -857,16 +857,16 @@ amplitud por diseño, así que un único $L_k(f)$ no los caracteriza.
 
 ## Véase también
 
-- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/es/vibration/structural/mechanical-mobility/):
   la regla de las movilidades de fuente y receptor que dice cuándo una fuerza
   bloqueada es la descripción correcta, y el vocabulario de FRF al que
   pertenecen las conversiones de esta página.
-- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/buildings/design/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/es/buildings/design/structure-borne-power/):
   la caracterización de fuente que queda al otro lado del aislador.
-- [Ruido estructural instalado (EN 12354-5)](/phonometry/es/buildings/design/installed-structure-borne/):
+- [Ruido estructural instalado (EN 12354-5)](/es/buildings/design/installed-structure-borne/):
   la predicción que consume $k_{2,1}$ junto con las dos movilidades y lo
   convierte en un nivel en un recinto receptor.
-- Referencia de la API: [`vibration.structural.transfer_stiffness`](/phonometry/es/reference/api/vibration/transfer-stiffness/) y [`vibration.structural.mechanical_mobility`](/phonometry/es/reference/api/vibration/mechanical-mobility/).
-- Teoría: [Movilidades puntuales y eficiencia de radiación](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): las definiciones de movilidad e impedancia de las que la rigidez de transferencia es la inversa.
+- Referencia de la API: [`vibration.structural.transfer_stiffness`](/es/reference/api/vibration/transfer-stiffness/) y [`vibration.structural.mechanical_mobility`](/es/reference/api/vibration/mechanical-mobility/).
+- Teoría: [Movilidades puntuales y eficiencia de radiación](/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29): las definiciones de movilidad e impedancia de las que la rigidez de transferencia es la inversa.
 
 </SeeAlso>

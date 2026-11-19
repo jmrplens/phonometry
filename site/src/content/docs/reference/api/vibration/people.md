@@ -70,7 +70,7 @@ $KB_\mathrm{Fmax}$ within the 15 % above $A_\mathrm{u}$, which its
 Example 3 sends on to $A_\mathrm{r}$ and fails; a railway compared with
 $A_\mathrm{o}$ like any other source, its $KB_\mathrm{Fmax}$ and
 $KB_\mathrm{FTr}$ formed by category of train in
-[`phonometry.vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/); an existing road
+[`phonometry.vibration.immission.train_categories`](/reference/api/vibration/train-categories/); an existing road
 whose neighbours must put up with $A_\mathrm{u}$ and $A_\mathrm{r}$ exceeded by up
 to 50 % (6.5.2); and an induced seismic event, held by day and by night to
 the daytime $A_\mathrm{o}$ (6.5.1.3). The rest of the numbers are the same, and
@@ -170,8 +170,8 @@ met, unless the source is a railway, which 6.5.3.1 judges on $A_\mathrm{u}$
 and $A_\mathrm{r}$ alone. Between the two, up to three short events a day
 are met as they are (6.5.1), and anything else is decided by
 $KB_\mathrm{FTr}$ against $A_\mathrm{r}$, which has to be supplied then: it is
-formed from the record by [`assessment_vibration_severity`](/phonometry/reference/api/vibration/people/#assessment_vibration_severity) or, for a
-railway, by [`railway_assessment_severity`](/phonometry/reference/api/vibration/people/#railway_assessment_severity). The note to 6.2 says when
+formed from the record by [`assessment_vibration_severity`](/reference/api/vibration/people/#assessment_vibration_severity) or, for a
+railway, by [`railway_assessment_severity`](/reference/api/vibration/people/#railway_assessment_severity). The note to 6.2 says when
 that is not worth doing: a steady vibration acting for much longer than
 4 h by day or 2 h by night keeps to $A_\mathrm{r}$ only if it keeps to
 $A_\mathrm{u}$.
@@ -186,12 +186,12 @@ differences: a $KB_\mathrm{Fmax}$ within the 15 % above
 $A_\mathrm{u}$ goes on to $A_\mathrm{r}$ like any other, which is how its
 Example 3 fails 0.114 against 0.10; a railway is compared with
 $A_\mathrm{o}$ as well, its $KB_\mathrm{Fmax}$ being the 1.5 times
-$KB_\mathrm{FTm,Zug}$ of [`railway_kb_fmax`](/phonometry/reference/api/vibration/train-categories/#railway_kb_fmax) and
+$KB_\mathrm{FTm,Zug}$ of [`railway_kb_fmax`](/reference/api/vibration/train-categories/#railway_kb_fmax) and
 its $KB_\mathrm{FTr}$ that of
-[`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity); and a road is
+[`train_assessment_severity`](/reference/api/vibration/train-categories/#train_assessment_severity); and a road is
 not, by night, its 6.5.2 saying that a rare exceedance of the night-time
 $A_\mathrm{o}$ does not fail the requirement, with
-[`ROAD_NIGHT_INVESTIGATION_KB`](/phonometry/reference/api/vibration/people/#road_night_investigation_kb) in its place as a reason to look
+[`ROAD_NIGHT_INVESTIGATION_KB`](/reference/api/vibration/people/#road_night_investigation_kb) in its place as a reason to look
 into the cause. An induced seismic event is a rare short event by
 definition (6.5.1.3). The edition is the one the guide values were read
 from, and asking for the other is refused: the values of one edition
@@ -202,13 +202,13 @@ under the rules of the other is not an assessment of either.
 | Name | Description |
 | :--- | :--- |
 | `kb_fmax` | $KB_\mathrm{Fmax}$, the largest of the three directions. |
-| `guide` | The guide values, from [`guide_values`](/phonometry/reference/api/vibration/people/#guide_values-1), [`construction_guide_values`](/phonometry/reference/api/vibration/people/#construction_guide_values-1) or, for a railway under the draft, [`railway_guide_values`](/phonometry/reference/api/vibration/train-categories/#railway_guide_values). |
+| `guide` | The guide values, from [`guide_values`](/reference/api/vibration/people/#guide_values-1), [`construction_guide_values`](/reference/api/vibration/people/#construction_guide_values-1) or, for a railway under the draft, [`railway_guide_values`](/reference/api/vibration/train-categories/#railway_guide_values). |
 | `kb_ftr` | $KB_\mathrm{FTr}$, needed only when the verdict comes down to it. |
 | `source` | `"general"` (default), `"road"`, `"railway"`, `"urban_railway"` or `"quarry_blasting"`, which is a rare short event by definition; under the draft, `"road_existing"` and `"induced_seismic"` in place of `"urban_railway"`. |
 | `rare_short_events` | Whether the immission is at most three short events a day, such as blasting, which 6.5.1 judges on $A_\mathrm{o}$ alone. |
 | `edition` | `"1999"` or `"2023"`, the draft; `None` (default) takes the edition of the guide values. |
 
-**Returns:** The verdict, as a [`PeopleAssessment`](/phonometry/reference/api/vibration/people/#peopleassessment).
+**Returns:** The verdict, as a [`PeopleAssessment`](/reference/api/vibration/people/#peopleassessment).
 
 **Raises**
 
@@ -258,7 +258,7 @@ not applied to road or rail traffic.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm` | $KB_\mathrm{FTm}$ of each stretch, dimensionless, as [`takt_max_rms`](/phonometry/reference/api/vibration/vibration-meter/#takt_max_rms) gives it. |
+| `kb_ftm` | $KB_\mathrm{FTm}$ of each stretch, dimensionless, as [`takt_max_rms`](/reference/api/vibration/vibration-meter/#takt_max_rms) gives it. |
 | `exposure_s` | $T_{\mathrm{e},j}$, how long each stretch lasts within the period, in seconds. |
 | `time_of_day` | `"day"` (default, $T_\mathrm{r}$ = 16 h) or `"night"` (8 h). |
 | `in_rest_time` | Whether each stretch falls in the rest hours of the day, one flag per stretch; `None` (default) for none. Rest hours exist by day only. |
@@ -322,7 +322,7 @@ shakes the neighbours, not how long it stands. A duration of two to six
 days takes the values Figure 3 interpolates between the one-day column
 and the column that starts at seven days, and a duration over 78 days is
 outside the table. Vibration at night is judged by Table 1 instead, and
-the site's blasting by [`CONSTRUCTION_BLASTING_A_O`](/phonometry/reference/api/vibration/people/#construction_blasting_a_o) alone. Table 2
+the site's blasting by [`CONSTRUCTION_BLASTING_A_O`](/reference/api/vibration/people/#construction_blasting_a_o) alone. Table 2
 is not applicable to an especially sensitive area, a hospital for one;
 6.5.4.2 sends those to their own investigation and agreement.
 
@@ -332,9 +332,9 @@ is not applicable to an especially sensitive area, a hospital for one;
 | :--- | :--- |
 | `duration_days` | $D$, a whole number of working days from 1 to 78. |
 | `stage` | `"I"` (default), `"II"` or `"III"`. |
-| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5. One of `"industrial"`, `"commercial"`, `"mixed"` or `"residential"`. The especially sensitive area, the `"sensitive"` that [`guide_values`](/phonometry/reference/api/vibration/people/#guide_values-1) takes, is not offered: 6.5.4.2 applies Table 2 to none, and asks for a separate investigation and agreement there. |
+| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5. One of `"industrial"`, `"commercial"`, `"mixed"` or `"residential"`. The especially sensitive area, the `"sensitive"` that [`guide_values`](/reference/api/vibration/people/#guide_values-1) takes, is not offered: 6.5.4.2 applies Table 2 to none, and asks for a separate investigation and agreement there. |
 
-**Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
+**Returns:** The three values, as a [`GuideValues`](/reference/api/vibration/people/#guidevalues).
 
 **Raises**
 
@@ -385,12 +385,12 @@ The guide values of Table 1 for one area, time of day and kind of source.
 
 | Name | Description |
 | :--- | :--- |
-| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
+| `area` | The row of Table 1, as [`GUIDE_VALUES`](/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_\mathrm{u}$ and $A_\mathrm{r}$ by the factor 1.5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_\mathrm{o}$ of row 1, which is 6. The draft of 2023 has no `"urban_railway"` and adds `"road_existing"`, an existing road by an existing building, whose $A_\mathrm{u}$ and $A_\mathrm{r}$ its neighbours must put up with exceeded by up to 50 % (6.5.2), and `"induced_seismic"`, which the daytime $A_\mathrm{o}$ bounds by night as well (6.5.1.3). |
 | `edition` | `"1999"` (default), DIN 4150-2:1999-06, or `"2023"`, E DIN 4150-2:2023-08, whose Table 1 has the night $A_\mathrm{u}$ of a mixed area at 0.1. |
 
-**Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
+**Returns:** The three values, as a [`GuideValues`](/reference/api/vibration/people/#guidevalues).
 
 **Raises**
 
@@ -430,7 +430,7 @@ One row of Table 1 or Table 2 for one period: the three guide values.
 | `a_o` | $A_\mathrm{o}$, the upper value, above which the requirement is not met however short the exposure. |
 | `a_r` | $A_\mathrm{r}$, the value the assessment vibration severity $KB_\mathrm{FTr}$ is compared with. |
 | `time_of_day` | The period the row is for, `"day"` or `"night"`; Table 2 is daytime only. |
-| `edition` | The edition the values are read from, `"1999"` or `"2023"`, which is the edition [`assess_people_in_buildings`](/phonometry/reference/api/vibration/people/#assess_people_in_buildings) judges them under unless told otherwise. |
+| `edition` | The edition the values are read from, `"1999"` or `"2023"`, which is the edition [`assess_people_in_buildings`](/reference/api/vibration/people/#assess_people_in_buildings) judges them under unless told otherwise. |
 
 ## induced_seismic_kb_fmax
 
@@ -491,7 +491,7 @@ the asterisk marks: Table 3 puts its factors at about 15 % either way.
 | :--- | :--- |
 | `peak_velocity_mm_s` | $v_\mathrm{max}$, in millimetres per second. |
 | `frequency_hz` | $f$, in hertz. |
-| `kind` | The row of Table 3, as [`PEAK_TO_KB_FACTORS`](/phonometry/reference/api/vibration/people/#peak_to_kb_factors) keys it: `"harmonic"` (little distortion, a sawmill at a distance), `"harmonic_distorted"` (more than about 20 %), `"stochastic_resonant"` and `"stochastic"` (looms, pile driving, with and without a resonating floor), `"single_event_resonant"` and `"single_event"`. |
+| `kind` | The row of Table 3, as [`PEAK_TO_KB_FACTORS`](/reference/api/vibration/people/#peak_to_kb_factors) keys it: `"harmonic"` (little distortion, a sawmill at a distance), `"harmonic_distorted"` (more than about 20 %), `"stochastic_resonant"` and `"stochastic"` (looms, pile driving, with and without a resonating floor), `"single_event_resonant"` and `"single_event"`. |
 
 **Returns:** $KB^*_{F\mathrm{max}}$.
 
@@ -658,12 +658,12 @@ how Example 8 reports $0.325^{+0.059}_{-0.073}$.
 
 | Name | Description |
 | :--- | :--- |
-| `kb_ftm` | $KB_{\mathrm{FTm},j}$, one per class, as [`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms) gives them. |
+| `kb_ftm` | $KB_{\mathrm{FTm},j}$, one per class, as [`railway_takt_max_rms`](/reference/api/vibration/people/#railway_takt_max_rms) gives them. |
 | `occupied_takte` | $M_j$, the clock intervals each class occupies in the period, one per class, which is about the number of its trains in the period when a train occupies one interval. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `spread` | $s(KB^2_{\mathrm{FTm},j})$ of each class, or `None`. |
 
-**Returns:** The severity and, with a spread, its interval, as a [`RailwayAssessment`](/phonometry/reference/api/vibration/people/#railwayassessment).
+**Returns:** The severity and, with a spread, its interval, as a [`RailwayAssessment`](/reference/api/vibration/people/#railwayassessment).
 
 **Raises**
 
@@ -720,7 +720,7 @@ The standard deviation of the square of the clock maxima, Formula (A.2).
 $s(KB^2_{\mathrm{FTm},j}) = \sqrt{\frac{1}{Z_j - 1} \sum_i (KB^2_{\mathrm{FT}i,j} - KB^2_{\mathrm{FTm},j})^2}$, on the square because it is the square that Formula
 (A.3) averages, so the spread of $KB_\mathrm{FTr}$ follows from it by
 adding and subtracting it there. The maxima enter as they enter
-[`railway_takt_max_rms`](/phonometry/reference/api/vibration/people/#railway_takt_max_rms), a value at or below 0.1 as zero, so the
+[`railway_takt_max_rms`](/reference/api/vibration/people/#railway_takt_max_rms), a value at or below 0.1 as zero, so the
 spread is about the mean square that function returns.
 
 **Parameters**

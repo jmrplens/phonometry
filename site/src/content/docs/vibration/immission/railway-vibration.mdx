@@ -40,7 +40,7 @@ That is what DIN 45672 is for. Part 1 says how to measure next to a railway:
 where the transducers go, which directions, which trains, what the report has
 to contain. Part 2 says how to **reduce** the record once it exists, and it is
 the part this page implements, with the meter of
-[DIN 45669-1](/phonometry/vibration/immission/vibration-meter/) in its 4 Hz to
+[DIN 45669-1](/vibration/immission/vibration-meter/) in its 4 Hz to
 315 Hz railway working range. Neither part says what the result may be: the
 assessment is DIN 4150-2 for people and DIN 4150-3 for buildings.
 
@@ -154,7 +154,7 @@ train arrives. It quotes the cost as 14 % after `2τ` and 2 % after `4τ`, and
 those are the shortfalls of the **mean square**, `e⁻²` and `e⁻⁴`. The running
 r.m.s. the sentence is about, and the one its own Figure 3 draws, is short by
 7 % and 0.9 %. The advice stands; the size of the error is overstated by a
-factor of two, and the [errata page](/phonometry/reference/errata/) has the
+factor of two, and the [errata page](/reference/errata/) has the
 detail.
 
 ## 3. The event value, and an hour of trains
@@ -365,7 +365,7 @@ the shear wave, Poisson's ratio from their ratio (Formula (3)), and the
 elastic modulus from the two together.
 
 Two of the clause's formulas are printed wrong, and the
-[errata page](/phonometry/reference/errata/) has the reading. Formula (1)
+[errata page](/reference/errata/) has the reading. Formula (1)
 writes the compression speed first as `√(E/ρ)`, the speed of a wave in a thin
 rod, and then as `√(G(1−ν)/(ρ(1−2ν)))`, which is short of a factor 2. Formula
 (5) builds on the first and writes $E = \mathrm{v}_\mathrm{p}^2\,\rho$, which from a measured $\mathrm{v}_\mathrm{p}$
@@ -519,14 +519,14 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
-- [Measuring vibration immission (DIN 45669-1)](/phonometry/vibration/immission/vibration-meter/):
+- [Measuring vibration immission (DIN 45669-1)](/vibration/immission/vibration-meter/):
   the meter every quantity here is read with, and the $KB_\mathrm{F}$ it produces.
-- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+- [Vibration damage to structures (DIN 4150-3)](/vibration/structural/structural-damage/):
   the guideline values a peak velocity from a railway is compared with.
-- [Spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the
+- [Spectral analysis](/signals/spectra/spectral-analysis/): the
   Welch estimate behind the narrow-band density and the confidence it carries.
 - API reference:
-  [`vibration.immission.railway`](/phonometry/reference/api/vibration/railway/)
-  and [`vibration.immission.ground`](/phonometry/reference/api/vibration/ground/).
+  [`vibration.immission.railway`](/reference/api/vibration/railway/)
+  and [`vibration.immission.ground`](/reference/api/vibration/ground/).
 
 </SeeAlso>

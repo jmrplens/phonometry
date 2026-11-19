@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 4 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Ver & Beranek (2006), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 4 entradas del [registro de erratas](/es/reference/errata/) sobre Ver & Beranek (2006), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Ver & Beranek 2e (2006), TABLA 14.1 (tres módulos con la notación e corrompida en la impresión)
 

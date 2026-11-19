@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/solids/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/solids/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/solids/
 
 # Elastic solids
 
@@ -86,6 +86,6 @@ and a seventh for the column two of those books share.
   speeds and their inverses, which one a printed table holds, and the
   thickness-critical-frequency product that lets two books be checked against
   each other for free.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/solids/):
+- [Published catalogues](https://phonometry.dev/reference/catalogues/solids/):
   the two hundred and sixty rows nine tables in eight books print, filterable
   by material and by table, each naming the page it was read on.

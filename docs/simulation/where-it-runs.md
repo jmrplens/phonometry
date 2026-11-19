@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/simulation/where-it-runs.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/where-it-runs/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/simulation/where-it-runs/
 
 # Where heavy work runs: CPU or GPU, here or on a node
 

@@ -38,7 +38,7 @@ opposite ends of the absorption scale and are **not** interchangeable:
   (measured `alpha` below ~0.15). Part 2 does not restate the
   transfer-function / reflection-factor / absorption mathematics; Clauses 4,
   5.7 and 6.6 defer it to ISO 10534-2. The core computation therefore lives in
-  [`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance) and is **not**
+  [`two_microphone_impedance`](/reference/api/materials/impedance-tube/#two_microphone_impedance) and is **not**
   reimplemented here. This module contributes only the Part-2 tube
   geometry/validity helpers (upper usable frequency, microphone-spacing bounds,
   the 250-1600 Hz one-third-octave working range) and the Annex A internal-loss
@@ -184,8 +184,8 @@ check_spot_frequency_range(frequency: NumericArrayLike) -> None
 Advise when a spot-method frequency is out of range (ISO 13472-2, Scope).
 
 The spot method is valid over the one-third-octave bands 250-1600 Hz
-(narrow-band 220-1800 Hz). Frequencies outside [`SPOT_FREQUENCY_RANGE_HZ`](/phonometry/reference/api/materials/road-absorption/#spot_frequency_range_hz)
-raise a [`RoadAbsorptionWarning`](/phonometry/reference/api/materials/road-absorption/#roadabsorptionwarning); results there are advisory.
+(narrow-band 220-1800 Hz). Frequencies outside [`SPOT_FREQUENCY_RANGE_HZ`](/reference/api/materials/road-absorption/#spot_frequency_range_hz)
+raise a [`RoadAbsorptionWarning`](/reference/api/materials/road-absorption/#roadabsorptionwarning); results there are advisory.
 
 **Parameters**
 
@@ -264,7 +264,7 @@ geometric_spreading_factor_angle(
 Oblique geometrical-spreading factor (ISO 13472-1, Annex F).
 
 $K_{\mathrm{r},\theta}^2 = 1 - \cos^2(\theta) (1 - K_\mathrm{r}^2)$ with `Kr` the
-normal-incidence factor of [`geometric_spreading_factor`](/phonometry/reference/api/materials/road-absorption/#geometric_spreading_factor). At
+normal-incidence factor of [`geometric_spreading_factor`](/reference/api/materials/road-absorption/#geometric_spreading_factor). At
 $\theta = 0$ the
 cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
@@ -301,7 +301,7 @@ in_situ_absorption_coefficient(
 Normal-incidence absorption coefficient `alpha(f)` (ISO 13472-1, 4.1).
 
 $\alpha(f) = 1 - Q_W(f) = 1 - (1 / K_\mathrm{r}^2) \lvert H_\mathrm{r}(f) / H_\mathrm{i}(f) \rvert^2$ (the direct
-energy route via [`power_reflection_coefficient`](/phonometry/reference/api/materials/road-absorption/#power_reflection_coefficient); for oblique incidence
+energy route via [`power_reflection_coefficient`](/reference/api/materials/road-absorption/#power_reflection_coefficient); for oblique incidence
 `Kr` is replaced by `Kr,theta`, Annex F). Non-specularly reflected energy
 is treated as absorbed, so `alpha` may be slightly overestimated
 (Clause 4.1).
@@ -310,7 +310,7 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 
 | Name | Description |
 | :--- | :--- |
-| `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
+| `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height_m` | Source-to-plane distance `ds`, in metres. |
 | `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
@@ -339,9 +339,9 @@ Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
 
 $\alpha = 1 - \lvert r \rvert^2$. With `r` already carrying the
 $1 / K_\mathrm{r}$ factor
-(see [`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor)) this is the **reflection-factor route** to
+(see [`in_situ_reflection_factor`](/reference/api/materials/road-absorption/#in_situ_reflection_factor)) this is the **reflection-factor route** to
 `alpha` and equals the direct energy route of
-[`in_situ_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#in_situ_absorption_coefficient).
+[`in_situ_absorption_coefficient`](/reference/api/materials/road-absorption/#in_situ_absorption_coefficient).
 
 **Parameters**
 
@@ -379,17 +379,17 @@ In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
 
 End-to-end convenience: the windowed incident and reflected impulse
 responses give the narrow-band absorption via
-[`in_situ_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#in_situ_absorption_coefficient), which is then reduced to
-one-third-octave bands with [`one_third_octave_absorption`](/phonometry/reference/api/materials/road-absorption/#one_third_octave_absorption) and wrapped
-in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult).
+[`in_situ_absorption_coefficient`](/reference/api/materials/road-absorption/#in_situ_absorption_coefficient), which is then reduced to
+one-third-octave bands with [`one_third_octave_absorption`](/reference/api/materials/road-absorption/#one_third_octave_absorption) and wrapped
+in a plottable [`InSituAbsorptionResult`](/reference/api/materials/road-absorption/#insituabsorptionresult).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `incident_ir` | Windowed incident (direct-path) impulse response `hi`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
+| `incident_ir` | Windowed incident (direct-path) impulse response `hi`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected-path impulse response `hr`. Same treatment as `incident_ir`: its calibration is applied too, which is what makes the shared factor cancel rather than skew the ratio. |
-| `fs` | Sampling frequency, in hertz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `fs` | Sampling frequency, in hertz. Required when both records are bare arrays; either may be a [`Signal`](/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height_m` | Source-to-plane distance `ds`, in metres. |
 | `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
@@ -398,7 +398,7 @@ in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | `f_max` | Highest band centre to report, in hertz (default 4000 Hz). |
 | `clip_negative` | Clip negative band results to zero (default `True`). |
 
-**Returns:** An [`InSituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult) with `.plot()`.
+**Returns:** An [`InSituAbsorptionResult`](/reference/api/materials/road-absorption/#insituabsorptionresult) with `.plot()`.
 
 **Raises**
 
@@ -440,12 +440,12 @@ Annex C; the frequency-dependent form of Annex G).
 
 | Name | Description |
 | :--- | :--- |
-| `incident_ir` | Windowed incident (direct-path) impulse response `hi(t)`, real, one sample per `1 / fs`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
+| `incident_ir` | Windowed incident (direct-path) impulse response `hi(t)`, real, one sample per `1 / fs`. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected-path impulse response `hr(t)`, real, same sampling as `incident_ir`. Same treatment as `incident_ir`: its calibration is applied too, which is what makes the shared factor cancel rather than skew the ratio. |
 | `source_height_m` | Source-to-plane distance `ds`, in metres. |
 | `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
-| `fs` | Sampling frequency, in hertz; required with `delay` for phase restoration, and otherwise unused. Either record may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it; an explicit value that disagrees with one raises, and two Signals recorded at different rates are refused rather than arbitrated. |
+| `fs` | Sampling frequency, in hertz; required with `delay` for phase restoration, and otherwise unused. Either record may be a [`Signal`](/reference/api/io/io/#signal) and supply it; an explicit value that disagrees with one raises, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `delay` | Reflected-path delay `dtau` to undo, in seconds; `None` returns the raw spectral ratio. |
 | `n` | FFT length; defaults to the longer of the two impulse responses. |
 
@@ -648,7 +648,7 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 | `f_max` | Highest band centre to report, in hertz (4000 Hz for Part 1; pass 1600 Hz for the Part-2 range). |
 | `clip_negative` | Set negative band results to zero (default `True`). |
 
-**Returns:** The band centres and the band absorption, as a [`OneThirdOctaveAbsorption`](/phonometry/reference/api/materials/road-absorption/#onethirdoctaveabsorption); a band with no narrow-band samples yields `nan`.
+**Returns:** The band centres and the band absorption, as a [`OneThirdOctaveAbsorption`](/reference/api/materials/road-absorption/#onethirdoctaveabsorption); a band with no narrow-band samples yields `nan`.
 
 **Raises**
 
@@ -668,7 +668,7 @@ OneThirdOctaveAbsorption(
 
 Narrow-band absorption averaged into one-third-octave bands.
 
-What [`one_third_octave_absorption`](/phonometry/reference/api/materials/road-absorption/#one_third_octave_absorption) returns: the band centres and
+What [`one_third_octave_absorption`](/reference/api/materials/road-absorption/#one_third_octave_absorption) returns: the band centres and
 the band absorption, named, where a `(band_centres, band_absorption)`
 tuple used to be unpacked by position.
 
@@ -771,14 +771,14 @@ The **direct energy route**
 $Q_W(f) = (1 / K_\mathrm{r}^2) \lvert H_\mathrm{r}(f) / H_\mathrm{i}(f) \rvert^2$
 (`Kr,theta` for oblique incidence). It equals
 $\lvert r \rvert^2$ from
-[`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor) but is formed from magnitudes only, so it is
+[`in_situ_reflection_factor`](/reference/api/materials/road-absorption/#in_situ_reflection_factor) but is formed from magnitudes only, so it is
 independent of any reflected-path time offset.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
+| `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height_m` | Source-to-plane distance `ds`, in metres. |
 | `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
@@ -808,7 +808,7 @@ Reflected-path arrival delay `dtau` (ISO 13472-1:2002, Annex C).
 $\Delta\tau = 2 d_\mathrm{m} / c$ is the time difference between the direct
 and the surface-reflected impulses for the normal-incidence geometry; it
 is the delay undone by the phase-restoration term of
-[`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor).
+[`in_situ_reflection_factor`](/reference/api/materials/road-absorption/#in_situ_reflection_factor).
 
 **Parameters**
 
@@ -882,7 +882,7 @@ $$
 
 Valid because both terms are small (measured \< 0.15, internal \< 0.03). This
 is the **subtractive** Part-2 correction and must not be confused with the
-Part-1 ratio correction ([`absorption_reference_corrected`](/phonometry/reference/api/materials/road-absorption/#absorption_reference_corrected)). Negative
+Part-1 ratio correction ([`absorption_reference_corrected`](/reference/api/materials/road-absorption/#absorption_reference_corrected)). Negative
 one-third-octave results are set to zero when `clip_negative` is true
 (Clause 6.6 step 5).
 

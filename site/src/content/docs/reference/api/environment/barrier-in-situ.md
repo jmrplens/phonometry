@@ -7,7 +7,7 @@ sidebar:
 
 What a barrier by the road is worth, measured (ISO 10847:1997).
 
-[`phonometry.environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) predicts what a
+[`phonometry.environment.propagation.ground_barriers`](/reference/api/environment/ground-barriers/) predicts what a
 barrier will do from its geometry. This is the measurement, and its scope
 paragraph is worth reading before the equations:
 
@@ -43,8 +43,8 @@ surface.
 
 The algebra of the two is the same whenever the receiver is of the same kind
 in both campaigns, which is what the NOTE to 8.2.2 recommends, and
-[`measured_insertion_loss_indirect`](/phonometry/reference/api/environment/barrier-in-situ/#measured_insertion_loss_indirect) reduces to
-[`measured_insertion_loss_direct`](/phonometry/reference/api/environment/barrier-in-situ/#measured_insertion_loss_direct) exactly there.
+[`measured_insertion_loss_indirect`](/reference/api/environment/barrier-in-situ/#measured_insertion_loss_indirect) reduces to
+[`measured_insertion_loss_direct`](/reference/api/environment/barrier-in-situ/#measured_insertion_loss_direct) exactly there.
 
 What the standard will not let you correct
 ------------------------------------------
@@ -105,16 +105,16 @@ one takes off 1. They are two tables and they stay two tables.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a margin under [`ISO10847_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/environment/barrier-in-situ/#iso10847_min_background_margin_db), which 6.4 calls invalid. |
+| ValueError | For a margin under [`ISO10847_MIN_BACKGROUND_MARGIN_DB`](/reference/api/environment/barrier-in-situ/#iso10847_min_background_margin_db), which 6.4 calls invalid. |
 | TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## BarrierInSituWarning
 
 A NOTE of ISO 10847 the measurement cannot follow.
 
-Emitted when [`reference_microphone_height_m`](/phonometry/reference/api/environment/barrier-in-situ/#reference_microphone_height_m) cannot raise the
+Emitted when [`reference_microphone_height_m`](/reference/api/environment/barrier-in-situ/#reference_microphone_height_m) cannot raise the
 reference microphone to the 10 degrees of the NOTE to 7.2.2, and when
-[`measured_insertion_loss_indirect`](/phonometry/reference/api/environment/barrier-in-situ/#measured_insertion_loss_indirect) is given receiver types that
+[`measured_insertion_loss_indirect`](/reference/api/environment/barrier-in-situ/#measured_insertion_loss_indirect) is given receiver types that
 differ between the two campaigns, against the NOTE to 8.2.2. The clause
 each NOTE hangs from is still applied.
 
@@ -136,8 +136,8 @@ Does the geometry count as a short distance? 6.3.1.
 What hangs on the answer is Table 1: the upwind class exists only over
 short distances, so a long-distance measurement may be made downwind or
 calm and not into the wind at all. The "before" campaign is judged on one
-ratio and the "after" one on two; pass [`ShortDistanceCheck.before`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore)
-or [`ShortDistanceCheck.after`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) to [`wind_class`](/phonometry/reference/api/environment/barrier-in-situ/#wind_class) for the
+ratio and the "after" one on two; pass [`ShortDistanceCheck.before`](/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore)
+or [`ShortDistanceCheck.after`](/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) to [`wind_class`](/reference/api/environment/barrier-in-situ/#wind_class) for the
 campaign at hand.
 
 **Parameters**
@@ -150,7 +150,7 @@ campaign at hand.
 | `source_to_barrier_m` | $d_1$, in metres. |
 | `barrier_to_receiver_m` | $d_2$, in metres. |
 
-**Returns:** The answer for each campaign, as a [`ShortDistanceCheck`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheck).
+**Returns:** The answer for each campaign, as a [`ShortDistanceCheck`](/reference/api/environment/barrier-in-situ/#shortdistancecheck).
 
 **Raises**
 
@@ -355,7 +355,7 @@ anything: **the same reference and receiver positions in both campaigns**.
 | `receiver_levels_after` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 
-**Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/phonometry/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
+**Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
 
 **Raises**
 
@@ -400,7 +400,7 @@ essentially the same", so the type is asked for once per campaign here
 (see the errata).
 
 Where the two types agree, the correction cancels and this returns exactly
-what [`measured_insertion_loss_direct`](/phonometry/reference/api/environment/barrier-in-situ/#measured_insertion_loss_direct) returns on the same four
+what [`measured_insertion_loss_direct`](/reference/api/environment/barrier-in-situ/#measured_insertion_loss_direct) returns on the same four
 levels. Where they differ, the answer moves by 6 dB, which is why the NOTE
 exists.
 
@@ -416,7 +416,7 @@ exists.
 | `receiver_type_before` | `"hemi_free_field"` (default) or `"reflecting_surface"`, for the substitute site. |
 | `receiver_type_after` | The same for the barrier site. One of `"hemi_free_field"` or `"reflecting_surface"`. |
 
-**Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/phonometry/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
+**Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
 
 **Raises**
 
@@ -554,7 +554,7 @@ reference_microphone_height_m(
 
 How high the reference microphone stands, 7.2.2.
 
-At least [`REFERENCE_MICROPHONE_CLEARANCE_M`](/phonometry/reference/api/environment/barrier-in-situ/#reference_microphone_clearance_m) above the top edge of
+At least [`REFERENCE_MICROPHONE_CLEARANCE_M`](/reference/api/environment/barrier-in-situ/#reference_microphone_clearance_m) above the top edge of
 the barrier, on a vertical plane through it, so that what it hears is the
 source and not the barrier. For a barrier whose top is not a straight
 edge, a berm or a cupped profile, the clearance is measured from its
@@ -562,10 +562,10 @@ highest point. The clause words the clearance with "shall" (printed folio
 9, PDF page 13), and no geometry takes the microphone under it.
 
 The NOTE adds a preference for a source that stands close. Where the near
-end of the source region is under [`CLOSE_SOURCE_DISTANCE_M`](/phonometry/reference/api/environment/barrier-in-situ/#close_source_distance_m) from
+end of the source region is under [`CLOSE_SOURCE_DISTANCE_M`](/reference/api/environment/barrier-in-situ/#close_source_distance_m) from
 the barrier, the microphone "may be raised as high as possible" until the
 elevation angle from that end exceeds the angle to the barrier top by
-[`REFERENCE_ELEVATION_INCREMENT_DEG`](/phonometry/reference/api/environment/barrier-in-situ/#reference_elevation_increment_deg):
+[`REFERENCE_ELEVATION_INCREMENT_DEG`](/reference/api/environment/barrier-in-situ/#reference_elevation_increment_deg):
 
 $$
 h = \max\left(H + 1.5\ \mathrm{m},\; d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
@@ -582,7 +582,7 @@ printed.
 Once the barrier top stands 80 degrees or more above the near end of the
 source region, no height reaches the increment at all, and the tangent
 would turn negative. The microphone then keeps the clearance and a
-[`BarrierInSituWarning`](/phonometry/reference/api/environment/barrier-in-situ/#barrierinsituwarning) says that the NOTE could not be followed.
+[`BarrierInSituWarning`](/reference/api/environment/barrier-in-situ/#barrierinsituwarning) says that the NOTE could not be followed.
 That is how this module treats a NOTE, as with the one to 8.2.2: a
 preference it cannot meet is reported, and the clause it hangs from is
 enforced.
@@ -711,7 +711,7 @@ printed "+ 1 to - 5" and read here as -1 to -5 (see the errata).
 The calm class carries a footnote of its own over all distances: it counts
 "only with the case of temperature inversion".
 
-Above [`MAX_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value no measurement is
+Above [`MAX_WIND_SPEED_M_S`](/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value no measurement is
 made at all, which is a refusal rather than a class.
 
 **Parameters**
@@ -719,7 +719,7 @@ made at all, which is a refusal rather than a class.
 | Name | Description |
 | :--- | :--- |
 | `vector_component_m_s` | The vector component, in metres per second. |
-| `short_distance` | Whether the geometry of the campaign is a short distance: [`ShortDistanceCheck.before`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore) for the "before" campaign and [`ShortDistanceCheck.after`](/phonometry/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) for the "after" one, from [`check_short_distance`](/phonometry/reference/api/environment/barrier-in-situ/#check_short_distance). |
+| `short_distance` | Whether the geometry of the campaign is a short distance: [`ShortDistanceCheck.before`](/reference/api/environment/barrier-in-situ/#shortdistancecheckbefore) for the "before" campaign and [`ShortDistanceCheck.after`](/reference/api/environment/barrier-in-situ/#shortdistancecheckafter) for the "after" one, from [`check_short_distance`](/reference/api/environment/barrier-in-situ/#check_short_distance). |
 
 **Returns:** The class name, or `None` where the component falls in no class the table prints, which over long distances is any upwind component.
 
@@ -727,7 +727,7 @@ made at all, which is a refusal rather than a class.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a component that is not finite, or past [`MAX_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value. |
+| ValueError | For a component that is not finite, or past [`MAX_WIND_SPEED_M_S`](/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value. |
 | TypeError | if `vector_component_m_s` is not a single number. |
 
 ## WIND_CLASSES

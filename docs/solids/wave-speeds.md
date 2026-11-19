@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/solids/wave-speeds.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/solids/wave-speeds/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/solids/wave-speeds/
 
 # Wave speeds of a solid
 
@@ -140,7 +140,7 @@ solve. `PUBLISHED_SOLIDS` holds two hundred and sixty rows read from nine publis
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 Every one of them is also in the
-[published catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/),
+[published catalogue of solids](https://phonometry.dev/reference/catalogues/solids/),
 filterable, with the book and the page each row was read on.
 
 The nine are Hopkins **Table A2**, building materials; Cremer 3e **Table 4.3**,

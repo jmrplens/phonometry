@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Esta es la entrada del [registro de erratas](/phonometry/es/reference/errata/) sobre Barham, Barrera-Figueroa & Avison (2014). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Esta es la entrada del [registro de erratas](/es/reference/errata/) sobre Barham, Barrera-Figueroa & Avison (2014). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Barham, Barrera-Figueroa & Avison (2014), Metrologia 51, 129, fórmulas (1), (2) y (4) (un modelo que no da su propia tabla 2)
 

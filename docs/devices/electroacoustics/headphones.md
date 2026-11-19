@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/headphones.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/headphones/
 
 # Headphones and Earphones (IEC 60268-7)
 
@@ -561,8 +561,8 @@ plt.show()
 - [Test signals and sample-rate tools](../../signals/spectra/test-signals.md):
   the tone bursts of IEC 60268-1 Appendix A, another part of that standard the
   library implements.
-- API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
-  and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
+- API reference: [`electroacoustics.program_signal`](https://phonometry.dev/reference/api/electroacoustics/program-signal/)
+  and [`electroacoustics.headphones`](https://phonometry.dev/reference/api/electroacoustics/headphones/).
 
 ## References
 

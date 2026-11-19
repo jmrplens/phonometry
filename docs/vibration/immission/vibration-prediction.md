@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/immission/vibration-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/immission/vibration-prediction/
 
 # Predicting vibration before measuring (DIN 4150-1)
 
@@ -287,7 +287,7 @@ point of Figure A.18, labelled all groups of a hall of 252 machines, sits at
   the solver behind the animation of section 1, and Lamb's problem with a
   free and with a rigid surface.
 - API reference:
-  [`vibration.immission.prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/prediction/).
+  [`vibration.immission.prediction`](https://phonometry.dev/reference/api/vibration/prediction/).
 
 ## References
 

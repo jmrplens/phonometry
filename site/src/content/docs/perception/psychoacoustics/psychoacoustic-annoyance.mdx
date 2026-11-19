@@ -82,7 +82,7 @@ model and unit in the library:
 
 - **Loudness**: the percentile loudness $N_5$ (the loudness exceeded 5 % of the
   time), in **sone**, from the ISO 532-1 Zwicker time-varying model
-  (`loudness_zwicker`, see [Loudness](/phonometry/perception/psychoacoustics/loudness/)).
+  (`loudness_zwicker`, see [Loudness](/perception/psychoacoustics/loudness/)).
 - **Sharpness** $S$, in **acum**: the spectral balance towards high
   frequencies, DIN 45692 (`sharpness_din`).
 - **Roughness** $R$, in **asper**: the harshness of fast (~70 Hz) amplitude
@@ -170,7 +170,7 @@ annoyance is a laboratory scaling of a single sound. It says nothing about
 long-term exposure, time of day, the attitude of the population towards the
 source, or the percentage highly annoyed, which is the business of the rating
 levels and exposure-response relations in
-[Environmental Levels](/phonometry/environment/assessment/environmental-levels/).
+[Environmental Levels](/environment/assessment/environmental-levels/).
 A $PA$ of 37 is not "37 % highly annoyed", and the two quantities are not
 convertible.
 :::
@@ -197,7 +197,7 @@ signal model.
 The convenience is only as good as the record it is given, and neither entry
 point on this page takes a calibration argument, so `x` must already be
 **calibrated pressure in pascals**; see
-[Measuring the input](/phonometry/perception/psychoacoustics/loudness/#measuring-the-input-clause-4)
+[Measuring the input](/perception/psychoacoustics/loudness/#measuring-the-input-clause-4)
 on the loudness page for how that factor is obtained. Beyond calibration:
 unweighted; one declared operating state rather than a run-up; long enough that
 $N_5$ is a percentile of something and that the ~4 Hz fluctuation analysis has
@@ -251,7 +251,7 @@ the three fluctuation-strength models in the library: the Fastl & Zwicker
 closed form for amplitude-modulated broadband noise (§3.1) and the Osses et
 al. (2016) signal model for arbitrary signals (§3.2). The normative
 Sottek-model fluctuation strength of ECMA-418-2 Clause 9, in vacil_HMS, lives
-in [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/);
+in [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/);
 note that this page's unit is the vacil and that one the vacil_HMS, so the two
 are not the same number for the same sound.
 
@@ -459,7 +459,7 @@ physical level fluctuation of the noise itself. For AM broadband noise, quote
 which overshoots that stimulus. The normative Sottek-model fluctuation
 strength of ECMA-418-2 Clause 9 is not implemented on this page: it lives in
 [Sound Quality
-Metrics](/phonometry/perception/psychoacoustics/sound-quality/).
+Metrics](/perception/psychoacoustics/sound-quality/).
 </ScopeClaim>
 </Scope>
 
@@ -467,20 +467,20 @@ Metrics](/phonometry/perception/psychoacoustics/sound-quality/).
 
 ## See also
 
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/): the ISO 532-1
+- [Loudness](/perception/psychoacoustics/loudness/): the ISO 532-1
   percentile loudness $N_5$ this model takes as its first argument, and the
   acquisition rules the recording has to satisfy before any of it applies.
-- [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/):
+- [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/):
   the DIN 45692 sharpness $S$, the ECMA-418-2 roughness $R$ and the normative
   vacil_HMS fluctuation strength of the same sensation this page models in
   vacil.
-- [Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/):
+- [Advanced Loudness](/perception/psychoacoustics/advanced-loudness/):
   the alternative loudness models, and why mixing families makes the composite
   an engineering estimate.
-- [Environmental Levels](/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels](/environment/assessment/environmental-levels/):
   community annoyance, the other thing the word means, and the rating levels it
   is assessed with.
-- Theory: [Advanced loudness models and sound quality](/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
-- API reference: [`psychoacoustics.quality.annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics`: fluctuation strength](/phonometry/reference/api/psychoacoustics/fluctuation-strength/).
+- Theory: [Advanced loudness models and sound quality](/reference/theory/perception/#advanced-loudness-models--sound-quality): the loudness and sound-quality metrics the annoyance model combines, derived one at a time.
+- API reference: [`psychoacoustics.quality.annoyance`](/reference/api/psychoacoustics/annoyance/) and [`psychoacoustics`: fluctuation strength](/reference/api/psychoacoustics/fluctuation-strength/).
 
 </SeeAlso>

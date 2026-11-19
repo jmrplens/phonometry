@@ -15,9 +15,9 @@ building. The chain closes the structural-vibroacoustics series:
    `L_Ws,c`. It is **not** the raw reception-plate power of EN 15657
    Formula (14): that plate-injected level must first be converted to the
    plate-independent `L_Ws,n` (EN 15657 Formulae (15)/(17); see
-   [`phonometry.building.measurement.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/)) and then referred to the
+   [`phonometry.building.measurement.structure_borne_power`](/reference/api/building/structure-borne-power/)) and then referred to the
    actual receiver with the Annex I mobility correction
-   ([`installed_power_from_reception_plate`](/phonometry/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)),
+   ([`installed_power_from_reception_plate`](/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)),
    $L_{\mathrm{Ws,inst},i} = L_\mathrm{Ws,n} + 10 \log_{10}( Y_{\infty,i} / Y_{\infty,\mathrm{rec}} )$
    with the reference plate mobility
    $Y_{\infty,\mathrm{rec}} = 5 \cdot 10^{-6}$ m/(N.s), or equivalently to the
@@ -26,7 +26,7 @@ building. The chain closes the structural-vibroacoustics series:
    source mobility (Annex I.3, Table I.8), from which `D_C` is subtracted.
 2. Only part of that power is actually injected into the supporting element; the
    loss is the **coupling term** `D_C` (clause 4.4.3), positive in the usual
-   mobility-mismatched cases (see [`coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#coupling_term) for the exception),
+   mobility-mismatched cases (see [`coupling_term`](/reference/api/building/installed-structure-borne/#coupling_term) for the exception),
    set by the source mobility `Y_s` and the receiver mobility `Y_i`
    (Formula 19b):
    $D_{\mathrm{C},i} = 10 \log_{10}\left( |Y_\mathrm{s} + Y_i|^2 / (|Y_\mathrm{s}| \operatorname{Re}\{Y_i\}) \right)$, which reduces to
@@ -48,7 +48,7 @@ building. The chain closes the structural-vibroacoustics series:
    (Formula 17).
 
 The source and receiver mobilities/impedances are those of
-[`phonometry.vibration.structural.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/) and [`phonometry.vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/).
+[`phonometry.vibration.structural.mechanical_mobility`](/reference/api/vibration/mechanical-mobility/) and [`phonometry.vibration.structural.transfer_stiffness`](/reference/api/vibration/transfer-stiffness/).
 
 **The informative tables.** Every term of that chain is a number the user
 would otherwise copy out of the standard, so the two tables of the informative
@@ -57,20 +57,20 @@ annexes are here as named lookups:
 - **Table D.1** (Annex D) estimates the mobility of typical construction
   elements from their own dimensions, which is how clause D.1.3 builds up a
   *source* mobility `Y_s` for step 2 out of the machine's mass, feet,
-  chassis panels and pipework: [`typical_element_mobility`](/phonometry/reference/api/building/installed-structure-borne/#typical_element_mobility), whose
+  chassis panels and pipework: [`typical_element_mobility`](/reference/api/building/installed-structure-borne/#typical_element_mobility), whose
   `structure` argument is the table's first column and whose keywords are
-  its second ([`TABLE_D1_QUANTITIES`](/phonometry/reference/api/building/installed-structure-borne/#table_d1_quantities)).
+  its second ([`TABLE_D1_QUANTITIES`](/reference/api/building/installed-structure-borne/#table_d1_quantities)).
 - **Table F.1** (Annex F) gives the octave-band force level `L_F` of the ISO
   tapping machine, the substitution source of clause D.1.2.3:
-  [`tapping_machine_force_level`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_force_level), with
-  [`tapping_machine_characteristic_power_level`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_characteristic_power_level) and
-  [`tapping_machine_coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_coupling_term) turning it into the `L_Ws,c` and
+  [`tapping_machine_force_level`](/reference/api/building/installed-structure-borne/#tapping_machine_force_level), with
+  [`tapping_machine_characteristic_power_level`](/reference/api/building/installed-structure-borne/#tapping_machine_characteristic_power_level) and
+  [`tapping_machine_coupling_term`](/reference/api/building/installed-structure-borne/#tapping_machine_coupling_term) turning it into the `L_Ws,c` and
   `D_C` of step 3.
 
 Annex F also supplies the two terms step 4 takes: the adjustment term `D_sa`
-of Formula (F.3) ([`structure_to_airborne_adjustment`](/phonometry/reference/api/building/installed-structure-borne/#structure_to_airborne_adjustment)) and the
+of Formula (F.3) ([`structure_to_airborne_adjustment`](/reference/api/building/installed-structure-borne/#structure_to_airborne_adjustment)) and the
 multi-junction adjustment `dK` of clause F.1
-([`multi_junction_adjustment`](/phonometry/reference/api/building/installed-structure-borne/#multi_junction_adjustment)), which the flanking reduction index
+([`multi_junction_adjustment`](/reference/api/building/installed-structure-borne/#multi_junction_adjustment)), which the flanking reduction index
 `R_ij,ref` of a path more than one junction away is built with.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -273,7 +273,7 @@ element (floor, wall), yielding the installed power of that element as in
 the Annex I.2 whirlpool example. The same correction with the *source*
 mobility instead of `Y_inf,i` yields the characteristic level
 `L_Ws,c` (Annex I.3, Table I.8), from which
-[`installed_structure_borne_power_level`](/phonometry/reference/api/building/installed-structure-borne/#installed_structure_borne_power_level) subtracts `D_C`.
+[`installed_structure_borne_power_level`](/reference/api/building/installed-structure-borne/#installed_structure_borne_power_level) subtracts `D_C`.
 
 **Parameters**
 
@@ -323,7 +323,7 @@ broadcast to the band count).
 | `paths` | One dict per transmission path with keys `adjustment_term` (`D_sa`), `flanking_reduction_index` (`R_ij,ref`) and `element_area` (`S_i`), each per band where applicable. |
 | `frequencies` | Band centre frequencies, in hertz, or `None`. |
 
-**Returns:** The [`InstalledSourceResult`](/phonometry/reference/api/building/installed-structure-borne/#installedsourceresult).
+**Returns:** The [`InstalledSourceResult`](/reference/api/building/installed-structure-borne/#installedsourceresult).
 
 **Raises**
 
@@ -460,7 +460,7 @@ the prediction disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the source equipment, `test_room` the receiving room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared upper limit on the overall `L_n,s` (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the source equipment, `test_room` the receiving room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared upper limit on the overall `L_n,s` (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds one column per transmission path (up to five); otherwise only the installed power and the combined total are shown. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -495,7 +495,7 @@ Formula (F.1) sums the junction `Kij` along the path and subtracts an
 adjustment `dK` that covers the transmission by wave types other than
 bending waves. Clause F.1 estimates it from published data as 4 dB for two
 junctions and 6 dB for three or more, with the resulting `Kij` floored at
-[`MIN_MULTI_JUNCTION_KIJ`](/phonometry/reference/api/building/installed-structure-borne/#min_multi_junction_kij).
+[`MIN_MULTI_JUNCTION_KIJ`](/reference/api/building/installed-structure-borne/#min_multi_junction_kij).
 
 **Parameters**
 
@@ -644,7 +644,7 @@ exact above the critical frequency (where the radiation factor saturates at
 
 `D_sa` is normally **negative**, and Formula (18a) subtracts it, so it
 raises the predicted level: this is the value
-[`structure_borne_pressure_level_path`](/phonometry/reference/api/building/installed-structure-borne/#structure_borne_pressure_level_path) takes as `adjustment_term`,
+[`structure_borne_pressure_level_path`](/reference/api/building/installed-structure-borne/#structure_borne_pressure_level_path) takes as `adjustment_term`,
 sign included.
 
 **Parameters**
@@ -726,8 +726,8 @@ $$
 The standard notes the result is about 115 dB re 1 pW per one-third octave
 for the ISO tapping machine, treated in clause D.1.3 as a force source with
 the mass-like source mobility of its 0.5 kg hammers. Pair it with
-[`tapping_machine_coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_coupling_term) and hand both to
-[`installed_source_prediction`](/phonometry/reference/api/building/installed-structure-borne/#installed_source_prediction).
+[`tapping_machine_coupling_term`](/reference/api/building/installed-structure-borne/#tapping_machine_coupling_term) and hand both to
+[`installed_source_prediction`](/reference/api/building/installed-structure-borne/#installed_source_prediction).
 
 The formula only balances with the reference force `F_0 = 1e-6` N, since
 it carries no term for $F_0^2 / W_0$; that is what pins the reading
@@ -738,7 +738,7 @@ of Table F.1 against its own printed "re 1 pN" caption.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `force_level` | Force level `L_F`, in dB re 1e-6 N (Table F.1 or [`tapping_machine_force_level_estimate`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_force_level_estimate)). |
+| `force_level` | Force level `L_F`, in dB re 1e-6 N (Table F.1 or [`tapping_machine_force_level_estimate`](/reference/api/building/installed-structure-borne/#tapping_machine_force_level_estimate)). |
 
 **Returns:** The characteristic power level `L_Ws,c`, in dB re 1 pW. A `float` when `force_level` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -798,7 +798,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `receiver_mobility` | Real mobility `Y_i` of the supporting element, in m/(N.s) (> 0). |
-| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0.5 kg of clause D.1.3 and ISO 10140-5). |
+| `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0.5 kg of clause D.1.3 and ISO 10140-5). |
 
 **Returns:** The coupling term `D_C,i`, in dB. A `float` when `receiver_mobility` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
@@ -818,13 +818,13 @@ tapping_machine_force_level() -> NDArray[np.float64]
 Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
 
 The eight octave-band values of Table F.1, in the order of
-[`TABLE_F1_OCTAVE_BANDS_HZ`](/phonometry/reference/api/building/installed-structure-borne/#table_f1_octave_bands_hz) (31.5 Hz to 4 kHz). Clause F.4.2
+[`TABLE_F1_OCTAVE_BANDS_HZ`](/reference/api/building/installed-structure-borne/#table_f1_octave_bands_hz) (31.5 Hz to 4 kHz). Clause F.4.2
 offers them for the tapping machine used in place of an electrodynamic
 shaker when measuring `D_Fp,n` (Formula F.9), and clause D.1.2.3
 restricts the source to low-mobility receiving structures.
 
-Feed them to [`tapping_machine_characteristic_power_level`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_characteristic_power_level) for the
-`L_Ws,c` that [`installed_source_prediction`](/phonometry/reference/api/building/installed-structure-borne/#installed_source_prediction) takes.
+Feed them to [`tapping_machine_characteristic_power_level`](/reference/api/building/installed-structure-borne/#tapping_machine_characteristic_power_level) for the
+`L_Ws,c` that [`installed_source_prediction`](/reference/api/building/installed-structure-borne/#installed_source_prediction) takes.
 
 **Returns:** The force level `L_F` per octave band, in dB re 1e-6 N (the table caption prints "re 1 pN"; see `docs/ERRATA.md`).
 
@@ -860,7 +860,7 @@ The standard qualifies this with "up till about 1000 Hz": it reproduces the
 first six tabulated values to the printed decibel, and above that it
 departs from the table, which
 flattens at 156 dB (the closed form gives 157 dB at 2 kHz and 160 dB at
-4 kHz). Use [`tapping_machine_force_level`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_force_level) for the octave bands the
+4 kHz). Use [`tapping_machine_force_level`](/reference/api/building/installed-structure-borne/#tapping_machine_force_level) for the octave bands the
 table covers and this only where it does not, chiefly the one-third-octave
 bands the standard does not tabulate.
 
@@ -979,7 +979,7 @@ prints, in m/(N.s), for the row named by *structure*:
   [N/m] and `loss_factor` $\eta$ [-]:
   $\lvert Y \rvert = \left[ \left( \frac{2 \pi f \eta}{s (1 + \eta^2)} \right)^2 + \left( \frac{2 \pi f}{s (1 + \eta^2)} - \frac{1}{2 \pi f M} \right)^2 \right]^{1/2}$.
 
-[`TABLE_D1_QUANTITIES`](/phonometry/reference/api/building/installed-structure-borne/#table_d1_quantities) carries the "Describing quantities" column as
+[`TABLE_D1_QUANTITIES`](/reference/api/building/installed-structure-borne/#table_d1_quantities) carries the "Describing quantities" column as
 the keyword names of this function, and only the quantities a row describes
 may be supplied.
 Frequency is not among them, because it is the band frequency of the
@@ -988,12 +988,12 @@ six expressions: `"mass"`, `"beam"`, `"pipe"` and `"mass_spring"`
 require `frequency` and the other two reject it.
 
 Clause D.1.3 offers the table for building up a **source** mobility `Y_s`
-from the machine's own parts, which is what [`coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#coupling_term) needs and
+from the machine's own parts, which is what [`coupling_term`](/reference/api/building/installed-structure-borne/#coupling_term) needs and
 what a measurement of the equipment does not give. Annex F Formulae (F.4)
 to (F.6b) cover the *receiver* mobility `Y_i` of the supporting element;
 the `"plate"` row is the same quantity as Formula (F.4)
 $Y_{i,\infty} = 1 / (8\sqrt{m B'})$ and as
-[`phonometry.vibration.structural.point_mobility.infinite_plate_mobility`](/phonometry/reference/api/vibration/point-mobility/#infinite_plate_mobility),
+[`phonometry.vibration.structural.point_mobility.infinite_plate_mobility`](/reference/api/vibration/point-mobility/#infinite_plate_mobility),
 written in $\rho$, $c_\mathrm{L}$ and $t$ instead of mass and
 bending stiffness.
 
@@ -1002,7 +1002,7 @@ bracket holds the two reactances, which cancel at the mass-spring
 resonance $f_0 = (2\pi)^{-1}\sqrt{s(1 + \eta^2)/M}$ and leave the
 mobility at its damping-limited minimum, the frequency at which the mount
 injects the most power. `loss_factor=0` returns exactly zero there,
-which [`coupling_term`](/phonometry/reference/api/building/installed-structure-borne/#coupling_term) then rejects.
+which [`coupling_term`](/reference/api/building/installed-structure-borne/#coupling_term) then rejects.
 
 **Parameters**
 

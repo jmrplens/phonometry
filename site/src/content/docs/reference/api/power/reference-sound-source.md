@@ -54,12 +54,12 @@ within Table B.1 from 50 Hz to 315 Hz. Table 2 gives the reproducibility
 standard deviation from which clause 11 builds the expanded uncertainty.
 
 The calibration is consumed where a comparison method asks for
-$L_{W(\mathrm{RSS})}$: [`sound_power_comparison`](/phonometry/reference/api/power/sound-power-reverberation/#sound_power_comparison),
-[`sound_energy_comparison`](/phonometry/reference/api/power/sound-power-reverberation/#sound_energy_comparison),
-[`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ),
-[`sound_energy_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_energy_in_situ) and
-[`high_frequency_sound_power_comparison`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison) accept a
-[`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) where they accept the levels, and read the
+$L_{W(\mathrm{RSS})}$: [`sound_power_comparison`](/reference/api/power/sound-power-reverberation/#sound_power_comparison),
+[`sound_energy_comparison`](/reference/api/power/sound-power-reverberation/#sound_energy_comparison),
+[`sound_power_in_situ`](/reference/api/power/sound-power-in-situ/#sound_power_in_situ),
+[`sound_energy_in_situ`](/reference/api/power/sound-power-in-situ/#sound_energy_in_situ) and
+[`high_frequency_sound_power_comparison`](/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison) accept a
+[`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration) where they accept the levels, and read the
 bands they need from it. The calibration holds $L_W$ under the
 reference meteorological conditions, where $C_2$ carried the power the
 source radiated during the calibration (8.4). ISO 3741 wants
@@ -68,7 +68,7 @@ the time of test" (Formulae (21) and (31)), and ISO 9295 carries its levels
 to the reference conditions as ISO 3741 does (10.1), so for those methods the
 calibration is read as $L_W - C_2$, with $C_2$ evaluated at the
 test by the same formula the calibration used, as 8.4 asks
-([`ReferenceSourceCalibration.sound_power_level_at`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at) with the test's
+([`ReferenceSourceCalibration.sound_power_level_at`](/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at) with the test's
 temperature and pressure). ISO 3747 instead corrects the reference source's
 measured pressure levels "for speed, temperature and static pressure
 according to the manufacturer's specifications" (Equation (9)), which puts
@@ -192,7 +192,7 @@ calibration used should be the one the user applies.
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals. |
 | `radiation` | `"unknown"` (default), `"monopole"` or `"dipole"`. |
 | `frequencies` | The band frequencies, in hertz; required for a monopole or a dipole, whose correction depends on the knee frequency. |
-| `knee_frequency_hz` | $f_\mathrm{k}$ (see [`knee_frequency`](/phonometry/reference/api/power/reference-sound-source/#knee_frequency)), required for a monopole or a dipole. |
+| `knee_frequency_hz` | $f_\mathrm{k}$ (see [`knee_frequency`](/reference/api/power/reference-sound-source/#knee_frequency)), required for a monopole or a dipole. |
 
 **Returns:** $C_2$ per band, in dB. A `float` for a number or for no frequencies, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -227,7 +227,7 @@ Calibrate a reference sound source in a hemi-anechoic room (ISO 6926 clause 8).
 
 The one-third octave band levels over the 2 m hemisphere are corrected
 for background position by position and energy-averaged as ISO 3745
-prescribes ([`sound_power_anechoic`](/phonometry/reference/api/power/sound-power-anechoic/#sound_power_anechoic)), then
+prescribes ([`sound_power_anechoic`](/reference/api/power/sound-power-anechoic/#sound_power_anechoic)), then
 Formula (2) carries them to the sound power level under the reference
 meteorological conditions with the $C_1$, $C_2$ and
 $C_3$ of 8.4. The directivity index of each position (3.9) is its
@@ -237,7 +237,7 @@ carries. Annex B, the alternative at low frequencies, replaces the 50 Hz
 to 80 Hz bands by the intensity levels when both agree within Table B.1
 from 50 Hz to 315 Hz. B.2 asks for the directivity index of those three
 bands from the intensity measurements too; the result keeps the one
-from sound pressure, and [`ReferenceSourceCalibration.intensity_bands`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationintensity_bands)
+from sound pressure, and [`ReferenceSourceCalibration.intensity_bands`](/reference/api/power/reference-sound-source/#referencesourcecalibrationintensity_bands)
 marks the bands whose level was replaced, as B.2 asks the report to.
 
 **Parameters**
@@ -249,15 +249,15 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | `arrangement` | `"paths"` (meridional or spiral paths) or `"fixed"` (the 20 fixed positions or coaxial circular paths), which selects the column of Table 2. |
 | `background_levels` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
 | `max_levels` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
-| `conditions` | The [`CalibrationConditions`](/phonometry/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
+| `conditions` | The [`CalibrationConditions`](/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
 | `radiation` | Radiation character for the Annex A $C_2$. One of `"monopole"`, `"dipole"` or `"unknown"`. |
 | `knee_frequency_hz` | Knee frequency for a monopole or a dipole. |
-| `c2` | The manufacturer's $C_2$, scalar or per band, which 8.4 prefers to Annex A; overrides `radiation`. A calibration made with it cannot be read at the conditions of a test, since only the manufacturer gives $C_2$ there (see [`ReferenceSourceCalibration.sound_power_level_at`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at)). |
+| `c2` | The manufacturer's $C_2$, scalar or per band, which 8.4 prefers to Annex A; overrides `radiation`. A calibration made with it cannot be read at the conditions of a test, since only the manufacturer gives $C_2$ there (see [`ReferenceSourceCalibration.sound_power_level_at`](/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at)). |
 | `intensity_sound_power_level` | Sound power levels from sound intensity per band (ISO 9614-3, Annex B), `nan` outside 50 Hz to 315 Hz; `None` applies no Annex B. |
-| `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room; 8.1 asks for a hemi-anechoic room qualified over the frequency range of interest, here the bands calibrated from sound pressure at 2 m (the bands Annex B takes from sound intensity are the ones clause 10 lets an unqualified room calibrate, and are left out). |
+| `room_qualification` | The [`check_free_field`](/reference/api/power/free-field-qualification/#check_free_field) verdict of the room; 8.1 asks for a hemi-anechoic room qualified over the frequency range of interest, here the bands calibrated from sound pressure at 2 m (the bands Annex B takes from sound intensity are the ones clause 10 lets an unqualified room calibrate, and are left out). |
 | `coverage_factor` | $k$ of the expanded uncertainty (1.96 in 11.2 for 95 %). |
 
-**Returns:** [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration).
+**Returns:** [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration).
 
 **Raises**
 
@@ -527,7 +527,7 @@ measurement Table B.1 refuses.
 | `radiation` | The radiation character whose Annex A $C_2$ the calibration used, or `None` when it used the manufacturer's value. One of `"monopole"`, `"dipole"` or `"unknown"`. |
 | `knee_frequency_hz` | The knee frequency of that $C_2$, or `None`. |
 | `intensity_sound_power_level` | The sound power level determined by sound intensity per band (Annex B), or `None`. |
-| `room_qualification` | The [`FreeFieldCheck`](/phonometry/reference/api/power/free-field-qualification/#freefieldcheck) of the room, or `None` when none was given. |
+| `room_qualification` | The [`FreeFieldCheck`](/reference/api/power/free-field-qualification/#freefieldcheck) of the room, or `None` when none was given. |
 
 ### ReferenceSourceCalibration.a_weighted_expanded_uncertainty_db
 
@@ -796,14 +796,14 @@ frequencies.
 
 | Name | Description |
 | :--- | :--- |
-| `calibration` | A [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), or the calibrated $L_W$ per band, in dB re 1 pW. |
+| `calibration` | A [`ReferenceSourceCalibration`](/reference/api/power/reference-sound-source/#referencesourcecalibration), or the calibrated $L_W$ per band, in dB re 1 pW. |
 | `frequencies` | The bands of a plain level array, ascending one-third octave mid-bands, in hertz; omitted with a calibration. |
 | `repeated_levels` | `(3, bands)` sound power levels or `(5, bands)` sound pressure levels measured in succession (8.3.3, 9.3.2); `None` leaves the steadiness of 5.2 unjudged. |
 | `supply_variation_db` | The largest change of the sound power level in each band over the declared range of the electrical or mechanical supply, the line voltage for instance (5.2), per band or one value for every band, in dB; `None` leaves that requirement unjudged. |
 | `directivity_index` | The directivity index per position and band, or the highest per band, for a plain level array (a calibration brings its own). |
 | `reverberation_rooms_only` | The source is labelled for reverberation test rooms complying with ISO 3741 only, and 5.5 does not apply. |
 
-**Returns:** [`ReferenceSoundSourceVerdict`](/phonometry/reference/api/power/reference-sound-source/#referencesoundsourceverdict).
+**Returns:** [`ReferenceSoundSourceVerdict`](/reference/api/power/reference-sound-source/#referencesoundsourceverdict).
 
 **Raises**
 
@@ -838,7 +838,7 @@ times Table 1 in any band calls for recalibration.
 | `latest_levels` | The levels of the latest check, same bands. |
 | `frequencies` | Nominal one-third octave mid-bands, 50 Hz to 20 kHz, in hertz. |
 
-**Returns:** [`ReferenceSourceDriftResult`](/phonometry/reference/api/power/reference-sound-source/#referencesourcedriftresult).
+**Returns:** [`ReferenceSourceDriftResult`](/reference/api/power/reference-sound-source/#referencesourcedriftresult).
 
 **Raises**
 

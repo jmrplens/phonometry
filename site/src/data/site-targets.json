@@ -1,10 +1,11 @@
 {
-  "default": "docs.jmrp.io",
+  "default": "phonometry.dev",
   "targets": {
-    "docs.jmrp.io": { "siteUrl": "https://docs.jmrp.io", "basePath": "/phonometry" },
-    "phonometry.dev": { "siteUrl": "https://phonometry.dev", "basePath": "/phonometry" }
+    "phonometry.dev": { "siteUrl": "https://phonometry.dev", "basePath": "" }
   },
-  "legacy": [],
-  "mediaOrigins": ["https://docs.jmrp.io"],
-  "clipBase": "https://docs.jmrp.io/phonometry/media/"
+  "legacy": [
+    { "siteUrl": "https://docs.jmrp.io", "basePath": "/phonometry" }
+  ],
+  "mediaOrigins": ["https://media.phonometry.dev"],
+  "clipBase": "https://media.phonometry.dev/"
 }

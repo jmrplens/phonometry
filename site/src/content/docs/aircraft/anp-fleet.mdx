@@ -23,7 +23,7 @@ import ScopeClaim from '../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../components/SeeAlso.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
 
-[Airport Noise (ECAC Doc 29)](/phonometry/aircraft/airport-noise/) computes an
+[Airport Noise (ECAC Doc 29)](/aircraft/airport-noise/) computes an
 event level from a noise-power-distance table and a flight path. That guide
 supplies both by hand, which is what you want while learning the method and
 what you never want afterwards: for a real study the numbers come from the
@@ -86,7 +86,7 @@ The engine **mounting** is the one field of the record that the Doc 29 chain
 itself reads. It is derived from the ANP lateral directivity identifier and is
 one of `"wing"`, `"fuselage"` or `"propeller"`, which selects the
 engine-installation correction that the
-[airport-noise guide](/phonometry/aircraft/airport-noise/) applies by hand.
+[airport-noise guide](/aircraft/airport-noise/) applies by hand.
 The choice is not cosmetic: at small depression angles wing and fuselage
 mountings differ by more than a decibel, propellers take none of that
 correction, and the shipped fleet splits 70 / 55 / 30 across the three. An
@@ -286,7 +286,7 @@ than from a cold one at the coast. There is nothing to tabulate, which is why
 the database ships the steps and not the points.
 
 `flight_profile` flies them, through the [ECAC Doc 29 Vol. 2 Appendix
-B](/phonometry/reference/api/aeroacoustics/flight-performance/) flight
+B](/reference/api/aeroacoustics/flight-performance/) flight
 performance model. It requires an `aerodrome`, because it computes the
 trajectory and the trajectory depends on the field, where `profile` returns an
 already tabulated fixed-point one and needs no such argument. It works in the
@@ -392,7 +392,7 @@ modelled by passing its temperature alone. Pass its `relative_humidity_percent`
 as well and the event and contour wiring recalculates both NPD tables for that
 air by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class; left
 unset, the tables stay in the AIR-1845 atmosphere they were normalised to.
-[NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/)
+[NPD data for the air at the airport](/aircraft/npd-atmosphere/)
 walks through that recalculation.
 
 ```python
@@ -502,11 +502,11 @@ phonometry ships version 2.3 and does not update it.
 
 Pages elsewhere on the site that this section leans on:
 
-- [Airport Noise (ECAC Doc 29)](/phonometry/aircraft/airport-noise/): the method
+- [Airport Noise (ECAC Doc 29)](/aircraft/airport-noise/): the method
   itself, built from a hand-written NPD table and flight path.
-- [Aircraft noise: Effective Perceived Noise Level](/phonometry/aircraft/aircraft-noise/):
+- [Aircraft noise: Effective Perceived Noise Level](/aircraft/aircraft-noise/):
   the certification metric, which is measured rather than tabulated.
 - API reference:
-  [`aircraft.anp_fleet`](/phonometry/reference/api/aeroacoustics/anp-fleet/).
+  [`aircraft.anp_fleet`](/reference/api/aeroacoustics/anp-fleet/).
 
 </SeeAlso>

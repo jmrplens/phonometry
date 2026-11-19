@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/speech/objective-intelligibility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/speech/objective-intelligibility/
 
 # Objective Intelligibility (STOI & ESTOI)
 
@@ -420,7 +420,7 @@ other: a processor can raise STOI while the room keeps the STI poor.
   predicts intelligibility from speech, noise and hearing-threshold spectra.
 - [Filter Banks](../../signals/filters/filter-banks.md): the one-third-octave bands
   the front end groups the DFT into.
-- API reference: [`speech.objective_intelligibility`](https://docs.jmrp.io/phonometry/reference/api/speech/objective-intelligibility/).
+- API reference: [`speech.objective_intelligibility`](https://phonometry.dev/reference/api/speech/objective-intelligibility/).
 - Theory: [Modulation transfer and STI](../../reference/theory/perception.md#modulation-transfer-and-sti-iec-60268-16): the modulation-transfer derivation the intrusive measures on this page are compared against.
 
 ## References

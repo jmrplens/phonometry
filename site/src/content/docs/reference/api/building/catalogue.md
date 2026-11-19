@@ -29,9 +29,9 @@ What the row carries
 --------------------
 Each octave band is a field of its own, `transmission_loss_500` and so
 on, with the band's centre frequency in hertz and the unit in the name. Every
-hedge of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) works on a band
+hedge of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) works on a band
 the way it works on any other field, so a band the page leaves empty says so
-through [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing)
+through [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing)
 rather than answering zero. The thickness and the surface density the page
 prints beside the description are fields of their own, because they are what a
 reader compares two constructions by, and because the mass law needs the
@@ -58,7 +58,7 @@ laboratory, standard or reference is named for any of them either. Those rows
 are here and the duct walls of the same chapter are not, because a duct wall is
 measured in two directions that are different numbers and is indexed by the
 duct's cross section, length and sheet gauge; it is published from
-[`phonometry.noise_control.duct_walls`](/phonometry/reference/api/noise_control/duct-walls/).
+[`phonometry.noise_control.duct_walls`](/reference/api/noise_control/duct-walls/).
 
 Rossing's Table 11.4 is the same kind of row with fewer bands: twenty-three
 common partitions, six octaves from 125 Hz to 4 kHz and a sound transmission
@@ -71,16 +71,16 @@ transmission class alone, with no frequency band anywhere: stud walls in six
 conditions, concrete block walls of two weights, block walls under six
 plasterboard mountings, doors unsealed and sealed, exterior doors, sealed
 windows and floor-ceiling systems. Each is a row of this catalogue with every
-band empty, and the rating in [`TransmissionLossSpectrum.sound_transmission_class`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrum).
+band empty, and the rating in [`TransmissionLossSpectrum.sound_transmission_class`](/reference/api/building/catalogue/#transmissionlossspectrum).
 A caller after a spectrum reads the band fields and finds `None`;
-[`TransmissionLossSpectrum.transmission_loss`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrumtransmission_loss) then refuses with the
+[`TransmissionLossSpectrum.transmission_loss`](/reference/api/building/catalogue/#transmissionlossspectrumtransmission_loss) then refuses with the
 row and the band, because the page printed nothing there.
 
 Most of those tables print one construction under several conditions, as
 columns: the plasterboard layers and the cavity absorbent of Table 31.2, the
 sealing of the doors of Table 31.6. A column is a row here, the construction
-is its [`name`](/phonometry/reference/api/io/io/#cataloguerow) and the
-column its [`variant`](/phonometry/reference/api/io/io/#cataloguerow),
+is its [`name`](/reference/api/io/io/#cataloguerow) and the
+column its [`variant`](/reference/api/io/io/#cataloguerow),
 composed from the printed headings above the cell. The window table is
 printed the other way round, with the ratings as rows and the glazings as
 cells, and is turned so that a row is a window. A row the page leaves blank
@@ -117,7 +117,7 @@ Every row whose printed description contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description, matched without case. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_TRANSMISSION_LOSS`](/reference/api/building/catalogue/#published_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_TRANSMISSION_LOSS`](/reference/api/building/catalogue/#published_transmission_loss)). |
 
 **Returns:** The rows whose description contains it, in catalogue order, which is empty when no row has one. It matches the printed description and nothing else, in the language the page is set in: `"door"` answers with the rows that carry the word, and not with Bies's hollow flush panel or solid hardwood, which the page describes without it, nor with the doors of the Spanish edition of Harris, which are `"puerta"`. The caller reads the thickness, the surface density and the variant to pick the row they mean.
 
@@ -125,7 +125,7 @@ Every row whose printed description contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`TransmissionLossSpectrum`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrum), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`TransmissionLossSpectrum`](/reference/api/building/catalogue/#transmissionlossspectrum), naming its key. |
 
 ## TransmissionLossSpectrum
 
@@ -187,12 +187,12 @@ One construction of a published table, with its loss in each band.
 | `surface_density_kg_m2` | The mass per unit area, in kilograms per square metre, as printed. This is what the mass law takes, and what two rows of the same description are told apart by. |
 | `sound_transmission_class` | The single-number rating the page prints beside the spectrum, where it prints one. It is not a band value and it does not follow from the ones beside it: an STC is computed from third-octave data, so a table that prints octave bands and an STC is printing two readings of one measurement and this catalogue keeps both. Empty for a page that rates nothing. |
 | `block_mass_kg` | The mass of one masonry block, in kilograms, where a page prints it beside the rating. It is a mass per block and not per square metre, so it is not a surface density and is not comparable with `surface_density_kg_m2`: Harris Table 31.3 tells its lightweight and normal-weight walls of one thickness apart by it. |
-| `refers_to_row` | The row this row's printed description refers to instead of repeating itself, named by the number the table prints. Harris Table 31.9 prints three floors once and the rows after them as "Igual que 8"; the printed text is kept whole in [`name`](/phonometry/reference/api/io/io/#cataloguerow), and this is the row it inherits from, resolved as `PUBLISHED_TRANSMISSION_LOSS[f"{row.table}/{row.refers_to_row}"]`. Empty when the description stands on its own. |
+| `refers_to_row` | The row this row's printed description refers to instead of repeating itself, named by the number the table prints. Harris Table 31.9 prints three floors once and the rows after them as "Igual que 8"; the printed text is kept whole in [`name`](/reference/api/io/io/#cataloguerow), and this is the row it inherits from, resolved as `PUBLISHED_TRANSMISSION_LOSS[f"{row.table}/{row.refers_to_row}"]`. Empty when the description stands on its own. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -224,7 +224,7 @@ The bands this row prints a value for, in hertz.
 TransmissionLossSpectrum.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -254,7 +254,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -406,7 +406,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### TransmissionLossSpectrum.transmission_loss()
@@ -421,7 +421,7 @@ The loss in one band, or a refusal that says what the page had.
 
 | Name | Description |
 | :--- | :--- |
-| `band_hz` | An octave-band centre frequency from [`TRANSMISSION_LOSS_BANDS_HZ`](/phonometry/reference/api/building/catalogue/#transmission_loss_bands_hz). |
+| `band_hz` | An octave-band centre frequency from [`TRANSMISSION_LOSS_BANDS_HZ`](/reference/api/building/catalogue/#transmission_loss_bands_hz). |
 
 **Returns:** The printed transmission loss, in decibels.
 
@@ -460,7 +460,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 

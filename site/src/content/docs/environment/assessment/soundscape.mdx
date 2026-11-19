@@ -115,7 +115,7 @@ everything after it takes scale values, never box positions.
 The tables keep the text as printed, including two slips of the page: the
 questions of Figures C.2 to C.4 read "to what extend" and their instructions
 "reponse alternative". A study that prints its questionnaire from them should
-correct both; the [errata register](/phonometry/reference/errata/) has the
+correct both; the [errata register](/reference/errata/) has the
 entry.
 
 ## 2. Median and range per site
@@ -212,7 +212,7 @@ Clause A.3 introduces the formulas as processing "the results from part 3".
 The attributes they read are part 2, as Table A.1, the rest of Annex A and
 ISO/TS 12913-2 Figure C.4 all say; part 3 is the single overall rating of
 Figure C.5. The library applies them to part 2, and the
-[errata register](/phonometry/reference/errata/) has the entry.
+[errata register](/reference/errata/) has the entry.
 
 ## 4. Linking the ratings to the acoustic data
 
@@ -255,7 +255,7 @@ and the number of those groups, the usual tie correction. And Formula (B.2),
 Pearson's covariance for interval data, divides by $n$; the standard deviations
 of (B.1) are then taken with $n$ as well, which is what makes $r$ the usual
 coefficient. The first two, and a stray capital in the where-list of (B.2), are
-in the [errata register](/phonometry/reference/errata/).
+in the [errata register](/reference/errata/).
 `rho.plot()` draws the ranked pairs, the right panel of the figure at the top.
 
 ## 5. Method B: continuous scales and the source ranking
@@ -292,7 +292,7 @@ The text of C.3.2.3 describes three scales labelled from "not at all" to
 visit this place again?") labelled from "never" to "very often".
 `METHOD_B_SCALES` holds the four as printed and `method_b_summary` takes a
 table of three or four of them; the contradiction is in the
-[errata register](/phonometry/reference/errata/).
+[errata register](/reference/errata/).
 
 ## 6. The binaural analysis
 
@@ -349,7 +349,7 @@ $N_\mathrm{rmc}$ is the root mean cube of the loudness over time, the cube
 root of the mean of $N^3$, as the formula of the NOTE under ISO/TS 12913-2
 A.3 f) prints it; the text of that NOTE calls the second step "the exponent 3"
 where the formula applies $1/3$, and the
-[errata register](/phonometry/reference/errata/) has the entry. $N_5/N_{95}$ is
+[errata register](/reference/errata/) has the entry. $N_5/N_{95}$ is
 the variability ratio D.2 suggests. Table D.1 cites ECMA-74 for tonality; the
 current edition of ECMA-74 refers its psychoacoustic tonality method to
 ECMA-418-2 clause 6, which is what `tonality_ecma` implements. For roughness
@@ -480,21 +480,21 @@ the binaural measurement protocol of ISO/TS 12913-2 D.7 are the caller's.
 
 ## See also
 
-- [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/):
+- [Environmental Levels (ISO 1996-1/-2)](/environment/assessment/environmental-levels/):
   the rating framework the sound pressure levels of Table D.1 are defined in.
-- [Integrated and Statistical Levels](/phonometry/signals/levels/levels/):
+- [Integrated and Statistical Levels](/signals/levels/levels/):
   $L_\mathrm{Aeq}$, $L_\mathrm{Ceq}$ and the percentile levels the binaural
   analysis reads at each ear.
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/):
+- [Loudness](/perception/psychoacoustics/loudness/):
   the ISO 532-1 time-varying loudness behind $N_5$, $N_{95}$ and $N_\mathrm{rmc}$.
-- [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/):
+- [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/):
   the DIN 45692 sharpness and the ECMA-418-2 tonality, roughness and
   fluctuation strength of Table D.1.
-- [Errata in published sources](/phonometry/reference/errata/): part 3 for
+- [Errata in published sources](/reference/errata/): part 3 for
   part 2, the stray factor of Formula (A.3), the where-lists of (A.4) and
   (B.2), the exponent of the $N_\mathrm{rmc}$ NOTE, three scales for four,
   and the misspellings of the questionnaire.
-- API reference: [`environment.assessment.soundscape`](/phonometry/reference/api/environment/soundscape/)
-  and [`environment.assessment.soundscape_binaural`](/phonometry/reference/api/environment/soundscape-binaural/).
+- API reference: [`environment.assessment.soundscape`](/reference/api/environment/soundscape/)
+  and [`environment.assessment.soundscape_binaural`](/reference/api/environment/soundscape-binaural/).
 
 </SeeAlso>

@@ -15,7 +15,7 @@ fourth page maps the evidence that backs the numbers: what a performance
 **class** asserts, the verifiers that grade a chain, and the published
 conformance report.
 
-[Calibration and dBFS](/phonometry/signals/metrology/calibration/) handles the
+[Calibration and dBFS](/signals/metrology/calibration/) handles the
 physical meaning. phonometry works in two reference frames: physical **dB
 SPL**, established from a recorded calibrator tone (the IEC 60942 field
 ritual), and digital **dBFS**, levels relative to full scale, appropriate when
@@ -24,7 +24,7 @@ The page explains how each mode is set up and, just as important, which
 quantities are meaningful in which frame, and it grades the calibrator itself
 against IEC 60942:2017 from what a laboratory measured on it.
 
-[Measurement uncertainty (GUM and Monte Carlo)](/phonometry/signals/metrology/gum-uncertainty/)
+[Measurement uncertainty (GUM and Monte Carlo)](/signals/metrology/gum-uncertainty/)
 handles the second, implementing the *Guide to the Expression of Uncertainty
 in Measurement* (**ISO/IEC Guide 98-3:2008**) and its Monte Carlo
 **Supplement 1**. The GUM route propagates standard uncertainties analytically
@@ -35,7 +35,7 @@ intervals that stay honest when the model is non-linear or the inputs are far
 from Gaussian. The page shows both on the same models, including where they
 diverge and why.
 
-[Compliance and verification](/phonometry/signals/metrology/compliance-verification/)
+[Compliance and verification](/signals/metrology/compliance-verification/)
 carries the evidence story: what a performance class actually claims in
 IEC 61672-1 and IEC 61260-1 (same design goals, different acceptance limits),
 which public verifier grades each stage of a measurement chain against its
@@ -49,7 +49,7 @@ for the periodic tests of a sound level meter, `filters.verify_filter_periodic`
 for those of a band filter) and compute on a design the tests that need no
 specimen.
 
-[Data qualification](/phonometry/signals/metrology/data-qualification/) guards the gate
+[Data qualification](/signals/metrology/data-qualification/) guards the gate
 in front of both: every average - a Leq, a Welch PSD, every averaged input
 to an uncertainty budget - assumes the record is stationary, and the Bendat & Piersol reverse
 arrangement and runs tests decide that objectively from segment mean squares,
@@ -58,41 +58,41 @@ statistics of level crossings and peaks - apparent frequency, peak rates,
 the irregularity factor - that characterise a qualified Gaussian record and
 screen for one that is not.
 
-[Random-incidence and diffuse-field response](/phonometry/signals/metrology/random-incidence/)
+[Random-incidence and diffuse-field response](/signals/metrology/random-incidence/)
 takes the calibration of the meter itself beyond its reference direction: the
 IEC 61183 directivity factor from readings in an anechoic room, the
 random-incidence sensitivity level that follows from it, and the
 diffuse-field level by comparison with a reference meter in a reverberation
 room.
 
-[Free-field corrections](/phonometry/signals/metrology/free-field-corrections/)
+[Free-field corrections](/signals/metrology/free-field-corrections/)
 bring a meter tested on a sound calibrator, a comparison coupler or an
 electrostatic actuator back to the free field it is specified for: the IEC
 62585 adjustment value at the calibration check frequency, the correction at
 each frequency, the uncertainty budget that goes with it, and the maximum each
 clause permits.
 
-[Periodic tests of a sound level meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
+[Periodic tests of a sound level meter](/signals/metrology/sound-level-meter-periodic-tests/)
 grade what a laboratory measured on a working meter by IEC 61672-3: every
 clause from the frequency weightings to the high-level stability against the
 acceptance limits of IEC 61672-1 and the maxima of its Table B.1, what a
 complete test holds, and the statement Clause 22 prescribes for the outcome.
 
-[Calibration by comparison](/phonometry/signals/metrology/comparison-calibration/)
+[Calibration by comparison](/signals/metrology/comparison-calibration/)
 goes one step up the chain, to the microphone itself: a working standard
 microphone takes the sensitivity of a reference through the ratio of their
 output voltages, in a coupler by IEC 61094-5 or in a free field by IEC
 61094-8, with the environmental, jig and free-field corrections each part asks
 for and the uncertainty budget of Table D.1 or Table 2.
 
-[Calibration by reciprocity](/phonometry/signals/metrology/reciprocity-calibration/)
+[Calibration by reciprocity](/signals/metrology/reciprocity-calibration/)
 is the top of that chain: the reference itself, a laboratory standard
 microphone, calibrated with no other microphone to compare it with, from
 three pair measurements and the acoustic transfer impedance of a coupler by
 IEC 61094-2 or of a free field by IEC 61094-3.
 
 The same discipline extends into the frequency domain: the
-[Signals and spectra](/phonometry/signals/spectra/) pages
+[Signals and spectra](/signals/spectra/) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
 every PSD carries its effective number of averages, its normalized random
 error and a chi-square confidence interval.
@@ -104,39 +104,39 @@ budgets that are specialisations of the GUM machinery described here.
 
 ## Pages in this section
 
-- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): physical SPL
+- [Calibration and dBFS](/signals/metrology/calibration/): physical SPL
   calibration from a calibrator tone, the stability check it applies to that
   recording, the IEC 60942:2017 verdict on the calibrator itself, and the
   digital full-scale mode.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+- [Compliance and verification](/signals/metrology/compliance-verification/):
   what a performance class asserts, the verifiers that grade weightings,
   filter banks and intensity spectra against their tolerance tables, the
   conformance rule of IEC TC 29, the conformance report, and the scope of
   IEC 61672-2/-3 and IEC 61260-2/-3.
-- [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/signals/metrology/gum-uncertainty/):
+- [Measurement uncertainty (GUM and Monte Carlo)](/signals/metrology/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
-- [Data qualification](/phonometry/signals/metrology/data-qualification/): the reverse
+- [Data qualification](/signals/metrology/data-qualification/): the reverse
   arrangement and runs stationarity tests on segment statistics, and the
   Rice level-crossing and peak statistics with the irregularity factor.
-- [Random-Incidence and Diffuse-Field Response (IEC 61183)](/phonometry/signals/metrology/random-incidence/):
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](/signals/metrology/random-incidence/):
   the directivity factor of a sound level meter from readings in two planes,
   one plane or 38 equal-area elements, its random-incidence and diffuse-field
   sensitivity levels, and Table B.1 of the reference microphone.
-- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](/phonometry/signals/metrology/free-field-corrections/):
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](/signals/metrology/free-field-corrections/):
   the adjustment value, the corrections for a calibrator, a coupler and an
   actuator, the budget of Annex I and the verdict of clauses 9 to 14.
-- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](/phonometry/signals/metrology/sound-level-meter-periodic-tests/):
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](/signals/metrology/sound-level-meter-periodic-tests/):
   the verdict on a laboratory's results, clause by clause, with Tables 4, 5
   and B.1 of IEC 61672-1, and the statement of Clause 22.
-- [Microphone Calibration by Comparison (IEC 61094-5/-8)](/phonometry/signals/metrology/comparison-calibration/):
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](/signals/metrology/comparison-calibration/):
   the simultaneous comparison with the interchange of Annex C, the sequential
   one against a monitor, in level and phase, the environmental, WS3 jig,
   different-diameter and acoustic impedance corrections with the air between
   two microphones, the validation of a jig or coupler, the budgets of Table
   D.1 and Table 2 with k = 2, and the time-selective processing of IEC
   61094-8 Annex B.
-- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](/phonometry/signals/metrology/reciprocity-calibration/):
+- [Microphone Calibration by Reciprocity (IEC 61094-2/-3)](/signals/metrology/reciprocity-calibration/):
   three microphones calibrated in pairs, the transfer impedance of a
   plane-wave or large-volume coupler with the heat conduction of Annex A and
   the capillary tubes of Annex B, the free field with the attenuation of
@@ -154,7 +154,7 @@ when the manual asks for one; the IEC 61672-3 periodic tests are not run
 either, and `verify_sound_level_meter_periodic` grades the results a
 laboratory returns;
 [Compliance and
-verification](/phonometry/signals/metrology/compliance-verification/) draws
+verification](/signals/metrology/compliance-verification/) draws
 that boundary precisely, part by part. The dBFS half of the calibration page
 sits outside any standard and makes no physical claim: it is a reference
 frame, not a measurement. Data qualification implements the quantitative core
@@ -164,8 +164,8 @@ steps, as the book describes them. And an uncertainty budget is a model of
 *your* measurement: the library propagates whatever you declare, and never
 invents the terms. Where a standard publishes its own budget the guides say
 so, as ISO 9612 does for [occupational
-exposure](/phonometry/perception/hearing/occupational-exposure/) and ISO
-12999-1 for [sound insulation](/phonometry/buildings/insulation/).
+exposure](/perception/hearing/occupational-exposure/) and ISO
+12999-1 for [sound insulation](/buildings/insulation/).
 </ScopeClaim>
 </Scope>
 

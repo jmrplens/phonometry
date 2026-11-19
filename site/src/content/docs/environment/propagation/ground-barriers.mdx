@@ -77,7 +77,7 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
 
-The [ISO 9613-2 general method](/phonometry/environment/propagation/outdoor-propagation/) folds
+The [ISO 9613-2 general method](/environment/propagation/outdoor-propagation/) folds
 the ground and barrier terms into tabulated, energy-based corrections. This page
 covers the underlying wave acoustics in
 `phonometry.environment.propagation.ground_barriers`: the **spherical-wave reflection
@@ -147,7 +147,7 @@ res.plot()                        # excess attenuation vs frequency
 
 The ground impedance is either derived from an effective `flow_resistivity_pa_s_m2`
 (via the `delany_bazley` or `miki` model of
-[`phonometry.materials`](/phonometry/materials/absorbers/porous-absorbers/), which model a
+[`phonometry.materials`](/materials/absorbers/porous-absorbers/), which model a
 semi-infinite porous ground) or supplied directly as a normalized complex
 `impedance` (a scalar, per-band array, or a `PorousMediumResult`). A plain
 `impedance` value is taken in the $\mathrm{e}^{-i\omega t}$ convention of Salomons, in
@@ -263,7 +263,7 @@ the asphalt curve of the figure never enters the range at all. Below the range t
 Delany-Bazley regression is an extrapolation whose classic failure is a negative
 real part of the surface impedance; **Miki** is the passivity-constrained refit
 to prefer there (see the fit-range paragraph of
-[Porous absorbers](/phonometry/materials/absorbers/porous-absorbers/)). The
+[Porous absorbers](/materials/absorbers/porous-absorbers/)). The
 choice is not cosmetic: on the case above, `model="miki"` moves the excess
 attenuation by up to 3.6 dB (250 Hz band: 0.43 dB with Delany-Bazley,
 −3.18 dB with Miki).
@@ -281,7 +281,7 @@ EN 29053 airflow resistivity of the same material.
 
 ### A ground from a catalogue
 
-A row of `environment.PUBLISHED_GROUND_SURFACES`, or of [a catalogue of your own](/phonometry/io/material-catalogues/),
+A row of `environment.PUBLISHED_GROUND_SURFACES`, or of [a catalogue of your own](/io/material-catalogues/),
 gives the impedance itself: `GroundSurface.medium` is the porous half-space
 of its effective flow resistivity, by the Delany and Bazley or the Miki
 model, which `ground_effect` takes as `impedance`, `barrier_insertion_loss`
@@ -329,7 +329,7 @@ which tends to 5 dB at the shadow boundary $N \to 0$ and approximates Maekawa's
 point-source curve within about 1.5 dB.
 
 The clip below is that formula as a field. It is the
-[2D FDTD solver](/phonometry/simulation/fdtd-simulation/) run twice on one
+[2D FDTD solver](/simulation/fdtd-simulation/) run twice on one
 12 × 7 m half-space over rigid ground with a thin rigid screen 2.5 m tall,
 once at 100 Hz and once at 500 Hz, each with a barrier-free reference run over
 the same ground so the annotated insertion loss is a true one. The geometry
@@ -584,7 +584,7 @@ transmission loss of the panel itself, and the obstacle has to qualify as a
 barrier in the first place: surface density, a closed surface, and a horizontal
 extent normal to the path larger than the wavelength. Those qualifying rules are
 stated in the
-["Barrier pitfalls" section of Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/);
+["Barrier pitfalls" section of Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/);
 they apply here unchanged.
 
 ## 3. What the product declaration says (EN 1793)
@@ -699,7 +699,7 @@ Both road numbers come from a laboratory, on a sample and in a diffuse field.
 EN 1793-5 measures the reflection of the barrier as built, in the direct field
 of a loudspeaker in front of it, and weights it by the same spectrum into a
 third number, $DL_{RI}$. It has its own page, [Sound reflection of a noise
-barrier in situ](/phonometry/environment/propagation/barrier-reflection/), because most of the work is in getting from nine
+barrier in situ](/environment/propagation/barrier-reflection/), because most of the work is in getting from nine
 impulse responses to the index; the rating itself is
 `environment.sound_reflection_rating`, beside the two above, and returns the
 same `RoadDeviceRating`.
@@ -709,7 +709,7 @@ same `RoadDeviceRating`.
 The Kurze-Anderson insertion loss written $\Delta$ here is the same quantity
 ISO 9613-2 calls $D_z$, and the two diffracted segments called $A$ and $B$ here
 are its $d_\mathrm{ss}$ and $d_\mathrm{sr}$. The tabulated $A_\mathrm{gr}$ and $D_z$ of the
-[ISO 9613-2 method](/phonometry/environment/propagation/outdoor-propagation/) are octave-band,
+[ISO 9613-2 method](/environment/propagation/outdoor-propagation/) are octave-band,
 energy-based engineering fits; `ground_effect` and `barrier_insertion_loss` are
 their narrowband wave-acoustic counterparts. Over hard ground both agree on the
 +6 dB enhancement and the 5 dB grazing barrier floor, but only the wave
@@ -736,7 +736,7 @@ coefficient.
 <ScopeClaim status="not-covered" label="Not covered">
 Both models assume a homogeneous, non-refracting, non-turbulent atmosphere; a
 vertical sound-speed gradient is the subject of the separate [atmospheric
-refraction](/phonometry/environment/propagation/atmospheric-refraction/) guide
+refraction](/environment/propagation/atmospheric-refraction/) guide
 instead. The coherent barrier-on-ground model weights all four diffracted
 paths with a single reflection coefficient $Q$ computed over the overall
 source-receiver geometry rather than a separate coefficient per image path, so
@@ -748,12 +748,12 @@ it is coherent and reciprocal but not a full boundary-element solution.
 
 ## See also
 
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
-- [Atmospheric refraction: rays and the GFPE](/phonometry/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
-- [Porous absorbers](/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
-- Theory: [Outdoor propagation](/phonometry/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
-- API reference: [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/).
-- [Published catalogues](/phonometry/reference/catalogues/ground-surfaces/): the
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/): the octave-band ISO 9613-2 fits these models sit underneath, and the rule an obstacle has to satisfy to be a barrier at all.
+- [Atmospheric refraction: rays and the GFPE](/environment/propagation/atmospheric-refraction/): the vertical sound-speed gradient both models here assume away.
+- [Porous absorbers](/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
+- Theory: [Outdoor propagation](/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
+- API reference: [`environment.propagation.ground_barriers`](/reference/api/environment/ground-barriers/).
+- [Published catalogues](/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

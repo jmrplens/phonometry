@@ -26,7 +26,7 @@ unchanged; above 1 it is making the ride worse. $a_\mathrm{wS}$ is the
 arithmetic mean of **three consecutive runs agreeing within ± 5 % at the
 seat**, and $a_\mathrm{wP}$ the mean of the platform values from those
 same runs, which 10.2.1 holds to the input tolerances of 9.2 instead.
-[`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) enforces the agreement, because a mean of runs that
+[`mean_of_test_runs`](/reference/api/vibration/seat-vibration/#mean_of_test_runs) enforces the agreement, because a mean of runs that
 disagree by more is not a measurement this standard recognises.
 
 **Correcting to an intended input** (10.2.3). A simulator does not reproduce
@@ -138,7 +138,7 @@ here rather than quietly returned.
 | Name | Description |
 | :--- | :--- |
 | `values` | The r.m.s. accelerations of the runs, one per reading, in any consistent unit. Three of them, as the standard asks; a different count is accepted rather than enforced, because 10.2.1 asks for three runs that *agree*, and its own warm-up note recommends discarding the first reading of each series, which leaves a laboratory holding a different number of them. Two is the floor: a spread needs two readings to exist. |
-| `relative_tolerance` | The permitted spread as a fraction of the mean; [`RUN_AGREEMENT_TOLERANCE`](/phonometry/reference/api/vibration/seat-vibration/#run_agreement_tolerance) by default. |
+| `relative_tolerance` | The permitted spread as a fraction of the mean; [`RUN_AGREEMENT_TOLERANCE`](/reference/api/vibration/seat-vibration/#run_agreement_tolerance) by default. |
 
 **Returns:** The arithmetic mean, in the unit the values were given in.
 
@@ -162,8 +162,8 @@ The transmissibility at resonance of Formula (5), dimensionless.
 
 The damping test drives the base at the suspension's resonance frequency
 $f_\mathrm{r}$ with the seat carrying an inert
-[`DAMPING_TEST_MASS_KG`](/phonometry/reference/api/vibration/seat-vibration/#damping_test_mass_kg), and this is the ratio there. The arithmetic
-matches [`seat_factor`](/phonometry/reference/api/vibration/seat-vibration/#seat_factor) and the meaning does not: this is the one
+[`DAMPING_TEST_MASS_KG`](/reference/api/vibration/seat-vibration/#damping_test_mass_kg), and this is the ratio there. The arithmetic
+matches [`seat_factor`](/reference/api/vibration/seat-vibration/#seat_factor) and the meaning does not: this is the one
 frequency the seat treats worst, not a verdict over a spectrum, and
 Clause 11 makes it the acceptance value of a different test.
 
@@ -228,7 +228,7 @@ seat_transmission(
 
 One simulated input vibration test, from its runs (10.2).
 
-Each set of runs is averaged through [`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs), so a test
+Each set of runs is averaged through [`mean_of_test_runs`](/reference/api/vibration/seat-vibration/#mean_of_test_runs), so a test
 whose runs do not agree within ± 5 % is refused rather than averaged.
 10.2.1 asks for that agreement at the seat only, so on the platform side
 this is stricter than the clause.
@@ -241,13 +241,13 @@ this is stricter than the clause.
 | `platform_runs` | The same at the platform, one per run. |
 | `relative_tolerance` | The permitted spread of each set, as a fraction of its mean. |
 
-**Returns:** The test, as a [`SeatTransmissionResult`](/phonometry/reference/api/vibration/seat-vibration/#seattransmissionresult).
+**Returns:** The test, as a [`SeatTransmissionResult`](/reference/api/vibration/seat-vibration/#seattransmissionresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For anything [`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) refuses, or if the two sets do not hold the same number of runs. |
+| ValueError | For anything [`mean_of_test_runs`](/reference/api/vibration/seat-vibration/#mean_of_test_runs) refuses, or if the two sets do not hold the same number of runs. |
 | TypeError | if `platform_runs` or `seat_runs` holds a text or a value that is not a real number. |
 
 ## SeatTransmissionResult

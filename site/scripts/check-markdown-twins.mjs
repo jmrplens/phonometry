@@ -419,7 +419,11 @@ function* jsonLdNodes(html) {
   }
 }
 
-/** A site address or path as a route of the build: `/phonometry/x/` -> `/x/`. */
+/**
+ * A site address or path as a route of the build, the base path taken off:
+ * `https://phonometry.dev/x/` -> `/x/` at the root, and `/docs/x/` -> `/x/`
+ * under a base of `/docs`.
+ */
 function routeOfAddress(address) {
   let path = address;
   try {

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/vibration/structural/mechanical-mobility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/vibration/structural/mechanical-mobility/
 
 # Mechanical mobility and the FRF family (ISO 7626-1)
 
@@ -699,7 +699,7 @@ Mechanical-mobility fiche (MobilityResult.report): the FRF characteristic points
   them.
 - [Frequency response and coherence](../../devices/electroacoustics/electroacoustics.md):
   the `transfer_function` and `coherence` estimators section 3 runs on.
-- API reference: [`vibration.structural.mechanical_mobility`](https://docs.jmrp.io/phonometry/reference/api/vibration/mechanical-mobility/).
+- API reference: [`vibration.structural.mechanical_mobility`](https://phonometry.dev/reference/api/vibration/mechanical-mobility/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the infinite-structure point mobilities and the radiation efficiency, and why they are averages a finite structure oscillates about.
 
 ## References

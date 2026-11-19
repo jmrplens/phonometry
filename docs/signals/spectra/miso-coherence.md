@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/spectra/miso-coherence.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/miso-coherence/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/spectra/miso-coherence/
 
 # Multiple and partial coherence
 
@@ -319,7 +319,7 @@ length are consistent bin by bin.
 - [Spectral analysis](spectral-analysis.md): the single-input coherent output spectrum this page generalizes, and the shared Welch core.
 - [Correlation and delay](correlation-delay.md): estimating and removing the bulk delays that bias coherence low.
 - [Multichannel and Performance](../filters/multichannel.md): the per-channel path this cross-channel analysis complements.
-- API reference: [`signals.miso`](https://docs.jmrp.io/phonometry/reference/api/signals/miso/).
+- API reference: [`signals.miso`](https://phonometry.dev/reference/api/signals/miso/).
 
 ## References
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/loudspeakers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/loudspeakers/
 
 # Loudspeaker Characterisation (IEC 60268-5)
 
@@ -801,7 +801,7 @@ and `plot_sound_reinforcement_geometry` draws the loop above.
   resistance and reactance, their low-frequency limit, the radiation mass, the
   first directivity null and the 3.01 dB half-space directivity index), and
   Long's two special cases of the feedback criterion.
-- API reference: [`electroacoustics.piston`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.sound_reinforcement`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/sound-reinforcement/).
+- API reference: [`electroacoustics.piston`](https://phonometry.dev/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](https://phonometry.dev/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.sound_reinforcement`](https://phonometry.dev/reference/api/electroacoustics/sound-reinforcement/).
 
 ## References
 

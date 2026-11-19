@@ -19,24 +19,24 @@ the unit, only off the ends with a cab for a trailer unit (5.5.1.1). The
 level $L^i_{p\mathrm{Aeq},T}$ of every position, over at least 20 s, is
 energy averaged weighted by the length $l_i$ each position stands for,
 $(\pi/2) \times 7.5$ m for the end positions
-([`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/reference/api/environment/rolling-stock-noise/#stationary_end_position_length_m)):
+([`STATIONARY_END_POSITION_LENGTH_M`](/reference/api/environment/rolling-stock-noise/#stationary_end_position_length_m)):
 
 $$
 \langle L_{p\mathrm{Aeq},T} \rangle_\mathrm{unit} = 10 \lg \left( \sum_{i=1}^{n} \frac{l_i}{l_\mathrm{tot}} 10^{L^i_{p\mathrm{Aeq},T}/10} \right), \qquad l_\mathrm{tot} = \sum_{i=1}^{n} l_i
 $$
 
-(Formulae 1 and 2, [`stationary_unit_level`](/phonometry/reference/api/environment/rolling-stock-noise/#stationary_unit_level); Formula 3 is the same over
+(Formulae 1 and 2, [`stationary_unit_level`](/reference/api/environment/rolling-stock-noise/#stationary_unit_level); Formula 3 is the same over
 one car). The result is the mean of three such sets rounded to the nearest
-integer decibel (5.8.1, [`stationary_test`](/phonometry/reference/api/environment/rolling-stock-noise/#stationary_test)).
+integer decibel (5.8.1, [`stationary_test`](/reference/api/environment/rolling-stock-noise/#stationary_test)).
 
 **Clause 6, at constant speed.** The pass-by level
 $L_{p\mathrm{Aeq},T_p}$ is the A-weighted equivalent level over the
 pass-by time $T_p$ of the unit, from its front to its rear for a fixed
-formation (6.6.3, [`pass_by_measurement`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_measurement)), at 7.5 m and 1.2 m, or 25 m
+formation (6.6.3, [`pass_by_measurement`](/reference/api/environment/rolling-stock-noise/#pass_by_measurement)), at 7.5 m and 1.2 m, or 25 m
 and 3.5 m at 200 km/h and above. Three runs per speed and side give a mean
 rounded to the integer; the louder side is the result (6.7.1,
-[`rolling_stock_test`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test)). The test speeds are 80 km/h and the maximum
-speed, or the maximum alone up to 80 km/h (6.6.2, [`type_test_speeds`](/phonometry/reference/api/environment/rolling-stock-noise/#type_test_speeds)).
+[`rolling_stock_test`](/reference/api/environment/rolling-stock-noise/#rolling_stock_test)). The test speeds are 80 km/h and the maximum
+speed, or the maximum alone up to 80 km/h (6.6.2, [`type_test_speeds`](/reference/api/environment/rolling-stock-noise/#type_test_speeds)).
 The 2005 edition also defined the **transit exposure level**, the energy of
 a whole train's passage normalised to its pass-by time,
 
@@ -44,7 +44,7 @@ $$
 \mathrm{TEL} = 10 \lg \left( \frac{1}{T_p} \int_0^T \frac{p_\mathrm{A}^2(t)}{p_0^2}\,\mathrm{d}t \right) = L_{p\mathrm{Aeq},T} + 10 \lg \frac{T}{T_p}
 $$
 
-(ISO 3095:2005, 3.14, Formulae 8 and 10, [`transit_exposure_level`](/phonometry/reference/api/environment/rolling-stock-noise/#transit_exposure_level)). The
+(ISO 3095:2005, 3.14, Formulae 8 and 10, [`transit_exposure_level`](/reference/api/environment/rolling-stock-noise/#transit_exposure_level)). The
 2013 edition dropped it; its Annex B.4 keeps the same form, with the pass-by
 time of half the unit, for a single trailer at the end of a train
 (Formula B.1).
@@ -52,7 +52,7 @@ time of half the unit, for a single trailer at the end of a train
 **Clauses 7 and 8, starting and braking.** Starting is measured two ways:
 the maximum $L_{p\mathrm{AFmax}}$ at 7.5 m at a cross section 10 m ahead
 of the unit and at further positions along a long unit
-([`acceleration_test_positions`](/phonometry/reference/api/environment/rolling-stock-noise/#acceleration_test_positions)), or $L_{p\mathrm{Aeq},T}$ at
+([`acceleration_test_positions`](/reference/api/environment/rolling-stock-noise/#acceleration_test_positions)), or $L_{p\mathrm{Aeq},T}$ at
 25 m over the passage of the unit. Braking from 30 km/h is measured by
 $L_{p\mathrm{AFmax}}$ opposite the first car at standstill. Each takes
 three runs per position, averages them, rounds to the integer and keeps the
@@ -62,24 +62,24 @@ highest (7.5.4, 7.6.4, 8.7). Three runs are valid when they are no more than
 **6.2, the reference track.** A constant-speed result is comparable only on
 a track whose rail roughness is below the limit of Figure 2 and whose decay
 rates are above the limits of Figure 3, both printed as numbers on the page
-([`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db),
-[`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/phonometry/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m)). The roughness is measured by
-EN 15610 ([`acoustic_roughness`](/phonometry/reference/api/environment/acoustic-roughness/)) and the
-decay rates by EN 15461 ([`track_decay`](/phonometry/reference/api/environment/track-decay/));
-[`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) brings the two together with the curve radius
+([`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`](/reference/api/environment/rolling-stock-noise/#reference_track_roughness_limit_db),
+[`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`](/reference/api/environment/rolling-stock-noise/#reference_track_decay_limits_db_per_m)). The roughness is measured by
+EN 15610 ([`acoustic_roughness`](/reference/api/environment/acoustic-roughness/)) and the
+decay rates by EN 15461 ([`track_decay`](/reference/api/environment/track-decay/));
+[`check_reference_track`](/reference/api/environment/rolling-stock-noise/#check_reference_track) brings the two together with the curve radius
 and gradient of 6.2.2. A track whose roughness exceeds the limit in a few
 bands can still be accepted by Annex C when the exceedance changes the
-pass-by level by no more than 1 dB ([`check_small_roughness_deviations`](/phonometry/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations)),
+pass-by level by no more than 1 dB ([`check_small_roughness_deviations`](/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations)),
 and Annex E bounds how much two tracks' roughness could change a pass-by level
-([`roughness_comparability`](/phonometry/reference/api/environment/rolling-stock-noise/#roughness_comparability)).
+([`roughness_comparability`](/reference/api/environment/rolling-stock-noise/#roughness_comparability)).
 
 **The rest.** Annex A characterises impulsive noise by the fastest rise of
-$L_{p\mathrm{AF}}(t)$ ([`impulsiveness_rise_speed`](/phonometry/reference/api/environment/rolling-stock-noise/#impulsiveness_rise_speed)); 6.3.4 accepts
+$L_{p\mathrm{AF}}(t)$ ([`impulsiveness_rise_speed`](/reference/api/environment/rolling-stock-noise/#impulsiveness_rise_speed)); 6.3.4 accepts
 a vehicle next to the unit under test when it adds no more than 2 dB
-([`check_adjacent_vehicle_neutrality`](/phonometry/reference/api/environment/rolling-stock-noise/#check_adjacent_vehicle_neutrality)); Annex D.4.2 corrects for a
-steady background ([`background_level_increase`](/phonometry/reference/api/environment/rolling-stock-noise/#background_level_increase)); and Annex G sums an
+([`check_adjacent_vehicle_neutrality`](/reference/api/environment/rolling-stock-noise/#check_adjacent_vehicle_neutrality)); Annex D.4.2 corrects for a
+steady background ([`background_level_increase`](/reference/api/environment/rolling-stock-noise/#background_level_increase)); and Annex G sums an
 uncertainty budget whose example, Table G.2, is the numerical oracle of this
-module ([`pass_by_uncertainty`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_uncertainty)).
+module ([`pass_by_uncertainty`](/reference/api/environment/rolling-stock-noise/#pass_by_uncertainty)).
 
 **Roundings.** 5.8.1, 6.7.1, 7.5.4, 7.6.4 and 8.7 round to the nearest integer
 decibel and 6.3.4 to one decimal, without a rule for a value on the half; a
@@ -279,9 +279,9 @@ asks for three) must cover at least 0.003 m to 0.10 m up to 190 km/h and
 0.003 m to 0.25 m above, and must not exceed the limit of Figure 2 in any
 band (EN 15610 clause 8). A small exceedance is accepted when Annex C
 finds its effect on the pass-by level at most 1 dB: pass the result of
-[`check_small_roughness_deviations`](/phonometry/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations) for the speed. A line analysed
+[`check_small_roughness_deviations`](/reference/api/environment/rolling-stock-noise/#check_small_roughness_deviations) for the speed. A line analysed
 by the digital filters of EN 15610 Method B
-([`filtered_roughness_spectrum`](/phonometry/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum))
+([`filtered_roughness_spectrum`](/reference/api/environment/acoustic-roughness/#filtered_roughness_spectrum))
 must also have at least 15 m of record analysed once 2 m are discarded
 at either end of each record (EN 15610 7.4.3), judged on the record
 length its average carries.
@@ -294,7 +294,7 @@ twice the floor of Formula 2, and the farthest response 10 dB below the
 direct one.
 
 **6.2.2.** When given, the curve radius must be at least
-[`min_curve_radius`](/phonometry/reference/api/environment/rolling-stock-noise/#min_curve_radius) of the speed, and the gradient at most 5:1 000
+[`min_curve_radius`](/reference/api/environment/rolling-stock-noise/#min_curve_radius) of the speed, and the gradient at most 5:1 000
 (the gradient applies where powered units are tested).
 
 **Parameters**
@@ -306,7 +306,7 @@ direct one.
 | `speed_kmh` | The test speed, in km/h. |
 | `curve_radius_m` | The radius of curvature of the track, in metres; not judged when omitted. |
 | `track_gradient_ratio` | The gradient, rise over length (5:1 000 is 0.005); not judged when omitted. |
-| `small_deviations` | The Annex C verdict of this speed, computed on the quadratic average of `roughness` ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra), C.2.1) against `roughness_limit_db` (Formula C.1), which accepts a roughness exceedance whose effect is small. |
+| `small_deviations` | The Annex C verdict of this speed, computed on the quadratic average of `roughness` ([`average_roughness_spectra`](/reference/api/environment/acoustic-roughness/#average_roughness_spectra), C.2.1) against `roughness_limit_db` (Formula C.1), which accepts a roughness exceedance whose effect is small. |
 | `roughness_limit_db` | The roughness limit; Figure 2 by default. |
 | `decay_limits_db_per_m` | The decay-rate limits, a band-to-rate mapping for each of the two directions; Figure 3 by default. Keyed by any of `"vertical"` or `"lateral"`. |
 
@@ -341,7 +341,7 @@ the measured level stands.
 **Step 2 (C.2.2).** Both spectra are carried from wavelength to frequency
 at the train speed, $f = v/\lambda$, and the energy of each band is
 shared among the normalised one-third octave bands in proportion to the
-width it covers ([`redistributed_band_energies`](/phonometry/reference/api/environment/acoustic-roughness/#redistributed_band_energies),
+width it covers ([`redistributed_band_energies`](/reference/api/environment/acoustic-roughness/#redistributed_band_energies),
 the Annex C algorithm of EN 15610 adapted to bands of unequal width). The
 correction is $\Delta L_{r,\mathrm{rail}}(f) = L^\mathrm{measured}(f) - L^\mathrm{corrected}(f)$ (Formula C.2), zero where no roughness band reaches.
 
@@ -355,11 +355,11 @@ speed.
 
 | Name | Description |
 | :--- | :--- |
-| `roughness` | The measured roughness of the test section, the spectra of its rails quadratically averaged ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra)). |
+| `roughness` | The measured roughness of the test section, the spectra of its rails quadratically averaged ([`average_roughness_spectra`](/reference/api/environment/acoustic-roughness/#average_roughness_spectra)). |
 | `noise_levels` | The A-weighted one-third octave spectrum of the pass-by, $L_{p\mathrm{Aeq},T_p}(f)$, in dB. |
 | `frequencies` | Its nominal band frequencies, in hertz. |
 | `speed_kmh` | The train speed, in km/h. |
-| `limit_db` | The upper limit, nominal wavelength in metres to level; Figure 2 by default. The verdict records it, and [`check_reference_track`](/phonometry/reference/api/environment/rolling-stock-noise/#check_reference_track) takes the verdict only when it judges the track against the same limit (6.2.5 and C.2.1). |
+| `limit_db` | The upper limit, nominal wavelength in metres to level; Figure 2 by default. The verdict records it, and [`check_reference_track`](/reference/api/environment/rolling-stock-noise/#check_reference_track) takes the verdict only when it judges the track against the same limit (6.2.5 and C.2.1). |
 
 **Returns:** The verdict, the limit it was judged against and every intermediate spectrum.
 
@@ -392,7 +392,7 @@ $$
 (Formula A.1), taken here as the largest difference quotient between
 neighbouring samples, and the result is the largest of them,
 $s = \max(s_j)$. The history should be sampled finely enough for the
-derivative to mean something; [`pass_by_measurement`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_measurement) stores it every
+derivative to mean something; [`pass_by_measurement`](/reference/api/environment/rolling-stock-noise/#pass_by_measurement) stores it every
 10 ms.
 
 **Parameters**
@@ -471,7 +471,7 @@ weighting F, whose integrator starts from the mean square of the first
 within the interval is $L_{p\mathrm{AFmax}}$ (3.13). Given the
 pass-by time $T_p$, the result also carries the energy of the
 interval spread over it, the transit exposure level of ISO 3095:2005
-([`PassByMeasurement.normalized_level`](/phonometry/reference/api/environment/rolling-stock-noise/#passbymeasurementnormalized_level)).
+([`PassByMeasurement.normalized_level`](/reference/api/environment/rolling-stock-noise/#passbymeasurementnormalized_level)).
 
 6.6.3 asks that the record start at least 10 dB below the level when the
 front of the train is opposite the microphone and end 10 dB below the
@@ -481,11 +481,11 @@ level at its rear; the result keeps both margins.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | The sound pressure record in pascals, unweighted, one channel, or a mono [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied. |
+| `x` | The sound pressure record in pascals, unweighted, one channel, or a mono [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied. |
 | `fs` | The sampling rate, in hertz; a Signal brings its own. |
 | `start_s` | $T_1$, in seconds from the start of the record. |
 | `end_s` | $T_2$, in seconds. |
-| `pass_by_time_s` | $T_p$, in seconds, to normalise the interval to ([`pass_by_time`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_time)). |
+| `pass_by_time_s` | $T_p$, in seconds, to normalise the interval to ([`pass_by_time`](/reference/api/environment/rolling-stock-noise/#pass_by_time)). |
 | `front_passing_s` | When the front of the train is opposite the microphone, in seconds; `start_s` when omitted, as for a fixed formation. |
 | `rear_passing_s` | When its rear is; `end_s` when omitted. |
 | `history_interval_s` | The interval the level history is stored at, in seconds. |
@@ -550,14 +550,14 @@ $$
 (Formulae G.5 and G.6), and their mean value corrections, which Table G.1
 gives for the unsymmetrical ranges, are added to the reading. An input
 known only by its limits $\pm a$ has $u = a/\sqrt{3}$ (Formula
-G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/api/metrology/uncertainty/#rectangular).
+G.2): build it with [`phonometry.metrology.rectangular`](/reference/api/metrology/uncertainty/#rectangular).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `pressure_level` | The reading $L_p$, in dB. |
-| `inputs` | The input quantities as [`phonometry.metrology.Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, whose `value` is the mean value correction in dB and whose `uncertainty` is the standard uncertainty in dB. An input without a name is called by its place, `x1`, `x2`, ..., primed (`x1'`) when another input was given that name. |
+| `inputs` | The input quantities as [`phonometry.metrology.Quantity`](/reference/api/metrology/uncertainty/#quantity) objects, whose `value` is the mean value correction in dB and whose `uncertainty` is the standard uncertainty in dB. An input without a name is called by its place, `x1`, `x2`, ..., primed (`x1'`) when another input was given that name. |
 | `coverage_factor` | $k$; 2 by G.5. |
 
 **Returns:** The budget.
@@ -566,7 +566,7 @@ G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/a
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | See [`PassByUncertainty`](/phonometry/reference/api/environment/rolling-stock-noise/#passbyuncertainty). |
+| ValueError | See [`PassByUncertainty`](/reference/api/environment/rolling-stock-noise/#passbyuncertainty). |
 | TypeError | if `pressure_level` or `coverage_factor` is not one real number. |
 
 ## PassByMeasurement
@@ -933,7 +933,7 @@ normalisation, when one is required, goes on the runs before this
 | Name | Description |
 | :--- | :--- |
 | `run_levels` | The runs of each position, in dB, keyed by a name for the position (`"left"`, `"right"`, `"front, direction 1"`). |
-| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
+| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
 
 **Returns:** The test.
 
@@ -941,7 +941,7 @@ normalisation, when one is required, goes on the runs before this
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | See [`RollingStockTestResult`](/phonometry/reference/api/environment/rolling-stock-noise/#rollingstocktestresult). |
+| ValueError | See [`RollingStockTestResult`](/reference/api/environment/rolling-stock-noise/#rollingstocktestresult). |
 | TypeError | if `method` is not a text. |
 
 ## ROLLING_STOCK_TEST_METHODS
@@ -967,7 +967,7 @@ A test decided by the highest rounded mean of three runs per position.
 
 | Name | Description |
 | :--- | :--- |
-| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
+| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
 | `run_levels` | The runs of each position, in dB, keyed by the position's name: $L_{p\mathrm{Aeq},T_p}$ at constant speed, $L_{p\mathrm{AFmax}}$ when starting (maximum level method) and braking, $L_{p\mathrm{Aeq},T}$ when starting (averaged level method). |
 
 ### RollingStockTestResult.final_level
@@ -1257,7 +1257,7 @@ The stationary test of a unit from its measured mesh, 5.7 and 5.8.1.
 
 Each set gives the unit level of Formula 1, and the result is the mean of
 the sets rounded to the nearest integer decibel
-([`StationaryTestResult.reported_level`](/phonometry/reference/api/environment/rolling-stock-noise/#stationarytestresultreported_level)). The samples of a
+([`StationaryTestResult.reported_level`](/reference/api/environment/rolling-stock-noise/#stationarytestresultreported_level)). The samples of a
 position are valid when they are no more than 3 dB apart (9.3).
 
 **Parameters**
@@ -1273,7 +1273,7 @@ position are valid when they are no more than 3 dB apart (9.3).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | See [`StationaryTestResult`](/phonometry/reference/api/environment/rolling-stock-noise/#stationarytestresult). |
+| ValueError | See [`StationaryTestResult`](/reference/api/environment/rolling-stock-noise/#stationarytestresult). |
 | TypeError | if `lengths_m` or `levels` holds a text or a value that is not a real number. |
 
 ## stationary_unit_level
@@ -1294,7 +1294,7 @@ $$
 over the positions of the whole unit (Formula 1) or of one car (Formula
 3). The mesh is the whole one of 5.5.1.1 before any reduction: an omitted
 position takes the level of the equivalent one measured (5.5.1.2), and an
-end position stands for [`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/reference/api/environment/rolling-stock-noise/#stationary_end_position_length_m).
+end position stands for [`STATIONARY_END_POSITION_LENGTH_M`](/reference/api/environment/rolling-stock-noise/#stationary_end_position_length_m).
 
 **Parameters**
 
@@ -1396,7 +1396,7 @@ TrackCondition(
 
 One requirement of the reference track and whether it holds.
 
-[`ReferenceTrackCheck.conditions`](/phonometry/reference/api/environment/rolling-stock-noise/#referencetrackcheckconditions) builds these rows from the track
+[`ReferenceTrackCheck.conditions`](/reference/api/environment/rolling-stock-noise/#referencetrackcheckconditions) builds these rows from the track
 it holds each time it is read; no verdict reads a row built elsewhere.
 
 **Parameters**
@@ -1437,7 +1437,7 @@ equivalent level.
 | :--- | :--- |
 | `equivalent_level` | $L_{p\mathrm{Aeq},T}$ over the measurement time, in dB. |
 | `measurement_time_s` | $T$, in seconds. |
-| `pass_by_time_s` | $T_p$, in seconds ([`pass_by_time`](/phonometry/reference/api/environment/rolling-stock-noise/#pass_by_time)). |
+| `pass_by_time_s` | $T_p$, in seconds ([`pass_by_time`](/reference/api/environment/rolling-stock-noise/#pass_by_time)). |
 
 **Returns:** TEL, in dB.
 
@@ -1458,7 +1458,7 @@ The speeds a unit is type tested at, 6.6.2.
 
 Above 80 km/h, at 80 km/h and at the maximum speed; at or below it, at
 the maximum speed alone. Further tests are run at the preferred speeds of
-[`PREFERRED_PASS_BY_SPEEDS_KMH`](/phonometry/reference/api/environment/rolling-stock-noise/#preferred_pass_by_speeds_kmh).
+[`PREFERRED_PASS_BY_SPEEDS_KMH`](/reference/api/environment/rolling-stock-noise/#preferred_pass_by_speeds_kmh).
 
 **Parameters**
 

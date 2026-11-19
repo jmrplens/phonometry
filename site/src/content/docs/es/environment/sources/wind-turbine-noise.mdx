@@ -124,7 +124,7 @@ una placa dura recibe una reflexión perfectamente coherente (duplicación de
 presión, $+6$ dB) en lugar del patrón de interferencia dependiente de la
 altura que muestrearía un micrófono en trípode (véase
 [la fuente imagen que explica el efecto del
-suelo](/phonometry/es/environment/propagation/outdoor-propagation/)).
+suelo](/es/environment/propagation/outdoor-propagation/)).
 
 ### Intervalos de velocidad de viento y condiciones estandarizadas
 
@@ -332,7 +332,7 @@ valoración $K_\mathrm{t}$ depende de la edición bajo la que se haga la evaluac
 promedio energético de 9.5.1 sobre los espectros de un intervalo de velocidad
 de viento es una audibilidad *media*, que es la magnitud para la que se
 escribió la Tabla J.1 de la ISO 1996-2:2017:
-[`tonal_adjustment_from_mean_audibility`](/phonometry/es/environment/assessment/environmental-levels/),
+[`tonal_adjustment_from_mean_audibility`](/es/environment/assessment/environmental-levels/),
 entero de 0 a 6 dB (o `coarse=True` para la escala 0/3/6 de su nota). La ley a
 tramos (C.4)-(C.6) de `tonal_adjustment` es el mapeo del Anexo C de 2007 y se
 aplica al $\Delta L_\mathrm{ta}$ de un único espectro, y las dos difieren entre 1 y
@@ -360,7 +360,7 @@ audibilidad, una fila opcional de veredicto CUMPLE/NO CUMPLE y una nota sobre c�
 se construye $\Delta L_\mathrm{a}$, y un pie con el descargo fijo.
 
 Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
-[ficha de sonoridad ISO 532-1](/phonometry/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
+[ficha de sonoridad ISO 532-1](/es/perception/psychoacoustics/loudness/#informe-de-iso-532-1-report);
 un `requirement` indicado se interpreta como la audibilidad tonal $\Delta L_\mathrm{a}$
 máxima admisible en dB (un tono menos audible cumple). La generación necesita
 reportlab y, para la figura que incrusta la ficha, matplotlib (`pip install
@@ -406,7 +406,7 @@ la cadena de audibilidad tonal de los apartados 9.5.2 a 9.5.8 mediante
 `wind_turbine_tonality`, con su ficha `.report()`. La conversión de la
 Fórmula (29) de una velocidad de viento a 10 m a la altura del buje con
 $z_{0\mathrm{ref}} = 0{,}05$ m es `environment.logarithmic_wind_speed`, en la
-[página del receptor](/phonometry/es/environment/sources/wind-turbine-receptor/).
+[página del receptor](/es/environment/sources/wind-turbine-receptor/).
 Los requisitos de instrumentación y de posición de los apartados 6 y 7 están
 documentados arriba como las condiciones que esas fórmulas suponen, y las
 tolerancias de la posición de medida están dibujadas.
@@ -426,11 +426,11 @@ el $L_{W\mathrm{A}}$ y que esta norma no valora en ningún sitio) y el **infraso
 Las dos figuran en el 7.2.1 como medidas *opcionales* sin método de valoración
 asociado. La modulación de amplitud en una vivienda la valora el apartado 13 de
 la IEC TS 61400-11-2, en la
-[página del receptor](/phonometry/es/environment/sources/wind-turbine-receptor/);
+[página del receptor](/es/environment/sources/wind-turbine-receptor/);
 el infrasonido queda en manos de las guías nacionales, y la vía psicoacústica
 hacia los dos empieza en [Intensidad de fluctuación y
-aspereza](/phonometry/es/perception/psychoacoustics/sound-quality/) y en
-[Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/)
+aspereza](/es/perception/psychoacoustics/sound-quality/) y en
+[Ponderaciones especiales](/es/signals/levels/special-weightings/)
 para el nivel de infrasonido con ponderación G.
 </ScopeClaim>
 </Scope>
@@ -439,10 +439,10 @@ para el nivel de infrasonido con ponderación G.
 
 ## Véase también
 
-- [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/): el ajuste del nivel de evaluación de ISO 1996-2 que alimenta el $\Delta L_\mathrm{a}$ de esta página.
-- [Audibilidad de tonos](/phonometry/es/perception/psychoacoustics/tone-audibility/): la misma idea de audibilidad tonal fuera del contexto de los aerogeneradores.
-- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/): la cadena que lleva el $L_{W\mathrm{A}}$ del rotor hasta una vivienda.
-- [Aerogeneradores en la vivienda](/phonometry/es/environment/sources/wind-turbine-receptor/): la IEC TS 61400-11-2, lo que llega al receptor, con la valoración de su modulación de amplitud y el nivel de baja frecuencia en el interior.
-- Referencia de la API: [`environment.sources.wind_turbine`](/phonometry/es/reference/api/environment/wind-turbine/).
+- [Niveles ambientales](/es/environment/assessment/environmental-levels/): el ajuste del nivel de evaluación de ISO 1996-2 que alimenta el $\Delta L_\mathrm{a}$ de esta página.
+- [Audibilidad de tonos](/es/perception/psychoacoustics/tone-audibility/): la misma idea de audibilidad tonal fuera del contexto de los aerogeneradores.
+- [Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/): la cadena que lleva el $L_{W\mathrm{A}}$ del rotor hasta una vivienda.
+- [Aerogeneradores en la vivienda](/es/environment/sources/wind-turbine-receptor/): la IEC TS 61400-11-2, lo que llega al receptor, con la valoración de su modulación de amplitud y el nivel de baja frecuencia en el interior.
+- Referencia de la API: [`environment.sources.wind_turbine`](/es/reference/api/environment/wind-turbine/).
 
 </SeeAlso>

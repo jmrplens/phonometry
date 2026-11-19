@@ -50,7 +50,7 @@ equally-contributing critical-band and octave-band methods of section 5.
 of the speech spectrum clears the noise and the hearing threshold at the
 listener's ear) while the STI characterises a *transmission channel*: how
 much of the speech modulation a room or sound system preserves. For the
-latter, see the [Speech Transmission Index guide](/phonometry/perception/speech/speech-transmission/).
+latter, see the [Speech Transmission Index guide](/perception/speech/speech-transmission/).
 :::
 
 <ThemeImage
@@ -378,7 +378,7 @@ restoring audibility (amplification), and the band profile says which bands
 the effort has to go into.
 
 **Getting a threshold array onto the SII grid.** The age-related thresholds of
-[ISO 7029](/phonometry/perception/hearing/hearing-threshold/) are a convenient
+[ISO 7029](/perception/hearing/hearing-threshold/) are a convenient
 population input, but the two standards are tabulated on different grids and
 the transfer is the caller's decision, not an automatic one. ISO 7029 returns
 **eleven audiometric frequencies** (125 to 8000 Hz) while the one-third-octave
@@ -717,7 +717,7 @@ noise can rate an acceptable STI from its impulse response while the SII (and
 the noise-aware STI, via `snr=` or `levels=`) reveals that little of the speech
 spectrum clears the noise. When both mechanisms are in play, compute both; the
 inputs are cheap once the room and the noise have been measured. See the
-[Speech Transmission Index guide](/phonometry/perception/speech/speech-transmission/) for
+[Speech Transmission Index guide](/perception/speech/speech-transmission/) for
 the STI side.
 
 ## 7. ANSI S3.5-1997 report (`.report()`)
@@ -730,7 +730,7 @@ function $A_i$ beside the audibility and importance-weighted contribution bars
 (the result's own `.plot()`), the boxed `SII = X` single number, an optional
 verdict row and a footer with the fixed disclaimer. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report);
+[ISO 717 insulation fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report);
 a supplied `requirement` is read as the minimum required SII (a higher SII
 passes). `verbose=True` adds the equivalent disturbance spectrum level $D_i$
 column. Rendering needs reportlab and, for the figure the fiche embeds,
@@ -792,7 +792,7 @@ No resampling between the four band sets is provided: each procedure is fed
 spectra on its own bands. The Speech Transmission Index, a different metric
 for a transmission channel rather than listener audibility, is covered
 separately in the [Speech Transmission Index
-guide](/phonometry/perception/speech/speech-transmission/).
+guide](/perception/speech/speech-transmission/).
 </ScopeClaim>
 </Scope>
 
@@ -800,17 +800,17 @@ guide](/phonometry/perception/speech/speech-transmission/).
 
 ## See also
 
-- [Speech Transmission Index](/phonometry/perception/speech/speech-transmission/): the STI/STIPA
+- [Speech Transmission Index](/perception/speech/speech-transmission/): the STI/STIPA
   transmission index that the SII complements.
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/) and
-  [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): loudness, sharpness and the
+- [Loudness](/perception/psychoacoustics/loudness/) and
+  [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): loudness, sharpness and the
   perception metrics of what the listener hears.
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the one-third-octave bands the SII is
+- [Filter Banks](/signals/filters/filter-banks/): the one-third-octave bands the SII is
   evaluated on.
-- [Levels](/phonometry/signals/levels/levels/): the spectrum and band levels behind the equivalent
+- [Levels](/signals/levels/levels/): the spectrum and band levels behind the equivalent
   spectrum-level inputs.
-- API reference: [`speech.sii`](/phonometry/reference/api/speech/sii/).
-- Theory: [Speech Intelligibility Index (ANSI S3.5)](/phonometry/reference/theory/perception/#speech-intelligibility-index-ansi-s35): the band-importance weighting of ANSI S3.5 and the audibility function it multiplies.
+- API reference: [`speech.sii`](/reference/api/speech/sii/).
+- Theory: [Speech Intelligibility Index (ANSI S3.5)](/reference/theory/perception/#speech-intelligibility-index-ansi-s35): the band-importance weighting of ANSI S3.5 and the audibility function it multiplies.
 
 </SeeAlso>
 

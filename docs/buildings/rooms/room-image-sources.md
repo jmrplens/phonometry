@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/room-image-sources.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/room-image-sources/
 
 # Image Sources and the Steady-State Room Field
 
@@ -915,8 +915,8 @@ texts' own numeric anchors (see the
 - [Conformance report](../../CONFORMANCE.md):
   the closed forms and worked anchors these implementations are validated
   against.
-- API reference: [`room.image_source`](https://docs.jmrp.io/phonometry/reference/api/rooms/image-source/)
-  and [`room.steady_field`](https://docs.jmrp.io/phonometry/reference/api/rooms/steady-field/).
+- API reference: [`room.image_source`](https://phonometry.dev/reference/api/rooms/image-source/)
+  and [`room.steady_field`](https://phonometry.dev/reference/api/rooms/steady-field/).
 
 ## References
 

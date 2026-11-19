@@ -38,9 +38,9 @@ and Groby, *Metadiffusers: Deep-subwavelength sound diffusers*, Sci. Rep.
 7, 5389, 2017); the classical background is Williams, *Fourier Acoustics*
 (Academic Press, 1999), chapter 8.
 
-[`far_field_from_contour`](/phonometry/reference/api/simulation/ntff/#far_field_from_contour) evaluates that integral for phasors captured
+[`far_field_from_contour`](/reference/api/simulation/ntff/#far_field_from_contour) evaluates that integral for phasors captured
 by `add_contour_probe` (or assembled by
-hand into a [`ContourPhasors`](/phonometry/reference/api/simulation/ntff/#contourphasors)), either in the true far-field limit,
+hand into a [`ContourPhasors`](/reference/api/simulation/ntff/#contourphasors)), either in the true far-field limit,
 where
 $H_0^{(2)}(kR) \to \sqrt{2 / (\pi k R)}\, \mathrm{e}^{-j (k R - \pi / 4)}$
 turns the
@@ -53,7 +53,7 @@ field whose sources lie outside the contour, the incident wave of a
 scattering run contributes (analytically) nothing to the exterior integral:
 transforming total-field phasors already yields the scattered far field.
 Subtracting a reference run without the scatterer
-([`ContourPhasors.subtract`](/phonometry/reference/api/simulation/ntff/#contourphasorssubtract)) removes the residual of that cancellation
+([`ContourPhasors.subtract`](/reference/api/simulation/ntff/#contourphasorssubtract)) removes the residual of that cancellation
 caused by grid dispersion; on the validation scenes the residual stays
 below 0.01 dB, so the subtraction is optional in practice.
 
@@ -182,7 +182,7 @@ For radiating problems the contour must enclose every source of the
 field being transformed. For scattering runs (scatterer enclosed,
 incident source outside) the incident field integrates to nothing, so
 total-field phasors transform directly into the scattered far field;
-subtracting a no-scatterer reference ([`ContourPhasors.subtract`](/phonometry/reference/api/simulation/ntff/#contourphasorssubtract))
+subtracting a no-scatterer reference ([`ContourPhasors.subtract`](/reference/api/simulation/ntff/#contourphasorssubtract))
 is optional numerical cleanup of the grid-dispersion residual of that
 cancellation (below 0.01 dB on the validation scenes).
 
@@ -194,7 +194,7 @@ cancellation (below 0.01 dB on the validation scenes).
 | `angles_deg` | Observation angles [degrees], 1D. `0` is `+x`, `90` is `+y` of the coordinates `contour.positions` live in. |
 | `distance` | Observation radius [m] for the exact evaluation, or `None` (default) for the far-field pattern. |
 | `origin` | Phase-reference point `(x, y)` [m]; the centre of the observation circle when `distance` is given. Default the grid origin. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`SIMULATION_AIR`](/phonometry/reference/api/simulation/ntff/#simulation_air), the air this package's solvers run in). |
+| `fluid` | The medium, a [`Fluid`](/reference/api/fluids/fluids/#fluid) (Default: [`SIMULATION_AIR`](/reference/api/simulation/ntff/#simulation_air), the air this package's solvers run in). |
 
 **Returns:** Complex array, one value per angle: the far-field pattern `F(a)` (units Pa sqrt(m)), or the pressure [Pa] at `distance`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -202,7 +202,7 @@ cancellation (below 0.01 dB on the validation scenes).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `contour` that is not a [`ContourPhasors`](/phonometry/reference/api/simulation/ntff/#contourphasors), a `distance` that is not one real number, or `angles_deg` or `origin` holding a complex number or a text. |
+| TypeError | For a `contour` that is not a [`ContourPhasors`](/reference/api/simulation/ntff/#contourphasors), a `distance` that is not one real number, or `angles_deg` or `origin` holding a complex number or a text. |
 | ValueError | For invalid angles, a non-positive `distance`, or an observation circle that does not clear the contour. |
 
 ## SIMULATION_AIR

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/filters/multichannel.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/multichannel/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/filters/multichannel/
 
 # Multichannel and Performance
 
@@ -306,7 +306,7 @@ Additional performance notes:
 - [Multiple and partial coherence](../spectra/miso-coherence.md): which of several correlated channels actually drives a response (Bendat & Piersol Ch. 7).
 - [Block Processing](block-processing.md): the streaming counterpart, with one filter state per channel.
 - [Levels](../levels/levels.md): the per-channel level metrics, and why dB values are combined energetically.
-- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
+- API reference: [`phonometry`](https://phonometry.dev/reference/api/filters/phonometry/) and [`filters.core`](https://phonometry.dev/reference/api/filters/core/).
 
 ## References
 

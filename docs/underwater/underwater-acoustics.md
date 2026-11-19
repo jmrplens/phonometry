@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/underwater/underwater-acoustics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/underwater-acoustics/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/underwater/underwater-acoustics/
 
 # Underwater acoustics: radiated noise and pile driving
 
@@ -455,7 +455,7 @@ the published onset criteria) is
 - [Underwater sound propagation](underwater-propagation.md):
   the propagation loss that carries these source levels to a receiver, and the
   sonar equation they feed.
-- API reference: [`underwater.acoustics`](https://docs.jmrp.io/phonometry/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](https://docs.jmrp.io/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](https://docs.jmrp.io/phonometry/reference/api/underwater/ship-radiated-noise/).
+- API reference: [`underwater.acoustics`](https://phonometry.dev/reference/api/underwater/acoustics/), [`underwater.sources.pile_driving_noise`](https://phonometry.dev/reference/api/underwater/pile-driving-noise/) and [`underwater.sources.ship_radiated_noise`](https://phonometry.dev/reference/api/underwater/ship-radiated-noise/).
 - General underwater propagation modelling (ray, normal mode, parabolic equation) is covered in [Underwater propagation solvers](underwater-solvers.md).
 
 ## References

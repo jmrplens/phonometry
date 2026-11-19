@@ -26,7 +26,7 @@ tables show it: the round ducts it measured for breakout are 200, 350, 560 and
 length, 300, 610 and 915 mm at 3.6, 7.3 and 3 m against 203, 356, 660 and
 813 mm all at 3.05 m. There is no single construction to hang the two numbers
 on, so this catalogue holds one row per printed row and each row says, in
-[`DuctWallSpectrum.direction`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), which of the two it is. The rectangular and
+[`DuctWallSpectrum.direction`](/reference/api/noise_control/duct-walls/#ductwallspectrum), which of the two it is. The rectangular and
 flat oval tables do print the same seven sizes, row for row and each at the
 same gauge as its twin, and they are still two rows each, because the page
 nowhere says the specimen was the same one and a merged row would be this
@@ -35,17 +35,17 @@ library making that claim on the chapter's behalf.
 What tells one row from another
 -------------------------------
 The cross section, the length and the gauge of the sheet. A rectangular or flat
-oval duct prints two sides, held in [`DuctWallSpectrum.first_side_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) and
-[`DuctWallSpectrum.second_side_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) in the order the page prints them, which
+oval duct prints two sides, held in [`DuctWallSpectrum.first_side_mm`](/reference/api/noise_control/duct-walls/#ductwallspectrum) and
+[`DuctWallSpectrum.second_side_mm`](/reference/api/noise_control/duct-walls/#ductwallspectrum) in the order the page prints them, which
 is not the same order in the two kinds of table; a round or circular one prints
-[`DuctWallSpectrum.diameter_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), and the two tables that print a length per
-row put it in [`DuctWallSpectrum.duct_length_m`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum). The gauge is a US
+[`DuctWallSpectrum.diameter_mm`](/reference/api/noise_control/duct-walls/#ductwallspectrum), and the two tables that print a length per
+row put it in [`DuctWallSpectrum.duct_length_m`](/reference/api/noise_control/duct-walls/#ductwallspectrum). The gauge is a US
 sheet-metal gauge number, and the chapter prints a thickness for one of the six
 gauges these tables use, in passing and five folios past the last of them:
 "16 ga (1.6 mm thickness)" in the running text on folio 49.37, against tables
 that end on folio 49.32, with nothing anywhere for the
 18, 20, 22, 24 and 26 the same tables print. So
-[`DuctWallSpectrum.sheet_metal_gauge`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) holds the characters the page prints
+[`DuctWallSpectrum.sheet_metal_gauge`](/reference/api/noise_control/duct-walls/#ductwallspectrum) holds the characters the page prints
 and nothing is converted from them.
 
 What a cell can be instead of a number
@@ -83,7 +83,7 @@ four say nothing at all about measurement or calculation and carry no source
 line either. The credit for all six is in the running text and travels with
 each row in `attributed_to`. Machine-room walls are not here: the chapter's
 Table 40 is an ordinary partition, the same quantity
-[`phonometry.building.PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss) holds from Bies, and it
+[`phonometry.building.PUBLISHED_TRANSMISSION_LOSS`](/reference/api/building/catalogue/#published_transmission_loss) holds from Bies, and it
 is published from there.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -103,8 +103,8 @@ Every duct wall whose printed label contains *name*, without case.
 A tuple and not one row, and a long one: the label a duct table prints is
 its size, and the same size is printed by the breakout table and by the
 break-in table, so the plain answer to `"305 × 305 mm"` is two rows that
-are two different quantities. Read [`DuctWallSpectrum.direction`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) to
-tell them apart, and [`DuctWallSpectrum.sheet_metal_gauge`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) to tell
+are two different quantities. Read [`DuctWallSpectrum.direction`](/reference/api/noise_control/duct-walls/#ductwallspectrum) to
+tell them apart, and [`DuctWallSpectrum.sheet_metal_gauge`](/reference/api/noise_control/duct-walls/#ductwallspectrum) to tell
 apart two rows of one diameter.
 
 **Parameters**
@@ -112,7 +112,7 @@ apart two rows of one diameter.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a row label, as its page prints it, with the unit its column heading carries: `"610"`, `"305 × 1220"`, `"152 mm"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DUCT_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/reference/api/noise_control/duct-walls/#published_duct_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DUCT_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/reference/api/noise_control/duct-walls/#published_duct_transmission_loss)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
 
@@ -120,7 +120,7 @@ apart two rows of one diameter.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DuctWallSpectrum`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DuctWallSpectrum`](/reference/api/noise_control/duct-walls/#ductwallspectrum), naming its key. |
 
 ## DUCT_WALL_BANDS_HZ
 
@@ -206,7 +206,7 @@ transmission loss, never both, and `direction` is what says which.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -238,7 +238,7 @@ The bands this row prints a value for, in hertz.
 DuctWallSpectrum.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -268,7 +268,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -432,7 +432,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### DuctWallSpectrum.transmission_loss()
@@ -450,7 +450,7 @@ Which of the two transmission losses it is follows from
 
 | Name | Description |
 | :--- | :--- |
-| `band_hz` | An octave-band centre frequency between 63 Hz and 8 kHz; [`bands`](/phonometry/reference/api/io/io/#bandedrowbands) says which ones this row fills. |
+| `band_hz` | An octave-band centre frequency between 63 Hz and 8 kHz; [`bands`](/reference/api/io/io/#bandedrowbands) says which ones this row fills. |
 
 **Returns:** The printed transmission loss, in decibels.
 
@@ -489,7 +489,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 

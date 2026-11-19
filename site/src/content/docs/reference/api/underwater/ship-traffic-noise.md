@@ -23,8 +23,8 @@ implements three, selectable through `model`:
 All three return an equivalent-monopole source spectral-density level (dB re
 1 µPa²/Hz at 1 m, source depth 6 m) and the decidecade-band source level
 (dB re 1 µPa m). The predicted spectrum can be used as the `shipping` input of
-[`phonometry.underwater.sources.ambient_noise.ocean_ambient_noise`](/phonometry/reference/api/underwater/ambient-noise/#ocean_ambient_noise) or placed at range
-with [`phonometry.underwater.propagation.propagation_loss`](/phonometry/reference/api/underwater/closed-form/#propagation_loss).
+[`phonometry.underwater.sources.ambient_noise.ocean_ambient_noise`](/reference/api/underwater/ambient-noise/#ocean_ambient_noise) or placed at range
+with [`phonometry.underwater.propagation.propagation_loss`](/reference/api/underwater/closed-form/#propagation_loss).
 
 Source (clean-room, implemented from the equations, validated against the
 authors' own Excel reference implementation, File S1): MacGillivray, A.;
@@ -56,11 +56,11 @@ Predicted underwater source-level spectrum of a ship.
 | :--- | :--- |
 | `speed_kt` | Vessel speed, in knots (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
 | `length_m` | Vessel length, in metres (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
-| `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/phonometry/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. One of `"bulker"`, `"containership"`, `"cruise"`, `"dredger"`, `"fishing"`, `"government/research"`, `"naval"`, `"other"`, `"passenger"`, `"recreational"`, `"tanker"`, `"tug"` or `"vehicle carrier"`. |
+| `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. One of `"bulker"`, `"containership"`, `"cruise"`, `"dredger"`, `"fishing"`, `"government/research"`, `"naval"`, `"other"`, `"passenger"`, `"recreational"`, `"tanker"`, `"tug"` or `"vehicle carrier"`. |
 | `model` | `"jomopans-echo"` (default), `"randi"` or `"wales-heitmeyer"`. |
 | `frequencies` | Frequencies, in Hz; defaults to the decidecade bands 10 Hz-31.5 kHz of the JOMOPANS-ECHO validation range. |
 
-**Returns:** A [`ShipTrafficSpectrum`](/phonometry/reference/api/underwater/ship-traffic-noise/#shiptrafficspectrum).
+**Returns:** A [`ShipTrafficSpectrum`](/reference/api/underwater/ship-traffic-noise/#shiptrafficspectrum).
 
 **Raises**
 

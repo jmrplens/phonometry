@@ -46,7 +46,7 @@ room and its **reverberation time** from the absorption of its surfaces and
 objects, the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
 impact insulation members live in
-[Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/)). phonometry
+[Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/)). phonometry
 implements the normative Clause 4 model. (The informative Annex D method for
 irregular spaces is out of scope.)
 
@@ -133,7 +133,7 @@ $55.3/c_0$ the familiar $0.16$.
 The 55.3 is $24\ln 10 = 55.262$, the constant that falls out of the
 diffuse-field decay when the mean free path is $4V/S$ and the decay is
 extrapolated to a full 60 dB (the
-[classical derivation](/phonometry/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)).
+[classical derivation](/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)).
 Formula 5 is therefore Sabine's law applied to the *free* volume left after the
 objects have displaced their share, and the standard's unusual $c_0$ is a
 rounding convention rather than a claim about the air temperature: 345.6 m/s is
@@ -268,9 +268,9 @@ The `ReverberationResult` carries the per-band absorption area and reverberation
 time, the volume and the object fraction, and its `.plot()` draws the
 reverberation-time spectrum. This is the prediction counterpart of the measured
 reverberation time in
-[Room Acoustics](/phonometry/buildings/rooms/room-acoustics/) (ISO 3382) and
+[Room Acoustics](/buildings/rooms/room-acoustics/) (ISO 3382) and
 of the reverberation-room absorption of
-[Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/) (ISO 354).
+[Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/) (ISO 354).
 
 ## 2b. Designing to a target
 
@@ -324,14 +324,14 @@ and 0.7 s from 283 m³ to 566 m³; open offices, corridors and stairwells are
 specified by *absorption area* rather than by reverberation time, which is
 clause 4.5's own advice (§3); and music spaces need longer times than this
 standard is intended for. The
-[classical prediction guide](/phonometry/buildings/rooms/reverberation-prediction/#what-value-to-aim-at)
+[classical prediction guide](/buildings/rooms/reverberation-prediction/#what-value-to-aim-at)
 carries the same anchors with their frequency-shape rules.
 
 ## 3. Where the input data comes from
 
 **Surface coefficients.** The standard expects the $\alpha_{\mathrm{s},i}$ to come
 from laboratory measurements to EN ISO 354, the reverberation-room method
-of [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/); theoretical,
+of [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/); theoretical,
 empirical or field values are admitted as long as the data source is
 stated. ISO 354 delivers one-third-octave data, and an octave-band
 calculation takes the arithmetic mean of the three thirds as its input. A
@@ -362,7 +362,7 @@ datasheet would print. Take the per-third-octave table from the ISO 354 test
 report and average the three thirds into each octave; where only a rating is
 available, treat the prediction as indicative and say so in the report. The
 rating itself is defined in
-[Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/).
+[Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/).
 
 **Furniture and occupants.** Objects contribute through three routes:
 a measured equivalent absorption area $A_\mathrm{obj}$ when one exists (persons
@@ -442,7 +442,7 @@ those limits the field is not diffuse and the model errs on the optimistic
 side: the standard's own accuracy clause records measured reverberation
 times up to twice the prediction in low-diffusivity rooms. The classical
 alternatives for those cases live in
-[Reverberation-time prediction](/phonometry/buildings/rooms/reverberation-prediction/).
+[Reverberation-time prediction](/buildings/rooms/reverberation-prediction/).
 
 Two scope statements sit above those numeric limits. Clause 1 says the model is
 based on experience with rooms in dwellings and offices and with common spaces
@@ -588,24 +588,24 @@ target passed through `requirement` is drawn as a reference line only.
 
 ## See also
 
-- [Reverberation-time prediction (Sabine, Eyring, Arau)](/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](/buildings/rooms/reverberation-prediction/):
   the classical family, and the models to reach for when the clause 4.6 limits
   fail.
-- [Room acoustic parameters (ISO 3382-1/2)](/phonometry/buildings/rooms/room-acoustics/):
+- [Room acoustic parameters (ISO 3382-1/2)](/buildings/rooms/room-acoustics/):
   the measured counterpart of the reverberation time predicted here.
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   where the $\alpha_\mathrm{s}$ come from (ISO 354) and where $\alpha_\mathrm{w}$ is defined
   (ISO 11654), the rating §3 forbids as an input.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/):
+- [Predicting Sound Insulation (EN 12354)](/buildings/design/insulation-prediction/):
   the family member that consumes the $A$ computed here, through
   $D_{\mathrm{n}T} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.
-- [Conformance report](/phonometry/reference/conformance/):
+- [Conformance report](/reference/conformance/):
   the three Annex E cases these implementations are checked against.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/):
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/):
   the full ISO 9613-1 atmospheric-absorption model, for conditions or
   frequencies the six built-in climate profiles do not cover, via
   `environment.propagation.air_absorption`.
-- API reference: [`room.enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/).
-- Theory: [Sound insulation and absorption, predicted](/phonometry/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
+- API reference: [`room.enclosed_space_absorption`](/reference/api/rooms/enclosed-space-absorption/).
+- Theory: [Sound insulation and absorption, predicted](/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the equivalent-absorption-area definition the EN 12354-6 procedure computes.
 
 </SeeAlso>

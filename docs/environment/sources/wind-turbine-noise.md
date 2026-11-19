@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/wind-turbine-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/wind-turbine-noise/
 
 # Wind-turbine noise: sound power and tonal audibility
 
@@ -382,7 +382,7 @@ Wind-turbine tonal-audibility fiche (WindTurbineTonalityResult.report), tonal au
 - [Tone audibility](../../perception/psychoacoustics/tone-audibility.md): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
 - [Wind turbine sound at a dwelling](wind-turbine-receptor.md): IEC TS 61400-11-2, what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
-- API reference: [`environment.sources.wind_turbine`](https://docs.jmrp.io/phonometry/reference/api/environment/wind-turbine/).
+- API reference: [`environment.sources.wind_turbine`](https://phonometry.dev/reference/api/environment/wind-turbine/).
 
 ## References
 

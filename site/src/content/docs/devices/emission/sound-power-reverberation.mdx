@@ -37,7 +37,7 @@ comparison method against a reference sound source, the qualification
 warnings, the accredited-style test fiche and, in section 4, the sound energy
 level $L_J$ that the same two methods give a single event. Which route fits
 which job, and the pressure and intensity alternatives, are weighed in
-[Sound Power](/phonometry/devices/emission/sound-power/).
+[Sound Power](/devices/emission/sound-power/).
 
 ## 1. Reverberation room, precision grade (ISO 3741)
 
@@ -379,7 +379,7 @@ source's levels and known power.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `reference_levels` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
+| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
 | `reference_background_levels` | 1D or 2D array | dB | matches `reference_levels` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 
@@ -392,7 +392,7 @@ both need `frequencies` (the ISO 3741 criterion is frequency-dependent).
 The reverberation-room result (`ReverberationSoundPowerResult`, ISO 3741)
 writes a one-page PDF fiche laid out like a sound-power test sheet through
 its own `.report()`, sharing the layout and the `ReportMetadata` container of
-the [pressure-method fiche](/phonometry/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
+the [pressure-method fiche](/devices/emission/sound-power-pressure/#3-the-measurement-report-report).
 The standard-basis line
 names ISO 3741:2010 and the precision accuracy grade (grade 1) and states which
 method was used, the direct method using the room equivalent absorption area
@@ -475,7 +475,7 @@ decay*, and no moving microphone for a non-repetitive impulse. Clause 9.2.1
 reduces both readings to the level of one event at each position (Eq. 22, the
 energy mean of $N_\mathrm{e}$ single readings, or Eq. 23, one reading less
 $10\log_{10} N_\mathrm{e}$; `mean_single_event_level` on the
-[pressure-methods page](/phonometry/devices/emission/sound-power-pressure/#five-events-one-at-a-time-or-all-at-once)
+[pressure-methods page](/devices/emission/sound-power-pressure/#five-events-one-at-a-time-or-all-at-once)
 is the same pair). Clause 9.2.2 corrects each position for its own background
 by the frequency-dependent criterion of 9.1.2 (Eq. 25/26), and clause 9.2.3
 energy-averages the corrected positions (Eq. 27). The background is the
@@ -606,7 +606,7 @@ is assumed, not performed; the library only warns on the coarse advisory
 criteria ISO 3741 states explicitly (the Table 1 minimum volume, the $V/S$
 reverberation floor, fewer than 6 positions, an inter-position spread above
 1.5 dB). Choosing among the seven routes, and the ISO 4871 declaration a result
-feeds, live in [Sound Power](/phonometry/devices/emission/sound-power/).
+feeds, live in [Sound Power](/devices/emission/sound-power/).
 </ScopeClaim>
 </Scope>
 
@@ -614,20 +614,20 @@ feeds, live in [Sound Power](/phonometry/devices/emission/sound-power/).
 
 ## See also
 
-- [Sound Power](/phonometry/devices/emission/sound-power/): choosing among the seven
+- [Sound Power](/devices/emission/sound-power/): choosing among the seven
   determination routes, the accuracy grades and the ISO 4871 noise-emission
   declaration.
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/devices/emission/sound-power-pressure/):
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](/devices/emission/sound-power-pressure/):
   the in-situ enveloping surface and the precision anechoic array.
-- [Sound Power by Intensity Scanning (ISO 9614)](/phonometry/devices/emission/sound-power-intensity/):
+- [Sound Power by Intensity Scanning (ISO 9614)](/devices/emission/sound-power-intensity/):
   the routes that tolerate steady background noise.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): measuring the
+- [Room Acoustics](/buildings/rooms/room-acoustics/): measuring the
   reverberation time $T_{60}$ that sets the Sabine absorption area.
-- [Levels](/phonometry/signals/levels/levels/): energy averaging and the A-weighting
+- [Levels](/signals/levels/levels/): energy averaging and the A-weighting
   behind $L_{W\mathrm{A}}$.
-- [Theory](/phonometry/reference/theory/environment-transport/): the
+- [Theory](/reference/theory/environment-transport/): the
   Waterhouse and $C_1$/$C_2$ derivations.
-- API reference: [`emission`: sound power in a reverberation room](/phonometry/reference/api/power/sound-power-reverberation/).
-- Theory: [Sound power determination](/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 3741 comparison and direct methods derived from the diffuse-field relation.
+- API reference: [`emission`: sound power in a reverberation room](/reference/api/power/sound-power-reverberation/).
+- Theory: [Sound power determination](/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 3741 comparison and direct methods derived from the diffuse-field relation.
 
 </SeeAlso>

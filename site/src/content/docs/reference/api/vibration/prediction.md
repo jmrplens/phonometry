@@ -41,7 +41,7 @@ floor amplifies by at most $1 / (2 D_1)$, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
 storeys or more is about $10 / n$ Hz (Formula (4)), the estimate
 DIN 4150-3 prints in 6.4 and ISO 4866 in D.2 as well, so it has one home:
-[`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency).
+[`story_fundamental_frequency`](/reference/api/vibration/building-damage/#story_fundamental_frequency).
 
 **Sources** (Clause 5). A blast in the far field follows
 $v_{\max} = k (L/L_0)^b (R/R_0)^{-m}$ (Formula (5)) with the charge per
@@ -234,8 +234,8 @@ amplitude at the reference distance, spread with the exponent of Figure
 | `reference_velocity_mm_s` | $\bar v_1$, at $R_1$, in millimetres per second. |
 | `distance_m` | $R$, in metres, one or many, none nearer than $R_1$. |
 | `reference_distance_m` | $R_1$, in metres. |
-| `exponent` | $n$, from [`geometric_exponent`](/phonometry/reference/api/vibration/prediction/#geometric_exponent). |
-| `attenuation_per_m` | $\alpha$, from [`attenuation_coefficient_per_m`](/phonometry/reference/api/vibration/prediction/#attenuation_coefficient_per_m); 0 (default) for no material damping. |
+| `exponent` | $n$, from [`geometric_exponent`](/reference/api/vibration/prediction/#geometric_exponent). |
+| `attenuation_per_m` | $\alpha$, from [`attenuation_coefficient_per_m`](/reference/api/vibration/prediction/#attenuation_coefficient_per_m); 0 (default) for no material damping. |
 
 **Returns:** $\bar v$, one per distance, in millimetres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -301,7 +301,7 @@ The most a foundation passes at the building's resonance, Clause 4.3.
 
 $V_F = 1 / (2 D_0)$ with the system damping of the building on its
 ground, 0.25 for loose ground, which gives 2. Above the resonance a
-mean of [`FOUNDATION_TRANSFER_ABOVE_RESONANCE`](/phonometry/reference/api/vibration/prediction/#foundation_transfer_above_resonance) may be assumed, and
+mean of [`FOUNDATION_TRANSFER_ABOVE_RESONANCE`](/reference/api/vibration/prediction/#foundation_transfer_above_resonance) may be assumed, and
 on rock there is no reduction.
 
 **Parameters**
@@ -388,7 +388,7 @@ usually the smaller source; the impact is this one.
 
 | Name | Description |
 | :--- | :--- |
-| `fall_energy_kj` | $E$, in kilojoules, from [`fall_energy_kj`](/phonometry/reference/api/vibration/prediction/#fall_energy_kj). |
+| `fall_energy_kj` | $E$, in kilojoules, from [`fall_energy_kj`](/reference/api/vibration/prediction/#fall_energy_kj). |
 | `distance_m` | $R$, in metres, one or many. |
 | `coefficient_mm_s` | $k$, in millimetres per second. |
 | `distance_exponent` | $m$. |

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-This is the entry of the [errata registry](/phonometry/reference/errata/) on ICAO Annex 16. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+This is the entry of the [errata registry](/reference/errata/) on ICAO Annex 16. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## ICAO Annex 16, Volume I, 8th edition (2017), Appendix 2, 4.4.2 (the minus sign of the bandsharing adjustment missing)
 

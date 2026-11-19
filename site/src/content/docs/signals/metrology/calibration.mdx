@@ -62,7 +62,7 @@ periodically in the laboratory (IEC 61672-3 and IEC 60942; Bies, Hansen &
 Howard 2017, §3.4), and treat the pre/post difference as your drift bound.
 The [field, laboratory and drift section](#field-checks-laboratory-verification-and-drift)
 below turns that into concrete rules, and the
-[Build a sound level meter](/phonometry/signals/sound-level-meter/)
+[Build a sound level meter](/signals/sound-level-meter/)
 walkthrough starts from exactly this step before any level is computed.
 
 ## Why calibrate? The theory
@@ -201,7 +201,7 @@ closely enough that no correction is applied. It also means $S$ is a
 single-frequency anchor. The *shape* of the chain's response away from the
 calibrator frequency comes from the microphone's own free-field data, not from
 this check; the three sensitivities and where each applies are laid out in
-[Microphones](/phonometry/devices/electroacoustics/microphones/). Put the
+[Microphones](/devices/electroacoustics/microphones/). Put the
 windscreen back on before measuring, and remember it has its own insertion loss
 of a few tenths of a decibel at high frequency, which the calibration did not see.
 
@@ -423,7 +423,7 @@ reads 3.01 dB lower, $L_\text{FS} = 20\log_{10}\!\big(S/(\sqrt{2}\,p_0)\big)$.
 That is the highest sine level the converter can carry without clipping; compare
 it against the microphone's own overload sound pressure level, which is a
 capsule-and-preamplifier property and not a converter one (see
-[Microphones](/phonometry/devices/electroacoustics/microphones/)), and keep the
+[Microphones](/devices/electroacoustics/microphones/)), and keep the
 smaller of the two at least 10 dB above the loudest event you expect. A clipped
 event does not announce itself: it reads *low*, and plausibly so.
 
@@ -471,7 +471,7 @@ few seconds, which is the point of the route.
 
 Beware the word *sensitivity*: it means reciprocal things on the two pages. Here
 $S$ is pascals per digital unit; on the
-[Microphones](/phonometry/devices/electroacoustics/microphones/) page $M$ is
+[Microphones](/devices/electroacoustics/microphones/) page $M$ is
 volts per pascal, exposed as `sensitivity_mv_per_pa`, and the free-field,
 pressure and random-incidence ratings are three different numbers for the same
 capsule: use the free-field one at the reference frequency.
@@ -515,7 +515,7 @@ Calibration lives at three time scales:
 ### What a calibration must record to be reportable
 
 The pre/post pair and the calibrator's class tolerance are the two Type B inputs
-that the [uncertainty budget](/phonometry/signals/metrology/gum-uncertainty/) of
+that the [uncertainty budget](/signals/metrology/gum-uncertainty/) of
 a level consumes. A check that was not written down cannot be propagated, so
 record, at the time of the check:
 
@@ -576,7 +576,7 @@ Each is judged by the conformance rule the IEC TC 29 instrument standards
 written since 2013 share (5.1.15): the deviation within its acceptance limit
 **and** the uncertainty within its maximum, both inclusive. The rule on its own is
 `metrology.verify_conformance`, and
-[Compliance and verification](/phonometry/signals/metrology/compliance-verification/#the-conformance-rule-of-iec-tc-29)
+[Compliance and verification](/signals/metrology/compliance-verification/#the-conformance-rule-of-iec-tc-29)
 works it through the examples the standards print.
 
 ```python
@@ -860,7 +860,7 @@ stabilization time, the supply indicator, the radio-frequency emissions and the
 electrostatic discharges of IEC 60942 are not graded. The IEC 61672-3 periodic tests are
 not run either: `metrology.verify_sound_level_meter_periodic` grades the
 results a laboratory returns ([Periodic tests of a sound level
-meter](/phonometry/signals/metrology/sound-level-meter-periodic-tests/)), and
+meter](/signals/metrology/sound-level-meter-periodic-tests/)), and
 nothing here verifies a sound level meter or assigns it a class. The dBFS half of the page sits outside any
 standard and makes no physical claim.
 </ScopeClaim>
@@ -870,12 +870,12 @@ standard and makes no physical claim.
 
 ## See also
 
-- [Build a sound level meter](/phonometry/signals/sound-level-meter/): the walkthrough that starts from this calibration step and ends at a class-checked instrument.
-- [Levels](/phonometry/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
-- [Multichannel and Performance](/phonometry/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
-- [GUM uncertainty](/phonometry/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
-- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by, on the examples IEC 60942 and IEC 61672-1 print.
-- API reference: [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/phonometry/reference/api/metrology/conformance/) and [`phonometry`](/phonometry/reference/api/filters/phonometry/).
+- [Build a sound level meter](/signals/sound-level-meter/): the walkthrough that starts from this calibration step and ends at a class-checked instrument.
+- [Levels](/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
+- [Multichannel and Performance](/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
+- [GUM uncertainty](/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
+- [Compliance and verification](/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by, on the examples IEC 60942 and IEC 61672-1 print.
+- API reference: [`metrology.calibration`](/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/reference/api/metrology/conformance/) and [`phonometry`](/reference/api/filters/phonometry/).
 
 </SeeAlso>
 

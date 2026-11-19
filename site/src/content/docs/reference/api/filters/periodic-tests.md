@@ -24,16 +24,16 @@ $$
 $$
 
 and Formula (2) mirrors them below the mid-band, $\Omega_{-k} = 1/\Omega_k$, with the same acceptance limits. For octave bands
-$\Omega_k = R_k$ (NOTE 2). [`periodic_test_frequencies`](/phonometry/reference/api/filters/periodic-tests/#periodic_test_frequencies) returns
+$\Omega_k = R_k$ (NOTE 2). [`periodic_test_frequencies`](/reference/api/filters/periodic-tests/#periodic_test_frequencies) returns
 the 15, for any $b$; Annex C prints them for one-third-octave filters
 to five decimals, and they are reproduced there to the last digit. It is the
 same mapping as Formula (9) of IEC 61260-1 that
-[`phonometry.filters.class_limits`](/phonometry/reference/api/filters/compliance/#class_limits) uses for its breakpoints.
+[`phonometry.filters.class_limits`](/reference/api/filters/compliance/#class_limits) uses for its breakpoints.
 
-**The verdict on a laboratory's results.** [`verify_filter_periodic`](/phonometry/reference/api/filters/periodic-tests/#verify_filter_periodic)
+**The verdict on a laboratory's results.** [`verify_filter_periodic`](/reference/api/filters/periodic-tests/#verify_filter_periodic)
 grades what a laboratory measured, clause by clause, by the conformance rule
 of IEC TC 29 that IEC 61260-3 5.1 states
-([`phonometry.metrology.verify_conformance`](/phonometry/reference/api/metrology/conformance/#verify_conformance)): the measured deviation
+([`phonometry.metrology.verify_conformance`](/reference/api/metrology/conformance/#verify_conformance)): the measured deviation
 within the acceptance limit **and** the actual expanded uncertainty within the
 maximum permitted by Annex B of IEC 61260-1:2014, both inclusive. The clauses
 it grades are the ones that are a measured deviation with such a pair:
@@ -69,18 +69,18 @@ of them at every $k$ from -7 to 7 whose frequency lies above 0.5 times
 the exact mid-band frequency of the lowest filter of the set and below 1.5
 times that of the highest. A record with fewer filters, or with a NaN at a
 frequency 13.4 requires, is incomplete
-([`FilterPeriodicVerification.incomplete`](/phonometry/reference/api/filters/periodic-tests/#filterperiodicverificationincomplete)) and does not pass. The record
+([`FilterPeriodicVerification.incomplete`](/reference/api/filters/periodic-tests/#filterperiodicverificationincomplete)) and does not pass. The record
 says which filter a level linearity result was measured on
 (`linearity_midband_frequencies_hz`) and where the set and the tested
 filters lie (`set_midband_frequencies_hz`,
 `tested_midband_frequencies_hz`); without them that coverage cannot be
-checked, [`FilterPeriodicVerification.coverage_checked`](/phonometry/reference/api/filters/periodic-tests/#filterperiodicverificationcoverage_checked) is false and the
+checked, [`FilterPeriodicVerification.coverage_checked`](/reference/api/filters/periodic-tests/#filterperiodicverificationcoverage_checked) is false and the
 statement says so.
 
 **What 5.3 makes unusable.** A result whose actual uncertainty exceeds the
 maximum permitted "shall not be used to evaluate conformance to this standard
 for periodic testing" (5.3). Such a result is neither a pass nor, by itself, a
-failure of the filter; [`FilterPeriodicVerification.unusable`](/phonometry/reference/api/filters/periodic-tests/#filterperiodicverificationunusable) lists them
+failure of the filter; [`FilterPeriodicVerification.unusable`](/reference/api/filters/periodic-tests/#filterperiodicverificationunusable) lists them
 and the verdict does not pass while any is left.
 
 **What a pass here is, and is not.** It is a verdict on the numbers put in.
@@ -142,7 +142,7 @@ not measured. Everything is in decibels.
 | `linearity_midband_frequencies_hz` | Optional: the exact mid-band frequency of the filter each 11.7 result was measured on, in the same order, which lets the verdict count the three filters 11.3 requires and names the filter in each result's label. |
 | `range_linearity_deviations_db` | 11.9: the level linearity deviation 30 dB below the upper boundary of every other level range. |
 | `range_linearity_uncertainties_db` | Their uncertainties. |
-| `relative_attenuations` | 13: for each of the three selected filters, a row of 15 relative attenuations at the test frequencies of [`periodic_test_frequencies`](/phonometry/reference/api/filters/periodic-tests/#periodic_test_frequencies), `k = -7 .. 7`, NaN where 13.4 drops the frequency. |
+| `relative_attenuations` | 13: for each of the three selected filters, a row of 15 relative attenuations at the test frequencies of [`periodic_test_frequencies`](/reference/api/filters/periodic-tests/#periodic_test_frequencies), `k = -7 .. 7`, NaN where 13.4 drops the frequency. |
 | `relative_attenuation_uncertainties_db` | The same shape, NaN in the same places. |
 | `tested_midband_frequencies_hz` | Optional labels for the 13 results: the exact mid-band frequency of each selected filter, one per row, which places its test frequencies for 13.4. |
 
@@ -168,7 +168,7 @@ The IEC 61260-3:2016 verdict on the periodic tests of a band filter.
 | `fraction` | The bandwidth designator denominator `b` of the filters of Clause 13, which places their test frequencies. |
 | `pattern_approval_public` | Whether evidence is publicly available that the model passed the pattern evaluation of IEC 61260-2 (14 c). |
 | `measurements` | The record the verdict was reached on. |
-| `clauses` | One [`PeriodicTestClause`](/phonometry/reference/api/filters/periodic-tests/#periodictestclause) per clause measured, in the order of the standard. |
+| `clauses` | One [`PeriodicTestClause`](/reference/api/filters/periodic-tests/#periodictestclause) per clause measured, in the order of the standard. |
 
 ### FilterPeriodicVerification.clause()
 
@@ -186,7 +186,7 @@ The verdict on one clause.
 | :--- | :--- |
 | `clause` | `"10.2"`, `"10.3"`, `"11.7"`, `"11.9"` or `"13"`. |
 
-**Returns:** Its [`PeriodicTestClause`](/phonometry/reference/api/filters/periodic-tests/#periodictestclause).
+**Returns:** Its [`PeriodicTestClause`](/reference/api/filters/periodic-tests/#periodictestclause).
 
 **Raises**
 
@@ -361,7 +361,7 @@ The verdict on one clause of IEC 61260-3:2016.
 | `clause` | The clause, `"10.2"`, `"10.3"`, `"11.7"`, `"11.9"` or `"13"`. |
 | `title` | What the clause tests. |
 | `labels` | What each result is (the filter, the level or the test frequency it belongs to), in the order given. |
-| `verifications` | One [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification) per result. |
+| `verifications` | One [`ConformanceVerification`](/reference/api/metrology/conformance/#conformanceverification) per result. |
 | `normalized_frequencies` | Clause 13 only: the $\Omega_k$ of each result, which its figure is drawn against; `None` otherwise. |
 
 ### PeriodicTestClause.failed
@@ -441,7 +441,7 @@ maximum-permitted uncertainties of IEC 61260-1:2014 Annex B; see the
 module docstring for which clause reads which. The verdict passes when
 every clause a complete test grades was measured (10.2 or 10.3, 11.7 and
 13) on the three filters and at the test frequencies it requires, and
-every result conforms; its [`statement`](/phonometry/reference/api/filters/periodic-tests/#filterperiodicverificationstatement)
+every result conforms; its [`statement`](/reference/api/filters/periodic-tests/#filterperiodicverificationstatement)
 is the text Clause 14 prescribes for the case.
 
 **Parameters**
@@ -453,7 +453,7 @@ is the text Clause 14 prescribes for the case.
 | `fraction` | The bandwidth designator denominator `b` of the filters of Clause 13 (1 for octave, 3 for one-third-octave bands), which places their test frequencies. |
 | `pattern_approval_public` | Whether evidence is publicly available, from an independent testing organization, that the model passed the pattern evaluation of IEC 61260-2. Without it a passing filter still supports no general conclusion about IEC 61260-1 (1.5), and the statement says so. |
 
-**Returns:** A [`FilterPeriodicVerification`](/phonometry/reference/api/filters/periodic-tests/#filterperiodicverification).
+**Returns:** A [`FilterPeriodicVerification`](/reference/api/filters/periodic-tests/#filterperiodicverification).
 
 **Raises**
 

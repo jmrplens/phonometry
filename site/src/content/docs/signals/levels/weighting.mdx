@@ -45,7 +45,7 @@ covers **A**, **C** and **Z**, the curves specified by **IEC 61672-1:2013**:
 where they come from, how to apply them, the `high_accuracy` design and the
 Table 3 class verification. The rest of the family, the infrasound G curve,
 the historical B and D and the AU curve, is
-[Special Weightings](/phonometry/signals/levels/special-weightings/).
+[Special Weightings](/signals/levels/special-weightings/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="A, C and Z frequency weighting curves of IEC 61672-1 with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%" loading="eager" />
 
@@ -53,7 +53,7 @@ the historical B and D and the AU curve, is
 at 48 kHz: A, which discards the bass; C, which keeps it; and Z, which
 weights nothing at all. The inset magnifies the small positive region of A
 around 2.5 kHz. The special B, D and AU curves have their own chart in
-[Special Weightings](/phonometry/signals/levels/special-weightings/), together with
+[Special Weightings](/signals/levels/special-weightings/), together with
 the infrasound G curve.*
 
 <details>
@@ -96,7 +96,7 @@ plt.show()
   high-pass the wind noise yourself if the recording extends below 10 Hz.
 
 The `weighting` argument also accepts the four special weightings, charted and
-documented in [Special Weightings](/phonometry/signals/levels/special-weightings/):
+documented in [Special Weightings](/signals/levels/special-weightings/):
 `'G'` for infrasound (ISO 7196), the historical `'B'` (ANSI S1.4-1983) and
 `'D'` (IEC 537), and `'AU'` for audible sound in the presence of ultrasound
 (IEC 61012).
@@ -148,7 +148,7 @@ A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
 through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z applies no shaping inside
 the specified band; its design goal is 0 dB everywhere from 10 Hz to
 20 kHz. The full pole/zero derivation is in the
-[Theory](/phonometry/reference/theory/signal-analysis/) page.
+[Theory](/reference/theory/signal-analysis/) page.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting.svg" alt="Equal-loudness contours per ISO 226 on the left, with the 40-phon contour highlighted; on the right the A-weighting curve overlaid on the inverted 40-phon contour, showing that A is the flipped contour frozen into a realizable filter" width="92%" />
 
@@ -169,7 +169,7 @@ B was dropped, A and C were kept with tightened tolerances, and **Z** was
 introduced to replace the vaguely specified "linear" of older meters, which
 varied by manufacturer. The B curve (and the aircraft-noise D curve that met
 the same fate) remains available for historical data; see
-[Special Weightings](/phonometry/signals/levels/special-weightings/).
+[Special Weightings](/signals/levels/special-weightings/).
 
 ### When C − A matters
 
@@ -243,11 +243,11 @@ structure at all, so an impulse and a steady sound of the same energy receive
 identical treatment.
 
 Each of those has a proper instrument. For perceived loudness, use the ISO 532
-models of [Loudness](/phonometry/perception/psychoacoustics/loudness/) rather
+models of [Loudness](/perception/psychoacoustics/loudness/) rather
 than a different weighting curve. For content below 20 Hz, use the G curve of
-ISO 7196 ([Special Weightings](/phonometry/signals/levels/special-weightings/)).
+ISO 7196 ([Special Weightings](/signals/levels/special-weightings/)).
 For tonal or impulsive character, use the ISO 1996-1 adjustments
-([Environmental Levels](/phonometry/environment/assessment/environmental-levels/)).
+([Environmental Levels](/environment/assessment/environmental-levels/)).
 None of that makes A wrong to use: A-weighted levels are the quantity the
 limits are written in, so a report states the A-weighted level and adds the
 other metrics as supporting evidence, never as a substitute.
@@ -271,7 +271,7 @@ c_weighted_signal = filters.weighting_filter(recording, fs, weighting='C')
 
 The special weightings take the same `weighting` argument; each is documented,
 with its own response chart, in
-[Special Weightings](/phonometry/signals/levels/special-weightings/).
+[Special Weightings](/signals/levels/special-weightings/).
 
 ### Weighting a spectrum, not a waveform
 
@@ -317,7 +317,7 @@ to G.
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array, or `Signal` | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0; taken from `x` when `x` is a `Signal` | |
-| `weighting` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](/phonometry/signals/levels/special-weightings/); `'Z'` is implemented as a bypass of a response the standard specifies as flat; `'468'` is the ITU-R BS.468-4 programme-level curve, and its skirt is steep enough that it needs the fitted design and refuses `high_accuracy=False` |
+| `weighting` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](/signals/levels/special-weightings/); `'Z'` is implemented as a bypass of a response the standard specifies as flat; `'468'` is the ITU-R BS.468-4 programme-level curve, and its skirt is steep enough that it needs the fitted design and refuses `high_accuracy=False` |
 | `high_accuracy` | bool | — | default `True` | Fit the analog prototype at $f_\mathrm{s}$ instead of transforming it blind; keeps A/C in class 1 at every sample rate. Details in §5 |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
@@ -463,8 +463,8 @@ for block in blocks:
     weighted = wf.filter(block)
 ```
 
-See [Block Processing](/phonometry/signals/filters/block-processing/) for the streaming workflow and
-[Theory](/phonometry/reference/theory/signal-analysis/) for the analytic curve definitions.
+See [Block Processing](/signals/filters/block-processing/) for the streaming workflow and
+[Theory](/reference/theory/signal-analysis/) for the analytic curve definitions.
 
 :::note[Above a few kilohertz the filter is the smallest term]
 The fitted design removes the *filter's* contribution to the
@@ -482,7 +482,7 @@ high-frequency band level, or any A-weighted level near the top of the range,
 means anything. And the operator is a reflector: use a tripod and stand back.
 
 The class chain of the
-[calibration guide](/phonometry/signals/metrology/calibration/) says the rest:
+[calibration guide](/signals/metrology/calibration/) says the rest:
 a class 1 verdict for the filter is one link, and the weakest link sets the
 accuracy of the reading.
 :::
@@ -603,7 +603,7 @@ acceptance limits checked by `verify_weighting_class`.
 The special curves, the infrasound G of ISO 7196, the historical B (ANSI
 S1.4-1983) and D (IEC 537) and the AU of IEC 61012, together with the
 verification of B and AU against their tolerance tables, have their own guide:
-[Special Weightings](/phonometry/signals/levels/special-weightings/).
+[Special Weightings](/signals/levels/special-weightings/).
 </ScopeClaim>
 </Scope>
 
@@ -611,15 +611,15 @@ verification of B and AU against their tolerance tables, have their own guide:
 
 ## See also
 
-- [Special Weightings (G, B, D, AU)](/phonometry/signals/levels/special-weightings/):
+- [Special Weightings (G, B, D, AU)](/signals/levels/special-weightings/):
   the infrasound G curve, the historical B and D, and AU for audible sound
   in the presence of ultrasound.
-- [Same bits on every machine](/phonometry/reference/determinism/): why the
+- [Same bits on every machine](/reference/determinism/): why the
   designed filter is byte-identical whatever the C library, the BLAS, the
   processor or the thread count, with no library step left on the design
   path, and the measured evidence.
-- API reference: [`filters.weighting`](/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](/phonometry/reference/api/filters/compliance/).
-- Theory: [Weighting Curves (IEC 61672-1)](/phonometry/reference/theory/signal-analysis/#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
+- API reference: [`filters.weighting`](/reference/api/filters/weighting/) and [`filters.compliance`](/reference/api/filters/compliance/).
+- Theory: [Weighting Curves (IEC 61672-1)](/reference/theory/signal-analysis/#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 
 </SeeAlso>
 

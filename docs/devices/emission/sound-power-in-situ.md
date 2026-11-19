@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-in-situ.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-in-situ/
 
 # Sound Power in Situ by Comparison (ISO 3747)
 
@@ -512,7 +512,7 @@ satisfactory there (Table D.1, footnote a).
   the routes that tolerate steady background noise without a reference source.
 - [Levels](../../signals/levels/levels.md): energy averaging, the single
   event level and the A-weighting behind $L_{W\mathrm{A}}$.
-- API reference: [`emission`: sound power in situ](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-in-situ/).
+- API reference: [`emission`: sound power in situ](https://phonometry.dev/reference/api/power/sound-power-in-situ/).
 
 ## References
 

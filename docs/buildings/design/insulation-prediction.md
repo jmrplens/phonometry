@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/design/insulation-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/design/insulation-prediction/
 
 # Predicting Sound Insulation (EN 12354)
 
@@ -604,9 +604,9 @@ ISO 16283-3 measurement they are compared against, in
   the absorption member of the same EN 12354 family.
 - [Dynamic stiffness of resilient materials (EN 29052-1)](../../materials/resilient/dynamic-stiffness.md):
   the $s'$ input to the EN 12354-2 floating-floor term.
-- API reference: [`building.prediction.simplified_model`](https://docs.jmrp.io/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://docs.jmrp.io/phonometry/reference/api/building/facade/).
+- API reference: [`building.prediction.simplified_model`](https://phonometry.dev/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://phonometry.dev/reference/api/building/facade/).
 - Theory: [Sound insulation and absorption, predicted](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the EN 12354 path model and the transmission quantities it sums.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/transmission-loss/): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 

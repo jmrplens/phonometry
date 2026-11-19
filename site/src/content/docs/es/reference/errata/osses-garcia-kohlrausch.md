@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Esta es la entrada del [registro de erratas](/phonometry/es/reference/errata/) sobre Osses, García & Kohlrausch (2016). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Esta es la entrada del [registro de erratas](/es/reference/errata/) sobre Osses, García & Kohlrausch (2016). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Osses, García & Kohlrausch (2016), modelo de intensidad de fluctuación, Ec. (3)
 

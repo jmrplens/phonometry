@@ -63,6 +63,11 @@ def _shard_of_links(line: str) -> str:
     return shard
 
 
+#: A link to a page of the site the run links, its route captured: the site
+#: and its base path come from the target, as the llms files are written.
+_PAGE_LINK = re.compile(rf"\]\({re.escape(llms.SITE_URL)}/(\S+?)/\)")
+
+
 def _runs_of(text: str) -> dict[str, list[str]]:
     """The routes listed under each ``###`` heading, keyed by its shard slug.
 
@@ -79,7 +84,7 @@ def _runs_of(text: str) -> dict[str, list[str]]:
         elif current == "" and "/llms/llms-" in line:
             current = _shard_of_links(line)
             runs.setdefault(current, [])
-        elif current and (m := re.search(r"\]\(\S+?/phonometry/(\S+?)/\)", line)):
+        elif current and (m := _PAGE_LINK.search(line)):
             runs[current].append(m.group(1))
     return runs
 
@@ -674,14 +679,17 @@ def test_the_site_url_follows_phonometry_site_as_the_site_build_does() -> None:
     """The llms files name the host the site was built for, from the same closed table.
 
     ``PHONOMETRY_SITE`` picks the host in ``site/src/data/site-targets.json``,
-    which the site build reads too, so the llms files a phonometry.dev build
-    publishes link phonometry.dev pages; unset, both name docs.jmrp.io; any
-    other value stops the run.
+    which the site build reads too, so the llms files link the pages where the
+    build serves them: phonometry.dev at the root, unset or named; any other
+    value, the host the site was published on before among them, stops the run.
     """
-    assert llms.site_url(None) == "https://docs.jmrp.io/phonometry"
-    assert llms.site_url("") == "https://docs.jmrp.io/phonometry"
-    assert llms.site_url("docs.jmrp.io") == "https://docs.jmrp.io/phonometry"
-    assert llms.site_url("phonometry.dev") == "https://phonometry.dev/phonometry"
+    assert llms.site_url(None) == "https://phonometry.dev"
+    assert llms.site_url("") == "https://phonometry.dev"
+    assert llms.site_url("phonometry.dev") == "https://phonometry.dev"
+    with pytest.raises(
+        SystemExit, match=r"PHONOMETRY_SITE=docs\.jmrp\.io is not one of"
+    ):
+        llms.site_url("docs.jmrp.io")
     with pytest.raises(
         SystemExit, match=r"PHONOMETRY_SITE=phonometry\.org is not one of"
     ):

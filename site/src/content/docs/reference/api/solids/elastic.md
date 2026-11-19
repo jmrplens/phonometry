@@ -138,7 +138,7 @@ Quasi-longitudinal wave speed along a plate (Hopkins Eq. 2.21).
 
 $c_\mathrm{L,p} = \sqrt{E / (\rho (1 - \nu^2))}$. The plate is
 constrained across its width, which stiffens it by $1/(1 - \nu^2)$
-against the beam of [`beam_longitudinal_speed`](/phonometry/reference/api/solids/elastic/#beam_longitudinal_speed).
+against the beam of [`beam_longitudinal_speed`](/reference/api/solids/elastic/#beam_longitudinal_speed).
 
 This is the value the building-acoustics tables print, and the one the
 critical frequency of a wall or floor is computed from.
@@ -184,11 +184,11 @@ otherwise share no column at all.
 
 The constant here is the exact $2\pi/\sqrt{12} = 1.8138$ of the
 thin-plate dispersion relation, which is what
-[`phonometry.vibration.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency) computes and what
+[`phonometry.vibration.coincidence_frequency`](/reference/api/vibration/radiation-efficiency/#coincidence_frequency) computes and what
 reproduces the printed column: Hopkins states `c0 = 343` m/s in the
 heading of Table A2 and prints 12.3 m Hz for steel, which this returns and
 the rounded 1.8 of ISO 12354-1 misses by 0.8 per cent (12.40).
-[`phonometry.building.critical_frequency`](/phonometry/reference/api/building/flanking-transmission/#critical_frequency) keeps the rounded constant,
+[`phonometry.building.critical_frequency`](/reference/api/building/flanking-transmission/#critical_frequency) keeps the rounded constant,
 because there it is the standard's own arithmetic and not the material's.
 
 **Parameters**

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/reference/theory/rooms-buildings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/reference/theory/rooms-buildings/
 
 # Theory: Rooms and Buildings
 

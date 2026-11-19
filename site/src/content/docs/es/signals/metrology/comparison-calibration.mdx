@@ -280,7 +280,7 @@ La raíz de la suma de cuadrados de los ocho valores impresos es 0,0437 dB, y
 la incertidumbre expandida 0,087 dB. El D.3 imprime **0,040 dB** y
 **0,08 dB**, que no son la combinación de sus propias componentes: 0,040 dB es
 lo que da la suma dejando fuera una de las dos filas de 0,017 dB. El caso está
-en el [registro de erratas](/phonometry/es/reference/errata/). El D.3 advierte
+en el [registro de erratas](/es/reference/errata/). El D.3 advierte
 también que un cálculo estricto pasaría cada componente a forma lineal antes
 de combinarlas, con un resultado esencialmente igual, y no imprime su valor;
 `linear_combined_uncertainty_db` lo hace y da 0,043 614 dB, 0,000 055 dB por
@@ -396,7 +396,7 @@ filas a la milésima impresa. Tal como se imprimen, las fórmulas del artículo
 con sus propios datos no dan su propia tabla: la biblioteca lee la
 sensibilidad radial de su Fórmula (4) menos 1 y la corona de su Fórmula (2)
 desde el radio exterior del WS3, las dos lecturas que sí la dan (está en el
-[registro de erratas](/phonometry/es/reference/errata/)). El A.2 fija la
+[registro de erratas](/es/reference/errata/)). El A.2 fija la
 incertidumbre expandida de la Tabla A.1 en el 10 % de cada corrección,
 «which is approximately the change observed by doubling the distance between
 the microphones»; `separation_change_db` es ese cambio según el modelo, del
@@ -614,7 +614,7 @@ B.2.2 dimensiona el paso según la sala: 120 Hz basta en una cámara anecoica
 pequeña «because the primary reflections all occur before 8 ms», unos 30 Hz
 en una grande. (El B.2.1 dice que el incremento «will determine the time
 domain resolution»; lo que fija es la duración, como dice el B.2.2, y el
-[registro de erratas](/phonometry/es/reference/errata/) recoge la frase.)
+[registro de erratas](/es/reference/errata/) recoge la frase.)
 `ir_ws2f.plot()` dibuja el registro completo:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stepped_sine_impulse_response.svg" alt="La respuesta al impulso del WS2F obtenida con la sinusoide por pasos de 0 Hz a 100 kHz en pasos de 50 Hz, normalizada a su pico, a lo largo de todo el registro de 20 ms: el sonido directo a 2,89 ms con una breve oscilación, la reflexión en el montaje a 4,28 ms, a una décima del pico, y nada más hasta los 20 ms. El título da el paso de 50 Hz y la duración de 20,00 ms" width="88%" />
@@ -691,7 +691,7 @@ $$
 cuyo primer cero, $1/(2b)$, «must be approximately an order of magnitude
 higher than the upper limit of the frequency range of interest». La fórmula y
 su primer cero son los de un pulso que dura $2b$, aunque el texto llama a $b$
-la duración (está en el [registro de erratas](/phonometry/es/reference/errata/));
+la duración (está en el [registro de erratas](/es/reference/errata/));
 `metrology.rectangular_pulse` toma la duración completa $T = 2b$:
 
 ```python
@@ -805,7 +805,7 @@ microphones», de modo que los dos «see slightly different pressures [...]
 misma impedancia en serie, y $V_x$ es el volumen equivalente de esa
 impedancia, que da el circuito de [2] (más abajo).
 `metrology.ReciprocityMicrophone`, el micrófono de
-[la calibración por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/),
+[la calibración por reciprocidad](/es/signals/metrology/reciprocity-calibration/),
 guarda los parámetros concentrados del E.4 de la IEC 61094-2, el volumen a
 baja frecuencia, la frecuencia de resonancia y el factor de pérdidas, y su
 `complex_equivalent_volume_m3` da $V_\mathrm{e}$ a partir de ellos. Su
@@ -924,7 +924,7 @@ densidad del aire de 1,21 kg/m³; con esa densidad el informe de conformidad
 las reproduce. En el escaneo publicado, su impedancia del LS2P no muestra
 la unidad imaginaria en el término de masa, donde queda un hueco en blanco;
 la del segundo micrófono sí la lleva, y la gráfica la necesita (está en el
-[registro de erratas](/phonometry/es/reference/errata/)).
+[registro de erratas](/es/reference/errata/)).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/comparison_air_gap.svg" alt="El cociente de presiones del WS2P de alta sensibilidad re el LS2P del Apéndice B de Jarvis (1996) en un acoplador de 2 mm de largo y 12,7 mm de diámetro, de 100 Hz a 20 kHz. Izquierda, su nivel: nada hasta 1 kHz, sube a +0,0064 dB a 7 kHz, cruza 0 dB cerca de 10 kHz y baja a -0,025 dB a 20 kHz, con su incertidumbre típica en trazos. Derecha, su fase: nada hasta 2 kHz, baja a -0,158 grados a 12,5 kHz y vuelve a -0,09 grados a 20 kHz" width="100%" />
 
@@ -964,7 +964,7 @@ cover a full frequency range with low uncertainty» (6.7).
 el acoplador junto a otra calibración del mismo micrófono, una comparación
 hecha en otro sitio o, para un micrófono patrón de laboratorio, la
 `ReciprocityCalibration` de [la calibración por
-reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/) con
+reciprocidad](/es/signals/metrology/reciprocity-calibration/) con
 el índice de ese micrófono, y las compara en las frecuencias que comparten.
 El apartado no imprime ningún criterio. La biblioteca lee «validated» como
 que las dos coincidan dentro de la incertidumbre expandida de su diferencia,
@@ -1265,10 +1265,10 @@ longitud máxima y el ruido aleatorio del B.3 al B.5 son
 `electroacoustics.transfer_function`, y el promedio síncrono del B.6.2 es
 `signals.time_synchronous_average`, en sus propias páginas; la cualificación
 del campo libre según la ISO 26101 está en
-[su propia página](/phonometry/es/devices/emission/free-field-qualification/).
+[su propia página](/es/devices/emission/free-field-qualification/).
 Los valores de la IEC/TS 61094-7, que aquí son entradas; la calibración por
 reciprocidad de la referencia (IEC 61094-2, -3) es el objeto de
-[Calibrar un micrófono por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/). El segundo caso especial
+[Calibrar un micrófono por reciprocidad](/es/signals/metrology/reciprocity-calibration/). El segundo caso especial
 de la Tabla D.1, un micrófono calibrado como sistema con su preamplificador
 (0,002 dB, y para la tensión de polarización y la capacidad, dependiente de
 la frecuencia y menos de 0,02 dB por encima de 200 Hz), no se guarda como
@@ -1284,22 +1284,22 @@ tercero (Fórmula (7) de IEC 61094-2:2009), no la toma
 
 ## Véase también
 
-- [Calibrar un micrófono por reciprocidad](/phonometry/es/signals/metrology/reciprocity-calibration/):
+- [Calibrar un micrófono por reciprocidad](/es/signals/metrology/reciprocity-calibration/):
   la IEC 61094-2 y la IEC 61094-3, que calibran el micrófono patrón de
   laboratorio que una comparación toma como referencia.
-- [Correcciones de campo libre de un sonómetro](/phonometry/es/signals/metrology/free-field-corrections/):
+- [Correcciones de campo libre de un sonómetro](/es/signals/metrology/free-field-corrections/):
   la IEC 62585, que compara un sonómetro con una referencia LS2P de la misma
   manera.
-- [Incidencia aleatoria y campo difuso](/phonometry/es/signals/metrology/random-incidence/):
+- [Incidencia aleatoria y campo difuso](/es/signals/metrology/random-incidence/):
   la IEC 61183, cuyo método en campo difuso es una comparación con el mismo
   modelo.
-- [Incertidumbre de medida](/phonometry/es/signals/metrology/gum-uncertainty/):
+- [Incertidumbre de medida](/es/signals/metrology/gum-uncertainty/):
   la ley de propagación de la GUM con que se combinan los balances.
-- [Aire húmedo](/phonometry/es/fluids/humid-air/): el aire del Anexo F de la
+- [Aire húmedo](/es/fluids/humid-air/): el aire del Anexo F de la
   IEC 61094-2 cuya velocidad del sonido fija la región de campo libre.
-- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): el tono
+- [Calibración y dBFS](/es/signals/metrology/calibration/): el tono
   del calibrador que convierte una grabación en pascales una vez que se conoce
   la sensibilidad del micrófono.
-- Referencia de la API: [`metrology.comparison_calibration`](/phonometry/es/reference/api/metrology/comparison-calibration/).
+- Referencia de la API: [`metrology.comparison_calibration`](/es/reference/api/metrology/comparison-calibration/).
 
 </SeeAlso>

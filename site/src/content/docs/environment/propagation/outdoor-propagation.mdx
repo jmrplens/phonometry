@@ -314,8 +314,8 @@ an A-weighted $L_{W\mathrm{A}}$ is available, the standard's own fallback (Claus
 Note 1) is to evaluate the attenuation terms at 500 Hz and apply them to that
 single number: an estimate, not a band prediction. The two CNOSSOS-EU emission
 guides,
-[road](/phonometry/environment/sources/cnossos-road-emission/) and
-[rail](/phonometry/environment/sources/cnossos-rail-emission/), stop exactly
+[road](/environment/sources/cnossos-road-emission/) and
+[rail](/environment/sources/cnossos-rail-emission/), stop exactly
 where this rule starts: both deliver a sound power *per metre of source line*
 and both declare the segmentation out of scope, so choosing the segment length
 and summing the segments energetically is the caller's engineering decision.
@@ -619,7 +619,7 @@ quantity, so that two implementations can be compared where a single formula
 would not separate them; it also fixes the envelope a result has to stay
 inside, $\pm 0.05$ dB per band and on the total. The seven that ISO 9613-2
 answers on its own (T01 to T07) are checked band by band in the
-[conformance report](https://docs.jmrp.io/phonometry/reference/conformance/).
+[conformance report](https://phonometry.dev/reference/conformance/).
 The other twelve build their ray paths by the additional recommendations of
 its Clause 5, over barriers and around buildings, and are not implemented.
 
@@ -713,7 +713,7 @@ refined one: over 400 / 500 / 630 / 800 Hz on porous ground at 100 m,
 0.216 / 0.280 / 0.348 / 0.419 dB. Run the prediction in octaves and distribute
 afterwards if a finer spectrum is needed, or use the wave-acoustic
 `ground_effect` of
-[Ground effect and barriers](/phonometry/environment/propagation/ground-barriers/)
+[Ground effect and barriers](/environment/propagation/ground-barriers/)
 when the interference structure inside an octave is the point. Nothing below
 63 Hz or above 8 kHz is covered at all, so a low-frequency assessment falls
 outside this method.
@@ -789,7 +789,7 @@ The comparison itself, each result against the limits of its certified result
 as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
 and what a faster configuration of a mapping program costs is measured by the
 quantiles of Annex C of the same standard: both are in [Quality of Outdoor
-Sound Software (ISO 17534-1)](/phonometry/environment/propagation/software-quality/).
+Sound Software (ISO 17534-1)](/environment/propagation/software-quality/).
 
 ## 4. Scope, assumptions and pitfalls
 
@@ -923,9 +923,9 @@ different questions:
   from the French NMPB 2008 method, producing the $L_\mathrm{den}$/$L_\mathrm{night}$
   indicators the Directive reports. This library implements the CNOSSOS-EU
   *emission* half on
-  [CNOSSOS-EU road emission](/phonometry/environment/sources/cnossos-road-emission/)
+  [CNOSSOS-EU road emission](/environment/sources/cnossos-road-emission/)
   and
-  [CNOSSOS-EU rail emission](/phonometry/environment/sources/cnossos-rail-emission/);
+  [CNOSSOS-EU rail emission](/environment/sources/cnossos-rail-emission/);
   the CNOSSOS-EU *propagation* method of 2.5 is **not** implemented, so
   carrying a CNOSSOS line power through the ISO 9613-2 chain on this page is an
   engineering estimate and not the normative chain the Directive prescribes.
@@ -948,9 +948,9 @@ under regulations that cite ISO 9613 use this module. (ISO published a
 revised ISO 9613-2 in 2024; this library implements the 1996 edition, the one
 most national regulations and the validation literature still reference.)
 
-See the [Theory](/phonometry/reference/theory/environment-transport/) page for the full derivation, the
-[Room Acoustics guide](/phonometry/buildings/rooms/room-acoustics/) for how $\alpha$ feeds
-ISO 354, and the [Occupational Noise Exposure guide](/phonometry/perception/hearing/occupational-exposure/) for the ISO 9612 occupational
+See the [Theory](/reference/theory/environment-transport/) page for the full derivation, the
+[Room Acoustics guide](/buildings/rooms/room-acoustics/) for how $\alpha$ feeds
+ISO 354, and the [Occupational Noise Exposure guide](/perception/hearing/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
 
 ## 5. Prediction reports (`.report()`)
@@ -1029,21 +1029,21 @@ result.report(
 />
 
 Here too `result.plot()` previews the insertion-loss spectrum of the fiche;
-the [ground and barriers guide](/phonometry/environment/propagation/ground-barriers/) draws the
+the [ground and barriers guide](/environment/propagation/ground-barriers/) draws the
 same result against the exact half-plane and coherent-ground models.
 
 <SeeAlso>
 
 ## See also
 
-- [Spherical ground effect and advanced barriers](/phonometry/environment/propagation/ground-barriers/): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
-- [Atmospheric refraction](/phonometry/environment/propagation/atmospheric-refraction/): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
-- [Quality of Outdoor Sound Software (ISO 17534-1)](/phonometry/environment/propagation/software-quality/): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
-- [CNOSSOS-EU road emission](/phonometry/environment/sources/cnossos-road-emission/) and [CNOSSOS-EU rail emission](/phonometry/environment/sources/cnossos-rail-emission/): the source strengths the comparison in section 4 refers to.
-- [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
-- API reference: [`environment.propagation.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/).
-- Theory: [Outdoor propagation](/phonometry/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
-- [Published catalogues](/phonometry/reference/catalogues/ground-surfaces/): the
+- [Spherical ground effect and advanced barriers](/environment/propagation/ground-barriers/): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
+- [Atmospheric refraction](/environment/propagation/atmospheric-refraction/): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](/environment/propagation/software-quality/): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
+- [CNOSSOS-EU road emission](/environment/sources/cnossos-road-emission/) and [CNOSSOS-EU rail emission](/environment/sources/cnossos-rail-emission/): the source strengths the comparison in section 4 refers to.
+- [Environmental noise levels](/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
+- API reference: [`environment.propagation.outdoor_propagation`](/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](/reference/api/environment/air-absorption/).
+- Theory: [Outdoor propagation](/reference/theory/environment-transport/#outdoor-propagation-iso-9613-12): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
+- [Published catalogues](/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

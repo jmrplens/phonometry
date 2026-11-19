@@ -82,10 +82,10 @@ reproduces this exactly, and the machinery extends to side-branch (Helmholtz,
 quarter-wave) and extended-tube resonators that the closed form cannot cover.
 
 **Layouts of your own.** Anything the four named devices do not cover is built
-by cascading elements directly. [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) does that through the
-same [`duct_matrix`](/phonometry/reference/api/noise_control/silencers/#duct_matrix), [`shunt_matrix`](/phonometry/reference/api/noise_control/silencers/#shunt_matrix) and [`cascade`](/phonometry/reference/api/noise_control/silencers/#cascade) calls while
+by cascading elements directly. [`SilencerChain`](/reference/api/noise_control/silencers/#silencerchain) does that through the
+same [`duct_matrix`](/reference/api/noise_control/silencers/#duct_matrix), [`shunt_matrix`](/reference/api/noise_control/silencers/#shunt_matrix) and [`cascade`](/reference/api/noise_control/silencers/#cascade) calls while
 keeping the arguments each element was given, which is what lets a hand-built
-chain be drawn ([`SilencerChain.plot_geometry`](/phonometry/reference/api/noise_control/silencers/#silencerchainplot_geometry)) and not only computed. The
+chain be drawn ([`SilencerChain.plot_geometry`](/reference/api/noise_control/silencers/#silencerchainplot_geometry)) and not only computed. The
 drawing shows the ducts to scale and marks the branch points, because that is
 the whole of what the elements declare: a duct element is handed a length and
 an area, a shunt element only an impedance.
@@ -93,9 +93,9 @@ an area, a shunt element only an impedance.
 **Validity.** All of this is one-dimensional: it holds while the duct and the
 chamber carry plane waves only, that is below the first higher-order-mode
 cut-on frequency of the widest cross section
-([`phonometry.noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/)). Every result reports that
-frequency as [`ReactiveSilencerResult.plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit) and raises a
-[`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) when the
+([`phonometry.noise_control.duct_modes`](/reference/api/noise_control/duct-modes/)). Every result reports that
+frequency as [`ReactiveSilencerResult.plane_wave_limit`](/reference/api/noise_control/duct-modes/#plane_wave_limit) and raises a
+[`PlaneWaveWarning`](/reference/api/noise_control/duct-modes/#planewavewarning) when the
 analysis grid reaches past it: the numbers are still returned, but above cut-on
 they describe the plane-wave mode alone and a measurement will show the rest.
 
@@ -191,7 +191,7 @@ Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 | `source_impedance` | Optional source impedance `Z_s` for the insertion loss, Pa s/m3. |
 | `radiation_impedance` | Optional radiation impedance `Z_r` for the insertion loss, Pa s/m3. |
 
-**Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult) (its `transmission_loss` equals the closed form $10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]$).
+**Returns:** A [`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult) (its `transmission_loss` equals the closed form $10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]$).
 
 **Raises**
 
@@ -227,7 +227,7 @@ extensions (classically $L/4$ and $L/2$) places quarter-wave
 peaks that
 fill the $kL = n \pi$ troughs of the plain expansion chamber. With
 both extensions `0` the result reduces exactly to
-[`expansion_chamber`](/phonometry/reference/api/noise_control/silencers/#expansion_chamber).
+[`expansion_chamber`](/reference/api/noise_control/silencers/#expansion_chamber).
 
 The junction where each extended pipe ends is where its three ducts meet,
 so the straight chamber element cascaded between the two side branches is
@@ -253,7 +253,7 @@ limit of the cascade; extensions that would overlap are rejected.
 | `source_impedance` | Optional source impedance `Z_s`, Pa s/m3. |
 | `radiation_impedance` | Optional radiation impedance `Z_r`, Pa s/m3. |
 
-**Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult).
+**Returns:** A [`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult).
 
 **Raises**
 
@@ -364,7 +364,7 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 | `source_impedance` | Optional source impedance `Z_s`, Pa s/m3. |
 | `radiation_impedance` | Optional radiation impedance `Z_r`, Pa s/m3. |
 
-**Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds $f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}$.
+**Returns:** A [`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds $f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}$.
 
 **Raises**
 
@@ -428,7 +428,7 @@ Draw a reactive silencer cross-section to scale.
 Side cut through the duct axis with equivalent circular diameters
 (`d = 2 sqrt(S / pi)`) for every cross-section area, drawn from the
 `kind` and the `geometry` that
-[`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult)
+[`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult)
 keeps, so a drawing reads like the result. A Helmholtz cavity is drawn as
 the cube of equal volume with its volume annotated.
 
@@ -538,7 +538,7 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 | `source_impedance` | Optional source impedance `Z_s`, Pa s/m3. |
 | `radiation_impedance` | Optional radiation impedance `Z_r`, Pa s/m3. |
 
-**Returns:** A [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds the odd multiples of $f = c / (4 l_\mathrm{e})$ within the frequency range.
+**Returns:** A [`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult); `resonances` holds the odd multiples of $f = c / (4 l_\mathrm{e})$ within the frequency range.
 
 **Raises**
 
@@ -575,9 +575,9 @@ Transmission and insertion loss of a reactive silencer over frequency.
 | `transfer_matrix` | The compound `(n_freq, 2, 2)` four-pole matrix. |
 | `kind` | A short label of the device (e.g. `"expansion chamber"`). One of `"expansion chamber"`, `"Helmholtz resonator"`, `"quarter-wave resonator"`, `"extended-tube chamber"` or `"element chain"`. |
 | `resonances` | Notable resonance frequencies, Hz (e.g. the resonator tuning frequency), or `None`. |
-| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device, or `None` for a result assembled by a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain), which carries its geometry in `chain`. Keyed by any of `"length"`, `"chamber_area"`, `"pipe_area"`, `"inlet_extension"`, `"outlet_extension"`, `"duct_area"`, `"neck_area"`, `"neck_length"`, `"cavity_volume"` or `"branch_area"`. |
-| `plane_wave_limit` | The first higher-order-mode cut-on frequency of the widest cross section of the device, Hz (Norton & Karczub Eq. 7.6, [`phonometry.noise_control.duct_modes.plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit)). The four-pole algebra of this module is one-dimensional and is valid below it; above it several modes propagate at once and the result describes the plane-wave mode only, which is why a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised when the analysis reaches past it. |
-| `chain` | The [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) that assembled this result, for a result built by [`SilencerChain.result`](/phonometry/reference/api/noise_control/silencers/#silencerchainresult), and `None` for a named device. A chain is a list of four-pole elements rather than a named device, so it carries its geometry element by element instead of in `geometry`; exactly one of the two is present, and `plot_geometry` draws it. |
+| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device, or `None` for a result assembled by a [`SilencerChain`](/reference/api/noise_control/silencers/#silencerchain), which carries its geometry in `chain`. Keyed by any of `"length"`, `"chamber_area"`, `"pipe_area"`, `"inlet_extension"`, `"outlet_extension"`, `"duct_area"`, `"neck_area"`, `"neck_length"`, `"cavity_volume"` or `"branch_area"`. |
+| `plane_wave_limit` | The first higher-order-mode cut-on frequency of the widest cross section of the device, Hz (Norton & Karczub Eq. 7.6, [`phonometry.noise_control.duct_modes.plane_wave_limit`](/reference/api/noise_control/duct-modes/#plane_wave_limit)). The four-pole algebra of this module is one-dimensional and is valid below it; above it several modes propagate at once and the result describes the plane-wave mode only, which is why a [`PlaneWaveWarning`](/reference/api/noise_control/duct-modes/#planewavewarning) is raised when the analysis reaches past it. |
+| `chain` | The [`SilencerChain`](/reference/api/noise_control/silencers/#silencerchain) that assembled this result, for a result built by [`SilencerChain.result`](/reference/api/noise_control/silencers/#silencerchainresult), and `None` for a named device. A chain is a list of four-pole elements rather than a named device, so it carries its geometry element by element instead of in `geometry`; exactly one of the two is present, and `plot_geometry` draws it. |
 
 ### ReactiveSilencerResult.plot()
 
@@ -614,7 +614,7 @@ ReactiveSilencerResult.plot_geometry(
 Draw the silencer cross-section to scale (dimensioned side cut).
 
 A named device is drawn from its `geometry`; a result assembled by a
-[`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) is drawn from that `chain`, duct by duct.
+[`SilencerChain`](/reference/api/noise_control/silencers/#silencerchain) is drawn from that `chain`, duct by duct.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
@@ -667,7 +667,7 @@ transmission-loss relation.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the device, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean transmission loss (more transmission loss is better). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the device, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean transmission loss (more transmission loss is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for signature symmetry with the other fiches; the silencer table already shows the insertion loss when it was computed. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -716,7 +716,7 @@ SilencerChain(
 
 A chain of four-pole elements that remembers the geometry it was given.
 
-[`duct_matrix`](/phonometry/reference/api/noise_control/silencers/#duct_matrix), [`shunt_matrix`](/phonometry/reference/api/noise_control/silencers/#shunt_matrix) and [`cascade`](/phonometry/reference/api/noise_control/silencers/#cascade) build any
+[`duct_matrix`](/reference/api/noise_control/silencers/#duct_matrix), [`shunt_matrix`](/reference/api/noise_control/silencers/#shunt_matrix) and [`cascade`](/reference/api/noise_control/silencers/#cascade) build any
 silencer layout the named devices do not cover, but they return bare
 matrices: the compound matrix of a hand-built chain is a stack of complex
 numbers, and nothing in it recalls that the first element was a 300 mm run
@@ -847,7 +847,7 @@ SilencerChain.result(
 ) -> ReactiveSilencerResult
 ```
 
-Evaluate the chain into a [`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult).
+Evaluate the chain into a [`ReactiveSilencerResult`](/reference/api/noise_control/silencers/#reactivesilencerresult).
 
 The port areas are the pipes the chain is connected between, which
 `transmission_loss` needs and the chain itself does not contain: put
@@ -908,7 +908,7 @@ it is the only one the drawing cannot identify by its dimensions.
 
 The compound four-pole matrix of the chain.
 
-**Returns:** The ordered product [`cascade`](/phonometry/reference/api/noise_control/silencers/#cascade) makes of the element matrices, `(n_freq, 2, 2)`.
+**Returns:** The ordered product [`cascade`](/reference/api/noise_control/silencers/#cascade) makes of the element matrices, `(n_freq, 2, 2)`.
 
 **Raises**
 
@@ -928,12 +928,12 @@ SilencerChainElement(
 )
 ```
 
-One recorded element of a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain).
+One recorded element of a [`SilencerChain`](/reference/api/noise_control/silencers/#silencerchain).
 
 The element carries its four-pole matrix and, with it, whatever geometry
 the call that produced the matrix was given. That is the whole asymmetry
-of a hand-built chain: [`duct_matrix`](/phonometry/reference/api/noise_control/silencers/#duct_matrix) is handed a length and an area,
-so a duct element knows its shape, while [`shunt_matrix`](/phonometry/reference/api/noise_control/silencers/#shunt_matrix) is handed an
+of a hand-built chain: [`duct_matrix`](/reference/api/noise_control/silencers/#duct_matrix) is handed a length and an area,
+so a duct element knows its shape, while [`shunt_matrix`](/reference/api/noise_control/silencers/#shunt_matrix) is handed an
 impedance and nothing else, so a shunt element has no shape to know.
 
 **Attributes**

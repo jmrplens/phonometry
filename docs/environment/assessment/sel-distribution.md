@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/assessment/sel-distribution.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/assessment/sel-distribution/
 
 # Impulsive Sound Exposure Statistics (ISO 13474)
 
@@ -269,7 +269,7 @@ plt.show()
   record, which this page predicts rather than measures.
 - [Errata in published sources](../../ERRATA.md): the shift
   Annex A prints as 1.04 dB and the five exceedance levels of Figure A.3.
-- API reference: [`environment.assessment.exposure_distribution`](https://docs.jmrp.io/phonometry/reference/api/environment/exposure-distribution/).
+- API reference: [`environment.assessment.exposure_distribution`](https://phonometry.dev/reference/api/environment/exposure-distribution/).
 
 ## References
 

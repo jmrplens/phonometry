@@ -19,7 +19,7 @@ the directional coefficients over the source positions (Clause 8.4).
 One subject: the free-field polar response of a surface and the single number
 Clause 8 distils from it, band by band. Part 1 of ISO 17497 is a different
 measurement, made in a reverberation room, and lives in
-[`phonometry.materials.diffusers.reverberation_room_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/); the two
+[`phonometry.materials.diffusers.reverberation_room_scattering`](/reference/api/materials/reverberation-room-scattering/); the two
 parts share no formula, and the helpers are named per part so they are never
 mixed. Neither part contains a numeric worked example.
 
@@ -88,11 +88,11 @@ diffusion_spectrum(
 Diffusion-coefficient spectrum `d(f)` (ISO 17497-2, Clause 8.5).
 
 Pairs the per-band diffusion coefficients `d` with their band centres and
-returns a plottable, reportable [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum). The coefficient
+returns a plottable, reportable [`DiffusionSpectrum`](/reference/api/materials/scattering-diffusion/#diffusionspectrum). The coefficient
 is the *directional* coefficient `d_theta` (Formula (5)/(6)) when it comes
 from a single source position, or the *random-incidence* coefficient `d`
 when it is the per-band average of the directional coefficients over the
-source positions (Clause 8.4, e.g. via [`random_incidence_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/#random_incidence_diffusion)
+source positions (Clause 8.4, e.g. via [`random_incidence_diffusion`](/reference/api/materials/scattering-diffusion/#random_incidence_diffusion)
 band by band). The optional normalised coefficients `d_n` (Formula (7))
 are carried through when supplied.
 
@@ -104,7 +104,7 @@ are carried through when supplied.
 | `diffusion` | Diffusion coefficient `d` per band. |
 | `normalized` | Optional normalised diffusion coefficient `d_n` per band; `None` when the reference flat surface was not measured. |
 
-**Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) with `.plot()` and `.report()`.
+**Returns:** A [`DiffusionSpectrum`](/reference/api/materials/scattering-diffusion/#diffusionspectrum) with `.plot()` and `.report()`.
 
 **Raises**
 
@@ -192,7 +192,7 @@ there is no pass/fail verdict.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-2 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-2 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for signature parity; the polar-response fiche has no extended table, so it renders the same body. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -218,7 +218,7 @@ DiffusionSpectrum(
 
 A diffusion-coefficient spectrum `d(f)` (ISO 17497-2, Clause 8.5).
 
-Where [`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult) holds the polar response of a single
+Where [`DiffusionResult`](/reference/api/materials/scattering-diffusion/#diffusionresult) holds the polar response of a single
 one-third-octave band, this holds the diffusion coefficient across the
 measured bands, so it can be tabulated and plotted against frequency as
 Clause 8.5 requires. The per-band coefficient is a *directional* diffusion
@@ -287,7 +287,7 @@ characterisation, so there is no pass/fail verdict.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-2 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 17497-2 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` and a normalised spectrum is present, the value table adds the normalised `d_n` column. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -314,9 +314,9 @@ directional_diffusion(
 
 Diffusion coefficient of a polar response (ISO 17497-2, Formula (5)/(6)).
 
-Convenience wrapper over [`directional_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#directional_diffusion_coefficient) that
+Convenience wrapper over [`directional_diffusion_coefficient`](/reference/api/materials/scattering-diffusion/#directional_diffusion_coefficient) that
 keeps the receiver angles alongside the levels and returns a plottable
-[`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult).
+[`DiffusionResult`](/reference/api/materials/scattering-diffusion/#diffusionresult).
 
 **Parameters**
 
@@ -326,7 +326,7 @@ keeps the receiver angles alongside the levels and returns a plottable
 | `levels` | Reflected sound-pressure level at each angle, in decibels. |
 | `weights` | Optional area weights `N_i` (Formula (8)); `None` uses the equal-area Formula (5). |
 
-**Returns:** A [`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult) with `.plot()`.
+**Returns:** A [`DiffusionResult`](/reference/api/materials/scattering-diffusion/#diffusionresult) with `.plot()`.
 
 **Raises**
 
@@ -357,7 +357,7 @@ $$
 
 where $p_i = 10^{L_i / 10}$. When each receiver samples a different
 area (Formula (6)) the per-receiver weights `N_i` (from
-[`area_factors`](/phonometry/reference/api/materials/scattering-diffusion/#area_factors)) enter:
+[`area_factors`](/reference/api/materials/scattering-diffusion/#area_factors)) enter:
 
 $$
 d_\theta = \frac{\left( \sum_i p_i N_i \right)^{2} - \sum_i N_i p_i^{2}} {\left( \sum_i N_i - 1 \right) \sum_i N_i p_i^{2}}
@@ -492,7 +492,7 @@ over the source positions. Hemispherical measurements use **equal**
 weightings (`weights is None`); two-dimensional (single-plane)
 measurements use the source weighting of Clause 8.4: weight 1 for the
 0 deg source and weight 3 for each of the four +/-30 deg, +/-60 deg sources
-(see [`TWO_DIMENSIONAL_SOURCE_WEIGHTS`](/phonometry/reference/api/materials/scattering-diffusion/#two_dimensional_source_weights)).
+(see [`TWO_DIMENSIONAL_SOURCE_WEIGHTS`](/reference/api/materials/scattering-diffusion/#two_dimensional_source_weights)).
 
 **Parameters**
 

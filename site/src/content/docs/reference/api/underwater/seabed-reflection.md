@@ -21,16 +21,16 @@ $$
 R = \frac{\rho_2 c_2 \sin\varphi - \rho_1 c_1 \cos\theta_2} {\rho_2 c_2 \sin\varphi + \rho_1 c_1 \cos\theta_2}
 $$
 
-* [`critical_angle`](/phonometry/reference/api/underwater/seabed-reflection/#critical_angle): the critical grazing angle
+* [`critical_angle`](/reference/api/underwater/seabed-reflection/#critical_angle): the critical grazing angle
   $\varphi_\mathrm{c} = \arccos(c_1/c_2)$ (only when `c2 > c1`); below it the
   wave is totally reflected ($\lvert R \rvert = 1$).
-* [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient): the complex `R` per grazing angle.
-* [`seabed_reflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabed_reflection): the complex `R`, its magnitude `|R|` and the
+* [`reflection_coefficient`](/reference/api/underwater/seabed-reflection/#reflection_coefficient): the complex `R` per grazing angle.
+* [`seabed_reflection`](/reference/api/underwater/seabed-reflection/#seabed_reflection): the complex `R`, its magnitude `|R|` and the
   bottom loss bundled with the interface parameters into a
-  [`SeabedReflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabedreflection) whose `.plot()` draws `|R|` versus grazing angle.
-* [`bottom_reflection_loss`](/phonometry/reference/api/underwater/seabed-reflection/#bottom_reflection_loss): the bottom loss
+  [`SeabedReflection`](/reference/api/underwater/seabed-reflection/#seabedreflection) whose `.plot()` draws `|R|` versus grazing angle.
+* [`bottom_reflection_loss`](/reference/api/underwater/seabed-reflection/#bottom_reflection_loss): the bottom loss
   $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ (dB), returned as a
-  [`BottomLossResult`](/phonometry/reference/api/underwater/seabed-reflection/#bottomlossresult) with a `.plot()`.
+  [`BottomLossResult`](/reference/api/underwater/seabed-reflection/#bottomlossresult) with a `.plot()`.
 
 Lossless fluid-fluid model (real $\rho$/`c`); sediment attenuation is
 out of scope. Densities enter only through the impedance ratio, so any
@@ -68,7 +68,7 @@ returned without warning.
 | `rho2` | Sediment density $\rho_2$. |
 | `c2` | Sound speed in the sediment `c2`, in m/s. |
 
-**Returns:** A [`BottomLossResult`](/phonometry/reference/api/underwater/seabed-reflection/#bottomlossresult).
+**Returns:** A [`BottomLossResult`](/reference/api/underwater/seabed-reflection/#bottomlossresult).
 
 **Raises**
 
@@ -215,10 +215,10 @@ seabed_reflection(
 Build a plottable seabed reflection-coefficient result (Rayleigh
 model).
 
-Evaluates [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) at `grazing_angle_deg` for the given
+Evaluates [`reflection_coefficient`](/reference/api/underwater/seabed-reflection/#reflection_coefficient) at `grazing_angle_deg` for the given
 fluid-fluid interface and bundles the complex `R`, its magnitude `|R|`,
 the bottom loss $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ and the
-interface parameters into a [`SeabedReflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabedreflection) that exposes
+interface parameters into a [`SeabedReflection`](/reference/api/underwater/seabed-reflection/#seabedreflection) that exposes
 `.plot()`. The maths is unchanged; this is a thin, plottable wrapper
 around the existing function (the same `ValueError` cases apply). At an
 angle of intromission $R = 0$ and the bottom loss is `inf` (total
@@ -234,7 +234,7 @@ transmission), returned without warning.
 | `rho2` | Sediment density $\rho_2$. |
 | `c2` | Sound speed in the sediment `c2`, in m/s. |
 
-**Returns:** A frozen [`SeabedReflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabedreflection).
+**Returns:** A frozen [`SeabedReflection`](/reference/api/underwater/seabed-reflection/#seabedreflection).
 
 **Raises**
 
@@ -265,7 +265,7 @@ Bundles the complex Rayleigh reflection coefficient `R` over a
 grazing-angle grid with its magnitude `|R|`, the bottom loss
 $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ and the fluid-fluid
 interface parameters, so the classic `|R|` versus grazing-angle curve
-can be drawn with `plot`. Build it with [`seabed_reflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabed_reflection);
+can be drawn with `plot`. Build it with [`seabed_reflection`](/reference/api/underwater/seabed-reflection/#seabed_reflection);
 the frozen instance is a thin, plottable wrapper and re-runs none of the
 maths.
 

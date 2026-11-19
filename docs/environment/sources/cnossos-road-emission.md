@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/sources/cnossos-road-emission.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/sources/cnossos-road-emission/
 
 # CNOSSOS-EU road traffic source emission
 
@@ -588,7 +588,7 @@ level to 0.005 dB, inside the two decimals the test set prints.
 
 ## See also
 
-- API reference: [`environment.sources.cnossos_road`](https://docs.jmrp.io/phonometry/reference/api/environment/cnossos-road/).
+- API reference: [`environment.sources.cnossos_road`](https://phonometry.dev/reference/api/environment/cnossos-road/).
 - [Outdoor Sound Propagation](../propagation/outdoor-propagation.md): the
   ISO 9613-2 chain that carries a source power to a receiver.
 - [Environmental noise levels](../assessment/environmental-levels.md): the

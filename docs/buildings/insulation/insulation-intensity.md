@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-intensity.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/insulation-intensity/
 
 # Sound Insulation by Intensity (ISO 15186)
 
@@ -768,7 +768,7 @@ cannot feed ISO 717-1.
   every scan.
 - [Theory](../../reference/theory/rooms-buildings.md): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.intensity_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/intensity-insulation/).
+- API reference: [`building.measurement.intensity_insulation`](https://phonometry.dev/reference/api/building/intensity-insulation/).
 
 ## References
 

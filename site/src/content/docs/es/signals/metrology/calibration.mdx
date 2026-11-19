@@ -64,7 +64,7 @@ Hansen y Howard 2017, §3.4) y trata la diferencia pre/post como tu cota de
 deriva. La sección de
 [campo, laboratorio y deriva](#comprobaciones-verificacion-y-deriva)
 de más abajo convierte eso en reglas concretas, y el recorrido
-[Construye un sonómetro](/phonometry/es/signals/sound-level-meter/) empieza
+[Construye un sonómetro](/es/signals/sound-level-meter/) empieza
 exactamente en este paso antes de calcular ningún nivel.
 
 ## ¿Por qué calibrar? La teoría
@@ -211,7 +211,7 @@ un anclaje a una sola frecuencia. La *forma* de la respuesta de la cadena lejos
 de la frecuencia del calibrador sale de los datos de campo libre del propio
 micrófono, no de esta comprobación: las tres sensibilidades y dónde se aplica
 cada una están en
-[Micrófonos](/phonometry/es/devices/electroacoustics/microphones/). Vuelve a poner
+[Micrófonos](/es/devices/electroacoustics/microphones/). Vuelve a poner
 la pantalla antiviento antes de medir, y recuerda que tiene su propia pérdida por
 inserción de unas décimas de decibelio en alta frecuencia, que la calibración no
 ha visto.
@@ -440,7 +440,7 @@ $L_\text{FS} = 20\log_{10}\!\big(S/(\sqrt{2}\,p_0)\big)$. Ese es el nivel
 sinusoidal más alto que el convertidor puede llevar sin recortar; contrástalo con
 el nivel de presión acústica de sobrecarga del propio micrófono, que es una
 propiedad de la cápsula y del preamplificador y no del convertidor (ver
-[Micrófonos](/phonometry/es/devices/electroacoustics/microphones/)), y mantén el
+[Micrófonos](/es/devices/electroacoustics/microphones/)), y mantén el
 menor de los dos al menos 10 dB por encima del suceso más fuerte que esperes. Un
 suceso recortado no se anuncia: se lee *de menos*, y de forma verosímil.
 
@@ -491,7 +491,7 @@ esta vía.
 
 Cuidado con la palabra *sensibilidad*: significa cosas recíprocas en las dos
 páginas. Aquí $S$ son pascales por unidad digital; en la página de
-[Micrófonos](/phonometry/es/devices/electroacoustics/microphones/), $M$ son
+[Micrófonos](/es/devices/electroacoustics/microphones/), $M$ son
 voltios por pascal, expuesta como `sensitivity_mv_per_pa`, y las
 caracterizaciones de campo libre, de presión y de incidencia aleatoria son tres
 números distintos para la misma cápsula: usa la de campo libre a la frecuencia de
@@ -544,7 +544,7 @@ La calibración vive en tres escalas de tiempo:
 
 La pareja antes/después y la tolerancia de clase del calibrador son las dos
 entradas de Tipo B que consume el
-[balance de incertidumbre](/phonometry/es/signals/metrology/gum-uncertainty/) de un
+[balance de incertidumbre](/es/signals/metrology/gum-uncertainty/) de un
 nivel. Una comprobación que no se escribió no se puede propagar, así que anota,
 en el momento de la comprobación:
 
@@ -608,7 +608,7 @@ instrumentos del IEC TC 29 escritas desde 2013 (5.1.15): la desviación dentro d
 su límite de aceptación **y** la incertidumbre dentro de su máximo, ambos
 inclusive. La regla por sí sola es
 `metrology.verify_conformance`, y
-[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/#la-regla-de-conformidad-del-iec-tc-29)
+[Conformidad y verificación](/es/signals/metrology/compliance-verification/#la-regla-de-conformidad-del-iec-tc-29)
 la recorre sobre los ejemplos que imprimen las normas.
 
 ```python
@@ -905,7 +905,7 @@ estabilización, el indicador de alimentación, las emisiones de radiofrecuencia
 las descargas electrostáticas de la IEC 60942 no se juzgan. Tampoco se ejecutan los
 ensayos periódicos de la IEC 61672-3: `metrology.verify_sound_level_meter_periodic`
 juzga los resultados que devuelve un laboratorio ([Ensayos periódicos de un
-sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)),
+sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/)),
 y aquí nada verifica un sonómetro ni le asigna una clase. La parte de dBFS de esta página queda fuera
 de cualquier norma y no hace ninguna afirmación física.
 </ScopeClaim>
@@ -915,12 +915,12 @@ de cualquier norma y no hace ninguna afirmación física.
 
 ## Véase también
 
-- [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): el recorrido que empieza en este paso de calibración y termina en un instrumento verificado por clase.
-- [Niveles](/phonometry/es/signals/levels/levels/): todas las métricas que consumen el `calibration_factor` derivado aquí.
-- [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): una sensibilidad por canal cuando los canales difieren.
-- [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/signals/metrology/gum-uncertainty/): propagar la tolerancia del calibrador y la cota de deriva a la incertidumbre de un nivel.
-- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/): la regla de conformidad del IEC TC 29 con la que se alcanza el veredicto sobre el calibrador, sobre los ejemplos que imprimen IEC 60942 e IEC 61672-1.
-- Referencia de la API: [`metrology.calibration`](/phonometry/es/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/phonometry/es/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/phonometry/es/reference/api/metrology/conformance/) y [`phonometry`](/phonometry/es/reference/api/filters/phonometry/).
+- [Construye un sonómetro](/es/signals/sound-level-meter/): el recorrido que empieza en este paso de calibración y termina en un instrumento verificado por clase.
+- [Niveles](/es/signals/levels/levels/): todas las métricas que consumen el `calibration_factor` derivado aquí.
+- [Multicanal y rendimiento](/es/signals/filters/multichannel/): una sensibilidad por canal cuando los canales difieren.
+- [Incertidumbre de medida (GUM y Monte Carlo)](/es/signals/metrology/gum-uncertainty/): propagar la tolerancia del calibrador y la cota de deriva a la incertidumbre de un nivel.
+- [Conformidad y verificación](/es/signals/metrology/compliance-verification/): la regla de conformidad del IEC TC 29 con la que se alcanza el veredicto sobre el calibrador, sobre los ejemplos que imprimen IEC 60942 e IEC 61672-1.
+- Referencia de la API: [`metrology.calibration`](/es/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/es/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/es/reference/api/metrology/conformance/) y [`phonometry`](/es/reference/api/filters/phonometry/).
 
 </SeeAlso>
 

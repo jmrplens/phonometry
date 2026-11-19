@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/support.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/support/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/start/support/
 
 # Support the project
 

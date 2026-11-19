@@ -13,7 +13,7 @@ The signal toolbox of the metrology domain: deterministic test signals and
 the two sample-rate operations every measurement chain eventually needs,
 with their accuracy stated instead of implied.
 
-* [`noise_signal`](/phonometry/reference/api/signals/test-signals/#noise_signal): Gaussian noise with an exact power-law spectral
+* [`noise_signal`](/reference/api/signals/test-signals/#noise_signal): Gaussian noise with an exact power-law spectral
   slope: white (0 dB/octave), pink (-3.01), red (-6.02, also called
   Brownian), blue (+3.01) and violet (+6.02). The autospectral density
   follows $G_{xx}(f) \propto f^\alpha$ with $\alpha$ = 0,
@@ -32,7 +32,7 @@ with their accuracy stated instead of implied.
   to the requested RMS exactly. With the same `seed` the generator is
   fully deterministic across runs.
 
-* [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst): the gated sine burst of IEC 60268-1:1985 (Appendix A,
+* [`tone_burst`](/reference/api/signals/test-signals/#tone_burst): the gated sine burst of IEC 60268-1:1985 (Appendix A,
   Clause A2): the tone starts at a zero crossing and lasts an integral
   number of full periods, either as a single burst or as a repetitive train
   with a stated repetition rate. The result records the rectangular gating
@@ -40,7 +40,7 @@ with their accuracy stated instead of implied.
   dynamic-response tests can state their stimulus instead of hand-rolling
   it.
 
-* [`resample_signal`](/phonometry/reference/api/signals/test-signals/#resample_signal): polyphase resampling behind an explicit
+* [`resample_signal`](/reference/api/signals/test-signals/#resample_signal): polyphase resampling behind an explicit
   anti-alias specification. The lowpass FIR is designed here (Kaiser
   window method) from two numbers the caller controls (the stopband
   attenuation in dB and the transition-band fraction of the target
@@ -48,10 +48,10 @@ with their accuracy stated instead of implied.
   alias rejection of a resampled record is a documented property, not a
   library default.
 
-* [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay): band-limited delay by an arbitrary
+* [`fractional_delay`](/reference/api/signals/test-signals/#fractional_delay): band-limited delay by an arbitrary
   (sub-sample) number of samples via a frequency-domain phase ramp,
   `linear` (zero-padded, for transients and impulse responses; the same
-  kernel [`align_impulse_responses`](/phonometry/reference/api/signals/correlation/#align_impulse_responses)
+  kernel [`align_impulse_responses`](/reference/api/signals/correlation/#align_impulse_responses)
   uses) or `circular` (for periodic records, exact to machine precision
   on bin-centered tones).
 
@@ -106,7 +106,7 @@ signal is, or use odd lengths, and the operation is exact.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the delayed record comes out in Pa. |
+| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the delayed record comes out in Pa. |
 | `delay` | Delay in samples (fractional and negative allowed); magnitude less than the record length. |
 | `mode` | Boundary convention, `'linear'` or `'circular'`. |
 
@@ -189,14 +189,14 @@ default.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the resampled record comes out in Pa and comes back as a Signal at the new rate. |
-| `fs` | Sample rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples, so the resampled record comes out in Pa and comes back as a Signal at the new rate. |
+| `fs` | Sample rate of `x`, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fs_new` | Target sample rate, in Hz. The ratio `fs_new/fs` must be a rational number with denominator at most `max_denominator` (e.g. 48000/44100 = 160/147). |
 | `stopband_attenuation` | Anti-alias stopband attenuation, in dB (at least 30). |
 | `transition_width` | Transition-band width as a fraction of the smaller Nyquist frequency, in (0, 0.5]. |
 | `max_denominator` | Largest denominator accepted for the rational rate ratio. |
 
-**Returns:** A [`ResampledSignalResult`](/phonometry/reference/api/signals/test-signals/#resampledsignalresult).
+**Returns:** A [`ResampledSignalResult`](/reference/api/signals/test-signals/#resampledsignalresult).
 
 **Raises**
 
@@ -233,7 +233,7 @@ can be verified against the filter itself.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | The resampled record, in the type the input arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) at the new rate when it was one (in pascals and carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
+| `signal` | The resampled record, in the type the input arrived as: a [`Signal`](/reference/api/io/io/#signal) at the new rate when it was one (in pascals and carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `fs` | Sample rate of `signal`, in Hz. |
 | `original_fs` | Sample rate of the input, in Hz. |
 | `up` | Interpolation factor of the rational ratio `up/down`. |
@@ -312,7 +312,7 @@ residual step of up to
 $\text{amplitude} \cdot \sin(\pi \cdot \text{frequency}/f_\mathrm{s})$
 there
 (e.g. 10 cycles of 997 Hz at 48 kHz span 481.44 samples, gated at
-481); a [`ToneBurstWarning`](/phonometry/reference/api/signals/test-signals/#toneburstwarning) quantifies the realized residual.
+481); a [`ToneBurstWarning`](/reference/api/signals/test-signals/#toneburstwarning) quantifies the realized residual.
 
 **Parameters**
 
@@ -327,7 +327,7 @@ there
 | `pre_silence` | Silence before the first burst, in seconds. |
 | `post_silence` | Silence after the last burst (or after the last repetition period), in seconds. |
 
-**Returns:** A [`ToneBurstResult`](/phonometry/reference/api/signals/test-signals/#toneburstresult).
+**Returns:** A [`ToneBurstResult`](/reference/api/signals/test-signals/#toneburstresult).
 
 **Raises**
 
@@ -410,6 +410,6 @@ Plot the burst waveform with its gating envelope.
 
 A tone burst whose gate cannot close on the tone's zero crossing.
 
-Emitted by [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) when the sample rate and the tone frequency
+Emitted by [`tone_burst`](/reference/api/signals/test-signals/#tone_burst) when the sample rate and the tone frequency
 are incommensurate, so the gate closes away from the final zero crossing
 and leaves a residual step, which the message quantifies.

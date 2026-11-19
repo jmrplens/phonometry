@@ -45,7 +45,7 @@ para tonos, la alternativa de campo libre, lo que la tabla 3 pide determinar
 para cada tipo de ruido y las erratas de las tablas que la norma imprime para
 la absorción del aire. Qué vía encaja con qué trabajo por
 debajo de 10 kHz se sopesa en
-[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+[Potencia acústica](/es/devices/emission/sound-power/).
 
 ## 1. La banda de octava de 16 kHz (ISO 9295)
 
@@ -213,7 +213,7 @@ dos ceros se imprimen un 10 % altas: «0,033 0» por 0,030 0, «0,04 4» por
 el mayor error de las tablas, 0,005 0 Np/m, y llevada a la fórmula (7)
 cualquiera de las tres sube el nivel al menos 0,41 dB. La lista
 completa, celda a celda, está en el
-[registro de erratas](/phonometry/es/reference/errata/). Las 581 celdas
+[registro de erratas](/es/reference/errata/). Las 581 celdas
 correctas guardan una sorpresa menor: solo se reproducen cifra a cifra con la
 temperatura convertida como $\theta + 273{,}16$ K, el punto triple del agua,
 donde la escala Celsius pone 273,15 K. La biblioteca convierte con 273,15 K,
@@ -373,7 +373,7 @@ plt.show()
 
 El cuarto método es ISO 3744 en una sala semianecoica, con las tres bandas de
 tercio de octava de la octava de 16 kHz, y
-[`sound_power_pressure`](/phonometry/es/devices/emission/sound-power-pressure/)
+[`sound_power_pressure`](/es/devices/emission/sound-power-pressure/)
 lo admite tal cual (sin `frequencies`, porque la tabla de ponderación A de
 ISO 3744 se detiene en 10 kHz). Lo que añade ISO 9295 es la fórmula (10): más
 allá de un radio de medida de 2 m el aire absorbe lo bastante en el camino
@@ -449,7 +449,7 @@ La sala, el brazo y los instrumentos se suponen cualificados: la cualificación
 de la sala según ISO 3741 y la planitud de la cadena son comprobaciones que
 hace el laboratorio, la fuente de referencia llega calibrada (para ruido de
 banda ancha, como la calibración de ISO 6926 de
-[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/)
+[Campo libre y fuente de referencia](/es/devices/emission/free-field-qualification/)
 si el laboratorio la hizo aquí), y la estabilidad de ±10 % de
 $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ no se vigila. La corrección de
 fondo es la de ISO 3741, aplicada a los niveles antes de pasarlos
@@ -465,19 +465,19 @@ reproducibilidad de 3 dB o menos en la octava de 16 kHz.
 
 ## Véase también
 
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): cómo elegir
+- [Potencia acústica](/es/devices/emission/sound-power/): cómo elegir
   entre las vías de determinación por debajo de 10 kHz y la declaración de
   ISO 4871.
-- [Potencia acústica en cámara reverberante (ISO 3741)](/phonometry/es/devices/emission/sound-power-reverberation/):
+- [Potencia acústica en cámara reverberante (ISO 3741)](/es/devices/emission/sound-power-reverberation/):
   la técnica de sala que esta norma extiende, y las $C_1$ y $C_2$ que toma de
   ella.
-- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/es/devices/emission/sound-power-pressure/):
   la superficie envolvente del método de campo libre.
-- [Propagación en exteriores (ISO 9613-1 / ISO 9613-2)](/phonometry/es/environment/propagation/outdoor-propagation/):
+- [Propagación en exteriores (ISO 9613-1 / ISO 9613-2)](/es/environment/propagation/outdoor-propagation/):
   el coeficiente de atenuación a partir del que se escribe el anexo A.
-- [Erratas](/phonometry/es/reference/errata/): las 43 celdas mal impresas de las
+- [Erratas](/es/reference/errata/): las 43 celdas mal impresas de las
   tablas 1 y 2, y la frecuencia de relajación del oxígeno que la fórmula (A.5)
   escribe con un cero.
-- Referencia de la API: [`emission.sound_power_high_frequency`](/phonometry/es/reference/api/power/sound-power-high-frequency/).
+- Referencia de la API: [`emission.sound_power_high_frequency`](/es/reference/api/power/sound-power-high-frequency/).
 
 </SeeAlso>

@@ -32,21 +32,21 @@ test of ISO 4869-1 are typical of their type. It is not the basic type test,
 and its data "are not intended to be quoted as representing the real-ear
 sound attenuation of an ear-muff, nor the protection provided by the
 ear-muff"; the Introduction adds that its results are not those of
-ISO 4869-1. So [`EarmuffInsertionLossResult`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuffinsertionlossresult) is not an input of
-[`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value),
-[`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) or
-[`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating): those take the real-ear attenuation of
-sixteen subjects, [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation), and
+ISO 4869-1. So [`EarmuffInsertionLossResult`](/reference/api/hearing/earmuff-insertion-loss/#earmuffinsertionlossresult) is not an input of
+[`phonometry.hearing.assumed_protection_value`](/reference/api/hearing/hearing-protectors/#assumed_protection_value),
+[`phonometry.hearing.hml_rating`](/reference/api/hearing/hearing-protectors/#hml_rating) or
+[`phonometry.hearing.snr_rating`](/reference/api/hearing/hearing-protectors/#snr_rating): those take the real-ear attenuation of
+sixteen subjects, [`phonometry.hearing.real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation), and
 nothing here converts one into the other.
 
-**The test site (5.1.4, 5.2).** [`check_random_incidence_field`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#check_random_incidence_field) judges
+**The test site (5.1.4, 5.2).** [`check_random_incidence_field`](/reference/api/hearing/earmuff-insertion-loss/#check_random_incidence_field) judges
 the random-incidence field of 5.2.2 with the diffuse-field judgement of
 ISO 8253-2:2009, 5.3, and this standard's Table 1
-([`RANDOM_INCIDENCE_VARIATION_LIMITS`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#random_incidence_variation_limits)); Annex A notes that the ATF
+([`RANDOM_INCIDENCE_VARIATION_LIMITS`](/reference/api/hearing/earmuff-insertion-loss/#random_incidence_variation_limits)); Annex A notes that the ATF
 itself may serve as the directional microphone where its front-to-random
-index, [`ATF_FRONT_TO_RANDOM_INDEX`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index), reaches 4 dB.
-[`check_plane_progressive_wave`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#check_plane_progressive_wave) judges the plane wave of 5.2.3, and
-[`verify_fixture_isolation`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#verify_fixture_isolation) the acoustic isolation of the fixture with
+index, [`ATF_FRONT_TO_RANDOM_INDEX`](/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index), reaches 4 dB.
+[`check_plane_progressive_wave`](/reference/api/hearing/earmuff-insertion-loss/#check_plane_progressive_wave) judges the plane wave of 5.2.3, and
+[`verify_fixture_isolation`](/reference/api/hearing/earmuff-insertion-loss/#verify_fixture_isolation) the acoustic isolation of the fixture with
 its isolation cup (5.1.4).
 
 **The uncertainty (Annex B).** The insertion loss is modelled as the two
@@ -62,7 +62,7 @@ $$
 deviation of the mean of the repeated measurements; Table B.1 prints typical
 values, 0.5 dB open, 1.0 dB occluded, 0.3 dB, 0.5 dB and 0.2 dB, which give
 $u$ = 1.3 dB and $U$ = 2.6 dB
-([`EARMUFF_INSERTION_LOSS_UNCERTAINTY`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuff_insertion_loss_uncertainty)).
+([`EARMUFF_INSERTION_LOSS_UNCERTAINTY`](/reference/api/hearing/earmuff-insertion-loss/#earmuff_insertion_loss_uncertainty)).
 
 Clause, table and formula numbers refer to ISO 4869-3:2007(E).
 
@@ -114,7 +114,7 @@ not a condition judged here.
 | `front_to_rear_index` | The microphone's front-to-rear sensitivity index, one number or one per band, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
-**Returns:** [`PlaneProgressiveWaveCheck`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#planeprogressivewavecheck). Without the directional readings the directional test is not judged and the verdict does not pass.
+**Returns:** [`PlaneProgressiveWaveCheck`](/reference/api/hearing/earmuff-insertion-loss/#planeprogressivewavecheck). Without the directional readings the directional test is not judged and the verdict does not pass.
 
 **Raises**
 
@@ -146,13 +146,13 @@ the level at the reference point, and the right and left positions within
 microphone reads at the reference point in any two directions, the
 directions of the extremes among them, stay within the variation Table 1
 allows for its front-to-random sensitivity index
-([`RANDOM_INCIDENCE_VARIATION_LIMITS`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#random_incidence_variation_limits)).
+([`RANDOM_INCIDENCE_VARIATION_LIMITS`](/reference/api/hearing/earmuff-insertion-loss/#random_incidence_variation_limits)).
 
 This is the diffuse-field judgement of ISO 8253-2:2009, 5.3, with this
 standard's Table 1, and it returns the same
-[`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck). The fixture itself
+[`DiffuseSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck). The fixture itself
 may be the directional microphone in the bands where its index
-([`ATF_FRONT_TO_RANDOM_INDEX`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index)) reaches 4 dB; pass the index band
+([`ATF_FRONT_TO_RANDOM_INDEX`](/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index)) reaches 4 dB; pass the index band
 by band, NaN where it has none, and the bands it cannot judge are left
 unjudged.
 
@@ -166,7 +166,7 @@ unjudged.
 | `front_to_random_index` | The directional microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels`. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
-**Returns:** [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
+**Returns:** [`DiffuseSoundFieldCheck`](/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
 
 **Raises**
 
@@ -210,7 +210,7 @@ to Table B.1's 0.3 dB, 0.5 dB and 0.2 dB.
 
 The result is an insertion loss on a fixture. It screens production and
 ageing and is not the real-ear attenuation ISO 4869-2 needs (Clause 1);
-use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) for that.
+use [`phonometry.hearing.real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) for that.
 
 **Parameters**
 
@@ -218,13 +218,13 @@ use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearin
 | :--- | :--- |
 | `open_levels` | The levels without the earmuff, one spectrum or a `(repetitions, bands)` grid, in dB. |
 | `occluded_levels` | The levels with it, one spectrum or one per fitting, in dB. |
-| `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz ([`EARMUFF_TEST_BANDS_HZ`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuff_test_bands_hz)). |
+| `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz ([`EARMUFF_TEST_BANDS_HZ`](/reference/api/hearing/earmuff-insertion-loss/#earmuff_test_bands_hz)). |
 | `isolation_cup_levels` | The level with the isolation cup in place of the earmuff per band, in dB, to check that it reads at least 10 dB lower (5.3). |
 | `fixture_uncertainty_db` | $u(\delta_1)$, in dB. |
 | `sound_field_uncertainty_db` | $u(\delta_2)$, in dB. |
 | `equipment_uncertainty_db` | $u(\delta_3)$, in dB. |
 
-**Returns:** [`EarmuffInsertionLossResult`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuffinsertionlossresult).
+**Returns:** [`EarmuffInsertionLossResult`](/reference/api/hearing/earmuff-insertion-loss/#earmuffinsertionlossresult).
 
 **Raises**
 
@@ -302,7 +302,7 @@ The budget of Table B.1 for one band of this measurement.
 | :--- | :--- |
 | `frequency` | A centre frequency of the measurement, in hertz. |
 
-**Returns:** [`InsertionLossUncertaintyBudget`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#insertionlossuncertaintybudget).
+**Returns:** [`InsertionLossUncertaintyBudget`](/reference/api/hearing/earmuff-insertion-loss/#insertionlossuncertaintybudget).
 
 **Raises**
 
@@ -716,7 +716,7 @@ resilient mounting (5.1.2).
 | `cup_levels` | The level with the cup sealed on, per band, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
-**Returns:** [`FixtureIsolationVerification`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#fixtureisolationverification).
+**Returns:** [`FixtureIsolationVerification`](/reference/api/hearing/earmuff-insertion-loss/#fixtureisolationverification).
 
 **Raises**
 

@@ -8,7 +8,7 @@ sidebar:
 Figures of merit of a spectral-analysis taper (Harris 1978).
 
 The window is the one choice every Fourier estimator forces and the one
-the estimators of [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) leave open in their
+the estimators of [`phonometry.signals.spectra`](/reference/api/signals/spectra/) leave open in their
 `window` parameter. Harris (1978, *On the use of windows for harmonic
 analysis with the discrete Fourier transform*) turned that choice into a
 table of numbers: equivalent noise bandwidth, coherent gain, scalloping
@@ -16,11 +16,11 @@ loss, worst-case processing loss, highest sidelobe level and the -3 dB
 main-lobe width: the trade-off between resolution, leakage and
 amplitude accuracy, read rather than guessed.
 
-[`window_metrics`](/phonometry/reference/api/signals/windows/#window_metrics) computes those figures for any taper
+[`window_metrics`](/reference/api/signals/windows/#window_metrics) computes those figures for any taper
 `scipy.signal.get_window` accepts, sampling it DFT-even (periodic)
 exactly as the Welch estimators of
-[`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) and the multitaper estimator of
-[`phonometry.signals.multitaper`](/phonometry/reference/api/signals/multitaper/) apply it, so the numbers describe
+[`phonometry.signals.spectra`](/reference/api/signals/spectra/) and the multitaper estimator of
+[`phonometry.signals.multitaper`](/reference/api/signals/multitaper/) apply it, so the numbers describe
 the window as this library actually uses it.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -37,7 +37,7 @@ window_metrics(
 Figures of merit of a spectral-analysis taper (Harris 1978).
 
 Computes the numbers behind the window trade-off for any taper the
-`window` parameter of the [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/)
+`window` parameter of the [`phonometry.signals.spectra`](/reference/api/signals/spectra/)
 estimators accepts: the
 equivalent noise bandwidth and coherent gain (closed forms of the
 samples, machine-exact), and the scalloping loss, worst-case
@@ -53,7 +53,7 @@ the Welch estimators apply it.
 | `window` | Window name or `(name, param)` tuple, anything `scipy.signal.get_window` accepts (e.g. `'hann'`, `('kaiser', 8.6)`, `('tukey', 0.5)`). |
 | `n` | Window length, in samples (at least 16). |
 
-**Returns:** A [`WindowMetricsResult`](/phonometry/reference/api/signals/windows/#windowmetricsresult).
+**Returns:** A [`WindowMetricsResult`](/reference/api/signals/windows/#windowmetricsresult).
 
 **Raises**
 
@@ -85,7 +85,7 @@ Losses are positive dB (how much is lost), sidelobe levels negative dB
 `fs/n` for Hz), matching the conventions of Harris' Table 1. The
 window is sampled DFT-even (periodic), exactly as
 `scipy.signal.welch` and the estimators of
-[`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) use it.
+[`phonometry.signals.spectra`](/reference/api/signals/spectra/) use it.
 
 **Attributes**
 

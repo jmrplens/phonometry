@@ -6,7 +6,7 @@ description: "Usa phonometry en Jupyter y JupyterLab: el kernel y los extras, la
 Un cuaderno ejecuta phonometry en un kernel de IPython corriente, así que se
 instala igual que en cualquier otro sitio; lo que añade el cuaderno es cómo se
 muestra un resultado bajo una celda. [En un
-cuaderno](/phonometry/es/start/getting-started/#en-un-cuaderno), en Primeros
+cuaderno](/es/start/getting-started/#en-un-cuaderno), en Primeros
 pasos, recorre una primera celda y la tabla que muestra; esta página es el
 resto de lo que encuentra quien trabaja en un cuaderno.
 
@@ -110,7 +110,7 @@ del cuaderno; `[report]` lo escribe y `[plot]` dibuja su gráfica.
 `io.write_video` y las funciones que escriben animaciones FDTD ejecutan
 ffmpeg, un programa que pip no instala. En Debian llega con los paquetes del
 sistema, con `apt install ffmpeg`, y [Escribir
-vídeos](/phonometry/es/io/videos/) da la orden para conda, macOS y Windows.
+vídeos](/es/io/videos/) da la orden para conda, macOS y Windows.
 Las clases de visualización del propio IPython muestran después el archivo
 bajo la celda:
 

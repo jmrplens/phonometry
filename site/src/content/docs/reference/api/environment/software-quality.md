@@ -21,8 +21,8 @@ is those four:
   +/-0.05 dB round the result given to two decimals. The Test Case Results
   Comparison form (TRC form, Tables B.1 and B.2) lists each result beside its
   limits and answers "Result inside tolerances: yes/no".
-  [`verify_calculation_results`](/phonometry/reference/api/environment/software-quality/#verify_calculation_results) fills that column and returns the
-  verdict, [`CalculationVerification`](/phonometry/reference/api/environment/software-quality/#calculationverification).
+  [`verify_calculation_results`](/reference/api/environment/software-quality/#verify_calculation_results) fills that column and returns the
+  verdict, [`CalculationVerification`](/reference/api/environment/software-quality/#calculationverification).
 * **The characteristic values of a set of level differences**, Annex C.
   Levels calculated twice at the same receiver points (in the reference
   configuration and in the faster "modified configuration" a noise map is
@@ -30,21 +30,21 @@ is those four:
   the differences by two order statistics of a random sample of them: the
   0.1-quantile $q_{0.1}$ and the 0.9-quantile $q_{0.9}$, so that
   80 % of the differences are expected between the two.
-  [`level_difference_quantiles`](/phonometry/reference/api/environment/software-quality/#level_difference_quantiles) sorts the sample, takes the ranking
-  positions of [`ranking_positions`](/phonometry/reference/api/environment/software-quality/#ranking_positions-1) and returns
-  [`LevelDifferenceQuantiles`](/phonometry/reference/api/environment/software-quality/#leveldifferencequantiles), with the mean and the estimated standard
+  [`level_difference_quantiles`](/reference/api/environment/software-quality/#level_difference_quantiles) sorts the sample, takes the ranking
+  positions of [`ranking_positions`](/reference/api/environment/software-quality/#ranking_positions-1) and returns
+  [`LevelDifferenceQuantiles`](/reference/api/environment/software-quality/#leveldifferencequantiles), with the mean and the estimated standard
   deviation C.5 asks for beside them.
 * **Where the sample is taken**, C.2 and C.3: a uniform sample of `M` of
   the `N` single points by the ordinal numbers
-  $\mathrm{IP}((i - 0.5) N / M)$ ([`uniform_sample_indices`](/phonometry/reference/api/environment/software-quality/#uniform_sample_indices)), or
+  $\mathrm{IP}((i - 0.5) N / M)$ ([`uniform_sample_indices`](/reference/api/environment/software-quality/#uniform_sample_indices)), or
   of points along sound contours of total length `L` at the chainages
-  $\mathrm{IP}((i - 0.5) L / M)$ ([`contour_sample_chainages_m`](/phonometry/reference/api/environment/software-quality/#contour_sample_chainages_m)),
+  $\mathrm{IP}((i - 0.5) L / M)$ ([`contour_sample_chainages_m`](/reference/api/environment/software-quality/#contour_sample_chainages_m)),
   with the points closer than 2 m to a source or an obstacle left out first.
 * **The precision of a method across programs**, 4.5.2 and A.3: with `M`
   participants of a round robin calculating the same `N` receivers, the
   0.9-quantile of the `N` largest absolute deviations from the mean level
-  at each receiver ([`round_robin_precision`](/phonometry/reference/api/environment/software-quality/#round_robin_precision),
-  [`RoundRobinPrecision`](/phonometry/reference/api/environment/software-quality/#roundrobinprecision)).
+  at each receiver ([`round_robin_precision`](/reference/api/environment/software-quality/#round_robin_precision),
+  [`RoundRobinPrecision`](/reference/api/environment/software-quality/#roundrobinprecision)).
 
 The rest of the standard (the documentation a method has to have, the
 declaration of conformity, the QA data format of Annex D) is a set of
@@ -115,7 +115,7 @@ is therefore not recorded as an erratum, which needs a defect whose intended
 reading the documents establish, and it is not corrected either.
 
 What decides the behaviour is that both standards print (C.2) the same way.
-[`ranking_positions`](/phonometry/reference/api/environment/software-quality/#ranking_positions-1) applies what they print: Table C.1 from 20 to 50
+[`ranking_positions`](/reference/api/environment/software-quality/#ranking_positions-1) applies what they print: Table C.1 from 20 to 50
 values, Formulas (C.1) and (C.2) above. A program that extended the symmetric
 rule past 50 would report $q_{0.9}$ one rank higher than this one for
 half of all sample sizes, which is exactly the disagreement between two
@@ -264,7 +264,7 @@ contour_sample_chainages_m(
 Where the sample points sit on the sound contours (ISO 17534-1:2015, C.3).
 
 With the contours to be designated laid end to end (their sections within
-[`SAMPLE_CLEARANCE_M`](/phonometry/reference/api/environment/software-quality/#sample_clearance_m) of a source or an obstacle left out) to a total
+[`SAMPLE_CLEARANCE_M`](/reference/api/environment/software-quality/#sample_clearance_m) of a source or an obstacle left out) to a total
 length `L`, the `M` sample points sit at the chainages
 
 $$
@@ -280,14 +280,14 @@ short (115 m for `L` = 184 m and `M` = 20, where `L/M` is 9.2), and
 through the binary fraction nearest a decimal length such as 22.4 m, so
 can one that the decimal length puts on a whole metre. The level of the
 contour there is compared with a single-point calculation at the same
-place, and the differences go to [`level_difference_quantiles`](/phonometry/reference/api/environment/software-quality/#level_difference_quantiles).
+place, and the differences go to [`level_difference_quantiles`](/reference/api/environment/software-quality/#level_difference_quantiles).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `total_length_m` | `L`, the length of the contours that remain, in metres, long enough that no two points share a whole metre, which is always so from `sample_size` metres on. |
-| `sample_size` | `M`, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size). |
+| `sample_size` | `M`, at least [`MIN_SAMPLE_SIZE`](/reference/api/environment/software-quality/#min_sample_size). |
 
 **Returns:** The `M` chainages, in metres, in increasing order.
 
@@ -310,13 +310,13 @@ The 0.1- and 0.9-quantiles of a sample of level differences
 (ISO 17534-1:2015, C.4).
 
 The sample is sorted in ascending order and the values at the ranking
-positions of [`ranking_positions`](/phonometry/reference/api/environment/software-quality/#ranking_positions-1) are the two characteristic values:
+positions of [`ranking_positions`](/reference/api/environment/software-quality/#ranking_positions-1) are the two characteristic values:
 it "shall be expected that 10 % of all level differences in the
 calculation area are each below" $q_{0.1}$ "and above"
 $q_{0.9}$. For a modified configuration judged against the
 reference configuration (5.2.3, 7.2), pass the modified configuration's
 levels minus the reference configuration's at the same sample points
-([`uniform_sample_indices`](/phonometry/reference/api/environment/software-quality/#uniform_sample_indices) chooses them).
+([`uniform_sample_indices`](/reference/api/environment/software-quality/#uniform_sample_indices) chooses them).
 
 The worked example that follows Table C.1: the 25 differences it prints
 give $R(q_{0.1}) = 2$, $R(q_{0.9}) = 24$,
@@ -326,9 +326,9 @@ $q_{0.1} = -1$ dB and $q_{0.9} = 3$ dB.
 
 | Name | Description |
 | :--- | :--- |
-| `level_differences` | The sample of level differences, in dB, in any order; at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
+| `level_differences` | The sample of level differences, in dB, in any order; at least [`MIN_SAMPLE_SIZE`](/reference/api/environment/software-quality/#min_sample_size) values. |
 
-**Returns:** A [`LevelDifferenceQuantiles`](/phonometry/reference/api/environment/software-quality/#leveldifferencequantiles).
+**Returns:** A [`LevelDifferenceQuantiles`](/reference/api/environment/software-quality/#leveldifferencequantiles).
 
 **Raises**
 
@@ -346,7 +346,7 @@ LevelDifferenceQuantiles(sorted_differences: NDArray[np.float64])
 The characteristic values of a sample of level differences
 (ISO 17534-1:2015, C.4 and C.5).
 
-Built by [`level_difference_quantiles`](/phonometry/reference/api/environment/software-quality/#level_difference_quantiles). Only the sorted sample is
+Built by [`level_difference_quantiles`](/reference/api/environment/software-quality/#level_difference_quantiles). Only the sorted sample is
 stored; the ranking positions, the two quantiles, the mean and the
 standard deviation are read from it, so they cannot disagree with it.
 
@@ -354,7 +354,7 @@ standard deviation are read from it, so they cannot disagree with it.
 
 | Name | Description |
 | :--- | :--- |
-| `sorted_differences` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
+| `sorted_differences` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MIN_SAMPLE_SIZE`](/reference/api/environment/software-quality/#min_sample_size) values. |
 
 ### LevelDifferenceQuantiles.from_table
 
@@ -468,7 +468,7 @@ Ranking positions of the 0.1- and 0.9-quantiles (ISO 17534-1 C.4).
 
 For a sample of `N` values sorted in ascending order, the positions,
 counted from 1, of the value taken as the 0.1-quantile and of the value
-taken as the 0.9-quantile. Table C.1 ([`RANKING_POSITIONS`](/phonometry/reference/api/environment/software-quality/#ranking_positions)) from 20 to
+taken as the 0.9-quantile. Table C.1 ([`RANKING_POSITIONS`](/reference/api/environment/software-quality/#ranking_positions)) from 20 to
 50 values; above 50, Formulas (C.1) and (C.2),
 
 $$
@@ -489,7 +489,7 @@ function applies the print.
 
 | Name | Description |
 | :--- | :--- |
-| `sample_size` | `N`, the number of values in the sample, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size). |
+| `sample_size` | `N`, the number of values in the sample, at least [`MIN_SAMPLE_SIZE`](/reference/api/environment/software-quality/#min_sample_size). |
 
 **Returns:** `(R(q0.1), R(q0.9))`.
 
@@ -523,7 +523,7 @@ The precision of a method from a round robin of programs
 | :--- | :--- |
 | `levels` | $L_{n,m}$, the level each of `M` participants calculated at each of `N` receivers, in dB: shape `(N, M)`, at least 20 receivers and two participants. |
 
-**Returns:** A [`RoundRobinPrecision`](/phonometry/reference/api/environment/software-quality/#roundrobinprecision); its `q09_level_difference` is the result of the round robin.
+**Returns:** A [`RoundRobinPrecision`](/reference/api/environment/software-quality/#roundrobinprecision); its `q09_level_difference` is the result of the round robin.
 
 **Raises**
 
@@ -549,7 +549,7 @@ largest of the `M` absolute deviations. "The result of such a round
 robin test is the quantile $q_{0,9}$ according to C.4 of the `N`
 maximal absolute differences."
 
-Built by [`round_robin_precision`](/phonometry/reference/api/environment/software-quality/#round_robin_precision). Only the levels are stored;
+Built by [`round_robin_precision`](/reference/api/environment/software-quality/#round_robin_precision). Only the levels are stored;
 everything else is read from them.
 
 **Attributes**
@@ -635,7 +635,7 @@ with the different software applied" (A.3, Example 1).
 
 *property*
 
-$R(q_{0.9})$ for `N` receivers ([`ranking_positions`](/phonometry/reference/api/environment/software-quality/#ranking_positions-1)).
+$R(q_{0.9})$ for `N` receivers ([`ranking_positions`](/reference/api/environment/software-quality/#ranking_positions-1)).
 
 ## SAMPLE_CLEARANCE_M
 
@@ -649,8 +649,8 @@ SAMPLE_CLEARANCE_M = 2.0
 
 A sample for Annex C of ISO 17534-1 is thinner than C.2 recommends.
 
-Emitted by [`uniform_sample_indices`](/phonometry/reference/api/environment/software-quality/#uniform_sample_indices) when fewer than one point in a
-hundred is drawn ([`RECOMMENDED_SAMPLE_RATIO`](/phonometry/reference/api/environment/software-quality/#recommended_sample_ratio)). The sample is still
+Emitted by [`uniform_sample_indices`](/reference/api/environment/software-quality/#uniform_sample_indices) when fewer than one point in a
+hundred is drawn ([`RECOMMENDED_SAMPLE_RATIO`](/reference/api/environment/software-quality/#recommended_sample_ratio)). The sample is still
 returned: the ratio is a recommendation, and the quantiles of a thinner
 sample are defined, only less representative of the map.
 
@@ -668,7 +668,7 @@ uniform_sample_indices(
 The single points of a uniform random sample (ISO 17534-1:2015, C.2).
 
 Of the `N` single points that remain once those closer than
-[`SAMPLE_CLEARANCE_M`](/phonometry/reference/api/environment/software-quality/#sample_clearance_m) to a source or an obstacle are left out, the
+[`SAMPLE_CLEARANCE_M`](/reference/api/environment/software-quality/#sample_clearance_m) to a source or an obstacle are left out, the
 sample of size `M` takes the points of ordinal number
 
 $$
@@ -678,14 +678,14 @@ $$
 counted from zero (the module docstring says why), evaluated in integer
 arithmetic as $\lfloor (2i - 1) N / 2M \rfloor$. A sample of fewer
 than one point in a hundred is returned with a
-[`SoftwareQualityWarning`](/phonometry/reference/api/environment/software-quality/#softwarequalitywarning), the ratio C.2 recommends.
+[`SoftwareQualityWarning`](/reference/api/environment/software-quality/#softwarequalitywarning), the ratio C.2 recommends.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `n_points` | How many single points there are (grid receivers, points along a street), before any is left out. |
-| `sample_size` | `M`, the random sample size, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) and at most the number of points that remain. |
+| `sample_size` | `M`, the random sample size, at least [`MIN_SAMPLE_SIZE`](/reference/api/environment/software-quality/#min_sample_size) and at most the number of points that remain. |
 | `horizontal_clearances_m` | Optional, one value per point: its horizontal distance to the nearest source or obstacle, in metres. The points at less than 2 m are left out before numbering; without it, every point takes part. |
 
 **Returns:** The indices of the sampled points among the `n_points` points, in increasing order.
@@ -718,7 +718,7 @@ every result a test case certifies, calculated by the program in its
 reference configuration, against the upper and lower limits the test case
 prints. A test case of ISO/TR 17534-3 prints a correct result to two
 decimals and, by Table A.5, a result is correct within
-[`CERTIFIED_RESULT_TOLERANCE_DB`](/phonometry/reference/api/environment/software-quality/#certified_result_tolerance_db) of it, so its limits are the
+[`CERTIFIED_RESULT_TOLERANCE_DB`](/reference/api/environment/software-quality/#certified_result_tolerance_db) of it, so its limits are the
 certified result minus and plus 0.05 dB. Table B.2 is the worked form:
 eight octave bands and a total of the test case "T XX", every result
 inside.
@@ -732,7 +732,7 @@ inside.
 | `upper_limits_db` | The upper limit of each certified result, in dB. |
 | `labels` | A name for each row; by default `"1"`, `"2"`, and so on. |
 
-**Returns:** A [`CalculationVerification`](/phonometry/reference/api/environment/software-quality/#calculationverification), whose `passes` is the verdict and `inside` the column of the form.
+**Returns:** A [`CalculationVerification`](/reference/api/environment/software-quality/#calculationverification), whose `passes` is the verdict and `inside` the column of the form.
 
 **Raises**
 

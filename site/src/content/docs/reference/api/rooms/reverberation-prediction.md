@@ -40,7 +40,7 @@ The Sabine constant is $k = 24 \ln 10 / c_0$
 ($= 55.26 / c_0$); with the
 default $c_0 = 343$ m/s it takes the familiar textbook value
 `0.161`. (The
-[`enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/) EN 12354-6 model instead rounds
+[`enclosed_space_absorption`](/reference/api/rooms/enclosed-space-absorption/) EN 12354-6 model instead rounds
 `k` to `55.3` and uses $c_0 = 345.6$ to pin the factor at exactly
 `0.16`.)
 
@@ -49,7 +49,7 @@ attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1:
 $m = \alpha / (10 \lg \mathrm{e})$, with $\alpha$ the ISO 9613-1
 attenuation in dB/m), as the additive term $4 m V$;
 obtain a physical `m` from temperature and humidity with
-[`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m).
+[`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m).
 
 Each model enforces its own mathematical domain on the absorption
 coefficients. Sabine's linear sum is finite for any non-negative coefficient,
@@ -275,9 +275,9 @@ Predict the reverberation time of a rectangular room by all five models.
 
 A convenience front-end that builds the six boundary surfaces of the room
 from `dimensions` and the three wall-pair mean absorptions, then evaluates
-[`sabine_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time), [`eyring_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#eyring_reverberation_time),
-[`millington_sette_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#millington_sette_reverberation_time), [`fitzroy_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#fitzroy_reverberation_time)
-and [`arau_puchades_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#arau_puchades_reverberation_time) on a common footing. Because
+[`sabine_reverberation_time`](/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time), [`eyring_reverberation_time`](/reference/api/rooms/reverberation-prediction/#eyring_reverberation_time),
+[`millington_sette_reverberation_time`](/reference/api/rooms/reverberation-prediction/#millington_sette_reverberation_time), [`fitzroy_reverberation_time`](/reference/api/rooms/reverberation-prediction/#fitzroy_reverberation_time)
+and [`arau_puchades_reverberation_time`](/reference/api/rooms/reverberation-prediction/#arau_puchades_reverberation_time) on a common footing. Because
 the bundle evaluates the logarithmic models too, the inputs must satisfy
 the strictest of the five domains: every absorption below 1.
 
@@ -291,7 +291,7 @@ the strictest of the five domains: every absorption below 1.
 | `frequencies` | Band centre frequencies, in hertz, used only to label the result and its plot; defaults to an integer index over the bands. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The [`ReverberationModelResult`](/phonometry/reference/api/rooms/reverberation-prediction/#reverberationmodelresult).
+**Returns:** The [`ReverberationModelResult`](/reference/api/rooms/reverberation-prediction/#reverberationmodelresult).
 
 **Raises**
 
@@ -395,7 +395,7 @@ quantity.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare prediction fiche (body, result and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for parity with the other fiches; the model table already shows every computed value, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -437,7 +437,7 @@ error (a percentage passed instead of a fraction).
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array in `[0, 2]`. |
-| `air_attenuation_per_m` | Air power attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; see [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m). Default `0` (air absorption neglected). |
+| `air_attenuation_per_m` | Air power attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; see [`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m). Default `0` (air absorption neglected). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C, giving the factor `0.161`). |
 
 **Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.

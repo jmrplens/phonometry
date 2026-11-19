@@ -5,7 +5,7 @@
  * see it. The caption is the italic paragraph the author writes after the
  * element, already Markdown, so the copy carries it without help.
  *
- * Agent copy: `![alt](https://docs.jmrp.io/phonometry/media/<figure>.svg)`,
+ * Agent copy: `![alt](https://phonometry.dev/media/<figure>.svg)`,
  * the copy this site serves (src/lib/media.mjs), never raw.githubusercontent,
  * which is not a host for assets. The `_es` figure on a Spanish page, as the
  * component picks it. Only the light palette: the dark one is the same

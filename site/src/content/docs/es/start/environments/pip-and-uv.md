@@ -62,7 +62,7 @@ allí desde el código fuente, y `[audio]` carga la libsndfile del sistema.
 numba no da soporte a ninguna de sus tres de 32 bits, así que `[perf]` y
 `[full]` no tienen soporte allí, y torch no publica wheel para ninguna de las
 seis ni código fuente, así que `[torch]` no se instala allí desde PyPI;
-[Docker y servidores](/phonometry/es/start/environments/docker/) dice qué pide
+[Docker y servidores](/es/start/environments/docker/) dice qué pide
 lo demás. Sin numba, la ponderación temporal `impulse` se ejecuta en
 Python puro y no dice nada. Una función cuyo extra falta dice cuál instalar,
 con la orden de pip y la de conda:
@@ -73,7 +73,7 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 
 La versión más antigua de cada dependencia con la que se prueba la biblioteca,
 en cada Python, está en [Primeros
-pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada). En
+pasos](/es/start/getting-started/#desde-pypi-recomendada). En
 Windows en ARM, en Linux con musl, en macOS en Intel y en Windows de 32 bits,
 algunas de esas versiones no tienen wheel, y pip las compila allí desde el
 código fuente, como hace incluso una instalación normal con SciPy en Windows
@@ -107,7 +107,7 @@ python -m pip install "phonometry[torch]"
 El entorno queda con la compilación de torch para CPU y ningún paquete de
 NVIDIA, y una simulación FDTD con `Compute(device="torch:cpu")` da las mismas
 presiones que con NumPy. [Dónde se calcula una
-simulación](/phonometry/es/simulation/compute/) trata los demás dispositivos.
+simulación](/es/simulation/compute/) trata los demás dispositivos.
 
 ## Desde un clon
 
@@ -155,7 +155,7 @@ En Windows y Linux de 32 bits, donde `[full]` no tiene soporte, nombra
 `uv add`; uv compila allí desde el código fuente lo mismo que pip, SciPy,
 matplotlib y kiwisolver en Windows de 32 bits, y en Linux de 32 bits los
 paquetes que nombra [Docker y
-servidores](/phonometry/es/start/environments/docker/).
+servidores](/es/start/environments/docker/).
 
 ### torch desde el índice de CPU en un proyecto
 

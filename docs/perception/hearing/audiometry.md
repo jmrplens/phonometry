@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/hearing/audiometry.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/audiometry/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/hearing/audiometry/
 
 # Audiometric Test Methods (ISO 8253-1 and -2)
 
@@ -492,8 +492,8 @@ registered in [ERRATA](../../ERRATA.md).
   on its test fixture.
 - [Noise-induced hearing loss (ISO 1999)](noise-induced-hearing-loss.md):
   what the threshold levels an audiogram records are compared against.
-- API reference: [`hearing.audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/audiometry/)
-  and [`hearing.sound_field_audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/sound-field-audiometry/).
+- API reference: [`hearing.audiometry`](https://phonometry.dev/reference/api/hearing/audiometry/)
+  and [`hearing.sound_field_audiometry`](https://phonometry.dev/reference/api/hearing/sound-field-audiometry/).
 
 ## References
 

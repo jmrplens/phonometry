@@ -9,7 +9,7 @@ Room acoustic parameters from impulse responses per ISO 3382-1:2009
 (performance spaces) and ISO 3382-2:2008 (ordinary rooms).
 
 The measured impulse response (acquired e.g. with the swept-sine or MLS
-front end of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response), ISO 18233) is filtered into
+front end of [`phonometry.room.impulse_response`](/reference/api/rooms/impulse-response/#impulse_response), ISO 18233) is filtered into
 fractional-octave bands (IEC 61260) and converted to a decay curve by
 Schroeder backward integration of the squared impulse response
 (ISO 3382-1:2009, 5.3.3, Equation (1)). To limit the influence of
@@ -70,13 +70,13 @@ integrated impulse response, Clause 6).
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Measured impulse response (1D), e.g. from [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) (ISO 18233). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: the curve is normalised to 0 dB at its start, so a factor on the record moves neither the levels nor the decay times read off them. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `ir` | Measured impulse response (1D), e.g. from [`phonometry.room.impulse_response`](/reference/api/rooms/impulse-response/#impulse_response) (ISO 18233). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: the curve is normalised to 0 dB at its start, so a factor on the record moves neither the levels nor the decay times read off them. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `band` | Optional band centre frequency in Hz. When given, the impulse response is first filtered with the matching IEC 61260 fractional-octave filter; when None the broadband response is integrated directly. |
 | `fraction` | Bandwidth fraction of the band filter (1 = octave, 3 = one-third octave). Only used when `band` is not None. |
 | `zero_phase` | If True, filter the band with forward-backward (zero-phase) filtering, removing the octave filter's group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (it relaxes the B\*T > 16 rule to B\*T > 4); it roughly halves the low-frequency short-decay bias at 125 Hz. Only used when `band` is not None. Default False (causal). |
 
-**Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point, read by name, with [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
+**Returns:** A [`DecayCurve`](/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point, read by name, with [`DecayCurve.plot`](/reference/api/rooms/acoustics/#decaycurveplot).
 
 **Raises**
 
@@ -110,7 +110,7 @@ truncation point (ISO 3382-1:2009, 5.3.3). `band` is the
 octave/third-octave band centre in Hz, or `None` for a broadband decay.
 The curve is read by name, `curve.times` and `curve.levels`, like every
 other record: it does not unpack as the `(time, level)` pair
-[`decay_curve`](/phonometry/reference/api/rooms/acoustics/#decay_curve) returned before it.
+[`decay_curve`](/reference/api/rooms/acoustics/#decay_curve) returned before it.
 
 ### DecayCurve.plot()
 
@@ -158,7 +158,7 @@ Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
 The `B` of Equations (4) to (6), as the clause prints it: 0.71 times
 the mid-band frequency for an octave filter and 0.23 times it for a
-one-third-octave one. See [`FILTER_BANDWIDTH_FRACTION`](/phonometry/reference/api/rooms/acoustics/#filter_bandwidth_fraction) for how
+one-third-octave one. See [`FILTER_BANDWIDTH_FRACTION`](/reference/api/rooms/acoustics/#filter_bandwidth_fraction) for how
 those two figures sit against the exact IEC 61260 band edges.
 
 **Parameters**
@@ -249,13 +249,13 @@ already outside what a forward analysis can be trusted with.
 
 ISO 3382-2:2008, 7.3 NOTE relaxes the first to `B T > 4` when the
 filtering is time-reversed, which is what
-[`phonometry.room.room_parameters`](/phonometry/reference/api/rooms/acoustics/#room_parameters) does with `zero_phase=True`.
+[`phonometry.room.room_parameters`](/reference/api/rooms/acoustics/#room_parameters) does with `zero_phase=True`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `bandwidth` | Bandwidth of the analysis filter, in Hz; [`filter_bandwidth`](/phonometry/reference/api/rooms/acoustics/#filter_bandwidth) gives the clause's own figure for it. |
+| `bandwidth` | Bandwidth of the analysis filter, in Hz; [`filter_bandwidth`](/reference/api/rooms/acoustics/#filter_bandwidth) gives the clause's own figure for it. |
 | `detector_time` | Reverberation time of the averaging detector, in seconds. Zero, the default, for an analysis with no detector. |
 
 **Returns:** The exclusive lower bound on a reliable reverberation time, in seconds, of the shape of `bandwidth`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
@@ -305,7 +305,7 @@ larger absolute uncertainty and a smaller relative one.
 | Name | Description |
 | :--- | :--- |
 | `reverberation_time` | The measured decay time, in seconds. |
-| `bandwidth` | Bandwidth of the analysis filter, in Hz; [`filter_bandwidth`](/phonometry/reference/api/rooms/acoustics/#filter_bandwidth) gives the clause's own figure for it. |
+| `bandwidth` | Bandwidth of the analysis filter, in Hz; [`filter_bandwidth`](/reference/api/rooms/acoustics/#filter_bandwidth) gives the clause's own figure for it. |
 | `evaluation_range` | The range the decay time was fitted over, in dB: 20 for $T_{20}$ or 30 for $T_{30}$, the two the clause prints coefficients for. |
 | `decays` | Decays measured in each position, the `n` of the equations. Broadcast against the rest. |
 | `positions` | Independent measurement positions, the `N`: source and receiver combinations, not receivers alone. Broadcast against the rest, so a sweep over survey sizes is one call. |
@@ -335,7 +335,7 @@ room_parameters(
 Room acoustic parameters per ISO 3382-1:2009 / ISO 3382-2:2008.
 
 The impulse response (e.g. acquired with the ISO 18233 swept-sine or
-MLS methods of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response)) is filtered into
+MLS methods of [`phonometry.room.impulse_response`](/reference/api/rooms/impulse-response/#impulse_response)) is filtered into
 fractional-octave bands (IEC 61260) and each band decay curve is
 obtained by Schroeder backward integration with noise truncation and
 tail compensation (ISO 3382-1:2009, 5.3.3). Least-squares line fits
@@ -358,13 +358,13 @@ Table A.1).
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Measured impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every parameter here is a decay time, a ratio of energies or a centre time, and none of them moves with a factor on the record. |
-| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `ir` | Measured impulse response (1D). Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every parameter here is a decay time, a ratio of energies or a centre time, and none of them moves with a factor on the record. |
+| `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use `(100.0, 5000.0)` with `fraction=3` for the one-third-octave engineering/precision range. `None` analyses the broadband response as a single band (`frequencies` is then `None`). |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). Default 1. |
 | `zero_phase` | If True, use forward-backward (zero-phase) octave filtering, removing the filter group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (relaxing B\*T > 16 to B\*T > 4); it roughly halves the 125 Hz short-decay T30 bias (about +4.9 % -> +2.4 % at T = 0.2 s). The benefit is small next to the ~10 % measurement variance but is free and standards-sanctioned. Default False (causal filtering). |
 
-**Returns:** [`RoomAcousticsResult`](/phonometry/reference/api/rooms/acoustics/#roomacousticsresult) with one entry per band.
+**Returns:** [`RoomAcousticsResult`](/reference/api/rooms/acoustics/#roomacousticsresult) with one entry per band.
 
 ## RoomAcousticsResult
 
@@ -486,7 +486,7 @@ band (the box names that band, the verdict line does not).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). The room-specific fields `room_volume`, `n_source_positions` and `n_receiver_positions` populate the header; `requirement` is read as the maximum acceptable reverberation time, compared with the descriptor the result box shows (the mid-frequency T where both mid bands carry a finite T30, otherwise a single band's T30). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). The room-specific fields `room_volume`, `n_source_positions` and `n_receiver_positions` populate the header; `requirement` is read as the maximum acceptable reverberation time, compared with the descriptor the result box shows (the mid-frequency T where both mid bands carry a finite T30, otherwise a single band's T30). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for parity with the other fiches; the room table already shows every computed parameter, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

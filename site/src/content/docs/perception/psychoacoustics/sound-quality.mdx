@@ -35,9 +35,9 @@ Two sounds of equal loudness can still differ in how *sharp*, how *tonal*,
 how *rough* or how strongly *fluctuating* they are. This page covers the
 sound-quality metrics that complement loudness: sharpness (DIN 45692) and the
 ECMA-418-2 tonality, roughness and fluctuation strength of the Sottek Hearing
-Model. Loudness itself lives in [Loudness](/phonometry/perception/psychoacoustics/loudness/);
+Model. Loudness itself lives in [Loudness](/perception/psychoacoustics/loudness/);
 the ECMA-418-2 loudness that shares the same auditory front-end lives in
-[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/).
+[Advanced Loudness](/perception/psychoacoustics/advanced-loudness/).
 
 The four metrics form one family: a single calibrated signal splits across
 two auditory front ends, and every branch is anchored to a reference sound
@@ -58,7 +58,7 @@ position 0.25 m from the reference box at 1.20 m seated or 1.50 m standing, or
 at least four bystander positions 1.00 m out and 1.50 m up) with the
 background noise measured with the equipment off and a calibrator applied
 before and after. The positions are the same ones the
-[tone-prominence guide](/phonometry/perception/psychoacoustics/tone-prominence/)
+[tone-prominence guide](/perception/psychoacoustics/tone-prominence/)
 works from, and it states them in full:
 
 <ThemeImage
@@ -344,7 +344,7 @@ and $F(z_\text{tonal} + 1)$; that statement is read from `specific_tonality` and
 tonalities when the single value $T$ of Formula (63) exceeds 0.4 tu_HMS. The
 test for one discrete tone against the noise around it is the ECMA-418-1
 tone-to-noise and prominence ratio of
-[Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/).
+[Prominent Discrete Tones](/perception/psychoacoustics/tone-prominence/).
 
 **Is the sound audible?** The fourth criterion of ECMA-418-2, the 0.01 sone_HMS
 of clause 5.1.9 that `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` holds,
@@ -357,7 +357,7 @@ loudness of their own, with the fixed blocks of clause 5.1.5.2 and the start
 padding of clause 5.1.2.2, which differs from this one for a sound that
 changes in time; clause 5.1.9 names no segmentation, so reading the criterion
 on the one the loudness of Clause 8 is built on is the library's choice.
-[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/)
+[Advanced Loudness](/perception/psychoacoustics/advanced-loudness/)
 shows how the total is formed and why the comparison stops at
 `last_evaluated_block`. No function applies the criterion. Clause 6.1.1 adds
 that the tonality method needs no audibility screening before it, because
@@ -632,13 +632,13 @@ the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
 
 The Fastl & Zwicker fluctuation-strength models (closed form for AM
 broadband noise and the Osses 2016 signal model) live in
-[Psychoacoustic Annoyance](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/);
+[Psychoacoustic Annoyance](/perception/psychoacoustics/psychoacoustic-annoyance/);
 this Clause 9 metric is the normative Sottek-model counterpart.
 
-See [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/) for the
+See [Prominent Discrete Tones](/perception/psychoacoustics/tone-prominence/) for the
 ECMA-418-1 TNR/PR prominence verdicts,
-[Speech Transmission Index](/phonometry/perception/speech/speech-transmission/) for
-STI/STIPA, and [Theory](/phonometry/reference/theory/perception/) for the underlying math.
+[Speech Transmission Index](/perception/speech/speech-transmission/) for
+STI/STIPA, and [Theory](/reference/theory/perception/) for the underlying math.
 
 ## What this guide covers
 
@@ -661,9 +661,9 @@ are not implemented, so analyse each channel separately. The optional entropy
 weighting of clause 7.1.6 needs an external rotational-speed signal and is
 left out, as is the ±0.25 % adjustment of $c_\mathrm{F}$ that footnote 47 permits. The
 ECMA-418-2 loudness that shares this front-end lives in [Advanced
-Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/), and the
+Loudness](/perception/psychoacoustics/advanced-loudness/), and the
 Fastl and Zwicker fluctuation-strength models in [Psychoacoustic
-Annoyance](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/).
+Annoyance](/perception/psychoacoustics/psychoacoustic-annoyance/).
 </ScopeClaim>
 </Scope>
 
@@ -671,8 +671,8 @@ Annoyance](/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/).
 
 ## See also
 
-- API reference: [`psychoacoustics.quality.sharpness`](/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
-- Theory: [Advanced loudness models and sound quality](/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
+- API reference: [`psychoacoustics.quality.sharpness`](/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- Theory: [Advanced loudness models and sound quality](/reference/theory/perception/#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
 </SeeAlso>
 

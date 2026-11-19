@@ -22,7 +22,7 @@ interpret it.
 Time convention $\mathrm{e}^{+j\omega t}$ with the forward wave carried by
 $\mathrm{e}^{-jkx}$ (Eq. (21)); air properties from Clause 8.2/8.3, Eqs. (4)/(5),
 use temperature in **degrees Celsius**. Both differ from the ISO 10534-2
-ansatz of [`impedance_tube`](/phonometry/reference/api/materials/impedance-tube/), whose
+ansatz of [`impedance_tube`](/reference/api/materials/impedance-tube/), whose
 wavenumber is $k_0 = k_0' - jk_0''$ and whose air properties take
 kelvin; the two are **not** interchangeable, so the air-property and
 working-range helpers are named per standard and each stays with the method
@@ -108,7 +108,7 @@ $T_{11} = T_{22}$).
 | `thickness_m` | Layer thickness `d`, in metres. |
 | `characteristic_impedance` | Characteristic impedance `rho c`, in rayls. |
 
-**Returns:** The air-layer [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix).
+**Returns:** The air-layer [`TransferMatrix`](/reference/api/materials/four-microphone/#transfermatrix).
 
 **Raises**
 
@@ -153,7 +153,7 @@ $$
 | `thickness_m` | Specimen thickness `d`, in metres. |
 | `characteristic_impedance` | Characteristic impedance `rho c`, in rayls. |
 
-**Returns:** The face pressures and velocities, as a [`FaceQuantities`](/phonometry/reference/api/materials/four-microphone/#facequantities).
+**Returns:** The face pressures and velocities, as a [`FaceQuantities`](/reference/api/materials/four-microphone/#facequantities).
 
 **Raises**
 
@@ -174,7 +174,7 @@ FaceQuantities(
 
 The pressures and particle velocities on the two faces of a specimen.
 
-What [`face_quantities`](/phonometry/reference/api/materials/four-microphone/#face_quantities) returns (ASTM E2611-19 Eq. (21)): named as
+What [`face_quantities`](/reference/api/materials/four-microphone/#face_quantities) returns (ASTM E2611-19 Eq. (21)): named as
 the standard prints them, where a `(p0, pd, u0, ud)` tuple used to be
 unpacked by position.
 
@@ -310,11 +310,11 @@ $$
 | `thickness_m` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
-| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
+| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
-**Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
+**Returns:** The specimen [`TransferMatrix`](/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
 
 **Raises**
 
@@ -365,11 +365,11 @@ $$
 | `thickness_m` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
-| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
+| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
-**Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
+**Returns:** The specimen [`TransferMatrix`](/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
 
 **Raises**
 
@@ -410,12 +410,12 @@ imaginary part. `frequencies`, when given, is stored as a read-only
 `float64` array.
 
 The trailing fields retain the measurement context when the matrix comes
-out of [`transfer_matrix_two_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_one_load)
+out of [`transfer_matrix_two_load`](/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/reference/api/materials/four-microphone/#transfer_matrix_one_load)
 (tube geometry `l1`/`s1`/`l2`/`s2`, specimen `thickness_m`, tube
 `diameter_m` and canonical cross-section `shape`, the `frequencies`
 vector when supplied to the solver, and the air
 `air_characteristic_impedance` `rho c`); all default to `None` so a
-hand-built matrix (for example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) is
+hand-built matrix (for example [`air_layer_transfer_matrix`](/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) is
 unchanged.
 
 **Attributes**
@@ -515,7 +515,7 @@ their own, so the plot needs the measurement's `frequencies` vector
 impedance `rho c`. A matrix built by the solvers retains both
 (`self.frequencies` / `self.air_characteristic_impedance`), so
 `plot()` takes no arguments there; only a hand-built matrix (for
-example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) must supply them.
+example [`air_layer_transfer_matrix`](/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) must supply them.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` of the transmission-loss curve.
@@ -678,7 +678,7 @@ function is `H2` sitting nearest the front face at distance `l1` (and
 `H1` at $l_1 + s_1$), and to `H3` nearest the downstream side at
 `l2` (and `H4` at $l_2 + s_2$), with `l1`, `l2` measured
 from the front reference plane. The convention was locked down against the analytic
-air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)).
+air-layer transfer matrix (see [`air_layer_transfer_matrix`](/reference/api/materials/four-microphone/#air_layer_transfer_matrix)).
 
 **Parameters**
 
@@ -696,7 +696,7 @@ air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/referen
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
-**Returns:** The four complex amplitudes, as a [`WaveAmplitudes`](/phonometry/reference/api/materials/four-microphone/#waveamplitudes).
+**Returns:** The four complex amplitudes, as a [`WaveAmplitudes`](/reference/api/materials/four-microphone/#waveamplitudes).
 
 **Raises**
 
@@ -717,9 +717,9 @@ WaveAmplitudes(
 
 The four plane-wave amplitudes of a four-microphone tube (ASTM E2611-19 Eqs. (17)-(20)).
 
-What [`wave_decomposition`](/phonometry/reference/api/materials/four-microphone/#wave_decomposition) returns: the amplitudes, named as the
+What [`wave_decomposition`](/reference/api/materials/four-microphone/#wave_decomposition) returns: the amplitudes, named as the
 standard prints them, where an `(A, B, C, D)` tuple used to be unpacked
-by position. They are what [`face_quantities`](/phonometry/reference/api/materials/four-microphone/#face_quantities) takes.
+by position. They are what [`face_quantities`](/reference/api/materials/four-microphone/#face_quantities) takes.
 
 **Attributes**
 

@@ -39,8 +39,8 @@ reference values, spectra and shifting rule are identical in the 2013 and
 When measurements cover an enlarged range, additional adaptation terms are
 stated with the range as a subscript: `C50-3150`, `C50-5000`,
 `C100-5000` (and the `Ctr` counterparts) with the Table B.1 spectra, and
-`CI,50-2500` for impact. [`weighted_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_rating_extended) and
-[`weighted_impact_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_impact_rating_extended) compute them alongside the core
+`CI,50-2500` for impact. [`weighted_rating_extended`](/reference/api/building/ratings/#weighted_rating_extended) and
+[`weighted_impact_rating_extended`](/reference/api/building/ratings/#weighted_impact_rating_extended) compute them alongside the core
 rating. Both accept `one_decimal=True` for the "1/10 dB for the expression
 of uncertainty" variant of Clauses 4.4/4.5 (reference-curve shift in 0.1 dB
 steps and one-decimal reductions), which ISO 12999-1:2020 Annex B requires
@@ -69,9 +69,9 @@ that the single number describes the product and not the laboratory. The
 measured improvement is added to (subtracted from) the reference curve of the
 element, the two curves are rated, and the improvement is the difference of
 the two ratings: `ΔLw` on the heavyweight floor and `ΔLt,w` on the three
-lightweight floors of Table 4 ([`IMPACT_REFERENCE_FLOORS`](/phonometry/reference/api/building/ratings/#impact_reference_floors)), and `ΔRw`
+lightweight floors of Table 4 ([`IMPACT_REFERENCE_FLOORS`](/reference/api/building/ratings/#impact_reference_floors)), and `ΔRw`
 with `Δ(Rw + C)` and `Δ(Rw + Ctr)` on the heavy wall, the heavy floor and
-the lightweight wall of Table E.1 ([`LINING_REFERENCE_ELEMENTS`](/phonometry/reference/api/building/ratings/#lining_reference_elements)). Both
+the lightweight wall of Table E.1 ([`LINING_REFERENCE_ELEMENTS`](/reference/api/building/ratings/#lining_reference_elements)). Both
 tables were printed in ISO 10140-5:2010 (Tables C.1 and B.1); its 2021
 edition keeps the constructions and refers to ISO 717 for the curves.
 
@@ -101,7 +101,7 @@ Values are integers unless computed with `one_decimal=True`.
 | `rating` | Weighted impact rating (`Ln,w`, ...) from the core 100-3150 Hz bands, in dB. |
 | `ci` | Core spectrum adaptation term `CI` (100-2500 Hz), in dB. |
 | `ci_50_2500` | Enlarged-range term `CI,50-2500`, in dB, or `None` when the supplied bands do not cover 50-2500 Hz. |
-| `core` | The integer-mode [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) of the core bands (independent of `one_decimal`). |
+| `core` | The integer-mode [`ImpactRatingResult`](/reference/api/building/ratings/#impactratingresult) of the core bands (independent of `one_decimal`). |
 | `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. |
 | `measured` | The measured impact levels over the full enlarged range (after the one-decimal reduction of Clause 4.3), in dB. |
 
@@ -173,7 +173,7 @@ frequency range.
 | `ctr_50_3150` | `Ctr,50-3150`, in dB, or `None`. |
 | `ctr_50_5000` | `Ctr,50-5000`, in dB, or `None`. |
 | `ctr_100_5000` | `Ctr,100-5000`, in dB, or `None`. |
-| `core` | The integer-mode [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
+| `core` | The integer-mode [`WeightedRatingResult`](/reference/api/building/ratings/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
 | `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. |
 | `measured` | The measured band quantities over the full enlarged range (after the one-decimal reduction of Clause 4.4), in dB. |
 
@@ -239,7 +239,7 @@ $C_\mathrm{I,t,r,0}$ of 0 dB for floors No 1 and No 2 and -3 dB for
 No 3. `CI,r` is the ISO 717-2 spectrum adaptation term of the reference
 floor with the covering under test,
 $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$ (Formula (1)). Together
-with [`weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement) it yields the single-number
+with [`weighted_impact_improvement`](/reference/api/building/ratings/#weighted_impact_improvement) it yields the single-number
 reduction for a flat spectrum,
 $\Delta L_\mathrm{lin} = \Delta L_\mathrm{w} + C_{\mathrm{I},\Delta}$
 (Formula (A.5), or (A.7) on a lightweight floor). ISO 16251-1 Clause 8 e)
@@ -301,8 +301,8 @@ one of the two terms, so both are here.
 
 | Name | Description |
 | :--- | :--- |
-| `delta_lw` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$, in dB, from [`weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement). Integer. |
-| `ci_delta` | The spectrum adaptation term $C_{\mathrm{I},\Delta}$, in dB, from [`impact_improvement_adaptation_term`](/phonometry/reference/api/building/ratings/#impact_improvement_adaptation_term). Integer. |
+| `delta_lw` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$, in dB, from [`weighted_impact_improvement`](/reference/api/building/ratings/#weighted_impact_improvement). Integer. |
+| `ci_delta` | The spectrum adaptation term $C_{\mathrm{I},\Delta}$, in dB, from [`impact_improvement_adaptation_term`](/reference/api/building/ratings/#impact_improvement_adaptation_term). Integer. |
 | `ci_r` | The spectrum adaptation term $C_\mathrm{I,r}$ of the reference floor with the covering, in dB, which is $C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}$. Integer. |
 | `frequencies` | The 16 one-third-octave centre frequencies rated, 100 Hz to 3150 Hz. |
 | `improvement` | $\Delta L$ in those bands, in dB, as given. |
@@ -408,7 +408,7 @@ optional verdict row and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -536,12 +536,12 @@ weighted_impact_improvement(
 Weighted reduction of impact level `ΔLw` or `ΔLt,w` (ISO 717-2:2020).
 
 Relates a measured improvement spectrum `ΔL` to a reference floor of
-Table 4 ([`IMPACT_REFERENCE_FLOORS`](/phonometry/reference/api/building/ratings/#impact_reference_floors)): the reference level with the
+Table 4 ([`IMPACT_REFERENCE_FLOORS`](/reference/api/building/ratings/#impact_reference_floors)): the reference level with the
 covering is $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$
 (Formula (1)) and the weighted improvement is
 $\Delta L_\mathrm{w} = L_\mathrm{n,r,0,w} - L_\mathrm{n,r,w}$
 (Formula (2)), both weighted ratings taken with
-[`weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating). On the heavyweight floor this is the
+[`weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating). On the heavyweight floor this is the
 `ΔLw` of Clause 5, $78 - L_\mathrm{n,r,w}$; on a lightweight floor
 it is the `ΔLt,w` of Clause 6, which 6.3 computes "as specified in 5.3,
 substituting the heavy reference floor by a lightweight reference floor"
@@ -592,7 +592,7 @@ by 5 dB (Clause 4.3.2). The spectrum adaptation term `CI` follows
 Clause A.2.1. Input values are first reduced to one decimal place
 (Clause 4.3.1, footnote 1).
 
-The shift search reuses the verified engine of [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating)
+The shift search reuses the verified engine of [`weighted_rating`](/reference/api/building/ratings/#weighted_rating)
 on the negated curves: minimising
 $\sum \max(0, \text{measured} - (\text{ref} + k))$ over `k`
 equals maximising
@@ -603,10 +603,10 @@ airborne problem, so no separate search is duplicated.
 
 | Name | Description |
 | :--- | :--- |
-| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
+| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. One of `1` or `3`. |
 
-**Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavorable_sum`.
+**Returns:** [`ImpactRatingResult`](/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavorable_sum`.
 
 **Raises**
 
@@ -648,7 +648,7 @@ as printed in A.2.2).
 | `frequencies` | Band centre frequencies, in Hz (one per value). `None` assumes exactly the 16 core bands 100-3150 Hz. |
 | `one_decimal` | Use the 0.1 dB shift and one-decimal reductions. |
 
-**Returns:** An [`ExtendedImpactRatingResult`](/phonometry/reference/api/building/ratings/#extendedimpactratingresult).
+**Returns:** An [`ExtendedImpactRatingResult`](/reference/api/building/ratings/#extendedimpactratingresult).
 
 **Raises**
 
@@ -682,10 +682,10 @@ No. 2. Input values are first reduced to one decimal place
 
 | Name | Description |
 | :--- | :--- |
-| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/phonometry/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
+| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
 | `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. One of `1` or `3`. |
 
-**Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavorable_sum`.
+**Returns:** [`WeightedRatingResult`](/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavorable_sum`.
 
 **Raises**
 
@@ -728,7 +728,7 @@ Annex B requires for the uncertainty of single-number values.
 | `frequencies` | Band centre frequencies, in Hz (one per value). `None` assumes exactly the 16 core bands 100-3150 Hz. The 16 core bands must always be present; extended terms are formed for each Annex B range whose bands are all present. |
 | `one_decimal` | Use the 0.1 dB shift and one-decimal reductions. |
 
-**Returns:** An [`ExtendedWeightedRatingResult`](/phonometry/reference/api/building/ratings/#extendedweightedratingresult).
+**Returns:** An [`ExtendedWeightedRatingResult`](/reference/api/building/ratings/#extendedweightedratingresult).
 
 **Raises**
 
@@ -754,10 +754,10 @@ Weighted improvement of the sound reduction index by a lining (ISO 717-1).
 ISO 717-1:2020 Annex D rates a lining on a standard basic element rather
 than on the wall it was measured on, so that the number describes the
 lining and not the laboratory: the measured improvement `ΔR` is added
-to the reference curve of the element ([`LINING_REFERENCE_ELEMENTS`](/phonometry/reference/api/building/ratings/#lining_reference_elements)),
+to the reference curve of the element ([`LINING_REFERENCE_ELEMENTS`](/reference/api/building/ratings/#lining_reference_elements)),
 $R_\mathrm{ref,with} = R_\mathrm{ref,without} + \Delta R$
 (Formula (D.3)), both curves are rated with
-[`weighted_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_rating_extended), and
+[`weighted_rating_extended`](/reference/api/building/ratings/#weighted_rating_extended), and
 $\Delta R_\mathrm{w} = R_\mathrm{w,ref,with} - R_\mathrm{w,ref,without}$
 (Formula (D.4)). `Δ(Rw + C)` and `Δ(Rw + Ctr)` are "calculated in an
 equivalent way", as differences of the sums, and so is every
@@ -768,7 +768,7 @@ For a basic element that is not one of the three standard ones, D.3 takes
 the ratings "directly from the single-number ratings for that basic
 element with and without the tested acoustical lining", the direct
 difference `ΔRw,direct` of Formula (D.2); that needs both measured
-curves and is what [`laboratory_lining_improvement`](/phonometry/reference/api/building/laboratory-improvement/#laboratory_lining_improvement)
+curves and is what [`laboratory_lining_improvement`](/reference/api/building/laboratory-improvement/#laboratory_lining_improvement)
 returns beside this rating.
 
 **Parameters**
@@ -780,7 +780,7 @@ returns beside this rating.
 | `basic_element` | `"heavy_wall"` (default), `"heavy_floor"` or `"lightweight_wall"`. |
 | `one_decimal` | Rate both curves with the 0.1 dB shift and one-decimal reductions, the form of Clause 4.4 for the expression of uncertainty. |
 
-**Returns:** A [`ReductionImprovementRating`](/phonometry/reference/api/building/ratings/#reductionimprovementrating).
+**Returns:** A [`ReductionImprovementRating`](/reference/api/building/ratings/#reductionimprovementrating).
 
 **Raises**
 
@@ -817,7 +817,7 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `frequencies` | Band centre frequencies of the measured curve, in Hz. |
 | `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. |
 | `shifted_reference` | Table 3 reference curve after the final shift, in dB. |
-| `quantity` | Always `"airborne"`: this class carries the ISO 717-1 airborne rating, and the renderers dispatch on this tag when handed the union with [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult), which carries `"impact"`. The field used to admit both values and promise that `"impact"` would select the impact labels; it never could, since the impact labels read `ci` off the result and this class does not have one, so the promise ended in the renderer's `AttributeError`. |
+| `quantity` | Always `"airborne"`: this class carries the ISO 717-1 airborne rating, and the renderers dispatch on this tag when handed the union with [`ImpactRatingResult`](/reference/api/building/ratings/#impactratingresult), which carries `"impact"`. The field used to admit both values and promise that `"impact"` would select the impact labels; it never could, since the impact labels read `ci` off the result and this class does not have one, so the promise ended in the renderer's `AttributeError`. |
 
 ### WeightedRatingResult.plot()
 
@@ -870,7 +870,7 @@ row and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

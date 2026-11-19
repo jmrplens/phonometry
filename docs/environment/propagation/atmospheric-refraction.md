@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/propagation/atmospheric-refraction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/propagation/atmospheric-refraction/
 
 # Atmospheric refraction: rays and the GFPE
 

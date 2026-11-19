@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/assessment/impulsive-sound.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/assessment/impulsive-sound/
 
 # Impulsive-sound prominence (NT ACOU 112)
 
@@ -364,7 +364,7 @@ Impulsive-sound prominence fiche (ImpulseProminenceResult.report), governing pro
 
 ## See also
 
-- API reference: [`environment.assessment.impulsive_sound`](https://docs.jmrp.io/phonometry/reference/api/environment/impulsive-sound/).
+- API reference: [`environment.assessment.impulsive_sound`](https://phonometry.dev/reference/api/environment/impulsive-sound/).
 - Theory: [Impulsive-sound prominence (NT ACOU 112)](../../reference/theory/environment-transport.md#impulsive-sound-prominence-nt-acou-112): the NT ACOU 112 prominence derivation and the onset criterion it rests on.
 
 ## References

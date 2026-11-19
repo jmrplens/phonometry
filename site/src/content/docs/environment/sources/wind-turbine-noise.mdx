@@ -120,7 +120,7 @@ bias with it. The ground board, in turn, is why the formula subtracts 6 dB:
 a capsule lying on a hard plate receives a perfectly coherent reflection
 (pressure doubling, $+6$ dB) instead of the uncontrolled height-dependent
 interference pattern a tripod microphone would sample (see
-[the image source behind the ground effect](/phonometry/environment/propagation/outdoor-propagation/)).
+[the image source behind the ground effect](/environment/propagation/outdoor-propagation/)).
 
 ### Wind-speed bins and standardized conditions
 
@@ -315,7 +315,7 @@ $\Delta L_\mathrm{a}$ and prescribes no adjustment, so which mapping gives the r
 adjustment $K_\mathrm{t}$ depends on the edition the assessment is made under. The
 9.5.1 energy average over the spectra of a wind-speed bin is a *mean*
 audibility, which is the quantity ISO 1996-2:2017 Table J.1 was written for:
-[`tonal_adjustment_from_mean_audibility`](/phonometry/environment/assessment/environmental-levels/),
+[`tonal_adjustment_from_mean_audibility`](/environment/assessment/environmental-levels/),
 integer 0-6 dB (or `coarse=True` for the 0/3/6 ladder of its note). The
 piecewise (C.4)-(C.6) law of `tonal_adjustment` is the 2007 Annex C mapping and
 applies to one spectrum's $\Delta L_\mathrm{ta}$, and the two differ by 1 to 2 dB on
@@ -342,7 +342,7 @@ optional PASS/FAIL verdict row and a note on how $\Delta L_\mathrm{a}$ is built,
 footer with the fixed disclaimer.
 
 It uses the same `ReportMetadata` container and rendering engine as the
-[ISO 532-1 loudness fiche](/phonometry/perception/psychoacoustics/loudness/#iso-532-1-report-report);
+[ISO 532-1 loudness fiche](/perception/psychoacoustics/loudness/#iso-532-1-report-report);
 a supplied `requirement` is read as the maximum acceptable tonal audibility
 $\Delta L_\mathrm{a}$ in dB (a less audible tone passes). Rendering needs reportlab and,
 for the figure the fiche embeds, matplotlib (`pip install
@@ -387,7 +387,7 @@ tonal-audibility chain of subclauses 9.5.2 to 9.5.8 through
 `wind_turbine_tonality`, with its `.report()` fiche. The Formula (29) mapping
 of a 10 m wind speed to hub height over $z_{0\mathrm{ref}} = 0.05$ m is
 `environment.logarithmic_wind_speed`, on the
-[receptor page](/phonometry/environment/sources/wind-turbine-receptor/). The
+[receptor page](/environment/sources/wind-turbine-receptor/). The
 instrumentation and position requirements of clauses 6 and 7 are documented
 above as the conditions those formulae assume, and the measurement-position
 tolerances are drawn.
@@ -405,11 +405,11 @@ for are outside IEC 61400-11 altogether: **amplitude modulation** (the
 **infrasound**. Both are listed in 7.2.1 as *optional* measurements with no
 rating method attached. Amplitude modulation at a dwelling is rated by clause
 13 of IEC TS 61400-11-2, on the
-[receptor page](/phonometry/environment/sources/wind-turbine-receptor/);
+[receptor page](/environment/sources/wind-turbine-receptor/);
 infrasound falls to national guidance, and the psychoacoustic route to both
 starts at [Fluctuation strength and
-roughness](/phonometry/perception/psychoacoustics/sound-quality/) and at
-[Special weightings](/phonometry/signals/levels/special-weightings/) for the
+roughness](/perception/psychoacoustics/sound-quality/) and at
+[Special weightings](/signals/levels/special-weightings/) for the
 G-weighted infrasound level.
 </ScopeClaim>
 </Scope>
@@ -418,10 +418,10 @@ G-weighted infrasound level.
 
 ## See also
 
-- [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
-- [Tone audibility](/phonometry/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
-- [Wind turbine sound at a dwelling](/phonometry/environment/sources/wind-turbine-receptor/): IEC TS 61400-11-2, what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
-- API reference: [`environment.sources.wind_turbine`](/phonometry/reference/api/environment/wind-turbine/).
+- [Environmental noise levels](/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
+- [Tone audibility](/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
+- [Wind turbine sound at a dwelling](/environment/sources/wind-turbine-receptor/): IEC TS 61400-11-2, what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
+- API reference: [`environment.sources.wind_turbine`](/reference/api/environment/wind-turbine/).
 
 </SeeAlso>

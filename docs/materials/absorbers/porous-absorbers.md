@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/absorbers/porous-absorbers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/absorbers/porous-absorbers/
 
 # Porous and Multilayer Absorbers
 
@@ -1348,7 +1348,7 @@ found in the sources during this work are recorded in the
   slow-sound slit panels and the critical-coupling condition that push
   perfect absorption into the deep-subwavelength regime.
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
+- [Published catalogues](https://phonometry.dev/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 

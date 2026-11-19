@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-field.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/insulation-field/
 
 # Field Insulation Measurement (ISO 16283)
 
@@ -954,7 +954,7 @@ power off the radiating face instead of the receiving-room level, is
   used for the insulation spectra.
 - [Theory](../../reference/theory/rooms-buildings.md): the reference-curve derivation behind the
   weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/) and [`building.measurement.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/building/uncertainty/).
+- API reference: [`building.measurement.insulation`](https://phonometry.dev/reference/api/building/insulation/) and [`building.measurement.uncertainty`](https://phonometry.dev/reference/api/building/uncertainty/).
 
 ## Quick answers
 

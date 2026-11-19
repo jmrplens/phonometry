@@ -63,8 +63,8 @@ velocity a DIN 4150-3 comparison wants (Formula (12)), and Formula (11) is the
 sum of Formula (6) of E DIN 4150-2:2023-08, printed without that formula's
 rule that a category whose $KB_\mathrm{FTm,Zug}$ is at or below 0.1
 enters as zero; the assessment the draft says it performs is that of DIN 4150-2, so
-[`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity) of
-[`phonometry.vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/), which applies the
+[`train_assessment_severity`](/reference/api/vibration/train-categories/#train_assessment_severity) of
+[`phonometry.vibration.immission.train_categories`](/reference/api/vibration/train-categories/), which applies the
 rule, is what the chain ends in. Formula (13) turns a level spectrum back
 into a velocity spectrum in micrometres per second, for the VC curves.
 
@@ -231,8 +231,8 @@ The level difference from the ground to a floor, Tables A.1 and A.2.
 
 $\Delta L_{v,\mathrm{DB}}$ for a building with concrete or with
 timber floors whose floors have the given natural frequency, along
-[`PREDICTION_BAND_CENTERS_HZ`](/phonometry/reference/api/vibration/railway-prediction/#prediction_band_centers_hz), for any storey. The tables print a
-column for each of [`FLOOR_NATURAL_FREQUENCIES_HZ`](/phonometry/reference/api/vibration/railway-prediction/#floor_natural_frequencies_hz) and no rule for a
+[`PREDICTION_BAND_CENTERS_HZ`](/reference/api/vibration/railway-prediction/#prediction_band_centers_hz), for any storey. The tables print a
+column for each of [`FLOOR_NATURAL_FREQUENCIES_HZ`](/reference/api/vibration/railway-prediction/#floor_natural_frequencies_hz) and no rule for a
 frequency between two, so the frequency has to be one of them. Clause
 5.4.4: run the prediction once for each natural frequency the building may
 have, and never with the envelope over all of them, which overestimates
@@ -274,7 +274,7 @@ $\Delta L_{v,\mathrm{FB}}$ for a basement or for a foundation at
 ground level, along the 14 bands from 4 Hz to 80 Hz, as the mean of the
 buildings measured or the mean less or plus its deviation. The tables stop
 at 80 Hz where the others run to 250 Hz, so the result enters
-[`predict_floor_spectrum`](/phonometry/reference/api/vibration/railway-prediction/#predict_floor_spectrum) only with an emission spectrum cut to the
+[`predict_floor_spectrum`](/reference/api/vibration/railway-prediction/#predict_floor_spectrum) only with an emission spectrum cut to the
 same 14 bands, or padded with zeros above them by the caller.
 
 **Parameters**
@@ -340,7 +340,7 @@ The transmission through the ground, Formulae (4) to (6).
 Formula (5) gives the ratio of the velocity at $r$ to that at
 $r_0$ as $(r/r_0)^{-n} \mathrm{e}^{-\alpha_R(f)(r - r_0)}$, geometric
 spreading with the exponent $n$ and material damping with
-$\alpha_R$ of [`ground_attenuation_coefficient_per_m`](/phonometry/reference/api/vibration/railway-prediction/#ground_attenuation_coefficient_per_m), and
+$\alpha_R$ of [`ground_attenuation_coefficient_per_m`](/reference/api/vibration/railway-prediction/#ground_attenuation_coefficient_per_m), and
 Formula (4) takes 20 lg of it. With the damping left out and an
 exponent per band it is Formula (6), the power law with the exponent
 measured on site for every band. On the surface the standard usually
@@ -585,7 +585,7 @@ mitigation. The Annex A tables are negative where they attenuate, and a
 mitigation must be too, which is why the term is not called an insertion
 loss here: the formula prints $D_\mathrm{e}$ with a plus sign and names
 DIN 45673-1 for it, and an insertion loss in the sense of DIN 45672-2
-Annex B, [`elastic_insertion_loss`](/phonometry/reference/api/vibration/railway/#elastic_insertion_loss), is
+Annex B, [`elastic_insertion_loss`](/reference/api/vibration/railway/#elastic_insertion_loss), is
 positive where the element reduces the level, so it goes in with its
 sign changed. An emission spectrum measured at the foundation makes the
 foundation term zero (Annex C does exactly that).
@@ -630,7 +630,7 @@ KB-weighted bands from 4 Hz to 80 Hz, Formula (9) for the clock maximum
 r.m.s. of the category, Formula (10) for its $KB_\mathrm{Fmax}$
 and Formula (12) for the peak velocity. The assessment vibration
 severity over the categories of a timetable is Formula (11), the sum of
-[`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity), which also
+[`train_assessment_severity`](/reference/api/vibration/train-categories/#train_assessment_severity), which also
 applies the rule of E DIN 4150-2:2023-08 that Formula (11) leaves out, a
 category at or below 0.1 counting as zero.
 
@@ -645,7 +645,7 @@ category at or below 0.1 counting as zero.
 | `floor_level_difference` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
 | `mitigation_level_difference` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
-**Returns:** The chain, as a [`TrainCategoryPrediction`](/phonometry/reference/api/vibration/railway-prediction/#traincategoryprediction).
+**Returns:** The chain, as a [`TrainCategoryPrediction`](/reference/api/vibration/railway-prediction/#traincategoryprediction).
 
 **Raises**
 
@@ -755,7 +755,7 @@ prints 0.4 for a sum level of 78.1 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `weighted_levels` | $L_{v,KB}$, as [`kb_weighted_levels`](/phonometry/reference/api/vibration/railway-prediction/#kb_weighted_levels) gives them, one per band. |
+| `weighted_levels` | $L_{v,KB}$, as [`kb_weighted_levels`](/reference/api/vibration/railway-prediction/#kb_weighted_levels) gives them, one per band. |
 
 **Returns:** $KB_\mathrm{FTm,Zug}$, dimensionless.
 

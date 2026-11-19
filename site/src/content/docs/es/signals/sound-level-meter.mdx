@@ -128,7 +128,7 @@ cal = metrology.sensitivity(calibrator, target_spl=94.0, fs=fs)
 # como calibration_factor. Para este tono sintético vale ≈1,0.
 ```
 
-Guía de fondo: [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/), que
+Guía de fondo: [Calibración y dBFS](/es/signals/metrology/calibration/), que
 cubre la comprobación de estabilidad que esta llamada ejecuta sobre la grabación
 del calibrador, la regla del formato entero y el modo digital dBFS que se usa
 cuando no existe referencia física. Sin ningún calibrador, el factor puede
@@ -175,8 +175,8 @@ ningún movimiento de aguja al que seguir. La cadena se muestra aquí porque *es
 la pantalla del sonómetro.
 
 Guías de fondo:
-[Ponderación frecuencial (A, C, Z)](/phonometry/es/signals/levels/weighting/) y
-[Ponderación temporal](/phonometry/es/signals/levels/time-weighting/), que
+[Ponderación frecuencial (A, C, Z)](/es/signals/levels/weighting/) y
+[Ponderación temporal](/es/signals/levels/time-weighting/), que
 desmonta este mismo clip frente a la tabla de ráfagas tonales de
 IEC 61672-1.
 
@@ -245,11 +245,11 @@ plt.show()
 </details>
 
 Guía de fondo:
-[Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/), que
+[Niveles integrados y estadísticos](/es/signals/levels/levels/), que
 añade el nivel máximo con ponderación temporal $L_\mathrm{AFmax}$ que da esta misma
 traza `laf_t`, la dosis de ruido y los espectrogramas de octava; el $L_\mathrm{den}$ y
 los niveles de evaluación continúan en
-[Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/).
+[Niveles ambientales](/es/environment/assessment/environmental-levels/).
 
 ## 5. Filtra en bandas: la vista de espectro (IEC 61260-1)
 
@@ -326,10 +326,10 @@ plt.show()
 
 </details>
 
-Guías de fondo: [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/) para
+Guías de fondo: [Bancos de filtros](/es/signals/filters/filter-banks/) para
 las arquitecturas de filtro y el modo de fase cero,
-[Procesado por bloques](/phonometry/es/signals/filters/block-processing/) para
-streaming, y [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/)
+[Procesado por bloques](/es/signals/filters/block-processing/) para
+streaming, y [Multicanal y rendimiento](/es/signals/filters/multichannel/)
 para arrays.
 
 ## 6. Verifica: ¿es este sonómetro de clase 1?
@@ -351,9 +351,9 @@ print(filters.verify_filter_class(bank).overall_class)    # 1
 
 Los veredictos también llegan por banda, de modo que puedes ver exactamente
 dónde un diseño se saldría de su corredor de clase. Guías de fondo:
-[Ponderación frecuencial](/phonometry/es/signals/levels/weighting/) (sección de
+[Ponderación frecuencial](/es/signals/levels/weighting/) (sección de
 verificación de clase) y
-[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/)
+[Verificación de clase de filtros](/es/signals/filters/filter-compliance/)
 (la máscara de la Tabla 1, la clase 0 y la ficha de conformidad).
 
 ## 7. ¿Es válida esta medición?
@@ -392,7 +392,7 @@ Rechaza el registro si existe cualquier racha saturada, exige al menos 10 dB de
 margen sobre el ruido propio de la cadena (por debajo de eso, el $L_{90}$ está
 leyendo el preamplificador y no el fondo), y mantén la diferencia de
 sensibilidad entre el antes y el después dentro del umbral de 0,5 dB de la
-[guía de calibración](/phonometry/es/signals/metrology/calibration/), que además
+[guía de calibración](/es/signals/metrology/calibration/), que además
 explica por qué esa misma diferencia es el término de deriva del balance de
 incertidumbre.
 
@@ -426,7 +426,7 @@ tiene el ensayo periódico de un sonómetro en servicio:
 `metrology.verify_sound_level_meter_periodic` juzga lo que un laboratorio
 midió en los ensayos de IEC 61672-3:2013, apartado por apartado ([Ensayos
 periódicos de un
-sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)).
+sonómetro](/es/signals/metrology/sound-level-meter-periodic-tests/)).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -443,7 +443,7 @@ paso 7 criban la *grabación*, no el instrumento. Lo mismo vale para el
 calibrador: aquí no se realiza sobre él ningún ensayo de IEC 60942:2017.
 `verify_sound_calibrator` juzga los números que midió un laboratorio, y
 `sensitivity()` criba la estabilidad a corto plazo de la toma frente a la
-Tabla 2; la [guía de calibración](/phonometry/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017)
+Tabla 2; la [guía de calibración](/es/signals/metrology/calibration/#verificar-el-propio-calibrador-iec-609422017)
 dice exactamente qué comprueba cada una y qué no.
 </ScopeClaim>
 </Scope>
@@ -454,21 +454,21 @@ dice exactamente qué comprueba cada una y qué no.
 
 El sonómetro construido aquí es el tronco; el resto del núcleo crece de él.
 
-- [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/signals/metrology/gum-uncertainty/):
+- [Incertidumbre de medida (GUM y Monte Carlo)](/es/signals/metrology/gum-uncertainty/):
   acompaña de una incertidumbre el $L_\mathrm{Aeq}$ que acabas de calcular, término de
   calibración incluido.
-- [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/):
+- [Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/):
   cuando las bandas se quedan cortas, la PSD de Welch con intervalos de
   confianza.
-- [Correlación, retardo y envolvente](/phonometry/es/signals/spectra/correlation-delay/):
+- [Correlación, retardo y envolvente](/es/signals/spectra/correlation-delay/):
   dos micrófonos en lugar de uno, y el retardo entre ellos.
-- [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): convierte
+- [Procesado por bloques](/es/signals/filters/block-processing/): convierte
   el sonómetro offline de esta página en uno en streaming con estado de
   filtro arrastrado.
-- Referencia de la API: [`metrology.calibration`](/phonometry/es/reference/api/metrology/calibration/),
-  [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/),
-  [`signals.levels`](/phonometry/es/reference/api/signals/levels/),
-  [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y
-  [`filters.compliance`](/phonometry/es/reference/api/filters/compliance/).
+- Referencia de la API: [`metrology.calibration`](/es/reference/api/metrology/calibration/),
+  [`filters.weighting`](/es/reference/api/filters/weighting/),
+  [`signals.levels`](/es/reference/api/signals/levels/),
+  [`phonometry`](/es/reference/api/filters/phonometry/) y
+  [`filters.compliance`](/es/reference/api/filters/compliance/).
 
 </SeeAlso>

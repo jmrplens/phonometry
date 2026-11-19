@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/noise-control/silencer-measurement.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/noise-control/silencer-measurement/
 
 # Measuring a Silencer (ISO 7235 and ISO 11691)
 
@@ -602,7 +602,7 @@ of the range that are extrapolation.
 - [Errata in published sources](../../ERRATA.md): the gap Table 6
   of ISO 7235 leaves at 160 Hz, and the two printed gas-law constants.
 - API reference:
-  [`noise_control.silencer_measurement`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-measurement/).
+  [`noise_control.silencer_measurement`](https://phonometry.dev/reference/api/noise_control/silencer-measurement/).
 
 ## References
 

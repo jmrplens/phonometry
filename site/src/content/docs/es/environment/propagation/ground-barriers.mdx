@@ -77,7 +77,7 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 import Video from '../../../../../components/Video.astro';
 
-El [método general ISO 9613-2](/phonometry/es/environment/propagation/outdoor-propagation/)
+El [método general ISO 9613-2](/es/environment/propagation/outdoor-propagation/)
 pliega los términos de suelo y barrera en correcciones tabuladas basadas en
 energía. Esta página cubre la acústica ondulatoria subyacente en
 `phonometry.environment.propagation.ground_barriers`: el **coeficiente de reflexión de
@@ -146,7 +146,7 @@ res.plot()                        # atenuación en exceso frente a frecuencia
 
 La impedancia del suelo se deriva de una `flow_resistivity_pa_s_m2` efectiva (con el
 modelo `delany_bazley` o `miki` de
-[`phonometry.materials`](/phonometry/es/materials/absorbers/porous-absorbers/), que modelan
+[`phonometry.materials`](/es/materials/absorbers/porous-absorbers/), que modelan
 un suelo poroso semiinfinito) o se suministra directamente como una `impedance`
 compleja normalizada (un escalar, un vector por banda o un `PorousMediumResult`).
 Un valor de `impedance` directo se toma en el convenio $\mathrm{e}^{-i\omega t}$ de
@@ -269,7 +269,7 @@ figura no llega a entrar en el rango en ningún punto. Por debajo del rango, la
 regresión de Delany-Bazley es una extrapolación cuyo fallo clásico es una parte
 real negativa de la impedancia de superficie; **Miki** es el reajuste con
 restricción de pasividad que conviene preferir ahí (ver el párrafo del rango de
-ajuste en [Absorbentes porosos](/phonometry/es/materials/absorbers/porous-absorbers/)).
+ajuste en [Absorbentes porosos](/es/materials/absorbers/porous-absorbers/)).
 La elección no es cosmética: en el caso de arriba, `model="miki"` mueve la
 atenuación en exceso hasta 3,6 dB (banda de 250 Hz: 0,43 dB con Delany-Bazley,
 −3,18 dB con Miki).
@@ -288,7 +288,7 @@ EN 29053 del mismo material.
 
 ### Un suelo de un catálogo
 
-Una fila de `environment.PUBLISHED_GROUND_SURFACES`, o de [un catálogo propio](/phonometry/es/io/material-catalogues/),
+Una fila de `environment.PUBLISHED_GROUND_SURFACES`, o de [un catálogo propio](/es/io/material-catalogues/),
 da la impedancia por sí misma: `GroundSurface.medium` es el semiespacio
 poroso de su resistividad al flujo efectiva, por el modelo de Delany y
 Bazley o por el de Miki, que `ground_effect` recibe como `impedance`,
@@ -338,7 +338,7 @@ que tiende a 5 dB en el límite de sombra $N \to 0$ y aproxima la curva de
 fuente puntual de Maekawa dentro de unos 1,5 dB.
 
 El clip de abajo es esa fórmula convertida en campo. Es el
-[esquema FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) ejecutado dos veces
+[esquema FDTD 2D](/es/simulation/fdtd-simulation/) ejecutado dos veces
 sobre un mismo semiespacio de 12 × 7 m sobre suelo rígido con una pantalla
 rígida delgada de 2,5 m de alto, una vez a 100 Hz y otra a 500 Hz, cada una con
 una simulación de referencia sin barrera sobre el mismo suelo para que la
@@ -604,7 +604,7 @@ de difracción y el índice de reducción sonora del propio panel, y el obstácu
 tiene que cualificar antes como barrera: masa por unidad de superficie, una
 superficie cerrada y una extensión horizontal normal a la trayectoria mayor que
 la longitud de onda. Esas reglas de cualificación están enunciadas en el
-[apartado de errores habituales con barreras de Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/);
+[apartado de errores habituales con barreras de Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/);
 aquí se aplican sin cambios.
 
 <span id="3-lo-que-dice-la-declaracion-del-producto-en-1793"></span>
@@ -724,7 +724,7 @@ Los dos números de carretera salen de un laboratorio, sobre una muestra y en un
 campo difuso. La EN 1793-5 mide la reflexión de la pantalla tal como está
 construida, en el campo directo de un altavoz colocado delante, y la pondera con
 el mismo espectro en un tercer número, $DL_{RI}$. Tiene su propia página,
-[Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/), porque casi todo el
+[Reflexión acústica de una pantalla in situ](/es/environment/propagation/barrier-reflection/), porque casi todo el
 trabajo está en pasar de nueve respuestas al impulso al índice; el índice global
 es `environment.sound_reflection_rating`, junto a los dos anteriores, y
 devuelve el mismo `RoadDeviceRating`.
@@ -736,7 +736,7 @@ misma magnitud que la ISO 9613-2 llama $D_z$, y los dos segmentos difractados
 llamados aquí $A$ y $B$ son sus $d_\mathrm{ss}$ y $d_\mathrm{sr}$. Los términos tabulados
 $A_\mathrm{gr}$ y $D_z$ del
 [método ISO
-9613-2](/phonometry/es/environment/propagation/outdoor-propagation/) son
+9613-2](/es/environment/propagation/outdoor-propagation/) son
 ajustes de
 ingeniería por banda de octava basados en energía; `ground_effect` y
 `barrier_insertion_loss` son sus contrapartes de banda estrecha por acústica
@@ -766,7 +766,7 @@ caminos ponderado por el coeficiente de reflexión de `ground_effect`.
 Ambos modelos suponen una atmósfera homogénea, sin refracción ni turbulencia;
 un gradiente vertical de velocidad del sonido es el objeto de la guía separada
 de [refracción
-atmosférica](/phonometry/es/environment/propagation/atmospheric-refraction/).
+atmosférica](/es/environment/propagation/atmospheric-refraction/).
 El modelo coherente de barrera sobre suelo pondera los cuatro caminos
 difractados con un único coeficiente de reflexión $Q$ calculado sobre la
 geometría global fuente-receptor, en lugar de un coeficiente distinto por
@@ -779,12 +779,12 @@ por elementos de contorno.
 
 ## Véase también
 
-- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/): los ajustes por bandas de octava de ISO 9613-2 bajo los que se sitúan estos modelos, y la regla que un obstáculo tiene que cumplir para ser barrera siquiera.
-- [Refracción atmosférica: rayos y GFPE](/phonometry/es/environment/propagation/atmospheric-refraction/): el gradiente vertical de velocidad del sonido que los dos modelos de aquí dan por inexistente.
-- [Absorbentes porosos](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos de Delany-Bazley y de Miki que hay detrás de `flow_resistivity_pa_s_m2`, y su rango de ajuste.
-- Teoría: [Propagación en exteriores](/phonometry/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): los términos de suelo y de barrera de ISO 9613-2 en el contexto de toda la suma de atenuaciones.
-- Referencia de la API: [`environment.propagation.ground_barriers`](/phonometry/es/reference/api/environment/ground-barriers/).
-- [Catálogos publicados](/phonometry/es/reference/catalogues/ground-surfaces/): la
+- [Propagación del sonido en exteriores](/es/environment/propagation/outdoor-propagation/): los ajustes por bandas de octava de ISO 9613-2 bajo los que se sitúan estos modelos, y la regla que un obstáculo tiene que cumplir para ser barrera siquiera.
+- [Refracción atmosférica: rayos y GFPE](/es/environment/propagation/atmospheric-refraction/): el gradiente vertical de velocidad del sonido que los dos modelos de aquí dan por inexistente.
+- [Absorbentes porosos](/es/materials/absorbers/porous-absorbers/): los modelos de Delany-Bazley y de Miki que hay detrás de `flow_resistivity_pa_s_m2`, y su rango de ajuste.
+- Teoría: [Propagación en exteriores](/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): los términos de suelo y de barrera de ISO 9613-2 en el contexto de toda la suma de atenuaciones.
+- Referencia de la API: [`environment.propagation.ground_barriers`](/es/reference/api/environment/ground-barriers/).
+- [Catálogos publicados](/es/reference/catalogues/ground-surfaces/): la
   resistividad al flujo y los parámetros de modelo que imprimen los libros
   para hierba, nieve, asfalto y el resto de superficies de suelo.
 

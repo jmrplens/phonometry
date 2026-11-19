@@ -88,7 +88,7 @@ describe('what the copy writes prints as the page prints it', () => {
   });
 
   test('a catalogue of the overview, its label and its description', async () => {
-    const item = catalogueItem({ label: MARKED, url: 'https://docs.jmrp.io/phonometry/reference/catalogues/solids/', count: '3 rows', description: `${MARKED} &amp;` });
+    const item = catalogueItem({ label: MARKED, url: 'https://phonometry.dev/reference/catalogues/solids/', count: '3 rows', description: `${MARKED} &amp;` });
     const { text, html } = await printed(item);
     assert.equal(text, `${MARKED} (3 rows): ${MARKED} &amp;`);
     assert.match(html, /^<ul>\n<li><a href="[^"]+">[^]*<\/li>\n<\/ul>$/u);

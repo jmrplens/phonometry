@@ -120,7 +120,7 @@ sidebar:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](/phonometry/reference/theory/).
+This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](/reference/theory/).
 
 Each section keeps its own standard's notation, and four letters are reused
 across them. Read them per section:
@@ -173,7 +173,7 @@ against the day's 51.3 %, and 3 dB off the day moves $L_\mathrm{den}$ by 1.3 dB 
 3 dB off the night moves it by 0.3 dB. Check the split before choosing where to
 spend.
 
-See the [Environmental Levels guide](/phonometry/environment/assessment/environmental-levels/) for usage.
+See the [Environmental Levels guide](/environment/assessment/environmental-levels/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%" />
 
@@ -225,7 +225,7 @@ measurement part: the objective procedure only decides how large the adjustment
 is, and it is ISO 1996-1 that then combines the adjusted periods into a rating
 level.
 
-See the [Impulse Prominence guide](/phonometry/environment/assessment/impulsive-sound/) for usage.
+See the [Impulse Prominence guide](/environment/assessment/impulsive-sound/) for usage.
 
 ## Outdoor propagation (ISO 9613-1/2)
 
@@ -387,7 +387,7 @@ $\pm 3$ dB in every other case within 1000 m, with no accuracy stated beyond
 ## Occupational noise exposure (ISO 9612)
 
 The quantity itself, $L_\mathrm{EX,8h}$, is defined from sound exposure in
-[Signal Analysis](/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics);
+[Signal Analysis](/reference/theory/signal-analysis/#event-and-dose-metrics);
 this section is about measuring it in a workplace and bounding its uncertainty.
 
 ISO 9612:2009 is the engineering method (accuracy grade 2) for a worker's daily
@@ -438,7 +438,7 @@ examples of Annexes D (task, $L_\mathrm{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job
 $88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
 the standard's printed precision: every intermediate of Annex E is digit-exact,
 and its final level differs only by the standard's own pre-rounding of the
-effective-day level (see the [Occupational Noise Exposure guide](/phonometry/perception/hearing/occupational-exposure/)).
+effective-day level (see the [Occupational Noise Exposure guide](/perception/hearing/occupational-exposure/)).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%" />
 
@@ -448,8 +448,8 @@ energy-summed $L_\mathrm{EX,8h}$ and the band up to $L_\mathrm{EX,8h} + U$ that 
 with $U = 2.7$ dB the upper limit sits 2.7 dB above the number, which is enough
 to cross an action value on its own.*
 
-See the [Outdoor Propagation guide](/phonometry/environment/propagation/outdoor-propagation/) and the
-[Occupational Noise Exposure guide](/phonometry/perception/hearing/occupational-exposure/) for usage.
+See the [Outdoor Propagation guide](/environment/propagation/outdoor-propagation/) and the
+[Occupational Noise Exposure guide](/perception/hearing/occupational-exposure/) for usage.
 
 ## Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-1/2/3)
 
@@ -469,7 +469,7 @@ ISO 9614-3 (precision) by scanning. **Surface velocity** reads the radiating
 casing with an accelerometer and takes no acoustic measurement at all, paying
 for that freedom with a radiation factor: that is ISO/TS 7849, whose factor is
 the radiation efficiency derived in the
-[vibration reference](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29).
+[vibration reference](/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The seven sound power routes, one row for each measured quantity, every cell carrying the same five attributes. The sound pressure row: the ISO 3744/3746 hemispherical enveloping surface over a reflecting plane, the ISO 3745 fixed microphone array in a wedge-lined anechoic room, and the ISO 3741 diffuse field of a reverberation room. The sound intensity row: the ISO 9614-1 measurement surface cut into ten segments with the probe held still at a point in each, the ISO 9614-2 serpentine scan swept over that same surface, and the tighter ISO 9614-3 precision scan. The surface velocity row carries one route across the full width, ISO/TS 7849 with an accelerometer on a radiating casing and no microphone at all" width="92%" />
 
@@ -643,7 +643,7 @@ ISO 9614-1 calls them $F_2$ (pressure-intensity), $F_3$ (negative partial power)
 and $F_4$ (field non-uniformity); Part 2 writes $F_{pI}$ and $F_{+/-}$; Part 3
 writes $F_{pI_\mathrm{n}}$ and $F_\mathrm{S}$. Each subsection here uses its own part's symbols. The
 $F_2$-to-$F_4$ naming is the one used in
-[Sound intensity](/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043).
+[Sound intensity](/reference/theory/signal-analysis/#sound-intensity-iec-61043).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" width="92%" />
 
@@ -677,11 +677,11 @@ net power is negative are not determinable (clause 9.2) and are flagged. A
 uniform normal intensity recovers the power exactly (100 µW over 3.75 m² →
 80.0 dB re 1 pW), independent of how the surface is segmented.
 
-See the [Sound Power guide](/phonometry/devices/emission/sound-power/) for the choice
+See the [Sound Power guide](/devices/emission/sound-power/) for the choice
 of method, and the
-[pressure](/phonometry/devices/emission/sound-power-pressure/),
-[reverberation-room](/phonometry/devices/emission/sound-power-reverberation/),
-[intensity-scanning](/phonometry/devices/emission/sound-power-intensity/),
-[discrete-point intensity](/phonometry/devices/emission/intensity/) and
-[surface-vibration](/phonometry/devices/emission/vibration-sound-power/) guides for
+[pressure](/devices/emission/sound-power-pressure/),
+[reverberation-room](/devices/emission/sound-power-reverberation/),
+[intensity-scanning](/devices/emission/sound-power-intensity/),
+[discrete-point intensity](/devices/emission/intensity/) and
+[surface-vibration](/devices/emission/vibration-sound-power/) guides for
 usage.

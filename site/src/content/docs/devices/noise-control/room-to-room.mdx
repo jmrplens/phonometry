@@ -63,7 +63,7 @@ Analysis for Engineers* (2nd ed., Cambridge University Press 2003),
 Chapter 4: §4.6 for the sound power models, §4.9 for the room-to-room
 balance and §4.10 for the enclosure. Its problems 4.16, 4.18 and 4.21 carry
 printed octave-band answers, and all three are pinned in the
-[conformance report](/phonometry/reference/conformance/).
+[conformance report](/reference/conformance/).
 
 Here is the whole page in one drawing: Norton's problem 4.18 in section, with
 every symbol of the balance sitting where it physically belongs.
@@ -71,7 +71,7 @@ every symbol of the balance sitting where it physically belongs.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_to_room.svg" alt="Section through two rooms sharing a wall, drawn at fifty pixels per metre. On the left an 8 by 10 by 3 metre plant room with a bare floor and an absorbent ceiling, a blower standing on the floor against a wall with the quarter-space wedge of its Q = 4 position shaded and its radiated arcs drawn. In the middle the 5 by 3 metre separating wall, hatched, with a thin reverse arrow for the power it returns to the source room. On the right a 5 by 5 by 3 metre operator room with a carpet, the same absorbent ceiling and a standing occupant. A dashed arc rises over the wall through the ceiling void for the flanking path. Below, three lines give the source-side, partition and receiving-side numbers at 125 Hz, and the footer prints the balance with the crossing where the receiving room's absorption area passes the 15 square metres of the wall" width="92%" loading="eager" />
 
 Where the *partition itself* comes from is a different question, answered by
-[Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/) (mass law, coincidence,
+[Panel sound insulation](/buildings/design/panel-sound-insulation/) (mass law, coincidence,
 double leaves, the plateau method) or by measurement. This page takes the
 transmission loss as given, exactly as a hand calculation does.
 
@@ -94,7 +94,7 @@ use for the quantity ISO 10140-2 measures and ISO 717-1 rates as the **sound
 reduction index** $R$; they are the same number, and its single-number rating is
 the $R_\mathrm{w}$ used below, so the $R$ and $R_\mathrm{w}$ of a laboratory test report drop
 straight into this equation (see
-[Insulation ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/)). $S_\mathrm{w}$ is the area of the partition and $S_2 \alpha_2$ the equivalent absorption
+[Insulation ratings (ISO 717)](/buildings/insulation/insulation-ratings/)). $S_\mathrm{w}$ is the area of the partition and $S_2 \alpha_2$ the equivalent absorption
 area of the receiving room.
 
 Read the logarithm and the whole page follows. A **large partition into a
@@ -126,10 +126,10 @@ $D_{\mathrm{n}T,\mathrm{w}}$ for the same wall are different numbers by construc
 comparing them without renormalising is the commonest way to conclude that the
 model is wrong when it is not. The receiving-room reverberation time has to be
 measured in the same session, because it is what carries the normalisation.
-[Field sound insulation](/phonometry/buildings/insulation/insulation-field/) has
+[Field sound insulation](/buildings/insulation/insulation-field/) has
 the source and microphone positions, the minimum separations and the
 background-noise correction; [Laboratory sound
-insulation](/phonometry/buildings/insulation/insulation-lab/) has where a
+insulation](/buildings/insulation/insulation-lab/) has where a
 declared $R$ comes from.
 
 ## 2. Three partitions, one receiving room
@@ -379,7 +379,7 @@ The deficit and the exceedance are the same six numbers, which is the whole
 content of the chain: a decibel too much in the room is a decibel too little
 in the wall. Whether that low-frequency deficit is worth chasing with mass,
 a cavity or a second leaf is what
-[Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/) is for.
+[Panel sound insulation](/buildings/design/panel-sound-insulation/) is for.
 
 The verdict is deliberately the band-by-band test, not the rating. A
 spectrum can rate NC-38 and still poke through the NC 45 curve in one band,
@@ -509,7 +509,7 @@ enclosure or share its base: a bolted contact radiates the machine's vibration
 from the outer skin and bypasses the panels entirely. Put the openings into the
 calculation rather than hoping. The composite route and the drawn construction
 are in
-[Industrial noise control §2.1](/phonometry/devices/noise-control/noise-control/#21-what-the-enclosure-actually-delivers-leaks-doors-and-openings),
+[Industrial noise control §2.1](/devices/noise-control/noise-control/#21-what-the-enclosure-actually-delivers-leaks-doors-and-openings),
 and use the same `flanking_penalty` below as the honest place to record
 whatever is left unmodelled.
 
@@ -559,8 +559,8 @@ print(np.round(honest.received_level, 1))
 
 Where the flanking paths *are* modelled rather than allowed for, the
 prediction models of EN 12354 are the right tool, and those live in
-[Building sound insulation prediction](/phonometry/buildings/design/insulation-prediction/) and
-[Flanking transmission](/phonometry/buildings/insulation/flanking-lab/).
+[Building sound insulation prediction](/buildings/design/insulation-prediction/) and
+[Flanking transmission](/buildings/insulation/flanking-lab/).
 
 The other assumption is diffusivity, and it fails in two directions. In
 frequency: Equation (4.101) is a diffuse-field balance in both rooms, so it has
@@ -584,7 +584,7 @@ standards keep their microphone positions half a wavelength from every surface.
 Past the partition's own direct field, below, it is also the reason this
 calculation cannot answer where in the receiving room to put the workstation;
 when that is the question, the image-source and ray methods of
-[Room image sources and steady field](/phonometry/buildings/rooms/room-image-sources/)
+[Room image sources and steady field](/buildings/rooms/room-image-sources/)
 are the tool.
 
 ### A receiver next to the partition
@@ -683,22 +683,22 @@ closer to a surface other than the partition than about half a wavelength.
 
 ## See also
 
-- [Panel sound insulation](/phonometry/buildings/design/panel-sound-insulation/):
+- [Panel sound insulation](/buildings/design/panel-sound-insulation/):
   where the transmission loss this page consumes comes from.
-- [Building sound insulation prediction](/phonometry/buildings/design/insulation-prediction/)
-  and [Flanking transmission](/phonometry/buildings/insulation/flanking-lab/):
+- [Building sound insulation prediction](/buildings/design/insulation-prediction/)
+  and [Flanking transmission](/buildings/insulation/flanking-lab/):
   the EN 12354 models for the flanking paths this page only debits.
-- [Field sound insulation](/phonometry/buildings/insulation/insulation-field/):
+- [Field sound insulation](/buildings/insulation/insulation-field/):
   how the same room pair is measured, and the $D_{\mathrm{n}T}$ and $R'$ a test report
   hands back.
-- [Room-noise criteria](/phonometry/buildings/rooms/room-noise/): the NC and
+- [Room-noise criteria](/buildings/rooms/room-noise/): the NC and
   RC Mark II families the verdict is written in.
-- [Industrial noise control](/phonometry/devices/noise-control/noise-control/):
+- [Industrial noise control](/devices/noise-control/noise-control/):
   the enclosure of section 5 as a construction, with its leaks and its
   measurement standards.
-- [Sound power](/phonometry/devices/emission/sound-power/): the machine $L_W$
+- [Sound power](/devices/emission/sound-power/): the machine $L_W$
   the whole chain starts from.
 - API reference:
-  [`noise_control.room_to_room`](/phonometry/reference/api/noise_control/room-to-room/).
+  [`noise_control.room_to_room`](/reference/api/noise_control/room-to-room/).
 
 </SeeAlso>

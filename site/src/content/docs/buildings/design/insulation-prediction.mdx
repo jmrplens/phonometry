@@ -39,11 +39,11 @@ the airborne model of EN 12354-1 with its junction vibration reduction
 indices, the impact model of EN 12354-2 and the prediction fiches of both. The
 third and fourth parts of the same family, which cross the building envelope
 instead of an internal partition, are in
-[Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/). The measured
+[Façade Sound Insulation](/buildings/insulation/facade-insulation/). The measured
 quantities the model is checked against live in
-[Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/);
+[Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/);
 the laboratory inputs come from
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/).
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/).
 
 ## How do I predict sound insulation with EN 12354 in Python?
 
@@ -319,7 +319,7 @@ application the 2000 text left implicit (Clause 4.3.1): the simplified model
 is restricted to 100 Hz–3150 Hz, and for lightweight constructions to the
 measured normalised flanking impact level route $L_{\mathrm{nf},ij}$ of Formula (17).
 The frequency-band route of
-[Detailed Sound Insulation Prediction](/phonometry/buildings/design/detailed-prediction/)
+[Detailed Sound Insulation Prediction](/buildings/design/detailed-prediction/)
 is anchored on the 2017 editions throughout.
 
 **What the two mass inputs are, and where the closed form stops.** Annex B's
@@ -412,10 +412,10 @@ it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
 $D_{\mathrm{n}T,\mathrm{w}} = 54$ dB).
 
 The three insulation guides close a loop: the
-[laboratory](/phonometry/buildings/insulation/insulation-lab/) measures $R$ and $K_{ij}$
+[laboratory](/buildings/insulation/insulation-lab/) measures $R$ and $K_{ij}$
 element by element and junction by junction, this model assembles them into
 a predicted $R'_\mathrm{w}$, and the
-[field measurement](/phonometry/buildings/insulation/insulation-field/) checks the built
+[field measurement](/buildings/insulation/insulation-field/) checks the built
 result. When the measured value lands well below the prediction, look for a
 construction defect on the dominant path the model reports: a rigid bridge
 across a resilient junction, a missing lining, a leak around the separating
@@ -473,7 +473,7 @@ about arithmetic.
   transmission between rooms that share the separating element, and secondary
   paths crossing more than one junction are neglected. Where the source is
   several junctions away, the
-  [EN 12354-5 route](/phonometry/buildings/design/installed-structure-borne/)
+  [EN 12354-5 route](/buildings/design/installed-structure-borne/)
   chains the junction indices instead.
 
 And the ~2 dB standard deviation is not a tolerance on your answer. Clause 5
@@ -498,7 +498,7 @@ that step. And the frequency independence holds "at least in the frequency range
 from 125 Hz to 2 000 Hz"; outside it the frequency effect can be larger. The way
 out is measured data: ISO 10848-4 for heavy junctions (which Annex E.3.1 itself
 recommends gathering at national level) and the
-[flanking laboratory](/phonometry/buildings/insulation/flanking-lab/) where the
+[flanking laboratory](/buildings/insulation/flanking-lab/) where the
 junction is lightweight, non-homogeneous or simply not in the catalogue.
 
 ### EN 12354 prediction report (`.report()`)
@@ -583,7 +583,7 @@ insulation against outdoor sound, EN 12354-4 the sound power an indoor source
 radiates outwards. Both are built on the same area-weighted summation of
 element transmission factors used above, and both are covered, beside the
 ISO 16283-3 measurement they are compared against, in
-[Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/).
+[Façade Sound Insulation](/buildings/insulation/facade-insulation/).
 
 ## What this guide covers
 
@@ -608,7 +608,7 @@ with `.report()`.
 <ScopeClaim status="not-covered" label="Not covered">
 The *detailed* per-band models of both parts are the subject of [Detailed
 Per-Band Prediction (ISO
-12354)](/phonometry/buildings/design/detailed-prediction/): the same standard
+12354)](/buildings/design/detailed-prediction/): the same standard
 run band by band, with the laboratory element and junction data converted to
 their in-situ values before the paths are formed. Use the simplified model
 here when only the weighted element ratings are known and the question is
@@ -616,14 +616,14 @@ whether the room passes; use the detailed one when the element spectra exist
 and the question is which path sets which band. The element inputs themselves
 ($R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area) are taken as given,
 from laboratory data or from the mass-law estimates of [Predicting Panel Sound
-Insulation](/phonometry/buildings/design/panel-sound-insulation/). The rest of
+Insulation](/buildings/design/panel-sound-insulation/). The rest of
 the family is covered by its own guides: EN 12354-3 and EN 12354-4 across the
 building envelope in [Façade Sound
-Insulation](/phonometry/buildings/insulation/facade-insulation/), EN 12354-5's
+Insulation](/buildings/insulation/facade-insulation/), EN 12354-5's
 service equipment in [Installed structure-borne
-sound](/phonometry/buildings/design/installed-structure-borne/) and EN
+sound](/buildings/design/installed-structure-borne/) and EN
 12354-6's absorption model in [Sound absorption in enclosed
-spaces](/phonometry/buildings/rooms/enclosed-space-absorption/).
+spaces](/buildings/rooms/enclosed-space-absorption/).
 </ScopeClaim>
 </Scope>
 
@@ -631,30 +631,30 @@ spaces](/phonometry/buildings/rooms/enclosed-space-absorption/).
 
 ## See also
 
-- [Façade Sound Insulation](/phonometry/buildings/insulation/facade-insulation/): the
+- [Façade Sound Insulation](/buildings/insulation/facade-insulation/): the
   EN 12354-3 and EN 12354-4 predictions across the building envelope, with the
   ISO 16283-3 measurement they are compared against.
-- [Detailed Per-Band Prediction (ISO 12354)](/phonometry/buildings/design/detailed-prediction/):
+- [Detailed Per-Band Prediction (ISO 12354)](/buildings/design/detailed-prediction/):
   the same two parts run band by band, with the in-situ conversion of the
   element and junction data the single-number model here takes as given.
-- [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
+- [Bending-wave transmission at plate junctions](/vibration/structural/junction-transmission/):
   the wave approach behind $K_{ij}$, with the index plotted against the plate
   thickness ratio for the X, T and L junctions of the catalogue above.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the measured in-situ quantities the prediction is checked against.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/): the
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/): the
   reference-curve engine behind the predicted $R'_\mathrm{w}$ and $L'_\mathrm{n,w}$.
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/): the
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/): the
   ISO 10140 ratings the model consumes.
-- [Laboratory Flanking Transmission (ISO 10848)](/phonometry/buildings/insulation/flanking-lab/):
+- [Laboratory Flanking Transmission (ISO 10848)](/buildings/insulation/flanking-lab/):
   the measured junction vibration reduction index $K_{ij}$ the model consumes.
-- [Sound absorption in enclosed spaces (EN 12354-6)](/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Sound absorption in enclosed spaces (EN 12354-6)](/buildings/rooms/enclosed-space-absorption/):
   the absorption member of the same EN 12354 family.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/materials/resilient/dynamic-stiffness/):
+- [Dynamic stiffness of resilient materials (EN 29052-1)](/materials/resilient/dynamic-stiffness/):
   the $s'$ input to the EN 12354-2 floating-floor term.
-- API reference: [`building.prediction.simplified_model`](/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](/phonometry/reference/api/building/facade/).
-- Theory: [Sound insulation and absorption, predicted](/phonometry/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the EN 12354 path model and the transmission quantities it sums.
-- [Published catalogues](/phonometry/reference/catalogues/transmission-loss/): the
+- API reference: [`building.prediction.simplified_model`](/reference/api/building/simplified-model/) and [`building.prediction.facade`](/reference/api/building/facade/).
+- Theory: [Sound insulation and absorption, predicted](/reference/theory/rooms-buildings/#sound-insulation-and-absorption-predicted-en-12354-1-2-6-bies-cremer-hopkins): the EN 12354 path model and the transmission quantities it sums.
+- [Published catalogues](/reference/catalogues/transmission-loss/): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 

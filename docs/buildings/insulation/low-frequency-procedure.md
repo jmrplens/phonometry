@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/insulation/low-frequency-procedure.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/insulation/low-frequency-procedure/
 
 # Small Rooms: the ISO 16283 Low-Frequency Procedure
 
@@ -615,9 +615,9 @@ corner procedure whether the report mentions it or not.
 - [Errata found in published sources](../../ERRATA.md): the two
   defects of ISO 16283-2 that this procedure runs into.
 - API reference:
-  [`building.measurement.low_frequency`](https://docs.jmrp.io/phonometry/reference/api/building/low-frequency/)
+  [`building.measurement.low_frequency`](https://phonometry.dev/reference/api/building/low-frequency/)
   and
-  [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).
+  [`building.measurement.insulation`](https://phonometry.dev/reference/api/building/insulation/).
 
 ## References
 

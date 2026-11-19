@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/signals/filters/filter-gallery.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/signals/filters/filter-gallery/
 
 # Filter Architecture Gallery
 
@@ -490,7 +490,7 @@ on-axis response with the swept-sine method of
 - [Filter Class Verification (IEC 61260-1)](filter-compliance.md):
   the Table 1 acceptance mask, class 0 and the compliance fiche of these
   architectures.
-- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
+- API reference: [`phonometry`](https://phonometry.dev/reference/api/filters/phonometry/) and [`filters.core`](https://phonometry.dev/reference/api/filters/core/).
 - Theory: [Magnitude Responses](../../reference/theory/signal-analysis.md#magnitude-responses): what a magnitude response is as a complex transfer function, and how the five architectures differ before any band is filtered.
 
 ## Quick answers

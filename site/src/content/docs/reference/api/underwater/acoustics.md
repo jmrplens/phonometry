@@ -12,15 +12,15 @@ airborne acoustics) and a reference sound exposure of **1 µPa²·s**. This modu
 realises the ISO 18405 terminology as the shared level primitives used by the
 ship-radiated-noise and pile-driving modules:
 
-* [`sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#sound_pressure_level): the mean-square sound pressure level,
+* [`sound_pressure_level`](/reference/api/underwater/acoustics/#sound_pressure_level): the mean-square sound pressure level,
   $\mathrm{SPL} = 10 \log_{10}(\langle p^2 \rangle / p_0^2)$ dB re 1 µPa.
-* [`sound_exposure_level`](/phonometry/reference/api/underwater/acoustics/#sound_exposure_level): the time-integrated exposure level,
+* [`sound_exposure_level`](/reference/api/underwater/acoustics/#sound_exposure_level): the time-integrated exposure level,
   $\mathrm{SEL} = 10 \log_{10}\!\left( \int p^2 \, dt / E_0 \right)$ dB re
   1 µPa²·s.
-* [`peak_sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#peak_sound_pressure_level): the zero-to-peak level
+* [`peak_sound_pressure_level`](/reference/api/underwater/acoustics/#peak_sound_pressure_level): the zero-to-peak level
   $20 \log_{10}(\max \lvert p \rvert / p_0)$ dB re 1 µPa.
 
-[`underwater_to_in_air_spl`](/phonometry/reference/api/underwater/acoustics/#underwater_to_in_air_spl) / [`in_air_to_underwater_spl`](/phonometry/reference/api/underwater/acoustics/#in_air_to_underwater_spl) convert a
+[`underwater_to_in_air_spl`](/reference/api/underwater/acoustics/#underwater_to_in_air_spl) / [`in_air_to_underwater_spl`](/reference/api/underwater/acoustics/#in_air_to_underwater_spl) convert a
 level between the two reference pressures (a
 $20 \log_{10}(20) \approx 26.02$ dB reference
 change, **not** an energy/intensity equivalence, which would additionally
@@ -39,7 +39,7 @@ Re-reference an in-air SPL (re 20 µPa) to the underwater 1 µPa
 reference.
 
 Adds $20 \log_{10}(20) \approx 26.02$ dB (a reference-pressure change
-only; see [`underwater_to_in_air_spl`](/phonometry/reference/api/underwater/acoustics/#underwater_to_in_air_spl)).
+only; see [`underwater_to_in_air_spl`](/reference/api/underwater/acoustics/#underwater_to_in_air_spl)).
 
 **Parameters**
 
@@ -75,7 +75,7 @@ $L_{p,\mathrm{pk}} = 20 \log_{10}(\max \lvert p \rvert / p_0)$ dB re
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
 | `reference` | Reference pressure $p_0$, in Pa (default 1 µPa). |
 
 **Returns:** Peak sound pressure level, in dB re the reference.
@@ -108,8 +108,8 @@ record.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
-| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `reference` | Reference exposure $E_0$, in Pa²·s (default 1 µPa²·s). |
 
 **Returns:** Sound exposure level, in dB re the reference.
@@ -140,7 +140,7 @@ in pascals and the underwater reference $p_0 = 1$ µPa by default.
 
 | Name | Description |
 | :--- | :--- |
-| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
+| `pressure_pa` | Sound-pressure time series (1-D), in Pa. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: this quantity is a pressure, and the underwater reference of 1 uPa changes what the decibel is counted from, not what the samples have to be in. |
 | `reference` | Reference pressure $p_0$, in Pa (default 1 µPa). |
 
 **Returns:** Sound pressure level, in dB re the reference.

@@ -16,33 +16,33 @@ $\Delta L_p = \Delta L_\mathrm{s} + \Delta L_\mathrm{a} + \Delta L_\mathrm{g}$ (
 $\Delta L_\mathrm{d}$ with shielding): spherical spreading, atmospheric
 absorption, ground effect and, later, shielding. Those adjustments depend on the
 path and not on the rotorcraft, and live in
-[`rotorcraft_propagation`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/); this module is the source
+[`rotorcraft_propagation`](/reference/api/aeroacoustics/rotorcraft-propagation/); this module is the source
 that emits and the event that receives.
 
 This module provides the source primitives and the single-event method built on
 them (clean-room, from the NORAH2 guidance SC01.D1.5d, the basis of ECAC
 Doc 32):
 
-* [`hemisphere_source_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hemisphere_source_level): the interpolated source level `L(fc, φ, θ)`
-  from a [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere), bilinear over the 10° grid (Eq. 13) with
+* [`hemisphere_source_level`](/reference/api/aeroacoustics/rotorcraft-noise/#hemisphere_source_level): the interpolated source level `L(fc, φ, θ)`
+  from a [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere), bilinear over the 10° grid (Eq. 13) with
   nearest-bin fill outside the measured coverage (Eq. 14/15).
-* [`hover_ring_hemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hover_ring_hemisphere) / [`hover_derived_hemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hover_derived_hemisphere): the
+* [`hover_ring_hemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#hover_ring_hemisphere) / [`hover_derived_hemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#hover_derived_hemisphere): the
   hover/idle source derivation of guidance §A.3.5 (Table 3): the ground-ring
   measurement of in-ground hover extended to a hemisphere assuming constant
   directivity in `φ`, and the out-of-ground-hover and idle hemispheres
   derived from it by the published offsets or a measured 0°-direction
   difference.
-* [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights) / [`interpolated_source_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#interpolated_source_level): the
+* [`flight_condition_weights`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights) / [`interpolated_source_level`](/reference/api/aeroacoustics/rotorcraft-noise/#interpolated_source_level): the
   flight-condition interpolation across a hemisphere set: distance-scaled
   triangulation inside the convex hull of the normalised `(V̄, γ̄)` database
   conditions, nearest neighbour outside (Eq. 3-10).
-* [`flight_path_kinematics`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics): track kinematics by central finite
+* [`flight_path_kinematics`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics): track kinematics by central finite
   differences: ground speed, airspeed, heading, curvature, bank and path angle
   (Eq. 16-21 / Doc 32 Eq. 8-10).
-* [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level): the received one-third-octave time history of
+* [`rotorcraft_event_level`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level): the received one-third-octave time history of
   a single event at recorded time (Eq. 1/22/23) and its integrated metrics:
   `LASmax`, `SEL` (Doc 32 Eq. 27) and `EPNL` (Doc 32 Eq. 28, ICAO Annex 16).
-* [`rotorcraft_noise_contour`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_noise_contour): the single-event `SEL`/`LASmax` ground
+* [`rotorcraft_noise_contour`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_noise_contour): the single-event `SEL`/`LASmax` ground
   grid.
 
 Source (clean-room): ECAC Doc 32, 1st ed.; NORAH2 rotorcraft-noise modelling
@@ -144,7 +144,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 | `positions` | Track positions `(x, y, z)`, in metres, shape `(N, 3)` (x east, y north, z up; any consistent right-handed ground frame works, headings are then relative to its y axis). |
 | `gravity` | Acceleration of gravity `g` in m/s² (default 9.80665). |
 
-**Returns:** A [`FlightPathKinematics`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flightpathkinematics).
+**Returns:** A [`FlightPathKinematics`](/reference/api/aeroacoustics/rotorcraft-noise/#flightpathkinematics).
 
 **Raises**
 
@@ -165,7 +165,7 @@ FlightConditionInterpolation(
 
 How a flight condition blends the database hemispheres (Eq. 3-10).
 
-The two settings of [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights), which the event and
+The two settings of [`flight_condition_weights`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights), which the event and
 contour entry points hand it per track point.
 
 **Attributes**
@@ -173,7 +173,7 @@ contour entry points hand it per track point.
 | Name | Description |
 | :--- | :--- |
 | `scaling_factor` | Flight-condition scaling factor `F_fc` applied to the normalised path angle (default 2, the guidance's empirical value). |
-| `triangles` | Optional precomputed triangulation, shape `(T, 3)` 0-based indices into the database conditions (default `None`: the Delaunay triangulation of the normalised conditions). See [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights). |
+| `triangles` | Optional precomputed triangulation, shape `(T, 3)` 0-based indices into the database conditions (default `None`: the Delaunay triangulation of the normalised conditions). See [`flight_condition_weights`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights). |
 
 ## FlightPathKinematics
 
@@ -263,7 +263,7 @@ grid return `NaN`.
 
 | Name | Description |
 | :--- | :--- |
-| `hemisphere` | The [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) source description. |
+| `hemisphere` | The [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) source description. |
 | `azimuth_deg` | Emission azimuth `φ`, in degrees. |
 | `polar_deg` | Emission polar angle `θ`, in degrees. |
 
@@ -301,11 +301,11 @@ reference implementation.
 
 | Name | Description |
 | :--- | :--- |
-| `hemisphere` | The in-ground-hover [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) (typically from [`hover_ring_hemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hover_ring_hemisphere); a fully measured Approach 1 hemisphere works the same). |
+| `hemisphere` | The in-ground-hover [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) (typically from [`hover_ring_hemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#hover_ring_hemisphere); a fully measured Approach 1 hemisphere works the same). |
 | `condition` | `"out_of_ground_hover"`, `"reduced_rpm_idle"` or `"full_rpm_idle"`. |
 | `offset_db` | Explicit offset from in-ground hover, in dB (Approach 2 or a database correction). Default `None`: the Approach 3 constant of `condition`. |
 
-**Returns:** A new [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) at the same grid and reference distance, every measured bin shifted by the offset (`NaN` bins stay `NaN`).
+**Returns:** A new [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) at the same grid and reference distance, every measured bin shifted by the offset (`NaN` bins stay `NaN`).
 
 **Raises**
 
@@ -372,7 +372,7 @@ and the propagation adjustments honour as the reference distance.
 | `polar_step` | Polar grid step, in degrees; must divide the 180° span (default 10). |
 | `mapping` | `"constant_phi"` (guidance text) or `"bearing"` (NORAH2 reference implementation), see above. |
 
-**Returns:** A [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) on the requested grid.
+**Returns:** A [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) on the requested grid.
 
 **Raises**
 
@@ -400,8 +400,8 @@ interpolated_source_level(
 
 Source level at a flight condition between hemispheres (Eq. 8/10 over Eq. 13).
 
-Blends [`hemisphere_source_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hemisphere_source_level) lookups of the hemispheres selected
-by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights) in the energy domain (Eq. 8).
+Blends [`hemisphere_source_level`](/reference/api/aeroacoustics/rotorcraft-noise/#hemisphere_source_level) lookups of the hemispheres selected
+by [`flight_condition_weights`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights) in the energy domain (Eq. 8).
 
 **Parameters**
 
@@ -415,7 +415,7 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 | `azimuth_deg` | Emission azimuth `φ`, in degrees. |
 | `polar_deg` | Emission polar angle `θ`, in degrees. |
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
-| `triangles` | Optional precomputed triangulation (see [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights)). |
+| `triangles` | Optional precomputed triangulation (see [`flight_condition_weights`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights)). |
 
 **Returns:** Band levels at the reference distance, in dB, shape `(F,)`.
 
@@ -457,11 +457,11 @@ recorded time $t_\mathrm{r} = t_\mathrm{e} + r/c$ (Eq. 22) and integrated into
 `LASmax`,
 `SEL` (Doc 32 Eq. 27) and `EPNL` (Doc 32 Eq. 28, ICAO Annex 16 App. 2,
 reusing
-[`epnl_from_pnlt`](/phonometry/reference/api/aeroacoustics/certification/#epnl_from_pnlt)).
+[`epnl_from_pnlt`](/reference/api/aeroacoustics/certification/#epnl_from_pnlt)).
 
 The flight condition per point comes from the `track_state` overrides
 when given (e.g. the smoothed values of a radar-track workflow),
-otherwise from [`flight_path_kinematics`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics) on the track itself, in which
+otherwise from [`flight_path_kinematics`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics) on the track itself, in which
 case the database `airspeeds` must be in m/s. The hemisphere frame is
 oriented by the heading and tilted by the bank angle in turns (guidance
 §A.3.4); pitch attitude is implicit in the hemispheres.
@@ -477,12 +477,12 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 | `positions` | Track positions `(x, y, z)`, in metres, shape `(N, 3)` (z up, above the ground elevation datum). |
 | `receiver` | Receiver ground position `(x, y)`, in metres. |
 | `level_offset` | Source-level offset `ΔEPNL` added to the hemisphere levels (Eq. 2 class substitution), in dB (default 0). Scalar or per track point, shape `(N,)`: Chapter-8 substitutions correct climb, level and descent conditions with different certification levels. |
-| `atmosphere` | The air the event propagates through, a [`RotorcraftAtmosphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere) (default: the ICAO reference conditions of the database). |
-| `ground` | The ground under the event, a [`RotorcraftGround`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftground) (default: flat ground at the track datum, CNOSSOS class `"G"`, a 1.2 m microphone). A single receiver takes its scalar fields only; the per-grid-point arrays are for the contour. |
-| `track_state` | Per-point airspeed, path angle, heading and bank angle, a [`RotorcraftTrackState`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafttrackstate) (default: all derived from the track by [`flight_path_kinematics`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics)). |
-| `interpolation` | How the flight condition blends the database hemispheres, a [`FlightConditionInterpolation`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flightconditioninterpolation) (default: `F_fc = 2` over the Delaunay triangulation). |
+| `atmosphere` | The air the event propagates through, a [`RotorcraftAtmosphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere) (default: the ICAO reference conditions of the database). |
+| `ground` | The ground under the event, a [`RotorcraftGround`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftground) (default: flat ground at the track datum, CNOSSOS class `"G"`, a 1.2 m microphone). A single receiver takes its scalar fields only; the per-grid-point arrays are for the contour. |
+| `track_state` | Per-point airspeed, path angle, heading and bank angle, a [`RotorcraftTrackState`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafttrackstate) (default: all derived from the track by [`flight_path_kinematics`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics)). |
+| `interpolation` | How the flight condition blends the database hemispheres, a [`FlightConditionInterpolation`](/reference/api/aeroacoustics/rotorcraft-noise/#flightconditioninterpolation) (default: `F_fc = 2` over the Delaunay triangulation). |
 
-**Returns:** A [`RotorcraftEventResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafteventresult).
+**Returns:** A [`RotorcraftEventResult`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafteventresult).
 
 **Raises**
 
@@ -514,7 +514,7 @@ rotorcraft_noise_contour(
 
 Rotorcraft single-event level over a ground grid (Doc 32 §6.3).
 
-Evaluates the event of [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level) at every grid point
+Evaluates the event of [`rotorcraft_event_level`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level) at every grid point
 `(xi, yj)` in one vectorised pass per emission step, and reduces the
 received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 (`LASmax`) level.
@@ -532,12 +532,12 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | `y` | Grid y coordinates, in metres (at least 2). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LASmax). |
 | `level_offset` | Source-level offset `ΔEPNL` (Eq. 2), in dB, scalar or per track point. |
-| `atmosphere` | The air the event propagates through, a [`RotorcraftAtmosphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere). |
-| `ground` | The ground under the grid, a [`RotorcraftGround`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftground). Its `ground_elevation` and `flow_resistivity` also accept one value per grid point (shape `(len(y), len(x))`), and its `terrain` model must cover the whole track and grid: every emission-receiver pair then samples its own vertical section, so the cost grows with track points times grid points; keep contour grids modest with terrain. |
-| `track_state` | Per-point airspeed, path angle, heading and bank angle (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). |
-| `interpolation` | How the flight condition blends the database hemispheres, a [`FlightConditionInterpolation`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flightconditioninterpolation). |
+| `atmosphere` | The air the event propagates through, a [`RotorcraftAtmosphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftatmosphere). |
+| `ground` | The ground under the grid, a [`RotorcraftGround`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftground). Its `ground_elevation` and `flow_resistivity` also accept one value per grid point (shape `(len(y), len(x))`), and its `terrain` model must cover the whole track and grid: every emission-receiver pair then samples its own vertical section, so the cost grows with track points times grid points; keep contour grids modest with terrain. |
+| `track_state` | Per-point airspeed, path angle, heading and bank angle (see [`rotorcraft_event_level`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). |
+| `interpolation` | How the flight condition blends the database hemispheres, a [`FlightConditionInterpolation`](/reference/api/aeroacoustics/rotorcraft-noise/#flightconditioninterpolation). |
 
-**Returns:** A [`RotorcraftNoiseContourResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftnoisecontourresult).
+**Returns:** A [`RotorcraftNoiseContourResult`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftnoisecontourresult).
 
 **Raises**
 
@@ -563,7 +563,7 @@ The air a rotorcraft event propagates through (Eq. 26/27).
 The ICAO reference conditions of the hemisphere database are the defaults,
 so an event flown at those conditions needs no atmosphere at all. The Doc 29
 airport chain keeps its own
-[`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) instead of
+[`AerodromeAtmosphere`](/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) instead of
 sharing this one: it corrects a broadband NPD level with the impedance of
 Eq. 4-7 alone, with no band-by-band absorption to ask the humidity or the
 method about, and at a different reference temperature.
@@ -663,7 +663,7 @@ and an optional elevation model replaces the flat plane with real terrain.
 | :--- | :--- |
 | `receiver_height_m` | Microphone height above local ground, in metres (default 1.2). |
 | `ground_elevation` | Ground elevation `z` at the receivers, in metres on the track datum (default 0); source and receiver heights above ground follow from it. A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for receivers on uneven sites without a full elevation model. |
-| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter (see [`ground_effect_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment)). A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
+| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter (see [`ground_effect_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment)). A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 | `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. The model must cover the whole track and every receiver (fabricating terrain beyond its edges is refused). |
 | `terrain_resolution` | Section sampling step along the path, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
@@ -695,7 +695,7 @@ lookup.
 | `azimuth_deg` | Azimuth angles `φ`, in degrees, shape `(A,)` (`-90` port … `+90` starboard). |
 | `polar_deg` | Polar angles `θ`, in degrees, shape `(P,)` (`0` forward … `180` rearward). |
 | `levels` | Band levels, in dB, shape `(A, P, F)`. |
-| `distance_m` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance_m` to [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment) so the propagation chain honours it. |
+| `distance_m` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance_m` to [`spherical_spreading_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment) so the propagation chain honours it. |
 
 ### RotorcraftHemisphere.mirrored()
 
@@ -710,7 +710,7 @@ configuration is mirrored with respect to the class reference (the
 bracketed types of its Table 2, e.g. `[A600]` in the `R22` class)
 by reversing the hemisphere azimuth angle.
 
-**Returns:** A new [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) with mirrored azimuth.
+**Returns:** A new [`RotorcraftHemisphere`](/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) with mirrored azimuth.
 
 ### RotorcraftHemisphere.plot()
 
@@ -787,7 +787,7 @@ RotorcraftTrackState(
 Per-point flight state of a rotorcraft track (Eq. 16-21).
 
 Every field left unset is derived from the track itself by
-[`flight_path_kinematics`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics); a radar-track workflow that has already
+[`flight_path_kinematics`](/reference/api/aeroacoustics/rotorcraft-noise/#flight_path_kinematics); a radar-track workflow that has already
 smoothed these quantities hands them over instead. Each is a scalar
 (broadcast over the track) or an array of shape `(N,)`.
 

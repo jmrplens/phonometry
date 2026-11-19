@@ -41,7 +41,7 @@ meter", gives signal-to-noise figures "that are not directly comparable" with
 the ones the Recommendation describes.
 
 The curve is
-[`weighting_filter(weighting="468")`](/phonometry/signals/levels/weighting/). The
+[`weighting_filter(weighting="468")`](/signals/levels/weighting/). The
 detector is `broadcast.quasi_peak_meter`.
 
 ## 1. What clause 2 specifies, and what it does not
@@ -353,7 +353,7 @@ clause 3's one sentence naming the unit. A conformity sheet in an accredited
 format would attest this library's own filter, on a page carrying a
 standard-basis line, with eleven numbers produced by ballistics this project
 fitted. The conformity evidence is real and it is published, in
-[`docs/CONFORMANCE.md`](/phonometry/reference/conformance/), through
+[`docs/CONFORMANCE.md`](/reference/conformance/), through
 `verify_quasi_peak_dynamics`.
 
 ## What this guide covers
@@ -388,18 +388,18 @@ the 600 Ω termination) are hardware and are not modelled. There is no
 
 ## See also
 
-- [Programme loudness & true peak](/phonometry/devices/broadcast/program-loudness/):
+- [Programme loudness & true peak](/devices/broadcast/program-loudness/):
   the other ITU-R BS meter, and the opposite design: a gated mean square with
   published coefficients where this one is a peak follower with none.
-- [Frequency weightings](/phonometry/signals/levels/weighting/): the 468 curve
+- [Frequency weightings](/signals/levels/weighting/): the 468 curve
   itself, beside A, C and Z.
-- [Test signals](/phonometry/signals/spectra/test-signals/): `tone_burst`, the
+- [Test signals](/signals/spectra/test-signals/): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
-- [Microphones (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/):
+- [Microphones (IEC 60268-4)](/devices/electroacoustics/microphones/):
   where a stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
-- [Broadcast](/phonometry/devices/broadcast/): the section overview.
-- API reference: [`broadcast.quasi_peak`](/phonometry/reference/api/broadcast/quasi-peak/).
+- [Broadcast](/devices/broadcast/): the section overview.
+- API reference: [`broadcast.quasi_peak`](/reference/api/broadcast/quasi-peak/).
 
 </SeeAlso>
 

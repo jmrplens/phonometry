@@ -73,20 +73,20 @@ Bies, Hansen & Howard 2017, §2.5 surveys them side by side):
   event's whole energy normalized to one second.
 - **Hearing-risk screening**: $L_\mathrm{Cpeak}$ and the dose measures, which
   feed the occupational workflow of
-  [Occupational exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/).
+  [Occupational exposure (ISO 9612)](/perception/hearing/occupational-exposure/).
 - **Long-term community annoyance**: $L_\mathrm{den}$/$L_\mathrm{dn}$ and the ISO
   1996-1 rating levels, which weight evening and night energy before
   averaging the day: the subject of
-  [Environmental Levels](/phonometry/environment/assessment/environmental-levels/).
+  [Environmental Levels](/environment/assessment/environmental-levels/).
 
 Two boundaries with the sibling pages are worth keeping sharp. The
 integrated metrics here deliberately bypass the exponential detector:
 $L_\mathrm{eq}$ and SEL have no time constant, and Fast/Slow ballistics enter
 only through the percentile levels, which are defined on the time-weighted
-level track (see [Time Weighting](/phonometry/signals/levels/time-weighting/)).
+level track (see [Time Weighting](/signals/levels/time-weighting/)).
 And everything on this page assumes the signal is already in pascals: the
 sensitivity factor that gets it there is the subject of
-[Calibration](/phonometry/signals/metrology/calibration/).
+[Calibration](/signals/metrology/calibration/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="A calibrated pressure record drawn as a waveform between the times t1 and t2 that bound the stated interval T, with a short impulse, a longer event and the background labelled above it. The record passes through a frequency weighting box, A, C or Z, each 0 dB at 1 kHz, and splits into four columns. The first, A or Z weighted, averages the square: the squared record is a row of spikes and its mean over T a low flat line, which gives Leq and LAeq over T, and SEL, the same energy referred to 1 s against the reference exposure of 400 times ten to the minus twelve pascal-squared seconds. The second, A weighted, time-weights the square: a fast F track with a time constant of 0.125 s and a slower, lower S track with 1 s, a dot on the top of each for LAFmax and LASmax, and three dashed lines for L10, L50 and L90 read off the F track once its first five time constants are left out. The third, C weighted, holds the greatest excursion of either sign, the impulse, marked by dashed lines at plus and minus that pressure, for LCpeak with no average and no time constant; one cycle of 500 Hz reads 3.5 dB over the LC of the steady signal it is cut from. The fourth, A weighted, integrates the square: a running curve that steps up at the impulse, by about a fifth of the total, and climbs most during the event, ending at the sound exposure E in pascal-squared hours, kept until reset, and LEX,8h spreads that exposure over 8 h, 3.2 pascal-squared hours being exactly 90 dB and 1.01 being 85 dB. A box at the foot writes SEL as LAeq plus 10 lg of T over 1 s, LEX,8h as LAeq plus 10 lg of T over 8 h and as 10 lg of E over p0 squared times 8 h, and says that the maxima, the percentiles and the peak cannot be had from that energy and need the record itself" width="100%" />
 
@@ -174,7 +174,7 @@ formulas that do average decibels directly are deliberate approximations and
 say so (ISO 1996-2 offers one as a substitute for repeated-measurement
 uncertainty and warns it inflates once levels spread beyond 3 dB, see the
 uncertainty section of
-[Environmental Levels](/phonometry/environment/assessment/environmental-levels/));
+[Environmental Levels](/environment/assessment/environmental-levels/));
 everywhere else, energy.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/energy_vs_arithmetic_mean.svg" alt="Left panel: two bars, a half period at 60 dB and a half period at 80 dB, with the arithmetic mean of the decibel values marked at 70 dB and the true energy mean Leq at 77 dB, the seven-decibel gap between them annotated. Right panel: the difference between Leq and the arithmetic mean of the level values against the standard deviation of those levels from zero to twelve decibels, one curve for a Gaussian spread following 0.115 sigma squared and one for a two-level spread, both rising monotonically from zero, with the five-decibel standard deviation that corresponds to a ten-decibel spread marked at about two and a half decibels" width="88%" />
@@ -389,7 +389,7 @@ One caution: percentiles do not combine. Two hours with known $L_{90}$
 values do not yield the two-hour $L_{90}$ by any formula; recompute it from
 the pooled envelope. $L_\mathrm{eq}$ values, by contrast, combine exactly by
 time-weighted energy averaging, which is what the `composite_rating_level`
-of [Environmental Levels](/phonometry/environment/assessment/environmental-levels/) does.
+of [Environmental Levels](/environment/assessment/environmental-levels/) does.
 
 ### `ln_levels()` parameters
 
@@ -424,7 +424,7 @@ print(f"LAFmax = {la_fmax:.1f} dB   LASmax = {la_smax:.1f} dB")
 Both weightings are part of the name, and for good reason: the same events read
 1.9 dB lower on Slow here, and a 100 ms burst reads about 7.6 dB lower on Slow
 than on Fast (the arithmetic is the tone-burst law of
-[Time Weighting](/phonometry/signals/levels/time-weighting/)). Report
+[Time Weighting](/signals/levels/time-weighting/)). Report
 $L_\mathrm{AFmax}$ or $L_\mathrm{ASmax}$, never a bare "Lmax".
 
 A maximum is a rank-free extreme, so it is decided by one envelope sample and
@@ -534,7 +534,7 @@ plt.show()
 Two things beyond the arithmetic decide whether an $L_\mathrm{Cpeak}$ means anything.
 **What the number means.** In the European occupational framework (Directive
 2003/10/EC, Article 3, the scheme the
-[occupational exposure guide](/phonometry/perception/hearing/occupational-exposure/)
+[occupational exposure guide](/perception/hearing/occupational-exposure/)
 assesses against) the peak action values are 135 and 137 dB(C) with an exposure
 limit value of 140 dB(C), alongside the $L_\mathrm{EX,8h}$ values of 80, 85 and 87 dB.
 A peak reading in the 120s is unremarkable in industry, while a reading above
@@ -554,7 +554,7 @@ and handling transients almost unattenuated, so an unscreened capsule reports
 the wind rather than the machine, and a peak inconsistent with the rest of the
 record should be listened to before it is reported. The capture settings this
 assumes are set out step by step in
-[Build a sound level meter](/phonometry/signals/sound-level-meter/).
+[Build a sound level meter](/signals/sound-level-meter/).
 
 ### SEL: comparing events of different duration
 
@@ -734,11 +734,11 @@ plt.show()
 
 `lex_8h` rates *one* recording; assembling a full working day from task or
 job samples, with the normative ISO 9612 uncertainty budget, continues in
-[Occupational Noise Exposure](/phonometry/perception/hearing/occupational-exposure/).
+[Occupational Noise Exposure](/perception/hearing/occupational-exposure/).
 
 Turning these levels into the regulatory day-evening-night indicators and
 reporting them defensibly is
-[Environmental Levels](/phonometry/environment/assessment/environmental-levels/): the
+[Environmental Levels](/environment/assessment/environmental-levels/): the
 $L_\mathrm{den}$ and $L_\mathrm{dn}$ descriptors, the composite rating levels of
 ISO 1996-1 with their
 character adjustments, and the ISO 1996-2 determination chain of tonal
@@ -862,7 +862,7 @@ to interpret. Nothing in the API warns when the frame is too short.
 
 The same arithmetic, applied to a whole record instead of one frame, is the
 record-length rule of
-[Filter Banks](/phonometry/signals/filters/filter-banks/#how-long-must-the-record-be).
+[Filter Banks](/signals/filters/filter-banks/#how-long-must-the-record-be).
 :::
 
 Read the published figure with that in mind. The sweep is the bright diagonal,
@@ -872,15 +872,15 @@ itself, not a property of the source. Raising `overlap` makes the display
 smoother but buys interpolation, not resolution: the frames overlap, the
 filters do not get faster.
 
-See [Calibration and dBFS](/phonometry/signals/metrology/calibration/) to convert digital units to physical
-SPL, and [Time Weighting](/phonometry/signals/levels/time-weighting/) for the envelope details. The
+See [Calibration and dBFS](/signals/metrology/calibration/) to convert digital units to physical
+SPL, and [Time Weighting](/signals/levels/time-weighting/) for the envelope details. The
 ISO 9612 occupational strategies continue in
-[Occupational Noise Exposure](/phonometry/perception/hearing/occupational-exposure/), the ECMA-418-1
-tonal-prominence verdicts in [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/),
+[Occupational Noise Exposure](/perception/hearing/occupational-exposure/), the ECMA-418-1
+tonal-prominence verdicts in [Prominent Discrete Tones](/perception/psychoacoustics/tone-prominence/),
 and the ISO 226 equal-loudness contours live with the perception metrics in
-[Loudness](/phonometry/perception/psychoacoustics/loudness/). Whether a single $L_\mathrm{eq}$ is a fair
+[Loudness](/perception/psychoacoustics/loudness/). Whether a single $L_\mathrm{eq}$ is a fair
 summary of a measurement at all is a stationarity question - the
-[data qualification](/phonometry/signals/metrology/data-qualification/) tests answer it
+[data qualification](/signals/metrology/data-qualification/) tests answer it
 objectively from segment mean squares.
 
 ## What this guide covers
@@ -899,7 +899,7 @@ level is counted from, published as `metrology.REFERENCE_VALUES`.
 <ScopeClaim status="not-covered" label="Not covered">
 The ISO 1996-1 whole-day indicators ($L_\mathrm{den}$, $L_\mathrm{dn}$, rating levels) and
 the ISO 1996-2 determination procedures have moved to [Environmental
-Levels](/phonometry/environment/assessment/environmental-levels/). IEC 61252
+Levels](/environment/assessment/environmental-levels/). IEC 61252
 was revised in 2025; only the formulae of the implemented first edition (1993)
 are here, not the newer one.
 </ScopeClaim>
@@ -909,13 +909,13 @@ are here, not the newer one.
 
 ## See also
 
-- [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators, rating levels and the ISO 1996-2 determination chain built on the levels of this page.
-- [Time Weighting](/phonometry/signals/levels/time-weighting/): the Fast/Slow/Impulse detector the percentile levels are defined on.
-- [Calibration](/phonometry/signals/metrology/calibration/): the sensitivity factor that turns digital units into the pascals every level here assumes.
-- [Occupational exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/): the workplace measurement strategies the dose measures feed.
-- [Multichannel and Performance](/phonometry/signals/filters/multichannel/): per-channel levels and how to combine them energetically.
-- API reference: [`signals.levels`](/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
-- Theory: [Event and dose metrics](/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
+- [Environmental Levels (ISO 1996-1/-2)](/environment/assessment/environmental-levels/): the $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators, rating levels and the ISO 1996-2 determination chain built on the levels of this page.
+- [Time Weighting](/signals/levels/time-weighting/): the Fast/Slow/Impulse detector the percentile levels are defined on.
+- [Calibration](/signals/metrology/calibration/): the sensitivity factor that turns digital units into the pascals every level here assumes.
+- [Occupational exposure (ISO 9612)](/perception/hearing/occupational-exposure/): the workplace measurement strategies the dose measures feed.
+- [Multichannel and Performance](/signals/filters/multichannel/): per-channel levels and how to combine them energetically.
+- API reference: [`signals.levels`](/reference/api/signals/levels/), and [`metrology.reference_values`](/reference/api/metrology/reference-values/) for the ISO 1683 table.
+- Theory: [Event and dose metrics](/reference/theory/signal-analysis/#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
 
 </SeeAlso>
 

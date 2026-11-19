@@ -72,9 +72,9 @@ Table 14.9 is the worked sheet this guide is built around, with the ASHRAE
 *HVAC Applications Handbook* Chapter 49 for the air terminal devices and
 Bies, Hansen & Howard for the splitter silencers and the plenums. The
 reactive four-pole silencers of
-[Silencers](/phonometry/devices/noise-control/silencers/) and the rest of the installation
+[Silencers](/devices/noise-control/silencers/) and the rest of the installation
 methods in
-[Industrial noise control](/phonometry/devices/noise-control/noise-control/) are the
+[Industrial noise control](/devices/noise-control/noise-control/) are the
 companion pages.
 
 ## 1. The sheet, and how it adds up
@@ -383,7 +383,7 @@ print(round(noise_control.equivalent_diameter(0.36 * 0.24), 3))    # 0.332 m
 thickness, combined by the energy average of Eq. 8.241 so that the leakiest
 airway dominates. `plenum_attenuation` is Wells' method for a lined plenum
 chamber (Bies Eq. (8.275)), whose reverberant term uses the plenum
-[room constant](/phonometry/buildings/rooms/room-image-sources/).
+[room constant](/buildings/rooms/room-image-sources/).
 
 ```python
 from phonometry import noise_control
@@ -404,7 +404,7 @@ actually specifies is a low-frequency design worth 16 and 21 dB at 63 and
 125 Hz, where this geometry-only model gives 6 and 9. Published dynamic
 insertion loss from the manufacturer, measured with the design airflow and
 in the design direction to
-[ISO 7235](/phonometry/devices/noise-control/silencers/#3-how-a-silencer-is-measured-iso-7235),
+[ISO 7235](/devices/noise-control/silencers/#3-how-a-silencer-is-measured-iso-7235),
 is what belongs in the sheet; the model is for sizing the airway before there is
 a manufacturer.
 
@@ -687,7 +687,7 @@ procedure applied to the measured octave-band spectrum rather than read off by
 tangency. Write into the specification whichever verdict is going to be
 measured (band-by-band against the curve, or the S12.2 rating), and not one for
 the design and the other for the test.
-[Room-noise criteria](/phonometry/buildings/rooms/room-noise/) has the rating
+[Room-noise criteria](/buildings/rooms/room-noise/) has the rating
 procedure itself.
 
 ### The same step by VDI 2081
@@ -961,7 +961,7 @@ is the point.
 ## 8. The plane-wave limit
 
 Every element model above, and every four-pole silencer in
-[Silencers](/phonometry/devices/noise-control/silencers/), is one-dimensional. It assumes
+[Silencers](/devices/noise-control/silencers/), is one-dimensional. It assumes
 a single sound pressure describes the whole duct cross section, which is
 true only below the frequency at which the first higher-order acoustic mode
 cuts on. Above it several modes propagate at once, each with its own axial
@@ -1030,7 +1030,7 @@ That is why a transfer-matrix silencer model has a **ceiling frequency**
 rather than an accuracy budget: below cut-on the second mode is not small,
 it is absent, and above it the model is describing one of several waves that
 are all there. The
-[Silencers](/phonometry/devices/noise-control/silencers/) four-pole algebra
+[Silencers](/devices/noise-control/silencers/) four-pole algebra
 inherits the same limit.
 
 At 15 m/s the flow correction is invisible: $M = 0.044$ gives
@@ -1158,7 +1158,7 @@ are usually one of them:
 - **Structure-borne transmission of fan vibration** through hangers, plinths
   and the slab, which no airborne sheet can see and which is treated with
   isolators, and whose dynamic transfer stiffness is measured in
-  [Transfer stiffness (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/).
+  [Transfer stiffness (ISO 10846)](/vibration/structural/transfer-stiffness/).
 - **The octave-band resolution itself**, which averages a blade-passing tone
   into its band and so understates how a pure tone will be judged.
 </ScopeClaim>
@@ -1168,19 +1168,19 @@ are usually one of them:
 
 ## See also
 
-- [Silencers](/phonometry/devices/noise-control/silencers/): the reactive four-pole
+- [Silencers](/devices/noise-control/silencers/): the reactive four-pole
   elements (expansion chambers, Helmholtz, quarter-wave and extended-tube
   resonators) whose validity ends at the same cut-on frequency.
-- [Industrial noise control](/phonometry/devices/noise-control/noise-control/): the rest
+- [Industrial noise control](/devices/noise-control/noise-control/): the rest
   of the installation, the individual HVAC duct methods and
   machine-enclosure insertion loss.
-- [Room-noise criteria (NC / RC Mark II)](/phonometry/buildings/rooms/room-noise/):
+- [Room-noise criteria (NC / RC Mark II)](/buildings/rooms/room-noise/):
   the ANSI/ASA S12.2-2019 families the received spectrum is judged against.
-- [Steady-state room field](/phonometry/buildings/rooms/room-image-sources/): the
+- [Steady-state room field](/buildings/rooms/room-image-sources/): the
   room constant behind the room effect and the plenum reverberant term.
 - API reference:
-  [`noise_control`: duct path](/phonometry/reference/api/noise_control/duct-path/),
-  [`noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/),
-  [`noise_control.hvac`](/phonometry/reference/api/noise_control/hvac/).
+  [`noise_control`: duct path](/reference/api/noise_control/duct-path/),
+  [`noise_control.duct_modes`](/reference/api/noise_control/duct-modes/),
+  [`noise_control.hvac`](/reference/api/noise_control/hvac/).
 
 </SeeAlso>

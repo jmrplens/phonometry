@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/reference/determinism.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/reference/determinism/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/reference/determinism/
 
 # Same bits on every machine
 

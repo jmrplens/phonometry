@@ -13,7 +13,7 @@ Most of the clauses describe a set-up and a reading; this module holds the
 parts that are arithmetic on what was read, and the verdicts where the part
 sets a limit. The simulated programme signal several of them use is the one
 of IEC 60268-1:1985 Clause 7, in
-[`phonometry.electroacoustics.program_signal`](/phonometry/reference/api/electroacoustics/program-signal/).
+[`phonometry.electroacoustics.program_signal`](/reference/api/electroacoustics/program-signal/).
 
 The code (Clause 4)
 -------------------
@@ -21,15 +21,15 @@ The code (Clause 4)
 A headphone is classified by the code `60268-7-IEC-XXXX-NNRN-N`: four
 letters for the transducer principle, the type of earphone, the acoustic
 coupling to the ear canal and the radiation to the outside
-([`TRANSDUCER_PRINCIPLES`](/phonometry/reference/api/electroacoustics/headphones/#transducer_principles), [`EARPHONE_TYPES`](/phonometry/reference/api/electroacoustics/headphones/#earphone_types),
-[`ACOUSTIC_COUPLINGS`](/phonometry/reference/api/electroacoustics/headphones/#acoustic_couplings), [`BACK_RADIATIONS`](/phonometry/reference/api/electroacoustics/headphones/#back_radiations)), the impedance in ohms in
+([`TRANSDUCER_PRINCIPLES`](/reference/api/electroacoustics/headphones/#transducer_principles), [`EARPHONE_TYPES`](/reference/api/electroacoustics/headphones/#earphone_types),
+[`ACOUSTIC_COUPLINGS`](/reference/api/electroacoustics/headphones/#acoustic_couplings), [`BACK_RADIATIONS`](/reference/api/electroacoustics/headphones/#back_radiations)), the impedance in ohms in
 "mantissa and exponent" form, and the number of channels. The clause prints
 three impedances, 8 ohm as `08R0`, 32 ohm as `32R0` and 600 ohm as
 `06R2`: a two-digit mantissa times ten to the digit after the `R`. The
 600 ohm example settles the one choice the rule leaves open, between `06R2`
 and `60R1`: the exponent takes every trailing zero, so 150 ohm is `15R1`
-and 300 ohm `03R2` ([`impedance_code`](/phonometry/reference/api/electroacoustics/headphones/#impedance_code)). [`HeadphoneClassification`](/phonometry/reference/api/electroacoustics/headphones/#headphoneclassification)
-writes the code and [`parse_classification_code`](/phonometry/reference/api/electroacoustics/headphones/#parse_classification_code) reads it.
+and 300 ohm `03R2` ([`impedance_code`](/reference/api/electroacoustics/headphones/#impedance_code)). [`HeadphoneClassification`](/reference/api/electroacoustics/headphones/#headphoneclassification)
+writes the code and [`parse_classification_code`](/reference/api/electroacoustics/headphones/#parse_classification_code) reads it.
 
 Impedance (8.2)
 ---------------
@@ -39,7 +39,7 @@ that the lowest value of the modulus of the actual impedance within the rated
 frequency range is not less than 80 % of the rated value"; a dip below that
 anywhere from 0 kHz to 20 kHz "should be stated in the specification". The
 modulus is measured "at least over the frequency range 20 Hz to 20 kHz"
-(8.2.2.2). [`verify_rated_impedance`](/phonometry/reference/api/electroacoustics/headphones/#verify_rated_impedance) judges both.
+(8.2.2.2). [`verify_rated_impedance`](/reference/api/electroacoustics/headphones/#verify_rated_impedance) judges both.
 
 Voltages, powers and sound pressure levels (8.3 to 8.5)
 -------------------------------------------------------
@@ -49,14 +49,14 @@ rated source impedance $R_\mathrm{s}$. The **characteristic voltage**
 (8.3.3) is the 500 Hz sinusoidal e.m.f. that produces 94 dB in the coupler or
 ear simulator; the headphone is linear there, so one reading $L$ at an
 e.m.f. $E$ gives it as $E\,10^{(94 - L)/20}$
-([`characteristic_voltage`](/phonometry/reference/api/electroacoustics/headphones/#characteristic_voltage)). The **simulated programme signal
+([`characteristic_voltage`](/reference/api/electroacoustics/headphones/#characteristic_voltage)). The **simulated programme signal
 characteristic voltage** (8.3.4) is the same with the programme signal, and
 8.3.5 adds the A-weighting of IEC 61672-1 and the inverse of the free-field
 response of the head and torso simulator of IEC 60959 to the coupler's output.
 The NOTE under Figure 3 says how to do that without filters: "Power summation
 of the 1/3-octave-analized data multiplied by filtering coefficients given by
 IEC 61672-1 and/or IEC 60969 gives the corrected voltage" (the second
-standard is IEC 60959, see `docs/ERRATA.md`). [`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)
+standard is IEC 60959, see `docs/ERRATA.md`). [`program_signal_level`](/reference/api/electroacoustics/headphones/#program_signal_level)
 is that power sum,
 
 $$
@@ -65,7 +65,7 @@ $$
 
 with $A_k$ the A-weighting at the exact centre of band $k$ and
 $F_k$ the free-field response, and
-[`program_characteristic_voltage`](/phonometry/reference/api/electroacoustics/headphones/#program_characteristic_voltage) turns it into the e.m.f. for 94 dB,
+[`program_characteristic_voltage`](/reference/api/electroacoustics/headphones/#program_characteristic_voltage) turns it into the e.m.f. for 94 dB,
 for each fitting of the headphone, and averages the e.m.f. of the fittings as
 8.3.5 g) asks ("3 to 5 measurements").
 
@@ -73,9 +73,9 @@ for each fitting of the headphone, and averages the e.m.f. of the fittings as
 voltages (8.3) and the rated impedance": the power the e.m.f. dissipates in a
 pure resistance equal to the rated impedance $R$ connected in place of
 the headphone, $P = E^2 R/(R + R_\mathrm{s})^2$
-([`headphone_input_power`](/phonometry/reference/api/electroacoustics/headphones/#headphone_input_power), and [`headphone_source_emf`](/phonometry/reference/api/electroacoustics/headphones/#headphone_source_emf) the other way
+([`headphone_input_power`](/reference/api/electroacoustics/headphones/#headphone_input_power), and [`headphone_source_emf`](/reference/api/electroacoustics/headphones/#headphone_source_emf) the other way
 round). The **working sound pressure level** of 8.5.2 b) to d) is the level at
-the e.m.f. that dissipates 1 mW that way ([`working_sound_pressure_level`](/phonometry/reference/api/electroacoustics/headphones/#working_sound_pressure_level)).
+the e.m.f. that dissipates 1 mW that way ([`working_sound_pressure_level`](/reference/api/electroacoustics/headphones/#working_sound_pressure_level)).
 The method of 8.5.3 c) sets the e.m.f. differently, so that the voltage
 across the headphone's own input connector is $\sqrt{1\ \mathrm{mW} \cdot R}$; the two agree only when the headphone's impedance at 500 Hz is the
 rated one, and the function gives the second reading when that impedance is
@@ -88,9 +88,9 @@ is not a limit, so no verdict is offered on it.
 
 The clipped programme signal of 8.3.2, which rates the voltages a headphone
 survives, has "a frequency distribution as specified in IEC 60268-1, and a
-peak-to-r.m.s ratio between 1,8 and 2,2" ([`check_limiting_test_signal`](/phonometry/reference/api/electroacoustics/headphones/#check_limiting_test_signal)).
+peak-to-r.m.s ratio between 1,8 and 2,2" ([`check_limiting_test_signal`](/reference/api/electroacoustics/headphones/#check_limiting_test_signal)).
 A protective device "causes a change of at least 1 dB in the sensitivity" at
-its protection voltage (8.3.6.2 b), which [`protection_voltage`](/phonometry/reference/api/electroacoustics/headphones/#protection_voltage) finds in a
+its protection voltage (8.3.6.2 b), which [`protection_voltage`](/reference/api/electroacoustics/headphones/#protection_voltage) finds in a
 sweep of e.m.f. and level.
 
 Frequency responses (8.6) and crosstalk (8.12)
@@ -99,14 +99,14 @@ Frequency responses (8.6) and crosstalk (8.12)
 The coupler or ear simulator frequency response (8.6.2) is the level against
 frequency at the rated e.m.f., and its graph has "the same length
 representing 50 dB as represents one decade of frequency"
-([`coupler_frequency_response`](/phonometry/reference/api/electroacoustics/headphones/#coupler_frequency_response)). The crosstalk attenuation (8.12) is the
-difference of two such curves ([`crosstalk_attenuation`](/phonometry/reference/api/electroacoustics/headphones/#crosstalk_attenuation)).
+([`coupler_frequency_response`](/reference/api/electroacoustics/headphones/#coupler_frequency_response)). The crosstalk attenuation (8.12) is the
+difference of two such curves ([`crosstalk_attenuation`](/reference/api/electroacoustics/headphones/#crosstalk_attenuation)).
 
 The two subjective responses (8.6.3, 8.6.4) are the quotient of the reference
 field's sound pressure by the e.m.f. that makes the headphone equally loud,
 "expressed in decibels referred to the value at the standard reference
 frequency", averaged over at least eight test persons with the standard
-deviation in each band ([`field_comparison_response`](/phonometry/reference/api/electroacoustics/headphones/#field_comparison_response)); a headphone
+deviation in each band ([`field_comparison_response`](/reference/api/electroacoustics/headphones/#field_comparison_response)); a headphone
 calibrated on at least 16 persons may then serve as the reference of the
 substitution method. The ear-canal responses (8.6.5) read a probe microphone
 in the ear canal instead of a loudness judgement, by Formula (1),
@@ -117,11 +117,11 @@ $$
 
 after averaging the two fittings of the headphone and the two readings of the
 sound field, with the procedure repeated when the two fittings differ by more
-than 2.5 dB in any band ([`ear_canal_frequency_response`](/phonometry/reference/api/electroacoustics/headphones/#ear_canal_frequency_response)). A headphone
+than 2.5 dB in any band ([`ear_canal_frequency_response`](/reference/api/electroacoustics/headphones/#ear_canal_frequency_response)). A headphone
 measured that way on at least 16 persons may replace the sound field of the
 indirect method (8.6.5.3, whose two references to 8.6.4.2 are read as 8.6.5.2,
 see `docs/ERRATA.md`). The microphone in the ear canal is specified by
-Annex B ([`verify_ear_canal_microphone`](/phonometry/reference/api/electroacoustics/headphones/#verify_ear_canal_microphone)).
+Annex B ([`verify_ear_canal_microphone`](/reference/api/electroacoustics/headphones/#verify_ear_canal_microphone)).
 
 The two reference frequencies are not the same. Formula (1) prints its
 reference band, 500 Hz, the standard measuring frequency of 7.2 b). The
@@ -129,7 +129,7 @@ comparison responses are referred to "the standard reference frequency", a
 term IEC 60268-7 uses without defining; IEC 60268-1:1985 Clause 3, which it
 cites, sets it at 1 000 Hz "in the absence of a clear reason to the
 contrary", and 8.6.3.2 c) and 8.6.4.2 c) begin and end the test sequence on
-that band, so [`field_comparison_response`](/phonometry/reference/api/electroacoustics/headphones/#field_comparison_response) refers to 1 000 Hz by default.
+that band, so [`field_comparison_response`](/reference/api/electroacoustics/headphones/#field_comparison_response) refers to 1 000 Hz by default.
 The coupler response keeps 500 Hz, for the reason the NOTE of 8.3.3.1 gives:
 the coupler's own resonances, leakage and standing waves at other frequencies.
 The frequency response itself has no tolerance: "It is not at present
@@ -142,14 +142,14 @@ Distortion (8.7)
 ----------------
 
 The harmonic, modulation and difference-frequency distortions are those of
-IEC 60268-2, read with [`harmonic_distortion`](/phonometry/reference/api/electroacoustics/distortion/#harmonic_distortion),
-[`modulation_distortion`](/phonometry/reference/api/electroacoustics/intermodulation/#modulation_distortion) and
-[`difference_frequency_distortion`](/phonometry/reference/api/electroacoustics/intermodulation/#difference_frequency_distortion), and
+IEC 60268-2, read with [`harmonic_distortion`](/reference/api/electroacoustics/distortion/#harmonic_distortion),
+[`modulation_distortion`](/reference/api/electroacoustics/intermodulation/#modulation_distortion) and
+[`difference_frequency_distortion`](/reference/api/electroacoustics/intermodulation/#difference_frequency_distortion), and
 expressed in decibels as $20\lg$ of the ratio. What 60268-7 adds are the
 test signals: 70 Hz and 600 Hz in the amplitude ratio 4:1 with the peak of the
 rated input voltage, "−1,9 dB at 70 Hz and −14,0 dB at 600 Hz" (NOTE 1 of
-8.7.3.3; [`headphone_modulation_signal`](/phonometry/reference/api/electroacoustics/headphones/#headphone_modulation_signal)), and two tones 80 Hz apart, each
-at half the rated input voltage ([`headphone_difference_frequency_signal`](/phonometry/reference/api/electroacoustics/headphones/#headphone_difference_frequency_signal)).
+8.7.3.3; [`headphone_modulation_signal`](/reference/api/electroacoustics/headphones/#headphone_modulation_signal)), and two tones 80 Hz apart, each
+at half the rated input voltage ([`headphone_difference_frequency_signal`](/reference/api/electroacoustics/headphones/#headphone_difference_frequency_signal)).
 The third-order modulation products are at 460 Hz and 740 Hz, as 8.7.3.3 b)
 says; Formula (3) prints $U_{470}$ (see `docs/ERRATA.md`).
 
@@ -159,10 +159,10 @@ What is not here
 The rated conditions (7.1, 8.6.6, 8.8, 8.13, 8.14) are stated, not computed.
 The external field (8.9) and the unwanted radiation (8.10) are readings. The
 sound attenuation of 8.11 is measured "as specified in ISO 4869-1", which
-[`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) computes from the open and
+[`phonometry.hearing.real_ear_attenuation`](/reference/api/hearing/real-ear-attenuation/#real_ear_attenuation) computes from the open and
 occluded thresholds of the subjects; for a headphone with active noise
 compensation, which the NOTE of 8.11.2 says "may require a modified
-procedure", [`phonometry.hearing.anr_total_attenuation`](/phonometry/reference/api/hearing/active-noise-reduction/#anr_total_attenuation) follows ISO
+procedure", [`phonometry.hearing.anr_total_attenuation`](/reference/api/hearing/active-noise-reduction/#anr_total_attenuation) follows ISO
 4869-6. Annex A is the geometry of a pinna simulator and Annexes C to E are
 informative practical conditions.
 
@@ -202,7 +202,7 @@ The headphone is linear at that level, so a reading of
 `sound_pressure_level` at `source_emf_v` scales to it:
 $E\,10^{(94 - L)/20}$. The same scaling serves the programme signal
 of 8.3.4 with the level of the whole signal
-([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)).
+([`program_signal_level`](/reference/api/electroacoustics/headphones/#program_signal_level)).
 
 **Parameters**
 
@@ -236,19 +236,19 @@ frequency distribution as specified in IEC 60268-1, and a peak-to-r.m.s
 ratio between 1,8 and 2,2." The record's one-third-octave bands from
 20 Hz up to the highest whose upper edge lies below the Nyquist frequency
 are judged against Table II of IEC 60268-1
-([`check_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#check_program_signal)), and its
+([`check_program_signal`](/reference/api/electroacoustics/program-signal/#check_program_signal)), and its
 peak over its RMS against the two limits.
-[`simulated_program_signal`](/phonometry/reference/api/electroacoustics/program-signal/#simulated_program_signal) with
+[`simulated_program_signal`](/reference/api/electroacoustics/program-signal/#simulated_program_signal) with
 `peak_to_rms` generates such a record.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `x` | The record (1-D), or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). |
+| `x` | The record (1-D), or a [`phonometry.io.Signal`](/reference/api/io/io/#signal). |
 | `fs` | Sample rate, in Hz; required for a bare array. |
 
-**Returns:** A [`LimitingTestSignalCheck`](/phonometry/reference/api/electroacoustics/headphones/#limitingtestsignalcheck).
+**Returns:** A [`LimitingTestSignalCheck`](/reference/api/electroacoustics/headphones/#limitingtestsignalcheck).
 
 **Raises**
 
@@ -282,7 +282,7 @@ the rated source impedance, over "at least the rated frequency range".
 | `sound_pressure_level` | The level at each, in dB re 20 µPa. |
 | `rated_frequency_range_hz` | The rated frequency range (8.6.6), as (lower, upper), in Hz, to judge the coverage; `None` if not stated. |
 
-**Returns:** A [`CouplerFrequencyResponse`](/phonometry/reference/api/electroacoustics/headphones/#couplerfrequencyresponse).
+**Returns:** A [`CouplerFrequencyResponse`](/reference/api/electroacoustics/headphones/#couplerfrequencyresponse).
 
 **Raises**
 
@@ -398,7 +398,7 @@ channel", expressed as the difference of the two levels against frequency.
 | `driven_level` | The level with the channel under test driven, in dB re 20 µPa. |
 | `other_level` | The level with the other channel driven, in dB re 20 µPa. |
 
-**Returns:** A [`CrosstalkAttenuation`](/phonometry/reference/api/electroacoustics/headphones/#crosstalkattenuation).
+**Returns:** A [`CrosstalkAttenuation`](/reference/api/electroacoustics/headphones/#crosstalkattenuation).
 
 **Raises**
 
@@ -496,7 +496,7 @@ result also carries the two checks of the procedure: the fittings within
 | `sound_field_levels` | The levels in the sound field, in dB, the same shape. |
 | `reference_frequency_hz` | The reference band of Formula (1), in Hz (500 Hz, as the formula prints it). |
 
-**Returns:** An [`EarCanalFrequencyResponse`](/phonometry/reference/api/electroacoustics/headphones/#earcanalfrequencyresponse).
+**Returns:** An [`EarCanalFrequencyResponse`](/reference/api/electroacoustics/headphones/#earcanalfrequencyresponse).
 
 **Raises**
 
@@ -748,7 +748,7 @@ method (8.6.3.3).
 | `field` | `"free"` (8.6.3) or `"diffuse"` (8.6.4). |
 | `reference_frequency_hz` | The band the response is referred to, in Hz: by default 1 000 Hz, the standard reference frequency of IEC 60268-1:1985 Clause 3, which IEC 60268-7 names without defining and on whose band 8.6.3.2 c) and 8.6.4.2 c) begin and end the test sequence. Pass 500 Hz to refer the response to the band of the ear-canal response of Formula (1). |
 
-**Returns:** A [`FieldComparisonResponse`](/phonometry/reference/api/electroacoustics/headphones/#fieldcomparisonresponse).
+**Returns:** A [`FieldComparisonResponse`](/reference/api/electroacoustics/headphones/#fieldcomparisonresponse).
 
 **Raises**
 
@@ -864,7 +864,7 @@ The difference-frequency distortion test signal of IEC 60268-7 8.7.4.
 the rated input voltage": tones at $f_2 - 80$ Hz and $f_2$,
 each of RMS value $U/2$, in cosine phase so that the peak is that of
 the rated voltage. Read the products with
-[`difference_frequency_distortion`](/phonometry/reference/api/electroacoustics/intermodulation/#difference_frequency_distortion).
+[`difference_frequency_distortion`](/reference/api/electroacoustics/intermodulation/#difference_frequency_distortion).
 
 **Parameters**
 
@@ -945,7 +945,7 @@ $0.2\sqrt{2}U$ for a rated voltage $U$, which NOTE 1 states
 as "−1,9 dB at 70 Hz and −14,0 dB at 600 Hz". Both start at their crest
 (cosine phase), so the record reaches that peak at its first sample.
 Read the products with
-[`modulation_distortion`](/phonometry/reference/api/electroacoustics/intermodulation/#modulation_distortion) at
+[`modulation_distortion`](/reference/api/electroacoustics/intermodulation/#modulation_distortion) at
 `f_low=70`, `f_high=600`: the second order at 530 Hz and 670 Hz, the
 third at 460 Hz and 740 Hz.
 
@@ -979,7 +979,7 @@ headphone_source_emf(
 
 The source e.m.f. that corresponds to a power (IEC 60268-7 8.4, 8.5.2).
 
-The inverse of [`headphone_input_power`](/phonometry/reference/api/electroacoustics/headphones/#headphone_input_power),
+The inverse of [`headphone_input_power`](/reference/api/electroacoustics/headphones/#headphone_input_power),
 $E = \sqrt{P R}\,(R + R_\mathrm{s})/R$. With 1 mW it is the e.m.f.
 of the working sound pressure level of 8.5.2 b) to d).
 
@@ -1019,11 +1019,11 @@ The classification of a headphone by IEC 60268-7:2010 Clause 4.
 
 | Name | Description |
 | :--- | :--- |
-| `principle` | The principle of the transducer, a key of [`TRANSDUCER_PRINCIPLES`](/phonometry/reference/api/electroacoustics/headphones/#transducer_principles). One of `"D"`, `"E"`, `"F"`, `"M"`, `"P"` or `"S"`. |
-| `earphone_type` | The type of earphone, a key of [`EARPHONE_TYPES`](/phonometry/reference/api/electroacoustics/headphones/#earphone_types). One of `"C"`, `"E"`, `"H"`, `"I"`, `"M"`, `"S"` or `"T"`. |
-| `coupling` | The acoustic coupling to the ear canal, a key of [`ACOUSTIC_COUPLINGS`](/phonometry/reference/api/electroacoustics/headphones/#acoustic_couplings). One of `"L"` or `"S"`. |
-| `radiation` | The radiation to the external environment, a key of [`BACK_RADIATIONS`](/phonometry/reference/api/electroacoustics/headphones/#back_radiations). One of `"C"` or `"O"`. |
-| `impedance_ohm` | The impedance, in ohms, as coded by [`impedance_code`](/phonometry/reference/api/electroacoustics/headphones/#impedance_code). |
+| `principle` | The principle of the transducer, a key of [`TRANSDUCER_PRINCIPLES`](/reference/api/electroacoustics/headphones/#transducer_principles). One of `"D"`, `"E"`, `"F"`, `"M"`, `"P"` or `"S"`. |
+| `earphone_type` | The type of earphone, a key of [`EARPHONE_TYPES`](/reference/api/electroacoustics/headphones/#earphone_types). One of `"C"`, `"E"`, `"H"`, `"I"`, `"M"`, `"S"` or `"T"`. |
+| `coupling` | The acoustic coupling to the ear canal, a key of [`ACOUSTIC_COUPLINGS`](/reference/api/electroacoustics/headphones/#acoustic_couplings). One of `"L"` or `"S"`. |
+| `radiation` | The radiation to the external environment, a key of [`BACK_RADIATIONS`](/reference/api/electroacoustics/headphones/#back_radiations). One of `"C"` or `"O"`. |
+| `impedance_ohm` | The impedance, in ohms, as coded by [`impedance_code`](/reference/api/electroacoustics/headphones/#impedance_code). |
 | `n_channels` | The number of channels, 1 to 9. |
 
 ### HeadphoneClassification.code
@@ -1135,7 +1135,7 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 | :--- | :--- |
 | `code` | The code, for instance `"60268-7-IEC-DCSC-32R0-2"`. |
 
-**Returns:** A [`HeadphoneClassification`](/phonometry/reference/api/electroacoustics/headphones/#headphoneclassification).
+**Returns:** A [`HeadphoneClassification`](/reference/api/electroacoustics/headphones/#headphoneclassification).
 
 **Raises**
 
@@ -1162,7 +1162,7 @@ The source e.m.f. of the simulated programme signal of IEC 60268-1 that
 produces 94 dB in the coupler or ear simulator (8.3.4), or 94 dB after the
 A-weighting and the free-field compensation of 8.3.5. Each fitting's
 one-third-octave band levels, read at a known e.m.f., are power-summed as
-the NOTE under Figure 3 describes ([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)) and
+the NOTE under Figure 3 describes ([`program_signal_level`](/reference/api/electroacoustics/headphones/#program_signal_level)) and
 scaled to 94 dB; 8.3.5 g) removes and refits the headphone between
 readings and states "the average value of source e.m.f. of 3 to 5
 measurements".
@@ -1177,7 +1177,7 @@ measurements".
 | `weighting` | `"A"` to apply the A-weighting (8.3.5) or `"Z"` (default) for none. |
 | `free_field_response_db` | The free-field response of the head and torso simulator in each band, in dB, compensated by its inverse (8.3.5); `None` for none. |
 
-**Returns:** A [`ProgramCharacteristicVoltage`](/phonometry/reference/api/electroacoustics/headphones/#programcharacteristicvoltage).
+**Returns:** A [`ProgramCharacteristicVoltage`](/reference/api/electroacoustics/headphones/#programcharacteristicvoltage).
 
 **Raises**
 
@@ -1348,7 +1348,7 @@ between the two steps that straddle it.
 | `source_emf_v` | The source e.m.f. of each step, in volts (RMS), strictly ascending. |
 | `sound_pressure_level` | The level at each step, in dB re 20 µPa. |
 
-**Returns:** A [`ProtectionVoltage`](/phonometry/reference/api/electroacoustics/headphones/#protectionvoltage).
+**Returns:** A [`ProtectionVoltage`](/reference/api/electroacoustics/headphones/#protectionvoltage).
 
 **Raises**
 
@@ -1558,7 +1558,7 @@ certificate, are not numbers.
 | `sealed_levels` | The output level with the entrance sealed at the same frequencies, in dB. |
 | `ear_canal_area_mm2` | The canal's cross-sectional area, in mm²; the adult average of item b) by default. |
 
-**Returns:** An [`EarCanalMicrophoneVerification`](/phonometry/reference/api/electroacoustics/headphones/#earcanalmicrophoneverification).
+**Returns:** An [`EarCanalMicrophoneVerification`](/reference/api/electroacoustics/headphones/#earcanalmicrophoneverification).
 
 **Raises**
 
@@ -1596,7 +1596,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 | `rated_impedance_ohm` | The rated impedance, in ohms. |
 | `rated_frequency_range_hz` | The rated frequency range (8.6.6), as (lower, upper), in Hz. |
 
-**Returns:** A [`RatedImpedanceVerification`](/phonometry/reference/api/electroacoustics/headphones/#ratedimpedanceverification).
+**Returns:** A [`RatedImpedanceVerification`](/reference/api/electroacoustics/headphones/#ratedimpedanceverification).
 
 **Raises**
 
@@ -1624,7 +1624,7 @@ The level produced by the e.m.f. "of such value that 1 mW would be
 dissipated in a pure resistance equal to the rated impedance of the
 headphone, connected in place of it", scaled from a reading at another
 e.m.f. With a 500 Hz sine it is 8.5.2 b); with the level of the
-simulated programme signal ([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)) it is c), and
+simulated programme signal ([`program_signal_level`](/reference/api/electroacoustics/headphones/#program_signal_level)) it is c), and
 d) when that level is A-weighted and free-field compensated.
 
 The method of 8.5.3 c) sets that e.m.f. another way: "so that the

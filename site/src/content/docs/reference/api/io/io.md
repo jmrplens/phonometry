@@ -16,7 +16,7 @@ point, and a constant that cancels out of every calibrated level because the
 calibrator tone is read through the same path (the derivation lives with the
 WAV reader's source).
 
-[`read`](/phonometry/reference/api/io/io/#read) returns a [`Signal`](/phonometry/reference/api/io/io/#signal): the samples as `(channels, samples)`
+[`read`](/reference/api/io/io/#read) returns a [`Signal`](/reference/api/io/io/#signal): the samples as `(channels, samples)`
 float64 together with the sample rate, the calibration, the channel labels,
 the `bext` broadcast provenance (EBU Tech 3285) and the origin record:
 one immutable object that any `(x, fs, ...)` function of the library
@@ -24,19 +24,19 @@ accepts today via `numpy.asarray`. The base install reads every linear
 WAV a sound level meter or field recorder writes (PCM 16/24/32-bit, IEEE
 float, `WAVE_FORMAT_EXTENSIBLE`, RF64/BW64 past 4 GiB); the `[audio]`
 extra (python-soundfile, which bundles the LGPL libsndfile) adds FLAC, AIFF,
-Ogg/Opus and MP3, and lossy sources raise [`LossyCompressionWarning`](/phonometry/reference/api/io/io/#lossycompressionwarning)
+Ogg/Opus and MP3, and lossy sources raise [`LossyCompressionWarning`](/reference/api/io/io/#lossycompressionwarning)
 because a level computed from a lossy codec is not metrologically defensible.
 
-[`info`](/phonometry/reference/api/io/io/#info) answers from the headers alone (format, rate, channels, valid
+[`info`](/reference/api/io/io/#info) answers from the headers alone (format, rate, channels, valid
 bits, duration, `bext`, cue points) without decoding a single sample, so
-it is safe on a 12-hour RF64. [`read_blocks`](/phonometry/reference/api/io/io/#read_blocks) streams what [`read`](/phonometry/reference/api/io/io/#read)
-would return, one [`Signal`](/phonometry/reference/api/io/io/#signal) per block, into the library's stateful
-filters. [`write`](/phonometry/reference/api/io/io/#write) produces WAV/BWF (and FLAC with the extra) with exact
-integer codes, loud clipping ([`ClippingWarning`](/phonometry/reference/api/io/io/#clippingwarning)), optional TPDF dither
+it is safe on a 12-hour RF64. [`read_blocks`](/reference/api/io/io/#read_blocks) streams what [`read`](/reference/api/io/io/#read)
+would return, one [`Signal`](/reference/api/io/io/#signal) per block, into the library's stateful
+filters. [`write`](/reference/api/io/io/#write) produces WAV/BWF (and FLAC with the extra) with exact
+integer codes, loud clipping ([`ClippingWarning`](/reference/api/io/io/#clippingwarning)), optional TPDF dither
 at 16 bits, a `bext` chunk written field by field, and never a silent
-normalization. [`convert`](/phonometry/reference/api/io/io/#convert) moves a measurement between lossless
+normalization. [`convert`](/reference/api/io/io/#convert) moves a measurement between lossless
 containers with samples, provenance and sidecar intact, and the calibration
-travels in a versioned JSON sidecar ([`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar)) next to the
+travels in a versioned JSON sidecar ([`CalibrationSidecar`](/reference/api/io/io/#calibrationsidecar)) next to the
 audio, where the audio formats themselves have no field for it. Every reader
 here refuses a name that holds no regular file, a named pipe, a device, a
 socket or a directory, with a `ValueError` that says which, before it
@@ -46,60 +46,60 @@ is open, so a pipe put in its place after the look is refused too; where SciPy
 or python-soundfile opens the name, the look comes just before that open, and
 a pipe put at the name in between is not seen.
 
-[`write_video`](/phonometry/reference/api/io/io/#write_video) writes any matplotlib animation to WebM, MP4 or GIF
+[`write_video`](/reference/api/io/io/#write_video) writes any matplotlib animation to WebM, MP4 or GIF
 through ffmpeg, the program matplotlib already knows where to find: every
 frame is drawn with Agg and piped into ffmpeg's stdin, the encoder of a
 WebM or an MP4 is the first of the GPU encoders and then the CPU's that
 encodes one black frame of that size (a GIF is written on the CPU), and the
 file appears only when ffmpeg has finished it. How a
-video is encoded is one record, [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), which the
+video is encoded is one record, [`VideoOptions`](/reference/api/io/io/#videooptions), which the
 simulation writers take too.
-[`FFmpegNotFoundError`](/phonometry/reference/api/io/io/#ffmpegnotfounderror) says ffmpeg is missing, with how to install it;
-[`VideoEncoderError`](/phonometry/reference/api/io/io/#videoencodererror) says no encoder can write the video, ffmpeg
+[`FFmpegNotFoundError`](/reference/api/io/io/#ffmpegnotfounderror) says ffmpeg is missing, with how to install it;
+[`VideoEncoderError`](/reference/api/io/io/#videoencodererror) says no encoder can write the video, ffmpeg
 cannot start or failed while writing it (with its last words), or the
 directory or the disk does not take the file.
 
 The rows of the library's published tables of materials are data read from a
-file too, and the type they share lives here: [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow), with
-[`BandedRow`](/phonometry/reference/api/io/io/#bandedrow) for a row that prints one value per frequency band. Every
+file too, and the type they share lives here: [`CatalogueRow`](/reference/api/io/io/#cataloguerow), with
+[`BandedRow`](/reference/api/io/io/#bandedrow) for a row that prints one value per frequency band. Every
 `PUBLISHED_*` catalogue of every package hands out subclasses of it, so a
 row keeps the same hedges (a range, a bound, a word, a value converted from
 the unit the page prints, a cell carried from another row) and says what
-its source claims for each cell through [`CatalogueRow.basis_of`](/phonometry/reference/api/io/io/#cataloguerowbasis_of), one of
-[`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). A row checks itself when it is built, whether a
-packaged table or a caller builds it, and [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) is what it
+its source claims for each cell through [`CatalogueRow.basis_of`](/reference/api/io/io/#cataloguerowbasis_of), one of
+[`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). A row checks itself when it is built, whether a
+packaged table or a caller builds it, and [`CatalogueError`](/reference/api/io/io/#catalogueerror) is what it
 raises for a cell nothing downstream can read: a number that is not finite
 or is text, a hedge on a field the row does not have, a value beside a hedge
 that says there is none, a density below zero. A packaged table raises it
 too for text that is not strict JSON or a table missing its citation.
-[`CatalogueRow.from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed) builds a row from the cells its page prints
+[`CatalogueRow.from_printed`](/reference/api/io/io/#cataloguerowfrom_printed) builds a row from the cells its page prints
 and fills what follows from them, which is how every packaged catalogue is
-built; [`CatalogueRow.printed_fields`](/phonometry/reference/api/io/io/#cataloguerowprinted_fields) gives those cells back, and
-[`BandedRow.values_at`](/phonometry/reference/api/io/io/#bandedrowvalues_at) reads a banded row at an array of frequencies.
+built; [`CatalogueRow.printed_fields`](/reference/api/io/io/#cataloguerowprinted_fields) gives those cells back, and
+[`BandedRow.values_at`](/reference/api/io/io/#bandedrowvalues_at) reads a banded row at an array of frequencies.
 
 The library publishes no manufacturer's data, so a caller's own data sheets,
 declarations of performance and test reports live in a catalogue file of
-their own, which [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads into rows of the same classes:
-a versioned JSON document with its [`Provenance`](/phonometry/reference/api/io/io/#provenance) (the kind of document,
+their own, which [`read_catalogue`](/reference/api/io/io/#read_catalogue) reads into rows of the same classes:
+a versioned JSON document with its [`Provenance`](/reference/api/io/io/#provenance) (the kind of document,
 its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
 every hedge the packaged tables use; or the CSV file a spreadsheet saves, each
 row starting on a line of its own, in a closed grammar of cells (`~0.85`,
 `<=30`, `0.30..0.50`, `0.85±0.05`, `[AFr5]`), with that document's
 header beside it declaring the delimiter and the decimal mark. What comes back
-is a [`Catalogue`](/phonometry/reference/api/io/io/#catalogue), a read-only mapping keyed like the packaged ones that
+is a [`Catalogue`](/reference/api/io/io/#catalogue), a read-only mapping keyed like the packaged ones that
 joins a `PUBLISHED_*` catalogue with `|` and never lets one row replace
 another. The problems in a file are raised at once in one
-[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with its place, a JSON
+[`CatalogueError`](/reference/api/io/io/#catalogueerror), each [`CatalogueIssue`](/reference/api/io/io/#catalogueissue) with its place, a JSON
 pointer or a line and a column of the CSV file (every problem of form, and
 the first rule of the row contract each row breaks), and what is only worth
 a second look rides on the catalogue as a note with one
-[`CatalogueWarning`](/phonometry/reference/api/io/io/#cataloguewarning). [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) reads the same from text or
-a mapping in memory, and [`write_catalogue`](/phonometry/reference/api/io/io/#write_catalogue) writes rows, a packaged
+[`CatalogueWarning`](/reference/api/io/io/#cataloguewarning). [`parse_catalogue`](/reference/api/io/io/#parse_catalogue) reads the same from text or
+a mapping in memory, and [`write_catalogue`](/reference/api/io/io/#write_catalogue) writes rows, a packaged
 table among them, as a file that reads back into the same rows, and a CSV
 file as a spreadsheet opens it with no text read as a formula. Nothing the
 file names is ever imported, and nothing it holds is kept anywhere but in the
-objects handed back. [`catalogue_schema`](/phonometry/reference/api/io/io/#catalogue_schema) writes the JSON Schema of such
+objects handed back. [`catalogue_schema`](/reference/api/io/io/#catalogue_schema) writes the JSON Schema of such
 a document for the row classes it is given, so an editor completes a file
 while it is typed and marks what the reader would refuse for its form.
 
@@ -127,7 +127,7 @@ AudioFileInfo(
 )
 ```
 
-What [`phonometry.io.info`](/phonometry/reference/api/io/io/#info) learned without reading the samples.
+What [`phonometry.io.info`](/reference/api/io/io/#info) learned without reading the samples.
 
 `bit_depth` is the *valid* bits per sample where the notion applies
 (for an EXTENSIBLE container the `wValidBitsPerSample` field, so a
@@ -137,11 +137,11 @@ waveform: the transcribed lossy/companded tags, and any codec outside
 the transcription that is not linear PCM/IEEE float, which fails
 closed as suspect rather than passing as clean (the
 `FormatChunk.lossy` property explains the bias);
-[`phonometry.io.read`](/phonometry/reference/api/io/io/#read) warns when asked to read one.
+[`phonometry.io.read`](/reference/api/io/io/#read) warns when asked to read one.
 `channel_mask`/`channel_labels`, `bext`, `has_ixml` and
 `cue_points` are WAV-family metadata and are `None`/empty for other
 containers, except `bext`, which a FLAC can also carry in its
-APPLICATION `riff` block (see [`phonometry.io._flac`](/phonometry/reference/api/io/io/)).
+APPLICATION `riff` block (see [`phonometry.io._flac`](/reference/api/io/io/)).
 
 ## BandedRow
 
@@ -176,7 +176,7 @@ One row of a table that prints its quantity once per frequency band.
 
 The catalogues of this library that hold a spectrum read off a page keep
 one field per band rather than an array, because every hedge
-of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) is keyed by field name and a cell the page left
+of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) is keyed by field name and a cell the page left
 empty has to say so the way any other cell does. What they then need is
 the same three things: which bands this row filled, the row as a spectrum,
 and a lookup that refuses rather than answering zero for a band the page
@@ -197,7 +197,7 @@ position.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -229,7 +229,7 @@ The bands this row prints a value for, in hertz.
 BandedRow.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -259,7 +259,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -411,7 +411,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
+[`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### BandedRow.values_at()
@@ -443,7 +443,7 @@ bands: a sixth of an octave for octave bands, an eighteenth for
 one-third octave bands. That takes the nominal centre, the exact
 base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
 157.49 Hz are one band) and never reaches the next band. A band the
-row does not print is refused, as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted)
+row does not print is refused, as [`printed`](/reference/api/io/io/#cataloguerowprinted)
 refuses it, with what the page had there; it is never read as zero
 and never filled from its neighbours.
 
@@ -585,7 +585,7 @@ only mandatory field; the rest document how it was obtained
 (`reference_spl`, `calibrator_frequency`, `calibrator_model`)
 and what the channels are (`channel_labels`). `phonometry_version`
 records the writing library version. Every number is a real number as
-[`Signal`](/phonometry/reference/api/io/io/#signal) takes a calibration factor: an `int` or a
+[`Signal`](/reference/api/io/io/#signal) takes a calibration factor: an `int` or a
 `float`, a NumPy integer or floating-point number, or a 0-d array of
 one, never a bool nor a masked value; it is finite, as JSON writes no
 other, and it is kept as a float. The labels are a tuple or a list, kept
@@ -616,9 +616,9 @@ Catalogue(
 
 A caller's catalogue: rows of one class, keyed as the packaged ones are.
 
-What [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) and [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) return. It is a
+What [`read_catalogue`](/reference/api/io/io/#read_catalogue) and [`parse_catalogue`](/reference/api/io/io/#parse_catalogue) return. It is a
 read-only mapping from `"<name>/<key>"` to a row, so it goes wherever a
-`PUBLISHED_*` catalogue goes, and a row's [`CatalogueRow.table`](/phonometry/reference/api/io/io/#cataloguerow) is
+`PUBLISHED_*` catalogue goes, and a row's [`CatalogueRow.table`](/reference/api/io/io/#cataloguerow) is
 the catalogue's name. `PUBLISHED_POROUS_MATERIALS | mine` reads both as one and
 refuses a key both hold rather than letting one row replace the other;
 a caller's catalogue can never take a name of the packaged form, so the
@@ -634,11 +634,11 @@ keys, as any two mappings are.
 | `name` | The catalogue's name, the first half of every key. |
 | `row_type` | The class every row is. |
 | `about` | What the document is and how it was read. |
-| `provenance` | The document the rows were read from. A row that narrows it holds its own in [`CatalogueRow.provenance`](/phonometry/reference/api/io/io/#cataloguerow). |
+| `provenance` | The document the rows were read from. A row that narrows it holds its own in [`CatalogueRow.provenance`](/reference/api/io/io/#cataloguerow). |
 | `rows` | The rows, by key, read-only, in the order of the document. |
 | `extras` | The caller's own `x-...` columns, by row key and column, as text: a number keeps the digits it was written with. |
 | `conventions` | The notes and legends the document prints for the whole table. |
-| `notes` | What is worth a second look, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) of severity `"note"`. |
+| `notes` | What is worth a second look, each a [`CatalogueIssue`](/reference/api/io/io/#catalogueissue) of severity `"note"`. |
 | `schema_version` | The version of the layout the document was written in. |
 | `file_sha256` | The SHA-256 of the bytes read, in hexadecimal, so that a report can cite exactly which file its values came from: the JSON document, or the CSV file for a catalogue read from one; empty for a document handed over as a mapping, which has no bytes. |
 | `header_sha256` | The SHA-256 of the JSON header beside a CSV file, which holds the provenance the rows cite; empty for a catalogue read from a JSON document, whose provenance is in its own bytes. |
@@ -680,7 +680,7 @@ row class of your own covers its fields too.
 
 | Name | Description |
 | :--- | :--- |
-| `row_types` | One or more subclasses of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow), a caller's own among them. |
+| `row_types` | One or more subclasses of [`CatalogueRow`](/reference/api/io/io/#cataloguerow), a caller's own among them. |
 
 **Returns:** A new mapping, ready for `json.dump`.
 
@@ -688,7 +688,7 @@ row class of your own covers its fields too.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | when no class is given, for anything that is not a row class (a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) among them), or for two classes that share a name, which a document's `row_type` could not tell apart. |
+| TypeError | when no class is given, for anything that is not a row class (a [`Fluid`](/reference/api/fluids/fluids/#fluid) among them), or for two classes that share a name, which a document's `row_type` could not tell apart. |
 
 ## CatalogueError
 
@@ -703,7 +703,7 @@ does not have, a bound with no printed end, a density below zero. A
 `ValueError`, because the data is wrong and not the call, whether
 it came from a file or from a caller building a row by hand.
 
-`issues` holds the problems found, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue)
+`issues` holds the problems found, each a [`CatalogueIssue`](/reference/api/io/io/#catalogueissue)
 naming where it is. A reader of a catalogue file raises one error for
 the whole file, with every problem of form in it and the first rule of
 the row contract each row breaks; a row built in Python raises one with
@@ -727,7 +727,7 @@ One thing wrong with a catalogue, or worth a second look, and where.
 
 A reader of a catalogue file collects every one of these before it
 builds a single row, so one pass over a file shows everything that has
-to change in it. A [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) carries the errors; a note
+to change in it. A [`CatalogueError`](/reference/api/io/io/#catalogueerror) carries the errors; a note
 rides on the catalogue that was read, in `Catalogue.notes`.
 
 **Attributes**
@@ -789,7 +789,7 @@ the fix, a slotted dataclass that calls `super()` without arguments, as
 a `__post_init__` does, raises `TypeError` when it is built.
 
 **A row checks itself when it is built**, whoever builds it, and refuses
-with [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) rather than holding a cell nothing
+with [`CatalogueError`](/reference/api/io/io/#catalogueerror) rather than holding a cell nothing
 downstream can read. The check is the same for a packaged row, a row a
 reader builds from a file and a row written by hand:
 
@@ -821,7 +821,7 @@ reader builds from a file and a row written by hand:
    `reported`, or a numeric field in `misprinted`, holds no
    value; a field in `converted` or `carried` holds
    something: a value, a range or a list.
-10. `basis` holds only the words of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+10. `basis` holds only the words of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 11. A quantity whose unit cannot be negative is not: a field ending in
     `_kg_m3`, `_kg_m2`, `_kg`, `_kg_mol`, `_m_s`, `_pa`,
     `_pa_s_m2`, `_pa_s_m`, `_n_m3`, `_mm`, `_um`, `_m`,
@@ -862,7 +862,7 @@ is built, rather than letting a field through unchecked.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
-| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
@@ -886,7 +886,7 @@ is built, rather than letting a field through unchecked.
 CatalogueRow.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+What the source says this field is, one of [`CATALOGUE_BASES`](/reference/api/io/io/#catalogue_bases).
 
 The five are `measured`, `declared`, `calculated`, `estimated`
 and `extended`.
@@ -916,7 +916,7 @@ unit of the same kind as its field (`thickness_m` for
 `thickness_mm`, `flow_resistivity_kpa_s_m2` for
 `flow_resistivity_pa_s_m2`), or in a unit the class takes as an
 alias of its own (an
-[`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
+[`AbsorptionAreaSpectrum`](/reference/api/materials/measured/#absorptionareaspectrum) takes
 `absorption_area_125_ft2` for `absorption_area_125_m2`), is
 converted on its digits with an exact factor and rounded once,
 whether it is a value or stands as the key of a hedge (the ends of a
@@ -1097,8 +1097,8 @@ s/m2) and no value"`, never a figure the page does not print.
 
 A catalogue file was read, and some of its cells are worth a second look.
 
-Emitted once per document by [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) and
-[`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) when [`Catalogue.notes`](/phonometry/reference/api/io/io/#catalogue) is not empty, with
+Emitted once per document by [`read_catalogue`](/reference/api/io/io/#read_catalogue) and
+[`parse_catalogue`](/reference/api/io/io/#parse_catalogue) when [`Catalogue.notes`](/reference/api/io/io/#catalogue) is not empty, with
 the count and the first notes. A note never changes a row: a value
 measured with no report or laboratory named for it, or a word in place of
 a number long enough to be a sentence, is kept as the file writes it.
@@ -1133,17 +1133,17 @@ original) so tools that only read PCM can open it.
 | Name | Description |
 | :--- | :--- |
 | `src` | The file to read (any format the readers accept). |
-| `dst` | The file to write; the suffix picks the container (WAV family or, with the `[audio]` extra, FLAC). Lossy suffixes are refused by policy. Nothing or a regular file at the name is replaced only once the new file beside it is whole, as [`write`](/phonometry/reference/api/io/io/#write) does; a link, a pipe, a device or a directory there is opened as Python opens it. |
+| `dst` | The file to write; the suffix picks the container (WAV family or, with the `[audio]` extra, FLAC). Lossy suffixes are refused by policy. Nothing or a regular file at the name is replaced only once the new file beside it is whole, as [`write`](/reference/api/io/io/#write) does; a link, a pipe, a device or a directory there is opened as Python opens it. |
 | `subtype` | Target sample format; `None` preserves the source's depth (the module docstring's mapping). An explicitly narrower choice quantises with the clipping count reported. One of `"PCM_16"`, `"PCM_24"`, `"PCM_32"`, `"FLOAT"` or `"DOUBLE"`. |
 | `block_size` | Frames per streamed block; the memory ceiling. |
 
-**Returns:** [`phonometry.io.info`](/phonometry/reference/api/io/io/#info) of the written file.
+**Returns:** [`phonometry.io.info`](/reference/api/io/io/#info) of the written file.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a source that is a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
+| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a source that is a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
 | ImportError | If source or target needs the `[audio]` extra and it is not installed. |
 | TypeError | if `subtype` is not a text. |
 
@@ -1219,7 +1219,7 @@ parse_catalogue(
 
 Read a catalogue from JSON text, or from a mapping already in memory.
 
-The same reading as [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue), for a document that is not a
+The same reading as [`read_catalogue`](/reference/api/io/io/#read_catalogue), for a document that is not a
 file: text built in a notebook, a spreadsheet turned into a dictionary, a
 test. A mapping has no printed digits, so a figure written in another
 unit is converted from the `repr` of its float; a `NaN` is refused as
@@ -1231,16 +1231,16 @@ dictionary has merged them.
 | Name | Description |
 | :--- | :--- |
 | `document` | JSON text, or a mapping of the same shape. |
-| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow). |
+| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/reference/api/io/io/#cataloguerow). |
 | `label` | What names the document in every issue, with a character no catalogue text may hold written as its escape, as a file's name is. |
 
-**Returns:** The catalogue, keyed `"<catalogue>/<key>"`. Its [`file_sha256`](/phonometry/reference/api/io/io/#catalogue) is the SHA-256 of the text's UTF-8 bytes, or empty for a mapping.
+**Returns:** The catalogue, keyed `"<catalogue>/<key>"`. Its [`file_sha256`](/reference/api/io/io/#catalogue) is the SHA-256 of the text's UTF-8 bytes, or empty for a mapping.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for everything [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) refuses. |
+| CatalogueError | for everything [`read_catalogue`](/reference/api/io/io/#read_catalogue) refuses. |
 | TypeError | for a *row_type* that is not a catalogue row class, and for a *document* that is neither text nor a mapping. |
 
 **Warns**
@@ -1280,7 +1280,7 @@ row says all there is to say. A manufacturer's data sheet is not a book:
 it is revised without notice, the same product has several of them, and
 what it prints may be a laboratory's result, a value declared under a
 product standard or a figure from a calculation. So a row read from a
-caller's catalogue file carries this, and its [`CatalogueRow.source`](/phonometry/reference/api/io/io/#cataloguerow)
+caller's catalogue file carries this, and its [`CatalogueRow.source`](/reference/api/io/io/#cataloguerow)
 is composed from it: for a `"publication"` the document as it is cited,
 and for every other kind the document, its publisher, its version, the
 page and the table, the report and the laboratory, and the day it was
@@ -1290,7 +1290,7 @@ consulted.
 
 | Name | Description |
 | :--- | :--- |
-| `kind` | One of [`PROVENANCE_KINDS`](/phonometry/reference/api/io/io/#provenance_kinds). One of `"datasheet"`, `"declaration_of_performance"`, `"test_report"`, `"measurement"`, `"calculation"`, `"publication"` or `"other"`. |
+| `kind` | One of [`PROVENANCE_KINDS`](/reference/api/io/io/#provenance_kinds). One of `"datasheet"`, `"declaration_of_performance"`, `"test_report"`, `"measurement"`, `"calculation"`, `"publication"` or `"other"`. |
 | `document` | The document's title as it prints it. |
 | `version` | The revision the document prints (`"Rev. 4"`), or `None` when it prints none, which is a different answer from a version nobody wrote down. |
 | `consulted` | The day the document was read, as `YYYY-MM-DD`: a data sheet changes under the same title. |
@@ -1362,12 +1362,12 @@ read(
 ) -> Signal
 ```
 
-Read an audio file into a [`Signal`](/phonometry/reference/api/io/io/#signal).
+Read an audio file into a [`Signal`](/reference/api/io/io/#signal).
 
 The samples come back float64, at the file's native rate, in the
 library's `(channels, samples)` order, scaled by $2^{B-1}$ for
 integer sources (exact in binary floating point, and any fixed scaling
-cancels out of calibrated results; see [`phonometry.io._wav`](/phonometry/reference/api/io/io/)).
+cancels out of calibrated results; see [`phonometry.io._wav`](/reference/api/io/io/)).
 Nothing else is done to them: no resampling, no normalisation, no
 channel mixing, each of which would silently change the level or the
 timing that a measurement depends on, and each of which is a documented
@@ -1380,12 +1380,12 @@ IEEE float, WAVE_FORMAT_EXTENSIBLE (with its channel labels), BWF
 extra (python-soundfile), FLAC, AIFF, Ogg Vorbis, Opus, MP3 and
 compressed WAV codecs (ADPCM, A-law/mu-law) decode too; without it,
 those raise `ImportError` naming the extra. A lossy source is
-read but announced with [`LossyCompressionWarning`](/phonometry/reference/api/io/io/#lossycompressionwarning) and stamped
+read but announced with [`LossyCompressionWarning`](/reference/api/io/io/#lossycompressionwarning) and stamped
 `lossy=True` on `signal.source`: a level computed from an
 approximation of the waveform is not a measurement.
 
 A calibration sidecar beside the file
-([`phonometry.io._sidecar`](/phonometry/reference/api/io/io/)) is applied automatically: its
+([`phonometry.io._sidecar`](/reference/api/io/io/)) is applied automatically: its
 `calibration_factor` fills in when the argument here is `None`
 (the explicit argument always wins: the caller knows more than a
 file on disk), and its curated `channel_labels` replace labels
@@ -1396,7 +1396,7 @@ derived from the file's channel mask.
 | Name | Description |
 | :--- | :--- |
 | `path` | The file to read. |
-| `calibration_factor` | Digital-to-pascal multiplier to attach to the returned signal when the calibration is known (typically from [`phonometry.metrology.sensitivity`](/phonometry/reference/api/metrology/calibration/#sensitivity) on a calibrator recording read through this same function). `None` (the default) takes the sidecar's factor when a sidecar exists, and otherwise leaves the signal in digital full-scale units. |
+| `calibration_factor` | Digital-to-pascal multiplier to attach to the returned signal when the calibration is known (typically from [`phonometry.metrology.sensitivity`](/reference/api/metrology/calibration/#sensitivity) on a calibrator recording read through this same function). `None` (the default) takes the sidecar's factor when a sidecar exists, and otherwise leaves the signal in digital full-scale units. |
 
 **Returns:** The signal with its metadata.
 
@@ -1419,9 +1419,9 @@ read_blocks(
 ) -> Iterator[Signal]
 ```
 
-Stream an audio file as [`Signal`](/phonometry/reference/api/io/io/#signal) blocks.
+Stream an audio file as [`Signal`](/reference/api/io/io/#signal) blocks.
 
-Yields what [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) would return for the same
+Yields what [`phonometry.io.read`](/reference/api/io/io/#read) would return for the same
 file, cut into consecutive pieces of `block_size` frames (the last
 piece may be shorter), while holding only one block in memory, the
 way an overnight RF64 flows through `BlockProcessing(stateful=True)`
@@ -1431,7 +1431,7 @@ calibration (from `calibration_factor` or the sidecar, by the same
 precedence as `read`), the channel labels, the `bext` provenance
 and the origin record. So a block is `read(path)` cropped to its own
 span, which is also why its provenance still describes the file, as a
-[`crop`](/phonometry/reference/api/io/io/#signalcrop) does. See the module docstring for
+[`crop`](/reference/api/io/io/#signalcrop) does. See the module docstring for
 the per-backend mechanics and the exact overlap rule.
 
 **Parameters**
@@ -1441,7 +1441,7 @@ the per-backend mechanics and the exact overlap rule.
 | `path` | The file to stream. |
 | `block_size` | Frames per block (at least 1). |
 | `overlap` | Frames each block shares with its predecessor (`0 <= overlap < block_size`). |
-| `calibration_factor` | Digital-to-pascal multiplier to attach to every block, as in [`read`](/phonometry/reference/api/io/io/#read). `None` (the default) takes the sidecar's factor when a sidecar exists, and otherwise leaves the blocks in digital full-scale units. |
+| `calibration_factor` | Digital-to-pascal multiplier to attach to every block, as in [`read`](/reference/api/io/io/#read). `None` (the default) takes the sidecar's factor when a sidecar exists, and otherwise leaves the blocks in digital full-scale units. |
 
 **Returns:** An iterator of Signal blocks.
 
@@ -1478,15 +1478,15 @@ A line break inside a quoted cell reads as a line feed, whether the file
 writes it as CRLF, as a spreadsheet on Windows saves it, or as LF; a
 carriage return alone is refused there.
 
-Every row is built through [`CatalogueRow.from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed), so a row
+Every row is built through [`CatalogueRow.from_printed`](/reference/api/io/io/#cataloguerowfrom_printed), so a row
 read from a file and a packaged row with the same cells are the same
-row, and [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing)
+row, and [`printed`](/reference/api/io/io/#cataloguerowprinted), [`why_missing`](/reference/api/io/io/#cataloguerowwhy_missing)
 and every method of the class behave alike on both. Every row carries
-the document's [`Provenance`](/phonometry/reference/api/io/io/#provenance), narrowed by the row where it narrows
-it, and a [`source`](/phonometry/reference/api/io/io/#cataloguerow) composed from it.
+the document's [`Provenance`](/reference/api/io/io/#provenance), narrowed by the row where it narrows
+it, and a [`source`](/reference/api/io/io/#cataloguerow) composed from it.
 
 The problems in the file are raised together in one
-[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with its place: a JSON pointer, or a
+[`CatalogueError`](/reference/api/io/io/#catalogueerror), each issue with its place: a JSON pointer, or a
 line and a column of a CSV file. That is every problem of form, and the
 first rule of the row contract each row breaks. The class named in the
 file is only compared with *row_type*, and nothing the file names is
@@ -1497,7 +1497,7 @@ ever imported.
 | Name | Description |
 | :--- | :--- |
 | `path` | The file, whose name ends in `.json` or `.csv` (in any case). |
-| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) such as `materials.PorousMaterial`. |
+| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/reference/api/io/io/#cataloguerow) such as `materials.PorousMaterial`. |
 | `header_path` | The JSON header of a CSV file, where it is not the one beside it; `None` for the one beside it. |
 
 **Returns:** The catalogue, keyed `"<catalogue>/<key>"`.
@@ -1579,7 +1579,7 @@ seven packages accept one, and those are the two spellings. The module
 holding this definition is private, and a name read out of it is the same
 object with nothing promising it will stay reachable that way.
 
-Returned by [`phonometry.io.read`](/phonometry/reference/api/io/io/#read); can also be constructed directly
+Returned by [`phonometry.io.read`](/reference/api/io/io/#read); can also be constructed directly
 around an array. The object is a drop-in replacement for the bare array:
 it implements `__array__`, so `np.asarray(signal)` yields the
 samples (1-D for one channel, `(channels, samples)` for several),
@@ -1626,7 +1626,7 @@ edge.
 | `tmin` | Start time, in seconds (default: the beginning). |
 | `tmax` | End time, in seconds, exclusive (default: the end). |
 
-**Returns:** A [`Signal`](/phonometry/reference/api/io/io/#signal) over that span, at the same rate.
+**Returns:** A [`Signal`](/reference/api/io/io/#signal) over that span, at the same rate.
 
 **Raises**
 
@@ -1683,7 +1683,7 @@ under test and stay a measurement.
 | :--- | :--- |
 | `channels` | One channel index, or a sequence or an integer array of them, Python or NumPy integers, in the order they should appear in the result; an integer array of no dimension is one index. |
 
-**Returns:** A [`Signal`](/phonometry/reference/api/io/io/#signal) with those channels, in that order.
+**Returns:** A [`Signal`](/reference/api/io/io/#signal) with those channels, in that order.
 
 **Raises**
 
@@ -1754,7 +1754,7 @@ each sample as `20 lg(|p| / 20 uPa)` instead, which needs a
 calibrated record to mean anything. That is a waveform in decibels
 and not a sound pressure level: an `L_p` is defined on a mean
 square over a stated time weighting, and
-[`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting) is what produces one.
+[`time_weighting`](/reference/api/filters/weighting/#time_weighting) is what produces one.
 Requires matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
@@ -1794,10 +1794,10 @@ SignalOrigin(
 )
 ```
 
-Where a [`Signal`](/phonometry/reference/api/io/io/#signal) came from, as read from the file itself.
+Where a [`Signal`](/reference/api/io/io/#signal) came from, as read from the file itself.
 
 The name is deliberately not `SignalSource`, which
-[`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) already is (an FDTD
+[`SignalSource`](/reference/api/simulation/fdtd/#signalsource) already is (an FDTD
 excitation driven by an arbitrary sample sequence). The two could share a
 spelling now that each is reached through its own package, and the reason
 for the distinction is the better one anyway: this is a passive record,
@@ -1832,7 +1832,7 @@ VideoOptions(
 
 How a video is encoded: by which encoder, in which codec, at what quality and rate.
 
-One record for every writer of a video ([`write_video`](/phonometry/reference/api/io/io/#write_video) and the
+One record for every writer of a video ([`write_video`](/reference/api/io/io/#write_video) and the
 simulation writers), checked when it is built. What depends on the file,
 the container its suffix names and the codecs that container holds, is
 checked when the path is known, still before anything starts.
@@ -1884,7 +1884,7 @@ write(
 
 Write a signal to an audio file, without ever touching its level.
 
-The counterpart of [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) and the export path for
+The counterpart of [`phonometry.io.read`](/reference/api/io/io/#read) and the export path for
 everything the library generates (IEC 60268-1 test tones, sweeps, MLS,
 processed measurements). The WAV subtypes are `PCM_16`, `PCM_24`
 (packed in-house; scipy cannot), `PCM_32`, `FLOAT` (float32, the
@@ -1899,7 +1899,7 @@ What this function will never do, each a documented ecosystem default
 that destroys a measurement: normalise (python-acoustics `to_wav`),
 resample, or mix channels. Samples that exceed full scale on an
 integer subtype are saturated and *reported* (see
-[`ClippingWarning`](/phonometry/reference/api/io/io/#clippingwarning) and the module docstring for the exact
+[`ClippingWarning`](/reference/api/io/io/#clippingwarning) and the module docstring for the exact
 quantisation math, the +1.0 edge, and why the scaling choice cancels
 out of calibrated results).
 
@@ -1908,19 +1908,19 @@ out of calibrated results).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. With nothing at the name, or a regular file, the audio is written to a new hidden file beside it, which takes the name only once it is whole, so a write stopped half way (an error, an interrupt) leaves what was there; the new file is readable by its owner alone while it is written over a file, then keeps the permission bits of the old one, and a hard link to the old file keeps the old bytes. A link, a pipe, a device or a directory at the name is opened there as Python opens it: a link is followed, a pipe waits for a reader, a directory raises `IsADirectoryError`. |
-| `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
-| `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
+| `x` | A [`Signal`](/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
+| `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
 | `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. One of `"PCM_16"`, `"PCM_24"`, `"PCM_32"`, `"FLOAT"` or `"DOUBLE"`. |
-| `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/phonometry/reference/api/io/io/)). `None` carries the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/phonometry/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended, never replaced, with phonometry's `A=,F=,W=,M=,T=` line. |
+| `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/reference/api/io/io/)). `None` carries the [`Signal`](/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended, never replaced, with phonometry's `A=,F=,W=,M=,T=` line. |
 | `dither` | `"tpdf"` adds +/-1 LSB triangular-PDF dither before quantising to `PCM_16` (Lipshitz et al. 1992; see the module docstring); `None` (default) quantises plainly. Refused for any other subtype, where it would only add noise. |
 | `rng` | Randomness for the dither noise: a seeded `numpy.random.Generator` (or an int seed) makes the written bytes reproducible, which is what a test or a pinned pipeline needs. `None` (default) draws fresh entropy on every write, and that default is deliberate: dither exists to decorrelate the quantisation error, and repeating one noise pattern across multiple writes would correlate the files with each other, undoing exactly what the dither is for. Refused without `dither`, the only thing it seeds. |
-| `sidecar` | When true, also write the calibration sidecar ([`phonometry.io._sidecar`](/phonometry/reference/api/io/io/)) beside the file, carrying the [`Signal`](/phonometry/reference/api/io/io/#signal)'s `calibration_factor` and channel labels so [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) recovers the absolute level with no argument at all. Requires a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal): a sidecar without a calibration would be a promise with nothing behind it. |
+| `sidecar` | When true, also write the calibration sidecar ([`phonometry.io._sidecar`](/reference/api/io/io/)) beside the file, carrying the [`Signal`](/reference/api/io/io/#signal)'s `calibration_factor` and channel labels so [`phonometry.io.read`](/reference/api/io/io/#read) recovers the absolute level with no argument at all. Requires a calibrated [`Signal`](/reference/api/io/io/#signal): a sidecar without a calibration would be a promise with nothing behind it. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
+| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
 | TypeError | if `x` is a text, holds one (a `bytearray` at any depth included) or holds a complex value, `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
 
 ## write_catalogue
@@ -1941,16 +1941,16 @@ write_catalogue(
 
 Write rows as a catalogue file that reads back into the same rows.
 
-The document [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads, written so that reading it
+The document [`read_catalogue`](/reference/api/io/io/#read_catalogue) reads, written so that reading it
 gives rows equal to these, field for field: the cells each row's page
-prints, as [`CatalogueRow.printed_fields`](/phonometry/reference/api/io/io/#cataloguerowprinted_fields) gives them, and never a
+prints, as [`CatalogueRow.printed_fields`](/reference/api/io/io/#cataloguerowprinted_fields) gives them, and never a
 derived value, which the reader works out again. A value converted from
 another unit is written in that unit, under the name that carries it,
 when that reads back to the same float, and otherwise in the field's own
 unit with its `converted` record beside it, as the degrees Fahrenheit
 and the psi of a damping table are.
 
-A [`Catalogue`](/phonometry/reference/api/io/io/#catalogue) brings its name, its `about`, its provenance, its
+A [`Catalogue`](/reference/api/io/io/#catalogue) brings its name, its `about`, its provenance, its
 legends and its `x-...` columns. A table of the library's own (a
 `PUBLISHED_*` catalogue filtered by `row.table`) needs a *catalogue*
 name that is not of the packaged form, and takes the table's `about`
@@ -1993,7 +1993,7 @@ such as FAT, the name is first taken by an empty file, made only where
 nothing is there, and the new file is renamed over it, so a reader of
 the name may find that empty file for the instant between the two.
 
-What is to be written is first read as [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads the
+What is to be written is first read as [`read_catalogue`](/reference/api/io/io/#read_catalogue) reads the
 file, so that nothing it refuses is ever written or replaces a file:
 more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, a
 text longer than a reader takes, or anything else the reader refuses, in
@@ -2003,7 +2003,7 @@ the reader's own words and naming the file.
 
 | Name | Description |
 | :--- | :--- |
-| `rows` | A [`Catalogue`](/phonometry/reference/api/io/io/#catalogue), or a mapping of rows of one class. |
+| `rows` | A [`Catalogue`](/reference/api/io/io/#catalogue), or a mapping of rows of one class. |
 | `path` | Where to write, a name ending in `.json` or `.csv` (in any case). |
 | `catalogue` | The catalogue's name. Required for a table of the library's own, and for rows of yours that do not share one. |
 | `about` | What the document is; required when the rows bring none. |
@@ -2018,7 +2018,7 @@ the reader's own words and naming the file.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, the cells a CSV file cannot hold, and what [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) would refuse in the file: more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, and a text longer than a reader takes among it. |
+| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, the cells a CSV file cannot hold, and what [`read_catalogue`](/reference/api/io/io/#read_catalogue) would refuse in the file: more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, and a text longer than a reader takes among it. |
 | TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring, or `decimal` or `delimiter` is not a text. |
 | ValueError | for a name that ends in neither `.json` nor `.csv`, a dialect a CSV file cannot take, and a dialect beside a JSON file. |
 | FileExistsError | for a file at *path* or at its header without *overwrite*, one made at either while the files are written among them (where no hard link is made, each name holds an empty file of the writer's own for the instant before its file is in place), and for a symbolic link at either. |
@@ -2050,8 +2050,8 @@ by its owner alone until its bytes are in, then keeps the permission
 bits of the old, and a hard link to the old file keeps the old
 calibration (on Windows without a read-only flag the old file had,
 since the flag belongs to the file and is cleared for the rename). What
-it writes, [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) reads back, and
-[`read`](/phonometry/reference/api/io/io/#read) reads the audio beside it: fields whose
+it writes, [`read_sidecar`](/reference/api/io/io/#read_sidecar) reads back, and
+[`read`](/reference/api/io/io/#read) reads the audio beside it: fields whose
 sidecar would pass the 1 MiB a reader takes are refused, and so are
 labels that do not give one to each channel of the audio file, when one
 is at *audio_path* and its channels can be read.
@@ -2061,9 +2061,9 @@ is at *audio_path* and its channels can be read.
 | Name | Description |
 | :--- | :--- |
 | `audio_path` | The audio file the sidecar belongs to (it need not exist yet; writing the sidecar first is fine). |
-| `calibration_factor` | Digital-to-pascal multiplier (required, a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one, finite and positive). |
-| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
-| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
+| `calibration_factor` | Digital-to-pascal multiplier (required, a real number as [`CalibrationSidecar`](/reference/api/io/io/#calibrationsidecar) takes one, finite and positive). |
+| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number as [`CalibrationSidecar`](/reference/api/io/io/#calibrationsidecar) takes one. |
+| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number as [`CalibrationSidecar`](/reference/api/io/io/#calibrationsidecar) takes one. |
 | `calibrator_model` | Free-text calibrator identification. |
 | `channel_labels` | One label per channel of the audio file, a tuple or a list of texts. |
 
@@ -2073,7 +2073,7 @@ is at *audio_path* and its channels can be read.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a factor, a reference SPL or a calibrator frequency that is not a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one (a bool, a text or a `Decimal` among them) or is not finite, a factor that is not positive, labels that are not a tuple or a list of texts, a model or a label that is not text or holds a lone surrogate, fields whose sidecar would pass 1 MiB, labels whose count is not the channel count of the audio file, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, each before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |
+| ValueError | for a factor, a reference SPL or a calibrator frequency that is not a real number as [`CalibrationSidecar`](/reference/api/io/io/#calibrationsidecar) takes one (a bool, a text or a `Decimal` among them) or is not finite, a factor that is not positive, labels that are not a tuple or a list of texts, a model or a label that is not text or holds a lone surrogate, fields whose sidecar would pass 1 MiB, labels whose count is not the channel count of the audio file, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, each before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |
 
 ## write_video
 
@@ -2103,7 +2103,7 @@ bits of the file it replaces; a new one takes the bits a new file takes.
 
 ffmpeg is the program matplotlib's `rcParams["animation.ffmpeg_path"]`
 names (`"ffmpeg"` on `PATH` by default). How it encodes is `video`,
-a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions): by default the GPU encoders are tried first
+a [`VideoOptions`](/reference/api/io/io/#videooptions): by default the GPU encoders are tried first
 (NVENC, Quick Sync, VAAPI, VideoToolbox), each with one black frame of
 this size, and the CPU last: SVT-AV1, or without it VP9 in a WebM and
 x265 or x264 in an MP4. A GIF is written on the CPU, with no trial. The
@@ -2115,13 +2115,13 @@ encoder chosen is logged on the `phonometry.io` logger.
 | :--- | :--- |
 | `path` | Where to write; its suffix picks the container. |
 | `animation` | Any `matplotlib.animation.Animation`. |
-| `video` | How to encode it ([`VideoOptions`](/phonometry/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`: the first encoder that works, the best codec the container holds, the standard quality, and the animation's own frame rate. |
+| `video` | How to encode it ([`VideoOptions`](/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`: the first encoder that works, the best codec the container holds, the standard quality, and the animation's own frame rate. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `animation` is not a matplotlib animation, or it has no interval and `video` no `fps`. |
+| TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/reference/api/io/io/#videooptions), `animation` is not a matplotlib animation, or it has no interval and `video` no `fps`. |
 | ValueError | for a suffix other than `.webm`, `.mp4` or `.gif`, a path that names a directory, a codec the container does not hold, an `encoder` that writes none of the codecs it holds (VideoToolbox in a `.webm`), for a GIF a codec, an `ffmpeg_encoder` or an encoder other than the CPU, or an animation interval that is not a positive finite number. |
 | FileNotFoundError | if the directory of `path` does not exist or cannot be reached (it sits inside a directory this process cannot search). |
 | FFmpegNotFoundError | if ffmpeg is not found, in Pyodide, or on Windows when it was found only in the working directory. |

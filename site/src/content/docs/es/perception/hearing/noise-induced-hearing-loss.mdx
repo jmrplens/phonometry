@@ -101,7 +101,7 @@ duraciones menores de 10 años la mediana se extrapola del valor a 10 años
 **Qué tiene que ser $L_\mathrm{EX,8h}$.** El primer argumento es el nivel de exposición
 al ruido ponderado A normalizado a una jornada nominal de ocho horas, en la
 práctica el resultado de un
-[estudio según ISO 9612](/phonometry/es/perception/hearing/occupational-exposure/)
+[estudio según ISO 9612](/es/perception/hearing/occupational-exposure/)
 del grupo de exposición homogénea, que es la norma que la ISO 1999 cita
 normativamente para ello. Es el nivel **en el oído sin protección**: el objeto y
 campo de aplicación dice con todas las letras que ninguno de sus niveles tiene
@@ -340,7 +340,7 @@ significa cada símbolo, porque es fácil confundirlos:
   audiograma.
 - El **HTLA** ($H$) es el umbral por *edad* en solitario (la componente
   ISO 7029 de la guía de
-  [umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/)), la pérdida
+  [umbral de audición](/es/perception/hearing/hearing-threshold/)), la pérdida
   que tendría la misma persona sin ruido laboral.
 - El **HTLAN** ($H'$) es el umbral *total*: edad **y** ruido combinados por la
   Fórmula (1). Es lo que mide un audiómetro, y el único de los tres comparable
@@ -457,7 +457,7 @@ El `NIPTSResult` lleva la `median` ($N_{50}$), las
 el `value` en el fractil pedido; el `HTLANResult` lleva `htla`, `nipts` y el
 `threshold` combinado. Ambos exponen `.plot()`. La componente de edad por sí
 sola es el tema de la guía de
-[umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/).
+[umbral de audición](/es/perception/hearing/hearing-threshold/).
 
 ### Informe de HTLAN (`.report()`)
 
@@ -530,16 +530,16 @@ aquí no se aplica ninguna, así que hay que aportarla y comprobarla uno mismo.
 
 ## Véase también
 
-- [Exposición laboral al ruido](/phonometry/es/perception/hearing/occupational-exposure/): el
+- [Exposición laboral al ruido](/es/perception/hearing/occupational-exposure/): el
   estudio según ISO 9612 que produce el $L_\mathrm{EX,8h}$ que consume este modelo, y
   la incertidumbre que lo acompaña.
-- [Umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/): la componente
+- [Umbral de audición](/es/perception/hearing/hearing-threshold/): la componente
   de edad $H$ de ISO 7029 a la que este modelo suma la componente de ruido, y el
   cero de ISO 389-7 al que está referida la escala dB HL.
-- [Índice de inteligibilidad del habla](/phonometry/es/perception/speech/speech-intelligibility/): lo
+- [Índice de inteligibilidad del habla](/es/perception/speech/speech-intelligibility/): lo
   que cuesta un umbral desplazado en audibilidad del habla, que es la
   consecuencia que el trabajador nota de verdad.
-- Referencia de la API: [`hearing.noise_induced_hearing_loss`](/phonometry/es/reference/api/hearing/noise-induced-hearing-loss/).
-- Teoría: [Pérdida auditiva inducida por ruido (ISO 1999)](/phonometry/es/reference/theory/perception/#perdida-auditiva-inducida-por-ruido-iso-1999): el modelo de desplazamiento del umbral de ISO 1999, su mediana y su dispersión por fractiles.
+- Referencia de la API: [`hearing.noise_induced_hearing_loss`](/es/reference/api/hearing/noise-induced-hearing-loss/).
+- Teoría: [Pérdida auditiva inducida por ruido (ISO 1999)](/es/reference/theory/perception/#perdida-auditiva-inducida-por-ruido-iso-1999): el modelo de desplazamiento del umbral de ISO 1999, su mediana y su dispersión por fractiles.
 
 </SeeAlso>

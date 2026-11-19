@@ -323,8 +323,8 @@ octava de 63 Hz a 8 kHz. Cuando solo se dispone de un $L_{W\mathrm{A}}$ ponderad
 recurso que la propia norma prevé (apartado 1, Nota 1) es evaluar los términos de
 atenuación a 500 Hz y aplicarlos a ese único número, que es una estimación y no
 una predicción por bandas. Las dos guías de emisión de CNOSSOS-EU,
-[carretera](/phonometry/es/environment/sources/cnossos-road-emission/) y
-[ferrocarril](/phonometry/es/environment/sources/cnossos-rail-emission/), se
+[carretera](/es/environment/sources/cnossos-road-emission/) y
+[ferrocarril](/es/environment/sources/cnossos-rail-emission/), se
 detienen justo donde empieza esta regla: las dos entregan una potencia acústica
 *por metro de línea fuente* y las dos declaran la segmentación fuera de su
 alcance, así que elegir la longitud del tramo y sumar los tramos
@@ -640,7 +640,7 @@ fórmula suelta no las separaría; también fija el margen dentro del que un
 resultado tiene que quedarse, $\pm 0{,}05$ dB por banda y en el total. Los
 siete que la ISO 9613-2 responde por sí sola (T01 a T07) se comprueban banda a
 banda en el
-[informe de conformidad](https://docs.jmrp.io/phonometry/es/reference/conformance/).
+[informe de conformidad](https://phonometry.dev/es/reference/conformance/).
 Los otros doce construyen sus caminos de rayo con las recomendaciones
 adicionales de su capítulo 5, sobre barreras y alrededor de edificios, y no
 están implementados.
@@ -741,7 +741,7 @@ luego la de 1 kHz), mientras que `a_atm` avanza suavemente por
 0,216 / 0,280 / 0,348 / 0,419 dB. Si hace falta un espectro más fino, conviene
 ejecutar la predicción en octavas y repartir después, o usar el `ground_effect`
 de acústica ondulatoria de
-[Efecto suelo y barreras](/phonometry/es/environment/propagation/ground-barriers/)
+[Efecto suelo y barreras](/es/environment/propagation/ground-barriers/)
 cuando lo que importa es la estructura de interferencia dentro de una octava.
 Por debajo de 63 Hz o por encima de 8 kHz no hay cobertura alguna, de modo que
 una evaluación en baja frecuencia queda fuera de este método.
@@ -820,7 +820,7 @@ certificado tal como la recoge el formulario TRC de la ISO 17534-1, es
 `verify_calculation_results`, y lo que cuesta una configuración más rápida de
 un programa de mapas se mide con los cuantiles del Anexo C de la misma norma:
 las dos cosas están en [Calidad del software de ruido exterior
-(ISO 17534-1)](/phonometry/es/environment/propagation/software-quality/).
+(ISO 17534-1)](/es/environment/propagation/software-quality/).
 
 ## 4. Alcance, hipótesis y errores habituales
 
@@ -964,9 +964,9 @@ preguntas distintas:
   parte de propagación derivada del método francés NMPB 2008, produciendo los
   indicadores $L_\mathrm{den}$/$L_\mathrm{night}$ que la Directiva exige. Esta biblioteca
   implementa la mitad de *emisión* de CNOSSOS-EU en
-  [Emisión de la fuente de tráfico viario CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-road-emission/)
+  [Emisión de la fuente de tráfico viario CNOSSOS-EU](/es/environment/sources/cnossos-road-emission/)
   y
-  [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/);
+  [Emisión de la fuente ferroviaria CNOSSOS-EU](/es/environment/sources/cnossos-rail-emission/);
   el método de *propagación* de CNOSSOS-EU del apartado 2.5 **no** está
   implementado, así que llevar una potencia de línea de CNOSSOS por la cadena de
   la ISO 9613-2 de esta página es una estimación de ingeniería y no la cadena
@@ -992,10 +992,10 @@ usan este módulo.
 la edición de 1996, la que la mayoría de reglamentos nacionales y la
 literatura de validación siguen citando.)
 
-Consulta la página de [Teoría](/phonometry/es/reference/theory/environment-transport/)
-para la derivación completa, la [guía de Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)
+Consulta la página de [Teoría](/es/reference/theory/environment-transport/)
+para la derivación completa, la [guía de Acústica de salas](/es/buildings/rooms/room-acoustics/)
 para cómo $\alpha$ alimenta la ISO 354, y la
-[guía de exposición al ruido en el trabajo](/phonometry/es/perception/hearing/occupational-exposure/)
+[guía de exposición al ruido en el trabajo](/es/perception/hearing/occupational-exposure/)
 para la exposición ocupacional (ISO 9612) que consume niveles
 ponderados A.
 
@@ -1080,7 +1080,7 @@ result.report(
 />
 
 También aquí `result.plot()` previsualiza el espectro de pérdida por inserción
-de la ficha; la [guía de suelo y barreras](/phonometry/es/environment/propagation/ground-barriers/)
+de la ficha; la [guía de suelo y barreras](/es/environment/propagation/ground-barriers/)
 dibuja el mismo resultado frente a los modelos de semiplano exacto y suelo
 coherente.
 
@@ -1088,14 +1088,14 @@ coherente.
 
 ## Véase también
 
-- [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/): la acústica ondulatoria que hay debajo del ajuste de suelo de la Tabla 3 y de la curva de apantallamiento de la Ec. (14).
-- [Refracción atmosférica](/phonometry/es/environment/propagation/atmospheric-refraction/): lo que la hipótesis de condiciones favorables y el $C_\mathrm{met}$ vienen a sustituir.
-- [Calidad del software de ruido exterior (ISO 17534-1)](/phonometry/es/environment/propagation/software-quality/): el formulario TRC con que se comprueban los resultados de un programa, y los cuantiles que dicen lo que cuesta una configuración más rápida de un programa de mapas.
-- [Emisión de la fuente de tráfico viario CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-road-emission/) y [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/): las potencias de fuente a las que se refiere la comparación de la sección 4.
-- [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/): qué le pasa al nivel predicho cuando pasa a ser un nivel evaluado.
-- Referencia de la API: [`environment.propagation.outdoor_propagation`](/phonometry/es/reference/api/environment/outdoor-propagation/) y [`environment.propagation.air_absorption`](/phonometry/es/reference/api/environment/air-absorption/).
-- Teoría: [Propagación en exteriores](/phonometry/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): los términos de atenuación de ISO 9613-2 derivados uno a uno, y la absorción atmosférica de la Parte 1.
-- [Catálogos publicados](/phonometry/es/reference/catalogues/ground-surfaces/): la
+- [Efecto suelo esférico y barreras avanzadas](/es/environment/propagation/ground-barriers/): la acústica ondulatoria que hay debajo del ajuste de suelo de la Tabla 3 y de la curva de apantallamiento de la Ec. (14).
+- [Refracción atmosférica](/es/environment/propagation/atmospheric-refraction/): lo que la hipótesis de condiciones favorables y el $C_\mathrm{met}$ vienen a sustituir.
+- [Calidad del software de ruido exterior (ISO 17534-1)](/es/environment/propagation/software-quality/): el formulario TRC con que se comprueban los resultados de un programa, y los cuantiles que dicen lo que cuesta una configuración más rápida de un programa de mapas.
+- [Emisión de la fuente de tráfico viario CNOSSOS-EU](/es/environment/sources/cnossos-road-emission/) y [Emisión de la fuente ferroviaria CNOSSOS-EU](/es/environment/sources/cnossos-rail-emission/): las potencias de fuente a las que se refiere la comparación de la sección 4.
+- [Niveles ambientales](/es/environment/assessment/environmental-levels/): qué le pasa al nivel predicho cuando pasa a ser un nivel evaluado.
+- Referencia de la API: [`environment.propagation.outdoor_propagation`](/es/reference/api/environment/outdoor-propagation/) y [`environment.propagation.air_absorption`](/es/reference/api/environment/air-absorption/).
+- Teoría: [Propagación en exteriores](/es/reference/theory/environment-transport/#propagacion-en-exteriores-iso-9613-12): los términos de atenuación de ISO 9613-2 derivados uno a uno, y la absorción atmosférica de la Parte 1.
+- [Catálogos publicados](/es/reference/catalogues/ground-surfaces/): la
   resistividad al flujo y los parámetros de modelo que imprimen los libros
   para hierba, nieve, asfalto y el resto de superficies de suelo.
 

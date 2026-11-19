@@ -39,11 +39,11 @@ ocupantes, y convierte una relación habla-ruido objetivo en un área de absorci
 por mesa. Primero la medición, después el diseño; las dos mitades no comparten
 más que la sala. Las
 respuestas al impulso y los niveles que la sustentan se adquieren como en
-[Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/);
+[Medición de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/);
 el STI por posición sale de la
-[guía del Índice de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/);
+[guía del Índice de transmisión del habla](/es/perception/speech/speech-transmission/);
 los parámetros de decaimiento de sala cerrada viven en
-[Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/).
+[Acústica de salas](/es/buildings/rooms/room-acoustics/).
 
 ## Privacidad del habla a lo largo de una línea de puestos
 
@@ -280,7 +280,7 @@ que cumpla los requisitos de omnidireccionalidad de la ISO 3382-1 (la norma es
 explícita sobre el porqué: quien trabaja en una oficina diáfana no habla de forma
 continua en ninguna dirección fija). Una señal determinista de espectro rosa (una
 MLS o un barrido, adquiridos como en la
-[guía de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/))
+[guía de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/))
 es un sustituto admitido, y los resultados se obtienen de la respuesta al
 impulso. Su potencia acústica se verifica como en la ISO 3382-1, con la fuente a
 1,2 m, y el apartado 6.2 fija el nivel: suficiente en cada banda de octava para
@@ -400,7 +400,7 @@ print(round(chain.d2s, 1), round(chain.lp_as_4m, 1))     # 4.7 42.9
 ```
 
 La aritmética de bandas en sí (ponderación A y suma en energía) es la misma
-que en [Niveles](/phonometry/es/signals/levels/levels/).
+que en [Niveles](/es/signals/levels/levels/).
 
 ### Parámetros de `open_plan_metrics()`
 
@@ -416,7 +416,7 @@ partir de esos cuatro campos y marca `rd` / `rp`.
 `d2s`/`lp_as_4m` son `nan` si menos de dos posiciones caen en 2–16 m;
 `rd`/`rp` son `nan` cuando el STI no decrece con la distancia. El STI por
 posición puede medirse a su vez con las herramientas STIPA de la
-[guía del índice de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/).
+[guía del índice de transmisión del habla](/es/perception/speech/speech-transmission/).
 
 ## Informe ISO 3382-3 (`.report()`)
 
@@ -439,7 +439,7 @@ mínimo aceptable en dB, según los intervalos de calidad informativos del Anexo
 A donde un mayor decaimiento espacial es mejor; la sala cumple igualando o
 superando el objetivo). Usa el mismo contenedor `ReportMetadata` y el mismo
 motor de renderizado que la [ficha de acústica de salas ISO
-3382-1/-2](/phonometry/es/buildings/rooms/room-acoustics/#informe-iso-3382-report);
+3382-1/-2](/es/buildings/rooms/room-acoustics/#informe-iso-3382-report);
 los campos propios de oficinas diáfanas `area` (superficie del suelo),
 `n_source_positions` y `n_receiver_positions` (el número de posiciones de medición)
 rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
@@ -613,10 +613,10 @@ plt.legend(); plt.show()
 **De dónde sale el propio $A_\text{mesa}$.** Para una sala que ya existe, mide el
 tiempo de reverberación según la ISO 3382-2 e invierte Sabine: $A = 0{,}161\,V/T$
 (la misma convención que define la ISO 354). Las guías de
-[respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/)
-y [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/)
+[respuesta al impulso](/es/buildings/rooms/room-impulse-response/)
+y [Acústica de salas](/es/buildings/rooms/room-acoustics/)
 aportan $T$. Para una sala en proyecto, mídela superficie a superficie como en
-[Absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/).
+[Absorción acústica en recintos](/es/buildings/rooms/enclosed-space-absorption/).
 En cualquiera de los dos casos $A_\text{mesa} = A/N$, con $N$ el número de mesas
 **ocupadas simultáneamente** (no los comensales, y no las mesas instaladas). Eso
 es lo que hace que un restaurante a media entrada sea una sala distinta de uno
@@ -691,7 +691,7 @@ para leer los resultados. El modelo de ruido autogenerado por los ocupantes
 del capítulo 17 de *Architectural Acoustics* 2.ª ed. de Long (ecs. (17.50) a
 (17.54)) mediante `room.crowd_noise` y sus piezas, con la ventana de diseño de
 las ecs. (17.53)-(17.54) y su condición de cierre. El
-[informe de conformidad](/phonometry/es/reference/conformance/) contrasta
+[informe de conformidad](/es/reference/conformance/) contrasta
 $D_\mathrm{2,S}$ con la definición que da la propia norma.
 </ScopeClaim>
 
@@ -699,7 +699,7 @@ $D_\mathrm{2,S}$ con la definición que da la propia norma.
 El STI por posición de la ISO 3382-3 se toma como entrada de
 `open_plan_metrics` en lugar de calcularse dentro de la función: mídelo con
 las herramientas STIPA de la [guía del Índice de transmisión del
-habla](/phonometry/es/perception/speech/speech-transmission/). La cuarta
+habla](/es/perception/speech/speech-transmission/). La cuarta
 magnitud de número único exigida, el ruido de fondo medio ponderado A
 $L_{p,\mathrm{A,B}}$, tampoco se calcula aquí: es la media energética ponderada A de
 los niveles de fondo por banda de octava de cada posición, y le corresponde ir
@@ -725,19 +725,19 @@ absorción local ni de dónde está cada mesa dentro de la sala.
 
 ## Véase también
 
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): los parámetros
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): los parámetros
   de decaimiento ISO 3382-1/2 de la misma sala.
-- [Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/):
+- [Medición de la respuesta al impulso](/es/buildings/rooms/room-impulse-response/):
   la adquisición tras los niveles por posición.
-- [Índice de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/):
+- [Índice de transmisión del habla](/es/perception/speech/speech-transmission/):
   la medición STI/STIPA que alimenta los `sti_values` por posición.
-- [Índice de inteligibilidad del habla](/phonometry/es/perception/speech/speech-intelligibility/):
+- [Índice de inteligibilidad del habla](/es/perception/speech/speech-intelligibility/):
   la mirada de ANSI S3.5 a la misma pregunta de inteligibilidad.
-- [Niveles](/phonometry/es/signals/levels/levels/): los niveles ponderados A tras el
+- [Niveles](/es/signals/levels/levels/): los niveles ponderados A tras el
   decaimiento espacial.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): las
+- [Teoría](/es/reference/theory/rooms-buildings/): las
   derivaciones de acústica de salas en las que se apoya esta página.
-- Referencia de la API: [`room.open_plan`](/phonometry/es/reference/api/rooms/open-plan/).
-- Teoría: [Respuesta al impulso y parámetros de acústica de salas](/phonometry/es/reference/theory/rooms-buildings/#respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3): la teoría de decaimiento y absorción frente a la que se mide la distancia de distracción de ISO 3382-3.
+- Referencia de la API: [`room.open_plan`](/es/reference/api/rooms/open-plan/).
+- Teoría: [Respuesta al impulso y parámetros de acústica de salas](/es/reference/theory/rooms-buildings/#respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3): la teoría de decaimiento y absorción frente a la que se mide la distancia de distracción de ISO 3382-3.
 
 </SeeAlso>

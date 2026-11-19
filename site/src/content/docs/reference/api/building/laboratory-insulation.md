@@ -8,7 +8,7 @@ sidebar:
 Laboratory sound insulation of building elements (ISO 10140).
 
 This is the **laboratory** counterpart of the field ISO 16283 family in
-[`phonometry.building.measurement.insulation`](/phonometry/reference/api/building/insulation/). In a qualified test facility flanking
+[`phonometry.building.measurement.insulation`](/reference/api/building/insulation/). In a qualified test facility flanking
 transmission is suppressed, so the *direct* airborne sound reduction index
 `R` (not the apparent `R'`) is the primary quantity, and the receiving
 room's equivalent absorption area `A` is a property of the known facility.
@@ -22,7 +22,7 @@ opening area `S` and the Sabine equivalent absorption area
 $A = 0.16\,V/T$ (ISO 10140-4:2010, Clause 4.6.3, Formula (5)). The
 single-number weighted rating `Rw` and the adaptation terms `C` / `Ctr`
 follow ISO 717-1 (Clause 5.3) through the verified
-[`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) engine, reused unchanged.
+[`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) engine, reused unchanged.
 
 **Impact sound pressure level (ISO 10140-3:2010).** With the standard
 tapping machine exciting the floor under test this module forms, from the
@@ -32,11 +32,11 @@ normalized impact sound pressure level $L_\mathrm{n} = L_\mathrm{i} + 10 \log_{1
 Formula (1)) with $A = 0.16\,V/T$ and the reference absorption area
 $A_0 = 10$ m². The single-number weighted rating `Ln,w` and the term
 `CI` follow ISO 717-2 (Clause 5.3) through
-[`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating), reused unchanged.
+[`phonometry.building.weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating), reused unchanged.
 
 **Background-noise correction (ISO 10140-4:2010, Clause 4.3, Formula (4)).**
 The receiving-room levels must be corrected for background noise before the
-insulation is formed. [`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction) implements the correction
+insulation is formed. [`background_correction`](/reference/api/building/laboratory-insulation/#background_correction) implements the correction
 $L = 10 \log_{10}(10^{L_\mathrm{sb}/10} - 10^{L_\mathrm{b}/10})$ for a signal-to-background
 margin
 between 6 dB and 15 dB, the fixed 1.3 dB correction (limit of measurement)
@@ -93,7 +93,7 @@ using the margin `Lsb - Lb`:
   applied
   ($L = L_\mathrm{sb} - 1.3$); such bands are the *limit of measurement*
   and a
-  [`LaboratoryInsulationWarning`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryinsulationwarning) is emitted (Clause 4.3). A *negative*
+  [`LaboratoryInsulationWarning`](/reference/api/building/laboratory-insulation/#laboratoryinsulationwarning) is emitted (Clause 4.3). A *negative*
   margin ($L_\mathrm{b} > L_\mathrm{sb}$, i.e. background above the measured
   signal) falls
   in this branch and is likewise capped at $L_\mathrm{sb} - 1.3$: the
@@ -102,7 +102,7 @@ using the margin `Lsb - Lb`:
   nonsensical (or `NaN`) corrected level.
 
 This is the sound-insulation counterpart of
-[`phonometry.emission.background_noise_correction`](/phonometry/reference/api/power/sound-power/#background_noise_correction) (ISO 3744:2010):
+[`phonometry.emission.background_noise_correction`](/reference/api/power/sound-power/#background_noise_correction) (ISO 3744:2010):
 both apply the same energy subtraction
 $10 \log_{10}(10^{L_\mathrm{sb}/10} - 10^{L_\mathrm{b}/10})$, but
 that routine returns the correction *offset* `K1` (to subtract from
@@ -147,13 +147,13 @@ opening area `S` and the Sabine equivalent absorption area
 $A = 0.16\,V/T$ (ISO 10140-4:2010, Formula (5)). When exactly 16
 one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are
 supplied, the single-number weighted rating `Rw` with `C` / `Ctr`
-is also formed via [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) (ISO 717-1).
+is also formed via [`phonometry.building.weighted_rating`](/reference/api/building/ratings/#weighted_rating) (ISO 717-1).
 
 `l1` and `l2` may be one value per band (already energy-averaged) or a
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged (ISO 10140-4:2010, Formula (2)). The band levels are
 assumed already corrected for background noise (see
-[`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)).
+[`background_correction`](/reference/api/building/laboratory-insulation/#background_correction)).
 
 **Parameters**
 
@@ -165,7 +165,7 @@ assumed already corrected for background noise (see
 | `area` | Area `S` of the free test opening, in m². |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LaboratoryAirborneInsulationResult`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryairborneinsulationresult) with `r`, `absorption_area` and `rating`.
+**Returns:** [`LaboratoryAirborneInsulationResult`](/reference/api/building/laboratory-insulation/#laboratoryairborneinsulationresult) with `r`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -195,13 +195,13 @@ Formula (5)) and the reference absorption area $A_0 = 10$ m².
 When exactly
 16 one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are
 supplied, the single-number weighted rating `Ln,w` with `CI` is also
-formed via [`phonometry.building.weighted_impact_rating`](/phonometry/reference/api/building/ratings/#weighted_impact_rating) (ISO 717-2).
+formed via [`phonometry.building.weighted_impact_rating`](/reference/api/building/ratings/#weighted_impact_rating) (ISO 717-2).
 
 `li` may be one value per band (already energy-averaged) or a
 two-dimensional `(positions, bands)` array, in which case the positions
 are energy-averaged (ISO 10140-4:2010, Formula (2)). The band levels are
 assumed already corrected for background noise (see
-[`background_correction`](/phonometry/reference/api/building/laboratory-insulation/#background_correction)).
+[`background_correction`](/reference/api/building/laboratory-insulation/#background_correction)).
 
 **Parameters**
 
@@ -211,7 +211,7 @@ assumed already corrected for background noise (see
 | `t2` | Receiving-room reverberation time per band, in seconds. |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LaboratoryImpactInsulationResult`](/phonometry/reference/api/building/laboratory-insulation/#laboratoryimpactinsulationresult) with `l_n`, `absorption_area` and `rating`.
+**Returns:** [`LaboratoryImpactInsulationResult`](/reference/api/building/laboratory-insulation/#laboratoryimpactinsulationresult) with `l_n`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -298,7 +298,7 @@ is rejected.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table annexes the per-band equivalent sound absorption area `A` beside the reported `R`. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -388,7 +388,7 @@ is rejected.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table annexes the per-band equivalent sound absorption area `A` beside the reported `Ln`. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Esta es la entrada del [registro de erratas](/phonometry/es/reference/errata/) sobre NMFS (2024). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Esta es la entrada del [registro de erratas](/es/reference/errata/) sobre NMFS (2024). La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## NMFS (2024) Updated Technical Guidance v3.0, Tabla 5 / Tabla ES2 (C de los otáridos)
 

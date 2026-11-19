@@ -57,9 +57,9 @@ the intensity sound reduction index $R_I$ and its $K_\mathrm{c}$-modified form, 
 element-normalized level difference of small building elements, the surface
 qualification indicator and the accredited test fiches. The pressure-based
 laboratory chain lives in
-[Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/); the
+[Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/); the
 probe physics and its field indicators are the subject of the
-[Sound Intensity guide](/phonometry/devices/emission/intensity/).
+[Sound Intensity guide](/devices/emission/intensity/).
 
 ## Measuring the transmitted power directly (ISO 15186-1)
 
@@ -523,7 +523,7 @@ radiates, partial surfaces isolate which element (the wall itself, a window,
 a leaky junction) carries the transmitted power, which no pressure-based
 field method can resolve. Qualify each scan with the same
 pressure-intensity indicator, and expect the probe's own limits (the
-[spacer phase error](/phonometry/devices/emission/intensity/)) to set the usable
+[spacer phase error](/devices/emission/intensity/)) to set the usable
 low-frequency range.
 
 ## Low frequencies: the pressure on the specimen (ISO 15186-3)
@@ -692,7 +692,7 @@ series print the two signs; this is the one that agrees with the physics
 (installing $N$ units raises the transmitted power by $10\lg N$, so recovering
 the per-unit figure has to add it back) and with the pressure-based
 ISO 10140-2 Formula (6). The Part 1 print is registered in
-[ERRATA](/phonometry/reference/errata/), and Part 1's implementation warns
+[ERRATA](/reference/errata/), and Part 1's implementation warns
 whenever $N > 1$ puts it at odds with its own page. Nothing warns here,
 because here the page and the physics agree.
 
@@ -741,7 +741,7 @@ conformance anchor for all five formulas. The steel-sandwich column beside
 them in the same table is not: no reading of the inputs printed next to it
 reproduces it, and the one that would takes an area and a surface mass moved
 together, the mass landing heavier than solid steel of the stated thickness. It
-is registered in [ERRATA](/phonometry/reference/errata/) and is deliberately
+is registered in [ERRATA](/reference/errata/) and is deliberately
 not used as an oracle.
 
 ### `low_frequency_intensity_reduction()`, `low_frequency_element_normalized_difference()` and `limp_panel_reduction_index()` parameters
@@ -815,17 +815,17 @@ the standard's Clause 8 report has no worked form here.
 
 ## See also
 
-- [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
+- [Laboratory Insulation Measurement](/buildings/insulation/insulation-lab/):
   the ISO 10140 pressure method that the $K_\mathrm{c}$ adaptation reproduces.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the pressure-based field quantities and their single-number ratings.
-- [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/):
+- [Insulation Ratings (ISO 717)](/buildings/insulation/insulation-ratings/):
   the reference-curve engine behind $R_{I,\mathrm{w}}$ and $D_{I,\mathrm{n,e,w}}$.
-- [Sound Intensity](/phonometry/devices/emission/intensity/): the two-microphone
+- [Sound Intensity](/devices/emission/intensity/): the two-microphone
   probe, its field indicators and the residual-index qualification behind
   every scan.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): the
+- [Theory](/reference/theory/rooms-buildings/): the
   reference-curve derivation behind the weighted single-number ratings.
-- API reference: [`building.measurement.intensity_insulation`](/phonometry/reference/api/building/intensity-insulation/).
+- API reference: [`building.measurement.intensity_insulation`](/reference/api/building/intensity-insulation/).
 
 </SeeAlso>

@@ -8,7 +8,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 2 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Medwin & Clay (1998), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 2 entradas del [registro de erratas](/es/reference/errata/) sobre Medwin & Clay (1998), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998), Ec. (3.4.30) (coeficiente del ácido bórico)
 

@@ -41,18 +41,18 @@ and Formula (D.1), which agree with each other; the defect is recorded in
 
 **The attenuation of sound in air** (7.4 and Annex B). $\alpha$ is the
 real part of the propagation coefficient, computed by the five steps of B.2
-([`reciprocity_air_attenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation)): ISO 9613-1 adjusted to the
+([`reciprocity_air_attenuation`](/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation)): ISO 9613-1 adjusted to the
 quantities of IEC 61094-2, with the speed of sound at the conditions of the
 calibration in the vibrational terms. Step 1 prints the last coefficient of
 the saturation vapour pressure as $6.3343\,184\,5\cdot10^3$, where
 IEC 61094-2 Table F.2, which the step refers to, prints
 $6.343\,164\,5\times10^3$; the library uses the latter (an erratum).
 Table B.1 tabulates the attenuation by ISO 9613-1 itself, as its text says,
-and [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation)
+and [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation)
 reproduces every one of its 162 entries.
 
 **The wave number** $k = \omega/c$ takes the speed of sound of IEC
-61094-2 Annex F ([`air`](/phonometry/reference/api/fluids/air/#air)), by default with the
+61094-2 Annex F ([`air`](/reference/api/fluids/air/#air)), by default with the
 dispersion of its NOTE to F.3: $c = c_0[1 + \sum_n c\,\alpha_{\mathrm{v}n}/ (2\pi f_{\mathrm{v}n})]$, a few parts in $10^5$ that reach a few tenths of
 a degree of phase at 20 kHz over 0.2 m. Annex B.1 points to it ("including
 dispersion effects").
@@ -60,10 +60,10 @@ dispersion effects").
 **Acoustic centres** (6.5 and Annex A). The distance $d_{12}$ is between
 the acoustic centres, each given as its position on the principal axis
 relative to the diaphragm, positive in front of it, a value or one per
-frequency; Annex A shows them only as a figure. [`acoustic_center`](/phonometry/reference/api/metrology/reciprocity-free-field/#acoustic_center) finds
+frequency; Annex A shows them only as a figure. [`acoustic_center`](/reference/api/metrology/reciprocity-free-field/#acoustic_center) finds
 one from the inverse-distance law, as 6.5 describes.
 
-**The arrangement** (6.4, 7.3). [`check_free_field_arrangement`](/phonometry/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement) holds the
+**The arrangement** (6.4, 7.3). [`check_free_field_arrangement`](/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement) holds the
 distance between the microphones to the ten nominal diameters 7.3 recommends
 and their supporting cylinders to the twenty 6.4 recommends, and the
 conditions to the domain in which Annex B states the accuracy of the
@@ -105,9 +105,9 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 | :--- | :--- |
 | `distances` | The distances from the reference point, in m, at least three, positive. |
 | `sound_pressures_pa` | The modulus of the sound pressure at each, in Pa or any proportional unit, positive. |
-| `attenuation_np_per_m` | $\alpha$ at the frequency, in Np/m (Default: 0), from [`reciprocity_air_attenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation). |
+| `attenuation_np_per_m` | $\alpha$ at the frequency, in Np/m (Default: 0), from [`reciprocity_air_attenuation`](/reference/api/metrology/reciprocity-free-field/#reciprocity_air_attenuation). |
 
-**Returns:** The [`AcousticCenter`](/phonometry/reference/api/metrology/reciprocity-free-field/#acousticcenter).
+**Returns:** The [`AcousticCenter`](/reference/api/metrology/reciprocity-free-field/#acousticcenter).
 
 **Raises**
 
@@ -210,7 +210,7 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `support_length_m` | The length of the supporting cylinder, in m, or `None` if not known. |
 
-**Returns:** The [`FreeFieldArrangementCheck`](/phonometry/reference/api/metrology/reciprocity-free-field/#freefieldarrangementcheck).
+**Returns:** The [`FreeFieldArrangementCheck`](/reference/api/metrology/reciprocity-free-field/#freefieldarrangementcheck).
 
 **Raises**
 
@@ -247,14 +247,14 @@ and the acoustic centre of each microphone are moved one at a time, as
 independent quantities, and their changes combined in quadrature into the
 single rows "Distance" and "Acoustic centres" of Table 1. The attenuation
 is moved by a fraction of itself,
-[`FreeFieldInputUncertainties.u_air_attenuation_ratio`](/phonometry/reference/api/metrology/reciprocity-free-field/#freefieldinputuncertainties).
+[`FreeFieldInputUncertainties.u_air_attenuation_ratio`](/reference/api/metrology/reciprocity-free-field/#freefieldinputuncertainties).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `uncertainties` | The standard uncertainty of each input quantity, a [`FreeFieldInputUncertainties`](/phonometry/reference/api/metrology/reciprocity-free-field/#freefieldinputuncertainties). |
+| `uncertainties` | The standard uncertainty of each input quantity, a [`FreeFieldInputUncertainties`](/reference/api/metrology/reciprocity-free-field/#freefieldinputuncertainties). |
 | `diaphragm_distances_m` | $d_{\mathrm{m}12}$, $d_{\mathrm{m}23}$, $d_{\mathrm{m}31}$, in m. |
 | `temperature_c` | The temperature, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
@@ -263,7 +263,7 @@ is moved by a fraction of itself,
 | `microphone` | The microphone whose level is analysed, 1, 2 or 3. |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
 
-**Returns:** The [`FreeFieldParameterUncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#freefieldparameteruncertainty).
+**Returns:** The [`FreeFieldParameterUncertainty`](/reference/api/metrology/reciprocity-free-field/#freefieldparameteruncertainty).
 
 **Raises**
 
@@ -320,7 +320,7 @@ printed Formula (8) drops (module docstring).
 | `corrections` | Corrections added to every level (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
-**Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
+**Returns:** The [`ReciprocityCalibration`](/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
 
 **Raises**
 
@@ -375,7 +375,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 | `corrections` | Corrections added to both levels (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
-**Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.
+**Returns:** The [`ReciprocityCalibration`](/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.
 
 **Raises**
 
@@ -485,7 +485,7 @@ of the attenuation; an arrangement that fails it is not forbidden, but
 falls outside what the standard recommends and what its uncertainty
 figures assume.
 
-Built by [`check_free_field_arrangement`](/phonometry/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement). The verdicts are read from
+Built by [`check_free_field_arrangement`](/reference/api/metrology/reciprocity-free-field/#check_free_field_arrangement). The verdicts are read from
 the distances, the diameter, the support and the attenuation the check
 holds, against the numbers 7.3, 6.4, Annex A and B.2 print, so they are
 not fields.
@@ -497,7 +497,7 @@ not fields.
 | `diaphragm_distances_m` | The distances between the microphones, in m. |
 | `microphone_diameter_m` | The nominal diameter of the microphones, in m. |
 | `support_length_m` | The length of the cylinder each microphone is attached to, in m, or `None`. |
-| `air_attenuation` | The [`ReciprocityAirAttenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuation) at the frequencies and conditions of the calibration. |
+| `air_attenuation` | The [`ReciprocityAirAttenuation`](/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuation) at the frequencies and conditions of the calibration. |
 
 ### FreeFieldArrangementCheck.annex_a_range
 
@@ -571,7 +571,7 @@ FreeFieldInputUncertainties(
 ```
 
 The standard uncertainty of each input quantity of the free-field
-acoustic transfer impedance that [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty)
+acoustic transfer impedance that [`free_field_parameter_uncertainty`](/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty)
 can move: the distance, the three conditions and the air attenuation, rows
 Table 1 of IEC 61094-3:2016 lists under "Acoustic transfer impedance", and
 the acoustic centres of its "Microphone parameters".
@@ -609,8 +609,8 @@ The standard uncertainty of a free-field sensitivity level that each
 parameter of the acoustic transfer impedance contributes (IEC
 61094-3:2016 7.8).
 
-Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty); ready to pass to
-[`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) with
+Built by [`free_field_parameter_uncertainty`](/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty); ready to pass to
+[`reciprocity_uncertainty_budget`](/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) with
 `field="free"`.
 
 **Attributes**
@@ -618,7 +618,7 @@ Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrolog
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"reflections"`, `"frequency"`, `"receiver_shield"`, `"transmitter_shield"`, `"distance"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"standing_waves"`, `"air_attenuation"`, `"acoustic_centers"`, `"polarizing_voltage"`, `"plane_wave_deviation"`, `"mathematical_manipulations"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"reflections"`, `"frequency"`, `"receiver_shield"`, `"transmitter_shield"`, `"distance"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"standing_waves"`, `"air_attenuation"`, `"acoustic_centers"`, `"polarizing_voltage"`, `"plane_wave_deviation"`, `"mathematical_manipulations"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### FreeFieldParameterUncertainty.plot()
@@ -669,7 +669,7 @@ mole fraction of Steps 1 and 2, and $c$ the speed of sound of IEC
 ±10 % within -20 °C to 50 °C, below 200 kPa, for
 $0.5\times10^{-3} \le x_\mathrm{w} \le 50\times10^{-3}$ and a
 frequency-to-pressure ratio of 0.4 Hz/kPa to $10^4$ Hz/kPa
-([`ReciprocityAirAttenuation.within_stated_accuracy`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuationwithin_stated_accuracy)).
+([`ReciprocityAirAttenuation.within_stated_accuracy`](/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuationwithin_stated_accuracy)).
 
 Step 1 is computed with the coefficient of IEC 61094-2 Table F.2, which it
 refers to, not with the one it prints (`docs/ERRATA.md`).
@@ -683,7 +683,7 @@ refers to, not with the one it prints (`docs/ERRATA.md`).
 | `static_pressure_pa` | $p_\mathrm{s}$, in Pa. |
 | `relative_humidity_percent` | $H$, in %. |
 
-**Returns:** The [`ReciprocityAirAttenuation`](/phonometry/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuation).
+**Returns:** The [`ReciprocityAirAttenuation`](/reference/api/metrology/reciprocity-free-field/#reciprocityairattenuation).
 
 **Raises**
 

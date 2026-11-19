@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power/
 
 # Sound Power
 
@@ -340,7 +340,7 @@ $K_{W\mathrm{A}}$ combines the measurement (reproducibility) and, for a batch, t
 production spread; for a single machine $K = 1.645\,\sigma_\mathrm{R}$ (Annex A.2.2),
 where 1.645 is the 95 % one-sided quantile of the normal distribution: the
 declared value is an upper limit, so only one tail is being covered. A
-[`NoiseEmissionDeclaration`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/)
+[`NoiseEmissionDeclaration`](https://phonometry.dev/reference/api/power/sound-power/)
 holds one or more per-operating-mode declarations and renders the ISO 4871
 fiche through `.report()`. The quickest route is to `declare()` straight from a
 measured sound power:
@@ -500,7 +500,7 @@ Noise emission declaration fiche (NoiseEmissionDeclaration.report), the ISO 4871
   that consume a source $L_W$.
 - [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the Waterhouse, $K_1$/$K_2$ and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
+- API reference: [`emission.sound_power`](https://phonometry.dev/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](https://phonometry.dev/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](https://phonometry.dev/reference/api/power/sound-power-intensity/).
 - Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the enveloping-surface, reverberation-room and intensity derivations behind the six acoustic routes.
 
 ## Quick answers

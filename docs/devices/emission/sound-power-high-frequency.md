@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-high-frequency.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-high-frequency/
 
 # Sound Power in the 16 kHz Octave (ISO 9295)
 
@@ -434,7 +434,7 @@ standard would ask.
 - [Errata](../../ERRATA.md): the 43 misprinted cells of
   Tables 1 and 2, and the oxygen relaxation frequency that Formula (A.5)
   sets with a digit zero.
-- API reference: [`emission.sound_power_high_frequency`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-high-frequency/).
+- API reference: [`emission.sound_power_high_frequency`](https://phonometry.dev/reference/api/power/sound-power-high-frequency/).
 
 ## References
 

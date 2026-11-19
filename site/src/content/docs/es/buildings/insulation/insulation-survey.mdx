@@ -48,14 +48,14 @@ el método de control (survey): el índice de reverberación y su estimación
 por clase de recinto, las magnitudes aéreas, de impacto, de fachada y de
 equipamiento, y las fichas del método. Los métodos de grado de ingeniería
 viven en
-[Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/);
+[Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/);
 los motores de número único tras los índices del método de control en
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/).
+[Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/).
 
 ## Bandas de octava y el índice de reverberación
 
 Un solo número sustituye a toda la corrección del recinto receptor. Donde los
-[métodos de ingeniería](/phonometry/es/buildings/insulation/insulation-field/)
+[métodos de ingeniería](/es/buildings/insulation/insulation-field/)
 llevan un tiempo de reverberación medido por banda a cada magnitud, ISO 10052
 condensa esa corrección en el **índice de reverberación**
 $k = 10\log_{10}(T/T_0)$ ($T_0 = 0{,}5\ \text{s}$), que puede medirse pero
@@ -217,7 +217,7 @@ plt.show()
 ## Realizar el control (apartados 5 y 6)
 
 Todo lo anterior consume niveles por banda. Lo que separa a ISO 10052 de
-[ISO 16283](/phonometry/es/buildings/insulation/insulation-field/) no es la
+[ISO 16283](/es/buildings/insulation/insulation-field/) no es la
 aritmética, que es más sencilla, sino *cómo se obtienen esos niveles*: una
 postura del cuerpo, un barrido y un cronómetro en lugar de cinco posiciones
 fijas de micrófono por recinto. El procedimiento es lo bastante corto para
@@ -272,7 +272,7 @@ distinta altura, separadas más de 0,7 m, a 0,5 m como mínimo de cualquier
 límite del recinto y a 1,0 m como mínimo de la posición de impacto, promediadas sobre
 posiciones banda a banda. Su número único es la suma ponderada A del Anexo D de
 ISO 717-2:2020, no una curva de referencia desplazada; véase
-[Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/).
+[Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/).
 Usa protección auditiva al medir en el recinto emisor.
 
 **La fachada (apartados 6.2.4 y 6.3.3).** Con altavoz, sitúalo en el exterior
@@ -337,7 +337,7 @@ del método de ingeniería correspondiente concuerdan **dentro de ± 2 dB**, y e
 propio apartado 6.6 exige comprobar de vez en cuando la reproducibilidad del
 procedimiento de acuerdo con ISO 12999-1, en particular tras cualquier cambio de
 procedimiento o de instrumentación, la misma norma sobre la que va la
-[sección de incertidumbre de la guía de campo](/phonometry/es/buildings/insulation/insulation-field/#incertidumbre-de-medicion-iso-12999-1).
+[sección de incertidumbre de la guía de campo](/es/buildings/insulation/insulation-field/#incertidumbre-de-medicion-iso-12999-1).
 Un índice de reverberación *estimado* se suma a eso: los índices tabulados de la
 Tabla 4 llevan una desviación típica de en torno a 1 dB (NOTA 1 de la Tabla 4),
 y esa dispersión entra directamente en todas las magnitudes de esta página,
@@ -472,7 +472,7 @@ concordancia de ± 2 dB con el método de ingeniería es la estimación de la
 propia norma (NOTA del apartado 6.6), no algo que esta biblioteca modele ni
 propague: ningún resultado de control lleva incertidumbre. Cuando sube lo que
 hay en juego, pasa a [Medición del aislamiento en campo (ISO
-16283)](/phonometry/es/buildings/insulation/insulation-field/), cuya
+16283)](/es/buildings/insulation/insulation-field/), cuya
 maquinaria de ISO 12999-1 sí produce una. El modelo de informe del Anexo A y
 los ciclos de funcionamiento de equipamientos del Anexo B también quedan fuera
 de la biblioteca.
@@ -483,25 +483,25 @@ de la biblioteca.
 
 ## Véase también
 
-- [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/):
+- [Medición del aislamiento en campo (ISO 16283)](/es/buildings/insulation/insulation-field/):
   las mediciones de grado de ingeniería aéreas, de impacto y de fachada que
   este método aproxima, y su incertidumbre ISO 12999-1.
-- [Ruido de equipamientos y actividades (ISO 16032)](/phonometry/es/buildings/insulation/service-equipment-noise/):
+- [Ruido de equipamientos y actividades (ISO 16032)](/es/buildings/insulation/service-equipment-noise/):
   el método de ingeniería para el sonido de equipamientos que este método de
   control mide deprisa: espectros por banda y un tiempo de reverberación
   medido.
-- [Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/):
+- [Fuentes de impacto pesadas y blandas](/es/buildings/insulation/heavy-impact-sources/):
   la pelota de caucho del apartado 6.3.2, su nivel de exposición a la fuerza de
   impacto y el número único del Anexo D de ISO 717-2 que declara la rama
   pesada/blanda del control.
-- [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+- [Índices globales de aislamiento (ISO 717)](/es/buildings/insulation/insulation-ratings/):
   los motores de curva de referencia tras los índices del método de control.
-- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): los tiempos de
+- [Acústica de salas](/es/buildings/rooms/room-acoustics/): los tiempos de
   reverberación medidos tras el índice de reverberación.
-- [Niveles](/phonometry/es/signals/levels/levels/): el promediado en energía tras
+- [Niveles](/es/signals/levels/levels/): el promediado en energía tras
   los niveles de bandas de octava.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la derivación
+- [Teoría](/es/reference/theory/rooms-buildings/): la derivación
   de la curva de referencia tras los índices globales ponderados.
-- Referencia de la API: [`building.measurement.survey_insulation`](/phonometry/es/reference/api/building/survey-insulation/).
+- Referencia de la API: [`building.measurement.survey_insulation`](/es/reference/api/building/survey-insulation/).
 
 </SeeAlso>

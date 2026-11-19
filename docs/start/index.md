@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/index.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/
+← [Documentation index](../README.md) · Published at https://phonometry.dev/start/
 
 # Start
 
@@ -102,6 +102,6 @@ This is not a tutorial series, and it is not the API. Function signatures and
 argument types are in the generated API reference. The derivations, the
 numerical conformance report, the errata register for defects found in the
 published standards themselves, the glossary of symbols and the bibliography
-are all in [Reference](https://docs.jmrp.io/phonometry/reference/). And the acoustics itself is
+are all in [Reference](https://phonometry.dev/reference/). And the acoustics itself is
 assumed rather than taught: the guides explain the method a standard
 prescribes and why it is written that way, not what a decibel is.

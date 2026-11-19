@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/start/environments/type-checking.md: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/type-checking/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/start/environments/type-checking/
 
 # Type checking
 
@@ -10,7 +10,7 @@ and [pyright](https://microsoft.github.io/pyright/) check a call into the
 library with nothing else installed. Every public module declares what it
 publishes, and the lazy domains of `import phonometry as ph` are visible to a
 checker as well as at run time. The types a checker reads are the ones the
-[API reference](https://docs.jmrp.io/phonometry/reference/api/) prints in each signature.
+[API reference](https://phonometry.dev/reference/api/) prints in each signature.
 
 Checked on 17 November 2026 with phonometry 4.0.0 from PyPI, in the
 `python:3.12-slim` and `python:3.14-slim` images, on Python 3.12.16 and

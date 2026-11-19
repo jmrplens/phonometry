@@ -30,7 +30,7 @@ Implemented here are the four general terms of clause 7:
 
 * `Adiv` geometrical divergence, $20 \log_{10}(d/d_0) + 11$ (Eq. (7));
 * `Aatm` atmospheric absorption, $\alpha d$ (Eq. (8)) with `alpha`
-  the ISO 9613-1 coefficient supplied by [`air_absorption`](/phonometry/reference/api/environment/air-absorption/);
+  the ISO 9613-1 coefficient supplied by [`air_absorption`](/reference/api/environment/air-absorption/);
 * `Agr` ground effect, both the general per-region method of 7.3.1 with the
   Table 3 functions `a'/b'/c'/d'` (Eq. (9)) and the alternative simplified
   method of 7.3.2 (Eq. (10));
@@ -65,7 +65,7 @@ Attenuation due to atmospheric absorption (ISO 9613-2:1996, Eq. (8)).
 
 $A_\mathrm{atm} = \alpha d$ with `alpha` the ISO 9613-1 atmospheric
 attenuation
-coefficient (here in dB/m, from [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation))
+coefficient (here in dB/m, from [`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation))
 at each octave-band midband frequency. Eq. (8) writes `alpha` in dB/km
 with $A_\mathrm{atm} = \alpha_{\text{dB/km}} \, d / 1000$; the two forms
 are identical.
@@ -192,7 +192,7 @@ line never amplifies).
 
 | Name | Description |
 | :--- | :--- |
-| `barrier` | Barrier geometry ([`Barrier`](/phonometry/reference/api/environment/outdoor-propagation/#barrier)). |
+| `barrier` | Barrier geometry ([`Barrier`](/reference/api/environment/outdoor-propagation/#barrier)). |
 | `distance` | Straight-line source-to-receiver distance `d`, in metres. |
 | `frequencies` | Octave-band midband frequencies, in hertz. |
 
@@ -266,7 +266,7 @@ radiating into free space.
 | Name | Description |
 | :--- | :--- |
 | `index` | Source directivity index `Di`, in decibels. |
-| `d_omega` | Solid-angle index `DOmega`, in decibels (see [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega) for the alternative ground method). |
+| `d_omega` | Solid-angle index `DOmega`, in decibels (see [`directivity_omega`](/reference/api/environment/outdoor-propagation/#directivity_omega) for the alternative ground method). |
 
 ## geometric_divergence
 
@@ -379,7 +379,7 @@ A_\mathrm{gr} = 4.8 - \frac{2 h_\mathrm{m}}{d} \left[ 17 + \frac{300}{d} \right]
 $$
 
 Negative results are replaced by zero. When this method is used, add the
-solid-angle index [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega) (Eq. (11)) to `Dc` in Eq. (3).
+solid-angle index [`directivity_omega`](/reference/api/environment/outdoor-propagation/#directivity_omega) (Eq. (11)) to `Dc` in Eq. (3).
 
 **Parameters**
 
@@ -555,17 +555,17 @@ barrier $A_\mathrm{bar} = D_z$
 | `distance` | Straight-line source-to-receiver distance `d`, in metres. |
 | `source_height_m` | Source height `hs` above ground, in metres. |
 | `receiver_height_m` | Receiver height `hr` above ground, in metres. |
-| `frequencies` | Octave-band midband frequencies, in hertz. The ground term snaps each frequency to the nearest nominal octave band (Table 3 is octave-band only) and the atmospheric term evaluates the exact base-10 midband behind it (see [`atmospheric_absorption`](/phonometry/reference/api/environment/outdoor-propagation/#atmospheric_absorption)). |
+| `frequencies` | Octave-band midband frequencies, in hertz. The ground term snaps each frequency to the nearest nominal octave band (Table 3 is octave-band only) and the atmospheric term evaluates the exact base-10 midband behind it (see [`atmospheric_absorption`](/reference/api/environment/outdoor-propagation/#atmospheric_absorption)). |
 | `ground_source` | Ground factor `Gs` of the source region ([0, 1], 0 = hard, 1 = porous). |
 | `ground_middle` | Ground factor `Gm` of the middle region ([0, 1]). |
 | `ground_receiver` | Ground factor `Gr` of the receiver region ([0, 1]). |
-| `barrier` | Optional screening obstacle ([`Barrier`](/phonometry/reference/api/environment/outdoor-propagation/#barrier)). |
+| `barrier` | Optional screening obstacle ([`Barrier`](/reference/api/environment/outdoor-propagation/#barrier)). |
 | `temperature_c` | Air temperature, in degrees Celsius. |
 | `relative_humidity_percent` | Relative humidity, in percent (default 70). |
 | `static_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; defaults to $\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}$. |
 
-**Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
+**Returns:** [`OutdoorAttenuation`](/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
 
 **Raises**
 
@@ -667,11 +667,11 @@ the total attenuation `A`.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True and a `source_emission` is supplied, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
-| `source_emission` | Optional [`SourceEmission`](/phonometry/reference/api/environment/outdoor-propagation/#sourceemission) (the source sound power `Lw` and directivity, plus an optional meteorological correction) that turns the attenuation breakdown into the boxed A-weighted downwind level at the receiver. |
+| `source_emission` | Optional [`SourceEmission`](/reference/api/environment/outdoor-propagation/#sourceemission) (the source sound power `Lw` and directivity, plus an optional meteorological correction) that turns the attenuation breakdown into the boxed A-weighted downwind level at the receiver. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -706,7 +706,7 @@ $$
 L_{fT}(DW) = L_W + D_\mathrm{c} - A, \qquad D_\mathrm{c} = D_i + D_\Omega
 $$
 
-from the total attenuation [`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation). When `c0`
+from the total attenuation [`outdoor_propagation_attenuation`](/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation). When `c0`
 is given, the meteorological correction `Cmet` (Eq. (21)/(22)) is subtracted
 band by band to approximate the long-term average level `LfT(LT)` (Eq. (6));
 the standard applies `Cmet` to the A-weighted level, so this is a per-band
@@ -717,12 +717,12 @@ convenience.
 | Name | Description |
 | :--- | :--- |
 | `sound_power_level` | Octave-band sound power level `Lw`, in decibels (re 1 pW), one value per frequency. |
-| `geometry` | Source-to-receiver geometry of the path ([`PropagationGeometry`](/phonometry/reference/api/environment/outdoor-propagation/#propagationgeometry)): the distance `d`, the two heights and the optional projected distance `dp`. |
+| `geometry` | Source-to-receiver geometry of the path ([`PropagationGeometry`](/reference/api/environment/outdoor-propagation/#propagationgeometry)): the distance `d`, the two heights and the optional projected distance `dp`. |
 | `frequencies` | Octave-band midband frequencies, in hertz. |
-| `ground` | Ground factors of the three regions ([`GroundFactors`](/phonometry/reference/api/environment/outdoor-propagation/#groundfactors)); `None` is hard ground throughout. |
-| `barrier` | Optional screening obstacle ([`Barrier`](/phonometry/reference/api/environment/outdoor-propagation/#barrier)). |
-| `atmosphere` | Air temperature, humidity and pressure behind the atmospheric absorption term ([`AtmosphericConditions`](/phonometry/reference/api/environment/outdoor-propagation/#atmosphericconditions)); `None` is the reference air of the tabulated coefficients. |
-| `directivity` | Directivity correction `Dc = Di + DOmega` ([`DirectivityCorrection`](/phonometry/reference/api/environment/outdoor-propagation/#directivitycorrection)); `None` is an omnidirectional source in free space ($D_\mathrm{c} = 0$). |
+| `ground` | Ground factors of the three regions ([`GroundFactors`](/reference/api/environment/outdoor-propagation/#groundfactors)); `None` is hard ground throughout. |
+| `barrier` | Optional screening obstacle ([`Barrier`](/reference/api/environment/outdoor-propagation/#barrier)). |
+| `atmosphere` | Air temperature, humidity and pressure behind the atmospheric absorption term ([`AtmosphericConditions`](/reference/api/environment/outdoor-propagation/#atmosphericconditions)); `None` is the reference air of the tabulated coefficients. |
+| `directivity` | Directivity correction `Dc = Di + DOmega` ([`DirectivityCorrection`](/reference/api/environment/outdoor-propagation/#directivitycorrection)); `None` is an omnidirectional source in free space ($D_\mathrm{c} = 0$). |
 | `c0` | Meteorological factor `C0`, in decibels; `None` returns the downwind level `LfT(DW)` ($C_\mathrm{met} = 0$). |
 
 **Returns:** Predicted octave-band level per frequency, in decibels.
@@ -796,7 +796,7 @@ the source.
 | `source_height_m` | Source height `hs` above ground, in metres. |
 | `receiver_height_m` | Receiver height `hr` above ground, in metres. |
 
-**Returns:** The [`GroundFactors`](/phonometry/reference/api/environment/outdoor-propagation/#groundfactors) of the source, middle and receiver regions.
+**Returns:** The [`GroundFactors`](/reference/api/environment/outdoor-propagation/#groundfactors) of the source, middle and receiver regions.
 
 **Raises**
 
@@ -807,7 +807,7 @@ the source.
 
 :::note
 Where the two outer regions meet or overlap there is no middle region,
-and the returned [`GroundFactors.middle`](/phonometry/reference/api/environment/outdoor-propagation/#groundfactors) is the mean over the whole
+and the returned [`GroundFactors.middle`](/reference/api/environment/outdoor-propagation/#groundfactors) is the mean over the whole
 projection. It does not reach the result: the overlap factor `q` of
 Table 3, note 2 is nought over exactly that range, which drops the
 middle-region term altogether.
@@ -827,7 +827,7 @@ SourceEmission(
 
 Source emission terms for the ISO 9613-2 downwind receiver level (Eq. (3)).
 
-Passed to [`OutdoorAttenuation.report`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuationreport) so the prediction fiche can box
+Passed to [`OutdoorAttenuation.report`](/reference/api/environment/outdoor-propagation/#outdoorattenuationreport) so the prediction fiche can box
 the A-weighted downwind level at the receiver from an octave-band
 attenuation breakdown. The level is composed as
 $L_{fT}(DW) = L_W + D_\mathrm{c} - A$
@@ -836,7 +836,7 @@ with the directivity correction $D_\mathrm{c} = D_i + D_\Omega$
 is subtracted for the long-term average level (Eq. (6)).
 
 This report-time object keeps the emission out of
-[`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) (which stays purely an attenuation
+[`outdoor_propagation_attenuation`](/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) (which stays purely an attenuation
 calculation), so the receiver level is a presentation concern of the fiche.
 
 **Parameters**
@@ -845,5 +845,5 @@ calculation), so the receiver level is a presentation concern of the fiche.
 | :--- | :--- |
 | `sound_power_level` | Octave-band source sound power level `Lw` (dB re 1 pW), one value per band of the attenuation result. |
 | `directivity_index` | Source directivity index `Di`, in decibels. |
-| `d_omega` | Solid-angle index `DOmega`, in decibels (see [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega) for the alternative ground method). |
-| `cmet` | Optional meteorological correction `Cmet` (dB), obtained from [`meteorological_correction`](/phonometry/reference/api/environment/outdoor-propagation/#meteorological_correction); `None` reports the downwind level `LfT(DW)` directly ($C_\mathrm{met} = 0$). |
+| `d_omega` | Solid-angle index `DOmega`, in decibels (see [`directivity_omega`](/reference/api/environment/outdoor-propagation/#directivity_omega) for the alternative ground method). |
+| `cmet` | Optional meteorological correction `Cmet` (dB), obtained from [`meteorological_correction`](/reference/api/environment/outdoor-propagation/#meteorological_correction); `None` reports the downwind level `LfT(DW)` directly ($C_\mathrm{met} = 0$). |

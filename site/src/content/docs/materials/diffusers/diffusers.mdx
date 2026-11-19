@@ -81,7 +81,7 @@ scattering is *how much* energy leaves the specular direction; diffusion is
 the distinction precise. The deep-subwavelength relatives of the Schroeder
 designs treated here, panels a few centimetres thick that scatter like wells
 tens of centimetres deep, have their own guide:
-[Metadiffusers](/phonometry/materials/diffusers/metadiffusers/).
+[Metadiffusers](/materials/diffusers/metadiffusers/).
 
 ## 1. Random-incidence scattering coefficient (ISO 17497-1)
 
@@ -951,7 +951,7 @@ A handful of design rules follow directly from the geometry:
 - **The design frequency sets the depth.** The deepest well is
   $d_\mathrm{max} = \max(s_n)\,\lambda_0/(2N)$, close to half a wavelength for large
   $N$; halve $f_0$ and the diffuser gets twice as deep. This is the cost that
-  the [metadiffuser](/phonometry/materials/diffusers/metadiffusers/) attacks: at 500 Hz an
+  the [metadiffuser](/materials/diffusers/metadiffusers/) attacks: at 500 Hz an
   $N = 5$ design already calls for wells 27.4 cm deep.
 - **The sequence repeats what the prime provides.** $s_n$ is symmetric about
   $n = 0$ and periodic in $N$, so one period has $N$ wells and the profile is
@@ -1237,9 +1237,9 @@ print(row.why_missing("scattering_coefficient_5000"))
 
 All three tables are published whole, filterable and with the source of
 every row, each in its own catalogue: the
-[scattering coefficients](/phonometry/reference/catalogues/scattering-coefficients/), the
-[diffusion coefficients](/phonometry/reference/catalogues/diffusion-coefficients/) and the
-[predicted scattering coefficients](/phonometry/reference/catalogues/predicted-scattering-coefficients/).
+[scattering coefficients](/reference/catalogues/scattering-coefficients/), the
+[diffusion coefficients](/reference/catalogues/diffusion-coefficients/) and the
+[predicted scattering coefficients](/reference/catalogues/predicted-scattering-coefficients/).
 
 ## Scattering or diffusion? Two coefficients, two jobs
 
@@ -1314,7 +1314,7 @@ Primitive-root and modulated arrangements are discussed as design guidance in
 section 3, but only the quadratic-residue depth sequence has a dedicated
 helper; other profiles enter through the explicit `depths` or `reflection`
 arguments. Resonator-loaded deep-subwavelength panels are the subject of the
-[Metadiffusers guide](/phonometry/materials/diffusers/metadiffusers/).
+[Metadiffusers guide](/materials/diffusers/metadiffusers/).
 
 The published tables of section 4 are representative values with a spread of their own, not specifications: the same battens measured by two teams differ by up to 0.2, and the boundary element rows of Appendix C were never built. Neither set replaces a measurement of the surface a project actually uses.
 </ScopeClaim>
@@ -1324,20 +1324,20 @@ The published tables of section 4 are representative values with a spread of the
 
 ## See also
 
-- [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/): the deep-subwavelength
+- [Metadiffusers](/materials/diffusers/metadiffusers/): the deep-subwavelength
   version of the Schroeder designs of section 3, slits loaded by Helmholtz
   resonators that reach the same reflection phases from a panel a few
   centimetres thick.
-- [In-situ Road-Surface Absorption](/phonometry/materials/surfaces/road-absorption/): the
+- [In-situ Road-Surface Absorption](/materials/surfaces/road-absorption/): the
   other surface family measured in the field rather than the laboratory, with
   the ISO 13472 subtraction and spot methods.
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   the same reverberation room used by ISO 17497-1, measuring absorption
   instead of scattering.
-- [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the
+- [Outdoor Sound Propagation](/environment/propagation/outdoor-propagation/): the
   full ISO 9613-1 atmospheric-absorption model whose pure-tone coefficient the
   ISO 17497-1 air-attenuation relations consume.
-- API reference: [`materials.diffusers.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](/phonometry/reference/api/materials/design/).
-- Theory: [Surface scattering and diffusion](/phonometry/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the derivation of the scattering and diffusion coefficients and why the two are different quantities.
+- API reference: [`materials.diffusers.scattering_diffusion`](/reference/api/materials/scattering-diffusion/) and [`materials.diffusers.design`](/reference/api/materials/design/).
+- Theory: [Surface scattering and diffusion](/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the derivation of the scattering and diffusion coefficients and why the two are different quantities.
 
 </SeeAlso>

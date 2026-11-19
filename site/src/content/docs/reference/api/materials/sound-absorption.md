@@ -53,7 +53,7 @@ $$
 ISO 354 otherwise defers the calculation of `alpha` entirely to ISO 9613-1.
 `m` is therefore a user-supplied per-band parameter here (default 0, i.e. no air
 correction); a caller holding ISO 9613-1 `alpha` values can convert them with
-[`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha).
+[`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -100,9 +100,9 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 | :--- | :--- |
 | `t60` | Reverberation time(s) `T`, in seconds (scalar or per band). |
 | `volume` | Room volume `V`, in cubic metres. |
-| `temperature_c` | Air temperature, in degrees Celsius, used to compute the speed of sound via Eq. (6) when `speed_of_sound` is not given (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below the 150 m3 minimum of clause 6.1.1 likewise emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `temperature_c` | Air temperature, in degrees Celsius, used to compute the speed of sound via Eq. (6) when `speed_of_sound` is not given (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC emits an [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below the 150 m3 minimum of clause 6.1.1 likewise emits an advisory [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). |
 | `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
-| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
+| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
 
 **Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
@@ -188,11 +188,11 @@ The two measurements may be at different temperatures; `c1` and `c2` are
 resolved independently. `alpha_s` is returned unclamped and may exceed 1.0
 (Clause 3.7 NOTE 2). Because adding an absorber must reduce the
 reverberation time, $T_2 \ge T_1$ ($\alpha_\mathrm{s} \le 0$) is
-non-physical and emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below
+non-physical and emits an [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below
 the 150 m3 minimum of clause 6.1.1, or a sample area outside the clause
 6.2.1.1 range ($10~\text{m}^2 \le S \le 12~\text{m}^2$, upper limit
 scaled by $(V/200)^{2/3}$ when $V > 200$ m3), each emit an
-advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning).
+advisory [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning).
 
 **Parameters**
 
@@ -240,18 +240,18 @@ measure_sound_absorption(
 
 Measure the sound absorption of a plane absorber (ISO 354:2003).
 
-Assembles a [`SoundAbsorptionMeasurement`](/phonometry/reference/api/materials/sound-absorption/#soundabsorptionmeasurement) from the one-third-octave
+Assembles a [`SoundAbsorptionMeasurement`](/reference/api/materials/sound-absorption/#soundabsorptionmeasurement) from the one-third-octave
 reverberation times of the empty room (`T1`) and of the room with the
 specimen installed (`T2`). The equivalent sound absorption areas `A1`
 and `A2` follow from Sabine's equation (Eq. (5)/(7), delegated to
-[`absorption_area`](/phonometry/reference/api/materials/sound-absorption/#absorption_area)) and the sound absorption coefficient
+[`absorption_area`](/reference/api/materials/sound-absorption/#absorption_area)) and the sound absorption coefficient
 $\alpha_\mathrm{s} = (A_2 - A_1)/S$ from Eq. (8)/(9) (delegated to
-[`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)); no formula is re-derived here.
+[`absorption_coefficient`](/reference/api/materials/sound-absorption/#absorption_coefficient)); no formula is re-derived here.
 
 Both measurements are taken at the same air temperature and, for the air
 attenuation term, the same climatic conditions (ISO 354:2003, 6.3), so a
 single `temperature_c` and `m` apply to both. Use the lower-level
-[`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient) directly when the empty-room and
+[`absorption_coefficient`](/reference/api/materials/sound-absorption/#absorption_coefficient) directly when the empty-room and
 with-specimen climates differ.
 
 **Parameters**
@@ -261,20 +261,20 @@ with-specimen climates differ.
 | `frequencies` | One-third-octave band centre frequencies, in Hz (the ISO 354 range is 100 Hz to 5000 Hz); a 1-D array matching `t_empty` and `t_specimen`. |
 | `t_empty` | Empty-room reverberation time `T1`, per band, in seconds. |
 | `t_specimen` | With-specimen reverberation time `T2`, per band, in seconds. |
-| `volume` | Reverberation-room volume `V`, in cubic metres. A volume below the 150 m3 minimum of clause 6.1.1 emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
-| `area` | Area `S` covered by the test specimen, in square metres. An area outside the clause 6.2.1.1 range (10 m2 to 12 m2, upper limit scaled by $(V/200)^{2/3}$ for $V > 200$ m3) emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
-| `temperature_c` | Air temperature during the test, in degrees Celsius (default 20). Used for the speed of sound via Eq. (6) unless `speed_of_sound` is given; a temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `volume` | Reverberation-room volume `V`, in cubic metres. A volume below the 150 m3 minimum of clause 6.1.1 emits an advisory [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `area` | Area `S` covered by the test specimen, in square metres. An area outside the clause 6.2.1.1 range (10 m2 to 12 m2, upper limit scaled by $(V/200)^{2/3}$ for $V > 200$ m3) emits an advisory [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `temperature_c` | Air temperature during the test, in degrees Celsius (default 20). Used for the speed of sound via Eq. (6) unless `speed_of_sound` is given; a temperature outside 15..30 degC emits an [`AbsorptionWarning`](/reference/api/materials/sound-absorption/#absorptionwarning). |
 | `relative_humidity_percent` | Relative humidity during the test, in % within `[0, 100]` (informational; recorded on the result but not used in the computation, which sees the climate only through `m`). `None` leaves it unrecorded. |
 | `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
-| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or a per-band array matching `frequencies`; default 0, i.e. no air correction). Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
+| `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or a per-band array matching `frequencies`; default 0, i.e. no air correction). Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
 
-**Returns:** A frozen [`SoundAbsorptionMeasurement`](/phonometry/reference/api/materials/sound-absorption/#soundabsorptionmeasurement).
+**Returns:** A frozen [`SoundAbsorptionMeasurement`](/reference/api/materials/sound-absorption/#soundabsorptionmeasurement).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
+| ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/reference/api/materials/sound-absorption/#absorption_coefficient)). |
 | TypeError | if `area`, `relative_humidity_percent`, `speed_of_sound`, `temperature_c` or `volume` is not a single number, or `frequencies`, `m`, `t_empty` or `t_specimen` holds a text or a value that is not a real number. |
 
 ## power_attenuation_from_alpha
@@ -304,8 +304,8 @@ attenuation coefficient in reciprocal metres that ISO 354 Eqs. (5), (7)
 and (8) and ISO 17497-1 Eqs. (1), (4) and (6) take. Neither standard
 tabulates `alpha`: both defer it to ISO 9613-1, so this only converts a
 value the caller already holds (from
-[`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation), for example, or in one
-step with [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m)).
+[`air_attenuation`](/reference/api/environment/air-absorption/#air_attenuation), for example, or in one
+step with [`air_power_attenuation_per_m`](/reference/api/environment/air-absorption/#air_power_attenuation_per_m)).
 
 **Parameters**
 
@@ -348,14 +348,14 @@ reverberation time measured empty (`T1`) and with the specimen (`T2`),
 the equivalent sound absorption areas `A1` (Eq. (5)) and `A2` (Eq. (7))
 they give through Sabine's equation, and the sound absorption coefficient
 `alpha_s` (Eq. (8)/(9)) of the specimen. Build it with
-[`measure_sound_absorption`](/phonometry/reference/api/materials/sound-absorption/#measure_sound_absorption); the frozen instance then exposes
+[`measure_sound_absorption`](/reference/api/materials/sound-absorption/#measure_sound_absorption); the frozen instance then exposes
 `plot` (`alpha_s` versus frequency) and `report` (an
 accredited ISO 354 test-report PDF).
 
 A single-number rating (the practical coefficient `alpha_p` and the
 weighted coefficient `alpha_w`) is defined by ISO 11654, not ISO 354, and
 is therefore not produced here; pass `alpha_s` to
-[`weighted_absorption_from_third_octave`](/phonometry/reference/api/materials/rating/#weighted_absorption_from_third_octave) for it.
+[`weighted_absorption_from_third_octave`](/reference/api/materials/rating/#weighted_absorption_from_third_octave) for it.
 
 **Attributes**
 
@@ -440,7 +440,7 @@ here).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche without a metadata header. The `requirement` field is ignored (ISO 354 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche without a metadata header. The `requirement` field is ignored (ISO 354 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table adds the reverberation times `T1`/`T2` and the equivalent absorption areas `A1`/`A2`. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |

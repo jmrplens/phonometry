@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/materials/diffusers/metadiffusers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/materials/diffusers/metadiffusers/
 
 # Metadiffusers
 
@@ -510,7 +510,7 @@ honest grade.
 - [2D FDTD wave simulation](../../simulation/fdtd-simulation.md): the wave
   solver behind the animation above, meshing the real slit and resonator
   geometry.
-- API reference: [`materials.diffusers.metadiffuser`](https://docs.jmrp.io/phonometry/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](https://docs.jmrp.io/phonometry/reference/api/materials/design/).
+- API reference: [`materials.diffusers.metadiffuser`](https://phonometry.dev/reference/api/materials/metadiffuser/) and [`materials.diffusers.design`](https://phonometry.dev/reference/api/materials/design/).
 - Theory: [Surface scattering and diffusion](../../reference/theory/materials-surfaces.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2): the scattering and diffusion coefficients the deep-subwavelength designs are judged by.
 
 ## References

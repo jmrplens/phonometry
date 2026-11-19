@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/assessment/spanish-noise-regulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/assessment/spanish-noise-regulation/
 
 # Spanish Noise Regulation (RD 1367/2007)
 
@@ -502,7 +502,7 @@ Acoustic inspection fiche (ActivityAssessment.report), the three per-period crit
 - [Integrated and Statistical Levels](../../signals/levels/levels.md): the per-phase $L_\mathrm{Aeq}$, $L_\mathrm{Ceq}$ and $L_\mathrm{AIeq}$ levels that feed the three corrections.
 - [Spanish Building Code (CTE DB-HR)](../../buildings/insulation/spanish-building-code.md): the other half of the Spanish framework, which shares the site's day noise index $L_\mathrm{d}$ with this page.
 - [Impulsive-sound prominence](impulsive-sound.md): the ISO/PAS 1996-3 impulsive adjustment, the relative of $K_\mathrm{i}$ that is not interchangeable with it.
-- API reference: [`environment.assessment.spain`](https://docs.jmrp.io/phonometry/reference/api/environment/spain/).
+- API reference: [`environment.assessment.spain`](https://phonometry.dev/reference/api/environment/spain/).
 - Theory: [Environmental descriptors (ISO 1996-1)](../../reference/theory/environment-transport.md#environmental-descriptors-iso-1996-1): the ISO 1996-1 indicators the national indices are built from.
 
 ## Quick answers

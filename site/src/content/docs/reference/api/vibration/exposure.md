@@ -20,7 +20,7 @@ standards' own analog definitions, clean-room:
   design-goal factors of Annex B (Tables B.1-B.9) are reproduced to their
   four-significant-figure precision.  The band-limiting pair
   $H_\mathrm{h}(s) H_\mathrm{l}(s)$ is published on its own as well
-  ([`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response)), because 5.1 lists the band-limited value
+  ([`band_limiting_response`](/reference/api/vibration/exposure/#band_limiting_response)), because 5.1 lists the band-limited value
   among the quantities an instrument must display and Annex B tabulates it in
   three columns of its own.
 
@@ -51,12 +51,12 @@ standards' own analog definitions, clean-room:
   ISO 5349-1 vector total `a_hv` (Annex, Part A, point 1); the whole-body
   `A(8)` is based on the *highest* of the frequency-weighted axis values
   $1.4 a_{\mathrm{w}x}$, $1.4 a_{\mathrm{w}y}$, $a_{\mathrm{w}z}$ (Annex, Part B,
-  point 1; see [`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)), not on the ISO 2631-1 Eq. (10)
+  point 1; see [`wbv_exposure_basis`](/reference/api/vibration/exposure/#wbv_exposure_basis)), not on the ISO 2631-1 Eq. (10)
   vector total.
 
 The band (spectrum) method and the exposure arithmetic carry the standards'
 worked-example oracles; the time-domain metrics operate on a weighted
-acceleration signal, which [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting) produces from a raw record
+acceleration signal, which [`apply_weighting`](/reference/api/vibration/exposure/#apply_weighting) produces from a raw record
 by applying the exact analog response of ISO 8041-1 in the frequency domain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -82,14 +82,14 @@ apply_band_limiting(
 
 Apply the band-limiting weighting of `name` to a time signal.
 
-The band-limiting weighting of [`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response) (ISO 8041-1
-Formulae (1) and (2)) applied the way [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting) applies the
+The band-limiting weighting of [`band_limiting_response`](/reference/api/vibration/exposure/#band_limiting_response) (ISO 8041-1
+Formulae (1) and (2)) applied the way [`apply_weighting`](/reference/api/vibration/exposure/#apply_weighting) applies the
 overall weighting: the exact analog response, multiplied in the frequency
 domain. This is the signal path the type tests of 12.7, 12.10, 12.11 and
 12.13 put the meter on, and the one the "Band limiting" rows of Tables 7
 to 9 are measured through.
 
-The multiplication is circular, exactly as in [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting), so
+The multiplication is circular, exactly as in [`apply_weighting`](/reference/api/vibration/exposure/#apply_weighting), so
 the record wraps at its ends. A test that has to reproduce the printed
 burst responses of 5.9 pads the record with zeros first, because the
 printed values come from a zero-state digital simulation (5.9, NOTE 1)
@@ -99,9 +99,9 @@ and the switch-on transient is part of what they measure.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The band-limited acceleration signal, same length as input.
 
@@ -125,7 +125,7 @@ apply_weighting(
 
 Apply frequency weighting `name` to a time signal (ISO 8041-1).
 
-The exact analog response [`frequency_weighting`](/phonometry/reference/api/vibration/exposure/#frequency_weighting) is applied in the
+The exact analog response [`frequency_weighting`](/reference/api/vibration/exposure/#frequency_weighting) is applied in the
 frequency domain (real FFT), so the weighted signal reproduces both the
 magnitude and phase of the standard's cascade without bilinear warping.
 The multiplication is circular, so the record wraps at its ends; apply it
@@ -136,9 +136,9 @@ negligible, as for any block frequency-domain filtering.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The frequency-weighted acceleration signal, same length as input.
 
@@ -170,7 +170,7 @@ band_limiting_factors(
 
 Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
 
-Convenience wrapper over [`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response) returning only the
+Convenience wrapper over [`band_limiting_response`](/reference/api/vibration/exposure/#band_limiting_response) returning only the
 magnitude array, which is the "Band-limiting Factor" column of
 Tables B.1 to B.9.
 
@@ -178,7 +178,7 @@ Tables B.1 to B.9.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
 **Returns:** Band-limiting factor per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -224,10 +224,10 @@ the standard cites it.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is wanted. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is wanted. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which to evaluate, in hertz (> 0). |
 
-**Returns:** A [`WeightingResponse`](/phonometry/reference/api/vibration/exposure/#weightingresponse) with `band_limiting` true and `.plot()`.
+**Returns:** A [`WeightingResponse`](/reference/api/vibration/exposure/#weightingresponse) with `band_limiting` true and `.plot()`.
 
 **Raises**
 
@@ -273,7 +273,7 @@ The modulus of the ratio of the peak weighted acceleration to its r.m.s.
 value.  ISO 2631-1 6.2.2 deems the basic (r.m.s.) method adequate for a
 crest factor up to 9.
 
-Emits a [`HumanVibrationWarning`](/phonometry/reference/api/vibration/exposure/#humanvibrationwarning) when the crest factor exceeds 9,
+Emits a [`HumanVibrationWarning`](/reference/api/vibration/exposure/#humanvibrationwarning) when the crest factor exceeds 9,
 the threshold above which ISO 2631-1 6.2.2 deems the basic method
 inadequate.
 
@@ -281,7 +281,7 @@ inadequate.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), of which only the samples are read: a peak-to-r.m.s. ratio needs no sample rate, and a calibration factor the object carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), of which only the samples are read: a peak-to-r.m.s. ratio needs no sample rate, and a calibration factor the object carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 
 **Returns:** The crest factor (dimensionless); `0` for an all-zero signal.
 
@@ -296,10 +296,10 @@ Daily exposure `A(8)` for one operation (ISO 5349-1 Eq. (2)).
 $A(8) = a_\mathrm{hv} \sqrt{T / T_0}$ with $T_0 = 8$ h.  The
 identical form gives the whole-body `A(8)` of Directive 2002/44/EC,
 whose magnitude is the Annex Part B dominant-axis value (see
-[`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.  Called with the
+[`wbv_exposure_basis`](/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.  Called with the
 value and duration of one operation of a working day, it returns that
 operation's partial vibration exposure $A_i(8)$ (ISO 5349-2
-Eq. (2)), the term [`combined_daily_exposure`](/phonometry/reference/api/vibration/exposure/#combined_daily_exposure) sums.
+Eq. (2)), the term [`combined_daily_exposure`](/reference/api/vibration/exposure/#combined_daily_exposure) sums.
 
 **Parameters**
 
@@ -339,19 +339,19 @@ The Directive fixes the per-operation magnitude each kind must be fed
 with (Annex, points 1): for `kind="hav"` the ISO 5349-1 Eq. (1) vector
 total `a_hv` (Part A); for `kind="wbv"` the *highest* frequency-
 weighted axis value `max(1,4*a_wx, 1,4*a_wy, a_wz)` that
-[`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis) returns (Part B), **not** the ISO 2631-1
+[`wbv_exposure_basis`](/reference/api/vibration/exposure/#wbv_exposure_basis) returns (Part B), **not** the ISO 2631-1
 Eq. (10) vector total `a_v`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `total_values` | Per-operation vibration magnitude, in m/s2: the hand-arm vibration total value `a_hv,i` (`kind="hav"`) or the Directive Part B dominant-axis value of [`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis) (`kind="wbv"`). |
+| `total_values` | Per-operation vibration magnitude, in m/s2: the hand-arm vibration total value `a_hv,i` (`kind="hav"`) or the Directive Part B dominant-axis value of [`wbv_exposure_basis`](/reference/api/vibration/exposure/#wbv_exposure_basis) (`kind="wbv"`). |
 | `durations_s` | Duration `T_i` per operation, in seconds. |
 | `kind` | `"hav"` or `"wbv"` (selects the EAV/ELV). |
 | `labels` | Optional operation labels; defaults to `op 1`, `op 2`, ... |
 
-**Returns:** A [`DailyVibrationExposure`](/phonometry/reference/api/vibration/exposure/#dailyvibrationexposure) with `.plot()`.
+**Returns:** A [`DailyVibrationExposure`](/reference/api/vibration/exposure/#dailyvibrationexposure) with `.plot()`.
 
 **Raises**
 
@@ -384,7 +384,7 @@ A daily exposure built from several operations, with its assessment.
 | `total_values` | Vibration total value `a_hvi` per operation, in m/s2. |
 | `durations_s` | Duration `T_i` per operation, in seconds. |
 | `partials` | Partial exposure `A_i(8)` per operation, in m/s2. |
-| `assessment` | The [`ExposureAssessment`](/phonometry/reference/api/vibration/exposure/#exposureassessment) of `a8`. |
+| `assessment` | The [`ExposureAssessment`](/reference/api/vibration/exposure/#exposureassessment) of `a8`. |
 
 ### DailyVibrationExposure.plot()
 
@@ -445,7 +445,7 @@ verdict against the limit value, and a footer identity/disclaimer block.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the operator/worker, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the operator/worker, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the operations table adds each operation's share of the daily vibration energy $A_i(8)^2 / A(8)^2$. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -509,7 +509,7 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 | `kind` | `"hav"` (hand-arm) or `"wbv"` (whole-body). |
 | `metric` | `"a8"` (default) or `"vdv"`. |
 
-**Returns:** An [`ExposureAssessment`](/phonometry/reference/api/vibration/exposure/#exposureassessment).
+**Returns:** An [`ExposureAssessment`](/reference/api/vibration/exposure/#exposureassessment).
 
 **Raises**
 
@@ -590,10 +590,10 @@ transition and upward step) of weighting `name` at `frequencies`.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which to evaluate, in hertz (> 0). |
 
-**Returns:** A [`WeightingResponse`](/phonometry/reference/api/vibration/exposure/#weightingresponse) with `.plot()`.
+**Returns:** A [`WeightingResponse`](/reference/api/vibration/exposure/#weightingresponse) with `.plot()`.
 
 **Raises**
 
@@ -698,8 +698,8 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The MSDV, in m/s^1.5.
 
@@ -726,7 +726,7 @@ Maximum transient vibration value (ISO 2631-1 Eq. (4)).
 
 `MTVV = max a_w(t0)`, the peak of the 1 s running r.m.s. value.
 
-The averaging is the one [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms) is asked for, because the
+The averaging is the one [`running_rms`](/reference/api/vibration/exposure/#running_rms) is asked for, because the
 two give different answers and both are graded: ISO 8041-1 Table 8
 (folios 18 and 19) prints an "MTVV linear" and an "MTVV exponential"
 column side by side, 48 cells each with a 10 % tolerance, and Annex D
@@ -738,10 +738,10 @@ defines the MTVV on.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `integration_time` | Running-r.m.s. averaging time, in seconds (1 s). |
-| `method` | `"linear"` (Eq. (2), the default) or `"exponential"` (Eq. (3)), forwarded to [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms). |
+| `method` | `"linear"` (Eq. (2), the default) or `"exponential"` (Eq. (3)), forwarded to [`running_rms`](/reference/api/vibration/exposure/#running_rms). |
 
 **Returns:** The MTVV, in m/s2.
 
@@ -778,8 +778,8 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `integration_time` | Averaging time `tau`, in seconds (default 1 s, the "slow" constant of ISO 2631-1 6.3.1). |
 | `method` | `"linear"` (Eq. (2), a sliding rectangular average) or `"exponential"` (Eq. (3), a single-pole average). |
 
@@ -810,8 +810,8 @@ m/s^1.75; more sensitive to peaks than the r.m.s. value.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
-| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The VDV, in m/s^1.75.
 
@@ -902,7 +902,7 @@ $1.4 a_{\mathrm{w}y}$, $a_{\mathrm{w}z}$ for a seated or standing worker
 (Annex, Part B, point 1, with the ISO 2631-1 clause 7.2.3
 multiplying factors), **not** on the ISO 2631-1 Eq. (10) vector total
 `a_v`.  Feed the returned dominant-axis value to
-[`daily_vibration_exposure`](/phonometry/reference/api/vibration/exposure/#daily_vibration_exposure) (`kind="wbv"`) for a
+[`daily_vibration_exposure`](/reference/api/vibration/exposure/#daily_vibration_exposure) (`kind="wbv"`) for a
 Directive-conforming whole-body assessment; the hand-arm basis is the
 vector total `a_hv` instead (Annex, Part A, point 1).
 
@@ -958,9 +958,9 @@ comparing against the tabulated factors; a nominal label (e.g.
 | :--- | :--- |
 | `band_accelerations` | r.m.s. acceleration $a_i$ per band, in m/s2. |
 | `frequencies` | Band centre frequencies, in hertz (true one-third-octave centres $10^{n/10}$ for table-conformant band values). |
-| `weighting` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `weighting` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
-**Returns:** A [`WeightedSpectrum`](/phonometry/reference/api/vibration/exposure/#weightedspectrum) with `.plot()`.
+**Returns:** A [`WeightedSpectrum`](/reference/api/vibration/exposure/#weightedspectrum) with `.plot()`.
 
 **Raises**
 
@@ -990,7 +990,7 @@ A weighted one-third-octave acceleration spectrum and its `a_w`.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz. |
 | `band_accelerations` | Unweighted r.m.s. acceleration per band, in m/s2. |
-| `weighting_name` | Weighting applied (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `weighting_name` | Weighting applied (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `weighting_factors` | Weighting factor `W_i` per band. |
 | `weighted` | Weighted band contribution `W_i*a_i`, in m/s2. |
 | `overall` | Overall weighted r.m.s. acceleration `a_w`, in m/s2. |
@@ -1038,14 +1038,14 @@ weighting_factors(
 
 Weighting factors `|H(f)|` of weighting `name` (ISO 8041-1).
 
-Convenience wrapper over [`frequency_weighting`](/phonometry/reference/api/vibration/exposure/#frequency_weighting) returning only the
+Convenience wrapper over [`frequency_weighting`](/reference/api/vibration/exposure/#frequency_weighting) returning only the
 magnitude array (the `W_i` of ISO 2631-1 Eq. (9) / ISO 5349-1 Eq. (A.1)).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
 **Returns:** Weighting factor per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
@@ -1084,7 +1084,7 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the response was evaluated, in Hz. |
 | `response` | Complex weighting $H(j2\pi f)$ per frequency. |
 | `magnitude` | Weighting factor $\lvert H \rvert$ per frequency. |

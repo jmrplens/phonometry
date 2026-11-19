@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/perception/hearing/hearing-threshold.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/perception/hearing/hearing-threshold/
 
 # Hearing threshold (age and reference zero)
 
@@ -384,7 +384,7 @@ ISO 389-2, not here.
   free-field pure-tone counterpart of the audiometric zero of section 2.
 - [Occupational noise exposure](occupational-exposure.md): the ISO 9612
   daily exposure level that drives the noise component.
-- API reference: [`hearing.threshold`](https://docs.jmrp.io/phonometry/reference/api/hearing/threshold/).
+- API reference: [`hearing.threshold`](https://phonometry.dev/reference/api/hearing/threshold/).
 - Theory: [Hearing thresholds and presbycusis](../../reference/theory/perception.md#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029): the ISO 389-7 reference thresholds and the ISO 7029 age statistics, and why the two are different quantities.
 
 ## References

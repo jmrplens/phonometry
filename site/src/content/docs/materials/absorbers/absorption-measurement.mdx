@@ -52,7 +52,7 @@ collapsed into the weighted coefficient $\alpha_\mathrm{w}$ with its letter clas
 E, the single number absorber datasheets quote. And because a coefficient
 without an uncertainty is only half a result, ISO 12999-2 supplies the
 **measurement uncertainty** of both. The normal-incidence counterpart measured
-on small samples lives in the [impedance tube](/phonometry/materials/absorbers/impedance-tube/)
+on small samples lives in the [impedance tube](/materials/absorbers/impedance-tube/)
 guide; the closing section here, after the uncertainty, explains when each of
 the two is the right tool and why the two numbers do not match.
 
@@ -172,7 +172,7 @@ plt.show()
 
 The two reverberation times are ordinary decay measurements (the machinery is
 the one described under
-[room acoustics](/phonometry/buildings/rooms/room-acoustics/)), but ISO 354
+[room acoustics](/buildings/rooms/room-acoustics/)), but ISO 354
 constrains the geometry and the averaging much harder than a general room
 survey does, because the whole result is the *difference* of two numbers that
 are almost equal at low frequency.
@@ -245,13 +245,13 @@ mounting catalogue a datasheet quotes:
 The suffix is a cavity depth, and cavity depth moves the answer more than most
 material choices do. Predicting the same 50 mm blanket
 ($\sigma = 20$ kPa·s/m²) with the
-[multilayer models](/phonometry/materials/absorbers/porous-absorbers/) gives
+[multilayer models](/materials/absorbers/porous-absorbers/) gives
 $\alpha_\mathrm{w} = 0.70(\text{H})$, class C, laid flat as a Type A, and
 $\alpha_\mathrm{w} = 0.90$, class A, on a Type E-400 mounting. Two classes come from one
 product because the 350 mm of air behind it moves the layer into the
 particle-velocity maximum at 250 Hz (where the predicted coefficient goes from
 0.37 to 0.86); the porous absorbers guide
-[plays that move](/phonometry/materials/absorbers/porous-absorbers/#spacing-the-layer-off-the-wall)
+[plays that move](/materials/absorbers/porous-absorbers/#spacing-the-layer-off-the-wall)
 at normal incidence, the layer leaving the wall and the velocity it meets. A
 quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
 therefore not a material property but an installation result, which is why the
@@ -394,7 +394,7 @@ alpha = materials.absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
 print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```
 
-$T_1$ and $T_2$ are exactly the reverberation times [`room_parameters`](/phonometry/buildings/rooms/room-acoustics/) returns, so
+$T_1$ and $T_2$ are exactly the reverberation times [`room_parameters`](/buildings/rooms/room-acoustics/) returns, so
 an ISO 3382-2 decay measurement of the empty and treated room flows straight
 into `absorption_coefficient`.
 
@@ -540,7 +540,7 @@ And it is "often not suitable for application to single items, such as chairs,
 baffles, etc." (whose absorption is an equivalent area per object, not a
 coefficient), nor is it applicable to road barriers and road surfaces, which
 have [EN 1793-1](#4-sound-absorption-measurement-uncertainty-iso-12999-2) and
-[ISO 13472](/phonometry/materials/surfaces/road-absorption/) of their own.
+[ISO 13472](/materials/surfaces/road-absorption/) of their own.
 This is why the fiche always prints the whole spectrum beside the single
 number.
 
@@ -609,7 +609,7 @@ print(result.third_octave_alpha_s)  # the input alpha_s, retained for the fiche
 every halving of the useful frequency costs a doubling of thickness or of
 cavity depth, and the ladder is short. Predicting a mineral-wool-class
 material ($\sigma = 20$ kPa·s/m²) hard against a wall with the
-[multilayer models](/phonometry/materials/absorbers/porous-absorbers/) gives a
+[multilayer models](/materials/absorbers/porous-absorbers/) gives a
 random-incidence coefficient at 500 Hz of about 0.32 for a 25 mm blanket, 0.68
 for 50 mm and 0.89 for 100 mm; at 250 Hz the same three give 0.14, 0.37 and
 0.74. Spacing the 50 mm layer off the wall on a 100 mm cavity lifts its 250 Hz
@@ -636,7 +636,7 @@ the fixed disclaimer. When the rating was built with
 one-third-octave $\alpha_\mathrm{s}$ table with the octave $\alpha_\mathrm{p}$ on the matching
 rows, exactly as accredited certificates print it. It uses the same
 `ReportMetadata` container and rendering engine as the
-[ISO 717 insulation fiche](/phonometry/buildings/insulation/insulation-ratings/#iso-717-report-report);
+[ISO 717 insulation fiche](/buildings/insulation/insulation-ratings/#iso-717-report-report);
 passing `metadata=None` produces a lightweight prediction fiche, and a supplied
 `requirement` is read as the minimum $\alpha_\mathrm{w}$ for the PASS/FAIL verdict.
 Setting `verbose=True` swaps the two-column table for the ISO 11654 evaluation
@@ -686,7 +686,7 @@ A rated absorption coefficient means little without its uncertainty. ISO
 reverberation-room measurement (ISO 354) and its ratings (ISO 11654, EN 1793-1),
 estimated from inter-laboratory tests to ISO 5725. It is the sound-absorption
 companion of the sound-insulation uncertainty of ISO 12999-1
-([Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/)).
+([Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/)).
 
 **One-third-octave bands (Clause 5).** For the sound-absorption coefficient the
 reproducibility standard deviation is $\sigma_\mathrm{R} = m_\mathrm{R}\,\alpha_\mathrm{s} + n_\mathrm{R}$
@@ -800,7 +800,7 @@ The tube and the reverberation room both deliver a number called the
 different physical quantities, measured under different sound fields, and they
 do not match, sometimes not even closely.
 
-The [tube](/phonometry/materials/absorbers/impedance-tube/) measures a **normal-incidence** coefficient: one plane wave, one
+The [tube](/materials/absorbers/impedance-tube/) measures a **normal-incidence** coefficient: one plane wave, one
 angle, a specimen a few centimetres across, and a complex reflection factor
 that keeps magnitude and phase. ISO 354 measures the **random-incidence**
 coefficient $\alpha_\mathrm{s}$: a diffuse field striking a sample of 10 m² to 12 m²
@@ -823,7 +823,7 @@ normalised surface impedance alone, so the integral has a closed form and a
 tube result converts in one line:
 `materials.statistical_absorption(result.normalized_impedance)`, documented
 with the
-[multilayer models](/phonometry/materials/absorbers/porous-absorbers/#4-oblique-and-random-incidence).
+[multilayer models](/materials/absorbers/porous-absorbers/#4-oblique-and-random-incidence).
 What that cannot do is cover a **bulk-reacting** layer, where the oblique
 behaviour depends on refraction inside the material and the integral has to be
 evaluated angle by angle from a model: `diffuse_field_absorption`, on the same
@@ -875,26 +875,26 @@ they depend on the sample size and perimeter, which is precisely why ISO 354
 fixes both. The ISO 11654 rating simply truncates: practical coefficients
 above $1.00$ are set to $1.00$ (section 3). Prediction inputs get no such
 silent clipping in this library: each
-[reverberation-time estimator](/phonometry/buildings/rooms/reverberation-prediction/)
+[reverberation-time estimator](/buildings/rooms/reverberation-prediction/)
 enforces its own mathematical domain, so Sabine and Eyring accept ISO 354
 values at or above one as supplied (Eyring as long as the mean absorption
 stays below one), while Millington-Sette rejects them (its per-surface
 logarithm diverges at one) and any adjustment below one is left to the
 caller. The equivalent-absorption-area budget of
-[EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) likewise accepts
+[EN 12354-6](/buildings/rooms/enclosed-space-absorption/) likewise accepts
 the coefficients as supplied.
 
 **Which to use.** They answer different questions. The reverberation-room
 value is the one that feeds diffuse-field prediction: Sabine reverberation
 estimates, the equivalent absorption areas of
-[EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) and the $\alpha_\mathrm{w}$
+[EN 12354-6](/buildings/rooms/enclosed-space-absorption/) and the $\alpha_\mathrm{w}$
 rating and class, all of which expect random incidence over a mounted, finite
 sample (ISO 354's Annex B mounting types exist because the mounting is part of
 the result). The tube value is the laboratory and development tool: it needs
 only a few square centimetres of material, resolves magnitude *and* phase, and
 its surface impedance pins down the parameters of porous-material models in
 the Allard and Atalla tradition, with the
-[airflow resistivity](/phonometry/materials/absorbers/airflow-resistance/) as the first
+[airflow resistivity](/materials/absorbers/airflow-resistance/) as the first
 input; the fitted model then predicts the layer at any angle,
 thickness or backing. What the tube number is *not* is a drop-in substitute
 for $\alpha_\mathrm{s}$: feeding normal-incidence coefficients into a Sabine or
@@ -936,7 +936,7 @@ the microphone and source counts, and `absorption_area` /
 raise an advisory warning when the room volume or sample area falls outside
 the Clause 6 limits. Neither is the decay measurement itself in scope; the
 interrupted-noise and integrated-impulse-response methods of Clause 7 belong
-to [room acoustics](/phonometry/buildings/rooms/room-acoustics/). ISO
+to [room acoustics](/buildings/rooms/room-acoustics/). ISO
 12999-2's uncertainty formula for the EN 1793-1 single-number rating
 $DL_{\alpha,\text{NRD}}$ is implemented, but EN 1793-1's own in-situ
 measurement method (road-traffic noise-reducing devices) is not.
@@ -947,25 +947,25 @@ measurement method (road-traffic noise-reducing devices) is not.
 
 ## See also
 
-- [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/): the normal-incidence
+- [Impedance Tube](/materials/absorbers/impedance-tube/): the normal-incidence
   absorption, surface impedance and transmission loss of small samples, and
   why its coefficient differs from $\alpha_\mathrm{s}$.
-- [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the ISO 9053
+- [Airflow Resistance](/materials/absorbers/airflow-resistance/): the ISO 9053
   flow resistivity that anchors the porous-material models behind most
   absorbers.
-- [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/):
+- [Porous and Multilayer Absorbers](/materials/absorbers/porous-absorbers/):
   predicting the absorption of a construction before it is built.
-- [Room Acoustics](/phonometry/buildings/rooms/room-acoustics/): the ISO 3382 decay
+- [Room Acoustics](/buildings/rooms/room-acoustics/): the ISO 3382 decay
   measurements that supply the reverberation times $T_1$ and $T_2$.
-- [Reverberation-time prediction](/phonometry/buildings/rooms/reverberation-prediction/):
+- [Reverberation-time prediction](/buildings/rooms/reverberation-prediction/):
   the Sabine, Eyring and Millington-Sette estimators that consume $\alpha_\mathrm{s}$.
-- [Equivalent absorption area of furnished rooms](/phonometry/buildings/rooms/enclosed-space-absorption/):
+- [Equivalent absorption area of furnished rooms](/buildings/rooms/enclosed-space-absorption/):
   the EN 12354-6 absorption budget these coefficients feed.
-- [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/):
+- [Field Insulation Measurement (ISO 16283)](/buildings/insulation/insulation-field/):
   the sound-insulation companion uncertainty standard, ISO 12999-1.
-- API reference: [`materials.absorbers.sound_absorption`](/phonometry/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](/phonometry/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](/phonometry/reference/api/materials/uncertainty/).
-- Theory: [Acoustic material characterisation](/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the ISO 354 decay difference, the ISO 11654 rating and where the practical coefficients come from.
-- [Published catalogues](/phonometry/reference/catalogues/absorption-coefficients/): the
+- API reference: [`materials.absorbers.sound_absorption`](/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](/reference/api/materials/uncertainty/).
+- Theory: [Acoustic material characterisation](/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the ISO 354 decay difference, the ISO 11654 rating and where the practical coefficients come from.
+- [Published catalogues](/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 

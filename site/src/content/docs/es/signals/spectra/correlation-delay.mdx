@@ -27,7 +27,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-Donde los [estimadores espectrales calibrados](/phonometry/es/signals/spectra/spectral-analysis/)
+Donde los [estimadores espectrales calibrados](/es/signals/spectra/spectral-analysis/)
 describen una señal en frecuencia, esta página cubre sus equivalentes en el
 dominio del tiempo dentro de `phonometry.signals`: estimaciones de
 **autocorrelación y correlación cruzada** con las tres normalizaciones
@@ -451,9 +451,9 @@ frecuencia física. Aplicadas a voz, a una respuesta al impulso de sala o a ruid
 de banda ancha, las tres magnitudes hacen esto. El arreglo es limitar antes el registro
 a banda estrecha: filtrar en paso banda alrededor de la componente que
 interesa, exactamente como hace el
-[espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/) con
+[espectro de la envolvente](/es/signals/spectra/cepstrum-echoes/) con
 su parámetro `band=`, o leer la cresta de un
-[espectrograma](/phonometry/es/signals/spectra/time-frequency/) cuando coexisten
+[espectrograma](/es/signals/spectra/time-frequency/) cuando coexisten
 varias componentes, porque la construcción de Hilbert no tiene forma de
 representar más de una a la vez.
 
@@ -533,18 +533,18 @@ banda estrecha.
 `time_delay` (métodos GCC y de fase) corre sobre el mismo núcleo de Welch
 (ventana, política de solape, calibración sin eliminación de tendencia,
 valores por defecto de segmento) que
-[`cross_spectral_density`](/phonometry/es/signals/spectra/spectral-analysis/) y los
-[estimadores de respuesta en frecuencia](/phonometry/es/devices/electroacoustics/electroacoustics/)
+[`cross_spectral_density`](/es/signals/spectra/spectral-analysis/) y los
+[estimadores de respuesta en frecuencia](/es/devices/electroacoustics/electroacoustics/)
 H1/H2, así que una GCC, una coherencia y un espectro cruzado calculados con
 la misma longitud de segmento coinciden bin a bin; el estimador `'phase'` es
 literalmente la pendiente de la fase del `CrossSpectralDensityResult`,
 ponderada como prescribe la ecuación 5.101b.
 
 La envolvente de Hilbert de aquí es la compañera en el tiempo del
-[espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/), que lee
+[espectro de la envolvente](/es/signals/spectra/cepstrum-echoes/), que lee
 las mismas modulaciones como líneas discretas en frecuencia; y la alineación
 submuestral comparte su núcleo de banda limitada con las
-[herramientas públicas de retardo fraccionario y remuestreo](/phonometry/es/signals/spectra/test-signals/).
+[herramientas públicas de retardo fraccionario y remuestreo](/es/signals/spectra/test-signals/).
 
 ## Qué cubre esta guía
 
@@ -567,7 +567,7 @@ ecuación 5.21). Un registro con varias llegadas (multitrayecto, un camino
 directo más reflexiones) no se separa automáticamente: `time_delay` y el
 correlador directo solo informan del mayor pico, la misma limitación que
 `echo_detection` señala en el cepstrum dentro de [Cepstrum, ecos y espectro de
-la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/). Estimar
+la envolvente](/es/signals/spectra/cepstrum-echoes/). Estimar
 retardos entre más de dos sensores, como haría un array o un beamformer,
 implica llamar tú mismo a estas funciones por pares: no hay ninguna resolución
 de TDOA multisensor incorporada.
@@ -578,10 +578,10 @@ de TDOA multisensor incorporada.
 
 ## Véase también
 
-- [Cepstrum, ecos y espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/): la vía sin referencia hasta un retardo, y la envolvente que construye esta página.
-- [Análisis espectral calibrado](/phonometry/es/signals/spectra/spectral-analysis/): el espectro cruzado con el que se construyen las ponderaciones GCC, y las reglas de adquisición de dos canales.
-- [Señales de prueba](/phonometry/es/signals/spectra/test-signals/): el núcleo de retardo fraccionario de banda limitada que hay detrás de la alineación submuestral.
-- [Promediado síncrono en el tiempo](/phonometry/es/signals/spectra/synchronous-averaging/): la misma alineación aplicada por revolución.
-- Referencia de la API: [`signals`: correlation](/phonometry/es/reference/api/signals/correlation/) y [`signals`: envelope](/phonometry/es/reference/api/signals/envelope/).
+- [Cepstrum, ecos y espectro de la envolvente](/es/signals/spectra/cepstrum-echoes/): la vía sin referencia hasta un retardo, y la envolvente que construye esta página.
+- [Análisis espectral calibrado](/es/signals/spectra/spectral-analysis/): el espectro cruzado con el que se construyen las ponderaciones GCC, y las reglas de adquisición de dos canales.
+- [Señales de prueba](/es/signals/spectra/test-signals/): el núcleo de retardo fraccionario de banda limitada que hay detrás de la alineación submuestral.
+- [Promediado síncrono en el tiempo](/es/signals/spectra/synchronous-averaging/): la misma alineación aplicada por revolución.
+- Referencia de la API: [`signals`: correlation](/es/reference/api/signals/correlation/) y [`signals`: envelope](/es/reference/api/signals/envelope/).
 
 </SeeAlso>

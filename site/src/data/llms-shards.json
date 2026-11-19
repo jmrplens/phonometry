@@ -1,5 +1,5 @@
 {
-  "about": "Every shard name docs.jmrp.io/phonometry/llms/ has published. scripts/generate_llms.py writes each name under published again on every run, and make llms adds the names it writes; a name is never taken out. A name under redirects was retired before that rule and answers a 301 to the name it maps to.",
+  "about": "Every shard name the site has published under /llms/. scripts/generate_llms.py writes each name under published again on every run, and make llms adds the names it writes; a name is never taken out. A name under redirects was retired before that rule and answers a 301 to the name it maps to.",
   "published": [
     "aircraft",
     "bibliography-1",

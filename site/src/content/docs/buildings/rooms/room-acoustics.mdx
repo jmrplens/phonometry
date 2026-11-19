@@ -69,16 +69,16 @@ ISO 3382-1/2 asks about the sound field inside a single room. This page
 turns a measured IR into those parameters: the Schroeder decay curve, the
 evaluation windows, the validity flags and the accredited fiche. Acquiring
 the IR itself (sweeps, MLS, where to measure) lives in
-[Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/),
+[Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/),
 and the open-plan speech metrics of ISO 3382-3 in
-[Open-Plan Office Acoustics](/phonometry/buildings/rooms/open-plan-acoustics/). Two
+[Open-Plan Office Acoustics](/buildings/rooms/open-plan-acoustics/). Two
 separate decay measurements in a reverberation room, one with the room empty
 and one with the specimen installed, yield a material's sound absorption;
 that method (ISO 354) lives in
-[Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/).
+[Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/).
 For sound insulation *between* spaces (the same IR measured either side of a
 partition) see the companion
-[Field Insulation Measurement (ISO 16283) guide](/phonometry/buildings/insulation/insulation-field/).
+[Field Insulation Measurement (ISO 16283) guide](/buildings/insulation/insulation-field/).
 
 ## How do I compute EDT, T20 and T30 from an impulse response in Python?
 
@@ -326,7 +326,7 @@ their disagreement carries information:
   stage house feeding energy back) and strongly uneven absorption that
   leaves one room axis reverberant. No single number describes such a
   decay: report both windows together with the curvature, and treat the
-  [statistical predictions](/phonometry/buildings/rooms/reverberation-prediction/)
+  [statistical predictions](/buildings/rooms/reverberation-prediction/)
   with suspicion, because their diffuse-field assumption has visibly
   failed.
 - **EDT far from T20/T30**: EDT is fitted where the direct sound and the
@@ -501,7 +501,7 @@ inside one bandwidth gives $2000\sqrt{T/V}$: a *choice* of how much overlap
 counts as diffuse, which is why stricter texts quote 4000 for the same physics.
 The transition is soft, so a band straddling $f_\mathrm{s}$ should be checked position by
 position rather than trusted, and the
-[mode ladder](/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
+[mode ladder](/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
 of the image-sources guide enumerates what is actually down there. The
 simulation below drives the same rigid
 5 m by 3.5 m room at its (2,1) mode and then between two modes; on
@@ -769,7 +769,7 @@ no "500-1000 Hz" claim, and so do a band range that misses those two octaves
 and one that reaches them with a non-evaluable $T_{30}$ in either, which fall
 back to the first band whose $T_{30}$ could be evaluated. It uses the same
 `ReportMetadata` container and rendering engine as the [ISO 11654 absorption
-fiche](/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
+fiche](/materials/absorbers/absorption-measurement/#iso-11654-report-report);
 the room-specific fields `room_volume`, `n_source_positions` and
 `n_receiver_positions` populate the header (ISO 3382 requires the room volume and
 the number of source and microphone positions to be reported), alongside
@@ -833,10 +833,10 @@ repository; click the preview to open the PDF.
 
 With the parameters in hand, the two neighbouring links in the chain are the
 acquisition that produced the impulse response
-([Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/))
+([Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/))
 and, for an open-plan floor rather than a closed room, the ISO 3382-3 line of
 workstations
-([Open-Plan Office Acoustics](/phonometry/buildings/rooms/open-plan-acoustics/)).
+([Open-Plan Office Acoustics](/buildings/rooms/open-plan-acoustics/)).
 
 ## What this guide covers
 
@@ -856,11 +856,11 @@ parameters LF/LFC and IACC; phonometry implements only the reverberance and
 clarity family named above (EDT, T20, T30, C50, C80, D50, Ts). The acquisition
 of the impulse response (ISO 18233) and the open-plan quantities (ISO 3382-3)
 have guides of their own, [Measuring the Room Impulse
-Response](/phonometry/buildings/rooms/room-impulse-response/) and [Open-Plan
-Office Acoustics](/phonometry/buildings/rooms/open-plan-acoustics/). The ISO
+Response](/buildings/rooms/room-impulse-response/) and [Open-Plan
+Office Acoustics](/buildings/rooms/open-plan-acoustics/). The ISO
 354 reverberation-room absorption that consumes the measured $T_1$/$T_2$ pair
 lives in [Sound Absorption Measurement and
-Rating](/phonometry/materials/absorbers/absorption-measurement/).
+Rating](/materials/absorbers/absorption-measurement/).
 </ScopeClaim>
 </Scope>
 
@@ -868,30 +868,30 @@ Rating](/phonometry/materials/absorbers/absorption-measurement/).
 
 ## See also
 
-- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+- [Measuring the Room Impulse Response](/buildings/rooms/room-impulse-response/):
   the ISO 18233 acquisition of the IR this page analyses.
-- [Open-Plan Office Acoustics (ISO 3382-3)](/phonometry/buildings/rooms/open-plan-acoustics/):
+- [Open-Plan Office Acoustics (ISO 3382-3)](/buildings/rooms/open-plan-acoustics/):
   the speech-privacy quantities of open-plan offices.
-- [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
+- [Sound Absorption Measurement and Rating](/materials/absorbers/absorption-measurement/):
   the ISO 354 reverberation-room absorption measurement that consumes the
   reverberation times `room_parameters` returns, and its ISO 11654 rating.
-- [Field](/phonometry/buildings/insulation/insulation-field/),
-  [laboratory](/phonometry/buildings/insulation/insulation-lab/) and
-  [predicted](/phonometry/buildings/design/insulation-prediction/) sound insulation: field,
+- [Field](/buildings/insulation/insulation-field/),
+  [laboratory](/buildings/insulation/insulation-lab/) and
+  [predicted](/buildings/design/insulation-prediction/) sound insulation: field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
-- [Sound Power](/phonometry/devices/emission/sound-power/): the $L_W$ methods that consume the
+- [Sound Power](/devices/emission/sound-power/): the $L_W$ methods that consume the
   ISO 354 absorption area (the ISO 3744 $K_2$ and the ISO 3741 absorption term).
-- [Loudness](/phonometry/perception/psychoacoustics/loudness/) and
-  [Sound Quality Metrics](/phonometry/perception/psychoacoustics/sound-quality/): loudness, sharpness and the other
+- [Loudness](/perception/psychoacoustics/loudness/) and
+  [Sound Quality Metrics](/perception/psychoacoustics/sound-quality/): loudness, sharpness and the other
   perception metrics of what the room delivers.
-- [Filter Banks](/phonometry/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
+- [Filter Banks](/signals/filters/filter-banks/): the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
-- [Theory](/phonometry/reference/theory/rooms-buildings/): Schroeder integration, regression windows and the
+- [Theory](/reference/theory/rooms-buildings/): Schroeder integration, regression windows and the
   reference-curve derivation.
-- [Conformance report](/phonometry/reference/conformance/): the closed-form decays and parameter
+- [Conformance report](/reference/conformance/): the closed-form decays and parameter
   definitions the ISO 3382 implementations are validated against.
-- API reference: [`room.acoustics`](/phonometry/reference/api/rooms/acoustics/).
-- Theory: [Impulse response and room-acoustic parameters](/phonometry/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay model behind T20, T30 and EDT and the energy ratios the clarity and definition parameters are built from.
+- API reference: [`room.acoustics`](/reference/api/rooms/acoustics/).
+- Theory: [Impulse response and room-acoustic parameters](/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay model behind T20, T30 and EDT and the energy ratios the clarity and definition parameters are built from.
 
 </SeeAlso>
 

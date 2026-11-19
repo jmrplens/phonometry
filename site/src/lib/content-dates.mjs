@@ -11,8 +11,9 @@
  *
  * Which commits move a date is src/lib/date-rules.mjs's rule: not one that
  * changed only a page's title, description or sidebar entry or a key only
- * machines read (src/lib/frontmatter-keys.mjs), moved it unchanged, or is
- * listed in `site/date-ignore-revs.txt`; and a page
+ * machines read (src/lib/frontmatter-keys.mjs), only took an old base path or
+ * host out of its links, moved it unchanged, or is listed in
+ * `site/date-ignore-revs.txt`; and a page
  * `site/date-sources.json` lists is dated by what it is built from too.
  * This module reads the history that rule is applied to.
  *
@@ -62,7 +63,7 @@ import {
   DATE_SOURCES,
   FULL_SHA,
   IGNORE_REVS,
-  frontmatterOnly,
+  linksMovedOnly,
   readDateSources,
   readIgnoreRevs,
 } from './date-rules.mjs';
@@ -530,13 +531,14 @@ async function resolveDates({ repo, pathspec, ignore, pages, heads }) {
    * time, and never another side's. A commit with one parent dates the page
    * unless that parent held the same text: the same blob, the same blob at
    * another path (a page moved unchanged, whose history carries on there), or
-   * a blob that differs in frontmatter alone. A merge that holds a version of
+   * a blob that differs in frontmatter alone or in the address its links are
+   * written with (`linksMovedOnly`). A merge that holds a version of
    * the page a parent held, at the page's path or moved there, follows that
    * parent, the first such in its parents' order, and leaves the other sides
    * and their changes behind, however much newer, since none of them is the
    * text the page shows. A merge that holds a version no parent held dates
-   * the page, unless one parent's version differs from it in frontmatter
-   * alone, whose history then dates it.
+   * the page, unless one parent's version differs from it in that way alone,
+   * whose history then dates it.
    */
   const walk = (state, unknown) => {
     for (;;) {
@@ -571,7 +573,7 @@ async function resolveDates({ repo, pathspec, ignore, pages, heads }) {
       }
       let text;
       try {
-        text = held.find(({ blob }) => frontmatterOnly(texts.get(blob), texts.get(state.blob)));
+        text = held.find(({ blob }) => linksMovedOnly(texts.get(blob), texts.get(state.blob)));
       } catch (error) {
         throw new Error(`content dates: ${state.page} (as ${state.path} in ${commit.sha}): ${error.message}`);
       }

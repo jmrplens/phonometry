@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/broadcast/quasi-peak.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/broadcast/quasi-peak/
 
 # Quasi-peak programme meter (ITU-R BS.468-4)
 
@@ -356,7 +356,7 @@ fitted. The conformity evidence is real and it is published, in
   where a stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](index.md): the section overview.
-- API reference: [`broadcast.quasi_peak`](https://docs.jmrp.io/phonometry/reference/api/broadcast/quasi-peak/).
+- API reference: [`broadcast.quasi_peak`](https://phonometry.dev/reference/api/broadcast/quasi-peak/).
 
 ## Standards
 

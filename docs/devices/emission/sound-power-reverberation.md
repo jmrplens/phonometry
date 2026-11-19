@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-reverberation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/sound-power-reverberation/
 
 # Sound Power in the Reverberation Room
 
@@ -588,7 +588,7 @@ warnings.
   behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the
   Waterhouse and $C_1$/$C_2$ derivations.
-- API reference: [`emission`: sound power in a reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/).
+- API reference: [`emission`: sound power in a reverberation room](https://phonometry.dev/reference/api/power/sound-power-reverberation/).
 - Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 3741 comparison and direct methods derived from the diffuse-field relation.
 
 ## References

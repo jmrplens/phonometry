@@ -11,7 +11,7 @@ ISO 9612:2009 is the engineering method (accuracy grade 2) for determining a
 worker's daily noise exposure level `LEX,8h` from measurements of the
 A-weighted equivalent continuous sound pressure level `Lp,A,eqT`. The raw
 levels themselves come from the dosimetry primitives in
-[`phonometry.signals.levels`](/phonometry/reference/api/signals/levels/) ([`leq`](/phonometry/reference/api/signals/levels/#leq)/[`lex_8h`](/phonometry/reference/api/signals/levels/#lex_8h)); this module adds the three
+[`phonometry.signals.levels`](/reference/api/signals/levels/) ([`leq`](/reference/api/signals/levels/#leq)/[`lex_8h`](/reference/api/signals/levels/#lex_8h)); this module adds the three
 **measurement strategies**, the energy combination of their contributions, and
 the normative **Annex C** uncertainty budget.
 
@@ -155,7 +155,7 @@ a footer identity/disclaimer block.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/job, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/job, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True, the task-based work-analysis table adds the Annex C per-task uncertainty columns (`u1a`, `u1b`, `u2`). The job-based/full-day sampling summary always shows its budget. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -215,9 +215,9 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 | `effective_duration_hours` | Effective working-day duration `T_e`, hours. |
 | `instrument` | Instrument class selecting `u2` (Table C.5). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
-| `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) for the 3 dB spread rule and the Table C.4 advisory. |
+| `warn` | Emit [`OccupationalExposureWarning`](/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) for the 3 dB spread rule and the Table C.4 advisory. |
 
-**Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult).
+**Returns:** An [`ExposureResult`](/reference/api/hearing/occupational-exposure/#exposureresult).
 
 **Raises**
 
@@ -267,9 +267,9 @@ $c_2 = c_3 = 1$.
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
 | `n_workers` | Optional homogeneous-group size `n_G`; when given with `sample_duration_hours`, the cumulative duration is checked against Table 1 and an advisory is raised if it falls short. |
 | `sample_duration_hours` | Optional per-sample duration (hours) for the Table 1 cumulative-duration check. |
-| `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) for the Table C.4 / Table 1 advisories. |
+| `warn` | Emit [`OccupationalExposureWarning`](/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) for the Table C.4 / Table 1 advisories. |
 
-**Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult).
+**Returns:** An [`ExposureResult`](/reference/api/hearing/occupational-exposure/#exposureresult).
 
 **Raises**
 
@@ -388,12 +388,12 @@ follows Eq C.3 with sampling `u1a` (Eq C.6), optional duration `u1b`
 | Name | Description |
 | :--- | :--- |
 | `tasks` | The tasks making up the nominal day. |
-| `instrument` | Default instrument class selecting `u2` (Table C.5); may be overridden per [`Task`](/phonometry/reference/api/hearing/occupational-exposure/#task). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
+| `instrument` | Default instrument class selecting `u2` (Table C.5); may be overridden per [`Task`](/reference/api/hearing/occupational-exposure/#task). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
 | `include_duration_uncertainty` | Include the $(c_{1\mathrm{b}} u_{1\mathrm{b}})^2$ duration term (Eq C.3). When False the budget omits it (ISO 9612 Annex D case a). |
-| `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) when a task triggers the 3 dB spread rule (Clause 9.3). |
+| `warn` | Emit [`OccupationalExposureWarning`](/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) when a task triggers the 3 dB spread rule (Clause 9.3). |
 
-**Returns:** An [`ExposureResult`](/phonometry/reference/api/hearing/occupational-exposure/#exposureresult) with per-task contributions.
+**Returns:** An [`ExposureResult`](/reference/api/hearing/occupational-exposure/#exposureresult) with per-task contributions.
 
 **Raises**
 

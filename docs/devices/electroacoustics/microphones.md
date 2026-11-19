@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/microphones.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/electroacoustics/microphones/
 
 # Microphone Characterisation (IEC 60268-4)
 
@@ -590,7 +590,7 @@ Microphone characteristics fiche (MicrophoneCharacteristics.report), the IEC 602
   microphone's rated sensitivity into calibrated sound pressure levels.
 - [Build a sound level meter](../../signals/sound-level-meter.md): the
   measurement chain a characterised microphone feeds.
-- API reference: [`electroacoustics.microphone`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/microphone/).
+- API reference: [`electroacoustics.microphone`](https://phonometry.dev/reference/api/electroacoustics/microphone/).
 
 ## References
 

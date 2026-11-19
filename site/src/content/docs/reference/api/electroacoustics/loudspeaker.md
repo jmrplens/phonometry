@@ -14,7 +14,7 @@ the **effective frequency range** read from the on-axis response against a
 -10 dB band (clause 21.2), the **rated impedance** and its modulus curve
 (clause 16), the **total harmonic distortion** against frequency (clause 24.1)
 and the **directional / polar response** (clause 23). This module bundles those
-into a single [`LoudspeakerCharacteristics`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakercharacteristics) result whose `report` method
+into a single [`LoudspeakerCharacteristics`](/reference/api/electroacoustics/loudspeaker/#loudspeakercharacteristics) result whose `report` method
 renders the IEC 60268-5 rated-characteristics fiche, with the characteristic
 graphs laid out to the IEC 60263:1982 scale conventions.
 
@@ -89,11 +89,11 @@ distortion and directivity data feed the corresponding report panels.
 | `sensitivity_band` | Stated band `(lo, hi)` for the characteristic sensitivity, in Hz; defaults to the one-octave band in the region of maximum sensitivity. |
 | `tolerance_db` | Half-width of the plotted response tolerance band, in dB (default 3). |
 | `impedance` | Impedance curve as `(frequencies, modulus)` in `(Hz, ohm)` (16.2). |
-| `distortion` | THD against frequency, either as a [`SweptSineDistortionResult`](/phonometry/reference/api/electroacoustics/swept-sine/#sweptsinedistortionresult) (its `thd_ratio` is converted to %) or a `(frequencies, thd_percent)` pair (24.1). |
-| `directivity` | Directional characteristics of Clause 23 as a [`LoudspeakerDirectivity`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakerdirectivity): the pattern (measured or from a radiating piston), its stated frequency and the directivity index. |
-| `ratings` | Manufacturer-stated ratings of Clauses 18 and 19 as a [`LoudspeakerRatings`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakerratings): the rated frequency range, the rated noise and sinusoidal powers and the resonance frequency. |
+| `distortion` | THD against frequency, either as a [`SweptSineDistortionResult`](/reference/api/electroacoustics/swept-sine/#sweptsinedistortionresult) (its `thd_ratio` is converted to %) or a `(frequencies, thd_percent)` pair (24.1). |
+| `directivity` | Directional characteristics of Clause 23 as a [`LoudspeakerDirectivity`](/reference/api/electroacoustics/loudspeaker/#loudspeakerdirectivity): the pattern (measured or from a radiating piston), its stated frequency and the directivity index. |
+| `ratings` | Manufacturer-stated ratings of Clauses 18 and 19 as a [`LoudspeakerRatings`](/reference/api/electroacoustics/loudspeaker/#loudspeakerratings): the rated frequency range, the rated noise and sinusoidal powers and the resonance frequency. |
 
-**Returns:** A [`LoudspeakerCharacteristics`](/phonometry/reference/api/electroacoustics/loudspeaker/#loudspeakercharacteristics).
+**Returns:** A [`LoudspeakerCharacteristics`](/reference/api/electroacoustics/loudspeaker/#loudspeakercharacteristics).
 
 **Raises**
 
@@ -265,7 +265,7 @@ sensitivity verdict when a requirement is given, and the footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity and, through `requirement`, a characteristic sensitivity level (dB) the verdict row compares against. |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata) supplying the header identity and, through `requirement`, a characteristic sensitivity level (dB) the verdict row compares against. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the fiche has one layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -303,7 +303,7 @@ directivity of a radiating piston.
 
 | Name | Description |
 | :--- | :--- |
-| `piston` | A [`RadiatingPistonResult`](/phonometry/reference/api/electroacoustics/piston/#radiatingpistonresult) computed with `angles` to supply the pattern and the directivity index; it takes precedence over `polar` (23.1/23.3). |
+| `piston` | A [`RadiatingPistonResult`](/reference/api/electroacoustics/piston/#radiatingpistonresult) computed with `angles` to supply the pattern and the directivity index; it takes precedence over `polar` (23.1/23.3). |
 | `polar` | Directional response pattern as `(angles_deg, relative_db)`, relative to the on-axis level, when it is not taken from `piston` (23.1). |
 | `frequency` | Stated frequency of the directional pattern, in Hz; it also selects which of `piston`'s frequencies is drawn. |
 | `index` | Directivity index at `frequency`, in dB (23.3), when not taken from `piston`. |

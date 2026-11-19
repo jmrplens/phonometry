@@ -35,7 +35,7 @@ contour therefore stops at 4 kHz.
 | :--- | :--- |
 | `phon` | Loudness level in phons (20 to 90). |
 
-**Returns:** The frequencies in Hz and the levels in dB re 20 uPa, as a [`LoudnessContour`](/phonometry/reference/api/psychoacoustics/contours/#loudnesscontour).
+**Returns:** The frequencies in Hz and the levels in dB re 20 uPa, as a [`LoudnessContour`](/reference/api/psychoacoustics/contours/#loudnesscontour).
 
 **Raises**
 
@@ -55,9 +55,9 @@ equal_loudness_contours(
 
 Build the ISO 226:2023 equal-loudness-level contour family.
 
-Evaluates [`equal_loudness_contour`](/phonometry/reference/api/psychoacoustics/contours/#equal_loudness_contour) at each level in `phons` and
-[`hearing_threshold`](/phonometry/reference/api/psychoacoustics/contours/#hearing_threshold), and bundles them into an
-[`EqualLoudnessContours`](/phonometry/reference/api/psychoacoustics/contours/#equalloudnesscontours) result that exposes `.plot()`. The maths
+Evaluates [`equal_loudness_contour`](/reference/api/psychoacoustics/contours/#equal_loudness_contour) at each level in `phons` and
+[`hearing_threshold`](/reference/api/psychoacoustics/contours/#hearing_threshold), and bundles them into an
+[`EqualLoudnessContours`](/reference/api/psychoacoustics/contours/#equalloudnesscontours) result that exposes `.plot()`. The maths
 is unchanged; this is a thin, plottable wrapper around the existing
 functions.
 
@@ -68,7 +68,7 @@ functions.
 | `phons` | Loudness levels of the contours, in phon; each must be in the 20 phon to 90 phon validity range of Formula (1). Defaults to the classic family from 20 phon to 90 phon in 10 phon steps. |
 | `frequencies` | Frequency grid in Hz; `None` (default) uses the 29 preferred third-octave frequencies of Table 1. Any value given must be one of those preferred frequencies (the standard specifies no interpolation between them). |
 
-**Returns:** An [`EqualLoudnessContours`](/phonometry/reference/api/psychoacoustics/contours/#equalloudnesscontours).
+**Returns:** An [`EqualLoudnessContours`](/reference/api/psychoacoustics/contours/#equalloudnesscontours).
 
 **Raises**
 
@@ -138,7 +138,7 @@ hearing_threshold() -> LoudnessContour
 
 Threshold of hearing T_f (ISO 226:2023 Table 1).
 
-**Returns:** The frequencies in Hz and the threshold levels in dB re 20 uPa, as a [`LoudnessContour`](/phonometry/reference/api/psychoacoustics/contours/#loudnesscontour).
+**Returns:** The frequencies in Hz and the threshold levels in dB re 20 uPa, as a [`LoudnessContour`](/reference/api/psychoacoustics/contours/#loudnesscontour).
 
 ## loudness_level
 
@@ -175,7 +175,7 @@ LoudnessContour(
 
 A curve of pure-tone levels over the ISO 226 frequencies.
 
-What [`equal_loudness_contour`](/phonometry/reference/api/psychoacoustics/contours/#equal_loudness_contour) and [`hearing_threshold`](/phonometry/reference/api/psychoacoustics/contours/#hearing_threshold) return:
+What [`equal_loudness_contour`](/reference/api/psychoacoustics/contours/#equal_loudness_contour) and [`hearing_threshold`](/reference/api/psychoacoustics/contours/#hearing_threshold) return:
 the frequencies and the levels, named, where a `(frequencies, spl)`
 tuple used to be unpacked by position.
 

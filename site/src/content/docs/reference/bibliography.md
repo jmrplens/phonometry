@@ -25,7 +25,7 @@ site search follows the standards chips: a search for a designation ranks first
 the guides that implement it, and finds the ones that only cite it after them,
 through their text. What a page implements
 clause by clause is collected for the whole library in the
-[conformance report](/phonometry/reference/conformance/), not here.
+[conformance report](/reference/conformance/), not here.
 
 This page collects those sources in one list: every work a page of the site
 cites, a guide, a theory page or a published catalogue, once, grouped by eleven

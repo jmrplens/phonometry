@@ -11,30 +11,30 @@ IEC 61400-11 measures what a turbine emits; IEC TS 61400-11-2:2024 measures
 what arrives at a dwelling, where the wind that drives the turbine also stirs
 the trees, the background and the propagation. This module holds its closed
 forms and printed tables; the amplitude modulation of clause 13 is in
-[`wind_turbine_modulation`](/phonometry/reference/api/environment/wind-turbine-modulation/).
+[`wind_turbine_modulation`](/reference/api/environment/wind-turbine-modulation/).
 
 **Wind speed at another height** (Annex K, IEC 61400-11:2012 Annex D). The
-power law of Equation (K.1), [`power_law_wind_speed`](/phonometry/reference/api/environment/wind-turbine-receptor/#power_law_wind_speed), and its inverse
-for the shear exponent, Equation (K.2), [`wind_shear_exponent`](/phonometry/reference/api/environment/wind-turbine-receptor/#wind_shear_exponent), which
+power law of Equation (K.1), [`power_law_wind_speed`](/reference/api/environment/wind-turbine-receptor/#power_law_wind_speed), and its inverse
+for the shear exponent, Equation (K.2), [`wind_shear_exponent`](/reference/api/environment/wind-turbine-receptor/#wind_shear_exponent), which
 Tables K.1 and K.2 tabulate for 10 m and 120 m; the logarithmic profile with
 the reference roughness length $z_{0\mathrm{ref}} = 0.05$ m (3.31) that
 9.3.2.1 uses to bring a hub-height wind speed to 10 m,
-[`logarithmic_wind_speed`](/phonometry/reference/api/environment/wind-turbine-receptor/#logarithmic_wind_speed); and [`wind_shear_profile`](/phonometry/reference/api/environment/wind-turbine-receptor/#wind_shear_profile), which plots
+[`logarithmic_wind_speed`](/reference/api/environment/wind-turbine-receptor/#logarithmic_wind_speed); and [`wind_shear_profile`](/reference/api/environment/wind-turbine-receptor/#wind_shear_profile), which plots
 both through two measured heights. Table K.3's roughness lengths are
-[`ROUGHNESS_LENGTHS_M`](/phonometry/reference/api/environment/wind-turbine-receptor/#roughness_lengths_m).
+[`ROUGHNESS_LENGTHS_M`](/reference/api/environment/wind-turbine-receptor/#roughness_lengths_m).
 
-**Bins and their averages** (10.1, 10.3). [`bin_sound_levels`](/phonometry/reference/api/environment/wind-turbine-receptor/#bin_sound_levels) sorts
+**Bins and their averages** (10.1, 10.3). [`bin_sound_levels`](/reference/api/environment/wind-turbine-receptor/#bin_sound_levels) sorts
 interval levels into 1 m/s wind speed bins and 30 degree sectors and forms, per
 bin, the energy average of Equation (1) (or the arithmetic one of Equation (8)
 for statistical levels), the type A uncertainty of Equation (2) or (9), the
 type B one of Equations (3) and (4) and their combination, Equation (5).
-[`turbine_sound_levels`](/phonometry/reference/api/environment/wind-turbine-receptor/#turbine_sound_levels) subtracts the background per bin with Equations
-(6) and (7), under the 3 dB rule of 11.7. [`predicted_receptor_level`](/phonometry/reference/api/environment/wind-turbine-receptor/#predicted_receptor_level)
+[`turbine_sound_levels`](/reference/api/environment/wind-turbine-receptor/#turbine_sound_levels) subtracts the background per bin with Equations
+(6) and (7), under the 3 dB rule of 11.7. [`predicted_receptor_level`](/reference/api/environment/wind-turbine-receptor/#predicted_receptor_level)
 sums a prediction over the turbines with the uncertainty of Equations (10)
-and (11), and [`sound_relevant_turbines`](/phonometry/reference/api/environment/wind-turbine-receptor/#sound_relevant_turbines) picks the turbines whose wind
+and (11), and [`sound_relevant_turbines`](/reference/api/environment/wind-turbine-receptor/#sound_relevant_turbines) picks the turbines whose wind
 speeds make the binning wind speed (9.3.2.3).
 
-**Low frequency sound** (Annex C). [`wind_turbine_low_frequency_level`](/phonometry/reference/api/environment/wind-turbine-receptor/#wind_turbine_low_frequency_level)
+**Low frequency sound** (Annex C). [`wind_turbine_low_frequency_level`](/reference/api/environment/wind-turbine-receptor/#wind_turbine_low_frequency_level)
 evaluates Equation (C.1) band by band with the ground correction and air
 attenuation of Table C.2 and a facade insulation such as those of Table C.3.
 Table C.2's air attenuation is the Danish statutory order's, not the
@@ -49,14 +49,14 @@ the exact mid-band frequencies and prints 0.584 dB/km at 160 Hz (158.5 Hz
 exactly), where Table C.2 prints the nominal 160 Hz value 0.59; Table 7 of the
 TS, in contrast, follows the exact mid-bands.
 
-**Emergence and the rating level** (Annexes J and A). [`sound_emergence`](/phonometry/reference/api/environment/wind-turbine-receptor/#sound_emergence)
-is Equation (J.1); [`wind_turbine_rating_level`](/phonometry/reference/api/environment/wind-turbine-receptor/#wind_turbine_rating_level) adds the most severe of
+**Emergence and the rating level** (Annexes J and A). [`sound_emergence`](/reference/api/environment/wind-turbine-receptor/#sound_emergence)
+is Equation (J.1); [`wind_turbine_rating_level`](/reference/api/environment/wind-turbine-receptor/#wind_turbine_rating_level) adds the most severe of
 the tonal, amplitude modulation and impulsive adjustments (A.1), with the
 amplitude modulation adjustment of Figure A.1 in
-[`amplitude_modulation_adjustment`](/phonometry/reference/api/environment/wind-turbine-receptor/#amplitude_modulation_adjustment).
+[`amplitude_modulation_adjustment`](/reference/api/environment/wind-turbine-receptor/#amplitude_modulation_adjustment).
 
 **The upper tone search frequency** (12.5.2.4, Table 7).
-[`upper_tone_search_frequency`](/phonometry/reference/api/environment/wind-turbine-receptor/#upper_tone_search_frequency) finds the lowest one-third-octave band that
+[`upper_tone_search_frequency`](/reference/api/environment/wind-turbine-receptor/#upper_tone_search_frequency) finds the lowest one-third-octave band that
 ISO 9613-1 attenuates by at least 20 dB over the distance to the nearest
 turbine.
 
@@ -84,7 +84,7 @@ The example adjustment of A.3: none below a modulation depth of 3 dB,
 3 dB at 3 dB, rising linearly to 5 dB at 10 dB and 5 dB above it. The
 figure is drawn to 12 dB; the 5 dB is kept beyond. The depth is the
 reconstructed time-series modulation depth of clause 13 (the AM rating of
-[`amplitude_modulation_period`](/phonometry/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_period)).
+[`amplitude_modulation_period`](/reference/api/environment/wind-turbine-modulation/#amplitude_modulation_period)).
 
 **Parameters**
 
@@ -156,11 +156,11 @@ whose first member is centred on north. Per bin:
 | `wind_speeds_m_s` | The binning wind speed of each interval, in m/s. |
 | `wind_directions_deg` | Optional wind direction of each interval, in degrees from north. |
 | `averaging` | `"energy"` (Equation (1), for `LAeq`) or `"arithmetic"` (Equation (8), for statistical levels). |
-| `type_b_uncertainty_db` | Combined type B standard uncertainty of each interval, Equation (3), in dB: one value for all or one per interval. Combine the components in quadrature, for example those of [`EXAMPLE_TYPE_B_UNCERTAINTIES_DB`](/phonometry/reference/api/environment/wind-turbine-receptor/#example_type_b_uncertainties_db). |
+| `type_b_uncertainty_db` | Combined type B standard uncertainty of each interval, Equation (3), in dB: one value for all or one per interval. Combine the components in quadrature, for example those of [`EXAMPLE_TYPE_B_UNCERTAINTIES_DB`](/reference/api/environment/wind-turbine-receptor/#example_type_b_uncertainties_db). |
 | `bin_width_m_s` | Width of the wind speed bins, in m/s (1 m/s by default, 10.1). |
 | `sector_width_deg` | Width of the direction sectors, in degrees (30 by default, 10.1); it must divide 360. |
 
-**Returns:** A [`BinnedSoundLevels`](/phonometry/reference/api/environment/wind-turbine-receptor/#binnedsoundlevels).
+**Returns:** A [`BinnedSoundLevels`](/reference/api/environment/wind-turbine-receptor/#binnedsoundlevels).
 
 **Raises**
 
@@ -220,7 +220,7 @@ BinnedSoundLevels.background_corrected(
 
 Correct these total levels for a background binned the same way (11.7).
 
-The bins the two share are corrected by [`turbine_sound_levels`](/phonometry/reference/api/environment/wind-turbine-receptor/#turbine_sound_levels)
+The bins the two share are corrected by [`turbine_sound_levels`](/reference/api/environment/wind-turbine-receptor/#turbine_sound_levels)
 with their combined uncertainties; a bin of either without a partner
 in the other is left out.
 
@@ -230,7 +230,7 @@ in the other is left out.
 | :--- | :--- |
 | `background` | The background (turbines off) levels, binned with the same wind speed classes and sectors. |
 
-**Returns:** A [`TurbineSoundLevels`](/phonometry/reference/api/environment/wind-turbine-receptor/#turbinesoundlevels) over the shared bins, with their sector centres when binned by direction.
+**Returns:** A [`TurbineSoundLevels`](/reference/api/environment/wind-turbine-receptor/#turbinesoundlevels) over the shared bins, with their sector centres when binned by direction.
 
 **Raises**
 
@@ -550,7 +550,7 @@ prediction model and the modelling in quadrature.
 | `prediction_model_uncertainty_db` | Standard uncertainty of the prediction model, in dB (2 dB by default, 10.3.4 NOTE). |
 | `modeling_uncertainty_db` | Uncertainty of the propagation modelling, in dB (0.5 dB by default). |
 
-**Returns:** A [`PredictedReceptorLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#predictedreceptorlevel).
+**Returns:** A [`PredictedReceptorLevel`](/reference/api/environment/wind-turbine-receptor/#predictedreceptorlevel).
 
 **Raises**
 
@@ -663,7 +663,7 @@ background.
 | `background_levels` | The background sound criterion of each class. |
 | `wind_speeds_m_s` | Optional wind speed of each class, in m/s. |
 
-**Returns:** A [`SoundEmergence`](/phonometry/reference/api/environment/wind-turbine-receptor/#soundemergence).
+**Returns:** A [`SoundEmergence`](/reference/api/environment/wind-turbine-receptor/#soundemergence).
 
 **Raises**
 
@@ -697,7 +697,7 @@ turbine the TS leaves out.
 | :--- | :--- |
 | `predicted_levels` | Each turbine's predicted level at the receptor, in dB. |
 
-**Returns:** A [`SoundRelevantTurbines`](/phonometry/reference/api/environment/wind-turbine-receptor/#soundrelevantturbines).
+**Returns:** A [`SoundRelevantTurbines`](/reference/api/environment/wind-turbine-receptor/#soundrelevantturbines).
 
 **Raises**
 
@@ -948,7 +948,7 @@ other.
 | `wind_speeds_m_s` | Optional wind speed of each bin, in m/s, for the plot. |
 | `wind_directions_deg` | Optional centre of each bin's direction sector, in degrees, for bins classified by direction as well (10.1); the plot draws each sector apart. |
 
-**Returns:** A [`TurbineSoundLevels`](/phonometry/reference/api/environment/wind-turbine-receptor/#turbinesoundlevels).
+**Returns:** A [`TurbineSoundLevels`](/reference/api/environment/wind-turbine-receptor/#turbinesoundlevels).
 
 **Raises**
 
@@ -1021,7 +1021,7 @@ past the twelfth take them again, in the same order.
 
 *property*
 
-The [`BackgroundCorrectionRegime`](/phonometry/reference/api/environment/wind-turbine-receptor/#backgroundcorrectionregime) of each bin (11.7).
+The [`BackgroundCorrectionRegime`](/reference/api/environment/wind-turbine-receptor/#backgroundcorrectionregime) of each bin (11.7).
 
 Read from `total_levels` and `background_levels`:
 the logarithmic subtraction where the total is at least 3 dB above the
@@ -1068,7 +1068,7 @@ top of ISO 9613-1, when no band reaches 20 dB.
 | `relative_humidity_percent` | Relative humidity, in %. |
 | `static_pressure_kpa` | Atmospheric pressure, in kPa. |
 
-**Returns:** A [`ToneSearchLimit`](/phonometry/reference/api/environment/wind-turbine-receptor/#tonesearchlimit).
+**Returns:** A [`ToneSearchLimit`](/reference/api/environment/wind-turbine-receptor/#tonesearchlimit).
 
 **Raises**
 
@@ -1117,7 +1117,7 @@ Wind shear exponent from two wind speeds (Equation (K.2)).
 
 $\alpha = \ln(V_z/V_{z,\mathrm{ref}}) / \ln(z/z_\mathrm{ref})$; with
 $z = 120$ m and $z_\mathrm{ref} = 10$ m this is Table K.2.
-Values outside [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range) are returned as
+Values outside [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range) are returned as
 computed; Table K.2 leaves them blank.
 
 **Parameters**
@@ -1153,7 +1153,7 @@ wind_shear_profile(
 The power-law wind profile through two measured wind speeds (K.4.3).
 
 The wind shear is typically found from a wind speed at 10 m and one at
-hub height (K.4.3); [`WindShearProfile.speed_at`](/phonometry/reference/api/environment/wind-turbine-receptor/#windshearprofilespeed_at) then gives the wind
+hub height (K.4.3); [`WindShearProfile.speed_at`](/reference/api/environment/wind-turbine-receptor/#windshearprofilespeed_at) then gives the wind
 speed at any height by Equation (K.1).
 
 **Parameters**
@@ -1165,7 +1165,7 @@ speed at any height by Equation (K.1).
 | `lower_height_m` | The lower measurement height, in m (10 m by default). |
 | `upper_height_m` | The upper measurement height, in m (typically the hub height). |
 
-**Returns:** A [`WindShearProfile`](/phonometry/reference/api/environment/wind-turbine-receptor/#windshearprofile).
+**Returns:** A [`WindShearProfile`](/reference/api/environment/wind-turbine-receptor/#windshearprofile).
 
 **Raises**
 
@@ -1210,13 +1210,13 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 | `sound_power_levels` | Band sound power levels from IEC 61400-11, in dB: one row per turbine, or one row for a single turbine. |
 | `distance` | Horizontal distance $l$ from each tower to the receptor, in m (scalar or one per turbine). |
 | `hub_height_m` | Hub height $h$ of each turbine, in m. |
-| `frequencies` | Nominal centre of each column, in Hz (10 Hz to 200 Hz by default, [`LOW_FREQUENCY_BANDS_HZ`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_bands_hz)). |
+| `frequencies` | Nominal centre of each column, in Hz (10 Hz to 200 Hz by default, [`LOW_FREQUENCY_BANDS_HZ`](/reference/api/environment/wind-turbine-receptor/#low_frequency_bands_hz)). |
 | `ground_correction` | $\Delta L_\mathrm{g,LF}$ per band; `None` for Table C.2 (onshore, impedance class D). |
-| `air_attenuation_db_per_km` | $\alpha$ per band, in dB/km, zero or positive (the ISO 9613-1 absorption coefficient, C.2); `None` for Table C.2, as printed (see [`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_air_attenuation_db_per_km)). |
-| `facade_insulation` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation)); `None` for the outdoor level alone. |
+| `air_attenuation_db_per_km` | $\alpha$ per band, in dB/km, zero or positive (the ISO 9613-1 absorption coefficient, C.2); `None` for Table C.2, as printed (see [`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`](/reference/api/environment/wind-turbine-receptor/#low_frequency_air_attenuation_db_per_km)). |
+| `facade_insulation` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION`](/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation)); `None` for the outdoor level alone. |
 | `weighting` | `"A"` (default) to add the A-weighting of Table C.4 (IEC 61672-1) to each band, or `"Z"` for unweighted levels. |
 
-**Returns:** A [`LowFrequencyLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#lowfrequencylevel).
+**Returns:** A [`LowFrequencyLevel`](/reference/api/environment/wind-turbine-receptor/#lowfrequencylevel).
 
 **Raises**
 
@@ -1245,11 +1245,11 @@ adjustment $K_\mathrm{am}$ and the impulsive adjustment
 $K_\mathrm{I}$: only one type is applied at a time. Local regulation
 usually defines the adjustments; the TS's examples are Table A.1 for
 $K_\mathrm{T}$
-([`tonal_adjustment_from_mean_audibility`](/phonometry/reference/api/environment/measurement/#tonal_adjustment_from_mean_audibility),
+([`tonal_adjustment_from_mean_audibility`](/reference/api/environment/measurement/#tonal_adjustment_from_mean_audibility),
 ISO 1996-2:2017 Table J.1, with its 3 dB-step variant), Figure A.1 for
-$K_\mathrm{am}$ ([`amplitude_modulation_adjustment`](/phonometry/reference/api/environment/wind-turbine-receptor/#amplitude_modulation_adjustment)) and
+$K_\mathrm{am}$ ([`amplitude_modulation_adjustment`](/reference/api/environment/wind-turbine-receptor/#amplitude_modulation_adjustment)) and
 ISO/PAS 1996-3 for $K_\mathrm{I}$
-([`impulse_adjustment`](/phonometry/reference/api/environment/impulsive-sound/#impulse_adjustment)).
+([`impulse_adjustment`](/reference/api/environment/impulsive-sound/#impulse_adjustment)).
 
 **Parameters**
 
@@ -1260,7 +1260,7 @@ ISO/PAS 1996-3 for $K_\mathrm{I}$
 | `amplitude_modulation_adjustment` | $K_\mathrm{am}$, in dB. |
 | `impulsive_adjustment` | $K_\mathrm{I}$, in dB. |
 
-**Returns:** A [`WindTurbineRatingLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#windturbineratinglevel).
+**Returns:** A [`WindTurbineRatingLevel`](/reference/api/environment/wind-turbine-receptor/#windturbineratinglevel).
 
 **Raises**
 
@@ -1346,7 +1346,7 @@ The power-law wind speed at `height_m` (Equation (K.1)), in m/s.
 
 Whether $\alpha$ lies in the typical range (K.4.3).
 
-The range is [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range), bounds included.
+The range is [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/reference/api/environment/wind-turbine-receptor/#typical_wind_shear_exponent_range), bounds included.
 
 ## WindTurbineRatingLevel
 

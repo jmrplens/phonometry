@@ -23,12 +23,12 @@ from meteorological data (clause 8) are the caller's input.
 The chain, in the order the standard writes it:
 
 * the frequency-weighted level of each replica from its band levels,
-  Equation (5), [`frequency_weighted_sel`](/phonometry/reference/api/environment/exposure-distribution/#frequency_weighted_sel);
+  Equation (5), [`frequency_weighted_sel`](/reference/api/environment/exposure-distribution/#frequency_weighted_sel);
 * the joint probability of the two classes, Equation (14),
-  [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities);
+  [`replica_probabilities`](/reference/api/environment/exposure-distribution/#replica_probabilities);
 * the long-term average of the single-event level, Equation (7), and the
   rating level that adds the adjustment `K` for highly impulsive sound,
-  Equation (8), [`long_term_sel`](/phonometry/reference/api/environment/exposure-distribution/#long_term_sel);
+  Equation (8), [`long_term_sel`](/reference/api/environment/exposure-distribution/#long_term_sel);
 * the levels placed in increasing order as `M` classes with contiguous
   boundaries half-way between consecutive levels and the density of each
   class, Equations (10) to (16);
@@ -42,14 +42,14 @@ The chain, in the order the standard writes it:
   $$
 
   so that the energetic mean of the subclass stays where it was, Equations
-  (21) to (23), [`turbulence_level_shift`](/phonometry/reference/api/environment/exposure-distribution/#turbulence_level_shift);
+  (21) to (23), [`turbulence_level_shift`](/reference/api/environment/exposure-distribution/#turbulence_level_shift);
 * from the continuous density $\rho^{*}(x)$, the probability that the
   level exceeds `x`, Equation (24), and the `n`-percent exceedance level,
   Equation (25), and the long-term level computed a second time from the
   distribution, Equation (A.4) of Annex A.
 
-[`sel_distribution`](/phonometry/reference/api/environment/exposure-distribution/#sel_distribution) does the last three steps and returns a
-[`SELDistribution`](/phonometry/reference/api/environment/exposure-distribution/#seldistribution), whose `.plot()` draws the class density, the
+[`sel_distribution`](/reference/api/environment/exposure-distribution/#sel_distribution) does the last three steps and returns a
+[`SELDistribution`](/reference/api/environment/exposure-distribution/#seldistribution), whose `.plot()` draws the class density, the
 continuous density or the exceedance curve.
 
 Two readings the text leaves to the implementer
@@ -147,7 +147,7 @@ atmospheric-absorption class of probability 1.
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape (`(N_atm, N_exc)` or already flattened). |
-| `probabilities` | The probability of each replica, the same shape as `levels` (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
+| `probabilities` | The probability of each replica, the same shape as `levels` (see [`replica_probabilities`](/reference/api/environment/exposure-distribution/#replica_probabilities)). |
 | `rating_adjustment` | `K`, in dB; 0 dB (the default) gives Equation (7). |
 
 **Returns:** The long-term average level, in dB.
@@ -186,7 +186,7 @@ excess-attenuation class.
 | `absorption_probabilities` | $\wp_{\mathrm{atm},k}$, one per atmospheric-absorption class. Annex A uses a single class of probability 1. |
 | `excess_attenuation_probabilities` | $\wp_{\mathrm{exc},l}$, one per excess-attenuation class. |
 
-**Returns:** An array of shape `(N_atm, N_exc)`, row `k` and column `l`, the shape [`sel_distribution`](/phonometry/reference/api/environment/exposure-distribution/#sel_distribution) and [`long_term_sel`](/phonometry/reference/api/environment/exposure-distribution/#long_term_sel) read `levels` in.
+**Returns:** An array of shape `(N_atm, N_exc)`, row `k` and column `l`, the shape [`sel_distribution`](/reference/api/environment/exposure-distribution/#sel_distribution) and [`long_term_sel`](/reference/api/environment/exposure-distribution/#long_term_sel) read `levels` in.
 
 **Raises**
 
@@ -229,7 +229,7 @@ width, in which case the run is combined (see the module documentation).
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_{E,\mathrm{w},k,l}$ of each replica atmosphere, in dB, any shape; a `(N_atm, N_exc)` array is read row by row. |
-| `probabilities` | The probability of occurrence of each replica, the same shape as `levels`, summing to one (see [`replica_probabilities`](/phonometry/reference/api/environment/exposure-distribution/#replica_probabilities)). |
+| `probabilities` | The probability of occurrence of each replica, the same shape as `levels`, summing to one (see [`replica_probabilities`](/reference/api/environment/exposure-distribution/#replica_probabilities)). |
 | `sigma_db` | Standard deviation of the spread due to turbulence, in dB; 5 dB by default, the value clause 5 says is typically used. |
 | `n_subclasses` | $N_\mathrm{sub}$, the subclasses per class; 10 by default, the number Annex A uses. The standard fixes none. |
 

@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/buildings/rooms/room-acoustics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/buildings/rooms/room-acoustics/
 
 # Room acoustic parameters (ISO 3382-1/2)
 
@@ -809,7 +809,7 @@ workstations
   reference-curve derivation.
 - [Conformance report](../../CONFORMANCE.md): the closed-form decays and parameter
   definitions the ISO 3382 implementations are validated against.
-- API reference: [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
+- API reference: [`room.acoustics`](https://phonometry.dev/reference/api/rooms/acoustics/).
 - Theory: [Impulse response and room-acoustic parameters](../../reference/theory/rooms-buildings.md#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay model behind T20, T30 and EDT and the energy ratios the clarity and definition parameters are built from.
 
 ## Quick answers

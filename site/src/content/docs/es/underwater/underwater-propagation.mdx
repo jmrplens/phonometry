@@ -194,9 +194,9 @@ alcance de detección, evaluar la pérdida por reflexión en el fondo que fija e
 regímenes y construir un espectro de ruido ambiental con los términos de viento,
 térmico y de tráfico marítimo. Los niveles de referencia en que se expresa cada
 resultado están en la página de
-[Acústica submarina](/phonometry/es/underwater/underwater-acoustics/); cuando la
+[Acústica submarina](/es/underwater/underwater-acoustics/); cuando la
 refracción y los contornos deciden la respuesta, toman el relevo los
-[métodos numéricos](/phonometry/es/underwater/underwater-solvers/).
+[métodos numéricos](/es/underwater/underwater-solvers/).
 
 <span id="perdida-de-propagacion"></span>
 
@@ -431,7 +431,7 @@ y `reflection_loss_gradient` lo rechaza si no se le da una.
 Al ser un resultado *incoherente*, el flujo describe el campo promediado en
 distancia, y eso es justo lo que lo convierte en referencia para los
 [métodos numéricos de propagación
-submarina](/phonometry/es/underwater/underwater-solvers/).
+submarina](/es/underwater/underwater-solvers/).
 Con el ángulo crítico a 90° y el gradiente de pérdida a cero, la rama cilíndrica
 se reduce a $F = \pi/(rH)$, el límite exacto de muchos modos de una guía ideal;
 la pérdida por modos normales promediada en profundidad y distancia cae sobre
@@ -462,7 +462,7 @@ La Ecuación (9.57) impresa por Ainslie para $r_\mathrm{MS}$ dice $k^2H_\mathrm{
 Su propia regla de derivación, igualar las Ecuaciones (9.47) y (9.56) tal como
 están impresas, da $k^2H_\mathrm{e}^2H/(9\pi\eta)$, menor en $\pi H_\mathrm{e}/H$. La biblioteca
 implementa la forma coherente con la derivación; véase
-[Erratas encontradas en fuentes publicadas](/phonometry/es/reference/errata/).
+[Erratas encontradas en fuentes publicadas](/es/reference/errata/).
 :::
 
 ## Velocidad del sonido en agua de mar
@@ -1205,7 +1205,7 @@ del módulo (modos normales, trazado de rayos, haces gaussianos y ecuación
 parabólica), junto con la guía para elegir entre ellos y estas formas
 cerradas, tienen su propia guía:
 [Métodos numéricos de propagación
-submarina](/phonometry/es/underwater/underwater-solvers/).
+submarina](/es/underwater/underwater-solvers/).
 
 ## Qué cubre esta guía
 
@@ -1242,7 +1242,7 @@ cualquier modelo integrado de tráfico marítimo lejano; hay que aportar un
 espectro de tráfico propio, por ejemplo con `ship_source_spectrum` de arriba.
 Los métodos numéricos del campo (`normal_modes`, `ray_trace`,
 `gaussian_beams`, `parabolic_equation`) se cubren en [Métodos numéricos de
-propagación submarina](/phonometry/es/underwater/underwater-solvers/).
+propagación submarina](/es/underwater/underwater-solvers/).
 </ScopeClaim>
 </Scope>
 
@@ -1250,10 +1250,10 @@ propagación submarina](/phonometry/es/underwater/underwater-solvers/).
 
 ## Véase también
 
-- [Métodos numéricos de propagación submarina](/phonometry/es/underwater/underwater-solvers/):
+- [Métodos numéricos de propagación submarina](/es/underwater/underwater-solvers/):
   los métodos de modos normales, trazado de rayos, haces gaussianos y
   ecuación parabólica para los casos en que estas formas cerradas no bastan,
   y la guía de selección de modelo.
-- Referencia de la API: [`underwater.propagation.closed_form`](/phonometry/es/reference/api/underwater/closed-form/) y [`underwater.propagation.sound_speed`](/phonometry/es/reference/api/underwater/sound-speed/).
+- Referencia de la API: [`underwater.propagation.closed_form`](/es/reference/api/underwater/closed-form/) y [`underwater.propagation.sound_speed`](/es/reference/api/underwater/sound-speed/).
 
 </SeeAlso>

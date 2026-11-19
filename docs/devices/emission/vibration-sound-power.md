@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/devices/emission/vibration-sound-power.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/devices/emission/vibration-sound-power/
 
 # Sound power from surface vibration (ISO/TS 7849)
 
@@ -502,7 +502,7 @@ Sound power from vibration fiche (VibrationSoundPowerResult.report), an ISO/TS 7
   result.
 - [Mechanical mobility (ISO 7626)](../../vibration/structural/mechanical-mobility.md):
   the transducer practice behind a measured surface velocity.
-- API reference: [`emission.vibration_sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/vibration-sound-power/).
+- API reference: [`emission.vibration_sound_power`](https://phonometry.dev/reference/api/power/vibration-sound-power/).
 - Theory: [Point mobilities and radiation efficiency](../../reference/theory/vibration.md#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29): the radiation efficiency that turns a surface velocity into a radiated power.
 
 ## References

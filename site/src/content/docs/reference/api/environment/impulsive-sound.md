@@ -120,7 +120,7 @@ adjustment is made
 to `LAeq,30min` on the basis of the single impulse with the highest `P`.
 This helper applies the bare Formula 2; the clause 8 onset-rate
 qualification (> 10 dB/s, clause 4.5) is enforced by
-[`impulse_prominence`](/phonometry/reference/api/environment/impulsive-sound/#impulse_prominence).
+[`impulse_prominence`](/reference/api/environment/impulsive-sound/#impulse_prominence).
 
 **Parameters**
 
@@ -155,7 +155,7 @@ prominence (clause 7) and derives its `LAeq` adjustment (Formula 2).
 An event qualifies as an impulse only when its onset rate exceeds
 10 dB/s (clause 4.5); clause 8 applies the adjustment "for sounds with
 onset rates larger than 10 dB/s" only, so non-qualifying events cannot
-produce a `KI` (an [`ImpulseProminenceWarning`](/phonometry/reference/api/environment/impulsive-sound/#impulseprominencewarning) reports them and
+produce a `KI` (an [`ImpulseProminenceWarning`](/reference/api/environment/impulsive-sound/#impulseprominencewarning) reports them and
 the adjustment is 0 dB when no event qualifies).
 
 **Parameters**
@@ -166,7 +166,7 @@ the adjustment is 0 dB when no event qualifies).
 | `level_differences` | Level difference of each impulse, in dB (> 0). |
 | `assessment_period_minutes` | The assessment time interval the impulses were selected over, in minutes; the standard's default is 30 min (Clause 5), and the value is carried through to the fiche. |
 
-**Returns:** An [`ImpulseProminenceResult`](/phonometry/reference/api/environment/impulsive-sound/#impulseprominenceresult) with the per-impulse and governing values and `.plot()`.
+**Returns:** An [`ImpulseProminenceResult`](/reference/api/environment/impulsive-sound/#impulseprominenceresult) with the per-impulse and governing values and `.plot()`.
 
 **Raises**
 
@@ -333,7 +333,7 @@ and a footer with the fixed disclaimer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable governing prominence `P` (a lower prominence passes). |
+| `metadata` | Optional [`ReportMetadata`](/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable governing prominence `P` (a lower prominence passes). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for signature parity with the other fiches; the per-impulse table already shows every candidate, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
@@ -377,15 +377,15 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound pressure signal of the candidate event, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
-| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal of the candidate event, in pascal. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
+| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target `LpAF` sampling interval, in seconds (10-25 ms). |
 | `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset, in dB, for signals not scaled to pascal. The adjustment `KI` is unaffected by it (Clause 8); only the reported levels shift. |
 | `onset_rate_method` | `"least_squares"` (default) or `"upper_half"` for pass-bys (3.5, Note 1). |
 | `laeq` | Equivalent level of the interval, in dB; when omitted it is computed from the A-weighted signal energy. |
 
-**Returns:** An [`ImpulsiveSoundResult`](/phonometry/reference/api/environment/impulsive-sound/#impulsivesoundresult) with the level history, onsets, prominence, adjustment, category and adjusted `LAeq`.
+**Returns:** An [`ImpulsiveSoundResult`](/reference/api/environment/impulsive-sound/#impulsivesoundresult) with the level history, onsets, prominence, adjustment, category and adjusted `LAeq`.
 
 **Raises**
 
@@ -496,7 +496,7 @@ LevelHistory(
 
 A frequency- and time-weighted level trace, and the axis it lives on.
 
-What [`sound_pressure_level_history`](/phonometry/reference/api/environment/impulsive-sound/#sound_pressure_level_history) computes is `LpAF`: the
+What [`sound_pressure_level_history`](/reference/api/environment/impulsive-sound/#sound_pressure_level_history) computes is `LpAF`: the
 A-weighted, F time-weighted sound pressure level sampled every `dt`
 seconds. It came back as a bare `(times, levels)` pair, which meant
 the one thing every other result in this library offers, a plot that
@@ -646,13 +646,13 @@ standard.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Calibrated sound pressure signal, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
-| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `x` | Calibrated sound pressure signal, in pascal. Accepts a [`phonometry.io.Signal`](/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
+| `fs` | Sampling rate of `x`, in Hz. Required for a bare array; a [`Signal`](/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target sampling interval of `LpAF`, in seconds (10-25 ms). |
 | `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset added to `LpAF`, in dB, for signals recorded on a scale other than pascal. |
 
-**Returns:** A [`LevelHistory`](/phonometry/reference/api/environment/impulsive-sound/#levelhistory), read by name: `times`, the sample times in seconds, and `levels`, `LpAF` in dB. The realised interval is `times[1] - times[0]` and may differ slightly from `dt` because it is an integer number of samples.
+**Returns:** A [`LevelHistory`](/reference/api/environment/impulsive-sound/#levelhistory), read by name: `times`, the sample times in seconds, and `levels`, `LpAF` in dB. The realised interval is `times[1] - times[0]` and may differ slightly from `dt` because it is an integer number of samples.
 
 **Raises**
 

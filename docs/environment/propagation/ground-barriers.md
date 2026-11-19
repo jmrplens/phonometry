@@ -1,6 +1,6 @@
 <!-- Written by `make llms` from site/src/content/docs/environment/propagation/ground-barriers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/
+← [Documentation index](../../README.md) · Published at https://phonometry.dev/environment/propagation/ground-barriers/
 
 # Spherical ground effect and advanced barriers
 
@@ -661,8 +661,8 @@ meteorological schemes of Nord2000 and CNOSSOS.
 - [Atmospheric refraction: rays and the GFPE](atmospheric-refraction.md): the vertical sound-speed gradient both models here assume away.
 - [Porous absorbers](../../materials/absorbers/porous-absorbers.md): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
 - Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-iso-9613-12): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
-- API reference: [`environment.propagation.ground_barriers`](https://docs.jmrp.io/phonometry/reference/api/environment/ground-barriers/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
+- API reference: [`environment.propagation.ground_barriers`](https://phonometry.dev/reference/api/environment/ground-barriers/).
+- [Published catalogues](https://phonometry.dev/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

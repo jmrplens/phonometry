@@ -27,7 +27,7 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-Where the [calibrated spectral estimators](/phonometry/signals/spectra/spectral-analysis/) describe a
+Where the [calibrated spectral estimators](/signals/spectra/spectral-analysis/) describe a
 signal in frequency, this page covers their time-domain counterparts in
 `phonometry.signals`: **auto- and cross-correlation** estimates with the
 three standard normalizations and their Bendat & Piersol random errors;
@@ -427,9 +427,9 @@ origin of the complex plane, and is a geometric artefact rather than a physical
 frequency. Applied to speech, to a room impulse response or to broadband noise,
 all three quantities do this. The fix is to make the record narrowband first:
 band-pass around the component of interest, exactly as the
-[envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/) does with its
+[envelope spectrum](/signals/spectra/cepstrum-echoes/) does with its
 `band=` front end, or read the ridge of a
-[spectrogram](/phonometry/signals/spectra/time-frequency/) when several
+[spectrogram](/signals/spectra/time-frequency/) when several
 components coexist: the Hilbert construction has no way to represent more than
 one at a time.
 
@@ -508,17 +508,17 @@ narrowband.
 
 `time_delay` (GCC and phase methods) runs on the same Welch core (taper,
 overlap policy, detrend-off calibration, segment defaults) as
-[`cross_spectral_density`](/phonometry/signals/spectra/spectral-analysis/) and the H1/H2
-[frequency-response estimators](/phonometry/devices/electroacoustics/electroacoustics/), so a GCC, a coherence
+[`cross_spectral_density`](/signals/spectra/spectral-analysis/) and the H1/H2
+[frequency-response estimators](/devices/electroacoustics/electroacoustics/), so a GCC, a coherence
 and a cross-spectrum computed with the same segment length agree bin by bin;
 the `'phase'` estimator is literally the slope of the
 `CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
 
 The Hilbert envelope here is the time-domain companion of the
-[envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/), which reads the same
+[envelope spectrum](/signals/spectra/cepstrum-echoes/), which reads the same
 modulations off as discrete lines in frequency; and the sub-sample alignment
 shares its band-limited kernel with the public
-[fractional-delay and resampling tools](/phonometry/signals/spectra/test-signals/).
+[fractional-delay and resampling tools](/signals/spectra/test-signals/).
 
 ## What this guide covers
 
@@ -541,7 +541,7 @@ exactly two sensors (the $y(t) = \alpha\,x(t-\tau_0) + n(t)$ model of Eq.
 reflections) is not separated automatically: `time_delay` and the direct
 correlator report only the single largest peak, the same limitation
 `echo_detection` names on the cepstrum in [Cepstrum, echoes and the envelope
-spectrum](/phonometry/signals/spectra/cepstrum-echoes/). Estimating delays
+spectrum](/signals/spectra/cepstrum-echoes/). Estimating delays
 across more than two sensors, as an array or beamformer would, means calling
 these pairwise functions yourself; there is no built-in multi-sensor TDOA
 solver.
@@ -552,10 +552,10 @@ solver.
 
 ## See also
 
-- [Cepstrum, echoes and the envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/): the reference-free route to a delay, and the envelope this page constructs.
-- [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/): the cross-spectrum the GCC weightings are built from, and the two-channel acquisition rules.
-- [Test signals](/phonometry/signals/spectra/test-signals/): the band-limited fractional-delay kernel behind the sub-sample alignment.
-- [Time synchronous averaging](/phonometry/signals/spectra/synchronous-averaging/): the same alignment applied per revolution.
-- API reference: [`signals`: correlation](/phonometry/reference/api/signals/correlation/) and [`signals`: envelope](/phonometry/reference/api/signals/envelope/).
+- [Cepstrum, echoes and the envelope spectrum](/signals/spectra/cepstrum-echoes/): the reference-free route to a delay, and the envelope this page constructs.
+- [Calibrated spectral analysis](/signals/spectra/spectral-analysis/): the cross-spectrum the GCC weightings are built from, and the two-channel acquisition rules.
+- [Test signals](/signals/spectra/test-signals/): the band-limited fractional-delay kernel behind the sub-sample alignment.
+- [Time synchronous averaging](/signals/spectra/synchronous-averaging/): the same alignment applied per revolution.
+- API reference: [`signals`: correlation](/reference/api/signals/correlation/) and [`signals`: envelope](/reference/api/signals/envelope/).
 
 </SeeAlso>

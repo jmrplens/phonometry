@@ -55,14 +55,14 @@ los valores son verificables y no ajustados.
 Todo lo de aquí se mide sobre una señal capturada. Lo que después hace una hoja
 de características de transductor con esas curvas es el asunto de las dos guías
 de ensayo de tipo,
-[Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/)
+[Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/)
 y
-[Caracterización de micrófonos (IEC 60268-4)](/phonometry/es/devices/electroacoustics/microphones/),
+[Caracterización de micrófonos (IEC 60268-4)](/es/devices/electroacoustics/microphones/),
 que se ocupan de las convenciones de sensibilidad, de los patrones polares y de
 las fichas de características nominales. La alternativa de un solo barrido a los
 ensayos de tono estacionario de las secciones 1 y 2, con la THD como función
 continua de la frecuencia de excitación, es
-[Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[Distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/).
 
 ## 0. Qué se captura y en qué condiciones
 
@@ -420,7 +420,7 @@ segundo con los tonos fijados, y los puntos van en orden de apartado:
   debajo de $f_\text{sine}$ (Tabla 2 de la IEC 60268-3), respecto a la amplitud de la
   sinusoide de 15 kHz (la definición de 14.12.9.1; el denominador impreso en
   14.12.9.2 f) es un defecto editorial, véase el
-  [registro de erratas](/phonometry/es/reference/errata/)).
+  [registro de erratas](/es/reference/errata/)).
 - **Distorsión total por diferencia de frecuencias** (14.12.10): el ensayo de
   14.12.8 con sus tonos fijados ($f_1 = 2f_0$, $f_2 = 3f_0 - \delta$; los tonos
   normalizados de 8 kHz y 11,95 kHz son los valores por defecto) y contando solo
@@ -506,7 +506,7 @@ tonos fijo deja cerca de $f_0$; la DIM cuenta todo
 $|k f_\text{square} \pm f_\text{sine}|$ que aterrice por debajo de la sinusoide.
 El denominador también cambia: $a_{f_1} + a_{f_2}$ para los dos primeros, y
 solo la amplitud de la sinusoide para la DIM, que es la magnitud de la que trata
-la entrada del [registro de erratas](/phonometry/es/reference/errata/).*
+la entrada del [registro de erratas](/es/reference/errata/).*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -580,7 +580,7 @@ entre los dos canales (o haz el segmento de Welch varias veces más largo que
 $\gamma^2$ banda a banda. `transfer_function` elige `nperseg` para una
 resolución de unos 4 Hz cuando no se lo das; la disposición física es la que
 está dibujada en
-[Medición de sistemas de dos canales](/phonometry/es/signals/spectra/system-measurement/).
+[Medición de sistemas de dos canales](/es/signals/spectra/system-measurement/).
 
 **Cómo leer la coherencia.** Un valor por debajo de uno tiene tres causas
 físicamente distintas, y se distinguen por experimento: ruido ajeno en
@@ -685,12 +685,12 @@ banco, el punto de funcionamiento y las tres comprobaciones de aceptación
 quedan a cargo de quien lee. Otras partes de la serie IEC 60268 quedan fuera
 de esta página: la Parte 16 (inteligibilidad objetiva del habla) está
 implementada como el índice de transmisión del habla en [Transmisión del
-habla](/phonometry/es/perception/speech/speech-transmission/), y los informes
+habla](/es/perception/speech/speech-transmission/), y los informes
 de características nominales de micrófono (Parte 4) y de altavoz (Parte 5) se
 han trasladado a [Caracterización de
-micrófonos](/phonometry/es/devices/electroacoustics/microphones/) y
+micrófonos](/es/devices/electroacoustics/microphones/) y
 [Caracterización de
-altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/). Las
+altavoces](/es/devices/electroacoustics/loudspeakers/). Las
 ediciones implementadas están fijadas en AES17-2015; la revisión sucesora
 AES17-2020 no es la comprobada.
 </ScopeClaim>
@@ -700,21 +700,21 @@ AES17-2020 no es la comprobada.
 
 ## Véase también
 
-- [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):
+- [Caracterización de altavoces (IEC 60268-5)](/es/devices/electroacoustics/loudspeakers/):
   las convenciones de sensibilidad, el pistón radiante y el informe de
   características nominales que estas mediciones alimentan.
-- [Caracterización de micrófonos (IEC 60268-4)](/phonometry/es/devices/electroacoustics/microphones/):
+- [Caracterización de micrófonos (IEC 60268-4)](/es/devices/electroacoustics/microphones/):
   las referencias de sensibilidad del micrófono, sus patrones direccionales,
   las ponderaciones de ruido y su informe de características nominales.
-- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/): los
+- [Control de ruido industrial](/es/devices/noise-control/noise-control/): los
   métodos HVAC de conducto y los cerramientos de máquina en el lado receptor
   de un dispositivo ruidoso.
-- [Distorsión con barrido sinusoidal](/phonometry/es/devices/electroacoustics/swept-sine-distortion/):
+- [Distorsión con barrido sinusoidal](/es/devices/electroacoustics/swept-sine-distortion/):
   la separación armónica de Farina/Novak cuya THD(f) alimenta el panel de
   distorsión del altavoz.
-- [Medición de sistemas de dos canales](/phonometry/es/signals/spectra/system-measurement/):
+- [Medición de sistemas de dos canales](/es/signals/spectra/system-measurement/):
   la disposición física detrás de la estimación de $H_1$ de la sección 5, con la
   toma de referencia y los dos canales sincronizados dibujados.
-- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](/phonometry/es/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](/phonometry/es/reference/api/electroacoustics/noise-measurements/) y [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/).
+- Referencia de la API: [`electroacoustics.distortion`](/es/reference/api/electroacoustics/distortion/), [`electroacoustics.intermodulation`](/es/reference/api/electroacoustics/intermodulation/), [`electroacoustics.noise_measurements`](/es/reference/api/electroacoustics/noise-measurements/) y [`electroacoustics.frequency_response`](/es/reference/api/electroacoustics/frequency-response/).
 
 </SeeAlso>

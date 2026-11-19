@@ -119,10 +119,10 @@ def test_parse_docstring_multiline_field_joins() -> None:
 
 
 def test_rest_roles_to_links_known_and_unknown() -> None:
-    xref = {"leq": "/phonometry/reference/api/levels/levels/#leq"}
+    xref = {"leq": "/reference/api/levels/levels/#leq"}
     text = "Use :func:`leq` but not :class:`numpy.ndarray`."
     out = gad.rest_roles_to_links(text, xref)
-    assert "[`leq`](/phonometry/reference/api/levels/levels/#leq)" in out
+    assert "[`leq`](/reference/api/levels/levels/#leq)" in out
     assert "`numpy.ndarray`" in out
     assert ":func:" not in out
     assert ":class:" not in out

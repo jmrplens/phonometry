@@ -76,7 +76,7 @@ sidebar:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-This page collects the theory behind the measurement chain itself: the standardized fractional-octave bands and the time-domain filter banks that implement them, the frequency weighting curves, time integration, level, event and exposure metrics, sound intensity, and the GUM uncertainty framework that underpins every measured quantity. It is part of the [theory reference](/phonometry/reference/theory/).
+This page collects the theory behind the measurement chain itself: the standardized fractional-octave bands and the time-domain filter banks that implement them, the frequency weighting curves, time integration, level, event and exposure metrics, sound intensity, and the GUM uncertainty framework that underpins every measured quantity. It is part of the [theory reference](/reference/theory/).
 
 ## Octave Band Frequencies (ANSI S1.11 / IEC 61260)
 
@@ -315,7 +315,7 @@ when the band signal feeds a reverberation-time fit, but will not meet class 1
 at any reasonable order. Raising the order tightens the mask fit and lengthens
 the filter transient, which the settling rule below quantifies.
 `verify_filter_class` checks a designed bank against the masks; see
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+[Filter Class Verification](/signals/filters/filter-compliance/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="88%" />
 
@@ -385,10 +385,10 @@ away from that regime:
    band (a pure in-band tone is unaffected, sitting where both passes are ≈ 0 dB),
    so a level reported for conformity should come from the single forward pass.
 
-See the [Filter Banks guide](/phonometry/signals/filters/filter-banks/) for usage,
-the [Filter Gallery](/phonometry/signals/filters/filter-gallery/) for the five
+See the [Filter Banks guide](/signals/filters/filter-banks/) for usage,
+the [Filter Gallery](/signals/filters/filter-gallery/) for the five
 architectures side by side, and
-[Filter Class Verification](/phonometry/signals/filters/filter-compliance/) for
+[Filter Class Verification](/signals/filters/filter-compliance/) for
 checking a designed bank against the IEC 61260-1 masks.
 
 ## Weighting Curves (IEC 61672-1)
@@ -402,7 +402,7 @@ absence of a filter. That origin is also the domain of validity: because A is
 anchored at 40 phon it progressively under-reads the low-frequency content of
 loud sources, which is exactly why loudness models, C-weighted peaks and the G
 curve below exist. See
-[Equal-loudness contours](/phonometry/reference/theory/perception/#equal-loudness-contours-iso-2262023)
+[Equal-loudness contours](/reference/theory/perception/#equal-loudness-contours-iso-2262023)
 for the contours themselves.
 
 The A-weighting transfer function:
@@ -425,11 +425,11 @@ transform. Because the bilinear transform compresses frequencies near Nyquist,
 the default `high_accuracy` mode does not apply that transform to the printed
 prototype: it fits a prototype of the same structure whose response *at the
 warped frequencies* is the printed one's response at the true frequencies, and
-transforms that; see [Frequency Weighting](/phonometry/signals/levels/weighting/).
+transforms that; see [Frequency Weighting](/signals/levels/weighting/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="A, C and Z frequency weighting curves of IEC 61672-1 with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%" />
 
-*The three IEC 61672-1 weighting curves realized by the library, with the small positive region of the A curve magnified. The special B, D and AU curves are charted in [Special Weightings](/phonometry/signals/levels/special-weightings/).*
+*The three IEC 61672-1 weighting curves realized by the library, with the small positive region of the A curve magnified. The special B, D and AU curves are charted in [Special Weightings](/signals/levels/special-weightings/).*
 
 ## Time Integration
 
@@ -465,7 +465,7 @@ intervals.
 
 The default initial condition is $y[-1] = 0$. Use `initial_state='first'` to
 start from the first input energy, or pass a scalar/array with the previous
-mean-square output state. See [Why phonometry](/phonometry/start/why-phonometry/) for the
+mean-square output state. See [Why phonometry](/start/why-phonometry/) for the
 IEC 61672-1 tone-burst verification of this implementation.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%" />
@@ -500,7 +500,7 @@ Infrasound needs its own curve because near the hearing threshold the perceived 
 
 Since G acts on 0.25 Hz – 315 Hz, far below the Nyquist frequency at audio rates, the frequency warping of the plain bilinear transform (applied without prewarping) is negligible there: about 0.014 % at 315 Hz for $f_\mathrm{s} = 48$ kHz, under 0.01 dB on the response. The default design still fits the prototype at the sample rate as it does for A and C, which costs nothing here and matters at the low rates infrasound is often recorded at, where 315 Hz approaches Nyquist.
 
-See the [Special Weightings guide](/phonometry/signals/levels/special-weightings/) for usage.
+See the [Special Weightings guide](/signals/levels/special-weightings/) for usage.
 
 ## Event and dose metrics
 
@@ -530,11 +530,11 @@ $$
 L_\mathrm{EX,8h} = 10 \log_{10}\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
-It is identical to $L_\mathrm{EP,d}$ of Directive 86/188/EEC and $L_\mathrm{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_\mathrm{EX,8h}$ of exactly 90 dB**. ISO 9612 prescribes how to sample a working day to obtain it and how to bound the result; see [Occupational noise exposure](/phonometry/reference/theory/environment-transport/#occupational-noise-exposure-iso-9612).
+It is identical to $L_\mathrm{EP,d}$ of Directive 86/188/EEC and $L_\mathrm{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_\mathrm{EX,8h}$ of exactly 90 dB**. ISO 9612 prescribes how to sample a working day to obtain it and how to bound the result; see [Occupational noise exposure](/reference/theory/environment-transport/#occupational-noise-exposure-iso-9612).
 
 **$L_\mathrm{Cpeak}$** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_\mathrm{Cpeak} = 20\log_{10}(\max|p_\mathrm{C}(t)|/p_0)$, the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
 
-See the [Levels guide](/phonometry/signals/levels/levels/) for usage and the [Calibration guide](/phonometry/signals/metrology/calibration/) for absolute-scale setup.
+See the [Levels guide](/signals/levels/levels/) for usage and the [Calibration guide](/signals/metrology/calibration/) for absolute-scale setup.
 
 ## Sound intensity (IEC 61043)
 
@@ -591,13 +591,13 @@ applied there stays applied for the measurement.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_residual_intensity_check.svg" alt="Three panels. First, the IEC 61043 residual-intensity testing device: a small coupler driving pink or white noise onto both probe capsules at the same level within plus or minus 0.1 decibel, from which the residual index is read as the pressure level minus the indicated intensity level. Second, an IEC 60942 class 0 or class 1 sound calibrator applied to one microphone at a time, with the instrument adjusted to within plus or minus 0.1 decibel in both channels. Third, the in-situ probe-reversal test: the probe on the measurement surface reading a positive normal intensity, then rotated 180 degrees about its acoustic centre and reading a negative one, accepted when the two have opposite signs and differ by less than 1.5 decibel in the band of maximum level" width="92%" />
 
-*The paragraph above is the first panel: the testing device of IEC 61043 clause 10.2, with pink or white noise over the whole or part of 45 Hz to 7.1 kHz and both capsules at the same level within ±0.1 dB (at least from 45 Hz to 1 kHz), from which $\delta_{pI0}$ is read. The other two panels are checks this page does not develop: the pressure check of each channel with a sound calibrator, adjusted to ±0.1 dB (IEC 61043 clause 14 b; ISO 9614-1 clause 6.2.1), and the probe reversal on the measurement surface, in which the two readings must have opposite signs and differ by less than 1.5 dB in the band of maximum level (clause 6.2.2 of ISO 9614-1 and of ISO 9614-2). The [Sound Intensity guide](/phonometry/devices/emission/intensity/) works through both.*
+*The paragraph above is the first panel: the testing device of IEC 61043 clause 10.2, with pink or white noise over the whole or part of 45 Hz to 7.1 kHz and both capsules at the same level within ±0.1 dB (at least from 45 Hz to 1 kHz), from which $\delta_{pI0}$ is read. The other two panels are checks this page does not develop: the pressure check of each channel with a sound calibrator, adjusted to ±0.1 dB (IEC 61043 clause 14 b; ISO 9614-1 clause 6.2.1), and the probe reversal on the measurement surface, in which the two readings must have opposite signs and differ by less than 1.5 dB in the band of maximum level (clause 6.2.2 of ISO 9614-1 and of ISO 9614-2). The [Sound Intensity guide](/devices/emission/intensity/) works through both.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="88%" />
 
 The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive the field is: in a free plane progressive wave it equals $10 \log_{10}(\rho_0 c / 400) = 0.14$ dB, while large values flag reactive or noisy fields in which the inter-channel phase error dominates. ISO 9614-1:1993 Annex A generalizes it over a measurement surface as the indicator F2 (with F3 for negative partial power and F4 for field non-uniformity), and the instrument's **dynamic capability** $L_\mathrm{d} = \delta_{pI0} - K$ (pressure-residual intensity index minus the bias error factor: 10 dB for grades 1/2, 7 dB for grade 3) must exceed F2 for the measurement to be valid (criterion 1).
 
-See the [Sound Intensity guide](/phonometry/devices/emission/intensity/) for usage.
+See the [Sound Intensity guide](/devices/emission/intensity/) for usage.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="One-third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%" />
 
@@ -650,4 +650,4 @@ is what clause 8 calls validation; where the model is non-linear or the output
 visibly non-Gaussian the histogram departs from the curve and the interval is
 read off the fractiles instead.*
 
-See the [GUM Uncertainty guide](/phonometry/signals/metrology/gum-uncertainty/) for usage.
+See the [GUM Uncertainty guide](/signals/metrology/gum-uncertainty/) for usage.

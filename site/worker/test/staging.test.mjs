@@ -8,7 +8,8 @@ import { afterEach, describe, test } from 'node:test';
 
 import { twinExclusions } from '../lib/twins.mjs';
 import { beaconScript } from '../lib/beacon.mjs';
-import { MAX_FILE_BYTES, MAX_FILES, agentPathProblems, beaconProblems, buildOrigin, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
+import { DEFAULT_SITE, SITE_TARGETS } from '../../src/data/site.mjs';
+import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, agentPathProblems, beaconProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
 const prefix = '/phonometry';
 const exclusions = twinExclusions(prefix);
@@ -136,6 +137,34 @@ describe('the checks', () => {
 		assert.throws(() => buildOrigin(tree({ ...good(), 'index.html': '<html></html>' }), prefix), /canonical/);
 	});
 
+});
+
+describe('whether a staged build is indexable', () => {
+	const served = 'https://phonometry.dev';
+	const other = 'https://docs.jmrp.io';
+
+	test('exactly when the build names the host it is served on, and that host is the canonical site', () => {
+		assert.equal(SERVED_ORIGIN, served);
+		assert.equal(indexableBuild(served, false, served), true);
+		assert.equal(indexableBuild(served, true, served), true);
+		assert.equal(indexableBuild(other, false, served), false);
+		assert.equal(indexableBuild(null, false, served), false);
+	});
+
+	test('a build for this host stays noindex while another host is the canonical site', () => {
+		assert.equal(indexableBuild(served, false, other), false);
+		assert.equal(indexableBuild(other, false, other), false);
+	});
+
+	test('--indexable on a build that would not be indexable is refused, not obeyed', () => {
+		assert.throws(() => indexableBuild(other, true, served), /--indexable.*names https:\/\/docs\.jmrp\.io as canonical, not https:\/\/phonometry\.dev/);
+		assert.throws(() => indexableBuild(null, true, served), /--indexable.*names no canonical origin/);
+		assert.throws(() => indexableBuild(served, true, other), /--indexable.*the canonical site is https:\/\/docs\.jmrp\.io, not https:\/\/phonometry\.dev/);
+	});
+
+	test('the canonical site the Worker is given is the default target of site-targets.json', () => {
+		assert.equal(CANONICAL_ORIGIN, SITE_TARGETS[DEFAULT_SITE].siteUrl);
+	});
 });
 
 describe('stage', () => {

@@ -42,7 +42,8 @@ What a script would have done lives elsewhere:
 | A year of cache for content-hashed `_astro/` files | zone response rule `astro-immutable`, on a 200 or 304 only, so a missing file is not cached for a year |
 | Markdown negotiation, a 302 to `<page>index.md` | zone Single Redirect rule `markdown-twin` (`lib/rules.mjs`) |
 | Validators and 304s | the asset server's own `ETag` |
-| Byte ranges for the clips | zone rule `clips-to-range-host`: a 302 to docs.jmrp.io, which answers 206, until the R2 bucket exists |
+| Byte ranges for the clips | zone rule `clips-to-range-host`: a 302 to `clipBase` (`site/src/data/site-targets.json`), today docs.jmrp.io, which answers 206, until the R2 bucket exists |
+| Addresses under an old base path | zone rules `legacy-base-slash` and `legacy-base-bare`: a 301 to the same path at the root, generated only once the site is served at the root and `site-targets.json` lists a legacy origin; none today |
 
 Zone rules run before any Worker and cost no invocation. `_headers` and
 `_redirects` are read by the asset server. Static Assets answers a `Range`
@@ -184,6 +185,16 @@ node worker/stage.mjs --from dist --site phonometry.dev
 
 The preview deploys docs.yml's own build (unset), so its canonical URLs name
 docs.jmrp.io, which is right for a preview.
+
+Whether the staged build carries `X-Robots-Tag: noindex` is not a choice:
+`stage.mjs` drops it exactly when the build names phonometry.dev, the host it
+is served on, as canonical and phonometry.dev is the canonical site, the
+`default` target of `site-targets.json` (`indexableBuild` in
+`lib/staging.mjs`), and keeps it on every other build. While docs.jmrp.io is
+the default, that is every build, the phonometry.dev build above included: it
+is a second copy of docs.jmrp.io under another name, and served without the
+noindex it would compete with it. `--indexable` only states that the noindex
+is expected to go, and is refused for any build that keeps it.
 
 ## Deploying
 

@@ -11,9 +11,9 @@ import { redirectRules, responseHeaderRules } from '../lib/rules.mjs';
 import { ruleDrift } from '../lib/rulesets.mjs';
 import { twinExclusions } from '../lib/twins.mjs';
 import { DNS_RECORDS, ZONE_SETTINGS, zonePlan } from '../lib/zone.mjs';
-import { mediaOrigins } from '../../src/data/site.mjs';
+import { LEGACY_ORIGINS, mediaOrigins } from '../../src/data/site.mjs';
 import { ZONE_ID } from '../lib/cloudflare.mjs';
-import { CLIP_BASE, checkClipBase, runApplyRules } from '../scripts/apply-rules.mjs';
+import { CLIP_BASE, LEGACY_PREFIX, checkClipBase, generatedPhases, legacyPrefixOf, runApplyRules } from '../scripts/apply-rules.mjs';
 import { runApplyZone } from '../scripts/apply-zone.mjs';
 
 const zone = 'phonometry.dev';
@@ -186,8 +186,9 @@ describe('apply-rules', () => {
 			assert.equal(code, 0);
 			const puts = calls.filter(({ method }) => method === 'PUT');
 			assert.equal(puts.length, 2);
-			assert.deepEqual(puts[0].body.rules.map(({ ref }) => ref), ['www-to-apex', 'root-to-base', 'clips-to-range-host', 'markdown-twin']);
-			assert.deepEqual(puts[1].body, { rules: responseHeaderRules({ host: zone, prefix: '/phonometry' }) });
+			const [redirects, headers] = generatedPhases();
+			assert.deepEqual(puts[0].body, { rules: redirects.rules });
+			assert.deepEqual(puts[1].body, { rules: headers.rules });
 			const saved = readdirSync(dir).sort();
 			assert.equal(saved.length, 2);
 			assert.deepEqual(JSON.parse(readFileSync(join(dir, saved[0]), 'utf8')), { phase: saved[0].includes('dynamic_redirect') ? phases[0] : phases[1], rules: [] });
@@ -197,10 +198,10 @@ describe('apply-rules', () => {
 	});
 
 	test('--check on a zone that holds the generated rules passes', async () => {
-		const wanted = redirectRules({ host: zone, prefix: '/phonometry', exclusions: twinExclusions('/phonometry'), clipBase: 'https://docs.jmrp.io/phonometry/media/' });
+		const [redirects, headers] = generatedPhases();
 		const { fetchImpl } = api({
-			[`GET /zones/${ZONE_ID}/rulesets/phases/${phases[0]}/entrypoint`]: () => ok({ rules: wanted }),
-			[`GET /zones/${ZONE_ID}/rulesets/phases/${phases[1]}/entrypoint`]: () => ok({ rules: responseHeaderRules({ host: zone, prefix: '/phonometry' }) }),
+			[`GET /zones/${ZONE_ID}/rulesets/phases/${phases[0]}/entrypoint`]: () => ok({ rules: redirects.rules }),
+			[`GET /zones/${ZONE_ID}/rulesets/phases/${phases[1]}/entrypoint`]: () => ok({ rules: headers.rules }),
 		});
 		assert.equal(await runApplyRules({ argv: ['--check'], env, fetchImpl, sink: sinkOf() }), 0);
 	});
@@ -211,6 +212,28 @@ describe('apply-rules', () => {
 		assert.equal(await runApplyRules({ argv: ['--apply', '--clip-base', 'https://media.example/'], env, fetchImpl, sink }), 1);
 		assert.match(sink.log.join('\n'), /clip host https:\/\/media\.example is not in mediaOrigins/);
 		assert.deepEqual(calls, []);
+	});
+
+	test('the generated phases follow the site: its base path, the clip host and the old base path', () => {
+		const clip = 'https://docs.jmrp.io/phonometry/media/';
+		const refs = (options) => generatedPhases({ clipBase: clip, ...options })[0].rules.map(({ ref }) => ref);
+		assert.deepEqual(refs({ prefix: '/phonometry', legacyPrefix: '' }), ['www-to-apex', 'root-to-base', 'clips-to-range-host', 'markdown-twin']);
+		assert.deepEqual(refs({ prefix: '', legacyPrefix: '' }), ['www-to-apex', 'clips-to-range-host', 'markdown-twin']);
+		assert.deepEqual(refs({ prefix: '', legacyPrefix: '/phonometry' }), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'markdown-twin']);
+		const [redirects, headers] = generatedPhases({ clipBase: clip, prefix: '/phonometry', legacyPrefix: '' });
+		assert.deepEqual(redirects.rules, redirectRules({ host: zone, prefix: '/phonometry', exclusions: twinExclusions('/phonometry'), clipBase: clip }));
+		assert.deepEqual(headers.rules, responseHeaderRules({ host: zone, prefix: '/phonometry' }));
+	});
+
+	test('the old base path is the one the legacy origins served the site under', () => {
+		assert.equal(legacyPrefixOf([]), '');
+		assert.equal(legacyPrefixOf([{ siteUrl: 'https://docs.jmrp.io', basePath: '/phonometry' }]), '/phonometry');
+		assert.equal(legacyPrefixOf([{ siteUrl: 'https://a.example', basePath: '' }]), '');
+		assert.throws(
+			() => legacyPrefixOf([{ siteUrl: 'https://a.example', basePath: '/a' }, { siteUrl: 'https://b.example', basePath: '/b' }]),
+			/under \/a and \/b/,
+		);
+		assert.equal(LEGACY_PREFIX, legacyPrefixOf(LEGACY_ORIGINS));
 	});
 
 	test('the default clip host is one the pages allow', () => {

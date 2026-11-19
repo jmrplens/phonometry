@@ -15,15 +15,20 @@
 // (`/llms*.txt`, `/sitemap*.xml`) are there although the build has only
 // `/llms.txt` at the root: crawlers probe both, and a probe is logged too.
 
+import { basePath } from '../../src/data/site.mjs';
+
 /** The beacon's path. Nothing below it (`/_v/`) runs the Worker. */
 export const BEACON_PATH = '/_v';
 
 /**
- * The base path the preview serves the site under (site.basePath).
- * wrangler.jsonc lists agentPaths(BASE_PATH), and the Worker reads the same
- * list; test/wrangler.test.mjs holds all three equal.
+ * The base path the preview serves the site under: site.basePath, from
+ * site/src/data/site-targets.json, so it cannot lag the site. The Worker has
+ * no PHONOMETRY_SITE, so it reads the target a build with nothing set is made
+ * for, the one the deploy stages. wrangler.jsonc lists agentPaths(BASE_PATH),
+ * and the Worker reads the same list; test/wrangler.test.mjs holds the two
+ * equal.
  */
-export const BASE_PATH = '/phonometry';
+export const BASE_PATH = basePath;
 
 /**
  * The run_worker_first patterns for a base path.

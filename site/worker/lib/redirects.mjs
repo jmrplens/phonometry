@@ -1,11 +1,16 @@
-// The `_redirects` file of the phonometry.dev preview.
+// The `_redirects` file of phonometry.dev.
 //
-// docs.jmrp.io answers a retired address with a 301 from the account Bulk
-// Redirects list `phonometry_retired`; the preview answers it from the
+// phonometry.dev answers a retired address with a 301 from the
 // `_redirects` file Static Assets reads beside the build
-// (https://developers.cloudflare.com/workers/static-assets/redirects/). Both
-// are written from the same pairs, redirectPairs() in
-// site/scripts/cloudflare-redirects.mjs, so they cannot drift apart. A redirect
+// (https://developers.cloudflare.com/workers/static-assets/redirects/), written
+// from redirectPairs() in site/scripts/cloudflare-redirects.mjs, and follows
+// that map on every deploy. The Bulk Redirects list that sends the addresses
+// docs.jmrp.io published to their pages here is written from the same map
+// (cloudflare-redirects.mjs --legacy) once, when the site moved, and is never
+// reloaded (CONTRIBUTING, section 5b): an address retired after the move,
+// which docs.jmrp.io never published, is in this file alone, and the list's
+// catch-all, which sends every other old address to the same path here,
+// leads to it. A redirect
 // is followed whether or not an asset matches, so Astro's meta-refresh stubs
 // at those addresses are never served. Limits: 2 000 static redirects and
 // 1 000 characters a line.

@@ -15,7 +15,7 @@
 /**
  * The pages and subtrees without a Markdown copy, under a base path.
  *
- * @param {string} prefix The base path the site is served under: `/phonometry`, or `` at the root.
+ * @param {string} prefix The base path the site is served under: `` at the root, or a path such as `/docs`.
  * @returns {{pages: string[], subtrees: string[]}} Slash pages listed one by one, and
  *   subtrees (ending in `/`) whose every slash page has no copy, the subtree's own page included.
  */

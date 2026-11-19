@@ -8,10 +8,14 @@ import { afterEach, describe, test } from 'node:test';
 
 import { twinExclusions } from '../lib/twins.mjs';
 import { beaconScript } from '../lib/beacon.mjs';
-import { DEFAULT_SITE, SITE_TARGETS } from '../../src/data/site.mjs';
+import { DEFAULT_SITE, SITE_TARGETS, mediaOrigins } from '../../src/data/site.mjs';
 import { CANONICAL_ORIGIN, MAX_FILE_BYTES, MAX_FILES, SERVED_ORIGIN, agentPathProblems, beaconProblems, buildOrigin, indexableBuild, withBeacon, exclusionProblems, listTree, mediaPolicyProblems, noTwinPages, servedPages, stage, treeProblems } from '../lib/staging.mjs';
 
-const prefix = '/phonometry';
+// The site as it is served: at the root of phonometry.dev, its clips on the
+// clip host of site-targets.json.
+const prefix = '';
+const ORIGIN = 'https://phonometry.dev';
+const [CLIP_HOST] = mediaOrigins;
 const exclusions = twinExclusions(prefix);
 const made = [];
 afterEach(() => {
@@ -30,9 +34,9 @@ function tree(files) {
 }
 
 /** The meta policy every page of a build carries; `media` is its media-src. */
-const policy = (media = "'self' https://docs.jmrp.io") =>
+const policy = (media = `'self' ${mediaOrigins.join(' ')}`) =>
 	`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src ${media}; object-src 'none'">`;
-const home = (origin = 'https://docs.jmrp.io') => `<html><head>${policy()}<link rel="canonical" href="${origin}/phonometry/"/></head></html>`;
+const home = (origin = ORIGIN, base = prefix) => `<html><head>${policy()}<link rel="canonical" href="${origin}${base}/"/></head></html>`;
 /** The smallest build the real checks accept. */
 const good = () => ({
 	'index.html': home(),
@@ -46,46 +50,46 @@ const good = () => ({
 	'es/reference/api/levels/index.html': 'api',
 	'about/index.html': '<meta http-equiv="refresh">',
 	'_astro/a.css': 'x',
-	'robots.txt': 'Sitemap: https://docs.jmrp.io/phonometry/sitemap-index.xml\n',
+	'robots.txt': 'Sitemap: https://phonometry.dev/sitemap-index.xml\n',
 });
 // As redirectPairs() lists them: the address with and without its slash, and its Markdown copy.
 const pairs = [
-	{ from: '/phonometry/about/', to: '/phonometry/signals/' },
-	{ from: '/phonometry/about', to: '/phonometry/signals/' },
-	{ from: '/phonometry/about/index.md', to: '/phonometry/signals/index.md' },
+	{ from: '/about/', to: '/signals/' },
+	{ from: '/about', to: '/signals/' },
+	{ from: '/about/index.md', to: '/signals/index.md' },
 ];
 
 describe('the checks', () => {
 	test('every page with a meta policy allows the clip hosts; stubs without one are skipped', () => {
 		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy()}</head></html>` });
-		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), []);
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), mediaOrigins), []);
 	});
 
 	test('a page whose policy keeps clips to its own origin blocks the redirected clips', () => {
 		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy("'self'")}</head></html>` });
-		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['signals/index.html: media-src does not allow https://docs.jmrp.io']);
-		assert.match(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io', 'https://media.phonometry.dev']).join('\n'), /index\.html: media-src does not allow https:\/\/media\.phonometry\.dev/);
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), [CLIP_HOST]), [`signals/index.html: media-src does not allow ${CLIP_HOST}`]);
+		assert.match(mediaPolicyProblems(root, listTree(root), [CLIP_HOST, 'https://clips.example.org']).join('\n'), /index\.html: media-src does not allow https:\/\/clips\.example\.org/);
 	});
 
 	test('without media-src the default-src decides', () => {
 		const root = tree({ ...good(), 'index.html': `<meta http-equiv="Content-Security-Policy" content="default-src 'self'">` });
-		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['index.html: media-src does not allow https://docs.jmrp.io']);
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), [CLIP_HOST]), [`index.html: media-src does not allow ${CLIP_HOST}`]);
 	});
 
 	test('a home with no meta policy is refused, so the check cannot pass by finding nothing', () => {
-		const root = tree({ ...good(), 'index.html': '<link rel="canonical" href="https://docs.jmrp.io/phonometry/"/>' });
-		assert.deepEqual(mediaPolicyProblems(root, listTree(root), ['https://docs.jmrp.io']), ['the home page carries no Content-Security-Policy meta tag']);
+		const root = tree({ ...good(), 'index.html': '<link rel="canonical" href="https://phonometry.dev/"/>' });
+		assert.deepEqual(mediaPolicyProblems(root, listTree(root), mediaOrigins), ['the home page carries no Content-Security-Policy meta tag']);
 	});
 
 	test('stage refuses a build made before the clip host was allowed', () => {
 		const root = tree({ ...good(), 'signals/index.html': `<html><head>${policy("'self'")}</head></html>` });
-		const report = stage({ from: root, out: join(root, 'never'), prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, checkOnly: true });
-		assert.match(report.problems.join('\n'), /signals\/index\.html: media-src does not allow https:\/\/docs\.jmrp\.io/);
+		const report = stage({ from: root, out: join(root, 'never'), prefix, origin: ORIGIN, pairs, exclusions, indexable: false, checkOnly: true });
+		assert.match(report.problems.join('\n'), new RegExp(`signals/index\\.html: media-src does not allow ${CLIP_HOST.replaceAll('.', '\\.')}`));
 	});
 
 	test('the slash pages without a copy, retired addresses aside', () => {
 		const files = listTree(tree(good()));
-		assert.deepEqual(noTwinPages(files, prefix, pairs), ['/phonometry/es/reference/api/', '/phonometry/es/reference/api/levels/']);
+		assert.deepEqual(noTwinPages(files, prefix, pairs), ['/es/reference/api/', '/es/reference/api/levels/']);
 	});
 
 	test('the exclusions match the build', () => {
@@ -97,11 +101,11 @@ describe('the checks', () => {
 		const files = good();
 		delete files['signals/index.md'];
 		const listed = listTree(tree(files));
-		assert.match(exclusionProblems(noTwinPages(listed, prefix, pairs), servedPages(listed, prefix, pairs), exclusions).join('\n'), /\/phonometry\/signals\/ has no Markdown copy/);
+		assert.match(exclusionProblems(noTwinPages(listed, prefix, pairs), servedPages(listed, prefix, pairs), exclusions).join('\n'), /^\/signals\/ has no Markdown copy/m);
 	});
 
 	test('a retired address inside an excluded subtree is neither a page nor a copy', () => {
-		const retired = [...pairs, { from: '/phonometry/es/reference/api/old/', to: '/phonometry/es/reference/api/levels/' }];
+		const retired = [...pairs, { from: '/es/reference/api/old/', to: '/es/reference/api/levels/' }];
 		const listed = listTree(tree({ ...good(), 'es/reference/api/old/index.html': '<meta http-equiv="refresh">' }));
 		assert.deepEqual(exclusionProblems(noTwinPages(listed, prefix, retired), servedPages(listed, prefix, retired), exclusions), []);
 	});
@@ -116,7 +120,7 @@ describe('the checks', () => {
 		delete files['es/reference/api/index.html'];
 		delete files['es/reference/api/levels/index.html'];
 		const listed = listTree(tree(files));
-		assert.match(exclusionProblems(noTwinPages(listed, prefix, pairs), servedPages(listed, prefix, pairs), exclusions).join('\n'), /no page under \/phonometry\/es\/reference\/api\//);
+		assert.match(exclusionProblems(noTwinPages(listed, prefix, pairs), servedPages(listed, prefix, pairs), exclusions).join('\n'), /no page under \/es\/reference\/api\//);
 	});
 
 	test('too many files, a file too large, a _headers or _redirects of its own', () => {
@@ -132,8 +136,9 @@ describe('the checks', () => {
 	});
 
 	test('the origin the build names as canonical', () => {
-		assert.equal(buildOrigin(tree(good()), prefix), 'https://docs.jmrp.io');
-		assert.equal(buildOrigin(tree({ ...good(), 'index.html': home('https://phonometry.dev') }), prefix), 'https://phonometry.dev');
+		assert.equal(buildOrigin(tree(good()), prefix), 'https://phonometry.dev');
+		assert.equal(buildOrigin(tree({ ...good(), 'index.html': home('https://docs.jmrp.io') }), prefix), 'https://docs.jmrp.io');
+		assert.equal(buildOrigin(tree({ ...good(), 'index.html': home(ORIGIN, '/docs') }), '/docs'), 'https://phonometry.dev');
 		assert.throws(() => buildOrigin(tree({ ...good(), 'index.html': '<html></html>' }), prefix), /canonical/);
 	});
 
@@ -168,38 +173,51 @@ describe('whether a staged build is indexable', () => {
 });
 
 describe('stage', () => {
-	test('writes the tree under the prefix with _headers, _redirects, .assetsignore and a root 404', () => {
+	test('writes the tree at the root with _headers, _redirects and .assetsignore', () => {
 		const from = tree(good());
 		const out = join(tree({}), 'stage');
-		const report = stage({ from, out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false });
+		const report = stage({ from, out, prefix, origin: ORIGIN, pairs, exclusions, indexable: false });
 		assert.equal(report.problems.length, 0, report.problems.join('\n'));
-		assert.ok(existsSync(join(out, 'phonometry', 'signals', 'index.html')));
+		assert.ok(existsSync(join(out, 'signals', 'index.html')));
 		assert.equal(readFileSync(join(out, '404.html'), 'utf8'), 'not found');
-		assert.equal(readFileSync(join(out, 'robots.txt'), 'utf8'), 'Sitemap: https://docs.jmrp.io/phonometry/sitemap-index.xml\n');
-		assert.equal(existsSync(join(out, 'llms.txt')), false);
-		assert.equal(report.files, 14);
+		assert.equal(readFileSync(join(out, 'robots.txt'), 'utf8'), 'Sitemap: https://phonometry.dev/sitemap-index.xml\n');
+		assert.equal(report.files, Object.keys(good()).length);
 		assert.match(readFileSync(join(out, '_headers'), 'utf8'), /^\/\*\n {2}X-Robots-Tag: noindex/);
-		assert.equal(
-			readFileSync(join(out, '_redirects'), 'utf8'),
-			'/phonometry/about/ /phonometry/signals/ 301\n/phonometry/about /phonometry/signals/ 301\n/phonometry/about/index.md /phonometry/signals/index.md 301\n',
-		);
+		assert.equal(readFileSync(join(out, '_redirects'), 'utf8'), '/about/ /signals/ 301\n/about /signals/ 301\n/about/index.md /signals/index.md 301\n');
 		assert.equal(readFileSync(join(out, '.assetsignore'), 'utf8'), '.*\n');
 		assert.equal(report.redirects, 3);
+	});
+
+	test('under a base path, writes the tree under it and copies the 404 page and robots.txt to the root', () => {
+		const base = '/docs';
+		const from = tree({ ...good(), 'index.html': home(ORIGIN, base), 'robots.txt': 'Sitemap: https://phonometry.dev/docs/sitemap-index.xml\n' });
+		const out = join(tree({}), 'stage');
+		const moved = pairs.map(({ from: old, to }) => ({ from: `${base}${old}`, to: `${base}${to}` }));
+		const report = stage({ from, out, prefix: base, origin: ORIGIN, pairs: moved, exclusions: twinExclusions(base), indexable: false });
+		assert.equal(report.problems.length, 0, report.problems.join('\n'));
+		assert.ok(existsSync(join(out, 'docs', 'signals', 'index.html')));
+		assert.equal(readFileSync(join(out, '404.html'), 'utf8'), 'not found');
+		assert.equal(readFileSync(join(out, 'robots.txt'), 'utf8'), 'Sitemap: https://phonometry.dev/docs/sitemap-index.xml\n');
+		assert.equal(existsSync(join(out, 'llms.txt')), false);
+		assert.equal(
+			readFileSync(join(out, '_redirects'), 'utf8'),
+			'/docs/about/ /docs/signals/ 301\n/docs/about /docs/signals/ 301\n/docs/about/index.md /docs/signals/index.md 301\n',
+		);
 	});
 
 	test('check-only writes nothing and reports the same problems', () => {
 		const files = good();
 		delete files['signals/index.md'];
 		const out = join(tree({}), 'stage');
-		const report = stage({ from: tree(files), out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, checkOnly: true });
+		const report = stage({ from: tree(files), out, prefix, origin: ORIGIN, pairs, exclusions, indexable: false, checkOnly: true });
 		assert.equal(existsSync(out), false);
 		assert.match(report.problems.join('\n'), /has no Markdown copy/);
 	});
 
 	test('a build made for another origin is refused', () => {
-		const from = tree({ ...good(), 'index.html': home('https://phonometry.dev') });
-		const report = stage({ from, out: join(tree({}), 's'), prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, checkOnly: true });
-		assert.match(report.problems.join('\n'), /built for https:\/\/phonometry\.dev, not https:\/\/docs\.jmrp\.io/);
+		const from = tree({ ...good(), 'index.html': home('https://docs.jmrp.io') });
+		const report = stage({ from, out: join(tree({}), 's'), prefix, origin: ORIGIN, pairs, exclusions, indexable: false, checkOnly: true });
+		assert.match(report.problems.join('\n'), /built for https:\/\/docs\.jmrp\.io, not https:\/\/phonometry\.dev/);
 	});
 
 	test('a redirect to a page the build does not hold is refused', () => {
@@ -207,18 +225,18 @@ describe('stage', () => {
 			from: tree(good()),
 			out: join(tree({}), 's'),
 			prefix,
-			origin: 'https://docs.jmrp.io',
-			pairs: [{ from: '/phonometry/old/', to: '/phonometry/gone/' }],
+			origin: ORIGIN,
+			pairs: [{ from: '/old/', to: '/gone/' }],
 			exclusions,
 			indexable: false,
 			checkOnly: true,
 		});
-		assert.match(report.problems.join('\n'), /no page at \/phonometry\/gone\//);
+		assert.match(report.problems.join('\n'), /no page at \/gone\//);
 	});
 
 	test('an existing output directory is refused rather than mixed into', () => {
 		const out = tree({ 'stale.html': 'x' });
-		assert.throws(() => stage({ from: tree(good()), out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false }), /already exists/);
+		assert.throws(() => stage({ from: tree(good()), out, prefix, origin: ORIGIN, pairs, exclusions, indexable: false }), /already exists/);
 	});
 });
 
@@ -238,16 +256,17 @@ describe('the beacon in the staged copy', () => {
 	test('a page with no closing body tag, or two, stops a staging with the beacon', () => {
 		const root = tree({ ...bodied(), 'signals/index.html': '<html><head></head></html>' });
 		assert.deepEqual(beaconProblems(root, listTree(root)), ['signals/index.html: 0 closing body tags, the beacon needs exactly one']);
-		const report = stage({ from: root, out: join(tree({}), 's'), prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, beacon: true, checkOnly: true });
+		const report = stage({ from: root, out: join(tree({}), 's'), prefix, origin: ORIGIN, pairs, exclusions, indexable: false, beacon: true, checkOnly: true });
 		assert.match(report.problems.join('\n'), /signals\/index\.html: 0 closing body tags/);
 	});
 
 	test('without it, every staged file of the build is the build\u2019s file, byte for byte', () => {
 		const from = tree(bodied());
 		const out = join(tree({}), 'stage');
-		stage({ from, out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false });
+		stage({ from, out, prefix, origin: ORIGIN, pairs, exclusions, indexable: false });
 		const source = hashes(from);
-		const staged = hashes(join(out, 'phonometry'));
+		const staged = hashes(out);
+		for (const name of ['_headers', '_redirects', '.assetsignore']) delete staged[name];
 		assert.deepEqual(staged, source);
 	});
 
@@ -255,13 +274,13 @@ describe('the beacon in the staged copy', () => {
 		const from = tree(bodied());
 		const before = hashes(from);
 		const out = join(tree({}), 'stage');
-		const report = stage({ from, out, prefix, origin: 'https://docs.jmrp.io', pairs, exclusions, indexable: false, beacon: true });
+		const report = stage({ from, out, prefix, origin: ORIGIN, pairs, exclusions, indexable: false, beacon: true });
 		assert.equal(report.problems.length, 0, report.problems.join('\n'));
 		assert.equal(report.beaconPages, 7);
 		assert.deepEqual(hashes(from), before, 'the build was not touched');
 		for (const { path } of listTree(from)) {
 			const built = readFileSync(join(from, path), 'utf8');
-			const staged = readFileSync(join(out, 'phonometry', path), 'utf8');
+			const staged = readFileSync(join(out, path), 'utf8');
 			if (!path.endsWith('.html')) {
 				assert.equal(staged, built, path);
 				continue;
@@ -270,7 +289,6 @@ describe('the beacon in the staged copy', () => {
 			assert.equal(staged.replace(script, ''), built, path);
 			assert.equal(staged.split(script).length, 2, path);
 		}
-		assert.equal(readFileSync(join(out, '404.html'), 'utf8'), readFileSync(join(out, 'phonometry', '404.html'), 'utf8'), 'the root 404 is the base one, flag included');
 		assert.match(readFileSync(join(out, '404.html'), 'utf8'), /nf:1/);
 	});
 });
@@ -282,10 +300,10 @@ describe('the paths that run the Worker', () => {
 	});
 
 	test('a file a pattern catches that is no agent file is refused', () => {
-		// `*` crosses `/`, so /phonometry/llms*.txt also catches a text file
-		// inside a folder whose name starts with llms.
+		// `*` crosses `/`, so /llms*.txt also catches a text file inside a
+		// folder whose name starts with llms.
 		assert.deepEqual(agentPathProblems([{ path: 'llms-notes/readme.txt' }, { path: 'guides/index.md.html' }], prefix), [
-			'/phonometry/llms-notes/readme.txt would run the Worker, and it is no agent file (lib/agent-paths.mjs)',
+			'/llms-notes/readme.txt would run the Worker, and it is no agent file (lib/agent-paths.mjs)',
 		]);
 	});
 });

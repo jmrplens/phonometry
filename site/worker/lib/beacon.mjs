@@ -21,7 +21,7 @@ export const BEACON_MAX_BYTES = 2048;
  * The inline script, minified by hand (it ships in every page of the
  * preview). `nf` is 1 in the 404 pages, written in at staging.
  *
- * A 404 page also answers a missing agent file (`/phonometry/x/index.md`),
+ * A 404 page also answers a missing agent file (`/x/index.md`),
  * and that request ran the Worker, which logged it with its 404. So the 404
  * page carries the agent paths for its base path and sends nothing when it
  * stands at one of them: the same miss is not counted twice, and the second

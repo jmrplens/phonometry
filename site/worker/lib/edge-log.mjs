@@ -9,8 +9,11 @@
 // (scripts/ae-to-influx.mjs there, which reads phonometry.dev rows like
 // docs.jmrp.io's): change it there first, then copy it here whole;
 // test/edge-log.test.mjs compares the two texts when that repository is on
-// the machine. requestClass strips the first path segment, which on both
-// hosts is the base path /phonometry, so a row classifies the same on both.
+// the machine. requestClass strips the first path segment, which on
+// docs.jmrp.io is a project's base path; phonometry.dev serves the site at
+// the root, where the segment it strips is the first of the page's own path,
+// and every path this Worker runs for still gets its class (the root cases
+// of test/edge-log.test.mjs).
 // Do not reformat this file: the comparison is of the text.
 /* eslint-disable */
 

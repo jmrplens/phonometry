@@ -128,7 +128,7 @@ describe('zonePlan', () => {
 });
 
 describe('ruleDrift', () => {
-	const wanted = redirectRules({ host: zone, prefix: '/phonometry', exclusions: twinExclusions('/phonometry'), clipBase: 'https://docs.jmrp.io/phonometry/media/' });
+	const wanted = redirectRules({ host: zone, prefix: '', exclusions: twinExclusions(''), clipBase: CLIP_BASE, legacyPrefix: LEGACY_PREFIX });
 	const live = wanted.map((rule, i) => ({ ...rule, id: `id${i}`, version: '1', last_updated: '2026-11-17T00:00:00Z' }));
 
 	test('the same rules with Cloudflare ids and dates: no drift', () => {
@@ -215,7 +215,7 @@ describe('apply-rules', () => {
 	});
 
 	test('the generated phases follow the site: its base path, the clip host and the old base path', () => {
-		const clip = 'https://docs.jmrp.io/phonometry/media/';
+		const clip = CLIP_BASE;
 		const refs = (options) => generatedPhases({ clipBase: clip, ...options })[0].rules.map(({ ref }) => ref);
 		assert.deepEqual(refs({ prefix: '/phonometry', legacyPrefix: '' }), ['www-to-apex', 'root-to-base', 'clips-to-range-host', 'markdown-twin']);
 		assert.deepEqual(refs({ prefix: '', legacyPrefix: '' }), ['www-to-apex', 'clips-to-range-host', 'markdown-twin']);
@@ -223,6 +223,8 @@ describe('apply-rules', () => {
 		const [redirects, headers] = generatedPhases({ clipBase: clip, prefix: '/phonometry', legacyPrefix: '' });
 		assert.deepEqual(redirects.rules, redirectRules({ host: zone, prefix: '/phonometry', exclusions: twinExclusions('/phonometry'), clipBase: clip }));
 		assert.deepEqual(headers.rules, responseHeaderRules({ host: zone, prefix: '/phonometry' }));
+		// What the deploy puts: the site at the root, the old base path sent there.
+		assert.deepEqual(generatedPhases()[0].rules.map(({ ref }) => ref), ['www-to-apex', 'legacy-base-slash', 'legacy-base-bare', 'clips-to-range-host', 'markdown-twin']);
 	});
 
 	test('the old base path is the one the legacy origins served the site under', () => {

@@ -1,12 +1,12 @@
 // Stages a site build as the asset directory of the phonometry.dev Worker.
 //
 // Usage (site/worker/README.md):
-//   node site/worker/stage.mjs --from <build> [--out <dir>] [--site docs.jmrp.io|phonometry.dev]
+//   node site/worker/stage.mjs --from <build> [--out <dir>] [--site phonometry.dev]
 //                               [--indexable] [--beacon] [--check]
 //
 // --from is a build: a local site/dist, or the unpacked github-pages artifact
 // docs.yml uploads. --site names the host that build was made for (its
-// PHONOMETRY_SITE; unset means docs.jmrp.io, the build docs.yml makes), and
+// PHONOMETRY_SITE; unset means phonometry.dev, the build docs.yml makes), and
 // the base path and the canonical origin of the headers follow from it.
 // --out defaults to site/worker/stage, the directory wrangler.jsonc names.
 // The noindex every response carries goes exactly when the build names

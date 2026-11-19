@@ -12,8 +12,12 @@
 // Agents that read the Markdown copies, the llms files, robots.txt and the
 // sitemaps run no JavaScript, so the beacon never sees them; running the
 // Worker for exactly those files is how they are logged. The root names
-// (`/llms*.txt`, `/sitemap*.xml`) are there although the build has only
-// `/llms.txt` at the root: crawlers probe both, and a probe is logged too.
+// (`/llms*.txt`, `/sitemap*.xml`) are there even under a base path, where the
+// build has no file at the root: crawlers probe both, and a probe is logged
+// too. The XML pattern names the sitemaps, the build's only XML files, rather
+// than `*.xml`: at the root that would run the Worker for every scanner probe
+// that ends in `.xml` (a burst for `wlwmanifest.xml` was logged on
+// 2026-11-19).
 
 import { basePath } from '../../src/data/site.mjs';
 
@@ -33,7 +37,7 @@ export const BASE_PATH = basePath;
 /**
  * The run_worker_first patterns for a base path.
  *
- * @param {string} prefix The base path the site is served under (`/phonometry`), or `` at the root.
+ * @param {string} prefix The base path the site is served under, `` at the root, or a path such as `/docs`.
  * @returns {string[]} The patterns, without duplicates, in a fixed order.
  */
 export function agentPaths(prefix) {
@@ -46,7 +50,7 @@ export function agentPaths(prefix) {
 		'/robots.txt',
 		`${prefix}/robots.txt`,
 		'/sitemap*.xml',
-		`${prefix}/*.xml`,
+		`${prefix}/sitemap*.xml`,
 	];
 	return [...new Set(patterns)];
 }

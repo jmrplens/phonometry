@@ -1,4 +1,4 @@
-// Plays clips of the phonometry.dev preview in Chrome and fails unless they
+// Plays clips of phonometry.dev in Chrome and fails unless they
 // play with no Content-Security-Policy violation (lib/clip-check.mjs says why
 // curl cannot see this).
 //
@@ -13,7 +13,7 @@ import { parseArgs } from 'node:util';
 import { clipVerdict } from '../lib/clip-check.mjs';
 
 /** A page of the preview with clips near the top. */
-export const DEFAULT_PAGE = 'https://phonometry.dev/phonometry/vibration/machinery/machine-diagnostics/';
+export const DEFAULT_PAGE = 'https://phonometry.dev/vibration/machinery/machine-diagnostics/';
 
 let args;
 try {

@@ -91,3 +91,15 @@ test('the request class strips the base path, as on docs.jmrp.io', () => {
 	assert.equal(requestClass('/robots.txt'), 'other');
 	assert.equal(requestClass('/llms.txt'), 'llms-txt');
 });
+
+test('at the root of phonometry.dev every path the Worker runs for keeps its class', () => {
+	assert.equal(requestClass('/index.md'), 'md-twin');
+	assert.equal(requestClass('/signals/index.md'), 'md-twin');
+	assert.equal(requestClass('/es/signals/levels/levels/index.md'), 'md-twin');
+	assert.equal(requestClass('/llms-full.txt'), 'llms-txt');
+	assert.equal(requestClass('/llms/llms-signals.txt'), 'llms-txt');
+	assert.equal(requestClass('/sitemap-index.xml'), 'feed-xml');
+	assert.equal(requestClass('/sitemap-0.xml'), 'feed-xml');
+	assert.equal(requestClass('/signals/levels/'), 'page');
+	assert.equal(requestClass('/_v'), 'page');
+});

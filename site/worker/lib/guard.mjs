@@ -36,6 +36,9 @@
 // nor quota-switch.mjs marked: it runs no code, so the quota is kept without
 // the rule, and a rule turned on beside it would have no owner to turn it
 // off after 00:00 UTC, so a later full deploy would find the beacon blocked.
+// `quota-switch.mjs --mode off` over an off state the guard set takes it
+// over: the same assets-only version is deployed again under the hand mark,
+// or the guard would switch it back after 00:00 UTC.
 
 import { ACCOUNT_ID, ZONE_ID, cfApi, graphql } from './cloudflare.mjs';
 import { quotaQuery, quotaRows } from './quota.mjs';
@@ -102,9 +105,10 @@ export function guardDeploy(message) {
  * @param {{enabled: boolean, lastUpdated: string} | null} state.rule The WAF rule, null when the zone has none.
  * @param {{id: string, tag: string, message?: string}} state.current The version at 100 %, and the message of the deployment that put it there.
  * @param {{id: string, tag: string, created: string}[]} state.versions The Worker's versions.
+ * @param {boolean} [state.byHand] Run from quota-switch.mjs, whose deploys carry the hand mark.
  * @returns {{desired: 'on' | 'off', actions: object[], notes: string[]}} The decision.
  */
-export function decide({ count, threshold, mode, now, rule, current, versions }) {
+export function decide({ count, threshold, mode, now, rule, current, versions, byHand = false }) {
 	const notes = [];
 	const trippedToday = Boolean(rule?.enabled) && utcDay(rule.lastUpdated) === utcDay(now);
 	const pinned = mode === 'off' || mode === 'on';
@@ -118,7 +122,12 @@ export function decide({ count, threshold, mode, now, rule, current, versions })
 		if (rule !== null && rule.enabled !== enabled) actions.push({ kind: 'rule', enabled });
 	};
 	const versionAction = (wanted) => {
-		if (half === wanted) return;
+		if (half === wanted) {
+			// Off by hand over the guard's own off deploy: the same version
+			// again, so the deployment says the hand switch holds it.
+			if (byHand && mode === 'off' && made.off) actions.push({ kind: 'deploy', versionId: current.id, tag: current.tag });
+			return;
+		}
 		const to = target(versions, current, wanted, notes);
 		if (to && to.id !== current.id) actions.push({ kind: 'deploy', versionId: to.id, tag: to.tag });
 	};
@@ -197,7 +206,7 @@ export async function reconcile({ env, fetchImpl = fetch, now = new Date(), byHa
 		lines.push(`error: the state could not be read, nothing changed: ${error.message}`);
 		return { dry: true, lines, error: error.message };
 	}
-	const decision = decide({ ...state, threshold, mode, now });
+	const decision = decide({ ...state, threshold, mode, now, byHand });
 	lines.push(
 		`${state.count} of ${threshold} requests today; rule ${state.rule ? (state.rule.enabled ? 'on' : 'off') : 'absent'}; live ${state.current.id} (${state.current.tag || 'no tag'}, deployed with ${state.current.message ? `"${state.current.message}"` : 'no message'}); wanted ${decision.desired}; mode ${mode}`,
 	);

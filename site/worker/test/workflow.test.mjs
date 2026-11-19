@@ -5,7 +5,9 @@
 // through `new URL(..., import.meta.url)`), and fails on a file the sparse
 // checkout leaves out.
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -122,17 +124,80 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		assert.match(step, /node scripts\/guard-state\.mjs \| tee -a "\$GITHUB_OUTPUT"/);
 	});
 
-	test('tripped: the full half is only uploaded and the assets-only half goes live under the off mark', () => {
+	/**
+	 * Runs a step's `run: |` block in bash with `pnpm` and `node` stubbed:
+	 * pnpm records each argument on its own (so an argument split by the
+	 * shell shows), node prints what guard-state.mjs --since would, failing
+	 * its first `nodeFails` calls. Returns the pnpm calls, each as its
+	 * arguments joined with " | ".
+	 */
+	function runDeploy(env, after, nodeFails = 0) {
+		const step = named('Deploy the Worker');
+		const block = step.match(/\n(\s+)run: \|\n((?:\1 {2}.*\n|\s*\n)+)/);
+		assert.ok(block, 'the deploy step has no run block');
+		const script = block[2].split('\n').map((line) => line.slice(block[1].length + 2)).join('\n');
+		const dir = mkdtempSync(join(tmpdir(), 'deploy-step-'));
+		try {
+			writeFileSync(join(dir, 'pnpm'), '#!/bin/bash\n{ for a in "$@"; do printf "%s\\x1f" "$a"; done; printf "\\n"; } >> "$CALLS"\n', { mode: 0o755 });
+			writeFileSync(join(dir, 'node'), `#!/bin/bash\n[ "$*" = "scripts/guard-state.mjs --since d0 --pair 300-1" ] || { echo "unexpected node $*" >&2; exit 9; }\necho x >> "$NODE_CALLS"\n[ "$(wc -l < "$NODE_CALLS")" -gt ${nodeFails} ] || exit 1\ncat "$AFTER"\n`, { mode: 0o755 });
+			writeFileSync(join(dir, 'after'), `${after}\n`);
+			writeFileSync(join(dir, 'calls'), '');
+			writeFileSync(join(dir, 'node-calls'), '');
+			execFileSync('bash', ['-c', script], { env: { PATH: `${dir}:/usr/bin:/bin`, CALLS: join(dir, 'calls'), NODE_CALLS: join(dir, 'node-calls'), READ_RETRY_SECONDS: '0', AFTER: join(dir, 'after'), GITHUB_STEP_SUMMARY: '/dev/null', PAIR: '300-1', DEPLOYMENT: 'd0', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+			return readFileSync(join(dir, 'calls'), 'utf8').split('\n').filter(Boolean).map((line) => line.split('\x1f').slice(0, -1).join(' | '));
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	}
+
+	/** A wrangler call as runDeploy returns it. */
+	const wrangler = (...args) => ['exec', 'wrangler', ...args].join(' | ');
+	const DEPLOY_FULL = (message) => wrangler('deploy', '--config', 'wrangler.jsonc', '--tag', 'full-300-1', '--message', message);
+	const PROMOTE = (half, message) => wrangler('versions', 'deploy', '--config', 'wrangler.jsonc', '--version-tag', `${half}-300-1@100`, '--message', message, '--yes');
+	const UPLOAD_FULL = wrangler('versions', 'upload', '--config', 'wrangler.jsonc', '--tag', 'full-300-1', '--message', 'full half of 300-1');
+
+	test('the deploy step reads the deployment the guard state named', () => {
 		const step = named('Deploy the Worker');
 		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);
 		assert.match(step, /MARK: \$\{\{ steps\.guard\.outputs\.mark \}\}/);
-		const [tripped, clear] = step.split(/\n\s+else\n/);
-		assert.match(tripped, /if \[ "\$TRIPPED" = true \]/);
-		assert.match(tripped, /wrangler versions upload --config wrangler\.jsonc --tag "full-\$PAIR"/);
-		assert.match(tripped, /wrangler versions deploy --config wrangler\.jsonc --version-tag "assets-\$PAIR@100" --message "\$MARK: off, /);
-		assert.doesNotMatch(tripped, /wrangler deploy /, 'no full deploy while tripped');
-		assert.match(clear, /wrangler deploy --config wrangler\.jsonc --tag "full-\$PAIR" --message "\$message"/);
-		assert.match(clear, /if \[ -n "\$MARK" \]; then message="\$MARK: on, \$message"; fi/);
+		assert.match(step, /DEPLOYMENT: \$\{\{ steps\.guard\.outputs\.deployment \}\}/);
+		assert.match(step, /set -euo pipefail/);
+	});
+
+	test('on: the full half goes live with wrangler deploy, the guard mark carried when the read had one', () => {
+		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false'), [DEPLOY_FULL('full half of 300-1')]);
+		assert.deepEqual(runDeploy({ TRIPPED: 'false', MARK: 'quota guard' }, 'switched=false'), [DEPLOY_FULL('quota guard: on, full half of 300-1')]);
+	});
+
+	test('tripped: the full half is only uploaded and the assets-only half goes live under the off mark', () => {
+		assert.deepEqual(runDeploy({ TRIPPED: 'true', MARK: 'quota switch by hand' }, 'switched=false'), [UPLOAD_FULL, PROMOTE('assets', 'quota switch by hand: off, deploy of 300-1 while the code paths are off')]);
+	});
+
+	test('the guard switched off during the deploy: the assets-only half goes live again under its mark', () => {
+		const calls = runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=true\nmark=quota guard');
+		assert.deepEqual(calls, [DEPLOY_FULL('full half of 300-1'), PROMOTE('assets', 'quota guard: off, deploy of 300-1 while the code paths are off')]);
+	});
+
+	test('switched back on during a deploy held off: the full half goes live, the guard mark carried', () => {
+		const calls = runDeploy({ TRIPPED: 'true', MARK: 'quota guard' }, 'switched=true\ntripped=false\nmark=quota guard');
+		assert.equal(calls.length, 3);
+		assert.equal(calls[2], PROMOTE('full', 'quota guard: on, full half of 300-1'));
+	});
+
+	test('another deploy in between that changes nothing: no second promotion', () => {
+		assert.equal(runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=false\nmark=').length, 1);
+	});
+
+	test('a failed read of the deployments since is tried again, and the promotion is not repeated', () => {
+		const calls = runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=true\ntripped=true\nmark=quota guard', 2);
+		assert.deepEqual(calls, [DEPLOY_FULL('full half of 300-1'), PROMOTE('assets', 'quota guard: off, deploy of 300-1 while the code paths are off')]);
+	});
+
+	test('the deployments since the read cannot be read three times: the step fails and says what to run', () => {
+		assert.throws(
+			() => runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false', 3),
+			(error) => /could not be read: 300-1 was this run's last promotion and what is live now is unknown; run node scripts\/guard-state\.mjs --since d0 --pair 300-1 by hand/.test(String(error.stdout)),
+		);
 	});
 
 	test('a deploy over an unfinished switch back carries the guard mark, so the guard still clears its rule', async () => {
@@ -150,15 +215,12 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 		}
 	});
 
-	test('the beacon check expects 204, or while tripped the WAF\'s 403 or the assets-only 404, never a 204', () => {
+	test('the beacon check reads the live state itself, with the deploy token, never the state read before the deploy', () => {
 		const step = named('Check what the assets answer');
-		assert.match(step, /TRIPPED: \$\{\{ steps\.guard\.outputs\.tripped \}\}/);
-		assert.match(step, /want=204\n\s+if \[ "\$TRIPPED" = true \]; then want="403 404"; fi/);
-		assert.match(step, /if ! grep -qwF -- "\$code" <<<"\$want"; then/);
-		assert.doesNotMatch(step, /"\$code" != 204/, 'a fixed 204 fails every deploy while the guard is tripped');
-		const accepts = (code, want) => want.split(' ').includes(code);
-		assert.ok(accepts('403', '403 404') && accepts('404', '403 404') && !accepts('204', '403 404'));
-		assert.ok(accepts('204', '204') && !accepts('404', '204'));
+		assert.match(step, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CF_PHONOMETRY_DEPLOY_TOKEN \}\}/);
+		assert.match(step, /node site\/worker\/scripts\/check-beacon\.mjs \|\| fail=1/);
+		assert.doesNotMatch(step, /steps\.guard\.outputs/, 'the state read before the deploy may be stale by the time of the probe');
+		assert.doesNotMatch(step, /-X POST/, 'one beacon probe, in check-beacon.mjs');
 	});
 });
 
@@ -172,5 +234,5 @@ test('the off mark the workflow writes is the one the guard switches back', asyn
 	const d = decide({ count: 5, threshold: 95000, mode: 'auto', now: new Date('2026-11-19T00:15:00Z'), rule: { enabled: true, lastUpdated: '2026-11-18T09:00:00Z' }, current: { id: 'a', tag: 'assets-300-1', message }, versions });
 	assert.deepEqual(d.actions, [{ kind: 'deploy', versionId: 'f', tag: 'full-300-1' }, { kind: 'rule', enabled: false }]);
 	const text = readFileSync(WORKFLOW, 'utf8');
-	assert.ok(text.includes('--message "$MARK: off, deploy of $PAIR while the code paths are off"'));
+	assert.ok(text.includes('--message "$1: off, deploy of $PAIR while the code paths are off"'));
 });

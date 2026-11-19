@@ -196,7 +196,7 @@ describe('a deploy while the quota guard holds the code paths off', () => {
 	test('the deployments since the read cannot be read three times: the step fails and says what to run', () => {
 		assert.throws(
 			() => runDeploy({ TRIPPED: 'false', MARK: '' }, 'switched=false', 3),
-			(error) => /could not be read: 300-1 is live as deployed; run node scripts\/guard-state\.mjs --since d0 --pair 300-1 by hand/.test(String(error.stdout)),
+			(error) => /could not be read: 300-1 was this run's last promotion and what is live now is unknown; run node scripts\/guard-state\.mjs --since d0 --pair 300-1 by hand/.test(String(error.stdout)),
 		);
 	});
 

@@ -30,6 +30,17 @@ on:
         required: false
         default: false
         type: boolean
+    secrets:
+      # Environment secrets of phonometry-preview: a called workflow reads
+      # them only when the caller names them, so both are required here and
+      # a call that forgets one fails at once instead of deploying with an
+      # empty token. A dispatch by hand reads them from the environment.
+      CF_PHONOMETRY_DEPLOY_TOKEN:
+        description: "Token that uploads and deploys the Worker versions"
+        required: true
+      CF_PHONOMETRY_RULES_TOKEN:
+        description: "Token that reads and puts the zone rules"
+        required: true
     outputs:
       # What the IndexNow job of docs.yml reads of a deploy.
       page_url:

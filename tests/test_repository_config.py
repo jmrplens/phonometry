@@ -273,30 +273,71 @@ def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() ->
         )
 
 
+def _requests_naming_a_user_agent(tree: ast.AST) -> set[str]:
+    """Names bound to a ``urllib.request.Request`` whose headers give a User-Agent."""
+    named: set[str] = set()
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and _is_request_with_user_agent(node.value)
+        ):
+            named.add(node.targets[0].id)
+    return named
+
+
+def _is_request_with_user_agent(node: ast.AST) -> bool:
+    """Whether *node* is a ``urllib.request.Request(...)`` call with a User-Agent header."""
+    if not (
+        isinstance(node, ast.Call)
+        and ast.unparse(node.func) == "urllib.request.Request"
+    ):
+        return False
+    headers = next((kw.value for kw in node.keywords if kw.arg == "headers"), None)
+    return isinstance(headers, ast.Dict) and any(
+        isinstance(key, ast.Constant) and key.value == "User-Agent"
+        for key in headers.keys
+    )
+
+
 def test_every_request_of_the_indexnow_job_names_the_job() -> None:
     """The IndexNow job sends its own User-Agent with every request it makes.
 
     Cloudflare answers 403 to urllib's default ``Python-urllib/3.x`` on
     phonometry.dev, so a job that fetched the key file without naming itself
     failed at the first deploy on the new host, and IndexNow was told
-    nothing.
+    nothing. Each ``urlopen`` call is read from the job's Python: its first
+    argument has to be a ``Request`` built with a User-Agent header, or a
+    name bound to one, never a bare URL.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     steps: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
-    scripts = [
-        str(step.get("run", ""))
+    sources = [
+        match.group(1)
         for step in steps
-        if "urllib.request" in str(step.get("run", ""))
+        for match in re.finditer(
+            r"<<'PY'\n(.*?)\nPY", str(step.get("run", "")), re.DOTALL
+        )
+        if "urlopen(" in match.group(1)
     ]
-    assert scripts, "no step of the indexnow job makes a request; update this test"
-    for script in scripts:
-        opened = script.count("urlopen(")
-        built = len(
-            re.findall(r"urllib\.request\.Request\([^)]*User-Agent", script, re.DOTALL)
-        )
-        assert opened == built, (
-            f"{opened} urlopen calls but {built} requests that name a User-Agent"
-        )
+    assert sources, "no step of the indexnow job opens a URL; update this test"
+    for source in sources:
+        tree = ast.parse(source)
+        named = _requests_naming_a_user_agent(tree)
+        calls = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call) and ast.unparse(node.func).endswith("urlopen")
+        ]
+        assert calls, "the indexnow script opens no URL; update this test"
+        for call in calls:
+            first = call.args[0] if call.args else None
+            ok = _is_request_with_user_agent(first) if first is not None else False
+            ok = ok or (isinstance(first, ast.Name) and first.id in named)
+            assert ok, (
+                f"urlopen({ast.unparse(first) if first else ''}) sends no User-Agent"
+            )
 
 
 _INDEXNOW_SCRIPT = _ROOT / "site" / "scripts" / "indexnow-diff.mjs"

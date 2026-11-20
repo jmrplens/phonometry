@@ -349,6 +349,19 @@ def test_every_request_of_the_indexnow_job_names_the_job() -> None:
     assert not bare, f"{bare} send no User-Agent"
 
 
+#: Where the IndexNow job sends the pages.
+_INDEXNOW_API = "https://api.indexnow.org/IndexNow"
+
+
+def _string_constants(source: str) -> set[str]:
+    """Every string literal a Python source holds, read from its AST."""
+    return {
+        node.value
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+
+
 def _indexnow_submission() -> str:
     """The Python of the IndexNow job's step that sends the pages."""
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
@@ -359,7 +372,7 @@ def _indexnow_submission() -> str:
         for match in re.finditer(
             r"<<'PY'\n(.*?)\nPY", str(step.get("run", "")), re.DOTALL
         )
-        if "api.indexnow.org" in match.group(1)
+        if _INDEXNOW_API in _string_constants(match.group(1))
     ]
     assert len(sources) == 1, "one step of the indexnow job sends the pages"
     return sources[0]
@@ -422,7 +435,7 @@ def test_indexnow_tries_a_403_or_a_429_again_and_nothing_else(
         url = request.full_url
         if url == f"{base}/{key}.txt":
             return _Answer(key.encode())
-        assert url == "https://api.indexnow.org/IndexNow", url
+        assert url == _INDEXNOW_API, url
         sent.append(url)
         code = left.pop(0)
         if code >= 400:
@@ -434,7 +447,8 @@ def test_indexnow_tries_a_403_or_a_429_again_and_nothing_else(
     monkeypatch.setattr(urllib.request, "urlopen", urlopen)
     source = _indexnow_submission()
     try:
-        exec(compile(source, "indexnow-submission", "exec"), {"__name__": "__main__"})  # noqa: S102 - the workflow's own script, run against stubs
+        # The workflow's own script, run against the stubs above.
+        exec(compile(source, "indexnow-submission", "exec"), {"__name__": "__main__"})  # noqa: S102
     except urllib.error.HTTPError as error:
         outcome = str(error)
     else:

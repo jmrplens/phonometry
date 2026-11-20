@@ -783,6 +783,10 @@ def test_a_link_written_only_inside_code_links_nothing(
     ]
     lone = f"A lone ` here.\n\nRead [B]({base}/signals/b/), then ` closes nothing.\n"
     assert llms._linked(lone, candidates) == ["signals/b"]
+    items = f"- A literal `\n- Read [A]({base}/signals/a/), then a literal `.\n"
+    assert llms._linked(items, candidates) == ["signals/a"]
+    wrapped = f"Write `[A]({base}/signals/a/)\nacross` two lines, then [B]({base}/signals/b/).\n"
+    assert llms._linked(wrapped, candidates) == ["signals/b"]
 
 
 def test_an_overview_linking_only_another_areas_guide_stops_the_run(

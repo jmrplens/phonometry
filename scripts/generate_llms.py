@@ -85,8 +85,8 @@ from typing import TYPE_CHECKING
 
 import site_target
 from generate_site_reports import family_pages
-from markdown_fences import code_lines, page_kind
-from markdown_spans import blank_inline_spans, page_markup
+from markdown_fences import code_lines, page_kind, page_lines
+from markdown_spans import blank_inline_spans_by_block, page_markup
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
@@ -698,17 +698,19 @@ def _linked(text: str, candidates: Iterable[str], *, kind: str = "md") -> list[s
 
 def _outside_code(text: str, kind: str) -> str:
     """*text* with its code blanked: the lines of every fence, as
-    ``markdown_fences`` reads them, and every code span, read paragraph by
-    paragraph so that a lone backtick never pairs with one of the next.
+    ``markdown_fences`` reads them, and every code span, read block by block as
+    the page reads it, so that a lone backtick never pairs with one in another
+    paragraph, list item or heading.
     """
     lines = text.split("\n")
+    walked = list(page_lines(lines, kind=kind))
     prose = "\n".join(
         "" if code else line
-        for line, code in zip(lines, code_lines(lines, kind=kind), strict=True)
+        for line, code in zip(
+            lines, code_lines(lines, kind=kind, walked=walked), strict=True
+        )
     )
-    return "\n\n".join(
-        blank_inline_spans(paragraph) for paragraph in re.split(r"\n[ \t]*\n", prose)
-    )
+    return blank_inline_spans_by_block(prose, kind=kind, walked=walked)
 
 
 def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> list[str]:

@@ -1,7 +1,7 @@
 # phonometry Documentation
 
 Full documentation for phonometry. Also available as a website:
-**https://docs.jmrp.io/phonometry/**
+**https://phonometry.dev/**
 
 ## Guides
 
@@ -367,7 +367,7 @@ field itself on a finite-difference grid.
 ## Reference
 
 - [API Reference](reference/api/index.md): curated quick table of every public function and class
-- [Generated API reference](https://docs.jmrp.io/phonometry/reference/api/): one page per public module, generated from the source docstrings (`make api-docs`). English only; the Spanish site serves it via locale fallback
+- [Generated API reference](https://phonometry.dev/reference/api/): one page per public module, generated from the source docstrings (`make api-docs`). English only; the Spanish site serves it via locale fallback
 - [Theory](reference/theory/index.md): standards, math and design decisions, split by domain
   - [Signal analysis](reference/theory/signal-analysis.md): filter banks, weightings, time integration, level and exposure metrics, sound intensity, GUM uncertainty
   - [Perception and hearing](reference/theory/perception.md): equal-loudness contours, loudness models, sound quality, tone prominence, STI/SII, hearing statistics
@@ -377,8 +377,8 @@ field itself on a finite-difference grid.
   - [Vibration](reference/theory/vibration.md): human vibration weightings and metrics, multiple-shock spinal model
 - [Glossary](reference/glossary.md): every quantity the guides compute, grouped by domain, each with its symbol, a one-sentence definition, its unit, the standard and clause that defines it and the guide that implements it, plus the table of symbols that collide across domains
 - [Bibliography](reference/bibliography.md): every work the guides cite, grouped by area, each with the pages that cite it and its DOI or official publisher link where it has one
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/): the material and fluid values this library reads rather than computes, one page per catalogue, each row naming the book, the table, the PDF page and the printed folio it was read on. Generated from the packaged data files (`make catalogue-data`) and published by the site alone, so this edition holds no copy of it, the same as the generated API reference
-- [Report fiches](https://docs.jmrp.io/phonometry/reference/reports/): every PDF fiche `.report()` renders, grouped by area, each linking to the fiche and to the guide that explains the measurement behind it. Built from the `<ReportPreview />` each guide already carries beside the fiche it shows, so this edition holds no copy of it either: a second list would be a second thing to keep in step with the guides, which is the one failure this page is built to prevent
+- [Published catalogues](https://phonometry.dev/reference/catalogues/): the material and fluid values this library reads rather than computes, one page per catalogue, each row naming the book, the table, the PDF page and the printed folio it was read on. Generated from the packaged data files (`make catalogue-data`) and published by the site alone, so this edition holds no copy of it, the same as the generated API reference
+- [Report fiches](https://phonometry.dev/reference/reports/): every PDF fiche `.report()` renders, grouped by area, each linking to the fiche and to the guide that explains the measurement behind it. Built from the `<ReportPreview />` each guide already carries beside the fiche it shows, so this edition holds no copy of it either: a second list would be a second thing to keep in step with the guides, which is the one failure this page is built to prevent
 - [Conformance report](CONFORMANCE.md): auto-generated numerical validation: every check pins a standard clause's expected value against the library's computed value, regenerated in CI
 - [Standards errata](ERRATA.md): defects found in the published standards themselves during implementation: misprints, examples contradicting their own normative text, ambiguous wording, each with evidence and the library's disposition; a Spanish edition, translated entry for entry, lives in [ERRATA.es.md](ERRATA.es.md)
 - [Same bits on every machine](reference/determinism.md): why floating point drifts between hosts, what the deterministic weighting design pins, and the measured evidence that a designed filter is byte-identical on any CPU, BLAS or thread count, and what still separates the platforms

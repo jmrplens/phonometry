@@ -1,4 +1,4 @@
-<a href="https://docs.jmrp.io/phonometry/"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/brand/banner.webp" alt="phonometry, acoustic measurement toolkit for Python" width="100%"></a>
+<a href="https://phonometry.dev/"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/brand/banner.webp" alt="phonometry, acoustic measurement toolkit for Python" width="100%"></a>
 
 <!-- Package -->
 [![PyPI version](https://img.shields.io/pypi/v/phonometry?logo=pypi&logoColor=white)](https://pypi.org/project/phonometry/)
@@ -53,7 +53,7 @@ If phonometry 3.x is already installed, upgrade it with
 (`pip install -U "phonometry[full]"` for all four where `[full]` installs);
 3.x has a different import layout and `from phonometry import filters` fails
 on it. Code written for 3.x needs changes to run on 4.x; the
-[upgrade guide](https://docs.jmrp.io/phonometry/start/upgrading/) maps each of
+[upgrade guide](https://phonometry.dev/start/upgrading/) maps each of
 them.
 
 phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
@@ -95,7 +95,7 @@ not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
 there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
 are for Python 3.10 at most and numba supports the platform no longer; [Docker
-and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) says
+and servers](https://phonometry.dev/start/environments/docker/) says
 what the other three build there. A plain install takes the newest releases,
 which have wheels on the other three platforms but numba's on musl and on
 macOS on Intel, where a plain `[perf]` install builds numba and llvmlite on
@@ -175,7 +175,7 @@ print(f"SPL [dB]: {result.levels}")
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *1/3 octave band spectrum analysis of a complex signal. More examples in the
-[documentation](https://docs.jmrp.io/phonometry/).*
+[documentation](https://phonometry.dev/).*
 
 ## ✨ What's inside
 
@@ -230,7 +230,7 @@ points on the ANSI band edges.*
 
 ## 📚 Documentation
 
-**Full documentation website: https://docs.jmrp.io/phonometry/**
+**Full documentation website: https://phonometry.dev/**
 (English / Español)
 
 The English guides are also browsable as Markdown in
@@ -274,7 +274,7 @@ every metric is implemented from the governing standard's paid text. You can
 sponsor the project on [GitHub Sponsors](https://github.com/sponsors/jmrplens)
 or [Ko-fi](https://ko-fi.com/jmrplens), and the documentation keeps a live
 list of the
-[sources that resisted every legitimate acquisition route](https://docs.jmrp.io/phonometry/start/support/),
+[sources that resisted every legitimate acquisition route](https://phonometry.dev/start/support/),
 with four ways to help get them: fund the purchase, send a copy privately
 (whatever its origin, it is never republished), verify against your own
 licensed copy, or point at a channel that was missed.

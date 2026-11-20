@@ -340,6 +340,41 @@ def test_every_request_of_the_indexnow_job_names_the_job() -> None:
             )
 
 
+def test_the_docs_workflow_triggers_on_every_file_outside_the_site_the_base_path_check_reads() -> (
+    None
+):
+    """A file the F76 check reads outside the site can trigger the run that checks it.
+
+    ``site/scripts/base-path.mjs`` reads the README, the security policy, the
+    package metadata, the paper and the issue templates for the old host, and
+    it runs only in the docs workflow. A file it reads that the path filter
+    leaves out could be given the old host again in a pull request that never
+    runs the check.
+    """
+    source = (_ROOT / "site" / "scripts" / "base-path.mjs").read_text(encoding="utf-8")
+    block = re.search(
+        r"export const OUTSIDE = Object\.freeze\(\[(.*?)\]\);", source, re.DOTALL
+    )
+    assert block, "site/scripts/base-path.mjs has no OUTSIDE list; update this test"
+    outside = [
+        name.removeprefix("../") for name in re.findall(r"'([^']+)'", block.group(1))
+    ]
+    assert outside, "the OUTSIDE list of site/scripts/base-path.mjs is empty"
+    for event in ("push", "pull_request"):
+        listed = _trigger_paths(_DOCS_WORKFLOW, event)
+        missing = [
+            name
+            for name in outside
+            if name not in listed
+            and not any(
+                pattern.endswith("/**") and name.startswith(pattern[:-2])
+                for pattern in listed
+            )
+            and f"{name}/**" not in listed
+        ]
+        assert not missing, f"docs.yml {event} trigger does not list {missing}"
+
+
 _INDEXNOW_SCRIPT = _ROOT / "site" / "scripts" / "indexnow-diff.mjs"
 
 #: The events that deploy the site: a push to main, and a run dispatched by

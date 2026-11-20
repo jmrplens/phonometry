@@ -64,6 +64,14 @@ on:
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"
+      # The repository files outside the site that name it by its address,
+      # which scripts/base-path.mjs reads for the old host (F76).
+      - "README.md"
+      - "README_PYPI.md"
+      - "SECURITY.md"
+      - "paper/paper.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/DISCUSSION_TEMPLATE/**"
       - ".github/workflows/docs.yml"
       # A re-rendered clip changes nothing here but this one line, and the
       # site has to be rebuilt to serve it.
@@ -96,6 +104,14 @@ on:
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"
+      # The repository files outside the site that name it by its address,
+      # which scripts/base-path.mjs reads for the old host (F76).
+      - "README.md"
+      - "README_PYPI.md"
+      - "SECURITY.md"
+      - "paper/paper.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/DISCUSSION_TEMPLATE/**"
       - ".github/workflows/docs.yml"
       # A re-rendered clip changes nothing here but this one line, and the
       # site has to be rebuilt to serve it.
@@ -184,7 +200,8 @@ jobs:
           filter: blob:none
           # Cone mode: these directories plus every repository-root file.
           # docs/ and scripts/ feed the edition, llms and evidence checks;
-          # site/ is the build itself. .github goes in whole, because the
+          # site/ is the build itself; paper/ holds paper.md, which the base
+          # path check reads for the old host. .github goes in whole, because the
           # site reaches into it three ways, each found the hard way when
           # a narrower cone broke the build: stage-media.mjs copies
           # images/ and reports/ into the site's own asset tree (the pages
@@ -200,6 +217,7 @@ jobs:
           sparse-checkout: |
             .github
             docs
+            paper
             scripts
             site
       # The animation clips and their posters are not in this repository:

@@ -273,6 +273,32 @@ def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() ->
         )
 
 
+def test_every_request_of_the_indexnow_job_names_the_job() -> None:
+    """The IndexNow job sends its own User-Agent with every request it makes.
+
+    Cloudflare answers 403 to urllib's default ``Python-urllib/3.x`` on
+    phonometry.dev, so a job that fetched the key file without naming itself
+    failed at the first deploy on the new host, and IndexNow was told
+    nothing.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    steps: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    scripts = [
+        str(step.get("run", ""))
+        for step in steps
+        if "urllib.request" in str(step.get("run", ""))
+    ]
+    assert scripts, "no step of the indexnow job makes a request; update this test"
+    for script in scripts:
+        opened = script.count("urlopen(")
+        built = len(
+            re.findall(r"urllib\.request\.Request\([^)]*User-Agent", script, re.DOTALL)
+        )
+        assert opened == built, (
+            f"{opened} urlopen calls but {built} requests that name a User-Agent"
+        )
+
+
 _INDEXNOW_SCRIPT = _ROOT / "site" / "scripts" / "indexnow-diff.mjs"
 
 #: The events that deploy the site: a push to main, and a run dispatched by

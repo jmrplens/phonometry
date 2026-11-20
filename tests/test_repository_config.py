@@ -301,6 +301,37 @@ def _is_request_with_user_agent(node: ast.AST) -> bool:
     )
 
 
+def _unnamed_requests(steps: list[dict[str, object]]) -> tuple[int, list[str]]:
+    """How many ``urlopen`` calls the steps' Python makes, and those sending no User-Agent.
+
+    Each ``<<'PY'`` heredoc is parsed, and a call is one when its AST says so,
+    however it is spaced (``urlopen (url)`` too), so no script that opens a
+    URL is left unread. A call names the job when its first argument is a
+    ``Request`` built with a User-Agent header, or a name bound to one.
+    """
+    calls = 0
+    bare: list[str] = []
+    for step in steps:
+        run = str(step.get("run", ""))
+        for match in re.finditer(r"<<'PY'\n(.*?)\nPY", run, re.DOTALL):
+            tree = ast.parse(match.group(1))
+            named = _requests_naming_a_user_agent(tree)
+            for node in ast.walk(tree):
+                if not (
+                    isinstance(node, ast.Call)
+                    and ast.unparse(node.func).endswith("urlopen")
+                ):
+                    continue
+                calls += 1
+                first = node.args[0] if node.args else None
+                if first is None or not (
+                    _is_request_with_user_agent(first)
+                    or (isinstance(first, ast.Name) and first.id in named)
+                ):
+                    bare.append(f"urlopen({ast.unparse(first) if first else ''})")
+    return calls, bare
+
+
 def test_every_request_of_the_indexnow_job_names_the_job() -> None:
     """The IndexNow job sends its own User-Agent with every request it makes.
 
@@ -313,31 +344,29 @@ def test_every_request_of_the_indexnow_job_names_the_job() -> None:
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     steps: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
-    sources = [
-        match.group(1)
-        for step in steps
-        for match in re.finditer(
-            r"<<'PY'\n(.*?)\nPY", str(step.get("run", "")), re.DOTALL
-        )
-        if "urlopen(" in match.group(1)
-    ]
-    assert sources, "no step of the indexnow job opens a URL; update this test"
-    for source in sources:
-        tree = ast.parse(source)
-        named = _requests_naming_a_user_agent(tree)
-        calls = [
-            node
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Call) and ast.unparse(node.func).endswith("urlopen")
-        ]
-        assert calls, "the indexnow script opens no URL; update this test"
-        for call in calls:
-            first = call.args[0] if call.args else None
-            ok = _is_request_with_user_agent(first) if first is not None else False
-            ok = ok or (isinstance(first, ast.Name) and first.id in named)
-            assert ok, (
-                f"urlopen({ast.unparse(first) if first else ''}) sends no User-Agent"
-            )
+    calls, bare = _unnamed_requests(steps)
+    assert calls, "no step of the indexnow job opens a URL; update this test"
+    assert not bare, f"{bare} send no User-Agent"
+
+
+def test_a_urlopen_call_is_read_however_it_is_spaced() -> None:
+    """The scripts are picked by the calls their AST holds, not by their text.
+
+    A heredoc picked by the substring ``urlopen(`` would leave out one written
+    ``urlopen (url)``, and the bare request in it would pass unread.
+    """
+    spaced = 'import urllib.request\nurllib.request.urlopen ("https://x/")\n'
+    named = (
+        "import urllib.request\n"
+        'r = urllib.request.Request("https://x/", headers={"User-Agent": "j"})\n'
+        "urllib.request.urlopen (r)\n"
+    )
+    assert _unnamed_requests([{"run": f"python3 - <<'PY'\n{spaced}PY\n"}]) == (
+        1,
+        ["urlopen('https://x/')"],
+    )
+    assert _unnamed_requests([{"run": f"python3 - <<'PY'\n{named}PY\n"}]) == (1, [])
+    assert _unnamed_requests([{"run": "echo no python here"}]) == (0, [])
 
 
 def test_the_docs_workflow_triggers_on_every_file_outside_the_site_the_base_path_check_reads() -> (
